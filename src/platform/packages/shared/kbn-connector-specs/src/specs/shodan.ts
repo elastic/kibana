@@ -36,7 +36,7 @@ export const ShodanConnector: ConnectorSpec = {
       type: 'header',
       customSchema: z.object({
         headers: z.object({
-          'X-Api-Key': z.string().describe('API Key'),
+          'X-Api-Key': z.string().meta({ sensitive: true }).describe('API Key'),
         }),
       }),
     },

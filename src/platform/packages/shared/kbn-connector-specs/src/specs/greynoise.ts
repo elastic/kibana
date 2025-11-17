@@ -36,7 +36,7 @@ export const GreyNoiseConnector: ConnectorSpec = {
       type: 'header',
       customSchema: z.object({
         headers: z.object({
-          key: z.string().describe('API Key'),
+          key: z.string().meta({ sensitive: true }).describe('API Key'),
         }),
       }),
     },

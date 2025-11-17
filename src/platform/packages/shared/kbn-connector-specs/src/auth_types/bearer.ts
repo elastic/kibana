@@ -7,13 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
 import type { AuthTypeSpec } from '../connector_spec';
 
 const authSchema = z.object({
-  // these should default to being registered as a secret field so we don't explicitly define it here
-  token: z.string().describe('Bearer Token'),
+  token: z.string().meta({ sensitive: true }).describe('Bearer Token'),
 });
 
 type AuthSchemaType = z.infer<typeof authSchema>;

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import Boom from '@hapi/boom';
 import type { AuthTypeDef, NormalizedAuthType } from '@kbn/connector-specs';
-import type { AUTH_TYPE_DISCRIMINATOR } from '@kbn/connector-specs/src/lib';
 import { getSchemaForAuthType } from '@kbn/connector-specs/src/lib';
 import { i18n } from '@kbn/i18n';
 import { isString } from 'lodash';
@@ -75,9 +74,7 @@ export class AuthTypeRegistry {
     return Array.from(this.authTypes).map(([authTypeId]) => authTypeId);
   }
 
-  public getSchemaForAuthType(
-    authTypeDef: string | AuthTypeDef
-  ): z.ZodDiscriminatedUnionOption<typeof AUTH_TYPE_DISCRIMINATOR> {
+  public getSchemaForAuthType(authTypeDef: string | AuthTypeDef): z.core.$ZodTypeDiscriminable {
     let authTypeId: string | undefined;
     let mergeStrategy: 'override' | 'merge' = 'override';
     let customSchema: z.ZodSchema | undefined;

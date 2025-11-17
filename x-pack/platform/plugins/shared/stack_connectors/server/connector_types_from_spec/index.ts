@@ -9,7 +9,7 @@ import { type PluginSetupContract as ActionsPluginSetupContract } from '@kbn/act
 
 import { connectorsSpecs, type ConnectorSpec } from '@kbn/connector-specs';
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { z } from '@kbn/zod';
+import { z as z4 } from '@kbn/zod/v4';
 import type { ActionTypeConfig, ActionTypeSecrets } from '@kbn/actions-plugin/server/types';
 
 export function registerConnectorTypesFromSpecs({
@@ -27,17 +27,17 @@ const createConnectorTypeFromSpec = (
   spec: ConnectorSpec,
   actions: ActionsPluginSetupContract
 ): SubActionConnectorType<ActionTypeConfig, ActionTypeSecrets> => {
-  const secretSchemas: z.ZodDiscriminatedUnionOption<'authType'>[] = [];
+  const secretSchemas: z4.core.$ZodTypeDiscriminable[] = [];
   for (const authType of spec.authTypes || []) {
     secretSchemas.push(actions.getSchemaForAuthType(authType));
   }
 
-  const config = spec.schema ? spec.schema : z.object({});
+  const config = spec.schema ? spec.schema : z4.object({});
   const secrets =
     secretSchemas.length > 0
       ? // to make zod types happy
-        z.discriminatedUnion('authType', [secretSchemas[0], ...secretSchemas.slice(1)])
-      : z.object({}).default({});
+        z4.discriminatedUnion('authType', [secretSchemas[0], ...secretSchemas.slice(1)])
+      : z4.object({}).default({});
 
   return {
     id: spec.metadata.id,

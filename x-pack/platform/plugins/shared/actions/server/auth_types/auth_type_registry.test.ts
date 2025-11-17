@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { AuthTypeRegistry } from './auth_type_registry';
 import { registerAuthTypes } from './register_auth_types';
-import zodToJsonSchema from 'zod-to-json-schema';
 import type { NormalizedAuthType } from '@kbn/connector-specs';
 
 const getAuthType = (overrides = {}): NormalizedAuthType => {
@@ -115,7 +114,7 @@ describe('AuthTypeRegistry', () => {
 
     test('correctly returns schema for auth type definition when only type ID is provided', () => {
       const schema = authTypeRegistry.getSchemaForAuthType('basic');
-      expect(zodToJsonSchema(schema)).toMatchSnapshot();
+      expect(z.toJSONSchema(schema)).toMatchSnapshot();
     });
 
     ['override', 'merge'].forEach((mergeStrategy) => {
@@ -130,7 +129,7 @@ describe('AuthTypeRegistry', () => {
               }),
             }),
           });
-          expect(zodToJsonSchema(schema)).toMatchSnapshot();
+          expect(z.toJSONSchema(schema)).toMatchSnapshot();
         });
 
         test('correctly returns custom schema when there are no overlapping keys', () => {
@@ -143,7 +142,7 @@ describe('AuthTypeRegistry', () => {
               }),
             }),
           });
-          expect(zodToJsonSchema(schema)).toMatchSnapshot();
+          expect(z.toJSONSchema(schema)).toMatchSnapshot();
         });
 
         test('correctly returns custom schema when there are overlapping and non-overlapping keys', () => {
@@ -155,7 +154,7 @@ describe('AuthTypeRegistry', () => {
               email: z.string().describe('Username'),
             }),
           });
-          expect(zodToJsonSchema(schema)).toMatchSnapshot();
+          expect(z.toJSONSchema(schema)).toMatchSnapshot();
         });
       });
     });

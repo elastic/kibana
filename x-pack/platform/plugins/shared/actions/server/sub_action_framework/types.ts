@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import type { z } from '@kbn/zod';
+import type * as z3 from '@kbn/zod';
+import type * as z4 from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
 import type { LicenseType } from '@kbn/licensing-types';
 
@@ -40,7 +41,7 @@ export interface ServiceParams<Config, Secrets> {
 
 export type SubActionRequestParams<R> = {
   url: string;
-  responseSchema: z.ZodType<R>;
+  responseSchema: z3.ZodType<R>;
   method?: Method;
   sslOverrides?: SSLSettings;
 } & AxiosRequestConfig;
@@ -55,7 +56,7 @@ export type IServiceAbstract<Config, Secrets> = abstract new (
 
 export type ICaseServiceAbstract<Config, Secrets, Incident, GetIncidentResponse> = abstract new (
   params: ServiceParams<Config, Secrets>,
-  pushToServiceIncidentParamsSchema: Record<string, z.ZodType<unknown>>
+  pushToServiceIncidentParamsSchema: Record<string, z3.ZodType<unknown>>
 ) => SubActionConnector<Config, Secrets>;
 
 export enum ValidatorType {
@@ -116,8 +117,8 @@ export interface SubActionConnectorType<Config, Secrets> {
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
   schema: {
-    config: z.ZodType<Config>;
-    secrets: z.ZodType<Secrets, z.ZodTypeDef, Secrets | undefined>;
+    config: z3.ZodType<Config> | z4.ZodType;
+    secrets: z3.ZodType<Secrets, z3.ZodTypeDef, Secrets | undefined> | z4.ZodType;
   };
   validators?: Array<ConfigValidator<Config> | SecretsValidator<Secrets>>;
   getService: (params: ServiceParams<Config, Secrets>) => SubActionConnector<Config, Secrets>;
@@ -145,7 +146,7 @@ export type ExtractFunctionKeys<T> = {
 export interface SubAction {
   name: string;
   method: string;
-  schema: z.ZodType<unknown> | null;
+  schema: z3.ZodType<unknown> | null;
 }
 
 export interface PushToServiceParams {

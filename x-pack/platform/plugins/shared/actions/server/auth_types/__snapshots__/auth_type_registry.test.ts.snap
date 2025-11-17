@@ -2,7 +2,7 @@
 
 exports[`AuthTypeRegistry getSchemaForAuthType() "merge" merge strategy" correctly returns custom schema when there are no overlapping keys 1`] = `
 Object {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": Object {
     "additionalHeaders": Object {
@@ -27,6 +27,10 @@ Object {
         "type": "string",
       },
       "description": "Custom Headers",
+      "propertyNames": Object {
+        "type": "string",
+      },
+      "sensitive": true,
       "type": "object",
     },
   },
@@ -41,7 +45,7 @@ Object {
 
 exports[`AuthTypeRegistry getSchemaForAuthType() "merge" merge strategy" correctly returns custom schema when there are overlapping and non-overlapping keys 1`] = `
 Object {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": Object {
     "authType": Object {
@@ -59,6 +63,7 @@ Object {
     },
     "username": Object {
       "description": "Username",
+      "sensitive": true,
       "type": "string",
     },
   },
@@ -74,7 +79,7 @@ Object {
 
 exports[`AuthTypeRegistry getSchemaForAuthType() "merge" merge strategy" correctly returns custom schema when there are overlapping keys 1`] = `
 Object {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": Object {
     "authType": Object {
@@ -105,7 +110,7 @@ Object {
 
 exports[`AuthTypeRegistry getSchemaForAuthType() "override" merge strategy" correctly returns custom schema when there are no overlapping keys 1`] = `
 Object {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": Object {
     "additionalHeaders": Object {
@@ -136,7 +141,7 @@ Object {
 
 exports[`AuthTypeRegistry getSchemaForAuthType() "override" merge strategy" correctly returns custom schema when there are overlapping and non-overlapping keys 1`] = `
 Object {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": Object {
     "authType": Object {
@@ -164,7 +169,7 @@ Object {
 
 exports[`AuthTypeRegistry getSchemaForAuthType() "override" merge strategy" correctly returns custom schema when there are overlapping keys 1`] = `
 Object {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": Object {
     "authType": Object {
@@ -195,7 +200,7 @@ Object {
 
 exports[`AuthTypeRegistry getSchemaForAuthType() correctly returns schema for auth type definition when only type ID is provided 1`] = `
 Object {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": Object {
     "authType": Object {
@@ -204,10 +209,12 @@ Object {
     },
     "password": Object {
       "description": "Password",
+      "sensitive": true,
       "type": "string",
     },
     "username": Object {
       "description": "Username",
+      "sensitive": true,
       "type": "string",
     },
   },

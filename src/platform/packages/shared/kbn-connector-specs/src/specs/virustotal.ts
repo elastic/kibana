@@ -36,7 +36,7 @@ export const VirusTotalConnector: ConnectorSpec = {
       type: 'header',
       customSchema: z.object({
         headers: z.object({
-          'x-apikey': z.string().describe('API Key'),
+          'x-apikey': z.string().meta({ sensitive: true }).describe('API Key'),
         }),
       }),
     },
