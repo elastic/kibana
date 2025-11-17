@@ -51,6 +51,7 @@
     "@kbn/react-query",
     "@kbn/zod",
     "@kbn/connector-schemas",
+    "@kbn/connector-specs",
   ],
   "exclude": [
     "target/**/*",
