@@ -1480,7 +1480,7 @@
     "@cypress/debugging-proxy": "2.0.1",
     "@cypress/grep": "^4.0.1",
     "@cypress/webpack-preprocessor": "^6.0.2",
-    "@elastic/eslint-plugin-eui": "2.5.0",
+    "@elastic/eslint-plugin-eui": "2.6.0",
     "@elastic/makelogs": "^6.1.1",
     "@elastic/synthetics": "^1.19.0",
     "@emotion/babel-preset-css-prop": "^11.11.0",
