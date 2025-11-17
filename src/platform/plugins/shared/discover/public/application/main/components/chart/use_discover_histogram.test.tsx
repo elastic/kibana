@@ -11,7 +11,7 @@ import React from 'react';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { act, renderHook } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
-import { type DiscoverLatestFetchDetails, FetchStatus } from '../../../types';
+import { FetchStatus } from '../../../types';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { useDiscoverHistogram, type UseUnifiedHistogramOptions } from './use_discover_histogram';
@@ -36,6 +36,7 @@ import { DiscoverTestProvider } from '../../../../__mocks__/test_provider';
 import type { ScopedProfilesManager } from '../../../../context_awareness';
 import { createContextAwarenessMocks } from '../../../../context_awareness/__mocks__';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { DiscoverLatestFetchDetails } from '../../state_management/discover_data_state_container';
 
 const mockData = dataPluginMock.createStartContract();
 let mockQueryState = {

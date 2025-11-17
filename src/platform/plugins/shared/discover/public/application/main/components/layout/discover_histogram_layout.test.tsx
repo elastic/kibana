@@ -17,9 +17,10 @@ import type {
   DataDocuments$,
   DataMain$,
   DataTotalHits$,
+  DiscoverLatestFetchDetails,
 } from '../../state_management/discover_data_state_container';
 import { discoverServiceMock } from '../../../../__mocks__/services';
-import type { DiscoverLatestFetchDetails, SidebarToggleState } from '../../../types';
+import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';

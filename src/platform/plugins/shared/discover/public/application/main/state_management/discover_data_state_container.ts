@@ -29,12 +29,13 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DEFAULT_COLUMNS_SETTING, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
+import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram/types';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { getEsqlDataView } from './utils/get_esql_data_view';
 import type { DiscoverAppStateContainer } from './discover_app_state_container';
 import type { DiscoverServices } from '../../../build_services';
 import type { DiscoverSearchSessionManager } from './discover_search_session';
-import { type DiscoverLatestFetchDetails, FetchStatus } from '../../types';
+import { FetchStatus } from '../../types';
 import { validateTimeRange } from './utils/validate_time_range';
 import { fetchAll, type CommonFetchParams, fetchMoreDocuments } from '../data_fetching/fetch_all';
 import { sendResetMsg } from '../hooks/use_saved_search_messages';
@@ -78,6 +79,11 @@ export interface DataDocumentsMsg extends DataMsg {
 
 export interface DataTotalHitsMsg extends DataMsg {
   result?: number;
+}
+
+export interface DiscoverLatestFetchDetails {
+  abortController?: AbortController;
+  visContext?: UnifiedHistogramVisContext;
 }
 
 export interface DiscoverDataStateContainer {

@@ -31,14 +31,17 @@ import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { useProfileAccessor } from '../../../../context_awareness';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
-import { type DiscoverLatestFetchDetails, FetchStatus } from '../../../types';
+import { FetchStatus } from '../../../types';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import {
   type DiscoverAppState,
   useAppStateSelector,
 } from '../../state_management/discover_app_state_container';
-import type { DataDocumentsMsg } from '../../state_management/discover_data_state_container';
+import type {
+  DataDocumentsMsg,
+  DiscoverLatestFetchDetails,
+} from '../../state_management/discover_data_state_container';
 import { useSavedSearch } from '../../state_management/discover_state_provider';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import {

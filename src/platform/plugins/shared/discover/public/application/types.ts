@@ -10,7 +10,6 @@
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
-import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram';
 
 export enum FetchStatus {
   UNINITIALIZED = 'uninitialized',
@@ -31,9 +30,4 @@ export interface RecordsFetchResponse {
 export interface SidebarToggleState {
   isCollapsed: boolean;
   toggle: undefined | ((isCollapsed: boolean) => void);
-}
-
-export interface DiscoverLatestFetchDetails {
-  abortController?: AbortController;
-  visContext?: UnifiedHistogramVisContext;
 }
