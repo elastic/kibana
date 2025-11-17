@@ -20,7 +20,11 @@ import type {
   NodeDocumentDataModel,
 } from '@kbn/cloud-security-posture-common/types/graph/v1';
 import type { Writable } from '@kbn/utility-types';
-import type { GraphEdge } from './types';
+import {
+  type GraphEdge,
+  NON_ENRICHED_ENTITY_TYPE_PLURAL,
+  NON_ENRICHED_ENTITY_TYPE_SINGULAR,
+} from './types';
 import { transformEntityTypeToIconAndShape } from './utils';
 
 interface LabelEdges {
@@ -101,6 +105,43 @@ const deriveEntityAttributesFromType = (entityGroupType: string): NodeVisualProp
   return mappedProps as NodeVisualProps;
 };
 
+/**
+ * Resolves the entity type based on enrichment data
+ * Falls back to singular/plural non-enriched types based on entity count
+ */
+const resolveEntityType = (entityType: string | null | undefined, idsCount: number): string => {
+  if (entityType) {
+    return entityType;
+  }
+  return idsCount === 1 ? NON_ENRICHED_ENTITY_TYPE_SINGULAR : NON_ENRICHED_ENTITY_TYPE_PLURAL;
+};
+
+/**
+ * Generates the appropriate label for an entity node
+ * Logic matches the previous ESQL EVAL calculations
+ */
+const generateEntityLabel = (
+  idsCount: number,
+  entityIds: Array<string | null>,
+  entityType: string,
+  entityName: string | null | undefined,
+  entitySubType: string | null | undefined
+): string => {
+  // Single non-enriched entity: show the ID
+  if (idsCount === 1 && entityType === NON_ENRICHED_ENTITY_TYPE_SINGULAR) {
+    return String(entityIds[0]);
+  }
+  // Single enriched entity: show the name
+  if (idsCount === 1 && entityType !== NON_ENRICHED_ENTITY_TYPE_SINGULAR) {
+    return entityName || '';
+  }
+  // Multiple entities with subtype: show the subtype
+  if (idsCount > 1 && entitySubType) {
+    return entitySubType;
+  }
+  return '';
+};
+
 const createGroupedActorAndTargetNodes = (
   record: GraphEdge,
   context: ParseContext
@@ -114,15 +155,17 @@ const createGroupedActorAndTargetNodes = (
     actorIds,
     actorIdsCount,
     actorsDocData,
-    actorEntityType,
-    actorLabel,
+    actorEntityType: rawActorEntityType,
+    actorEntitySubType,
+    actorEntityName,
     actorHostIps,
     // target attributes
     targetIds,
     targetIdsCount,
     targetsDocData,
-    targetEntityType,
-    targetLabel,
+    targetEntityType: rawTargetEntityType,
+    targetEntitySubType,
+    targetEntityName,
     targetHostIps,
   } = record;
 
@@ -130,6 +173,26 @@ const createGroupedActorAndTargetNodes = (
   const targetIdsArray = targetIds ? castArray(targetIds) : [];
   const actorHostIpsArray = actorHostIps ? castArray(actorHostIps) : [];
   const targetHostIpsArray = targetHostIps ? castArray(targetHostIps) : [];
+
+  // Resolve entity types and labels using utility functions
+  const actorEntityType = resolveEntityType(rawActorEntityType, actorIdsCount);
+  const targetEntityType = resolveEntityType(rawTargetEntityType, targetIdsCount);
+
+  const actorLabel = generateEntityLabel(
+    actorIdsCount,
+    actorIdsArray,
+    actorEntityType,
+    actorEntityName,
+    actorEntitySubType
+  );
+
+  const targetLabel = generateEntityLabel(
+    targetIdsCount,
+    targetIdsArray,
+    targetEntityType,
+    targetEntityName,
+    targetEntitySubType
+  );
 
   const actorsDocDataArray: NodeDocumentDataModel[] = actorsDocData
     ? castArray(actorsDocData)

@@ -18,10 +18,6 @@ import {
 import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
 import type { EsQuery, GraphEdge, OriginEventId } from './types';
 
-const NON_ENRICHED_ENTITY_TYPE_PLURAL = 'Entities';
-const NON_ENRICHED_ENTITY_TYPE_SINGULAR = 'Entity';
-const NON_ENRICHED_PLACEHOLDER = 'NonEnriched';
-
 interface BuildEsqlQueryParams {
   indexPatterns: string[];
   originEventIds: OriginEventId[];
@@ -266,22 +262,6 @@ ${
     }
   "}")
 
-// Construct actor and target entity groups (using placeholder for non-enriched)
-| EVAL actorEntityGroup = CASE(
-    actorEntityType IS NOT NULL AND actorEntitySubType IS NOT NULL,
-    CONCAT(actorEntityType, ":", actorEntitySubType),
-    actorEntityType IS NOT NULL,
-    actorEntityType,
-    "${NON_ENRICHED_PLACEHOLDER}"
-  )
-| EVAL targetEntityGroup = CASE(
-    targetEntityType IS NOT NULL AND targetEntitySubType IS NOT NULL,
-    CONCAT(targetEntityType, ":", targetEntitySubType),
-    targetEntityType IS NOT NULL,
-    targetEntityType,
-    "${NON_ENRICHED_PLACEHOLDER}"
-  )
-
 | STATS badge = COUNT(*),
   uniqueEventsCount = COUNT_DISTINCT(CASE(isAlert == false, event.id, null)),
   uniqueAlertsCount = COUNT_DISTINCT(CASE(isAlert == true, event.id, null)),
@@ -293,54 +273,21 @@ ${
   actorIds = VALUES(actor.entity.id),
   actorIdsCount = COUNT_DISTINCT(actor.entity.id),
   actorEntityName = VALUES(actorEntityName),
-  actorEntityType = VALUES(actorEntityType),
-  actorEntitySubType = VALUES(actorEntitySubType),
-  actorsDocData = VALUES(actorDocData),
   actorHostIp = VALUES(actorHostIp),
+  actorsDocData = VALUES(actorDocData),
   // target attributes
   targetIds = VALUES(target.entity.id),
   targetIdsCount = COUNT_DISTINCT(target.entity.id),
   targetEntityName = VALUES(targetEntityName),
-  targetEntityType = VALUES(targetEntityType),
-  targetEntitySubType = VALUES(targetEntitySubType),
+  targetHostIp = VALUES(targetHostIp),
   targetsDocData = VALUES(targetDocData)
     BY action = event.action,
-      actorEntityGroup,
-      targetEntityGroup,
+      actorEntityType,
+      actorEntitySubType,
+      targetEntityType,
+      targetEntitySubType,
       isOrigin,
       isOriginAlert
-| EVAL actorEntityType = CASE(
-    actorEntityType IS NOT NULL,
-    actorEntityType,
-    actorIdsCount == 1,
-    "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
-    "${NON_ENRICHED_ENTITY_TYPE_PLURAL}"
-  )
-| EVAL targetEntityType = CASE(
-    targetEntityType IS NOT NULL,
-    targetEntityType,
-    targetIdsCount == 1,
-    "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
-    "${NON_ENRICHED_ENTITY_TYPE_PLURAL}"
-  )
-| EVAL actorLabel = CASE(
-    actorIdsCount == 1 AND actorEntityType == "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
-    TO_STRING(actorIds),
-    actorIdsCount == 1 AND actorEntityType != "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
-    actorEntityName,
-    actorIdsCount > 1 AND actorEntitySubType IS NOT NULL,
-    actorEntitySubType,
-    ""
-  )
-| EVAL targetLabel = CASE(
-    targetIdsCount == 1 AND targetEntityType == "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
-    TO_STRING(targetIds),
-    targetIdsCount == 1 AND targetEntityType != "${NON_ENRICHED_ENTITY_TYPE_SINGULAR}",
-    targetEntityName,
-    targetIdsCount > 1 AND targetEntitySubType IS NOT NULL,
-    targetEntitySubType,
-    ""
-  )
 | LIMIT 1000
 | SORT action DESC, isOrigin`;
 
