@@ -9,7 +9,7 @@ import type {
   CreateExceptionListItemOptions,
   UpdateExceptionListItemOptions,
 } from '@kbn/lists-plugin/server';
-import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { EndpointExceptionsValidationError } from './endpoint_exception_errors';
 import { BaseValidator, GLOBAL_ARTIFACT_MANAGEMENT_NOT_ALLOWED_MESSAGE } from './base_validator';
@@ -17,7 +17,7 @@ import type { ExceptionItemLikeOptions } from '../types';
 
 export class EndpointExceptionsValidator extends BaseValidator {
   static isEndpointException(item: { listId: string }): boolean {
-    return item.listId === ENDPOINT_LIST_ID;
+    return item.listId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id;
   }
 
   protected async validateHasReadPrivilege(): Promise<void> {
