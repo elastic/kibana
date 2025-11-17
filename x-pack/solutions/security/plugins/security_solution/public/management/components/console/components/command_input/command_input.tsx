@@ -225,20 +225,23 @@ export const CommandInput = memo<CommandInputProps>(({ prompt = '', focusRef, ..
 
             // ENTER = Execute command and blank out the input area
             case 'Enter':
-              // In order to avoid triggering another state update from inside this current update,
+              // In order to avoid triggering another state update while this one is being processed,
               // we defer the setting of the command to execute until this state update is done
-              // This essentially avoids the React warning: Cannot update a component (`name here`) while rendering a different component (`name here`)
-              Promise.resolve().then(() => {
-                if (isMounted()) {
-                  setCommandToExecute({
-                    input: inputText.getFullText(true),
-                    enteredCommand:
-                      prevEnteredCommand as ConsoleDataState['input']['enteredCommand'],
-                    parsedInput: prevParsedInput as ConsoleDataState['input']['parsedInput'],
-                  });
-                }
-              });
-              inputText.clear();
+              // This essentially avoids the React warning:
+              //    "Cannot update a component (`name here`) while rendering a different component (`name here`)"
+              {
+                const commandToExecutePayload: ExecuteCommandPayload = {
+                  input: inputText.getFullText(true),
+                  enteredCommand: prevEnteredCommand as ConsoleDataState['input']['enteredCommand'],
+                  parsedInput: prevParsedInput as ConsoleDataState['input']['parsedInput'],
+                };
+                Promise.resolve().then(() => {
+                  if (isMounted()) {
+                    setCommandToExecute(commandToExecutePayload);
+                  }
+                });
+                inputText.clear();
+              }
               break;
 
             // ARROW LEFT

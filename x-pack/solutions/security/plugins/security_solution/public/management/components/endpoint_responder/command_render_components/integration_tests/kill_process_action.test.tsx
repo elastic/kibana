@@ -458,6 +458,9 @@ describe('When using the kill-process action from response actions console', () 
     });
 
     it('should call API with correct payload for SentinelOne kill-process', async () => {
+      apiMocks.responseProvider.killProcess.mockDelay.mockImplementation(
+        () => new Promise((r) => setTimeout(r, 100))
+      );
       await render();
       await enterConsoleCommand(
         renderResult,

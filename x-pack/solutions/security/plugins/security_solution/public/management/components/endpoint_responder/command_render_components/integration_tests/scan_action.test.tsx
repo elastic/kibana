@@ -179,6 +179,9 @@ describe('When using scan action from response actions console', () => {
   });
 
   it('should work with a single `--comment` argument', async () => {
+    apiMocks.responseProvider.scan.mockDelay.mockImplementation(
+      () => new Promise((r) => setTimeout(r, 100))
+    );
     await render();
     await enterConsoleCommand(renderResult, user, 'scan --path="one/two" --comment "Scan folder"');
 
@@ -206,6 +209,9 @@ describe('When using scan action from response actions console', () => {
   });
 
   it('should display pending message', async () => {
+    apiMocks.responseProvider.scan.mockDelay.mockImplementation(
+      () => new Promise((r) => setTimeout(r, 100))
+    );
     await render();
     await enterConsoleCommand(renderResult, user, 'scan --path="one/two"');
 
