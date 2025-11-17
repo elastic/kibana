@@ -717,16 +717,16 @@ const optimizeParamsForPoll = (
   request: IKibanaSearchRequest,
   strategy: string | undefined
 ): IKibanaSearchRequest => {
-  let optimizedParams = request.params;
+  if (!request.params) return request;
 
-  if (strategy === ENHANCED_ES_SEARCH_STRATEGY) {
-    const { body, ...paramsWithoutBody } = request.params;
-    optimizedParams = paramsWithoutBody;
-  }
+  let optimizedParams = request.params;
 
   if (strategy === ESQL_ASYNC_SEARCH_STRATEGY) {
     const { query, filter: _filter, ...paramsWithoutQueryAndFilter } = request.params;
     optimizedParams = paramsWithoutQueryAndFilter;
+  } else {
+    const { body, ...paramsWithoutBody } = request.params;
+    optimizedParams = paramsWithoutBody;
   }
 
   return {
