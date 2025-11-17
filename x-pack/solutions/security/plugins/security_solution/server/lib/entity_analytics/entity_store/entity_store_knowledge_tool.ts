@@ -21,7 +21,7 @@ export const entityStoreKnowledgeTool =
     return {
       id: ENTITY_STORE_KNOWLEDGE_TOOL_ID,
       type: ToolType.builtin,
-      description: `Get knowledge about querying Entity Store data. Use this tool when you need information about how to query entity risk scores, entity attributes, or entity relationships from the Entity Store.`,
+      description: `Get knowledge about querying Entity Store data. Use this tool when you need information about how to query entity risk scores, entity attributes, entity relationships, or historical entity data trends from the Entity Store.`,
       schema: entityStoreKnowledgeSchema,
       handler: async ({ question }, { logger }) => {
         logger.debug(`Entity Store knowledge tool called with question: ${question}`);
@@ -32,14 +32,20 @@ Entity Store Index Patterns and Data Structure:
 The Entity Store contains aggregated information about entities (users, hosts, services) in Elasticsearch.
 
 **Index Patterns:**
-- Latest entities: .entities.v1.latest.*
-- All entities: .entities.*
-- Historical data: .entities.*history*
+- Latest entities (current state): .entities.v1.latest.*
+- Historical snapshots (daily): .entities.v1.history.YYYY-MM-DD.*
 
 **Concrete Index Names (examples):**
+
+Latest (current state):
 - .entities.v1.latest.security_user_default (user entities)
 - .entities.v1.latest.security_host_default (host entities)
 - .entities.v1.latest.security_service_default (service entities)
+
+Historical (daily snapshots):
+- .entities.v1.history.2025-11-13.security_host_default (host entities on Nov 13)
+- .entities.v1.history.*.security_host_default (all host snapshots - use with execute_esql)
+- .entities.v1.history.*.security_user_default (all user snapshots - use with execute_esql)
 
 **CRITICAL - Risk Score Fields:**
 Risk scores are stored in ENTITY-TYPE-SPECIFIC fields, NOT in generic entity.risk fields!
@@ -103,6 +109,36 @@ FROM .entities.v1.latest.security_user_default
 | SORT user.risk.calculated_score_norm DESC
 | KEEP user.name, user.risk.calculated_score_norm, user.risk.calculated_level
 | LIMIT 10
+
+**HISTORICAL DATA QUERIES:**
+
+For questions about how risk scores have changed over time, use historical snapshot indices.
+
+**Historical Index Pattern:**
+- Daily snapshots: .entities.v1.history.YYYY-MM-DD.security_<type>_default
+- Wildcard for trends: .entities.v1.history.*.security_<type>_default (only works with execute_esql)
+
+**Important Notes:**
+- Historical snapshots are created daily and contain the complete entity state at that point in time
+- Each snapshot has an @timestamp field indicating when the snapshot was created
+- You can query across multiple snapshots using wildcard patterns with execute_esql
+- The search tool CANNOT handle wildcards - use execute_esql for historical queries
+
+**Example ES|QL Query for Host Risk Score Trend (Last 90 Days):**
+FROM .entities.v1.history.*.security_host_default
+| WHERE host.name == "asset-inventory-vm"
+  AND host.risk.calculated_score_norm IS NOT NULL
+| SORT @timestamp ASC
+| KEEP @timestamp, host.name, host.risk.calculated_score_norm, host.risk.calculated_level
+| LIMIT 100
+
+**Example ES|QL Query for User Risk Score Changes:**
+FROM .entities.v1.history.*.security_user_default
+| WHERE user.name == "john.doe"
+  AND user.risk.calculated_score_norm IS NOT NULL
+| SORT @timestamp DESC
+| KEEP @timestamp, user.name, user.risk.calculated_score_norm, user.risk.calculated_level
+| LIMIT 30
 `;
 
         return {
