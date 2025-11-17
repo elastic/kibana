@@ -116,7 +116,7 @@
     "@arizeai/openinference-semantic-conventions": "^1.1.0",
     "@aws-sdk/client-bedrock-runtime": "^3.879.0",
     "@babel/runtime": "^7.24.7",
-    "@dagrejs/dagre": "^1.1.5",
+    "@dagrejs/dagre": "^1.1.8",
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
