@@ -366,12 +366,12 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-layout-constants",
-            "id": "def-common.layoutLevels.sidebar",
+            "id": "def-common.layoutLevels.navigation",
             "type": "number",
             "tags": [],
-            "label": "sidebar",
+            "label": "navigation",
             "description": [
-              "// Interactive layout components that need higher priority than euiFlyout (1000)"
+              "// 999 is chosen to be the same as old EuiCollapsibleNavBeta for backwards compatibility"
             ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/levels.ts",
             "deprecated": false,
@@ -379,11 +379,13 @@
           },
           {
             "parentPluginId": "@kbn/core-chrome-layout-constants",
-            "id": "def-common.layoutLevels.navigation",
+            "id": "def-common.layoutLevels.sidebar",
             "type": "number",
             "tags": [],
-            "label": "navigation",
-            "description": [],
+            "label": "sidebar",
+            "description": [
+              "// Interactive layout components that need higher priority than euiFlyout (1000)"
+            ],
             "path": "src/core/packages/chrome/layout/core-chrome-layout-constants/src/levels.ts",
             "deprecated": false,
             "trackAdoption": false

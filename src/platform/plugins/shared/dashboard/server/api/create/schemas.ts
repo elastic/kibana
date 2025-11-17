@@ -8,9 +8,10 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { dashboardMetaSchema, getDashboardDataSchema } from '../../content_management/v1/schema';
+import { getDashboardDataSchema } from '../../content_management/v1/schema';
+import { baseMetaSchema, createdMetaSchema, updatedMetaSchema } from '../meta_schemas';
 
-export function getCreateRequestBody() {
+export function getCreateRequestBodySchema() {
   return schema.object({
     id: schema.maybe(schema.string()),
     data: getDashboardDataSchema(),
@@ -18,11 +19,9 @@ export function getCreateRequestBody() {
   });
 }
 
-export function getCreateResponseBody() {
-  return schema.object({
-    id: schema.string(),
-    data: getDashboardDataSchema(),
-    meta: dashboardMetaSchema,
-    spaces: schema.maybe(schema.arrayOf(schema.string())),
-  });
-}
+export const createResponseBodySchema = schema.object({
+  id: schema.string(),
+  data: getDashboardDataSchema(),
+  meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema]),
+  spaces: schema.maybe(schema.arrayOf(schema.string())),
+});
