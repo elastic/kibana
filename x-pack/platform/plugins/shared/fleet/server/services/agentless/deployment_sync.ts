@@ -12,6 +12,7 @@ import type { AgentlessAgentService } from '../agents/agentless_agent';
 import { agentPolicyService, appContextService } from '..';
 
 import { AGENT_POLICY_SAVED_OBJECT_TYPE, SO_SEARCH_LIMIT } from '../../constants';
+import { AgentlessAgentListNotFoundError } from '../../errors';
 
 const AGENTLESS_CONCURRENCY = 1;
 const PAGE_SIZE = 20;
@@ -156,6 +157,13 @@ export async function syncAgentlessDeployments(
     );
     logger.info(`[Agentless Deployment Sync] Finished sync process`);
   } catch (error) {
+    if (error instanceof AgentlessAgentListNotFoundError) {
+      logger.warn(`[Agentless Deployment Sync] Skipping sync agentless list API not found`, {
+        error,
+      });
+      return;
+    }
+
     logger.error(`[Agentless Deployment Sync] Sync failed with error`, { error });
 
     throw error;

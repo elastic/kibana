@@ -69,7 +69,7 @@ describe('Agentless Deployment Sync', () => {
           { policy_id: 'policy3', revision_idx: 10 },
           { policy_id: 'policy4', revision_idx: 10 },
         ],
-        nextPageToken: 'token10',
+        next_token: 'token10',
       });
       agentlessAgentService.listAgentlessDeployments.mockResolvedValueOnce({
         deployments: [
@@ -78,7 +78,7 @@ describe('Agentless Deployment Sync', () => {
           { policy_id: 'policy6', revision_idx: 10 },
           { policy_id: 'policy7', revision_idx: 10 },
         ],
-        nextPageToken: 'token2',
+        next_token: 'token2',
       });
       agentlessAgentService.listAgentlessDeployments.mockResolvedValueOnce({
         deployments: [{ policy_id: 'policy8', revision_idx: 10 }],
@@ -105,7 +105,7 @@ describe('Agentless Deployment Sync', () => {
           { policy_id: 'policy3', revision_idx: 10 },
           { policy_id: 'policy4', revision_idx: 10 },
         ],
-        nextPageToken: 'token10',
+        next_token: 'token10',
       });
       agentlessAgentService.listAgentlessDeployments.mockResolvedValueOnce({
         deployments: [
@@ -114,7 +114,7 @@ describe('Agentless Deployment Sync', () => {
           { policy_id: 'policy6', revision_idx: 10 },
           { policy_id: 'policy7', revision_idx: 10 },
         ],
-        nextPageToken: 'token2',
+        next_token: 'token2',
       });
       agentlessAgentService.listAgentlessDeployments.mockResolvedValueOnce({
         deployments: [
@@ -141,7 +141,7 @@ describe('Agentless Deployment Sync', () => {
           { policy_id: 'policy3', revision_idx: 10 },
           { policy_id: 'policy4', revision_idx: 10 },
         ],
-        nextPageToken: 'token10',
+        next_token: 'token10',
       });
       agentlessAgentService.listAgentlessDeployments.mockResolvedValueOnce({
         deployments: [
@@ -150,7 +150,7 @@ describe('Agentless Deployment Sync', () => {
           { policy_id: 'policy6', revision_idx: 10 },
           { policy_id: 'policy7', revision_idx: 10 },
         ],
-        nextPageToken: 'token2',
+        next_token: 'token2',
       });
       agentlessAgentService.listAgentlessDeployments.mockResolvedValueOnce({
         deployments: [
@@ -188,7 +188,7 @@ describe('Agentless Deployment Sync', () => {
           { policy_id: 'policy3', revision_idx: 10 },
           { policy_id: 'policy4', revision_idx: 10 },
         ],
-        nextPageToken: 'token10',
+        next_token: 'token10',
       });
       agentlessAgentService.listAgentlessDeployments.mockResolvedValueOnce({
         deployments: [
@@ -197,7 +197,7 @@ describe('Agentless Deployment Sync', () => {
           { policy_id: 'policy6', revision_idx: 10 },
           { policy_id: 'policy7', revision_idx: 10 },
         ],
-        nextPageToken: 'token2',
+        next_token: 'token2',
       });
       agentlessAgentService.listAgentlessDeployments.mockResolvedValueOnce({
         deployments: [
@@ -231,7 +231,7 @@ describe('Agentless Deployment Sync', () => {
           { policy_id: 'policy3', revision_idx: 10 },
           { policy_id: 'policy4', revision_idx: 10 },
         ],
-        nextPageToken: 'token10',
+        next_token: 'token10',
       });
       agentlessAgentService.listAgentlessDeployments.mockResolvedValueOnce({
         deployments: [
@@ -240,7 +240,7 @@ describe('Agentless Deployment Sync', () => {
           { policy_id: 'policy6', revision_idx: 10 },
           { policy_id: 'policy7', revision_idx: 10 },
         ],
-        nextPageToken: 'token2',
+        next_token: 'token2',
       });
       agentlessAgentService.listAgentlessDeployments.mockResolvedValueOnce({
         deployments: [{ policy_id: 'policy8' }],
@@ -270,7 +270,7 @@ describe('Agentless Deployment Sync', () => {
           { policy_id: 'policy3', revision_idx: 10 },
           { policy_id: 'policy4', revision_idx: 10 },
         ],
-        nextPageToken: 'token10',
+        next_token: 'token10',
       });
       agentlessAgentService.listAgentlessDeployments.mockResolvedValueOnce({
         deployments: [
@@ -279,7 +279,7 @@ describe('Agentless Deployment Sync', () => {
           { policy_id: 'policy6', revision_idx: 10 },
           { policy_id: 'policy7', revision_idx: 10 },
         ],
-        nextPageToken: 'token2',
+        next_token: 'token2',
       });
       agentlessAgentService.listAgentlessDeployments.mockResolvedValueOnce({
         deployments: [{ policy_id: 'policy8', revision_idx: 9 }],
@@ -309,7 +309,7 @@ describe('Agentless Deployment Sync', () => {
           { policy_id: 'policy3', revision_idx: 10 },
           { policy_id: 'policy4', revision_idx: 10 },
         ],
-        nextPageToken: 'token10',
+        next_token: 'token10',
       });
       agentlessAgentService.listAgentlessDeployments.mockResolvedValueOnce({
         deployments: [
@@ -318,7 +318,7 @@ describe('Agentless Deployment Sync', () => {
           { policy_id: 'policy6', revision_idx: 10 },
           { policy_id: 'policy7', revision_idx: 10 },
         ],
-        nextPageToken: 'token2',
+        next_token: 'token2',
       });
       agentlessAgentService.listAgentlessDeployments.mockResolvedValueOnce({
         deployments: [{ policy_id: 'policy8' }],
@@ -350,7 +350,7 @@ describe('Agentless Deployment Sync', () => {
           { policy_id: 'policy3', revision_idx: 10 },
           { policy_id: 'policy4', revision_idx: 10 },
         ],
-        nextPageToken: 'token10',
+        next_token: 'token10',
       });
       agentlessAgentService.listAgentlessDeployments.mockResolvedValueOnce({
         deployments: [
@@ -359,7 +359,7 @@ describe('Agentless Deployment Sync', () => {
           { policy_id: 'policy6', revision_idx: 10 },
           { policy_id: 'policy7', revision_idx: 10 },
         ],
-        nextPageToken: 'token2',
+        next_token: 'token2',
       });
       agentlessAgentService.listAgentlessDeployments.mockResolvedValueOnce({
         deployments: [{ policy_id: 'policy8' }],
@@ -390,7 +390,7 @@ describe('Agentless Deployment Sync', () => {
           { policy_id: 'policy3', revision_idx: 10 },
           { policy_id: 'policy4', revision_idx: 10 },
         ],
-        nextPageToken: 'token10',
+        next_token: 'token10',
       });
       agentlessAgentService.listAgentlessDeployments.mockResolvedValueOnce({
         deployments: [
@@ -425,7 +425,7 @@ describe('Agentless Deployment Sync', () => {
           { policy_id: 'policy3', revision_idx: 10 },
           { policy_id: 'policy4', revision_idx: 10 },
         ],
-        nextPageToken: 'token10',
+        next_token: 'token10',
       });
       agentlessAgentService.listAgentlessDeployments.mockResolvedValueOnce({
         deployments: [

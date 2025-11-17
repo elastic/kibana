@@ -32,6 +32,8 @@ import {
   AgentlessAgentConfigError,
   AgentlessAgentCreateError,
   AgentlessAgentDeleteError,
+  AgentlessAgentListError,
+  AgentlessAgentListNotFoundError,
   AgentlessAgentUpgradeError,
 } from '../../errors';
 import {
@@ -571,6 +573,10 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
       if (action === 'upgrade') {
         errorLogMessage = `[Agentless API] Upgrading agentless deployment failed with an error that is not an Axios error for agentless policy`;
       }
+      if (action === 'list') {
+        errorLogMessage = `[Agentless API] Listing agentless deployments failed with an error that is not an Axios error for agentless policy`;
+      }
+
       logger.error(
         `${errorLogMessage} ${error} ${requestConfigDebugStatus}`,
         errorMetadataWithRequestConfig
@@ -654,6 +660,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     const responseData = {
       code: response?.data?.code,
       error: response?.data?.error,
+      statusCode: response?.status,
     };
 
     throw this.getAgentlessAgentError(action, userMessage, traceId, responseData);
@@ -673,6 +680,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     responseData?: {
       code?: string;
       error?: string;
+      statusCode?: number;
     }
   ) {
     if (action === 'create') {
@@ -697,6 +705,13 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     }
     if (action === 'upgrade') {
       return new AgentlessAgentUpgradeError(this.withRequestIdMessage(userMessage, traceId));
+    }
+    if (action === 'list') {
+      if (responseData?.statusCode === 404) {
+        return new AgentlessAgentListNotFoundError(this.withRequestIdMessage(userMessage, traceId));
+      }
+
+      return new AgentlessAgentListError(this.withRequestIdMessage(userMessage, traceId));
     }
   }
 
