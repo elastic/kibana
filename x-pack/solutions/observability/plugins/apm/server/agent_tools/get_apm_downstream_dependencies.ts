@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
 import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import { buildApmToolResources } from './utils/build_apm_tool_resources';
@@ -42,8 +42,8 @@ export function createApmDownstreamDependenciesTool({
   core: CoreSetup<APMPluginStartDependencies>;
   plugins: APMPluginSetupDependencies;
   logger: Logger;
-}) {
-  const toolDefinition: BuiltinToolDefinition<typeof schema> = {
+}): StaticToolRegistration<typeof getApmDownstreamDependenciesToolSchema> {
+  const toolDefinition: BuiltinToolDefinition<typeof getApmDownstreamDependenciesToolSchema> = {
     id: OBSERVABILITY_GET_APM_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
     type: ToolType.builtin,
     description:

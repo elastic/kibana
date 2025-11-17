@@ -7,25 +7,30 @@
 
 import { z } from '@kbn/zod';
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import type { BuiltinToolDefinition } from '@kbn/onechat-server';
+import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
 import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import { getDataTierFilterCombined } from '@kbn/apm-data-access-plugin/server/utils';
 import { buildApmToolResources } from './utils/build_apm_tool_resources';
 import { getApmToolAvailability } from './utils/get_apm_tool_availability';
 import { getApmServiceList } from '../routes/assistant_functions/get_apm_service_list';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../types';
 import { ServiceHealthStatus } from '../../common/service_health_status';
-import { APM_ALERTING_RULE_TYPE_IDS } from '../../common/alerting/config/apm_alerting_feature_ids';
 import { OBSERVABILITY_GET_SERVICES_TOOL_ID } from '../../common/observability_agent/agent_tool_ids';
 
-const schema = z.object({
+const getServicesSchema = z.object({
+  start: z
+    .string()
+    .min(1)
+    .describe('The start of the time range, in Elasticsearch date math, like `now-24h`.'),
+  end: z
+    .string()
+    .min(1)
+    .describe('The end of the time range, in Elasticsearch date math, like `now`.'),
   serviceEnvironment: z
     .string()
+    .min(1)
     .optional()
-    .describe('Optionally filter the services by the environments that they are running in'),
-  start: z.string().min(1).describe('The start of the time range, in Elasticsearch date math.'),
-  end: z.string().min(1).describe('The end of the time range, in Elasticsearch date math.'),
+    .describe('Optionally filter the services by the environments that they are running in.'),
   healthStatus: z
     .array(
       z.enum([
@@ -36,10 +41,10 @@ const schema = z.object({
       ])
     )
     .optional()
-    .describe('Filter service list by health status'),
+    .describe('Optionally filter the services by their health status.'),
 });
 
-export function createApmGetServicesTool({
+export function createGetServicesTool({
   core,
   plugins,
   logger,
@@ -47,13 +52,13 @@ export function createApmGetServicesTool({
   core: CoreSetup<APMPluginStartDependencies>;
   plugins: APMPluginSetupDependencies;
   logger: Logger;
-}) {
-  const toolDefinition: BuiltinToolDefinition<typeof schema> = {
+}): StaticToolRegistration<typeof getServicesSchema> {
+  const toolDefinition: BuiltinToolDefinition<typeof getServicesSchema> = {
     id: OBSERVABILITY_GET_SERVICES_TOOL_ID,
     type: ToolType.builtin,
-    description: 'Get the list of monitored APM services, their health status, and alerts.',
-    schema,
-    tags: ['observability', 'apm', 'services'],
+    description: 'Get the list of monitored services, their health status, and alerts.',
+    schema: getServicesSchema,
+    tags: ['observability', 'services'],
     availability: {
       cacheMode: 'space',
       handler: async ({ request }) => {
@@ -64,56 +69,22 @@ export function createApmGetServicesTool({
       const { request, esClient, logger: scopedLogger } = context;
 
       try {
-        const { apmEventClient, randomSampler } = await buildApmToolResources({
-          core,
-          plugins,
-          request,
-          esClient,
-          logger: scopedLogger,
-        });
-
-        // Alerts client adapter
-        const [coreStart, pluginStarts] = await core.getStartServices();
-        const alertsClient = await pluginStarts.ruleRegistry.getRacClientWithRequest(request);
-        const apmAlertsIndices =
-          (await alertsClient.getAuthorizedAlertsIndices(APM_ALERTING_RULE_TYPE_IDS)) || [];
-        const uiSettingsClient = coreStart.uiSettings.asScopedToClient(
-          coreStart.savedObjects.getScopedClient(request)
-        );
-        const excludedDataTiers = await uiSettingsClient.get<any>(
-          '@kbn/observability:searchExcludedDataTiers'
-        );
-        const apmAlertsClient = {
-          search: async (searchParams: any) =>
-            alertsClient.find({
-              ...searchParams,
-              query: getDataTierFilterCombined({
-                filter: searchParams.query,
-                excludedDataTiers,
-              }),
-              index: apmAlertsIndices.join(','),
-            }) as Promise<any>,
-        };
-
-        // ML client (best-effort)
-        let mlClient: any | undefined;
-        try {
-          const mlStart = pluginStarts.ml;
-          if (mlStart) {
-            // ML start does not expose providers; omit ML if not easily available
-            mlClient = undefined;
-          }
-        } catch (e) {
-          scopedLogger.debug(`ML client unavailable: ${e.message}`);
-        }
+        const { apmEventClient, randomSampler, mlClient, apmAlertsClient } =
+          await buildApmToolResources({
+            core,
+            plugins,
+            request,
+            esClient,
+            logger: scopedLogger,
+          });
 
         const services = await getApmServiceList({
-          arguments: args as any,
           apmEventClient,
-          mlClient,
           apmAlertsClient,
-          logger: scopedLogger,
           randomSampler,
+          mlClient,
+          logger: scopedLogger,
+          arguments: args,
         });
 
         return {
@@ -125,13 +96,15 @@ export function createApmGetServicesTool({
           ],
         };
       } catch (error) {
-        logger.error(`APM get services tool failed: ${error.message}`);
+        logger.error(`Error getting services: ${error.message}`);
+        logger.debug(error);
+
         return {
           results: [
             {
               type: ToolResultType.error,
               data: {
-                message: `Failed to fetch APM services: ${error.message}`,
+                message: `Failed to fetch services: ${error.message}`,
                 stack: error.stack,
               },
             },

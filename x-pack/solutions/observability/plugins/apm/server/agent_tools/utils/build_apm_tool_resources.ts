@@ -7,16 +7,23 @@
 
 import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import { firstValueFrom } from 'rxjs';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
 import { hasHistoricalAgentData } from '../../routes/historical_data/has_historical_agent_data';
 import type { MinimalApmPluginRequestHandlerContext } from '../../routes/typings';
+import { getMlClient } from '../../lib/helpers/get_ml_client';
+import type { MinimalAPMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
+import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
+import type { ApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 
 export interface ApmToolResources {
   apmEventClient: Awaited<ReturnType<typeof getApmEventClient>>;
   randomSampler: Awaited<ReturnType<typeof getRandomSampler>>;
   hasHistoricalData: boolean;
+  mlClient: Awaited<ReturnType<typeof getMlClient>>;
+  apmAlertsClient: ApmAlertsClient;
 }
 
 export async function buildApmToolResources({
@@ -32,10 +39,15 @@ export async function buildApmToolResources({
   esClient?: IScopedClusterClient;
   logger: Logger;
 }): Promise<ApmToolResources> {
-  const [coreStart] = await core.getStartServices();
+  const [coreStart, pluginStart] = await core.getStartServices();
   const esScoped = esClient ?? coreStart.elasticsearch.client.asScoped(request);
   const soClient = coreStart.savedObjects.getScopedClient(request, { includedHiddenTypes: [] });
   const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
+
+  const licensingContext = firstValueFrom(pluginStart.licensing.license$).then((license) => ({
+    license,
+    featureUsage: pluginStart.licensing.featureUsage,
+  }));
 
   const contextAdapter = {
     core: Promise.resolve({
@@ -43,30 +55,62 @@ export async function buildApmToolResources({
       uiSettings: { client: uiSettingsClient },
       elasticsearch: { client: esScoped },
     }),
+    licensing: licensingContext,
   } as unknown as MinimalApmPluginRequestHandlerContext;
 
-  const [apmEventClient, randomSampler] = await Promise.all([
-    getApmEventClient({
-      context: contextAdapter,
-      request,
-      params: {
-        query: {
-          _inspect: false,
-        },
+  const pluginsAdapter = {
+    ml: plugins.ml
+      ? {
+          setup: plugins.ml,
+          start: async () => pluginStart.ml!,
+        }
+      : undefined,
+    ruleRegistry: {
+      setup: plugins.ruleRegistry,
+      start: async () => pluginStart.ruleRegistry,
+    },
+  } as unknown as MinimalAPMRouteHandlerResources['plugins'];
+
+  const apmEventClientPromise = getApmEventClient({
+    context: contextAdapter,
+    request,
+    params: {
+      query: {
+        _inspect: false,
       },
-      getApmIndices: async () => {
-        return plugins.apmDataAccess.getApmIndices(soClient);
-      },
-    }),
-    getRandomSampler({
-      coreStart,
-      request,
-      probability: 1,
-    }),
+    },
+    getApmIndices: async () => {
+      return plugins.apmDataAccess.getApmIndices(soClient);
+    },
+  });
+
+  const randomSamplerPromise = getRandomSampler({
+    coreStart,
+    request,
+    probability: 1,
+  });
+
+  const mlClientPromise = getMlClient({
+    plugins: pluginsAdapter,
+    context: contextAdapter,
+    request,
+  }).catch(() => undefined);
+
+  const apmAlertsClientPromise = getApmAlertsClient({
+    context: contextAdapter,
+    plugins: pluginsAdapter,
+    request,
+  });
+
+  const [apmEventClient, randomSampler, mlClient, apmAlertsClient] = await Promise.all([
+    apmEventClientPromise,
+    randomSamplerPromise,
+    mlClientPromise,
+    apmAlertsClientPromise,
   ]);
 
   const hasHistoricalData = await hasHistoricalAgentData(apmEventClient);
-  logger.debug(`Has historical data: ${hasHistoricalData}`);
+  logger.debug(`Has historical APM data: ${hasHistoricalData}`);
 
-  return { apmEventClient, randomSampler, hasHistoricalData };
+  return { apmEventClient, randomSampler, mlClient, apmAlertsClient, hasHistoricalData };
 }
