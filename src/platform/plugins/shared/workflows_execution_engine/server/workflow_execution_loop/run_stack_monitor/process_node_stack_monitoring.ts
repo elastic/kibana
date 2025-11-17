@@ -35,8 +35,12 @@ export async function processNodeStackMonitoring(
   let nodeStack = WorkflowScopeStack.fromStackFrames(nodeStackFrames);
 
   while (!nodeStack.isEmpty()) {
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    const scopeData = nodeStack.getCurrentScope()!;
+    const scopeData = nodeStack.getCurrentScope();
+
+    if (!scopeData) {
+      break;
+    }
+
     nodeStack = nodeStack.exitScope();
     const scopeStepExecutionRuntime = params.stepExecutionRuntimeFactory.createStepExecutionRuntime(
       {
