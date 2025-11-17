@@ -10,7 +10,7 @@ import { useTimelineSelectAlertsOnlyDataView } from './use_timeline_select_alert
 import { useSelectDataView } from '../../../../../../data_view_manager/hooks/use_select_data_view';
 import { useSpaceId } from '../../../../../../common/hooks/use_space_id';
 import { DEFAULT_ALERT_DATA_VIEW_ID } from '../../../../../../../common/constants';
-import { DataViewManagerScopeName } from '../../../../../../data_view_manager/constants';
+import { PageScope } from '../../../../../../data_view_manager/constants';
 
 jest.mock('../../../../../../data_view_manager/hooks/use_select_data_view');
 jest.mock('../../../../../../common/hooks/use_space_id');
@@ -29,7 +29,7 @@ describe('useTimelineSelectAlertsOnlyDataView', () => {
 
     expect(selectDataView).toHaveBeenCalledWith({
       id: `${DEFAULT_ALERT_DATA_VIEW_ID}-${spaceId}`,
-      scope: DataViewManagerScopeName.timeline,
+      scope: PageScope.timeline,
     });
   });
 });
