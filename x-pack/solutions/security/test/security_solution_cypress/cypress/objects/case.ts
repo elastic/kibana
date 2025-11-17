@@ -353,23 +353,6 @@ export const getExecuteResponses = () => ({
     },
   },
   resilient: {
-    incidentTypes: {
-      status: 'ok',
-      data: [
-        { id: 17, name: 'Communication error (fax; email)' },
-        { id: 21, name: 'Denial of Service' },
-      ],
-      actionId: getConnectorIds().resilient,
-    },
-    severity: {
-      status: 'ok',
-      data: [
-        { id: 4, name: 'Low' },
-        { id: 5, name: 'Medium' },
-        { id: 6, name: 'High' },
-      ],
-      actionId: getConnectorIds().resilient,
-    },
     getFields: {
       status: 'ok',
       data: [
@@ -380,6 +363,63 @@ export const getExecuteResponses = () => ({
           values: [],
           required: null,
           text: 'Resolution summary',
+          internal: true,
+          prefix: null,
+        },
+        {
+          name: 'incident_type_ids',
+          input_type: 'multiselect',
+          read_only: false,
+          values: [
+            {
+              default: false,
+              enabled: true,
+              hidden: false,
+              value: 17,
+              label: 'Communication error (fax; email)',
+            },
+            {
+              default: false,
+              enabled: true,
+              hidden: false,
+              value: 21,
+              label: 'Denial of Service',
+            },
+          ],
+          required: null,
+          text: '',
+          internal: true,
+          prefix: null,
+        },
+        {
+          name: 'severity_code',
+          input_type: 'select',
+          read_only: false,
+          values: [
+            {
+              default: false,
+              enabled: true,
+              hidden: false,
+              value: 4,
+              label: 'Low',
+            },
+            {
+              default: false,
+              enabled: true,
+              hidden: false,
+              value: 5,
+              label: 'Medium',
+            },
+            {
+              default: false,
+              enabled: true,
+              hidden: false,
+              value: 6,
+              label: 'High',
+            },
+          ],
+          required: null,
+          text: '',
           internal: true,
           prefix: null,
         },

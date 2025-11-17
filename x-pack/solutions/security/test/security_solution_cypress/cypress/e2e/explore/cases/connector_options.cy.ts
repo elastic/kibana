@@ -53,12 +53,6 @@ describe('Cases connector incident fields', { tags: ['@ess', '@serverless'] }, (
       (req) => {
         let response = {};
         switch (req.body.params.subAction) {
-          case 'incidentTypes':
-            response = getExecuteResponses().resilient.incidentTypes;
-            break;
-          case 'severity':
-            response = getExecuteResponses().resilient.severity;
-            break;
           case 'getFields':
             response = getExecuteResponses().resilient.getFields;
             break;
