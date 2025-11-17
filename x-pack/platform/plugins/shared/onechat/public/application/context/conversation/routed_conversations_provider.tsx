@@ -36,6 +36,7 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
 
   const location = useLocation<LocationState>();
   const shouldStickToBottom = location.state?.shouldStickToBottom ?? true;
+  const initialMessage = location.state?.initialMessage;
 
   // Get search params for agent ID syncing
   const [searchParams] = useSearchParams();
@@ -114,8 +115,9 @@ export const RoutedConversationsProvider: React.FC<RoutedConversationsProviderPr
       shouldStickToBottom,
       isEmbeddedContext: false,
       conversationActions,
+      initialMessage,
     }),
-    [conversationId, shouldStickToBottom, conversationActions]
+    [conversationId, shouldStickToBottom, conversationActions, initialMessage]
   );
 
   return (

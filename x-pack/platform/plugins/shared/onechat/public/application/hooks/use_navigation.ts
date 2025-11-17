@@ -11,6 +11,7 @@ import { useKibana } from './use_kibana';
 
 export interface LocationState {
   shouldStickToBottom?: boolean;
+  initialMessage?: string;
 }
 
 export const useNavigation = () => {

@@ -19,9 +19,27 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { useKibana } from '../hooks/use_kibana';
 
 export const ExploreDefaultAgent: React.FC = () => {
+  const {
+    services: { application },
+  } = useKibana();
   const [chatInput, setChatInput] = useState('');
+
+  const handleSubmit = () => {
+    if (chatInput.trim() === '') {
+      return;
+    }
+
+    // Navigate to Agent Builder with the message in location state
+    application.navigateToApp('agent_builder', {
+      path: '/conversations/new',
+      state: {
+        initialMessage: chatInput.trim(),
+      },
+    });
+  };
 
   return (
     <EuiPanel paddingSize="l">
@@ -136,7 +154,7 @@ export const ExploreDefaultAgent: React.FC = () => {
               display="fill"
               size="m"
               disabled={chatInput.trim() === ''}
-              onClick={() => {}}
+              onClick={handleSubmit}
             />
           </EuiFlexItem>
         </EuiFlexGroup>
