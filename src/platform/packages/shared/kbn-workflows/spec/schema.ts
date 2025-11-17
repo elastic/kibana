@@ -192,7 +192,8 @@ export const HttpStepSchema = BaseStepSchema.extend({
   .merge(StepWithIfConditionSchema)
   .merge(StepWithForEachSchema)
   .merge(TimeoutPropSchema)
-  .merge(StepWithOnFailureSchema);
+  .merge(StepWithOnFailureSchema)
+  .describe('Http connector, allows you to make HTTP requests to external APIs');
 export type HttpStep = z.infer<typeof HttpStepSchema>;
 
 // Generic Elasticsearch step schema for backend validation
@@ -284,8 +285,12 @@ export function getHttpStepSchema(stepSchema: z.ZodType, loose: boolean = false)
 }
 
 export const ForEachStepSchema = BaseStepSchema.extend({
-  type: z.literal('foreach'),
-  foreach: z.string(),
+  type: z.literal('foreach').describe('Foreach step, allows you to iterate over a list of items'),
+  foreach: z
+    .string()
+    .describe(
+      'The variable name to iterate over. e.g. "{{consts.items}}" or "{{steps.previous_step.output}}"'
+    ),
   steps: z.array(BaseStepSchema).min(1),
 }).merge(StepWithIfConditionSchema);
 export type ForEachStep = z.infer<typeof ForEachStepSchema>;
@@ -305,8 +310,14 @@ export const getForEachStepSchema = (stepSchema: z.ZodType, loose: boolean = fal
 };
 
 export const IfStepSchema = BaseStepSchema.extend({
-  type: z.literal('if'),
-  condition: z.string(),
+  type: z
+    .literal('if')
+    .describe('If step, allows you to execute a branch of steps based on a condition'),
+  condition: z
+    .string()
+    .describe(
+      'The condition to evaluate in KQL. e.g. "status: active" or "{{steps.previous_step.output}}: active"'
+    ),
   steps: z.array(BaseStepSchema).min(1),
   else: z.array(BaseStepSchema).optional(),
 });
@@ -463,8 +474,13 @@ export const WorkflowSchema = z.object({
   enabled: z.boolean().default(true),
   tags: z.array(z.string()).optional(),
   triggers: z.array(TriggerSchema).min(1),
-  inputs: z.array(WorkflowInputSchema).optional(),
-  consts: WorkflowConstsSchema.optional(),
+  inputs: z
+    .array(WorkflowInputSchema)
+    .optional()
+    .describe('The inputs for the workflow, array of objects'),
+  consts: WorkflowConstsSchema.optional().describe(
+    'The constants for the workflow, object with key-value pairs'
+  ),
   steps: z.array(StepSchema).min(1),
 });
 
