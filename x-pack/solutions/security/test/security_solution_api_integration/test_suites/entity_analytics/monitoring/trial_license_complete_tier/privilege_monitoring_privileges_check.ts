@@ -49,7 +49,7 @@ export default ({ getService }: FtrProviderContext) => {
               '.entity_analytics.monitoring.users-default': {
                 read: true,
               },
-              '.ml-anomalies-shared': {
+              '.ml-anomalies-shared-*': {
                 read: true,
               },
               'risk-score.risk-score-*': {
