@@ -19,6 +19,10 @@ paths:
               $ref: '../common.schema.yaml#/components/schemas/EntityType'
             description: Array of engine types to delete. Empty by default, which results in all the engines being deleted.
           description: The entity type of the engine ('user', 'host', 'service', 'generic').
+          examples:
+            hostAndService:
+              value:
+                'host,service'
         - name: delete_data
           in: query
           required: false
@@ -61,6 +65,9 @@ paths:
           schema:
             $ref: '../common.schema.yaml#/components/schemas/EntityType'
           description: The entity type of the engine (either 'user' or 'host').
+          examples:
+            host:
+              value: host
         - name: delete_data
           in: query
           required: false
