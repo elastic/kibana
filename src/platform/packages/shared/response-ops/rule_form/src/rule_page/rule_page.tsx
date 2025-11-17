@@ -22,6 +22,7 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useRuleFormScreenContext, useRuleFormState, useRuleFormSteps } from '../hooks';
 import { DISABLED_ACTIONS_WARNING_TITLE, RULE_FORM_RETURN_TITLE } from '../translations';
 import type { RuleFormData } from '../types';
+import { RuleFormInspectorProvider } from './inspector_context';
 import { RulePageFooter } from './rule_page_footer';
 import { RulePageNameInput } from './rule_page_name_input';
 import { RuleActionsConnectorsModal } from '../rule_actions/rule_actions_connectors_modal';
@@ -31,12 +32,22 @@ import { ConfirmRuleClose } from '../components';
 export interface RulePageProps {
   isEdit?: boolean;
   isSaving?: boolean;
+  isLoadingPreview?: boolean;
   onCancel?: () => void;
   onSave: (formData: RuleFormData) => void;
+  onPreview: (formData: RuleFormData) => Promise<any>;
+  http: any;
 }
 
 export const RulePage = (props: RulePageProps) => {
-  const { isEdit = false, isSaving = false, onCancel = () => {}, onSave } = props;
+  const {
+    isEdit = false,
+    isSaving = false,
+    onCancel = () => {},
+    onSave,
+    onPreview,
+    isLoadingPreview,
+  } = props;
   const [isCancelModalOpen, setIsCancelModalOpen] = useState<boolean>(false);
 
   const { formData, multiConsumerSelection, connectorTypes, connectors, touched, onInteraction } =
@@ -57,6 +68,13 @@ export const RulePage = (props: RulePageProps) => {
       ...(multiConsumerSelection ? { consumer: multiConsumerSelection } : {}),
     });
   }, [onSave, formData, multiConsumerSelection]);
+
+  const onPreviewInternal = useCallback(() => {
+    return onPreview({
+      ...formData,
+      ...(multiConsumerSelection ? { consumer: multiConsumerSelection } : {}),
+    });
+  }, [onPreview, formData, multiConsumerSelection]);
 
   const onCancelInternal = useCallback(() => {
     if (touched) {
@@ -136,12 +154,16 @@ export const RulePage = (props: RulePageProps) => {
           <EuiSteps steps={steps} />
         </EuiPageTemplate.Section>
         <EuiPageTemplate.Section>
-          <RulePageFooter
-            isEdit={isEdit}
-            isSaving={isSaving}
-            onCancel={onCancelInternal}
-            onSave={onSaveInternal}
-          />
+          <RuleFormInspectorProvider>
+            <RulePageFooter
+              isEdit={isEdit}
+              isSaving={isSaving}
+              isLoadingPreview={isLoadingPreview}
+              onCancel={onCancelInternal}
+              onSave={onSaveInternal}
+              onPreview={onPreviewInternal}
+            />
+          </RuleFormInspectorProvider>
         </EuiPageTemplate.Section>
       </EuiPageTemplate>
       {isCancelModalOpen && (
