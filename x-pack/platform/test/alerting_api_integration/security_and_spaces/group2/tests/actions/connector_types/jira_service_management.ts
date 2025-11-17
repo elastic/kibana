@@ -87,8 +87,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: [apiUrl]: expected value of type [string] but got [undefined]',
+              message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"apiUrl\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
             });
           });
       });
@@ -134,8 +133,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type secrets: [apiKey]: expected value of type [string] but got [undefined]',
+              message: `error validating action type secrets: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"apiKey\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
             });
           });
       });
@@ -214,8 +212,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.USER,
-            service_message:
-              'Request validation failed (Error: [message]: expected value of type [string] but got [undefined])',
+            service_message: `Request validation failed ([\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"message\"\n    ],\n    \"message\": \"Required\"\n  }\n])`,
           });
         });
 
@@ -234,8 +231,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.USER,
-            service_message:
-              'Request validation failed (Error: [alias]: expected value of type [string] but got [undefined])',
+            service_message: `Request validation failed ([\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"alias\"\n    ],\n    \"message\": \"Required\"\n  }\n])`,
           });
         });
 
@@ -267,8 +263,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message:
-                  'Request validation failed (Error: [responders.0.id]: expected value of type [string] but got [undefined])',
+                service_message: `Request validation failed ([\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"responders\",\n      0,\n      \"id\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"received\": \"invalidType\",\n    \"code\": \"invalid_enum_value\",\n    \"options\": [\n      \"team\",\n      \"user\",\n      \"escalation\",\n      \"schedule\"\n    ],\n    \"path\": [\n      \"responders\",\n      0,\n      \"type\"\n    ],\n    \"message\": \"Invalid enum value. Expected 'team' | 'user' | 'escalation' | 'schedule', received 'invalidType'\"\n  },\n  {\n    \"code\": \"unrecognized_keys\",\n    \"keys\": [\n      \"name\"\n    ],\n    \"path\": [\n      \"responders\",\n      0\n    ],\n    \"message\": \"Unrecognized key(s) in object: 'name'\"\n  }\n])`,
               });
             });
 
@@ -297,8 +292,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message:
-                  'Request validation failed (Error: [responders.0.id]: expected value of type [string] but got [undefined])',
+                service_message: `Request validation failed ([\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"responders\",\n      0,\n      \"id\"\n    ],\n    \"message\": \"Required\"\n  }\n])`,
               });
             });
 
@@ -362,8 +356,7 @@ export default function jiraServiceManagementTest({ getService }: FtrProviderCon
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message:
-                  'Request validation failed (Error: [details.bananas]: expected value of type [string] but got [number])',
+                service_message: `Request validation failed ([\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"number\",\n    \"path\": [\n      \"details\",\n      \"bananas\"\n    ],\n    \"message\": \"Expected string, received number\"\n  }\n])`,
               });
             });
 

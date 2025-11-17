@@ -417,13 +417,17 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     try {
       const { signal, timeout, telemetryMetadata: _telemetryMetadata, ...rest } = body;
       const messages = rest.messages as unknown as ChatCompletionMessageParam[];
+      let model: string = DEFAULT_OPENAI_MODEL;
+      if (rest.model) {
+        model = rest.model;
+      } else if ('defaultModel' in this.config && this.config.defaultModel) {
+        model = this.config.defaultModel;
+      }
       const requestBody: ChatCompletionCreateParamsStreaming = {
         ...rest,
         stream: true,
         messages,
-        model:
-          rest.model ??
-          ('defaultModel' in this.config ? this.config.defaultModel : DEFAULT_OPENAI_MODEL),
+        model,
       };
 
       connectorUsageCollector.addRequestBodyBytes(undefined, requestBody);

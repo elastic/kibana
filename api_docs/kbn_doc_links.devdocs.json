@@ -302,6 +302,20 @@
           },
           {
             "parentPluginId": "@kbn/doc-links",
+            "id": "def-common.DocLinks.searchGettingStarted",
+            "type": "Object",
+            "tags": [],
+            "label": "searchGettingStarted",
+            "description": [],
+            "signature": [
+              "{ readonly visitSearchLabs: string; readonly notebooksExamples: string; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/doc-links",
             "id": "def-common.DocLinks.metricbeat",
             "type": "Object",
             "tags": [],
@@ -582,7 +596,7 @@
             "label": "query",
             "description": [],
             "signature": [
-              "{ readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuery: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; readonly queryESQL: string; readonly queryESQLExamples: string; }"
+              "{ readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuery: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; readonly queryESQL: string; readonly queryESQLExamples: string; readonly queryESQLMultiValueControls: string; }"
             ],
             "path": "src/platform/packages/shared/kbn-doc-links/src/types.ts",
             "deprecated": false,

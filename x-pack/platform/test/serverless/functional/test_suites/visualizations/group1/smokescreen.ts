@@ -163,12 +163,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.editDimensionLabel('Test of label');
       await PageObjects.lens.editDimensionFormat('Percent');
       await PageObjects.lens.editDimensionColor('#ff0000');
+      await PageObjects.lens.closeDimensionEditor();
+
       await PageObjects.lens.openVisualOptions();
 
       await PageObjects.lens.setCurvedLines('CURVE_MONOTONE_X');
       await PageObjects.lens.editMissingValues('Linear');
 
       await PageObjects.lens.assertMissingValues('Linear');
+
+      await PageObjects.lens.closeVisualOptionsPopover();
 
       await PageObjects.lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
       await PageObjects.lens.assertColor('#ff0000');
@@ -255,6 +259,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // enable value labels
       await PageObjects.lens.openTextOptions();
       await testSubjects.click('lns_valueLabels_inside');
+      await PageObjects.lens.closeTitlesAndTextOptionsPopover();
 
       // check for value labels
       const data = await PageObjects.lens.getCurrentChartDebugState('xyVisChart');

@@ -97,10 +97,10 @@ steps:
         workflowRunFixture.stepExecutionRepositoryMock.stepExecutions.values()
       ).sort((a, b) => new Date(a.startedAt).getTime() - new Date(b.startedAt).getTime());
 
-      expect(allStepExecutions.length).toBe(3);
-      expect(allStepExecutions[0].stepId).toBe('firstConnectorStep');
-      expect(allStepExecutions[1].stepId).toBe('waitStep');
-      expect(allStepExecutions[2].stepId).toBe('lastConnectorStep');
+      expect(allStepExecutions.length).toBe(4);
+      expect(allStepExecutions[1].stepId).toBe('firstConnectorStep');
+      expect(allStepExecutions[2].stepId).toBe('waitStep');
+      expect(allStepExecutions[3].stepId).toBe('lastConnectorStep');
     });
 
     it('should have correct workflow duration', async () => {

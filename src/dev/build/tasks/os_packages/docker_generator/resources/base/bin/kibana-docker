@@ -268,8 +268,14 @@ kibana_vars=(
     xpack.banners.placement
     xpack.banners.textColor
     xpack.banners.textContent
+    xpack.cases.enabled
+    xpack.cases.analytics.index.enabled
+    xpack.cases.incrementalId.enabled
+    xpack.cases.incrementalId.taskIntervalMinutes
+    xpack.cases.incrementalId.taskStartDelayMinutes
     xpack.cases.files.allowedMimeTypes
     xpack.cases.files.maxSize
+    xpack.cases.stack.enabled
     xpack.code.disk.thresholdEnabled
     xpack.code.disk.watermarkLow
     xpack.code.indexRepoFrequencyMs

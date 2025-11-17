@@ -3,7 +3,7 @@ name: "CodeQL PR"
 on:
   pull_request:
     branches: [ "main" ]
-    types: [ opened, synchronize, ready_for_review ]
+    types: [ opened, ready_for_review ]
 
 jobs:
   analyze:

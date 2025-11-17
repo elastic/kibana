@@ -207,12 +207,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.editDimensionLabel('Test of label');
       await lens.editDimensionFormat('Percent');
       await lens.editDimensionColor('#ff0000');
+      await lens.closeDimensionEditor();
+
       await lens.openVisualOptions();
 
       await lens.setCurvedLines('CURVE_MONOTONE_X');
       await lens.editMissingValues('Linear');
 
       await lens.assertMissingValues('Linear');
+
+      await lens.closeVisualOptionsPopover();
 
       await lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
       await lens.assertColor('#ff0000');
@@ -295,6 +299,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // enable value labels
       await lens.openTextOptions();
       await testSubjects.click('lns_valueLabels_inside');
+      await lens.closeTitlesAndTextOptionsPopover();
 
       // check for value labels
       const data = await lens.getCurrentChartDebugState('xyVisChart');
@@ -873,6 +878,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('Line Chart', () => {
         before(async () => {
+          // Make sure the popover is closed
+          await lens.closeVisualOptionsPopover();
           await lens.switchToVisualization('line');
           await lens.waitForVisualization('xyVisChart');
           await lens.openVisualOptions();
@@ -896,6 +903,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       describe('Area Chart', () => {
         before(async () => {
+          // Make sure the popover is closed
+          await lens.closeVisualOptionsPopover();
           await lens.switchToVisualization('area');
           await lens.waitForVisualization('xyVisChart');
           await lens.openVisualOptions();

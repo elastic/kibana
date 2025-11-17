@@ -5,27 +5,24 @@
  * 2.0.
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { AuthConfiguration } from '../../../common/auth/schema';
 import { WebhookMethods } from '../../../common/auth/constants';
 
-export const HeadersSchema = schema.recordOf(schema.string(), schema.string());
+export const HeadersSchema = z.record(z.string(), z.string());
 
 const configSchemaProps = {
-  url: schema.string(),
-  method: schema.oneOf(
-    [
-      schema.literal(WebhookMethods.POST),
-      schema.literal(WebhookMethods.PUT),
-      schema.literal(WebhookMethods.PATCH),
-      schema.literal(WebhookMethods.GET),
-      schema.literal(WebhookMethods.DELETE),
-    ],
-    {
-      defaultValue: WebhookMethods.POST,
-    }
-  ),
-  headers: schema.nullable(HeadersSchema),
+  url: z.string(),
+  method: z
+    .enum([
+      WebhookMethods.POST,
+      WebhookMethods.PUT,
+      WebhookMethods.PATCH,
+      WebhookMethods.GET,
+      WebhookMethods.DELETE,
+    ])
+    .default(WebhookMethods.POST),
+  headers: HeadersSchema.nullable().default(null),
   hasAuth: AuthConfiguration.hasAuth,
   authType: AuthConfiguration.authType,
   certType: AuthConfiguration.certType,
@@ -37,9 +34,11 @@ const configSchemaProps = {
   additionalFields: AuthConfiguration.additionalFields,
 };
 
-export const ConfigSchema = schema.object(configSchemaProps);
+export const ConfigSchema = z.object(configSchemaProps).strict();
 
 // params definition
-export const ParamsSchema = schema.object({
-  body: schema.maybe(schema.string()),
-});
+export const ParamsSchema = z
+  .object({
+    body: z.string().optional(),
+  })
+  .strict();

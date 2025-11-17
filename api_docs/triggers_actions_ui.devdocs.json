@@ -3832,6 +3832,21 @@
           },
           {
             "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeModel.getDescriptionFields",
+            "type": "Function",
+            "tags": [],
+            "label": "getDescriptionFields",
+            "description": [],
+            "signature": [
+              "GetDescriptionFieldsFn",
+              "<Params> | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
             "id": "def-public.RuleTypeModel.iconClass",
             "type": "string",
             "tags": [],
@@ -6484,6 +6499,21 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.RULE_PREBUILD_DESCRIPTION_FIELDS",
+        "type": "Object",
+        "tags": [],
+        "label": "RULE_PREBUILD_DESCRIPTION_FIELDS",
+        "description": [],
+        "signature": [
+          "{ readonly INDEX_PATTERN: \"indexPattern\"; readonly CUSTOM_QUERY: \"customQuery\"; readonly ESQL_QUERY: \"esqlQuery\"; readonly DATA_VIEW_ID: \"dataViewId\"; readonly DATA_VIEW_INDEX_PATTERN: \"dataViewIndexPattern\"; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rule_details/components/rule_detail_description_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],

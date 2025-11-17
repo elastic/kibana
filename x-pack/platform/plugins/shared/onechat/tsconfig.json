@@ -85,8 +85,12 @@
     "@kbn/spaces-plugin",
     "@kbn/licensing-types",
     "@kbn/licensing-plugin",
+    "@kbn/lens-embeddable-utils",
     "@kbn/ai-assistant-connector-selector-action",
     "@kbn/elastic-assistant",
-    "@kbn/react-kibana-mount"
+    "@kbn/react-kibana-mount",
+    "@kbn/react-query",
+    "@kbn/maps-plugin",
+    "@kbn/shared-ux-utility"
   ]
 }

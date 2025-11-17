@@ -303,6 +303,14 @@ interface RruleHourly extends RruleCommon {
   bymonthday?: never;
 }
 
+interface RruleHourly extends RruleCommon {
+  freq: Frequency.HOURLY;
+  byhour?: never;
+  byminute?: number[];
+  byweekday?: never;
+  bymonthday?: never;
+}
+
 export interface TaskUserScope {
   apiKeyId: string;
   spaceId?: string;

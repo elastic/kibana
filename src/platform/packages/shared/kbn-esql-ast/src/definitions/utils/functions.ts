@@ -386,6 +386,7 @@ export const buildColumnSuggestions = (
     addComma?: boolean;
     variableType?: ESQLVariableType;
     supportsControls?: boolean;
+    supportsMultiValue?: boolean;
   },
   variables?: ESQLControlVariable[]
 ): ISuggestionItem[] => {

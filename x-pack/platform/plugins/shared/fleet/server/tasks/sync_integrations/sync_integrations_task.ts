@@ -241,7 +241,11 @@ export class SyncIntegrationsTask {
       sortOrder: 'asc',
     });
     newDoc.integrations = packageSavedObjects.saved_objects
-      .filter((item) => item.attributes.install_source === 'registry')
+      .filter(
+        (item) =>
+          item.attributes.install_source === 'registry' ||
+          item.attributes.install_source === 'bundled'
+      ) // not included install sources: 'custom' and 'upload'
       .map((item) => {
         return {
           package_name: item.attributes.name,

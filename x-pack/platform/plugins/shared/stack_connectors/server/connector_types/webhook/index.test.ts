@@ -101,9 +101,15 @@ describe('secrets validation', () => {
   test('fails when secret user is provided, but password is omitted', () => {
     expect(() => {
       validateSecrets(connectorType, { user: 'bob' }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action type secrets: [
+        {
+          \\"code\\": \\"custom\\",
+          \\"message\\": \\"must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)\\",
+          \\"path\\": []
+        }
+      ]"
+    `);
   });
 
   test('succeeds when authentication credentials are omitted', () => {
@@ -175,14 +181,26 @@ describe('secrets validation', () => {
   test('fails when secret crt is provided but key omitted, or vice versa', () => {
     expect(() => {
       validateSecrets(connectorType, { crt: CRT_FILE }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action type secrets: [
+        {
+          \\"code\\": \\"custom\\",
+          \\"message\\": \\"must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)\\",
+          \\"path\\": []
+        }
+      ]"
+    `);
     expect(() => {
       validateSecrets(connectorType, { key: KEY_FILE }, { configurationUtilities });
-    }).toThrowErrorMatchingInlineSnapshot(
-      `"error validating action type secrets: must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)"`
-    );
+    }).toThrowErrorMatchingInlineSnapshot(`
+      "error validating action type secrets: [
+        {
+          \\"code\\": \\"custom\\",
+          \\"message\\": \\"must specify one of the following schemas: user and password; crt and key (with optional password); pfx (with optional password); or clientSecret (for OAuth2)\\",
+          \\"path\\": []
+        }
+      ]"
+    `);
   });
 });
 
@@ -227,12 +245,23 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action type config: [method]: types that failed validation:
-      - [method.0]: expected value to equal [post]
-      - [method.1]: expected value to equal [put]
-      - [method.2]: expected value to equal [patch]
-      - [method.3]: expected value to equal [get]
-      - [method.4]: expected value to equal [delete]"
+      "error validating action type config: [
+        {
+          \\"received\\": \\"https\\",
+          \\"code\\": \\"invalid_enum_value\\",
+          \\"options\\": [
+            \\"post\\",
+            \\"put\\",
+            \\"patch\\",
+            \\"get\\",
+            \\"delete\\"
+          ],
+          \\"path\\": [
+            \\"method\\"
+          ],
+          \\"message\\": \\"Invalid enum value. Expected 'post' | 'put' | 'patch' | 'get' | 'delete', received 'https'\\"
+        }
+      ]"
     `);
   });
 
@@ -284,9 +313,17 @@ describe('config validation', () => {
     expect(() => {
       validateConfig(connectorType, config, { configurationUtilities });
     }).toThrowErrorMatchingInlineSnapshot(`
-      "error validating action type config: [headers]: types that failed validation:
-      - [headers.0]: could not parse record value from json input
-      - [headers.1]: expected value to equal [null]"
+      "error validating action type config: [
+        {
+          \\"code\\": \\"invalid_type\\",
+          \\"expected\\": \\"object\\",
+          \\"received\\": \\"string\\",
+          \\"path\\": [
+            \\"headers\\"
+          ],
+          \\"message\\": \\"Expected object, received string\\"
+        }
+      ]"
     `);
   });
 

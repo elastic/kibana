@@ -131,6 +131,7 @@ export class SpaceTestApiClient {
       .auth(this.auth.username, this.auth.password)
       .set('kbn-xsrf', 'xxxx')
       .send(data);
+
     expectStatusCode200(res);
 
     return res.body;

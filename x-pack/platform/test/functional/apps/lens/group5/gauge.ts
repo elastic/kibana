@@ -139,6 +139,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(debugData?.value).to.be(14005);
       expect(debugData?.target).to.be(11250);
       expect(debugData?.domain).to.eql([1000, 25000]);
+
+      await lens.closeVisualOptionsPopover();
     });
     it('should switch to table chart and filter not supported static values', async () => {
       await lens.switchToVisualization('lnsDatatable');

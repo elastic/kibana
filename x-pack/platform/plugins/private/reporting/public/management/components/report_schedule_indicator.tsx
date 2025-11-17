@@ -36,6 +36,7 @@ export const ReportScheduleIndicator: FC<ReportScheduleIndicatorProps> = ({ sche
     return null;
   }
 
+  // @ts-ignore to be fixed by https://github.com/elastic/kibana/pull/234121
   const statusText = translations[schedule.rrule.freq];
 
   if (!statusText) {

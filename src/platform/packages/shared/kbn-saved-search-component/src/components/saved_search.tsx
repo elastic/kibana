@@ -10,10 +10,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE, getDefaultSort } from '@kbn/discover-utils';
-import type {
-  SearchEmbeddableSerializedState,
-  SearchEmbeddableApi,
-} from '@kbn/discover-plugin/public';
+import type { SearchEmbeddableApi } from '@kbn/discover-plugin/public';
+import type { SearchEmbeddableState } from '@kbn/discover-plugin/common';
 import type { SerializedPanelState } from '@kbn/presentation-publishing';
 import { css } from '@emotion/react';
 import { type SavedSearch, toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
@@ -27,7 +25,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
   // Creates our *initial* search source and set of attributes.
   // Future changes to these properties will be facilitated by the Parent API from the embeddable.
   const [initialSerializedState, setInitialSerializedState] =
-    useState<SerializedPanelState<SearchEmbeddableSerializedState>>();
+    useState<SerializedPanelState<SearchEmbeddableState>>();
 
   const [error, setError] = useState<Error | undefined>();
 
@@ -89,7 +87,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
                 enableDocumentViewer: documentViewerEnabled,
                 enableFilters: filtersEnabled,
               },
-            } as SearchEmbeddableSerializedState,
+            } as SearchEmbeddableState,
             references,
           });
         }
@@ -137,7 +135,7 @@ export const SavedSearchComponent: React.FC<SavedSearchComponentProps> = (props)
 
 const SavedSearchComponentTable: React.FC<
   SavedSearchComponentProps & {
-    initialSerializedState: SerializedPanelState<SearchEmbeddableSerializedState>;
+    initialSerializedState: SerializedPanelState<SearchEmbeddableState>;
   }
 > = (props) => {
   const {
@@ -219,7 +217,7 @@ const SavedSearchComponentTable: React.FC<
   );
 
   return (
-    <EmbeddableRenderer<SearchEmbeddableSerializedState, SearchEmbeddableApi>
+    <EmbeddableRenderer<SearchEmbeddableState, SearchEmbeddableApi>
       maybeId={undefined}
       type={SEARCH_EMBEDDABLE_TYPE}
       getParentApi={() => parentApi}

@@ -9,8 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { curry } from 'lodash';
 import type { AxiosError, AxiosResponse } from 'axios';
 import axios from 'axios';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { pipe } from 'fp-ts/pipeable';
 import { map, getOrElse } from 'fp-ts/Option';
 import type { Logger } from '@kbn/core/server';
@@ -41,23 +40,25 @@ export type TorqActionTypeExecutorOptions = ActionTypeExecutorOptions<
 >;
 
 const configSchemaProps = {
-  webhookIntegrationUrl: schema.string(),
+  webhookIntegrationUrl: z.string(),
 };
-const ConfigSchema = schema.object(configSchemaProps);
-export type ActionTypeConfigType = TypeOf<typeof ConfigSchema>;
+const ConfigSchema = z.object(configSchemaProps).strict();
+export type ActionTypeConfigType = z.infer<typeof ConfigSchema>;
 
 // secrets definition
-export type ActionTypeSecretsType = TypeOf<typeof SecretsSchema>;
+export type ActionTypeSecretsType = z.infer<typeof SecretsSchema>;
 const secretSchemaProps = {
-  token: schema.string(),
+  token: z.string(),
 };
-const SecretsSchema = schema.object(secretSchemaProps);
+const SecretsSchema = z.object(secretSchemaProps).strict();
 
 // params definition
-export type ActionParamsType = TypeOf<typeof ParamsSchema>;
-const ParamsSchema = schema.object({
-  body: schema.string(),
-});
+export type ActionParamsType = z.infer<typeof ParamsSchema>;
+const ParamsSchema = z
+  .object({
+    body: z.string(),
+  })
+  .strict();
 
 export const ActionTypeId = '.torq';
 // action type definition
@@ -75,7 +76,7 @@ export function getActionType(): TorqActionType {
     ],
     validate: {
       config: {
-        schema: schema.object(configSchemaProps),
+        schema: ConfigSchema,
         customValidator: validateActionTypeConfig,
       },
       secrets: {

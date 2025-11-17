@@ -24,7 +24,15 @@ import { aggFunctionDefinitions } from '../definitions/generated/aggregation_fun
 import { timeSeriesAggFunctionDefinitions } from '../definitions/generated/time_series_agg_functions';
 import { groupingFunctionDefinitions } from '../definitions/generated/grouping_functions';
 import { scalarFunctionDefinitions } from '../definitions/generated/scalar_functions';
-import { operatorsDefinitions } from '../definitions/all_operators';
+import {
+  operatorsDefinitions,
+  comparisonFunctions,
+  logicalOperators,
+  arithmeticOperators,
+  patternMatchOperators,
+  inOperators,
+  nullCheckOperators,
+} from '../definitions/all_operators';
 import { parse } from '../parser';
 import type { ESQLAstAllCommands } from '../types';
 import type {
@@ -75,9 +83,13 @@ export const suggest = (
 ): Promise<ISuggestionItem[]> => {
   const innerText = query.substring(0, offset ?? query.length);
   const correctedQuery = correctQuerySyntax(innerText);
-  const { ast } = parse(correctedQuery, { withFormatting: true });
+  const { ast, root } = parse(correctedQuery, { withFormatting: true });
+  const headerConstruction = root?.header?.find((cmd) => cmd.name === commandName);
+
   const cursorPosition = offset ?? query.length;
-  const { command } = findAstPosition(ast, cursorPosition);
+
+  const command = headerConstruction ?? findAstPosition(ast, cursorPosition).command;
+
   if (!command) {
     throw new Error(`${commandName.toUpperCase()} command not found in the parsed query`);
   }
@@ -160,6 +172,7 @@ export function getFunctionSignaturesByReturnType(
     grouping,
     scalar,
     operators,
+    excludeOperatorGroups,
     // skipAssign here is used to communicate to not propose an assignment if it's not possible
     // within the current context (the actual logic has it, but here we want a shortcut)
     skipAssign,
@@ -169,6 +182,10 @@ export function getFunctionSignaturesByReturnType(
     grouping?: boolean;
     scalar?: boolean;
     operators?: boolean;
+    /** Exclude specific operator groups (e.g., ['in', 'nullCheck']) */
+    excludeOperatorGroups?: Array<
+      'logical' | 'comparison' | 'arithmetic' | 'pattern' | 'in' | 'nullCheck'
+    >;
     skipAssign?: boolean;
   } = {},
   paramsTypes?: Readonly<FunctionParameterType[]>,
@@ -197,7 +214,50 @@ export function getFunctionSignaturesByReturnType(
     list.push(...scalarFunctionDefinitions);
   }
   if (operators) {
-    list.push(...operatorsDefinitions.filter(({ name }) => (skipAssign ? name !== '=' : true)));
+    const hasStringParams = paramsTypes?.some((type) => type === 'text' || type === 'keyword');
+    const comparisonOperatorNames = comparisonFunctions.map(({ name }) => name);
+
+    // Build set of operator names to exclude based on excludeOperatorGroups
+    const excludedOperatorNames = new Set<string>();
+
+    if (excludeOperatorGroups) {
+      const operatorGroupMap: Record<string, Array<{ name: string; signatures?: unknown[] }>> = {
+        logical: logicalOperators,
+        comparison: comparisonFunctions,
+        arithmetic: arithmeticOperators,
+        pattern: patternMatchOperators,
+        in: inOperators,
+        nullCheck: nullCheckOperators,
+      };
+
+      for (const groupName of excludeOperatorGroups) {
+        const group = operatorGroupMap[groupName];
+
+        if (group) {
+          for (const op of group) {
+            excludedOperatorNames.add(op.name);
+          }
+        }
+      }
+    }
+
+    const filteredOperators = operatorsDefinitions.filter(({ name }) => {
+      if (skipAssign && (name === '=' || name === ':')) {
+        return false;
+      }
+
+      if (hasStringParams && comparisonOperatorNames.includes(name)) {
+        return false;
+      }
+
+      if (excludedOperatorNames.has(name)) {
+        return false;
+      }
+
+      return true;
+    });
+
+    list.push(...filteredOperators);
   }
 
   const deduped = Array.from(new Set(list));
@@ -295,3 +355,17 @@ export const containsSnippet = (text: string): boolean => {
   const snippetRegex = /\$(\d+|\{\d+:[^}]*\})/;
   return snippetRegex.test(text);
 };
+
+/**
+ * Convert operator definition groups to suggestion strings.
+ * Use this instead of hardcoding operator strings in tests.
+ */
+export function getOperatorSuggestions(
+  operators: Array<{ name: string; signatures: Array<{ params: unknown[] }> }>
+): string[] {
+  return operators.map(({ name, signatures }) =>
+    signatures.some(({ params }) => params.length > 1)
+      ? `${name.toUpperCase()} $0`
+      : name.toUpperCase()
+  );
+}

@@ -61,6 +61,32 @@ export const getStepDescription = (step: StreamlangProcessorDefinitionWithUIAttr
           },
         }
       );
+    } else if (step.action === 'convert') {
+      if (step.to) {
+        return i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.convertProcessorDescriptionWithTo',
+          {
+            defaultMessage:
+              'Converts "{field}" field value to "{type}" type and stores it in "{to}" field',
+            values: {
+              field: step.from,
+              type: step.type,
+              to: step.to,
+            },
+          }
+        );
+      } else {
+        return i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.convertProcessorDescription',
+          {
+            defaultMessage: 'Converts "{field}" field value to "{type}" type',
+            values: {
+              field: step.from,
+              type: step.type,
+            },
+          }
+        );
+      }
     } else {
       // eslint-disable-next-line @typescript-eslint/naming-convention
       const { action, parentId, customIdentifier, where, ignore_failure, ...rest } = step;

@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@kbn/react-query';
 import { lastValueFrom } from 'rxjs';
 import { number } from 'io-ts';
 import type { EsHitRecord } from '@kbn/discover-utils/types';

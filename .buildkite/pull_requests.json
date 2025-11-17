@@ -34,7 +34,7 @@
       "always_require_ci_on_changed": [
         "^docs/developer/plugin-list.asciidoc$",
         "^\\.github/CODEOWNERS$",
-        "/plugins/[^/]+/readme\\.(md|asciidoc)$"
+        "/plugins/([^/]+/)+readme\\.(md|asciidoc)$"
       ],
       "enable_trigger_checkbox": true,
       "kibana_versions_check": true,

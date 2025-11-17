@@ -84,6 +84,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should render donut chart', async () => {
       await lens.setDonutHoleSize('Large');
+      await lens.closeVisualOptionsPopover();
       const data = await lens.getCurrentChartDebugState('partitionVisChart');
       assertMatchesExpectedPieData(data);
     });

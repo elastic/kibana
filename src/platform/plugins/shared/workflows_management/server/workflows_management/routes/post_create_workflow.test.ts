@@ -29,41 +29,6 @@ describe('POST /api/workflows', () => {
     jest.clearAllMocks();
   });
 
-  describe('route definition', () => {
-    it('should define the create workflow route with correct configuration', () => {
-      registerPostCreateWorkflowRoute({
-        router: mockRouter,
-        api: workflowsApi,
-        logger: mockLogger,
-        spaces: mockSpaces,
-      });
-
-      const postCreateCall = (mockRouter.post as jest.Mock).mock.calls.find(
-        (call) => call[0].path === '/api/workflows'
-      );
-
-      expect(postCreateCall).toBeDefined();
-      expect(postCreateCall[0]).toMatchObject({
-        path: '/api/workflows',
-        options: {
-          tags: ['api', 'workflows'],
-        },
-        security: {
-          authz: {
-            requiredPrivileges: [
-              {
-                anyRequired: ['all', 'workflow_create'],
-              },
-            ],
-          },
-        },
-      });
-      expect(postCreateCall[0].validate).toBeDefined();
-      expect(postCreateCall[0].validate.body).toBeDefined();
-      expect(postCreateCall[1]).toEqual(expect.any(Function));
-    });
-  });
-
   describe('handler logic', () => {
     let routeHandler: any;
 

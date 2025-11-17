@@ -25,7 +25,8 @@ export default function (providerContext: FtrProviderContext) {
   const findingsIndex = new EsIndexDataProvider(es, FINDINGS_INDEX_DEFAULT_NS);
   const vulnerabilitiesIndex = new EsIndexDataProvider(es, VULNERABILITIES_INDEX_DEFAULT_NS);
 
-  describe('GET /internal/cloud_security_posture/status', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/240000
+  describe.skip('GET /internal/cloud_security_posture/status', () => {
     let agentPolicyId: string;
 
     describe('STATUS = INDEXING TEST', () => {

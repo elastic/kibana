@@ -249,6 +249,7 @@ export const DetailsPageSettingsContent: FunctionComponent<Props> = ({
             <>
               <EuiSpacer size="m" />
               <EuiCallOut
+                announceOnMount
                 title={i18n.translate(
                   'xpack.idxMgmt.indexDetails.settings.saveSettingsErrorMessage',
                   {

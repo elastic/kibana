@@ -103,7 +103,7 @@ const searchResult = await client.search({
 });
 
 // Log the search hits (documents that match the query)
-console.log(result.hits.hits);`;
+console.log(searchResult.hits.hits);`;
 
 export const JavascriptConnectDeploymentExample: GettingStartedCodeDefinition = {
   gettingStartedSemantic,

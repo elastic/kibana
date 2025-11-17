@@ -29,6 +29,7 @@ import {
   SPAN_TYPE,
   SPAN_SUBTYPE,
   KIND,
+  SERVICE_NAME,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
@@ -92,6 +93,7 @@ export async function getUnifiedTraceItems({
   start,
   end,
   config,
+  serviceName,
 }: {
   apmEventClient: APMEventClient;
   logsClient: LogsClient;
@@ -100,6 +102,7 @@ export async function getUnifiedTraceItems({
   start: number;
   end: number;
   config: APMConfig;
+  serviceName?: string;
 }): Promise<{ traceItems: TraceItem[]; unifiedTraceErrors: UnifiedTraceErrors }> {
   const maxTraceItems = maxTraceItemsFromUrlParam ?? config.ui.maxTraceItems;
   const size = Math.min(maxTraceItems, MAX_ITEMS_PER_PAGE);
@@ -125,7 +128,11 @@ export async function getUnifiedTraceItems({
           must: [
             {
               bool: {
-                filter: [...termQuery(TRACE_ID, traceId), ...rangeQuery(start, end)],
+                filter: [
+                  ...termQuery(TRACE_ID, traceId),
+                  ...rangeQuery(start, end),
+                  ...termQuery(SERVICE_NAME, serviceName),
+                ],
                 should: { exists: { field: PARENT_ID } },
               },
             },

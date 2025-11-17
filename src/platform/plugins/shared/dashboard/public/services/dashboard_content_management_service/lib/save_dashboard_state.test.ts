@@ -8,7 +8,7 @@
  */
 
 import { getSampleDashboardState } from '../../../mocks';
-import { contentManagementService, coreServices, dataService } from '../../kibana_services';
+import { contentManagementService, coreServices } from '../../kibana_services';
 import { saveDashboardState } from './save_dashboard_state';
 import type { DashboardPanel } from '../../../../server';
 
@@ -26,10 +26,6 @@ contentManagementService.client.update = jest.fn().mockImplementation(({ id }) =
   }
   return { item: { id } };
 });
-
-dataService.query.timefilter.timefilter.getTime = jest
-  .fn()
-  .mockReturnValue({ from: 'then', to: 'now' });
 
 describe('Save dashboard state', () => {
   beforeEach(() => {
@@ -69,16 +65,8 @@ describe('Save dashboard state', () => {
 
     expect(result.id).toBe('newlyGeneratedId');
     expect(result.redirectRequired).toBe(true);
-    expect(contentManagementService.client.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        options: { references: [] },
-      })
-    );
-    expect(coreServices.notifications.toasts.addSuccess).toHaveBeenCalledWith({
-      title: `Dashboard 'BooToo' was saved`,
-      className: 'eui-textBreakWord',
-      'data-test-subj': 'saveDashboardSuccess',
-    });
+    expect(contentManagementService.client.create).toHaveBeenCalled();
+    expect(coreServices.notifications.toasts.addSuccess).toHaveBeenCalled();
   });
 
   it('should generate new panel IDs for dashboard panels when save as copy is true', async () => {

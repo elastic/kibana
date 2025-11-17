@@ -7,51 +7,43 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import { AuthType, SSLCertType } from './constants';
 
-export const authTypeSchema = schema.maybe(
-  schema.oneOf(
-    [
-      schema.literal(AuthType.Basic),
-      schema.literal(AuthType.SSL),
-      schema.literal(AuthType.OAuth2ClientCredentials),
-      schema.literal(null),
-    ],
-    {
-      defaultValue: AuthType.Basic,
-    }
-  )
-);
+export const authTypeSchema = z
+  .union([
+    z.literal(AuthType.Basic),
+    z.literal(AuthType.SSL),
+    z.literal(AuthType.OAuth2ClientCredentials),
+    z.literal(null),
+  ])
+  .default(AuthType.Basic)
+  .optional();
 
-export const hasAuthSchema = schema.boolean({ defaultValue: true });
+export const hasAuthSchema = z.boolean().default(true);
 
-const HeadersSchema = schema.recordOf(schema.string(), schema.string());
+const HeadersSchema = z.record(z.string(), z.string());
 
 export const AuthConfiguration = {
   hasAuth: hasAuthSchema,
   authType: authTypeSchema,
-  certType: schema.maybe(
-    schema.oneOf([schema.literal(SSLCertType.CRT), schema.literal(SSLCertType.PFX)])
-  ),
-  ca: schema.maybe(schema.string()),
-  verificationMode: schema.maybe(
-    schema.oneOf([schema.literal('none'), schema.literal('certificate'), schema.literal('full')])
-  ),
-  accessTokenUrl: schema.maybe(schema.string()),
-  clientId: schema.maybe(schema.string()),
-  scope: schema.maybe(schema.string()),
-  additionalFields: schema.maybe(schema.nullable(schema.string())),
+  certType: z.enum([SSLCertType.CRT, SSLCertType.PFX]).optional(),
+  ca: z.string().optional(),
+  verificationMode: z.enum(['none', 'certificate', 'full']).optional(),
+  accessTokenUrl: z.string().optional(),
+  clientId: z.string().optional(),
+  scope: z.string().optional(),
+  additionalFields: z.string().nullish(),
 };
 
 export const SecretConfiguration = {
-  user: schema.nullable(schema.string()),
-  password: schema.nullable(schema.string()),
-  crt: schema.nullable(schema.string()),
-  key: schema.nullable(schema.string()),
-  pfx: schema.nullable(schema.string()),
-  clientSecret: schema.nullable(schema.string()),
-  secretHeaders: schema.nullable(HeadersSchema),
+  user: z.string().nullable().default(null),
+  password: z.string().nullable().default(null),
+  crt: z.string().nullable().default(null),
+  key: z.string().nullable().default(null),
+  pfx: z.string().nullable().default(null),
+  clientSecret: z.string().nullable().default(null),
+  secretHeaders: HeadersSchema.nullable().default(null),
 };
 
 export const SecretConfigurationSchemaValidation = {
@@ -105,7 +97,15 @@ export const SecretConfigurationSchemaValidation = {
   },
 };
 
-export const SecretConfigurationSchema = schema.object(
-  SecretConfiguration,
-  SecretConfigurationSchemaValidation
-);
+export const SecretConfigurationSchema = z
+  .object(SecretConfiguration)
+  .strict()
+  .superRefine((secrets, ctx) => {
+    const errorMessage = SecretConfigurationSchemaValidation.validate(secrets);
+    if (errorMessage) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: errorMessage,
+      });
+    }
+  });

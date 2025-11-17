@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import type {
   ExecutorSubActionPushParamsSchema,
@@ -110,10 +110,10 @@ export interface CreateIncidentData extends Record<string, unknown> {
   [unknown: string]: unknown;
 }
 
-export type ResilientConfig = TypeOf<typeof ExternalIncidentServiceConfigurationSchema>;
-export type ResilientSecrets = TypeOf<typeof ExternalIncidentServiceSecretConfigurationSchema>;
+export type ResilientConfig = z.infer<typeof ExternalIncidentServiceConfigurationSchema>;
+export type ResilientSecrets = z.infer<typeof ExternalIncidentServiceSecretConfigurationSchema>;
 
-export type ExecutorSubActionPushParams = TypeOf<typeof ExecutorSubActionPushParamsSchema>;
+export type ExecutorSubActionPushParams = z.infer<typeof ExecutorSubActionPushParamsSchema>;
 
-export type ExternalServiceIncidentResponse = TypeOf<typeof ExternalServiceIncidentResponseSchema>;
-export type GetIncidentResponse = TypeOf<typeof GetIncidentResponseSchema>;
+export type ExternalServiceIncidentResponse = z.infer<typeof ExternalServiceIncidentResponseSchema>;
+export type GetIncidentResponse = z.infer<typeof GetIncidentResponseSchema>;

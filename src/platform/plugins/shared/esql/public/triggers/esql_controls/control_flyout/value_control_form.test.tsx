@@ -107,6 +107,14 @@ describe('ValueControlForm', () => {
       );
       expect(pressedWidth).toHaveAttribute('aria-pressed', 'true');
 
+      // control type radio should be rendered and default to 'single'
+      const selectionTypeContainer = await findByTestId('esqlControlSelectionType');
+      expect(selectionTypeContainer).toBeInTheDocument();
+      const singleRadioButton = within(selectionTypeContainer).getByLabelText(
+        'Only allow a single selection'
+      );
+      expect(singleRadioButton).toBeChecked();
+
       // control grow switch should be rendered and default to 'false'
       expect(await findByTestId('esqlControlGrow')).toBeInTheDocument();
       const growSwitch = await findByTestId('esqlControlGrow');

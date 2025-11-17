@@ -80,7 +80,8 @@
     "@kbn/licensing-types",
     "@kbn/core-elasticsearch-server-utils",
     "@kbn/es-types",
-    "@kbn/lazy-object"
+    "@kbn/lazy-object",
+    "@kbn/react-query"
   ],
   "exclude": [
     "target/**/*"

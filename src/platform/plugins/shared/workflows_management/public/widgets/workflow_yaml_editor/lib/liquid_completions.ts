@@ -43,6 +43,18 @@ export const LIQUID_FILTERS = [
     example: '{{ 4 | at_most: 5 }} => 4',
   },
   {
+    name: 'base64_decode',
+    description: 'Decodes a base64-encoded string',
+    insertText: 'base64_decode',
+    example: '{{ "SGVsbG8gV29ybGQ=" | base64_decode }} => "Hello World"',
+  },
+  {
+    name: 'base64_encode',
+    description: 'Encodes a string to base64',
+    insertText: 'base64_encode',
+    example: '{{ "Hello World" | base64_encode }} => "SGVsbG8gV29ybGQ="',
+  },
+  {
     name: 'capitalize',
     description: 'Capitalizes the first letter of a string',
     insertText: 'capitalize',

@@ -16,7 +16,7 @@ import { throwNotFoundIfMetricsExperienceDisabled } from '../../lib/utils';
 
 export const getIndexPatternMetadataRoute = createRoute({
   endpoint: 'GET /internal/metrics_experience/index_pattern_metadata/{indexPattern}',
-  security: { authz: { requiredPrivileges: ['read'] } },
+  security: { authz: { enabled: false, reason: 'Authorization provided by Elasticsearch' } },
   params: z.object({
     path: z.object({
       indexPattern: z.string(),

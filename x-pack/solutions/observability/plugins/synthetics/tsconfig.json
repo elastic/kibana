@@ -120,7 +120,8 @@
     "@kbn/core-ui-settings-browser",
     "@kbn/content-management-plugin",
     "@kbn/licensing-types",
-    "@kbn/observability-synthetics-test-data"
+    "@kbn/observability-synthetics-test-data",
+    "@kbn/react-query"
   ],
   "exclude": ["target/**/*"]
 }

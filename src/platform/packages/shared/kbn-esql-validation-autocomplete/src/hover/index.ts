@@ -6,64 +6,33 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { i18n } from '@kbn/i18n';
-import { TIME_SYSTEM_PARAMS, Walker, parse, within, type ESQLAstItem } from '@kbn/esql-ast';
+import { Walker, parse, within } from '@kbn/esql-ast';
 import {
-  ENRICH_MODES,
-  modeDescription,
-} from '@kbn/esql-ast/src/commands_registry/commands/enrich/util';
-import {
-  getFunctionDefinition,
-  getFormattedFunctionSignature,
-  getValidSignaturesAndTypesToSuggestNext,
-} from '@kbn/esql-ast/src/definitions/utils';
-import {
-  isESQLNamedParamLiteral,
-  type ESQLAstQueryExpression,
   type ESQLFunction,
   type ESQLSingleAstItem,
   type ESQLSource,
 } from '@kbn/esql-ast/src/types';
 
 import type { ESQLCallbacks } from '../shared/types';
-import { getColumnsByTypeRetriever } from '../autocomplete/autocomplete';
-import { getPolicyHelper } from '../shared/resources_helpers';
+import { getColumnsByTypeRetriever } from '../shared/columns';
 import { correctQuerySyntax, getVariablesHoverContent } from './helpers';
+import { getPolicyHover } from './get_policy_hover';
+import { getFunctionSignatureHover } from './get_function_signature_hover';
 import { getQueryForFields } from '../autocomplete/get_query_for_fields';
+import { getFunctionArgumentHover } from './get_function_argument_hover';
+import { getColumnHover } from './get_column_hover';
 
 interface HoverContent {
   contents: Array<{ value: string }>;
 }
 
-const ACCEPTABLE_TYPES_HOVER = i18n.translate(
-  'kbn-esql-validation-autocomplete.esql.hover.acceptableTypes',
-  {
-    defaultMessage: 'Acceptable types',
-  }
-);
-
-const TIME_SYSTEM_DESCRIPTIONS = {
-  '?_tstart': i18n.translate(
-    'kbn-esql-validation-autocomplete.esql.autocomplete.timeSystemParamStart',
-    {
-      defaultMessage: 'The start time from the date picker',
-    }
-  ),
-  '?_tend': i18n.translate(
-    'kbn-esql-validation-autocomplete.esql.autocomplete.timeSystemParamEnd',
-    {
-      defaultMessage: 'The end time from the date picker',
-    }
-  ),
-};
-
 export async function getHoverItem(fullText: string, offset: number, callbacks?: ESQLCallbacks) {
   const correctedQuery = correctQuerySyntax(fullText, offset);
-
   const { root } = parse(correctedQuery);
 
   let containingFunction: ESQLFunction<'variadic-call'> | undefined;
   let node: ESQLSingleAstItem | undefined;
+
   Walker.walk(root, {
     visitFunction: (fn) => {
       if (within(offset, fn)) node = fn;
@@ -101,6 +70,14 @@ export async function getHoverItem(fullText: string, offset: number, callbacks?:
     return hoverContent;
   }
 
+  // getColumnMap has its own cache, shared with the autocomplete system
+  const { getColumnMap } = getColumnsByTypeRetriever(
+    getQueryForFields(fullText, root),
+    fullText,
+    callbacks
+  );
+
+  // ES|QL variables hover
   const variables = callbacks?.getVariables?.();
   const variablesContent = getVariablesHoverContent(node, variables);
 
@@ -108,158 +85,30 @@ export async function getHoverItem(fullText: string, offset: number, callbacks?:
     hoverContent.contents.push(...variablesContent);
   }
 
+  // Function arguments hover
   if (containingFunction) {
-    const argHints = await getHintForFunctionArg(
-      containingFunction,
-      root,
-      fullText,
-      offset,
-      callbacks
-    );
+    const argHints = await getFunctionArgumentHover(containingFunction, offset);
     hoverContent.contents.push(...argHints);
   }
 
+  // Function signature hover
   if (node.type === 'function') {
-    const functionSignature = await getFunctionSignatureHover(node, fullText, root, callbacks);
+    const functionSignature = await getFunctionSignatureHover(node, getColumnMap);
     hoverContent.contents.push(...functionSignature);
   }
 
+  // Policy hover
   if (node.type === 'source' && node.sourceType === 'policy') {
     const source = node as ESQLSource;
-    const { getPolicyMetadata } = getPolicyHelper(callbacks);
-    const policyMetadata = await getPolicyMetadata(node.name);
-    if (policyMetadata) {
-      hoverContent.contents.push(
-        ...[
-          {
-            value: `${i18n.translate('kbn-esql-validation-autocomplete.esql.hover.policyIndexes', {
-              defaultMessage: '**Indexes**',
-            })}: ${policyMetadata.sourceIndices.join(', ')}`,
-          },
-          {
-            value: `${i18n.translate(
-              'kbn-esql-validation-autocomplete.esql.hover.policyMatchingField',
-              {
-                defaultMessage: '**Matching field**',
-              }
-            )}: ${policyMetadata.matchField}`,
-          },
-          {
-            value: `${i18n.translate(
-              'kbn-esql-validation-autocomplete.esql.hover.policyEnrichedFields',
-              {
-                defaultMessage: '**Fields**',
-              }
-            )}: ${policyMetadata.enrichFields.join(', ')}`,
-          },
-        ]
-      );
-    }
+    const policyHoverInfo = await getPolicyHover(source, callbacks);
+    hoverContent.contents.push(...policyHoverInfo);
+  }
 
-    if (!!source.prefix) {
-      const mode = ENRICH_MODES.find(
-        ({ name }) => '_' + name === source.prefix!.valueUnquoted.toLowerCase()
-      )!;
-      if (mode) {
-        hoverContent.contents.push(
-          ...[
-            { value: modeDescription },
-            {
-              value: `**${mode.name}**: ${mode.description}`,
-            },
-          ]
-        );
-      }
-    }
+  // Column hover
+  if (node.type === 'column') {
+    const columnHover = await getColumnHover(node, getColumnMap);
+    hoverContent.contents.push(...columnHover);
   }
 
   return hoverContent;
-}
-
-async function getHintForFunctionArg(
-  fnNode: ESQLFunction,
-  root: ESQLAstQueryExpression,
-  query: string,
-  offset: number,
-  resourceRetriever?: ESQLCallbacks
-) {
-  const { getColumnMap } = getColumnsByTypeRetriever(root, query, resourceRetriever);
-
-  const fnDefinition = getFunctionDefinition(fnNode.name);
-  // early exit on no hit
-  if (!fnDefinition) {
-    return [];
-  }
-  const columnsMap = await getColumnMap();
-
-  const references = {
-    columns: columnsMap,
-  };
-
-  const { compatibleParamDefs, enrichedArgs } = getValidSignaturesAndTypesToSuggestNext(
-    fnNode,
-    references,
-    fnDefinition
-  );
-
-  const hoveredArg: ESQLAstItem & {
-    dataType: string;
-  } = enrichedArgs[enrichedArgs.length - 1];
-  const contents = [];
-  if (hoveredArg && isESQLNamedParamLiteral(hoveredArg)) {
-    const bestMatch = TIME_SYSTEM_PARAMS.find((p) => p.startsWith(hoveredArg.text));
-    // We only know if it's start or end after first 3 characters (?t_s or ?t_e)
-    if (hoveredArg.text.length > 3 && bestMatch) {
-      Object.entries(TIME_SYSTEM_DESCRIPTIONS).forEach(([key, value]) => {
-        contents.push({
-          value: `**${key}**: ${value}`,
-        });
-      });
-    }
-  }
-
-  if (compatibleParamDefs.length > 0) {
-    contents.push({
-      value: `**${ACCEPTABLE_TYPES_HOVER}**: ${compatibleParamDefs
-        .map(
-          ({ type, constantOnly }) =>
-            `${constantOnly ? '_constant_ ' : ''}**${type}**` +
-            // If function arg is a constant date, helpfully suggest named time system params
-            (constantOnly && type === 'date' ? ` | ${TIME_SYSTEM_PARAMS.join(' | ')}` : '')
-        )
-        .join(' | ')}`,
-    });
-  }
-
-  return contents;
-}
-
-async function getFunctionSignatureHover(
-  fnNode: ESQLFunction,
-  fullText: string,
-  root: ESQLAstQueryExpression,
-  callbacks?: ESQLCallbacks
-) {
-  const fnDefinition = getFunctionDefinition(fnNode.name);
-  if (fnDefinition) {
-    const { getColumnMap } = getColumnsByTypeRetriever(
-      getQueryForFields(fullText, root),
-      fullText,
-      callbacks
-    );
-    const columnsMap = await getColumnMap();
-
-    const formattedSignature = getFormattedFunctionSignature(fnDefinition, fnNode, columnsMap);
-
-    return [
-      {
-        value: `\`\`\`none
-${formattedSignature}
-\`\`\``,
-      },
-      { value: fnDefinition.description },
-    ];
-  } else {
-    return [];
-  }
 }

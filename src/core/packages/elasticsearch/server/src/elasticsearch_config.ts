@@ -72,11 +72,6 @@ export interface IElasticsearchConfig {
   readonly requestHeadersWhitelist: string[];
 
   /**
-   * Timeout after which PING HTTP request will be aborted and retried.
-   */
-  readonly pingTimeout: Duration;
-
-  /**
    * Timeout after which HTTP request will be aborted and retried.
    */
   readonly requestTimeout: Duration;

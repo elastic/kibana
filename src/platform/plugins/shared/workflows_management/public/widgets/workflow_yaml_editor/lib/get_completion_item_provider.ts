@@ -48,7 +48,7 @@ import {
   generateRRuleTriggerSnippet,
   generateTriggerSnippet,
 } from './snippets/generate_trigger_snippet';
-import type { WorkflowEditorState } from './store';
+import type { WorkflowDetailState } from './store';
 import type { StepPropInfo } from './store/utils/build_workflow_lookup';
 import {
   LIQUID_BLOCK_END_REGEX,
@@ -964,7 +964,7 @@ export function getSuggestion(
 }
 
 export function getCompletionItemProvider(
-  getState: () => WorkflowEditorState | undefined
+  getState: () => WorkflowDetailState | undefined
 ): monaco.languages.CompletionItemProvider {
   return {
     // Trigger characters for completion:

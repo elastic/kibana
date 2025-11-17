@@ -9,7 +9,7 @@
 
 import { useEffect } from 'react';
 import type { ConnectorTypeInfoMinimal } from '@kbn/workflows';
-import type { ConnectorsResponse } from '../../../entities/connectors/model/use_available_connectors';
+import type { ConnectorsResponse } from '../../../entities/connectors/model/types';
 import { getStepIconBase64 } from '../../../shared/ui/step_icons/get_step_icon_base64';
 
 const predefinedStepTypes = [

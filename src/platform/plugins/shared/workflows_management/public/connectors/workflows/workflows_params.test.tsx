@@ -218,7 +218,8 @@ describe('WorkflowsParamsFields', () => {
     fireEvent.click(input);
 
     await waitFor(() => {
-      expect(screen.getByText('No workflows available')).toBeInTheDocument();
+      const createButtons = screen.getAllByText('Create your first workflow');
+      expect(createButtons.length).toBeGreaterThan(0);
     });
   });
 
@@ -448,7 +449,11 @@ describe('WorkflowsParamsFields', () => {
 
     // Should show no workflows available
     await waitFor(() => {
-      expect(screen.getByText('No workflows available')).toBeInTheDocument();
+      // Check that the empty state is shown
+      expect(screen.getAllByText("You don't have any workflows yet").length).toBeGreaterThan(0);
+      // Check that there's at least one "Create your first workflow" button
+      const createButtons = screen.getAllByText('Create your first workflow');
+      expect(createButtons.length).toBeGreaterThan(0);
     });
   });
 
@@ -782,5 +787,73 @@ describe('WorkflowsParamsFields', () => {
     expect(window.open).toHaveBeenCalledWith('/app/workflows', '_blank');
 
     window.open = originalOpen;
+  });
+
+  test('should show disabled badge for disabled workflows', async () => {
+    const mockWorkflows = {
+      results: [
+        {
+          id: 'workflow-1',
+          name: 'Disabled Workflow',
+          description: 'A disabled workflow',
+          enabled: false,
+          definition: { triggers: [] },
+        },
+      ],
+    };
+
+    mockHttpPost.mockResolvedValue(mockWorkflows);
+
+    await act(async () => {
+      renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
+    });
+
+    await waitFor(() => {
+      expect(mockHttpPost).toHaveBeenCalled();
+    });
+
+    // Click on the input to open the popover
+    const input = screen.getByRole('searchbox');
+    fireEvent.click(input);
+
+    // Wait for the disabled workflow to appear
+    await waitFor(() => {
+      expect(screen.getByText('Disabled Workflow')).toBeInTheDocument();
+      expect(screen.getByText('Disabled')).toBeInTheDocument();
+    });
+  });
+
+  test('should show "No description" for workflows with undefined description', async () => {
+    const mockWorkflows = {
+      results: [
+        {
+          id: 'workflow-1',
+          name: 'Workflow without description',
+          description: undefined,
+          enabled: true,
+          definition: { triggers: [] },
+        },
+      ],
+    };
+
+    mockHttpPost.mockResolvedValue(mockWorkflows);
+
+    await act(async () => {
+      renderWithIntl(<WorkflowsParamsFields {...defaultProps} />);
+    });
+
+    await waitFor(() => {
+      expect(mockHttpPost).toHaveBeenCalled();
+    });
+
+    // Click on the input to open the popover
+    const input = screen.getByRole('searchbox');
+    fireEvent.click(input);
+
+    // Wait for the workflow to appear
+    await waitFor(() => {
+      expect(screen.getByText('Workflow without description')).toBeInTheDocument();
+      expect(screen.getByText('No description')).toBeInTheDocument();
+    });
   });
 });

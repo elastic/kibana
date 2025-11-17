@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { getSupportedActionConnectors } from './api';
 import { useApplicationCapabilities, useToasts } from '../../common/lib/kibana';
 import * as i18n from './translations';

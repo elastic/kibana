@@ -613,7 +613,9 @@
               "\nHandler to call to execute the tool."
             ],
             "signature": [
-              "(args: Zod.TypeOf<RunInput>, context: ",
+              "(args: ",
+              "TypeOf",
+              "<RunInput>, context: ",
               {
                 "pluginId": "@kbn/onechat-server",
                 "scope": "common",
@@ -766,7 +768,9 @@
                 "section": "def-common.ExecutableToolHandlerParams",
                 "text": "ExecutableToolHandlerParams"
               },
-              "<Zod.TypeOf<TSchema>>) => Promise<",
+              "<",
+              "TypeOf",
+              "<TSchema>>) => Promise<",
               {
                 "pluginId": "@kbn/onechat-server",
                 "scope": "common",
@@ -900,7 +904,7 @@
             "tags": [],
             "label": "getDefaultModel",
             "description": [
-              "\nReturns the default model to be used for LLM tasks.\n\nWill use Elasticsearch LLMs by default if present, otherwise will pick\nthe first GenAI compatible connector."
+              "\nReturns the model used for LLM tasks in the current round."
             ],
             "signature": [
               "() => Promise<",
@@ -2014,7 +2018,13 @@
                 "section": "def-common.ExecutableTool",
                 "text": "ExecutableTool"
               },
-              "<{}, Zod.ZodObject<any, Zod.UnknownKeysParam, Zod.ZodTypeAny, { [x: string]: any; }, { [x: string]: any; }>>>"
+              "<{}, ",
+              "ZodObject",
+              "<any, ",
+              "UnknownKeysParam",
+              ", ",
+              "ZodTypeAny",
+              ", { [x: string]: any; }, { [x: string]: any; }>>>"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/tool_provider.ts",
             "deprecated": false,
@@ -2070,7 +2080,13 @@
                 "section": "def-common.ExecutableTool",
                 "text": "ExecutableTool"
               },
-              "<{}, Zod.ZodObject<any, Zod.UnknownKeysParam, Zod.ZodTypeAny, { [x: string]: any; }, { [x: string]: any; }>>[]>"
+              "<{}, ",
+              "ZodObject",
+              "<any, ",
+              "UnknownKeysParam",
+              ", ",
+              "ZodTypeAny",
+              ", { [x: string]: any; }, { [x: string]: any; }>>[]>"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-server/runner/tool_provider.ts",
             "deprecated": false,

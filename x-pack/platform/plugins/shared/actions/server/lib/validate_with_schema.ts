@@ -101,7 +101,7 @@ function validateWithSchema<
         case 'params':
           name = 'action params';
           if (actionType.validate.params) {
-            const validatedValue = actionType.validate.params.schema.validate(value);
+            const validatedValue = actionType.validate.params.schema.parse(value);
 
             if (actionType.validate.params.customValidator) {
               actionType.validate.params.customValidator(
@@ -115,7 +115,7 @@ function validateWithSchema<
         case 'config':
           name = 'action type config';
           if (actionType.validate.config) {
-            const validatedValue = actionType.validate.config.schema.validate(value);
+            const validatedValue = actionType.validate.config.schema.parse(value);
 
             if (actionType.validate.config.customValidator) {
               actionType.validate.config.customValidator(
@@ -130,7 +130,7 @@ function validateWithSchema<
         case 'secrets':
           name = 'action type secrets';
           if (actionType.validate.secrets) {
-            const validatedValue = actionType.validate.secrets.schema.validate(value);
+            const validatedValue = actionType.validate.secrets.schema.parse(value);
 
             if (actionType.validate.secrets.customValidator) {
               actionType.validate.secrets.customValidator(

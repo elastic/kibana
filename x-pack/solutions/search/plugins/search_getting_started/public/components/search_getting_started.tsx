@@ -7,34 +7,31 @@
 
 import React, { useEffect } from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { AnalyticsEvents, PLUGIN_NAME } from '../../common';
+import { GETTING_STARTED_LOCALSTORAGE_KEY } from '@kbn/search-shared-ui';
 import { useUsageTracker } from '../contexts/usage_tracker_context';
+import { AnalyticsEvents } from '../../common';
 import { SearchGettingStartedPageTemplate } from '../layout/page_template';
 import { ConsoleTutorialsGroup } from './tutorials/console_tutorials_group';
 import { SearchGettingStartedConnectCode } from './connect_code';
 import { GettingStartedFooter } from './footer';
+import { SearchGettingStartedHeader } from './header';
 
 export const SearchGettingStartedPage: React.FC = () => {
   const usageTracker = useUsageTracker();
-
   useEffect(() => {
     usageTracker.load(AnalyticsEvents.gettingStartedLoaded);
+    localStorage.setItem(GETTING_STARTED_LOCALSTORAGE_KEY, 'true');
   }, [usageTracker]);
 
   return (
     <SearchGettingStartedPageTemplate>
-      <KibanaPageTemplate.Header
-        pageTitle={PLUGIN_NAME}
-        description={i18n.translate('xpack.search.gettingStarted.page.description', {
-          defaultMessage: 'Get started with Elasticsearch',
-        })}
-      />
+      <EuiPageTemplate.Section paddingSize="xl" grow={false}>
+        <SearchGettingStartedHeader />
+      </EuiPageTemplate.Section>
       <EuiPageTemplate.Section paddingSize="xl">
         <ConsoleTutorialsGroup />
       </EuiPageTemplate.Section>
-      <EuiPageTemplate.Section data-test-subj="search-getting-code-example">
+      <EuiPageTemplate.Section data-test-subj="gettingStartedCodeExamples">
         <SearchGettingStartedConnectCode />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section>

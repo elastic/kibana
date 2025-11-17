@@ -25,7 +25,7 @@ describe('Legacy Metric Schema', () => {
   };
 
   describe('metric configuration', () => {
-    it('validates default values are applied', () => {
+    it('validates base count metric operation', () => {
       const input = {
         ...baseLegacyMetricConfig,
         metric: {
@@ -36,11 +36,8 @@ describe('Legacy Metric Schema', () => {
       };
 
       const validated = legacyMetricStateSchema.validate(input);
-      expect(validated.metric.size).toBe('m');
-      expect(validated.metric.alignments).toEqual({
-        labels: 'top',
-        value: 'left',
-      });
+      expect(validated.metric.size).toBeUndefined();
+      expect(validated.metric.alignments).toBeUndefined();
       expect(validated.metric.apply_color_to).toBeUndefined();
       expect(validated.metric.color).toBeUndefined();
     });

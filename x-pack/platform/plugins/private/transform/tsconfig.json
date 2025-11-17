@@ -83,7 +83,8 @@
     "@kbn/response-ops-rule-form",
     "@kbn/response-ops-rule-params",
     "@kbn/fields-metadata-plugin",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/react-query"
   ],
   "exclude": ["target/**/*"]
 }

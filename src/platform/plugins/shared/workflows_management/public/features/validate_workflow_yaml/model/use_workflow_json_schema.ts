@@ -35,7 +35,7 @@ interface UseWorkflowJsonSchemaResult {
 export const useWorkflowJsonSchema = (
   options: UseWorkflowJsonSchemaOptions
 ): UseWorkflowJsonSchemaResult => {
-  const { data: connectorsData } = useAvailableConnectors();
+  const connectorsData = useAvailableConnectors();
 
   // TODO: download from server instead of generating on client
 

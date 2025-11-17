@@ -70,8 +70,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
           expect(resp.body).to.eql({
             statusCode: 400,
             error: 'Bad Request',
-            message:
-              'error validating action type secrets: [token]: expected value of type [string] but got [undefined]',
+            message: `error validating action type secrets: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"token\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
           });
         });
     });

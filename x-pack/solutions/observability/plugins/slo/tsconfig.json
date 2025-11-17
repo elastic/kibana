@@ -114,5 +114,6 @@
     "@kbn/content-management-plugin",
     "@kbn/dashboards-selector",
     "@kbn/deeplinks-management",
+    "@kbn/react-query"
   ]
 }

@@ -10,7 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { useNavigation } from '../../hooks/use_navigation';
 import { appPaths } from '../../utils/app_paths';
-import { useConversationId } from '../../hooks/use_conversation_id';
+import { useConversationId } from '../../context/conversation/use_conversation_id';
 import { useIsSendingMessage } from '../../hooks/use_is_sending_message';
 import { useSendMessage } from '../../context/send_message/send_message_context';
 

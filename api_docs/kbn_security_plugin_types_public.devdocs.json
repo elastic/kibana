@@ -886,14 +886,6 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/kibana/hooks.ts"
-              },
-              {
-                "plugin": "securitySolutionServerless",
-                "path": "x-pack/solutions/security/plugins/security_solution_serverless/public/navigation/navigation_tree.ts"
-              },
-              {
-                "plugin": "securitySolutionServerless",
-                "path": "x-pack/solutions/security/plugins/security_solution_serverless/public/navigation/navigation.test.ts"
               }
             ]
           },

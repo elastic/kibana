@@ -113,7 +113,7 @@ export const ItemFormRow: React.FC<ItemFormRowProps> = ({
         <>
           <EuiSpacer size="s" />
           <EuiCallOut
-            announceOnMount
+            announceOnMount={!isEdit}
             size="s"
             color="warning"
             title={LABELS.RE_ENTER_SECRETS(label)}

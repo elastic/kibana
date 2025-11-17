@@ -20,5 +20,5 @@ export const SecurityLinkGroup: Record<SecurityGroupName, SecurityLinkGroupDefin
     [SecurityGroupName.assets]: { title: i18nStrings.assets.title },
     [SecurityGroupName.entityAnalytics]: { title: i18nStrings.entityAnalytics.title },
     [SecurityGroupName.machineLearning]: { title: i18nStrings.ml.title },
-    [SecurityGroupName.launchpad]: { title: i18nStrings.launchpad.title },
+    [SecurityGroupName.launchpad]: { title: i18nStrings.launchPad.title },
   });

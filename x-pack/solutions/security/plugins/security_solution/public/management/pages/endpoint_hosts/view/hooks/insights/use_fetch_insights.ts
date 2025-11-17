@@ -7,7 +7,7 @@
 
 import type { Moment } from 'moment';
 import moment from 'moment';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { DefendInsightType } from '@kbn/elastic-assistant-common';
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 

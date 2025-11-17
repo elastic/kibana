@@ -55,10 +55,7 @@ export class NavigationPublicPlugin
   public setup(core: CoreSetup, deps: NavigationPublicSetupDependencies): NavigationPublicSetup {
     registerNavigationEventTypes(core);
 
-    const cloudTrialEndDate = deps.cloud?.trialEndDate;
-    if (cloudTrialEndDate) {
-      this.isCloudTrialUser = cloudTrialEndDate.getTime() > Date.now();
-    }
+    this.isCloudTrialUser = deps.cloud?.isInTrial() ?? false;
 
     return {
       registerMenuItem: this.topNavMenuExtensionsRegistry.register.bind(

@@ -10,10 +10,10 @@ exports[`Calculate risk scores with ESQL ESQL query matches snapshot 1`] = `
              kibana.alert.uuid as alert_id,
              event.kind as category,
              @timestamp as time
-    | EVAL input = CONCAT(\\"\\"\\" {\\"score\\": \\"\\"\\"\\", risk_score::keyword, \\"\\"\\"\\", \\"time\\": \\"\\"\\"\\", time::keyword, \\"\\"\\"\\", \\"index\\": \\"\\"\\"\\", _index, \\"\\"\\"\\", \\"rule_name\\": \\"\\"\\"\\", rule_name, \\"\\"\\"\\", \\"category\\": \\"\\"\\"\\", category, \\"\\"\\"\\", \\"id\\": \\"\\"\\"\\", alert_id, \\"\\"\\"\\" } \\"\\"\\")
+    | EVAL input = CONCAT(\\"\\"\\" {\\"risk_score\\": \\"\\"\\"\\", risk_score::keyword, \\"\\"\\"\\", \\"time\\": \\"\\"\\"\\", time::keyword, \\"\\"\\"\\", \\"index\\": \\"\\"\\"\\", _index, \\"\\"\\"\\", \\"rule_name\\": \\"\\"\\"\\", rule_name, \\"\\"\\"\\", \\"category\\": \\"\\"\\"\\", category, \\"\\"\\"\\", \\"id\\": \\"\\"\\"\\", alert_id, \\"\\"\\"\\" } \\"\\"\\")
     | STATS
         alert_count = count(risk_score),
-        scores = 1 * MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, 10000, \\"desc\\"), 1.5),
+        scores = MV_PSERIES_WEIGHTED_SUM(TOP(risk_score, 10000, \\"desc\\"), 1.5),
         risk_inputs = TOP(input, 10, \\"desc\\")
     BY host.name
     | SORT scores DESC, host.name ASC

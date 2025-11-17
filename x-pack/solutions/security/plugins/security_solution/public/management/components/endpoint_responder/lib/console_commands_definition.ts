@@ -20,7 +20,11 @@ import type { CommandArgDefinition } from '../../console/types';
 import { isAgentTypeAndActionSupported } from '../../../../common/lib/endpoint';
 import { getRbacControl } from '../../../../../common/endpoint/service/response_actions/utils';
 import { UploadActionResult } from '../command_render_components/upload_action';
-import { ArgumentFileSelector } from '../../console_argument_selectors';
+import {
+  ArgumentFileSelector,
+  CrowdstrikeScriptInputParams,
+  MicrosoftScriptInputParams,
+} from '../../console_argument_selectors';
 import type { ParsedArgData } from '../../console/service/types';
 import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import type {
@@ -62,6 +66,7 @@ import {
   MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS,
 } from '../../../common/translations';
 import { ScanActionResult } from '../command_render_components/scan_action';
+import { SentinelOneScriptInputParams } from '../../console_argument_selectors/script_input_params_selector';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
   if (argData?.length > 0 && typeof argData[0] === 'string' && argData[0]?.trim().length > 0) {
@@ -715,6 +720,8 @@ const adjustCommandsForSentinelOne = ({
               { defaultMessage: 'Input arguments for the selected script' }
             ),
             mustHaveValue: 'non-empty-string',
+            SelectorComponent: SentinelOneScriptInputParams,
+            selectorShowTextValue: true,
           },
           ...commandCommentArgument(),
         };
@@ -830,6 +837,8 @@ const adjustCommandsForCrowdstrike = ({
               allowMultiples: false,
               about: CROWDSTRIKE_CONSOLE_COMMANDS.runscript.args.commandLine.about,
               mustHaveValue: 'non-empty-string',
+              selectorShowTextValue: true,
+              SelectorComponent: CrowdstrikeScriptInputParams,
             },
             HostPath: {
               required: false,
@@ -902,6 +911,8 @@ const adjustCommandsForMicrosoftDefenderEndpoint = ({
               allowMultiples: false,
               about: MS_DEFENDER_ENDPOINT_CONSOLE_COMMANDS.runscript.args.args.about,
               mustHaveValue: 'non-empty-string',
+              selectorShowTextValue: true,
+              SelectorComponent: MicrosoftScriptInputParams,
             },
             ...commandCommentArgument(),
           },

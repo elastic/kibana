@@ -907,40 +907,108 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.createApmErrorsContextService",
+        "id": "def-common.createApmContextService",
         "type": "Function",
         "tags": [],
-        "label": "createApmErrorsContextService",
+        "label": "createApmContextService",
         "description": [],
         "signature": [
-          "({ apmSourcesAccess, }: ApmErrorsContextServiceDeps) => Promise<",
+          "({ apmSourcesAccess, }: { apmSourcesAccess?: { getApmIndices: (options?: Omit<",
+          {
+            "pluginId": "apmSourcesAccess",
+            "scope": "public",
+            "docId": "kibApmSourcesAccessPluginApi",
+            "section": "def-public.SourcesApiOptions",
+            "text": "SourcesApiOptions"
+          },
+          ", \"body\"> | undefined) => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>; getApmIndexSettings: (options?: Omit<",
+          {
+            "pluginId": "apmSourcesAccess",
+            "scope": "public",
+            "docId": "kibApmSourcesAccessPluginApi",
+            "section": "def-public.SourcesApiOptions",
+            "text": "SourcesApiOptions"
+          },
+          ", \"body\"> | undefined) => Promise<",
+          "ApmIndexSettingsResponse",
+          ">; saveApmIndices: (options: ",
+          {
+            "pluginId": "apmSourcesAccess",
+            "scope": "public",
+            "docId": "kibApmSourcesAccessPluginApi",
+            "section": "def-public.SourcesApiOptions",
+            "text": "SourcesApiOptions"
+          },
+          " & { body: Partial<Record<\"error\" | \"transaction\" | \"span\" | \"metric\" | \"onboarding\" | \"sourcemap\", string>>; }) => Promise<",
+          "SavedObject",
+          "<{}>>; } | undefined; }) => Promise<",
           {
             "pluginId": "@kbn/discover-utils",
             "scope": "common",
             "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.ApmErrorsContextService",
-            "text": "ApmErrorsContextService"
+            "section": "def-common.ApmContextService",
+            "text": "ApmContextService"
           },
           ">"
         ],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/apm/errors/errors_context_service.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/apm/apm_context_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.createApmErrorsContextService.$1",
+            "id": "def-common.createApmContextService.$1",
             "type": "Object",
             "tags": [],
             "label": "{\n  apmSourcesAccess,\n}",
             "description": [],
-            "signature": [
-              "ApmErrorsContextServiceDeps"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/apm/errors/errors_context_service.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/apm/apm_context_service.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "children": [
+              {
+                "parentPluginId": "@kbn/discover-utils",
+                "id": "def-common.createApmContextService.$1.apmSourcesAccess",
+                "type": "Object",
+                "tags": [],
+                "label": "apmSourcesAccess",
+                "description": [],
+                "signature": [
+                  "{ getApmIndices: (options?: Omit<",
+                  {
+                    "pluginId": "apmSourcesAccess",
+                    "scope": "public",
+                    "docId": "kibApmSourcesAccessPluginApi",
+                    "section": "def-public.SourcesApiOptions",
+                    "text": "SourcesApiOptions"
+                  },
+                  ", \"body\"> | undefined) => Promise<Readonly<{} & { error: string; transaction: string; span: string; metric: string; onboarding: string; sourcemap: string; }>>; getApmIndexSettings: (options?: Omit<",
+                  {
+                    "pluginId": "apmSourcesAccess",
+                    "scope": "public",
+                    "docId": "kibApmSourcesAccessPluginApi",
+                    "section": "def-public.SourcesApiOptions",
+                    "text": "SourcesApiOptions"
+                  },
+                  ", \"body\"> | undefined) => Promise<",
+                  "ApmIndexSettingsResponse",
+                  ">; saveApmIndices: (options: ",
+                  {
+                    "pluginId": "apmSourcesAccess",
+                    "scope": "public",
+                    "docId": "kibApmSourcesAccessPluginApi",
+                    "section": "def-public.SourcesApiOptions",
+                    "text": "SourcesApiOptions"
+                  },
+                  " & { body: Partial<Record<\"error\" | \"transaction\" | \"span\" | \"metric\" | \"onboarding\" | \"sourcemap\", string>>; }) => Promise<",
+                  "SavedObject",
+                  "<{}>>; } | undefined"
+                ],
+                "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/apm/apm_context_service.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -1131,49 +1199,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.createTracesContextService",
-        "type": "Function",
-        "tags": [],
-        "label": "createTracesContextService",
-        "description": [],
-        "signature": [
-          "({ apmSourcesAccess, }: ",
-          "TracesContextServiceDeps",
-          ") => Promise<",
-          {
-            "pluginId": "@kbn/discover-utils",
-            "scope": "common",
-            "docId": "kibKbnDiscoverUtilsPluginApi",
-            "section": "def-common.TracesContextService",
-            "text": "TracesContextService"
-          },
-          ">"
-        ],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/traces/traces_context_service.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.createTracesContextService.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  apmSourcesAccess,\n}",
-            "description": [],
-            "signature": [
-              "TracesContextServiceDeps"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/traces/traces_context_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
           }
         ],
         "returnComment": [],
@@ -3466,30 +3491,42 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.ApmErrorsContextService",
+        "id": "def-common.ApmContextService",
         "type": "Interface",
         "tags": [],
-        "label": "ApmErrorsContextService",
+        "label": "ApmContextService",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/apm/errors/errors_context_service.ts",
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/apm/apm_context_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.ApmErrorsContextService.getErrorsIndexPattern",
-            "type": "Function",
+            "id": "def-common.ApmContextService.tracesService",
+            "type": "Object",
             "tags": [],
-            "label": "getErrorsIndexPattern",
+            "label": "tracesService",
             "description": [],
             "signature": [
-              "() => string | undefined"
+              "TracesContextService"
             ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/apm/errors/errors_context_service.ts",
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/apm/apm_context_service.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/discover-utils",
+            "id": "def-common.ApmContextService.errorsService",
+            "type": "Object",
+            "tags": [],
+            "label": "errorsService",
+            "description": [],
+            "signature": [
+              "ErrorsContextService"
+            ],
+            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/apm/apm_context_service.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -5855,100 +5892,6 @@
             "path": "src/platform/packages/shared/kbn-discover-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.TracesContextService",
-        "type": "Interface",
-        "tags": [],
-        "label": "TracesContextService",
-        "description": [],
-        "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/traces/traces_context_service.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.TracesContextService.getAllTracesIndexPattern",
-            "type": "Function",
-            "tags": [],
-            "label": "getAllTracesIndexPattern",
-            "description": [],
-            "signature": [
-              "() => string | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/traces/traces_context_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.TracesContextService.isTracesIndexPattern",
-            "type": "Function",
-            "tags": [],
-            "label": "isTracesIndexPattern",
-            "description": [],
-            "signature": [
-              "(indexPattern: unknown) => boolean"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/traces/traces_context_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/discover-utils",
-                "id": "def-common.TracesContextService.isTracesIndexPattern.$1",
-                "type": "Unknown",
-                "tags": [],
-                "label": "indexPattern",
-                "description": [],
-                "signature": [
-                  "unknown"
-                ],
-                "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/traces/traces_context_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/discover-utils",
-            "id": "def-common.TracesContextService.containsTracesIndexPattern",
-            "type": "Function",
-            "tags": [],
-            "label": "containsTracesIndexPattern",
-            "description": [],
-            "signature": [
-              "(indexPattern: unknown) => boolean"
-            ],
-            "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/traces/traces_context_service.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/discover-utils",
-                "id": "def-common.TracesContextService.containsTracesIndexPattern.$1",
-                "type": "Unknown",
-                "tags": [],
-                "label": "indexPattern",
-                "description": [],
-                "signature": [
-                  "unknown"
-                ],
-                "path": "src/platform/packages/shared/kbn-discover-utils/src/data_types/traces/traces_context_service.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
           }
         ],
         "initialIsOpen": false

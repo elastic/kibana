@@ -10,12 +10,12 @@
 import { useMemo, useRef } from 'react';
 import { useSelector } from 'react-redux';
 import { getCompletionItemProvider } from '../../lib/get_completion_item_provider';
-import type { WorkflowEditorState } from '../../lib/store';
-import { selectWorkflowEditorState } from '../../lib/store';
+import { selectDetailState } from '../../lib/store/selectors';
+import type { WorkflowDetailState } from '../../lib/store/types';
 
 export const useCompletionProvider = () => {
-  const editorState = useSelector(selectWorkflowEditorState);
-  const editorStateRef = useRef<WorkflowEditorState>(editorState);
+  const editorState = useSelector(selectDetailState);
+  const editorStateRef = useRef<WorkflowDetailState>(editorState);
   editorStateRef.current = editorState;
 
   const completionProvider = useMemo(

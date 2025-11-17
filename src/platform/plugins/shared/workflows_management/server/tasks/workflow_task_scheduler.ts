@@ -27,7 +27,7 @@ export class WorkflowTaskScheduler {
   ) {}
 
   /**
-   * Schedules tasks for all enabled scheduled triggers in a workflow
+   * Schedules tasks for all scheduled triggers in a workflow
    */
   async scheduleWorkflowTasks(
     workflow: EsWorkflow,
@@ -144,7 +144,7 @@ export class WorkflowTaskScheduler {
     // First, unschedule all existing tasks
     await this.unscheduleWorkflowTasks(workflow.id);
 
-    // Then, schedule new tasks for enabled scheduled triggers
+    // Then, schedule new tasks for scheduled triggers
     await this.scheduleWorkflowTasks(workflow, spaceId, request);
   }
 }

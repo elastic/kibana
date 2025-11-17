@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { CloudConnector, CloudConnectorListOptions } from '@kbn/fleet-plugin/public';
 import { CLOUD_CONNECTOR_API_ROUTES } from '@kbn/fleet-plugin/public';
 import type { CoreStart, HttpStart } from '@kbn/core/public';

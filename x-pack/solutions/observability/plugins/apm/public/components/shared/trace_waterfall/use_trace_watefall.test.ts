@@ -13,6 +13,7 @@ import {
   getTraceWaterfallDuration,
   getClockSkew,
   getLegends,
+  getColorByType,
   createColorLookupMap,
   getRootItemOrFallback,
   TraceDataState,
@@ -335,6 +336,86 @@ describe('getLegends', () => {
   });
 });
 
+describe('getColorByType', () => {
+  const traceItems: TraceItem[] = [
+    {
+      id: '1',
+      timestampUs: 0,
+      name: '',
+      traceId: '',
+      duration: 1,
+      serviceName: 'svcA',
+      errors: [],
+    },
+    {
+      id: '2',
+      timestampUs: 0,
+      name: '',
+      traceId: '',
+      duration: 1,
+      serviceName: 'svcB',
+      errors: [],
+    },
+    {
+      id: '3',
+      timestampUs: 0,
+      name: '',
+      traceId: '',
+      duration: 1,
+      serviceName: 'svcC',
+      errors: [],
+    },
+    {
+      id: '4',
+      timestampUs: 0,
+      name: '',
+      traceId: '',
+      duration: 1,
+      serviceName: 'svcC',
+      type: 'db',
+      errors: [],
+    },
+    {
+      id: '5',
+      timestampUs: 0,
+      name: '',
+      traceId: '',
+      duration: 1,
+      serviceName: 'svcC',
+      type: 'http',
+      errors: [],
+    },
+    {
+      id: '6',
+      timestampUs: 0,
+      name: '',
+      traceId: '',
+      duration: 1,
+      serviceName: 'svcC',
+      type: 'cache',
+      errors: [],
+    },
+  ];
+
+  it('returns color by service name if more than one different service is present', () => {
+    const legends = getLegends(traceItems);
+
+    expect(getColorByType(legends)).toBe(WaterfallLegendType.ServiceName);
+  });
+
+  it('returns color by type if only one service is present', () => {
+    const legends = getLegends(traceItems.slice(3));
+
+    expect(getColorByType(legends)).toBe(WaterfallLegendType.Type);
+  });
+
+  it('defaults to color by type if no legends provided', () => {
+    const legends = getLegends([]);
+
+    expect(getColorByType(legends)).toBe(WaterfallLegendType.Type);
+  });
+});
+
 describe('createColorLookupMap', () => {
   afterAll(() => {
     jest.clearAllMocks();
@@ -355,7 +436,7 @@ describe('createColorLookupMap', () => {
   });
 });
 
-describe('getTraceMap', () => {
+describe('getTraceParentChildrenMap', () => {
   afterAll(() => {
     jest.clearAllMocks();
   });
@@ -402,7 +483,7 @@ describe('getTraceMap', () => {
       },
     ];
 
-    const result = getTraceParentChildrenMap(items);
+    const result = getTraceParentChildrenMap(items, false);
 
     expect(result.root).toEqual([expect.objectContaining({ id: '1' })]);
     expect(result['1']).toEqual([
@@ -425,7 +506,7 @@ describe('getTraceMap', () => {
       },
     ];
 
-    const result = getTraceParentChildrenMap(items);
+    const result = getTraceParentChildrenMap(items, false);
 
     expect(result.root).toEqual([expect.objectContaining({ id: '1' })]);
     expect(Object.keys(result)).toHaveLength(1);
@@ -453,13 +534,42 @@ describe('getTraceMap', () => {
       },
     ];
 
-    const result = getTraceParentChildrenMap(items);
+    const result = getTraceParentChildrenMap(items, false);
 
     expect(result.root).toEqual([expect.objectContaining({ id: '2' })]);
   });
 
+  it("elects a root if there isn't one for a filtered trace", () => {
+    const items: TraceItem[] = [
+      {
+        id: '1',
+        timestampUs: 0,
+        name: 'span1',
+        parentId: '0',
+        traceId: 't1',
+        duration: 100,
+        serviceName: 'svcA',
+        errors: [],
+      },
+      {
+        id: '2',
+        timestampUs: 0,
+        name: 'span2',
+        parentId: '1',
+        traceId: 't1',
+        duration: 100,
+        serviceName: 'svcB',
+        errors: [],
+      },
+    ];
+
+    const result = getTraceParentChildrenMap(items, true);
+
+    expect(result.root).toEqual([expect.objectContaining({ id: '1' })]);
+  });
+
   it('returns an empty object for empty input', () => {
-    const result = getTraceParentChildrenMap([]);
+    const result = getTraceParentChildrenMap([], false);
     expect(result).toEqual({});
   });
 });
@@ -468,7 +578,7 @@ describe('getRootItemOrFallback', () => {
   it('should return a FULL state and a rootItem for a complete trace', () => {
     const traceData = [root, child1, child2, grandchild];
 
-    const result = getRootItemOrFallback(getTraceParentChildrenMap(traceData), traceData);
+    const result = getRootItemOrFallback(getTraceParentChildrenMap(traceData, false), traceData);
 
     expect(result.rootItem).toEqual(root);
     expect(result.traceState).toBe(TraceDataState.Full);
@@ -486,7 +596,7 @@ describe('getRootItemOrFallback', () => {
   it('should return a PARTIAL state for an incomplete trace with no root span', () => {
     const traceData = [child1, grandchild];
 
-    const result = getRootItemOrFallback(getTraceParentChildrenMap(traceData), traceData);
+    const result = getRootItemOrFallback(getTraceParentChildrenMap(traceData, false), traceData);
 
     expect(result.rootItem).toEqual(child1);
     expect(result.traceState).toBe(TraceDataState.Partial);
@@ -496,11 +606,23 @@ describe('getRootItemOrFallback', () => {
   it('should return a PARTIAL state for an incomplete trace with orphan child spans', () => {
     const traceData = [root, child2, grandchild];
 
-    const result = getRootItemOrFallback(getTraceParentChildrenMap(traceData), traceData);
+    const result = getRootItemOrFallback(getTraceParentChildrenMap(traceData, false), traceData);
 
     expect(result.rootItem).toEqual(root);
     expect(result.traceState).toBe(TraceDataState.Partial);
     expect(result.orphans).toEqual([grandchild]);
+  });
+
+  it('should return a FULL state for a filtered service trace with no orphan child spans', () => {
+    const serviceChild = { ...grandchild, serviceName: 'svcB' };
+
+    const traceData = [child1, serviceChild];
+
+    const result = getRootItemOrFallback(getTraceParentChildrenMap(traceData, true), traceData);
+
+    expect(result.rootItem).toEqual(child1);
+    expect(result.traceState).toBe(TraceDataState.Full);
+    expect(result.orphans).toEqual([]);
   });
 });
 

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { TypeOf } from '@kbn/config-schema';
-import { schema } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 import type {
   ActionType as ConnectorType,
@@ -40,33 +39,38 @@ export type ESIndexConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
 
 // config definition
 
-export type ConnectorTypeConfigType = TypeOf<typeof ConfigSchema>;
+export type ConnectorTypeConfigType = z.infer<typeof ConfigSchema>;
 
-const ConfigSchema = schema.object({
-  index: schema.string(),
-  refresh: schema.boolean({ defaultValue: false }),
-  executionTimeField: schema.nullable(schema.string()),
-});
+const ConfigSchema = z
+  .object({
+    index: z.string(),
+    refresh: z.boolean().default(false),
+    executionTimeField: z.string().nullable().default(null),
+  })
+  .strict();
 
 // params definition
 
-export type ActionParamsType = TypeOf<typeof ParamsSchema>;
+export type ActionParamsType = z.infer<typeof ParamsSchema>;
 
 // see: https://www.elastic.co/guide/en/elasticsearch/reference/current/actions-index.html
 // - timeout not added here, as this seems to be a generic thing we want to do
 //   eventually: https://github.com/elastic/kibana/projects/26#card-24087404
-const ParamsSchema = schema.object({
-  documents: schema.arrayOf(schema.recordOf(schema.string(), schema.any())),
-  indexOverride: schema.nullable(
-    schema.string({
-      validate: (pattern) => {
-        if (!pattern.startsWith(ALERT_HISTORY_PREFIX)) {
-          return `index must start with "${ALERT_HISTORY_PREFIX}"`;
+const ParamsSchema = z
+  .object({
+    documents: z.array(z.record(z.string(), z.any())),
+    indexOverride: z
+      .string()
+      .nullable()
+      .default(null)
+      .refine(
+        (pattern) => pattern === null || (pattern && pattern.startsWith(ALERT_HISTORY_PREFIX)),
+        {
+          message: `index must start with "${ALERT_HISTORY_PREFIX}"`,
         }
-      },
-    })
-  ),
-});
+      ),
+  })
+  .strict();
 
 export const ConnectorTypeId = '.index';
 // connector type definition
@@ -83,7 +87,7 @@ export function getConnectorType(): ESIndexConnectorType {
       SecurityConnectorFeatureId,
     ],
     validate: {
-      secrets: { schema: schema.object({}, { defaultValue: {} }) },
+      secrets: { schema: z.object({}).strict().default({}) },
       config: {
         schema: ConfigSchema,
       },
