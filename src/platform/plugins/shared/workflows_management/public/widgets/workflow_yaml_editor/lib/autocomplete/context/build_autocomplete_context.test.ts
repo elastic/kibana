@@ -150,7 +150,7 @@ steps:
         type: console
         with:
           message: "im true, {{steps.|<-}}"
-    else: 
+    else:
       - name: false-step
         type: console
         with:
@@ -182,5 +182,41 @@ steps: []
     );
 
     expect(result?.isInScheduledTriggerWithBlock).toBe(true);
+  });
+
+  it('should correctly detect inputs context when typing type field', () => {
+    const result = buildAutocompleteContext(
+      getFakeAutocompleteContextParams(`
+version: "1"
+name: "test"
+inputs:
+  - name: myInput
+    type: |<-
+    description: "My input"
+steps: []
+`)
+    );
+
+    expect(result?.isInStepsContext).toBe(false);
+    expect(result?.isInTriggersContext).toBe(false);
+    expect(result?.path).toEqual(['inputs', 0, 'type']);
+  });
+
+  it('should correctly detect inputs context when typing type field with value', () => {
+    const result = buildAutocompleteContext(
+      getFakeAutocompleteContextParams(`
+version: "1"
+name: "test"
+inputs:
+  - name: myInput
+    type: string|<-
+    description: "My input"
+steps: []
+`)
+    );
+
+    expect(result?.isInStepsContext).toBe(false);
+    expect(result?.isInTriggersContext).toBe(false);
+    expect(result?.path).toEqual(['inputs', 0, 'type']);
   });
 });

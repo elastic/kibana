@@ -36,7 +36,7 @@ describe('getPathAtOffset', () => {
 `;
     const offset = yaml.indexOf('|<-');
     const result = getPathAtOffset(parseDocument(yaml), offset);
-    expect(result).toEqual(['steps', 0]);
+    expect(result).toEqual(['steps']);
   });
 
   it('should handle deeply nested structures', () => {
@@ -62,7 +62,7 @@ describe('getPathAtOffset', () => {
         - third`;
     const offset = yaml.indexOf('|<-');
     const result = getPathAtOffset(parseDocument(yaml), offset);
-    expect(result).toEqual(['config', 'items', 0]);
+    expect(result).toEqual(['config', 'items']);
   });
 
   it('should return empty array for empty document', () => {
@@ -108,6 +108,107 @@ describe('getPathAtOffset', () => {
     const offset = yaml.indexOf('|<-');
     const cleanedYaml = yaml.replace('|<-', '');
     const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
-    expect(result).toEqual(['steps', 0]);
+    expect(result).toEqual(['steps']);
+  });
+
+  it('should return correct path for inputs section type field', () => {
+    const yaml = `inputs:
+  - name: myInput
+    type: string|<-
+    description: "My input"`;
+    const offset = yaml.indexOf('|<-');
+    const cleanedYaml = yaml.replace('|<-', '');
+    const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
+    expect(result).toEqual(['inputs', 0, 'type']);
+  });
+
+  it('should return correct path when typing after type: in inputs section', () => {
+    const yaml = `inputs:
+  - name: myInput
+    type: |<-
+    description: "My input"`;
+    const offset = yaml.indexOf('|<-');
+    const cleanedYaml = yaml.replace('|<-', '');
+    const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
+    // When typing right after "type:", should return path to the Map node containing type
+    expect(result).toEqual(['inputs', 0, 'type']);
+  });
+
+  it('should return correct path for triggers section', () => {
+    const yaml = `triggers:
+  - type: manual|<-
+steps: []`;
+    const offset = yaml.indexOf('|<-');
+    const cleanedYaml = yaml.replace('|<-', '');
+    const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
+    expect(result).toEqual(['triggers', 0, 'type']);
+  });
+
+  it('should return correct path when typing after type: in triggers section', () => {
+    const yaml = `triggers:
+  - type: |<-
+steps: []`;
+    const offset = yaml.indexOf('|<-');
+    const cleanedYaml = yaml.replace('|<-', '');
+    const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
+    // When typing right after "type:", should return path to the Map node containing type
+    expect(result).toEqual(['triggers', 0, 'type']);
+  });
+
+  it('should return correct path when typing after type: in inputs section with steps section below', () => {
+    const yaml = `inputs:
+  - type: |<-
+steps: []`;
+    const offset = yaml.indexOf('|<-');
+    const cleanedYaml = yaml.replace('|<-', '');
+    const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
+    // When typing right after "type:", should return path to the Map node containing type
+    expect(result).toEqual(['inputs', 0, 'type']);
+  });
+
+  it('should return correct path for inputs section when steps section exists below', () => {
+    const yaml = `name: New workflow
+
+enabled: false
+
+triggers:
+  - type: alert
+
+inputs:
+  - type: |<-
+
+steps:
+  - name: first-step
+    type: console
+    with:
+      message: First step executed`;
+    const offset = yaml.indexOf('|<-');
+    const cleanedYaml = yaml.replace('|<-', '');
+    const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
+    // Should return inputs path, not steps path
+    expect(result).toEqual(['inputs', 0, 'type']);
+  });
+
+  it('should return correct path when typing after type: with multiple spaces', () => {
+    const yaml = `name: New workflow
+
+enabled: false
+
+triggers:
+  - type: alert
+
+inputs:
+  - type:     |<-
+
+steps:
+  - name: first-step
+    type: console
+    with:
+      message: First step executed`;
+    const offset = yaml.indexOf('|<-');
+    const cleanedYaml = yaml.replace('|<-', '');
+    const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
+    // Should return inputs path even with multiple spaces after type:
+    expect(result).toEqual(['inputs', 0, 'type']);
   });
 });

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isScalar } from 'yaml';
+import { isScalar, parseDocument } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import { DynamicStepContextSchema } from '@kbn/workflows';
 import type { z } from '@kbn/zod';
@@ -49,8 +49,7 @@ export function buildAutocompleteContext({
   const absoluteOffset = model.getOffsetAt(position);
   const { lineNumber } = position;
   const line = model.getLineContent(lineNumber);
-  const wordUntil = model.getWordUntilPosition(position);
-  const word = model.getWordAtPosition(position) || wordUntil;
+  const word = model.getWordAtPosition(position) || model.getWordUntilPosition(position);
   const { startColumn, endColumn } = word;
 
   const focusedStepInfo: StepInfo | null = focusedStepId
@@ -82,8 +81,21 @@ export function buildAutocompleteContext({
     };
   }
 
-  const path = getPathAtOffset(yamlDocument, absoluteOffset);
-  const yamlNode = yamlDocument.getIn(path, true);
+  // Parse YAML document on-demand from current model content to ensure it matches
+  // the current cursor position. The debounced yamlDocument from state may be stale
+  // during fast typing, causing incorrect path calculations.
+  const currentYamlContent = model.getValue();
+  let documentForPath = yamlDocument; // Default to debounced document
+  try {
+    documentForPath = parseDocument(currentYamlContent, { keepSourceTokens: true });
+  } catch (error) {
+    // Fallback to debounced document if parsing fails (e.g., invalid YAML)
+    // documentForPath already set to yamlDocument above
+  }
+
+  // Use the parsed document (current or fallback) for path calculation and other operations
+  const path = getPathAtOffset(documentForPath, absoluteOffset);
+  const yamlNode = documentForPath.getIn(path, true);
   const scalarType = isScalar(yamlNode) ? yamlNode.type ?? null : null;
 
   let contextSchema: z.ZodType = DynamicStepContextSchema;
@@ -108,9 +120,9 @@ export function buildAutocompleteContext({
   }
 
   // Check if we're actually inside a liquid block
-  const isInLiquidBlock = isInsideLiquidBlock(model.getValue(), position);
+  const isInLiquidBlock = isInsideLiquidBlock(currentYamlContent, position);
   const _isInScheduledTriggerWithBlock = isInScheduledTriggerWithBlock(
-    yamlDocument,
+    documentForPath,
     absoluteOffset
   );
 

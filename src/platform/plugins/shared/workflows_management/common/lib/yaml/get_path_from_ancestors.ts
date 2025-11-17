@@ -51,9 +51,11 @@ export function getPathFromAncestors(
       }
 
       // Check if targetNode is within the range of this item
-      // This handles cases where the target is a child of the sequence item
+      // This handles cases where the target is the sequence item itself or a child of it
       if (isNode(item) && isNode(targetNode) && targetNode.range && item.range) {
-        return targetNode.range[0] >= item.range[0] && targetNode.range[1] <= item.range[2];
+        // Check if targetNode's start position is within the item's range
+        // This is more lenient and handles cases where the target is the item itself
+        return targetNode.range[0] >= item.range[0] && targetNode.range[0] <= item.range[2];
       }
 
       return false;
