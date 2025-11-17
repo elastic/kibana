@@ -51,23 +51,7 @@ export async function getUnifiedTraceRootSpanByTraceId({
     query: {
       bool: {
         filter: [...termQuery(TRACE_ID, traceId), ...rangeQuery(start, end)],
-        must: [
-          {
-            bool: {
-              should: [
-                {
-                  constant_score: {
-                    filter: {
-                      bool: {
-                        must_not: existsQuery(PARENT_ID),
-                      },
-                    },
-                  },
-                },
-              ],
-            },
-          },
-        ],
+        must_not: existsQuery(PARENT_ID),
         should: [
           ...termsQuery(PROCESSOR_EVENT, ProcessorEvent.span, ProcessorEvent.transaction),
           { bool: { must_not: existsQuery(PROCESSOR_EVENT) } },
