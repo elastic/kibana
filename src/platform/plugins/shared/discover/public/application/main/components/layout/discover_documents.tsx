@@ -410,7 +410,7 @@ function DiscoverDocumentsComponent({
   const renderCustomToolbarWithElements = useMemo(
     () =>
       getRenderCustomToolbarWithElements({
-        leftSide: !isDataGridFullScreen ? viewModeToggle : undefined,
+        leftSide: isDataGridFullScreen ? undefined : viewModeToggle,
         bottomSection: (
           <>
             {callouts}
