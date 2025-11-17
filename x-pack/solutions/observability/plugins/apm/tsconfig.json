@@ -151,7 +151,6 @@
     "@kbn/zod",
     "@kbn/onechat-server",
     "@kbn/onechat-common",
-    "@kbn/observability-agent-plugin",
     "@kbn/onechat-plugin"
   ],
   "exclude": ["target/**/*"]
