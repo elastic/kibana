@@ -7,34 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { schema } from '@kbn/config-schema';
+import { getDashboardItemSchema, getDashboardDataSchema } from './common';
 import {
-  getDashboardItemSchema,
-  dashboardMetaSchema,
-  dashboardResolveMetaSchema,
-  getDashboardDataSchema,
-} from './common';
+  baseMetaSchema,
+  createdMetaSchema,
+  resolveMetaSchema,
+  updatedMetaSchema,
+} from '../../../api/meta_schemas';
 
 export function getDashboardGetResultSchema() {
   return schema.object(
     {
       item: getDashboardItemSchema(),
-      meta: schema.object(
-        {
-          outcome: schema.oneOf([
-            schema.literal('exactMatch'),
-            schema.literal('aliasMatch'),
-            schema.literal('conflict'),
-          ]),
-          aliasTargetId: schema.maybe(schema.string()),
-          aliasPurpose: schema.maybe(
-            schema.oneOf([
-              schema.literal('savedObjectConversion'),
-              schema.literal('savedObjectImport'),
-            ])
-          ),
-        },
-        { unknowns: 'forbid' }
-      ),
+      meta: resolveMetaSchema,
     },
     { unknowns: 'forbid' }
   );
@@ -46,10 +31,8 @@ export function getDashboardAPIGetResultSchema() {
       id: schema.string(),
       type: schema.string(),
       data: getDashboardDataSchema(),
-      meta: dashboardMetaSchema.extends(dashboardResolveMetaSchema),
+      meta: schema.allOf([baseMetaSchema, createdMetaSchema, updatedMetaSchema, resolveMetaSchema]),
     },
     { unknowns: 'forbid' }
   );
 }
-
-export const dashboardGetResultMetaSchema = dashboardMetaSchema.extends(dashboardResolveMetaSchema);

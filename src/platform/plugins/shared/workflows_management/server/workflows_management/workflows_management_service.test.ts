@@ -1387,6 +1387,7 @@ steps:
             spaceId: 'default',
             id: 'execution-1',
             status: 'completed',
+            isTestRun: false,
             startedAt: '2023-01-01T00:00:00Z',
             finishedAt: '2023-01-01T00:05:00Z',
             duration: 300000,
@@ -1475,7 +1476,7 @@ steps:
       );
     });
 
-    it('should return workflow executions with execution type filter', async () => {
+    describe('execution type filter', () => {
       const mockExecutionsResponse = {
         hits: {
           hits: [
@@ -1495,32 +1496,112 @@ steps:
           total: { value: 1 },
         },
       };
+      it('should add filter excluding test runs when filter is production', async () => {
+        mockEsClient.search.mockResolvedValue(mockExecutionsResponse as any);
 
-      mockEsClient.search.mockResolvedValue(mockExecutionsResponse as any);
+        await service.getWorkflowExecutions(
+          {
+            workflowId: 'workflow-1',
+            executionTypes: [ExecutionType.PRODUCTION],
+          },
+          'default'
+        );
 
-      await service.getWorkflowExecutions(
-        {
-          workflowId: 'workflow-1',
-          executionTypes: [ExecutionType.PRODUCTION, ExecutionType.TEST],
-        },
-        'default'
-      );
-
-      expect(mockEsClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: expect.objectContaining({
-            bool: expect.objectContaining({
-              must: expect.arrayContaining([
-                {
-                  terms: {
-                    executionType: [ExecutionType.PRODUCTION, ExecutionType.TEST],
+        expect(mockEsClient.search).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              bool: expect.objectContaining({
+                must: expect.arrayContaining([
+                  {
+                    bool: {
+                      should: [
+                        { term: { isTestRun: false } },
+                        { bool: { must_not: { exists: { field: 'isTestRun' } } } },
+                      ],
+                      minimum_should_match: 1,
+                    },
                   },
-                },
-              ]),
+                ]),
+              }),
             }),
-          }),
-        })
-      );
+          })
+        );
+      });
+
+      it('should add filter excluding production runs when filter is test', async () => {
+        mockEsClient.search.mockResolvedValue(mockExecutionsResponse as any);
+
+        await service.getWorkflowExecutions(
+          {
+            workflowId: 'workflow-1',
+            executionTypes: [ExecutionType.TEST],
+          },
+          'default'
+        );
+
+        expect(mockEsClient.search).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              bool: expect.objectContaining({
+                must: expect.arrayContaining([
+                  {
+                    term: {
+                      isTestRun: true,
+                    },
+                  },
+                ]),
+              }),
+            }),
+          })
+        );
+      });
+
+      it('should not add test/production run related filters if no execution type is specified', async () => {
+        mockEsClient.search.mockResolvedValue(mockExecutionsResponse as any);
+
+        await service.getWorkflowExecutions(
+          {
+            workflowId: 'workflow-1',
+            executionTypes: [],
+          },
+          'default'
+        );
+
+        expect(mockEsClient.search).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              bool: expect.objectContaining({
+                must: expect.not.arrayContaining([
+                  {
+                    term: {
+                      isTestRun: true,
+                    },
+                  },
+                ]),
+              }),
+            }),
+          })
+        );
+        expect(mockEsClient.search).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              bool: expect.objectContaining({
+                must: expect.not.arrayContaining([
+                  {
+                    bool: {
+                      should: [
+                        { term: { isTestRun: false } },
+                        { bool: { must_not: { exists: { field: 'isTestRun' } } } },
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  },
+                ]),
+              }),
+            }),
+          })
+        );
+      });
     });
 
     it('should handle empty results', async () => {

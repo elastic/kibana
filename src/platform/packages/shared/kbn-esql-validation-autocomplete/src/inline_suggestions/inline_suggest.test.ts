@@ -149,6 +149,18 @@ describe('inlineSuggest', () => {
         queryString: 'FROM logs* | WHERE KQL("term")',
         sortText: 'D',
       },
+      {
+        label: 'Search all',
+        description: '',
+        queryString: 'FROM logs* | /* comment */ WHERE KQL("term")',
+        sortText: 'D',
+      },
+      {
+        label: 'Search all again',
+        description: '',
+        queryString: 'FROM logs* | WHERE KQL("term") // comment',
+        sortText: 'D',
+      },
     ]);
     const result = await inlineSuggest('FROM logs*', 'FROM logs*', mockRange, mockCallbacks);
 

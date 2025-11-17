@@ -11,8 +11,7 @@ import { expect } from '@kbn/scout';
 import { test } from '../../fixtures';
 import { generateLogsData } from '../../fixtures/generators';
 
-// Failing: See https://github.com/elastic/kibana/issues/242994
-test.describe.skip('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt'] }, () => {
+test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt'] }, () => {
   test.beforeAll(async ({ apiServices, logsSynthtraceEsClient }) => {
     await apiServices.streams.enable();
     // Clear existing rules
