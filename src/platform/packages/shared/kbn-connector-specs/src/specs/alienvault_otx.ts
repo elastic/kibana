@@ -19,7 +19,7 @@
  * MVP implementation focusing on core community intelligence actions.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../connector_spec';
 import { UISchemas } from '../connector_spec_ui';
 
