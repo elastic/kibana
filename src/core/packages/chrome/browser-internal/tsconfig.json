@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -69,6 +69,7 @@
     "@kbn/core-feature-flags-browser-mocks",
     "@kbn/shared-ux-feedback-snippet",
     "@kbn/core-chrome-navigation-tour",
+    "@kbn/shared-ux-error-boundary",
   ],
   "exclude": [
     "target/**/*",

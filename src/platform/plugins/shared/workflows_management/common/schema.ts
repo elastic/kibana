@@ -14,7 +14,10 @@ import type {
   EnhancedInternalConnectorContract,
   InternalConnectorContract,
 } from '@kbn/workflows';
-import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
+import {
+  enhanceKibanaConnectorsWithFetcher,
+  generateYamlSchemaFromConnectors,
+} from '@kbn/workflows';
 import { z } from '@kbn/zod';
 
 // Import connector schemas from the organized structure
@@ -712,14 +715,13 @@ function generateElasticsearchConnectors(): EnhancedInternalConnectorContract[] 
 
 function generateKibanaConnectors(): InternalConnectorContract[] {
   // Lazy load the generated Kibana connectors
-
   const {
     GENERATED_KIBANA_CONNECTORS,
     // eslint-disable-next-line @typescript-eslint/no-var-requires
   } = require('@kbn/workflows/common/generated/kibana_connectors');
 
-  // Return the pre-generated Kibana connectors (build-time generated, browser-safe)
-  return GENERATED_KIBANA_CONNECTORS;
+  // Enhance connectors with fetcher parameter support
+  return enhanceKibanaConnectorsWithFetcher(GENERATED_KIBANA_CONNECTORS);
 }
 
 /**
@@ -859,6 +861,8 @@ export function addDynamicConnectorsToCache(
 /**
  * Get cached dynamic connector types (with instances)
  * Used by completion provider to access connector instances
+ * TODO: This function is not used anywhere, we should clean it up
+ * @deprecated use the store to get dynamic connectors
  */
 export function getCachedDynamicConnectorTypes(): Record<string, ConnectorTypeInfo> | null {
   return dynamicConnectorTypesCache;

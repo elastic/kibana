@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -22,6 +22,7 @@
     "@kbn/navigation-plugin",
     "@kbn/config-schema",
     "@kbn/workflows",
+    "@kbn/workflows-ui",
     "@kbn/zod",
     "@kbn/code-editor",
     "@kbn/monaco",
@@ -62,8 +63,12 @@
     "@kbn/utility-types",
     "@kbn/core-logging-server-mocks",
     "@kbn/core-http-router-server-mocks",
+    "@kbn/connector-schemas",
     "@kbn/react-query",
-    "@kbn/core-http-server"
+    "@kbn/core-http-server",
+    "@kbn/test-jest-helpers",
+    "@kbn/es-errors",
+    "@kbn/core-http-server-mocks"
   ],
   "exclude": ["target/**/*"]
 }

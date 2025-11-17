@@ -11,6 +11,7 @@ import type { QueryOperator } from '@kbn/esql-composer';
 import { drop, evaluate, stats, timeseries, where } from '@kbn/esql-composer';
 import { type MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
+import { sanitazeESQLInput } from '@kbn/esql-utils';
 import { DIMENSION_TYPES } from '../../constants';
 import { DIMENSIONS_COLUMN } from './constants';
 import { createMetricAggregation, createTimeBucketAggregation } from './create_aggregation';
@@ -52,6 +53,8 @@ export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQL
 
   const whereConditions: QueryOperator[] = [];
   const valuesByField = new Map<string, Set<string>>();
+  const dimensionTypeMap = new Map(metricDimensions?.map((dim) => [dim.name, dim.type]));
+
   if (filters && filters.length) {
     for (const filter of filters) {
       const currentValues = valuesByField.get(filter.field);
@@ -63,26 +66,43 @@ export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQL
     }
 
     valuesByField.forEach((value, key) => {
+      const valuesArray = Array.from(value);
+      const escapedKey = sanitazeESQLInput(key);
+
+      // Always cast to STRING for filtering to handle potential mapping conflicts
+      // where the same field name exists with different types (e.g., both long and keyword)
+      const castedKey = `${escapedKey}::STRING`;
+
       whereConditions.push(
-        where(`${key} IN (${new Array(value.size).fill('?').join(', ')})`, Array.from(value))
+        where(`${castedKey} IN (${new Array(value.size).fill('?').join(', ')})`, valuesArray)
       );
     });
   }
-
-  const dimensionTypeMap = new Map(metricDimensions?.map((dim) => [dim.name, dim.type]));
 
   const unfilteredDimensions = (dimensions ?? []).filter((dim) => !valuesByField.has(dim));
   const queryPipeline = source.pipe(
     ...whereConditions,
     unfilteredDimensions.length > 0
-      ? where(unfilteredDimensions.map((dim) => `${dim} IS NOT NULL`).join(' AND '))
+      ? where(
+          unfilteredDimensions
+            .map((dim) => {
+              const dimType = dimensionTypeMap.get(dim);
+              const escapedDim = sanitazeESQLInput(dim);
+              const castedDim =
+                dimType && needsStringCasting(dimType) ? `${escapedDim}::STRING` : escapedDim;
+              return `${castedDim} IS NOT NULL`;
+            })
+            .join(' AND ')
+        )
       : (query) => query,
     stats(
       `${createMetricAggregation({
         instrument,
         placeholderName: 'metricField',
       })} BY ${createTimeBucketAggregation({})}${
-        (dimensions ?? []).length > 0 ? `, ${dimensions.join(',')}` : ''
+        (dimensions ?? []).length > 0
+          ? `, ${dimensions.map((dim) => sanitazeESQLInput(dim)).join(',')}`
+          : ''
       }`,
       {
         metricField,
@@ -96,11 +116,14 @@ export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQL
               `${DIMENSIONS_COLUMN} = CONCAT(${dimensions
                 .map((dim) => {
                   const dimType = dimensionTypeMap.get(dim);
-                  return dimType && needsStringCasting(dimType) ? `${dim}::STRING` : dim;
+                  const escapedDim = sanitazeESQLInput(dim);
+                  return dimType && needsStringCasting(dimType)
+                    ? `${escapedDim}::STRING`
+                    : escapedDim;
                 })
                 .join(`, " ${separator} ", `)})`
             ),
-            drop(`${dimensions.join(',')}`),
+            drop(`${dimensions.map((dim) => sanitazeESQLInput(dim)).join(',')}`),
           ]
       : [])
   );

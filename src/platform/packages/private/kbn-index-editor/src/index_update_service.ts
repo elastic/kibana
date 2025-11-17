@@ -191,7 +191,11 @@ export class IndexUpdateService {
   private readonly _error$ = new BehaviorSubject<IndexEditorError | null>(null);
   public readonly error$: Observable<IndexEditorError | null> = this._error$.asObservable();
 
-  private readonly _exitAttemptWithUnsavedChanges$ = new BehaviorSubject<boolean>(false);
+  private readonly _exitAttemptWithUnsavedChanges$ = new BehaviorSubject<{
+    isActive: boolean;
+    onExitCallback?: () => void;
+  }>({ isActive: false });
+
   public readonly exitAttemptWithUnsavedChanges$ =
     this._exitAttemptWithUnsavedChanges$.asObservable();
 
@@ -1022,8 +1026,8 @@ export class IndexUpdateService {
     this.telemetry.trackEditInteraction({ actionType: 'delete_column' });
   }
 
-  public setExitAttemptWithUnsavedChanges(value: boolean) {
-    this._exitAttemptWithUnsavedChanges$.next(value);
+  public setExitAttemptWithUnsavedChanges(isActive: boolean, onExitCallback?: () => void) {
+    this._exitAttemptWithUnsavedChanges$.next({ isActive, onExitCallback });
   }
 
   public discardUnsavedChanges() {
@@ -1118,16 +1122,17 @@ export class IndexUpdateService {
     return lookupIndexesResult.indices.some((index) => index.name === indexName);
   }
 
-  public exit() {
+  public exit(onExitCallback?: () => void) {
     const hasUnsavedChanges = this._hasUnsavedChanges$.getValue();
     const unsavedColumns = this._pendingColumnsToBeSaved$
       .getValue()
       .filter((col) => !isPlaceholderColumn(col.name));
 
     if (hasUnsavedChanges || unsavedColumns.length > 0) {
-      this.setExitAttemptWithUnsavedChanges(true);
+      this.setExitAttemptWithUnsavedChanges(true, onExitCallback);
     } else {
       this.destroy();
+      onExitCallback?.();
     }
   }
 }
