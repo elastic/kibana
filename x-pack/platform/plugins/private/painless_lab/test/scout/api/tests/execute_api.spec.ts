@@ -48,7 +48,7 @@ apiTest.describe(
         const response = await apiClient.post('api/painless_lab/execute', {
           headers: {
             ...COMMON_HEADERS,
-            ...clusterPainlessExecuteClusterPrivilegesCredentials.apiKeyHeader,
+            ...painlessExecuteClusterPrivilegesCredentials.apiKeyHeader,
           },
           responseType: 'json',
           body: TEST_INPUT.script,
