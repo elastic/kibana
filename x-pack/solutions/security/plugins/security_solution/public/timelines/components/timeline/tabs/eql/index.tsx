@@ -16,6 +16,7 @@ import { InPortal } from 'react-reverse-portal';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import { PageScope } from '../../../../../data_view_manager/constants';
 import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
 import { InputsModelId } from '../../../../../common/store/inputs/constants';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -30,7 +31,6 @@ import { useTimelineEvents } from '../../../../containers';
 import { TimelineId, TimelineTabs } from '../../../../../../common/types/timeline';
 import type { inputsModel, State } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
-import { SourcererScopeName } from '../../../../../sourcerer/store/model';
 import { timelineDefaults } from '../../../../store/defaults';
 import { useSourcererDataView } from '../../../../../sourcerer/containers';
 import { useEqlEventsCountPortal } from '../../../../../common/hooks/use_timeline_events_count';
@@ -83,10 +83,10 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     loading: oldSourcererLoading,
     selectedPatterns: oldSelectedPatterns,
     sourcererDataView: oldSourcererDataViewSpec,
-  } = useSourcererDataView(SourcererScopeName.timeline);
+  } = useSourcererDataView(PageScope.timeline);
 
-  const { dataView: experimentalDataView, status } = useDataView(SourcererScopeName.timeline);
-  const experimentalSelectedPatterns = useSelectedPatterns(SourcererScopeName.timeline);
+  const { dataView: experimentalDataView, status } = useDataView(PageScope.timeline);
+  const experimentalSelectedPatterns = useSelectedPatterns(PageScope.timeline);
   const experimentalDataViewId = experimentalDataView.id ?? null;
 
   const dataViewId = useMemo(
