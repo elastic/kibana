@@ -6,6 +6,7 @@
  */
 
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { castArray } from 'lodash';
 import type { ApmDataAccessServicesWrapper } from '../../../../lib/helpers/get_apm_data_access_client';
 import type { GetInfraEntityCountRequestBodyPayload } from '../../../../../common/http_api';
 import type { InfraMetricsClient } from '../../../../lib/helpers/get_infra_metrics_client';
@@ -19,7 +20,7 @@ export async function getHostsCount({
   query,
   from,
   to,
-  schema,
+  schema = 'ecs',
 }: GetInfraEntityCountRequestBodyPayload & {
   infraMetricsClient: InfraMetricsClient;
   apmDataAccessServices?: ApmDataAccessServicesWrapper;
@@ -46,7 +47,7 @@ export async function getHostsCount({
     query: {
       bool: {
         filter: [
-          query,
+          ...castArray(query),
           ...rangeQuery(from, to),
           {
             bool: {
