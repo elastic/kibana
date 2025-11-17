@@ -108,16 +108,6 @@ export function getSectionSchema() {
   });
 }
 
-export const dashboardMetaSchema = schema.object({
-  updatedAt: schema.maybe(schema.string()),
-  createdAt: schema.maybe(schema.string()),
-  updatedBy: schema.maybe(schema.string()),
-  createdBy: schema.maybe(schema.string()),
-  managed: schema.maybe(schema.boolean()),
-  error: schema.maybe(apiError),
-  version: schema.maybe(schema.string()),
-});
-
 export const optionsSchema = schema.object({
   hidePanelTitles: schema.maybe(
     schema.boolean({
@@ -183,60 +173,6 @@ export function getDashboardDataSchema() {
     namespaces: schema.maybe(schema.arrayOf(schema.string())),
   });
 }
-
-export function getDashboardAPIItemSchema() {
-  return schema.object({
-    data: getDashboardDataSchema(),
-    meta: dashboardMetaSchema,
-    type: schema.string(),
-    id: schema.string(),
-  });
-}
-
-export function getDashboardAPICreateResultSchema() {
-  return schema.object(
-    {
-      id: schema.string(),
-      type: schema.string(),
-      data: getDashboardDataSchema(),
-      meta: dashboardMetaSchema,
-    },
-    { unknowns: 'forbid' }
-  );
-}
-
-export function getDashboardStorageSchema() {
-  return schema.object(
-    {
-      id: schema.string(),
-      type: schema.string(),
-      version: schema.maybe(schema.string()),
-      createdAt: schema.maybe(schema.string()),
-      updatedAt: schema.maybe(schema.string()),
-      createdBy: schema.maybe(schema.string()),
-      updatedBy: schema.maybe(schema.string()),
-      managed: schema.maybe(schema.boolean()),
-      error: schema.maybe(apiError),
-      attributes: schema.object(getDashboardStateSchema()),
-      references: schema.arrayOf(referenceSchema),
-      namespaces: schema.maybe(schema.arrayOf(schema.string())),
-      originId: schema.maybe(schema.string()),
-    },
-    { unknowns: 'allow' }
-  );
-}
-
-export const dashboardResolveMetaSchema = {
-  outcome: schema.oneOf([
-    schema.literal('exactMatch'),
-    schema.literal('aliasMatch'),
-    schema.literal('conflict'),
-  ]),
-  aliasTargetId: schema.maybe(schema.string()),
-  aliasPurpose: schema.maybe(
-    schema.oneOf([schema.literal('savedObjectConversion'), schema.literal('savedObjectImport')])
-  ),
-};
 
 export function getDashboardItemSchema() {
   return schema.object(
