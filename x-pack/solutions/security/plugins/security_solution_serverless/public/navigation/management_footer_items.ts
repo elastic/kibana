@@ -10,27 +10,21 @@ import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 
-export const createV2footerItemsTree = (): NodeDefinition => ({
+export const createManagementFooterItemsTree = (): NodeDefinition => ({
   id: 'category-management',
   title: i18nStrings.projectSettings.title,
-  icon: 'gear',
   breadcrumbStatus: 'hidden',
-  renderAs: 'accordion',
-  spaceBefore: null,
-  sideNavVersion: 'v2',
   children: [
     {
       id: DATA_MANAGEMENT_NAV_ID,
-      iconV2: 'database',
+      icon: 'database',
       title: i18nStrings.ingestAndManageData.title,
       renderAs: 'panelOpener',
-      spaceBefore: null,
       children: [
         {
           title: i18nStrings.ingestAndManageData.ingestAndIntegrations.title,
           breadcrumbStatus: 'hidden',
           children: [
-            // TODO: verify visibility; not visible on v1 serverless footer items
             {
               breadcrumbStatus: 'hidden',
               link: 'integrations',
@@ -77,11 +71,9 @@ export const createV2footerItemsTree = (): NodeDefinition => ({
     {
       title: i18nStrings.stackManagementV2.serverlessTitle,
       id: STACK_MANAGEMENT_NAV_ID,
-      iconV2: 'gear',
+      icon: 'gear',
       breadcrumbStatus: 'hidden',
       renderAs: 'panelOpener',
-      spaceBefore: null,
-      sideNavVersion: 'v2',
       children: [
         {
           title: i18nStrings.stackManagement.access.title,
