@@ -17,7 +17,7 @@ import type { Scenario } from '../cli/scenario';
 import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
 import { withClient } from '../lib/utils/with_client';
 import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
-import { getJavaLogs, getWebLogs } from './helpers/logs_mock_data';
+import { getWebLogs } from './helpers/logs_mock_data';
 
 const scenario: Scenario<LogDocument> = async (runOptions) => {
   const { isLogsDb } = parseLogsScenarioOpts(runOptions.scenarioOpts);
@@ -36,12 +36,13 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         .rate(1)
         .generator((timestamp) => {
           return [
-            ...getJavaLogs().map((message) =>
-              log.create({ isLogsDb }).dataset('java').message(message).timestamp(timestamp)
-            ),
-            ...getWebLogs().map((message) =>
-              log.create({ isLogsDb }).dataset('web').message(message).timestamp(timestamp)
-            ),
+            ...getWebLogs().map((message) => {
+              return log.create({ isLogsDb }).dataset('web').message(message).defaults({
+                'log.custom': {
+                  'teamID': Math.floor(Math.random() * 10),
+                }
+              }).timestamp(timestamp);
+            }),
           ];
         });
 

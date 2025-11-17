@@ -58,15 +58,15 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
         .generator((timestamp) => {
           return [
             ...getWebLogs().map((message) => {
-              const serverPort = [443, 8080, 8443, 3000, 5000, 'default', 'N/A'][Math.floor(Math.random() * 7)]; // Common web server ports and some malformed
+              const malformedTeams = ['core', 'observability', 'security', 'logging', 'monitoring', 'alerting', 'reporting', 'analytics', 'intelligence', 'automation', 'integration'];
               return log
                 .create({ isLogsDb })
                 .dataset('web')
                 .message(message)
                 .defaults({
                   'log.custom': {
-                    'server.port': serverPort,
-                  },
+                    'teamID': malformedTeams[Math.floor(Math.random() * malformedTeams.length)],
+                  }
                 })
                 .timestamp(timestamp);
             }),
@@ -74,11 +74,10 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
             ...getMalformedMessageLogs(timestamp)
               .slice(0, Math.max(1, Math.floor(getWebLogs().length * 0.1)))
               .map((message) => {
-                const serverPort = [443, 8080, 8443, 3000, 5000][Math.floor(Math.random() * 5)]; // Common web server ports
                 return log.create({ isLogsDb }).dataset('web').message(message).defaults({
                   'log.custom': {
-                    'server.port': serverPort,
-                  },
+                    'teamID': Math.floor(Math.random() * 10),
+                  }
                 }).timestamp(timestamp)
               }),
           ];
