@@ -19,7 +19,7 @@
  * MVP implementation focusing on core noise detection actions.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../connector_spec';
 
 export const GreyNoiseConnector: ConnectorSpec = {
@@ -46,7 +46,7 @@ export const GreyNoiseConnector: ConnectorSpec = {
     getIpContext: {
       isTool: true,
       input: z.object({
-        ip: z.string().ip().describe('IP address'),
+        ip: z.ipv4().describe('IP address'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string };
@@ -68,7 +68,7 @@ export const GreyNoiseConnector: ConnectorSpec = {
     quickLookup: {
       isTool: true,
       input: z.object({
-        ip: z.string().ip().describe('IP address'),
+        ip: z.ipv4().describe('IP address'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string };
@@ -87,7 +87,7 @@ export const GreyNoiseConnector: ConnectorSpec = {
     getMetadata: {
       isTool: true,
       input: z.object({
-        ip: z.string().ip().describe('IP address'),
+        ip: z.ipv4().describe('IP address'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string };
@@ -109,7 +109,7 @@ export const GreyNoiseConnector: ConnectorSpec = {
     riotLookup: {
       isTool: true,
       input: z.object({
-        ip: z.string().ip().describe('IP address'),
+        ip: z.ipv4().describe('IP address'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string };

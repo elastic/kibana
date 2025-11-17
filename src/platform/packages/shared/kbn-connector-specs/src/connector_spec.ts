@@ -21,12 +21,12 @@
  * - Zod for validation and UI derivation
  */
 
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import type { Logger } from '@kbn/logging';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { AxiosInstance } from 'axios';
 
-export { withUIMeta, UISchemas } from './connector_spec_ui';
+export { UISchemas } from './connector_spec_ui';
 
 // ============================================================================
 // INTERNATIONALIZATION

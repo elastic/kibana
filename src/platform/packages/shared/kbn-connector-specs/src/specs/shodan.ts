@@ -19,7 +19,7 @@
  * MVP implementation focusing on core asset discovery actions.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../connector_spec';
 
 export const ShodanConnector: ConnectorSpec = {
@@ -70,7 +70,7 @@ export const ShodanConnector: ConnectorSpec = {
     getHostInfo: {
       isTool: true,
       input: z.object({
-        ip: z.string().ip().describe('IP address'),
+        ip: z.ipv4().describe('IP address'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string };

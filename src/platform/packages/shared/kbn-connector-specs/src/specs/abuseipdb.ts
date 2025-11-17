@@ -19,7 +19,7 @@
  * MVP implementation focusing on core IP reputation actions.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../connector_spec';
 
 export const AbuseIPDBConnector: ConnectorSpec = {
@@ -46,7 +46,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
     checkIp: {
       isTool: true,
       input: z.object({
-        ipAddress: z.string().ip().describe('IP address to check'),
+        ipAddress: z.ipv4().describe('IP address to check'),
         maxAgeInDays: z
           .number()
           .int()
@@ -78,7 +78,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
     reportIp: {
       isTool: true,
       input: z.object({
-        ip: z.string().ip().describe('IP address to report'),
+        ip: z.ipv4().describe('IP address to report'),
         categories: z.array(z.number().int()).min(1).describe('Abuse category IDs'),
         comment: z.string().optional().describe('Additional details'),
       }),
@@ -107,7 +107,7 @@ export const AbuseIPDBConnector: ConnectorSpec = {
     getIpInfo: {
       isTool: true,
       input: z.object({
-        ipAddress: z.string().ip().describe('IP address to lookup'),
+        ipAddress: z.ipv4().describe('IP address to lookup'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { ipAddress: string };

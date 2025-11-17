@@ -19,7 +19,8 @@
  * MVP implementation focusing on core domain reputation actions.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
+
 import type { ConnectorSpec } from '../connector_spec';
 
 export const URLVoidConnector: ConnectorSpec = {
@@ -36,7 +37,7 @@ export const URLVoidConnector: ConnectorSpec = {
       type: 'header',
       customSchema: z.object({
         headers: z.object({
-          'X-Api-Key': z.string().describe('API Key'),
+          'X-Api-Key': z.string().meta({ sensitive: true }).describe('API Key'),
         }),
       }),
     },
@@ -66,7 +67,7 @@ export const URLVoidConnector: ConnectorSpec = {
     checkUrl: {
       isTool: true,
       input: z.object({
-        url: z.string().url().describe('URL to check'),
+        url: z.url().describe('URL to check'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { url: string };
