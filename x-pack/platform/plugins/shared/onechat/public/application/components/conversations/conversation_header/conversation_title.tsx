@@ -16,8 +16,8 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useConversationTitle, useHasActiveConversation } from '../../../hooks/use_conversation';
-import { useDeleteConversationModal } from '../../../hooks/use_delete_conversation_modal';
-import { useRenameConversationModal } from '../../../hooks/use_rename_conversation_modal';
+import { DeleteConversationModal } from './delete_conversation_modal';
+import { RenameConversationModal } from './rename_conversation_modal';
 
 const labels = {
   ariaLabel: i18n.translate('xpack.onechat.conversationTitle.ariaLabel', {
@@ -39,10 +39,9 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
   const { title, isLoading } = useConversationTitle();
   const hasActiveConversation = useHasActiveConversation();
   const { euiTheme } = useEuiTheme();
-  const { openDeleteModal, DeleteModal } = useDeleteConversationModal();
-  const { openRenameModal, RenameModal } = useRenameConversationModal();
-
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isRenameModalOpen, setIsRenameModalOpen] = useState(false);
 
   const shouldShowButton = hasActiveConversation && !isLoading && title;
 
@@ -54,7 +53,7 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
       data-test-subj="agentBuilderConversationRenameButton"
       onClick={() => {
         setIsContextMenuOpen(false);
-        openRenameModal();
+        setIsRenameModalOpen(true);
       }}
     >
       {labels.rename}
@@ -69,7 +68,7 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
       data-test-subj="agentBuilderConversationDeleteButton"
       onClick={() => {
         setIsContextMenuOpen(false);
-        openDeleteModal();
+        setIsDeleteModalOpen(true);
       }}
     >
       {labels.delete}
@@ -99,8 +98,14 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
         >
           <EuiContextMenuPanel size="s" items={menuItems} />
         </EuiPopover>
-        {DeleteModal}
-        {RenameModal}
+        <DeleteConversationModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+        />
+        <RenameConversationModal
+          isOpen={isRenameModalOpen}
+          onClose={() => setIsRenameModalOpen(false)}
+        />
       </>
     );
   }
