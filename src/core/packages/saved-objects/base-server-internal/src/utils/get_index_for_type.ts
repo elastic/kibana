@@ -24,5 +24,5 @@ export const getIndexForType = ({
   kibanaVersion,
   snapshot = false,
 }: GetIndexForTypeOptions): string => {
-  return `${typeRegistry.getIndex(type) || defaultIndex}${snapshot ? '_snapshot' : kibanaVersion}`;
+  return `${typeRegistry.getIndex(type) || defaultIndex}_${snapshot ? 'snapshots' : kibanaVersion}`;
 };
