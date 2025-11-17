@@ -14,6 +14,8 @@ import { streamlangProcessorSchema } from './processors';
 import type { StreamlangStepWithUIAttributes } from './ui';
 
 // Recursive schema for ConditionWithSteps
+export type ConditionWithSteps = Condition & { steps: StreamlangStep[] };
+
 export const conditionWithStepsSchema: z.ZodType<ConditionWithSteps> = z.lazy(() =>
   z.intersection(
     conditionSchema,
@@ -21,9 +23,7 @@ export const conditionWithStepsSchema: z.ZodType<ConditionWithSteps> = z.lazy(()
       steps: z.array(streamlangStepSchema),
     })
   )
-);
-
-export type ConditionWithSteps = Condition & { steps: StreamlangStep[] };
+) as any;
 
 /**
  * Nested where block (recursive)
@@ -55,9 +55,10 @@ export const isWhereBlock = (obj: any): obj is StreamlangWhereBlock => {
  * A step can be either a processor or a where block (optionally recursive)
  */
 export type StreamlangStep = StreamlangProcessorDefinition | StreamlangWhereBlock;
+
 export const streamlangStepSchema: z.ZodType<StreamlangStep> = z.lazy(() =>
   z.union([streamlangProcessorSchema, streamlangWhereBlockSchema])
-);
+) as any;
 
 export const isActionBlockSchema = (obj: any): obj is StreamlangProcessorDefinition => {
   return isSchema(streamlangProcessorSchema, obj);
@@ -102,13 +103,13 @@ const ensureWhereBlockHasTypedConditions = (block: StreamlangWhereBlock): Stream
 const ensureProcessorHasTypedCondition = <TProcessor extends StreamlangProcessorDefinition>(
   processor: TProcessor
 ): TProcessor => {
-  if (!processor.where) {
+  if (!(processor as any).where) {
     return processor;
   }
 
   return {
     ...processor,
-    where: ensureConditionType(processor.where),
+    where: ensureConditionType((processor as any).where as Condition),
   };
 };
 

@@ -293,13 +293,45 @@ export const convertPathParameters = (schema: unknown, knownParameters: KnownPar
   };
 };
 
+/**
+ * Replace any JSON Schema $ref that points at "#/definitions/..." with an OpenAPI-compatible
+ * "#/components/schemas/..." pointer. This is used to adapt zod-to-json-schema's output
+ * (which uses "definitions" even for target: 'openApi3') to the structure expected by
+ * the router-to-openapispec components collection.
+ */
+const replaceDefinitionRefs = <T>(schema: T): T => {
+  if (schema === null || typeof schema !== 'object') {
+    return schema;
+  }
+
+  if (Array.isArray(schema)) {
+    return schema.map((item) => replaceDefinitionRefs(item)) as unknown as T;
+  }
+
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(schema as Record<string, unknown>)) {
+    if (key === '$ref' && typeof value === 'string' && value.startsWith('#/definitions/')) {
+      result[key] = value.replace('#/definitions/', '#/components/schemas/');
+    } else {
+      result[key] = replaceDefinitionRefs(value);
+    }
+  }
+
+  return result as T;
+};
+
 export const convert = (schema: z.ZodTypeAny) => {
+  const rawJsonSchema = zodToJsonSchema(schema, {
+    target: 'openApi3',
+    // Use a non-ref strategy here so we don't leak internal zod-to-json-schema
+    // definition graphs (ZodSchema*) into the OpenAPI bundle and create
+    // deeply nested $ref chains that tools like Redocly cannot resolve.
+    $refStrategy: 'none',
+  }) as OpenAPIV3.SchemaObject;
+
   return {
     shared: {},
-    schema: zodToJsonSchema(schema, {
-      target: 'openApi3',
-      $refStrategy: 'none',
-    }) as OpenAPIV3.SchemaObject,
+    schema: replaceDefinitionRefs(rawJsonSchema) as OpenAPIV3.SchemaObject,
   };
 };
 
