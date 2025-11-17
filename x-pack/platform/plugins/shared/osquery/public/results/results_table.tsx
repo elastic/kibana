@@ -84,9 +84,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 }) => {
   const [isLive, setIsLive] = useState(true);
 
-  const {
-    data: { aggregations },
-  } = useActionResults({
+  const { data } = useActionResults({
     actionId,
     startDate,
     activePage: 0,
@@ -160,20 +158,20 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
       // eslint-disable-next-line react/display-name
       ({ rowIndex, columnId }) => {
         // eslint-disable-next-line react-hooks/rules-of-hooks
-        const data = useContext(DataContext);
+        const gridData = useContext(DataContext);
 
         // @ts-expect-error update types
-        const value = data[rowIndex % pagination.pageSize]?.fields[columnId];
+        const value = gridData[rowIndex % pagination.pageSize]?.fields[columnId];
 
         if (columnId === 'agent.name') {
           // @ts-expect-error update types
-          const agentIdValue = data[rowIndex % pagination.pageSize]?.fields['agent.id'];
+          const agentIdValue = gridData[rowIndex % pagination.pageSize]?.fields['agent.id'];
 
           return <EuiLink href={getFleetAppUrl(agentIdValue)}>{value}</EuiLink>;
         }
 
         if (ecsMappingColumns.includes(columnId)) {
-          const ecsFieldValue = get(columnId, data[rowIndex % pagination.pageSize]?._source);
+          const ecsFieldValue = get(columnId, gridData[rowIndex % pagination.pageSize]?._source);
 
           if (isArray(ecsFieldValue) || isObject(ecsFieldValue)) {
             try {
@@ -261,10 +259,10 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
     const newColumns = fields.reduce(
       (acc, fieldName) => {
-        const { data, seen } = acc;
+        const { data: accData, seen } = acc;
         if (fieldName === 'agent.name') {
           if (!seen.has(fieldName)) {
-            data.push({
+            accData.push({
               id: fieldName,
               displayAsText: i18n.translate(
                 'xpack.osquery.liveQueryResults.table.agentColumnTitle',
@@ -282,7 +280,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
         if (ecsMappingColumns.includes(fieldName)) {
           if (!seen.has(fieldName)) {
-            data.push({
+            accData.push({
               id: fieldName,
               displayAsText: fieldName,
               defaultSortDirection: Direction.asc,
@@ -298,7 +296,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
           const hasNumberType = fields.includes(`${fieldName}.number`);
           if (!seen.has(displayAsText)) {
             const id = hasNumberType ? fieldName + '.number' : fieldName;
-            data.push({
+            accData.push({
               id,
               displayAsText,
               display: getHeaderDisplay(displayAsText),
@@ -324,8 +322,8 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
   }, [allResultsData?.columns.length, ecsMappingColumns, getHeaderDisplay]);
 
   const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
-    const data = allResultsData?.edges;
-    if (timelines && data) {
+    const edges = allResultsData?.edges;
+    if (timelines && edges) {
       return [
         {
           id: 'timeline',
@@ -335,7 +333,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
             const { visibleRowIndex } = actionProps as EuiDataGridCellValueElementProps & {
               visibleRowIndex: number;
             };
-            const eventId = data[visibleRowIndex]?._id;
+            const eventId = edges[visibleRowIndex]?._id;
 
             return <AddToTimelineButton field="_id" value={eventId!} isIcon={true} />;
           },
@@ -380,15 +378,14 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         if (!agentIds?.length || expired || error) return false;
 
         return !!(
-          aggregations.totalResponded !== agentIds?.length ||
-          allResultsData?.total !== aggregations?.totalRowCount ||
+          data.aggregations.totalResponded !== agentIds?.length ||
+          allResultsData?.total !== data.aggregations?.totalRowCount ||
           (allResultsData?.total && !allResultsData?.edges.length)
         );
       }),
     [
       agentIds?.length,
-      aggregations.totalResponded,
-      aggregations?.totalRowCount,
+      data.aggregations,
       allResultsData?.edges.length,
       allResultsData?.total,
       error,
@@ -408,7 +405,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
         <EuiPanel hasShadow={false} data-test-subj={'osqueryResultsPanel'}>
           <EuiCallOut
             announceOnMount
-            title={generateEmptyDataMessage(aggregations.totalResponded)}
+            title={generateEmptyDataMessage(data?.aggregations.totalResponded ?? 0)}
           />
         </EuiPanel>
       ) : (

@@ -1824,7 +1824,7 @@
         "tags": [],
         "label": "getInitialESQLQuery",
         "description": [
-          "\nBuilds an ES|QL query for the provided dataView\nIf there is @timestamp field in the index, we don't add the WHERE clause\nIf there is no @timestamp and there is a dataView timeFieldName, we add the WHERE clause with the timeFieldName"
+          "\nBuilds an ES|QL query for the provided dataView\nIf there is @timestamp field in the index, we don't add the WHERE clause\nIf there is no @timestamp and there is a dataView timeFieldName, we add the WHERE clause with the timeFieldName\nIf the index pattern contains TSDB fields, we add the TS command, otherwise we add the FROM command"
         ],
         "signature": [
           "(dataView: ",
@@ -2547,39 +2547,6 @@
               }
             ],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/esql_fields_utils.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/esql-utils",
-        "id": "def-common.isQueryWrappedByPipes",
-        "type": "Function",
-        "tags": [],
-        "label": "isQueryWrappedByPipes",
-        "description": [],
-        "signature": [
-          "(query: string) => boolean"
-        ],
-        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/esql-utils",
-            "id": "def-common.isQueryWrappedByPipes.$1",
-            "type": "string",
-            "tags": [],
-            "label": "query",
-            "description": [],
-            "signature": [
-              "string"
-            ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -262,5 +262,9 @@
     "@kbn/scout-security",
     "@kbn/license-management-plugin",
     "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/core-chrome-layout-constants",
+    "@kbn/response-ops-rule-form",
+    "@kbn/core-lifecycle-browser-mocks"
   ]
 }

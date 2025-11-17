@@ -263,8 +263,10 @@ describe('TabbedContent', () => {
     );
 
     await user.click(screen.getByTestId(`unifiedTabs_tabMenuBtn_${tabWithSpecialChars.id}`));
-    expect(screen.getByTestId('unifiedTabs_tabMenuItem_duplicate')).toBeInTheDocument();
-    await user.click(screen.getByTestId('unifiedTabs_tabMenuItem_duplicate'));
+
+    const duplicateMenuItem = await screen.findByTestId('unifiedTabs_tabMenuItem_duplicate');
+    await waitFor(() => expect(duplicateMenuItem).toBeEnabled());
+    await user.click(duplicateMenuItem);
 
     const duplicatedTab = { ...NEW_TAB, label: 'Tab (1+2)*.? (copy)' };
 
