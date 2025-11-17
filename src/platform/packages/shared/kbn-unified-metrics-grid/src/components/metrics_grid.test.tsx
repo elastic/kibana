@@ -71,7 +71,6 @@ describe('MetricsGrid', () => {
         fields={fields}
         fetchParams={fetchParams}
         services={services}
-        filters={[]}
       />
     );
 
@@ -83,12 +82,11 @@ describe('MetricsGrid', () => {
     const { rerender } = render(
       <MetricsGrid
         columns={3}
-        dimensions={['host.name']}
+        dimensions={[{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }]}
         discoverFetch$={discoverFetch$}
         fields={fields}
         fetchParams={fetchParams}
         services={services}
-        filters={[]}
       />
     );
 
@@ -97,12 +95,11 @@ describe('MetricsGrid', () => {
     rerender(
       <MetricsGrid
         columns={4}
-        dimensions={['host.name']}
+        dimensions={[{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }]}
         discoverFetch$={discoverFetch$}
         fields={fields}
         fetchParams={fetchParams}
         services={services}
-        filters={[]}
       />
     );
 
@@ -128,7 +125,6 @@ describe('MetricsGrid', () => {
           fields={fields}
           fetchParams={fetchParams}
           services={services}
-          filters={[]}
         />
       );
 
@@ -152,7 +148,6 @@ describe('MetricsGrid', () => {
           fields={fields}
           fetchParams={fetchParams}
           services={services}
-          filters={[]}
         />
       );
 
@@ -181,7 +176,6 @@ describe('MetricsGrid', () => {
           fields={fields}
           fetchParams={fetchParams}
           services={services}
-          filters={[]}
         />
       );
 
@@ -213,7 +207,6 @@ describe('MetricsGrid', () => {
           fields={fields}
           fetchParams={fetchParams}
           services={services}
-          filters={[]}
         />
       );
 
@@ -252,7 +245,6 @@ describe('MetricsGrid', () => {
           fields={multipleFields}
           fetchParams={fetchParams}
           services={services}
-          filters={[]}
         />
       );
 
@@ -298,7 +290,6 @@ describe('MetricsGrid', () => {
             fields={fields}
             fetchParams={fetchParams}
             services={services}
-            filters={[]}
           />
         );
 
@@ -318,7 +309,6 @@ describe('MetricsGrid', () => {
             fields={fields}
             fetchParams={fetchParams}
             services={services}
-            filters={[]}
           />
         );
 
@@ -350,7 +340,6 @@ describe('MetricsGrid', () => {
             fields={fields}
             fetchParams={fetchParams}
             services={services}
-            filters={[]}
           />
         );
 
@@ -373,7 +362,6 @@ describe('MetricsGrid', () => {
             fields={fields}
             fetchParams={fetchParams}
             services={services}
-            filters={[]}
           />
         );
 

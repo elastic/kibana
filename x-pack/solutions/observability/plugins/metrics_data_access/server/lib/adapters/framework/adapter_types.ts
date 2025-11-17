@@ -24,7 +24,7 @@ import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
 import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
 import type { VersionedRouteConfig, RouteSecurity } from '@kbn/core-http-server';
-import type { MetricsDataPluginSetup } from '../../../types';
+import type { MetricsDataPluginSetup } from '../../../plugin';
 
 export interface InfraServerPluginSetupDeps {
   alerting: AlertingServerSetup;

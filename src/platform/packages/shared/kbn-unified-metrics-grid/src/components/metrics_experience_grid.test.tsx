@@ -198,7 +198,7 @@ describe('MetricsExperienceGrid', () => {
   it('render <ValuesSelector /> when dimensions are selected', () => {
     useMetricsExperienceStateMock.mockReturnValue({
       currentPage: 0,
-      dimensions: ['foo'],
+      dimensions: [{ name: 'foo', type: ES_FIELD_TYPES.KEYWORD }],
       valueFilters: [`foo${FIELD_VALUE_SEPARATOR}bar`],
       onDimensionsChange: jest.fn(),
       onPageChange: jest.fn(),
