@@ -8847,6 +8847,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/superdatepicker@link:src/platform/packages/shared/kbn-superdatepicker":
+  version "0.0.0"
+  uid ""
+
 "@kbn/synthetics-e2e@link:x-pack/solutions/observability/plugins/synthetics/e2e":
   version "0.0.0"
   uid ""

@@ -2174,6 +2174,8 @@
       "@kbn/streams-schema/*": ["x-pack/platform/packages/shared/kbn-streams-schema/*"],
       "@kbn/styled-components-mapping-cli": ["packages/kbn-styled-components-mapping-cli"],
       "@kbn/styled-components-mapping-cli/*": ["packages/kbn-styled-components-mapping-cli/*"],
+      "@kbn/superdatepicker": ["src/platform/packages/shared/kbn-superdatepicker"],
+      "@kbn/superdatepicker/*": ["src/platform/packages/shared/kbn-superdatepicker/*"],
       "@kbn/synthetics-e2e": ["x-pack/solutions/observability/plugins/synthetics/e2e"],
       "@kbn/synthetics-e2e/*": ["x-pack/solutions/observability/plugins/synthetics/e2e/*"],
       "@kbn/synthetics-plugin": ["x-pack/solutions/observability/plugins/synthetics"],

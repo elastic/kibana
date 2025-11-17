@@ -24,13 +24,13 @@ import {
   isOfQueryType,
   isOfAggregateQueryType,
   getLanguageDisplayName,
+  buildEsQuery,
 } from '@kbn/es-query';
 import { ESQLLangEditor, type ESQLEditorProps } from '@kbn/esql/public';
 import type { EuiFieldText, EuiIconProps, OnRefreshProps, UseEuiTheme } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
-  EuiSuperDatePicker,
   usePrettyDuration,
   useIsWithinBreakpoints,
   EuiSuperUpdateButton,
@@ -48,6 +48,7 @@ import type { ESQLControlVariable } from '@kbn/esql-types';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { SplitButton } from '@kbn/split-button';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { KbnSuperDatePicker } from '@kbn/superdatepicker';
 import { AddFilterPopover } from './add_filter_popover';
 import type { DataViewPickerProps } from '../dataview_picker';
 import { DataViewPicker } from '../dataview_picker';
@@ -59,7 +60,6 @@ import type {
 } from '../typeahead/suggestions_component';
 import type { IUnifiedSearchPluginServices, UnifiedSearchDraft } from '../types';
 import { shallowEqual } from '../utils/shallow_equal';
-
 import { QueryStringInput } from './query_string_input';
 import { ESQLMenuPopover, type ESQLMenuPopoverProps } from './esql_menu_popover';
 
@@ -128,8 +128,8 @@ const getWrapperWithTooltip = (
 };
 
 const SuperDatePicker = React.memo(
-  EuiSuperDatePicker as any
-) as unknown as typeof EuiSuperDatePicker;
+  KbnSuperDatePicker as any
+) as unknown as typeof KbnSuperDatePicker;
 
 // @internal
 export interface QueryBarTopRowProps<QT extends Query | AggregateQuery = Query> {
@@ -383,19 +383,6 @@ export const QueryBarTopRow = React.memo(
       timeHistory$,
       toRecentlyUsedRanges(timeHistory?.get() ?? [])
     );
-    const [commonlyUsedRanges] = useState(() => {
-      return (
-        uiSettings
-          ?.get(UI_SETTINGS.TIMEPICKER_QUICK_RANGES)
-          ?.map(({ from, to, display }: { from: string; to: string; display: string }) => {
-            return {
-              start: from,
-              end: to,
-              label: display,
-            };
-          }) ?? []
-      );
-    });
 
     const onSubmit = useCallback(
       ({ query, dateRange }: { query?: Query | QT; dateRange: TimeRange }) => {
@@ -602,6 +589,21 @@ export const QueryBarTopRow = React.memo(
 
       const wrapperClasses = classNames('kbnQueryBar__datePickerWrapper');
 
+      const currentDataView =
+        props.indexPatterns?.[0] && typeof props.indexPatterns[0] !== 'string'
+          ? props.indexPatterns[0]
+          : undefined;
+
+      // Convert Kibana Query to ES Query DSL for entire time range functionality
+      let esQuery;
+      if (props.query && isOfQueryType(props.query) && currentDataView) {
+        try {
+          esQuery = buildEsQuery(currentDataView, props.query, []);
+        } catch (e) {
+          esQuery = undefined;
+        }
+      }
+
       const datePicker = (
         <SuperDatePicker
           isDisabled={isDisabled}
@@ -616,13 +618,16 @@ export const QueryBarTopRow = React.memo(
           showUpdateButton={false}
           recentlyUsedRanges={recentlyUsedRanges}
           locale={i18n.getLocale()}
-          commonlyUsedRanges={commonlyUsedRanges}
-          dateFormat={uiSettings.get('dateFormat')}
           isAutoRefreshOnly={showAutoRefreshOnly}
           className="kbnQueryBar__datePicker"
           isQuickSelectOnly={isMobile ? false : isQueryInputFocused}
           width={isMobile ? 'full' : 'auto'}
           compressed
+          uiSettings={uiSettings}
+          http={http}
+          dataView={currentDataView}
+          query={esQuery}
+          enableEntireTimeRange={true}
         />
       );
       const component = getWrapperWithTooltip(datePicker, enableTooltip, props.query);
