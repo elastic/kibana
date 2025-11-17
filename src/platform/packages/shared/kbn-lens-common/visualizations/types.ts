@@ -345,6 +345,8 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
 
   isSubtypeCompatible?: (subtype1?: string, subtype2?: string) => boolean;
 
+  isSubtypeSupported?: (subtype: string) => boolean;
+
   /**
    * Header rendered as layer title. This can be used for both static and dynamic content like
    * for extra configurability, such as for switch chart type
@@ -362,16 +364,9 @@ export interface Visualization<T = unknown, P = T, ExtraAppendLayerArg = unknown
   LayerPanelComponent?: (
     props: VisualizationLayerWidgetProps<T>
   ) => null | ReactElement<VisualizationLayerWidgetProps<T>>;
-  /**
-   * Toolbar rendered above the visualization. This is meant to be used to provide chart-level
-   * settings for the visualization.
-   */
-  ToolbarComponent?: (
-    props: VisualizationToolbarProps<T>
-  ) => null | ReactElement<VisualizationToolbarProps<T>>;
 
   /**
-   * Optional flyout toolbar component that renders visualization-specific controls
+   * Flyout toolbar component that renders visualization-specific controls
    * in a flyout panel. Provides configuration options for style, legend and filters.
    */
   FlyoutToolbarComponent?: (

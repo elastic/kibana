@@ -32,15 +32,6 @@ import type { monaco } from '@kbn/monaco';
 
 const DEFAULT_ESQL_LIMIT = 1000;
 
-// retrieves the index pattern from the aggregate query for ES|QL using ast parsing
-export function getIndexPatternFromESQLQuery(esql?: string) {
-  const { root } = Parser.parse(esql || '');
-  const sourceCommand = root.commands.find(({ name }) => ['from', 'ts'].includes(name));
-  const args = (sourceCommand?.args ?? []) as ESQLSource[];
-  const indices = args.filter((arg) => arg.sourceType === 'index');
-  return indices?.map((index) => index.name).join(',');
-}
-
 export function getRemoteClustersFromESQLQuery(esql?: string): string[] | undefined {
   if (!esql) return undefined;
   const { root } = Parser.parse(esql);

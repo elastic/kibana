@@ -22,7 +22,7 @@ describe('testWorkflowThunk', () => {
     mockServices = getMockServices(store);
   });
 
-  it('should test workflow successfully', async () => {
+  it('should test workflow successfully without workflow id', async () => {
     const mockResponse = {
       workflowExecutionId: 'execution-123',
     };
@@ -34,6 +34,8 @@ describe('testWorkflowThunk', () => {
 
     // Set up state with yaml content
     store.dispatch({ type: 'detail/setYamlString', payload: 'name: Test Workflow\nsteps: []' });
+    // Set workflow to undefined
+    store.dispatch({ type: 'detail/setWorkflow', payload: undefined });
 
     mockServices.http.post.mockResolvedValue(mockResponse);
 
@@ -43,6 +45,40 @@ describe('testWorkflowThunk', () => {
       body: JSON.stringify({
         workflowYaml: 'name: Test Workflow\nsteps: []',
         inputs: testInputs,
+      }),
+    });
+    expect(mockServices.notifications.toasts.addSuccess).toHaveBeenCalledWith(
+      'Workflow test execution started',
+      { toastLifeTimeMs: 2000 }
+    );
+    expect(result.type).toBe('detail/testWorkflowThunk/fulfilled');
+    expect(result.payload).toEqual(mockResponse);
+  });
+
+  it('should test workflow successfully with workflow id when workflow is available', async () => {
+    const mockResponse = {
+      workflowExecutionId: 'execution-123',
+    };
+
+    const testInputs = {
+      param1: 'value1',
+      param2: 'value2',
+    };
+
+    // Set up state with yaml content
+    store.dispatch({ type: 'detail/setYamlString', payload: 'name: Test Workflow\nsteps: []' });
+    // Set workflow
+    store.dispatch({ type: 'detail/setWorkflow', payload: { id: 'workflow-123' } });
+
+    mockServices.http.post.mockResolvedValue(mockResponse);
+
+    const result = await store.dispatch(testWorkflowThunk({ inputs: testInputs }));
+
+    expect(mockServices.http.post).toHaveBeenCalledWith('/api/workflows/test', {
+      body: JSON.stringify({
+        workflowYaml: 'name: Test Workflow\nsteps: []',
+        inputs: testInputs,
+        workflowId: 'workflow-123',
       }),
     });
     expect(mockServices.notifications.toasts.addSuccess).toHaveBeenCalledWith(
