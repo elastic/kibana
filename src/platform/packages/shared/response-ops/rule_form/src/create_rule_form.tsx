@@ -223,6 +223,7 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
         onSave={onSave}
         onChangeMetaData={onChangeMetaData}
         focusTrapProps={props.focusTrapProps}
+        http={http}
       />
     </RuleFormStateProvider>
   );

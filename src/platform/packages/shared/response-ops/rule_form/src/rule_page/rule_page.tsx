@@ -22,22 +22,26 @@ import React, { useCallback, useMemo, useState } from 'react';
 import { useRuleFormScreenContext, useRuleFormState, useRuleFormSteps } from '../hooks';
 import { DISABLED_ACTIONS_WARNING_TITLE, RULE_FORM_RETURN_TITLE } from '../translations';
 import type { RuleFormData } from '../types';
+import { RuleFormInspectorProvider } from './inspector_context';
 import { RulePageFooter } from './rule_page_footer';
 import { RulePageNameInput } from './rule_page_name_input';
 import { RuleActionsConnectorsModal } from '../rule_actions/rule_actions_connectors_modal';
 import { RulePageShowRequestModal } from './rule_page_show_request_modal';
 import { ConfirmRuleClose } from '../components';
+import { transformCreateRuleBody } from '../common/apis/create_rule';
 
 export interface RulePageProps {
   isEdit?: boolean;
   isSaving?: boolean;
   onCancel?: () => void;
   onSave: (formData: RuleFormData) => void;
+  http: any;
 }
 
 export const RulePage = (props: RulePageProps) => {
-  const { isEdit = false, isSaving = false, onCancel = () => {}, onSave } = props;
+  const { isEdit = false, isSaving = false, onCancel = () => {}, onSave, http } = props;
   const [isCancelModalOpen, setIsCancelModalOpen] = useState<boolean>(false);
+  const [isRunningPreview, setIsRunningPreview] = useState<boolean>(false);
 
   const { formData, multiConsumerSelection, connectorTypes, connectors, touched, onInteraction } =
     useRuleFormState();
@@ -65,6 +69,21 @@ export const RulePage = (props: RulePageProps) => {
       onCancel();
     }
   }, [touched, onCancel]);
+
+  const onPreview = useCallback(
+    async (formData: any) => {
+      setIsRunningPreview(true);
+      try {
+        const response = await http.post('/api/alerting/rule/_execute', {
+          body: JSON.stringify(transformCreateRuleBody(formData)),
+        });
+        return response;
+      } finally {
+        setIsRunningPreview(false);
+      }
+    },
+    [http]
+  );
 
   const { isConnectorsScreenVisible, isShowRequestScreenVisible } = useRuleFormScreenContext();
 
@@ -136,12 +155,16 @@ export const RulePage = (props: RulePageProps) => {
           <EuiSteps steps={steps} />
         </EuiPageTemplate.Section>
         <EuiPageTemplate.Section>
-          <RulePageFooter
-            isEdit={isEdit}
-            isSaving={isSaving}
-            onCancel={onCancelInternal}
-            onSave={onSaveInternal}
-          />
+          <RuleFormInspectorProvider>
+            <RulePageFooter
+              isEdit={isEdit}
+              isSaving={isSaving}
+              isRunningPreview={isRunningPreview}
+              onCancel={onCancelInternal}
+              onSave={onSaveInternal}
+              onPreview={onPreview}
+            />
+          </RuleFormInspectorProvider>
         </EuiPageTemplate.Section>
       </EuiPageTemplate>
       {isCancelModalOpen && (
