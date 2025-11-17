@@ -194,6 +194,8 @@ export const CloudSecurityDataTable = ({
     columns,
     sort,
   });
+  const isGroupingEnabled = groupSelectorComponent === undefined;
+
 
   /**
    * This object is used to determine if the table rendering will be virtualized and the virtualization wrapper height.
@@ -206,20 +208,22 @@ export const CloudSecurityDataTable = ({
     const getWrapperHeight = () => {
       if (height) return height;
 
-      // If virtualization is not needed the table will render unconstrained.
-      if (!isVirtualizationEnabled) return 'auto';
+      // constaint height when virtualization is enabled or for groups with more than 10 rows
+      if (isVirtualizationEnabled || (isGroupingEnabled && total > 10)) {
+        const baseHeight = 362; // height of Kibana Header + Findings page header and search bar
+        const filterBarHeight = filters?.length > 0 ? 40 : 0;
+        const distributionBarHeight = hasDistributionBar ? 52 : 0;
+        return `calc(100vh - ${baseHeight}px - ${filterBarHeight}px - ${distributionBarHeight}px)`;
+      }
 
-      const baseHeight = 362; // height of Kibana Header + Findings page header and search bar
-      const filterBarHeight = filters?.length > 0 ? 40 : 0;
-      const distributionBarHeight = hasDistributionBar ? 52 : 0;
-      return `calc(100vh - ${baseHeight}px - ${filterBarHeight}px - ${distributionBarHeight}px)`;
+      return 'auto';
     };
 
     return {
       wrapperHeight: getWrapperHeight(),
       mode: isVirtualizationEnabled ? 'virtualized' : 'standard',
     };
-  }, [pageSize, total, height, filters?.length, hasDistributionBar]);
+  }, [pageSize, total, height, filters?.length, hasDistributionBar, isGroupingEnabled]);
 
   const { filterManager } = data.query;
 
