@@ -19,6 +19,8 @@ import { max10DecimalPlaces } from '../helpers';
 import { bayesianUpdate } from '../../asset_criticality/helpers';
 import type { PrivmonUserCrudService } from '../../privilege_monitoring/users/privileged_users_crud';
 
+import type { ExperimentalFeatures } from '../../../../../common';
+
 export interface PrivmonRiskFields {
   category_3_score: number;
   category_3_count: number;
@@ -40,6 +42,7 @@ interface ApplyCriticalityModifierParams {
     privmonUserCrudService: PrivmonUserCrudService;
     logger: Logger;
   };
+  experimentalFeatures: ExperimentalFeatures;
   globalWeight?: number;
 }
 
@@ -51,9 +54,17 @@ export const applyPrivmonModifier = async ({
   page: { buckets, identifierField, bounds },
   deps,
   globalWeight,
+  experimentalFeatures,
 }: ApplyCriticalityModifierParams) => {
   if (buckets.length === 0) {
     return [];
+  }
+
+  if (!experimentalFeatures.enableRiskScorePrivmonModifier) {
+    return buckets.map(() => ({
+      category_3_score: 0,
+      category_3_count: 0,
+    }));
   }
 
   const lower = bounds?.lower ? `${identifierField} > ${bounds.lower}` : undefined;

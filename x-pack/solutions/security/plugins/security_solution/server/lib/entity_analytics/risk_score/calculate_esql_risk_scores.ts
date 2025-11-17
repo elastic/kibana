@@ -195,6 +195,7 @@ export const calculateScoresWithESQL = async (
           .then(async (riskScoreBuckets) => {
             const results = await applyScoreModifiers({
               now,
+              experimentalFeatures: params.experimentalFeatures,
               identifierType: entityType as EntityType,
               deps: {
                 assetCriticalityService: params.assetCriticalityService,

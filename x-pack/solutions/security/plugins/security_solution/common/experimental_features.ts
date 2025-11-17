@@ -65,6 +65,11 @@ export const allowedExperimentalValues = Object.freeze({
   enableRiskScoreResetToZero: true,
 
   /**
+   * Enable privmon modifier in risk scoring calculation
+   */
+  enableRiskScorePrivmonModifier: false,
+
+  /**
    * Entity Analytics: Disables the Risk Score AI Assistant tool.
    */
   riskScoreAssistantToolDisabled: false,

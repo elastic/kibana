@@ -26,7 +26,7 @@ import { applyCriticalityModifier } from './modifiers/asset_criticality';
 import type { PrivmonRiskFields } from './modifiers/privileged_users';
 import { applyPrivmonModifier } from './modifiers/privileged_users';
 import { max10DecimalPlaces } from './helpers';
-
+import type { ExperimentalFeatures } from '../../../../common';
 interface ModifiersUpdateParams {
   now: string;
   deps: {
@@ -45,6 +45,7 @@ interface ModifiersUpdateParams {
   };
   weights?: RiskScoreWeights;
   identifierType?: EntityType;
+  experimentalFeatures: ExperimentalFeatures;
 }
 
 export const applyScoreModifiers = async ({
@@ -53,6 +54,7 @@ export const applyScoreModifiers = async ({
   deps,
   weights,
   page,
+  experimentalFeatures,
 }: ModifiersUpdateParams): Promise<EntityRiskScoreRecord[]> => {
   const globalWeight = identifierType
     ? getGlobalWeightForIdentifierType(identifierType, weights)
@@ -64,9 +66,11 @@ export const applyScoreModifiers = async ({
       globalWeight,
       deps: _.pick(deps, ['assetCriticalityService', 'logger']),
     }),
+
     applyPrivmonModifier({
       page,
       globalWeight,
+      experimentalFeatures,
       deps: _.pick(deps, ['privmonUserCrudService', 'logger']),
     }),
   ] as const;
