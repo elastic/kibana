@@ -7,7 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import type { ScoutPage } from '@kbn/scout';
+import { type ScoutPage, expect } from '@kbn/scout';
 
 export class AbstractPageObject {
   constructor(public readonly page: ScoutPage) {}
@@ -119,4 +119,12 @@ export class IndexManagement extends AbstractPageObject {
     };
     await this.page.testSubj.locator(tabMap[tab]).click();
   }
+
+  indexDetailsPage = {
+    expectIndexDetailsPageIsLoaded: async () => {
+      await expect(this.page.testSubj.locator('indexDetailsTab-overview')).toBeVisible();
+      await expect(this.page.testSubj.locator('indexDetailsContent')).toBeVisible();
+      await expect(this.page.testSubj.locator('indexDetailsBackToIndicesButton')).toBeVisible();
+    },
+  };
 }

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { expect } from '@kbn/scout';
 import { test } from '../fixtures';
 // import { CUSTOM_ROLES } from './custom_roles';
 
@@ -16,11 +15,7 @@ test.describe('Index details page', { tag: ['@ess'] }, () => {
     await pageObjects.indexManagement.goto();
   });
 
-  test('Navigates to the index details page from the home page', async ({
-    pageObjects,
-    log,
-    page,
-  }) => {
+  test('Navigates to the index details page from the home page', async ({ pageObjects, log }) => {
     await log.debug('Navigating to the index details page');
 
     // Display hidden indices to have some rows in the indices table
@@ -30,8 +25,6 @@ test.describe('Index details page', { tag: ['@ess'] }, () => {
     await pageObjects.indexManagement.openIndexDetailsPage(0);
 
     // Verify index details page is loaded
-    await expect(page.testSubj.locator('indexDetailsTab-overview')).toBeVisible();
-    await expect(page.testSubj.locator('indexDetailsContent')).toBeVisible();
-    await expect(page.testSubj.locator('indexDetailsBackToIndicesButton')).toBeVisible();
+    await pageObjects.indexManagement.indexDetailsPage.expectIndexDetailsPageIsLoaded();
   });
 });
