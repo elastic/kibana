@@ -102,11 +102,11 @@ export const withCompleteItem: ISuggestionItem = withAutoSuggest({
 });
 
 export const withMapCompleteItem: ISuggestionItem = withAutoSuggest({
-  label: '{ ... }',
-  text: '{ $0 }',
+  label: 'inference_id',
+  text: '{ "inference_id": "$0" }',
   asSnippet: true,
   kind: 'Snippet',
-  detail: '',
+  detail: 'Inference endpoint',
   sortText: '1',
 });
 

@@ -314,7 +314,7 @@ describe('RERANK Autocomplete', () => {
           onClause: 'textField',
         }) + ' WITH ';
 
-      await expectRerankSuggestions(query, ['{ $0 }']);
+      await expectRerankSuggestions(query, ['{ "inference_id": "$0" }']);
     });
 
     test('suggests inference_id key in WITH map', async () => {

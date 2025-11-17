@@ -114,7 +114,7 @@ describe('COMPLETION Autocomplete', () => {
   });
 
   it('suggests opening braces when WITH is already typed', async () => {
-    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH `, ['{ $0 }']);
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH `, ['{ "inference_id": "$0" }']);
   });
 
   it('suggests inference_id parameter within the named parameters map', async () => {
