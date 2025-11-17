@@ -7,20 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import type { SerializedStyles } from '@emotion/react';
 import {
   EuiButtonIcon,
-  EuiContextMenuPanel,
-  EuiContextMenuItem,
+  EuiContextMenu,
   EuiPopover,
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
   EuiLoadingSpinner,
-  EuiIcon,
-  EuiHorizontalRule,
 } from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import type { NotificationsStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -67,35 +65,36 @@ export const ContextMenu = ({
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRequestConverterLoading, setRequestConverterLoading] = useState(false);
-  const [isLanguageSelectorVisible, setLanguageSelectorVisibility] = useState(false);
-
-  const onCopyAsSubmit = async (language?: string) => {
-    const withLanguage = language || currentLanguage;
-
-    // Show loading spinner
-    setRequestConverterLoading(true);
-
-    // When copying as worked as expected, close the context menu popover
-    onCopyAs(withLanguage)
-      .then(() => {
-        setIsPopoverOpen(false);
-      })
-      .finally(() => {
-        // Delay hiding the spinner to avoid flickering between the spinner and
-        // the change language button
-        setTimeout(() => {
-          setRequestConverterLoading(false);
-        }, DELAY_FOR_HIDING_SPINNER);
-      });
-  };
 
   const closePopover = () => {
     setIsPopoverOpen(false);
-    setLanguageSelectorVisibility(false);
   };
 
-  const openDocs = async () => {
-    closePopover();
+  const onCopyAsSubmit = useCallback(
+    async (language?: string) => {
+      const withLanguage = language || currentLanguage;
+
+      // Show loading spinner
+      setRequestConverterLoading(true);
+
+      // When copying as worked as expected, close the context menu popover
+      onCopyAs(withLanguage)
+        .then(() => {
+          setIsPopoverOpen(false);
+        })
+        .finally(() => {
+          // Delay hiding the spinner to avoid flickering between the spinner and
+          // the change language button
+          setTimeout(() => {
+            setRequestConverterLoading(false);
+          }, DELAY_FOR_HIDING_SPINNER);
+        });
+    },
+    [currentLanguage, onCopyAs]
+  );
+
+  const openDocs = useCallback(async () => {
+    setIsPopoverOpen(false);
     const documentation = await getDocumentation();
     if (!documentation) {
       notifications.toasts.addWarning({
@@ -106,17 +105,23 @@ export const ContextMenu = ({
       return;
     }
     window.open(documentation, '_blank');
-  };
+  }, [getDocumentation, notifications.toasts]);
 
-  const handleAutoIndent = (event: React.MouseEvent) => {
-    closePopover();
-    autoIndent(event);
-  };
+  const handleAutoIndent = useCallback(
+    (event: React.MouseEvent) => {
+      setIsPopoverOpen(false);
+      autoIndent(event);
+    },
+    [autoIndent]
+  );
 
-  const handleLanguageSelect = (language: string) => {
-    onLanguageChange(language);
-    setLanguageSelectorVisibility(false);
-  };
+  const handleLanguageSelect = useCallback(
+    (language: string) => {
+      onLanguageChange(language);
+      setIsPopoverOpen(false);
+    },
+    [onLanguageChange]
+  );
 
   const button = (
     <EuiButtonIcon
@@ -134,151 +139,140 @@ export const ContextMenu = ({
     />
   );
 
-  // Create the language clients menu items with separators
-  const languageClientsItems = AVAILABLE_LANGUAGES.flatMap((lang, index) => {
-    const menuItem = (
-      <EuiContextMenuItem
-        key={lang.value}
-        data-test-subj={`languageClientMenuItem-${lang.value}`}
-        icon={currentLanguage === lang.value ? 'check' : 'empty'}
-        onClick={() => handleLanguageSelect(lang.value)}
-      >
-        {lang.label}
-      </EuiContextMenuItem>
-    );
+  // Build panels for EuiContextMenu
+  const panels: EuiContextMenuPanelDescriptor[] = useMemo(() => {
+    // Language selection panel (panel 1)
+    const languageItems = AVAILABLE_LANGUAGES.flatMap((lang, index) => {
+      const item = {
+        name: lang.label,
+        key: lang.value,
+        'data-test-subj': `languageClientMenuItem-${lang.value}`,
+        icon: currentLanguage === lang.value ? ('check' as const) : ('empty' as const),
+        onClick: () => handleLanguageSelect(lang.value),
+      };
 
-    // Add separator after each item except the last one
-    if (index < AVAILABLE_LANGUAGES.length - 1) {
-      return [menuItem, <EuiHorizontalRule key={`separator-${lang.value}`} margin="none" />];
-    }
+      // Add separator after each item except the last one
+      if (index < AVAILABLE_LANGUAGES.length - 1) {
+        return [item, { isSeparator: true as const, key: `separator-${lang.value}` }];
+      }
 
-    return [menuItem];
-  });
+      return [item];
+    });
 
-  // Main menu items
-  const mainMenuItems = [
-    ...(!isPackagedEnvironment
-      ? [
-          <EuiContextMenuItem
-            key="Copy to language"
-            data-test-subj="consoleMenuCopyToLanguage"
-            id="copyToLanguage"
-            disabled={!window.navigator?.clipboard}
-            onClick={() => onCopyAsSubmit()}
-            icon={isRequestConverterLoading ? <EuiLoadingSpinner size="m" /> : 'copyClipboard'}
-          >
-            <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <FormattedMessage
-                  id="console.monaco.requestOptions.copyToLanguageButtonLabel"
-                  defaultMessage="Copy to {language}"
-                  values={{ language: getLanguageLabelByValue(currentLanguage) }}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="hollow" data-test-subj="consoleMenuLanguageBadge">
-                  {getLanguageLabelByValue(currentLanguage)}
-                </EuiBadge>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiContextMenuItem>,
-          // Hide Language clients option for Kibana requests
-          ...(!isKbnRequestSelected
-            ? [
-                <EuiContextMenuItem
-                  key="Language clients"
-                  data-test-subj="consoleMenuLanguageClients"
-                  id="languageClients"
-                  onClick={() => setLanguageSelectorVisibility(true)}
-                  icon="editorCodeBlock"
-                >
-                  <EuiFlexGroup
-                    alignItems="center"
-                    justifyContent="spaceBetween"
-                    responsive={false}
-                  >
-                    <EuiFlexItem grow={false}>
+    // Main menu items (panel 0)
+    const mainItems = [
+      ...(!isPackagedEnvironment
+        ? [
+            {
+              name: (
+                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <FormattedMessage
+                      id="console.monaco.requestOptions.copyToLanguageButtonLabel"
+                      defaultMessage="Copy to {language}"
+                      values={{ language: getLanguageLabelByValue(currentLanguage) }}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiBadge color="hollow" data-test-subj="consoleMenuLanguageBadge">
+                      {getLanguageLabelByValue(currentLanguage)}
+                    </EuiBadge>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              ),
+              key: 'copyToLanguage',
+              'data-test-subj': 'consoleMenuCopyToLanguage',
+              icon: isRequestConverterLoading ? <EuiLoadingSpinner size="m" /> : 'copyClipboard',
+              disabled: !window.navigator?.clipboard,
+              onClick: () => onCopyAsSubmit(),
+            },
+            // Hide Language clients option for Kibana requests
+            ...(!isKbnRequestSelected
+              ? [
+                  {
+                    name: (
                       <FormattedMessage
                         id="console.monaco.requestOptions.changeLanguageButtonLabel"
                         defaultMessage="Change language"
                       />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiIcon type="arrowRight" size="m" />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiContextMenuItem>,
-              ]
-            : []),
-        ]
-      : []),
-    <EuiContextMenuItem
-      data-test-subj="consoleMenuAutoIndent"
-      key="Auto indent"
-      onClick={handleAutoIndent}
-      icon="kqlFunction"
-    >
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <FormattedMessage
-            id="console.monaco.requestOptions.autoIndentButtonLabel"
-            defaultMessage="Auto indent"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow" data-test-subj="consoleMenuAutoIndentShortcut">
-            {modifierKey} + I
-          </EuiBadge>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiContextMenuItem>,
-    <EuiContextMenuItem
-      key="Open documentation"
-      data-test-subj="consoleMenuOpenDocs"
-      onClick={openDocs}
-      icon="documentation"
-    >
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-        <EuiFlexItem grow={false}>
-          <FormattedMessage
-            id="console.monaco.requestOptions.openDocumentationButtonLabel"
-            defaultMessage="Open API reference"
-          />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiBadge color="hollow" data-test-subj="consoleMenuOpenDocsShortcut">
-            {modifierKey} + /
-          </EuiBadge>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiContextMenuItem>,
-  ];
+                    ),
+                    key: 'languageClients',
+                    'data-test-subj': 'consoleMenuLanguageClients',
+                    icon: 'editorCodeBlock',
+                    panel: 1,
+                  },
+                ]
+              : []),
+          ]
+        : []),
+      {
+        name: (
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <FormattedMessage
+                id="console.monaco.requestOptions.autoIndentButtonLabel"
+                defaultMessage="Auto indent"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow" data-test-subj="consoleMenuAutoIndentShortcut">
+                {modifierKey} + I
+              </EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+        key: 'autoIndent',
+        'data-test-subj': 'consoleMenuAutoIndent',
+        icon: 'kqlFunction',
+        onClick: handleAutoIndent,
+      },
+      {
+        name: (
+          <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <FormattedMessage
+                id="console.monaco.requestOptions.openDocumentationButtonLabel"
+                defaultMessage="Open API reference"
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow" data-test-subj="consoleMenuOpenDocsShortcut">
+                {modifierKey} + /
+              </EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ),
+        key: 'openDocs',
+        'data-test-subj': 'consoleMenuOpenDocs',
+        icon: 'documentation',
+        onClick: openDocs,
+      },
+    ];
 
-  // Determine which items and title to show based on language selector visibility
-  const items = isLanguageSelectorVisible ? languageClientsItems : mainMenuItems;
-
-  const title = isLanguageSelectorVisible ? (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiButtonIcon
-          size="s"
-          iconType="arrowLeft"
-          aria-label={i18n.translate('console.consoleMenu.languageClientsBackAriaLabel', {
-            defaultMessage: 'Back to main menu',
-          })}
-          onClick={() => setLanguageSelectorVisibility(false)}
-          data-test-subj="languageClientsPanelBackButton"
-        />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <strong>
-          {i18n.translate('console.consoleMenu.changeLanguagePanelTitle', {
-            defaultMessage: 'Change language',
-          })}
-        </strong>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  ) : undefined;
+    return [
+      {
+        id: 0,
+        items: mainItems,
+      },
+      {
+        id: 1,
+        title: i18n.translate('console.consoleMenu.changeLanguagePanelTitle', {
+          defaultMessage: 'Change language',
+        }),
+        items: languageItems,
+      },
+    ];
+  }, [
+    isPackagedEnvironment,
+    isKbnRequestSelected,
+    currentLanguage,
+    isRequestConverterLoading,
+    modifierKey,
+    onCopyAsSubmit,
+    handleAutoIndent,
+    openDocs,
+    handleLanguageSelect,
+  ]);
 
   return (
     <EuiPopover
@@ -289,7 +283,7 @@ export const ContextMenu = ({
       panelPaddingSize="none"
       anchorPosition="downLeft"
     >
-      <EuiContextMenuPanel items={items} title={title} data-test-subj="consoleMenu" />
+      <EuiContextMenu initialPanelId={0} panels={panels} data-test-subj="consoleMenu" />
     </EuiPopover>
   );
 };
