@@ -84,10 +84,6 @@ export interface UnifiedHistogramStateService {
    */
   state$: BehaviorSubject<UnifiedHistogramState>;
   /**
-   * Gets the current chart hidden state
-   */
-  getChartHidden: () => boolean;
-  /**
    * Sets the current chart hidden state
    */
   setChartHidden: (chartHidden: boolean) => void;
@@ -144,10 +140,6 @@ export const createStateService = (
 
   return {
     state$,
-
-    getChartHidden: () => {
-      return state$.getValue().chartHidden;
-    },
 
     setChartHidden: (chartHidden: boolean) => {
       if (localStorageKeyPrefix) {

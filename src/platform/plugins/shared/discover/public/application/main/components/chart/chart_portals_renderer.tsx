@@ -179,9 +179,7 @@ const UnifiedHistogramWrapper = ({ stateContainer, panelsToggle }: UnifiedHistog
   const unifiedHistogram = useUnifiedHistogram(unifiedHistogramProps);
 
   useEffect(() => {
-    if (unifiedHistogram.api) {
-      setUnifiedHistogramApi(unifiedHistogram.api);
-    }
+    setUnifiedHistogramApi(unifiedHistogram.api);
   }, [setUnifiedHistogramApi, unifiedHistogram.api]);
 
   const { renderCustomChartToggleActions } = useUnifiedHistogramCommon({
@@ -238,10 +236,8 @@ const CustomChartSectionWrapper = ({
   );
 
   useEffect(() => {
-    if (api) {
-      setUnifiedHistogramApi(api);
-    }
-  }, [api, setUnifiedHistogramApi]);
+    setUnifiedHistogramApi(api);
+  }, [setUnifiedHistogramApi, api]);
 
   const layoutProps = useMemo<UnifiedHistogramPartialLayoutProps>(
     () => ({
@@ -271,7 +267,7 @@ const CustomChartSectionWrapper = ({
     !!layoutProps.chart && !layoutProps.chart.hidden
   );
 
-  if (!api || !fetchParams || !hasValidFetchParams) {
+  if (!fetchParams || !hasValidFetchParams) {
     return null;
   }
 

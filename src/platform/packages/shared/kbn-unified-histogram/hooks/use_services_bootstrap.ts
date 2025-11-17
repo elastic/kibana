@@ -160,9 +160,7 @@ export const useServicesBootstrap = (
     stateProps,
     fetch$,
     fetchParams,
-    hasValidFetchParams: Boolean(
-      fetchParams && (fetchParams.searchSessionId || fetchParams.isESQLQuery)
-    ),
+    hasValidFetchParams: Boolean(fetchParams && fetchParams.searchSessionId),
     lensVisService,
     lensVisServiceState,
   };
