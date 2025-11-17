@@ -101,6 +101,15 @@ export const withCompleteItem: ISuggestionItem = withAutoSuggest({
   sortText: '1',
 });
 
+export const withMapCompleteItem: ISuggestionItem = withAutoSuggest({
+  label: 'inference_id',
+  text: '{ "inference_id": "$0" }',
+  asSnippet: true,
+  kind: 'Reference',
+  detail: 'Inference endpoint',
+  sortText: '1',
+});
+
 export const subqueryCompleteItem: ISuggestionItem = withAutoSuggest({
   label: '(FROM ...)',
   text: '(FROM $0)',
