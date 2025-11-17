@@ -33,15 +33,9 @@ export interface ActionContextVariables {
   date: string;
   rule?: {
     id: string;
-    query: string;
+    familyId: string;
   };
-  alert?: {
-    id: string;
-    status: string;
-  };
-  entity?: {
-    key: string;
-  };
+  status?: string;
 }
 
 /**

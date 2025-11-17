@@ -24,14 +24,13 @@ export function getRuleType(): RuleTypeModel<ESQLRuleParams> {
     defaultActionMessage: i18n.translate(
       'xpack.stackAlerts.esql.ui.alertType.defaultActionMessage',
       {
-        defaultMessage: `ES|QL alert {{entity.key}} is {{alert.status}}:
+        defaultMessage: `
+        ES|QL alert is {{status}}:
 
         - Rule ID: {{rule.id}}
-        - Query: {{rule.query}}
+        - Family ID: {{rule.familyId}}
         - Timestamp: {{date}}
-        - Alert ID: {{alert.id}}
-        - Entity key: {{entity.key}}
-        - Grouping: {{kibana.alert.grouping}}`,
+        - Attributes: {{attrs}}`,
       }
     ),
     requiresAppContext: false,

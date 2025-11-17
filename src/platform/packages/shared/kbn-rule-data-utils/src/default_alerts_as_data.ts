@@ -81,7 +81,7 @@ const ALERT_UPDATED_BY_USER_ID = `${ALERT_NAMESPACE}.updated_by.user.id` as cons
 const ALERT_UPDATED_BY_USER_NAME = `${ALERT_NAMESPACE}.updated_by.user.name` as const;
 
 // kibana.alert.status - active/recovered status of alert
-const ALERT_STATUS = `alert.status` as const;
+const ALERT_STATUS = `status` as const;
 
 // kibana.alert.time_range - time range of alert from kibana.alert.start to now
 const ALERT_TIME_RANGE = `${ALERT_NAMESPACE}.time_range` as const;
@@ -111,7 +111,7 @@ const ALERT_RULE_EXECUTION_TIMESTAMP = `${ALERT_RULE_NAMESPACE}.execution.timest
 const ALERT_RULE_EXECUTION_UUID = `rule.execution.uuid` as const;
 
 // kibana.alert.rule.name - rule name for rule that generated this alert
-const ALERT_RULE_NAME = `${ALERT_RULE_NAMESPACE}.name` as const;
+const ALERT_RULE_NAME = `rule.family_id` as const;
 
 // kibana.alert.rule.parameters - rule parameters for rule that generated this alert
 const ALERT_RULE_PARAMETERS = `${ALERT_RULE_NAMESPACE}.parameters` as const;

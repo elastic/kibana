@@ -55,15 +55,9 @@ export function transformActionParams({
     date: new Date().toISOString(),
     rule: {
       id: aadAlert['rule.id'],
-      query: aadAlert['rule.query'],
+      familyId: aadAlert['rule.family_id'],
     },
-    alert: {
-      id: aadAlert['alert.id'],
-      status: aadAlert['alert.status'],
-    },
-    entity: {
-      key: aadAlert['entity.key'],
-    },
+    status: aadAlert.status,
   };
 
   const variablesWithAADFields: Record<string, unknown> = {

@@ -69,11 +69,10 @@ export const schemaGeoPointArray = rt.array(schemaGeoPoint);
 // prettier-ignore
 const AlertRequired = rt.type({
   '@timestamp': schemaDate,
-  'entity.key': schemaString,
-  'alert.status': schemaString,
-  'alert.id': schemaString,
+  'status': schemaString,
   'rule.id': schemaString,
-  'rule.query': schemaString,
+  'rule.family_id': schemaString,
+  'attrs': schemaUnknown,
 });
 // prettier-ignore
 const AlertOptional = rt.partial({
