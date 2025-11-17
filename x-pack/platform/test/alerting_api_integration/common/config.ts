@@ -91,6 +91,7 @@ const enabledActionTypes = [
   'test.system-action-connector-adapter',
   'test.connector-with-hooks',
   'test.deprecated',
+  'test.single_file_connector',
 ];
 
 export const getPreConfiguredActions = (

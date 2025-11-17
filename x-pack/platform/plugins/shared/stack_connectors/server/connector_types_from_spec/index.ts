@@ -23,7 +23,7 @@ export function registerConnectorTypesFromSpecs({
   }
 }
 
-const createConnectorTypeFromSpec = (
+export const createConnectorTypeFromSpec = (
   spec: ConnectorSpec,
   actions: ActionsPluginSetupContract
 ): SubActionConnectorType<ActionTypeConfig, ActionTypeSecrets> => {

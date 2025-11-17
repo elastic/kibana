@@ -16,6 +16,7 @@ import type {
   PluginStartContract as ActionsPluginStartContract,
 } from '@kbn/actions-plugin/server/plugin';
 import type { ActionType } from '@kbn/actions-plugin/server';
+import { createConnectorTypeFromSpec } from '@kbn/stack-connectors-plugin/server/connector_types_from_spec';
 import { initPlugin as initPagerduty } from './pagerduty_simulation';
 import { initPlugin as initSwimlane } from './swimlane_simulation';
 import { initPlugin as initServiceNow } from './servicenow_simulation';
@@ -29,6 +30,7 @@ import { initPlugin as initXmatters } from './xmatters_simulation';
 import { initPlugin as initTorq } from './torq_simulation';
 import { initPlugin as initUnsecuredAction } from './unsecured_actions_simulation';
 import { initPlugin as initTines } from './tines_simulation';
+import { TestSingleFileConnector } from './test_spec_connector';
 
 export const NAME = 'actions-FTS-external-service-simulators';
 
@@ -149,6 +151,11 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
         },
       },
     });
+
+    // register a single file connector
+    actions.registerSubActionConnectorType(
+      createConnectorTypeFromSpec(TestSingleFileConnector, actions)
+    );
 
     const router = core.http.createRouter();
 
