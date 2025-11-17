@@ -7,8 +7,8 @@
 
 import type { AlertAttachmentData } from '@kbn/onechat-common/attachments';
 import { AttachmentType, alertAttachmentDataSchema } from '@kbn/onechat-common/attachments';
-import { platformCoreTools } from '@kbn/onechat-common/tools';
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
+import { SECURITY_ALERTS_TOOL_ID } from '../tools';
 
 /**
  * Creates the definition for the `alert` attachment type.
@@ -34,9 +34,9 @@ export const createAlertAttachmentType = (): AttachmentTypeDefinition<
         },
       };
     },
-    getTools: () => [platformCoreTools.search],
+    getTools: () => [SECURITY_ALERTS_TOOL_ID],
     getAgentDescription: () => {
-      return `Alert attachments contain security alert data. When using the search tool with alert attachments, use the "index" parameter to specify the index pattern. Do NOT include index patterns or "_index" filters in the query string itself. Before making additional searches, analyze existing alert data and previous search results to avoid redundant queries.`;
+      return `Alert attachments contain security alert data. Use the alerts tool (${SECURITY_ALERTS_TOOL_ID}) to search for related alerts or additional context. The alerts tool automatically filters fields to reduce response size.`;
     },
   };
 };
@@ -96,22 +96,22 @@ const filterEssentialFields = (alertData: string): string => {
  */
 const formatAlertData = (data: AlertAttachmentData): string => {
   const filteredAlert = filterEssentialFields(data.alert);
-  
+
   // Extract alert ID if available
   const alertIdMatch = data.alert.match(/_id,([^\n]+)/);
   const alertId = alertIdMatch ? alertIdMatch[1] : null;
-  
+
   return `SECURITY ALERT DATA (ALREADY PROVIDED)
 
 ${filteredAlert}
 
-CRITICAL: This alert is already provided above. DO NOT query for this exact alert (matching host.name, user.name, source.ip, destination.ip, or _id="${alertId || 'N/A'}").
+CRITICAL: This alert is already provided above. DO NOT query for this exact alert (matching host.name, user.name, source.ip, destination.ip, or _id="${
+    alertId || 'N/A'
+  }").
 
 ONLY search if the user explicitly requests related alerts or additional context. Do NOT automatically search for related data unless specifically asked.
 
 When searching:
 - Use index "${data.indexPattern}" as the "index" parameter (NOT in query string)
-- Use KEEP command for field filtering to reduce response size
 - Exclude _id="${alertId || 'N/A'}" from results`;
 };
-

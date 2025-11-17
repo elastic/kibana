@@ -10,14 +10,12 @@ import type { AttachmentTypeRegistry } from '../attachment_type_registry';
 import { createTextAttachmentType } from './text';
 import { createEsqlAttachmentType } from './esql';
 import { createScreenContextAttachmentType } from './screen_context';
-import { createAlertAttachmentType } from './alert';
 
 export const registerAttachmentTypes = ({ registry }: { registry: AttachmentTypeRegistry }) => {
   const attachmentTypes: AttachmentTypeDefinition<any, any>[] = [
     createTextAttachmentType(),
     createScreenContextAttachmentType(),
     createEsqlAttachmentType(),
-    createAlertAttachmentType(),
   ];
 
   attachmentTypes.forEach((attachmentType) => {

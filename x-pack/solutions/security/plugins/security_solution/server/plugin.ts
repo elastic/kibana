@@ -146,6 +146,8 @@ import { HealthDiagnosticServiceImpl } from './lib/telemetry/diagnostic/health_d
 import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_diagnostic_service.types';
 import { ENTITY_RISK_SCORE_TOOL_ID } from './assistant/tools/entity_risk_score/entity_risk_score';
 import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
+import { createAlertAttachmentType } from './agent_builder/attachments';
+import { alertsTool } from './agent_builder/tools';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -657,6 +659,17 @@ export class Plugin implements ISecuritySolutionPlugin {
     };
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
     plugins.elasticAssistant.registerFeatures('management', features);
+
+    // Register alert attachment type and alerts tool with onechat
+    // Note: This requires onechat to be added as a setup dependency
+    if (plugins.onechat) {
+      if (plugins.onechat.attachments) {
+        plugins.onechat.attachments.registerType(createAlertAttachmentType());
+      }
+      if (plugins.onechat.tools) {
+        plugins.onechat.tools.register(alertsTool());
+      }
+    }
 
     const manifestManager = new ManifestManager({
       savedObjectsClientFactory: new SavedObjectsClientFactory(core.savedObjects, core.http),

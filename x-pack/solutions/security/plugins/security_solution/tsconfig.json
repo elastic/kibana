@@ -262,6 +262,9 @@
     "@kbn/react-query",
     "@kbn/core-chrome-layout-constants",
     "@kbn/response-ops-rule-form",
-    "@kbn/core-lifecycle-browser-mocks"
+    "@kbn/core-lifecycle-browser-mocks",
+    "@kbn/onechat-common",
+    "@kbn/spaces-utils",
+    "@kbn/onechat-plugin"
   ]
 }
