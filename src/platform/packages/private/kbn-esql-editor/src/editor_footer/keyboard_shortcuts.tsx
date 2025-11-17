@@ -55,7 +55,7 @@ const listItems = [
       </>
     ),
     description: i18n.translate('esqlEditor.query.openVisorKeyboardShortcutsLabel', {
-      defaultMessage: 'Open Quick search',
+      defaultMessage: 'Open quick search',
     }),
   },
 ];
