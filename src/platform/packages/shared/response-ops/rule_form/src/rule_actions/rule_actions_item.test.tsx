@@ -163,8 +163,9 @@ const mockValidate = jest.fn().mockResolvedValue({
 });
 
 describe('ruleActionsItem', () => {
-  beforeEach(() => {
-    const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
+  const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
+
+  beforeAll(() => {
     actionTypeRegistry.register(
       getActionTypeModel('1', {
         id: 'actionType-1',
@@ -173,6 +174,9 @@ describe('ruleActionsItem', () => {
         validateParams: mockValidate,
       })
     );
+  });
+
+  beforeEach(() => {
     useRuleFormState.mockReturnValue({
       plugins: {
         actionTypeRegistry,
@@ -339,6 +343,49 @@ describe('ruleActionsItem', () => {
   });
 
   test('should allow params to be changed', async () => {
+    render(
+      <RuleActionsItem
+        action={getAction('1', { actionTypeId: 'actionType-1' })}
+        index={0}
+        producerId="stackAlerts"
+      />
+    );
+
+    await userEvent.click(screen.getByText('Message'));
+
+    await userEvent.click(screen.getByText('onParamsChange'));
+
+    expect(mockOnChange).toHaveBeenCalledTimes(2);
+
+    expect(mockOnChange).toHaveBeenCalledWith({
+      payload: { uuid: 'uuid-action-1', value: { paramsKey: { paramsKey: 'paramsValue' } } },
+      type: 'setActionParams',
+    });
+
+    expect(mockOnChange).toHaveBeenCalledWith({
+      payload: { errors: {}, uuid: 'uuid-action-1' },
+      type: 'setActionParamsError',
+    });
+  });
+
+  test('should allow params to be changed for connector with missing config', async () => {
+    useRuleFormState.mockReturnValue({
+      plugins: {
+        actionTypeRegistry,
+        http: {
+          basePath: {
+            publicBaseUrl: 'publicUrl',
+          },
+        },
+      },
+      connectors: [getConnector('1', { id: 'action-1', config: undefined })],
+      connectorTypes: mockActionTypes,
+      aadTemplateFields: [],
+      actionsParamsErrors: {},
+      selectedRuleType: ruleType,
+      selectedRuleTypeModel: ruleModel,
+    });
+
     render(
       <RuleActionsItem
         action={getAction('1', { actionTypeId: 'actionType-1' })}
