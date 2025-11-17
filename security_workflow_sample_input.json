@@ -1,0 +1,57 @@
+{
+  "analyst": {
+    "email": "sarah.analyst@security.example.com",
+    "name": "Sarah Analyst",
+    "team": "SOC"
+  },
+  "threatIndicator": {
+    "type": "ip",
+    "value": "192.168.1.100",
+    "ipAddress": "192.168.1.100",
+    "cveId": "CVE-2024-1234",
+    "firstSeen": "2024-01-15T10:30:00Z",
+    "severity": "high"
+  },
+  "incidentMetadata": {
+    "incidentId": "INC-20240115-0001",
+    "source": "SIEM Alert",
+    "affectedSystems": [
+      "web-server-01.example.com",
+      "db-server-02.example.com"
+    ],
+    "tags": [
+      "malware",
+      "c2",
+      "apt"
+    ],
+    "enrichment": {
+      "reputation": "malicious",
+      "confidence": 85,
+      "threatActors": [
+        "APT28",
+        "Fancy Bear"
+      ],
+      "iocs": {
+        "domains": [
+          "malicious-domain.com",
+          "c2-server.net"
+        ],
+        "hashes": [
+          "abc123def456",
+          "789ghi012jkl"
+        ]
+      }
+    }
+  },
+  "responseActions": {
+    "blockIndicator": true,
+    "quarantineHosts": true,
+    "createTicket": true,
+    "notifyTeams": [
+      "SOC",
+      "Management"
+    ]
+  },
+  "priority": "P1"
+}
+

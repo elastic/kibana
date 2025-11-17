@@ -19,6 +19,7 @@ import { convertJsonSchemaToZod } from '../../../../common/lib/json_schema_to_zo
 
 const makeWorkflowInputsValidator = (inputs: WorkflowYaml['inputs']) => {
   // Normalize inputs to the new JSON Schema format (handles backward compatibility)
+  // This handles both array (legacy) and object (new) formats
   const normalizedInputs = normalizeInputsToJsonSchema(inputs);
 
   if (!normalizedInputs?.properties) {
@@ -57,18 +58,6 @@ interface WorkflowExecuteManualFormProps {
   errors: string | null;
   setErrors: (errors: string | null) => void;
 }
-
-type WorkflowInputPlaceholder =
-  | string
-  | number
-  | boolean
-  | string[]
-  | number[]
-  | boolean[]
-  | Record<string, unknown>
-  | ((
-      input: z.infer<typeof WorkflowInputSchema>
-    ) => string | number | boolean | string[] | number[] | boolean[] | Record<string, unknown>);
 
 /**
  * Generates a sample object from a JSON Schema

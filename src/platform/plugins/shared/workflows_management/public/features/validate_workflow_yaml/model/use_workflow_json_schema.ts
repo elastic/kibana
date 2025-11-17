@@ -60,6 +60,9 @@ export const useWorkflowJsonSchema = ({
       // Post-process to improve validation messages and add display names for connectors
       const processedSchema = improveTypeFieldDescriptions(jsonSchema, connectorsData);
 
+      // Ensure inputs schema doesn't have array format (fix after all post-processing)
+      ensureInputsSchemaIsObjectFormat(processedSchema);
+
       return {
         jsonSchema: processedSchema ?? null,
         uri,
@@ -140,4 +143,75 @@ function improveTypeFieldDescriptions(schema: any, connectorsData?: any): any {
   }
 
   return enhanceSchema(schema);
+}
+
+/**
+ * Ensure the inputs schema is in object format (not array format)
+ * This fixes any cases where array schemas might have been reintroduced
+ * This is a safety net that runs after all other post-processing
+ */
+function ensureInputsSchemaIsObjectFormat(schema: any): void {
+  if (!schema?.definitions?.WorkflowSchema?.properties?.inputs) {
+    return;
+  }
+
+  const inputsSchema = schema.definitions.WorkflowSchema.properties.inputs;
+
+  // Helper to recursively remove array types from schema
+  const removeArrayTypes = (obj: any): void => {
+    if (!obj || typeof obj !== 'object') {
+      return;
+    }
+
+    // If this is an array schema, convert it to object
+    if (obj.type === 'array' && obj !== inputsSchema) {
+      // Don't modify the inputsSchema itself if it's an array (shouldn't happen)
+      // But if properties.properties is an array, fix it
+      obj.type = 'object';
+      if (!obj.additionalProperties) {
+        obj.additionalProperties = true;
+      }
+    }
+
+    // Recursively process all properties
+    if (Array.isArray(obj)) {
+      obj.forEach(removeArrayTypes);
+    } else {
+      Object.values(obj).forEach(removeArrayTypes);
+    }
+  };
+
+  // If inputs has anyOf, filter out array schemas
+  if (inputsSchema.anyOf && Array.isArray(inputsSchema.anyOf)) {
+    inputsSchema.anyOf = inputsSchema.anyOf.filter((subSchema: any) => {
+      // Keep null/undefined (for optional)
+      if (subSchema.type === 'null' || subSchema.type === 'undefined') {
+        return true;
+      }
+      // Remove array schemas (legacy format)
+      if (subSchema.type === 'array') {
+        return false;
+      }
+      // Keep object schemas (new format)
+      return true;
+    });
+
+    // Ensure properties.properties is not an array in any remaining schemas
+    inputsSchema.anyOf.forEach((subSchema: any) => {
+      if (subSchema?.properties?.properties?.type === 'array') {
+        subSchema.properties.properties.type = 'object';
+        if (!subSchema.properties.properties.additionalProperties) {
+          subSchema.properties.properties.additionalProperties = true;
+        }
+      }
+    });
+  } else {
+    // Not wrapped in anyOf, check directly
+    if (inputsSchema.properties?.properties?.type === 'array') {
+      inputsSchema.properties.properties.type = 'object';
+      if (!inputsSchema.properties.properties.additionalProperties) {
+        inputsSchema.properties.properties.additionalProperties = true;
+      }
+    }
+  }
 }

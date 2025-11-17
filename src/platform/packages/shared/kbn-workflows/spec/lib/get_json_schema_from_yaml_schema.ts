@@ -30,6 +30,11 @@ export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType): WorkflowJson
   // Apply targeted fixes to make it valid for JSON Schema validators
   const fixedSchema = fixBrokenSchemaReferencesAndEnforceStrictValidation(jsonSchema);
 
+  // Fix inputs schema: z.record() converts to additionalProperties, but we need properties
+  // Convert the inputs schema from {type: "object", additionalProperties: {...}} to
+  // {properties: {...}, required: [...], additionalProperties: boolean}
+  fixInputsSchemaForMonaco(fixedSchema);
+
   // Add fetcher parameter to all Kibana connector steps
   addFetcherToKibanaConnectors(fixedSchema);
 
@@ -190,6 +195,118 @@ function fixBrokenSchemaReferencesAndEnforceStrictValidation(schema: any): any {
   } catch (parseError) {
     // If parsing fails, throw an error, since replacing with regexp isn't safe
     throw new Error('Failed to fix additionalProperties in json schema');
+  }
+}
+
+/**
+ * Fix the inputs schema structure for Monaco editor
+ * z.record() converts to additionalProperties, but JSON Schema needs properties
+ * This converts the structure to match the expected JSON Schema format
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function fixInputsSchemaForMonaco(schema: any): void {
+  const workflowSchema = schema?.definitions?.WorkflowSchema;
+  if (!workflowSchema) {
+    return;
+  }
+
+  const inputsSchema = workflowSchema.properties?.inputs;
+  if (!inputsSchema) {
+    return;
+  }
+
+  // Helper function to fix a schema object
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const fixSchemaObject = (schemaObj: any): void => {
+    if (!schemaObj || typeof schemaObj !== 'object') {
+      return;
+    }
+
+    // Check if this schema has properties that contain a record (z.record() converts to additionalProperties)
+    // We need to fix the nested structure where properties.properties is a record
+    if (schemaObj.type === 'object' && schemaObj.properties) {
+      const propertiesProp = schemaObj.properties.properties;
+
+      // If properties.properties exists and has additionalProperties but no properties,
+      // it means z.record() was converted incorrectly
+      if (
+        propertiesProp &&
+        propertiesProp.type === 'object' &&
+        propertiesProp.additionalProperties &&
+        !propertiesProp.properties
+      ) {
+        const valueSchema = propertiesProp.additionalProperties;
+
+        // Fix the properties.properties structure to allow any JSON Schema as values
+        propertiesProp.additionalProperties = valueSchema;
+        // Keep it as an object type that accepts any JSON Schema
+      }
+    }
+
+    // Also check if the schema itself has the wrong structure (additionalProperties instead of properties)
+    // This happens when z.record() is converted to JSON Schema at the top level
+    if (schemaObj.type === 'object' && schemaObj.additionalProperties && !schemaObj.properties) {
+      const valueSchema = schemaObj.additionalProperties;
+
+      // Create the correct structure: an object that represents a JSON Schema
+      // This allows properties (object with string keys and JSON Schema values),
+      // required (array of strings), and additionalProperties (boolean or schema)
+      schemaObj.properties = {
+        properties: {
+          type: 'object',
+          additionalProperties: valueSchema, // This allows any JSON Schema as property values
+          description: 'Input property definitions (JSON Schema)',
+        },
+        required: {
+          type: 'array',
+          items: { type: 'string' },
+          description: 'List of required input property names',
+        },
+        additionalProperties: {
+          oneOf: [
+            { type: 'boolean' },
+            { type: 'object' }, // Can be a JSON Schema object
+          ],
+          description: 'Whether additional properties are allowed',
+        },
+      };
+      schemaObj.required = [];
+      delete schemaObj.additionalProperties;
+    }
+  };
+
+  // Handle optional schemas (they might be wrapped in anyOf with null/undefined)
+  if (inputsSchema.anyOf && Array.isArray(inputsSchema.anyOf)) {
+    // Filter out array schemas (legacy format) and keep only object schemas (new format)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const filteredAnyOf = inputsSchema.anyOf.filter((subSchema: any) => {
+      // Keep null/undefined (for optional)
+      if (subSchema.type === 'null' || subSchema.type === 'undefined') {
+        return true;
+      }
+      // Remove array schemas (legacy format)
+      if (subSchema.type === 'array') {
+        return false;
+      }
+      // Keep object schemas (new format)
+      return true;
+    });
+
+    // If we filtered out array schemas, update the anyOf
+    if (filteredAnyOf.length !== inputsSchema.anyOf.length) {
+      inputsSchema.anyOf = filteredAnyOf;
+    }
+
+    // Find and fix all non-null schemas in the anyOf
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    inputsSchema.anyOf.forEach((subSchema: any) => {
+      if (subSchema && subSchema.type !== 'null' && subSchema.type !== 'undefined') {
+        fixSchemaObject(subSchema);
+      }
+    });
+  } else {
+    // Not wrapped in anyOf, fix directly
+    fixSchemaObject(inputsSchema);
   }
 }
 
