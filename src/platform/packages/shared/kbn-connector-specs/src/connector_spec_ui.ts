@@ -126,11 +126,8 @@ export const UISchemas = {
    * @example webhookUrl: UISchemas.url().describe("Webhook URL")
    */
   url: (placeholder?: string) =>
-    z
-      .string()
-      .url()
-      .meta({
-        widget: 'text',
-        placeholder: placeholder ?? 'https://',
-      }),
+    z.url().meta({
+      widget: 'text',
+      placeholder: placeholder ?? 'https://',
+    }),
 };
