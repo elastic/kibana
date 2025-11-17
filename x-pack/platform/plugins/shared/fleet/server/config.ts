@@ -222,7 +222,7 @@ export const config: PluginConfigDescriptor = {
             schema.object({
               enabled: schema.boolean({ defaultValue: false }),
               dryRun: schema.boolean({ defaultValue: false }),
-              interval: schema.maybe(schema.string({ defaultValue: '5m' })),
+              interval: schema.maybe(schema.string({ defaultValue: '1h' })),
             })
           ),
         })

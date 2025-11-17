@@ -166,6 +166,7 @@ export default function ({ getService }: FtrProviderContext) {
         'entity_store:field_retention:enrichment',
         'entity_store:snapshot',
         'fleet:agent-status-change-task',
+        'fleet:agentless-deployment-sync-task',
         'fleet:auto-install-content-packages-task',
         'fleet:automatic-agent-upgrade-task',
         'fleet:bump_agent_policies',

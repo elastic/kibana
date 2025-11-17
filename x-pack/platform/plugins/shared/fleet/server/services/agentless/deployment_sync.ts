@@ -47,6 +47,9 @@ export async function syncAgentlessDeployments(
     let nextPageToken: string | undefined;
 
     while (hasMore) {
+      if (opts?.abortController?.signal.aborted) {
+        throw new Error('Task was aborted');
+      }
       const deploymentRes = await agentlessAgentService.listAgentlessDeployments({
         perPage: PAGE_SIZE,
         nextPageToken,
@@ -69,6 +72,9 @@ export async function syncAgentlessDeployments(
       await pMap(
         deploymentRes.deployments,
         async (deployment) => {
+          if (opts?.abortController?.signal.aborted) {
+            throw new Error('Task was aborted');
+          }
           const agentPolicy = agentPolicies.find((ap) => ap.id === deployment.policy_id);
 
           if (!agentPolicy) {
@@ -132,9 +138,16 @@ export async function syncAgentlessDeployments(
       spaceId: '*',
     });
 
+    if (opts?.abortController?.signal.aborted) {
+      throw new Error('Task was aborted');
+    }
+
     await pMap(
       agentlessPolicies.items,
       async (agentPolicy) => {
+        if (opts?.abortController?.signal.aborted) {
+          throw new Error('Task was aborted');
+        }
         const deployment = currentDeployments.find((d) => d.policy_id === agentPolicy.id);
         if (!deployment) {
           logger.info(
