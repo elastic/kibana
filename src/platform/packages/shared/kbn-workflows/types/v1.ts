@@ -157,6 +157,7 @@ export interface WorkflowExecutionDto {
   spaceId: string;
   id: string;
   status: ExecutionStatus;
+  isTestRun: boolean;
   startedAt: string;
   finishedAt: string;
   workflowId?: string;
@@ -168,6 +169,7 @@ export interface WorkflowExecutionDto {
   duration: number | null;
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
+  context?: Record<string, unknown>;
 }
 
 export type WorkflowExecutionListItemDto = Omit<

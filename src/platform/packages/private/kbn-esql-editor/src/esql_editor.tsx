@@ -48,8 +48,8 @@ import type { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
-import type { TelemetryQuerySubmittedProps } from '@kbn/esql-types/src/esql_telemetry_types';
-import { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
+import type { TelemetryQuerySubmittedProps } from '@kbn/esql-types';
+import { QuerySource, ControlTriggerSource } from '@kbn/esql-types';
 import { useCanCreateLookupIndex, useLookupIndexCommand } from './custom_commands';
 import { EditorFooter } from './editor_footer';
 import { QuickSearchVisor } from './editor_visor';
@@ -92,6 +92,7 @@ const triggerControl = async (
   variableType: ESQLVariableType,
   position: monaco.Position | null | undefined,
   uiActions: ESQLEditorDeps['uiActions'],
+  triggerSource: ControlTriggerSource,
   esqlVariables?: ESQLControlVariable[],
   onSaveControl?: ControlsContext['onSaveControl'],
   onCancelControl?: ControlsContext['onCancelControl']
@@ -100,6 +101,7 @@ const triggerControl = async (
     queryString,
     variableType,
     cursorPosition: position,
+    triggerSource,
     esqlVariables,
     onSaveControl,
     onCancelControl,
@@ -374,12 +376,21 @@ const ESQLEditorInternal = function ESQLEditor({
 
   controlCommands.forEach(({ command, variableType }) => {
     monaco.editor.registerCommand(command, async (...args) => {
+      const [, { triggerSource }] = args;
+      const prefilled = triggerSource !== ControlTriggerSource.QUESTION_MARK;
+      telemetryService.trackEsqlControlFlyoutOpened(
+        prefilled,
+        variableType,
+        triggerSource,
+        fixedQuery
+      );
       const position = editor1.current?.getPosition();
       await triggerControl(
         fixedQuery,
         variableType,
         position,
         uiActions,
+        triggerSource,
         esqlVariables,
         controlsContext?.onSaveControl,
         controlsContext?.onCancelControl
@@ -553,8 +564,8 @@ const ESQLEditorInternal = function ESQLEditor({
     () => ({
       onDecorationHoverShown: (hoverMessage: string) =>
         telemetryService.trackLookupJoinHoverActionShown(hoverMessage),
-      onSuggestionsWithCustomCommandShown: (commandIds: string[]) =>
-        telemetryService.trackSuggestionsWithCustomCommandShown(commandIds),
+      onSuggestionsWithCustomCommandShown: (commands) =>
+        telemetryService.trackSuggestionsWithCustomCommandShown(commands),
     }),
     [telemetryService]
   );

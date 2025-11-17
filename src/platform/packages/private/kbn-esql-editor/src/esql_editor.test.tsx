@@ -115,11 +115,6 @@ describe('ESQLEditor', () => {
     expect(getByTestId('ESQLEditor-date-info')).toHaveTextContent('@timestamp not found');
   });
 
-  it('should  render the feedback link', async () => {
-    const { getByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
-    expect(getByTestId('ESQLEditor-feedback-link')).toBeInTheDocument();
-  });
-
   it('should not render the date info if hideTimeFilterInfo is set to true', async () => {
     const newProps = {
       ...props,

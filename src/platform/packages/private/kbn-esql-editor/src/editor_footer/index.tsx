@@ -30,7 +30,6 @@ import type { MonacoMessage } from '@kbn/monaco/src/languages/esql/language';
 import type { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 import type { DataErrorsControl, ESQLEditorDeps } from '../types';
 import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
-import { SubmitFeedbackComponent } from './feedback_component';
 import { HistoryAndStarredQueriesTabs, QueryHistoryAction } from './history_starred_queries';
 import { KeyboardShortcuts } from './keyboard_shortcuts';
 import { QueryWrapComponent } from './query_wrap_component';
@@ -229,7 +228,6 @@ export const EditorFooter = memo(function EditorFooter({
               {!Boolean(editorIsInline) && (
                 <>
                   {!hideQuickSearch && <QuickSearchAction toggleVisor={toggleVisor} />}
-                  <SubmitFeedbackComponent />
                   {!hideQueryHistory && (
                     <QueryHistoryAction
                       toggleHistory={() => setIsHistoryOpen(!isHistoryOpen)}
