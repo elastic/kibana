@@ -21,7 +21,7 @@ const DocLink: FC<DocLinkProps> = ({ guidePath = 'security', docPath, linkText }
   const { services } = useKibana();
   const { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION } = services.docLinks;
 
-  const url = `${ELASTIC_WEBSITE_URL}guide/en/${guidePath}/${DOC_LINK_VERSION}/${docPath}`;
+  const url = `${ELASTIC_WEBSITE_URL}docs/${docPath}`;
   const ariaLabel = `${linkText} - ${COMMON_ARIA_LABEL_ENDING}`;
 
   return (
