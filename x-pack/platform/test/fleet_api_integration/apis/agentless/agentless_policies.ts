@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import type * as http from 'http';
 import { v4 as uuidv4 } from 'uuid';
 
