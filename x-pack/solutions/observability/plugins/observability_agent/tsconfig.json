@@ -17,7 +17,8 @@
     "@kbn/security-plugin",
     "@kbn/es-query",
     "@kbn/core-elasticsearch-server",
-    "@kbn/es-types"
+    "@kbn/es-types",
+    "@kbn/metrics-data-access-plugin"
   ],
   "exclude": ["target/**/*"]
 }
