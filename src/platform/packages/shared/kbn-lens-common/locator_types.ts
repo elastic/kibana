@@ -113,11 +113,7 @@ export interface LensAppLocatorParams extends SerializableRecord {
   /**
    * Set the visualization configuration
    */
-  visualization?: {
-    activeId: string | null;
-    state: unknown;
-    selectedLayerId: string | null;
-  } & SerializableRecord;
+  visualization?: VisualizationState & SerializableRecord;
 
   /**
    * Set the datasources configurations
