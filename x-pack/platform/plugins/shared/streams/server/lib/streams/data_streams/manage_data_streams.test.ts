@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import { getTemplateLifecycle } from './manage_data_streams';
+import { getTemplateLifecycle, updateDataStreamsFailureStore } from './manage_data_streams';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 
 describe('getTemplateLifecycle', () => {
   it('returns dsl when only dsl is enabled', () => {
@@ -74,5 +76,201 @@ describe('getTemplateLifecycle', () => {
       lifecycle: { enabled: false },
     });
     expect(result).toEqual({ disabled: {} });
+  });
+});
+
+describe('updateDataStreamsFailureStore', () => {
+  let mockEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockLogger: jest.Mocked<Logger>;
+
+  beforeEach(() => {
+    mockEsClient = {
+      indices: {
+        putDataStreamOptions: jest.fn().mockResolvedValue({}),
+        simulateIndexTemplate: jest.fn().mockResolvedValue({
+          template: {
+            data_stream_options: {
+              failure_store: { enabled: true, lifecycle: { enabled: true, data_retention: '7d' } },
+            },
+          },
+        }),
+      },
+    } as any;
+
+    mockLogger = {
+      debug: jest.fn(),
+      error: jest.fn(),
+      info: jest.fn(),
+      warn: jest.fn(),
+    } as any;
+  });
+
+  it('enables failure store with lifecycle data retention', async () => {
+    const failureStore: FailureStore = {
+      lifecycle: { data_retention: '30d' },
+    };
+
+    await updateDataStreamsFailureStore({
+      esClient: mockEsClient,
+      logger: mockLogger,
+      name: 'test-stream',
+      failureStore,
+    });
+
+    expect(mockEsClient.indices.putDataStreamOptions).toHaveBeenCalledWith(
+      {
+        name: 'test-stream',
+        failure_store: {
+          enabled: true,
+          lifecycle: { data_retention: '30d', enabled: true },
+        },
+      },
+      { meta: true }
+    );
+  });
+
+  it('enables failure store without lifecycle data retention', async () => {
+    const failureStore: FailureStore = {
+      lifecycle: {},
+    };
+
+    await updateDataStreamsFailureStore({
+      esClient: mockEsClient,
+      logger: mockLogger,
+      name: 'test-stream',
+      failureStore,
+    });
+
+    expect(mockEsClient.indices.putDataStreamOptions).toHaveBeenCalledWith(
+      {
+        name: 'test-stream',
+        failure_store: {
+          enabled: true,
+        },
+      },
+      { meta: true }
+    );
+  });
+
+  it('disables failure store', async () => {
+    const failureStore: FailureStore = {
+      disabled: {},
+    };
+
+    await updateDataStreamsFailureStore({
+      esClient: mockEsClient,
+      logger: mockLogger,
+      name: 'test-stream',
+      failureStore,
+    });
+
+    expect(mockEsClient.indices.putDataStreamOptions).toHaveBeenCalledWith(
+      {
+        name: 'test-stream',
+        failure_store: {
+          enabled: false,
+        },
+      },
+      { meta: true }
+    );
+  });
+
+  it('uses template defaults when failureStore is set to inherit', async () => {
+    const failureStore: FailureStore = {
+      inherit: {},
+    };
+
+    await updateDataStreamsFailureStore({
+      esClient: mockEsClient,
+      logger: mockLogger,
+      name: 'test-stream',
+      failureStore,
+    });
+
+    expect(mockEsClient.indices.simulateIndexTemplate).toHaveBeenCalledWith({
+      name: 'test-stream',
+    });
+
+    expect(mockEsClient.indices.putDataStreamOptions).toHaveBeenCalledWith(
+      {
+        name: 'test-stream',
+        failure_store: {
+          enabled: true,
+          lifecycle: { enabled: true, data_retention: '7d' },
+        },
+      },
+      { meta: true }
+    );
+  });
+
+  it('disables failure store when failureStore is set to inherit and template has no failure store config', async () => {
+    mockEsClient.indices.simulateIndexTemplate = jest.fn().mockResolvedValue({
+      template: {},
+    });
+
+    const failureStore: FailureStore = {
+      inherit: {},
+    };
+
+    await updateDataStreamsFailureStore({
+      esClient: mockEsClient,
+      logger: mockLogger,
+      name: 'test-stream',
+      failureStore,
+    });
+
+    expect(mockEsClient.indices.simulateIndexTemplate).toHaveBeenCalledWith({
+      name: 'test-stream',
+    });
+
+    expect(mockEsClient.indices.putDataStreamOptions).toHaveBeenCalledWith(
+      {
+        name: 'test-stream',
+        failure_store: {
+          enabled: false,
+        },
+      },
+      { meta: true }
+    );
+  });
+
+  it('logs and throws error when putDataStreamOptions fails', async () => {
+    const failureStore: FailureStore = {
+      lifecycle: { data_retention: '30d' },
+    };
+
+    const error = new Error('Elasticsearch error');
+    mockEsClient.indices.putDataStreamOptions = jest.fn().mockRejectedValue(error);
+
+    await expect(
+      updateDataStreamsFailureStore({
+        esClient: mockEsClient,
+        logger: mockLogger,
+        name: 'test-stream',
+        failureStore,
+      })
+    ).rejects.toThrow('Elasticsearch error');
+
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'Error updating data stream failure store: Elasticsearch error'
+    );
+  });
+
+  it('logs and throws error when simulateIndexTemplate fails', async () => {
+    const error = new Error('Template simulation error');
+    mockEsClient.indices.simulateIndexTemplate = jest.fn().mockRejectedValue(error);
+
+    await expect(
+      updateDataStreamsFailureStore({
+        esClient: mockEsClient,
+        logger: mockLogger,
+        name: 'test-stream',
+        failureStore: { inherit: {} },
+      })
+    ).rejects.toThrow('Template simulation error');
+
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'Error updating data stream failure store: Template simulation error'
+    );
   });
 });

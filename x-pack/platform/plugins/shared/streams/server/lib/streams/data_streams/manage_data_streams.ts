@@ -22,7 +22,10 @@ import type {
   FailureStore,
   FailureStoreEnabled,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
-import { isEnabledFailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import {
+  isEnabledFailureStore,
+  isInheritFailureStore,
+} from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DataStreamManagementOptions {
@@ -290,27 +293,13 @@ export async function updateDataStreamsFailureStore({
   esClient: ElasticsearchClient;
   logger: Logger;
   name: string;
-  failureStore: FailureStore | undefined;
+  failureStore: FailureStore;
 }) {
   try {
     let failureStoreConfig: IndicesDataStreamFailureStore;
 
-    if (failureStore) {
-      const enabled = isEnabledFailureStore(failureStore);
-
-      if (enabled) {
-        const dataRetention = (failureStore as FailureStoreEnabled).lifecycle.data_retention;
-        failureStoreConfig = {
-          enabled: true,
-          ...(dataRetention ? { lifecycle: { data_retention: dataRetention, enabled: true } } : {}),
-        };
-      } else {
-        failureStoreConfig = {
-          enabled: false,
-        };
-      }
-    } else {
-      // Figure out default settings for the failure store from the template
+    // Handle { inherit: {} }
+    if (isInheritFailureStore(failureStore)) {
       const response = await retryTransientEsErrors(
         () => esClient.indices.simulateIndexTemplate({ name }),
         { logger }
@@ -319,6 +308,18 @@ export async function updateDataStreamsFailureStore({
       // If not template, disable the failure store. Empty object would cause Elasticsearch error.
       // @ts-expect-error index simulate response is not well typed
       failureStoreConfig = response.template?.data_stream_options?.failure_store ?? {
+        enabled: false,
+      };
+    } else if (isEnabledFailureStore(failureStore)) {
+      // Handle { lifecycle: { data_retention?: string } }
+      const dataRetention = (failureStore as FailureStoreEnabled).lifecycle.data_retention;
+      failureStoreConfig = {
+        enabled: true,
+        ...(dataRetention ? { lifecycle: { data_retention: dataRetention, enabled: true } } : {}),
+      };
+    } else {
+      // Handle { disabled: {} }
+      failureStoreConfig = {
         enabled: false,
       };
     }

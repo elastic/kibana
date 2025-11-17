@@ -101,7 +101,7 @@ describe('RetentionCard', () => {
           view_index_metadata: true,
         },
         effective_failure_store: {
-          lifecycle: { data_retention: undefined },
+          lifecycle: {},
           from: 'logs-test',
         },
       };

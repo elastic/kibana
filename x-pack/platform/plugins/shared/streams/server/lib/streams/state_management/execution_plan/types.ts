@@ -130,7 +130,7 @@ export interface UpdateFailureStoreAction {
   type: 'update_failure_store';
   request: {
     name: string;
-    failure_store?: FailureStore;
+    failure_store: FailureStore;
   };
 }
 

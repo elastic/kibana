@@ -346,11 +346,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
         type: 'update_failure_store',
         request: {
           name: this._definition.name,
-          failure_store:
-            this._definition.ingest.failure_store &&
-            !('inherit' in this._definition.ingest.failure_store)
-              ? this._definition.ingest.failure_store
-              : undefined,
+          failure_store: this._definition.ingest.failure_store,
         },
       });
     }
