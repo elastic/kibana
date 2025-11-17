@@ -36,7 +36,6 @@ interface SourcesDropdownProps {
   // Callback when the selected data sources change
   onChangeSources: (newSources: string[]) => void;
 }
-const DEFAULT_WIDTH = 350;
 
 const shrinkableContainerCss = css`
   min-width: 0;
@@ -81,7 +80,6 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
       <EuiFormControlButton
         role="combobox"
         compressed
-        style={{ maxWidth: DEFAULT_WIDTH }}
         title={currentSources.join(', ')}
         data-test-subj="visorSourcesDropdownButton"
         aria-expanded={isPopoverOpen}
@@ -144,7 +142,7 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <>
         <EuiFlexItem grow={true} css={shrinkableContainerCss}>
-          <EuiFormControlLayout compressed isDropdown>
+          <EuiFormControlLayout compressed isDropdown fullWidth>
             <EuiPopover
               id={popoverId}
               panelClassName="changeDatasourcePopover"
@@ -157,9 +155,7 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
               panelPaddingSize="none"
               display="block"
             >
-              <div style={{ minWidth: DEFAULT_WIDTH }}>
-                <EuiContextMenuPanel size="s" items={items} />
-              </div>
+              <EuiContextMenuPanel size="s" items={items} />
             </EuiPopover>
           </EuiFormControlLayout>
         </EuiFlexItem>

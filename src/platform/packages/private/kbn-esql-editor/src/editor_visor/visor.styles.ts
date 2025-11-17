@@ -49,7 +49,7 @@ export const visorStyles = (
       borderTopLeftRadius: euiTheme.size.s,
       paddingLeft: '2px',
       flexGrow: 1,
-      maxWidth: `${comboBoxWidth}px`,
+      maxWidth: isSpaceReduced ? '50%' : `${comboBoxWidth}px`,
     },
     separator: {
       width: '1px',

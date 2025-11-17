@@ -23,6 +23,8 @@ import { isEqual } from 'lodash';
 import { SourcesDropdown } from './sources_dropdown';
 import { visorStyles } from './visor.styles';
 
+const COMBOBOX_MAX_WIDTH = 400;
+
 interface QuickSearchVisorProps {
   // Current ESQL query
   query: string;
@@ -117,7 +119,7 @@ export function QuickSearchVisor({
 
   const comboBoxWidth = useMemo(() => {
     const labelLength = selectedSources.map((s) => s.label).join(', ').length || 0;
-    return calculateWidthFromCharCount(labelLength);
+    return calculateWidthFromCharCount(labelLength, { maxWidth: COMBOBOX_MAX_WIDTH });
   }, [selectedSources]);
 
   const styles = visorStyles(
