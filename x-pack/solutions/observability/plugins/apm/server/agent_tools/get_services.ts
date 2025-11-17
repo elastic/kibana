@@ -10,7 +10,7 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
 import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import { timeRangeSchema } from '@kbn/observability-agent-plugin/server/utils/tool_schemas';
+import { timeRangeSchema } from './utils/tool_schemas';
 import { buildApmToolResources } from './utils/build_apm_tool_resources';
 import { getApmToolAvailability } from './utils/get_apm_tool_availability';
 import { getApmServiceList } from '../routes/assistant_functions/get_apm_service_list';
