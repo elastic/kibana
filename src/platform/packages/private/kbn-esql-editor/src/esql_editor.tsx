@@ -1201,15 +1201,17 @@ const ESQLEditorInternal = function ESQLEditor({
           }
         />
       )}
-      <QuickSearchVisor
-        query={code}
-        isSpaceReduced={Boolean(editorIsInline) || measuredEditorWidth < BREAKPOINT_WIDTH}
-        isVisible={isVisorOpen}
-        onClose={() => setIsVisorOpen(false)}
-        onUpdateAndSubmitQuery={(newQuery) =>
-          onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
-        }
-      />
+      {!hideQuickSearch && (
+        <QuickSearchVisor
+          query={code}
+          isSpaceReduced={Boolean(editorIsInline) || measuredEditorWidth < BREAKPOINT_WIDTH}
+          isVisible={isVisorOpen}
+          onClose={() => setIsVisorOpen(false)}
+          onUpdateAndSubmitQuery={(newQuery) =>
+            onUpdateAndSubmitQuery(newQuery, QuerySource.QUICK_SEARCH)
+          }
+        />
+      )}
       <EditorFooter
         lines={editorModel.current?.getLineCount() || 1}
         styles={{
@@ -1236,7 +1238,6 @@ const ESQLEditorInternal = function ESQLEditor({
         resizableContainerHeight={resizableContainerHeight}
         displayDocumentationAsFlyout={displayDocumentationAsFlyout}
         dataErrorsControl={dataErrorsControl}
-        telemetryService={telemetryService}
         toggleVisor={() => setIsVisorOpen(!isVisorOpen)}
         hideQuickSearch={hideQuickSearch}
       />

@@ -34,7 +34,6 @@ import { SubmitFeedbackComponent } from './feedback_component';
 import { HistoryAndStarredQueriesTabs, QueryHistoryAction } from './history_starred_queries';
 import { KeyboardShortcuts } from './keyboard_shortcuts';
 import { QueryWrapComponent } from './query_wrap_component';
-import type { ESQLEditorTelemetryService } from '../telemetry/telemetry_service';
 import { QuickSearchAction } from '../editor_visor/quick_search_action';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
@@ -68,7 +67,6 @@ interface EditorFooterProps {
   hideQuickSearch?: boolean;
   displayDocumentationAsFlyout?: boolean;
   dataErrorsControl?: DataErrorsControl;
-  telemetryService: ESQLEditorTelemetryService;
   toggleVisor: () => void;
 }
 
@@ -97,7 +95,6 @@ export const EditorFooter = memo(function EditorFooter({
   measuredContainerWidth,
   code,
   dataErrorsControl,
-  telemetryService,
   toggleVisor,
 }: EditorFooterProps) {
   const kibana = useKibana<ESQLEditorDeps>();

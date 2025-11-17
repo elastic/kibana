@@ -25,7 +25,7 @@ import { visorStyles } from './visor.styles';
 
 const COMBOBOX_MAX_WIDTH = 400;
 
-interface QuickSearchVisorProps {
+export interface QuickSearchVisorProps {
   // Current ESQL query
   query: string;
   // Handling smaller space for the visor
@@ -161,6 +161,7 @@ export function QuickSearchVisor({
             compressed
             fullWidth
             css={styles.searchFieldStyles}
+            data-test-subj="ESQLEditor-visor-search-input"
             append={
               <EuiButtonIcon
                 color="text"

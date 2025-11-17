@@ -225,6 +225,20 @@ describe('ESQLEditor', () => {
     expect(queryByTestId('ESQLEditor-run-query-button')).not.toBeInTheDocument();
   });
 
+  it('should render the visor by default', async () => {
+    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...props }));
+    expect(queryByTestId('ESQLEditor-quick-search-visor')).toBeInTheDocument();
+  });
+
+  it('should hide the visor by default if the hideQuickSearch prop is set to true', async () => {
+    const newProps = {
+      ...props,
+      hideQuickSearch: true,
+    };
+    const { queryByTestId } = renderWithI18n(renderESQLEditorComponent({ ...newProps }));
+    expect(queryByTestId('ESQLEditor-quick-search-visor')).not.toBeInTheDocument();
+  });
+
   describe('data errors switch', () => {
     test('shown with errors enabled', async () => {
       const newProps = {

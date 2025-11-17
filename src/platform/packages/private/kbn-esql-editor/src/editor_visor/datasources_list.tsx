@@ -64,7 +64,7 @@ export function DataSourcesList({
         return;
       }
 
-      // I am doing this to preserve the order of existing selections and append new ones at the end
+      // Preserve the order of existing selections and append new ones at the end
       const orderedSelections = [
         ...currentSources.filter((source) => newSelectedValues.includes(source)),
         ...newSelectedValues.filter((value) => !currentSources.includes(value)),
@@ -97,7 +97,7 @@ export function DataSourcesList({
           truncation: 'middle',
         },
       }}
-      data-test-subj="esqlEditor-datasourcesList-switcher"
+      data-test-subj="esqlEditor-visor-datasourcesList-switcher"
       searchable
       options={options}
       onChange={onChoicesChange}

@@ -139,17 +139,18 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
   }, [currentSources, euiTheme.euiTheme.size.s, onChangeSources, sourcesOptions]);
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    <EuiFlexGroup
+      alignItems="center"
+      gutterSize="s"
+      responsive={false}
+      data-test-subj="ESQLEditor-visor-sources-dropdown"
+    >
       <>
         <EuiFlexItem grow={true} css={shrinkableContainerCss}>
           <EuiFormControlLayout compressed isDropdown fullWidth>
             <EuiPopover
               id={popoverId}
-              panelClassName="changeDatasourcePopover"
               button={createTrigger()}
-              panelProps={{
-                ['data-test-subj']: 'changeDatasourcePopover',
-              }}
               isOpen={isPopoverOpen}
               closePopover={() => setPopoverIsOpen(false)}
               panelPaddingSize="none"
