@@ -11,7 +11,7 @@ import React, { useCallback, useMemo, useState, useRef } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import type { Dimension, MetricField } from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import type { Observable } from 'rxjs';
 import { css } from '@emotion/react';
@@ -29,7 +29,7 @@ export type MetricsGridProps = Pick<
   'searchSessionId' | 'services' | 'onBrushEnd' | 'onFilter' | 'abortController' | 'requestParams'
 > & {
   filters?: Array<{ field: string; value: string }>;
-  dimensions: string[];
+  dimensions: Dimension[];
   searchTerm?: string;
   columns: NonNullable<EuiFlexGridProps['columns']>;
   discoverFetch$: Observable<UnifiedHistogramInputMessage>;
@@ -56,8 +56,6 @@ export const MetricsGrid = ({
   const gridRef = useRef<HTMLDivElement>(null);
   const chartRefs = useRef<Map<string, HTMLDivElement>>(new Map());
   const { euiTheme } = useEuiTheme();
-
-  const chartSize = useMemo(() => (columns === 2 || columns === 4 ? 's' : 'm'), [columns]);
 
   const [expandedMetric, setExpandedMetric] = useState<
     | {
@@ -159,7 +157,7 @@ export const MetricsGrid = ({
                   index={index}
                   ref={(element) => setChartRef(id, element)}
                   metric={metric}
-                  size={chartSize}
+                  size="s"
                   dimensions={dimensions}
                   filters={filters}
                   searchSessionId={searchSessionId}
@@ -202,7 +200,7 @@ interface ChartItemProps
   metric: MetricField;
   index: number;
   size: ChartSize;
-  dimensions: string[];
+  dimensions: Dimension[];
   filters: Array<{ field: string; value: string }>;
   discoverFetch$: Observable<UnifiedHistogramInputMessage>;
   rowIndex: number;
