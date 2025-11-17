@@ -36,9 +36,9 @@ export function transformOut(
   // inject dashboard references when by-value
   return {
     ...state,
-    links: injectReferences(state.links, references).map(link => ({
+    links: injectReferences(state.links, references).map((link) => ({
       ...link,
-      ...(link.options && { options: getOptions(link.type, link.options) })
+      ...(link.options && { options: getOptions(link.type, link.options) }),
     })),
   };
 }

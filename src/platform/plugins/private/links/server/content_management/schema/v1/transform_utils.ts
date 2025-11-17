@@ -35,10 +35,13 @@ export function savedObjectToItem(
     ...rest,
     attributes: {
       ...attributes,
-      links: links.map(link => ({
-        ...link,
-        ...(link.options && { options: getOptions(link.type, link.options) })
-      }) as DashboardLink | ExternalLink),
+      links: links.map(
+        (link) =>
+          ({
+            ...link,
+            ...(link.options && { options: getOptions(link.type, link.options) }),
+          } as DashboardLink | ExternalLink)
+      ),
     },
     references: (references ?? []).filter(({ type }) => type === 'tag'),
   };

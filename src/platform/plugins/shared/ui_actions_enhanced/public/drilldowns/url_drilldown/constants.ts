@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type {
-  BaseActionConfig,
-  SerializedAction,
-  SerializedEvent,
-  DynamicActionsState,
-} from './types';
+import type { UrlDrilldownOptions } from './types';
+
+export const DEFAULT_URL_DRILLDOWN_OPTIONS: UrlDrilldownOptions = {
+  encodeUrl: true,
+  openInNewTab: true,
+};

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LinkOptions } from '@kbn/links-plugin/server';
+import type { LinkOptions } from '../../../server';
 import type { LinksEmbeddableState, StoredLinksEmbeddableState } from '../types';
 import type { StoredLinksByValueState910 } from './bwc';
 import { transformOut } from './transform_out';
@@ -41,7 +41,6 @@ describe('transformOut', () => {
             "destination": "https://github.com/",
             "id": "e2ab286f-0945-4e17-b256-f497b6c3102e",
             "options": Object {
-              "encodeUrl": true,
               "openInNewTab": true,
             },
             "order": 0,
