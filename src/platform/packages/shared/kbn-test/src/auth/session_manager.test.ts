@@ -166,9 +166,9 @@ describe('SamlSessionManager', () => {
 
       Is '${nonExistingRole}' a custom test role? → Use loginWithCustomRole() to log in with custom Kibana and Elasticsearch privileges (see Scout docs to create reusable login methods)
 
-      Is '${nonExistingRole}' a predefined role? (e.g., admin, viewer, editor) → Add it to ${
+      Is '${nonExistingRole}' a predefined role? (e.g., admin, viewer, editor) → Add the role descriptor to ${
         supportedRoles.sourcePath
-      } to use loginAs() with that role.`;
+      } to enable it for testing.`;
       const samlSessionManager = new SamlSessionManager({
         ...samlSessionManagerOptions,
         supportedRoles,
@@ -382,9 +382,9 @@ describe('SamlSessionManager', () => {
 
       Is '${nonExistingRole}' a custom test role? → Use loginWithCustomRole() to log in with custom Kibana and Elasticsearch privileges (see Scout docs to create reusable login methods)
 
-      Is '${nonExistingRole}' a predefined role? (e.g., admin, viewer, editor) → Add it to ${
+      Is '${nonExistingRole}' a predefined role? (e.g., admin, viewer, editor) → Add the role descriptor to ${
         supportedRoles.sourcePath
-      } to use loginAs() with that role.`;
+      } to enable it for testing.`;
       const samlSessionManager = new SamlSessionManager({
         ...samlSMOptionsWithCloudHostName,
         supportedRoles,

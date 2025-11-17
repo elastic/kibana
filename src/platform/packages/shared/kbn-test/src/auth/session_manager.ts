@@ -195,9 +195,9 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
 
       Is '${role}' a custom test role? → Use loginWithCustomRole() to log in with custom Kibana and Elasticsearch privileges (see Scout docs to create reusable login methods)
 
-      Is '${role}' a predefined role? (e.g., admin, viewer, editor) → Add it to ${
+      Is '${role}' a predefined role? (e.g., admin, viewer, editor) → Add the role descriptor to ${
         this.supportedRoles.sourcePath
-      } to use loginAs() with that role.`);
+      } to enable it for testing.`);
     }
   };
 
