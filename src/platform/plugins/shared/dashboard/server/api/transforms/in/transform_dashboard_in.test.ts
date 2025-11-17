@@ -125,7 +125,7 @@ describe('transformDashboardIn', () => {
     `);
   });
 
-  describe('allowUnmappedKeys === false', () => {
+  describe('allowUnmappedKeys is false', () => {
     it('should return error when dashboard state contains controlGroupInput', () => {
       const dashboardState: DashboardState = {
         controlGroupInput: {
@@ -146,10 +146,11 @@ describe('transformDashboardIn', () => {
       `);
     });
 
-    it('should return error when there are references', () => {
+    it('should return error when dashboard state contains references', () => {
       const dashboardState: DashboardState = {
         title: 'title',
         panels: [],
+        references: []
       };
       expect(transformDashboardIn(dashboardState, false)).toMatchInlineSnapshot(`
         Object {
