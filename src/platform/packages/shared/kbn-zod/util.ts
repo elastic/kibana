@@ -7,8 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '.';
+import * as z3 from 'zod/v3';
+import type * as z4 from 'zod/v4/core';
 
-export function isZod(value: unknown): value is z.ZodType<any> {
-  return value instanceof z.Schema;
-}
+export const isZod = (schema: z3.ZodTypeAny | z4.$ZodType) => {
+  if ('_zod' in schema) {
+    return true; // v4
+  } else if (schema instanceof z3.ZodType) {
+    return true; // v3
+  }
+  return false;
+};
