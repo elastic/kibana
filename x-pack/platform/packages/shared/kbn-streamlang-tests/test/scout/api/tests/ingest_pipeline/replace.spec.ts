@@ -260,7 +260,7 @@ apiTest.describe(
         description: 'should reject {{{ }}} template syntax in field names',
       },
     ].forEach(({ templateField, description }) => {
-      apiTest(`${description}`, async ({ testBed }) => {
+      apiTest(`${description}`, async () => {
         const streamlangDSL: StreamlangDSL = {
           steps: [
             {

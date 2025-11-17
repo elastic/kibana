@@ -297,22 +297,19 @@ apiTest.describe('Streamlang to ES|QL - Replace Processor', { tag: ['@ess', '@sv
     }
   );
 
-  apiTest(
-    'should reject Mustache template syntax {{ and {{{ in field names',
-    async ({ testBed, esql }) => {
-      const streamlangDSL: StreamlangDSL = {
-        steps: [
-          {
-            action: 'replace',
-            from: '{{field.name}}',
-            pattern: 'error',
-            replacement: 'warning',
-          } as ReplaceProcessor,
-        ],
-      };
-      expect(() => transpile(streamlangDSL)).toThrow(
-        'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
-      );
-    }
-  );
+  apiTest('should reject Mustache template syntax {{ and {{{ in field names', async () => {
+    const streamlangDSL: StreamlangDSL = {
+      steps: [
+        {
+          action: 'replace',
+          from: '{{field.name}}',
+          pattern: 'error',
+          replacement: 'warning',
+        } as ReplaceProcessor,
+      ],
+    };
+    expect(() => transpile(streamlangDSL)).toThrow(
+      'Mustache template syntax {{ }} or {{{ }}} is not allowed in field names'
+    );
+  });
 });
