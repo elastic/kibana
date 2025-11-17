@@ -11,6 +11,7 @@ import { Document, Scalar } from 'yaml';
 import { monaco } from '@kbn/monaco';
 import { z } from '@kbn/zod';
 import { getVariableSuggestions } from './get_variable_suggestions';
+import type { StepPropInfo } from '../../../../../../entities/workflows/store';
 import type { AutocompleteContext } from '../../context/autocomplete.types';
 import type {
   ForeachVariableLineParseResult,
@@ -53,6 +54,7 @@ describe('getVariableSuggestions', () => {
     contextScopedToPath: 'consts',
     focusedStepInfo: null,
     yamlDocument: new Document(),
+    focusedYamlPair: null,
     scalarType: Scalar.QUOTE_DOUBLE,
     path: ['steps', 0, 'with', 'message'],
     absoluteOffset: 50,
@@ -61,8 +63,6 @@ describe('getVariableSuggestions', () => {
     isInScheduledTriggerWithBlock: false,
     isInStepsContext: false,
     isInTriggersContext: false,
-    shouldUseCurlyBraces: true,
-    shouldBeQuoted: false,
     ...overrides,
   });
 
@@ -331,17 +331,74 @@ describe('getVariableSuggestions', () => {
   });
 
   describe('suggestion formatting', () => {
-    it('should use correct formatting options from context', () => {
+    it('should quote insertText if scalarType is PLAIN and value starts with @', () => {
       const context = createMockAutocompleteContext({
-        shouldBeQuoted: true,
-        shouldUseCurlyBraces: false,
+        triggerCharacter: '@',
+        triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+        line: 'message: @',
+        lineUpToCursor: 'message: @',
+        lineParseResult: createMockVariableLineParseResult({
+          matchType: 'at',
+        }),
+        scalarType: Scalar.PLAIN,
+        focusedYamlPair: {
+          path: ['steps', 0, 'with', 'message'],
+          keyNode: {
+            value: 'message',
+          },
+          valueNode: {
+            value: '@co',
+          },
+        } as StepPropInfo,
+        contextSchema: z.object({
+          consts: z.object({
+            test: z.string(),
+          }),
+        }),
+        contextScopedToPath: null,
+      });
+
+      const suggestions = getVariableSuggestions(context);
+      expect(suggestions).toHaveLength(1);
+      expect(suggestions.map((s) => s.label)).toEqual(['consts']);
+      expect(suggestions.map((s) => s.insertText)).toEqual(['"{{ consts$0 }}"']);
+      // The actual formatting is handled by wrapAsMonacoSuggestion
+      // We just verify that suggestions are generated
+    });
+
+    it('should not quote insertText by default', () => {
+      const context = createMockAutocompleteContext({
+        triggerCharacter: '.',
+        triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+        range: createMockRange(),
+        line: 'message: {{ consts.',
+        lineUpToCursor: 'message: {{ consts.',
+        lineParseResult: createMockVariableLineParseResult(),
+        contextSchema: z.object({
+          apiUrl: z.string().describe('The API URL'),
+          apiKey: z.string().describe('The API key'),
+          timeout: z.number().describe('Request timeout in seconds'),
+        }),
+        contextScopedToPath: 'consts',
+        focusedStepInfo: null,
+        yamlDocument: new Document(),
+        focusedYamlPair: {
+          path: ['steps', 0, 'with', 'message'],
+          keyNode: {
+            value: 'message',
+          },
+          valueNode: {
+            value: '{{ consts.',
+          },
+        } as StepPropInfo,
+        scalarType: Scalar.PLAIN,
+        path: ['steps', 0, 'with', 'message'],
+        absoluteOffset: 50,
       });
 
       const suggestions = getVariableSuggestions(context);
       expect(suggestions).toHaveLength(3);
       expect(suggestions.map((s) => s.label)).toEqual(['apiUrl', 'apiKey', 'timeout']);
-      // The actual formatting is handled by wrapAsMonacoSuggestion
-      // We just verify that suggestions are generated
     });
 
     it('should handle different scalar types', () => {

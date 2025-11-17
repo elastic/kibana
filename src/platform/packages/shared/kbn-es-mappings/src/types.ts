@@ -8,6 +8,8 @@
  */
 
 import type api from '@elastic/elasticsearch/lib/api/types';
+import type { Required } from 'utility-types';
+import type { UnionKeys, Exact, MissingKeysError } from './types_helpers';
 
 export type StrictDynamic = false | 'strict';
 
@@ -35,11 +37,29 @@ export type ObjectMapping = Omit<Strict<api.MappingObjectProperty>, 'properties'
   properties: Record<string, AnyMapping>;
 };
 
-export type AnyPropertyBase = Omit<api.MappingPropertyBase, 'properties'> & {
-  properties: Record<string, AnyMapping>;
-};
+type AllMappingPropertyType = Required<api.MappingProperty>['type'];
 
-export type ToPrimitives<O extends AnyPropertyBase> = {} extends O
+type SupportedMappingPropertyType = AllMappingPropertyType &
+  (
+    | 'text'
+    | 'integer'
+    | 'keyword'
+    | 'boolean'
+    | 'date'
+    | 'byte'
+    | 'float'
+    | 'double'
+    | 'long'
+    | 'object'
+  );
+
+type MappingPropertyObjectType = Required<api.MappingObjectProperty, 'type'>;
+
+export type MappingProperty =
+  | Extract<api.MappingProperty, { type: Exclude<SupportedMappingPropertyType, 'object'> }>
+  | MappingPropertyObjectType;
+
+export type ToPrimitives<O extends { properties: Record<string, MappingProperty> }> = {} extends O
   ? never
   : {
       [K in keyof O['properties']]: {} extends O['properties'][K]
@@ -68,27 +88,45 @@ export type ToPrimitives<O extends AnyPropertyBase> = {} extends O
           : T extends 'date_nanos'
           ? string
           : T extends 'object'
-          ? O['properties'][K] extends AnyPropertyBase
+          ? O['properties'][K] extends AnyMappingDefinition
             ? ToPrimitives<O['properties'][K]>
             : never
           : never
         : never;
     };
 
-interface MappingsProperties {
-  [x: string]: AnyMapping;
-}
+export type AnyMappingDefinition = MappingsDefinition<MappingProperty>;
 
-export interface MappingsDefinition {
-  properties: MappingsProperties;
-}
+export type MappingsDefinition<S extends MappingProperty = MappingProperty> = Omit<
+  api.MappingPropertyBase,
+  'properties'
+> & {
+  properties: Record<string, S>;
+};
 
-export type DocumentOf<
-  D extends Record<K, MappingsDefinition> = Record<K, MappingsDefinition>,
-  K extends string = 'mappings'
-> = Partial<
+export type GetFieldsOf<Definition extends MappingsDefinition<MappingProperty>> = Partial<
   ToPrimitives<{
     type: 'object';
-    properties: D[K]['properties'];
+    properties: Definition['properties'];
   }>
 >;
+
+// The definition need to support the document payload, but it's OK if the
+// document can hold more fields than the definition.
+// To keep the type safety of the document payload in the consuming code, both the definition and the document payload are passed to the EnsureSubsetOf type.
+// The EnsureSubsetOf type then checks if the document payload is a subset of the definition.
+// If this is not the case, the EnsureSubsetOf type is set to never, which will cause a type error in the consuming code.
+export type EnsureSubsetOf<
+  SubsetDefinition extends AnyMappingDefinition,
+  AllFields extends GetFieldsOf<SubsetDefinition>,
+  SubsetType
+> = Exact<GetFieldsOf<SubsetDefinition>, Partial<AllFields>> extends true
+  ? SubsetType
+  : MissingKeysError<
+      Exclude<
+        UnionKeys<GetFieldsOf<SubsetDefinition>> extends string
+          ? UnionKeys<GetFieldsOf<SubsetDefinition>>
+          : never,
+        UnionKeys<AllFields>
+      >
+    >;

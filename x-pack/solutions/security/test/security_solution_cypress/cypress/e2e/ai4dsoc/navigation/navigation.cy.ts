@@ -120,7 +120,8 @@ const linkedPagesAssertions: Record<string, () => void> = {
   },
 };
 
-describe('AI4dSoC Navigation', { tags: '@serverless' }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/242988
+describe.skip('AI4dSoC Navigation', { tags: '@serverless' }, () => {
   beforeEach(() => {
     login('admin');
     visit(GET_STARTED_URL);

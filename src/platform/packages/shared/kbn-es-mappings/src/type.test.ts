@@ -7,93 +7,150 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as mappings from './mappings';
-import type { DocumentOf } from './types';
+import * as path from 'path';
+import {
+  createProgramForFixture,
+  getDiagnosticsIgnoringTsIgnores,
+  groupDiagnosticsByLine,
+} from './__jest__/ts_helpers';
 
-const typeTest: DocumentOf<
-  {
-    dynamic: false;
-    test123: {
-      properties: {
-        keyword_no_enum: { type: 'keyword' };
-        date_no_format: { type: 'date' };
-        date_nanos: { type: 'date_nanos' };
-        name: { type: 'text' };
-        obj: {
-          type: 'object';
-          properties: { email: { type: 'keyword'; enum: ['test@test.com'] } };
-        };
-      };
-    };
-  },
-  'test123'
-> = {
-  name: 'test',
-  obj: { email: 'test@test.com' },
-  date_no_format: '2021-01-01',
-  date_nanos: '2021-01-01T00:00:00.000000000Z',
-  keyword_no_enum: 'test',
-};
+describe('Type checking with TypeScript compiler', () => {
+  it('should validate MappingsDefinition and DocumentOf types in mappings_example.ts', () => {
+    const fixturePath = path.join(__dirname, '__fixture__', 'mappings_example.ts');
 
-expect(typeTest).toBeDefined();
+    const program = createProgramForFixture(fixturePath);
+    const diagnostics = getDiagnosticsIgnoringTsIgnores(fixturePath, program);
 
-// We define the mapping type to make sure it matches the mapping definition created by the mappings helpers
-interface TestMappingDefinition {
-  properties: {
-    a: { type: 'keyword' };
-    b: { type: 'text' };
-    c: { type: 'integer' };
-    d: { type: 'long' };
-    e: { type: 'short' };
-    f: { type: 'boolean' };
-    g: { type: 'date' };
-    h: { type: 'date_nanos' };
-    i: { type: 'object'; properties: { a: { type: 'keyword' }; b: { type: 'long' } } };
-  };
-}
+    const errorsByLine = groupDiagnosticsByLine(fixturePath, diagnostics);
 
-const testClient = {
-  mappings: {
-    dynamic: false,
-    properties: {
-      a: mappings.text(),
-      b: mappings.integer(),
-      c: mappings.long(),
-      d: mappings.short(),
-      e: mappings.boolean(),
-      f: mappings.date(),
-      g: mappings.dateNanos(),
-      h: { properties: { a: mappings.keyword(), b: mappings.long() } },
-    },
-  },
-};
+    expect(errorsByLine).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "errorMessage": "Type 'number' is not assignable to type 'string'.",
+          "lineNumber": 46,
+          "tsErrorLine": Array [
+            "- name must be a string",
+            "  name: 123,",
+          ],
+        },
+        Object {
+          "errorMessage": "Type 'string' is not assignable to type 'number'.",
+          "lineNumber": 54,
+          "tsErrorLine": Array [
+            "- age must be a number",
+            "  age: 'thirty',",
+          ],
+        },
+        Object {
+          "errorMessage": "Type 'string' is not assignable to type 'boolean | undefined'.",
+          "lineNumber": 61,
+          "tsErrorLine": Array [
+            "- isActive must be a boolean",
+            "  isActive: 'yes',",
+          ],
+        },
+        Object {
+          "errorMessage": "Type '\\"invalid_type\\"' is not assignable to type '\\"boolean\\" | \\"object\\" | \\"keyword\\" | \\"text\\" | \\"date\\" | \\"byte\\" | \\"double\\" | \\"float\\" | \\"integer\\" | \\"long\\"'.",
+          "lineNumber": 69,
+          "tsErrorLine": Array [
+            "- not_mapped is not defined in the mapping",
+            "    not_mapped: { type: 'invalid_type' },",
+          ],
+        },
+      ]
+    `);
+  });
 
-// We type the document explicitly to make sure typescript infers the same types.
-type TypedDocument = DocumentOf<typeof testClient>;
+  it('should validate EnsureSubsetOf type in subset_example.ts', () => {
+    const fixturePath = path.join(__dirname, '__fixture__', 'subset_example.ts');
 
-describe('createTypedMappings', () => {
-  it('should create a typed mappings object', () => {
-    // We create a mapping definition that matches the mapping definition created by the mappings helpers
-    // Defined here as part of the TS where the typecheck would fail if it doesnt match anymore.
-    const mappingDefinition: TestMappingDefinition = {};
+    const program = createProgramForFixture(fixturePath);
+    const diagnostics = getDiagnosticsIgnoringTsIgnores(fixturePath, program);
 
-    // We create a document that matches the mapping definition
-    // Defined here as part of the TS where the typecheck would fail if it doesnt match anymore.
-    const testDoc: TypedDocument = {
-      a: 'test',
-      b: 'test',
-      c: 1,
-      d: 1,
-      e: 1,
-      f: true,
-      g: '2021-01-01',
-      h: '2021-01-01',
-      i: { a: 'test', b: 1 },
-    };
+    const errorsByLine = groupDiagnosticsByLine(fixturePath, diagnostics);
+    expect(errorsByLine).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "errorMessage": "Type 'Error & \\"The following keys are missing from the document fields: createdAt\\"' is not assignable to type 'MissingKeysError<\\"definedButNotInDocOne\\" | \\"definedButNotInDocTwo\\">'.
+        Type 'Error & \\"The following keys are missing from the document fields: createdAt\\"' is not assignable to type 'Error & \\"The following keys are missing from the document fields: definedButNotInDocTwo\\"'.
+          Type 'Error & \\"The following keys are missing from the document fields: createdAt\\"' is not assignable to type '\\"The following keys are missing from the document fields: definedButNotInDocTwo\\"'.",
+          "lineNumber": 77,
+          "tsErrorLine": Array [
+            "- createdAt is in the definition, this checks that an error is not thrown for defined keys",
+            "  Object.assign( new Error(), 'The following keys are missing from the document fields: createdAt'),",
+          ],
+        },
+        Object {
+          "errorMessage": "Type 'Error & \\"The following keys are missing from the document fields: Unknown Key\\"' is not assignable to type 'MissingKeysError<\\"definedButNotInDocOne\\" | \\"definedButNotInDocTwo\\">'.
+        Type 'Error & \\"The following keys are missing from the document fields: Unknown Key\\"' is not assignable to type 'Error & \\"The following keys are missing from the document fields: definedButNotInDocTwo\\"'.
+          Type 'Error & \\"The following keys are missing from the document fields: Unknown Key\\"' is not assignable to type '\\"The following keys are missing from the document fields: definedButNotInDocTwo\\"'.",
+          "lineNumber": 79,
+          "tsErrorLine": Array [
+            "- Unknown Key is not in the definition, this checks that an error is thrown for the unknown key",
+            "  Object.assign( new Error(), 'The following keys are missing from the document fields: Unknown Key'),",
+          ],
+        },
+        Object {
+          "errorMessage": "Type 'Error & \\"The following keys are missing from the document fields: name\\"' is not assignable to type 'MissingKeysError<\\"definedButNotInDocOne\\" | \\"definedButNotInDocTwo\\">'.
+        Type 'Error & \\"The following keys are missing from the document fields: name\\"' is not assignable to type 'Error & \\"The following keys are missing from the document fields: definedButNotInDocTwo\\"'.
+          Type 'Error & \\"The following keys are missing from the document fields: name\\"' is not assignable to type '\\"The following keys are missing from the document fields: definedButNotInDocTwo\\"'.",
+          "lineNumber": 106,
+          "tsErrorLine": Array [
+            "- createdAt is in the definition, this checks that an error is not thrown for defined keys",
+            "  Object.assign( new Error(), 'The following keys are missing from the document fields: name'),",
+          ],
+        },
+        Object {
+          "errorMessage": "Type 'Error & \\"The following keys are missing from the document fields: createdAt\\"' is not assignable to type 'MissingKeysError<\\"definedButNotInDocOne\\" | \\"definedButNotInDocTwo\\">'.",
+          "lineNumber": 108,
+          "tsErrorLine": Array [
+            "- createdAt is in the definition, this checks that an error is not thrown for defined keys",
+            "  Object.assign( new Error(), 'The following keys are missing from the document fields: createdAt'),",
+          ],
+        },
+        Object {
+          "errorMessage": "Type 'Error & \\"The following keys are missing from the document fields: Unknown Key\\"' is not assignable to type 'MissingKeysError<\\"definedButNotInDocOne\\" | \\"definedButNotInDocTwo\\">'.",
+          "lineNumber": 110,
+          "tsErrorLine": Array [
+            "- Unknown Key is not in the definition, this checks that an error is thrown for the unknown key",
+            "  Object.assign( new Error(), 'The following keys are missing from the document fields: Unknown Key'),",
+          ],
+        },
+        Object {
+          "errorMessage": "Type 'FullEsDocumentFields' does not satisfy the constraint 'Partial<{ name: string; age: number; email: string; isActive: boolean; createdAt: boolean; }>'.
+        Types of property 'createdAt' are incompatible.
+          Type 'string | number' is not assignable to type 'boolean | undefined'.
+            Type 'string' is not assignable to type 'boolean | undefined'.",
+          "lineNumber": 131,
+          "tsErrorLine": Array [
+            "- createdAt is in the definition, this checks that an error is not thrown for defined keys",
+            "  FullEsDocumentFields,",
+          ],
+        },
+      ]
+    `);
+  });
 
-    // nothing to test here, just make sure the types are inferred correctly
-    expect(testDoc).toBeDefined();
-    // nothing to test here, just make sure the types are inferred correctly
-    expect(mappingDefinition).toBeDefined();
+  it('should validate Exact type in helpers.ts', () => {
+    const fixturePath = path.join(__dirname, '__fixture__', 'helpers.ts');
+
+    const program = createProgramForFixture(fixturePath);
+    const diagnostics = getDiagnosticsIgnoringTsIgnores(fixturePath, program);
+
+    const errorsByLine = groupDiagnosticsByLine(fixturePath, diagnostics);
+    expect(errorsByLine).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "errorMessage": "Type 'Error & \\"The following keys are missing from the document fields: exclusiveFirstThree\\"' is not assignable to type 'MissingKeysError<\\"exclusiveFirstOne\\" | \\"exclusiveFirstTwo\\">'.
+        Type 'Error & \\"The following keys are missing from the document fields: exclusiveFirstThree\\"' is not assignable to type 'Error & \\"The following keys are missing from the document fields: exclusiveFirstTwo\\"'.
+          Type 'Error & \\"The following keys are missing from the document fields: exclusiveFirstThree\\"' is not assignable to type '\\"The following keys are missing from the document fields: exclusiveFirstTwo\\"'.",
+          "lineNumber": 27,
+          "tsErrorLine": Array [
+            "- exclusiveFirstThree is not in the excludedKeys",
+            "  Object.assign(new Error(), 'The following keys are missing from the document fields: exclusiveFirstThree' as const),",
+          ],
+        },
+      ]
+    `);
   });
 });
