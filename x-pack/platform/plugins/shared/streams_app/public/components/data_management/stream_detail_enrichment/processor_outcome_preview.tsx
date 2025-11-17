@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import {
   EuiFilterButton,
@@ -176,7 +177,10 @@ const PreviewDocumentsGroupBy = () => {
 };
 
 const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRecord[] }) => {
-  const [userSelectedViewMode, setViewMode] = useState<PreviewTableMode>('summary');
+  const [userSelectedViewMode, setViewMode] = useLocalStorage<PreviewTableMode>(
+    'streams:processorOutcomePreview:viewMode',
+    'summary'
+  );
 
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
   const streamName = useSimulatorSelector((state) => state.context.streamName);
@@ -261,7 +265,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
   const isViewModeForced = Boolean(validGrokField || validCurrentProcessorSourceField);
 
   // Determine the effective view mode (forced to 'columns' if needed, otherwise user's choice)
-  const effectiveViewMode = isViewModeForced ? 'columns' : userSelectedViewMode;
+  const effectiveViewMode = isViewModeForced ? 'columns' : userSelectedViewMode ?? 'summary';
 
   const availableColumns = useMemo(() => {
     let cols = getTableColumns({
@@ -346,14 +350,14 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
       }
 
       // find which columns got added or removed comparing visibleColumns with the current displayColumns
-      const addedColumns = visibleColumns.filter((col) => !previewColumns.includes(col));
+      const addedColumns = visibleColumns.filter((col) => !displayColumnsForTable.includes(col));
       if (addedColumns.length > 0) {
         setExplicitlyEnabledPreviewColumns([
           ...explicitlyEnabledPreviewColumns,
           ...addedColumns.filter((col) => !explicitlyEnabledPreviewColumns.includes(col)),
         ]);
       }
-      const removedColumns = previewColumns.filter((col) => !visibleColumns.includes(col));
+      const removedColumns = displayColumnsForTable.filter((col) => !visibleColumns.includes(col));
       if (removedColumns.length > 0) {
         setExplicitlyDisabledPreviewColumns([
           ...explicitlyDisabledPreviewColumns,
@@ -365,7 +369,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     [
       explicitlyDisabledPreviewColumns,
       explicitlyEnabledPreviewColumns,
-      previewColumns,
+      displayColumnsForTable,
       setExplicitlyDisabledPreviewColumns,
       setExplicitlyEnabledPreviewColumns,
       setPreviewColumnsOrder,
@@ -438,7 +442,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
           mode={effectiveViewMode}
           streamName={streamName}
           viewModeToggle={{
-            currentMode: userSelectedViewMode,
+            currentMode: userSelectedViewMode ?? 'summary',
             setViewMode,
             isDisabled: isViewModeForced,
           }}
