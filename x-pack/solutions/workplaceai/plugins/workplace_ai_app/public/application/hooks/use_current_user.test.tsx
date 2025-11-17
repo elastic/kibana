@@ -97,12 +97,10 @@ describe('useCurrentUser', () => {
 
     const { result } = renderHook(() => useCurrentUser(), { wrapper });
 
-    // Wait for the query to complete
     await waitFor(() => {
       expect(mockGetCurrentUser).toHaveBeenCalled();
     });
 
-    // React Query returns undefined when data is null/undefined
     expect(result.current).toBeUndefined();
   });
 });

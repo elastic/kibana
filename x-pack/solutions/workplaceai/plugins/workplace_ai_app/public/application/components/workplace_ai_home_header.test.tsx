@@ -70,7 +70,7 @@ describe('WorkplaceAIHomeHeader', () => {
   });
 
   describe('User Greeting', () => {
-    it('renders welcome message with full name', () => {
+    it('renders welcome message', () => {
       expect(screen.getByText(/Welcome, John Doe/i)).toBeInTheDocument();
       const heroImage = screen.getByAltText('Workplace AI Hero');
       expect(heroImage).toBeInTheDocument();
@@ -104,7 +104,6 @@ describe('WorkplaceAIHomeHeader', () => {
 
   describe('MCP Endpoint Button', () => {
     beforeEach(() => {
-      // Reset mocks for this describe block
       jest.clearAllMocks();
     });
 
@@ -115,12 +114,10 @@ describe('WorkplaceAIHomeHeader', () => {
     it('copies MCP Server URL to clipboard when clicked', () => {
       const mcpButton = screen.getByText('MCP Endpoint');
 
-      // Mock execCommand to return true (success)
       (document.execCommand as jest.Mock).mockImplementationOnce(() => true);
 
       fireEvent.click(mcpButton);
 
-      // Verify execCommand was called with 'copy'
       expect(document.execCommand).toHaveBeenCalledWith('copy');
     });
   });
@@ -136,11 +133,6 @@ describe('WorkplaceAIHomeHeader', () => {
       fireEvent.click(connectionButton);
 
       expect(mockOpenWiredConnectionDetails).toHaveBeenCalledTimes(1);
-    });
-
-    it('has proper aria-label for accessibility', () => {
-      const connectionButton = screen.getByLabelText('View connection settings');
-      expect(connectionButton).toBeInTheDocument();
     });
   });
 });

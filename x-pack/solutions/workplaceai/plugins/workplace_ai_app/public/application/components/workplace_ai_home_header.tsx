@@ -55,7 +55,6 @@ export const WorkplaceAIHomeHeader: React.FC = () => {
         </EuiText>
         <EuiSpacer size="xxl" />
 
-        {/* Configuration Buttons Row */}
         <EuiFlexGroup gutterSize="s" wrap>
           <EuiFlexItem grow={false}>
             <ElasticsearchUrlField
@@ -124,7 +123,6 @@ export const WorkplaceAIHomeHeader: React.FC = () => {
         </EuiFlexGroup>
       </EuiFlexItem>
 
-      {/* Hero Illustration */}
       <EuiFlexItem grow={3}>
         <EuiImage
           src={headerHeroSvg}

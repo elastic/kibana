@@ -57,7 +57,6 @@ export const SnapshotsSection: React.FC = () => {
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="l" alignItems="flexStart">
-        {/* My Agents Table */}
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
             <EuiTitle size="xs">
@@ -119,7 +118,6 @@ export const SnapshotsSection: React.FC = () => {
           </EuiPanel>
         </EuiFlexItem>
 
-        {/* My sources Table */}
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
             <EuiTitle size="xs">
@@ -236,7 +234,6 @@ export const SnapshotsSection: React.FC = () => {
           </EuiPanel>
         </EuiFlexItem>
 
-        {/* Usage snapshot Table */}
         <EuiFlexItem>
           <EuiPanel paddingSize="m">
             <EuiTitle size="xs">

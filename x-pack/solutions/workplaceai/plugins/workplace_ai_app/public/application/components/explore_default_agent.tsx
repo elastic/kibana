@@ -53,7 +53,6 @@ export const ExploreDefaultAgent: React.FC = () => {
       </EuiTitle>
       <EuiSpacer size="m" />
       <EuiPanel paddingSize="s" hasShadow={false} hasBorder>
-        {/* Add context button */}
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiButton size="s" iconType="at" color="text" onClick={() => {}}>
@@ -67,7 +66,6 @@ export const ExploreDefaultAgent: React.FC = () => {
 
         <EuiSpacer size="m" />
 
-        {/* Input text area */}
         <EuiTextArea
           placeholder={i18n.translate(
             'xpack.workplaceai.gettingStarted.exploreDefaultAgent.chatInputPlaceholder',
@@ -85,7 +83,6 @@ export const ExploreDefaultAgent: React.FC = () => {
 
         <EuiSpacer size="m" />
 
-        {/* Bottom row: Modify and Tools on left, Submit arrow on right */}
         <EuiFlexGroup
           gutterSize="s"
           responsive={false}
