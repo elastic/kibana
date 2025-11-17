@@ -20,18 +20,13 @@ import { updateTabIndices } from '../../utils/update_tab_indices';
 import { useScroll } from '../../hooks/use_scroll';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 
-/**
- * **Border and shadow**
- *
- * For instance, only plain or transparent panels can have a border and/or shadow.
- * Source: {@link https://eui.elastic.co/docs/components/containers/panel/}
- */
 const getWrapperStyles = (theme: UseEuiTheme['euiTheme']) => css`
   box-sizing: border-box;
-  border-right: ${theme.border.width.thin} ${theme.colors.borderBaseSubdued} solid;
+  position: relative;
   display: flex;
   flex-direction: column;
   width: ${SIDE_PANEL_WIDTH}px;
+  border-left: ${theme.border.width.thin} solid ${theme.colors.borderBaseSubdued};
 `;
 
 export interface SidePanelProps {
