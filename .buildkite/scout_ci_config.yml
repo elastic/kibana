@@ -2,6 +2,7 @@
 plugins:
   enabled:
     - apm
+    - console
     - discover_enhanced
     - maps
     - observability_onboarding
@@ -12,4 +13,7 @@ plugins:
 
 packages:
   enabled:
+    - kbn-scout-release-testing
   disabled:
+    - kbn-scout # Internal scout tests are run in advance to validate Scout integrity (see .buildkite/scripts/steps/test/scout_test_run_builder.sh)
+    - kbn-scout-release-testing # Release tests will run separately as part of the release process

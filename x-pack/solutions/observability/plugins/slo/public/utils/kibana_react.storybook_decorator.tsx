@@ -9,7 +9,7 @@ import { CoreTheme } from '@kbn/core-theme-browser';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { casesFeatureId, sloFeatureId } from '@kbn/observability-shared-plugin/common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React, { ComponentType } from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { of } from 'rxjs';

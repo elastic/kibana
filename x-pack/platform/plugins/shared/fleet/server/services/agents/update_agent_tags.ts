@@ -6,9 +6,10 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import pRetry from 'p-retry';
 
 import type { Agent } from '../../types';
-import { AgentReassignmentError } from '../../errors';
+import { AgentReassignmentError, FleetVersionConflictError } from '../../errors';
 
 import { SO_SEARCH_LIMIT } from '../../constants';
 
@@ -84,9 +85,22 @@ export async function updateAgentTags(
     ).runActionAsyncTask();
   }
 
-  return await updateTagsBatch(soClient, esClient, givenAgents, outgoingErrors, {
-    tagsToAdd,
-    tagsToRemove,
-    spaceId: currentSpaceId,
-  });
+  return pRetry(
+    () =>
+      updateTagsBatch(soClient, esClient, givenAgents, outgoingErrors, {
+        tagsToAdd,
+        tagsToRemove,
+        spaceId: currentSpaceId,
+      }),
+    {
+      onFailedAttempt: (error) => {
+        if (!(error instanceof FleetVersionConflictError)) {
+          throw error;
+        }
+      },
+      retries: 3,
+      minTimeout: 100,
+      maxTimeout: 200,
+    }
+  );
 }

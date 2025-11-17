@@ -68,6 +68,7 @@
     "@kbn/expandable-flyout",
     "@kbn/code-editor-mock",
     "@kbn/core-saved-objects-utils-server",
+    "@kbn/react-query",
   ],
   "exclude": ["target/**/*"]
 }

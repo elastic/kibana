@@ -302,10 +302,6 @@ $$$savedObjects-maxImportPayloadBytes$$$ `savedObjects.maxImportPayloadBytes`
 $$$server-basePath$$$ `server.basePath`
 :   Enables you to specify a path to mount {{kib}} at if you are running behind a proxy. Use the [`server.rewriteBasePath`](#server-rewriteBasePath) setting to tell {{kib}} if it should remove the basePath from requests it receives, and to prevent a deprecation warning at startup. This setting cannot end in a slash (`/`).
 
-`server.defaultRoute` ![logo cloud](https://doc-icons.s3.us-east-2.amazonaws.com/logo_cloud.svg "Supported on {{ech}}")
-:   Specifies the default route when opening Kibana. You can use this setting to modify the landing page when opening Kibana.
-% TBD: Applicable only to Elastic Cloud?
-
 $$$server-publicBaseUrl$$$ `server.publicBaseUrl`
 :   The publicly available URL that end-users access Kibana at. Must include the protocol, hostname, port (if different than the defaults for `http` and `https`, 80 and 443 respectively), and the [`server.basePath`](#server-basePath) (when that setting is configured explicitly). This setting cannot end in a slash (`/`).
 

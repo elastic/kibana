@@ -124,6 +124,7 @@
     "@kbn/core-saved-objects-server",
     "@kbn/core-pricing-browser-mocks",
     "@kbn/esql",
+    "@kbn/react-query",
   ],
   "exclude": [
     "target/**/*"

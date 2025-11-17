@@ -10,7 +10,7 @@ import { rmSync } from 'fs';
 import { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
 import { FtrConfigProviderContext } from '@kbn/test';
 import { PREBUILT_RULES_PACKAGE_NAME } from '@kbn/security-solution-plugin/common/detection_engine/constants';
-import { createPrebuiltRulesPackage } from '../../../../../utils';
+import { generatePrebuiltRulesPackageZipFile } from '@kbn/security-solution-test-api-clients/prebuilt_rules_package_generation';
 
 const BUNDLED_PACKAGE_DIR = `${os.tmpdir()}/mock_bundled_large_fleet_prebuilt_rules_package`;
 
@@ -52,14 +52,14 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   };
 }
 
-export const MOCK_PKG_VERSION = '99.0.0';
-export const NUM_OF_RULE_IN_MOCK_LARGE_PKG = 750;
+export const MOCK_PKG_VERSION = '99.1.0';
+export const NUM_OF_RULE_IN_MOCK_LARGE_PKG = 3000;
 
 function cleanUpBundledPackagesFolder(): void {
   rmSync(BUNDLED_PACKAGE_DIR, { recursive: true, force: true });
 }
 
-function setUpLargePrebuiltRulesBundledPackage(): void {
+async function setUpLargePrebuiltRulesBundledPackage(): Promise<void> {
   cleanUpBundledPackagesFolder();
 
   const createPrebuiltRuleAsset = (index: number, version: number): PrebuiltRuleAsset => ({
@@ -105,7 +105,7 @@ function setUpLargePrebuiltRulesBundledPackage(): void {
     ],
     timestamp_override: 'event.ingested',
   });
-  const PREBUILT_RULE_VERSIONS_COUNT = 20;
+  const PREBUILT_RULE_VERSIONS_COUNT = 10;
 
   const prebuiltRuleAssets: PrebuiltRuleAsset[] = [];
 
@@ -116,13 +116,10 @@ function setUpLargePrebuiltRulesBundledPackage(): void {
     }
   }
 
-  const MOCK_PREBUILT_RULES_PKG_FOR_IMPORTING_PREBUILT_RULES = createPrebuiltRulesPackage({
+  await generatePrebuiltRulesPackageZipFile({
     packageName: PREBUILT_RULES_PACKAGE_NAME,
     packageSemver: MOCK_PKG_VERSION,
     prebuiltRuleAssets,
+    filePath: `${BUNDLED_PACKAGE_DIR}/${PREBUILT_RULES_PACKAGE_NAME}-${MOCK_PKG_VERSION}.zip`,
   });
-
-  MOCK_PREBUILT_RULES_PKG_FOR_IMPORTING_PREBUILT_RULES.writeZip(
-    `${BUNDLED_PACKAGE_DIR}/${PREBUILT_RULES_PACKAGE_NAME}-${MOCK_PKG_VERSION}.zip`
-  );
 }

@@ -314,6 +314,90 @@ export default function (providerContext: FtrProviderContext) {
           /400 Bad Request Not enough permissions to remove policies from space test1/
         );
       });
+
+      it('should prevent updating agent policy to target multiple spaces when name conflicts exist', async () => {
+        const testSpaceOnlyPolicy = await apiClient.createAgentPolicy(TEST_SPACE_1);
+
+        const defaultSpaceOnlyPolicy = await apiClient.createAgentPolicy('default', {
+          name: testSpaceOnlyPolicy.item.name,
+        });
+
+        await expectToRejectWithError(
+          () =>
+            apiClient.putAgentPolicy(
+              defaultSpaceOnlyPolicy.item.id,
+              {
+                name: testSpaceOnlyPolicy.item.name,
+                namespace: 'default',
+                space_ids: ['default', TEST_SPACE_1],
+              },
+              'default'
+            ),
+          /409 Conflict Agent Policy\s.* already exists with name\s.*$/i
+        );
+      });
+
+      it('should prevent updating agent policy to target multiple spaces when name conflicts exists with integration policies', async () => {
+        const testSpaceOnlyPolicy = await apiClient.createAgentPolicy(TEST_SPACE_1);
+        const testSpacePackagePolicy = await apiClient.createPackagePolicy(TEST_SPACE_1, {
+          policy_ids: [testSpaceOnlyPolicy.item.id],
+          name: `test-nginx-${Date.now()}`,
+          description: 'test',
+          package: {
+            name: 'nginx',
+            version: '1.20.0',
+          },
+          inputs: {},
+        });
+
+        const defaultSpaceOnlyPolicy = await apiClient.createAgentPolicy('default');
+        await apiClient.createPackagePolicy(undefined, {
+          policy_ids: [defaultSpaceOnlyPolicy.item.id],
+          name: testSpacePackagePolicy.item.name,
+          description: 'test',
+          package: {
+            name: 'nginx',
+            version: '1.20.0',
+          },
+          inputs: {},
+        });
+
+        await expectToRejectWithError(
+          () =>
+            apiClient.putAgentPolicy(
+              defaultSpaceOnlyPolicy.item.id,
+              {
+                name: defaultSpaceOnlyPolicy.item.name,
+                namespace: 'default',
+                space_ids: ['default', TEST_SPACE_1],
+              },
+              'default'
+            ),
+          /409 Conflict An integration policy with the name\s.* already exists in space\s.*$/i
+        );
+      });
+
+      it('should prevent updating agent policy name already in multiple spaces when name conflicts exist', async () => {
+        const testSpaceOnlyPolicy = await apiClient.createAgentPolicy(TEST_SPACE_1);
+
+        const multiSpacePolicy = await apiClient.createAgentPolicy('default', {
+          name: `test policy ${Date.now()}}`,
+          space_ids: ['default', TEST_SPACE_1],
+        });
+
+        await expectToRejectWithError(
+          () =>
+            apiClient.putAgentPolicy(
+              multiSpacePolicy.item.id,
+              {
+                name: testSpaceOnlyPolicy.item.name,
+                namespace: 'default',
+              },
+              'default'
+            ),
+          /409 Conflict Agent Policy\s.* already exists with name\s.*$/i
+        );
+      });
     });
 
     describe('DELETE /agent_policies/{id}', () => {

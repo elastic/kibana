@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { ComponentProps } from 'react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';

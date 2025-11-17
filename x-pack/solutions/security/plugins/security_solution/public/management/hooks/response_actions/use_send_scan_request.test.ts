@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useMutation as _useMutation } from '@tanstack/react-query';
+import { useMutation as _useMutation } from '@kbn/react-query';
 import type { AppContextTestRender } from '../../../common/mock/endpoint';
 import type { RenderHookResult } from '@testing-library/react';
 import { createAppRootMockRenderer } from '../../../common/mock/endpoint';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { getESQLResults } from '@kbn/esql-utils';
 import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privilege_monitoring/utils';
 import { esqlResponseToRecords } from '../../../../common/utils/esql';

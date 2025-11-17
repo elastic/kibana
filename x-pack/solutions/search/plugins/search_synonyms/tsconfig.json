@@ -28,6 +28,7 @@
     "@kbn/analytics",
     "@kbn/usage-collection-plugin",
     "@kbn/core-chrome-browser",
+    "@kbn/react-query",
   ],
   "exclude": [
     "target/**/*",

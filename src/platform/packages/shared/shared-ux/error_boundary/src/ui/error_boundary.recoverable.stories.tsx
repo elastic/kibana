@@ -13,7 +13,7 @@ import React from 'react';
 import { EuiFormFieldset } from '@elastic/eui';
 import { Template } from '../../mocks/src/storybook_template';
 import { ChunkLoadErrorComponent, KibanaErrorBoundaryStorybookMock } from '../../mocks';
-import { KibanaErrorBoundaryDepsProvider } from '../services/error_boundary_services';
+import { KibanaErrorBoundaryDepsProvider } from '../services/error_boundary_provider';
 import { KibanaErrorBoundary } from './error_boundary';
 import { KibanaSectionErrorBoundary } from './section_error_boundary';
 
