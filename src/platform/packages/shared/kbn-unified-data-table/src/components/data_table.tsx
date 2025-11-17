@@ -1315,7 +1315,7 @@ const InternalUnifiedDataTable = React.forwardRef<
       return (
         <div
           className="euiDataGrid__noResults"
-          css={styles.loadingAndEmpty}
+          css={styles.emptyRow}
           data-render-complete={isRenderComplete}
           data-shared-item=""
           data-title={searchTitle}
@@ -1465,6 +1465,9 @@ const componentStyles = {
     height: '100%',
     width: '100%',
   }),
+  emptyRow: ({ euiTheme }: UseEuiTheme) => {
+    return css([componentStyles.loadingAndEmpty, { padding: euiTheme.size.m }]);
+  },
   dataTableGlobal: ({ euiTheme }: UseEuiTheme) =>
     css({
       // Custom styles for data grid header cell.
