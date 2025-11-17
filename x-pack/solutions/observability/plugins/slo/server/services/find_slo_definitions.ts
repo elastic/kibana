@@ -41,7 +41,7 @@ export class FindSLODefinitions {
     });
 
     if (params.includeHealth) {
-      const getSLOHealth = new GetSLOHealth(this.scopedClusterClient);
+      const getSLOHealth = new GetSLOHealth(this.scopedClusterClient, this.repository);
 
       const healthResponses = await getSLOHealth.execute({
         list: result.results.map((item) => ({
@@ -53,7 +53,7 @@ export class FindSLODefinitions {
       });
 
       const resultsWithHealth = result.results.map((slo) => {
-        const healthInfo = healthResponses.data.find((health) => health.sloId === slo.id);
+        const healthInfo = healthResponses.find((health) => health.sloId === slo.id);
         return {
           ...slo,
           health: healthInfo?.health,
