@@ -1,3 +1,6 @@
+env:
+  KIBANA_CI_MERGED_PHASES: 'true'
+
 steps:
   # - command: .buildkite/scripts/steps/build_kibana.sh
   #   label: Build Kibana Distribution
