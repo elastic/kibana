@@ -17,13 +17,21 @@ jest.mock('./build_apm_tool_resources', () => ({
   buildApmToolResources: jest.fn(),
 }));
 
+jest.mock('../../routes/historical_data/has_historical_agent_data', () => ({
+  hasHistoricalAgentData: jest.fn(),
+}));
+
 import { getIsObservabilityAgentEnabled } from './get_is_obs_agent_enabled';
 import { buildApmToolResources } from './build_apm_tool_resources';
+import { hasHistoricalAgentData } from '../../routes/historical_data/has_historical_agent_data';
 const mockedGetIsObservabilityAgentEnabled = getIsObservabilityAgentEnabled as jest.MockedFunction<
   typeof getIsObservabilityAgentEnabled
 >;
 const mockedBuildApmToolResources = buildApmToolResources as jest.MockedFunction<
   typeof buildApmToolResources
+>;
+const mockedHasHistoricalAgentData = hasHistoricalAgentData as jest.MockedFunction<
+  typeof hasHistoricalAgentData
 >;
 
 const mockLogger = {
@@ -42,12 +50,14 @@ describe('getApmToolAvailability', () => {
 
   it('returns unavailable when feature flag is disabled', async () => {
     mockedGetIsObservabilityAgentEnabled.mockResolvedValue(false);
+
     const result = await getApmToolAvailability({
       core: mockCore,
       plugins,
       request,
       logger: mockLogger,
     });
+
     expect(result.status).toBe('unavailable');
     expect(result.reason).toMatch(/Feature flag/);
     expect(mockedBuildApmToolResources).not.toHaveBeenCalled();
@@ -55,7 +65,8 @@ describe('getApmToolAvailability', () => {
 
   it('returns available when feature flag enabled and historical data exists', async () => {
     mockedGetIsObservabilityAgentEnabled.mockResolvedValue(true);
-    mockedBuildApmToolResources.mockResolvedValue({ hasHistoricalData: true } as any);
+    mockedBuildApmToolResources.mockResolvedValue({ apmEventClient: {} });
+    mockedHasHistoricalAgentData.mockResolvedValue(true);
 
     const result = await getApmToolAvailability({
       core: mockCore,
@@ -63,12 +74,14 @@ describe('getApmToolAvailability', () => {
       request,
       logger: mockLogger,
     });
+
     expect(result.status).toBe('available');
   });
 
   it('returns unavailable when feature flag enabled but no historical data', async () => {
     mockedGetIsObservabilityAgentEnabled.mockResolvedValue(true);
-    mockedBuildApmToolResources.mockResolvedValue({ hasHistoricalData: false } as any);
+    mockedBuildApmToolResources.mockResolvedValue({ apmEventClient: {} });
+    mockedHasHistoricalAgentData.mockResolvedValue(false);
 
     const result = await getApmToolAvailability({
       core: mockCore,
@@ -76,6 +89,7 @@ describe('getApmToolAvailability', () => {
       request,
       logger: mockLogger,
     });
+
     expect(result.status).toBe('unavailable');
     expect(result.reason).toMatch(/No historical APM data/);
   });
@@ -90,6 +104,7 @@ describe('getApmToolAvailability', () => {
       request,
       logger: mockLogger,
     });
+
     expect(result.status).toBe('unavailable');
     expect(result.reason).toMatch(/Failed observability agent availability check/);
   });

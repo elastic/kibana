@@ -11,7 +11,6 @@ import { firstValueFrom } from 'rxjs';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getRandomSampler } from '../../lib/helpers/get_random_sampler';
-import { hasHistoricalAgentData } from '../../routes/historical_data/has_historical_agent_data';
 import type { MinimalApmPluginRequestHandlerContext } from '../../routes/typings';
 import { getMlClient } from '../../lib/helpers/get_ml_client';
 import type { MinimalAPMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
@@ -21,7 +20,6 @@ import type { ApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 export interface ApmToolResources {
   apmEventClient: Awaited<ReturnType<typeof getApmEventClient>>;
   randomSampler: Awaited<ReturnType<typeof getRandomSampler>>;
-  hasHistoricalData: boolean;
   mlClient: Awaited<ReturnType<typeof getMlClient>>;
   apmAlertsClient: ApmAlertsClient;
 }
@@ -109,8 +107,5 @@ export async function buildApmToolResources({
     apmAlertsClientPromise,
   ]);
 
-  const hasHistoricalData = await hasHistoricalAgentData(apmEventClient);
-  logger.debug(`Has historical APM data: ${hasHistoricalData}`);
-
-  return { apmEventClient, randomSampler, mlClient, apmAlertsClient, hasHistoricalData };
+  return { apmEventClient, randomSampler, mlClient, apmAlertsClient };
 }

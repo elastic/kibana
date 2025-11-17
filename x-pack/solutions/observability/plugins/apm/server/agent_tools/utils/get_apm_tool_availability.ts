@@ -9,8 +9,9 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolAvailabilityResult } from '@kbn/onechat-server';
 import { OBSERVABILITY_AGENT_FEATURE_FLAG } from '../../../common/observability_agent/feature_flag';
-import { getIsObservabilityAgentEnabled } from './get_is_obs_agent_enabled';
+import { hasHistoricalAgentData } from '../../routes/historical_data/has_historical_agent_data';
 import type { APMPluginStartDependencies, APMPluginSetupDependencies } from '../../types';
+import { getIsObservabilityAgentEnabled } from './get_is_obs_agent_enabled';
 import { buildApmToolResources } from './build_apm_tool_resources';
 
 export async function getApmToolAvailability({
@@ -33,19 +34,22 @@ export async function getApmToolAvailability({
       };
     }
 
-    const { hasHistoricalData } = await buildApmToolResources({
+    const { apmEventClient } = await buildApmToolResources({
       core,
       plugins,
       request,
       logger,
     });
 
+    const hasHistoricalData = await hasHistoricalAgentData(apmEventClient);
+    logger.debug(`Has historical APM data: ${hasHistoricalData}`);
+
     return hasHistoricalData
       ? { status: 'available' }
       : { status: 'unavailable', reason: 'No historical APM data' };
-  } catch (e: any) {
-    logger.error(`Failed to check observability agent availability: ${e?.message}`);
-    logger.debug(e);
+  } catch (error) {
+    logger.error(`Failed to check observability agent availability: ${error?.message}`);
+    logger.debug(error);
 
     return {
       status: 'unavailable',
