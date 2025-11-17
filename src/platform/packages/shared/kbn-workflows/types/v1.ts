@@ -169,6 +169,7 @@ export interface WorkflowExecutionDto {
   duration: number | null;
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
+  context?: Record<string, unknown>;
 }
 
 export type WorkflowExecutionListItemDto = Omit<
