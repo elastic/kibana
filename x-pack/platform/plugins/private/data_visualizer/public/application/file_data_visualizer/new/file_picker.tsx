@@ -42,7 +42,7 @@ export const FilePicker: FC<Props> = ({ fileUploadManager, fullWidth, large = fa
             <EuiTitle size="xxxs">
               <h6>
                 <FormattedMessage
-                  id="xpack.dataVisualizer.file.uploadView.uploadFilesTitle"
+                  id="xpack.dataVisualizer.file.uploadView.uploadFilesLabel"
                   defaultMessage="Upload data"
                 />
               </h6>
