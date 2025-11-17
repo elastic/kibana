@@ -38,6 +38,7 @@ import { MAX_OPTIONS_LIST_BULK_SELECT_SIZE, MAX_OPTIONS_LIST_REQUEST_SIZE } from
 interface OptionsListPopoverProps {
   showOnlySelected: boolean;
   setShowOnlySelected: (value: boolean) => void;
+  disableMultiValueEmptySelection?: boolean;
 }
 
 const optionsListPopoverStyles = {
@@ -70,6 +71,7 @@ const optionsListPopoverStyles = {
 export const OptionsListPopoverActionBar = ({
   showOnlySelected,
   setShowOnlySelected,
+  disableMultiValueEmptySelection = false,
 }: OptionsListPopoverProps) => {
   const { componentApi, displaySettings } = useOptionsListContext();
   const [areAllSelected, setAllSelected] = useState<boolean>(false);
@@ -123,8 +125,7 @@ export const OptionsListPopoverActionBar = ({
     ? selectedOptions.length > MAX_OPTIONS_LIST_BULK_SELECT_SIZE
     : totalCardinality > MAX_OPTIONS_LIST_BULK_SELECT_SIZE;
 
-  const isEmptySelectionDisabled =
-    displaySettings.disableMultiValueEmptySelection && areAllSelected;
+  const isEmptySelectionDisabled = disableMultiValueEmptySelection && areAllSelected;
 
   const isBulkSelectDisabled =
     dataLoading ||

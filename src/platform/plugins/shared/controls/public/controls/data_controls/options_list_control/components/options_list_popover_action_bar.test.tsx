@@ -36,10 +36,12 @@ const renderComponent = ({
   componentApi,
   displaySettings,
   showOnlySelected,
+  disableMultiValueEmptySelection = false,
 }: {
   componentApi: OptionsListComponentApi;
   displaySettings: OptionsListDisplaySettings;
   showOnlySelected?: boolean;
+  disableMultiValueEmptySelection?: boolean;
 }) => {
   return render(
     <OptionsListControlContext.Provider
@@ -51,6 +53,7 @@ const renderComponent = ({
       <OptionsListPopoverActionBar
         showOnlySelected={showOnlySelected ?? false}
         setShowOnlySelected={() => {}}
+        disableMultiValueEmptySelection={disableMultiValueEmptySelection}
       />
     </OptionsListControlContext.Provider>
   );
@@ -152,7 +155,7 @@ describe('Options list popover', () => {
     contextMock.componentApi.setSelectedOptions(['moo', 'miau', 'oink']);
     renderComponent({
       ...contextMock,
-      displaySettings: { disableMultiValueEmptySelection: true },
+      disableMultiValueEmptySelection: true,
     });
 
     expect(getSelectAllCheckbox()).toBeDisabled();

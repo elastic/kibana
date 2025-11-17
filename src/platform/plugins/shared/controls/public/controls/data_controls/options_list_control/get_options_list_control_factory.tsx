@@ -292,7 +292,6 @@ export const getOptionsListControlFactory = (): DataControlFactory<
             hideExclude: 'skip',
             hideExists: 'skip',
             hideSort: 'skip',
-            disableMultiValueEmptySelection: 'skip',
           };
         },
         defaultState: {

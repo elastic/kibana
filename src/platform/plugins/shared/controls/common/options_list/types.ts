@@ -28,7 +28,6 @@ export interface OptionsListDisplaySettings {
   hideExclude?: boolean;
   hideExists?: boolean;
   hideSort?: boolean;
-  disableMultiValueEmptySelection?: boolean;
 }
 
 type OptionsListBaseControlState = OptionsListDisplaySettings & {

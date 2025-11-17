@@ -176,12 +176,14 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
                 hideExclude: true,
                 hideExists: true,
                 hideSort: true,
-                // Don't allow empty selections until "ANY" value is supported: https://github.com/elastic/elasticsearch/issues/136735
-                disableMultiValueEmptySelection: true,
               },
             }}
           >
-            <OptionsListControl controlPanelClassName={controlPanelClassName} />
+            <OptionsListControl
+              controlPanelClassName={controlPanelClassName}
+              // Don't allow empty selections until "ANY" value is supported: https://github.com/elastic/elasticsearch/issues/136735
+              disableMultiValueEmptySelection={true}
+            />
           </OptionsListControlContext.Provider>
         ),
       };
