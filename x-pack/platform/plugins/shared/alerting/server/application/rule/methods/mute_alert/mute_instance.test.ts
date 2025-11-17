@@ -77,7 +77,7 @@ describe('mute alert instance', () => {
 
     await muteInstance(context, {
       params: { alertId: '1', alertInstanceId: 'instance1' },
-      body: {},
+      query: {},
     });
 
     expect(auditLoggerMock.log).toHaveBeenCalledTimes(1);
@@ -140,7 +140,7 @@ describe('mute alert instance', () => {
 
     await muteInstance(context, {
       params: { alertId: '1', alertInstanceId: 'instance1' },
-      body: { validateAlertsExistence: true },
+      query: { validateAlertsExistence: true },
     });
 
     expect(auditLoggerMock.log).toHaveBeenCalledTimes(1);
@@ -204,7 +204,7 @@ describe('mute alert instance', () => {
     await expect(() =>
       muteInstance(context, {
         params: { alertId: '1', alertInstanceId: 'instance1' },
-        body: { validateAlertsExistence: true },
+        query: { validateAlertsExistence: true },
       })
     ).rejects.toThrow('Alert instance with id "instance1" does not exist for rule with id "1"');
   });
