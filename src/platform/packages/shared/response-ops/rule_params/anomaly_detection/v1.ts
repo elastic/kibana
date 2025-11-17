@@ -27,4 +27,6 @@ export const mlAnomalyDetectionAlertParamsSchema = schema.object({
   lookbackInterval: schema.nullable(schema.string()),
   /** User's override for the top N buckets  */
   topNBuckets: schema.nullable(schema.number({ min: 1 })),
+  /** Optional KQL filter */
+  kqlQueryString: schema.nullable(schema.string()),
 });
