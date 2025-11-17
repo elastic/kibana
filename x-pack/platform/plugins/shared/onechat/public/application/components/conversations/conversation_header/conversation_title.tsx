@@ -23,9 +23,6 @@ const labels = {
   ariaLabel: i18n.translate('xpack.onechat.conversationTitle.ariaLabel', {
     defaultMessage: 'Conversation title',
   }),
-  newConversationDisplay: i18n.translate('xpack.onechat.conversationTitle.newConversationDisplay', {
-    defaultMessage: 'New conversation',
-  }),
   rename: i18n.translate('xpack.onechat.conversationTitle.rename', {
     defaultMessage: 'Rename',
   }),
@@ -47,14 +44,6 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
 
   const [isContextMenuOpen, setIsContextMenuOpen] = useState(false);
 
-  const getTitle = () => {
-    if (hasActiveConversation) {
-      return title;
-    }
-    return labels.newConversationDisplay;
-  };
-
-  const displayTitle = getTitle();
   const shouldShowButton = hasActiveConversation && !isLoading && title;
 
   const menuItems = [
@@ -100,7 +89,7 @@ export const ConversationTitle: React.FC<ConversationTitleProps> = ({ ariaLabell
               color="text"
               data-test-subj="agentBuilderConversationTitle"
             >
-              <h1 id={ariaLabelledBy}>{displayTitle}</h1>
+              <h1 id={ariaLabelledBy}>{title}</h1>
             </EuiButtonEmpty>
           }
           isOpen={isContextMenuOpen}

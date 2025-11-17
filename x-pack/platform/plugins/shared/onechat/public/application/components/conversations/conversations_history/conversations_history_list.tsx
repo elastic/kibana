@@ -81,13 +81,10 @@ export const ConversationHistoryList: React.FC<ConversationHistoryListProps> = (
   }, [timeSections, currentConversationId]);
 
   const handleChange = useCallback(
-    (options: EuiSelectableOption[]) => {
-      const selectedOption = options.find(
-        (option) => option.checked === 'on' && !option.isGroupLabel
-      );
-      if (!selectedOption?.data?.conversation) return;
+    (_options: EuiSelectableOption[], _event: unknown, changedOption: EuiSelectableOption) => {
+      if (!changedOption?.data?.conversation) return;
 
-      const conversation = selectedOption.data.conversation as ConversationWithoutRounds;
+      const conversation = changedOption.data.conversation as ConversationWithoutRounds;
 
       if (isEmbeddedContext) {
         setConversationId?.(conversation.id);
