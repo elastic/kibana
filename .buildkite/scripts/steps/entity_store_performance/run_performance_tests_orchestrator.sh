@@ -37,26 +37,24 @@ echo "Elasticsearch URL: $CLOUD_DEPLOYMENT_ELASTICSEARCH_URL"
 echo "--- Get Deployment Resource Specifications"
 DEPLOYMENT_JSON=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --output json)
 
-# Save deployment specification as artifact
-DEPLOYMENT_SPEC_FILE="${KIBANA_DIR}/deployment-spec-${CLOUD_DEPLOYMENT_ID}.json"
-echo "$DEPLOYMENT_JSON" | jq '.' > "$DEPLOYMENT_SPEC_FILE"
-echo "Saved deployment specification to: $DEPLOYMENT_SPEC_FILE"
-buildkite-agent artifact upload "$DEPLOYMENT_SPEC_FILE"
+# Extract hardware profile (deployment template) from plan
+DEPLOYMENT_PLAN_JSON=$(ecctl deployment show "$CLOUD_DEPLOYMENT_ID" --generate-update-payload 2>/dev/null || echo "{}")
+ES_HARDWARE_PROFILE=$(echo "$DEPLOYMENT_PLAN_JSON" | jq -r '.resources.elasticsearch[0].plan.deployment_template.id // "unknown"')
 
-# Extract hardware profile (deployment template)
-ES_HARDWARE_PROFILE=$(echo "$DEPLOYMENT_JSON" | jq -r '.resources.elasticsearch[0].plan.deployment_template.id // "unknown"')
+# Extract Kibana specifications from info.topology.instances
+KIBANA_MEMORY=$(echo "$DEPLOYMENT_JSON" | jq -r '.resources.kibana[0].info.topology.instances[0].memory.instance_capacity // "unknown"')
+KIBANA_ZONES=$(echo "$DEPLOYMENT_JSON" | jq -r '[.resources.kibana[0].info.topology.instances[]?.zone] | unique | length // "unknown"')
+KIBANA_INSTANCE_CONFIG=$(echo "$DEPLOYMENT_JSON" | jq -r '.resources.kibana[0].info.topology.instances[0].instance_configuration.id // "unknown"')
 
-# Extract Kibana specifications
-KIBANA_MEMORY=$(echo "$DEPLOYMENT_JSON" | jq -r '.resources.kibana[0].plan.cluster_topology[0].size.value // "unknown"')
-KIBANA_ZONES=$(echo "$DEPLOYMENT_JSON" | jq -r '.resources.kibana[0].plan.cluster_topology[0].zone_count // "unknown"')
-KIBANA_INSTANCE_CONFIG=$(echo "$DEPLOYMENT_JSON" | jq -r '.resources.kibana[0].plan.cluster_topology[0].instance_configuration_id // "unknown"')
-
-# Extract Elasticsearch specifications
-# Get active nodes (size.value > 0) and aggregate their specs
-ES_TOTAL_MEMORY=$(echo "$DEPLOYMENT_JSON" | jq -r '[.resources.elasticsearch[0].plan.cluster_topology[] | select(.size.value != null and .size.value > 0) | (.size.value * (.zone_count // 1))] | add // 0')
-ES_ZONES=$(echo "$DEPLOYMENT_JSON" | jq -r '.resources.elasticsearch[0].plan.cluster_topology[] | select(.size.value != null and .size.value > 0) | (.zone_count // 1)' | head -1)
-ES_NODE_COUNT=$(echo "$DEPLOYMENT_JSON" | jq -r '[.resources.elasticsearch[0].plan.cluster_topology[] | select(.size.value != null and .size.value > 0) | (.zone_count // 1)] | add // 0')
-ES_NODE_DETAILS=$(echo "$DEPLOYMENT_JSON" | jq -r '.resources.elasticsearch[0].plan.cluster_topology[] | select(.size.value != null and .size.value > 0) | "\(.id): \(.size.value)MB x \((.zone_count // 1)) zones (\(.instance_configuration_id // "unknown"))"' | tr '\n' '; ')
+# Extract Elasticsearch specifications from info.topology.instances
+# Sum memory from all instances
+ES_TOTAL_MEMORY=$(echo "$DEPLOYMENT_JSON" | jq -r '[.resources.elasticsearch[0].info.topology.instances[]?.memory.instance_capacity // 0] | add // 0')
+# Count unique zones
+ES_ZONES=$(echo "$DEPLOYMENT_JSON" | jq -r '[.resources.elasticsearch[0].info.topology.instances[]?.zone] | unique | length // "unknown"')
+# Count total instances
+ES_NODE_COUNT=$(echo "$DEPLOYMENT_JSON" | jq -r '.resources.elasticsearch[0].info.topology.instances | length // 0')
+# Create node details string
+ES_NODE_DETAILS=$(echo "$DEPLOYMENT_JSON" | jq -r '.resources.elasticsearch[0].info.topology.instances[]? | "\(.instance_name): \(.memory.instance_capacity // 0)MB (\(.zone // "unknown") zone, \(.instance_configuration.id // "unknown"))"' | tr '\n' '; ')
 
 # Export for reporting script
 export ES_HARDWARE_PROFILE
