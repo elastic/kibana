@@ -24,8 +24,10 @@ import {
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
 import { DetectedFieldsEditor } from './detected_fields_editor';
-import { DataSourcesList } from './data_sources_list';
 import type { SchemaEditorField } from '../schema_editor/types';
+import { DataSourcesControls } from './data_sources_controls';
+import { getActiveDataSourceRef } from './state_management/stream_enrichment_state_machine/utils';
+import { useDataSourceSelector } from './state_management/data_source_state_machine';
 
 export const SimulationPlayground = ({
   schemaEditorFields,
@@ -46,6 +48,14 @@ export const SimulationPlayground = ({
     })
   );
 
+  const activeDataSourceRef = useStreamEnrichmentSelector((state) =>
+    getActiveDataSourceRef(state.context.dataSourcesRefs)
+  );
+
+  const isDataSourceLoading = useDataSourceSelector(activeDataSourceRef, (state) =>
+    state ? state.matches({ enabled: 'loadingData' }) : false
+  );
+
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
 
   return (
@@ -61,6 +71,7 @@ export const SimulationPlayground = ({
                   <EuiButtonIcon
                     iconType="refresh"
                     onClick={refreshSimulation}
+                    isLoading={isDataSourceLoading}
                     aria-label={i18n.translate(
                       'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.refreshPreviewAriaLabel',
                       { defaultMessage: 'Refresh data preview' }
@@ -90,7 +101,7 @@ export const SimulationPlayground = ({
             </EuiTabs>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <DataSourcesList />
+            <DataSourcesControls />
           </EuiFlexItem>
           <ProgressBar />
         </EuiFlexGroup>
