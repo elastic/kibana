@@ -115,6 +115,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
       {isDeprecatedUser ? (
         <>
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.security.management.users.editUserPage.deprecatedUserWarning"
@@ -131,6 +132,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
       ) : isReservedUser ? (
         <>
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.security.management.users.editUserPage.reservedUserWarning"
@@ -144,6 +146,7 @@ export const EditUserPage: FunctionComponent<EditUserPageProps> = ({ username })
       ) : user.enabled === false ? (
         <>
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.security.management.users.editUserPage.disabledUserWarning"
