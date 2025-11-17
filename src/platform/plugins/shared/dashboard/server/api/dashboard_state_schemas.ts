@@ -26,7 +26,7 @@ export const allowUnmappedKeysSchema = schema.boolean({
   meta: {
     deprecated: true,
     description:
-      'When enabled, dashboard REST endpoints support unmapped keys. Unmapped key schemas will unexpectedly change or be removed without notice and are not supported.',
+      'When enabled, dashboard REST endpoints support unmapped keys. Unmapped key schemas can be changed or be removed without notice and are not supported.',
   },
 });
 
