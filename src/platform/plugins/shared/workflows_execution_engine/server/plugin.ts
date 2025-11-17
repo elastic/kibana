@@ -19,7 +19,6 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution, WorkflowExecutionEngineModel } from '@kbn/workflows';
 import { ExecutionStatus, WorkflowRepository } from '@kbn/workflows';
 import { WorkflowExecutionNotFoundError } from '@kbn/workflows/common/errors';
@@ -48,8 +47,8 @@ import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
-import { createIndexes } from '../common';
 import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
+import { createIndexes } from '../common';
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 
