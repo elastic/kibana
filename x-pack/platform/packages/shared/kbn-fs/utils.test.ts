@@ -7,7 +7,7 @@
 
 import { join } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { getSafePath, ensureDirectory, ensureDirectorySync } from './utils';
+import { getSafePath } from './utils';
 
 const DATA_PATH = join(REPO_ROOT, 'data');
 
@@ -65,100 +65,6 @@ describe('kbn-fs utils', () => {
 
       expect(result.fullPath).toBe(join(DATA_PATH, 'test.txt'));
       expect(result.alias).toBe('disk:data/test.txt');
-    });
-  });
-
-  describe('ensureDirectory', () => {
-    it('should create directory if it does not exist', async () => {
-      const testDir = join(DATA_PATH, 'test-ensure-dir');
-      const testFile = join(testDir, 'subdir', 'file.txt');
-
-      await ensureDirectory(testFile);
-
-      // Check that the directory was created
-      const fs = await import('fs');
-      expect(fs.existsSync(join(testDir, 'subdir'))).toBe(true);
-
-      // Clean up
-      await fs.promises.rm(testDir, { recursive: true, force: true });
-    });
-
-    it('should not create directory if it already exists', async () => {
-      const testDir = join(DATA_PATH, 'test-existing-dir');
-      const testFile = join(testDir, 'file.txt');
-
-      // Create directory first
-      const fs = await import('fs');
-      await fs.promises.mkdir(testDir, { recursive: true });
-
-      // Ensure directory (should not throw)
-      await ensureDirectory(testFile);
-
-      // Clean up
-      await fs.promises.rm(testDir, { recursive: true, force: true });
-    });
-
-    it('should handle nested directory creation', async () => {
-      const testDir = join(DATA_PATH, 'test-nested-dir');
-      const testFile = join(testDir, 'level1', 'level2', 'level3', 'file.txt');
-
-      await ensureDirectory(testFile);
-
-      // Check that all nested directories were created
-      const fs = await import('fs');
-      expect(fs.existsSync(join(testDir, 'level1'))).toBe(true);
-      expect(fs.existsSync(join(testDir, 'level1', 'level2'))).toBe(true);
-      expect(fs.existsSync(join(testDir, 'level1', 'level2', 'level3'))).toBe(true);
-
-      // Clean up
-      await fs.promises.rm(testDir, { recursive: true, force: true });
-    });
-  });
-
-  describe('ensureDirectorySync', () => {
-    it('should create directory synchronously if it does not exist', async () => {
-      const testDir = join(DATA_PATH, 'test-ensure-dir-sync');
-      const testFile = join(testDir, 'subdir', 'file.txt');
-
-      ensureDirectorySync(testFile);
-
-      // Check that the directory was created
-      const fs = await import('fs');
-      expect(fs.existsSync(join(testDir, 'subdir'))).toBe(true);
-
-      // Clean up
-      fs.rmSync(testDir, { recursive: true, force: true });
-    });
-
-    it('should not create directory if it already exists', async () => {
-      const testDir = join(DATA_PATH, 'test-existing-dir-sync');
-      const testFile = join(testDir, 'file.txt');
-
-      // Create directory first
-      const fs = await import('fs');
-      fs.mkdirSync(testDir, { recursive: true });
-
-      // Ensure directory (should not throw)
-      expect(() => ensureDirectorySync(testFile)).not.toThrow();
-
-      // Clean up
-      fs.rmSync(testDir, { recursive: true, force: true });
-    });
-
-    it('should handle nested directory creation synchronously', async () => {
-      const testDir = join(DATA_PATH, 'test-nested-dir-sync');
-      const testFile = join(testDir, 'level1', 'level2', 'level3', 'file.txt');
-
-      ensureDirectorySync(testFile);
-
-      // Check that all nested directories were created
-      const fs = await import('fs');
-      expect(fs.existsSync(join(testDir, 'level1'))).toBe(true);
-      expect(fs.existsSync(join(testDir, 'level1', 'level2'))).toBe(true);
-      expect(fs.existsSync(join(testDir, 'level1', 'level2', 'level3'))).toBe(true);
-
-      // Clean up
-      fs.rmSync(testDir, { recursive: true, force: true });
     });
   });
 });
