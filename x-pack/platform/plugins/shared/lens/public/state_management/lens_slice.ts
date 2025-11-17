@@ -421,6 +421,8 @@ export const makeLensReducer = (storeDeps: LensStoreDeps) => {
           newLayerId,
           clonedIDsMap
         );
+        // Set the selected layer to the newly cloned layer
+        state.visualization.selectedLayerId = newLayerId;
       })
       .addCase(removeOrClearLayer, (state, { payload: { visualizationId, layerId, layerIds } }) => {
         const activeVisualization = visualizationMap[visualizationId];

@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { LensLayerType } from './types';
 
 // Mapping of lens layer types to tab display names
-export const lensLayerTypeTabDisplayNames = {
+const lensLayerTypeTabDisplayNames = {
   data: i18n.translate('xpack.lens.layerTypes.tabDisplayName.data', {
     defaultMessage: 'Data layer',
   }),

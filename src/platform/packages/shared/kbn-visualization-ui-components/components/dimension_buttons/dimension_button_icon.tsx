@@ -24,7 +24,8 @@ const IconFromAccessorConfig = ({ accessorConfig }: { accessorConfig: AccessorCo
           css={css`
             /* Add a stroke/border to make light colors visible against light backgrounds */
             /* Inspired by EUI's swatchInput icon pattern */
-            svg rect {
+            svg rect.euiSwatchInput__stroke {
+              fill: none;
               stroke: ${borderColor};
               stroke-width: 1px;
             }
@@ -32,7 +33,7 @@ const IconFromAccessorConfig = ({ accessorConfig }: { accessorConfig: AccessorCo
         >
           <EuiIcon
             color={accessorConfig.color}
-            type="stopFilled"
+            type="swatchInput"
             aria-label={i18n.translate(
               'visualizationUiComponents.dimensionButtonIcon.colorIndicatorLabel',
               {

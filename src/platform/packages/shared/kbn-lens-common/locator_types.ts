@@ -13,6 +13,7 @@ import type { Filter, AggregateQuery, Query } from '@kbn/es-query';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Reference } from '@kbn/content-management-utils';
+import type { VisualizationState } from './visualizations/types';
 import type { DateRange } from './types';
 
 export const LENS_SHARE_STATE_ACTION = 'LENS_SHARE_STATE_ACTION';
@@ -41,11 +42,7 @@ export interface LensShareableState {
   /**
    * Set the visualization configuration
    */
-  visualization: {
-    activeId: string | null;
-    state: unknown;
-    selectedLayerId: string | null;
-  } & SerializableRecord;
+  visualization: VisualizationState & SerializableRecord;
 
   /**
    * Set the active datasource used
