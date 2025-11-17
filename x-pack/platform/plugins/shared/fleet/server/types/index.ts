@@ -116,11 +116,15 @@ export interface BulkActionResult {
   error?: Error;
 }
 
-import type { PackageVerificationStatus } from '../../common/types';
+import { type PackageVerificationStatus } from '../../common/types';
+
 export interface PackageVerificationResult {
   verificationKeyId?: string;
   verificationStatus: PackageVerificationStatus;
 }
+
+import { GetAutoUpgradeAgentsStatusResponseSchema } from '../../common/types/rest_spec/agent_policy';
+export { GetAutoUpgradeAgentsStatusResponseSchema };
 
 export * from './models';
 export * from './rest_spec';
