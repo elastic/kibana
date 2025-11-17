@@ -9,10 +9,6 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import { platformCoreTools } from '@kbn/onechat-common';
 import type { StaticToolRegistration } from '@kbn/onechat-server';
 import {
-  OBSERVABILITY_GET_APM_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
-  OBSERVABILITY_GET_SERVICES_TOOL_ID,
-} from '@kbn/apm-plugin/common/observability_agent/agent_tool_ids';
-import {
   OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
   createGetDataSourcesTool,
 } from './get_data_sources/get_data_sources';
@@ -26,6 +22,10 @@ import type {
   ObservabilityAgentPluginStartDependencies,
 } from '../types';
 import { OBSERVABILITY_GET_ALERTS_TOOL_ID, createGetAlertsTool } from './get_alerts/get_alerts';
+import {
+  OBSERVABILITY_GET_SERVICES_TOOL_ID,
+  OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
+} from '../../common/constants';
 
 const PLATFORM_TOOL_IDS = [
   platformCoreTools.search,
@@ -38,7 +38,7 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
   OBSERVABILITY_SEARCH_KNOWLEDGE_BASE_TOOL_ID,
   OBSERVABILITY_GET_ALERTS_TOOL_ID,
-  OBSERVABILITY_GET_APM_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
+  OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
   OBSERVABILITY_GET_SERVICES_TOOL_ID,
 ];
 

@@ -8,7 +8,7 @@
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { StaticToolRegistration } from '@kbn/onechat-server';
 import type { APMPluginStartDependencies, APMPluginSetupDependencies } from '../types';
-import { createApmDownstreamDependenciesTool } from './get_apm_downstream_dependencies';
+import { createDownstreamDependenciesTool } from './get_downstream_dependencies';
 import { createGetServicesTool } from './get_services';
 
 export async function registerAgentTools({
@@ -21,7 +21,7 @@ export async function registerAgentTools({
   logger: Logger;
 }) {
   const apmTools: StaticToolRegistration<any>[] = [
-    createApmDownstreamDependenciesTool({ core, plugins, logger }),
+    createDownstreamDependenciesTool({ core, plugins, logger }),
     createGetServicesTool({ core, plugins, logger }),
   ];
 

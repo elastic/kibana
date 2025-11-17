@@ -14,10 +14,10 @@ import { timeRangeSchema } from './utils/tool_schemas';
 import { buildApmToolResources } from './utils/build_apm_tool_resources';
 import { getApmToolAvailability } from './utils/get_apm_tool_availability';
 import { getApmDownstreamDependencies } from '../routes/assistant_functions/get_apm_downstream_dependencies';
-import { OBSERVABILITY_GET_APM_DOWNSTREAM_DEPENDENCIES_TOOL_ID } from '../../common/observability_agent/agent_tool_ids';
+import { OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID } from '../../common/observability_agent/agent_tool_ids';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../types';
 
-const getApmDownstreamDependenciesToolSchema = z.object({
+const getDownstreamDependenciesToolSchema = z.object({
   ...timeRangeSchema.shape,
   serviceName: z.string().min(1).describe('The name of the service'),
   serviceEnvironment: z
@@ -28,7 +28,7 @@ const getApmDownstreamDependenciesToolSchema = z.object({
     ),
 });
 
-export function createApmDownstreamDependenciesTool({
+export function createDownstreamDependenciesTool({
   core,
   plugins,
   logger,
@@ -36,13 +36,13 @@ export function createApmDownstreamDependenciesTool({
   core: CoreSetup<APMPluginStartDependencies>;
   plugins: APMPluginSetupDependencies;
   logger: Logger;
-}): StaticToolRegistration<typeof getApmDownstreamDependenciesToolSchema> {
-  const toolDefinition: BuiltinToolDefinition<typeof getApmDownstreamDependenciesToolSchema> = {
-    id: OBSERVABILITY_GET_APM_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
+}): StaticToolRegistration<typeof getDownstreamDependenciesToolSchema> {
+  const toolDefinition: BuiltinToolDefinition<typeof getDownstreamDependenciesToolSchema> = {
+    id: OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
     type: ToolType.builtin,
     description:
       'Get downstream dependencies (services or uninstrumented backends) for a given service and time range.',
-    schema: getApmDownstreamDependenciesToolSchema,
+    schema: getDownstreamDependenciesToolSchema,
     tags: ['observability', 'apm', 'dependencies'],
     availability: {
       cacheMode: 'space',

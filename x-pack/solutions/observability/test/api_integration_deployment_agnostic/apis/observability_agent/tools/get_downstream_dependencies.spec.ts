@@ -12,7 +12,7 @@ import type { ToolResult, OtherResult } from '@kbn/onechat-common';
 import type { LlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
 import { createLlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
 import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-plugin/server/agent/register_observability_agent';
-import { OBSERVABILITY_GET_APM_DOWNSTREAM_DEPENDENCIES_TOOL_ID } from '@kbn/apm-plugin/common/observability_agent/agent_tool_ids';
+import { OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID } from '@kbn/apm-plugin/common/observability_agent/agent_tool_ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
 import { setupToolCallThenAnswer } from '../utils/llm_proxy/scenarios';
@@ -28,8 +28,8 @@ const START = 'now-15m';
 const END = 'now';
 const DEPENDENCY_RESOURCE = 'elasticsearch/my-backend';
 
-const LLM_EXPOSED_TOOL_NAME_FOR_GET_APM_DOWNSTREAM_DEPENDENCIES =
-  'observability_get_apm_downstream_dependencies';
+const LLM_EXPOSED_TOOL_NAME_FOR_GET_DOWNSTREAM_DEPENDENCIES =
+  'observability_get_downstream_dependencies';
 const USER_PROMPT = `What are the downstream dependencies for the service ${SERVICE_NAME} in the last 15 minutes?`;
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
@@ -40,7 +40,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let connectorId: string;
   let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
 
-  describe(`tool: ${OBSERVABILITY_GET_APM_DOWNSTREAM_DEPENDENCIES_TOOL_ID}`, function () {
+  describe(`tool: ${OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID}`, function () {
     // LLM Proxy is not yet supported in cloud environments
     this.tags(['skipCloud']);
 
@@ -64,7 +64,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         setupToolCallThenAnswer({
           llmProxy,
-          toolName: LLM_EXPOSED_TOOL_NAME_FOR_GET_APM_DOWNSTREAM_DEPENDENCIES,
+          toolName: LLM_EXPOSED_TOOL_NAME_FOR_GET_DOWNSTREAM_DEPENDENCIES,
           toolArg: {
             serviceName: SERVICE_NAME,
             serviceEnvironment: ENVIRONMENT,
