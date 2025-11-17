@@ -11,11 +11,11 @@ import React from 'react';
 import { z } from '@kbn/zod/v4';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import type { EuiSelectProps } from '@elastic/eui';
-import type { BaseMetadata, StripFormProps } from '../schema_metadata';
-import type { BaseWidgetProps } from './widget_props';
+import type { BaseMetadata, StripFormProps } from '../../schema_metadata';
+import type { BaseWidgetProps, WidgetType } from '../types';
 
 export type SelectWidgetMeta = BaseMetadata & {
-  widget: 'select';
+  widget: WidgetType.Select;
 } & StripFormProps<EuiSelectProps>;
 
 export type SelectWidgetProps = BaseWidgetProps<string, SelectWidgetMeta>;

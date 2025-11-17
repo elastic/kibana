@@ -14,29 +14,21 @@ import type { WidgetType } from './widgets';
 export type StripFormProps<T> = Partial<Omit<T, 'value' | 'onChange' | 'onBlur'>>;
 
 export interface BaseMetadata {
-  widget: WidgetType;
+  widget?: WidgetType | string;
   label?: string;
   placeholder?: string;
   default?: unknown;
   helpText?: string;
   isDisabled?: boolean;
-  [key: string]: unknown;
 }
 
+// Allow additional properties while maintaining type safety for known properties
 declare module '@kbn/zod/v4' {
-  interface GlobalMeta extends Partial<BaseMetadata> {
-    // Allow any additional properties for flexibility
+  interface GlobalMeta extends BaseMetadata {
     [key: string]: unknown;
   }
 }
 
-export function createWidgetTypeGuard<T extends { widget: WidgetType }>(
-  widgetType: WidgetType
-): (meta: unknown) => meta is T {
-  return (meta): meta is T =>
-    typeof meta === 'object' && meta !== null && 'widget' in meta && meta.widget === widgetType;
-}
-
-export function getMeta(schema: z.ZodTypeAny): z.GlobalMeta | undefined {
-  return z.globalRegistry.get(schema);
+export function getMeta(schema: z.ZodTypeAny): BaseMetadata | undefined {
+  return z.globalRegistry.get(schema) as BaseMetadata | undefined;
 }

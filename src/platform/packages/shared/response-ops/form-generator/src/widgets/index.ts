@@ -7,26 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type React from 'react';
-import { TextField } from './text_field';
-import { SelectField } from './select_field';
-import { PasswordField } from './password_field';
-import { DiscriminatedUnionField } from './discriminated_union_field';
-import { KeyValueField } from './key_value_field';
-
-export type WidgetType = 'text' | 'password' | 'select' | 'formFieldset' | 'keyValue';
-
-export const WIDGET_REGISTRY: Partial<Record<WidgetType, React.ComponentType<any>>> = {
-  text: TextField,
-  password: PasswordField,
-  select: SelectField,
-  formFieldset: DiscriminatedUnionField,
-  keyValue: KeyValueField,
-};
-
-export function getWidget(widgetType: WidgetType): React.ComponentType<any> | undefined {
-  return WIDGET_REGISTRY[widgetType];
-}
-
-export { getKeyValueInitialValue } from './key_value_field';
-export { getDiscriminatedUnionInitialValue } from './discriminated_union_field';
+export { WidgetType } from './types';
+export { WIDGET_REGISTRY, getWidget } from './registry';

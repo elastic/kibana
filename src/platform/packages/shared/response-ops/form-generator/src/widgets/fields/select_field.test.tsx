@@ -12,6 +12,7 @@ import { render, screen, fireEvent } from '@testing-library/react';
 import { z } from '@kbn/zod/v4';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { SelectField } from './select_field';
+import { WidgetType } from '../types';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
@@ -78,7 +79,7 @@ describe('SelectField', () => {
         value="admin"
         label="Role"
         meta={{
-          widget: 'select',
+          widget: WidgetType.Select,
           options,
         }}
         onChange={mockOnChange}

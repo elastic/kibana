@@ -11,9 +11,11 @@ import React, { useMemo } from 'react';
 import { z } from '@kbn/zod/v4';
 import { EuiButton, EuiForm, EuiSpacer } from '@elastic/eui';
 import { getMeta } from './schema_metadata';
+import type { BaseMetadata } from './schema_metadata';
 import { useFormState } from './use_form_state';
 import type { WidgetType } from './widgets';
 import { getWidget } from './widgets';
+import { INVALID_VALUE } from './translations';
 
 /**
  * Key used for root-level field validation errors.
@@ -29,8 +31,8 @@ export interface FieldDefinition {
   value?: unknown;
   validate: (value: unknown) => Record<string, string | string[]> | undefined;
   schema?: z.ZodTypeAny;
-  widget?: WidgetType;
-  meta?: z.GlobalMeta;
+  widget?: WidgetType | string;
+  meta?: BaseMetadata;
 }
 
 const getFieldsFromSchema = <T extends z.ZodRawShape>(schema: z.ZodObject<T>) => {
@@ -73,8 +75,7 @@ const getFieldsFromSchema = <T extends z.ZodRawShape>(schema: z.ZodObject<T>) =>
 
             return Object.keys(errors).length > 0 ? errors : undefined;
           }
-          // Non-Zod error: return root-level error
-          return { [ROOT_ERROR_KEY]: 'Invalid value' };
+          return { [ROOT_ERROR_KEY]: INVALID_VALUE };
         }
       },
     });

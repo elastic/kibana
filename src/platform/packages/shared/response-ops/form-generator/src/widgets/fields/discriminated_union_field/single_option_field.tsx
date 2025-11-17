@@ -10,10 +10,10 @@
 import React, { useMemo, useCallback } from 'react';
 import { z } from '@kbn/zod/v4';
 import { EuiFormFieldset, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { getMeta } from '../../schema_metadata';
+import { getMeta } from '../../../schema_metadata';
 import type { DiscriminatedUnionWidgetProps } from './discriminated_union_field';
 import { getDiscriminatorKey } from './discriminated_union_field';
-import { getWidget } from '..';
+import { getWidget, WidgetType } from '../..';
 
 const getDiscriminatorFieldValue = (
   optionSchema: z.ZodObject<z.ZodRawShape>,
@@ -71,7 +71,7 @@ export const SingleOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = (
 
       const fieldSchema = subSchema as z.ZodTypeAny;
       const metaInfo = getMeta(fieldSchema);
-      const widget = metaInfo?.widget || 'text';
+      const widget = metaInfo?.widget || WidgetType.Text;
       const fieldValue = valueObj[fieldKey] ?? '';
 
       const WidgetComponent = getWidget(widget);

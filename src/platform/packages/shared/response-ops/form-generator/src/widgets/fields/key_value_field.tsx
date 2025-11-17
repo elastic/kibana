@@ -19,14 +19,12 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
-import { createWidgetTypeGuard, type BaseMetadata } from '../schema_metadata';
-import type { BaseWidgetProps } from './widget_props';
+import type { BaseMetadata } from '../../schema_metadata';
+import type { BaseWidgetProps, WidgetType } from '../types';
 
 export type KeyValueWidgetMeta = BaseMetadata & {
-  widget: 'keyValue';
+  widget: WidgetType.KeyValue;
 };
-
-export const isKeyValueWidgetMeta = createWidgetTypeGuard<KeyValueWidgetMeta>('keyValue');
 
 export const getKeyValueInitialValue = (schema: z.ZodTypeAny, defaultValue?: unknown) => {
   return defaultValue ?? {};

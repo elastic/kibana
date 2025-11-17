@@ -10,11 +10,11 @@
 import React from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type { EuiFieldTextProps } from '@elastic/eui';
-import type { BaseMetadata, StripFormProps } from '../schema_metadata';
-import type { BaseWidgetProps } from './widget_props';
+import type { BaseMetadata, StripFormProps } from '../../schema_metadata';
+import type { BaseWidgetProps, WidgetType } from '../types';
 
 export type TextWidgetMeta = BaseMetadata & {
-  widget: 'text';
+  widget: WidgetType.Text;
 } & StripFormProps<EuiFieldTextProps>;
 
 export type TextWidgetProps = BaseWidgetProps<string, TextWidgetMeta>;

@@ -10,11 +10,11 @@
 import React from 'react';
 import { EuiFieldPassword, EuiFormRow } from '@elastic/eui';
 import type { EuiFieldPasswordProps } from '@elastic/eui';
-import type { BaseMetadata, StripFormProps } from '../schema_metadata';
-import type { BaseWidgetProps } from './widget_props';
+import type { BaseMetadata, StripFormProps } from '../../schema_metadata';
+import type { BaseWidgetProps, WidgetType } from '../types';
 
 export type PasswordWidgetMeta = BaseMetadata & {
-  widget: 'password';
+  widget: WidgetType.Password;
 } & StripFormProps<EuiFieldPasswordProps>;
 
 export type PasswordWidgetProps = BaseWidgetProps<string, PasswordWidgetMeta>;

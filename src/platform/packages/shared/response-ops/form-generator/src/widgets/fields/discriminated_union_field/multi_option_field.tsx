@@ -10,11 +10,11 @@
 import React, { useMemo, useCallback } from 'react';
 import { z } from '@kbn/zod/v4';
 import { EuiCheckableCard, EuiFormFieldset, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { getMeta } from '../../schema_metadata';
+import { getMeta } from '../../../schema_metadata';
 import type { DiscriminatedUnionWidgetProps } from './discriminated_union_field';
 import { getDiscriminatorKey } from './discriminated_union_field';
 import { getDefaultValuesForOption } from './get_default_values';
-import { getWidget } from '..';
+import { getWidget, WidgetType } from '../..';
 
 const getDiscriminatorFieldValue = (
   optionSchema: z.ZodObject<z.ZodRawShape>,
@@ -91,7 +91,7 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
 
                 const fieldSchema = subSchema as z.ZodTypeAny;
                 const optionFieldMeta = getMeta(fieldSchema);
-                const optionWidget = optionFieldMeta?.widget || 'text';
+                const optionWidget = optionFieldMeta?.widget || WidgetType.Text;
                 const valueObj =
                   typeof value === 'object' && value !== null
                     ? value

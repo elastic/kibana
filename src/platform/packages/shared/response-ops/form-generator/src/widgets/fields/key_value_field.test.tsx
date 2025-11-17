@@ -11,6 +11,7 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { KeyValueField } from './key_value_field';
+import { WidgetType } from '../types';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
@@ -351,7 +352,7 @@ describe('KeyValueField', () => {
         fieldId="headers"
         value={{}}
         label="Headers"
-        meta={{ widget: 'keyValue', helpText: 'Add HTTP headers' }}
+        meta={{ widget: WidgetType.KeyValue, helpText: 'Add HTTP headers' }}
         onChange={mockOnChange}
         onBlur={mockOnBlur}
       />,
