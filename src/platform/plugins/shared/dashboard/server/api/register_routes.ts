@@ -14,15 +14,13 @@ import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger } from '@kbn/logging';
 
 import { CONTENT_ID, LATEST_VERSION } from '../../common/content_management';
-import { INTERNAL_API_VERSION, PUBLIC_API_PATH, commonRouteConfig } from './constants';
+import { commonRouteConfig, INTERNAL_API_VERSION, PUBLIC_API_PATH } from './constants';
 import type { DashboardItem } from '../content_management/v1';
 import { getDashboardAPIGetResultSchema } from '../content_management/v1';
-import {
-  getDashboardDataSchema,
-  getDashboardListResultAPISchema,
-  getDashboardUpdateResultSchema,
-} from '../content_management/v1/schema';
 import { registerCreateRoute } from './create';
+import { registerUpdateRoute } from './update';
+import { registerDeleteRoute } from './delete';
+import { registerSearchRoute } from './search';
 
 interface RegisterAPIRoutesArgs {
   http: HttpServiceSetup;
@@ -64,132 +62,9 @@ export function registerAPIRoutes({
   const { versioned: versionedRouter } = http.createRouter();
 
   registerCreateRoute(versionedRouter);
-
-  // Update API route
-
-  const updateRoute = versionedRouter.put({
-    path: `${PUBLIC_API_PATH}/{id}`,
-    summary: `Update an existing dashboard`,
-    ...commonRouteConfig,
-  });
-
-  updateRoute.addVersion(
-    {
-      version: INTERNAL_API_VERSION,
-      validate: () => ({
-        request: {
-          params: schema.object({
-            id: schema.string({
-              meta: { description: 'A unique identifier for the dashboard.' },
-            }),
-          }),
-          body: getDashboardDataSchema(),
-        },
-        response: {
-          200: {
-            body: getDashboardUpdateResultSchema,
-          },
-        },
-      }),
-    },
-    async (ctx, req, res) => {
-      const { references, ...attributes } = req.body;
-      const client = contentManagement.contentClient
-        .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for<DashboardItem>(CONTENT_ID, LATEST_VERSION);
-      let result;
-      try {
-        ({ result } = await client.update(req.params.id, attributes, { references }));
-      } catch (e) {
-        if (e.isBoom && e.output.statusCode === 404) {
-          return res.notFound({
-            body: {
-              message: `A dashboard with saved object ID ${req.params.id} was not found.`,
-            },
-          });
-        }
-        if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
-        }
-        return res.badRequest({ body: e.output.payload });
-      }
-
-      const formattedResult = formatResult(result.item);
-      return res.ok({
-        body: { ...formattedResult, meta: { ...formattedResult.meta, ...result.meta } },
-      });
-    }
-  );
-
-  // List API route
-  const listRoute = versionedRouter.get({
-    path: `${PUBLIC_API_PATH}`,
-    summary: `Get a list of dashboards`,
-    ...commonRouteConfig,
-  });
-
-  listRoute.addVersion(
-    {
-      version: INTERNAL_API_VERSION,
-      validate: {
-        request: {
-          query: schema.object({
-            page: schema.number({
-              meta: { description: 'The page number to return. Default is "1".' },
-              min: 1,
-              defaultValue: 1,
-            }),
-            perPage: schema.number({
-              meta: {
-                description:
-                  'The number of dashboards to display on each page (max 1000). Default is "20".',
-              },
-              defaultValue: 20,
-              min: 1,
-              max: 1000,
-            }),
-          }),
-        },
-        response: {
-          200: {
-            body: getDashboardListResultAPISchema,
-          },
-        },
-      },
-    },
-    async (ctx, req, res) => {
-      const { page, perPage: limit } = req.query;
-      const client = contentManagement.contentClient
-        .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for<DashboardItem>(CONTENT_ID, LATEST_VERSION);
-      let result;
-      try {
-        // TODO add filtering
-        ({ result } = await client.search(
-          {
-            cursor: page.toString(),
-            limit,
-          },
-          {
-            fields: ['title', 'description', 'timeRange'],
-          }
-        ));
-      } catch (e) {
-        if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
-        }
-
-        return res.badRequest();
-      }
-
-      const body = {
-        items: result.hits.map(formatResult),
-        total: result.pagination.total,
-      };
-
-      return res.ok({ body });
-    }
-  );
+  registerUpdateRoute(versionedRouter);
+  registerDeleteRoute(versionedRouter);
+  registerSearchRoute(versionedRouter);
 
   // Get API route
   const getRoute = versionedRouter.get({
@@ -244,52 +119,6 @@ export function registerAPIRoutes({
       return res.ok({
         body: { ...formattedResult, meta: { ...formattedResult.meta, ...result.meta } },
       });
-    }
-  );
-
-  // Delete API route
-  const deleteRoute = versionedRouter.delete({
-    path: `${PUBLIC_API_PATH}/{id}`,
-    summary: `Delete a dashboard`,
-    ...commonRouteConfig,
-  });
-
-  deleteRoute.addVersion(
-    {
-      version: INTERNAL_API_VERSION,
-      validate: {
-        request: {
-          params: schema.object({
-            id: schema.string({
-              meta: {
-                description: 'A unique identifier for the dashboard.',
-              },
-            }),
-          }),
-        },
-      },
-    },
-    async (ctx, req, res) => {
-      const client = contentManagement.contentClient
-        .getForRequest({ request: req, requestHandlerContext: ctx })
-        .for(CONTENT_ID, LATEST_VERSION);
-      try {
-        await client.delete(req.params.id);
-      } catch (e) {
-        if (e.isBoom && e.output.statusCode === 404) {
-          return res.notFound({
-            body: {
-              message: `A dashboard with saved object ID ${req.params.id} was not found.`,
-            },
-          });
-        }
-        if (e.isBoom && e.output.statusCode === 403) {
-          return res.forbidden();
-        }
-        return res.badRequest();
-      }
-
-      return res.ok();
     }
   );
 }
