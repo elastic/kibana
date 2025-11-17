@@ -6,12 +6,60 @@
  */
 
 import { getReviewFields } from './get_review_fields';
-import type { DissectPattern } from '../types';
+import type { DissectPattern, DissectAST } from '../types';
+
+// Helper to parse a pattern string into AST
+function parsePattern(patternString: string): DissectAST {
+  const nodes: DissectAST['nodes'] = [];
+  const regex = /%\{([^}]+)\}|([^%]+)/g;
+  let match;
+
+  while ((match = regex.exec(patternString)) !== null) {
+    if (match[1]) {
+      // Field node
+      const fieldContent = match[1];
+      const modifiers: any = {};
+      let fieldName = fieldContent;
+
+      // Parse modifiers
+      if (fieldContent.startsWith('+')) {
+        modifiers.append = true;
+        fieldName = fieldContent.slice(1);
+      }
+      if (fieldContent.startsWith('?')) {
+        modifiers.skip = true;
+        modifiers.namedSkip = true;
+        fieldName = fieldContent.slice(1);
+      }
+      if (fieldContent.endsWith('->')) {
+        modifiers.rightPadding = true;
+        fieldName = fieldName.slice(0, -2);
+      }
+      if (fieldName === '') {
+        modifiers.skip = true;
+      }
+
+      nodes.push({
+        type: 'field',
+        name: fieldName,
+        modifiers: Object.keys(modifiers).length > 0 ? modifiers : undefined,
+      });
+    } else if (match[2]) {
+      // Literal node
+      nodes.push({
+        type: 'literal',
+        value: match[2],
+      });
+    }
+  }
+
+  return { nodes };
+}
 
 describe('getReviewFields', () => {
   it('extracts fields with example values and positions', () => {
     const pattern: DissectPattern = {
-      pattern: '%{field_1} %{field_2} %{field_3}',
+      ast: parsePattern('%{field_1} %{field_2} %{field_3}'),
       fields: [
         {
           name: 'field_1',
@@ -51,7 +99,7 @@ describe('getReviewFields', () => {
 
   it('limits example values to numExamples', () => {
     const pattern: DissectPattern = {
-      pattern: '%{field_1}',
+      ast: parsePattern('%{field_1}'),
       fields: [
         {
           name: 'field_1',
@@ -68,7 +116,7 @@ describe('getReviewFields', () => {
 
   it('skips fields with skip modifier', () => {
     const pattern: DissectPattern = {
-      pattern: '%{field_1} %{?field_2} %{field_3}',
+      ast: parsePattern('%{field_1} %{?field_2} %{field_3}'),
       fields: [
         {
           name: 'field_1',
@@ -105,7 +153,7 @@ describe('getReviewFields', () => {
 
   it('deduplicates example values', () => {
     const pattern: DissectPattern = {
-      pattern: '%{field_1}',
+      ast: parsePattern('%{field_1}'),
       fields: [
         {
           name: 'field_1',

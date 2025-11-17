@@ -48,26 +48,10 @@ export function getDissectProcessorWithReview(
     }
   });
 
-  // Track static fields that should be inlined as literals
-  const staticFieldMap = new Map<string, string>();
-  reviewResult.fields.forEach((field) => {
-    if (field.is_static && field.static_value) {
-      field.columns.forEach((columnName) => {
-        const dissectField = pattern.fields.find((f) => f.name === columnName);
-        if (dissectField?.modifiers?.rightPadding) {
-          // If the field has right padding, we cannot inline it as a static value
-          return;
-        }
-        staticFieldMap.set(columnName, field.static_value!);
-      });
-    }
-  });
-
   // Transform the AST with ECS field names and handle grouping
   const transformedAST = transformASTWithReview(
     pattern.ast,
     fieldNameMap,
-    staticFieldMap,
     fieldGroupMap,
     joinStrategyMap
   );
@@ -84,12 +68,6 @@ export function getDissectProcessorWithReview(
 
   pattern.fields.forEach((field) => {
     const ecsFieldName = fieldNameMap.get(field.name);
-    const staticValue = staticFieldMap.get(field.name);
-
-    // Skip static fields (they're now literals in the pattern)
-    if (staticValue !== undefined) {
-      return;
-    }
 
     if (!ecsFieldName) {
       // Field not mapped by LLM, keep original
@@ -172,17 +150,14 @@ export function getDissectProcessorWithReview(
 
 /**
  * Transform AST nodes based on review result
- * Replaces field names with ECS names, converts static fields to literals,
- * and adds append modifiers for grouped fields
+ * Replaces field names with ECS names and adds appropriate modifiers for grouped fields
  */
 function transformASTWithReview(
   ast: DissectAST,
   fieldNameMap: Map<string, string>,
-  staticFieldMap: Map<string, string>,
   fieldGroupMap: Map<string, string[]>,
   joinStrategyMap: Map<string, 'append' | 'skip'>
 ): DissectAST {
-  const processedGroups = new Set<string>();
   const transformedNodes: DissectASTNode[] = [];
 
   for (let i = 0; i < ast.nodes.length; i++) {
@@ -196,17 +171,6 @@ function transformASTWithReview(
     // Field node
     const fieldNode = node as DissectFieldNode;
     const originalName = fieldNode.name;
-    const staticValue = staticFieldMap.get(originalName);
-
-    // Convert static fields to literals
-    if (staticValue !== undefined) {
-      transformedNodes.push({
-        type: 'literal',
-        value: staticValue,
-      });
-      continue;
-    }
-
     const ecsFieldName = fieldNameMap.get(originalName);
 
     if (!ecsFieldName) {

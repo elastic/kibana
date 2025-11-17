@@ -208,7 +208,9 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
       const result = extractDissectPatternDangerouslySlow(logs);
 
-      expect(getPattern(result)).toBe('%{field_1}@%{field_2} -> /%{field_3}/%{field_4} (%{field_5})');
+      expect(getPattern(result)).toBe(
+        '%{field_1}@%{field_2} -> /%{field_3}/%{field_4} (%{field_5})'
+      );
       expect(result.fields).toHaveLength(5);
     });
 

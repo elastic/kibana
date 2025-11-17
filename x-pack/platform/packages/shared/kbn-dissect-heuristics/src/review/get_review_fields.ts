@@ -42,7 +42,5 @@ export interface NormalizedReviewResult {
     ecs_field: string;
     columns: string[];
     join_strategy: 'append' | 'skip';
-    is_static?: boolean;
-    static_value?: string;
   }>;
 }

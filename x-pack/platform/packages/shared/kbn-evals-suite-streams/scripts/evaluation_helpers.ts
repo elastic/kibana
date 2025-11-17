@@ -62,7 +62,6 @@ export async function fetchDocs(index: string | string[], size = 100) {
     .search({
       index,
       size,
-      sort: '@timestamp:desc',
       query: { match_all: {} },
       _source: true,
     })
