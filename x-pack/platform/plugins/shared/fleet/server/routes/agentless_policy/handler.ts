@@ -17,21 +17,22 @@ import type { DeleteAgentlessPolicyRequestSchema } from '../../../common/types/r
 import { syncAgentlessDeployments } from '../../services/agentless/deployment_sync';
 import { agentlessAgentService } from '../../services/agents/agentless_agent';
 
-export const syncAgentlessPoliciesHandler: FleetRequestHandler = async (
-  context,
-  request,
-  response
-) => {
+export const syncAgentlessPoliciesHandler: FleetRequestHandler<
+  undefined,
+  undefined,
+  { dryRun?: boolean }
+> = async (context, request, response) => {
   const logger = appContextService.getLogger().get('agentless');
 
-  await syncAgentlessDeployments({
-    logger,
-    agentlessAgentService,
-  });
-
-  // const agentlessPoliciesService = new AgentlessPoliciesServiceImpl();
-
-  // await syncAgentlessPolicies({ logger, agent });
+  await syncAgentlessDeployments(
+    {
+      logger,
+      agentlessAgentService,
+    },
+    {
+      dryRun: request.body?.dryRun,
+    }
+  );
 
   return response.ok({
     body: {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type * as http from 'http';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -36,6 +36,15 @@ export default function (providerContext: FtrProviderContext) {
       before(async () => {
         const mockAgentlessApiService = setupMockServer();
         mockApiServer = await mockAgentlessApiService.listen(8089); // Start the agentless api mock server on port 8089
+        mockApiServer.addListener('request', (request) => {
+          request.on('data', (data) => {
+            apiCalls.push({
+              url: request.url || '',
+              method: request.method || '',
+              data: JSON.parse(data.toString()),
+            });
+          });
+        });
       });
 
       after(async () => {
@@ -50,15 +59,6 @@ export default function (providerContext: FtrProviderContext) {
       beforeEach(async () => {
         await kibanaServer.savedObjects.cleanStandardList();
         apiCalls = [];
-        mockApiServer.addListener('request', (request) => {
-          request.on('data', (data) => {
-            apiCalls.push({
-              url: request.url || '',
-              method: request.method || '',
-              data: JSON.parse(data.toString()),
-            });
-          });
-        });
         await cleanFleetIndices(es);
         await apiClient.setup();
       });
@@ -264,6 +264,13 @@ export default function (providerContext: FtrProviderContext) {
       before(async () => {
         const mockAgentlessApiService = setupMockServer();
         mockApiServer = await mockAgentlessApiService.listen(8089); // Start the agentless api mock server on port 8089
+
+        mockApiServer.addListener('request', (request) => {
+          apiCalls.push({
+            url: request.url || '',
+            method: request.method || '',
+          });
+        });
       });
 
       after(async () => {
@@ -304,12 +311,6 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         apiCalls = [];
-        mockApiServer.addListener('request', (request) => {
-          apiCalls.push({
-            url: request.url || '',
-            method: request.method || '',
-          });
-        });
       });
 
       afterEach(async () => {
@@ -327,6 +328,124 @@ export default function (providerContext: FtrProviderContext) {
         expect(apiCalls.length).to.be(1);
         expect(apiCalls[0].url).to.be(`/agentless-api/api/v1/ess/deployments/${policyId}`);
         expect(apiCalls[0].method).to.be('DELETE');
+      });
+    });
+
+    describe('Sync Agentless Policies', () => {
+      before(async () => {
+        const mockAgentlessApiService = setupMockServer();
+        mockApiServer = await mockAgentlessApiService.listen(8089); // Start the agentless api mock server on port 8089
+        mockApiServer.addListener('request', (request) => {
+          if (request.method === 'POST') {
+            request.on('data', (data) => {
+              apiCalls.push({
+                url: request.url || '',
+                method: request.method || '',
+                data: JSON.parse(data.toString()),
+              });
+            });
+          } else {
+            apiCalls.push({
+              url: request.url || '',
+              method: request.method || '',
+            });
+          }
+        });
+      });
+
+      after(async () => {
+        await mockApiServer.close();
+      });
+
+      let apiCalls: Array<{
+        url: string;
+        method: string;
+        data?: any;
+      }> = [];
+      beforeEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+
+        await cleanFleetIndices(es);
+        await apiClient.setup();
+
+        await apiClient.createAgentlessPolicy({
+          id: 'agentless-deployment-1',
+          package: {
+            name: 'test_agentless',
+            version: '1.0.0',
+          },
+          name: 'Test agentless policy ' + Date.now(),
+          description: 'test agentless policy',
+          namespace: 'default',
+          inputs: {
+            'sample-httpjson': {
+              enabled: true,
+              vars: {
+                api_key: 'TEST_VALUE_API_KEY',
+              },
+              streams: {},
+            },
+          },
+        });
+
+        await apiClient.createAgentlessPolicy({
+          id: 'agentless-deployment-3',
+          package: {
+            name: 'test_agentless',
+            version: '1.0.0',
+          },
+          name: 'Test agentless policy ' + Date.now(),
+          description: 'test agentless policy',
+          namespace: 'default',
+          inputs: {
+            'sample-httpjson': {
+              enabled: true,
+              vars: {
+                api_key: 'TEST_VALUE_API_KEY',
+              },
+              streams: {},
+            },
+          },
+        });
+        apiCalls = [];
+      });
+
+      afterEach(async () => {
+        await kibanaServer.savedObjects.cleanStandardList();
+        await cleanFleetIndices(es);
+      });
+
+      it('should allow to sync agentless policies', async () => {
+        // agentless-deployment-1 is already synced
+        // agentless-deployment-2 does not exist anymore and should be deleted
+        // agentless-deployment-3 needs to be created
+
+        await apiClient.syncAgentlessPolicies();
+        expect(apiCalls.length).to.be(3);
+
+        expect(apiCalls.find((call) => call.method === 'GET')).not.to.be(undefined);
+        expect(
+          apiCalls.find(
+            (call) => call.method === 'POST' && call.data?.policy_id === 'agentless-deployment-3'
+          )
+        ).not.to.be(undefined);
+        expect(
+          apiCalls.find(
+            (call) =>
+              call.url === '/agentless-api/api/v1/ess/deployments/agentless-deployment-2' &&
+              call.method === 'DELETE'
+          )
+        ).not.to.be(undefined);
+      });
+
+      it('should do nothing in dryrun', async () => {
+        // agentless-deployment-1 is already synced
+        // agentless-deployment-2 does not exist anymore and should be deleted
+        // agentless-deployment-3 needs to be created
+
+        await apiClient.syncAgentlessPolicies({ dryRun: true });
+        expect(apiCalls.length).to.be(1);
+        expect(apiCalls.find((call) => call.method === 'GET')).not.to.be(undefined);
       });
     });
   });

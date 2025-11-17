@@ -47,7 +47,14 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       {
         version: API_VERSIONS.internal.v1,
         validate: {
-          request: {},
+          request: {
+            body: schema.object({
+              dryRun: schema.boolean({
+                defaultValue: false,
+                meta: { description: 'If true, no changes are applied.' },
+              }),
+            }),
+          },
           response: {
             200: {
               description: 'OK: A successful request.',

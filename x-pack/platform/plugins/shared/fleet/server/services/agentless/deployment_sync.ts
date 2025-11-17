@@ -121,10 +121,17 @@ export async function syncAgentlessDeployments(
 
     const agentlessPolicies = await agentPolicyService.list(soClient, {
       perPage: SO_SEARCH_LIMIT,
-      fields: ['revision', 'supports_agentless', 'global_data_tags'],
+      fields: [
+        'revision',
+        'supports_agentless',
+        'global_data_tags',
+        'fleet_server_host_id',
+        'agentless',
+      ],
       kuery: `${AGENT_POLICY_SAVED_OBJECT_TYPE}.supports_agentless:true`,
       spaceId: '*',
     });
+
     await pMap(
       agentlessPolicies.items,
       async (agentPolicy) => {
