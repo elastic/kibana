@@ -59,6 +59,7 @@ export class WorkflowTaskManager {
     });
 
     if (idleTasks.length) {
+      // TODO: To use bulkRunSoon once available
       await Promise.all(idleTasks.map((idleTask) => this.taskManager.runSoon(idleTask.id)));
     }
   }
