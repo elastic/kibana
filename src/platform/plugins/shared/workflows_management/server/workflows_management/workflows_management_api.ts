@@ -26,6 +26,7 @@ import type {
   WorkflowYaml,
 } from '@kbn/workflows';
 import { getJsonSchemaFromYamlSchema, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type { LogSearchResult } from './lib/workflow_logger';
 import type {
@@ -103,6 +104,14 @@ export interface GetAvailableConnectorsParams {
 export interface GetAvailableConnectorsResponse {
   connectorsByType: Record<string, ConnectorTypeInfo>;
   totalConnectors: number;
+}
+
+export interface TestWorkflowParams {
+  workflowId?: string;
+  workflowYaml?: string;
+  inputs: Record<string, any>;
+  spaceId: string;
+  request: KibanaRequest;
 }
 
 export class WorkflowsManagementApi {
@@ -197,18 +206,38 @@ export class WorkflowsManagementApi {
     return executeResponse.workflowExecutionId;
   }
 
-  public async testWorkflow(
-    workflowYaml: string,
-    inputs: Record<string, any>,
-    spaceId: string,
-    request: KibanaRequest
-  ): Promise<string> {
+  public async testWorkflow({
+    workflowId,
+    workflowYaml,
+    inputs,
+    spaceId,
+    request,
+  }: TestWorkflowParams): Promise<string> {
+    let resolvedYaml = workflowYaml;
+    let resolvedWorkflowId = workflowId;
+
+    if (workflowId && !workflowYaml) {
+      const existingWorkflow = await this.workflowsService.getWorkflow(workflowId, spaceId);
+      if (!existingWorkflow) {
+        throw new WorkflowNotFoundError(workflowId);
+      }
+      resolvedYaml = existingWorkflow.yaml;
+    }
+
+    if (!resolvedWorkflowId) {
+      resolvedWorkflowId = 'test-workflow';
+    }
+
+    if (!resolvedYaml) {
+      throw new Error('Either workflowId or workflowYaml must be provided');
+    }
+
     const zodSchema = await this.workflowsService.getWorkflowZodSchema(
       { loose: false },
       spaceId,
       request
     );
-    const parsedYaml = parseWorkflowYamlToJSON(workflowYaml, zodSchema);
+    const parsedYaml = parseWorkflowYamlToJSON(resolvedYaml, zodSchema);
 
     if (parsedYaml.error) {
       // TODO: handle error properly
@@ -226,7 +255,7 @@ export class WorkflowsManagementApi {
       );
     }
 
-    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
+    const workflowJson = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
     const { event, ...manualInputs } = inputs;
     const context = {
       event,
@@ -236,11 +265,11 @@ export class WorkflowsManagementApi {
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(
       {
-        id: 'test-workflow',
-        name: workflowToCreate.name,
-        enabled: workflowToCreate.enabled,
-        definition: workflowToCreate.definition,
-        yaml: workflowYaml,
+        id: resolvedWorkflowId,
+        name: workflowJson.name,
+        enabled: workflowJson.enabled,
+        definition: workflowJson.definition,
+        yaml: resolvedYaml,
         isTestRun: true,
       },
       context,
@@ -278,7 +307,8 @@ export class WorkflowsManagementApi {
         spaceId,
       },
       stepId,
-      contextOverride
+      contextOverride,
+      request
     );
     return executeResponse.workflowExecutionId;
   }
