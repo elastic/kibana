@@ -243,7 +243,6 @@ describe('SloHealthCallout', () => {
             overall: 'unhealthy',
             rollup: 'unhealthy',
             summary: 'missing',
-
           },
           state: 'running',
         },
@@ -382,7 +381,6 @@ describe('SloHealthCallout', () => {
             overall: 'unhealthy',
             rollup: 'missing',
             summary: 'healthy',
-
           },
           state: 'running',
         },
