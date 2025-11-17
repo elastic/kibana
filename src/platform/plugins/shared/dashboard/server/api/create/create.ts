@@ -18,7 +18,6 @@ import type { DashboardCreateResponseBody } from './types';
 
 export async function create(
   requestCtx: RequestHandlerContext,
-  allowUnmappedKeys: boolean,
   searchBody: DashboardCreateRequestBody
 ): Promise<DashboardCreateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
@@ -27,7 +26,7 @@ export async function create(
     attributes: soAttributes,
     references: soReferences,
     error: transformInError,
-  } = transformDashboardIn(searchBody.data, allowUnmappedKeys);
+  } = transformDashboardIn(searchBody.data);
   if (transformInError) {
     throw Boom.badRequest(`Invalid data. ${transformInError.message}`);
   }
@@ -42,5 +41,5 @@ export async function create(
     }
   );
 
-  return getDashboardCRUResponseBody(savedObject, 'create', allowUnmappedKeys);
+  return getDashboardCRUResponseBody(savedObject, 'create');
 }

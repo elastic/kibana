@@ -17,8 +17,7 @@ import { transformSearchSourceIn } from './transform_search_source_in';
 import { transformTagsIn } from './transform_tags_in';
 
 export const transformDashboardIn = (
-  dashboardState: DashboardState,
-  allowUnmappedKeys: boolean
+  dashboardState: DashboardState
 ):
   | {
       attributes: DashboardSavedObjectAttributes;
@@ -31,17 +30,6 @@ export const transformDashboardIn = (
       error: Error;
     } => {
   try {
-    if (!allowUnmappedKeys && dashboardState.controlGroupInput) {
-      throw new Error(
-        'controlGroupInput key is deprecated and not supported by dashboard CREATE and UPDATE endpoints.'
-      );
-    }
-    if (!allowUnmappedKeys && dashboardState.references) {
-      throw new Error(
-        'references key is deprecated and not supported by dashboard CREATE and UPDATE endpoints.'
-      );
-    }
-
     const {
       controlGroupInput,
       options,
@@ -64,11 +52,7 @@ export const transformDashboardIn = (
       ({ type }) => type !== tagSavedObjectTypeName
     );
 
-    const {
-      panelsJSON,
-      sections,
-      references: panelReferences,
-    } = transformPanelsIn(panels, allowUnmappedKeys);
+    const { panelsJSON, sections, references: panelReferences } = transformPanelsIn(panels);
 
     const { searchSourceJSON, references: searchSourceReferences } = transformSearchSourceIn(
       filters,

@@ -18,8 +18,7 @@ import { transformPanelsOut } from './transform_panels_out';
 
 export function transformDashboardOut(
   attributes: DashboardSavedObjectAttributes | Partial<DashboardSavedObjectAttributes>,
-  references: SavedObjectReference[],
-  allowUnmappedKeys: boolean
+  references?: SavedObjectReference[]
 ): DashboardState | Partial<DashboardState> {
   const {
     controlGroupInput,

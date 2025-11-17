@@ -42,8 +42,7 @@ export async function scanDashboards(
     dashboards: soResponse.saved_objects.map((so) => {
       const { description, tags, title, panels } = transformDashboardOut(
         so.attributes,
-        so.references,
-        true
+        so.references
       );
 
       return {

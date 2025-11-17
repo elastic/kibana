@@ -1,0 +1,51 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+import { isDashboardSection } from '../../common';
+import { embeddableService } from '../kibana_services';
+import type { DashboardPanel, DashboardState } from './types';
+
+export function stripUnmappedKeys(dashboardState: DashboardState) {
+  const warnings: string[] = [];
+  const { controlGroupInput, references, ...rest } = dashboardState;
+  if (controlGroupInput) {
+    warnings.push('Dropped unmapped key, controlGroupInput, from dashboard');
+  }
+  return {
+    data: rest,
+    warnings,
+  };
+}
+
+export function throwOnUnmappedKeys(dashboardState: DashboardState) {
+  if (dashboardState.controlGroupInput) {
+    throw new Error('controlGroupInput key is not supported by dashboard REST endpoints.');
+  }
+
+  if (dashboardState.references) {
+    throw new Error('references key is not supported by dashboard REST endpoints.');
+  }
+
+  function throwOnUnknownPanel(panel: DashboardPanel) {
+    const transforms = embeddableService?.getTransforms(panel.type);
+    if (!transforms?.schema) {
+      throw new Error(
+        `Panel schema not available for panel type: ${panel.type}. Panels without schemas are not supported by dashboard REST endpoints`
+      );
+    }
+  }
+
+  dashboardState.panels.forEach((panel) => {
+    if (isDashboardSection(panel)) {
+      panel.panels.forEach(throwOnUnknownPanel);
+    } else {
+      throwOnUnknownPanel(panel);
+    }
+  });
+}

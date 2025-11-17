@@ -14,6 +14,7 @@ import { INTERNAL_API_VERSION, PUBLIC_API_PATH, commonRouteConfig } from '../con
 import { getUpdateRequestBodySchema, getUpdateResponseBodySchema } from './schemas';
 import { update } from './update';
 import { allowUnmappedKeysSchema } from '../dashboard_state_schemas';
+import { throwOnUnmappedKeys } from '../scope_tooling';
 
 export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const updateRoute = router.put({
@@ -48,12 +49,10 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
     },
     async (ctx, req, res) => {
       try {
-        const result = await update(
-          ctx,
-          req.params.id,
-          req.query?.allowUnmappedKeys ?? false,
-          req.body
-        );
+        const allowUnmappedKeys = req.query?.allowUnmappedKeys ?? false;
+        if (!allowUnmappedKeys) throwOnUnmappedKeys(req.body.data);
+
+        const result = await update(ctx, req.params.id, req.body);
         return res.ok({ body: result });
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 404) {

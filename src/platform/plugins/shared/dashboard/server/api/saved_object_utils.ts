@@ -38,16 +38,14 @@ export function getDashboardCRUResponseBody(
   savedObject:
     | SavedObject<DashboardSavedObjectAttributes>
     | SavedObjectsUpdateResponse<DashboardSavedObjectAttributes>,
-  operation: 'create' | 'read' | 'update' | 'search',
-  allowUnmappedKeys: boolean
+  operation: 'create' | 'read' | 'update' | 'search'
 ) {
   let dashboardState: DashboardState;
   let references: Reference[];
   try {
     dashboardState = transformDashboardOut(
       savedObject.attributes,
-      savedObject.references ?? [],
-      allowUnmappedKeys
+      savedObject.references
     ) as DashboardState;
     references = transformReferencesOut(savedObject.references ?? [], dashboardState.panels);
   } catch (transformOutError) {

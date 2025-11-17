@@ -54,7 +54,7 @@ describe('transformPanelsIn', () => {
         uid: 'bcebc09a-270f-42ef-8d45-daf5f5f4f511',
       },
     ];
-    const results = transformPanelsIn(panels, true);
+    const results = transformPanelsIn(panels);
     expect(JSON.parse(results.panelsJSON)).toMatchInlineSnapshot(`
       Array [
         Object {
@@ -133,7 +133,7 @@ describe('transformPanelsIn', () => {
           uid: 'panel1',
         },
       ];
-      expect(() => transformPanelsIn(panels, true)).toThrowErrorMatchingInlineSnapshot(
+      expect(() => transformPanelsIn(panels)).toThrowErrorMatchingInlineSnapshot(
         `"Panel config validation failed. Panel uid: panel1, type: test, validation error: [lessThan10]: Value must be equal to or lower than [10]."`
       );
     });
@@ -153,40 +153,12 @@ describe('transformPanelsIn', () => {
           type: TEST_EMBEDDABLE_TYPE,
         },
       ];
-      const results = transformPanelsIn(panels, true);
+      const results = transformPanelsIn(panels);
       expect(JSON.parse(results.panelsJSON)[0].embeddableConfig).toMatchInlineSnapshot(`
         Object {
           "lessThan10": 7,
         }
       `);
-    });
-  });
-
-  describe('allowUnmappedKeys is false', () => {
-    beforeAll(() => {
-      // eslint-disable-next-line @typescript-eslint/no-var-requires
-      require('../../../kibana_services').embeddableService = {
-        getTransforms: () => ({}),
-      };
-    });
-
-    it('should throw when there is no schema for panel type', () => {
-      const panels = [
-        {
-          config: {
-            foo: '',
-          },
-          grid: {
-            h: 15,
-            w: 24,
-            x: 0,
-            y: 0,
-          },
-          type: 'widgetX',
-          uid: 'panel1',
-        },
-      ];
-      expect(() => transformPanelsIn(panels, false)).toThrow();
     });
   });
 });

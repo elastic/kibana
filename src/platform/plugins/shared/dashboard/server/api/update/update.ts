@@ -18,7 +18,6 @@ import { getDashboardCRUResponseBody } from '../saved_object_utils';
 export async function update(
   requestCtx: RequestHandlerContext,
   id: string,
-  allowUnmappedKeys: boolean,
   searchBody: DashboardUpdateRequestBody
 ): Promise<DashboardUpdateResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
@@ -27,7 +26,7 @@ export async function update(
     attributes: soAttributes,
     references: soReferences,
     error: transformInError,
-  } = transformDashboardIn(searchBody.data, allowUnmappedKeys);
+  } = transformDashboardIn(searchBody.data);
   if (transformInError) {
     throw Boom.badRequest(`Invalid data. ${transformInError.message}`);
   }
@@ -43,5 +42,5 @@ export async function update(
     }
   );
 
-  return getDashboardCRUResponseBody(savedObject, 'update', allowUnmappedKeys);
+  return getDashboardCRUResponseBody(savedObject, 'update');
 }

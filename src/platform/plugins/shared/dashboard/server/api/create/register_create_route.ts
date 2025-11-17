@@ -14,6 +14,7 @@ import { commonRouteConfig, INTERNAL_API_VERSION, PUBLIC_API_PATH } from '../con
 import { getCreateRequestBodySchema, getCreateResponseBodySchema } from './schemas';
 import { create } from './create';
 import { allowUnmappedKeysSchema } from '../dashboard_state_schemas';
+import { throwOnUnmappedKeys } from '../scope_tooling';
 
 export function registerCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
   const createRoute = router.post({
@@ -43,7 +44,10 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
     },
     async (ctx, req, res) => {
       try {
-        const result = await create(ctx, req.query?.allowUnmappedKeys ?? false, req.body);
+        const allowUnmappedKeys = req.query?.allowUnmappedKeys ?? false;
+        if (!allowUnmappedKeys) throwOnUnmappedKeys(req.body.data);
+
+        const result = await create(ctx, req.body);
         return res.ok({ body: result });
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 409) {
