@@ -66,3 +66,9 @@ export const createElasticsearchCustomRole = async (
     ...role,
   });
 };
+
+export const isElasticsearchRole = (
+  role: KibanaRole | ElasticsearchRoleDescriptor
+): role is ElasticsearchRoleDescriptor => {
+  return !(role && 'kibana' in role);
+};

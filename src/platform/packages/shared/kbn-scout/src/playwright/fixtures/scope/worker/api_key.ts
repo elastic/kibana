@@ -12,7 +12,7 @@ import { coreWorkerFixtures } from './core_fixtures';
 import type { ApiClientFixture } from './api_client';
 import type { DefaultRolesFixture } from './default_roles';
 import type { ElasticsearchRoleDescriptor, KibanaRole } from '../../../../common';
-import { measurePerformanceAsync } from '../../../../common';
+import { measurePerformanceAsync, isElasticsearchRole } from '../../../../common';
 
 export interface ApiKey {
   id: string;
@@ -57,14 +57,13 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
         descriptors: Record<string, any>
       ) => {
         const roleDescriptor = descriptors[roleName];
-        const isKibanaRole = roleDescriptor && 'kibana' in roleDescriptor;
 
         return {
           name: apiKeyName,
           metadata: {},
-          ...(isKibanaRole
-            ? { kibana_role_descriptors: descriptors }
-            : { role_descriptors: descriptors }),
+          ...(isElasticsearchRole(roleDescriptor)
+            ? { role_descriptors: descriptors }
+            : { kibana_role_descriptors: descriptors }),
         };
       };
 

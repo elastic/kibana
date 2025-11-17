@@ -1,0 +1,82 @@
+{
+  "editor": {
+    "cluster": [],
+    "indices": [
+      {
+        "names": [
+          "observability-annotations"
+        ],
+        "privileges": [
+          "read",
+          "view_index_metadata",
+          "write"
+        ],
+        "allow_restricted_indices": false
+      },
+      {
+        "names": [
+          ".items-*",
+          ".lists-*",
+          ".siem-signals*"
+        ],
+        "privileges": [
+          "maintenance",
+          "read",
+          "view_index_metadata",
+          "write"
+        ],
+        "allow_restricted_indices": false
+      },
+      {
+        "names": [
+          "/~(([.]|ilm-history-).*)/"
+        ],
+        "privileges": [
+          "read",
+          "view_index_metadata"
+        ],
+        "allow_restricted_indices": false
+      },
+      {
+        "names": [
+          ".profiling-*",
+          "profiling-*"
+        ],
+        "privileges": [
+          "read",
+          "view_index_metadata"
+        ],
+        "allow_restricted_indices": false
+      },
+      {
+        "names": [
+          ".alerts*",
+          ".internal.alerts*",
+          ".internal.preview.alerts*",
+          ".preview.alerts*",
+          ".internal.adhoc.alerts*",
+          ".adhoc.alerts*"
+        ],
+        "privileges": [
+          "maintenance",
+          "read",
+          "view_index_metadata",
+          "write"
+        ],
+        "allow_restricted_indices": false
+      }
+    ],
+    "applications": [
+      {
+        "application": "kibana-.kibana",
+        "privileges": [
+          "all"
+        ],
+        "resources": [
+          "*"
+        ]
+      }
+    ],
+    "run_as": []
+  }
+}
