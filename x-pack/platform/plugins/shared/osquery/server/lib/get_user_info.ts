@@ -32,8 +32,12 @@ export const getUserInfo = async ({
     });
 
     if (userProfile != null) {
+      // Use display name priority: full_name > email > username
+      const displayName =
+        userProfile.user.full_name || userProfile.user.email || userProfile.user.username;
+
       return {
-        username: userProfile.user.username,
+        username: displayName,
         full_name: userProfile.user.full_name ?? null,
         email: userProfile.user.email ?? null,
         profile_uid: userProfile.uid,
@@ -47,8 +51,11 @@ export const getUserInfo = async ({
     const user = security.authc.getCurrentUser(request);
 
     if (user != null) {
+      // Use display name priority: full_name > email > username
+      const displayName = user.full_name || user.email || user.username;
+
       return {
-        username: user.username,
+        username: displayName,
         full_name: user.full_name ?? null,
         email: user.email ?? null,
         profile_uid: null,
