@@ -9,6 +9,7 @@
 
 import type { QueryFunctionContext } from '@kbn/react-query';
 import type { TimeRange } from '@kbn/es-query';
+import type { DimensionFilters } from '@kbn/metrics-experience-plugin/common/types';
 import { useMetricsExperienceClient } from '../context/metrics_experience_client_provider';
 import { usePaginatedMetricFieldsQuery } from './use_paginated_metric_fields_query';
 
@@ -16,7 +17,7 @@ export const useMetricFieldsSearchQuery = (params?: {
   fields: string[];
   index: string;
   timeRange: TimeRange | undefined;
-  kuery: string | undefined;
+  filters?: DimensionFilters;
   enabled?: boolean;
 }) => {
   const { client } = useMetricsExperienceClient();
@@ -28,18 +29,18 @@ export const useMetricFieldsSearchQuery = (params?: {
       params?.index,
       params?.timeRange?.from,
       params?.timeRange?.to,
-      params?.kuery,
+      params?.filters,
     ] as const,
     queryFn: async ({
       queryKey,
       pageParam = 1,
       signal,
     }: QueryFunctionContext<
-      readonly [string, string[]?, string?, string?, string?, string?],
+      readonly [string, string[]?, string?, string?, string?, DimensionFilters?],
       number
     >) => {
       try {
-        const [, fields, index, from, to, kuery] = queryKey;
+        const [, fields, index, from, to, filters] = queryKey;
 
         const response = await client.searchFields(
           {
@@ -49,7 +50,7 @@ export const useMetricFieldsSearchQuery = (params?: {
             to,
             page: pageParam,
             size: 200,
-            kuery,
+            filters,
           },
           signal
         );
