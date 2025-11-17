@@ -157,6 +157,7 @@ export interface WorkflowExecutionDto {
   spaceId: string;
   id: string;
   status: ExecutionStatus;
+  isTestRun: boolean;
   startedAt: string;
   finishedAt: string;
   workflowId?: string;
