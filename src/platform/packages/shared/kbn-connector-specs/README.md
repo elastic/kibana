@@ -158,14 +158,12 @@ which will be used in place of the default
 authTypes: [
   // use basic auth type with the default schema
   'basic',
-  // use header auth type with a custom header schema
+  // use api_key_header auth type with a custom header field
   {
-    type: 'header',
-    customSchema: z.object({
-      headers: z.object({
-        'custom-api-key-field': z.string().describe('API Key'),
-      }),
-    }),
+    type: 'api_key_header',
+    defaults: {
+      headerField: 'custom-api-key-field'
+    }
   }
 ]
 ```
