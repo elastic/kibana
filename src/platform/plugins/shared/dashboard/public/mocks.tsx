@@ -77,6 +77,7 @@ export function buildMockDashboardApi({
   const results = getDashboardApi({
     initialState,
     savedObjectId,
+    incomingEmbeddables: [],
     savedObjectResult: savedObjectId
       ? ({
           id: savedObjectId,
