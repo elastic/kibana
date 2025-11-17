@@ -66,6 +66,8 @@ export const getDefaultAssistantGraph = async ({
     const llmWithTools = llm.bindTools(tools);
     const toolNode = new ToolNode(tools);
 
+    const deepagent = createDeepAgent();
+
     // Put together a new graph using default state from above
     const graph = new StateGraph(stateAnnotation)
       .addNode(NodeType.AGENT, (state: AgentState) =>

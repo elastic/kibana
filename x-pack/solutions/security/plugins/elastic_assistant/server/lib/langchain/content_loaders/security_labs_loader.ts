@@ -8,7 +8,7 @@
 import { globSync } from 'fs';
 import normalizePath from 'normalize-path';
 import type { Logger } from '@kbn/core/server';
-import { DirectoryLoader } from 'langchain/document_loaders/fs/directory';
+import { DirectoryLoader } from '@langchain/classic/document_loaders/fs/directory';
 import { resolve } from 'path';
 import type { Document } from '@langchain/core/documents';
 import type { Metadata } from '@kbn/elastic-assistant-common';
@@ -35,7 +35,7 @@ export const loadSecurityLabs = async (
       true
     );
 
-    const rawDocs = await docsLoader.load();
+    const rawDocs = await docsLoader?.load();
 
     // Add additional metadata to set kbResource as esql
     const docs = addRequiredKbResourceMetadata({
