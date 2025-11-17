@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Client } from '@elastic/elasticsearch';
 import { coreWorkerFixtures } from './core_fixtures';
 import type { ApiClientFixture } from './api_client';
 import type { DefaultRolesFixture } from './default_roles';
+import type { ElasticsearchRoleDescriptor, KibanaRole } from '../../../../common';
 import { measurePerformanceAsync } from '../../../../common';
 
 export interface ApiKey {
@@ -30,6 +32,9 @@ export interface RoleApiCredentials {
 
 export interface RequestAuthFixture {
   getApiKey: (role: string) => Promise<RoleApiCredentials>;
+  getApiKeyForCustomRole: (
+    role: KibanaRole | ElasticsearchRoleDescriptor
+  ) => Promise<RoleApiCredentials>;
 }
 
 export const requestAuthFixture = coreWorkerFixtures.extend<
@@ -38,11 +43,13 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
     requestAuth: RequestAuthFixture;
     defaultRoles: DefaultRolesFixture;
     apiClient: ApiClientFixture;
+    esClient: Client;
   }
 >({
   requestAuth: [
-    async ({ log, samlAuth, defaultRoles, apiClient }, use, workerInfo) => {
+    async ({ log, samlAuth, defaultRoles, apiClient, esClient }, use, workerInfo) => {
       const generatedApiKeys: ApiKey[] = [];
+      let isCustomRoleCreated = false;
 
       const createApiKeyPayload = (
         apiKeyName: string,
@@ -127,13 +134,33 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
         return { apiKey, apiKeyHeader };
       };
 
-      await use({ getApiKey });
+      const getApiKeyForCustomRole = async (
+        role: KibanaRole | ElasticsearchRoleDescriptor
+      ): Promise<RoleApiCredentials> => {
+        await samlAuth.setCustomRole(role);
+        isCustomRoleCreated = true;
+        const result = await getApiKey(samlAuth.customRoleName);
+        log.info(`Created API key with custom role: ${samlAuth.customRoleName}`);
+        return result;
+      };
+
+      await use({ getApiKey, getApiKeyForCustomRole });
 
       // Invalidate all API Keys after tests
       await measurePerformanceAsync(log, `Delete all API Keys`, async () => {
         log.debug(`Delete all API Keys`);
         return invalidateApiKeys(generatedApiKeys);
       });
+
+      if (isCustomRoleCreated) {
+        log.debug(`Deleting custom role with name ${samlAuth.customRoleName}`);
+        try {
+          await esClient.security.deleteRole({ name: samlAuth.customRoleName });
+          log.info(`Successfully deleted custom role: ${samlAuth.customRoleName}`);
+        } catch (error: any) {
+          log.error(`Failed to delete custom role ${samlAuth.customRoleName}: ${error.message}`);
+        }
+      }
     },
     { scope: 'worker' },
   ],
