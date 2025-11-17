@@ -80,184 +80,179 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
   ],
   footer: [
     {
-      id: 'security_solution_nav_footer',
+      id: 'launchpad',
+      title: i18nStrings.launchPad.title,
+      renderAs: 'panelOpener',
+      icon: 'launch',
       children: [
         {
-          id: 'launchpad',
-          title: i18nStrings.launchPad.title,
-          renderAs: 'panelOpener',
-          icon: 'launch',
           children: [
             {
-              children: [
-                {
-                  id: 'launchpad_get_started',
-                  link: securityLink(SecurityPageName.landing),
-                },
-                {
-                  id: SecurityPageName.siemReadiness,
-                  link: securityLink(SecurityPageName.siemReadiness),
-                },
-                {
-                  // value report
-                  id: SecurityPageName.aiValue,
-                  link: securityLink(SecurityPageName.aiValue),
-                },
-              ],
+              id: 'launchpad_get_started',
+              link: securityLink(SecurityPageName.landing),
             },
             {
-              title: i18nStrings.launchPad.migrations.title,
-              children: [
-                {
-                  id: SecurityPageName.siemMigrationsRules,
-                  link: securityLink(SecurityPageName.siemMigrationsRules),
-                },
-                {
-                  id: SecurityPageName.siemMigrationsDashboards,
-                  link: securityLink(SecurityPageName.siemMigrationsDashboards),
-                },
-              ],
+              id: SecurityPageName.siemReadiness,
+              link: securityLink(SecurityPageName.siemReadiness),
+            },
+            {
+              // value report
+              id: SecurityPageName.aiValue,
+              link: securityLink(SecurityPageName.aiValue),
             },
           ],
         },
         {
-          link: 'dev_tools',
-          title: i18nStrings.devTools,
-          icon: 'editorCodeBlock',
-        },
-        {
-          id: DATA_MANAGEMENT_NAV_ID,
-          title: i18nStrings.ingestAndManageData.title,
-          icon: 'database',
-          breadcrumbStatus: 'hidden',
-          renderAs: 'panelOpener',
+          title: i18nStrings.launchPad.migrations.title,
           children: [
             {
-              title: i18nStrings.ingestAndManageData.ingestAndIntegrations.title,
-              children: [
-                { link: 'integrations' },
-                // TODO: Add fleet back when it is possible to not jump to  fleet sub menu under assets
-                // { link: 'fleet' },
-                { link: 'management:ingest_pipelines' },
-                // logstash pipeline
-                { link: 'management:pipelines' },
-                { link: 'management:content_connectors' },
-              ],
+              id: SecurityPageName.siemMigrationsRules,
+              link: securityLink(SecurityPageName.siemMigrationsRules),
             },
             {
-              title: i18nStrings.ingestAndManageData.indicesAndDataStreams.title,
-              children: [
-                { link: 'streams' },
-                { link: 'management:index_management' },
-                { link: 'management:index_lifecycle_management' },
-                { link: 'management:snapshot_restore' },
-                { link: 'management:transform' },
-                { link: 'management:rollup_jobs' },
-                { link: 'management:data_quality' },
-              ],
+              id: SecurityPageName.siemMigrationsDashboards,
+              link: securityLink(SecurityPageName.siemMigrationsDashboards),
             },
           ],
         },
+      ],
+    },
+    {
+      link: 'dev_tools',
+      title: i18nStrings.devTools,
+      icon: 'editorCodeBlock',
+    },
+    {
+      id: DATA_MANAGEMENT_NAV_ID,
+      title: i18nStrings.ingestAndManageData.title,
+      icon: 'database',
+      breadcrumbStatus: 'hidden',
+      renderAs: 'panelOpener',
+      children: [
         {
-          id: STACK_MANAGEMENT_NAV_ID,
-          title: i18nStrings.stackManagementV2.title,
-          icon: 'gear',
+          title: i18nStrings.ingestAndManageData.ingestAndIntegrations.title,
+          children: [
+            { link: 'integrations' },
+            // TODO: Add fleet back when it is possible to not jump to  fleet sub menu under assets
+            // { link: 'fleet' },
+            { link: 'management:ingest_pipelines' },
+            // logstash pipeline
+            { link: 'management:pipelines' },
+            { link: 'management:content_connectors' },
+          ],
+        },
+        {
+          title: i18nStrings.ingestAndManageData.indicesAndDataStreams.title,
+          children: [
+            { link: 'streams' },
+            { link: 'management:index_management' },
+            { link: 'management:index_lifecycle_management' },
+            { link: 'management:snapshot_restore' },
+            { link: 'management:transform' },
+            { link: 'management:rollup_jobs' },
+            { link: 'management:data_quality' },
+          ],
+        },
+      ],
+    },
+    {
+      id: STACK_MANAGEMENT_NAV_ID,
+      title: i18nStrings.stackManagementV2.title,
+      icon: 'gear',
+      breadcrumbStatus: 'hidden',
+      renderAs: 'panelOpener',
+      children: [
+        {
+          id: 'stack_management_home',
           breadcrumbStatus: 'hidden',
-          renderAs: 'panelOpener',
           children: [
             {
-              id: 'stack_management_home',
+              // We include this link here to ensure that the settings icon does not land on Stack Monitoring by default
+              // https://github.com/elastic/kibana/issues/241518
+              // And that the sidenav panel opens when user lands to legacy management landing page
+              // https://github.com/elastic/kibana/issues/240275
+              link: 'management',
+              title: i18nStrings.stackManagementV2.home.title,
               breadcrumbStatus: 'hidden',
-              children: [
-                {
-                  // We include this link here to ensure that the settings icon does not land on Stack Monitoring by default
-                  // https://github.com/elastic/kibana/issues/241518
-                  // And that the sidenav panel opens when user lands to legacy management landing page
-                  // https://github.com/elastic/kibana/issues/240275
-                  link: 'management',
-                  title: i18nStrings.stackManagementV2.home.title,
-                  breadcrumbStatus: 'hidden',
-                },
-                { link: 'monitoring' },
-              ],
+            },
+            { link: 'monitoring' },
+          ],
+        },
+        {
+          title: i18nStrings.stackManagementV2.alertsAndInsights.title,
+          children: [
+            { link: 'management:triggersActions' },
+            { link: 'management:cases' },
+            { link: 'management:triggersActionsConnectors' },
+            { link: 'management:reporting' },
+            { link: 'management:jobsListLink' },
+            { link: 'management:watcher' },
+            { link: 'management:maintenanceWindows' },
+            {
+              id: SecurityPageName.entityAnalyticsManagement,
+              link: securityLink(SecurityPageName.entityAnalyticsManagement),
             },
             {
-              title: i18nStrings.stackManagementV2.alertsAndInsights.title,
-              children: [
-                { link: 'management:triggersActions' },
-                { link: 'management:cases' },
-                { link: 'management:triggersActionsConnectors' },
-                { link: 'management:reporting' },
-                { link: 'management:jobsListLink' },
-                { link: 'management:watcher' },
-                { link: 'management:maintenanceWindows' },
-                {
-                  id: SecurityPageName.entityAnalyticsManagement,
-                  link: securityLink(SecurityPageName.entityAnalyticsManagement),
-                },
-                {
-                  id: SecurityPageName.entityAnalyticsEntityStoreManagement,
-                  link: securityLink(SecurityPageName.entityAnalyticsEntityStoreManagement),
-                },
-              ],
+              id: SecurityPageName.entityAnalyticsEntityStoreManagement,
+              link: securityLink(SecurityPageName.entityAnalyticsEntityStoreManagement),
             },
-            {
-              title: i18nStrings.ml.title,
-              children: [
-                { link: 'management:overview' },
-                { link: 'management:anomaly_detection' },
-                { link: 'management:analytics' },
-                { link: 'management:trained_models' },
-                { link: 'management:supplied_configurations' },
-              ],
-            },
-            {
-              title: i18nStrings.stackManagement.ai.title,
-              children: [
-                { link: 'management:genAiSettings' },
-                { link: 'management:aiAssistantManagementSelection' },
-              ],
-            },
-            {
-              title: i18nStrings.stackManagementV2.security.title,
-              children: [
-                { link: 'management:users' },
-                { link: 'management:roles' },
-                { link: 'management:api_keys' },
-                { link: 'management:role_mappings' },
-              ],
-            },
-            {
-              title: i18nStrings.stackManagementV2.data.title,
-              children: [
-                { link: 'management:cross_cluster_replication' },
-                { link: 'management:remote_clusters' },
-                { link: 'management:migrate_data' },
-              ],
-            },
-            {
-              title: i18nStrings.stackManagementV2.kibana.title,
-              children: [
-                { link: 'management:dataViews' },
-                { link: 'management:filesManagement' },
-                { link: 'management:objects' },
-                { link: 'management:tags' },
-                { link: 'management:search_sessions' },
-                { link: 'management:spaces' },
-                { link: 'maps' },
-                { link: 'visualize' },
-                { link: 'graph' },
-                { link: 'canvas' },
-                { link: 'management:settings' },
-              ],
-            },
-            {
-              title: i18nStrings.stackManagement.stack.title,
-              children: [
-                { link: 'management:license_management' },
-                { link: 'management:upgrade_assistant' },
-              ],
-            },
+          ],
+        },
+        {
+          title: i18nStrings.ml.title,
+          children: [
+            { link: 'management:overview' },
+            { link: 'management:anomaly_detection' },
+            { link: 'management:analytics' },
+            { link: 'management:trained_models' },
+            { link: 'management:supplied_configurations' },
+          ],
+        },
+        {
+          title: i18nStrings.stackManagement.ai.title,
+          children: [
+            { link: 'management:genAiSettings' },
+            { link: 'management:aiAssistantManagementSelection' },
+          ],
+        },
+        {
+          title: i18nStrings.stackManagementV2.security.title,
+          children: [
+            { link: 'management:users' },
+            { link: 'management:roles' },
+            { link: 'management:api_keys' },
+            { link: 'management:role_mappings' },
+          ],
+        },
+        {
+          title: i18nStrings.stackManagementV2.data.title,
+          children: [
+            { link: 'management:cross_cluster_replication' },
+            { link: 'management:remote_clusters' },
+            { link: 'management:migrate_data' },
+          ],
+        },
+        {
+          title: i18nStrings.stackManagementV2.kibana.title,
+          children: [
+            { link: 'management:dataViews' },
+            { link: 'management:filesManagement' },
+            { link: 'management:objects' },
+            { link: 'management:tags' },
+            { link: 'management:search_sessions' },
+            { link: 'management:spaces' },
+            { link: 'maps' },
+            { link: 'visualize' },
+            { link: 'graph' },
+            { link: 'canvas' },
+            { link: 'management:settings' },
+          ],
+        },
+        {
+          title: i18nStrings.stackManagement.stack.title,
+          children: [
+            { link: 'management:license_management' },
+            { link: 'management:upgrade_assistant' },
           ],
         },
       ],
