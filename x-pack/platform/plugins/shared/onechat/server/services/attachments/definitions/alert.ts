@@ -101,30 +101,17 @@ const formatAlertData = (data: AlertAttachmentData): string => {
   const alertIdMatch = data.alert.match(/_id,([^\n]+)/);
   const alertId = alertIdMatch ? alertIdMatch[1] : null;
   
-  return `=== SECURITY ALERT DATA (ALREADY PROVIDED) ===
-
-The following alert data is ALREADY available in this conversation. You do NOT need to query for this specific alert again.
+  return `SECURITY ALERT DATA (ALREADY PROVIDED)
 
 ${filteredAlert}
 
-=== CRITICAL INSTRUCTIONS ===
+CRITICAL: This alert is already provided above. DO NOT query for this exact alert (matching host.name, user.name, source.ip, destination.ip, or _id="${alertId || 'N/A'}").
 
-1. **DO NOT query for this specific alert** - The data above is already provided. Any search query that would return this exact alert (e.g., matching host.name, user.name, source.ip, destination.ip, or _id) is REDUNDANT and should NOT be executed.
+ONLY search if the user explicitly requests related alerts or additional context. Do NOT automatically search for related data unless specifically asked.
 
-2. **Only use the search tool to find RELATED data** such as:
-   - Other alerts from the same source IP, user, or host (but NOT this exact alert)
-   - Related events or logs from the same timeframe
-   - Additional context that supplements this alert
-
-3. **When searching**, you MUST:
-   - Pass the index pattern "${data.indexPattern}" as the "index" parameter
-   - Do NOT include "_index" or index patterns in your query string
-   - Use field filtering with KEEP command to reduce response size
-   - Exclude this alert's _id ("${alertId || 'N/A'}") from results if querying by other fields
-
-4. **Before making any search**, check if the information you need is already in the alert data above.
-
-=== INDEX PATTERN ===
-Use "${data.indexPattern}" as the index parameter when searching for related alerts.`;
+When searching:
+- Use index "${data.indexPattern}" as the "index" parameter (NOT in query string)
+- Use KEEP command for field filtering to reduce response size
+- Exclude _id="${alertId || 'N/A'}" from results`;
 };
 

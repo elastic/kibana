@@ -62,6 +62,41 @@ export const createSearchToolGraph = ({
   const selectAndValidateIndex = async (state: StateType) => {
     events?.reportProgress(progressMessages.selectingTarget());
 
+    // If a specific index is provided (not a pattern with '*'), skip indexExplorer for performance
+    if (state.targetPattern && !state.targetPattern.includes('*') && state.targetPattern !== '*') {
+      logger?.info(
+        `[Search Tool] Using provided specific index directly: "${state.targetPattern}"`
+      );
+      // Validate that the index exists by attempting to resolve it
+      try {
+        const resolveRes = await esClient.indices.resolveIndex({
+          name: [state.targetPattern],
+          allow_no_indices: false,
+        });
+        const resourceCount =
+          resolveRes.indices.length + resolveRes.aliases.length + resolveRes.data_streams.length;
+        if (resourceCount > 0) {
+          // Determine the type based on what was resolved
+          let resourceType: 'index' | 'alias' | 'data_stream' = 'index';
+          if (resolveRes.aliases.length > 0) {
+            resourceType = 'alias';
+          } else if (resolveRes.data_streams.length > 0) {
+            resourceType = 'data_stream';
+          }
+          return {
+            indexIsValid: true,
+            searchTarget: { type: resourceType, name: state.targetPattern },
+          };
+        }
+      } catch (e) {
+        logger?.warn(
+          `[Search Tool] Failed to validate index "${state.targetPattern}", falling back to indexExplorer: ${e.message}`
+        );
+        // Fall through to indexExplorer
+      }
+    }
+
+    // Use indexExplorer for pattern matching or when specific index validation failed
     const explorerRes = await indexExplorer({
       nlQuery: state.nlQuery,
       indexPattern: state.targetPattern ?? '*',
