@@ -168,19 +168,23 @@ export class JobImportService {
     if (type === 'data-frame-analytics' && esSearch) {
       await Promise.all(
         commonJobs.map(async ({ jobId, indices }) => {
-          if (indices.length === 0) {
+          if (!indices || indices.length === 0) {
             missingSourceIndices.add(jobId);
             return;
           }
 
           try {
-            await esSearch({
+            const resp = await esSearch({
               index: indices,
               size: 0,
               body: {
                 query: { match_all: {} },
               },
             });
+
+            if (resp._shards?.total === 0) {
+              missingSourceIndices.add(jobId);
+            }
           } catch (error) {
             const errorMessage = extractErrorMessage(error);
             if (
