@@ -14,7 +14,7 @@ import {
 import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 import { visualizationElement } from '@kbn/onechat-common/tools/tool_result';
 import { ChartType } from '@kbn/visualization-utils';
-import { customInstructionsBlock, formatDate } from '../utils/prompt_helpers';
+import { customInstructionsBlock, formatDate } from './prompts/prompt_helpers';
 import type { ResearchAgentAction, AnswerAgentAction } from './actions';
 import { formatResearcherActionHistory, formatAnswerActionHistory } from './prompts/format_actions';
 
