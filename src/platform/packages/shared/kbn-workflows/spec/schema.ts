@@ -9,6 +9,7 @@
 
 import moment from 'moment-timezone';
 import { z } from '@kbn/zod';
+import { isValidJsonSchema } from './lib/validate_json_schema';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
@@ -371,7 +372,7 @@ export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false
 };
 
 /* --- Inputs --- */
-export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
+export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array', 'json-schema']);
 
 const WorkflowInputBaseSchema = z.object({
   name: z.string(),
@@ -408,12 +409,22 @@ export const WorkflowInputArraySchema = WorkflowInputBaseSchema.extend({
   default: z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]).optional(),
 });
 
+export const WorkflowInputJsonSchemaSchema = WorkflowInputBaseSchema.extend({
+  type: z.literal('json-schema'),
+  schema: z.any().refine(
+    isValidJsonSchema,
+    { message: 'schema must be a valid JSON Schema (Draft 7)' }
+  ),
+  default: z.any().optional(), // Can be any JSON-serializable value
+});
+
 export const WorkflowInputSchema = z.union([
   WorkflowInputStringSchema,
   WorkflowInputNumberSchema,
   WorkflowInputBooleanSchema,
   WorkflowInputChoiceSchema,
   WorkflowInputArraySchema,
+  WorkflowInputJsonSchemaSchema,
 ]);
 
 /* --- Consts --- */
@@ -478,6 +489,17 @@ export const WorkflowSchemaForAutocomplete = WorkflowSchema.partial()
       .array(z.object({ type: z.string().catch('') }).passthrough())
       .catch([])
       .default([]),
+    inputs: z
+      .array(
+        z
+          .object({
+            name: z.string().catch(''),
+            type: z.string().catch(''),
+          })
+          .passthrough()
+      )
+      .optional()
+      .catch([]),
     steps: z
       .array(
         z

@@ -13,6 +13,8 @@ import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowInputChoiceSchema, WorkflowInputSchema, WorkflowYaml } from '@kbn/workflows';
 import { z } from '@kbn/zod';
+import { convertJsonSchemaToZod } from '../../../../common/lib/json_schema_to_zod';
+import type { JSONSchema7 } from 'json-schema';
 
 const makeWorkflowInputsValidator = (inputs: Array<z.infer<typeof WorkflowInputSchema>>) => {
   return z.object(
@@ -53,6 +55,11 @@ const makeWorkflowInputsValidator = (inputs: Array<z.infer<typeof WorkflowInputS
           acc[input.name] = input.required ? arr : arr.optional();
           break;
         }
+        case 'json-schema': {
+          const zodSchema = convertJsonSchemaToZod(input.schema);
+          acc[input.name] = input.required ? zodSchema : zodSchema.optional();
+          break;
+        }
       }
       return acc;
     }, {} as Record<string, z.ZodType>)
@@ -74,7 +81,50 @@ type WorkflowInputPlaceholder =
   | string[]
   | number[]
   | boolean[]
-  | ((input: z.infer<typeof WorkflowInputSchema>) => string);
+  | Record<string, unknown>
+  | ((input: z.infer<typeof WorkflowInputSchema>) => string | number | boolean | string[] | number[] | boolean[] | Record<string, unknown>);
+
+/**
+ * Generates a sample object from a JSON Schema
+ */
+function generateSampleFromJsonSchema(schema: JSONSchema7): unknown {
+  if (schema.default !== undefined) {
+    return schema.default;
+  }
+
+  switch (schema.type) {
+    case 'string':
+      return schema.format === 'email' ? 'user@example.com' : 'string';
+    case 'number':
+      return 0;
+    case 'integer':
+      return 0;
+    case 'boolean':
+      return false;
+    case 'array': {
+      const items = schema.items as JSONSchema7 | undefined;
+      if (items) {
+        return [generateSampleFromJsonSchema(items)];
+      }
+      return [];
+    }
+    case 'object': {
+      const sample: Record<string, unknown> = {};
+      if (schema.properties) {
+        for (const [key, propSchema] of Object.entries(schema.properties)) {
+          const prop = propSchema as JSONSchema7;
+          const isRequired = schema.required?.includes(key) ?? false;
+          if (isRequired || prop.default !== undefined) {
+            sample[key] = generateSampleFromJsonSchema(prop);
+          }
+        }
+      }
+      return sample;
+    }
+    default:
+      return null;
+  }
+}
 
 const defaultWorkflowInputsMappings: Record<string, WorkflowInputPlaceholder> = {
   string: 'Enter a string',
@@ -84,6 +134,12 @@ const defaultWorkflowInputsMappings: Record<string, WorkflowInputPlaceholder> = 
     `Select an option: ${(input as z.infer<typeof WorkflowInputChoiceSchema>).options.join(', ')}`,
   array: (input: z.infer<typeof WorkflowInputSchema>) =>
     'Enter array of strings, numbers or booleans',
+  'json-schema': (input: z.infer<typeof WorkflowInputSchema>) => {
+    if (input.type === 'json-schema') {
+      return generateSampleFromJsonSchema(input.schema);
+    }
+    return {};
+  },
 };
 
 const getDefaultWorkflowInput = (definition: WorkflowYaml): string => {

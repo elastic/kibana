@@ -61,6 +61,13 @@ const generateField = (input: InputType) => {
       field = input.required ? arr : arr.optional();
       break;
     }
+    case 'json-schema': {
+      // For JSON Schema inputs, use z.any() as a fallback since we can't easily convert
+      // JSON Schema to Zod in this context (would require importing the converter)
+      // The actual validation will happen at runtime
+      field = z.any();
+      break;
+    }
     default:
       field = z.any();
       break;

@@ -59,7 +59,7 @@
     "serverless-security": "node --no-experimental-require-module scripts/kibana --dev --serverless=security",
     "serverless-workplace-ai": "node --no-experimental-require-module scripts/kibana --dev --serverless=workplaceai",
     "spec_to_console": "node --no-experimental-require-module scripts/spec_to_console",
-    "start": "node --no-experimental-require-module scripts/kibana --dev",
+    "start": "node --no-experimental-require-module scripts/kibana --dev  --run-examples",
     "storybook": "node --no-experimental-require-module scripts/storybook",
     "test:ftr": "node --no-experimental-require-module scripts/functional_tests",
     "test:ftr:runner": "node --no-experimental-require-module scripts/functional_test_runner",

@@ -11,6 +11,7 @@ import type { WorkflowYaml } from '@kbn/workflows';
 import { WorkflowContextSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod';
 import { inferZodType } from '../../../../common/lib/zod';
+import { convertJsonSchemaToZod } from '../../../../common/lib/json_schema_to_zod';
 
 export function getWorkflowContextSchema(definition: WorkflowYaml) {
   return WorkflowContextSchema.extend({
@@ -62,6 +63,11 @@ export function getWorkflowContextSchema(definition: WorkflowYaml) {
                   z.ZodArray<z.ZodBoolean>
                 ]
               );
+              break;
+            }
+            case 'json-schema': {
+              // Convert JSON Schema to Zod schema
+              valueSchema = convertJsonSchemaToZod(input.schema);
               break;
             }
             default:
