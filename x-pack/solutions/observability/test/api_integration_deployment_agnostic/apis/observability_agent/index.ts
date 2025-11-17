@@ -11,5 +11,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
   describe('Observability Agent', function () {
     loadTestFile(require.resolve('./tools/get_data_sources.spec.ts'));
     loadTestFile(require.resolve('./tools/search_knowledge_base.spec.ts'));
+    loadTestFile(require.resolve('./tools/get_alerts.spec.ts'));
   });
 }
