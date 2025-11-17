@@ -13,6 +13,7 @@ import { schema } from '@kbn/config-schema';
 import { commonRouteConfig, INTERNAL_API_VERSION, PUBLIC_API_PATH } from '../constants';
 import { getReadResponseBodySchema } from './schemas';
 import { read } from './read';
+import { allowUnmappedKeysSchema } from '../dashboard_state_schemas';
 
 export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>) {
   const readRoute = router.get({
@@ -33,6 +34,11 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
               },
             }),
           }),
+          query: schema.maybe(
+            schema.object({
+              allowUnmappedKeys: schema.maybe(allowUnmappedKeysSchema),
+            })
+          ),
         },
         response: {
           200: {
@@ -43,7 +49,7 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
     },
     async (ctx, req, res) => {
       try {
-        const result = await read(ctx, req.params.id);
+        const result = await read(ctx, req.params.id, req.query?.allowUnmappedKeys ?? false);
         return res.ok({ body: result });
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 404) {

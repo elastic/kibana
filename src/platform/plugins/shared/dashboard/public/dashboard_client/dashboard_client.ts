@@ -58,6 +58,9 @@ export const dashboardClient = {
     const result = await coreServices.http
       .get<DashboardReadResponseBody>(`/api/dashboards/dashboard/${id}`, {
         version: DASHBOARD_API_VERSION,
+        query: {
+          allowUnmappedKeys: true,
+        },
       })
       .catch((e) => {
         if (e.response?.status === 404) {
