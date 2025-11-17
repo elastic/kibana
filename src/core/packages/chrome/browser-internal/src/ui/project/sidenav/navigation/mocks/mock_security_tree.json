@@ -2,86 +2,357 @@
   "id": "security",
   "body": [
     {
-      "type": "navGroup",
-      "id": "security_solution_nav",
-      "title": "Security",
+      "id": "security_solution_home",
       "icon": "logoSecurity",
-      "breadcrumbStatus": "hidden",
-      "defaultIsCollapsed": false,
-      "isCollapsible": false,
-      "path": "security_solution_nav",
+      "renderAs": "home",
+      "title": "Security",
+      "href": "/jom/app/security/get_started",
+      "path": "security_solution_home",
+      "deepLink": {},
+      "isExternalLink": false,
+      "sideNavStatus": "visible"
+    },
+    {
+      "icon": "discoverApp",
+      "id": "discover",
+      "href": "/jom/app/discover#/?_tab=(tabId:'06892a05-71de-4ca9-ad58-0e0a970dde44')&_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now%2Fd,to:now%2Fd))&_a=(columns:!(),dataSource:(dataViewId:'90943e30-9a47-11e8-b64d-95841ca0b247',type:dataView),filters:!(),hideChart:!t,interval:auto,query:(language:kuery,query:''),sort:!(!(timestamp,desc)))",
+      "path": "discover",
+      "title": "Discover",
+      "deepLink": {},
+      "isExternalLink": false,
+      "sideNavStatus": "visible"
+    },
+    {
+      "id": "dashboards",
+      "icon": "dashboardApp",
+      "href": "/jom/app/security/dashboards",
+      "path": "dashboards",
+      "title": "Dashboards",
+      "deepLink": {},
       "isExternalLink": false,
       "sideNavStatus": "visible",
       "children": [
         {
-          "id": "discover",
-          "href": "/tzo/s/sec/app/discover#/?_g=(filters:!(),query:(language:kuery,query:''),refreshInterval:(pause:!t,value:60000),time:(from:now%2Fd,to:now%2Fd))",
-          "path": "security_solution_nav.discover",
-          "title": "Discover",
+          "id": "overview",
+          "href": "/jom/app/security/overview",
+          "path": "dashboards.overview",
+          "title": "Overview",
           "deepLink": {},
           "isExternalLink": false,
           "sideNavStatus": "visible"
         },
         {
-          "id": "dashboards",
-          "renderAs": "item",
-          "href": "/tzo/s/sec/app/security/dashboards",
-          "path": "security_solution_nav.dashboards",
-          "title": "Dashboards",
+          "id": "detection_response",
+          "href": "/jom/app/security/detection_response",
+          "path": "dashboards.detection_response",
+          "title": "Detection & Response",
+          "deepLink": {},
+          "isExternalLink": false,
+          "sideNavStatus": "visible"
+        },
+        {
+          "id": "cloud_security_posture-dashboard",
+          "href": "/jom/app/security/cloud_security_posture/dashboard",
+          "path": "dashboards.cloud_security_posture-dashboard",
+          "title": "Cloud Security Posture",
+          "deepLink": {},
+          "isExternalLink": false,
+          "sideNavStatus": "visible"
+        },
+        {
+          "id": "cloud_security_posture-vulnerability_dashboard",
+          "href": "/jom/app/security/cloud_security_posture/vulnerability_dashboard",
+          "path": "dashboards.cloud_security_posture-vulnerability_dashboard",
+          "title": "Cloud Native Vulnerability Management",
+          "deepLink": {},
+          "isExternalLink": false,
+          "sideNavStatus": "visible"
+        },
+        {
+          "id": "entity_analytics",
+          "href": "/jom/app/security/entity_analytics",
+          "path": "dashboards.entity_analytics",
+          "title": "Entity analytics",
+          "deepLink": {},
+          "isExternalLink": false,
+          "sideNavStatus": "visible"
+        },
+        {
+          "id": "data_quality",
+          "href": "/jom/app/security/data_quality",
+          "path": "dashboards.data_quality",
+          "title": "Data Quality",
+          "deepLink": {},
+          "isExternalLink": false,
+          "sideNavStatus": "visible"
+        }
+      ]
+    },
+    {
+      "id": "securityGroup:rules",
+      "title": "Rules",
+      "icon": "securitySignal",
+      "renderAs": "panelOpener",
+      "path": "securityGroup:rules",
+      "isExternalLink": false,
+      "sideNavStatus": "visible",
+      "children": [
+        {
+          "title": "Management",
+          "breadcrumbStatus": "hidden",
+          "id": "node-0",
+          "path": "securityGroup:rules.node-0",
+          "isExternalLink": false,
+          "sideNavStatus": "visible",
+          "children": [
+            {
+              "id": "rules",
+              "href": "/jom/app/security/rules",
+              "path": "securityGroup:rules.node-0.rules",
+              "title": "Detection rules (SIEM)",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible",
+              "children": [
+                {
+                  "id": "rules-add",
+                  "href": "/jom/app/security/rules/add_rules",
+                  "path": "securityGroup:rules.node-0.rules.rules-add",
+                  "title": "Add Rules",
+                  "deepLink": {},
+                  "isExternalLink": false,
+                  "sideNavStatus": "visible"
+                },
+                {
+                  "id": "rules-create",
+                  "href": "/jom/app/security/rules/create",
+                  "path": "securityGroup:rules.node-0.rules.rules-create",
+                  "title": "Create new rule",
+                  "deepLink": {},
+                  "isExternalLink": false,
+                  "sideNavStatus": "visible"
+                }
+              ]
+            },
+            {
+              "id": "cloud_security_posture-benchmarks",
+              "href": "/jom/app/security/cloud_security_posture/benchmarks",
+              "path": "securityGroup:rules.node-0.cloud_security_posture-benchmarks",
+              "title": "Benchmarks",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "exceptions",
+              "href": "/jom/app/security/exceptions",
+              "path": "securityGroup:rules.node-0.exceptions",
+              "title": "Shared exception lists",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            }
+          ]
+        },
+        {
+          "title": "Discover",
+          "breadcrumbStatus": "hidden",
+          "id": "node-1",
+          "path": "securityGroup:rules.node-1",
+          "isExternalLink": false,
+          "sideNavStatus": "visible",
+          "children": [
+            {
+              "id": "coverage-overview",
+              "href": "/jom/app/security/rules_coverage_overview",
+              "path": "securityGroup:rules.node-1.coverage-overview",
+              "title": "MITRE ATT&CK® Coverage",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "alerts",
+      "icon": "warning",
+      "href": "/jom/app/security/alerts",
+      "path": "alerts",
+      "title": "Alerts",
+      "deepLink": {},
+      "isExternalLink": false,
+      "sideNavStatus": "visible"
+    },
+    {
+      "id": "attack_discovery",
+      "icon": "bolt",
+      "href": "/jom/app/security/attack_discovery",
+      "path": "attack_discovery",
+      "title": "Attack discovery",
+      "deepLink": {},
+      "isExternalLink": false,
+      "sideNavStatus": "visible"
+    },
+    {
+      "id": "cloud_security_posture-findings",
+      "icon": {
+        "_payload": {
+          "_status": 1,
+          "_result": {}
+        }
+      },
+      "href": "/jom/app/security/cloud_security_posture/findings",
+      "path": "cloud_security_posture-findings",
+      "title": "Findings",
+      "deepLink": {},
+      "isExternalLink": false,
+      "sideNavStatus": "visible"
+    },
+    {
+      "id": "cases",
+      "icon": {
+        "_payload": {
+          "_status": 1,
+          "_result": {}
+        }
+      },
+      "href": "/jom/app/security/cases",
+      "path": "cases",
+      "title": "Cases",
+      "deepLink": {},
+      "isExternalLink": false,
+      "sideNavStatus": "visible",
+      "children": [
+        {
+          "id": "cases_create",
+          "href": "/jom/app/security/cases/create",
+          "path": "cases.cases_create",
+          "title": "Create",
+          "deepLink": {},
+          "isExternalLink": false,
+          "sideNavStatus": "visible"
+        },
+        {
+          "id": "cases_configure",
+          "href": "/jom/app/security/cases/configure",
+          "path": "cases.cases_configure",
+          "title": "Settings",
+          "deepLink": {},
+          "isExternalLink": false,
+          "sideNavStatus": "visible"
+        }
+      ]
+    },
+    {
+      "id": "securityGroup:entityAnalytics",
+      "icon": {
+        "_payload": {
+          "_status": 1,
+          "_result": {}
+        }
+      },
+      "title": "Entity analytics",
+      "renderAs": "panelOpener",
+      "path": "securityGroup:entityAnalytics",
+      "isExternalLink": false,
+      "sideNavStatus": "visible",
+      "children": [
+        {
+          "id": "entity_analytics-overview",
+          "href": "/jom/app/security/entity_analytics_overview",
+          "path": "securityGroup:entityAnalytics.entity_analytics-overview",
+          "title": "Overview",
+          "deepLink": {},
+          "isExternalLink": false,
+          "sideNavStatus": "visible"
+        },
+        {
+          "id": "entity_analytics-privileged_user_monitoring",
+          "href": "/jom/app/security/entity_analytics_privileged_user_monitoring",
+          "path": "securityGroup:entityAnalytics.entity_analytics-privileged_user_monitoring",
+          "title": "Privileged user monitoring",
+          "deepLink": {},
+          "isExternalLink": false,
+          "sideNavStatus": "visible"
+        }
+      ]
+    },
+    {
+      "id": "securityGroup:explore",
+      "title": "Explore",
+      "renderAs": "panelOpener",
+      "icon": "globe",
+      "path": "securityGroup:explore",
+      "isExternalLink": false,
+      "sideNavStatus": "visible",
+      "children": [
+        {
+          "id": "hosts",
+          "href": "/jom/app/security/hosts",
+          "path": "securityGroup:explore.hosts",
+          "title": "Hosts",
           "deepLink": {},
           "isExternalLink": false,
           "sideNavStatus": "visible",
           "children": [
             {
-              "id": "overview",
-              "href": "/tzo/s/sec/app/security/overview",
-              "path": "security_solution_nav.dashboards.overview",
-              "title": "Overview",
+              "id": "hosts-all",
+              "breadcrumbStatus": "hidden",
+              "href": "/jom/app/security/hosts/allHosts",
+              "path": "securityGroup:explore.hosts.hosts-all",
+              "title": "All hosts",
               "deepLink": {},
               "isExternalLink": false,
               "sideNavStatus": "visible"
             },
             {
-              "id": "detection_response",
-              "href": "/tzo/s/sec/app/security/detection_response",
-              "path": "security_solution_nav.dashboards.detection_response",
-              "title": "Detection & Response",
+              "id": "hosts-uncommon_processes",
+              "breadcrumbStatus": "hidden",
+              "href": "/jom/app/security/hosts/uncommonProcesses",
+              "path": "securityGroup:explore.hosts.hosts-uncommon_processes",
+              "title": "Uncommon Processes",
               "deepLink": {},
               "isExternalLink": false,
               "sideNavStatus": "visible"
             },
             {
-              "id": "cloud_security_posture-dashboard",
-              "href": "/tzo/s/sec/app/security/cloud_security_posture/dashboard",
-              "path": "security_solution_nav.dashboards.cloud_security_posture-dashboard",
-              "title": "Cloud Security Posture",
+              "id": "hosts-anomalies",
+              "breadcrumbStatus": "hidden",
+              "href": "/jom/app/security/hosts/anomalies",
+              "path": "securityGroup:explore.hosts.hosts-anomalies",
+              "title": "Anomalies",
               "deepLink": {},
               "isExternalLink": false,
               "sideNavStatus": "visible"
             },
             {
-              "id": "cloud_security_posture-vulnerability_dashboard",
-              "href": "/tzo/s/sec/app/security/cloud_security_posture/vulnerability_dashboard",
-              "path": "security_solution_nav.dashboards.cloud_security_posture-vulnerability_dashboard",
-              "title": "Cloud Native Vulnerability Management",
+              "id": "hosts-events",
+              "breadcrumbStatus": "hidden",
+              "href": "/jom/app/security/hosts/events",
+              "path": "securityGroup:explore.hosts.hosts-events",
+              "title": "Events",
               "deepLink": {},
               "isExternalLink": false,
               "sideNavStatus": "visible"
             },
             {
-              "id": "entity_analytics",
-              "href": "/tzo/s/sec/app/security/entity_analytics",
-              "path": "security_solution_nav.dashboards.entity_analytics",
-              "title": "Entity analytics",
+              "id": "hosts-risk",
+              "breadcrumbStatus": "hidden",
+              "href": "/jom/app/security/hosts/hostRisk",
+              "path": "securityGroup:explore.hosts.hosts-risk",
+              "title": "Host risk",
               "deepLink": {},
               "isExternalLink": false,
               "sideNavStatus": "visible"
             },
             {
-              "id": "data_quality",
-              "href": "/tzo/s/sec/app/security/data_quality",
-              "path": "security_solution_nav.dashboards.data_quality",
-              "title": "Data Quality",
+              "id": "hosts-sessions",
+              "breadcrumbStatus": "hidden",
+              "href": "/jom/app/security/hosts/sessions",
+              "path": "securityGroup:explore.hosts.hosts-sessions",
+              "title": "Sessions",
               "deepLink": {},
               "isExternalLink": false,
               "sideNavStatus": "visible"
@@ -89,624 +360,492 @@
           ]
         },
         {
+          "id": "network",
+          "href": "/jom/app/security/network",
+          "path": "securityGroup:explore.network",
+          "title": "Network",
+          "deepLink": {},
+          "isExternalLink": false,
+          "sideNavStatus": "visible",
+          "children": [
+            {
+              "id": "network-flows",
+              "breadcrumbStatus": "hidden",
+              "href": "/jom/app/security/network/flows",
+              "path": "securityGroup:explore.network.network-flows",
+              "title": "Flows",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "network-dns",
+              "breadcrumbStatus": "hidden",
+              "href": "/jom/app/security/network/dns",
+              "path": "securityGroup:explore.network.network-dns",
+              "title": "DNS",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "network-http",
+              "breadcrumbStatus": "hidden",
+              "href": "/jom/app/security/network/http",
+              "path": "securityGroup:explore.network.network-http",
+              "title": "HTTP",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "network-tls",
+              "breadcrumbStatus": "hidden",
+              "href": "/jom/app/security/network/tls",
+              "path": "securityGroup:explore.network.network-tls",
+              "title": "TLS",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "network-anomalies",
+              "breadcrumbStatus": "hidden",
+              "href": "/jom/app/security/network/anomalies",
+              "path": "securityGroup:explore.network.network-anomalies",
+              "title": "Anomalies",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "network-events",
+              "breadcrumbStatus": "hidden",
+              "href": "/jom/app/security/network/events",
+              "path": "securityGroup:explore.network.network-events",
+              "title": "Events",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            }
+          ]
+        },
+        {
+          "id": "users",
+          "href": "/jom/app/security/users",
+          "path": "securityGroup:explore.users",
+          "title": "Users",
+          "deepLink": {},
+          "isExternalLink": false,
+          "sideNavStatus": "visible",
+          "children": [
+            {
+              "id": "users-all",
+              "breadcrumbStatus": "hidden",
+              "href": "/jom/app/security/users/allUsers",
+              "path": "securityGroup:explore.users.users-all",
+              "title": "All users",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "users-authentications",
+              "breadcrumbStatus": "hidden",
+              "href": "/jom/app/security/users/authentications",
+              "path": "securityGroup:explore.users.users-authentications",
+              "title": "Authentications",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "users-anomalies",
+              "breadcrumbStatus": "hidden",
+              "href": "/jom/app/security/users/anomalies",
+              "path": "securityGroup:explore.users.users-anomalies",
+              "title": "Anomalies",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "users-risk",
+              "breadcrumbStatus": "hidden",
+              "href": "/jom/app/security/users/userRisk",
+              "path": "securityGroup:explore.users.users-risk",
+              "title": "User risk",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "users-events",
+              "breadcrumbStatus": "hidden",
+              "href": "/jom/app/security/users/events",
+              "path": "securityGroup:explore.users.users-events",
+              "title": "Events",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "securityGroup:investigations",
+      "icon": "inspect",
+      "title": "Investigations",
+      "renderAs": "panelOpener",
+      "path": "securityGroup:investigations",
+      "isExternalLink": false,
+      "sideNavStatus": "visible",
+      "children": [
+        {
+          "id": "timelines",
+          "href": "/jom/app/security/timelines",
+          "path": "securityGroup:investigations.timelines",
+          "title": "Timelines",
+          "deepLink": {},
+          "isExternalLink": false,
+          "sideNavStatus": "visible",
+          "children": [
+            {
+              "id": "timelines-templates",
+              "href": "/jom/app/security/timelines/template",
+              "path": "securityGroup:investigations.timelines.timelines-templates",
+              "title": "Templates",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            }
+          ]
+        },
+        {
+          "id": "notes",
+          "href": "/jom/app/security/administration/notes",
+          "path": "securityGroup:investigations.notes",
+          "title": "Notes",
+          "deepLink": {},
+          "isExternalLink": false,
+          "sideNavStatus": "visible"
+        },
+        {
+          "id": "osquery",
+          "href": "/jom/app/osquery",
+          "path": "securityGroup:investigations.osquery",
+          "title": "Osquery",
+          "deepLink": {},
+          "isExternalLink": false,
+          "sideNavStatus": "visible"
+        }
+      ]
+    },
+    {
+      "id": "threat_intelligence",
+      "icon": {
+        "_payload": {
+          "_status": 1,
+          "_result": {}
+        }
+      },
+      "href": "/jom/app/security/threat_intelligence/indicators",
+      "path": "threat_intelligence",
+      "title": "Intelligence",
+      "deepLink": {},
+      "isExternalLink": false,
+      "sideNavStatus": "visible"
+    },
+    {
+      "id": "securityGroup:assets",
+      "icon": {
+        "_payload": {
+          "_status": 1,
+          "_result": {}
+        }
+      },
+      "title": "Assets",
+      "renderAs": "panelOpener",
+      "path": "securityGroup:assets",
+      "isExternalLink": false,
+      "sideNavStatus": "visible",
+      "children": [
+        {
+          "title": "Fleet",
+          "id": "fleet",
+          "href": "/jom/app/fleet",
+          "path": "securityGroup:assets.fleet",
+          "deepLink": {},
+          "isExternalLink": false,
+          "sideNavStatus": "visible",
+          "children": [
+            {
+              "id": "fleet:agents",
+              "href": "/jom/app/fleet/agents",
+              "path": "securityGroup:assets.fleet.fleet:agents",
+              "title": "Agents",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "title": "Policies",
+              "id": "fleet:policies",
+              "href": "/jom/app/fleet/policies",
+              "path": "securityGroup:assets.fleet.fleet:policies",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "fleet:enrollment_tokens",
+              "href": "/jom/app/fleet/enrollment-tokens",
+              "path": "securityGroup:assets.fleet.fleet:enrollment_tokens",
+              "title": "Enrollment tokens",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "fleet:uninstall_tokens",
+              "href": "/jom/app/fleet/uninstall-tokens",
+              "path": "securityGroup:assets.fleet.fleet:uninstall_tokens",
+              "title": "Uninstall tokens",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "fleet:data_streams",
+              "href": "/jom/app/fleet/data-streams",
+              "path": "securityGroup:assets.fleet.fleet:data_streams",
+              "title": "Data streams",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "fleet:settings",
+              "href": "/jom/app/fleet/settings",
+              "path": "securityGroup:assets.fleet.fleet:settings",
+              "title": "Settings",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            }
+          ]
+        },
+        {
+          "id": "endpoints",
+          "title": "Endpoints",
+          "path": "securityGroup:assets.endpoints",
+          "isExternalLink": false,
+          "sideNavStatus": "visible",
+          "children": [
+            {
+              "id": "endpoints",
+              "breadcrumbStatus": "hidden",
+              "href": "/jom/app/security/administration/endpoints",
+              "path": "securityGroup:assets.endpoints.endpoints",
+              "title": "Endpoints",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "policy",
+              "href": "/jom/app/security/administration/policy",
+              "path": "securityGroup:assets.endpoints.policy",
+              "title": "Policies",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "trusted_apps",
+              "href": "/jom/app/security/administration/trusted_apps",
+              "path": "securityGroup:assets.endpoints.trusted_apps",
+              "title": "Trusted applications",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "trusted_devices",
+              "href": "/jom/app/security/administration/trusted_devices",
+              "path": "securityGroup:assets.endpoints.trusted_devices",
+              "title": "Trusted devices",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "event_filters",
+              "href": "/jom/app/security/administration/event_filters",
+              "path": "securityGroup:assets.endpoints.event_filters",
+              "title": "Event filters",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "host_isolation_exceptions",
+              "href": "/jom/app/security/administration/host_isolation_exceptions",
+              "path": "securityGroup:assets.endpoints.host_isolation_exceptions",
+              "title": "Host isolation exceptions",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "blocklist",
+              "href": "/jom/app/security/administration/blocklist",
+              "path": "securityGroup:assets.endpoints.blocklist",
+              "title": "Blocklist",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "response_actions_history",
+              "href": "/jom/app/security/administration/response_actions_history",
+              "path": "securityGroup:assets.endpoints.response_actions_history",
+              "title": "Response actions history",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "securityGroup:machineLearning",
+      "icon": "machineLearningApp",
+      "title": "Machine Learning",
+      "renderAs": "panelOpener",
+      "path": "securityGroup:machineLearning",
+      "isExternalLink": false,
+      "sideNavStatus": "visible",
+      "children": [
+        {
+          "breadcrumbStatus": "hidden",
+          "id": "node-0",
+          "path": "securityGroup:machineLearning.node-0",
+          "isExternalLink": false,
+          "sideNavStatus": "visible",
+          "children": [
+            {
+              "title": "Overview",
+              "id": "ml:overview",
+              "href": "/jom/app/ml/overview",
+              "path": "securityGroup:machineLearning.node-0.ml:overview",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "title": "Data visualizer",
+              "id": "ml:dataVisualizer",
+              "href": "/jom/app/ml/datavisualizer",
+              "path": "securityGroup:machineLearning.node-0.ml:dataVisualizer",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            }
+          ]
+        },
+        {
+          "title": "Anomaly detection",
+          "breadcrumbStatus": "hidden",
+          "id": "node-1",
+          "path": "securityGroup:machineLearning.node-1",
+          "isExternalLink": false,
+          "sideNavStatus": "visible",
+          "children": [
+            {
+              "title": "Anomaly explorer",
+              "id": "ml:anomalyExplorer",
+              "href": "/jom/app/ml/explorer",
+              "path": "securityGroup:machineLearning.node-1.ml:anomalyExplorer",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "title": "Single metric viewer",
+              "id": "ml:singleMetricViewer",
+              "href": "/jom/app/ml/timeseriesexplorer",
+              "path": "securityGroup:machineLearning.node-1.ml:singleMetricViewer",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            }
+          ]
+        },
+        {
+          "title": "Data frame analytics",
           "breadcrumbStatus": "hidden",
           "id": "node-2",
-          "path": "security_solution_nav.node-2",
+          "path": "securityGroup:machineLearning.node-2",
           "isExternalLink": false,
           "sideNavStatus": "visible",
           "children": [
             {
-              "id": "securityGroup:rules",
-              "title": "Rules",
-              "renderAs": "panelOpener",
-              "path": "security_solution_nav.node-2.securityGroup:rules",
-              "isExternalLink": false,
-              "sideNavStatus": "visible",
-              "children": [
-                {
-                  "title": "Management",
-                  "breadcrumbStatus": "hidden",
-                  "id": "node-0",
-                  "path": "security_solution_nav.node-2.securityGroup:rules.node-0",
-                  "isExternalLink": false,
-                  "sideNavStatus": "visible",
-                  "children": [
-                    {
-                      "id": "rules",
-                      "renderAs": "item",
-                      "href": "/tzo/s/sec/app/security/rules",
-                      "path": "security_solution_nav.node-2.securityGroup:rules.node-0.rules",
-                      "title": "Detection rules (SIEM)",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible",
-                      "children": [
-                        {
-                          "id": "rules-add",
-                          "href": "/tzo/s/sec/app/security/rules/add_rules",
-                          "path": "security_solution_nav.node-2.securityGroup:rules.node-0.rules.rules-add",
-                          "title": "Add Rules",
-                          "deepLink": {},
-                          "isExternalLink": false,
-                          "sideNavStatus": "visible"
-                        },
-                        {
-                          "id": "rules-create",
-                          "href": "/tzo/s/sec/app/security/rules/create",
-                          "path": "security_solution_nav.node-2.securityGroup:rules.node-0.rules.rules-create",
-                          "title": "Create new rule",
-                          "deepLink": {},
-                          "isExternalLink": false,
-                          "sideNavStatus": "visible"
-                        }
-                      ]
-                    },
-                    {
-                      "id": "cloud_security_posture-benchmarks",
-                      "href": "/tzo/s/sec/app/security/cloud_security_posture/benchmarks",
-                      "path": "security_solution_nav.node-2.securityGroup:rules.node-0.cloud_security_posture-benchmarks",
-                      "title": "Benchmarks",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "exceptions",
-                      "href": "/tzo/s/sec/app/security/exceptions",
-                      "path": "security_solution_nav.node-2.securityGroup:rules.node-0.exceptions",
-                      "title": "Shared exception lists",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "siem_migrations-rules",
-                      "href": "/tzo/s/sec/app/security/siem_migrations/rules",
-                      "path": "security_solution_nav.node-2.securityGroup:rules.node-0.siem_migrations-rules",
-                      "title": "Automatic migrations",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    }
-                  ]
-                },
-                {
-                  "title": "Discover",
-                  "breadcrumbStatus": "hidden",
-                  "id": "node-1",
-                  "path": "security_solution_nav.node-2.securityGroup:rules.node-1",
-                  "isExternalLink": false,
-                  "sideNavStatus": "visible",
-                  "children": [
-                    {
-                      "id": "coverage-overview",
-                      "href": "/tzo/s/sec/app/security/rules_coverage_overview",
-                      "path": "security_solution_nav.node-2.securityGroup:rules.node-1.coverage-overview",
-                      "title": "MITRE ATT&CK® Coverage",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "alerts",
-              "href": "/tzo/s/sec/app/security/alerts",
-              "path": "security_solution_nav.node-2.alerts",
-              "title": "Alerts",
+              "title": "Result explorer",
+              "id": "ml:resultExplorer",
+              "href": "/jom/app/ml/data_frame_analytics/exploration",
+              "path": "securityGroup:machineLearning.node-2.ml:resultExplorer",
               "deepLink": {},
               "isExternalLink": false,
               "sideNavStatus": "visible"
             },
             {
-              "id": "attack_discovery",
-              "href": "/tzo/s/sec/app/security/attack_discovery",
-              "path": "security_solution_nav.node-2.attack_discovery",
-              "title": "Attack discovery",
+              "title": "Analytics map",
+              "id": "ml:analyticsMap",
+              "href": "/jom/app/ml/data_frame_analytics/map",
+              "path": "securityGroup:machineLearning.node-2.ml:analyticsMap",
               "deepLink": {},
               "isExternalLink": false,
               "sideNavStatus": "visible"
-            },
-            {
-              "id": "cloud_security_posture-findings",
-              "href": "/tzo/s/sec/app/security/cloud_security_posture/findings",
-              "path": "security_solution_nav.node-2.cloud_security_posture-findings",
-              "title": "Findings",
-              "deepLink": {},
-              "isExternalLink": false,
-              "sideNavStatus": "visible"
-            },
-            {
-              "id": "cases",
-              "renderAs": "item",
-              "href": "/tzo/s/sec/app/security/cases",
-              "path": "security_solution_nav.node-2.cases",
-              "title": "Cases",
-              "deepLink": {},
-              "isExternalLink": false,
-              "sideNavStatus": "visible",
-              "children": [
-                {
-                  "id": "cases_create",
-                  "href": "/tzo/s/sec/app/security/cases/create",
-                  "path": "security_solution_nav.node-2.cases.cases_create",
-                  "title": "Create",
-                  "deepLink": {},
-                  "isExternalLink": false,
-                  "sideNavStatus": "visible"
-                },
-                {
-                  "id": "cases_configure",
-                  "href": "/tzo/s/sec/app/security/cases/configure",
-                  "path": "security_solution_nav.node-2.cases.cases_configure",
-                  "title": "Settings",
-                  "deepLink": {},
-                  "isExternalLink": false,
-                  "sideNavStatus": "visible"
-                }
-              ]
             }
           ]
         },
         {
+          "title": "AIOps labs",
           "breadcrumbStatus": "hidden",
           "id": "node-3",
-          "path": "security_solution_nav.node-3",
+          "path": "securityGroup:machineLearning.node-3",
           "isExternalLink": false,
           "sideNavStatus": "visible",
           "children": [
             {
-              "id": "securityGroup:entityAnalytics",
-              "title": "Entity analytics",
-              "renderAs": "panelOpener",
-              "path": "security_solution_nav.node-3.securityGroup:entityAnalytics",
-              "isExternalLink": false,
-              "sideNavStatus": "visible",
-              "children": []
-            },
-            {
-              "id": "securityGroup:explore",
-              "title": "Explore",
-              "renderAs": "panelOpener",
-              "path": "security_solution_nav.node-3.securityGroup:explore",
-              "isExternalLink": false,
-              "sideNavStatus": "visible",
-              "children": [
-                {
-                  "id": "hosts",
-                  "renderAs": "item",
-                  "href": "/tzo/s/sec/app/security/hosts",
-                  "path": "security_solution_nav.node-3.securityGroup:explore.hosts",
-                  "title": "Hosts",
-                  "deepLink": {},
-                  "isExternalLink": false,
-                  "sideNavStatus": "visible",
-                  "children": [
-                    {
-                      "id": "hosts-all",
-                      "breadcrumbStatus": "hidden",
-                      "href": "/tzo/s/sec/app/security/hosts/allHosts",
-                      "path": "security_solution_nav.node-3.securityGroup:explore.hosts.hosts-all",
-                      "title": "All hosts",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "hosts-uncommon_processes",
-                      "breadcrumbStatus": "hidden",
-                      "href": "/tzo/s/sec/app/security/hosts/uncommonProcesses",
-                      "path": "security_solution_nav.node-3.securityGroup:explore.hosts.hosts-uncommon_processes",
-                      "title": "Uncommon Processes",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "hosts-events",
-                      "breadcrumbStatus": "hidden",
-                      "href": "/tzo/s/sec/app/security/hosts/events",
-                      "path": "security_solution_nav.node-3.securityGroup:explore.hosts.hosts-events",
-                      "title": "Events",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "hosts-risk",
-                      "breadcrumbStatus": "hidden",
-                      "href": "/tzo/s/sec/app/security/hosts/hostRisk",
-                      "path": "security_solution_nav.node-3.securityGroup:explore.hosts.hosts-risk",
-                      "title": "Host risk",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    }
-                  ]
-                },
-                {
-                  "id": "network",
-                  "renderAs": "item",
-                  "href": "/tzo/s/sec/app/security/network",
-                  "path": "security_solution_nav.node-3.securityGroup:explore.network",
-                  "title": "Network",
-                  "deepLink": {},
-                  "isExternalLink": false,
-                  "sideNavStatus": "visible",
-                  "children": [
-                    {
-                      "id": "network-flows",
-                      "breadcrumbStatus": "hidden",
-                      "href": "/tzo/s/sec/app/security/network/flows",
-                      "path": "security_solution_nav.node-3.securityGroup:explore.network.network-flows",
-                      "title": "Flows",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "network-dns",
-                      "breadcrumbStatus": "hidden",
-                      "href": "/tzo/s/sec/app/security/network/dns",
-                      "path": "security_solution_nav.node-3.securityGroup:explore.network.network-dns",
-                      "title": "DNS",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "network-http",
-                      "breadcrumbStatus": "hidden",
-                      "href": "/tzo/s/sec/app/security/network/http",
-                      "path": "security_solution_nav.node-3.securityGroup:explore.network.network-http",
-                      "title": "HTTP",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "network-tls",
-                      "breadcrumbStatus": "hidden",
-                      "href": "/tzo/s/sec/app/security/network/tls",
-                      "path": "security_solution_nav.node-3.securityGroup:explore.network.network-tls",
-                      "title": "TLS",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "network-events",
-                      "breadcrumbStatus": "hidden",
-                      "href": "/tzo/s/sec/app/security/network/events",
-                      "path": "security_solution_nav.node-3.securityGroup:explore.network.network-events",
-                      "title": "Events",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    }
-                  ]
-                },
-                {
-                  "id": "users",
-                  "renderAs": "item",
-                  "href": "/tzo/s/sec/app/security/users",
-                  "path": "security_solution_nav.node-3.securityGroup:explore.users",
-                  "title": "Users",
-                  "deepLink": {},
-                  "isExternalLink": false,
-                  "sideNavStatus": "visible",
-                  "children": [
-                    {
-                      "id": "users-all",
-                      "breadcrumbStatus": "hidden",
-                      "href": "/tzo/s/sec/app/security/users/allUsers",
-                      "path": "security_solution_nav.node-3.securityGroup:explore.users.users-all",
-                      "title": "All users",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "users-authentications",
-                      "breadcrumbStatus": "hidden",
-                      "href": "/tzo/s/sec/app/security/users/authentications",
-                      "path": "security_solution_nav.node-3.securityGroup:explore.users.users-authentications",
-                      "title": "Authentications",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "users-risk",
-                      "breadcrumbStatus": "hidden",
-                      "href": "/tzo/s/sec/app/security/users/userRisk",
-                      "path": "security_solution_nav.node-3.securityGroup:explore.users.users-risk",
-                      "title": "User risk",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "users-events",
-                      "breadcrumbStatus": "hidden",
-                      "href": "/tzo/s/sec/app/security/users/events",
-                      "path": "security_solution_nav.node-3.securityGroup:explore.users.users-events",
-                      "title": "Events",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "securityGroup:investigations",
-              "title": "Investigations",
-              "renderAs": "panelOpener",
-              "path": "security_solution_nav.node-3.securityGroup:investigations",
-              "isExternalLink": false,
-              "sideNavStatus": "visible",
-              "children": [
-                {
-                  "id": "timelines",
-                  "renderAs": "item",
-                  "href": "/tzo/s/sec/app/security/timelines",
-                  "path": "security_solution_nav.node-3.securityGroup:investigations.timelines",
-                  "title": "Timelines",
-                  "deepLink": {},
-                  "isExternalLink": false,
-                  "sideNavStatus": "visible",
-                  "children": [
-                    {
-                      "id": "timelines-templates",
-                      "href": "/tzo/s/sec/app/security/timelines/template",
-                      "path": "security_solution_nav.node-3.securityGroup:investigations.timelines.timelines-templates",
-                      "title": "Templates",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    }
-                  ]
-                },
-                {
-                  "id": "notes",
-                  "href": "/tzo/s/sec/app/security/administration/notes",
-                  "path": "security_solution_nav.node-3.securityGroup:investigations.notes",
-                  "title": "Notes",
-                  "deepLink": {},
-                  "isExternalLink": false,
-                  "sideNavStatus": "visible"
-                },
-                {
-                  "id": "osquery",
-                  "href": "/tzo/s/sec/app/osquery",
-                  "path": "security_solution_nav.node-3.securityGroup:investigations.osquery",
-                  "title": "Osquery",
-                  "deepLink": {},
-                  "isExternalLink": false,
-                  "sideNavStatus": "visible"
-                }
-              ]
-            },
-            {
-              "id": "threat_intelligence",
-              "href": "/tzo/s/sec/app/security/threat_intelligence/indicators",
-              "path": "security_solution_nav.node-3.threat_intelligence",
-              "title": "Intelligence",
+              "title": "Log rate analysis",
+              "id": "ml:logRateAnalysis",
+              "href": "/jom/app/ml/aiops/log_rate_analysis_index_select",
+              "path": "securityGroup:machineLearning.node-3.ml:logRateAnalysis",
               "deepLink": {},
               "isExternalLink": false,
               "sideNavStatus": "visible"
-            }
-          ]
-        },
-        {
-          "breadcrumbStatus": "hidden",
-          "id": "node-4",
-          "path": "security_solution_nav.node-4",
-          "isExternalLink": false,
-          "sideNavStatus": "visible",
-          "children": [
-            {
-              "id": "securityGroup:assets",
-              "title": "Assets",
-              "renderAs": "panelOpener",
-              "path": "security_solution_nav.node-4.securityGroup:assets",
-              "isExternalLink": false,
-              "sideNavStatus": "visible",
-              "children": [
-                {
-                  "title": "Fleet",
-                  "id": "fleet",
-                  "href": "/tzo/s/sec/app/fleet",
-                  "path": "security_solution_nav.node-4.securityGroup:assets.fleet",
-                  "deepLink": {},
-                  "isExternalLink": false,
-                  "sideNavStatus": "visible",
-                  "children": [
-                    {
-                      "id": "fleet:agents",
-                      "href": "/tzo/s/sec/app/fleet/agents",
-                      "path": "security_solution_nav.node-4.securityGroup:assets.fleet.fleet:agents",
-                      "title": "Agents",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "title": "Policies",
-                      "id": "fleet:policies",
-                      "href": "/tzo/s/sec/app/fleet/policies",
-                      "path": "security_solution_nav.node-4.securityGroup:assets.fleet.fleet:policies",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "fleet:enrollment_tokens",
-                      "href": "/tzo/s/sec/app/fleet/enrollment-tokens",
-                      "path": "security_solution_nav.node-4.securityGroup:assets.fleet.fleet:enrollment_tokens",
-                      "title": "Enrollment tokens",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "fleet:uninstall_tokens",
-                      "href": "/tzo/s/sec/app/fleet/uninstall-tokens",
-                      "path": "security_solution_nav.node-4.securityGroup:assets.fleet.fleet:uninstall_tokens",
-                      "title": "Uninstall tokens",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "fleet:data_streams",
-                      "href": "/tzo/s/sec/app/fleet/data-streams",
-                      "path": "security_solution_nav.node-4.securityGroup:assets.fleet.fleet:data_streams",
-                      "title": "Data streams",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "fleet:settings",
-                      "href": "/tzo/s/sec/app/fleet/settings",
-                      "path": "security_solution_nav.node-4.securityGroup:assets.fleet.fleet:settings",
-                      "title": "Settings",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    }
-                  ]
-                },
-                {
-                  "id": "endpoints",
-                  "title": "Endpoints",
-                  "path": "security_solution_nav.node-4.securityGroup:assets.endpoints",
-                  "isExternalLink": false,
-                  "sideNavStatus": "visible",
-                  "children": [
-                    {
-                      "id": "endpoints",
-                      "breadcrumbStatus": "hidden",
-                      "href": "/tzo/s/sec/app/security/administration/endpoints",
-                      "path": "security_solution_nav.node-4.securityGroup:assets.endpoints.endpoints",
-                      "title": "Endpoints",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "policy",
-                      "href": "/tzo/s/sec/app/security/administration/policy",
-                      "path": "security_solution_nav.node-4.securityGroup:assets.endpoints.policy",
-                      "title": "Policies",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "trusted_apps",
-                      "href": "/tzo/s/sec/app/security/administration/trusted_apps",
-                      "path": "security_solution_nav.node-4.securityGroup:assets.endpoints.trusted_apps",
-                      "title": "Trusted applications",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "event_filters",
-                      "href": "/tzo/s/sec/app/security/administration/event_filters",
-                      "path": "security_solution_nav.node-4.securityGroup:assets.endpoints.event_filters",
-                      "title": "Event filters",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "blocklist",
-                      "href": "/tzo/s/sec/app/security/administration/blocklist",
-                      "path": "security_solution_nav.node-4.securityGroup:assets.endpoints.blocklist",
-                      "title": "Blocklist",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    }
-                  ]
-                },
-                {
-                  "id": "node-2",
-                  "path": "security_solution_nav.node-4.securityGroup:assets.node-2",
-                  "isExternalLink": false,
-                  "sideNavStatus": "visible",
-                  "children": [
-                    {
-                      "id": "node-0",
-                      "path": "security_solution_nav.node-4.securityGroup:assets.node-2.node-0",
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    }
-                  ]
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": "securityGroup:machineLearning",
-          "title": "Machine Learning",
-          "renderAs": "panelOpener",
-          "path": "security_solution_nav.securityGroup:machineLearning",
-          "isExternalLink": false,
-          "sideNavStatus": "visible",
-          "children": [
-            {
-              "breadcrumbStatus": "hidden",
-              "id": "node-0",
-              "path": "security_solution_nav.securityGroup:machineLearning.node-0",
-              "isExternalLink": false,
-              "sideNavStatus": "visible",
-              "children": [
-                {
-                  "title": "Data visualizer",
-                  "id": "ml:dataVisualizer",
-                  "href": "/tzo/s/sec/app/ml/datavisualizer",
-                  "path": "security_solution_nav.securityGroup:machineLearning.node-0.ml:dataVisualizer",
-                  "deepLink": {},
-                  "isExternalLink": false,
-                  "sideNavStatus": "visible"
-                }
-              ]
             },
             {
-              "title": "Anomaly detection",
-              "breadcrumbStatus": "hidden",
-              "id": "node-1",
-              "path": "security_solution_nav.securityGroup:machineLearning.node-1",
+              "title": "Log pattern analysis",
+              "id": "ml:logPatternAnalysis",
+              "href": "/jom/app/ml/aiops/log_categorization_index_select",
+              "path": "securityGroup:machineLearning.node-3.ml:logPatternAnalysis",
+              "deepLink": {},
               "isExternalLink": false,
-              "sideNavStatus": "visible",
-              "children": []
+              "sideNavStatus": "visible"
             },
             {
-              "title": "Data frame analytics",
-              "breadcrumbStatus": "hidden",
-              "id": "node-2",
-              "path": "security_solution_nav.securityGroup:machineLearning.node-2",
+              "title": "Change point detection",
+              "id": "ml:changePointDetections",
+              "href": "/jom/app/ml/aiops/change_point_detection_index_select",
+              "path": "securityGroup:machineLearning.node-3.ml:changePointDetections",
+              "deepLink": {},
               "isExternalLink": false,
-              "sideNavStatus": "visible",
-              "children": []
-            },
-            {
-              "title": "AIOps labs",
-              "breadcrumbStatus": "hidden",
-              "id": "node-3",
-              "path": "security_solution_nav.securityGroup:machineLearning.node-3",
-              "isExternalLink": false,
-              "sideNavStatus": "visible",
-              "children": []
+              "sideNavStatus": "visible"
             }
           ]
         }
@@ -715,382 +854,582 @@
   ],
   "footer": [
     {
-      "id": "security_solution_nav_footer",
-      "type": "navGroup",
-      "path": "security_solution_nav_footer",
+      "id": "launchpad",
+      "title": "Launchpad",
+      "renderAs": "panelOpener",
+      "icon": "launch",
+      "path": "launchpad",
       "isExternalLink": false,
       "sideNavStatus": "visible",
       "children": [
         {
-          "id": "get_started",
-          "icon": "launch",
-          "href": "/tzo/s/sec/app/security/get_started",
-          "path": "security_solution_nav_footer.get_started",
-          "title": "Get started",
-          "deepLink": {},
-          "isExternalLink": false,
-          "sideNavStatus": "visible"
-        },
-        {
-          "title": "Developer tools",
-          "icon": "editorCodeBlock",
-          "id": "dev_tools",
-          "href": "/tzo/s/sec/app/dev_tools",
-          "path": "security_solution_nav_footer.dev_tools",
-          "deepLink": {},
-          "isExternalLink": false,
-          "sideNavStatus": "visible"
-        },
-        {
-          "title": "Management",
-          "icon": "gear",
-          "breadcrumbStatus": "hidden",
-          "renderAs": "accordion",
-          "spaceBefore": null,
-          "id": "node-2",
-          "path": "security_solution_nav_footer.node-2",
+          "id": "node-0",
+          "path": "launchpad.node-0",
           "isExternalLink": false,
           "sideNavStatus": "visible",
           "children": [
             {
-              "id": "stack_management",
-              "title": "Stack Management",
-              "renderAs": "panelOpener",
-              "spaceBefore": null,
-              "path": "security_solution_nav_footer.node-2.stack_management",
-              "isExternalLink": false,
-              "sideNavStatus": "visible",
-              "children": [
-                {
-                  "title": "Ingest",
-                  "id": "node-0",
-                  "path": "security_solution_nav_footer.node-2.stack_management.node-0",
-                  "isExternalLink": false,
-                  "sideNavStatus": "visible",
-                  "children": [
-                    {
-                      "id": "management:ingest_pipelines",
-                      "href": "/tzo/s/sec/app/management/ingest/ingest_pipelines",
-                      "path": "security_solution_nav_footer.node-2.stack_management.node-0.management:ingest_pipelines",
-                      "title": "Ingest Pipelines",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    }
-                  ]
-                },
-                {
-                  "title": "Data",
-                  "id": "node-1",
-                  "path": "security_solution_nav_footer.node-2.stack_management.node-1",
-                  "isExternalLink": false,
-                  "sideNavStatus": "visible",
-                  "children": [
-                    {
-                      "id": "management:index_management",
-                      "href": "/tzo/s/sec/app/management/data/index_management",
-                      "path": "security_solution_nav_footer.node-2.stack_management.node-1.management:index_management",
-                      "title": "Index Management",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "management:index_lifecycle_management",
-                      "href": "/tzo/s/sec/app/management/data/index_lifecycle_management",
-                      "path": "security_solution_nav_footer.node-2.stack_management.node-1.management:index_lifecycle_management",
-                      "title": "Index Lifecycle Policies",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "management:snapshot_restore",
-                      "href": "/tzo/s/sec/app/management/data/snapshot_restore",
-                      "path": "security_solution_nav_footer.node-2.stack_management.node-1.management:snapshot_restore",
-                      "title": "Snapshot and Restore",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "management:rollup_jobs",
-                      "href": "/tzo/s/sec/app/management/data/rollup_jobs",
-                      "path": "security_solution_nav_footer.node-2.stack_management.node-1.management:rollup_jobs",
-                      "title": "Rollup Jobs",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "management:transform",
-                      "href": "/tzo/s/sec/app/management/data/transform",
-                      "path": "security_solution_nav_footer.node-2.stack_management.node-1.management:transform",
-                      "title": "Transforms",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "management:remote_clusters",
-                      "href": "/tzo/s/sec/app/management/data/remote_clusters",
-                      "path": "security_solution_nav_footer.node-2.stack_management.node-1.management:remote_clusters",
-                      "title": "Remote Clusters",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "management:migrate_data",
-                      "href": "/tzo/s/sec/app/management/data/migrate_data",
-                      "path": "security_solution_nav_footer.node-2.stack_management.node-1.management:migrate_data",
-                      "title": "Migrate",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "management:content_connectors",
-                      "href": "/tzo/s/sec/app/management/data/content_connectors",
-                      "path": "security_solution_nav_footer.node-2.stack_management.node-1.management:content_connectors",
-                      "title": "Content Connectors",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    }
-                  ]
-                },
-                {
-                  "title": "Alerts and Insights",
-                  "id": "node-2",
-                  "path": "security_solution_nav_footer.node-2.stack_management.node-2",
-                  "isExternalLink": false,
-                  "sideNavStatus": "visible",
-                  "children": [
-                    {
-                      "id": "management:triggersActions",
-                      "href": "/tzo/s/sec/app/management/insightsAndAlerting/triggersActions",
-                      "path": "security_solution_nav_footer.node-2.stack_management.node-2.management:triggersActions",
-                      "title": "Rules",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "management:cases",
-                      "href": "/tzo/s/sec/app/management/insightsAndAlerting/cases",
-                      "path": "security_solution_nav_footer.node-2.stack_management.node-2.management:cases",
-                      "title": "Cases",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "management:triggersActionsConnectors",
-                      "href": "/tzo/s/sec/app/management/insightsAndAlerting/triggersActionsConnectors",
-                      "path": "security_solution_nav_footer.node-2.stack_management.node-2.management:triggersActionsConnectors",
-                      "title": "Connectors",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "management:reporting",
-                      "href": "/tzo/s/sec/app/management/insightsAndAlerting/reporting",
-                      "path": "security_solution_nav_footer.node-2.stack_management.node-2.management:reporting",
-                      "title": "Reporting",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "management:maintenanceWindows",
-                      "href": "/tzo/s/sec/app/management/insightsAndAlerting/maintenanceWindows",
-                      "path": "security_solution_nav_footer.node-2.stack_management.node-2.management:maintenanceWindows",
-                      "title": "Maintenance Windows",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "entity_analytics-entity_store_management",
-                      "href": "/tzo/s/sec/app/security/entity_analytics_entity_store",
-                      "path": "security_solution_nav_footer.node-2.stack_management.node-2.entity_analytics-entity_store_management",
-                      "title": "Entity store",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    }
-                  ]
-                },
-                {
-                  "title": "Machine Learning",
-                  "id": "node-3",
-                  "path": "security_solution_nav_footer.node-2.stack_management.node-3",
-                  "isExternalLink": false,
-                  "sideNavStatus": "visible",
-                  "children": []
-                },
-                {
-                  "title": "Security",
-                  "id": "node-4",
-                  "path": "security_solution_nav_footer.node-2.stack_management.node-4",
-                  "isExternalLink": false,
-                  "sideNavStatus": "visible",
-                  "children": [
-                    {
-                      "id": "management:users",
-                      "href": "/tzo/s/sec/app/management/security/users",
-                      "path": "security_solution_nav_footer.node-2.stack_management.node-4.management:users",
-                      "title": "Users",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "management:roles",
-                      "href": "/tzo/s/sec/app/management/security/roles",
-                      "path": "security_solution_nav_footer.node-2.stack_management.node-4.management:roles",
-                      "title": "Roles",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "management:api_keys",
-                      "href": "/tzo/s/sec/app/management/security/api_keys",
-                      "path": "security_solution_nav_footer.node-2.stack_management.node-4.management:api_keys",
-                      "title": "API keys",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    }
-                  ]
-                },
-                {
-                  "title": "Kibana",
-                  "id": "node-5",
-                  "path": "security_solution_nav_footer.node-2.stack_management.node-5",
-                  "isExternalLink": false,
-                  "sideNavStatus": "visible",
-                  "children": [
-                    {
-                      "id": "management:dataViews",
-                      "href": "/tzo/s/sec/app/management/kibana/dataViews",
-                      "path": "security_solution_nav_footer.node-2.stack_management.node-5.management:dataViews",
-                      "title": "Data Views",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "management:filesManagement",
-                      "href": "/tzo/s/sec/app/management/kibana/filesManagement",
-                      "path": "security_solution_nav_footer.node-2.stack_management.node-5.management:filesManagement",
-                      "title": "Files",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "management:objects",
-                      "href": "/tzo/s/sec/app/management/kibana/objects",
-                      "path": "security_solution_nav_footer.node-2.stack_management.node-5.management:objects",
-                      "title": "Saved Objects",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "management:tags",
-                      "href": "/tzo/s/sec/app/management/kibana/tags",
-                      "path": "security_solution_nav_footer.node-2.stack_management.node-5.management:tags",
-                      "title": "Tags",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "management:aiAssistantManagementSelection",
-                      "href": "/tzo/s/sec/app/management/kibana/aiAssistantManagementSelection",
-                      "path": "security_solution_nav_footer.node-2.stack_management.node-5.management:aiAssistantManagementSelection",
-                      "title": "AI Assistants",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "management:spaces",
-                      "href": "/tzo/s/sec/app/management/kibana/spaces",
-                      "path": "security_solution_nav_footer.node-2.stack_management.node-5.management:spaces",
-                      "title": "Spaces",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "maps",
-                      "href": "/tzo/s/sec/app/maps",
-                      "path": "security_solution_nav_footer.node-2.stack_management.node-5.maps",
-                      "title": "Maps",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "visualize",
-                      "href": "/tzo/s/sec/app/visualize#/?_g=(filters:!(),query:(language:kuery,query:''),refreshInterval:(pause:!t,value:60000),time:(from:now%2Fd,to:now%2Fd))",
-                      "path": "security_solution_nav_footer.node-2.stack_management.node-5.visualize",
-                      "title": "Visualize library",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    },
-                    {
-                      "id": "management:settings",
-                      "href": "/tzo/s/sec/app/management/kibana/settings",
-                      "path": "security_solution_nav_footer.node-2.stack_management.node-5.management:settings",
-                      "title": "Advanced Settings",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    }
-                  ]
-                },
-                {
-                  "title": "Stack",
-                  "id": "node-6",
-                  "path": "security_solution_nav_footer.node-2.stack_management.node-6",
-                  "isExternalLink": false,
-                  "sideNavStatus": "visible",
-                  "children": [
-                    {
-                      "id": "management:license_management",
-                      "href": "/tzo/s/sec/app/management/stack/license_management",
-                      "path": "security_solution_nav_footer.node-2.stack_management.node-6.management:license_management",
-                      "title": "License Management",
-                      "deepLink": {},
-                      "isExternalLink": false,
-                      "sideNavStatus": "visible"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "id": "monitoring",
-              "href": "/tzo/s/sec/app/monitoring",
-              "path": "security_solution_nav_footer.node-2.monitoring",
-              "title": "Stack Monitoring",
+              "id": "get_started",
+              "href": "/jom/app/security/get_started",
+              "path": "launchpad.node-0.get_started",
+              "title": "Get started",
               "deepLink": {},
               "isExternalLink": false,
               "sideNavStatus": "visible"
             },
             {
+              "id": "ai_value",
+              "href": "/jom/app/security/reports/ai_value",
+              "path": "launchpad.node-0.ai_value",
+              "title": "Value report",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            }
+          ]
+        },
+        {
+          "title": "Migrations",
+          "id": "node-1",
+          "path": "launchpad.node-1",
+          "isExternalLink": false,
+          "sideNavStatus": "visible",
+          "children": [
+            {
+              "id": "siem_migrations-rules",
+              "href": "/jom/app/security/siem_migrations/rules",
+              "path": "launchpad.node-1.siem_migrations-rules",
+              "title": "Translated rules",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "siem_migrations-dashboards",
+              "href": "/jom/app/security/siem_migrations/dashboards",
+              "path": "launchpad.node-1.siem_migrations-dashboards",
+              "title": "Translated dashboards",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "title": "Developer tools",
+      "icon": "editorCodeBlock",
+      "id": "dev_tools",
+      "href": "/jom/app/dev_tools",
+      "path": "dev_tools",
+      "deepLink": {},
+      "isExternalLink": false,
+      "sideNavStatus": "visible"
+    },
+    {
+      "id": "data_management",
+      "title": "Data management",
+      "icon": "database",
+      "breadcrumbStatus": "hidden",
+      "renderAs": "panelOpener",
+      "path": "data_management",
+      "isExternalLink": false,
+      "sideNavStatus": "visible",
+      "children": [
+        {
+          "title": "Ingest and Integrations",
+          "id": "node-0",
+          "path": "data_management.node-0",
+          "isExternalLink": false,
+          "sideNavStatus": "visible",
+          "children": [
+            {
               "id": "integrations",
-              "href": "/tzo/s/sec/app/integrations",
-              "path": "security_solution_nav_footer.node-2.integrations",
+              "href": "/jom/app/integrations",
+              "path": "data_management.node-0.integrations",
               "title": "Integrations",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:ingest_pipelines",
+              "href": "/jom/app/management/ingest/ingest_pipelines",
+              "path": "data_management.node-0.management:ingest_pipelines",
+              "title": "Ingest Pipelines",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:pipelines",
+              "href": "/jom/app/management/ingest/pipelines",
+              "path": "data_management.node-0.management:pipelines",
+              "title": "Logstash Pipelines",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:content_connectors",
+              "href": "/jom/app/management/data/content_connectors",
+              "path": "data_management.node-0.management:content_connectors",
+              "title": "Content Connectors",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            }
+          ]
+        },
+        {
+          "title": "Indices and data streams",
+          "id": "node-1",
+          "path": "data_management.node-1",
+          "isExternalLink": false,
+          "sideNavStatus": "visible",
+          "children": [
+            {
+              "id": "streams",
+              "href": "/jom/app/streams",
+              "path": "data_management.node-1.streams",
+              "title": "Streams",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:index_management",
+              "href": "/jom/app/management/data/index_management",
+              "path": "data_management.node-1.management:index_management",
+              "title": "Index Management",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:index_lifecycle_management",
+              "href": "/jom/app/management/data/index_lifecycle_management",
+              "path": "data_management.node-1.management:index_lifecycle_management",
+              "title": "Index Lifecycle Policies",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:snapshot_restore",
+              "href": "/jom/app/management/data/snapshot_restore",
+              "path": "data_management.node-1.management:snapshot_restore",
+              "title": "Snapshot and Restore",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:transform",
+              "href": "/jom/app/management/data/transform",
+              "path": "data_management.node-1.management:transform",
+              "title": "Transforms",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:rollup_jobs",
+              "href": "/jom/app/management/data/rollup_jobs",
+              "path": "data_management.node-1.management:rollup_jobs",
+              "title": "Rollup Jobs",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:data_quality",
+              "href": "/jom/app/management/data/data_quality",
+              "path": "data_management.node-1.management:data_quality",
+              "title": "Data Set Quality",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stack_management",
+      "title": "Stack Management",
+      "icon": "gear",
+      "breadcrumbStatus": "hidden",
+      "renderAs": "panelOpener",
+      "path": "stack_management",
+      "isExternalLink": false,
+      "sideNavStatus": "visible",
+      "children": [
+        {
+          "id": "stack_management_home",
+          "breadcrumbStatus": "hidden",
+          "path": "stack_management.stack_management_home",
+          "isExternalLink": false,
+          "sideNavStatus": "visible",
+          "children": [
+            {
+              "title": "Home",
+              "breadcrumbStatus": "hidden",
+              "id": "management",
+              "href": "/jom/app/management",
+              "path": "stack_management.stack_management_home.management",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "monitoring",
+              "href": "/jom/app/monitoring",
+              "path": "stack_management.stack_management_home.monitoring",
+              "title": "Stack Monitoring",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            }
+          ]
+        },
+        {
+          "title": "Alerts and Insights",
+          "id": "node-1",
+          "path": "stack_management.node-1",
+          "isExternalLink": false,
+          "sideNavStatus": "visible",
+          "children": [
+            {
+              "id": "management:triggersActions",
+              "href": "/jom/app/management/insightsAndAlerting/triggersActions",
+              "path": "stack_management.node-1.management:triggersActions",
+              "title": "Rules",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:cases",
+              "href": "/jom/app/management/insightsAndAlerting/cases",
+              "path": "stack_management.node-1.management:cases",
+              "title": "Cases",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:triggersActionsConnectors",
+              "href": "/jom/app/management/insightsAndAlerting/triggersActionsConnectors",
+              "path": "stack_management.node-1.management:triggersActionsConnectors",
+              "title": "Connectors",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:reporting",
+              "href": "/jom/app/management/insightsAndAlerting/reporting",
+              "path": "stack_management.node-1.management:reporting",
+              "title": "Reporting",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:watcher",
+              "href": "/jom/app/management/insightsAndAlerting/watcher",
+              "path": "stack_management.node-1.management:watcher",
+              "title": "Watcher",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:maintenanceWindows",
+              "href": "/jom/app/management/insightsAndAlerting/maintenanceWindows",
+              "path": "stack_management.node-1.management:maintenanceWindows",
+              "title": "Maintenance Windows",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "entity_analytics-management",
+              "href": "/jom/app/security/entity_analytics_management",
+              "path": "stack_management.node-1.entity_analytics-management",
+              "title": "Entity risk score",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "entity_analytics-entity_store_management",
+              "href": "/jom/app/security/entity_analytics_entity_store",
+              "path": "stack_management.node-1.entity_analytics-entity_store_management",
+              "title": "Entity store",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            }
+          ]
+        },
+        {
+          "title": "Machine Learning",
+          "id": "node-2",
+          "path": "stack_management.node-2",
+          "isExternalLink": false,
+          "sideNavStatus": "visible",
+          "children": [
+            {
+              "id": "management:overview",
+              "href": "/jom/app/management/ml/overview",
+              "path": "stack_management.node-2.management:overview",
+              "title": "Overview",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:anomaly_detection",
+              "href": "/jom/app/management/ml/anomaly_detection",
+              "path": "stack_management.node-2.management:anomaly_detection",
+              "title": "Anomaly Detection Jobs",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:analytics",
+              "href": "/jom/app/management/ml/analytics",
+              "path": "stack_management.node-2.management:analytics",
+              "title": "Data Frame Analytics Jobs",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:trained_models",
+              "href": "/jom/app/management/ml/trained_models",
+              "path": "stack_management.node-2.management:trained_models",
+              "title": "Trained Models",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            }
+          ]
+        },
+        {
+          "title": "AI",
+          "id": "node-3",
+          "path": "stack_management.node-3",
+          "isExternalLink": false,
+          "sideNavStatus": "visible",
+          "children": [
+            {
+              "id": "management:genAiSettings",
+              "href": "/jom/app/management/ai/genAiSettings",
+              "path": "stack_management.node-3.management:genAiSettings",
+              "title": "GenAI Settings",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:aiAssistantManagementSelection",
+              "href": "/jom/app/management/ai/aiAssistantManagementSelection",
+              "path": "stack_management.node-3.management:aiAssistantManagementSelection",
+              "title": "AI Assistants",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            }
+          ]
+        },
+        {
+          "title": "Security",
+          "id": "node-4",
+          "path": "stack_management.node-4",
+          "isExternalLink": false,
+          "sideNavStatus": "visible",
+          "children": [
+            {
+              "id": "management:users",
+              "href": "/jom/app/management/security/users",
+              "path": "stack_management.node-4.management:users",
+              "title": "Users",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:roles",
+              "href": "/jom/app/management/security/roles",
+              "path": "stack_management.node-4.management:roles",
+              "title": "Roles",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:api_keys",
+              "href": "/jom/app/management/security/api_keys",
+              "path": "stack_management.node-4.management:api_keys",
+              "title": "API keys",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:role_mappings",
+              "href": "/jom/app/management/security/role_mappings",
+              "path": "stack_management.node-4.management:role_mappings",
+              "title": "Role Mappings",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            }
+          ]
+        },
+        {
+          "title": "Data",
+          "id": "node-5",
+          "path": "stack_management.node-5",
+          "isExternalLink": false,
+          "sideNavStatus": "visible",
+          "children": [
+            {
+              "id": "management:cross_cluster_replication",
+              "href": "/jom/app/management/data/cross_cluster_replication",
+              "path": "stack_management.node-5.management:cross_cluster_replication",
+              "title": "Cross-Cluster Replication",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:remote_clusters",
+              "href": "/jom/app/management/data/remote_clusters",
+              "path": "stack_management.node-5.management:remote_clusters",
+              "title": "Remote Clusters",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:migrate_data",
+              "href": "/jom/app/management/data/migrate_data",
+              "path": "stack_management.node-5.management:migrate_data",
+              "title": "Migrate",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            }
+          ]
+        },
+        {
+          "title": "Kibana",
+          "id": "node-6",
+          "path": "stack_management.node-6",
+          "isExternalLink": false,
+          "sideNavStatus": "visible",
+          "children": [
+            {
+              "id": "management:dataViews",
+              "href": "/jom/app/management/kibana/dataViews",
+              "path": "stack_management.node-6.management:dataViews",
+              "title": "Data Views",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:filesManagement",
+              "href": "/jom/app/management/kibana/filesManagement",
+              "path": "stack_management.node-6.management:filesManagement",
+              "title": "Files",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:objects",
+              "href": "/jom/app/management/kibana/objects",
+              "path": "stack_management.node-6.management:objects",
+              "title": "Saved Objects",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:tags",
+              "href": "/jom/app/management/kibana/tags",
+              "path": "stack_management.node-6.management:tags",
+              "title": "Tags",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:spaces",
+              "href": "/jom/app/management/kibana/spaces",
+              "path": "stack_management.node-6.management:spaces",
+              "title": "Spaces",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "maps",
+              "href": "/jom/app/maps",
+              "path": "stack_management.node-6.maps",
+              "title": "Maps",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "visualize",
+              "href": "/jom/app/visualize#/?_g=(filters:!(),query:(language:kuery,query:''),refreshInterval:(pause:!t,value:60000),time:(from:now%2Fd,to:now%2Fd))",
+              "path": "stack_management.node-6.visualize",
+              "title": "Visualize library",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "graph",
+              "href": "/jom/app/graph",
+              "path": "stack_management.node-6.graph",
+              "title": "Graph",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            },
+            {
+              "id": "management:settings",
+              "href": "/jom/app/management/kibana/settings",
+              "path": "stack_management.node-6.management:settings",
+              "title": "Advanced Settings",
+              "deepLink": {},
+              "isExternalLink": false,
+              "sideNavStatus": "visible"
+            }
+          ]
+        },
+        {
+          "title": "Stack",
+          "id": "node-7",
+          "path": "stack_management.node-7",
+          "isExternalLink": false,
+          "sideNavStatus": "visible",
+          "children": [
+            {
+              "id": "management:license_management",
+              "href": "/jom/app/management/stack/license_management",
+              "path": "stack_management.node-7.management:license_management",
+              "title": "License Management",
               "deepLink": {},
               "isExternalLink": false,
               "sideNavStatus": "visible"
