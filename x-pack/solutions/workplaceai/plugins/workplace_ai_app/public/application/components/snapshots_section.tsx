@@ -79,7 +79,7 @@ export const SnapshotsSection: React.FC = () => {
             </EuiText>
             <EuiSpacer size="m" />
             <EuiBasicTable
-              items={agents}
+              items={agents.slice(0, 3)}
               loading={isLoadingAgents}
               columns={[
                 {
