@@ -21,7 +21,6 @@ import {
   EuiFlexGroup,
   EuiBadge,
   EuiToolTip,
-  EuiTextTruncate,
 } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import { FieldIcon } from '@kbn/react-field';
@@ -139,18 +138,25 @@ export function SchemaChangesReviewModal({
         name: i18n.translate('xpack.streams.schemaEditor.confirmChangesModal.tableColumnField', {
           defaultMessage: 'Field',
         }),
-        width: '272px',
+        width: '40%',
         render: (name: string) => (
           <EuiToolTip
             content={name}
-            delay="long"
-            display="block"
             anchorClassName={css`
-              width: 272px;
+              width: 100%;
             `}
           >
-            {/* Need to truncate manually because of tooltip wrapper */}
-            <EuiTextTruncate text={name} />
+            {/* Custom truncation logic because EuiTextTruncate doesn't work well in this context */}
+            <div
+              tabIndex={0}
+              className={css`
+                overflow: hidden;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+              `}
+            >
+              {name}
+            </div>
           </EuiToolTip>
         ),
       },
@@ -159,7 +165,7 @@ export function SchemaChangesReviewModal({
         name: i18n.translate('xpack.streams.schemaEditor.confirmChangesModal.tableColumnType', {
           defaultMessage: 'Type',
         }),
-        width: '160px',
+        width: '20%',
         truncateText: true,
         render: (type: FieldDefinitionConfig['type'] | undefined, field: SchemaEditorField) => {
           // Prioritize showing esType if available and different from our supported type
@@ -204,7 +210,6 @@ export function SchemaChangesReviewModal({
         name: i18n.translate('xpack.streams.schemaEditor.confirmChangesModal.tableColumnStatus', {
           defaultMessage: 'Status',
         }),
-        width: '128px',
         render: (status: FieldStatus, field: SchemaEditorField) => {
           return (
             <FieldStatusBadge
@@ -225,7 +230,6 @@ export function SchemaChangesReviewModal({
                   defaultMessage: 'Result',
                 }
               ),
-              width: '128px',
               render: (result: SchemaEditorField['result'], field: SchemaEditorField) => {
                 if (!result) return null;
                 return <FieldResultBadge result={result} />;
@@ -243,7 +247,6 @@ export function SchemaChangesReviewModal({
                   defaultMessage: 'Source',
                 }
               ),
-              width: '128px',
               truncateText: true,
               render: (source: string | undefined, field: SchemaEditorField) => {
                 // Don't show source for existing fields (those that have esType)
@@ -257,13 +260,13 @@ export function SchemaChangesReviewModal({
                   ecs: i18n.translate(
                     'xpack.streams.schemaEditor.confirmChangesModal.sourceLabel.ecs',
                     {
-                      defaultMessage: 'ECS Standard',
+                      defaultMessage: 'ECS',
                     }
                   ),
                   otel: i18n.translate(
                     'xpack.streams.schemaEditor.confirmChangesModal.sourceLabel.otel',
                     {
-                      defaultMessage: 'OpenTelemetry',
+                      defaultMessage: 'OTel',
                     }
                   ),
                 };
