@@ -11,7 +11,7 @@ import type { ResultLinks } from '@kbn/file-upload-common';
 import type { CoreSetup } from '@kbn/core/public';
 
 import type { FileUploadStartDependencies } from '@kbn/file-upload';
-import { getFileDataVisualizerWrapper } from '@kbn/file-upload';
+import { getFileDataVisualizerWrapper } from '@kbn/file-upload/src/file_upload_component/wrapper';
 import {
   featureTitle,
   FILE_DATA_VIS_TAB_ID,

@@ -16,12 +16,7 @@ export type { UploadStatus } from './file_upload_manager/file_manager';
 export type { FileAnalysis } from './file_upload_manager/file_wrapper';
 export { CLASH_TYPE, CLASH_ERROR_TYPE } from './file_upload_manager/merge_tools';
 
-export {
-  FileDataVisualizer,
-  FileDataVisualizerWrapper,
-  getFileDataVisualizerWrapper,
-  type FileDataVisualizerSpec,
-} from './src/file_upload_component';
+export { FileDataVisualizer, type FileDataVisualizerSpec } from './src/file_upload_component';
 
 export {
   createOpenFileUploadLiteAction,

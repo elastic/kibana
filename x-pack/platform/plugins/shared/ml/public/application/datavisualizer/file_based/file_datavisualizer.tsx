@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTimefilter } from '@kbn/ml-date-picker';
 
-import { FileDataVisualizerWrapper } from '@kbn/file-upload';
+import { FileDataVisualizerWrapper } from '@kbn/file-upload/src/file_upload_component/wrapper';
 
 import type { GetAdditionalLinks, GetAdditionalLinksParams } from '@kbn/file-upload-common';
 import { HelpMenu } from '../../components/help_menu';

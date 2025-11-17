@@ -11,9 +11,6 @@ import type { FC } from 'react';
 import React, { useState, useEffect } from 'react';
 import type { FileUploadStartDependencies } from './kibana_context';
 
-export type { FileDataVisualizerSpec } from './file_data_visualizer';
-export { FileDataVisualizer } from './file_data_visualizer';
-
 const FileDataVisualizerComponent = React.lazy(() => import('./file_data_visualizer'));
 
 export const FileDataVisualizerWrapper: FC<{

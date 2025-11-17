@@ -11,7 +11,10 @@ import {
   OPEN_FILE_UPLOAD_LITE_TRIGGER,
 } from '@kbn/file-upload-common';
 import type { FileUploadStartDependencies } from '@kbn/file-upload';
-import { createOpenFileUploadLiteAction, createOpenFileUploadLiteTrigger } from '@kbn/file-upload';
+import {
+  createOpenFileUploadLiteAction,
+  createOpenFileUploadLiteTrigger,
+} from '@kbn/file-upload/src/file_upload_component/new/file_upload_lite_action';
 
 export function registerUiActions(coreStart: CoreStart, plugins: FileUploadStartDependencies) {
   const { uiActions } = plugins;
