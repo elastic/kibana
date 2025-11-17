@@ -42,5 +42,5 @@ export async function create(
     }
   );
 
-  return getDashboardCRUResponseBody(savedObject, 'create');
+  return getDashboardCRUResponseBody(savedObject, 'create', allowUnmappedKeys);
 }

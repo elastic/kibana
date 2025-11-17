@@ -42,7 +42,8 @@ export async function search(
     dashboards: soResponse.saved_objects.map((so) => {
       const { description, tags, timeRange, title } = transformDashboardOut(
         so.attributes,
-        so.references
+        so.references,
+        true
       );
 
       return {

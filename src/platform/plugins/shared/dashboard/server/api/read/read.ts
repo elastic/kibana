@@ -29,7 +29,7 @@ export async function read(
     id
   );
 
-  const response = getDashboardCRUResponseBody(savedObject, 'read');
+  const response = getDashboardCRUResponseBody(savedObject, 'read', allowUnmappedKeys);
   return {
     ...response,
     meta: {

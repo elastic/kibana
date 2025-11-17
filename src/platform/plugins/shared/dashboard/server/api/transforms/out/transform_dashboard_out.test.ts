@@ -54,7 +54,7 @@ describe('transformDashboardOut', () => {
       title: 'my title',
       description: 'my description',
     };
-    expect(transformDashboardOut(input)).toEqual<DashboardState>({
+    expect(transformDashboardOut(input, [], true)).toEqual<DashboardState>({
       controlGroupInput: {
         chainingSystem: DEFAULT_CONTROLS_CHAINING,
         labelPosition: DEFAULT_CONTROLS_LABEL_POSITION,
@@ -142,7 +142,7 @@ describe('transformDashboardOut', () => {
         name: 'index-pattern-ref-index-pattern1',
       },
     ];
-    expect(transformDashboardOut(input, references)).toEqual<DashboardState>({
+    expect(transformDashboardOut(input, references, true)).toEqual<DashboardState>({
       controlGroupInput: {
         chainingSystem: 'NONE',
         labelPosition: 'twoLine',
