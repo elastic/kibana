@@ -12,10 +12,12 @@ import { EuiProvider } from '@elastic/eui';
 import { WorkplaceAIHomeHeader } from './workplace_ai_home_header';
 import { useCurrentUser } from '../hooks/use_current_user';
 import { useElasticsearchUrl } from '../hooks/use_elasticsearch_url';
+import { useMcpServerUrl } from '../hooks/use_mcp_server_url';
 import { openWiredConnectionDetails } from '@kbn/cloud/connection_details';
 
 jest.mock('../hooks/use_current_user');
 jest.mock('../hooks/use_elasticsearch_url');
+jest.mock('../hooks/use_mcp_server_url');
 jest.mock('@kbn/cloud/connection_details', () => ({
   openWiredConnectionDetails: jest.fn(),
 }));
@@ -27,6 +29,7 @@ const mockUseCurrentUser = useCurrentUser as jest.Mock;
 const mockUseElasticsearchUrl = useElasticsearchUrl as jest.MockedFunction<
   typeof useElasticsearchUrl
 >;
+const mockUseMcpServerUrl = useMcpServerUrl as jest.MockedFunction<typeof useMcpServerUrl>;
 const mockOpenWiredConnectionDetails = openWiredConnectionDetails as jest.MockedFunction<
   typeof openWiredConnectionDetails
 >;
@@ -42,7 +45,14 @@ describe('WorkplaceAIHomeHeader', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+
+    // Mock document.execCommand for EuiCopy
+    document.execCommand = jest.fn();
+
     mockUseElasticsearchUrl.mockReturnValue('https://test-elasticsearch.elastic.co');
+    mockUseMcpServerUrl.mockReturnValue({
+      mcpServerUrl: 'https://test-kibana.elastic.co/api/agent_builder/mcp',
+    });
     mockUseCurrentUser.mockReturnValue({
       full_name: 'John Doe',
       username: 'johndoe',
@@ -93,8 +103,25 @@ describe('WorkplaceAIHomeHeader', () => {
   });
 
   describe('MCP Endpoint Button', () => {
+    beforeEach(() => {
+      // Reset mocks for this describe block
+      jest.clearAllMocks();
+    });
+
     it('renders MCP Endpoint button', () => {
       expect(screen.getByText('MCP Endpoint')).toBeInTheDocument();
+    });
+
+    it('copies MCP Server URL to clipboard when clicked', () => {
+      const mcpButton = screen.getByText('MCP Endpoint');
+
+      // Mock execCommand to return true (success)
+      (document.execCommand as jest.Mock).mockImplementationOnce(() => true);
+
+      fireEvent.click(mcpButton);
+
+      // Verify execCommand was called with 'copy'
+      expect(document.execCommand).toHaveBeenCalledWith('copy');
     });
   });
 

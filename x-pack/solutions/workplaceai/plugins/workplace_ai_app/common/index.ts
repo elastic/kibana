@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { AGENT_BUILDER_API_PATH, GET_AGENTS_ROUTE, AGENT_BUILDER_AGENTS } from './routes';
+export {
+  AGENT_BUILDER_API_PATH,
+  GET_AGENTS_ROUTE,
+  AGENT_BUILDER_AGENTS,
+  MCP_SERVER_PATH,
+} from './routes';

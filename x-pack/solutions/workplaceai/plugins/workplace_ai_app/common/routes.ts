@@ -8,3 +8,4 @@
 export const AGENT_BUILDER_API_PATH = '/api/agent_builder';
 export const GET_AGENTS_ROUTE = `${AGENT_BUILDER_API_PATH}/agents`;
 export const AGENT_BUILDER_AGENTS = 'agents';
+export const MCP_SERVER_PATH = `${AGENT_BUILDER_API_PATH}/mcp`;
