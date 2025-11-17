@@ -36,5 +36,9 @@ export const createEntityAnalyticsNavigationTree = (
       id: SecurityPageName.entityAnalyticsPrivilegedUserMonitoring,
       link: securityLink(SecurityPageName.entityAnalyticsPrivilegedUserMonitoring),
     },
+    {
+      id: SecurityPageName.entityAnalyticsThreatHunting,
+      link: securityLink(SecurityPageName.entityAnalyticsThreatHunting),
+    },
   ],
 });

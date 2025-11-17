@@ -131,12 +131,18 @@ export interface AssetInventoryDataTableProps {
   state: AssetInventoryURLStateResult;
   height?: number;
   groupSelectorComponent?: JSX.Element;
+  /**
+   * Optional additional custom cell renderers to extend the default ones
+   * This is a function that takes rows and returns a CustomCellRenderer object
+   */
+  additionalCustomRenderers?: (rows: DataTableRecord[]) => CustomCellRenderer;
 }
 
 export const AssetInventoryDataTable = ({
   state,
   height,
   groupSelectorComponent,
+  additionalCustomRenderers,
 }: AssetInventoryDataTableProps) => {
   const {
     pageSize,
@@ -319,7 +325,12 @@ export const AssetInventoryDataTable = ({
     setPersistedSettings(newGrid);
   };
 
-  const externalCustomRenderers = useMemo(() => customCellRenderer(rows), [rows]);
+  const externalCustomRenderers = useMemo(() => {
+    const baseRenderers = customCellRenderer(rows);
+    const additionalRenderers = additionalCustomRenderers ? additionalCustomRenderers(rows) : {};
+    // Merge additional renderers, with additional ones taking precedence
+    return { ...baseRenderers, ...additionalRenderers };
+  }, [rows, additionalCustomRenderers]);
 
   const onResetColumns = () => {
     setLocalStorageColumns(defaultColumns.map((c) => c.id));

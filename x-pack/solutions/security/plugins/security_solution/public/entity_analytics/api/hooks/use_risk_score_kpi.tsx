@@ -34,7 +34,7 @@ interface RiskScoreKpi {
 interface UseRiskScoreKpiProps {
   filterQuery?: string | ESQuery;
   skip?: boolean;
-  riskEntity: EntityType;
+  riskEntity: EntityType | EntityType[];
   timerange?: { to: string; from: string };
 }
 
@@ -69,12 +69,22 @@ export const useRiskScoreKpi = ({
     [timerange]
   );
 
+  // Memoize entity to prevent unnecessary re-renders when it's an array
+  const entityKey = useMemo(() => {
+    return Array.isArray(riskEntity) ? JSON.stringify(riskEntity) : riskEntity;
+  }, [riskEntity]);
+
+  const memoizedEntity = useMemo(() => {
+    return riskEntity;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [entityKey]);
+
   useEffect(() => {
     if (!skip && defaultIndex && !isStatusLoading && riskEngineHasBeenEnabled) {
       search({
         filterQuery,
         defaultIndex: [defaultIndex],
-        entity: riskEntity,
+        entity: memoizedEntity,
         timerange: requestTimerange,
       });
     }
@@ -83,7 +93,7 @@ export const useRiskScoreKpi = ({
     search,
     filterQuery,
     skip,
-    riskEntity,
+    memoizedEntity,
     requestTimerange,
     isStatusLoading,
     riskEngineHasBeenEnabled,
