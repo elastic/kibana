@@ -65,8 +65,15 @@ export const HeaderPageAnnouncer: FC<{
 
     const handleTabFn: EventListener = (e) => {
       if (shouldHandleTab && e instanceof KeyboardEvent && e.key === keys.TAB) {
-        skipLinkRef.current?.focus();
-        e.preventDefault?.();
+        // Only intercept Tab if the user is not already focused within the main content area
+        const activeElement = document.activeElement;
+        const mainContent = document.querySelector(MAIN_CONTENT_SELECTORS.join(','));
+        const isWithinMainContent = mainContent && mainContent.contains(activeElement);
+
+        if (!isWithinMainContent) {
+          skipLinkRef.current?.focus();
+          e.preventDefault?.();
+        }
       }
       setShouldHandleTab(false);
     };
