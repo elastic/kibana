@@ -5,8 +5,6 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import type { StreamlangDSL } from '@kbn/streamlang';
-import { streamlangDSLSchema } from '@kbn/streamlang';
 import type { ModelValidation } from '../validation/model_validation';
 import { modelValidation } from '../validation/model_validation';
 import type { Validation } from '../validation/validation';
@@ -18,6 +16,8 @@ import type { IngestStreamSettings } from './settings';
 import { ingestStreamSettingsSchema } from './settings';
 import type { FailureStore } from './failure_store';
 import { failureStoreSchema } from './failure_store';
+import type { IngestStreamProcessing } from './processing';
+import { ingestStreamProcessingSchema } from './processing';
 
 interface IngestStreamPrivileges {
   // User can change everything about the stream
@@ -51,7 +51,7 @@ const ingestStreamPrivilegesSchema: z.Schema<IngestStreamPrivileges> = z.object(
 
 export interface IngestBase {
   lifecycle: IngestStreamLifecycle;
-  processing: StreamlangDSL;
+  processing: IngestStreamProcessing;
   settings: IngestStreamSettings;
   failure_store: FailureStore;
 }
@@ -60,7 +60,7 @@ export const IngestBase: Validation<unknown, IngestBase> = validation(
   z.unknown(),
   z.object({
     lifecycle: ingestStreamLifecycleSchema,
-    processing: streamlangDSLSchema,
+    processing: ingestStreamProcessingSchema,
     settings: ingestStreamSettingsSchema,
     failure_store: failureStoreSchema,
   })
@@ -84,7 +84,13 @@ export namespace IngestBaseStream {
 
   export type UpsertRequest<
     TDefinition extends IngestBaseStream.Definition = IngestBaseStream.Definition
-  > = BaseStream.UpsertRequest<TDefinition>;
+  > = BaseStream.UpsertRequest<
+    Omit<TDefinition, 'ingest'> & {
+      ingest: Omit<IngestBase, 'processing'> & {
+        processing: Omit<IngestStreamProcessing, 'updated_at'>;
+      };
+    }
+  >;
 
   export interface Model {
     Definition: IngestBaseStream.Definition;
