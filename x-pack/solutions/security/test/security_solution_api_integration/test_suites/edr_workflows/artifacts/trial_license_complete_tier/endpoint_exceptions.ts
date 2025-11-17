@@ -310,21 +310,39 @@ ${JSON.stringify(createItem())}
           await endpointPolicyManagerSupertest.delete(deleteUrl).set('kbn-xsrf', 'true');
         });
 
-        it(`should add global artifact tag on [${endpointExceptionApiCall.method}] if no assignment tag is present`, async () => {
-          const requestBody = endpointExceptionApiCall.getBody();
-          requestBody.tags = [];
+        if (IS_ENDPOINT_EXCEPTION_MOVE_FF_ENABLED) {
+          it(`should accept item on [${endpointExceptionApiCall.method}] if no assignment tag is present`, async () => {
+            const requestBody = endpointExceptionApiCall.getBody();
+            requestBody.tags = [];
 
-          await endpointPolicyManagerSupertest[endpointExceptionApiCall.method](
-            endpointExceptionApiCall.path
-          )
-            .set('kbn-xsrf', 'true')
-            .send(requestBody)
-            .expect(200)
-            .expect(({ body }) => expect(body.tags).to.contain(GLOBAL_ARTIFACT_TAG));
+            await endpointPolicyManagerSupertest[endpointExceptionApiCall.method](
+              endpointExceptionApiCall.path
+            )
+              .set('kbn-xsrf', 'true')
+              .send(requestBody)
+              .expect(200)
+              .expect(({ body }) => expect(body.tags).to.not.contain(GLOBAL_ARTIFACT_TAG));
 
-          const deleteUrl = `${EXCEPTION_LIST_ITEM_URL}?item_id=${requestBody.item_id}&namespace_type=${requestBody.namespace_type}`;
-          await endpointPolicyManagerSupertest.delete(deleteUrl).set('kbn-xsrf', 'true');
-        });
+            const deleteUrl = `${EXCEPTION_LIST_ITEM_URL}?item_id=${requestBody.item_id}&namespace_type=${requestBody.namespace_type}`;
+            await endpointPolicyManagerSupertest.delete(deleteUrl).set('kbn-xsrf', 'true');
+          });
+        } else {
+          it(`should add global artifact tag on [${endpointExceptionApiCall.method}] if no assignment tag is present`, async () => {
+            const requestBody = endpointExceptionApiCall.getBody();
+            requestBody.tags = [];
+
+            await endpointPolicyManagerSupertest[endpointExceptionApiCall.method](
+              endpointExceptionApiCall.path
+            )
+              .set('kbn-xsrf', 'true')
+              .send(requestBody)
+              .expect(200)
+              .expect(({ body }) => expect(body.tags).to.contain(GLOBAL_ARTIFACT_TAG));
+
+            const deleteUrl = `${EXCEPTION_LIST_ITEM_URL}?item_id=${requestBody.item_id}&namespace_type=${requestBody.namespace_type}`;
+            await endpointPolicyManagerSupertest.delete(deleteUrl).set('kbn-xsrf', 'true');
+          });
+        }
       }
       for (const endpointExceptionApiCall of [...needsWritePrivilege, ...needsReadPrivilege]) {
         it(`should not error on [${endpointExceptionApiCall.method}] - [${endpointExceptionApiCall.info}]`, async () => {
