@@ -137,8 +137,8 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
       const getApiKeyForCustomRole = async (
         role: KibanaRole | ElasticsearchRoleDescriptor
       ): Promise<RoleApiCredentials> => {
-        await samlAuth.setCustomRole(role);
         isCustomRoleCreated = true;
+        await samlAuth.setCustomRole(role);
         const result = await getApiKey(samlAuth.customRoleName);
         log.info(`Created API key with custom role: ${samlAuth.customRoleName}`);
         return result;
