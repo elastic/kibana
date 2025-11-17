@@ -113,8 +113,7 @@ export const useCasesAddToExistingCaseModal = ({
           attachments,
         });
 
-        // NOTE: this is where we add client side telemetry
-        trackAttachEvents('unknown', attachments);
+        trackAttachEvents(window.location.pathname, attachments);
 
         if (theCase.settings?.extractObservables && observables.length > 0) {
           await bulkPostObservables({ caseId: theCase.id, observables });

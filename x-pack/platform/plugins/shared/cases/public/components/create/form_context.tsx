@@ -76,7 +76,7 @@ export const FormContext: React.FC<Props> = ({
             attachments,
           });
 
-          trackAttachEvents('unknown', attachments);
+          trackAttachEvents(window.location.pathname, attachments);
         }
 
         if (theCase && Array.isArray(observables) && observables.length > 0) {
