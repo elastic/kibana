@@ -503,7 +503,6 @@ describe('Agents CRUD test', () => {
           .mockResolvedValueOnce(getEsResponse(['1', '2'], 2, 'online'));
 
         const result = await getAgentsByKuery(esClientMock, soClientMock, {
-          showAgentless: true,
           showInactive: false,
         });
 
@@ -539,7 +538,6 @@ describe('Agents CRUD test', () => {
 
         await expect(
           getAgentsByKuery(esClientMock, soClientMock, {
-            showAgentless: true,
             showInactive: false,
           })
         ).rejects.toThrow('Oh no!');
