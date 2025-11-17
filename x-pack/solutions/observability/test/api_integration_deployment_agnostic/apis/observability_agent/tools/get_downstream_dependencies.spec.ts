@@ -6,41 +6,48 @@
  */
 
 import expect from '@kbn/expect';
-import type { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import { isOtherResult } from '@kbn/onechat-common/tools';
 import type { ToolResult, OtherResult } from '@kbn/onechat-common';
 import type { LlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
 import { createLlmProxy } from '@kbn/test-suites-xpack-platform/onechat_api_integration/utils/llm_proxy';
-import { OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID } from '@kbn/observability-agent-plugin/server/tools';
 import { OBSERVABILITY_AGENT_ID } from '@kbn/observability-agent-plugin/server/agent/register_observability_agent';
+import { OBSERVABILITY_GET_APM_DOWNSTREAM_DEPENDENCIES_TOOL_ID } from '@kbn/apm-plugin/common/observability_agent/agent_tool_ids';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
 import { setupToolCallThenAnswer } from '../utils/llm_proxy/scenarios';
-import { createSyntheticLogsData, createSyntheticApmData } from '../utils/synthtrace_scenarios';
 import {
   createLlmProxyActionConnector,
   deleteActionConnector,
 } from '../utils/llm_proxy/action_connectors';
 
-const LLM_EXPOSED_TOOL_NAME_FOR_GET_DATA_SOURCES = 'observability_get_data_sources';
-const USER_PROMPT = 'Do I have any data sources? ';
+const SERVICE_NAME = 'service-a';
+const ENVIRONMENT = 'production';
+const START = 'now-15m';
+const END = 'now';
+const DEPENDENCY_RESOURCE = 'elasticsearch/my-backend';
+
+const LLM_EXPOSED_TOOL_NAME_FOR_GET_APM_DOWNSTREAM_DEPENDENCIES =
+  'observability_get_apm_downstream_dependencies';
+const USER_PROMPT = `What are the downstream dependencies for the service ${SERVICE_NAME} in the last 15 minutes?`;
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const synthtrace = getService('synthtrace');
 
-  describe(`tool: ${OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID}`, function () {
+  let llmProxy: LlmProxy;
+  let connectorId: string;
+  let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
+
+  describe(`tool: ${OBSERVABILITY_GET_APM_DOWNSTREAM_DEPENDENCIES_TOOL_ID}`, function () {
     // LLM Proxy is not yet supported in cloud environments
     this.tags(['skipCloud']);
-
-    let llmProxy: LlmProxy;
-    let connectorId: string;
-    let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
 
     describe('POST /api/agent_builder/converse', () => {
       let toolResponseContent: { results: ToolResult[] };
       let apmSynthtraceEsClient: ApmSynthtraceEsClient;
-      let logsSynthtraceEsClient: LogsSynthtraceEsClient;
 
       before(async () => {
         llmProxy = await createLlmProxy(log);
@@ -49,12 +56,47 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const scoped = await roleScopedSupertest.getSupertestWithRoleScope('editor');
         agentBuilderApiClient = createAgentBuilderApiClient(scoped);
 
-        ({ apmSynthtraceEsClient } = await createSyntheticApmData({ getService }));
-        ({ logsSynthtraceEsClient } = await createSyntheticLogsData({ getService }));
+        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+        await apmSynthtraceEsClient.clean();
+
+        const instance = apm
+          .service({ name: SERVICE_NAME, environment: ENVIRONMENT, agentName: 'nodejs' })
+          .instance('instance-a');
+
+        await apmSynthtraceEsClient.index(
+          timerange(START, END)
+            .interval('1m')
+            .rate(5)
+            .generator((timestamp) =>
+              instance
+                .transaction({ transactionName: 'GET /dep' })
+                .timestamp(timestamp)
+                .duration(200)
+                .success()
+                .children(
+                  instance
+                    .span({
+                      spanName: 'GET apm-*/_search',
+                      spanType: 'db',
+                      spanSubtype: 'elasticsearch',
+                    })
+                    .destination(DEPENDENCY_RESOURCE)
+                    .timestamp(timestamp)
+                    .duration(100)
+                    .success()
+                )
+            )
+        );
 
         setupToolCallThenAnswer({
           llmProxy,
-          toolName: LLM_EXPOSED_TOOL_NAME_FOR_GET_DATA_SOURCES,
+          toolName: LLM_EXPOSED_TOOL_NAME_FOR_GET_APM_DOWNSTREAM_DEPENDENCIES,
+          toolArg: {
+            serviceName: SERVICE_NAME,
+            serviceEnvironment: ENVIRONMENT,
+            start: START,
+            end: END,
+          },
         });
 
         const body = await agentBuilderApiClient.converse({
@@ -79,9 +121,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       after(async () => {
         await apmSynthtraceEsClient.clean();
-        await logsSynthtraceEsClient.clean();
         await deleteActionConnector(getService, { actionId: connectorId });
-
         llmProxy.close();
       });
 
@@ -93,39 +133,25 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(isOtherResult(toolResult)).to.be(true);
 
         const { data } = toolResult as OtherResult;
-        expect(data).to.have.property('apm');
-        expect(data).to.have.property('logs');
-        expect(data).to.have.property('metrics');
-        expect(data).to.have.property('alerts');
+        expect(data).to.have.property('dependencies');
       });
 
-      it('returns tool results with the relevant index patterns', () => {
+      it('returns downstream dependencies for the given service and time range', () => {
         const toolResult = toolResponseContent.results[0] as OtherResult;
         const { data } = toolResult as OtherResult;
+        const dependencies = data.dependencies as Array<Record<string, unknown>>;
 
-        const expectedIndexPatterns = {
-          apm: {
-            indexPatterns: {
-              transaction: 'traces-apm*,apm-*,traces-*.otel-*',
-              span: 'traces-apm*,apm-*,traces-*.otel-*',
-              error: 'logs-apm*,apm-*,logs-*.otel-*',
-              metric: 'metrics-apm*,apm-*,metrics-*.otel-*',
-              onboarding: 'apm-*',
-              sourcemap: 'apm-*',
-            },
-          },
-          logs: {
-            indexPatterns: ['logs-*-*', 'logs-*', 'filebeat-*'],
-          },
-          metrics: {
-            indexPatterns: ['metrics-*', 'metricbeat-*'],
-          },
-          alerts: {
-            indexPattern: ['alerts-observability-*'],
-          },
-        };
+        expect(Array.isArray(dependencies)).to.be(true);
+        expect(dependencies.length > 0).to.be(true);
 
-        expect(data).to.eql(expectedIndexPatterns);
+        const hasExpectedBackend = dependencies.some(
+          (d) =>
+            d['span.destination.service.resource'] === DEPENDENCY_RESOURCE &&
+            d['span.type'] === 'db' &&
+            d['span.subtype'] === 'elasticsearch'
+        );
+
+        expect(hasExpectedBackend).to.be(true);
       });
     });
   });
