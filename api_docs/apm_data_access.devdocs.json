@@ -1924,6 +1924,20 @@
             "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_host_names/index.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "apmDataAccess",
+            "id": "def-server.HostNamesRequest.schema",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "schema",
+            "description": [],
+            "signature": [
+              "\"ecs\" | \"semconv\""
+            ],
+            "path": "x-pack/solutions/observability/plugins/apm_data_access/server/services/get_host_names/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1955,7 +1969,7 @@
             "section": "def-common.ApmDataSource",
             "text": "ApmDataSource"
           },
-          "<AnyApmDocumentType> & { hasDocs: boolean; hasDurationSummaryField: boolean; })[]>; getHostNames: ({ start, end, size, query, documentSources }: ",
+          "<AnyApmDocumentType> & { hasDocs: boolean; hasDurationSummaryField: boolean; })[]>; getHostNames: ({ start, end, size, query, documentSources, schema, }: ",
           {
             "pluginId": "apmDataAccess",
             "scope": "server",
@@ -2131,7 +2145,7 @@
               "section": "def-common.ApmDataSource",
               "text": "ApmDataSource"
             },
-            "<AnyApmDocumentType> & { hasDocs: boolean; hasDurationSummaryField: boolean; })[]>; getHostNames: ({ start, end, size, query, documentSources }: ",
+            "<AnyApmDocumentType> & { hasDocs: boolean; hasDurationSummaryField: boolean; })[]>; getHostNames: ({ start, end, size, query, documentSources, schema, }: ",
             {
               "pluginId": "apmDataAccess",
               "scope": "server",
