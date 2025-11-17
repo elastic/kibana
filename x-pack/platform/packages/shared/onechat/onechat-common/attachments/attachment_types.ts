@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod';
+
 /**
  * List of internal / built-in attachment types.
  *
@@ -13,12 +15,33 @@
 export enum AttachmentType {
   screenContext = 'screen_context',
   text = 'text',
+  esql = 'esql',
 }
 
 interface AttachmentDataMap {
+  [AttachmentType.esql]: EsqlAttachmentData;
   [AttachmentType.text]: TextAttachmentData;
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
 }
+
+export const esqlAttachmentDataSchema = z.object({
+  query: z.string(),
+  description: z.string().optional(),
+});
+
+/**
+ * Data for an esql attachment.
+ */
+export interface EsqlAttachmentData {
+  /** the esql query */
+  query: string;
+  /** optional description of the query */
+  description?: string;
+}
+
+export const textAttachmentDataSchema = z.object({
+  content: z.string(),
+});
 
 /**
  * Data for a text attachment.
@@ -27,6 +50,18 @@ export interface TextAttachmentData {
   /** text content of the attachment */
   content: string;
 }
+
+export const screenContextAttachmentDataSchema = z
+  .object({
+    url: z.string().optional(),
+    app: z.string().optional(),
+    description: z.string().optional(),
+    additional_data: z.record(z.string()).optional(),
+  })
+  .refine((data) => {
+    // at least one of the fields must be present
+    return data.url || data.app || data.description || data.additional_data;
+  });
 
 /**
  * Data for a screen context attachment.

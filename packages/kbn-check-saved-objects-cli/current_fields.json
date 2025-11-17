@@ -804,6 +804,7 @@
     "delete_unenrolled_agents.is_preconfigured",
     "fleet_server_hosts",
     "has_seen_add_data_notice",
+    "ilm_migration_status",
     "output_secret_storage_requirements_met",
     "prerelease_integrations_enabled",
     "secret_storage_requirements_met",
