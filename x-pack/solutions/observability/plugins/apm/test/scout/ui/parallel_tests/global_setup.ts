@@ -14,7 +14,7 @@ import { testData } from '../fixtures';
 globalSetupHook(
   'Ingest data to Elasticsearch',
   { tag: ['@ess', '@svlOblt'] },
-  async ({ apmSynthtraceEsClient, apiServices, log, config, esClient }, use) => {
+  async ({ apmSynthtraceEsClient, apiServices, log, config, esClient }) => {
     if (!config.isCloud) {
       await apiServices.fleet.internal.setup();
       log.info('Fleet infrastructure setup completed');
@@ -36,9 +36,9 @@ globalSetupHook(
       try {
         await esClient.ml.stopDatafeed({ datafeed_id: `datafeed-${job.job_id}`, force: true });
         await esClient.ml.deleteDatafeed({ datafeed_id: `datafeed-${job.job_id}`, force: true });
-      } catch (e) {
+      } catch (error) {
         // Datafeed might not exist
-        log.warning(`Datafeed not found for job: ${job.job_id}`);
+        log.warning(`Datafeed not found for job: ${job.job_id}`, error);
       }
       await esClient.ml.deleteJob({ job_id: job.job_id, force: true });
       log.info(`Deleted job: ${job.job_id}`);
