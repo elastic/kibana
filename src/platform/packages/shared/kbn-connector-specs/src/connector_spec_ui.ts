@@ -40,6 +40,7 @@ export interface BaseMetadata {
   helpText?: string;
   isDisabled?: boolean;
   sensitive?: boolean;
+  order?: number;
 }
 
 export function getMeta(schema: z.ZodTypeAny): BaseMetadata | undefined {
