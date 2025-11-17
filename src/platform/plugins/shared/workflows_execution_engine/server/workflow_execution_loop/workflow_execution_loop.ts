@@ -11,7 +11,6 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { runNode } from './run_node';
 import type { WorkflowExecutionLoopParams } from './types';
 
-
 /**
  * Executes the main workflow execution loop, processing nodes sequentially until completion.
  *
@@ -42,7 +41,7 @@ export async function workflowExecutionLoop(params: WorkflowExecutionLoopParams)
     });
   });
 
-  while (params.workflowRuntime.getWorkflowExecution().status === ExecutionStatus.RUNNING) {
+  while (params.workflowRuntime.getWorkflowExecutionStatus() === ExecutionStatus.RUNNING) {
     await runNode(params);
     await params.workflowLogger.flushEvents();
   }
