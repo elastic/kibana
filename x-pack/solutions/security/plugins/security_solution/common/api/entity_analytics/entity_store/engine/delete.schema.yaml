@@ -30,6 +30,12 @@ paths:
           description: Successful response
           content:
             application/json:
+              examples:
+                deleteEntityEnginesExample:
+                  description: Example response after deleting 'host' engine
+                  value:
+                    deleted: ['host']
+                    still_running: ['generic', 'user', 'service']
               schema:
                 type: object
                 properties:      
@@ -70,6 +76,11 @@ paths:
           description: Control flag to also delete the entity data.
       responses:
         '200':
+          examples:
+            deleteEntityEngineExample:
+              description: Example response after deleting 'host' engine
+              value:
+                deleted: true
           description: Successful response
           content:
             application/json:
