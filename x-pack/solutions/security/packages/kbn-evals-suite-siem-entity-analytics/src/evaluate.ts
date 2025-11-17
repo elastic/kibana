@@ -91,7 +91,6 @@ export const evaluate = base.extend<
         log,
         client: esClient,
         kbnClient,
-        baseDir: 'x-pack/solutions/security/test/fixtures/es_archives/security_solution',
       });
 
       const loadedArchivers: Set<string> = new Set();

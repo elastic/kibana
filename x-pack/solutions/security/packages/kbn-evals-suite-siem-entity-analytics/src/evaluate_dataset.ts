@@ -7,6 +7,7 @@
 
 import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
 import type { DefaultEvaluators, KibanaPhoenixClient, EvaluationDataset } from '@kbn/evals';
+import type { EvaluationResult } from '@arizeai/phoenix-client/dist/esm/types/experiments';
 import type {
   SiemEntityAnalyticsEvaluationChatClient,
   ErrorResponse,
@@ -20,6 +21,11 @@ interface DatasetExample extends Example {
   };
   output: {
     criteria: string[];
+  };
+  metadata?: {
+    query_intent?: string;
+    toolId?: string;
+    [key: string]: unknown;
   };
 }
 
@@ -42,6 +48,47 @@ export type EvaluateDataset = ({
     examples: DatasetExample[];
   };
 }) => Promise<void>;
+
+/**
+ * Checks if a tool was called during the conversation and combines the result with criteria evaluation.
+ * @param toolId - The tool ID to check for
+ * @param steps - The conversation steps to search for tool calls
+ * @param criteriaResult - The result from criteria evaluation
+ * @returns Combined evaluation result with tool call check
+ */
+function checkToolCallAndCombineResults(
+  toolId: string,
+  steps: Step[],
+  criteriaResult: EvaluationResult
+): EvaluationResult {
+  const toolWasCalled = steps.some(
+    (step) =>
+      (step as { type?: string; tool_id?: string }).type === 'tool_call' &&
+      (step as { type?: string; tool_id?: string }).tool_id === toolId
+  );
+
+  const toolCallExplanation = toolWasCalled
+    ? `Tool "${toolId}" was called during the conversation.`
+    : `Tool "${toolId}" was not called during the conversation.`;
+
+  const combinedExplanation = `${criteriaResult.explanation ?? ''} ${toolCallExplanation}`;
+
+  // If tool call failed, fail the overall evaluation
+  if (!toolWasCalled) {
+    return {
+      score: 0,
+      label: 'FAIL',
+      explanation: combinedExplanation,
+    };
+  }
+
+  // Tool call passed, return criteria result with combined explanation
+  return {
+    score: criteriaResult.score ?? null,
+    label: criteriaResult.label ?? 'PASS',
+    explanation: combinedExplanation,
+  };
+}
 
 export function createEvaluateDataset({
   evaluators,
@@ -78,6 +125,7 @@ export function createEvaluateDataset({
           return {
             errors: response.errors,
             messages: response.messages,
+            steps: response.steps,
           };
         },
       },
@@ -93,6 +141,7 @@ export function createEvaluateDataset({
 /**
  * Common criteria evaluator that can be used across all evaluation scenarios.
  * This provides a standardized evaluator with a consistent name "Criteria".
+ * It also checks tool calls if toolId is specified in the example metadata.
  */
 export function createCriteriaEvaluator({ evaluators }: { evaluators: DefaultEvaluators }) {
   return {
@@ -110,11 +159,19 @@ export function createCriteriaEvaluator({ evaluators }: { evaluators: DefaultEva
       metadata: DatasetExample['metadata'];
     }) => {
       const criteria = expected.criteria ?? [];
-      const result = await evaluators
+      const criteriaResult = await evaluators
         .criteria(criteria)
         .evaluate({ input, expected, output, metadata });
 
-      return result;
+      // Check tool call if toolId is specified in metadata
+      const toolId = metadata?.toolId;
+      if (toolId && typeof toolId === 'string') {
+        const steps = output.steps ?? [];
+        return checkToolCallAndCombineResults(toolId, steps, criteriaResult);
+      }
+
+      // No toolId specified, return criteria result as-is
+      return criteriaResult;
     },
   };
 }

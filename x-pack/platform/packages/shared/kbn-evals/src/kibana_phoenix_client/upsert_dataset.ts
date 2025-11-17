@@ -43,7 +43,9 @@ async function graphQLRequest<T>(
     body: JSON.stringify({ query, variables }),
   });
   const body = await res.json();
-  if (body.errors?.length) throw new Error(body.errors[0].message);
+  if (body.errors?.length) {
+    throw new Error(body.errors[0].message);
+  }
   return body.data as T;
 }
 

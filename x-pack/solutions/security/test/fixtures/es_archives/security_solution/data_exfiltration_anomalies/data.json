@@ -1,0 +1,353 @@
+{
+  "type": "doc",
+  "value": {
+    "index": ".ml-anomalies-shared",
+    "id": "ded_high_bytes_written_to_external_device_record_1761555600000_3600_0_31480572455670469845712471656300053055_14",
+    "source": {
+      "job_id": "ded_high_bytes_written_to_external_device",
+      "result_type": "record",
+      "probability": 0.01810916955578223,
+      "multi_bucket_impact": -5,
+      "record_score": 20.52510384175859,
+      "initial_record_score": 20.52510384175859,
+      "bucket_span": 3600,
+      "detector_index": 0,
+      "is_interim": false,
+      "timestamp": 1761555600000,
+      "partition_field_name": "host.name",
+      "partition_field_value": "win-finance-01",
+      "function": "high_sum",
+      "function_description": "sum",
+      "typical": [
+        56066317.38093647
+      ],
+      "actual": [
+        1073741824
+      ],
+      "field_name": "file.size",
+      "influencers": [
+        {
+          "influencer_field_name": "host.name",
+          "influencer_field_values": [
+            "win-finance-01"
+          ]
+        },
+        {
+          "influencer_field_name": "file.path",
+          "influencer_field_values": [
+            "E:\\secret_archive_1.zip"
+          ]
+        },
+        {
+          "influencer_field_name": "file.name",
+          "influencer_field_values": [
+            "secret_archive_1.zip"
+          ]
+        },
+        {
+          "influencer_field_name": "process.name",
+          "influencer_field_values": [
+            "7z.exe"
+          ]
+        },
+        {
+          "influencer_field_name": "file.Ext.device.bus_type",
+          "influencer_field_values": [
+            "USB"
+          ]
+        },
+        {
+          "influencer_field_name": "user.name",
+          "influencer_field_values": [
+            "insider"
+          ]
+        }
+      ],
+      "anomaly_score_explanation": {
+        "single_bucket_impact": 2,
+        "lower_confidence_bound": 0,
+        "typical_value": 56066317.38093647,
+        "upper_confidence_bound": 554606210.0092009
+      },
+      "process.name": [
+        "7z.exe"
+      ],
+      "file.path": [
+        "E:\\secret_archive_1.zip"
+      ],
+      "file.Ext.device.bus_type": [
+        "USB"
+      ],
+      "file.name": [
+        "secret_archive_1.zip"
+      ],
+      "user.name": [
+        "insider"
+      ],
+      "host.name": [
+        "win-finance-01"
+      ]
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".ml-anomalies-shared",
+    "id": "ded_high_sent_bytes_destination_geo_country_iso_code_record_1761296400000_10800_0_-148140333488160941124976492251201410821_2",
+    "source": {
+      "job_id": "ded_high_sent_bytes_destination_geo_country_iso_code",
+      "result_type": "record",
+      "probability": 0.018332756775264587,
+      "record_score": 20.33752193196575,
+      "initial_record_score": 20.33752193196575,
+      "bucket_span": 10800,
+      "detector_index": 0,
+      "is_interim": false,
+      "timestamp": 1761296400000,
+      "function": "high_sum",
+      "function_description": "sum",
+      "field_name": "source.bytes",
+      "over_field_name": "destination.geo.country_iso_code",
+      "over_field_value": "IR",
+      "causes": [
+        {
+          "probability": 0.018332756775264587,
+          "function": "high_sum",
+          "function_description": "sum",
+          "typical": [
+            105276079.03787479
+          ],
+          "actual": [
+            1750000000
+          ],
+          "field_name": "source.bytes",
+          "over_field_name": "destination.geo.country_iso_code",
+          "over_field_value": "IR"
+        }
+      ],
+      "influencers": [
+        {
+          "influencer_field_name": "host.name",
+          "influencer_field_values": [
+            "compromised-ws"
+          ]
+        },
+        {
+          "influencer_field_name": "destination.geo.country_name",
+          "influencer_field_values": [
+            "Iran"
+          ]
+        },
+        {
+          "influencer_field_name": "source.ip",
+          "influencer_field_values": [
+            "10.0.0.99"
+          ]
+        },
+        {
+          "influencer_field_name": "destination.ip",
+          "influencer_field_values": [
+            "5.144.128.1",
+            "5.144.128.2"
+          ]
+        },
+        {
+          "influencer_field_name": "destination.geo.country_iso_code",
+          "influencer_field_values": [
+            "IR"
+          ]
+        },
+        {
+          "influencer_field_name": "process.name",
+          "influencer_field_values": [
+            "exfil.exe"
+          ]
+        },
+        {
+          "influencer_field_name": "user.name",
+          "influencer_field_values": [
+            "data.thief"
+          ]
+        }
+      ]
+    },
+    "type": "_doc"
+  }
+}
+
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".ml-anomalies-shared",
+    "id": "ded_high_bytes_written_to_external_device_airdrop_record_1761638400000_3600_0_68221808432123056094733796019066421700_15",
+    "source": {
+      "job_id": "ded_high_bytes_written_to_external_device_airdrop",
+      "result_type": "record",
+      "probability": 0.030693105053515357,
+      "multi_bucket_impact": -5,
+      "record_score": 12.459613083409897,
+      "initial_record_score": 12.459613083409897,
+      "bucket_span": 3600,
+      "detector_index": 0,
+      "is_interim": false,
+      "timestamp": 1761638400000,
+      "partition_field_name": "host.name",
+      "partition_field_value": "ceo-macbook-pro",
+      "function": "high_sum",
+      "function_description": "sum",
+      "typical": [
+        2932993.9753766167
+      ],
+      "actual": [
+        1610612736
+      ],
+      "field_name": "file.size",
+      "influencers": [
+        {
+          "influencer_field_name": "host.name",
+          "influencer_field_values": [
+            "ceo-macbook-pro"
+          ]
+        },
+        {
+          "influencer_field_name": "file.path",
+          "influencer_field_values": [
+            "/Users/ceo/Downloads/M_and_A_Target_Data.zip"
+          ]
+        },
+        {
+          "influencer_field_name": "file.name",
+          "influencer_field_values": [
+            "M_and_A_Target_Data.zip"
+          ]
+        },
+        {
+          "influencer_field_name": "process.name",
+          "influencer_field_values": [
+            "sharingd"
+          ]
+        },
+        {
+          "influencer_field_name": "user.name",
+          "influencer_field_values": [
+            "ceo"
+          ]
+        }
+      ],
+      "anomaly_score_explanation": {
+        "single_bucket_impact": 2,
+        "lower_confidence_bound": 43597.936156599026,
+        "typical_value": 2932993.9753766167,
+        "upper_confidence_bound": 197306734.93763757
+      },
+      "process.name": [
+        "sharingd"
+      ],
+      "file.path": [
+        "/Users/ceo/Downloads/M_and_A_Target_Data.zip"
+      ],
+      "file.name": [
+        "M_and_A_Target_Data.zip"
+      ],
+      "user.name": [
+        "ceo"
+      ],
+      "host.name": [
+        "ceo-macbook-pro"
+      ]
+    },
+    "type": "_doc"
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".ml-anomalies-shared",
+    "id": "ded_high_sent_bytes_destination_ip_record_1761739200000_10800_0_36986207755615047981937298215093700697_10",
+    "source": {
+      "job_id": "ded_high_sent_bytes_destination_ip",
+      "result_type": "record",
+      "probability": 0.030109063680825617,
+      "record_score": 12.753295371219743,
+      "initial_record_score": 12.753295371219743,
+      "bucket_span": 10800,
+      "detector_index": 0,
+      "is_interim": false,
+      "timestamp": 1761739200000,
+      "function": "high_sum",
+      "function_description": "sum",
+      "field_name": "source.bytes",
+      "over_field_name": "destination.ip",
+      "over_field_value": "45.12.10.1",
+      "causes": [
+        {
+          "probability": 0.030109063680825613,
+          "function": "high_sum",
+          "function_description": "sum",
+          "typical": [
+            101544.65002183209
+          ],
+          "actual": [
+            1700000000
+          ],
+          "field_name": "source.bytes",
+          "over_field_name": "destination.ip",
+          "over_field_value": "45.12.10.1"
+        }
+      ],
+      "influencers": [
+        {
+          "influencer_field_name": "host.name",
+          "influencer_field_values": [
+            "compromised-pc"
+          ]
+        },
+        {
+          "influencer_field_name": "source.ip",
+          "influencer_field_values": [
+            "10.1.1.55"
+          ]
+        },
+        {
+          "influencer_field_name": "destination.ip",
+          "influencer_field_values": [
+            "45.12.10.1"
+          ]
+        },
+        {
+          "influencer_field_name": "process.name",
+          "influencer_field_values": [
+            "svchost.exe"
+          ]
+        },
+        {
+          "influencer_field_name": "user.name",
+          "influencer_field_values": [
+            "a.user"
+          ]
+        }
+      ],
+      "process.name": [
+        "svchost.exe"
+      ],
+      "user.name": [
+        "a.user"
+      ],
+      "source.ip": [
+        "10.1.1.55"
+      ],
+      "host.name": [
+        "compromised-pc"
+      ],
+      "destination.ip": [
+        "45.12.10.1"
+      ]
+    },
+    "type": "_doc"
+  }
+}

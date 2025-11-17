@@ -1358,6 +1358,20 @@
         },
         "file": {
           "properties": {
+            "name": {
+              "type": "keyword"
+            },
+            "Ext": {
+              "properties": {
+                "device": {
+                  "properties": {
+                    "bus_type": {
+                      "type": "keyword"
+                    }
+                  }
+                }
+              }
+            },
             "ctime": {
               "type": "date"
             },

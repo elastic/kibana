@@ -9,6 +9,7 @@ import { z } from '@kbn/zod';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition, ToolHandlerResult } from '@kbn/onechat-server';
 import { ToolType } from '@kbn/onechat-common';
+import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import type { EntityAnalyticsRoutesDeps } from '../../../lib/entity_analytics/types';
 import type { EntityType } from '../../../../common/search_strategy';
 import { EntityType as EntityTypeZod } from '../../../../common/api/entity_analytics';
@@ -29,7 +30,9 @@ const entityRiskScoreInternalSchema = z.object({
       'privileged_user_monitoring',
       'anomaly_detection',
     ])
-    .describe('The domain of entity analytics to retrieve information about.')
+    .describe(
+      'The domain of entity analytics to retrieve information about. When not provided only general security solution knowledge will be returned.'
+    )
     .optional(),
 
   prompt: z.string().describe('The prompt or question that calling this tool will help to answer.'),
@@ -128,7 +131,13 @@ export const entityAnalyticsToolInternal = (
           request,
         });
 
-        const generalSecuritySolutionMessage = `Always try querying the most appropriate domain index when available. When it isn't enough, you can query security solution events and logs. For that you must generate an ES|QL and you **MUST ALWAYS** use the following from clause (ONLY FOR LOGS AND NOT FOR OTHER INDICES): "FROM ${dataView.getIndexPattern()}"`;
+        const generalSecuritySolutionMessage = `Always try querying the most appropriate domain index when available. 
+        When it isn't enough, you can query security solution events and logs. 
+        For that you must generate an ES|QL and you **MUST ALWAYS** use the following from clause (ONLY FOR LOGS AND NOT FOR OTHER INDICES): "FROM ${dataView.getIndexPattern()}"
+        When searching for logs of a ${entityType} you **MUST ALWAYS** use the following where clause "where ${
+          EntityTypeToIdentifierField[entityType]
+        } == {identifier}"
+        `;
 
         const results: ToolHandlerResult[] = [];
         if (hasGenerateESQLQuery && specificEntityAnalyticsResponse.index && !informationOnly) {

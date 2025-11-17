@@ -8,11 +8,7 @@
 import type { ModuleJob } from '@kbn/ml-plugin/common/types/modules';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import type { LEGACY_ML_GROUP_ID, ML_GROUP_ID } from '../../../../../common/constants';
-import {
-  DEFAULT_ANOMALY_SCORE,
-  ML_GROUP_IDS,
-  ML_ANOMALIES_INDEX,
-} from '../../../../../common/constants';
+import { DEFAULT_ANOMALY_SCORE, ML_GROUP_IDS } from '../../../../../common/constants';
 import type { EntityType } from '../../../../../common/search_strategy';
 import type { EntityAnalyticsSubPlugin } from './types';
 
@@ -120,6 +116,6 @@ Fields that you should use to answer the question:
 
   You should suggest the user to install these jobs.
 `,
-    index: ML_ANOMALIES_INDEX,
+    index: `.ml-anomalies-*`, // TODO: Use a constant for the index pattern
   };
 };
