@@ -111,6 +111,8 @@ export const registerAuthenticateRoute = ({
           const esClient = coreContext.elasticsearch.client.asCurrentUser;
           const clusterData = await getCurrentClusterData(esClient);
 
+          console.log(clusterData);
+
           // Use cluster details to onboard
           onboardingResponse = await cloudConnectClient.onboardClusterWithKeyGeneration(
             apiKey,

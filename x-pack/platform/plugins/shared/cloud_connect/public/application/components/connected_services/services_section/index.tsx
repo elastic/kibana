@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiTitle, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { ServiceCardProps } from './service_card';
-import { ServiceCard } from './service_card';
+import type { ServiceCardProps } from './details_card';
+import { ServiceCard } from './details_card';
 
 interface Service {
   enabled: boolean;

@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import {
   EuiPage,
   EuiPageHeader,
@@ -86,17 +87,17 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({ cl
       await http.delete('/internal/cloud_connect/cluster');
 
       notifications.toasts.addSuccess({
-        title: (
-          <FormattedMessage
-            id="xpack.cloudConnect.connectedServices.disconnect.successTitle"
-            defaultMessage="Cluster disconnected successfully"
-          />
+        title: i18n.translate(
+          'xpack.cloudConnect.connectedServices.disconnect.successTitle',
+          {
+            defaultMessage: 'Cluster disconnected successfully'
+          }
         ),
-        text: (
-          <FormattedMessage
-            id="xpack.cloudConnect.connectedServices.disconnect.successMessage"
-            defaultMessage="Your cluster has been disconnected from Cloud Connect."
-          />
+        text: i18n.translate(
+          'xpack.cloudConnect.connectedServices.disconnect.successMessage',
+          {
+            defaultMessage: 'Your cluster has been disconnected from Cloud Connect.'
+          }
         ),
       });
 
@@ -106,11 +107,11 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({ cl
       window.location.reload();
     } catch (error) {
       notifications.toasts.addError(error as Error, {
-        title: (
-          <FormattedMessage
-            id="xpack.cloudConnect.connectedServices.disconnect.errorTitle"
-            defaultMessage="Failed to disconnect cluster"
-          />
+        title: i18n.translate(
+          'xpack.cloudConnect.connectedServices.disconnect.errorTitle',
+          {
+            defaultMessage: 'Failed to disconnect cluster'
+          }
         ),
       });
       setIsDisconnecting(false);
@@ -216,3 +217,25 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({ cl
     </EuiPage>
   );
 };
+
+/*
+
+the cluster details api response is like this:
+{"id":"b59d7d12daa44e08ba0665c8f140b29d","license":{"type":"trial","uid":"fdc52385-1b15-4bc9-b39f-249ddd3d34b8"},"metadata":{"created_at":"2025-11-14T10:22:51.709885494Z","created_by":"1974340327","organization_id":"92149198"},"name":"c0c72560-8e51-49a8-a555-94076d718320","self_managed_cluster":{"id":"I5yxbA3dTFe-aJA78PSvEw","name":"c0c72560-8e51-49a8-a555-94076d718320","version":"9.3.0-SNAPSHOT"},"services":{"auto_ops":{"enabled":false,"support":{"minimum_stack_version":"7.17.0","supported":true,"valid_license_types":["trial","enterprise"]}},"eis":{"enabled":false,"support":{"minimum_stack_version":"9.3.0","supported":false,"valid_license_types":["trial","basic","dev","silver","gold","platinum","enterprise"]}}}}
+
+
+There are a few things we need to make sure of when rendering the serivices cards:
+
+* if we ever encounter a service that has support.supported=false, we should hide mark it as isCardDisabled: true in services_section/index.tsx and the badge should say Unsupported and have a tooltip that says "This service is not supported with the current cluster configuration."
+* Syntethics service should be hardcoded as it is right now given that is not yet returned by the API, but we want to tell the users that it will be there soon.
+* If a service is not enabled (enabled: false), the connect button should call a server api that allows us to edit the service:
+  * The route should be PUT cloud_connect/cluster_details in our server side and should internally call PATCH /api/v1/cloud-connected/clusters/{id} in cloud.
+  * Should send the service to be enabled in the body, e.g. { services: { eis: { enabled: true } } }
+  * When a service is enabled, the disconnect button should call the same api but with enabled: false
+  * When disabling a service, we should show a confirmation modal before proceeding.
+  * When a service is enabled:
+  * the main action button should be just a link to the service dashboard in cloud, we can hardcode this to https://cloud.elastic.co/deployments for now.
+  * The more actions button should have a disable action instead.
+* Currently we hardcode the description for each service, we isntead should create a mapping object that holds the service key and an object with title and documentation url. The title should be internationalized and the url can be hardcoded eto https://elastic.co/docs/test for now
+
+*/

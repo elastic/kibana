@@ -63,7 +63,7 @@ export async function getCurrentClusterData(
   const clusterData: OnboardClusterRequest = {
     self_managed_cluster: {
       id: clusterInfo.cluster_uuid,
-      name: uuidv4(),
+      name: clusterInfo.cluster_name || uuidv4(),
       version: clusterInfo.version.number,
     },
     license: {
