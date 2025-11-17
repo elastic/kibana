@@ -11,80 +11,29 @@ import {
   EuiFlexItem,
   EuiI18nNumber,
   EuiLoadingChart,
-  EuiIcon,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import {
-  BarSeries,
-  Chart,
-  ScaleType,
-  Settings,
-  niceTimeFormatter,
-  Tooltip,
-  TooltipStickTo,
-} from '@elastic/charts';
-import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
-import useAsync from 'react-use/lib/useAsync';
-import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
-import type { useTimefilter } from '../../hooks/use_timefilter';
 import { TooltipOrPopoverIcon } from '../tooltip_popover_icon/tooltip_popover_icon';
 import { getFormattedError } from '../../util/errors';
-import type { StreamDocCountsFetch } from '../../hooks/use_streams_doc_counts_fetch';
 
 export function DocumentsColumn({
   indexPattern,
-  histogramQueryFetch,
-  timeState,
-  numDataPoints,
+  docCount,
+  isLoading,
+  error,
 }: {
   indexPattern: string;
-  histogramQueryFetch: StreamDocCountsFetch;
-  timeState: ReturnType<typeof useTimefilter>['timeState'];
-  numDataPoints: number;
+  docCount: number;
+  isLoading: boolean;
+  error?: Error;
 }) {
-  const chartBaseTheme = useElasticChartsTheme();
   const { euiTheme } = useEuiTheme();
-
-  const histogramQueryResult = useAsync(() => histogramQueryFetch.docCount, [histogramQueryFetch]);
-
-  const allTimeseries = React.useMemo(
-    () =>
-      esqlResultToTimeseries({
-        result: histogramQueryResult,
-        metricNames: ['doc_count'],
-      }),
-    [histogramQueryResult]
-  );
-
-  const docCount = React.useMemo(
-    () =>
-      allTimeseries.reduce(
-        (acc, series) => acc + series.data.reduce((acc2, item) => acc2 + (item.doc_count || 0), 0),
-        0
-      ),
-    [allTimeseries]
-  );
 
   const hasData = docCount > 0;
 
-  const xFormatter = niceTimeFormatter([timeState.start, timeState.end]);
-  const minInterval = Math.floor((timeState.end - timeState.start) / numDataPoints);
-
-  const noDocCountData = histogramQueryResult.error ? '' : '-';
-
-  const noHistogramData = histogramQueryResult.error ? (
-    <TooltipOrPopoverIcon
-      dataTestSubj="streamsDocCount-error"
-      icon="warning"
-      title={getFormattedError(histogramQueryResult.error).message}
-      mode="popover"
-      iconColor="danger"
-    />
-  ) : (
-    <EuiIcon type="visLine" size="m" />
-  );
+  const noDocCountData = error ? '' : '-';
 
   const cellAriaLabel = hasData
     ? i18n.translate('xpack.streams.documentsColumn.cellDocCountLabel', {
@@ -107,7 +56,7 @@ export function DocumentsColumn({
       role="group"
       aria-label={cellAriaLabel}
     >
-      {histogramQueryResult.loading ? (
+      {isLoading ? (
         <LoadingPlaceholder />
       ) : (
         <>
@@ -123,43 +72,24 @@ export function DocumentsColumn({
             {hasData ? <EuiI18nNumber value={docCount} /> : noDocCountData}
           </EuiFlexItem>
           <EuiFlexItem
-            grow={3}
+            grow={0}
             aria-hidden="true"
             className={css`
-              border-bottom: ${hasData ? '1px solid' : 'none'} ${euiTheme.colors.lightShade};
               display: flex;
               justify-content: center;
               align-items: center;
+              padding-left: ${euiTheme.size.s};
             `}
           >
-            {hasData ? (
-              <Chart size={{ width: '100%', height: euiTheme.size.l }}>
-                <Settings
-                  locale={i18n.getLocale()}
-                  baseTheme={chartBaseTheme}
-                  theme={{ background: { color: 'transparent' } }}
-                  xDomain={{ min: timeState.start, max: timeState.end, minInterval }}
-                  noResults={<div />}
-                />
-                <Tooltip
-                  stickTo={TooltipStickTo.Middle}
-                  headerFormatter={({ value }) => xFormatter(value)}
-                />
-                {allTimeseries.map((serie) => (
-                  <BarSeries
-                    key={serie.id}
-                    id={serie.id}
-                    xScaleType={ScaleType.Time}
-                    yScaleType={ScaleType.Linear}
-                    xAccessor="x"
-                    yAccessors={['doc_count']}
-                    data={serie.data}
-                  />
-                ))}
-              </Chart>
-            ) : (
-              noHistogramData
-            )}
+            {error ? (
+              <TooltipOrPopoverIcon
+                dataTestSubj="streamsDocCount-error"
+                icon="warning"
+                title={getFormattedError(error).message}
+                mode="popover"
+                iconColor="danger"
+              />
+            ) : null}
           </EuiFlexItem>
         </>
       )}

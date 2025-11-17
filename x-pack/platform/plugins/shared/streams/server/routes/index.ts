@@ -26,6 +26,7 @@ import { ruleRoutes } from './rules/route';
 import { failureStoreRoutes } from './internal/streams/failure_store/route';
 import { internalIngestRoutes } from './internal/streams/ingest/route';
 import { connectorRoutes } from './internal/connectors/route';
+import { docCountsRoutes } from './streams/doc_counts/route';
 
 export const streamsRouteRepository = {
   // internal APIs
@@ -41,6 +42,7 @@ export const streamsRouteRepository = {
   ...internalIngestRoutes,
   ...connectorRoutes,
   // public APIs
+  ...docCountsRoutes,
   ...dashboardRoutes,
   ...crudRoutes,
   ...enablementRoutes,

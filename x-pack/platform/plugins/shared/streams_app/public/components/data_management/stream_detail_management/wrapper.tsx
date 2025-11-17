@@ -78,19 +78,21 @@ export function Wrapper({
       ? definition.privileges.read_failure_store
       : true,
   });
-  const docCountsFetch = getStreamDocCounts(streamId);
+  const docCountsFetch = getStreamDocCounts();
 
   const countResult = useAsync(() => docCountsFetch.docCount, [docCountsFetch]);
   const failedDocsResult = useAsync(() => docCountsFetch.failedDocCount, [docCountsFetch]);
-  const degradedDocsResult = useAsync(() => docCountsFetch.degradedDocCount, [docCountsFetch]);
+  const degradedDocsResult = useAsync(
+    () => docCountsFetch.degradedDocCount,
+    [docCountsFetch]
+  );
 
-  const docCount = countResult?.value ? Number(countResult.value?.values?.[0]?.[0]) : 0;
-  const degradedDocCount = degradedDocsResult?.value
-    ? Number(degradedDocsResult.value?.values?.[0]?.[0])
-    : 0;
-  const failedDocCount = failedDocsResult?.value
-    ? Number(failedDocsResult.value?.values?.[0]?.[0])
-    : 0;
+  const docCount =
+    countResult?.value?.find((stat) => stat.dataset === streamId)?.count ?? 0;
+  const degradedDocCount =
+    degradedDocsResult?.value?.find((stat) => stat.dataset === streamId)?.count ?? 0;
+  const failedDocCount =
+    failedDocsResult?.value?.find((stat) => stat.dataset === streamId)?.count ?? 0;
 
   const quality = calculateDataQuality({
     totalDocs: docCount,
