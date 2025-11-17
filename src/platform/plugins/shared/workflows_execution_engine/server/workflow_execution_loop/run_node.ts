@@ -9,7 +9,7 @@
 
 import { catchError } from './catch_error';
 import { handleExecutionDelay } from './handle_execution_delay';
-import { runStackMonitor } from './run_stack_monitor';
+import { runStackMonitor } from './run_stack_monitor/run_stack_monitor';
 import type { WorkflowExecutionLoopParams } from './types';
 
 /**

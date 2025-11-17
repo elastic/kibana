@@ -491,7 +491,6 @@ export class WorkflowsExecutionEnginePlugin
       }
 
       // force delayed tasks to run so that internal cancellation logic can proceed
-
       if (idleTasks.length > 0) {
         taskManager.bulkSchedule(idleTasks.map((task) => ({ ...task, runAt: undefined })));
       }
