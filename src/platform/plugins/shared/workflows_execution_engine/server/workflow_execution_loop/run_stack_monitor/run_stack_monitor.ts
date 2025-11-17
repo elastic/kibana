@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { cancelWorkflowIfRequested } from '../cancel_workflow_if_requested';
-import type { WorkflowExecutionLoopParams } from '../types';
-import type { MonitorableNode } from '../../step/node_implementation';
-import { TimeoutAbortedError, abortableTimeout } from '../../utils';
+import { processNodeStackMonitoring } from './process_node_stack_monitoring';
+import { abortableTimeout, TimeoutAbortedError } from '../../utils';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
-import { WorkflowScopeStack } from '../../workflow_context_manager/workflow_scope_stack';
+import type { WorkflowExecutionLoopParams } from '../types';
 
 /**
  * Runs a monitoring loop that continuously checks workflow execution state and invokes
@@ -69,38 +67,7 @@ export async function runStackMonitor(
   monitoredStepExecutionRuntime: StepExecutionRuntime,
   monitorAbortController: AbortController
 ): Promise<void> {
-  const nodeStackFrames = params.workflowRuntime.getCurrentNodeScope();
-
   while (!monitorAbortController.signal.aborted) {
-    // eslint-disable-next-line no-console
-    console.warn('!!!! MONITOR  loop iteration start', new Date().toISOString());
-    await cancelWorkflowIfRequested(
-      params.workflowExecutionRepository,
-      params.workflowExecutionState,
-      monitoredStepExecutionRuntime,
-      monitoredStepExecutionRuntime.abortController
-    );
-
-    let nodeStack = WorkflowScopeStack.fromStackFrames(nodeStackFrames);
-
-    while (!nodeStack.isEmpty() && !monitorAbortController.signal.aborted) {
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      const scopeData = nodeStack.getCurrentScope()!;
-      nodeStack = nodeStack.exitScope();
-      const scopeStepExecutionRuntime =
-        params.stepExecutionRuntimeFactory.createStepExecutionRuntime({
-          nodeId: scopeData.nodeId,
-          stackFrames: nodeStack.stackFrames,
-        });
-
-      const nodeImplementation = params.nodesFactory.create(scopeStepExecutionRuntime);
-
-      if (typeof (nodeImplementation as unknown as MonitorableNode).monitor === 'function') {
-        const monitored = nodeImplementation as unknown as MonitorableNode;
-        await monitored.monitor(monitoredStepExecutionRuntime);
-      }
-    }
-
     try {
       await abortableTimeout(500, monitorAbortController.signal);
     } catch (error) {
@@ -111,5 +78,7 @@ export async function runStackMonitor(
 
       throw error;
     }
+
+    await processNodeStackMonitoring(params, monitoredStepExecutionRuntime);
   }
 }
