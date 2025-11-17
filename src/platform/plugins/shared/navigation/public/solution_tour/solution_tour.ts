@@ -12,14 +12,12 @@ import type { NavigationTourManager } from '@kbn/core-chrome-navigation-tour';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
-import { getTourQueueStateManager, TOURS } from '@kbn/tour-queue';
 
 /**
  * This tour combines the spaces solution view tour and new navigation tour into a single
  * multi-step tour.
  */
 export class SolutionNavigationTourManager {
-  private tourQueueStateManager = getTourQueueStateManager();
   constructor(
     private deps: {
       navigationTourManager: NavigationTourManager;
@@ -31,9 +29,11 @@ export class SolutionNavigationTourManager {
   ) {}
 
   async startTour(): Promise<void> {
+    const { getTourQueueStateManager, TOURS } = await import('@kbn/tour-queue');
+    const tourQueueStateManager = getTourQueueStateManager();
     // Register and get cleanup function
-    const removeTour = this.tourQueueStateManager.registerTour(TOURS.NAVIGATION);
-    const shouldShow = this.tourQueueStateManager.shouldShowTour(TOURS.NAVIGATION);
+    const removeTour = tourQueueStateManager.registerTour(TOURS.NAVIGATION);
+    const shouldShow = tourQueueStateManager.shouldShowTour(TOURS.NAVIGATION);
     if (!shouldShow) {
       removeTour();
       return;
@@ -51,7 +51,7 @@ export class SolutionNavigationTourManager {
       // when completes, maybe start the navigation tour (if applicable)
       const hasCompletedTour = await checkTourCompletion(this.deps.userProfile);
       if (hasCompletedTour) {
-        this.tourQueueStateManager.completeTour(TOURS.NAVIGATION);
+        tourQueueStateManager.completeTour(TOURS.NAVIGATION);
         return;
       }
       this.deps.navigationTourManager.startTour();
@@ -59,10 +59,10 @@ export class SolutionNavigationTourManager {
 
       // If skipped, notify queue to skip all remaining tours for the current page load only
       if (navigationTourResult === 'skipped') {
-        this.tourQueueStateManager.skipAllTours();
+        tourQueueStateManager.skipAllTours();
       }
       await preserveTourCompletion(this.deps.userProfile);
-      this.tourQueueStateManager.completeTour(TOURS.NAVIGATION);
+      tourQueueStateManager.completeTour(TOURS.NAVIGATION);
     } finally {
       removeTour();
     }
