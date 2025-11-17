@@ -6,7 +6,14 @@
  */
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { isObject } from 'lodash';
-import { EuiComboBox, EuiFormRow, EuiSpacer, type EuiComboBoxOptionOption } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSpacer,
+  type EuiComboBoxOptionOption,
+} from '@elastic/eui';
 import {
   type FieldHook,
   getFieldValidityAndErrorMessage,
@@ -23,7 +30,8 @@ import * as i18n from './translations';
 export const AdditionalFormFields = React.memo<{
   field: FieldHook<string, string>;
   connector: ConnectorFieldsProps['connector'];
-}>(({ connector, field: additionalFieldsFormField }) => {
+  isInSidebarForm: boolean;
+}>(({ connector, field: additionalFieldsFormField, isInSidebarForm }) => {
   const { http } = useKibana().services;
   const {
     isLoading: isLoadingFields,
@@ -110,26 +118,26 @@ export const AdditionalFormFields = React.memo<{
 
   return (
     <Form form={form}>
-      <div>
+      <EuiFlexGroup direction={isInSidebarForm ? 'column' : 'row'}>
         {additionalFields.map((field) => {
           const fieldMetaData = fieldsData?.data?.fieldsObj[field.value || ''];
           if (!fieldMetaData) {
             return null;
           }
           return (
-            <React.Fragment key={fieldMetaData.name}>
-              <EuiSpacer size="m" />
+            <EuiFlexItem key={fieldMetaData.name}>
               <AdditionalFormField field={fieldMetaData} onRemoveField={onRemoveField} />
-            </React.Fragment>
+            </EuiFlexItem>
           );
         })}
-      </div>
-      <EuiSpacer size="m" />
+      </EuiFlexGroup>
+      {additionalFields.length > 0 ? <EuiSpacer size="m" /> : null}
       <EuiFormRow
         label={i18n.ADDITIONAL_FIELDS_LABEL}
         helpText={i18n.ADDITIONAL_FIELDS_HELP_TEXT}
         isInvalid={isInvalid}
         error={errorMessage}
+        fullWidth
       >
         <EuiComboBox
           data-test-subj="resilientAdditionalFieldsComboBox"

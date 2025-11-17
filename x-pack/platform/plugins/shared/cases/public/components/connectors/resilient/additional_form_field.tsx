@@ -120,7 +120,6 @@ const AdditionalSelectField = React.memo<AdditionalFieldProps>(
           euiFieldProps: {
             'data-test-subj': dataTestSubj,
             hasNoInitialSelection: true,
-            fullWidth: true,
             disabled: false,
             isLoading: false,
             options: field.values
@@ -174,11 +173,10 @@ const AdditionalMultiSelectInnerField = React.memo<
 
   const isInvalid = false;
   return (
-    <EuiFormRow fullWidth label={label} labelAppend={labelAppend} isInvalid={isInvalid}>
+    <EuiFormRow label={label} labelAppend={labelAppend} isInvalid={isInvalid}>
       <EuiComboBox
         isInvalid={isInvalid}
         data-test-subj={dataTestSubj}
-        fullWidth
         isClearable={true}
         isDisabled={false}
         isLoading={false}
