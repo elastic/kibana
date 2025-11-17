@@ -79,7 +79,8 @@ import { EffectedPolicySelect } from '../../../../components/effected_policy_sel
 import { ExceptionItemComments } from '../../../../../detection_engine/rule_exceptions/components/item_comments';
 import { EventFiltersApiClient } from '../../service/api_client';
 import { ShowValueListModal } from '../../../../../value_list/components/show_value_list_modal';
-import type { EventFilterItemAndAdvancedTrustedAppsEntries } from '../../../../../../common/endpoint/types/exception_list_items';
+import { ProcessDescendantsTooltip } from './process_descendant_tooltip';
+import type { ExceptionEntries } from '../../../../../../common/endpoint/types/exception_list_items';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
   OperatingSystem.MAC,
@@ -102,16 +103,12 @@ const defaultConditionEntry = (): ExceptionListItemSchema['entries'] => [
   },
 ];
 
-const cleanupEntries = (
-  item: ArtifactFormComponentProps['item']
-): ArtifactFormComponentProps['item']['entries'] => {
-  return item.entries.map(
+const cleanupEntries = (item: ArtifactFormComponentProps['item']) =>
+  item.entries.forEach(
     (e: ArtifactFormComponentProps['item']['entries'][number] & { id?: string }) => {
       delete e.id;
-      return e;
     }
   );
-};
 
 export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSelectOs?: boolean }> =
   memo(({ allowSelectOs = true, item: exception, onChange, mode, error: submitError }) => {
@@ -172,9 +169,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         !hasNameError &&
         !hasCommentError &&
         !!exception.entries.length &&
-        (exception.entries as EventFilterItemAndAdvancedTrustedAppsEntries).some(
-          (e) => e.value !== '' || e.value.length
-        )
+        (exception.entries as ExceptionEntries).some((e) => e.value !== '' || e.value.length)
       );
     }, [hasCommentError, hasNameError, exception.entries]);
 
@@ -215,8 +210,6 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         ? (exception.entries as ExceptionListItemSchema['entries'])
         : defaultConditionEntry();
 
-      // TODO: `id` gets added to the exception.entries item
-      // Is there a simpler way to this?
       cleanupEntries(ef);
 
       setAreConditionsValid(!!exception.entries.length);
@@ -656,6 +649,7 @@ export const EventFiltersForm: React.FC<ArtifactFormComponentProps & { allowSele
         <EuiHorizontalRule />
         {criteriaSection}
         {hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
+        {hasWildcardWithWrongOperator && hasPartialCodeSignatureWarning && <EuiSpacer size="xs" />}
         {hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
         {hasDuplicateFields && (
           <>
