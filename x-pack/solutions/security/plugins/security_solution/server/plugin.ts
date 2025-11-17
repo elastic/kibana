@@ -605,6 +605,30 @@ export class Plugin implements ISecuritySolutionPlugin {
       this.logger.warn('Task Manager not available, health diagnostic task not registered.');
     }
 
+    // Register alert attachment type and alerts tool with onechat
+    // Note: This requires onechat to be added as an optional plugin dependency
+    // Note: The alert attachment type may already be registered by onechat's built-in types.
+    // If so, we'll skip registration and use the built-in version.
+    if (plugins.onechat) {
+      if (plugins.onechat.attachments) {
+        try {
+          plugins.onechat.attachments.registerType(createAlertAttachmentType());
+        } catch (error) {
+          // Alert attachment type may already be registered by onechat's built-in types
+          if (error instanceof Error && error.message.includes('already registered')) {
+            this.logger.debug(
+              'Alert attachment type already registered by onechat plugin, using built-in version'
+            );
+          } else {
+            throw error;
+          }
+        }
+      }
+      if (plugins.onechat.tools) {
+        plugins.onechat.tools.register(alertsTool());
+      }
+    }
+
     return {
       setProductFeaturesConfigurator:
         productFeaturesService.setProductFeaturesConfigurator.bind(productFeaturesService),
@@ -659,17 +683,6 @@ export class Plugin implements ISecuritySolutionPlugin {
     };
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
     plugins.elasticAssistant.registerFeatures('management', features);
-
-    // Register alert attachment type and alerts tool with onechat
-    // Note: This requires onechat to be added as a setup dependency
-    if (plugins.onechat) {
-      if (plugins.onechat.attachments) {
-        plugins.onechat.attachments.registerType(createAlertAttachmentType());
-      }
-      if (plugins.onechat.tools) {
-        plugins.onechat.tools.register(alertsTool());
-      }
-    }
 
     const manifestManager = new ManifestManager({
       savedObjectsClientFactory: new SavedObjectsClientFactory(core.savedObjects, core.http),

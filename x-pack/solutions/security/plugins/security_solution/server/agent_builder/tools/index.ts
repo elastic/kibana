@@ -6,4 +6,3 @@
  */
 
 export { alertsTool, SECURITY_ALERTS_TOOL_ID } from './alerts/alerts_tool';
-
