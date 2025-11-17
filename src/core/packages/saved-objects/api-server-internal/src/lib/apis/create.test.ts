@@ -920,10 +920,34 @@ describe('#create', () => {
           })
         ).rejects.toThrowError(
           createBadRequestErrorPayload(
-            `Unable to create \"write_restricted\" \"accessControlType\" saved object. User profile ID not found.`
+            `Unable to create \"accessControlType\" with \"accessMode\". User profile ID not found.`
           )
         );
         expect(client.create).not.toHaveBeenCalled();
+      });
+
+      // Regression test
+      it('allows creation when the type supports access control and no user is present if access mode is not provided', async () => {
+        securityExtension.getCurrentUser.mockReturnValueOnce(null);
+
+        const result = await repository.create(ACCESS_CONTROL_TYPE, attributes, {
+          id,
+          namespace,
+          references,
+        });
+
+        expect(result).toEqual({
+          type: ACCESS_CONTROL_TYPE,
+          id,
+          ...mockTimestampFieldsWithCreated,
+          version: mockVersion,
+          attributes,
+          references,
+          namespaces: [namespace ?? 'default'],
+          coreMigrationVersion: expect.any(String),
+          typeMigrationVersion: '1.1.1',
+          managed: false,
+        });
       });
     });
   });
