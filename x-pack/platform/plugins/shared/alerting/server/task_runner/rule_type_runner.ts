@@ -221,7 +221,7 @@ export class RuleTypeRunner<
               context.namespace ?? DEFAULT_NAMESPACE_STRING
             }] namespace`,
           };
-          // Cache maintenance windows data to avoid duplicate service calls
+
           let maintenanceWindowsPromise: Promise<{
             ids: string[];
             names: string[];
