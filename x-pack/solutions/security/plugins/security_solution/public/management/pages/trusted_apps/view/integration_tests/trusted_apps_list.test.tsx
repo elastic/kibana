@@ -89,7 +89,7 @@ describe('When on the trusted applications page', () => {
     );
   });
 
-  describe.only('process descendants', () => {
+  describe('process descendants', () => {
     let renderWithData: () => Promise<ReturnType<AppContextTestRender['render']>>;
 
     beforeEach(() => {
