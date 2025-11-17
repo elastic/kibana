@@ -180,7 +180,6 @@ export const ChangePasswordModal: FunctionComponent<ChangePasswordModalProps> = 
             {isSystemUser ? (
               <>
                 <EuiCallOut
-                  announceOnMount
                   title={i18n.translate(
                     'xpack.security.management.users.changePasswordForm.systemUserTitle',
                     { defaultMessage: 'Kibana will lose connection to Elasticsearch' }
