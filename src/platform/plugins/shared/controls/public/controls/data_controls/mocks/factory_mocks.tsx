@@ -9,40 +9,90 @@
 
 import React from 'react';
 
-import type { EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { DataViewField } from '@kbn/data-views-plugin/common';
+import { stubFields } from '@kbn/data-views-plugin/common/field.stub';
+import type { CreateControlTypeAction } from '../../../actions/control_panel_actions';
 
-export const getMockedSearchControlFactory = (api: any) =>
-  ({
+interface ControlTypeContext {
+  state: { fieldName: string };
+}
+
+const mockIsCompatible = (
+  { state: { fieldName } }: ControlTypeContext,
+  isFieldCompatible: (field: DataViewField) => boolean
+) => {
+  const field =
+    stubFields.find((f) => f.name === fieldName) ??
+    new DataViewField({
+      name: 'none',
+      type: 'string',
+      aggregatable: false,
+      searchable: false,
+    });
+  return Promise.resolve(isFieldCompatible(field));
+};
+
+export const getMockedSearchControlFactory = (api: any): CreateControlTypeAction => {
+  const isFieldCompatible = (field: DataViewField) =>
+    field.aggregatable &&
+    field.searchable &&
+    field.spec.type === 'string' &&
+    (field.spec.esTypes ?? []).includes('text');
+  return {
+    id: 'search',
     type: 'search',
     getIconType: () => 'searchControlIcon',
     getDisplayName: () => 'Search',
-    buildEmbeddable: jest.fn().mockReturnValue({
+    isCompatible: (context) => mockIsCompatible(context as ControlTypeContext, isFieldCompatible),
+    extension: {
+      isFieldCompatible,
+    },
+    execute: jest.fn().mockReturnValue({
       api,
       Component: <>Search control component</>,
     }),
-  } as EmbeddableFactory);
+  };
+};
 
-export const getMockedOptionsListControlFactory = (api: any) =>
-  ({
+export const getMockedOptionsListControlFactory = (api: any): CreateControlTypeAction => {
+  const isFieldCompatible = (field: DataViewField) =>
+    field.aggregatable &&
+    !field.spec.scripted &&
+    ['string', 'boolean', 'ip', 'date', 'number'].includes(field.type);
+
+  return {
+    id: 'optionsList',
     type: 'optionsList',
     getIconType: () => 'optionsListIcon',
     getDisplayName: () => 'Options list',
-    buildEmbeddable: jest.fn().mockReturnValue({
+    isCompatible: (context) => mockIsCompatible(context as ControlTypeContext, isFieldCompatible),
+    extension: {
+      CustomOptionsComponent: () => (
+        <div data-test-subj="optionsListCustomSettings">Custom options list component</div>
+      ),
+      isFieldCompatible,
+    },
+    execute: jest.fn().mockReturnValue({
       api,
       Component: <>Options list component</>,
     }),
-    CustomOptionsComponent: () => (
-      <div data-test-subj="optionsListCustomSettings">Custom options list component</div>
-    ),
-  } as EmbeddableFactory);
+  };
+};
 
-export const getMockedRangeSliderControlFactory = (api: any) =>
-  ({
+export const getMockedRangeSliderControlFactory = (api: any): CreateControlTypeAction => {
+  const isFieldCompatible = (field: DataViewField) => field.aggregatable && field.type === 'number';
+  return {
+    id: 'rangeSlider',
     type: 'rangeSlider',
     getIconType: () => 'rangeSliderIcon',
     getDisplayName: () => 'Range slider',
-    buildEmbeddable: jest.fn().mockReturnValue({
+    isCompatible: (context) => mockIsCompatible(context as ControlTypeContext, isFieldCompatible),
+    extension: {
+      isFieldCompatible,
+    },
+    execute: jest.fn().mockReturnValue({
       api,
       Component: <>Range slider component</>,
     }),
-  } as EmbeddableFactory);
+  };
+};

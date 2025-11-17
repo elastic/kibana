@@ -16,11 +16,17 @@ import type { TimeRange } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RenderResult } from '@testing-library/react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
-import { DEFAULT_CONTROL_GROW } from '@kbn/controls-constants';
 import type { DataControlState } from '@kbn/controls-schemas';
+import {
+  getMockedOptionsListControlFactory,
+  getMockedRangeSliderControlFactory,
+  getMockedSearchControlFactory,
+} from './mocks/factory_mocks';
 
-import { dataViewsService } from '../../services/kibana_services';
+import { dataViewsService, uiActionsService } from '../../services/kibana_services';
 import { DataControlEditor } from './data_control_editor';
+import type { Writable } from '@kbn/utility-types';
+import type { CreateControlTypeAction } from '../../actions/control_panel_actions';
 
 const mockDataView = createStubDataView({
   spec: {
@@ -43,7 +49,37 @@ const mockDataView = createStubDataView({
 
 const dashboardApi = {
   timeRange$: new BehaviorSubject<TimeRange | undefined>(undefined),
+  getEditorConfig: jest.fn(),
 };
+
+const mockRegisteredTriggerActions: CreateControlTypeAction[] = [
+  getMockedSearchControlFactory({ parentApi: dashboardApi }),
+  getMockedOptionsListControlFactory({ parentApi: dashboardApi }),
+  getMockedRangeSliderControlFactory({ parentApi: dashboardApi }),
+  {
+    id: 'alphabeticalFirst',
+    type: 'alphabeticalFirst',
+    getIconType: () => 'lettering',
+    getDisplayName: () => 'Alphabetically first',
+    isCompatible: () => Promise.resolve(true),
+    execute: jest.fn().mockReturnValue({
+      api: dashboardApi,
+      Component: <>Should be first alphabetically</>,
+    }),
+  },
+  {
+    id: 'supremeControl',
+    type: 'supremeControl',
+    order: 100, // force it first despite alphabetical ordering
+    getIconType: () => 'starFilled',
+    getDisplayName: () => 'Supreme leader',
+    isCompatible: () => Promise.resolve(true),
+    execute: jest.fn().mockReturnValue({
+      api: dashboardApi,
+      Component: <>This control is forced first via the factory order</>,
+    }),
+  },
+];
 
 describe('Data control editor', () => {
   const mountComponent = async ({
@@ -58,6 +94,9 @@ describe('Data control editor', () => {
     initialDefaultPanelTitle?: string;
   }) => {
     dataViewsService.get = jest.fn().mockResolvedValue(mockDataView);
+    (uiActionsService as Writable<typeof uiActionsService>).getTriggerActions = jest
+      .fn()
+      .mockResolvedValue(mockRegisteredTriggerActions);
 
     const controlEditor = render(
       <I18nProvider>
@@ -169,17 +208,6 @@ describe('Data control editor', () => {
     });
   });
 
-  test('selects the default width and grow', async () => {
-    const controlEditor = await mountComponent({});
-
-    expect(getPressedAttribute(controlEditor, 'control-editor-width-small')).toBe('false');
-    expect(getPressedAttribute(controlEditor, 'control-editor-width-medium')).toBe('true');
-    expect(getPressedAttribute(controlEditor, 'control-editor-width-large')).toBe('false');
-    expect(
-      controlEditor.getByTestId('control-editor-grow-switch').getAttribute('aria-checked')
-    ).toBe(`${DEFAULT_CONTROL_GROW}`);
-  });
-
   describe('editing existing control', () => {
     describe('control title', () => {
       test('auto-fills input with the default title', async () => {
@@ -231,8 +259,6 @@ describe('Data control editor', () => {
   });
 
   describe('control editor config', () => {
-    const getEditorConfig = jest.fn().mockImplementation(() => undefined);
-
     test('all elements are visible when no editor config', async () => {
       const controlEditor = await mountComponent({
         initialState: {
@@ -245,14 +271,12 @@ describe('Data control editor', () => {
 
       const dataViewPicker = controlEditor.queryByTestId('control-editor-data-view-picker');
       expect(dataViewPicker).toBeInTheDocument();
-      const widthSettings = controlEditor.queryByTestId('control-editor-width-settings');
-      expect(widthSettings).toBeInTheDocument();
       const customSettings = controlEditor.queryByTestId('control-editor-custom-settings');
       expect(customSettings).toBeInTheDocument();
     });
 
     test('can hide elements with the editor config', async () => {
-      getEditorConfig.mockImplementationOnce(() => ({
+      dashboardApi.getEditorConfig.mockImplementationOnce(() => ({
         hideDataViewSelector: true,
         hideAdditionalSettings: true,
       }));
@@ -268,8 +292,6 @@ describe('Data control editor', () => {
 
       const dataViewPicker = controlEditor.queryByTestId('control-editor-data-view-picker');
       expect(dataViewPicker).not.toBeInTheDocument();
-      const widthSettings = controlEditor.queryByTestId('control-editor-width-settings');
-      expect(widthSettings).not.toBeInTheDocument();
       const customSettings = controlEditor.queryByTestId('control-editor-custom-settings');
       expect(customSettings).not.toBeInTheDocument();
     });
