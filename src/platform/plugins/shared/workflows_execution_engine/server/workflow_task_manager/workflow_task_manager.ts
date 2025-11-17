@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { v4 as generateUuid } from 'uuid';
 import { type TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflowExecution } from '@kbn/workflows';
 import type { ResumeWorkflowExecutionParams } from './types';
@@ -60,7 +61,9 @@ export class WorkflowTaskManager {
 
     if (idleTasks.length) {
       await this.taskManager.bulkRemove(idleTasks.map((task) => task.id));
-      await this.taskManager.bulkSchedule(idleTasks.map((task) => ({ ...task, runAt: undefined })));
+      await this.taskManager.bulkSchedule(
+        idleTasks.map((task) => ({ ...task, id: generateUuid(), runAt: undefined }))
+      );
     }
   }
 }
