@@ -14,13 +14,10 @@ import {
   EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiTitle,
-  EuiText,
   EuiFormRow,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFileUploadContext, UPLOAD_TYPE } from '@kbn/file-upload';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { IndexInput } from './index_input';
 
 interface Props {
@@ -69,55 +66,40 @@ export const IndexSelection: FC<Props> = ({ allowExistingIndices = true }) => {
 
   return (
     <>
-      <EuiTitle size="s">
-        <h3>
-          <FormattedMessage
-            id="xpack.dataVisualizer.file.uploadView.indexSelectionTitle"
-            defaultMessage="Index"
-          />
-        </h3>
-      </EuiTitle>
-
-      <EuiSpacer size="xs" />
-
-      <EuiText size="s">
-        <p>
-          <FormattedMessage
-            id="xpack.dataVisualizer.file.uploadView.indexChoiceDescription"
-            defaultMessage="An index stores your data and defines the field mappings for searches."
-          />
-        </p>
-      </EuiText>
-
       <EuiSpacer size="xs" />
 
       {allowExistingIndices === true ? (
-        <EuiFlexGroup>
-          <EuiFlexItem>
-            <EuiButtonGroup
-              legend={i18n.translate('xpack.dataVisualizer.file.indexSelection.label', {
-                defaultMessage: 'Select index creation method',
-              })}
-              isFullWidth={true}
-              isDisabled={false}
-              options={[
-                {
-                  id: UPLOAD_TYPE.NEW,
-                  label: i18n.translate('xpack.dataVisualizer.file.indexSelection.newLabel', {
-                    defaultMessage: 'Create new index',
-                  }),
-                },
-                {
-                  id: UPLOAD_TYPE.EXISTING,
-                  label: i18n.translate('xpack.dataVisualizer.file.existingIndexSelection.label', {
-                    defaultMessage: 'Upload to existing index',
-                  }),
-                },
-              ]}
-              idSelected={indexCreateMode}
-              onChange={(id) => setIndexCreateModeWrapper(id as UPLOAD_TYPE)}
-            />
-
+        <EuiFlexGroup direction="column" gutterSize="none">
+          <EuiFlexItem grow={false}>
+            <span>
+              <EuiButtonGroup
+                legend={i18n.translate('xpack.dataVisualizer.file.indexSelection.label', {
+                  defaultMessage: 'Select index creation method',
+                })}
+                isDisabled={false}
+                options={[
+                  {
+                    id: UPLOAD_TYPE.NEW,
+                    label: i18n.translate('xpack.dataVisualizer.file.indexSelection.newLabel', {
+                      defaultMessage: 'New index',
+                    }),
+                  },
+                  {
+                    id: UPLOAD_TYPE.EXISTING,
+                    label: i18n.translate(
+                      'xpack.dataVisualizer.file.existingIndexSelection.label',
+                      {
+                        defaultMessage: 'Existing index',
+                      }
+                    ),
+                  },
+                ]}
+                idSelected={indexCreateMode}
+                onChange={(id) => setIndexCreateModeWrapper(id as UPLOAD_TYPE)}
+              />
+            </span>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiSpacer size="m" />
 
             {indexCreateMode === UPLOAD_TYPE.NEW ? (
@@ -161,7 +143,6 @@ export const IndexSelection: FC<Props> = ({ allowExistingIndices = true }) => {
               </>
             )}
           </EuiFlexItem>
-          <EuiFlexItem />
         </EuiFlexGroup>
       ) : (
         <IndexInput

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React from 'react';
@@ -58,48 +58,48 @@ export const FileUploadView: FC<Props> = ({ reset, getAdditionalLinks }) => {
     <div data-test-subj="dataVisualizerPageFileUpload">
       <>
         {uploadStatus.overallImportStatus === STATUS.NOT_STARTED ? (
-          <>
-            <IndexSelection />
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="m"
+            style={{
+              maxWidth: '60%',
+            }}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiText size="s" color="subdued">
+                <p>
+                  <FormattedMessage
+                    id="xpack.dataVisualizer.file.uploadView.uploadFileDescription"
+                    defaultMessage="Upload your file, analyze its data, and import the data into an Elasticsearch index."
+                  />
+                </p>
+              </EuiText>
+            </EuiFlexItem>
 
-            <EuiSpacer />
+            <EuiFlexItem grow={false}>
+              <FilePicker
+                fileUploadManager={fileUploadManager}
+                fullWidth={true}
+                large={filesStatus.length === 0}
+              />
+            </EuiFlexItem>
 
-            <EuiTitle size="s">
-              <h3>
-                <FormattedMessage
-                  id="xpack.dataVisualizer.file.uploadView.uploadFilesTitle"
-                  defaultMessage="Upload files"
-                />
-              </h3>
-            </EuiTitle>
-
-            <EuiSpacer size="xs" />
-
-            <EuiText size="s">
-              <p>
-                <FormattedMessage
-                  id="xpack.dataVisualizer.file.uploadView.uploadFileDescription"
-                  defaultMessage="Upload your file, analyze its data, and import the data into an Elasticsearch index."
-                />
-              </p>
-            </EuiText>
-
-            <EuiSpacer size="xs" />
-
-            <FilePicker
-              fileUploadManager={fileUploadManager}
-              fullWidth={true}
-              large={filesStatus.length === 0}
-            />
-
-            <EuiSpacer />
+            <EuiFlexItem grow={false}>
+              <IndexSelection />
+            </EuiFlexItem>
 
             {filesStatus.map((status, i) => (
-              <FileStatus key={i} index={i} lite={false} showOverrideButton={true} />
+              <EuiFlexItem grow={false}>
+                <FileStatus key={i} index={i} lite={false} showOverrideButton={true} />
+              </EuiFlexItem>
             ))}
 
-            {fileClashes ? <FileClashWarning /> : null}
-            <EuiSpacer />
-          </>
+            {fileClashes ? (
+              <EuiFlexItem grow={false}>
+                <FileClashWarning />
+              </EuiFlexItem>
+            ) : null}
+          </EuiFlexGroup>
         ) : null}
 
         {showImportControls ? <AdvancedSection /> : null}

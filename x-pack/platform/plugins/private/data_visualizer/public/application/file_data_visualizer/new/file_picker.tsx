@@ -5,10 +5,11 @@
  * 2.0.
  */
 import type { EuiFilePickerProps } from '@elastic/eui';
-import { EuiFormRow, EuiFilePicker, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFormRow, EuiFilePicker, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import type { EuiFilePickerClass } from '@elastic/eui/src/components/form/file_picker/file_picker';
 import type { FileUploadManager } from '@kbn/file-upload';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useCallback, useRef } from 'react';
 
@@ -33,9 +34,19 @@ export const FilePicker: FC<Props> = ({ fileUploadManager, fullWidth, large = fa
   );
 
   return (
-    <EuiFlexGroup gutterSize="none">
+    <EuiFlexGroup direction="column" gutterSize="none">
       {fullWidth === false ? <EuiFlexItem grow={true} /> : null}
-      <EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiTitle size="xxxs">
+          <h6>
+            <FormattedMessage
+              id="xpack.dataVisualizer.file.uploadView.uploadFilesTitle"
+              defaultMessage="Upload data"
+            />
+          </h6>
+        </EuiTitle>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
         <EuiFormRow
           fullWidth
           helpText={i18n.translate(

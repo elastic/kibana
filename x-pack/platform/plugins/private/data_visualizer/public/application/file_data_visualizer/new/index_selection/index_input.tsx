@@ -100,7 +100,7 @@ export const IndexInput: FC<Props> = ({
   return (
     <EuiFormRow
       label={i18n.translate('xpack.dataVisualizer.file.importView.indexNameLabel', {
-        defaultMessage: 'New index name',
+        defaultMessage: 'Index name',
       })}
       isInvalid={indexNameError !== ''}
       error={indexNameError}
@@ -121,7 +121,7 @@ export const IndexInput: FC<Props> = ({
         placeholder={i18n.translate(
           'xpack.dataVisualizer.file.importView.indexNameContainsIllegalCharactersErrorMessage',
           {
-            defaultMessage: 'Add name to index',
+            defaultMessage: 'Enter an index name',
           }
         )}
       />
