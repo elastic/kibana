@@ -230,10 +230,11 @@ export class FleetPolicyRevisionsCleanupTask {
 
     const result = await this.deletePolicyRevisions(esClient, policiesRevisionSummaries, context);
 
-    this.logger.debug(
-      `[FleetPolicyRevisionsCleanupTask] Deleted ${result.deleted} policy revision documents.`
-    );
-
+    if (result) {
+      this.logger.debug(
+        `[FleetPolicyRevisionsCleanupTask] Deleted ${result.deleted} policy revision documents.`
+      );
+    }
     this.logger.debug('[FleetPolicyRevisionsCleanupTask] Cleanup completed');
   };
 
@@ -272,6 +273,7 @@ export class FleetPolicyRevisionsCleanupTask {
     return await esClient.search<{}, Aggregations>(
       {
         index: AGENT_POLICY_INDEX,
+        ignore_unavailable: true,
         size: 0,
         aggs: {
           latest_revisions_by_policy_id: {
@@ -335,6 +337,7 @@ export class FleetPolicyRevisionsCleanupTask {
     return await esClient.search<{}, Aggregations>(
       {
         index: AGENTS_INDEX,
+        ignore_unavailable: true,
         size: 0,
         query: {
           terms: {
@@ -370,11 +373,11 @@ export class FleetPolicyRevisionsCleanupTask {
       RevisionsToDeleteParams[]
     >((acc, [policyId, summary]) => {
       const minUsedRevisionIdxCutoff = summary.minUsedRevision
-        ? Math.max(summary.minUsedRevision - this.maxRevisions, 1)
+        ? Math.max(summary.minUsedRevision - this.maxRevisions, 0)
         : undefined;
 
-      // If we have a minimum used revision, but the max policy offset is less than or equal to 1, nothing to delete
-      if (minUsedRevisionIdxCutoff === 1) {
+      // If we have a minimum used revision, but the max policy offset is less than 1, nothing to delete
+      if (minUsedRevisionIdxCutoff === 0) {
         return acc;
       }
 
@@ -382,6 +385,13 @@ export class FleetPolicyRevisionsCleanupTask {
       const revisionIdxCutoff = minUsedRevisionIdxCutoff ?? summary.maxRevision - this.maxRevisions;
       return [...acc, { policyId, revisionIdxCutoff, docCount: summary.count }];
     }, []);
+
+    if (policiesToDelete.length === 0) {
+      this.logger.debug(
+        `[FleetPolicyRevisionsCleanupTask] No policy revisions to delete after evaluating agent usage.`
+      );
+      return;
+    }
 
     return await this.queryDeletePolicyRevisions(esClient, policiesToDelete, context);
   };
@@ -391,6 +401,10 @@ export class FleetPolicyRevisionsCleanupTask {
     policiesToDelete: Array<RevisionsToDeleteParams>,
     context: Context
   ) => {
+    if (policiesToDelete.length === 0) {
+      return;
+    }
+
     const policyCutoffClauses = policiesToDelete.map(({ policyId, revisionIdxCutoff }) => ({
       bool: {
         must: [
