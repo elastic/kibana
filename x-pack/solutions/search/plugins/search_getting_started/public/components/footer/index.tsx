@@ -46,19 +46,19 @@ export const GettingStartedFooter = () => {
       dataTestSubj: 'gettingStartedSearchLabs',
     },
     {
-      id: 'pythonNotebooks',
-      title: i18n.translate('xpack.gettingStarted.pythonNotebooks.title', {
-        defaultMessage: 'Python notebooks',
+      id: 'elasticTraining',
+      title: i18n.translate('xpack.gettingStarted.elasticTraining.title', {
+        defaultMessage: 'Learn Elasticsearch',
       }),
-      description: i18n.translate('xpack.gettingStarted.pythonNotebooks.description', {
+      description: i18n.translate('xpack.gettingStarted.elasticTraining.description', {
         defaultMessage:
-          'A range of executable Python notebooks available to easily test features in a virtual environment.',
+          'Unlock the full potential of Elastic through expert-led training, interactive labs, comprehensive certification programs, and flexible on-demand learning.',
       }),
-      buttonLabel: i18n.translate('xpack.gettingStarted.pythonNotebooks.buttonText', {
-        defaultMessage: 'Browse our notebooks',
+      buttonLabel: i18n.translate('xpack.gettingStarted.elasticTraining.buttonText', {
+        defaultMessage: 'Elastic Training',
       }),
-      buttonHref: docLinks.notebooksExamples,
-      dataTestSubj: 'gettingStartedOpenNotebooks',
+      buttonHref: docLinks.elasticTraining,
+      dataTestSubj: 'gettingStartedElasticTraining',
     },
     {
       id: 'elasticsearchDocs',

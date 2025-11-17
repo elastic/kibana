@@ -11,7 +11,7 @@ class ESDocLinks {
   public visitSearchLabs: string = '';
   public notebooksExamples: string = '';
   public elasticsearchDocs: string = '';
-
+  public elasticTraining: string = 'https://www.elastic.co/training';
   constructor() {}
 
   setDocLinks(newDocLinks: DocLinks) {
