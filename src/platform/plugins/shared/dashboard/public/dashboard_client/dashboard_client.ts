@@ -12,21 +12,26 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardSearchRequestBody, DashboardSearchResponseBody } from '../../server';
-import { CONTENT_ID, DASHBOARD_API_VERSION } from '../../common/content_management/constants';
-import type { DashboardAPIGetOut, DashboardState } from '../../server/content_management';
+import { DASHBOARD_API_VERSION, DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
+import type {
+  DashboardCreateResponseBody,
+  DashboardReadResponseBody,
+  DashboardState,
+  DashboardUpdateResponseBody,
+} from '../../server';
 import { coreServices } from '../services/kibana_services';
 
 const CACHE_SIZE = 20; // only store a max of 20 dashboards
 const CACHE_TTL = 1000 * 60 * 5; // time to live = 5 minutes
 
-const cache = new LRUCache<string, DashboardAPIGetOut>({
+const cache = new LRUCache<string, DashboardReadResponseBody>({
   max: CACHE_SIZE,
   ttl: CACHE_TTL,
 });
 
 export const dashboardClient = {
   create: async (dashboardState: DashboardState, references: Reference[]) => {
-    return coreServices.http.post<DashboardAPIGetOut>(`/api/dashboards/dashboard`, {
+    return coreServices.http.post<DashboardCreateResponseBody>(`/api/dashboards/dashboard`, {
       version: DASHBOARD_API_VERSION,
       body: JSON.stringify({
         data: {
@@ -42,18 +47,18 @@ export const dashboardClient = {
       version: DASHBOARD_API_VERSION,
     });
   },
-  get: async (id: string): Promise<DashboardAPIGetOut> => {
+  get: async (id: string): Promise<DashboardReadResponseBody> => {
     if (cache.has(id)) {
       return cache.get(id)!;
     }
 
     const result = await coreServices.http
-      .get<DashboardAPIGetOut>(`/api/dashboards/dashboard/${id}`, {
+      .get<DashboardReadResponseBody>(`/api/dashboards/dashboard/${id}`, {
         version: DASHBOARD_API_VERSION,
       })
       .catch((e) => {
         if (e.response?.status === 404) {
-          throw new SavedObjectNotFound({ type: CONTENT_ID, id });
+          throw new SavedObjectNotFound({ type: DASHBOARD_SAVED_OBJECT_TYPE, id });
         }
         const message = (e.body as { message?: string })?.message ?? e.message;
         throw new Error(message);
@@ -78,7 +83,7 @@ export const dashboardClient = {
     });
   },
   update: async (id: string, dashboardState: DashboardState, references: Reference[]) => {
-    const updateResponse = await coreServices.http.put<DashboardAPIGetOut>(
+    const updateResponse = await coreServices.http.put<DashboardUpdateResponseBody>(
       `/api/dashboards/dashboard/${id}`,
       {
         version: DASHBOARD_API_VERSION,

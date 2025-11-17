@@ -27,7 +27,7 @@ import type {
 } from '@kbn/esql-ast/src/commands_registry/types';
 import { getControlSuggestionIfSupported } from '@kbn/esql-ast/src/definitions/utils';
 import { correctQuerySyntax } from '@kbn/esql-ast/src/definitions/utils/ast';
-import { ESQLVariableType } from '@kbn/esql-types';
+import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
 import { getAstContext } from '../shared/context';
@@ -160,6 +160,7 @@ export async function suggest(
     controlSuggestions = getControlSuggestionIfSupported(
       Boolean(supportsControls),
       ESQLVariableType.VALUES,
+      ControlTriggerSource.QUESTION_MARK,
       getVariables?.(),
       false
     );
