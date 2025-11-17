@@ -18,11 +18,7 @@ export const SearchHomepageHeader: React.FC = () => {
   const { cloud } = useKibana().services;
 
   return (
-    <EuiPageTemplate.Section
-      data-test-subj="search-homepage-header"
-      paddingSize="none"
-      color="subdued"
-    >
+    <EuiPageTemplate.Section data-test-subj="search-homepage-header" paddingSize="none">
       <EuiFlexGroup
         gutterSize="m"
         alignItems="stretch"
