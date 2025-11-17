@@ -181,7 +181,7 @@ export const MonacoEditor = ({
     if (hasKbnRequests && withLanguage !== 'curl') {
       toasts.addDanger({
         title: i18n.translate('console.consoleMenu.copyAsMixedRequestsMessage', {
-          defaultMessage: 'Kibana requests can only be copied as curl',
+          defaultMessage: 'Kibana requests can only be copied to curl',
         }),
       });
       return;
@@ -405,7 +405,8 @@ export const MonacoEditor = ({
         <EuiFlexItem grow={false}>
           <EuiToolTip
             content={i18n.translate('console.monaco.copyToLanguageButtonTooltipContent', {
-              defaultMessage: 'Copy to language',
+              defaultMessage: 'Copy to {language}',
+              values: { language: getLanguageLabelByValue(currentLanguage) },
             })}
           >
             <EuiButtonIcon
@@ -416,7 +417,8 @@ export const MonacoEditor = ({
               onClick={onCopyAsSubmit}
               data-test-subj="copyToLanguageActionButton"
               aria-label={i18n.translate('console.monaco.copyToLanguageButtonAriaLabel', {
-                defaultMessage: 'Copy to language',
+                defaultMessage: 'Copy to {language}',
+                values: { language: getLanguageLabelByValue(currentLanguage) },
               })}
               disabled={!window.navigator?.clipboard}
               css={styles.actionButton}

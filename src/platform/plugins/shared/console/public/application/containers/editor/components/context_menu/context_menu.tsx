@@ -171,7 +171,8 @@ export const ContextMenu = ({
               <EuiFlexItem grow={false}>
                 <FormattedMessage
                   id="console.monaco.requestOptions.copyToLanguageButtonLabel"
-                  defaultMessage="Copy to language"
+                  defaultMessage="Copy to {language}"
+                  values={{ language: getLanguageLabelByValue(currentLanguage) }}
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -198,8 +199,8 @@ export const ContextMenu = ({
                   >
                     <EuiFlexItem grow={false}>
                       <FormattedMessage
-                        id="console.monaco.requestOptions.languageClientsButtonLabel"
-                        defaultMessage="Language clients"
+                        id="console.monaco.requestOptions.changeLanguageButtonLabel"
+                        defaultMessage="Change language"
                       />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
@@ -271,8 +272,8 @@ export const ContextMenu = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <strong>
-          {i18n.translate('console.consoleMenu.languageClientsPanelTitle', {
-            defaultMessage: 'Language clients',
+          {i18n.translate('console.consoleMenu.changeLanguagePanelTitle', {
+            defaultMessage: 'Change language',
           })}
         </strong>
       </EuiFlexItem>
