@@ -716,6 +716,9 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       skippingDisconnectedClusters: `${ELASTIC_DOCS}solutions/search/cross-cluster-search#skip-unavailable-clusters`,
     },
     apis: {
+      bulkIndexAlias: isServerless
+        ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-indices-update-aliases`
+        : `${ELASTICSEARCH_APIS}operation/operation-indices-update-aliases`,
       indexStats: isServerless
         ? `${ELASTICSEARCH_SERVERLESS_APIS}operation/operation-indices-update-aliases`
         : `${ELASTICSEARCH_APIS}operation/operation-indices-stats`,
