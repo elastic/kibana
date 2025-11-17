@@ -32,7 +32,7 @@ describe('servicenow action params validation', () => {
     const connectorTypeModel = connectorTypeRegistry.get(CONNECTOR_ID);
     const actionParams = { subActionParams: { severity: 'Critical' } };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         ['severity']: [],
         ['additional_info']: [],
@@ -44,7 +44,7 @@ describe('servicenow action params validation', () => {
     const connectorTypeModel = connectorTypeRegistry.get(CONNECTOR_ID);
     const actionParams = { subActionParams: { severity: 'Critical', additional_info: '' } };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         ['severity']: [],
         ['additional_info']: [],
@@ -56,7 +56,7 @@ describe('servicenow action params validation', () => {
     const connectorTypeModel = connectorTypeRegistry.get(CONNECTOR_ID);
     const actionParams = { subActionParams: { severity: null } };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         ['severity']: ['Severity is required.'],
         ['additional_info']: [],
@@ -68,7 +68,7 @@ describe('servicenow action params validation', () => {
     const connectorTypeModel = connectorTypeRegistry.get(CONNECTOR_ID);
     const actionParams = { subActionParams: { severity: 'Critical', additional_info: 'foobar' } };
 
-    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+    expect(await connectorTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         ['severity']: [],
         ['additional_info']: ['The additional info field does not have a valid JSON format.'],
