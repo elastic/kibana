@@ -177,15 +177,12 @@ const buildEsqlQuery = ({
   const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
   const enrichPolicyName = getEnrichPolicyId(spaceId);
 
-  // Build WHERE clause for actor entity fields
   const actorFieldsWhereClause = [
     ...GRAPH_ACTOR_ENTITY_FIELDS.map((field) => `${field} IS NOT NULL`),
   ].join(' OR ');
 
-  // Build COALESCE for actor entity ID
   const actorFieldsCoalesce = [...GRAPH_ACTOR_ENTITY_FIELDS].join(',\n    ');
 
-  // Build COALESCE for target entity ID
   const targetFieldsCoalesce = [...GRAPH_TARGET_ENTITY_FIELDS].join(',\n    ');
 
   const query = `FROM ${indexPatterns
