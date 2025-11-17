@@ -29,8 +29,8 @@ apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@ess']
     });
     const adminStatus = adminRes.body;
     expect(adminStatus.has_setup).toBeFalsy();
-    expect(adminStatus.has_data).toBe(false);
-    expect(adminStatus.pre_8_9_1_data).toBe(false);
+    expect(adminStatus.has_data).toBeFalsy();
+    expect(adminStatus.pre_8_9_1_data).toBeFalsy();
   });
 
   apiTest('Viewer users', async ({ roleBasedApiClient }) => {
@@ -39,10 +39,10 @@ apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@ess']
     });
 
     const readStatus = readRes.body;
-    expect(readStatus.has_setup).toBe(false);
-    expect(readStatus.has_data).toBe(false);
-    expect(readStatus.pre_8_9_1_data).toBe(false);
-    expect(readStatus.has_required_role).toBe(false);
+    expect(readStatus.has_setup).toBeFalsy();
+    expect(readStatus.has_data).toBeFalsy();
+    expect(readStatus.pre_8_9_1_data).toBeFalsy();
+    expect(readStatus.has_required_role).toBeFalsy();
   });
 });
 
@@ -56,9 +56,9 @@ apiTest.describe('APM integration not installed but setup completed', { tag: ['@
     });
 
     const adminStatus = adminRes.body;
-    expect(adminStatus.has_setup).toBe(true);
-    expect(adminStatus.has_data).toBe(false);
-    expect(adminStatus.pre_8_9_1_data).toBe(false);
+    expect(adminStatus.has_setup).toBeTruthy();
+    expect(adminStatus.has_data).toBeFalsy();
+    expect(adminStatus.pre_8_9_1_data).toBeFalsy();
   });
 
   apiTest('Viewer user', async ({ roleBasedApiClient }) => {
@@ -67,10 +67,10 @@ apiTest.describe('APM integration not installed but setup completed', { tag: ['@
     });
 
     const readStatus = readRes.body;
-    expect(readStatus.has_setup).toBe(true);
-    expect(readStatus.has_data).toBe(false);
-    expect(readStatus.pre_8_9_1_data).toBe(false);
-    expect(readStatus.has_required_role).toBe(false);
+    expect(readStatus.has_setup).toBeTruthy();
+    expect(readStatus.has_data).toBeFalsy();
+    expect(readStatus.pre_8_9_1_data).toBeFalsy();
+    expect(readStatus.has_required_role).toBeFalsy();
   });
 });
 
@@ -95,18 +95,18 @@ apiTest.describe('Profiling is setup', { tag: ['@ess'] }, () => {
       endpoint: 'GET /api/profiling/setup/es_resources',
     });
     const adminStatus = adminRes.body;
-    expect(adminStatus.has_setup).toBe(true);
-    expect(adminStatus.has_data).toBe(false);
-    expect(adminStatus.pre_8_9_1_data).toBe(false);
+    expect(adminStatus.has_setup).toBeTruthy();
+    expect(adminStatus.has_data).toBeFalsy();
+    expect(adminStatus.pre_8_9_1_data).toBeFalsy();
 
     const readRes = await roleBasedApiClient.viewerUser({
       endpoint: 'GET /api/profiling/setup/es_resources',
     });
     const readStatus = readRes.body;
-    expect(readStatus.has_setup).toBe(true);
-    expect(readStatus.has_data).toBe(false);
-    expect(readStatus.pre_8_9_1_data).toBe(false);
-    expect(readStatus.has_required_role).toBe(false);
+    expect(readStatus.has_setup).toBeTruthy();
+    expect(readStatus.has_data).toBeFalsy();
+    expect(readStatus.pre_8_9_1_data).toBeFalsy();
+    expect(readStatus.has_required_role).toBeFalsy();
   });
 
   apiTest('Admin user with data', async ({ esClient, roleBasedApiClient, log }) => {
@@ -115,9 +115,9 @@ apiTest.describe('Profiling is setup', { tag: ['@ess'] }, () => {
       endpoint: 'GET /api/profiling/setup/es_resources',
     });
     const adminStatus = adminRes.body;
-    expect(adminStatus.has_setup).toBe(true);
-    expect(adminStatus.has_data).toBe(true);
-    expect(adminStatus.pre_8_9_1_data).toBe(false);
+    expect(adminStatus.has_setup).toBeTruthy();
+    expect(adminStatus.has_data).toBeTruthy();
+    expect(adminStatus.pre_8_9_1_data).toBeFalsy();
   });
 
   apiTest('Viewer user with data', async ({ roleBasedApiClient }) => {
@@ -125,10 +125,10 @@ apiTest.describe('Profiling is setup', { tag: ['@ess'] }, () => {
       endpoint: 'GET /api/profiling/setup/es_resources',
     });
     const readStatus = readRes.body;
-    expect(readStatus.has_setup).toBe(true);
-    expect(readStatus.has_data).toBe(true);
-    expect(readStatus.pre_8_9_1_data).toBe(false);
-    expect(readStatus.has_required_role).toBe(false);
+    expect(readStatus.has_setup).toBeTruthy();
+    expect(readStatus.has_data).toBeTruthy();
+    expect(readStatus.pre_8_9_1_data).toBeFalsy();
+    expect(readStatus.has_required_role).toBeFalsy();
   });
 });
 
@@ -148,9 +148,9 @@ apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, ()
       endpoint: 'GET /api/profiling/setup/es_resources',
     });
     const adminStatus = adminRes.body;
-    expect(adminStatus.has_setup).toBe(false);
-    expect(adminStatus.has_data).toBe(false);
-    expect(adminStatus.pre_8_9_1_data).toBe(false);
+    expect(adminStatus.has_setup).toBeFalsy();
+    expect(adminStatus.has_data).toBeFalsy();
+    expect(adminStatus.pre_8_9_1_data).toBeFalsy();
   });
 
   apiTest('Viewer user collector integration missing', async ({ roleBasedApiClient, config }) => {
@@ -164,10 +164,10 @@ apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, ()
       endpoint: 'GET /api/profiling/setup/es_resources',
     });
     const readStatus = readRes.body;
-    expect(readStatus.has_setup).toBe(false);
-    expect(readStatus.has_data).toBe(false);
-    expect(readStatus.pre_8_9_1_data).toBe(false);
-    expect(readStatus.has_required_role).toBe(false);
+    expect(readStatus.has_setup).toBeFalsy();
+    expect(readStatus.has_data).toBeFalsy();
+    expect(readStatus.pre_8_9_1_data).toBeFalsy();
+    expect(readStatus.has_required_role).toBeFalsy();
   });
 
   apiTest(
@@ -185,9 +185,9 @@ apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, ()
         endpoint: 'GET /api/profiling/setup/es_resources',
       });
       const adminStatus = adminRes.body;
-      expect(adminStatus.has_setup).toBe(false);
-      expect(adminStatus.has_data).toBe(false);
-      expect(adminStatus.pre_8_9_1_data).toBe(false);
+      expect(adminStatus.has_setup).toBeFalsy();
+      expect(adminStatus.has_data).toBeFalsy();
+      expect(adminStatus.pre_8_9_1_data).toBeFalsy();
     }
   );
 
@@ -204,10 +204,10 @@ apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, ()
         endpoint: 'GET /api/profiling/setup/es_resources',
       });
       const readStatus = readRes.body;
-      expect(readStatus.has_setup).toBe(false);
-      expect(readStatus.has_data).toBe(false);
-      expect(readStatus.pre_8_9_1_data).toBe(false);
-      expect(readStatus.has_required_role).toBe(false);
+      expect(readStatus.has_setup).toBeFalsy();
+      expect(readStatus.has_data).toBeFalsy();
+      expect(readStatus.pre_8_9_1_data).toBeFalsy();
+      expect(readStatus.has_required_role).toBeFalsy();
     }
   );
 });
