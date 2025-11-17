@@ -27,23 +27,36 @@ export const getUserInfo = async ({
   }
 
   try {
-    const currentUser = security.authc.getCurrentUser(request);
+    const userProfile = await security.userProfiles.getCurrent({
+      request,
+    });
 
-    if (!currentUser) {
-      return undefined;
+    if (userProfile != null) {
+      return {
+        username: userProfile.user.username,
+        full_name: userProfile.user.full_name ?? null,
+        email: userProfile.user.email ?? null,
+        profile_uid: userProfile.uid,
+      };
     }
-
-    const userProfile = await security.userProfiles.getCurrent({ request });
-
-    return {
-      username: currentUser.username,
-      full_name: userProfile?.user.full_name ?? null,
-      email: userProfile?.user.email ?? null,
-      profile_uid: userProfile?.uid ?? null,
-    };
   } catch (error) {
-    logger.error(`Failed to fetch user info: ${error.message}`);
-
-    return undefined;
+    logger.debug(`Failed to retrieve user profile, falling back to authc: ${error}`);
   }
+
+  try {
+    const user = security.authc.getCurrentUser(request);
+
+    if (user != null) {
+      return {
+        username: user.username,
+        full_name: user.full_name ?? null,
+        email: user.email ?? null,
+        profile_uid: null,
+      };
+    }
+  } catch (error) {
+    logger.debug(`Failed to retrieve user info from authc: ${error}`);
+  }
+
+  return undefined;
 };
