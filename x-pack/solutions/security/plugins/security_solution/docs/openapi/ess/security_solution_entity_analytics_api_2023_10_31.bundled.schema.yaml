@@ -843,17 +843,17 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                deleteEntityEngineExample:
+                  description: Example response after deleting 'host' engine
+                  value:
+                    deleted: true
               schema:
                 type: object
                 properties:
                   deleted:
                     type: boolean
           description: Successful response
-          examples:
-            deleteEntityEngineExample:
-              description: Example response after deleting 'host' engine
-              value:
-                deleted: true
       summary: Delete the Entity Engine
       tags:
         - Security Entity Analytics API
