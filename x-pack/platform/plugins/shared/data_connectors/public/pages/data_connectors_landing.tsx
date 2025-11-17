@@ -30,24 +30,14 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import React, { useMemo, useState } from 'react';
 import { DATA_CONNECTORS_FULL_TITLE } from '../../common/constants';
 import { ConnectorFlyout } from '../components/connector_flyout';
+import { KSCConnectorFlyout } from '../components/ksc_connector_flyout';
 import { useConnectors } from '../hooks/use_connectors';
-
-/**
- * Generate icon path using naming pattern: connector_{type}.png
- * Converts connector types like 'brave_search' to '/plugins/dataConnectors/assets/connector_brave_search.png'
- *
- * @param connectorType - The connector type identifier (e.g., 'brave_search', 'slack', 'google_drive')
- * @returns The full path to the connector icon PNG file
- */
-export const getConnectorIconPath = (connectorType: string): string => {
-  const iconName = `connector_${connectorType}.png`;
-  return `/plugins/dataConnectors/assets/${iconName}`;
-};
 
 interface ConnectorTileData {
   connectorType: string;
   title: string;
   description: string;
+  icon: string; // Image URL or path
   defaultFeatures: string[];
   flyoutComponentId?: string; // Identifier for the flyout component
   customFlyoutComponentId?: string; // Identifier for custom flyout component
@@ -56,35 +46,25 @@ interface ConnectorTileData {
     config?: Record<string, any>; // Static config values
     featuresField?: string; // Field name in input data that contains features array
   };
-  oauthConfig?: {
-    provider: string;
-    scopes: string[];
-    initiatePath: string;
-    fetchSecretsPath: string;
-    oauthBaseUrl?: string;
-  };
 }
 
 // Component registry - maps component IDs to actual React components
 interface StandardFlyoutProps {
   connectorType: string;
   connectorName: string;
-  defaultFeatures?: string[];
-  oauthConfig?: {
-    provider: string;
-    scopes: string[];
-    initiatePath: string;
-    fetchSecretsPath: string;
-    oauthBaseUrl?: string;
-  };
   onClose: () => void;
-  onSave?: (data: any) => Promise<void>;
-  onConnectionSuccess?: () => void;
-  isEditing?: boolean;
+  onSave: (data: any) => Promise<void>;
+  isEditing: boolean;
 }
 
 const FLYOUT_COMPONENT_REGISTRY: Record<string, React.ComponentType<StandardFlyoutProps>> = {
   connector_flyout: ConnectorFlyout,
+};
+
+// Map custom flyout IDs to connector types for the KSCConnectorFlyout
+const KSC_CONNECTOR_FLYOUT_TYPES: Record<string, 'google_drive' | 'notion'> = {
+  google_drive_connector_flyout: 'google_drive',
+  notion_connector_flyout: 'notion',
 };
 
 export const DataConnectorsLandingPage = () => {
@@ -110,11 +90,6 @@ export const DataConnectorsLandingPage = () => {
   // Fetch connector configuration from API
   React.useEffect(() => {
     const fetchConnectorConfig = async () => {
-      if (!httpClient) {
-        setIsLoadingConfig(false);
-        return;
-      }
-
       try {
         const response = await httpClient.get<{ connectors: ConnectorTileData[] }>(
           '/api/workplace_connectors/config'
@@ -228,14 +203,7 @@ export const DataConnectorsLandingPage = () => {
       <EuiFlexItem key={tileData.connectorType}>
         <div style={{ position: 'relative' }}>
           <EuiCard
-            icon={
-              <img
-                src={getConnectorIconPath(tileData.connectorType)}
-                alt={`${tileData.title} logo`}
-                width={48}
-                height={48}
-              />
-            }
+            icon={<img src={tileData.icon} alt={`${tileData.title} logo`} width={48} height={48} />}
             title={tileData.title}
             description={tileData.description}
             footer={
@@ -375,27 +343,36 @@ export const DataConnectorsLandingPage = () => {
           const connector = connectorsByType.get(selectedConnectorType);
           const isEditing = Boolean(connector);
 
-          // Use unified flyout component for both API key and OAuth connectors
-          // The flyout automatically detects authentication method based on connector type
-          const Flyout = FLYOUT_COMPONENT_REGISTRY.connector_flyout;
-          if (Flyout) {
-            // Determine if this is an OAuth connector (has customFlyoutComponentId)
-            const isOAuthConnector = Boolean(tileData.customFlyoutComponentId);
+          // Look up custom flyout component from registry
+          if (tileData.customFlyoutComponentId) {
+            const kscConnectorType = KSC_CONNECTOR_FLYOUT_TYPES[tileData.customFlyoutComponentId];
+            if (kscConnectorType) {
+              return (
+                <KSCConnectorFlyout
+                  connectorType={kscConnectorType}
+                  onClose={handleCloseFlyout}
+                  isEditing={isEditing}
+                  onConnectionSuccess={refreshConnectors}
+                />
+              );
+            }
+          }
 
-            return (
-              <Flyout
-                connectorType={selectedConnectorType}
-                connectorName={tileData.title}
-                defaultFeatures={tileData.defaultFeatures}
-                oauthConfig={tileData.oauthConfig}
-                onClose={handleCloseFlyout}
-                onSave={
-                  isOAuthConnector ? undefined : (data: any) => handleSaveConnector(tileData, data)
-                }
-                onConnectionSuccess={isOAuthConnector ? refreshConnectors : undefined}
-                isEditing={isEditing}
-              />
-            );
+          // Look up standard flyout component from registry
+          if (tileData.flyoutComponentId) {
+            const Flyout = FLYOUT_COMPONENT_REGISTRY[tileData.flyoutComponentId];
+            if (Flyout) {
+              return (
+                <Flyout
+                  connectorType={selectedConnectorType}
+                  connectorName={tileData.title}
+                  defaultFeatures={tileData.defaultFeatures}
+                  onClose={handleCloseFlyout}
+                  onSave={(data: any) => handleSaveConnector(tileData, data)}
+                  isEditing={isEditing}
+                />
+              );
+            }
           }
 
           return null;
@@ -446,9 +423,8 @@ export const DataConnectorsLandingPage = () => {
           buttonColor="danger"
         >
           <p>
-            This will permanently delete all {connectors.length} connector
-            {connectors.length !== 1 ? 's' : ''} and their associated workflows. This action cannot
-            be undone.
+            This will permanently delete all {connectors.length} connector{connectors.length !== 1 ? 's' : ''} and
+            their associated workflows. This action cannot be undone.
           </p>
         </EuiConfirmModal>
       )}
