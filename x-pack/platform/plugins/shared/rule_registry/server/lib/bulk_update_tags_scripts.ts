@@ -7,24 +7,30 @@
 
 import { ALERT_WORKFLOW_TAGS } from '../../common/technical_rule_data_field_names';
 
-export const ADD_TAGS_UPDATE_SCRIPT = `
-  if (ctx._source['${ALERT_WORKFLOW_TAGS}'] == null) {
+export const UPDATE_TAGS_SCRIPT = `
+  // --- Step 1: Ensure list exists ---
+  // If the tags field is not a list (e.g., null or wrong type),
+  // initialize it as a new, empty list.
+
+  if (!(ctx._source['${ALERT_WORKFLOW_TAGS}'] instanceof List)) {
     ctx._source['${ALERT_WORKFLOW_TAGS}'] = new ArrayList();
   }
+      
+  // --- Step 2: Remove ---
+  // Check if parameter is a valid list before removing
 
-  for (item in params.add) {
-    if (!ctx._source['${ALERT_WORKFLOW_TAGS}'].contains(item.trim())) {
-      ctx._source['${ALERT_WORKFLOW_TAGS}'].add(item.trim());
-    }
+  if (params.remove instanceof List) {
+    ctx._source['${ALERT_WORKFLOW_TAGS}'].removeIf(tag -> params.remove.contains(tag));
   }
-`;
 
-export const REMOVE_TAGS_UPDATE_SCRIPT = `
-  if (ctx._source['${ALERT_WORKFLOW_TAGS}'] != null) {
-    for (int i = 0; i < params.remove.length; i++) {
-      if (ctx._source['${ALERT_WORKFLOW_TAGS}'].contains(params.remove[i].trim())) {
-        int index = ctx._source['${ALERT_WORKFLOW_TAGS}'].indexOf(params.remove[i].trim());
-        ctx._source['${ALERT_WORKFLOW_TAGS}'].remove(index);
+  // --- Step 3: Add ---
+  // Check if parameter is a valid list before adding
+
+  if (params.add instanceof List) {
+    for (String tagToAdd : params.add) {
+      // Add the new tag only if it's not already in the list
+      if (!ctx._source['${ALERT_WORKFLOW_TAGS}'].contains(tagToAdd)) {
+        ctx._source['${ALERT_WORKFLOW_TAGS}'].add(tagToAdd);
       }
     }
   }
@@ -34,22 +40,9 @@ export const getBulkUpdateTagsPainlessScript = (
   add?: string[] | null,
   remove?: string[] | null
 ) => {
-  const scriptOps: string[] = [];
-  const params: Record<string, string[]> = {};
-
-  if (add != null && add.length > 0) {
-    params.add = add;
-    scriptOps.push(ADD_TAGS_UPDATE_SCRIPT);
-  }
-
-  if (remove != null && remove.length > 0) {
-    params.remove = remove;
-    scriptOps.push(REMOVE_TAGS_UPDATE_SCRIPT);
-  }
-
   return {
-    source: scriptOps.join('\n'),
+    source: UPDATE_TAGS_SCRIPT,
     lang: 'painless',
-    params: Object.keys(params).length > 0 ? params : undefined,
+    params: { add: add ?? [], remove: remove ?? [] },
   };
 };

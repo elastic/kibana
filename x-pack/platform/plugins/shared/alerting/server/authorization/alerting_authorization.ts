@@ -280,16 +280,17 @@ export class AlertingAuthorization {
     if (authorization && this.shouldCheckAuthorization()) {
       const checkPrivileges = authorization.checkPrivilegesDynamicallyWithRequest(this.request);
 
-      const { hasAllRequested } = await checkPrivileges({
-        kibana: [
-          ...ruleTypeIdConsumersPairs.flatMap(({ ruleTypeId, consumers }) =>
-            consumers.map((consumer) =>
-              authorization.actions.alerting.get(ruleTypeId, consumer, entity, operation)
-            )
-          ),
-          ...additionalPrivileges,
-        ],
+      const privileges = ruleTypeIdConsumersPairs.flatMap(({ ruleTypeId, consumers }) =>
+        consumers.map((consumer) =>
+          authorization.actions.alerting.get(ruleTypeId, consumer, entity, operation)
+        )
+      );
+
+      const res = await checkPrivileges({
+        kibana: [...privileges, ...additionalPrivileges],
       });
+
+      const { hasAllRequested } = res;
 
       if (!areAllConsumersAvailable) {
         /**

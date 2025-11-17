@@ -5,8 +5,10 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import { buildEsQuery } from '@kbn/es-query';
 
-import { ALERT_WORKFLOW_STATUS } from '@kbn/rule-data-utils';
+import { bulkGetDocs } from '../../../common/lib/helpers/bulk_get_docs';
+import { bulkUpdateAlertTags } from '../../../common/lib/helpers/bulk_update_alert_tags';
 import {
   superUser,
   globalRead,
@@ -30,67 +32,139 @@ import {
 
 import type { User } from '../../../common/lib/authentication/types';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';
-import { getSpaceUrlPrefix } from '../../../common/lib/authentication/spaces';
 
 interface TestCase {
-  /** The space where the alert exists */
-  space: string;
-  /** The ID of the alert */
-  alertId: string;
-  /** The index of the alert */
+  spaceId: string;
+  alertIds?: string[];
   index: string;
-  /** Authorized users */
   authorizedUsers: User[];
-  /** Unauthorized users */
   unauthorizedUsers: User[];
+}
+
+interface AlertIdsTestCase extends TestCase {
+  alertIds: string[];
+}
+
+interface QueryTestCase extends TestCase {
+  query: string;
+  usersThatShouldNotUpdateTheTags: User[];
 }
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
+  const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const esArchiver = getService('esArchiver');
+  const esClient = getService('es');
 
-  const TEST_URL = '/internal/rac/alerts';
-  const ALERTS_INDEX_URL = `${TEST_URL}/index`;
-  const SPACE1 = 'space1';
-  const SPACE2 = 'space2';
-  const APM_ALERT_ID = 'NoxgpHkBqbdrfX07MqXV';
-  const APM_ALERT_INDEX = '.alerts-observability.apm.alerts';
-  const SECURITY_SOLUTION_ALERT_ID = '020202';
-  const SECURITY_SOLUTION_ALERT_INDEX = '.alerts-security.alerts';
-
-  const getAPMIndexName = async (user: User) => {
-    const { body: indexNames }: { body: { index_name: string[] | undefined } } =
-      await supertestWithoutAuth
-        .get(`${getSpaceUrlPrefix(SPACE1)}${ALERTS_INDEX_URL}`)
-        .auth(user.username, user.password)
-        .set('kbn-xsrf', 'true')
-        .expect(200);
-    const observabilityIndex = indexNames?.index_name?.find(
-      (indexName) => indexName === APM_ALERT_INDEX
-    );
-    expect(observabilityIndex).to.eql(APM_ALERT_INDEX); // assert this here so we can use constants in the dynamically-defined test cases below
-  };
-
-  const getSecuritySolutionIndexName = async (user: User) => {
-    const { body: indexNames }: { body: { index_name: string[] | undefined } } =
-      await supertestWithoutAuth
-        .get(`${getSpaceUrlPrefix(SPACE1)}${ALERTS_INDEX_URL}`)
-        .auth(user.username, user.password)
-        .set('kbn-xsrf', 'true')
-        .expect(200);
-    const securitySolution = indexNames?.index_name?.find((indexName) =>
-      indexName.startsWith(SECURITY_SOLUTION_ALERT_INDEX)
-    );
-    expect(securitySolution).to.eql(`${SECURITY_SOLUTION_ALERT_INDEX}-${SPACE1}`); // assert this here so we can use constants in the dynamically-defined test cases below
-  };
-
-  describe('Alert - Bulk Update tags - RBAC - spaces', () => {
-    before(async () => {
-      await getSecuritySolutionIndexName(superUser);
-      await getAPMIndexName(superUser);
+  const addAlertIdsTests = ({
+    spaceId,
+    authorizedUsers,
+    unauthorizedUsers,
+    alertIds,
+    index,
+  }: AlertIdsTestCase) => {
+    authorizedUsers.forEach((user) => {
+      it(`${user.username} should bulk update alert tags by alert ids in ${spaceId}/${index}`, async () => {
+        await bulkUpdateAlertTags({
+          supertest: supertestWithoutAuth,
+          spaceId,
+          alertIds,
+          index,
+          add: [user.username],
+          user,
+          expectedStatusCode: 207,
+        });
+      });
     });
 
+    unauthorizedUsers.forEach((user) => {
+      it(`${user.username} should NOT bulk update alert tags by alert ids in ${spaceId}/${index}`, async () => {
+        await bulkUpdateAlertTags({
+          supertest: supertestWithoutAuth,
+          spaceId,
+          alertIds,
+          index,
+          add: [user.username],
+          user,
+          expectedStatusCode: 403,
+        });
+      });
+    });
+  };
+
+  const addQueryTests = ({
+    spaceId,
+    authorizedUsers,
+    unauthorizedUsers,
+    usersThatShouldNotUpdateTheTags,
+    query,
+    index,
+  }: QueryTestCase) => {
+    authorizedUsers.forEach((user) => {
+      it(`${user.username} should bulk update alert tags by query in ${spaceId}/${index}`, async () => {
+        await bulkUpdateAlertTags({
+          supertest: supertestWithoutAuth,
+          spaceId,
+          query,
+          index,
+          add: [user.username],
+          user,
+          expectedStatusCode: 207,
+        });
+
+        const res = await esClient.search<{ 'kibana.alert.workflow_tags': string[] }>({
+          index,
+          query: buildEsQuery(undefined, { query, language: 'kuery' }, []),
+        });
+
+        for (const hit of res.hits.hits) {
+          const tags = hit._source?.['kibana.alert.workflow_tags'] ?? [];
+          expect(tags).to.contain(user.username);
+        }
+      });
+    });
+
+    usersThatShouldNotUpdateTheTags.forEach((user) => {
+      it(`${user.username} should bulk update alert tags by query in ${spaceId}/${index}`, async () => {
+        await bulkUpdateAlertTags({
+          supertest: supertestWithoutAuth,
+          spaceId,
+          query,
+          index,
+          add: ['should-not-update'],
+          user,
+          expectedStatusCode: 207,
+        });
+
+        const res = await esClient.search<{ 'kibana.alert.workflow_tags': string[] }>({
+          index,
+          query: buildEsQuery(undefined, { query, language: 'kuery' }, []),
+        });
+
+        for (const hit of res.hits.hits) {
+          const tags = hit._source?.['kibana.alert.workflow_tags'] ?? [];
+          expect(tags).to.not.contain('should-not-update');
+        }
+      });
+    });
+
+    unauthorizedUsers.forEach((user) => {
+      it(`${user.username} should NOT bulk update alert tags by query in ${spaceId}/${index}`, async () => {
+        await bulkUpdateAlertTags({
+          supertest: supertestWithoutAuth,
+          spaceId,
+          query,
+          index,
+          add: [user.username],
+          user,
+          expectedStatusCode: 403,
+        });
+      });
+    });
+  };
+
+  describe('Bulk update tags', () => {
     before(async () => {
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts');
     });
@@ -99,140 +173,281 @@ export default ({ getService }: FtrProviderContext) => {
       await esArchiver.unload('x-pack/platform/test/fixtures/es_archives/rule_registry/alerts');
     });
 
-    function addTests({ space, authorizedUsers, unauthorizedUsers, alertId, index }: TestCase) {
-      authorizedUsers.forEach(({ username, password }) => {
-        it(`${username} should bulk update alert tags with given id ${alertId} in ${space}/${index}`, async () => {
-          const { body: updated } = await supertestWithoutAuth
-            .post(`${getSpaceUrlPrefix(space)}${TEST_URL}/tags`)
-            .auth(username, password)
-            .set('kbn-xsrf', 'true')
-            .send({
-              alertIds: [alertId],
-              add: ['new-tag', 'another-tag'],
-              remove: ['old-tag'],
-              index,
-            });
-          expect(updated.statusCode).to.eql(200);
-          const items = updated.body.items;
-          // @ts-expect-error
-          items.map((item) => expect(item.update.result).to.eql('updated'));
-        });
-
-        it(`${username} should bulk update alert tags which match KQL query string in ${space}/${index}`, async () => {
-          const { body: updated } = await supertestWithoutAuth
-            .post(`${getSpaceUrlPrefix(space)}${TEST_URL}/tags`)
-            .auth(username, password)
-            .set('kbn-xsrf', 'true')
-            .send({
-              query: `${ALERT_WORKFLOW_STATUS}: open`,
-              add: ['new-tag'],
-              index,
-            });
-          expect(updated.statusCode).to.eql(200);
-          expect(updated.body.updated).to.greaterThan(0);
-        });
-
-        it(`${username} should bulk update alert tags which match query in DSL in ${space}/${index}`, async () => {
-          const { body: updated } = await supertestWithoutAuth
-            .post(`${getSpaceUrlPrefix(space)}${TEST_URL}/tags`)
-            .auth(username, password)
-            .set('kbn-xsrf', 'true')
-            .send({
-              query: { match: { [ALERT_WORKFLOW_STATUS]: 'open' } },
-              add: ['new-tag'],
-              index,
-            });
-          expect(updated.statusCode).to.eql(200);
-          expect(updated.body.updated).to.greaterThan(0);
+    describe('validation', () => {
+      it('should return 400 with no alertIds and queries', async () => {
+        await bulkUpdateAlertTags({
+          supertest,
+          index: 'foo',
+          add: ['tag1'],
+          user: superUser,
+          expectedStatusCode: 400,
         });
       });
 
-      unauthorizedUsers.forEach(({ username, password }) => {
-        it(`${username} should NOT be able to bulk update alert tags with given id ${alertId} in ${space}/${index}`, async () => {
-          const res = await supertestWithoutAuth
-            .post(`${getSpaceUrlPrefix(space)}${TEST_URL}/tags`)
-            .auth(username, password)
-            .set('kbn-xsrf', 'true')
-            .send({
-              alertIds: [alertId],
-              add: ['new-tag'],
-              index,
-            });
-          expect([403, 404]).to.contain(res.statusCode);
+      it('should return 400 when requesting more than 1K alerts', async () => {
+        await bulkUpdateAlertTags({
+          supertest,
+          alertIds: Array.from({ length: 1001 }, (_, i) => `alert-id-${i}`),
+          index: 'foo',
+          add: ['tag1'],
+          user: superUser,
+          expectedStatusCode: 400,
         });
       });
-    }
 
-    // Alert - Update - RBAC - spaces Security Solution superuser should bulk update alerts which match query in space1/.alerts-security.alerts
-    // Alert - Update - RBAC - spaces superuser should bulk update alert with given id 020202 in space1/.alerts-security.alerts
-    describe('Security Solution', () => {
-      const authorizedInAllSpaces = [superUser, secOnlySpacesAll, obsSecSpacesAll];
-      const authorizedOnlyInSpace1 = [secOnly, obsSec];
-      const authorizedOnlyInSpace2 = [secOnlySpace2, obsSecAllSpace2];
-      const unauthorized = [
-        // these users are not authorized to update alerts for the Security Solution in any space
-        globalRead,
-        secOnlyRead,
-        obsSecRead,
-        secOnlyReadSpace2,
-        obsSecReadSpace2,
-        obsOnly,
-        obsOnlyRead,
-        obsOnlySpace2,
-        obsOnlyReadSpace2,
-        obsOnlySpacesAll,
-        noKibanaPrivileges,
-      ];
-
-      addTests({
-        space: SPACE1,
-        alertId: SECURITY_SOLUTION_ALERT_ID,
-        index: SECURITY_SOLUTION_ALERT_INDEX,
-        authorizedUsers: [...authorizedInAllSpaces, ...authorizedOnlyInSpace1],
-        unauthorizedUsers: [...authorizedOnlyInSpace2, ...unauthorized],
+      it('should return 400 when requesting both alertIds and query', async () => {
+        await bulkUpdateAlertTags({
+          supertest,
+          alertIds: ['alert-id-1'],
+          query: 'some-query',
+          index: 'foo',
+          add: ['tag1'],
+          user: superUser,
+          expectedStatusCode: 400,
+        });
       });
-      addTests({
-        space: SPACE2,
-        alertId: SECURITY_SOLUTION_ALERT_ID,
-        index: SECURITY_SOLUTION_ALERT_INDEX,
-        authorizedUsers: [...authorizedInAllSpaces, ...authorizedOnlyInSpace2],
-        unauthorizedUsers: [...authorizedOnlyInSpace1, ...unauthorized],
+
+      it('should return 400 when requesting emtpy alertIds', async () => {
+        await bulkUpdateAlertTags({
+          supertest,
+          alertIds: [],
+          index: 'foo',
+          add: ['tag1'],
+          user: superUser,
+          expectedStatusCode: 400,
+        });
+      });
+
+      it('should return 400 when requesting emtpy query', async () => {
+        await bulkUpdateAlertTags({
+          supertest,
+          query: '',
+          index: 'foo',
+          add: ['tag1'],
+          user: superUser,
+          expectedStatusCode: 400,
+        });
+      });
+
+      it('should return 400 when requesting with no operation', async () => {
+        await bulkUpdateAlertTags({
+          supertest,
+          alertIds: ['alert-id-1'],
+          index: 'foo',
+          user: superUser,
+          expectedStatusCode: 400,
+        });
+      });
+
+      it('should return 400 when requesting with empty add', async () => {
+        await bulkUpdateAlertTags({
+          supertest,
+          alertIds: ['alert-id-1'],
+          index: 'foo',
+          add: [],
+          user: superUser,
+          expectedStatusCode: 400,
+        });
+      });
+
+      it('should return 400 when requesting with empty remove', async () => {
+        await bulkUpdateAlertTags({
+          supertest,
+          alertIds: ['alert-id-1'],
+          index: 'foo',
+          remove: [],
+          user: superUser,
+          expectedStatusCode: 400,
+        });
       });
     });
 
-    describe('APM', () => {
-      const authorizedInAllSpaces = [superUser, obsOnlySpacesAll, obsSecSpacesAll];
-      const authorizedOnlyInSpace1 = [obsOnly, obsSec];
-      const authorizedOnlyInSpace2 = [obsOnlySpace2, obsSecAllSpace2];
-      const unauthorized = [
-        // these users are not authorized to update alerts for APM in any space
-        globalRead,
-        obsOnlyRead,
-        obsSecRead,
-        obsOnlyReadSpace2,
-        obsSecReadSpace2,
-        secOnly,
-        secOnlyRead,
-        secOnlySpace2,
-        secOnlyReadSpace2,
-        secOnlySpacesAll,
-        noKibanaPrivileges,
-      ];
+    describe('update', () => {
+      describe('with alertIds', () => {
+        it('should update the alert tags correctly', async () => {
+          await bulkUpdateAlertTags({
+            supertest,
+            alertIds: ['alert-without-workflow-tags', 'alert-with-workflow-tags'],
+            index: '.alerts-*',
+            add: ['tag-1', 'tag-3'],
+            remove: ['tag-2', 'tag-4'],
+            user: superUser,
+            expectedStatusCode: 207,
+          });
 
-      addTests({
-        space: SPACE1,
-        alertId: APM_ALERT_ID,
-        index: APM_ALERT_INDEX,
-        authorizedUsers: [...authorizedInAllSpaces, ...authorizedOnlyInSpace1],
-        unauthorizedUsers: [...authorizedOnlyInSpace2, ...unauthorized],
+          const alertDocs = await bulkGetDocs({
+            docs: [
+              { _id: 'alert-without-workflow-tags', _index: '.alerts-observability.apm.alerts' },
+              { _id: 'alert-with-workflow-tags', _index: '.alerts-observability.apm.alerts' },
+            ],
+            esClient,
+          });
+
+          expect(alertDocs.docs.length).to.eql(2);
+
+          for (const doc of alertDocs.docs) {
+            expect(getTagsFromDoc(doc)).to.eql(['tag-1', 'tag-3']);
+          }
+        });
       });
-      addTests({
-        space: SPACE2,
-        alertId: APM_ALERT_ID,
-        index: APM_ALERT_INDEX,
-        authorizedUsers: [...authorizedInAllSpaces, ...authorizedOnlyInSpace2],
-        unauthorizedUsers: [...authorizedOnlyInSpace1, ...unauthorized],
+
+      describe('with query', () => {
+        it('should update the alert tags correctly with KQL', async () => {
+          await bulkUpdateAlertTags({
+            supertest,
+            query: 'kibana.alert.workflow_tags : "tag-2" OR kibana.alert.workflow_tags : "tag-4"',
+            index: '.alerts-*',
+            add: ['tag-1', 'tag-3'],
+            remove: ['tag-2', 'tag-4'],
+            user: superUser,
+            expectedStatusCode: 207,
+          });
+
+          const alertDocs = await bulkGetDocs({
+            docs: [{ _id: 'alert-with-workflow-tags', _index: '.alerts-observability.apm.alerts' }],
+            esClient,
+          });
+
+          expect(alertDocs.docs.length).to.eql(1);
+
+          for (const doc of alertDocs.docs) {
+            expect(getTagsFromDoc(doc)).to.eql(['tag-1', 'tag-3']);
+          }
+        });
+      });
+    });
+
+    describe('RBAC', () => {
+      describe('Security Solution', () => {
+        /**
+         * Security Solution allows users with read privileges to update alerts.
+         */
+        const authorizedInAllSpaces = [superUser, secOnlySpacesAll, obsSecSpacesAll, globalRead];
+        const authorizedOnlyInSpace1 = [secOnly, obsSec, secOnlyRead, obsSecRead];
+
+        const authorizedOnlyInSpace2 = [
+          secOnlySpace2,
+          obsSecAllSpace2,
+          secOnlyReadSpace2,
+          obsSecReadSpace2,
+        ];
+
+        const unauthorized = [obsOnlyRead, obsOnlyReadSpace2, noKibanaPrivileges];
+
+        describe('with alert ids', () => {
+          addAlertIdsTests({
+            spaceId: 'space1',
+            alertIds: ['020202'],
+            index: '.alerts-security*',
+            authorizedUsers: [...authorizedInAllSpaces, ...authorizedOnlyInSpace1],
+            unauthorizedUsers: [...authorizedOnlyInSpace2, ...unauthorized],
+          });
+
+          addAlertIdsTests({
+            spaceId: 'space2',
+            alertIds: ['020202'],
+            index: '.alerts-security*',
+            authorizedUsers: [...authorizedInAllSpaces, ...authorizedOnlyInSpace2],
+            unauthorizedUsers: [...authorizedOnlyInSpace1, ...unauthorized],
+          });
+        });
+
+        describe('with queries', () => {
+          addQueryTests({
+            spaceId: 'space1',
+            query: 'kibana.alert.workflow_tags: siem-tag-1',
+            index: '.alerts-security*',
+            authorizedUsers: [...authorizedInAllSpaces, ...authorizedOnlyInSpace1],
+            unauthorizedUsers: [...authorizedOnlyInSpace2, ...unauthorized],
+            usersThatShouldNotUpdateTheTags: [obsOnly, obsOnlySpacesAll],
+          });
+
+          addQueryTests({
+            spaceId: 'space2',
+            query: 'kibana.alert.workflow_tags: siem-tag-1',
+            index: '.alerts-security*',
+            authorizedUsers: [...authorizedInAllSpaces, ...authorizedOnlyInSpace2],
+            unauthorizedUsers: [...authorizedOnlyInSpace1, ...unauthorized],
+            usersThatShouldNotUpdateTheTags: [obsOnlySpace2, obsOnlySpacesAll],
+          });
+        });
+      });
+
+      describe('APM', () => {
+        const authorizedInAllSpaces = [superUser, obsOnlySpacesAll, obsSecSpacesAll];
+        const authorizedOnlyInSpace1 = [obsOnly, obsSec];
+        const authorizedOnlyInSpace2 = [obsOnlySpace2, obsSecAllSpace2];
+
+        const unauthorizedForAlertIds = [
+          globalRead,
+          obsOnlyRead,
+          obsSecRead,
+          obsOnlyReadSpace2,
+          obsSecReadSpace2,
+          secOnly,
+          secOnlyRead,
+          secOnlySpace2,
+          secOnlyReadSpace2,
+          secOnlySpacesAll,
+          noKibanaPrivileges,
+        ];
+
+        const unauthorizedForQuery = [obsOnlyRead, obsOnlyReadSpace2, noKibanaPrivileges];
+
+        describe('with alert ids', () => {
+          addAlertIdsTests({
+            spaceId: 'space1',
+            alertIds: ['NoxgpHkBqbdrfX07MqXV'],
+            index: '.alerts-observability*',
+            authorizedUsers: [...authorizedInAllSpaces, ...authorizedOnlyInSpace1],
+            unauthorizedUsers: [...authorizedOnlyInSpace2, ...unauthorizedForAlertIds],
+          });
+
+          addAlertIdsTests({
+            spaceId: 'space2',
+            alertIds: ['NoxgpHkBqbdrfX07MqXV'],
+            index: '.alerts-observability*',
+            authorizedUsers: [...authorizedInAllSpaces, ...authorizedOnlyInSpace2],
+            unauthorizedUsers: [...authorizedOnlyInSpace1, ...unauthorizedForAlertIds],
+          });
+        });
+
+        describe('with queries', () => {
+          addQueryTests({
+            spaceId: 'space1',
+            query: 'kibana.alert.workflow_tags: apm-tag-1',
+            index: '.alerts-observability*',
+            authorizedUsers: [...authorizedInAllSpaces, ...authorizedOnlyInSpace1],
+            unauthorizedUsers: [...authorizedOnlyInSpace2, ...unauthorizedForQuery],
+            usersThatShouldNotUpdateTheTags: [
+              globalRead,
+              obsSecRead,
+              secOnly,
+              secOnlyRead,
+              secOnlySpacesAll,
+            ],
+          });
+
+          addQueryTests({
+            spaceId: 'space2',
+            query: 'kibana.alert.workflow_tags: apm-tag-1',
+            index: '.alerts-observability*',
+            authorizedUsers: [...authorizedInAllSpaces, ...authorizedOnlyInSpace2],
+            unauthorizedUsers: [...authorizedOnlyInSpace1, ...unauthorizedForQuery],
+            usersThatShouldNotUpdateTheTags: [
+              globalRead,
+              obsSecReadSpace2,
+              secOnlySpace2,
+              secOnlyReadSpace2,
+              secOnlySpacesAll,
+            ],
+          });
+        });
       });
     });
   });
+};
+
+const getTagsFromDoc = (doc?: any): string[] => {
+  return doc?._source?.['kibana.alert.workflow_tags'] ?? [];
 };

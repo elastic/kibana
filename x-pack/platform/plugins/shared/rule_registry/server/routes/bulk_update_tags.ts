@@ -6,40 +6,35 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import * as t from 'io-ts';
-import { transformError } from '@kbn/securitysolution-es-utils';
 
-import { buildRouteValidation } from './utils/route_validation';
+import { schema } from '@kbn/config-schema';
+import { transformError } from '@kbn/securitysolution-es-utils';
 import type { RacRequestHandlerContext } from '../types';
 import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
-import { MAX_ALERT_IDS_PER_REQUEST } from '../alert_data_client/constants';
+import {
+  MAX_ALERT_IDS_PER_REQUEST,
+  MAX_INDEX_NAME,
+  MAX_TAGS_TO_UPDATE,
+} from '../alert_data_client/constants';
+
+const bodySchema = schema.object({
+  index: schema.string({ maxLength: MAX_INDEX_NAME }),
+  add: schema.maybe(schema.arrayOf(schema.string(), { minSize: 1, maxSize: MAX_TAGS_TO_UPDATE })),
+  remove: schema.maybe(
+    schema.arrayOf(schema.string(), { minSize: 1, maxSize: MAX_TAGS_TO_UPDATE })
+  ),
+  alertIds: schema.maybe(
+    schema.arrayOf(schema.string(), { minSize: 1, maxSize: MAX_ALERT_IDS_PER_REQUEST })
+  ),
+  query: schema.maybe(schema.string()),
+});
 
 export const bulkUpdateTagsRoute = (router: IRouter<RacRequestHandlerContext>) => {
   router.post(
     {
       path: `${BASE_RAC_ALERTS_API_PATH}/tags`,
       validate: {
-        body: buildRouteValidation(
-          t.intersection([
-            t.type({
-              index: t.string,
-            }),
-            t.union([
-              t.strict({
-                alertIds: t.array(t.string),
-                query: t.undefined,
-              }),
-              t.strict({
-                alertIds: t.undefined,
-                query: t.union([t.object, t.string]),
-              }),
-            ]),
-            t.partial({
-              add: t.array(t.string),
-              remove: t.array(t.string),
-            }),
-          ])
-        ),
+        body: bodySchema,
       },
       security: {
         authz: {
@@ -56,11 +51,15 @@ export const bulkUpdateTagsRoute = (router: IRouter<RacRequestHandlerContext>) =
         const alertsClient = await racContext.getAlertsClient();
         const { query, alertIds, index, add, remove } = req.body;
 
-        if (alertIds && alertIds.length > MAX_ALERT_IDS_PER_REQUEST) {
+        if (alertIds && query) {
           return response.badRequest({
-            body: {
-              message: `Cannot use more than ${MAX_ALERT_IDS_PER_REQUEST} ids`,
-            },
+            body: { message: 'Cannot specify both alertIds and query' },
+          });
+        }
+
+        if (add == null && remove == null) {
+          return response.badRequest({
+            body: { message: 'No tags to add or remove were provided' },
           });
         }
 

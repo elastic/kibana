@@ -31,3 +31,13 @@ export const MAX_PAGINATED_ALERTS = 10000;
  * The maximum number of alerts to paginate
  */
 export const MAX_ALERT_IDS_PER_REQUEST = 1000;
+
+/**
+ * The maximum number of tags to update in a single request
+ */
+export const MAX_TAGS_TO_UPDATE = 100;
+
+/**
+ * The maximum length of an index name as allowed by Elasticsearch
+ */
+export const MAX_INDEX_NAME = 255;

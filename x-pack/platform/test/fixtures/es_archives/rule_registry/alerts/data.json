@@ -168,3 +168,86 @@
     }
   }
 }
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".alerts-observability.apm.alerts",
+    "id": "alert-with-workflow-tags",
+    "source": {
+      "event.kind" : "signal",
+      "@timestamp": "2020-12-16T15:16:18.570Z",
+      "kibana.alert.rule.rule_type_id": "apm.error_rate",
+      "message": "hello world 1",
+      "kibana.alert.rule.consumer": "apm",
+      "kibana.alert.workflow_status": "open",
+      "kibana.alert.time_range": {
+        "gte": "2020-12-16T15:16:18.570Z"
+      },
+      "kibana.alert.status": "active",
+      "kibana.space_ids": ["default"],
+      "kibana.alert.workflow_tags": ["tag-2", "tag-4"]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".alerts-observability.apm.alerts",
+    "id": "alert-without-workflow-tags",
+    "source": {
+      "event.kind" : "signal",
+      "@timestamp": "2020-12-16T15:16:18.570Z",
+      "kibana.alert.rule.rule_type_id": "apm.error_rate",
+      "message": "hello world 1",
+      "kibana.alert.rule.consumer": "apm",
+      "kibana.alert.workflow_status": "open",
+      "kibana.alert.time_range": {
+        "gte": "2020-12-16T15:16:18.570Z"
+      },
+      "kibana.alert.status": "active",
+      "kibana.space_ids": ["default"]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".alerts-observability.apm.alerts",
+    "id": "alert-with-workflow-tags-for-rbac-apm",
+    "source": {
+      "event.kind" : "signal",
+      "@timestamp": "2020-12-16T15:16:18.570Z",
+      "kibana.alert.rule.rule_type_id": "apm.error_rate",
+      "message": "hello world 1",
+      "kibana.alert.rule.consumer": "apm",
+      "kibana.alert.workflow_status": "open",
+      "kibana.alert.time_range": {
+        "gte": "2020-12-16T15:16:18.570Z"
+      },
+      "kibana.alert.status": "active",
+      "kibana.space_ids": ["default"],
+      "kibana.alert.workflow_tags": ["apm-tag-1"]
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "index": ".alerts-security.alerts",
+    "id": "alert-with-workflow-tags-for-rbac-siem",
+    "source": {
+      "event.kind" : "signal",
+      "@timestamp": "2020-12-16T15:16:20.570Z",
+      "kibana.alert.rule.rule_type_id": "siem.queryRule",
+      "message": "hello world security",
+      "kibana.alert.rule.consumer": "siem",
+      "kibana.alert.workflow_status": "open",
+      "kibana.alert.workflow_tags": ["siem-tag-1"],
+      "kibana.space_ids": ["space1", "space2"]
+    }
+  }
+}

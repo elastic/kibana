@@ -12,11 +12,7 @@ import type { ConstructorOptions } from './alerts_client';
 import { AlertsClient } from './alerts_client';
 import { fromKueryExpression } from '@kbn/es-query';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
-import { ALERT_RULE_CONSUMER, ALERT_RULE_TYPE_ID, SPACE_IDS } from '@kbn/rule-data-utils';
-import {
-  ADD_TAGS_UPDATE_SCRIPT,
-  REMOVE_TAGS_UPDATE_SCRIPT,
-} from '../utils/alert_client_bulk_update_scripts';
+import { MAX_ALERT_IDS_PER_REQUEST } from './constants';
 
 describe('AlertsClient', () => {
   const alertingAuthMock = alertingAuthorizationMock.create();
@@ -55,6 +51,7 @@ describe('AlertsClient', () => {
       logger: loggingSystemMock.create().get(),
       authorization: alertingAuthMock,
       esClient: esClientMock,
+      esClientAsInternalUser: esClientMock,
       esClientScoped: esClientScopedMock,
       ruleDataService,
       getRuleType: jest.fn(),
@@ -509,307 +506,245 @@ describe('AlertsClient', () => {
 
   describe('bulkUpdateTags', () => {
     beforeEach(() => {
-      esClientMock.mget.mockResolvedValue({
-        docs: [
-          {
-            _index: '.alerts-security.alerts-default',
-            _id: 'alert-1',
-            _source: {
-              [ALERT_RULE_TYPE_ID]: 'test-rule-type-1',
-              [ALERT_RULE_CONSUMER]: 'foo',
-              [SPACE_IDS]: ['space-1'],
-              '@timestamp': '2023-01-01T00:00:00.000Z',
-            },
-            found: true,
-          },
-          {
-            _index: '.alerts-security.alerts-default',
-            _id: 'alert-2',
-            _source: {
-              [ALERT_RULE_TYPE_ID]: 'test-rule-type-1',
-              [ALERT_RULE_CONSUMER]: 'foo',
-              [SPACE_IDS]: ['space-1'],
-              '@timestamp': '2023-01-01T00:00:00.000Z',
-            },
-            found: true,
-          },
-        ],
-      });
-
-      esClientMock.bulk.mockResolvedValue({
-        took: 5,
-        errors: false,
-        items: [
-          {
-            update: {
-              _index: '.alerts-security.alerts-default',
-              _id: 'alert-1',
-              _version: 1,
-              result: 'updated',
-              _shards: { total: 1, successful: 1, failed: 0 },
-              status: 200,
-            },
-          },
-          {
-            update: {
-              _index: '.alerts-security.alerts-default',
-              _id: 'alert-2',
-              _version: 1,
-              result: 'updated',
-              _shards: { total: 1, successful: 1, failed: 0 },
-              status: 200,
-            },
-          },
-        ],
+      esClientMock.updateByQuery.mockResolvedValue({
+        total: 2,
+        updated: 2,
+        failures: [],
       });
     });
 
-    it('should bulk update alerts with add only', async () => {
-      await alertsClient.bulkUpdateTags({
-        alertIds: ['alert-1', 'alert-2'],
-        index: '.alerts-security.alerts-default',
-        add: ['urgent', 'production'],
+    describe('validation', () => {
+      it('should return early when no operations are provided', async () => {
+        await expect(
+          alertsClient.bulkUpdateTags({
+            alertIds: ['alert-1', 'alert-2'],
+            index: '.alerts-security.alerts-default',
+          })
+        ).rejects.toMatchInlineSnapshot(`[Error: No tags to add or remove were provided]`);
+
+        expect(esClientMock.updateByQuery).not.toHaveBeenCalled();
       });
 
-      expect(esClientMock.mget).toHaveBeenCalledWith({
-        docs: [
-          { _id: 'alert-1', _index: '.alerts-security.alerts-default' },
-          { _id: 'alert-2', _index: '.alerts-security.alerts-default' },
-        ],
+      it.each([
+        [[], ''],
+        [undefined, undefined],
+        [null, null],
+      ])('should throw error when alert ids is %s and query is %s', async (alertIds, query) => {
+        await expect(
+          alertsClient.bulkUpdateTags({
+            alertIds,
+            query,
+            index: '.alerts-security.alerts-default',
+            add: ['urgent', 'production'],
+          })
+        ).rejects.toMatchInlineSnapshot(
+          `[Error: No alert ids or query were provided for updating]`
+        );
+
+        expect(esClientMock.updateByQuery).not.toHaveBeenCalled();
       });
 
-      expect(esClientMock.bulk).toHaveBeenCalledWith({
-        refresh: 'wait_for',
-        body: [
-          {
-            update: {
-              _index: '.alerts-security.alerts-default',
-              _id: 'alert-1',
-            },
-          },
-          {
-            script: {
-              source: ADD_TAGS_UPDATE_SCRIPT,
-              lang: 'painless',
-              params: {
-                add: ['urgent', 'production'],
-              },
-            },
-          },
-          {
-            update: {
-              _index: '.alerts-security.alerts-default',
-              _id: 'alert-2',
-            },
-          },
-          {
-            script: {
-              source: ADD_TAGS_UPDATE_SCRIPT,
-              lang: 'painless',
-              params: {
-                add: ['urgent', 'production'],
-              },
-            },
-          },
-        ],
-      });
-    });
-
-    it('should bulk update alerts with remove only', async () => {
-      await alertsClient.bulkUpdateTags({
-        alertIds: ['alert-1', 'alert-2'],
-        index: '.alerts-security.alerts-default',
-        remove: ['outdated', 'test'],
+      it('should handle empty add array', async () => {
+        await expect(
+          alertsClient.bulkUpdateTags({
+            alertIds: ['alert-1', 'alert-2'],
+            index: '.alerts-security.alerts-default',
+            add: [],
+          })
+        ).rejects.toMatchInlineSnapshot(`[Error: No tags to add or remove were provided]`);
       });
 
-      expect(esClientMock.mget).toHaveBeenCalledWith({
-        docs: [
-          { _id: 'alert-1', _index: '.alerts-security.alerts-default' },
-          { _id: 'alert-2', _index: '.alerts-security.alerts-default' },
-        ],
+      it('should handle empty remove array', async () => {
+        await expect(
+          alertsClient.bulkUpdateTags({
+            alertIds: ['alert-1', 'alert-2'],
+            index: '.alerts-security.alerts-default',
+            remove: [],
+          })
+        ).rejects.toMatchInlineSnapshot(`[Error: No tags to add or remove were provided]`);
       });
 
-      expect(esClientMock.bulk).toHaveBeenCalledWith({
-        refresh: 'wait_for',
-        body: [
-          {
-            update: {
-              _index: '.alerts-security.alerts-default',
-              _id: 'alert-1',
-            },
-          },
-          {
-            script: {
-              source: REMOVE_TAGS_UPDATE_SCRIPT,
-              lang: 'painless',
-              params: {
-                remove: ['outdated', 'test'],
-              },
-            },
-          },
-          {
-            update: {
-              _index: '.alerts-security.alerts-default',
-              _id: 'alert-2',
-            },
-          },
-          {
-            script: {
-              source: REMOVE_TAGS_UPDATE_SCRIPT,
-              lang: 'painless',
-              params: {
-                remove: ['outdated', 'test'],
-              },
-            },
-          },
-        ],
+      it(`should throw error when there are more than ${MAX_ALERT_IDS_PER_REQUEST} alert ids`, async () => {
+        await expect(
+          alertsClient.bulkUpdateTags({
+            alertIds: Array.from(
+              { length: MAX_ALERT_IDS_PER_REQUEST + 1 },
+              (_, i) => `alert-${i + 1}`
+            ),
+            index: '.alerts-security.alerts-default',
+            remove: [],
+          })
+        ).rejects.toMatchInlineSnapshot(`[Error: Cannot use more than 1000 ids]`);
       });
     });
 
-    it('should bulk update alerts with both add and remove', async () => {
-      await alertsClient.bulkUpdateTags({
-        alertIds: ['alert-1', 'alert-2'],
-        index: '.alerts-security.alerts-default',
-        add: ['urgent'],
-        remove: ['outdated'],
-      });
-
-      expect(esClientMock.mget).toHaveBeenCalledWith({
-        docs: [
-          { _id: 'alert-1', _index: '.alerts-security.alerts-default' },
-          { _id: 'alert-2', _index: '.alerts-security.alerts-default' },
-        ],
-      });
-
-      expect(esClientMock.bulk).toHaveBeenCalledWith({
-        refresh: 'wait_for',
-        body: [
-          {
-            update: {
-              _index: '.alerts-security.alerts-default',
-              _id: 'alert-1',
+    describe('With alertIds', () => {
+      beforeEach(() => {
+        // @ts-expect-error: only the aggregations field is needed for this test
+        esClientMock.search.mockResolvedValue({
+          aggregations: {
+            ruleTypeIds: {
+              buckets: [
+                {
+                  key: 'rule-type-id-1',
+                  consumers: { buckets: [{ key: 'consumer-1' }, { key: 'consumer-2' }] },
+                },
+                {
+                  key: 'rule-type-id-2',
+                  consumers: { buckets: [{ key: 'consumer-1' }, { key: 'consumer-3' }] },
+                },
+              ],
             },
           },
-          {
-            script: {
-              source: [ADD_TAGS_UPDATE_SCRIPT, REMOVE_TAGS_UPDATE_SCRIPT].join('\n'),
-              lang: 'painless',
-              params: {
-                add: ['urgent'],
-                remove: ['outdated'],
-              },
-            },
-          },
-          {
-            update: {
-              _index: '.alerts-security.alerts-default',
-              _id: 'alert-2',
-            },
-          },
-          {
-            script: {
-              source: [ADD_TAGS_UPDATE_SCRIPT, REMOVE_TAGS_UPDATE_SCRIPT].join('\n'),
-              lang: 'painless',
-              params: {
-                add: ['urgent'],
-                remove: ['outdated'],
-              },
-            },
-          },
-        ],
-      });
-    });
-
-    it('should return early when no operations are provided', async () => {
-      const result = await alertsClient.bulkUpdateTags({
-        alertIds: ['alert-1', 'alert-2'],
-        index: '.alerts-security.alerts-default',
+        });
       });
 
-      expect(result).toMatchInlineSnapshot(`
-        Object {
-          "errors": Array [],
-          "message": "No tags to update.",
-          "updated": 0,
-        }
-      `);
-      expect(esClientMock.mget).not.toHaveBeenCalled();
-      expect(esClientMock.bulk).not.toHaveBeenCalled();
-    });
-
-    it('should throw error when alert ids and query are empty', async () => {
-      await expect(
-        alertsClient.bulkUpdateTags({
-          alertIds: [],
-          query: '',
+      it('authorizes the alerts correctly', async () => {
+        await alertsClient.bulkUpdateTags({
+          alertIds: ['alert-1', 'alert-2'],
           index: '.alerts-security.alerts-default',
           add: ['urgent', 'production'],
-        })
-      ).rejects.toMatchInlineSnapshot(`[Error: no alert ids or query were provided for updating]`);
+        });
 
-      expect(esClientMock.mget).not.toHaveBeenCalled();
-      expect(esClientMock.bulk).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('bulkUpdateTags edge cases', () => {
-    beforeEach(() => {
-      esClientMock.mget.mockResolvedValue({
-        docs: [
-          {
-            _index: '.alerts-security.alerts-default',
-            _id: 'alert-1',
-            _source: {
-              [ALERT_RULE_TYPE_ID]: 'test-rule-type-1',
-              [ALERT_RULE_CONSUMER]: 'foo',
-              [SPACE_IDS]: ['space-1'],
-              '@timestamp': '2023-01-01T00:00:00.000Z',
+        expect(alertingAuthMock.bulkEnsureAuthorized).toHaveBeenCalledWith({
+          entity: 'alert',
+          operation: 'update',
+          ruleTypeIdConsumersPairs: [
+            {
+              consumers: ['consumer-1', 'consumer-2'],
+              ruleTypeId: 'rule-type-id-1',
             },
-            found: true,
-          },
-        ],
-      });
-
-      esClientMock.bulk.mockResolvedValue({
-        took: 5,
-        errors: false,
-        items: [
-          {
-            update: {
-              _index: '.alerts-security.alerts-default',
-              _id: 'alert-1',
-              _version: 1,
-              result: 'updated',
-              _shards: { total: 1, successful: 1, failed: 0 },
-              status: 200,
+            {
+              consumers: ['consumer-1', 'consumer-3'],
+              ruleTypeId: 'rule-type-id-2',
             },
-          },
-        ],
+          ],
+        });
+      });
+
+      it('should bulk update alerts correctly', async () => {
+        await alertsClient.bulkUpdateTags({
+          alertIds: ['alert-1', 'alert-2'],
+          index: '.alerts-security.alerts-default',
+          add: ['urgent', 'production'],
+          remove: ['outdated', 'test'],
+        });
+
+        expect(esClientMock.updateByQuery).toHaveBeenCalledTimes(1);
+      });
+
+      it('should format the response correctly with success and error', async () => {
+        esClientMock.updateByQuery.mockResolvedValue({
+          total: 2,
+          updated: 1,
+          failures: [
+            {
+              id: 'alert-2',
+              index: '.alerts-security.alerts-default',
+              status: 1,
+              cause: { type: 'some_error', reason: 'Something went wrong' },
+            },
+          ],
+        });
+
+        const res = await alertsClient.bulkUpdateTags({
+          alertIds: ['alert-1', 'alert-2'],
+          index: '.alerts-security.alerts-default',
+          add: ['urgent', 'production'],
+          remove: ['outdated', 'test'],
+        });
+
+        expect(esClientMock.updateByQuery).toHaveBeenCalledTimes(1);
+
+        expect(res).toEqual({
+          results: [
+            {
+              id: 'alert-1',
+              status: 'success',
+            },
+            {
+              error: {
+                code: 'some_error',
+                message: 'Something went wrong',
+              },
+              id: 'alert-2',
+              index: '.alerts-security.alerts-default',
+              status: 'error',
+            },
+          ],
+          total: 2,
+          updated: 1,
+        });
       });
     });
 
-    it('should handle empty add array', async () => {
-      await alertsClient.bulkUpdateTags({
-        alertIds: ['alert-1'],
-        index: '.alerts-security.alerts-default',
-        add: [],
+    describe('With query', () => {
+      beforeEach(() => {
+        esClientMock.search.mockResolvedValue({
+          // @ts-expect-error: only the aggregations field is needed for this test
+          hits: { hits: [{ _id: 'alert-1' }, { _id: 'alert-2' }] },
+        });
       });
 
-      expect(esClientMock.mget).not.toHaveBeenCalled();
-
-      expect(esClientMock.bulk).not.toHaveBeenCalled();
-    });
-
-    it('should handle empty remove array', async () => {
-      await alertsClient.bulkUpdateTags({
-        alertIds: ['alert-1'],
-        index: '.alerts-security.alerts-default',
-        remove: [],
+      it('authorizes the alerts correctly', async () => {
+        await alertsClient.bulkUpdateTags({
+          query: 'some-query',
+          index: '.alerts-security.alerts-default',
+          add: ['urgent', 'production'],
+          remove: ['outdated', 'test'],
+        });
       });
 
-      expect(esClientMock.mget).not.toHaveBeenCalled();
+      it('should bulk update alerts correctly', async () => {
+        await alertsClient.bulkUpdateTags({
+          query: 'some-query',
+          index: '.alerts-security.alerts-default',
+          add: ['urgent', 'production'],
+          remove: ['outdated', 'test'],
+        });
 
-      expect(esClientMock.bulk).not.toHaveBeenCalled();
+        expect(esClientMock.updateByQuery).toHaveBeenCalledTimes(1);
+      });
+
+      it('should format the response correctly with success and error', async () => {
+        esClientMock.updateByQuery.mockResolvedValue({
+          total: 2,
+          updated: 1,
+          failures: [
+            {
+              id: 'alert-2',
+              index: '.alerts-security.alerts-default',
+              status: 1,
+              cause: { type: 'some_error', reason: 'Something went wrong' },
+            },
+          ],
+        });
+
+        const res = await alertsClient.bulkUpdateTags({
+          query: 'some-query',
+          index: '.alerts-security.alerts-default',
+          add: ['urgent', 'production'],
+          remove: ['outdated', 'test'],
+        });
+
+        expect(esClientMock.updateByQuery).toHaveBeenCalledTimes(1);
+
+        expect(res).toEqual({
+          results: [
+            {
+              error: {
+                code: 'some_error',
+                message: 'Something went wrong',
+              },
+              id: 'alert-2',
+              index: '.alerts-security.alerts-default',
+              status: 'error',
+            },
+          ],
+          total: 2,
+          updated: 1,
+        });
+      });
     });
   });
 });

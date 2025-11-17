@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import { SPACE_IDS } from '../../common/technical_rule_data_field_names';
+import type { Client } from '@elastic/elasticsearch';
 
-export function getSpacesFilter(spaceId?: string) {
-  return spaceId ? { terms: { [SPACE_IDS]: [spaceId, '*'] } } : undefined;
-}
+export const bulkGetDocs = async <T = unknown>({
+  esClient,
+  docs,
+}: {
+  esClient: Client;
+  docs: Array<{ _id: string; _index: string }>;
+}) => {
+  return esClient.mget<T>({ docs });
+};
