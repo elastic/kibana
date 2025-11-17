@@ -21,6 +21,8 @@ import {
 import type { TimeRange } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
+import { css } from '@emotion/react';
+import type { Dimension } from '@kbn/metrics-experience-plugin/common/types';
 import { FIELD_VALUE_SEPARATOR } from '../../common/constants';
 import { useDimensionsQuery } from '../../hooks';
 import { ClearAllSection } from './clear_all_section';
@@ -30,11 +32,12 @@ import {
 } from '../../common/constants';
 
 export interface ValuesFilterProps {
-  selectedDimensions: string[];
+  selectedDimensions: Dimension[];
   selectedValues: string[];
   indices?: string[];
   disabled?: boolean;
   timeRange: TimeRange;
+  fullWidth?: boolean;
   onChange: (values: string[]) => void;
   onClear: () => void;
 }
@@ -43,31 +46,42 @@ export const ValuesSelector = ({
   selectedValues,
   onChange,
   timeRange,
+  fullWidth = false,
   disabled = false,
   indices = [],
   onClear,
 }: ValuesFilterProps) => {
+  const selectedDimensionNames = useMemo(
+    () => selectedDimensions.map((d) => d.name),
+    [selectedDimensions]
+  );
+
   const {
     data: values = [],
     isLoading,
     error,
   } = useDimensionsQuery({
-    dimensions: selectedDimensions,
+    dimensions: selectedDimensionNames,
     indices,
     from: timeRange.from,
     to: timeRange.to,
   });
+
+  const groupedValues = useMemo(() => {
+    const result = new Map<string, Array<string>>();
+    values.forEach(({ value, field }) => {
+      const arr = result.get(field) ?? [];
+      arr.push(value);
+      result.set(field, arr);
+    });
+
+    return result;
+  }, [values]);
+
   // Convert values to EuiSelectable options with group labels
   const options: SelectableEntry[] = useMemo(() => {
-    const groupedValues = new Map<string, string[]>();
     const selectedSet = new Set(selectedValues);
     const isAtMaxLimit = selectedValues.length >= MAX_VALUES_SELECTIONS;
-
-    values.forEach(({ value, field }) => {
-      const arr = groupedValues.get(field) ?? [];
-      arr.push(value);
-      groupedValues.set(field, arr);
-    });
 
     return Array.from(groupedValues.entries()).flatMap<SelectableEntry>(([field, fieldValues]) => [
       { label: field, isGroupLabel: true, value: field },
@@ -85,13 +99,13 @@ export const ValuesSelector = ({
         };
       }),
     ]);
-  }, [values, selectedValues]);
+  }, [groupedValues, selectedValues]);
 
   const handleChange = useCallback(
     (chosenOption?: SelectableEntry[]) => {
       const newSelectedValues = chosenOption
         ?.filter((option) => !option.isGroupLabel && option.key)
-        .map((option) => option.key!);
+        .map((option: SelectableEntry) => option.key!);
 
       // Enforce the maximum limit
       const limitedSelection = (newSelectedValues ?? []).slice(0, MAX_VALUES_SELECTIONS);
@@ -105,7 +119,12 @@ export const ValuesSelector = ({
 
     return (
       <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            align-items: flex-start;
+          `}
+        >
           {count > 0 ? (
             <FormattedMessage
               id="metricsExperience.valuesSelector.valuesSelectorButtonLabelWithSelection"
@@ -176,7 +195,7 @@ export const ValuesSelector = ({
   return (
     <ToolbarSelector
       data-test-subj={METRICS_VALUES_SELECTOR_DATA_TEST_SUBJ}
-      data-selected-value={selectedDimensions}
+      data-selected-value={selectedDimensionNames}
       searchable
       buttonLabel={buttonLabel}
       optionMatcher={comboBoxFieldOptionMatcher}
@@ -186,6 +205,7 @@ export const ValuesSelector = ({
       onChange={handleChange}
       disabled={disabled}
       popoverContentBelowSearch={popoverContentBelowSearch}
+      fullWidth={fullWidth}
     />
   );
 };

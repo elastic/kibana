@@ -184,7 +184,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     this._joins = joins;
     this._descriptor = AbstractVectorLayer.createDescriptor(layerDescriptor);
     this._style = new VectorStyle(
-      this._descriptor.style,
+      this._descriptor.style ?? VectorStyle.createDescriptor(),
       source,
       this,
       customIcons,
@@ -228,8 +228,8 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
               rightSourceId: clonedJoinId,
             });
 
-            Object.keys(clonedDescriptor.style.properties).forEach((key) => {
-              const styleProp = clonedDescriptor.style.properties[key as VECTOR_STYLES];
+            Object.keys(clonedDescriptor.style?.properties ?? {}).forEach((key) => {
+              const styleProp = clonedDescriptor.style!.properties[key as VECTOR_STYLES];
               if (styleProp && 'type' in styleProp && styleProp.type === STYLE_TYPE.DYNAMIC) {
                 const options = styleProp.options as DynamicStylePropertyOptions;
                 if (

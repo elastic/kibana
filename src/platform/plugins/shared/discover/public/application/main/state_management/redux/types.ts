@@ -47,10 +47,11 @@ export interface TabState extends TabItem {
     controlGroupJson?: string;
     searchSessionId?: string;
   };
-  initialAppState?: DiscoverAppState;
 
   // The following properties are used to manage the tab's state after it has been initialized.
   globalState: TabStateGlobalState;
+  appState: DiscoverAppState;
+  previousAppState: DiscoverAppState;
   controlGroupState: ControlPanelsState<ESQLControlState> | undefined;
   /**
    * ESQL query variables

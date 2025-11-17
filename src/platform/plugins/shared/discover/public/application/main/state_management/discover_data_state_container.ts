@@ -322,9 +322,9 @@ export function getDataStateContainer({
           );
 
           await scopedProfilesManager.resolveDataSourceProfile({
-            dataSource: appStateContainer.getState().dataSource,
+            dataSource: appStateContainer.get().dataSource,
             dataView: savedSearchContainer.getState().searchSource.getField('index'),
-            query: appStateContainer.getState().query,
+            query: appStateContainer.get().query,
           });
 
           const dataView = currentDataView$.getValue();
@@ -413,7 +413,7 @@ export function getDataStateContainer({
   }
 
   const fetchQuery = async () => {
-    const query = appStateContainer.getState().query;
+    const query = appStateContainer.get().query;
     const currentDataView = savedSearchContainer.getState().searchSource.getField('index');
 
     if (isOfAggregateQueryType(query)) {

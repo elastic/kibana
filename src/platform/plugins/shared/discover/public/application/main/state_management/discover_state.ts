@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { IKbnUrlStateStorage, StateContainer } from '@kbn/kibana-utils-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginStart, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import { noSearchSessionStorageCapabilityMessage } from '@kbn/data-plugin/public';
 import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/public';
@@ -21,7 +21,6 @@ import type { AggregateQuery, Query, TimeRange } from '@kbn/es-query';
 import { isOfAggregateQueryType, isOfQueryType } from '@kbn/es-query';
 import { isFunction } from 'lodash';
 import type { DiscoverServices } from '../../..';
-import { restoreStateFromSavedSearch } from './utils/restore_from_saved_search';
 import { FetchStatus } from '../../types';
 import { changeDataView } from './utils/change_data_view';
 import { buildStateSubscribe } from './utils/build_state_subscribe';
@@ -32,7 +31,7 @@ import type { DiscoverSearchSessionManager } from './discover_search_session';
 import type { DiscoverAppLocatorParams } from '../../../../common';
 import { DISCOVER_APP_LOCATOR } from '../../../../common';
 import type { DiscoverAppState, DiscoverAppStateContainer } from './discover_app_state_container';
-import { getDiscoverAppStateContainer, getInitialState } from './discover_app_state_container';
+import { getDiscoverAppStateContainer } from './discover_app_state_container';
 import { updateFiltersReferences } from './utils/update_filter_references';
 import type { DiscoverCustomizationContext } from '../../../customizations';
 import {
@@ -199,10 +198,6 @@ export interface DiscoverStateContainer {
      * @param dataView
      */
     setDataView: (dataView: DataView) => void;
-    /**
-     * Undo changes made to the saved search, e.g. when the user triggers the "Reset search" button
-     */
-    undoSavedSearchChanges: () => Promise<SavedSearch>;
     /**
      * When editing an ad hoc data view, a new id needs to be generated for the data view
      * This is to prevent duplicate ids messing with our system
@@ -469,7 +464,7 @@ export function getDiscoverStateContainer({
     const appStateInitAndSyncUnsubscribe = appStateContainer.initAndSync();
 
     // subscribing to state changes of appStateContainer, triggering data fetching
-    const appStateUnsubscribe = appStateContainer.subscribe(
+    const appStateSubscription = appStateContainer.state$.subscribe(
       buildStateSubscribe({
         appState: appStateContainer,
         savedSearchState: savedSearchContainer,
@@ -478,6 +473,7 @@ export function getDiscoverStateContainer({
         runtimeStateManager,
         services,
         setDataView,
+        getCurrentTab,
       })
     );
 
@@ -493,7 +489,7 @@ export function getDiscoverStateContainer({
       const { currentDataView$ } = selectTabRuntimeState(runtimeStateManager, tabId);
       savedSearchContainer.update({
         nextDataView: currentDataView$.getValue(),
-        nextState: appStateContainer.getState(),
+        nextState: appStateContainer.get(),
         useFilterAndQueryServices: true,
       });
       addLog('[getDiscoverStateContainer] filter changes triggers data fetching');
@@ -520,7 +516,7 @@ export function getDiscoverStateContainer({
     internalStopSyncing = () => {
       savedSearchChangesSubscription.unsubscribe();
       unsubscribeData();
-      appStateUnsubscribe();
+      appStateSubscription.unsubscribe();
       appStateInitAndSyncUnsubscribe();
       unsubscribeSavedSearchUrlTracking();
       filterUnsubscribe.unsubscribe();
@@ -600,45 +596,6 @@ export function getDiscoverStateContainer({
     });
   };
 
-  /**
-   * Undo all changes to the current saved search
-   */
-  const undoSavedSearchChanges = async () => {
-    addLog('undoSavedSearchChanges');
-
-    const nextSavedSearch = savedSearchContainer.getInitial$().getValue();
-    const globalState = selectTab(internalState.getState(), tabId).globalState;
-    const globalStateUpdate = restoreStateFromSavedSearch({ savedSearch: nextSavedSearch });
-
-    // a saved search can't have global (pinned) filters so we can reset global filters state
-    if (globalState.filters) {
-      globalStateUpdate.filters = [];
-    }
-
-    if (Object.keys(globalStateUpdate).length > 0) {
-      internalState.dispatch(
-        injectCurrentTab(internalStateActions.setGlobalState)({
-          globalState: {
-            ...globalState,
-            ...globalStateUpdate,
-          },
-        })
-      );
-    }
-
-    const newAppState = getInitialState({
-      initialUrlState: undefined,
-      savedSearch: nextSavedSearch,
-      services,
-    });
-
-    internalState.dispatch(injectCurrentTab(internalStateActions.resetOnSavedSearchChange)());
-    savedSearchContainer.set(nextSavedSearch);
-    await appStateContainer.replaceUrlState(newAppState);
-
-    return nextSavedSearch;
-  };
-
   const fetchData = (initial: boolean = false) => {
     addLog('fetchData', { initial });
     if (!initial || dataStateContainer.getInitialFetchStatus() === FetchStatus.LOADING) {
@@ -648,7 +605,7 @@ export function getDiscoverStateContainer({
 
   const updateESQLQuery = ((queryOrUpdater) => {
     addLog('updateESQLQuery');
-    const { query: currentQuery } = appStateContainer.getState();
+    const { query: currentQuery } = appStateContainer.get();
 
     if (!isOfAggregateQueryType(currentQuery)) {
       throw new Error(
@@ -687,7 +644,6 @@ export function getDiscoverStateContainer({
       transitionFromDataViewToESQL,
       onUpdateQuery,
       setDataView,
-      undoSavedSearchChanges,
       updateAdHocDataViewId,
       updateESQLQuery,
       onCascadeGroupingChange,
@@ -696,7 +652,7 @@ export function getDiscoverStateContainer({
 }
 
 export function createSearchSessionRestorationDataProvider(deps: {
-  appStateContainer: StateContainer<DiscoverAppState>;
+  appStateContainer: DiscoverAppStateContainer;
   data: DataPublicPluginStart;
   getSavedSearch: () => SavedSearch;
 }): SearchSessionInfoProvider {
@@ -735,7 +691,7 @@ function createUrlGeneratorState({
   getSavedSearch,
   shouldRestoreSearchSession,
 }: {
-  appStateContainer: StateContainer<DiscoverAppState>;
+  appStateContainer: DiscoverAppStateContainer;
   data: DataPublicPluginStart;
   getSavedSearch: () => SavedSearch;
   shouldRestoreSearchSession: boolean;

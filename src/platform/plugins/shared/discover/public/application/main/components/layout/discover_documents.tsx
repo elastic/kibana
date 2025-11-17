@@ -94,7 +94,7 @@ export const onResize = (
   colSettings: { columnId: string; width: number | undefined },
   stateContainer: DiscoverStateContainer
 ) => {
-  const state = stateContainer.appState.getState();
+  const state = stateContainer.appState.get();
   const newGrid = onResizeGridColumn(colSettings, state.grid);
   stateContainer.appState.update({ grid: newGrid });
 };

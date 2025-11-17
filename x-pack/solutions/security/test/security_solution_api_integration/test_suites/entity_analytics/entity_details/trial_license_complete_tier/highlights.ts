@@ -132,6 +132,13 @@ export default function ({ getService }: FtrProviderContext) {
       await riskEngineRoutes.init();
       await waitForRiskScoresToBePresent({ es, log, scoreCount: 1 });
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
+
+      await supertest
+        .post(`/api/fleet/setup`)
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+        .set('kbn-xsrf', 'xxxx')
+        .expect(200);
+
       const { body: agentPolicyResponse } = await supertest
         .post(`/api/fleet/agent_policies`)
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
@@ -304,7 +311,7 @@ export default function ({ getService }: FtrProviderContext) {
         },
         anomalies: [],
       });
-      expect(body.replacements).toEqual(expect.any(Object));
+      expect(Object.values(body.replacements)).toEqual(['un-existent-host']);
       expect(body.prompt).toContain('Generate markdown text with most important information');
     });
 

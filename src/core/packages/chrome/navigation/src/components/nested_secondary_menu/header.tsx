@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButtonIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
-import type { FC } from 'react';
 import React from 'react';
+import type { FC } from 'react';
+import { EuiButtonIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-
 import { i18n } from '@kbn/i18n';
-import { useNestedMenu } from './use_nested_menu';
+
 import { useMenuHeaderStyle } from '../../hooks/use_menu_header_style';
+import { useNestedMenu } from './use_nested_menu';
 
 export interface HeaderProps {
   title?: string;
