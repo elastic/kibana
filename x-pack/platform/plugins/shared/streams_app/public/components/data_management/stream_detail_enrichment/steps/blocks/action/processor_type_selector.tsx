@@ -283,6 +283,7 @@ const PROCESSOR_GROUP_MAP: Record<
   append: 'set',
   set: 'set',
   rename: 'set',
+  drop_document: 'other',
   manual_ingest_pipeline: 'other',
 };
 
