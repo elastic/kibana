@@ -11,38 +11,34 @@ import { LRUCache } from 'lru-cache';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { DeleteResult } from '@kbn/content-management-plugin/common';
 import type { Reference } from '@kbn/content-management-utils';
-import { CONTENT_ID, DASHBOARD_API_VERSION } from '../../common/content_management/constants';
+import type { DashboardSearchRequestBody, DashboardSearchResponseBody } from '../../server';
+import { DASHBOARD_API_VERSION, DASHBOARD_SAVED_OBJECT_TYPE } from '../../common/constants';
 import type {
-  DashboardAPIGetOut,
-  DashboardCreateIn,
-  DashboardCreateOut,
-  DashboardSearchAPIResult,
-  DashboardSearchIn,
+  DashboardCreateResponseBody,
+  DashboardReadResponseBody,
   DashboardState,
-  DashboardUpdateIn,
-  DashboardUpdateOut,
-} from '../../server/content_management';
-import { contentManagementService, coreServices } from '../services/kibana_services';
-import type { SearchDashboardsArgs } from './types';
-import { DASHBOARD_CONTENT_ID } from '../utils/telemetry_constants';
+  DashboardUpdateResponseBody,
+} from '../../server';
+import { coreServices } from '../services/kibana_services';
 
 const CACHE_SIZE = 20; // only store a max of 20 dashboards
 const CACHE_TTL = 1000 * 60 * 5; // time to live = 5 minutes
 
-const cache = new LRUCache<string, DashboardAPIGetOut>({
+const cache = new LRUCache<string, DashboardReadResponseBody>({
   max: CACHE_SIZE,
   ttl: CACHE_TTL,
 });
 
 export const dashboardClient = {
   create: async (dashboardState: DashboardState, references: Reference[]) => {
-    // TODO replace with call to dashboard REST create endpoint
-    return contentManagementService.client.create<DashboardCreateIn, DashboardCreateOut>({
-      contentTypeId: DASHBOARD_CONTENT_ID,
-      data: dashboardState,
-      options: {
-        references,
-      },
+    return coreServices.http.post<DashboardCreateResponseBody>(`/api/dashboards/dashboard`, {
+      version: DASHBOARD_API_VERSION,
+      body: JSON.stringify({
+        data: {
+          ...dashboardState,
+          references,
+        },
+      }),
     });
   },
   delete: async (id: string): Promise<DeleteResult> => {
@@ -51,18 +47,18 @@ export const dashboardClient = {
       version: DASHBOARD_API_VERSION,
     });
   },
-  get: async (id: string): Promise<DashboardAPIGetOut> => {
+  get: async (id: string): Promise<DashboardReadResponseBody> => {
     if (cache.has(id)) {
       return cache.get(id)!;
     }
 
     const result = await coreServices.http
-      .get<DashboardAPIGetOut>(`/api/dashboards/dashboard/${id}`, {
+      .get<DashboardReadResponseBody>(`/api/dashboards/dashboard/${id}`, {
         version: DASHBOARD_API_VERSION,
       })
       .catch((e) => {
         if (e.response?.status === 404) {
-          throw new SavedObjectNotFound({ type: CONTENT_ID, id });
+          throw new SavedObjectNotFound({ type: DASHBOARD_SAVED_OBJECT_TYPE, id });
         }
         const message = (e.body as { message?: string })?.message ?? e.message;
         throw new Error(message);
@@ -77,44 +73,28 @@ export const dashboardClient = {
     }
     return result;
   },
-  search: async ({ hasNoReference, hasReference, options, search, size }: SearchDashboardsArgs) => {
-    // TODO replace with call to dashboard REST search endpoint
-    // https://github.com/elastic/kibana/issues/241211
-    const {
-      hits,
-      pagination: { total },
-    } = await contentManagementService.client.search<DashboardSearchIn, DashboardSearchAPIResult>({
-      contentTypeId: CONTENT_ID,
-      query: {
-        text: search ? `${search}*` : undefined,
-        limit: size,
-        tags: {
-          included: (hasReference ?? []).map(({ id }) => id),
-          excluded: (hasNoReference ?? []).map(({ id }) => id),
-        },
-      },
-      options,
+  search: async (searchBody: DashboardSearchRequestBody) => {
+    return await coreServices.http.post<DashboardSearchResponseBody>(`/api/dashboards/search`, {
+      version: DASHBOARD_API_VERSION,
+      body: JSON.stringify({
+        ...searchBody,
+        search: searchBody.search ? `${searchBody.search}*` : undefined,
+      }),
     });
-    return {
-      total,
-      hits,
-    };
   },
   update: async (id: string, dashboardState: DashboardState, references: Reference[]) => {
-    // TODO replace with call to dashboard REST update endpoint
-    const updateResponse = await contentManagementService.client.update<
-      DashboardUpdateIn,
-      DashboardUpdateOut
-    >({
-      contentTypeId: DASHBOARD_CONTENT_ID,
-      id,
-      data: dashboardState,
-      options: {
-        /** perform a "full" update instead, where the provided attributes will fully replace the existing ones */
-        mergeAttributes: false,
-        references,
-      },
-    });
+    const updateResponse = await coreServices.http.put<DashboardUpdateResponseBody>(
+      `/api/dashboards/dashboard/${id}`,
+      {
+        version: DASHBOARD_API_VERSION,
+        body: JSON.stringify({
+          data: {
+            ...dashboardState,
+            references,
+          },
+        }),
+      }
+    );
     cache.delete(id);
     return updateResponse;
   },

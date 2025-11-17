@@ -20,7 +20,7 @@ import { useAfterLoadedState } from '../../../hooks/use_after_loaded_state';
 
 export type ChartProps = LensConfig & {
   id: string;
-  dataView?: DataView;
+  dataView: DataView | undefined;
 };
 
 export const Chart = ({ id, dataView, ...chartProps }: ChartProps) => {

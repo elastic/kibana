@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IconType } from '@elastic/eui';
-import type { ComponentProps, FC, ReactNode } from 'react';
 import React from 'react';
+import type { ComponentProps, FC, ReactNode } from 'react';
+import type { IconType } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import { SecondaryMenu } from '../secondary_menu';
+import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 
 export interface ItemProps
   extends Omit<ComponentProps<typeof SecondaryMenu.Item>, 'isHighlighted' | 'href'> {
@@ -38,13 +39,13 @@ export const Item: FC<ItemProps> = ({
     justify-content: space-between;
     width: 100%;
   `;
-
   const labelStyles = css`
     display: inline-block;
     &::first-letter {
       text-transform: uppercase;
     }
   `;
+  const nestedMenuItemTestSubjPrefix = `${NAVIGATION_SELECTOR_PREFIX}-nestedMenuItem`;
 
   return (
     <SecondaryMenu.Item
@@ -54,7 +55,7 @@ export const Item: FC<ItemProps> = ({
       isCurrent={isCurrent}
       {...props}
       key={`nested-item-${id}`}
-      testSubjPrefix="nestedMenuItem"
+      testSubjPrefix={nestedMenuItemTestSubjPrefix}
     >
       <div css={itemStyle}>
         <span css={labelStyles}>{children}</span>
