@@ -772,6 +772,16 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                deleteEntityEnginesExample:
+                  description: Example response after deleting 'host' engine
+                  value:
+                    deleted:
+                      - host
+                    still_running:
+                      - generic
+                      - user
+                      - service
               schema:
                 type: object
                 properties:
@@ -839,6 +849,11 @@ paths:
                   deleted:
                     type: boolean
           description: Successful response
+          examples:
+            deleteEntityEngineExample:
+              description: Example response after deleting 'host' engine
+              value:
+                deleted: true
       summary: Delete the Entity Engine
       tags:
         - Security Entity Analytics API
