@@ -185,7 +185,7 @@ export class JobImportService {
     };
   }
 
-  public async validateJobsDatafeeds(
+  public async validateDatafeeds(
     jobs: ImportedAdJob[],
     validateDatafeedPreview: MlApi['validateDatafeedPreview']
   ): Promise<{ jobId: string; hasWarning: boolean; warningMessage?: string }[]> {
@@ -200,6 +200,19 @@ export class JobImportService {
           const response: DatafeedValidationResponse = await validateDatafeedPreview({
             job: combinedJob,
           });
+
+          if (response.error) {
+            return {
+              jobId: job.job_id,
+              hasWarning: true,
+              warningMessage: i18n.translate('xpack.ml.jobsList.datafeedPreviewValidationFailed', {
+                defaultMessage: `Unable to validate datafeed preview. Reason: {reason}`,
+                values: {
+                  reason: extractErrorMessage(response.error),
+                },
+              }),
+            }
+          }
 
           if (!response.valid) {
             return {

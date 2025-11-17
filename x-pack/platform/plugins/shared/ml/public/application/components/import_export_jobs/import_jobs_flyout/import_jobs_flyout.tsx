@@ -151,7 +151,6 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
         getFilters
       );
 
-      // Create datafeed validation map based on job type
       const datafeedValidationMap = new Map<string, DatafeedValidationInfo>();
 
       if (loadedFile.jobType === 'anomaly-detector') {
@@ -160,7 +159,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
         );
         setAdJobs(tempJobs);
 
-        const validations = await jobImportService.validateJobsDatafeeds(
+        const validations = await jobImportService.validateDatafeeds(
           tempJobs,
           validateDatafeedPreview
         );
