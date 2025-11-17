@@ -11,7 +11,7 @@ import { test } from '../fixtures';
 
 test.describe('Index template wizard - Create', { tag: ['@ess'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects, page }) => {
-    // await browserAuth.loginWithCustomRole(CUSTOM_ROLES.indexManagement);
+    // await browserAuth.loginWithCustomRole(CUSTOM_ROLES.indexManagementUser);
     await browserAuth.loginAsAdmin();
     await pageObjects.indexManagement.navigateToIndexManagementTab('templates');
     // Click Create Template button

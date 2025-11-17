@@ -8,10 +8,10 @@
 import type { KibanaRole } from '@kbn/scout';
 
 export const CUSTOM_ROLES: Record<string, KibanaRole> = {
-  indexManagement: {
+  indexManagementUser: {
     elasticsearch: {
       // would be nice if this wasn't needed
-      cluster: ['manage'],
+      cluster: ['monitor', 'manage_index_templates', 'manage_enrich'],
       indices: [
         {
           names: ['*'],

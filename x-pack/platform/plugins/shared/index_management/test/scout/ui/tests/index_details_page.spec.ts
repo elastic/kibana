@@ -11,7 +11,7 @@ import { test } from '../fixtures';
 
 test.describe('Index details page', { tag: ['@ess'] }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    // await browserAuth.loginWithCustomRole(CUSTOM_ROLES.indexManagement);
+    // await browserAuth.loginWithCustomRole(CUSTOM_ROLES.indexManagementUser);
     await browserAuth.loginAsAdmin();
     await pageObjects.indexManagement.goto();
   });
