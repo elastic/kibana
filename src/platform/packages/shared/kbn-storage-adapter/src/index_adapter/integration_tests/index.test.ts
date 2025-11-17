@@ -385,6 +385,7 @@ describe('StorageIndexAdapter', () => {
             },
           ],
           refresh: 'wait_for',
+          throwOnFail: true,
         })
       ).rejects.toThrow(BulkOperationError);
 
@@ -420,6 +421,7 @@ describe('StorageIndexAdapter', () => {
               },
             },
           ],
+          throwOnFail: true,
           refresh: 'wait_for',
         });
         fail('Expected BulkOperationError to be thrown');
