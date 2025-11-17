@@ -51,7 +51,7 @@ export const EntireTimeRangePanel = ({
     } finally {
       setIsLoading(false);
     }
-  }, [http, dataView, query]);
+  }, [http, dataView, query, onTimeChange]);
 
   return (
     <>
