@@ -352,7 +352,7 @@ const CODES = Object.freeze({
   // DEV: process with pid or entity_id not foud
   'ra_memory-dump_error_not-found': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.memoryDump.notFound',
-    { defaultMessage: 'The identifier (pid or entity_id) was not found' }
+    { defaultMessage: 'The process to dump was not found' }
   ),
 
   // DEV: not permitted to dump protected process memory. Endpoint honors the OS system protection model
@@ -385,7 +385,7 @@ const CODES = Object.freeze({
   // action will fail
   'ra_memory-dump_error_processing-interrupted': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.memoryDump.processingInterruptedError',
-    { defaultMessage: 'Action was interrupted during processing (possible host shutdown/reboot)' }
+    { defaultMessage: 'Memory dump action was interrupted' }
   ),
 
   // DEV: Fail early when disk space falls below free space threshold set via advanced Endpoint policy
