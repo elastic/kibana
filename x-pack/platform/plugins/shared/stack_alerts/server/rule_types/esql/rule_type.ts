@@ -139,6 +139,6 @@ export function getRuleType(
     solution: 'stack',
     doesSetRecoveryContext: false,
     alerts: STACK_ALERTS_AAD_CONFIG,
-    autoRecoverAlerts: true,
+    autoRecoverAlerts: false,
   };
 }

@@ -97,7 +97,7 @@ export const getEsqlQueryHits = async (
       }
 
       if (isPreview) {
-        rows.push(Object.assign({ [ALERT_ID_COLUMN]: alertId }, document));
+        rows.push(document);
       }
 
       if (r !== 0 && r % chunkSize === 0) {
@@ -126,7 +126,7 @@ export const transformToEsqlTable = (datatable: ESQLSearchResponse): EsqlTable =
 const getColumnsForPreview = (
   columns: EsqlResultColumn[]
 ): Array<{ id: string; actions: boolean }> => {
-  const cols = [{ id: ALERT_ID_COLUMN, actions: false }];
+  const cols = [];
   for (const c of columns) {
     cols.push({ id: c.name, actions: false });
   }

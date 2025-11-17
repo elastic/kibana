@@ -15,6 +15,7 @@ export interface ESQLRuleParams extends RuleTypeParams {
   timeWindowUnit: string;
   esqlQuery: AggregateQuery;
   timeField: string;
+  familyId: string;
 }
 
 export interface ESQLRuleMetaData {

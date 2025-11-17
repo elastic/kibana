@@ -5,20 +5,10 @@
  * 2.0.
  */
 
-import { v4 as uuidv4 } from 'uuid';
 import deepmerge from 'deepmerge';
 import type { Alert } from '@kbn/alerts-as-data-utils';
-import {
-  ALERT_RULE_UUID,
-  ALERT_RULE_PARAMETERS,
-  ALERT_RULE_EXECUTION_UUID,
-  ALERT_INSTANCE_ID,
-  ALERT_STATUS,
-  ALERT_UUID,
-  TIMESTAMP,
-  ALERT_STATUS_ACTIVE,
-  ALERT_STATUS_RECOVERED,
-} from '@kbn/rule-data-utils';
+import { ALERT_RULE_UUID, ALERT_RULE_PARAMETERS, TIMESTAMP } from '@kbn/rule-data-utils';
+import type { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import type {
   AlertInstanceContext,
   AlertInstanceState,
@@ -75,14 +65,11 @@ export const buildAlert = <
       cleanedPayload,
       {
         [ALERT_RULE_UUID]: rule[ALERT_RULE_UUID],
-        'rule.query': rule[ALERT_RULE_PARAMETERS].esqlQuery.esql,
-        [ALERT_RULE_EXECUTION_UUID]: rule[ALERT_RULE_EXECUTION_UUID],
+        'rule.family_id': rule[ALERT_RULE_PARAMETERS].familyId,
       },
       {
         [TIMESTAMP]: timestamp,
-        [ALERT_INSTANCE_ID]: alert.id,
-        [ALERT_STATUS]: status,
-        [ALERT_UUID]: uuidv4(),
+        status,
       },
     ],
     { arrayMerge: (_, sourceArray) => sourceArray }
