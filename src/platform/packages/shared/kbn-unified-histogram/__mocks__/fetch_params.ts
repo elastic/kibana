@@ -33,7 +33,6 @@ export const getFetchParamsMock = (
         timeRange: { from: '2025-10-07T22:00:00.000Z', to: '2025-11-07T15:56:36.264Z' },
         relativeTimeRange: { from: 'now-30d/d', to: 'now' },
         dataView: dataViewWithTimefieldMock,
-        lastReloadRequestTime: new Date('2025-10-07T22:00:00.000Z').getTime(),
         requestAdapter: new RequestAdapter(),
         ...partialParams,
       },

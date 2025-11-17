@@ -246,10 +246,6 @@ export interface UnifiedHistogramFetchParamsExternal {
   getModifiedVisAttributes?: (
     attributes: TypedLensByValueInput['attributes']
   ) => TypedLensByValueInput['attributes'];
-  /**
-   * The timestamp of the last data request
-   */
-  lastReloadRequestTime?: number;
 }
 
 export type UnifiedHistogramFetchParams = Omit<
@@ -263,7 +259,7 @@ export type UnifiedHistogramFetchParams = Omit<
   esqlVariables: ESQLControlVariable[];
 
   // additional
-  triggeredAt: number;
+  lastReloadRequestTime: number;
   isESQLQuery: boolean;
   isTimeBased: boolean;
   columnsMap: Record<string, DatatableColumn> | undefined;

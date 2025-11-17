@@ -50,7 +50,7 @@ export const processFetchParams = ({
     relativeTimeRange,
     timeRange: params.timeRange ?? getAbsoluteTimeRange(relativeTimeRange),
     // additional
-    triggeredAt: Date.now(),
+    lastReloadRequestTime: Date.now(),
     isTimeBased,
     isESQLQuery,
     columnsMap: params.columns?.reduce<Record<string, DatatableColumn>>((acc, column) => {

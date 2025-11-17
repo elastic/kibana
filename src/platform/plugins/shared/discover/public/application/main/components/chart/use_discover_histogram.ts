@@ -203,7 +203,6 @@ export const useDiscoverHistogram = (
     timeRangeRelative: relativeTimeRange,
     timeRangeAbsolute: timeRange,
     searchSessionId,
-    lastReloadRequestTime,
   } = requestParams;
 
   const dataView = useCurrentDataView();
@@ -251,7 +250,6 @@ export const useDiscoverHistogram = (
           ? savedSearchState?.visContext
           : undefined,
       getModifiedVisAttributes,
-      lastReloadRequestTime,
     };
   }, [
     breakdownField,
@@ -268,7 +266,6 @@ export const useDiscoverHistogram = (
     query,
     savedSearchState?.visContext,
     getModifiedVisAttributes,
-    lastReloadRequestTime,
   ]);
 
   const previousFetchParamsRef = useRef<UnifiedHistogramFetchParamsExternal | null>(null);

@@ -18,7 +18,6 @@ import {
   Subject,
   switchMap,
   tap,
-  withLatestFrom,
 } from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -231,8 +230,6 @@ export function getDataStateContainer({
     autoRefreshDone = fn;
   };
 
-  const lastReloadRequestTime$ = new Subject<number | undefined>();
-
   const fetch$ = getFetch$({
     setAutoRefreshDone,
     data,
@@ -240,7 +237,6 @@ export function getDataStateContainer({
     refetch$,
     searchSource: savedSearchContainer.getState().searchSource,
     searchSessionManager,
-    lastReloadRequestTime$,
   }).pipe(
     filter(() => validateTimeRange(timefilter.getTime(), toastNotifications)),
     tap(() => inspectorAdapters.requests.reset()),
@@ -258,8 +254,7 @@ export function getDataStateContainer({
   function subscribe() {
     const subscription = fetch$
       .pipe(
-        withLatestFrom(lastReloadRequestTime$),
-        mergeMap(async ([{ options }, lastReloadRequestTime]) => {
+        mergeMap(async ({ options }) => {
           const { id: currentTabId, resetDefaultProfileState, dataRequestParams } = getCurrentTab();
           const { scopedProfilesManager$, scopedEbtManager$, currentDataView$ } =
             selectTabRuntimeState(runtimeStateManager, currentTabId);
@@ -321,7 +316,6 @@ export function getDataStateContainer({
                 timeRangeRelative: timefilter.getTime(),
                 searchSessionId,
                 isSearchSessionRestored,
-                lastReloadRequestTime,
               },
             })
           );

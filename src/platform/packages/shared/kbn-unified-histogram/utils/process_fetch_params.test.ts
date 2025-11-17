@@ -38,7 +38,7 @@ describe('processFetchParams', () => {
     expect(result.esqlVariables).toEqual([]);
   });
 
-  it('assigns triggeredAt to current timestamp', () => {
+  it('assigns lastReloadRequestTime to current timestamp', () => {
     const before = Date.now();
     const result = processFetchParams({
       params: commonParams,
@@ -46,8 +46,8 @@ describe('processFetchParams', () => {
       initialBreakdownField: undefined,
     });
     const after = Date.now();
-    expect(result.triggeredAt).toBeGreaterThanOrEqual(before);
-    expect(result.triggeredAt).toBeLessThanOrEqual(after);
+    expect(result.lastReloadRequestTime).toBeGreaterThanOrEqual(before);
+    expect(result.lastReloadRequestTime).toBeLessThanOrEqual(after);
   });
 
   it('assigns isTimeBased based on dataView', () => {
@@ -226,7 +226,6 @@ describe('processFetchParams', () => {
       ],
       searchSessionId: 'session-123',
       requestAdapter: new RequestAdapter(),
-      lastReloadRequestTime: Date.now(),
       abortController: new AbortController(),
       esqlVariables: [
         { key: 'field', value: 'variableColumn', type: ESQLVariableType.FIELDS },
@@ -245,7 +244,7 @@ describe('processFetchParams', () => {
     expect(result.filters).toEqual(params.filters);
     expect(result.searchSessionId).toEqual(params.searchSessionId);
     expect(result.requestAdapter).toEqual(params.requestAdapter);
-    expect(result.lastReloadRequestTime).toEqual(params.lastReloadRequestTime);
+    expect(result.lastReloadRequestTime).toBeGreaterThan(0);
     expect(result.abortController).toEqual(params.abortController);
     expect(result.esqlVariables).toEqual(params.esqlVariables);
     expect(result.table).toEqual(params.table);
