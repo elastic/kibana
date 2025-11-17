@@ -496,30 +496,3 @@ export const initUiSettings = (
 
   uiSettings.register(orderSettings(securityUiSettings));
 };
-export const getDefaultAIConnectorSetting = (connectors: Connector[]): SettingsConfig | null =>
-  connectors.length > 0
-    ? {
-        [DEFAULT_AI_CONNECTOR]: {
-          name: i18n.translate('xpack.securitySolution.uiSettings.defaultAIConnectorLabel', {
-            defaultMessage: 'Default AI Connector',
-          }),
-          // TODO, make Elastic LLM the default value once fully available in serverless
-          value: connectors[0].id,
-          description: i18n.translate(
-            'xpack.securitySolution.uiSettings.defaultAIConnectorDescription',
-            {
-              // TODO update this copy, waiting on James Spiteri's input
-              defaultMessage:
-                'Default AI connector for serverless AI features (Elastic AI SOC Engine)',
-            }
-          ),
-          type: 'select',
-          options: connectors.map(({ id }) => id),
-          optionLabels: Object.fromEntries(connectors.map(({ id, name }) => [id, name])),
-          category: [APP_ID],
-          requiresPageReload: true,
-          schema: schema.string(),
-          solution: 'security',
-        },
-      }
-    : null;

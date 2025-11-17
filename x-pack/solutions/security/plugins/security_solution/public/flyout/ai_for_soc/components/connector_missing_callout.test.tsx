@@ -15,6 +15,11 @@ import {
 import { useNavigateTo } from '@kbn/security-solution-navigation';
 
 jest.mock('@kbn/security-solution-navigation');
+jest.mock('../../../common/lib/kibana', () => {
+  return {
+    ...jest.requireActual('../../../common/lib/kibana'),
+  };
+});
 
 describe('ConnectorMissingCallout', () => {
   it('should render component', () => {
@@ -45,7 +50,7 @@ describe('ConnectorMissingCallout', () => {
 
     expect(navigateTo).toHaveBeenCalledWith({
       appId: 'management',
-      path: '/kibana/settings?query=defaultAIConnector',
+      path: '/ai/genAiSettings',
     });
   });
 
