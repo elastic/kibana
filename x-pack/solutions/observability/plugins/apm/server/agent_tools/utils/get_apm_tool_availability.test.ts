@@ -65,7 +65,7 @@ describe('getApmToolAvailability', () => {
 
   it('returns available when feature flag enabled and historical data exists', async () => {
     mockedGetIsObservabilityAgentEnabled.mockResolvedValue(true);
-    mockedBuildApmToolResources.mockResolvedValue({ apmEventClient: {} });
+    mockedBuildApmToolResources.mockResolvedValue({ apmEventClient: {} } as any);
     mockedHasHistoricalAgentData.mockResolvedValue(true);
 
     const result = await getApmToolAvailability({
@@ -80,7 +80,7 @@ describe('getApmToolAvailability', () => {
 
   it('returns unavailable when feature flag enabled but no historical data', async () => {
     mockedGetIsObservabilityAgentEnabled.mockResolvedValue(true);
-    mockedBuildApmToolResources.mockResolvedValue({ apmEventClient: {} });
+    mockedBuildApmToolResources.mockResolvedValue({ apmEventClient: {} } as any);
     mockedHasHistoricalAgentData.mockResolvedValue(false);
 
     const result = await getApmToolAvailability({
