@@ -2291,13 +2291,16 @@ export default function (providerContext: FtrProviderContext) {
       before(async () => {
         await esArchiver.load('x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server');
         await kibanaServer.savedObjects.cleanStandardList();
-        await fleetAndAgents.setup();
       });
 
       after(async () => {
         await esArchiver.unload(
           'x-pack/platform/test/fixtures/es_archives/fleet/empty_fleet_server'
         );
+      });
+
+      beforeEach(async () => {
+        await fleetAndAgents.setup();
       });
 
       afterEach(async () => {
