@@ -254,7 +254,6 @@
     "@kbn/spaces-utils",
     "@kbn/core-metrics-server",
     "@kbn/ai-assistant-default-llm-setting",
-    "@kbn/core-ui-settings-common",
     "@kbn/react-query"
   ]
 }
