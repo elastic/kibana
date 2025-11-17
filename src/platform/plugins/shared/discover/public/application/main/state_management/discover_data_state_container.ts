@@ -365,7 +365,7 @@ export function getDataStateContainer({
             abortController,
             getCurrentTab,
             onFetchRecordsComplete: async () => {
-              if (isEsqlQuery) {
+              if (isEsqlQuery && !abortController.signal.aborted) {
                 // defer triggering chart fetching until after main request completes for ES|QL mode
                 fetchChart$.next(latestFetchDetails);
               }
