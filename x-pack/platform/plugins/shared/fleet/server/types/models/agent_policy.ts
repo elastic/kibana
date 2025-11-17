@@ -290,7 +290,7 @@ export const NewAgentPolicySchema = schema.object({
 export const AgentPolicySchema = schema.object({
   ...AgentPolicyBaseSchema,
   id: schema.string(),
-  is_managed: schema.boolean(),
+  is_managed: schema.maybe(schema.boolean()),
   status: schema.oneOf([
     schema.literal(agentPolicyStatuses.Active),
     schema.literal(agentPolicyStatuses.Inactive),
@@ -484,6 +484,35 @@ export const FullAgentPolicyResponseSchema = schema.object({
         traces: schema.boolean(),
         apm: schema.maybe(schema.any()),
         _runtime_experimental: schema.maybe(schema.string()),
+        pprof: schema.maybe(
+          schema.object({
+            enabled: schema.boolean(),
+          })
+        ),
+        http: schema.maybe(
+          schema.object({
+            enabled: schema.maybe(schema.boolean()),
+            host: schema.maybe(schema.string()),
+            port: schema.maybe(schema.number()),
+          })
+        ),
+        diagnostics: schema.maybe(
+          schema.object({
+            limit: schema.maybe(
+              schema.object({
+                interval: schema.maybe(schema.string()),
+                burst: schema.maybe(schema.number()),
+              })
+            ),
+            uploader: schema.maybe(
+              schema.object({
+                max_retries: schema.maybe(schema.number()),
+                init_dur: schema.maybe(schema.string()),
+                max_dur: schema.maybe(schema.string()),
+              })
+            ),
+          })
+        ),
       }),
       download: schema.object({
         sourceURI: schema.string(),
