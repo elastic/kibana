@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GoogleAuth } from 'google-auth-library';
 import axios, { type AxiosRequestConfig } from 'axios';
+import { GoogleAuth } from 'google-auth-library';
 
 const DRIVE_API_BASE_URL = 'https://www.googleapis.com/drive/v3';
 const DRIVE_API_TIMEOUT = 60 * 1000; // 1 minute
@@ -19,7 +19,8 @@ const DRIVE_SCOPES = [
 ];
 
 export interface GoogleDriveClientConfig {
-  service_credential: Record<string, any>;
+  serviceCredential?: Record<string, unknown>; // Service account JSON (optional)
+  accessToken?: string; // OAuth access token (optional, alternative to service_credential)
   subject?: string; // For domain-wide delegation
 }
 
@@ -39,7 +40,7 @@ export interface FileMetadata {
   modifiedTime?: string;
   parents?: string[];
   webViewLink?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface ListFilesResponse {
@@ -49,49 +50,72 @@ export interface ListFilesResponse {
 }
 
 export class GoogleDriveClient {
-  private auth: GoogleAuth;
-  private accessToken: string | null = null;
+  private auth: GoogleAuth | null = null;
+  private access_token: string | null = null;
   private tokenExpiry: number = 0;
+  private useOAuthToken: boolean;
 
-  constructor(private config: GoogleDriveClientConfig) {
-    const credentials = { ...config.service_credential };
+  constructor(config: GoogleDriveClientConfig) {
+    // If access_token is provided, use OAuth token directly
+    // Otherwise, use service_credential for service account auth
+    if (config.accessToken) {
+      this.useOAuthToken = true;
+      this.access_token = config.accessToken;
+      // OAuth tokens typically expire in 1 hour, set expiry to 55 minutes to be safe
+      this.tokenExpiry = Date.now() + 55 * 60 * 1000;
+    } else if (config.serviceCredential) {
+      this.useOAuthToken = false;
+      const credentials = { ...config.serviceCredential };
 
-    // Remove universe_domain if present (not needed for auth)
-    if (credentials.universe_domain) {
-      delete credentials.universe_domain;
+      // Remove universe_domain if present (not needed for auth)
+      if (credentials.universe_domain) {
+        delete credentials.universe_domain;
+      }
+
+      // Add subject for domain-wide delegation if provided
+      if (config.subject) {
+        credentials.subject = config.subject;
+      }
+
+      this.auth = new GoogleAuth({
+        credentials,
+        scopes: DRIVE_SCOPES,
+      });
+    } else {
+      throw new Error('Either access_token or service_credential must be provided');
     }
-
-    // Add subject for domain-wide delegation if provided
-    if (config.subject) {
-      credentials.subject = config.subject;
-    }
-
-    this.auth = new GoogleAuth({
-      credentials,
-      scopes: DRIVE_SCOPES,
-    });
   }
 
   /**
    * Get an access token, refreshing if necessary
    */
   private async getAccessToken(): Promise<string> {
+    // If using OAuth token directly, return it (refresh logic would be handled externally)
+    if (this.useOAuthToken && this.access_token) {
+      return this.access_token;
+    }
+
+    // For service account auth, refresh token if expired
+    if (!this.auth) {
+      throw new Error('Google Auth not initialized');
+    }
+
     const now = Date.now();
 
     // Refresh token if expired or about to expire (within 5 minutes)
-    if (!this.accessToken || this.tokenExpiry <= now + 5 * 60 * 1000) {
+    if (!this.access_token || this.tokenExpiry <= now + 5 * 60 * 1000) {
       const tokenResponse = await this.auth.getAccessToken();
 
       if (!tokenResponse) {
         throw new Error('Failed to retrieve access token from Google Auth');
       }
 
-      this.accessToken = tokenResponse;
+      this.access_token = tokenResponse;
       // Tokens typically expire in 1 hour, set expiry to 55 minutes to be safe
       this.tokenExpiry = now + 55 * 60 * 1000;
     }
 
-    return this.accessToken;
+    return this.access_token;
   }
 
   /**
@@ -100,8 +124,8 @@ export class GoogleDriveClient {
   private async makeRequest<T>(
     method: string,
     endpoint: string,
-    params?: Record<string, any>,
-    data?: any
+    params?: Record<string, unknown>,
+    data?: unknown
   ): Promise<T> {
     const accessToken = await this.getAccessToken();
     const url = `${DRIVE_API_BASE_URL}${endpoint}`;
@@ -121,10 +145,12 @@ export class GoogleDriveClient {
     try {
       const response = await axios(config);
       return response.data;
-    } catch (error: any) {
+    } catch (error) {
       if (error.response) {
         throw new Error(
-          `Google Drive API error: ${error.response.status} ${error.response.statusText} - ${JSON.stringify(error.response.data)}`
+          `Google Drive API error: ${error.response.status} ${
+            error.response.statusText
+          } - ${JSON.stringify(error.response.data)}`
         );
       }
       throw new Error(`Google Drive API request failed: ${error.message}`);
@@ -144,12 +170,7 @@ export class GoogleDriveClient {
    * List files from Google Drive
    */
   async listFiles(options: ListFilesOptions = {}): Promise<ListFilesResponse> {
-    const {
-      folderId,
-      pageSize = 100,
-      pageToken,
-      q: customQuery,
-    } = options;
+    const { folderId, pageSize = 100, pageToken, q: customQuery } = options;
 
     // Build query
     let query = 'trashed=false';
@@ -162,10 +183,11 @@ export class GoogleDriveClient {
       query = customQuery;
     }
 
-    const params: Record<string, any> = {
+    const params: Record<string, unknown> = {
       q: query,
       pageSize,
-      fields: 'nextPageToken,files(id,name,mimeType,size,createdTime,modifiedTime,parents,webViewLink)',
+      fields:
+        'nextPageToken,files(id,name,mimeType,size,createdTime,modifiedTime,parents,webViewLink)',
       corpora: 'allDrives',
       includeItemsFromAllDrives: true,
       supportsAllDrives: true,
@@ -213,7 +235,7 @@ export class GoogleDriveClient {
     const isGoogleWorkspaceFile = fileMetadata.mimeType?.startsWith('application/vnd.google-apps.');
 
     let downloadUrl = url;
-    const params: Record<string, any> = {
+    const params: Record<string, unknown> = {
       supportsAllDrives: true,
     };
 
@@ -264,7 +286,8 @@ export class GoogleDriveClient {
 
       if (isTextFile) {
         // Return as UTF-8 text
-        content = typeof response.data === 'string' ? response.data : response.data.toString('utf8');
+        content =
+          typeof response.data === 'string' ? response.data : response.data.toString('utf8');
         encoding = 'utf8';
         size = Buffer.byteLength(content, 'utf8');
       } else {
@@ -280,14 +303,15 @@ export class GoogleDriveClient {
         encoding,
         size,
       };
-    } catch (error: any) {
+    } catch (error) {
       if (error.response) {
         throw new Error(
-          `Google Drive API error downloading file: ${error.response.status} ${error.response.statusText} - ${JSON.stringify(error.response.data)}`
+          `Google Drive API error downloading file: ${error.response.status} ${
+            error.response.statusText
+          } - ${JSON.stringify(error.response.data)}`
         );
       }
       throw new Error(`Google Drive file download failed: ${error.message}`);
     }
   }
 }
-

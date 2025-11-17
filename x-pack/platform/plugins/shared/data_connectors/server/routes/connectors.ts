@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import axios from 'axios';
+import axios, { type AxiosResponse } from 'axios';
 import https from 'https';
 import { schema } from '@kbn/config-schema';
 import type { IRouter, Logger, KibanaRequest } from '@kbn/core/server';
-import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type {
+  SavedObjectsClientContract,
+  SavedObject,
+  SavedObjectsFindResponse,
+} from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE } from '../saved_objects';
 import type {
@@ -27,10 +31,9 @@ import type { WorkflowCreatorService } from '../services/workflow_creator';
 import { CONNECTOR_CONFIG } from '../data/connector_config';
 
 // Helper function to build response from saved object
-function buildConnectorResponse(savedObject: {
-  id: string;
-  attributes: WorkplaceConnectorAttributes;
-}): WorkplaceConnectorResponse {
+function buildConnectorResponse(
+  savedObject: SavedObject<WorkplaceConnectorAttributes>
+): WorkplaceConnectorResponse {
   const attrs = savedObject.attributes;
   return {
     id: savedObject.id,
@@ -48,6 +51,8 @@ function buildConnectorResponse(savedObject: {
 }
 
 // Helper function to create workflows for a connector
+// If workflows already exist, they will be reused (not recreated)
+// forceCreate: if true, will create workflows even if they exist (for regeneration)
 async function createWorkflowsForConnector(
   connectorId: string,
   connectorType: string,
@@ -55,12 +60,36 @@ async function createWorkflowsForConnector(
   savedObjectsClient: SavedObjectsClientContract,
   workflowCreator: WorkflowCreatorService,
   request: KibanaRequest,
-  logger: Logger
+  logger: Logger,
+  forceCreate: boolean = false
 ): Promise<{ workflowId?: string; workflowIds: string[]; toolIds: string[] }> {
-  const workflowIds: string[] = [];
-  const toolIds: string[] = [];
-
   try {
+    // Check if workflows already exist for this connector (unless forcing creation)
+    if (!forceCreate) {
+      const connector = await savedObjectsClient.get(
+        WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE,
+        connectorId
+      );
+      const attrs = connector.attributes as WorkplaceConnectorAttributes;
+      const existingWorkflowIds = attrs.workflowIds || [];
+      const existingToolIds = attrs.toolIds || [];
+
+      // If workflows already exist, reuse them
+      if (existingWorkflowIds.length > 0) {
+        logger.info(
+          `Reusing existing workflows for connector ${connectorId}: ${existingWorkflowIds.join(', ')}`
+        );
+        return {
+          workflowId: attrs.workflowId,
+          workflowIds: existingWorkflowIds,
+          toolIds: existingToolIds,
+        };
+      }
+    }
+
+    // Create new workflows if they don't exist
+    const workflowIds: string[] = [];
+    const toolIds: string[] = [];
     const spaceId = savedObjectsClient.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING;
 
     for (const feature of features) {
@@ -88,7 +117,7 @@ async function createWorkflowsForConnector(
     logger.error(
       `Failed to create workflow for connector ${connectorId}: ${(workflowError as Error).message}`
     );
-    return { workflowIds, toolIds };
+    return { workflowIds: [], toolIds: [] };
   }
 }
 
@@ -109,7 +138,7 @@ async function createOAuthConnector(
 
   const now = new Date().toISOString();
 
-  const savedObject = await savedObjectsClient.create(WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE, {
+  return await savedObjectsClient.create(WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE, {
     name: connectorConfig.name,
     type: connectorType,
     config: { status: 'pending_oauth' },
@@ -118,8 +147,6 @@ async function createOAuthConnector(
     createdAt: now,
     updatedAt: now,
   });
-
-  return savedObject;
 }
 
 // Helper function to fetch OAuth secrets with retry logic
@@ -135,7 +162,7 @@ async function fetchOAuthSecrets(
   retryDelay: number,
   logger: Logger
 ): Promise<OAuthSecretsResponse> {
-  let secretsresponse: axios.AxiosResponse<OAuthSecretsResponse> | undefined;
+  let secretsresponse: AxiosResponse<OAuthSecretsResponse> | undefined;
   let accessToken: string | undefined;
 
   for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -201,11 +228,11 @@ export function registerConnectorRoutes(
           connectorType,
           title: config.name,
           description: config.description,
-          icon: config.icon,
           defaultFeatures: config.defaultFeatures,
           flyoutComponentId: config.flyoutComponentId,
           customFlyoutComponentId: config.customFlyoutComponentId,
           saveConfig: config.saveConfig,
+          oauthConfig: config.oauthConfig,
         }));
 
         return response.ok({
@@ -232,6 +259,10 @@ export function registerConnectorRoutes(
         params: schema.object({
           provider: schema.string(),
         }),
+        body: schema.object({
+          connectorId: schema.maybe(schema.string()),
+          regenerateWorkflows: schema.maybe(schema.boolean()),
+        }),
       },
       security: {
         authz: {
@@ -243,6 +274,10 @@ export function registerConnectorRoutes(
     async (context, request, response) => {
       const coreContext = await context.core;
       const { provider } = request.params;
+      const { connectorId: existingConnectorId, regenerateWorkflows = false } = request.body as {
+        connectorId?: string;
+        regenerateWorkflows?: boolean;
+      };
 
       // Find connector type by OAuth provider
       const connectorType = Object.keys(CONNECTOR_CONFIG).find(
@@ -272,8 +307,28 @@ export function registerConnectorRoutes(
       try {
         const savedObjectsClient = coreContext.savedObjects.client;
 
-        // Create connector using data-driven helper
-        const savedObject = await createOAuthConnector(connectorType, savedObjectsClient);
+        // Use existing connector if provided, otherwise create new one
+        let savedObject: { id: string };
+        if (existingConnectorId) {
+          // Verify the connector exists and is the correct type
+          const existingConnector = await savedObjectsClient.get(
+            WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE,
+            existingConnectorId
+          );
+          const existingType = (existingConnector.attributes as WorkplaceConnectorAttributes).type;
+          if (existingType !== connectorType) {
+            return response.customError({
+              statusCode: 400,
+              body: {
+                message: `Connector type mismatch: expected ${connectorType}, got ${existingType}`,
+              },
+            });
+          }
+          savedObject = { id: existingConnectorId };
+        } else {
+          // Create connector using data-driven helper
+          savedObject = await createOAuthConnector(connectorType, savedObjectsClient);
+        }
 
         const oauthBaseUrl = connectorConfig.oauthConfig.oauthBaseUrl || 'https://localhost:8052';
         const oauthUrl = `${oauthBaseUrl}${connectorConfig.oauthConfig.initiatePath}`;
@@ -291,6 +346,20 @@ export function registerConnectorRoutes(
 
         const authUrl = authresponse.data.auth_url;
         const requestId = authresponse.data.request_id;
+
+        // Store regenerateWorkflows flag in connector config temporarily
+        if (existingConnectorId && regenerateWorkflows) {
+          await savedObjectsClient.update(
+            WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE,
+            existingConnectorId,
+            {
+              config: {
+                status: 'pending_oauth',
+                regenerateWorkflows: true,
+              },
+            }
+          );
+        }
 
         logger.info(`OAuth URL for ${provider}: ${authUrl}`);
 
@@ -373,28 +442,92 @@ export function registerConnectorRoutes(
 
         logger.info(`Secrets fetched for connector ${connectorId}`);
 
+        // Check if connector already has workflows (re-authentication scenario)
+        const connectorAttrs = connector.attributes as WorkplaceConnectorAttributes;
+        const hasExistingWorkflows =
+          connectorAttrs && !!connectorAttrs.workflowIds && connectorAttrs.workflowIds.length > 0;
+        const shouldRegenerateWorkflows =
+          (connectorAttrs.config as { regenerateWorkflows?: boolean })?.regenerateWorkflows ||
+          false;
+
+        // If regenerating workflows, delete old ones first
+        if (shouldRegenerateWorkflows && hasExistingWorkflows) {
+          logger.info(
+            `Regenerating workflows for connector ${connectorId} - deleting old workflows`
+          );
+          const spaceId = savedObjectsClient.getCurrentNamespace() ?? DEFAULT_NAMESPACE_STRING;
+          const oldWorkflowIds = connectorAttrs.workflowIds || [];
+          const oldToolIds = connectorAttrs.toolIds || [];
+
+          // Delete old workflows
+          if (oldWorkflowIds.length > 0 && workflowCreator.deleteWorkflows) {
+            try {
+              await workflowCreator.deleteWorkflows(oldWorkflowIds, spaceId, request);
+            } catch (err) {
+              logger.warn(`Failed to delete some old workflows: ${(err as Error).message}`);
+            }
+          }
+
+          // Delete old tools
+          if (oldToolIds.length > 0 && workflowCreator.deleteTools) {
+            try {
+              await workflowCreator.deleteTools(oldToolIds, request);
+            } catch (err) {
+              logger.warn(`Failed to delete some old tools: ${(err as Error).message}`);
+            }
+          }
+
+          // Clear workflow references
+          await savedObjectsClient.update(WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE, connectorId, {
+            workflowId: undefined,
+            workflowIds: [],
+            toolIds: [],
+          });
+        }
+
         // Update connector with OAuth tokens
+        // Map Google API snake_case to camelCase for storage
+        // Preserve existing config by merging, and preserve workflowIds/toolIds
+        const existingConfig = connectorAttrs.config || {};
         await savedObjectsClient.update(WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE, connectorId, {
           secrets: {
-            access_token: oauthSecrets.access_token || '',
-            refresh_token: oauthSecrets.refresh_token || '',
-            expires_in: oauthSecrets.expires_in || '3600',
+            accessToken: oauthSecrets.access_token || '',
+            refreshToken: oauthSecrets.refresh_token || '',
+            expiresIn: oauthSecrets.expires_in || '3600',
           },
-          config: { status: 'connected' },
+          config: {
+            ...existingConfig,
+            status: 'connected',
+            // Remove regenerateWorkflows flag after processing
+            regenerateWorkflows: undefined,
+          },
           updatedAt: new Date().toISOString(),
         });
 
-        // Create workflows for the connector
-        const features = connectorConfig.defaultFeatures;
-        await createWorkflowsForConnector(
-          connectorId,
-          connectorType,
-          features,
-          savedObjectsClient,
-          workflowCreator,
-          request,
-          logger
-        );
+        // Only create workflows if they don't already exist or if regenerating
+        // Skip createWorkflowsForConnector entirely if workflows exist and we're not regenerating
+        if (!hasExistingWorkflows || shouldRegenerateWorkflows) {
+          logger.info(
+            `Creating ${
+              shouldRegenerateWorkflows ? 'new' : ''
+            } workflows for connector ${connectorId}`
+          );
+          const features = connectorConfig.defaultFeatures;
+          await createWorkflowsForConnector(
+            connectorId,
+            connectorType,
+            features,
+            savedObjectsClient,
+            workflowCreator,
+            request,
+            logger,
+            shouldRegenerateWorkflows // forceCreate = true when regenerating
+          );
+        } else {
+          logger.info(
+            `Reusing existing workflows for connector ${connectorId} during re-authentication`
+          );
+        }
 
         return response.ok({
           body: {
@@ -507,7 +640,10 @@ export function registerConnectorRoutes(
 
       try {
         const savedObjectsClient = coreContext.savedObjects.client;
-        const savedObject = await savedObjectsClient.get(WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE, id);
+        const savedObject: SavedObject<WorkplaceConnectorAttributes> = await savedObjectsClient.get(
+          WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE,
+          id
+        );
 
         const responseData = buildConnectorResponse(savedObject);
 
@@ -544,15 +680,16 @@ export function registerConnectorRoutes(
         },
       },
     },
-    async (context, request, response) => {
+    async (context, _, response) => {
       const coreContext = await context.core;
 
       try {
         const savedObjectsClient = coreContext.savedObjects.client;
-        const findResult = await savedObjectsClient.find({
-          type: WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE,
-          perPage: 100,
-        });
+        const findResult: SavedObjectsFindResponse<WorkplaceConnectorAttributes> =
+          await savedObjectsClient.find({
+            type: WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE,
+            perPage: 100,
+          });
 
         const connectors: WorkplaceConnectorResponse[] = findResult.saved_objects.map(
           (savedObject) => buildConnectorResponse(savedObject)
@@ -599,13 +736,15 @@ export function registerConnectorRoutes(
         const savedObjectsClient = coreContext.savedObjects.client;
         const now = new Date().toISOString();
 
-        const savedObject = await savedObjectsClient.update(
+        await savedObjectsClient.update(WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE, id, {
+          ...updates,
+          updatedAt: now,
+        });
+
+        // Fetch the full updated object to get all attributes
+        const savedObject: SavedObject<WorkplaceConnectorAttributes> = await savedObjectsClient.get(
           WORKPLACE_CONNECTOR_SAVED_OBJECT_TYPE,
-          id,
-          {
-            ...updates,
-            updatedAt: now,
-          }
+          id
         );
 
         const responseData = buildConnectorResponse(savedObject);
