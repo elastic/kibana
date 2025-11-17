@@ -147,7 +147,7 @@ export const ContextMenu = ({
         name: lang.label,
         key: lang.value,
         'data-test-subj': `languageClientMenuItem-${lang.value}`,
-        icon: currentLanguage === lang.value ? ('check' as const) : ('empty' as const),
+        icon: currentLanguage === lang.value ? 'check' : 'empty',
         onClick: () => handleLanguageSelect(lang.value),
       };
 
