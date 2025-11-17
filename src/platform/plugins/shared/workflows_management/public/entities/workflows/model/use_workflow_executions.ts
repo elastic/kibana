@@ -81,7 +81,7 @@ export function useWorkflowExecutions(
       'executions',
       params.statuses,
       params.executionTypes,
-      size,
+      currentSize,
     ],
     queryFn,
     getNextPageParam,
