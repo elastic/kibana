@@ -113,6 +113,7 @@ export const ProcessorTypeSelector = ({ disabled = false }: { disabled?: boolean
         onChange={handleChange}
         fullWidth
         singleSelection={{ asPlainText: true }}
+        compressed={true}
         placeholder={i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.typeSelectorPlaceholder',
           { defaultMessage: 'Grok, Dissect ...' }
@@ -282,6 +283,7 @@ const PROCESSOR_GROUP_MAP: Record<
   append: 'set',
   set: 'set',
   rename: 'set',
+  drop_document: 'other',
   manual_ingest_pipeline: 'other',
 };
 
