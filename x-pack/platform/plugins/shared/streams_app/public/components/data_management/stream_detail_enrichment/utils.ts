@@ -7,10 +7,7 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import type { FlattenRecord } from '@kbn/streams-schema';
-import { isSchema } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
-import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
 import { DraftGrokExpression } from '@kbn/grok-ui';
 import type {
   ConvertProcessor,
@@ -29,27 +26,30 @@ import {
   streamlangProcessorSchema,
 } from '@kbn/streamlang';
 import { isWhereBlock } from '@kbn/streamlang/types/streamlang';
+import type { FlattenRecord } from '@kbn/streams-schema';
+import { isSchema } from '@kbn/streams-schema';
+import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
 import type { EnrichmentDataSource } from '../../../../common/url_schema';
+import type { ProcessorResources } from './state_management/steps_state_machine';
+import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
+import { configDrivenProcessors } from './steps/blocks/action/config_driven';
 import type {
-  DissectFormState,
-  GrokFormState,
-  ProcessorFormState,
+  ConfigDrivenProcessors,
+  ConfigDrivenProcessorType,
+} from './steps/blocks/action/config_driven/types';
+import type {
+  ConvertFormState,
   DateFormState,
-  ManualIngestPipelineFormState,
+  DissectFormState,
+  DropFormState,
   EnrichmentDataSourceWithUIAttributes,
+  GrokFormState,
+  ManualIngestPipelineFormState,
+  ProcessorFormState,
   ReplaceFormState,
   SetFormState,
   WhereBlockFormState,
-  ConvertFormState,
-  DropFormState,
 } from './types';
-import { configDrivenProcessors } from './steps/blocks/action/config_driven';
-import type {
-  ConfigDrivenProcessorType,
-  ConfigDrivenProcessors,
-} from './steps/blocks/action/config_driven/types';
-import type { StreamEnrichmentContextType } from './state_management/stream_enrichment_state_machine/types';
-import type { ProcessorResources } from './state_management/steps_state_machine';
 
 /**
  * These are processor types with specialised UI. Other processor types are handled by a generic config-driven UI.
@@ -145,9 +145,9 @@ const defaultDissectProcessorFormState = (sampleDocs: FlattenRecord[]): DissectF
 
 const defaultDropProcessorFormState = (): DropFormState => ({
   action: 'drop_document',
+  // TODO - what should this default to? and should we add UI to clarify what this does to customers?
   where: ALWAYS_CONDITION,
   ignore_failure: true,
-  ignore_missing: true,
 });
 
 const defaultGrokProcessorFormState: (
@@ -361,13 +361,12 @@ export const convertFormStateToProcessor = (
     }
 
     if (formState.action === 'drop_document') {
-      const { where, ignore_failure, ignore_missing } = formState;
+      const { where, ignore_failure } = formState;
       return {
         processorDefinition: {
           action: 'drop_document',
           where,
           ignore_failure,
-          ignore_missing,
         },
       };
     }

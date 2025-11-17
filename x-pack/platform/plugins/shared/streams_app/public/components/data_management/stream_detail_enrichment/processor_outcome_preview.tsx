@@ -119,6 +119,7 @@ const PreviewDocumentsGroupBy = () => {
   const simulationParsedRate = useSimulatorSelector((state) =>
     formatRateToPercentage(state.context.simulation?.documents_metrics.parsed_rate)
   );
+  // TODO - need to add 'dropped' rate here
 
   const getFilterButtonPropsFor = (filter: PreviewDocsFilterOption) => ({
     isToggle: previewDocsFilter === filter,

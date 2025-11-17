@@ -7,7 +7,7 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { IgnoreFailureToggle, IgnoreMissingToggle } from '../ignore_toggles';
+import { IgnoreFailureToggle } from '../ignore_toggles';
 import { ProcessorConditionEditor } from '../processor_condition_editor';
 
 export const DropProcessorForm = () => {
@@ -16,7 +16,6 @@ export const DropProcessorForm = () => {
       <ProcessorConditionEditor />
       <EuiSpacer size="m" />
       <IgnoreFailureToggle />
-      <IgnoreMissingToggle />
     </>
   );
 };
