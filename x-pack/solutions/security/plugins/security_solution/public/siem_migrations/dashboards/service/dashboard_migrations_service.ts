@@ -250,10 +250,7 @@ export class SiemDashboardMigrationsService extends SiemMigrationsServiceBase<Da
       settings: { connectorId },
     };
     await api
-      .startDashboardMigration({
-        migrationId: taskStats.id,
-        settings: { connectorId },
-      })
+      .startDashboardMigration(params)
       .then(() => {
         this.telemetry.reportStartTranslation(params);
       })
