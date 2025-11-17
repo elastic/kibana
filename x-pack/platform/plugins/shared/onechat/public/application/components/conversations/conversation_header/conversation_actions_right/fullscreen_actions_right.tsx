@@ -91,19 +91,20 @@ export const FullScreenActionsRight: React.FC = () => {
     >
       {fullscreenLabels.editCurrentAgent}
     </EuiContextMenuItem>,
-    ...(agentId
-      ? [
-          <EuiContextMenuItem
-            key="clone-agent"
-            icon="copy"
-            size="s"
-            onClick={closePopover}
-            href={createOnechatUrl(appPaths.agents.new, { [searchParamNames.sourceId]: agentId })}
-          >
-            {fullscreenLabels.cloneAgentAsNew}
-          </EuiContextMenuItem>,
-        ]
-      : []),
+    <EuiContextMenuItem
+      key="clone-agent"
+      icon="copy"
+      size="s"
+      disabled={!agentId}
+      onClick={closePopover}
+      href={
+        agentId
+          ? createOnechatUrl(appPaths.agents.new, { [searchParamNames.sourceId]: agentId })
+          : undefined
+      }
+    >
+      {fullscreenLabels.cloneAgentAsNew}
+    </EuiContextMenuItem>,
     <MenuSectionTitle title={fullscreenLabels.manage} />,
     <ExternalLinkMenuItem
       key="agents"
