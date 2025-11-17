@@ -39,6 +39,12 @@ export const initServicesRoute = (libs: InfraBackendLibs) => {
 
       const apmDataAccessServices = await apmDataAccessClient.getServices();
 
+      if (!apmDataAccessServices) {
+        return response.ok({
+          body: ServicesAPIResponseRT.encode({ services: [] }),
+        });
+      }
+
       const apmDocumentSources = await apmDataAccessServices.getDocumentSources({
         start: from,
         end: to,
@@ -51,6 +57,7 @@ export const initServicesRoute = (libs: InfraBackendLibs) => {
         filters: validatedFilters!,
         size,
       });
+
       return response.ok({
         body: ServicesAPIResponseRT.encode(services),
       });
