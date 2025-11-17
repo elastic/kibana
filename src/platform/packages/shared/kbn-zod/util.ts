@@ -8,13 +8,16 @@
  */
 
 import * as z3 from 'zod/v3';
-import type * as z4 from 'zod/v4/core';
+import type * as z4 from 'zod/v4';
 
-export const isZod = (schema: z3.ZodTypeAny | z4.$ZodType) => {
-  if ('_zod' in schema) {
-    return true; // v4
-  } else if (schema instanceof z3.ZodType) {
-    return true; // v3
+export function isZod(value: unknown): value is z3.ZodTypeAny | z4.ZodType {
+  // Check for v3
+  if (value instanceof z3.ZodType) {
+    return true;
+  }
+  // Check for v4 (has _zod symbol)
+  if (value && typeof value === 'object' && '_zod' in value) {
+    return true;
   }
   return false;
-};
+}
