@@ -55,6 +55,7 @@ export default function (providerContext: FtrProviderContext) {
         // Create a test index matching transform's pattern to store test documents
         await es.indices.createDataStream({ name: DATASTREAM_NAME });
         await enableEntityStore(providerContext);
+        await ensureTransformStarted(providerContext);
       });
 
       after(async () => {
@@ -170,6 +171,7 @@ export default function (providerContext: FtrProviderContext) {
         );
 
         // Schedule transform and await a new timestamp, greater than timestampBeforeSnapshot
+        await ensureTransformStarted(providerContext);
         const { acknowledged } = await es.transform.scheduleNowTransform({
           transform_id: HOST_TRANSFORM_ID,
         });
@@ -225,6 +227,16 @@ function buildHostTransformDocument(
   return document;
 }
 
+async function ensureTransformStarted(providerContext: FtrProviderContext): Promise<void> {
+  const es = providerContext.getService('es');
+  await es.transform.startTransform(
+    {
+      transform_id: HOST_TRANSFORM_ID,
+    },
+    { ignore: [409] }
+  );
+}
+
 async function createDocumentsAndTriggerTransform(
   providerContext: FtrProviderContext,
   docs: (EcsHost & { timestamp?: string })[],
@@ -246,18 +258,25 @@ async function createDocumentsAndTriggerTransform(
     const { result } = await es.index(buildHostTransformDocument(docs[i], dataStream));
     expect(result).to.eql('created');
   }
-
+  if (transform.state === 'stopped') {
+    await ensureTransformStarted(providerContext);
+  }
   // Trigger the transform manually
   const { acknowledged } = await es.transform.scheduleNowTransform({
     transform_id: HOST_TRANSFORM_ID,
   });
   expect(acknowledged).to.be(true);
 
+  const startedWaiting: number = new Date().valueOf();
+  const log = providerContext.getService('log');
   await retry.waitForWithTimeout('Transform to run again', TIMEOUT_MS, async () => {
     const response = await es.transform.getTransformStats({
       transform_id: HOST_TRANSFORM_ID,
     });
     transform = response.transforms[0];
+    if (new Date().valueOf() - startedWaiting > TIMEOUT_MS * 0.95) {
+      log.error(JSON.stringify(response));
+    }
     expect(transform.stats.trigger_count).to.greaterThan(triggerCount);
     expect(transform.stats.documents_processed).to.greaterThan(docsProcessed);
     return true;
