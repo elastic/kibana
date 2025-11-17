@@ -41,6 +41,7 @@ export const useLayoutStyles = () => {
         0 -${euiTheme.border.width.thin} ${euiTheme.colors.vis.euiColorVis0};
 
       .kbnGridSection--targeted {
+        background-color: ${transparentize(euiTheme.colors.primary, 0.2)};
         background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
           calc((var(--kbnGridGutterSize) / 2) * -1px);
         background-size: calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px)
@@ -48,6 +49,7 @@ export const useLayoutStyles = () => {
         background-image: ${getRadialGradient('top left')}, ${getRadialGradient('top right')},
           ${getRadialGradient('bottom left')}, ${getRadialGradient('bottom right')};
         background-origin: content-box;
+        border-radius: ${euiTheme.border.radius.medium};
       }
 
       // styles for the area where the panel and/or section header will be dropped
@@ -108,6 +110,11 @@ export const useLayoutStyles = () => {
           display: none;
         }
       }
+      // highlight the section header when the section is targeted during drag
+      .kbnGridSectionHeader--targeted {
+        background-color: ${transparentize(euiTheme.colors.primary, 0.15)};
+        border-radius: ${euiTheme.border.radius.medium};
+      }
 
       // styling for the section footer
       .kbnGridSectionFooter {
@@ -119,6 +126,12 @@ export const useLayoutStyles = () => {
           border-top: ${euiTheme.border.width.thick} solid
             ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.5)};
         }
+      }
+      // make the divider larger when in edit mode and targeted
+      .kbnGridSectionFooter--targeted {
+        height: ${euiTheme.size.l} !important;
+        min-height: ${euiTheme.size.l} !important;
+        border-top: ${euiTheme.size.s} solid ${transparentize(euiTheme.colors.primary, 0.5)} !important;
       }
       // hide footer border when section is being dragged
       &:has(.kbnGridSectionHeader--active) .kbnGridSectionHeader--active + .kbnGridSectionFooter {

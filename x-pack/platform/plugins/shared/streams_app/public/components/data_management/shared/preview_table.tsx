@@ -32,7 +32,7 @@ import type {
   DocumentWithIgnoredFields,
 } from '@kbn/streams-schema/src/shared/record_types';
 import { LazySummaryColumn } from '@kbn/discover-contextual-components';
-import { DataGridDensity } from '@kbn/unified-data-table';
+import { DataGridDensity, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import useAsync from 'react-use/lib/useAsync';
 import { recalcColumnWidths } from '../stream_detail_enrichment/utils';
 import { useKibana } from '../../../hooks/use_kibana';
@@ -48,6 +48,7 @@ export const SUMMARY_COLUMN_ID = i18n.translate(
     defaultMessage: '(Summary)',
   }
 );
+const SUMMARY_COLUMN_WIDTH_WITH_SIBLINGS = 600;
 
 interface RowSelectionContextType {
   selectedRowIndex?: number;
@@ -165,12 +166,8 @@ export function PreviewTable({
 
   // Determine canonical column order
   const canonicalColumnOrder = useMemo(() => {
-    // In summary mode, only show the summary column
-    if (mode === 'summary') {
-      return [SUMMARY_COLUMN_ID];
-    }
-
-    // In columns mode, show regular columns
+    // In columns mode, show regular columns only
+    // In summary mode, show summary column + regular columns
     const cols = new Set<string>();
 
     documents.forEach((doc) => {
@@ -211,22 +208,53 @@ export function PreviewTable({
         ...allColumns.filter((col) => !displaySet.has(col)),
       ];
     }
+
+    if (mode === 'summary') {
+      return [SUMMARY_COLUMN_ID, ...allColumns];
+    }
+
     return allColumns;
   }, [columnOrderHint, displayColumns, documents, mode]);
 
   // Derive visibleColumns from canonical order
   const visibleColumns = useMemo(() => {
-    // In summary mode, always show only the summary column
+    // In summary mode, only show summary column + explicitly enabled columns
     if (mode === 'summary') {
-      return [SUMMARY_COLUMN_ID];
+      if (!displayColumns || displayColumns.length === 0) {
+        // If no columns specified, show only summary column
+        return [SUMMARY_COLUMN_ID];
+      }
+      const filteredColumns = canonicalColumnOrder.filter(
+        (col) => col !== SUMMARY_COLUMN_ID && displayColumns.includes(col)
+      );
+      return [SUMMARY_COLUMN_ID, ...filteredColumns];
     }
 
-    // In columns mode, filter by displayColumns or show all
-    if (displayColumns) {
-      return canonicalColumnOrder.filter((col) => displayColumns.includes(col));
-    }
-    return canonicalColumnOrder;
+    // In columns mode, show all or filtered columns (no summary)
+    const filteredColumns = displayColumns
+      ? canonicalColumnOrder.filter(
+          (col) => col !== SUMMARY_COLUMN_ID && displayColumns.includes(col)
+        )
+      : canonicalColumnOrder.filter((col) => col !== SUMMARY_COLUMN_ID);
+
+    return filteredColumns;
   }, [canonicalColumnOrder, displayColumns, mode]);
+
+  const summaryHasSiblings = useMemo(
+    () => visibleColumns.some((column) => column !== SUMMARY_COLUMN_ID),
+    [visibleColumns]
+  );
+
+  const internalSetVisibleColumns = useMemo<((columns: string[]) => void) | undefined>(() => {
+    if (!setVisibleColumns) {
+      return undefined;
+    }
+    if (mode === 'summary') {
+      return (columns: string[]) =>
+        setVisibleColumns(columns.filter((column) => column !== SUMMARY_COLUMN_ID));
+    }
+    return setVisibleColumns;
+  }, [mode, setVisibleColumns]);
 
   const sortingConfig = useMemo(() => {
     if (!sorting && !setSorting) {
@@ -312,6 +340,10 @@ export function PreviewTable({
             </ColumnHeaderTruncateContainer>
           ),
           actions: false as false,
+          isResizable: true,
+          initialWidth:
+            columnWidths[column] ??
+            (summaryHasSiblings ? SUMMARY_COLUMN_WIDTH_WITH_SIBLINGS : undefined),
         };
       }
 
@@ -362,6 +394,7 @@ export function PreviewTable({
     setSorting,
     setVisibleColumns,
     columnWidths,
+    summaryHasSiblings,
   ]);
 
   const [currentRowHeights, setCurrentRowHeights] = useState<
@@ -463,7 +496,7 @@ export function PreviewTable({
       columns={gridColumns}
       columnVisibility={{
         visibleColumns,
-        setVisibleColumns: setVisibleColumns || (() => {}),
+        setVisibleColumns: internalSetVisibleColumns || (() => {}),
         canDragAndDropColumns: false,
       }}
       sorting={sortingConfig}
@@ -524,13 +557,16 @@ export function PreviewTable({
 
           let rowHeight: number | undefined;
           if (currentRowHeights) {
-            if (
-              currentRowHeights.defaultHeight &&
-              typeof currentRowHeights.defaultHeight === 'object' &&
-              'lineCount' in currentRowHeights.defaultHeight &&
-              currentRowHeights.defaultHeight.lineCount
+            const { defaultHeight } = currentRowHeights;
+            if (defaultHeight === 'auto') {
+              rowHeight = ROWS_HEIGHT_OPTIONS.auto;
+            } else if (
+              defaultHeight &&
+              typeof defaultHeight === 'object' &&
+              'lineCount' in defaultHeight &&
+              defaultHeight.lineCount
             ) {
-              rowHeight = currentRowHeights.defaultHeight.lineCount;
+              rowHeight = defaultHeight.lineCount;
             }
           }
 
