@@ -20,7 +20,6 @@
  */
 
 import { z } from '@kbn/zod';
-import 'zod-metadata/register';
 import type { ConnectorSpec } from '../connector_spec';
 
 export const GreyNoiseConnector: ConnectorSpec = {
@@ -37,7 +36,7 @@ export const GreyNoiseConnector: ConnectorSpec = {
       type: 'header',
       customSchema: z.object({
         headers: z.object({
-          key: z.string().meta({ sensitive: true }).describe('API Key'),
+          key: z.string().describe('API Key'),
         }),
       }),
     },

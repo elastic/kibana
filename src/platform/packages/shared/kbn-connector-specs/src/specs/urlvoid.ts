@@ -20,7 +20,6 @@
  */
 
 import { z } from '@kbn/zod';
-import 'zod-metadata/register';
 import type { ConnectorSpec } from '../connector_spec';
 
 export const URLVoidConnector: ConnectorSpec = {
@@ -37,7 +36,7 @@ export const URLVoidConnector: ConnectorSpec = {
       type: 'header',
       customSchema: z.object({
         headers: z.object({
-          'X-Api-Key': z.string().meta({ sensitive: true }).describe('API Key'),
+          'X-Api-Key': z.string().describe('API Key'),
         }),
       }),
     },

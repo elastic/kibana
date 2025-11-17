@@ -8,13 +8,12 @@
  */
 
 import { z } from '@kbn/zod';
-import 'zod-metadata/register';
 import type { AxiosInstance } from 'axios';
 import type { AuthTypeSpec } from '../connector_spec';
 
 const authSchema = z.object({
   // these should default to being registered as a secret field so we don't explicitly define it here
-  headers: z.record(z.string(), z.string()).meta({ sensitive: true }).describe('Custom Headers'),
+  headers: z.record(z.string(), z.string()).describe('Custom Headers'),
 });
 
 type AuthSchemaType = z.infer<typeof authSchema>;
