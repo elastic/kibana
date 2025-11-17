@@ -66,11 +66,10 @@ function castFieldIfNeeded(fieldName: string, fieldType: string | undefined): st
  * @returns A complete ESQL query string.
  */
 export function createESQLQuery({ metric, dimensions = [], filters = {} }: CreateESQLQueryParams) {
-  const { name: metricField, instrument, index, dimensions: metricDimensions } = metric;
+  const { name: metricField, instrument, index } = metric;
   const source = timeseries(index);
 
   const whereConditions: QueryOperator[] = [];
-  const dimensionTypeMap = new Map(metricDimensions?.map((dim) => [dim.name, dim.type]));
 
   Object.entries(filters).forEach(([key, values]) => {
     const escapedKey = sanitazeESQLInput(key);
