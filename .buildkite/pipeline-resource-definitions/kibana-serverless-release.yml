@@ -47,4 +47,4 @@ spec:
           branch: main
       tags:
         - kibana
-        - kibana-serverless-release
+        - :kibana: Kibana release path
