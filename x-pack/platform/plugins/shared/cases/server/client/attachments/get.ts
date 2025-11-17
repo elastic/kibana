@@ -43,8 +43,8 @@ import { AttachmentRt, AttachmentsRt } from '../../../common/types/domain';
 const normalizeDocumentResponse = (
   documents: Array<SavedObject<AlertAttachmentAttributes | EventAttachmentAttributes>>
 ): DocumentResponse =>
-  documents.reduce((acc: DocumentResponse, alert) => {
-    const { ids, indices } = getIDsAndIndicesAsArrays(alert.attributes);
+  documents.reduce((acc: DocumentResponse, document) => {
+    const { ids, indices } = getIDsAndIndicesAsArrays(document.attributes);
 
     if (ids.length !== indices.length) {
       return acc;
@@ -54,7 +54,7 @@ const normalizeDocumentResponse = (
       ...ids.map((id, index) => ({
         id,
         index: indices[index],
-        attached_at: alert.attributes.created_at,
+        attached_at: document.attributes.created_at,
       }))
     );
     return acc;
@@ -94,9 +94,9 @@ export const getAllDocumentsAttachedToCase = async (
     });
 
     ensureSavedObjectsAreAuthorized(
-      documents.map((alert) => ({
-        owner: alert.attributes.owner,
-        id: alert.id,
+      documents.map((document) => ({
+        owner: document.attributes.owner,
+        id: document.id,
       }))
     );
 
