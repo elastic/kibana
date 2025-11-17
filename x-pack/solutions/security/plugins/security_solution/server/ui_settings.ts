@@ -50,11 +50,7 @@ import {
   ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING,
   SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM,
-  DEFAULT_VALUE_REPORT_MINUTES,
-  DEFAULT_VALUE_REPORT_RATE,
-  DEFAULT_VALUE_REPORT_TITLE,
   ENABLE_ESQL_RISK_SCORING,
-  DEFAULT_AI_CONNECTOR,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
