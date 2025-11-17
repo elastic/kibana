@@ -79,7 +79,6 @@ import { EffectedPolicySelect } from '../../../../components/effected_policy_sel
 import { ExceptionItemComments } from '../../../../../detection_engine/rule_exceptions/components/item_comments';
 import { EventFiltersApiClient } from '../../service/api_client';
 import { ShowValueListModal } from '../../../../../value_list/components/show_value_list_modal';
-import { ProcessDescendantsTooltip } from './process_descendant_tooltip';
 import type { ExceptionEntries } from '../../../../../../common/endpoint/types/exception_list_items';
 
 const OPERATING_SYSTEMS: readonly OperatingSystem[] = [
