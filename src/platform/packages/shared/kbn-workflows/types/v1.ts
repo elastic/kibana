@@ -162,6 +162,7 @@ export interface WorkflowExecutionDto {
   workflowId?: string;
   workflowName?: string;
   workflowDefinition: WorkflowYaml;
+  /** If specified, only this step and its children were executed */
   stepId?: string | undefined;
   stepExecutions: WorkflowStepExecutionDto[];
   duration: number | null;
@@ -429,3 +430,11 @@ export interface EnhancedInternalConnectorContract extends InternalConnectorCont
 }
 
 export type ConnectorContractUnion = DynamicConnectorContract | EnhancedInternalConnectorContract;
+
+export interface WorkflowsSearchParams {
+  limit: number;
+  page: number;
+  query?: string;
+  createdBy?: string[];
+  enabled?: boolean[];
+}
