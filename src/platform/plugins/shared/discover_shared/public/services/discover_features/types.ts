@@ -14,6 +14,7 @@ import type { Query, TimeRange } from '@kbn/es-query';
 import type { SpanLinks, ErrorsByTraceId, TraceRootSpan, SpanDocument } from '@kbn/apm-types';
 import type { ProcessorEvent } from '@kbn/apm-types-shared';
 import type { HistogramItem } from '@kbn/apm-types-shared';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import type { FeaturesRegistry } from '../../../common';
 
 /**
@@ -30,6 +31,7 @@ import type { FeaturesRegistry } from '../../../common';
 
 export interface ObservabilityStreamsFeatureRenderDeps {
   doc: DataTableRecord;
+  dataView: DataView;
 }
 
 export interface ObservabilityStreamsFeature {
