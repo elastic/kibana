@@ -21,5 +21,6 @@
     "@kbn/field-types",
     "@kbn/utility-types",
     "@kbn/config-schema",
+    "@kbn/es-query",
   ]
 }
