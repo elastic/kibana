@@ -415,6 +415,7 @@ export const ScheduledReportForm = ({
                       editMode ||
                       !reportingHealth.areNotificationsEnabled ||
                       (!hasManageReportingPrivilege && !userProfile?.user.email),
+                    'data-test-subj': 'sendByEmailToggle',
                   },
                 }}
               />
