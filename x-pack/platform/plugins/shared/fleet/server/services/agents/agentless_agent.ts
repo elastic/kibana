@@ -11,6 +11,7 @@ import type { ElasticsearchClient, LogMeta, SavedObjectsClientContract } from '@
 import type { Logger } from '@kbn/logging';
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
 import pRetry, { type FailedAttemptError } from 'p-retry';
+import { pick } from 'lodash';
 
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import axios from 'axios';
@@ -523,7 +524,15 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     return JSON.stringify({
       ...requestConfig,
       data: {
-        ...requestConfig.data,
+        ...pick(
+          requestConfig.data,
+          'policy_id',
+          'fleet_url',
+          'labels',
+          'resources',
+          'cloud_connectors'
+        ),
+        agent_policy: '[REDACTED]',
         fleet_token: '[REDACTED]',
       },
       httpsAgent: {
@@ -553,7 +562,6 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
       http: {
         request: {
           id: traceId,
-          body: requestConfig.data,
         },
       },
     };
@@ -643,7 +651,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
   ) {
     logger.error(
       `${logMessage} ${JSON.stringify(response.status)} ${JSON.stringify(
-        response.data
+        pick(response.data ?? {}, 'code', 'error')
       )}} ${requestConfigDebugStatus}`,
       {
         ...errorMetadataWithRequestConfig,
@@ -651,7 +659,6 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
           ...errorMetadataWithRequestConfig.http,
           response: {
             status_code: response?.status,
-            body: response?.data,
           },
         },
       }
