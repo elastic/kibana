@@ -104,6 +104,7 @@ const StoryWrapper: React.FC<{
         // Create a mock execution with stepExecutions
         const mockExecution: WorkflowExecutionDto = {
           id: 'test-execution',
+          isTestRun: false,
           spaceId: 'default',
           workflowId: 'test-workflow',
           status: ExecutionStatus.RUNNING,

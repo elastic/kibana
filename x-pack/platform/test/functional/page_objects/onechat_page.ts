@@ -112,10 +112,46 @@ export class OneChatPageObject extends FtrService {
     return await this.getCurrentConversationIdFromUrl();
   }
 
+  async openConversationsHistory() {
+    // Only open if not already open
+    if (await this.isConversationsHistoryOpen()) {
+      return;
+    }
+
+    const conversationsHistoryToggleBtn = await this.testSubjects.find(
+      'onechatConversationsHistoryToggleBtn'
+    );
+    await conversationsHistoryToggleBtn.click();
+
+    // Wait for the conversations history popover to be visible and populated
+    await this.retry.try(async () => {
+      const conversationList = await this.testSubjects.find('agentBuilderConversationList');
+      // Verify the list is actually visible and has content
+      const isDisplayed = await conversationList.isDisplayed();
+      if (!isDisplayed) {
+        throw new Error('Conversation list is not displayed');
+      }
+    });
+  }
+
+  /**
+   * Check if the conversations history popover is currently open
+   */
+  async isConversationsHistoryOpen(): Promise<boolean> {
+    try {
+      const conversationList = await this.testSubjects.find('agentBuilderConversationList');
+      return await conversationList.isDisplayed();
+    } catch {
+      return false;
+    }
+  }
+
   /**
    * Navigate to an existing conversation by clicking on it in the history sidebar
    */
   async navigateToConversationViaHistory(conversationId: string) {
+    await this.openConversationsHistory();
+
     const conversationItem = await this.testSubjects.find(`conversationItem-${conversationId}`);
     await conversationItem.click();
   }
@@ -154,13 +190,16 @@ export class OneChatPageObject extends FtrService {
    * Delete a conversation by hovering and clicking the delete button
    */
   async deleteConversation(conversationId: string) {
+    await this.openConversationsHistory();
+
+    // Click on conversation to open it
     const conversationItem = await this.testSubjects.find(`conversationItem-${conversationId}`);
+    await conversationItem.click();
+    // Click on conversation title (it's a button)
+    const titleElement = await this.testSubjects.find('agentBuilderConversationTitle');
+    await titleElement.click();
 
-    await conversationItem.moveMouseTo();
-
-    const deleteButton = await this.testSubjects.find(
-      `delete-conversation-button-${conversationId}`
-    );
+    const deleteButton = await this.testSubjects.find('agentBuilderConversationDeleteButton');
     await deleteButton.click();
 
     const confirmButton = await this.testSubjects.find('confirmModalConfirmButton');
@@ -176,6 +215,8 @@ export class OneChatPageObject extends FtrService {
    * Check if a conversation exists in the history by conversation ID
    */
   async isConversationInHistory(conversationId: string): Promise<boolean> {
+    await this.openConversationsHistory();
+
     try {
       await this.testSubjects.find(`conversationItem-${conversationId}`);
       return true;

@@ -16,6 +16,7 @@ import useUnmount from 'react-use/lib/useUnmount';
 import type { AppMountParameters } from '@kbn/core/public';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import useLatest from 'react-use/lib/useLatest';
+import { i18n } from '@kbn/i18n';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import {
@@ -251,11 +252,25 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
     <rootProfileState.AppWrapper>
       <ChartPortalsRenderer runtimeStateManager={runtimeStateManager}>
         <DiscoverTopNavMenuProvider>
-          {tabsEnabled && customizationContext.displayMode !== 'embedded' ? (
-            <TabsView {...props} />
-          ) : (
-            <SingleTabView {...props} />
-          )}
+          <>
+            <h1 className="euiScreenReaderOnly" data-test-subj="discoverSavedSearchTitle">
+              {persistedDiscoverSession?.title
+                ? i18n.translate('discover.pageTitleWithSavedSearch', {
+                    defaultMessage: 'Discover - {savedSearchTitle}',
+                    values: {
+                      savedSearchTitle: persistedDiscoverSession.title,
+                    },
+                  })
+                : i18n.translate('discover.pageTitleWithoutSavedSearch', {
+                    defaultMessage: 'Discover - Session not yet saved',
+                  })}
+            </h1>
+            {tabsEnabled && customizationContext.displayMode !== 'embedded' ? (
+              <TabsView {...props} />
+            ) : (
+              <SingleTabView {...props} />
+            )}
+          </>
         </DiscoverTopNavMenuProvider>
       </ChartPortalsRenderer>
     </rootProfileState.AppWrapper>
