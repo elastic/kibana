@@ -26,6 +26,7 @@ import capitalize from 'lodash/capitalize';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowYaml } from '@kbn/workflows';
+import { normalizeInputsToJsonSchema } from '@kbn/workflows/spec/lib/input_conversion';
 import { useExecutionInput } from './use_execution_input/use_execution_input';
 import { WorkflowExecuteEventForm } from './workflow_execute_event_form';
 import { WorkflowExecuteIndexForm } from './workflow_execute_index_form';
@@ -40,7 +41,10 @@ function getDefaultTrigger(definition: WorkflowYaml | null): TriggerType {
   }
 
   const hasManualTrigger = definition.triggers?.some((trigger) => trigger.type === 'manual');
-  const hasInputs = definition.inputs && definition.inputs.length > 0;
+  // Check if inputs exist and have properties (handles both new and legacy formats)
+  const normalizedInputs = normalizeInputsToJsonSchema(definition.inputs);
+  const hasInputs =
+    normalizedInputs?.properties && Object.keys(normalizedInputs.properties).length > 0;
 
   if (hasManualTrigger && hasInputs) {
     return 'manual';
@@ -84,11 +88,15 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
     );
 
     const shouldAutoRun = useMemo(() => {
-      if (
-        definition &&
-        !definition.triggers?.some((trigger) => trigger.type === 'alert') &&
-        !definition.inputs
-      ) {
+      if (!definition) {
+        return false;
+      }
+      const hasAlertTrigger = definition.triggers?.some((trigger) => trigger.type === 'alert');
+      const normalizedInputs = normalizeInputsToJsonSchema(definition.inputs);
+      const hasInputs =
+        normalizedInputs?.properties && Object.keys(normalizedInputs.properties).length > 0;
+
+      if (!hasAlertTrigger && !hasInputs) {
         return true;
       }
       return false;
@@ -105,7 +113,10 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         setSelectedTrigger('alert');
         return;
       }
-      if (definition?.inputs) {
+      const normalizedInputs = definition
+        ? normalizeInputsToJsonSchema(definition.inputs)
+        : undefined;
+      if (normalizedInputs?.properties && Object.keys(normalizedInputs.properties).length > 0) {
         setSelectedTrigger('manual');
       }
     }, [shouldAutoRun, onSubmit, onClose, definition]);

@@ -11,8 +11,12 @@ import Ajv from 'ajv/dist/2020';
 import type { JSONSchema7 } from 'json-schema';
 
 // Meta-schema for JSON Schema Draft 7
-// Using a simplified validation approach since we don't have the full meta-schema
-const ajv = new Ajv({ strict: false, allErrors: true, validateFormats: false });
+// Enable format validation to support email, uri, date-time, etc.
+const ajv = new Ajv({
+  strict: false,
+  allErrors: true,
+  validateFormats: true, // Enable format validation for email, uri, date-time, etc.
+});
 
 /**
  * Validates if the provided value is a valid JSON Schema (Draft 7)
@@ -28,7 +32,7 @@ export function isValidJsonSchema(schema: unknown): schema is JSONSchema7 {
   const schemaObj = schema as Record<string, unknown>;
 
   // Must have a type property (or be a valid schema structure)
-  // JSON Schema can have: type, $ref, allOf, anyOf, oneOf, not, etc.
+  // JSON Schema can have: type, $ref, allOf, anyOf, oneOf, not, const, enum, etc.
   // For simplicity, we check for common JSON Schema properties
   const hasValidStructure =
     'type' in schemaObj ||
@@ -37,6 +41,7 @@ export function isValidJsonSchema(schema: unknown): schema is JSONSchema7 {
     'anyOf' in schemaObj ||
     'oneOf' in schemaObj ||
     'not' in schemaObj ||
+    'const' in schemaObj ||
     'enum' in schemaObj;
 
   if (!hasValidStructure) {
@@ -52,4 +57,3 @@ export function isValidJsonSchema(schema: unknown): schema is JSONSchema7 {
     return false;
   }
 }
-

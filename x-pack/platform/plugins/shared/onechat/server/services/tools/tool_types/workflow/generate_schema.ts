@@ -7,79 +7,87 @@
 
 import { z } from '@kbn/zod';
 import type { WorkflowDetailDto } from '@kbn/workflows/types/v1';
-import type { WorkflowInputSchema } from '@kbn/workflows/spec/schema';
+import { normalizeInputsToJsonSchema } from '@kbn/workflows/spec/lib/input_conversion';
+// Note: convertJsonSchemaToZod is in the workflows_management plugin, not in the kbn-workflows package
+// For now, we'll use z.any() as a fallback for complex JSON Schema types
+import type { JSONSchema7 } from 'json-schema';
 
-type InputType = z.infer<typeof WorkflowInputSchema>;
+// Simple JSON Schema to Zod converter for basic types
+function convertJsonSchemaToZodSimple(schema: JSONSchema7): z.ZodTypeAny {
+  switch (schema.type) {
+    case 'string':
+      return z.string();
+    case 'number':
+    case 'integer':
+      return z.number();
+    case 'boolean':
+      return z.boolean();
+    case 'array': {
+      const items = schema.items as JSONSchema7 | undefined;
+      if (items) {
+        return z.array(convertJsonSchemaToZodSimple(items));
+      }
+      return z.array(z.any());
+    }
+    case 'object': {
+      if (schema.properties) {
+        const shape: Record<string, z.ZodTypeAny> = {};
+        for (const [key, propSchema] of Object.entries(schema.properties)) {
+          const prop = propSchema as JSONSchema7;
+          const isRequired = schema.required?.includes(key) ?? false;
+          let zodProp = convertJsonSchemaToZodSimple(prop);
+          if (!isRequired) {
+            zodProp = zodProp.optional();
+          }
+          shape[key] = zodProp;
+        }
+        return z.object(shape);
+      }
+      return z.record(z.any());
+    }
+    default:
+      return z.any();
+  }
+}
 
 export const generateSchema = ({ workflow }: { workflow: WorkflowDetailDto }): z.ZodObject<any> => {
   if (!workflow.definition || !workflow.definition.inputs) {
     return z.object({});
   }
 
-  const inputs = workflow.definition.inputs;
+  // Normalize inputs to the new JSON Schema format (handles backward compatibility)
+  const normalizedInputs = normalizeInputsToJsonSchema(workflow.definition.inputs);
+
+  if (!normalizedInputs?.properties) {
+    return z.object({});
+  }
 
   const schemaFields: Record<string, z.ZodTypeAny> = {};
-  for (const input of inputs) {
-    schemaFields[input.name] = generateField(input);
+
+  for (const [propertyName, propertySchema] of Object.entries(normalizedInputs.properties)) {
+    const jsonSchema = propertySchema as JSONSchema7;
+
+    // Convert JSON Schema to Zod schema
+    let field: z.ZodTypeAny = convertJsonSchemaToZodSimple(jsonSchema);
+
+    // Apply description
+    if (jsonSchema.description) {
+      field = field.describe(jsonSchema.description);
+    }
+
+    // Check if this property is required
+    const isRequired = normalizedInputs.required?.includes(propertyName) ?? false;
+    if (!isRequired) {
+      field = field.optional();
+    }
+
+    // Apply default value if present
+    if (jsonSchema.default !== undefined) {
+      field = field.default(jsonSchema.default);
+    }
+
+    schemaFields[propertyName] = field;
   }
 
   return z.object(schemaFields).describe('Parameters needed to execute the workflow');
-};
-
-const generateField = (input: InputType) => {
-  let field: z.ZodTypeAny;
-
-  switch (input.type) {
-    case 'string':
-      field = z.string();
-      break;
-    case 'number':
-      field = z.number();
-      break;
-    case 'boolean':
-      field = z.boolean();
-      break;
-    case 'choice':
-      field = z.enum(input.options as [string, ...string[]]);
-      break;
-    case 'array': {
-      const arraySchemas = [z.array(z.string()), z.array(z.number()), z.array(z.boolean())];
-      const { minItems, maxItems } = input;
-      const applyConstraints = (schema: z.ZodArray<z.ZodString | z.ZodNumber | z.ZodBoolean>) => {
-        let s = schema;
-        if (minItems != null) s = s.min(minItems);
-        if (maxItems != null) s = s.max(maxItems);
-        return s;
-      };
-      const arr = z.union(
-        arraySchemas.map(applyConstraints) as [
-          z.ZodArray<z.ZodString>,
-          z.ZodArray<z.ZodNumber>,
-          z.ZodArray<z.ZodBoolean>
-        ]
-      );
-      field = input.required ? arr : arr.optional();
-      break;
-    }
-    case 'json-schema': {
-      // For JSON Schema inputs, use z.any() as a fallback since we can't easily convert
-      // JSON Schema to Zod in this context (would require importing the converter)
-      // The actual validation will happen at runtime
-      field = z.any();
-      break;
-    }
-    default:
-      field = z.any();
-      break;
-  }
-
-  field = field.describe(input.description ?? input.name);
-  if (input.required !== true) {
-    field = field.optional();
-  }
-  if (input.default) {
-    field = field.default(input.default);
-  }
-
-  return field;
 };

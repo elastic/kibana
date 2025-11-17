@@ -8,62 +8,46 @@
  */
 
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import type { JSONSchema7 } from 'json-schema';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
-import type { WorkflowInputChoiceSchema, WorkflowInputSchema, WorkflowYaml } from '@kbn/workflows';
+import type { WorkflowYaml } from '@kbn/workflows';
+import { normalizeInputsToJsonSchema } from '@kbn/workflows/spec/lib/input_conversion';
 import { z } from '@kbn/zod';
 import { convertJsonSchemaToZod } from '../../../../common/lib/json_schema_to_zod';
-import type { JSONSchema7 } from 'json-schema';
 
-const makeWorkflowInputsValidator = (inputs: Array<z.infer<typeof WorkflowInputSchema>>) => {
-  return z.object(
-    inputs.reduce((acc, input) => {
-      switch (input.type) {
-        case 'string':
-          acc[input.name] = input.required ? z.string() : z.string().optional();
-          break;
-        case 'number':
-          acc[input.name] = input.required ? z.number() : z.number().optional();
-          break;
-        case 'boolean':
-          acc[input.name] = input.required ? z.boolean() : z.boolean().optional();
-          break;
-        case 'choice':
-          acc[input.name] = input.required
-            ? z.enum(input.options as [string, ...string[]])
-            : z.enum(input.options as [string, ...string[]]).optional();
-          break;
-        case 'array': {
-          const arraySchemas = [z.array(z.string()), z.array(z.number()), z.array(z.boolean())];
-          const { minItems, maxItems } = input;
-          const applyConstraints = (
-            schema: z.ZodArray<z.ZodString | z.ZodNumber | z.ZodBoolean>
-          ) => {
-            let s = schema;
-            if (minItems != null) s = s.min(minItems);
-            if (maxItems != null) s = s.max(maxItems);
-            return s;
-          };
-          const arr = z.union(
-            arraySchemas.map(applyConstraints) as [
-              z.ZodArray<z.ZodString>,
-              z.ZodArray<z.ZodNumber>,
-              z.ZodArray<z.ZodBoolean>
-            ]
-          );
-          acc[input.name] = input.required ? arr : arr.optional();
-          break;
-        }
-        case 'json-schema': {
-          const zodSchema = convertJsonSchemaToZod(input.schema);
-          acc[input.name] = input.required ? zodSchema : zodSchema.optional();
-          break;
-        }
-      }
-      return acc;
-    }, {} as Record<string, z.ZodType>)
-  );
+const makeWorkflowInputsValidator = (inputs: WorkflowYaml['inputs']) => {
+  // Normalize inputs to the new JSON Schema format (handles backward compatibility)
+  const normalizedInputs = normalizeInputsToJsonSchema(inputs);
+
+  if (!normalizedInputs?.properties) {
+    return z.object({});
+  }
+
+  const validatorObject: Record<string, z.ZodType> = {};
+
+  for (const [propertyName, propertySchema] of Object.entries(normalizedInputs.properties)) {
+    const jsonSchema = propertySchema as JSONSchema7;
+
+    // Convert JSON Schema to Zod schema
+    let zodSchema: z.ZodType = convertJsonSchemaToZod(jsonSchema);
+
+    // Apply default value if present
+    if (jsonSchema.default !== undefined) {
+      zodSchema = zodSchema.default(jsonSchema.default);
+    }
+
+    // Check if this property is required
+    const isRequired = normalizedInputs.required?.includes(propertyName) ?? false;
+    if (!isRequired) {
+      zodSchema = zodSchema.optional();
+    }
+
+    validatorObject[propertyName] = zodSchema;
+  }
+
+  return z.object(validatorObject);
 };
 
 interface WorkflowExecuteManualFormProps {
@@ -82,7 +66,9 @@ type WorkflowInputPlaceholder =
   | number[]
   | boolean[]
   | Record<string, unknown>
-  | ((input: z.infer<typeof WorkflowInputSchema>) => string | number | boolean | string[] | number[] | boolean[] | Record<string, unknown>);
+  | ((
+      input: z.infer<typeof WorkflowInputSchema>
+    ) => string | number | boolean | string[] | number[] | boolean[] | Record<string, unknown>);
 
 /**
  * Generates a sample object from a JSON Schema
@@ -126,33 +112,23 @@ function generateSampleFromJsonSchema(schema: JSONSchema7): unknown {
   }
 }
 
-const defaultWorkflowInputsMappings: Record<string, WorkflowInputPlaceholder> = {
-  string: 'Enter a string',
-  number: 0,
-  boolean: false,
-  choice: (input: z.infer<typeof WorkflowInputSchema>) =>
-    `Select an option: ${(input as z.infer<typeof WorkflowInputChoiceSchema>).options.join(', ')}`,
-  array: (input: z.infer<typeof WorkflowInputSchema>) =>
-    'Enter array of strings, numbers or booleans',
-  'json-schema': (input: z.infer<typeof WorkflowInputSchema>) => {
-    if (input.type === 'json-schema') {
-      return generateSampleFromJsonSchema(input.schema);
-    }
-    return {};
-  },
-};
-
 const getDefaultWorkflowInput = (definition: WorkflowYaml): string => {
-  const inputPlaceholder: Record<string, WorkflowInputPlaceholder> = {};
+  // Normalize inputs to the new JSON Schema format (handles backward compatibility)
+  const normalizedInputs = normalizeInputsToJsonSchema(definition.inputs);
 
-  if (definition.inputs) {
-    definition.inputs.forEach((input: z.infer<typeof WorkflowInputSchema>) => {
-      let placeholder: WorkflowInputPlaceholder = defaultWorkflowInputsMappings[input.type];
-      if (typeof placeholder === 'function') {
-        placeholder = placeholder(input);
+  const inputPlaceholder: Record<string, unknown> = {};
+
+  if (normalizedInputs?.properties) {
+    for (const [propertyName, propertySchema] of Object.entries(normalizedInputs.properties)) {
+      const jsonSchema = propertySchema as JSONSchema7;
+
+      // Use default value if present, otherwise generate a sample
+      if (jsonSchema.default !== undefined) {
+        inputPlaceholder[propertyName] = jsonSchema.default;
+      } else {
+        inputPlaceholder[propertyName] = generateSampleFromJsonSchema(jsonSchema);
       }
-      inputPlaceholder[input.name] = input.default || placeholder;
-    });
+    }
   }
 
   return JSON.stringify(inputPlaceholder, null, 2);
@@ -166,7 +142,7 @@ export const WorkflowExecuteManualForm = ({
   setErrors,
 }: WorkflowExecuteManualFormProps): React.JSX.Element => {
   const inputsValidator = useMemo(
-    () => makeWorkflowInputsValidator(definition?.inputs || []),
+    () => makeWorkflowInputsValidator(definition?.inputs),
     [definition?.inputs]
   );
 

@@ -8,15 +8,16 @@
  */
 
 import type { JSONSchema7 } from 'json-schema';
+import type { z } from '@kbn/zod';
 import type {
-  WorkflowInputSchema,
-  WorkflowInputStringSchema,
-  WorkflowInputNumberSchema,
+  WorkflowInputArraySchema,
   WorkflowInputBooleanSchema,
   WorkflowInputChoiceSchema,
-  WorkflowInputArraySchema,
+  WorkflowInputNumberSchema,
+  WorkflowInputSchema,
+  WorkflowInputsJsonSchema,
+  WorkflowInputStringSchema,
 } from '../schema';
-import { z } from '@kbn/zod';
 
 type LegacyWorkflowInput =
   | z.infer<typeof WorkflowInputStringSchema>
@@ -25,101 +26,105 @@ type LegacyWorkflowInput =
   | z.infer<typeof WorkflowInputChoiceSchema>
   | z.infer<typeof WorkflowInputArraySchema>;
 
-type WorkflowInputWithJsonSchema = {
-  name: string;
-  description?: string;
-  required?: boolean;
-  default?: unknown;
-  type: 'json-schema';
-  schema: JSONSchema7;
-};
+type WorkflowInputsJsonSchemaType = z.infer<typeof WorkflowInputsJsonSchema>;
 
 /**
- * Converts a legacy workflow input to JSON Schema format
+ * Converts a legacy workflow input definition to a JSON Schema property
  * @param input - The legacy input to convert
- * @returns The input in JSON Schema format
+ * @returns A JSON Schema property definition
  */
-export function convertLegacyInputToJsonSchema(
-  input: LegacyWorkflowInput
-): WorkflowInputWithJsonSchema {
-  const base = {
-    name: input.name,
-    description: input.description,
-    required: input.required,
-    default: input.default,
+function convertLegacyInputToJsonSchemaProperty(input: LegacyWorkflowInput): JSONSchema7 {
+  const property: JSONSchema7 = {
+    type: input.type === 'choice' ? 'string' : input.type,
   };
 
+  if (input.description) {
+    property.description = input.description;
+  }
+
+  if (input.default !== undefined) {
+    property.default = input.default;
+  }
+
   switch (input.type) {
-    case 'string': {
-      return {
-        ...base,
-        type: 'json-schema',
-        schema: { type: 'string' },
-      };
-    }
-    case 'number': {
-      return {
-        ...base,
-        type: 'json-schema',
-        schema: { type: 'number' },
-      };
-    }
-    case 'boolean': {
-      return {
-        ...base,
-        type: 'json-schema',
-        schema: { type: 'boolean' },
-      };
-    }
-    case 'choice': {
-      return {
-        ...base,
-        type: 'json-schema',
-        schema: {
-          type: 'string',
-          enum: input.options,
-        },
-      };
-    }
+    case 'choice':
+      property.enum = input.options;
+      break;
     case 'array': {
-      const schema: JSONSchema7 = {
-        type: 'array',
-        items: {
-          anyOf: [{ type: 'string' }, { type: 'number' }, { type: 'boolean' }],
-        },
+      property.items = {
+        anyOf: [{ type: 'string' }, { type: 'number' }, { type: 'boolean' }],
       };
       if (input.minItems !== undefined) {
-        schema.minItems = input.minItems;
+        property.minItems = input.minItems;
       }
       if (input.maxItems !== undefined) {
-        schema.maxItems = input.maxItems;
+        property.maxItems = input.maxItems;
       }
-      return {
-        ...base,
-        type: 'json-schema',
-        schema,
-      };
+      break;
     }
-    default: {
-      // TypeScript exhaustiveness check
-      const _exhaustive: never = input;
-      throw new Error(`Unknown input type: ${(_exhaustive as LegacyWorkflowInput).type}`);
-    }
+    default:
+      // string, number, boolean - already handled
+      break;
   }
+
+  return property;
 }
 
 /**
- * Normalizes any workflow input to JSON Schema format
- * If the input is already in JSON Schema format, returns it as-is
- * @param input - The input to normalize
- * @returns The input in JSON Schema format
+ * Converts legacy array-based inputs format to the new JSON Schema object format
+ * @param legacyInputs - Array of legacy input definitions
+ * @returns The inputs in the new JSON Schema object format
  */
-export function normalizeInputToJsonSchema(
-  input: z.infer<typeof WorkflowInputSchema>
-): WorkflowInputWithJsonSchema {
-  if (input.type === 'json-schema') {
-    return input;
+export function convertLegacyInputsToJsonSchema(
+  legacyInputs: Array<z.infer<typeof WorkflowInputSchema>>
+): WorkflowInputsJsonSchemaType {
+  const properties: Record<string, JSONSchema7> = {};
+  const required: string[] = [];
+
+  for (const input of legacyInputs) {
+    // Convert the input to a JSON Schema property
+    const property = convertLegacyInputToJsonSchemaProperty(input as LegacyWorkflowInput);
+
+    // Add to properties using the input name as the key
+    properties[input.name] = property;
+
+    // If the input is required, add to required array
+    if (input.required === true) {
+      required.push(input.name);
+    }
   }
-  return convertLegacyInputToJsonSchema(input as LegacyWorkflowInput);
+
+  return {
+    properties,
+    ...(required.length > 0 ? { required } : {}),
+    additionalProperties: false,
+  };
 }
 
+/**
+ * Normalizes workflow inputs to the new JSON Schema object format
+ * If inputs are already in the new format, returns them as-is
+ * If inputs are in the legacy array format, converts them
+ * @param inputs - The inputs to normalize (can be array or JSON Schema object)
+ * @returns The inputs in the new JSON Schema object format, or undefined if no inputs
+ */
+export function normalizeInputsToJsonSchema(
+  inputs?: WorkflowInputsJsonSchemaType | Array<z.infer<typeof WorkflowInputSchema>>
+): WorkflowInputsJsonSchemaType | undefined {
+  if (!inputs) {
+    return undefined;
+  }
+
+  // If it's already in the new format (has properties), return as-is
+  if ('properties' in inputs && typeof inputs === 'object' && inputs !== null) {
+    return inputs as WorkflowInputsJsonSchemaType;
+  }
+
+  // If it's an array, convert it
+  if (Array.isArray(inputs)) {
+    return convertLegacyInputsToJsonSchema(inputs);
+  }
+
+  // Fallback: return undefined
+  return undefined;
+}

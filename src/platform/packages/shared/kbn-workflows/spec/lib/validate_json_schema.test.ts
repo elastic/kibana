@@ -168,5 +168,124 @@ describe('isValidJsonSchema', () => {
     };
     expect(isValidJsonSchema(schema)).toBe(true);
   });
-});
 
+  it('should validate schema with email format', () => {
+    const schema = {
+      type: 'string',
+      format: 'email',
+    };
+    expect(isValidJsonSchema(schema)).toBe(true);
+  });
+
+  it('should validate schema with uri format', () => {
+    const schema = {
+      type: 'string',
+      format: 'uri',
+    };
+    expect(isValidJsonSchema(schema)).toBe(true);
+  });
+
+  it('should validate schema with date-time format', () => {
+    const schema = {
+      type: 'string',
+      format: 'date-time',
+    };
+    expect(isValidJsonSchema(schema)).toBe(true);
+  });
+
+  it('should validate schema with regex pattern', () => {
+    const schema = {
+      type: 'string',
+      pattern: '^\\d{5}(-\\d{4})?$', // US ZIP code pattern
+    };
+    expect(isValidJsonSchema(schema)).toBe(true);
+  });
+
+  it('should validate schema with minLength and maxLength', () => {
+    const schema = {
+      type: 'string',
+      minLength: 1,
+      maxLength: 100,
+    };
+    expect(isValidJsonSchema(schema)).toBe(true);
+  });
+
+  it('should validate schema with minimum and maximum', () => {
+    const schema = {
+      type: 'number',
+      minimum: 0,
+      maximum: 100,
+    };
+    expect(isValidJsonSchema(schema)).toBe(true);
+  });
+
+  it('should validate schema with $ref (reference)', () => {
+    const schema = {
+      $ref: '#/definitions/User',
+      definitions: {
+        User: {
+          type: 'object',
+          properties: {
+            name: { type: 'string' },
+          },
+        },
+      },
+    };
+    expect(isValidJsonSchema(schema)).toBe(true);
+  });
+
+  it('should validate schema with not (negation)', () => {
+    const schema = {
+      not: { type: 'null' },
+    };
+    expect(isValidJsonSchema(schema)).toBe(true);
+  });
+
+  it('should validate schema with additionalProperties', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+      },
+      additionalProperties: false,
+    };
+    expect(isValidJsonSchema(schema)).toBe(true);
+  });
+
+  it('should validate schema with additionalProperties as schema', () => {
+    const schema = {
+      type: 'object',
+      properties: {
+        name: { type: 'string' },
+      },
+      additionalProperties: {
+        type: 'string',
+      },
+    };
+    expect(isValidJsonSchema(schema)).toBe(true);
+  });
+
+  it('should validate schema with const (constant value)', () => {
+    const schema = {
+      const: 'fixed-value',
+    };
+    expect(isValidJsonSchema(schema)).toBe(true);
+  });
+
+  it('should validate schema with multipleOf', () => {
+    const schema = {
+      type: 'number',
+      multipleOf: 2,
+    };
+    expect(isValidJsonSchema(schema)).toBe(true);
+  });
+
+  it('should validate schema with uniqueItems for arrays', () => {
+    const schema = {
+      type: 'array',
+      items: { type: 'string' },
+      uniqueItems: true,
+    };
+    expect(isValidJsonSchema(schema)).toBe(true);
+  });
+});

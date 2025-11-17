@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { WorkflowSchemaForAutocomplete, WorkflowInputJsonSchemaSchema, WorkflowInputSchema, WorkflowSchema } from './schema';
+import { WorkflowInputsJsonSchema, WorkflowSchema, WorkflowSchemaForAutocomplete } from './schema';
 
 describe('WorkflowSchemaForAutocomplete', () => {
   it('should allow empty "with" block', () => {
@@ -122,200 +122,177 @@ describe('WorkflowSchemaForAutocomplete', () => {
   });
 });
 
-describe('WorkflowInputJsonSchemaSchema', () => {
-  it('should validate a simple JSON Schema input', () => {
-    const input = {
-      name: 'fields',
-      type: 'json-schema',
-      schema: {
-        type: 'object',
-        properties: {
-          email: { type: 'string' },
-          name: { type: 'string' },
+describe('WorkflowInputsJsonSchema', () => {
+  it('should validate a simple JSON Schema inputs object', () => {
+    const inputs = {
+      properties: {
+        username: {
+          type: 'string',
+          description: "User's username",
         },
-        required: ['email', 'name'],
+        age: {
+          type: 'number',
+          description: "User's age",
+          default: 18,
+        },
       },
+      required: ['username'],
+      additionalProperties: false,
     };
-    const result = WorkflowInputJsonSchemaSchema.safeParse(input);
+    const result = WorkflowInputsJsonSchema.safeParse(inputs);
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.name).toBe('fields');
-      expect(result.data.type).toBe('json-schema');
-      expect(result.data.schema.type).toBe('object');
+      expect(result.data.properties?.username).toEqual({
+        type: 'string',
+        description: "User's username",
+      });
+      expect(result.data.required).toEqual(['username']);
     }
   });
 
-  it('should validate a nested JSON Schema input', () => {
-    const input = {
-      name: 'fields',
-      type: 'json-schema',
-      schema: {
-        type: 'object',
-        properties: {
-          email: { type: 'string' },
-          metadata: {
-            type: 'object',
-            properties: {
-              source: { type: 'string' },
-              routing: {
-                type: 'object',
-                properties: {
-                  shard: { type: 'number' },
-                  primary: { type: 'boolean' },
-                },
+  it('should validate a nested JSON Schema inputs object', () => {
+    const inputs = {
+      properties: {
+        customer: {
+          type: 'object',
+          description: 'Customer information',
+          properties: {
+            name: { type: 'string' },
+            email: { type: 'string', format: 'email' },
+            address: {
+              type: 'object',
+              properties: {
+                street: { type: 'string' },
+                city: { type: 'string' },
+                zipCode: { type: 'string', pattern: '^\\d{5}(-\\d{4})?$' },
               },
+              required: ['street', 'city'],
+              additionalProperties: false,
             },
           },
-        },
-        required: ['email'],
-      },
-      default: {
-        email: 'user@example.com',
-        metadata: {
-          source: 'api',
-          routing: {
-            shard: 1,
-            primary: true,
-          },
+          required: ['name', 'email'],
+          additionalProperties: false,
         },
       },
+      required: ['customer'],
+      additionalProperties: false,
     };
-    const result = WorkflowInputJsonSchemaSchema.safeParse(input);
+    const result = WorkflowInputsJsonSchema.safeParse(inputs);
     expect(result.success).toBe(true);
   });
 
-  it('should reject invalid JSON Schema', () => {
-    const input = {
-      name: 'fields',
-      type: 'json-schema',
-      schema: {
-        type: 'invalid-type',
+  it('should reject invalid JSON Schema in properties', () => {
+    const inputs = {
+      properties: {
+        invalid: {
+          type: 'invalid-type',
+        },
       },
     };
-    const result = WorkflowInputJsonSchemaSchema.safeParse(input);
+    const result = WorkflowInputsJsonSchema.safeParse(inputs);
     expect(result.success).toBe(false);
   });
 
-  it('should accept JSON Schema input in WorkflowSchema', () => {
+  it('should reject if required field does not exist in properties', () => {
+    const inputs = {
+      properties: {
+        username: { type: 'string' },
+      },
+      required: ['username', 'nonexistent'],
+    };
+    const result = WorkflowInputsJsonSchema.safeParse(inputs);
+    expect(result.success).toBe(false);
+  });
+
+  it('should accept new JSON Schema object format for inputs', () => {
     const workflow = {
       version: '1',
       name: 'test',
       triggers: [{ type: 'manual' }],
       steps: [{ name: 'step1', type: 'console' }],
-      inputs: [
-        {
-          name: 'fields',
-          type: 'json-schema',
-          schema: {
-            type: 'object',
-            properties: {
-              email: { type: 'string' },
-              name: { type: 'string' },
-            },
-            required: ['email', 'name'],
+      inputs: {
+        properties: {
+          username: {
+            type: 'string',
+            description: "User's username",
+          },
+          age: {
+            type: 'number',
+            description: "User's age",
+            default: 18,
           },
         },
-      ],
+        required: ['username'],
+        additionalProperties: false,
+      },
     };
     const result = WorkflowSchema.safeParse(workflow);
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.inputs?.[0].type).toBe('json-schema');
+      expect(result.data.inputs?.properties?.username).toEqual({
+        type: 'string',
+        description: "User's username",
+      });
+      expect(result.data.inputs?.required).toEqual(['username']);
     }
   });
 
-  it('should accept the example from requirements', () => {
+  it('should accept nested object example from requirements', () => {
     const workflow = {
       version: '1',
       name: 'test',
       triggers: [{ type: 'manual' }],
       steps: [{ name: 'step1', type: 'console' }],
-      inputs: [
-        {
-          name: 'fields',
-          type: 'json-schema',
-          schema: {
+      inputs: {
+        properties: {
+          customer: {
             type: 'object',
+            description: 'Customer information',
             properties: {
-              email: { type: 'string' },
               name: { type: 'string' },
-              metadata: {
+              email: { type: 'string', format: 'email' },
+              address: {
                 type: 'object',
                 properties: {
-                  source: { type: 'string' },
-                  routing: {
-                    type: 'object',
-                    properties: {
-                      shard: { type: 'number' },
-                      primary: { type: 'boolean' },
-                    },
-                  },
+                  street: { type: 'string' },
+                  city: { type: 'string' },
+                  zipCode: { type: 'string', pattern: '^\\d{5}(-\\d{4})?$' },
                 },
+                required: ['street', 'city'],
+                additionalProperties: false,
               },
             },
-            required: ['email', 'name'],
-          },
-          default: {
-            email: 'user@example.com',
-            name: 'John Doe',
-            metadata: {
-              source: 'api',
-              routing: {
-                shard: 1,
-                primary: true,
-              },
-            },
+            required: ['name', 'email'],
+            additionalProperties: false,
           },
         },
-      ],
+        required: ['customer'],
+        additionalProperties: false,
+      },
     };
     const result = WorkflowSchema.safeParse(workflow);
     expect(result.success).toBe(true);
   });
 
-  it('should accept JSON Schema input in WorkflowSchemaForAutocomplete', () => {
+  it('should accept JSON Schema inputs in WorkflowSchemaForAutocomplete (new format)', () => {
     const workflow = {
       name: 'New workflow',
       enabled: false,
       triggers: [{ type: 'manual' }],
-      inputs: [
-        {
-          name: 'fields',
-          type: 'json-schema',
-          schema: {
+      inputs: {
+        properties: {
+          fields: {
             type: 'object',
             properties: {
               email: { type: 'string' },
               name: { type: 'string' },
-              metadata: {
-                type: 'object',
-                properties: {
-                  source: { type: 'string' },
-                  routing: {
-                    type: 'object',
-                    properties: {
-                      shard: { type: 'number' },
-                      primary: { type: 'boolean' },
-                    },
-                  },
-                },
-              },
             },
             required: ['email', 'name'],
           },
-          default: {
-            email: 'user@example.com',
-            name: 'John Doe',
-            metadata: {
-              source: 'api',
-              routing: {
-                shard: 1,
-                primary: true,
-              },
-            },
-          },
         },
-      ],
+        required: ['fields'],
+        additionalProperties: false,
+      },
       steps: [
         {
           name: 'first-step',
@@ -329,8 +306,24 @@ describe('WorkflowInputJsonSchemaSchema', () => {
     const result = WorkflowSchemaForAutocomplete.safeParse(workflow);
     expect(result.success).toBe(true);
     if (result.success) {
-      expect(result.data.inputs?.[0].type).toBe('json-schema');
-      expect(result.data.inputs?.[0].name).toBe('fields');
+      expect(result.data.inputs?.properties?.fields).toBeDefined();
     }
+  });
+
+  it('should accept legacy array format in WorkflowSchemaForAutocomplete (backward compatibility)', () => {
+    const workflow = {
+      name: 'Legacy workflow',
+      triggers: [{ type: 'manual' }],
+      inputs: [
+        {
+          name: 'username',
+          type: 'string',
+          required: true,
+        },
+      ],
+      steps: [{ name: 'step1', type: 'console' }],
+    };
+    const result = WorkflowSchemaForAutocomplete.safeParse(workflow);
+    expect(result.success).toBe(true);
   });
 });

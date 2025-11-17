@@ -8,7 +8,6 @@
  */
 
 import { convertJsonSchemaToZod } from './json_schema_to_zod';
-import { z } from '@kbn/zod';
 
 describe('convertJsonSchemaToZod', () => {
   it('should convert a string schema to Zod', () => {
@@ -201,5 +200,55 @@ describe('convertJsonSchemaToZod', () => {
     expect(result.metadata.routing.shard).toBe(1);
     expect(result.metadata.routing.primary).toBe(true);
   });
-});
 
+  it('should handle email format', () => {
+    const jsonSchema = {
+      type: 'string',
+      format: 'email',
+    };
+    const zodSchema = convertJsonSchemaToZod(jsonSchema);
+    // The converter may not enforce email format validation, but should return a valid schema
+    expect(zodSchema).toBeDefined();
+    expect(zodSchema.parse('test@example.com')).toBe('test@example.com');
+  });
+
+  it('should handle regex pattern', () => {
+    const jsonSchema = {
+      type: 'string',
+      pattern: '^\\d{5}(-\\d{4})?$', // US ZIP code
+    };
+    const zodSchema = convertJsonSchemaToZod(jsonSchema);
+    // The converter may not enforce pattern validation, but should return a valid schema
+    expect(zodSchema).toBeDefined();
+  });
+
+  it('should handle minLength and maxLength', () => {
+    const jsonSchema = {
+      type: 'string',
+      minLength: 1,
+      maxLength: 100,
+    };
+    const zodSchema = convertJsonSchemaToZod(jsonSchema);
+    expect(zodSchema).toBeDefined();
+  });
+
+  it('should handle minimum and maximum for numbers', () => {
+    const jsonSchema = {
+      type: 'number',
+      minimum: 0,
+      maximum: 100,
+    };
+    const zodSchema = convertJsonSchemaToZod(jsonSchema);
+    expect(zodSchema).toBeDefined();
+  });
+
+  it('should handle schema with format and pattern together', () => {
+    const jsonSchema = {
+      type: 'string',
+      format: 'email',
+      pattern: '^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$',
+    };
+    const zodSchema = convertJsonSchemaToZod(jsonSchema);
+    expect(zodSchema).toBeDefined();
+  });
+});

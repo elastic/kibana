@@ -7,161 +7,186 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  convertLegacyInputToJsonSchema,
-  normalizeInputToJsonSchema,
-} from './input_conversion';
-import { WorkflowInputSchema } from '../schema';
+import type { z } from '@kbn/zod';
+import { convertLegacyInputsToJsonSchema, normalizeInputsToJsonSchema } from './input_conversion';
+import type { WorkflowInputSchema } from '../schema';
 
-describe('convertLegacyInputToJsonSchema', () => {
-  it('should convert string input to JSON Schema', () => {
-    const input = {
-      name: 'username',
-      type: 'string' as const,
-      description: 'User name',
-      required: true,
-      default: 'john',
-    };
-    const result = convertLegacyInputToJsonSchema(input);
-    expect(result).toEqual({
-      name: 'username',
-      type: 'json-schema',
-      description: 'User name',
-      required: true,
-      default: 'john',
-      schema: { type: 'string' },
-    });
-  });
-
-  it('should convert number input to JSON Schema', () => {
-    const input = {
-      name: 'age',
-      type: 'number' as const,
-      default: 25,
-    };
-    const result = convertLegacyInputToJsonSchema(input);
-    expect(result).toEqual({
-      name: 'age',
-      type: 'json-schema',
-      default: 25,
-      schema: { type: 'number' },
-    });
-  });
-
-  it('should convert boolean input to JSON Schema', () => {
-    const input = {
-      name: 'enabled',
-      type: 'boolean' as const,
-      default: true,
-    };
-    const result = convertLegacyInputToJsonSchema(input);
-    expect(result).toEqual({
-      name: 'enabled',
-      type: 'json-schema',
-      default: true,
-      schema: { type: 'boolean' },
-    });
-  });
-
-  it('should convert choice input to JSON Schema with enum', () => {
-    const input = {
-      name: 'status',
-      type: 'choice' as const,
-      options: ['active', 'inactive', 'pending'],
-      default: 'active',
-    };
-    const result = convertLegacyInputToJsonSchema(input);
-    expect(result).toEqual({
-      name: 'status',
-      type: 'json-schema',
-      default: 'active',
-      schema: {
-        type: 'string',
-        enum: ['active', 'inactive', 'pending'],
+describe('convertLegacyInputsToJsonSchema', () => {
+  it('should convert array of legacy inputs to JSON Schema object format', () => {
+    const legacyInputs = [
+      {
+        name: 'username',
+        type: 'string' as const,
+        description: 'User name',
+        required: true,
+        default: 'john',
       },
+      {
+        name: 'age',
+        type: 'number' as const,
+        default: 25,
+      },
+    ];
+
+    const result = convertLegacyInputsToJsonSchema(
+      legacyInputs as Array<z.infer<typeof WorkflowInputSchema>>
+    );
+
+    expect(result).toEqual({
+      properties: {
+        username: {
+          type: 'string',
+          description: 'User name',
+          default: 'john',
+        },
+        age: {
+          type: 'number',
+          default: 25,
+        },
+      },
+      required: ['username'],
+      additionalProperties: false,
     });
   });
 
-  it('should convert array input to JSON Schema', () => {
-    const input = {
-      name: 'tags',
-      type: 'array' as const,
-      minItems: 1,
-      maxItems: 10,
-    };
-    const result = convertLegacyInputToJsonSchema(input);
-    expect(result).toEqual({
-      name: 'tags',
-      type: 'json-schema',
-      schema: {
-        type: 'array',
-        items: {
-          anyOf: [{ type: 'string' }, { type: 'number' }, { type: 'boolean' }],
-        },
+  it('should convert choice input to enum', () => {
+    const legacyInputs = [
+      {
+        name: 'status',
+        type: 'choice' as const,
+        options: ['active', 'inactive'],
+        required: true,
+      },
+    ];
+
+    const result = convertLegacyInputsToJsonSchema(
+      legacyInputs as Array<z.infer<typeof WorkflowInputSchema>>
+    );
+
+    expect(result.properties?.status).toEqual({
+      type: 'string',
+      enum: ['active', 'inactive'],
+    });
+    expect(result.required).toEqual(['status']);
+  });
+
+  it('should convert array input with constraints', () => {
+    const legacyInputs = [
+      {
+        name: 'tags',
+        type: 'array' as const,
         minItems: 1,
         maxItems: 10,
       },
+    ];
+
+    const result = convertLegacyInputsToJsonSchema(
+      legacyInputs as Array<z.infer<typeof WorkflowInputSchema>>
+    );
+
+    expect(result.properties?.tags).toEqual({
+      type: 'array',
+      items: {
+        anyOf: [{ type: 'string' }, { type: 'number' }, { type: 'boolean' }],
+      },
+      minItems: 1,
+      maxItems: 10,
     });
   });
 
-  it('should convert array input without constraints', () => {
-    const input = {
-      name: 'items',
-      type: 'array' as const,
-    };
-    const result = convertLegacyInputToJsonSchema(input);
+  it('should handle empty array', () => {
+    const result = convertLegacyInputsToJsonSchema([]);
     expect(result).toEqual({
-      name: 'items',
-      type: 'json-schema',
-      schema: {
-        type: 'array',
-        items: {
-          anyOf: [{ type: 'string' }, { type: 'number' }, { type: 'boolean' }],
-        },
-      },
+      properties: {},
+      additionalProperties: false,
     });
   });
+
+  it('should not include required array if no inputs are required', () => {
+    const legacyInputs = [
+      {
+        name: 'optional',
+        type: 'string' as const,
+        required: false,
+      },
+    ];
+
+    const result = convertLegacyInputsToJsonSchema(
+      legacyInputs as Array<z.infer<typeof WorkflowInputSchema>>
+    );
+
+    expect(result.required).toBeUndefined();
+  });
 });
 
-describe('normalizeInputToJsonSchema', () => {
-  it('should return json-schema input as-is', () => {
-    const input = {
-      name: 'fields',
-      type: 'json-schema' as const,
-      schema: {
-        type: 'object',
-        properties: {
-          email: { type: 'string' },
+describe('normalizeInputsToJsonSchema', () => {
+  it('should return new format inputs as-is', () => {
+    const inputs = {
+      properties: {
+        username: {
+          type: 'string',
+          description: 'User name',
         },
       },
+      required: ['username'],
+      additionalProperties: false,
     };
-    const result = normalizeInputToJsonSchema(input);
-    expect(result).toBe(input);
+
+    const result = normalizeInputsToJsonSchema(inputs);
+    expect(result).toEqual(inputs);
   });
 
-  it('should convert legacy string input', () => {
-    const input = {
-      name: 'username',
-      type: 'string' as const,
-    };
-    const result = normalizeInputToJsonSchema(input);
-    expect(result.type).toBe('json-schema');
-    expect(result.schema).toEqual({ type: 'string' });
+  it('should convert legacy array format to new format', () => {
+    const legacyInputs = [
+      {
+        name: 'username',
+        type: 'string' as const,
+        required: true,
+      },
+    ];
+
+    const result = normalizeInputsToJsonSchema(legacyInputs as any);
+
+    expect(result?.properties?.username).toEqual({
+      type: 'string',
+    });
+    expect(result?.required).toEqual(['username']);
   });
 
-  it('should preserve all base properties', () => {
-    const input = {
-      name: 'test',
-      type: 'string' as const,
-      description: 'Test description',
-      required: true,
-      default: 'default value',
+  it('should return undefined for undefined input', () => {
+    const result = normalizeInputsToJsonSchema(undefined);
+    expect(result).toBeUndefined();
+  });
+
+  it('should handle nested object example from requirements', () => {
+    const inputs = {
+      properties: {
+        customer: {
+          type: 'object',
+          description: 'Customer information',
+          properties: {
+            name: { type: 'string' },
+            email: { type: 'string', format: 'email' },
+            address: {
+              type: 'object',
+              properties: {
+                street: { type: 'string' },
+                city: { type: 'string' },
+                zipCode: { type: 'string', pattern: '^\\d{5}(-\\d{4})?$' },
+              },
+              required: ['street', 'city'],
+              additionalProperties: false,
+            },
+          },
+          required: ['name', 'email'],
+          additionalProperties: false,
+        },
+      },
+      required: ['customer'],
+      additionalProperties: false,
     };
-    const result = normalizeInputToJsonSchema(input);
-    expect(result.name).toBe('test');
-    expect(result.description).toBe('Test description');
-    expect(result.required).toBe(true);
-    expect(result.default).toBe('default value');
+
+    const result = normalizeInputsToJsonSchema(inputs);
+    expect(result).toEqual(inputs);
   });
 });
-

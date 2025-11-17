@@ -372,7 +372,8 @@ export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false
 };
 
 /* --- Inputs --- */
-export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array', 'json-schema']);
+// Legacy input schemas (kept for backward compatibility conversion)
+export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
 
 const WorkflowInputBaseSchema = z.object({
   name: z.string(),
@@ -409,23 +410,51 @@ export const WorkflowInputArraySchema = WorkflowInputBaseSchema.extend({
   default: z.union([z.array(z.string()), z.array(z.number()), z.array(z.boolean())]).optional(),
 });
 
-export const WorkflowInputJsonSchemaSchema = WorkflowInputBaseSchema.extend({
-  type: z.literal('json-schema'),
-  schema: z.any().refine(
-    isValidJsonSchema,
-    { message: 'schema must be a valid JSON Schema (Draft 7)' }
-  ),
-  default: z.any().optional(), // Can be any JSON-serializable value
-});
-
 export const WorkflowInputSchema = z.union([
   WorkflowInputStringSchema,
   WorkflowInputNumberSchema,
   WorkflowInputBooleanSchema,
   WorkflowInputChoiceSchema,
   WorkflowInputArraySchema,
-  WorkflowInputJsonSchemaSchema,
 ]);
+
+// New JSON Schema-based inputs structure
+// This represents a JSON Schema object with properties, required, and additionalProperties
+export const WorkflowInputsJsonSchema = z
+  .object({
+    properties: z.record(z.string(), z.any()).optional(),
+    required: z.array(z.string()).optional(),
+    additionalProperties: z.union([z.boolean(), z.any()]).optional(),
+  })
+  .refine(
+    (data) => {
+      // Validate that properties is a valid JSON Schema object
+      if (data.properties) {
+        // Validate each property is a valid JSON Schema
+        for (const value of Object.values(data.properties)) {
+          if (!isValidJsonSchema(value)) {
+            return false;
+          }
+        }
+      }
+      return true;
+    },
+    { message: 'properties must contain valid JSON Schema definitions' }
+  )
+  .refine(
+    (data) => {
+      // Validate that required fields exist in properties
+      if (data.required && data.properties) {
+        for (const field of data.required) {
+          if (!(field in data.properties)) {
+            return false;
+          }
+        }
+      }
+      return true;
+    },
+    { message: 'required fields must exist in properties' }
+  );
 
 /* --- Consts --- */
 export const WorkflowConstsSchema = z.record(
@@ -474,7 +503,7 @@ export const WorkflowSchema = z.object({
   enabled: z.boolean().default(true),
   tags: z.array(z.string()).optional(),
   triggers: z.array(TriggerSchema).min(1),
-  inputs: z.array(WorkflowInputSchema).optional(),
+  inputs: WorkflowInputsJsonSchema.optional(),
   consts: WorkflowConstsSchema.optional(),
   steps: z.array(StepSchema).min(1),
 });
@@ -490,16 +519,21 @@ export const WorkflowSchemaForAutocomplete = WorkflowSchema.partial()
       .catch([])
       .default([]),
     inputs: z
-      .array(
-        z
-          .object({
-            name: z.string().catch(''),
-            type: z.string().catch(''),
-          })
-          .passthrough()
-      )
+      .union([
+        // New JSON Schema format
+        WorkflowInputsJsonSchema,
+        // Legacy array format (for backward compatibility during parsing)
+        z.array(
+          z
+            .object({
+              name: z.string().catch(''),
+              type: z.string().catch(''),
+            })
+            .passthrough()
+        ),
+      ])
       .optional()
-      .catch([]),
+      .catch(undefined),
     steps: z
       .array(
         z
