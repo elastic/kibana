@@ -63,6 +63,42 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
           : { role_descriptors: descriptors }),
       });
 
+      const createApiKey = async (roleName: string, roleDescriptors: Record<string, any>) => {
+        log.debug(
+          `Creating API key for ${roleName} with privileges: ${JSON.stringify(roleDescriptors)}`
+        );
+
+        const apiKeyName = `myTestApiKey-${generatedApiKeys.length}-worker-${
+          workerInfo.parallelIndex + 1
+        }`;
+
+        const adminCookieHeader = await samlAuth.session.getApiCredentialsForRole('admin');
+
+        const payload = createApiKeyPayload(apiKeyName, roleName, roleDescriptors);
+        const response = await apiClient.post('internal/security/api_key', {
+          headers: {
+            'kbn-xsrf': 'some-xsrf-token',
+            'x-elastic-internal-origin': 'kibana',
+            ...adminCookieHeader,
+          },
+          body: payload,
+          responseType: 'json',
+        });
+
+        if (response.statusCode !== 200) {
+          throw new Error(
+            `Failed to create API key for '${roleName}' role with response text: ${response.statusMessage}`
+          );
+        }
+
+        const apiKey = response.body as ApiKey;
+        const apiKeyHeader = { Authorization: `ApiKey ${apiKey.encoded}` };
+
+        log.info(`Created API key for ${roleName} role: [${roleName}]`);
+        generatedApiKeys.push(apiKey);
+        return { apiKey, apiKeyHeader };
+      };
+
       const invalidateApiKeys = async (apiKeys: ApiKey[]) => {
         // Get admin credentials in order to invalidate the API key
         for (const apiKey of apiKeys) {
@@ -90,11 +126,7 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
       };
 
       const getApiKey = async (role: string): Promise<RoleApiCredentials> => {
-        const apiKeyName = `myTestApiKey-${generatedApiKeys.length}-worker-${
-          workerInfo.parallelIndex + 1
-        }`;
-        const adminCookieHeader = await samlAuth.session.getApiCredentialsForRole('admin');
-
+        // fetch role descriptors from roles.yml file
         const roleDescriptors =
           role === 'admin'
             ? {}
@@ -103,44 +135,21 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
                 if (!roleDescriptor) {
                   throw new Error(`Cannot create API key for non-existent role "${role}"`);
                 }
-                log.debug(
-                  `Creating API key for ${role} with privileges: ${JSON.stringify(roleDescriptor)}`
-                );
                 return { [role]: roleDescriptor };
               })();
-
-        const payload = createApiKeyPayload(apiKeyName, role, roleDescriptors);
-        const response = await apiClient.post('internal/security/api_key', {
-          headers: {
-            'kbn-xsrf': 'some-xsrf-token',
-            'x-elastic-internal-origin': 'kibana',
-            ...adminCookieHeader,
-          },
-          body: payload,
-          responseType: 'json',
-        });
-
-        if (response.statusCode !== 200) {
-          throw new Error(
-            `Failed to create API key for '${role}' role with response text: ${response.statusMessage}`
-          );
-        }
-
-        const apiKey = response.body as ApiKey;
-        const apiKeyHeader = { Authorization: `ApiKey ${apiKey.encoded}` };
-
-        log.info(`Created API key for role: [${role}]`);
-        generatedApiKeys.push(apiKey);
-        return { apiKey, apiKeyHeader };
+        return await createApiKey(role, roleDescriptors);
       };
 
       const getApiKeyForCustomRole = async (
-        role: KibanaRole | ElasticsearchRoleDescriptor
+        roleDescriptor: KibanaRole | ElasticsearchRoleDescriptor
       ): Promise<RoleApiCredentials> => {
         isCustomRoleCreated = true;
-        await samlAuth.setCustomRole(role);
-        const result = await getApiKey(samlAuth.customRoleName);
-        log.info(`Created API key with custom role: ${samlAuth.customRoleName}`);
+
+        // create custom role in Elasticsearch (if it doesn't already exist)
+        await samlAuth.setCustomRole(roleDescriptor);
+        const result = await createApiKey(samlAuth.customRoleName, {
+          [samlAuth.customRoleName]: roleDescriptor,
+        });
         return result;
       };
 
