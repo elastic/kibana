@@ -124,29 +124,31 @@ describe('RangeSliderControlApi', () => {
         uuid,
         parentApi,
       });
-      expect(api.appliedFilters$.value).toEqual([
-        {
-          meta: {
-            controlledBy: 'myControl1',
-            field: 'myFieldName',
-            index: 'myDataViewId',
-            key: 'myFieldName',
-            params: {
-              gte: 5,
-              lte: 10,
-            },
-            type: 'range',
-          },
-          query: {
-            range: {
-              myFieldName: {
+      await waitFor(() =>
+        expect(api.appliedFilters$.value).toEqual([
+          {
+            meta: {
+              controlledBy: 'myControl1',
+              field: 'myFieldName',
+              index: 'myDataViewId',
+              key: 'myFieldName',
+              params: {
                 gte: 5,
                 lte: 10,
               },
+              type: 'range',
+            },
+            query: {
+              range: {
+                myFieldName: {
+                  gte: 5,
+                  lte: 10,
+                },
+              },
             },
           },
-        },
-      ]);
+        ])
+      );
     });
 
     test('should set blocking error when data view is not found', async () => {
