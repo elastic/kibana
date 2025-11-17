@@ -17,7 +17,7 @@
 const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-
+const yaml = require('yaml');
 /**
  * Helper function to safely quote parameter names if needed
  */
@@ -97,13 +97,11 @@ function generateApiClient() {
 function extractEndpointSummaries() {
   const endpointSummaries = new Map();
   try {
-    const specPath = path.resolve(__dirname, '../../../../../../oas_docs/output/kibana.yaml');
-    if (!fs.existsSync(specPath)) {
+    if (!fs.existsSync(KIBANA_OPENAPI_SPEC_PATH)) {
       return endpointSummaries;
     }
 
-    const yaml = require('yaml');
-    const specContent = fs.readFileSync(specPath, 'utf8');
+    const specContent = fs.readFileSync(KIBANA_OPENAPI_SPEC_PATH, 'utf8');
     const spec = yaml.parse(specContent);
     if (spec.paths) {
       for (const path of Object.keys(spec.paths)) {
@@ -129,12 +127,11 @@ function extractTagDocumentation() {
   const tagDocs = new Map();
 
   try {
-    const specPath = path.resolve(__dirname, '../../../../../../oas_docs/output/kibana.yaml');
-    if (!fs.existsSync(specPath)) {
+    if (!fs.existsSync(KIBANA_OPENAPI_SPEC_PATH)) {
       return tagDocs;
     }
 
-    const specContent = fs.readFileSync(specPath, 'utf8');
+    const specContent = fs.readFileSync(KIBANA_OPENAPI_SPEC_PATH, 'utf8');
 
     // Extract tag documentation for fallback purposes only
     const externalDocsRegex =
