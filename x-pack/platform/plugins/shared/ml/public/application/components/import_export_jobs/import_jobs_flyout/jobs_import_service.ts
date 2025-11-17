@@ -37,8 +37,10 @@ export interface JobIdObject {
   originalDestIndex?: string;
   destIndexValid: boolean;
   destIndexInvalidMessage: string;
-
   destIndexValidated: boolean;
+
+  sourceIndexInvalid?: boolean;
+  sourceIndexWarningMessage?: string;
 
   datafeedInvalid?: boolean;
   datafeedWarningMessage?: string;
@@ -185,6 +187,69 @@ export class JobImportService {
     };
   }
 
+  public async validateSourceIndex(jobs: DataFrameAnalyticsConfig[], esSearch: MlApi['esSearch']) {
+    const results = await Promise.all(
+      jobs.map(async (job) => {
+        try {
+          const sourceIndex = Array.isArray(job.source.index)
+            ? job.source.index
+            : [job.source.index];
+
+          if (sourceIndex.length === 0) {
+            return {
+              jobId: job.id,
+              hasWarning: true,
+              warningMessage: i18n.translate('xpack.ml.jobsList.sourceIndexNotSpecified', {
+                defaultMessage: 'Source index not specified. This job will not run.',
+              }),
+            };
+          }
+
+          const resp = await esSearch({
+            index: sourceIndex,
+            size: 0,
+            body: {
+              track_total_hits: true,
+              query: { match_all: {} },
+            },
+          });
+
+          const docsCount =
+            resp.hits.total && typeof resp.hits.total === 'object'
+              ? resp.hits.total.value
+              : resp.hits.total;
+
+          if (docsCount === 0) {
+            return {
+              jobId: job.id,
+              hasWarning: true,
+              warningMessage: i18n.translate('xpack.ml.jobsList.sourceIndexNoData', {
+                defaultMessage: 'Source index returned no data. This job will not run.',
+              }),
+            };
+          }
+
+          return {
+            jobId: job.id,
+            hasWarning: false,
+          };
+        } catch (error) {
+          return {
+            jobId: job.id,
+            hasWarning: true,
+            warningMessage: i18n.translate('xpack.ml.jobsList.sourceIndexValidationFailed', {
+              defaultMessage: `Unable to validate source index. Reason: {reason}`,
+              values: {
+                reason: extractErrorMessage(error),
+              },
+            }),
+          };
+        }
+      })
+    );
+    return results;
+  }
+
   public async validateDatafeeds(
     jobs: ImportedAdJob[],
     validateDatafeedPreview: MlApi['validateDatafeedPreview']
@@ -211,7 +276,7 @@ export class JobImportService {
                   reason: extractErrorMessage(response.error),
                 },
               }),
-            }
+            };
           }
 
           if (!response.valid) {
