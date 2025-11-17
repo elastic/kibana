@@ -69,6 +69,7 @@ export const OnechatConversationsView: React.FC<{}> = () => {
             bottomBorder={false}
             aria-label={labels.header}
             paddingSize="m"
+            responsive={false}
           >
             <ConversationHeader />
           </KibanaPageTemplate.Header>
