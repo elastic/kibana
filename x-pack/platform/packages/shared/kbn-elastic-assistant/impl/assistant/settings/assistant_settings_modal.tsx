@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@tanstack/react-query';
+import { QueryObserverResult, RefetchOptions, RefetchQueryFilters } from '@kbn/react-query';
 import { DataStreamApis } from '../use_data_stream_apis';
 import { AIConnector } from '../../connectorland/connector_selector';
 import { Conversation } from '../../..';

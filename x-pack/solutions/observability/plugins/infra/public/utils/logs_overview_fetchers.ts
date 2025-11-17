@@ -70,12 +70,13 @@ export function getLogsOverviewDataFetcher(
     const { logsLocator } = getLogsLocatorsFromUrlService(share.url);
     const timeSpanInMinutes = (params.absoluteTime.end - params.absoluteTime.start) / (1000 * 60);
 
-    const appLink = logsLocator.getRedirectUrl({
-      timeRange: {
-        startTime: params.absoluteTime.start,
-        endTime: params.absoluteTime.end,
-      },
-    });
+    const appLink =
+      logsLocator?.getRedirectUrl({
+        timeRange: {
+          startTime: params.absoluteTime.start,
+          endTime: params.absoluteTime.end,
+        },
+      }) ?? '';
 
     return {
       appLink,

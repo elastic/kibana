@@ -108,7 +108,8 @@
     "@kbn/core-application-browser-mocks",
     "@kbn/rison",
     "@kbn/alerts-ui-shared",
-    "@kbn/core-pricing-browser-mocks"
+    "@kbn/core-pricing-browser-mocks",
+    "@kbn/react-query"
   ],
   "exclude": ["target/**/*"]
 }

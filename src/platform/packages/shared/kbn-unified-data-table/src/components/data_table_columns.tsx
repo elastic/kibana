@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { MutableRefObject } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -16,6 +17,7 @@ import {
   EuiListGroupItemProps,
   type EuiDataGridColumnSortingConfig,
   RenderCellValue,
+  type EuiDataGridRefProps,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { getDataViewFieldOrCreateFromColumnMeta } from '@kbn/data-view-utils';
@@ -116,6 +118,7 @@ function buildEuiGridColumn({
   columnDisplay,
   onResize,
   sortedColumns,
+  dataGridRef,
 }: {
   numberOfColumns: number;
   columnName: string;
@@ -140,6 +143,7 @@ function buildEuiGridColumn({
   columnDisplay?: string;
   onResize: UnifiedDataTableProps['onResize'];
   sortedColumns?: EuiDataGridColumnSortingConfig[];
+  dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
 }) {
   const dataViewField = getDataViewFieldOrCreateFromColumnMeta({
     dataView,
@@ -190,7 +194,8 @@ function buildEuiGridColumn({
           isPlainRecord,
           toastNotifications,
           valueToStringConverter,
-          onFilter
+          onFilter,
+          dataGridRef
         )
       : [];
 
@@ -324,6 +329,7 @@ export function getEuiGridColumns({
   customGridColumnsConfiguration,
   onResize,
   sortedColumns,
+  dataGridRef,
 }: {
   columns: string[];
   columnsCellActions?: EuiDataGridColumnCellAction[][];
@@ -349,6 +355,7 @@ export function getEuiGridColumns({
   customGridColumnsConfiguration?: CustomGridColumnsConfiguration;
   onResize: UnifiedDataTableProps['onResize'];
   sortedColumns?: EuiDataGridColumnSortingConfig[];
+  dataGridRef?: MutableRefObject<EuiDataGridRefProps | null>;
 }) {
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
   const headerRowHeight = deserializeHeaderRowHeight(headerRowHeightLines);
@@ -379,6 +386,7 @@ export function getEuiGridColumns({
       columnDisplay: settings?.columns?.[column]?.display,
       onResize,
       sortedColumns,
+      dataGridRef,
     })
   );
 }

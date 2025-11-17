@@ -118,6 +118,7 @@
     "@kbn/shared-ux-error-boundary",
     "@kbn/observability-synthetics-test-data",
     "@kbn/charts-plugin",
+    "@kbn/react-query",
   ],
   "exclude": ["target/**/*"]
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { QueryRulesListRulesetsQueryRulesetListItem } from '@elastic/elasticsearch/lib/api/types';
 import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import { QUERY_RULES_SETS_QUERY_KEY } from '../../common/constants';

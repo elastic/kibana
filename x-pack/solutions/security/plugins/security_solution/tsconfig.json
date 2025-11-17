@@ -15,12 +15,9 @@
     "scripts/**/*.json",
     "public/**/*.json",
     "../../../../../typings/**/*",
-    "emotion.d.ts" ],
-  "exclude": [
-    "target/**/*",
-    "**/cypress/**",
-    "public/management/cypress.config.ts"
+    "emotion.d.ts"
   ],
+  "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
   "kbn_references": [
     "@kbn/core",
     {
@@ -176,7 +173,6 @@
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-styled",
     "@kbn/unified-doc-viewer-plugin",
-    "@kbn/openapi-generator",
     "@kbn/unified-data-table",
     "@kbn/unified-doc-viewer",
     "@kbn/dom-drag-drop",
@@ -261,5 +257,6 @@
     "@kbn/core-metrics-server",
     "@kbn/ai-assistant-default-llm-setting",
     "@kbn/core-ui-settings-browser",
+    "@kbn/react-query"
   ]
 }

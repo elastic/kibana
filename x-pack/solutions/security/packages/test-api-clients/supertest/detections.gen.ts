@@ -14,6 +14,9 @@
  *   version: Bundle (no version)
  */
 
+import supertest_ from 'supertest';
+import type SuperTest from 'supertest';
+import { format as formatUrl } from 'url';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -67,11 +70,8 @@ import type { UpdateRuleRequestBodyInput } from '@kbn/security-solution-plugin/c
 import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 
-export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-
-  return {
-    /**
+const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
+  /**
       * Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of
 the migration process. A successful migration will result in both the old and new indices being present.
 As such, the old, orphaned index can (and likely should) be deleted.
@@ -81,27 +81,27 @@ the endpoint accomplishes this task by applying a deletion policy to the relevan
 after 30 days. It also deletes other artifacts specific to the migration implementation.
 
       */
-    alertsMigrationCleanup(props: AlertsMigrationCleanupProps, kibanaSpace: string = 'default') {
-      return supertest
-        .delete(getRouteUrlForSpace('/api/detection_engine/signals/migration', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Ensures that the packages needed for prebuilt detection rules to work are installed and up to date
-     */
-    bootstrapPrebuiltRules(kibanaSpace: string = 'default') {
-      return supertest
-        .post(
-          getRouteUrlForSpace('/internal/detection_engine/prebuilt_rules/_bootstrap', kibanaSpace)
-        )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
+  alertsMigrationCleanup(props: AlertsMigrationCleanupProps, kibanaSpace: string = 'default') {
+    return supertest
+      .delete(getRouteUrlForSpace('/api/detection_engine/signals/migration', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Ensures that the packages needed for prebuilt detection rules to work are installed and up to date
+   */
+  bootstrapPrebuiltRules(kibanaSpace: string = 'default') {
+    return supertest
+      .post(
+        getRouteUrlForSpace('/internal/detection_engine/prebuilt_rules/_bootstrap', kibanaSpace)
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
       * Create new detection rules in bulk.
 > warn
 > This API is deprecated and will be removed in Kibana v9.0.
@@ -112,43 +112,43 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
       */
-    bulkCreateRules(props: BulkCreateRulesProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/detection_engine/rules/_bulk_create', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
+  bulkCreateRules(props: BulkCreateRulesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/detection_engine/rules/_bulk_create', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
       * Delete detection rules in bulk.
 > warn
 > This API is deprecated and will be removed in Kibana v9.0.
 
       */
-    bulkDeleteRules(props: BulkDeleteRulesProps, kibanaSpace: string = 'default') {
-      return supertest
-        .delete(getRouteUrlForSpace('/api/detection_engine/rules/_bulk_delete', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
+  bulkDeleteRules(props: BulkDeleteRulesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .delete(getRouteUrlForSpace('/api/detection_engine/rules/_bulk_delete', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
       * Delete detection rules in bulk.
 > warn
 > This API is deprecated and will be removed in Kibana v9.0.
 
       */
-    bulkDeleteRulesPost(props: BulkDeleteRulesPostProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/detection_engine/rules/_bulk_delete', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
+  bulkDeleteRulesPost(props: BulkDeleteRulesPostProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/detection_engine/rules/_bulk_delete', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
       * Update specific fields of existing detection rules using the `rule_id` or `id` field.
 > warn
 > This API is deprecated and will be removed in Kibana v9.0.
@@ -159,15 +159,15 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
       */
-    bulkPatchRules(props: BulkPatchRulesProps, kibanaSpace: string = 'default') {
-      return supertest
-        .patch(getRouteUrlForSpace('/api/detection_engine/rules/_bulk_update', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
+  bulkPatchRules(props: BulkPatchRulesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .patch(getRouteUrlForSpace('/api/detection_engine/rules/_bulk_update', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
       * Update multiple detection rules using the `rule_id` or `id` field. The original rules are replaced, and all unspecified fields are deleted.
 > warn
 > This API is deprecated and will be removed in Kibana v9.0.
@@ -178,35 +178,35 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
       */
-    bulkUpdateRules(props: BulkUpdateRulesProps, kibanaSpace: string = 'default') {
-      return supertest
-        .put(getRouteUrlForSpace('/api/detection_engine/rules/_bulk_update', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    createAlertsIndex(kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/detection_engine/index', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
+  bulkUpdateRules(props: BulkUpdateRulesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .put(getRouteUrlForSpace('/api/detection_engine/rules/_bulk_update', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  createAlertsIndex(kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/detection_engine/index', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
       * Initiate a migration of detection alerts.
 Migrations are initiated per index. While the process is neither destructive nor interferes with existing data, it may be resource-intensive. As such, it is recommended that you plan your migrations accordingly.
 
       */
-    createAlertsMigration(props: CreateAlertsMigrationProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/detection_engine/signals/migration', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
+  createAlertsMigration(props: CreateAlertsMigrationProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/detection_engine/signals/migration', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
       * Create a new detection rule.
 > warn
 > When used with [API key](https://www.elastic.co/docs/deploy-manage/api-keys) authentication, the user's key gets assigned to the affected rules. If the user's key gets deleted or the user becomes inactive, the rules will stop running.
@@ -263,22 +263,22 @@ For detailed information on Kibana actions and alerting, and additional API call
 * [Connectors API](https://www.elastic.co/docs/api/doc/kibana/group/endpoint-connectors)
 
       */
-    createRule(props: CreateRuleProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/detection_engine/rules', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    deleteAlertsIndex(kibanaSpace: string = 'default') {
-      return supertest
-        .delete(getRouteUrlForSpace('/api/detection_engine/index', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
+  createRule(props: CreateRuleProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/detection_engine/rules', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  deleteAlertsIndex(kibanaSpace: string = 'default') {
+    return supertest
+      .delete(getRouteUrlForSpace('/api/detection_engine/index', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
       * Delete a detection rule using the `rule_id` or `id` field.
 
 The URL query must include one of the following:
@@ -289,15 +289,15 @@ The URL query must include one of the following:
 The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
 
       */
-    deleteRule(props: DeleteRuleProps, kibanaSpace: string = 'default') {
-      return supertest
-        .delete(getRouteUrlForSpace('/api/detection_engine/rules', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
+  deleteRule(props: DeleteRuleProps, kibanaSpace: string = 'default') {
+    return supertest
+      .delete(getRouteUrlForSpace('/api/detection_engine/rules', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
       * Export detection rules to an `.ndjson` file. The following configuration items are also included in the `.ndjson` file:
 - Actions
 - Exception lists
@@ -309,73 +309,70 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
 > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
 
       */
-    exportRules(props: ExportRulesProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/detection_engine/rules/_export', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object)
-        .query(props.query);
-    },
-    /**
+  exportRules(props: ExportRulesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/detection_engine/rules/_export', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object)
+      .query(props.query);
+  },
+  /**
       * Finalize successful migrations of detection alerts. This replaces the original index's alias with the successfully migrated index's alias.
 The endpoint is idempotent; therefore, it can safely be used to poll a given migration and, upon completion,
 finalize it.
 
       */
-    finalizeAlertsMigration(props: FinalizeAlertsMigrationProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/detection_engine/signals/finalize_migration', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Retrieve a paginated list of detection rules. By default, the first page is returned, with 20 results per page.
-     */
-    findRules(props: FindRulesProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/detection_engine/rules/_find', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    getRuleExecutionEvents(props: GetRuleExecutionEventsProps, kibanaSpace: string = 'default') {
-      return supertest
-        .put(
-          getRouteUrlForSpace(
-            replaceParams(
-              '/internal/detection_engine/rules/{ruleId}/execution/events',
-              props.params
-            ),
-            kibanaSpace
-          )
+  finalizeAlertsMigration(props: FinalizeAlertsMigrationProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/detection_engine/signals/finalize_migration', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Retrieve a paginated list of detection rules. By default, the first page is returned, with 20 results per page.
+   */
+  findRules(props: FindRulesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/detection_engine/rules/_find', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  getRuleExecutionEvents(props: GetRuleExecutionEventsProps, kibanaSpace: string = 'default') {
+    return supertest
+      .put(
+        getRouteUrlForSpace(
+          replaceParams('/internal/detection_engine/rules/{ruleId}/execution/events', props.params),
+          kibanaSpace
         )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    getRuleExecutionResults(props: GetRuleExecutionResultsProps, kibanaSpace: string = 'default') {
-      return supertest
-        .put(
-          getRouteUrlForSpace(
-            replaceParams(
-              '/internal/detection_engine/rules/{ruleId}/execution/results',
-              props.params
-            ),
-            kibanaSpace
-          )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  getRuleExecutionResults(props: GetRuleExecutionResultsProps, kibanaSpace: string = 'default') {
+    return supertest
+      .put(
+        getRouteUrlForSpace(
+          replaceParams(
+            '/internal/detection_engine/rules/{ruleId}/execution/results',
+            props.params
+          ),
+          kibanaSpace
         )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
       * Import detection rules from an `.ndjson` file, including actions and exception lists. The request must include:
 - The `Content-Type: multipart/form-data` HTTP header.
 - A link to the `.ndjson` file containing the rules.
@@ -394,15 +391,15 @@ finalize it.
 > Similarly, any value lists used for rule exceptions are not included in rule exports or imports. Use the [Manage value lists](https://www.elastic.co/guide/en/security/current/value-lists-exceptions.html#manage-value-lists) UI (Rules → Detection rules (SIEM) → Manage value lists) to export and import value lists separately.
 
       */
-    importRules(props: ImportRulesProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/detection_engine/rules/_import', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
+  importRules(props: ImportRulesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/detection_engine/rules/_import', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
       * Install and update all Elastic prebuilt detection rules and Timelines.
 
 This endpoint allows you to install and update prebuilt detection rules and Timelines provided by Elastic. 
@@ -416,14 +413,14 @@ This ensures that your detection engine is always up-to-date with the latest rul
 providing you with the most current and effective threat detection capabilities.
 
       */
-    installPrebuiltRulesAndTimelines(kibanaSpace: string = 'default') {
-      return supertest
-        .put(getRouteUrlForSpace('/api/detection_engine/rules/prepackaged', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
+  installPrebuiltRulesAndTimelines(kibanaSpace: string = 'default') {
+    return supertest
+      .put(getRouteUrlForSpace('/api/detection_engine/rules/prepackaged', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
       * Update specific fields of an existing detection rule using the `rule_id` or `id` field.
 
 The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
@@ -433,15 +430,15 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
       */
-    patchRule(props: PatchRuleProps, kibanaSpace: string = 'default') {
-      return supertest
-        .patch(getRouteUrlForSpace('/api/detection_engine/rules', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
+  patchRule(props: PatchRuleProps, kibanaSpace: string = 'default') {
+    return supertest
+      .patch(getRouteUrlForSpace('/api/detection_engine/rules', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
       * Apply a bulk action, such as bulk edit, duplicate, or delete, to multiple detection rules. The bulk action is applied to all rules that match the query or to the rules listed by their IDs.
 
 The edit action allows you to add, delete, or set tags, index patterns, investigation fields, rule actions and schedules for multiple rules at once. 
@@ -452,64 +449,64 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
       */
-    performRulesBulkAction(props: PerformRulesBulkActionProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/detection_engine/rules/_bulk_action', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object)
-        .query(props.query);
-    },
-    readAlertsIndex(kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/detection_engine/index', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
-     * Retrieve indices that contain detection alerts of a particular age, along with migration information for each of those indices.
-     */
-    readAlertsMigrationStatus(
-      props: ReadAlertsMigrationStatusProps,
-      kibanaSpace: string = 'default'
-    ) {
-      return supertest
-        .post(getRouteUrlForSpace('/api/detection_engine/signals/migration_status', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
+  performRulesBulkAction(props: PerformRulesBulkActionProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/detection_engine/rules/_bulk_action', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object)
+      .query(props.query);
+  },
+  readAlertsIndex(kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/detection_engine/index', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+   * Retrieve indices that contain detection alerts of a particular age, along with migration information for each of those indices.
+   */
+  readAlertsMigrationStatus(
+    props: ReadAlertsMigrationStatusProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .post(getRouteUrlForSpace('/api/detection_engine/signals/migration_status', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
       * Retrieve the status of all Elastic prebuilt detection rules and Timelines. 
 
 This endpoint provides detailed information about the number of custom rules, installed prebuilt rules, available prebuilt rules that are not installed, outdated prebuilt rules, installed prebuilt timelines, available prebuilt timelines that are not installed, and outdated prebuilt timelines.
 
       */
-    readPrebuiltRulesAndTimelinesStatus(kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/detection_engine/rules/prepackaged/_status', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
+  readPrebuiltRulesAndTimelinesStatus(kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/detection_engine/rules/prepackaged/_status', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
       * Retrieves whether or not the user is authenticated, and the user's Kibana
 space and index privileges, which determine if the user can create an
 index for the Elastic Security alerts generated by
 detection engine rules.
 
       */
-    readPrivileges(kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/detection_engine/privileges', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
+  readPrivileges(kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/detection_engine/privileges', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
       * Retrieve a detection rule using the `rule_id` or `id` field.
 
 The URL query must include one of the following:
@@ -520,95 +517,95 @@ The URL query must include one of the following:
 The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
 
       */
-    readRule(props: ReadRuleProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/detection_engine/rules', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
-     * List all unique tags from all detection rules.
-     */
-    readTags(kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/detection_engine/tags', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    rulePreview(props: RulePreviewProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/detection_engine/rules/preview', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object)
-        .query(props.query);
-    },
-    /**
-     * Find and/or aggregate detection alerts that match the given query.
-     */
-    searchAlerts(props: SearchAlertsProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/detection_engine/signals/search', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
+  readRule(props: ReadRuleProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/detection_engine/rules', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * List all unique tags from all detection rules.
+   */
+  readTags(kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/detection_engine/tags', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  rulePreview(props: RulePreviewProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/detection_engine/rules/preview', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object)
+      .query(props.query);
+  },
+  /**
+   * Find and/or aggregate detection alerts that match the given query.
+   */
+  searchAlerts(props: SearchAlertsProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/detection_engine/signals/search', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
       * Assign users to detection alerts, and unassign them from alerts.
 > info
 > You cannot add and remove the same assignee in the same request.
 
       */
-    setAlertAssignees(props: SetAlertAssigneesProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/detection_engine/signals/assignees', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Set the status of one or more detection alerts.
-     */
-    setAlertsStatus(props: SetAlertsStatusProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/detection_engine/signals/status', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
+  setAlertAssignees(props: SetAlertAssigneesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/detection_engine/signals/assignees', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Set the status of one or more detection alerts.
+   */
+  setAlertsStatus(props: SetAlertsStatusProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/detection_engine/signals/status', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
       * And tags to detection alerts, and remove them from alerts.
 > info
 > You cannot add and remove the same alert tag in the same request.
 
       */
-    setAlertTags(props: SetAlertTagsProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/detection_engine/signals/tags', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Suggests user profiles.
-     */
-    suggestUserProfiles(props: SuggestUserProfilesProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/internal/detection_engine/users/_find', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
+  setAlertTags(props: SetAlertTagsProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/detection_engine/signals/tags', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Suggests user profiles.
+   */
+  suggestUserProfiles(props: SuggestUserProfilesProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/internal/detection_engine/users/_find', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
       * Update a detection rule using the `rule_id` or `id` field. The original rule is replaced, and all unspecified fields are deleted.
 
 The difference between the `id` and `rule_id` is that the `id` is a unique rule identifier that is randomly generated when a rule is created and cannot be set, whereas `rule_id` is a stable rule identifier that can be assigned during rule creation.
@@ -618,13 +615,28 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
 > If the API key that is used for authorization has different privileges than the key that created or most recently updated the rule, the rule behavior might change.
 
       */
-    updateRule(props: UpdateRuleProps, kibanaSpace: string = 'default') {
-      return supertest
-        .put(getRouteUrlForSpace('/api/detection_engine/rules', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
+  updateRule(props: UpdateRuleProps, kibanaSpace: string = 'default') {
+    return supertest
+      .put(getRouteUrlForSpace('/api/detection_engine/rules', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+});
+
+export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
+  const supertestService = getService('supertest');
+  const config = getService('config');
+
+  return {
+    ...securitySolutionApiServiceFactory(supertestService),
+    withUser: (user: { username: string; password: string }) => {
+      const kbnUrl = formatUrl({ ...config.get('servers.kibana'), auth: false });
+
+      return securitySolutionApiServiceFactory(
+        supertest_.agent(kbnUrl).auth(user.username, user.password)
+      );
     },
   };
 }

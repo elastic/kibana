@@ -3,7 +3,7 @@
   "id": "@kbn/apm-synthtrace-client",
   "owner": [
     "@elastic/obs-ux-infra_services-team",
-    "@elastic/obs-ux-logs-team"
+    "@elastic/obs-ux-onboarding-team"
   ],
   "group": "platform",
   "visibility": "shared",

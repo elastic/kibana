@@ -55,5 +55,6 @@
     "@kbn/logging",
     "@kbn/security-plugin-types-public",
     "@kbn/core-application-browser",
+    "@kbn/react-query",
   ]
 }

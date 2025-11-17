@@ -31,7 +31,7 @@ export const findLiveQueryRoute = (router: IRouter<DataRequestHandlerContext>) =
       path: '/api/osquery/live_queries',
       security: {
         authz: {
-          requiredPrivileges: [`${PLUGIN_ID}-read`],
+          requiredPrivileges: [`${PLUGIN_ID}-readLiveQueries`],
         },
       },
       options: { tags: ['api'] },

@@ -6,7 +6,7 @@
  */
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { ResetSLOResponse } from '@kbn/slo-schema';
 import { useKibana } from './use_kibana';
 import { sloKeys } from './query_key_factory';

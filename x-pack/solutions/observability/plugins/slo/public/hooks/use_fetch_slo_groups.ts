@@ -12,7 +12,7 @@ import {
   RefetchOptions,
   RefetchQueryFilters,
   useQuery,
-} from '@tanstack/react-query';
+} from '@kbn/react-query';
 import { useMemo } from 'react';
 import {
   DEFAULT_SLO_GROUPS_PAGE_SIZE,

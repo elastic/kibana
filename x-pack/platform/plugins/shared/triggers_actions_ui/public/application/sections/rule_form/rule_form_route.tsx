@@ -8,7 +8,7 @@
 import React, { useEffect } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleForm } from '@kbn/response-ops-rule-form';
-import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
+import { AlertConsumers, getRuleDetailsRoute } from '@kbn/rule-data-utils';
 import { useLocation, useParams } from 'react-router-dom';
 import { useKibana } from '../../../common/lib/kibana';
 import { getAlertingSectionBreadcrumb } from '../../lib/breadcrumb';
@@ -93,6 +93,7 @@ export const RuleFormRoute = () => {
             path: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(ruleId)}`,
           });
         }}
+        multiConsumerSelection={AlertConsumers.ALERTS}
       />
     </IntlProvider>
   );
