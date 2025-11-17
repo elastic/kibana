@@ -153,9 +153,7 @@ export function needsRightPadding(
   }
 
   // Check if delimiter positions vary across messages
-  const hasVaryingPositions = delimiterPositions.some(
-    (pos) => pos !== delimiterPositions[0]
-  );
+  const hasVaryingPositions = delimiterPositions.some((pos) => pos !== delimiterPositions[0]);
 
   if (!hasVaryingPositions) {
     return false;
