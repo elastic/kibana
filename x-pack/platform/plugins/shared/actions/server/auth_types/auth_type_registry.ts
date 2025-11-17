@@ -76,19 +76,14 @@ export class AuthTypeRegistry {
 
   public getSchemaForAuthType(authTypeDef: string | AuthTypeDef): z.core.$ZodTypeDiscriminable {
     let authTypeId: string | undefined;
-    let mergeStrategy: 'override' | 'merge' = 'override';
-    let customSchema: z.ZodSchema | undefined;
+    let defaults: Record<string, unknown> | undefined;
 
     if (isString(authTypeDef)) {
       authTypeId = authTypeDef as string;
     } else {
       const def = authTypeDef as AuthTypeDef;
       authTypeId = def.type;
-      customSchema = def.customSchema;
-
-      if (def.mergeStrategy) {
-        mergeStrategy = def.mergeStrategy;
-      }
+      defaults = def.defaults;
     }
 
     if (!authTypeId) {
@@ -97,6 +92,6 @@ export class AuthTypeRegistry {
 
     const authType = this.get(authTypeId);
 
-    return getSchemaForAuthType(authTypeId, authType, { customSchema, mergeStrategy });
+    return getSchemaForAuthType(authTypeId, authType, { defaults });
   }
 }

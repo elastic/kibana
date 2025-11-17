@@ -30,13 +30,9 @@ export const getAxiosInstanceWithAuth = ({
   logger,
 }: GetAxiosInstanceOpts): GetAxiosInstanceWithAuthFn => {
   return async (secrets: ValidatedSecrets) => {
+    let authTypeId: string | undefined;
     try {
-      const authTypeId = (secrets as { authType?: string }).authType || 'none';
-
-      // return empty axios instance if no auth
-      if (authTypeId === 'none') {
-        return axios.create();
-      }
+      authTypeId = (secrets as { authType?: string }).authType || 'none';
 
       // throws if auth type is not found
       const authType = authTypeRegistry.get(authTypeId);
@@ -45,8 +41,6 @@ export const getAxiosInstanceWithAuth = ({
         configurationUtilities.getResponseSettings();
 
       const axiosInstance = axios.create({
-        // use httpAgent and httpsAgent and set axios proxy: false, to be able to handle fail on invalid certs
-        proxy: false,
         maxContentLength,
         // should we allow a way for a connector type to specify a timeout override?
         timeout: settingsTimeout,
@@ -59,18 +53,26 @@ export const getAxiosInstanceWithAuth = ({
             configurationUtilities,
             logger,
             config.url,
-            // sslOverrides??
+            // todo - sslOverrides, needed when we support certificate based auth
             {}
           );
 
+          // use httpAgent and httpsAgent and set axios proxy: false, to be able to handle fail on invalid certs
           config.httpAgent = httpAgent;
           config.httpsAgent = httpsAgent;
+          config.proxy = false;
         }
         return config;
       });
+
+      // use the registered auth type to configure authentication for the axios instance
       return authType.configure(axiosInstance, secrets);
     } catch (err) {
-      // log something?
+      logger.error(
+        `Error getting configured axios instance configured for auth type "${
+          authTypeId ?? 'unknown'
+        }": ${err.message} `
+      );
       throw err;
     }
   };

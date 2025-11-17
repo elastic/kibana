@@ -39,9 +39,6 @@ describe('getAxiosInstance', () => {
 
     expect(result).not.toBeUndefined();
     expect(result!.defaults.auth).toBeUndefined();
-
-    // @ts-expect-error
-    expect(result!.interceptors.request.handlers.length).toBe(0);
   });
 
   test('throws error when auth type is not supported', async () => {
@@ -52,6 +49,9 @@ describe('getAxiosInstance', () => {
     });
     await expect(getAxios({ authType: 'foo' })).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Auth type \\"foo\\" is not registered."`
+    );
+    expect(logger.error).toHaveBeenCalledWith(
+      `Error getting configured axios instance configured for auth type "foo": Auth type "foo" is not registered. `
     );
   });
 
@@ -108,18 +108,16 @@ describe('getAxiosInstance', () => {
     );
   });
 
-  test('returns axios instance configured for header auth', async () => {
+  test('returns axios instance configured for api_key_header auth', async () => {
     const getAxios = getAxiosInstanceWithAuth({
       authTypeRegistry,
       configurationUtilities,
       logger,
     });
     const result = await getAxios({
-      authType: 'header',
-      headers: {
-        'X-Custom-Auth': 'i-am-a-custom-auth-string',
-        'another-important-header': 'foo',
-      },
+      authType: 'api_key_header',
+      headerField: 'X-Custom-Auth',
+      apiKey: 'i-am-a-custom-auth-string',
     });
 
     expect(result).not.toBeUndefined();
@@ -127,7 +125,6 @@ describe('getAxiosInstance', () => {
     expect(result!.defaults.headers.common).toEqual(
       expect.objectContaining({
         'X-Custom-Auth': 'i-am-a-custom-auth-string',
-        'another-important-header': 'foo',
       })
     );
 

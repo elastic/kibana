@@ -117,46 +117,24 @@ describe('AuthTypeRegistry', () => {
       expect(z.toJSONSchema(schema)).toMatchSnapshot();
     });
 
-    ['override', 'merge'].forEach((mergeStrategy) => {
-      describe(`"${mergeStrategy}" merge strategy"`, () => {
-        test('correctly returns custom schema when there are overlapping keys', () => {
-          const schema = authTypeRegistry.getSchemaForAuthType({
-            type: 'header',
-            mergeStrategy: mergeStrategy as 'override' | 'merge',
-            customSchema: z.object({
-              headers: z.object({
-                'custom-api-key-field': z.string().describe('A custom field'),
-              }),
-            }),
-          });
-          expect(z.toJSONSchema(schema)).toMatchSnapshot();
-        });
-
-        test('correctly returns custom schema when there are no overlapping keys', () => {
-          const schema = authTypeRegistry.getSchemaForAuthType({
-            type: 'header',
-            mergeStrategy: mergeStrategy as 'override' | 'merge',
-            customSchema: z.object({
-              additionalHeaders: z.object({
-                'additional-custom-api-key-field': z.string().describe('A custom field'),
-              }),
-            }),
-          });
-          expect(z.toJSONSchema(schema)).toMatchSnapshot();
-        });
-
-        test('correctly returns custom schema when there are overlapping and non-overlapping keys', () => {
-          const schema = authTypeRegistry.getSchemaForAuthType({
-            type: 'basic',
-            mergeStrategy: mergeStrategy as 'override' | 'merge',
-            customSchema: z.object({
-              password: z.string().min(5).describe('Password'),
-              email: z.string().describe('Username'),
-            }),
-          });
-          expect(z.toJSONSchema(schema)).toMatchSnapshot();
-        });
+    test('correctly returns schema for auth type definition when defaults are provided', () => {
+      const schema = authTypeRegistry.getSchemaForAuthType({
+        type: 'api_key_header',
+        defaults: {
+          headerField: 'custom-api-key-field',
+        },
       });
+      expect(z.toJSONSchema(schema)).toMatchSnapshot();
+    });
+
+    test('ignores defaults for key that is not in auth type schema', () => {
+      const schema = authTypeRegistry.getSchemaForAuthType({
+        type: 'api_key_header',
+        defaults: {
+          noField: 'custom-api-key-field2',
+        },
+      });
+      expect(z.toJSONSchema(schema)).toMatchSnapshot();
     });
   });
 });

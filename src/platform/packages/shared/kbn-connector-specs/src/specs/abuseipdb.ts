@@ -33,12 +33,10 @@ export const AbuseIPDBConnector: ConnectorSpec = {
 
   authTypes: [
     {
-      type: 'header',
-      customSchema: z.object({
-        headers: z.object({
-          Key: z.string().meta({ sensitive: true }).describe('API Key'),
-        }),
-      }),
+      type: 'api_key_header',
+      defaults: {
+        headerField: 'Key',
+      },
     },
   ],
 

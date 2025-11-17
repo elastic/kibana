@@ -216,9 +216,7 @@ export interface ConnectorTest {
 
 export interface AuthTypeDef {
   type: string;
-  // defaults to 'override' if not specified
-  mergeStrategy?: 'override' | 'merge';
-  customSchema: z.ZodObject<Record<string, z.ZodType>>;
+  defaults: Record<string, unknown>;
 }
 export interface ConnectorSpec {
   metadata: ConnectorMetadata;

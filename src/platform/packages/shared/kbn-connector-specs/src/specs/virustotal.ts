@@ -33,12 +33,10 @@ export const VirusTotalConnector: ConnectorSpec = {
 
   authTypes: [
     {
-      type: 'header',
-      customSchema: z.object({
-        headers: z.object({
-          'x-apikey': z.string().meta({ sensitive: true }).describe('API Key'),
-        }),
-      }),
+      type: 'api_key_header',
+      defaults: {
+        headerField: 'x-apikey',
+      },
     },
   ],
 

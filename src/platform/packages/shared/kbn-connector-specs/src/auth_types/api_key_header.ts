@@ -12,7 +12,8 @@ import type { AxiosInstance } from 'axios';
 import type { AuthTypeSpec } from '../connector_spec';
 
 const authSchema = z.object({
-  headers: z.record(z.string(), z.string()).meta({ sensitive: true }).describe('Custom Headers'),
+  headerField: z.string().meta({ sensitive: true }).describe('API Key header field'),
+  apiKey: z.string().meta({ sensitive: true }).describe('API Key value'),
 });
 
 type AuthSchemaType = z.infer<typeof authSchema>;
@@ -21,14 +22,12 @@ type AuthSchemaType = z.infer<typeof authSchema>;
  * Header-based authentication (generic)
  * Use for: API keys, custom headers (X-API-Key, etc.)
  */
-export const HeaderAuth: AuthTypeSpec<AuthSchemaType> = {
-  id: 'header',
+export const ApiKeyHeaderAuth: AuthTypeSpec<AuthSchemaType> = {
+  id: 'api_key_header',
   schema: authSchema,
   configure: (axiosInstance: AxiosInstance, secret: AuthSchemaType): AxiosInstance => {
     // set global defaults
-    for (const [key, value] of Object.entries(secret.headers)) {
-      axiosInstance.defaults.headers.common[key] = value;
-    }
+    axiosInstance.defaults.headers.common[secret.headerField] = secret.apiKey;
 
     return axiosInstance;
   },

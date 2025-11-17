@@ -33,12 +33,10 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
 
   authTypes: [
     {
-      type: 'header',
-      customSchema: z.object({
-        headers: z.object({
-          'X-OTX-API-KEY': z.string().meta({ sensitive: true }).describe('API Key'),
-        }),
-      }),
+      type: 'api_key_header',
+      defaults: {
+        headerField: 'X-OTX-API-KEY',
+      },
     },
   ],
 

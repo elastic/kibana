@@ -7,7 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './auth_types/api_key_header';
-export * from './auth_types/bearer';
-export * from './auth_types/basic';
-export * from './auth_types/none';
+import { z } from '@kbn/zod/v4';
+import type { AxiosInstance } from 'axios';
+import type { AuthTypeSpec } from '../connector_spec';
+
+const authSchema = z.object({});
+
+type AuthSchemaType = z.infer<typeof authSchema>;
+
+/**
+ * No Authentication
+ */
+export const NoAuth: AuthTypeSpec<AuthSchemaType> = {
+  id: 'none',
+  schema: authSchema,
+  configure: (axiosInstance: AxiosInstance): AxiosInstance => {
+    return axiosInstance;
+  },
+};

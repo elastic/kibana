@@ -33,12 +33,10 @@ export const GreyNoiseConnector: ConnectorSpec = {
 
   authTypes: [
     {
-      type: 'header',
-      customSchema: z.object({
-        headers: z.object({
-          key: z.string().meta({ sensitive: true }).describe('API Key'),
-        }),
-      }),
+      type: 'api_key_header',
+      defaults: {
+        headerField: 'key',
+      },
     },
   ],
 

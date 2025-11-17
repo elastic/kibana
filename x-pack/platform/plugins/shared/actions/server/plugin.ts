@@ -540,13 +540,13 @@ export class ActionsPlugin
     const secureGetActionsClientWithRequest = (request: KibanaRequest) =>
       getActionsClientWithRequest(request);
 
+    const getAxiosInstanceFn = getAxiosInstanceWithAuth({
+      authTypeRegistry: this.authTypeRegistry!,
+      configurationUtilities: actionsConfigUtils,
+      logger,
+    });
     const getAxiosInstanceWithAuthHelper = async (validatedSecrets: Record<string, unknown>) => {
-      const getAxiosInstance = getAxiosInstanceWithAuth({
-        authTypeRegistry: this.authTypeRegistry!,
-        configurationUtilities: actionsConfigUtils,
-        logger,
-      });
-      return await getAxiosInstance(validatedSecrets);
+      return await getAxiosInstanceFn(validatedSecrets);
     };
 
     this.eventLogService!.registerSavedObjectProvider('action', (request) => {

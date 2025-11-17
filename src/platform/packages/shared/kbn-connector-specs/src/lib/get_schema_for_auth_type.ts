@@ -12,23 +12,24 @@ import type { NormalizedAuthType } from '../connector_spec';
 
 export const AUTH_TYPE_DISCRIMINATOR = 'authType';
 interface AuthTypeOverride {
-  customSchema?: z.ZodSchema;
-  mergeStrategy: 'merge' | 'override';
+  defaults: Record<string, unknown> | undefined;
 }
+
 export const getSchemaForAuthType = (
   id: string,
   authType: NormalizedAuthType,
-  { customSchema, mergeStrategy }: AuthTypeOverride
+  { defaults }: AuthTypeOverride
 ) => {
-  let schemaToUse = authType.schema;
-  if (customSchema && customSchema instanceof z.ZodObject) {
-    if (mergeStrategy === 'override') {
-      // use the custom schema
-      schemaToUse = customSchema;
-    } else {
-      // merge the schemas, with the custom schema overriding any shared props
-      schemaToUse = schemaToUse.merge(customSchema);
-    }
+  const schemaToUse = z.object({
+    ...authType.schema.shape,
+  });
+  if (defaults) {
+    Object.keys(defaults).forEach((key) => {
+      if (schemaToUse.shape[key]) {
+        const defaultValue = defaults[key];
+        schemaToUse.shape[key] = schemaToUse.shape[key].default(defaultValue);
+      }
+    });
   }
 
   // add the authType discriminator key
