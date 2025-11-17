@@ -96,10 +96,7 @@ export function StreamDetailEnrichmentContentImpl() {
     const definitionFieldsMap = new Map(definitionFields.map((field) => [field.name, field]));
 
     // Convert definitionFields to SchemaEditorField[] for uncommitted comparison
-    const storedFields: SchemaEditorField[] = [];
-    definitionFieldsMap.forEach((field, name) => {
-      storedFields.push(field);
-    });
+    const storedFields: SchemaEditorField[] = Array.from(definitionFieldsMap.values());
 
     const result: SchemaEditorField[] = [];
 
