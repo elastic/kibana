@@ -38,6 +38,7 @@ export {
 export {
   REGISTRY_EXTENSIONS_ROUTE,
   SOURCES_AUTOCOMPLETE_ROUTE,
+  TIMEFIELD_ROUTE,
   SOURCES_TYPES,
 } from './src/constants';
 
