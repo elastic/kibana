@@ -35,7 +35,8 @@ export const getMonacoWorkflowOverridesStyles = (euiThemeContext: UseEuiTheme) =
       width: 100%;
       min-width: 500px;
       max-width: 800px;
-      padding: 12px 16px;
+      border-radius: ${euiTheme.border.radius.medium};
+      ${euiShadow(euiThemeContext, 'm')}
     }
 
     .monaco-editor
