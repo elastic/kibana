@@ -213,12 +213,14 @@ const convertObjectMembersToParameterObjects = (
       }
     }
 
-    const {
-      schema: { description: schemaDescription, ...openApiSchemaObject },
-    } = convert(typeWithoutOptionalDefault);
+    const { schema: convertedSchema } = convert(typeWithoutOptionalDefault);
+
+    // For parameter schemas we expect an inline schema object, not a $ref wrapper.
+    const { description: schemaDescription, ...openApiSchemaObject } =
+      convertedSchema as OpenAPIV3.SchemaObject;
 
     if (typeof defaultValue !== 'undefined') {
-      openApiSchemaObject.default = defaultValue;
+      (openApiSchemaObject as OpenAPIV3.SchemaObject).default = defaultValue;
     }
 
     return {
@@ -320,12 +322,72 @@ const replaceDefinitionRefs = <T>(schema: T): T => {
   return result as T;
 };
 
+const COMPONENT_PREFIX = '@kbn/oas-component:';
+
+const getComponentId = (type: z.ZodTypeAny): string | undefined => {
+  // Direct marker on this schema
+  if (type.description?.startsWith(COMPONENT_PREFIX)) {
+    return type.description.slice(COMPONENT_PREFIX.length);
+  }
+
+  // Unwrap lazy
+  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodLazy)) {
+    return getComponentId(unwrapZodLazy(type));
+  }
+
+  // Unwrap optional/default
+  if (
+    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodOptional) ||
+    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodDefault)
+  ) {
+    const { innerType } = unwrapZodOptionalDefault(type);
+    return getComponentId(innerType);
+  }
+
+  // Unwrap effects (preprocess / refinement / transform)
+  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodEffects)) {
+    return getComponentId(type._def.schema);
+  }
+
+  return undefined;
+};
+
 export const convert = (schema: z.ZodTypeAny) => {
+  const componentId = getComponentId(schema);
+
+  if (componentId) {
+    // Special path for schemas that opt in as reusable OpenAPI components
+    // (e.g. StreamlangCondition). We let zod-to-json-schema build a root
+    // definition tree and then expose those definitions as components.
+    const rawJsonSchema = zodToJsonSchema(unwrapZodType(schema, true), {
+      target: 'openApi3',
+      $refStrategy: 'root',
+      name: componentId,
+    }) as OpenAPIV3.SchemaObject & {
+      definitions?: Record<string, OpenAPIV3.SchemaObject>;
+    };
+
+    const { definitions = {} } = rawJsonSchema;
+
+    const shared: { [id: string]: OpenAPIV3.SchemaObject } = {};
+    for (const [id, definitionSchema] of Object.entries(definitions)) {
+      shared[id] = replaceDefinitionRefs(definitionSchema) as OpenAPIV3.SchemaObject;
+    }
+
+    return {
+      shared,
+      schema: {
+        $ref: `#/components/schemas/${componentId}`,
+      },
+    };
+  }
+
   const rawJsonSchema = zodToJsonSchema(schema, {
     target: 'openApi3',
     // Use a non-ref strategy here so we don't leak internal zod-to-json-schema
-    // definition graphs (ZodSchema*) into the OpenAPI bundle and create
-    // deeply nested $ref chains that tools like Redocly cannot resolve.
+    // definition graphs into the OpenAPI bundle or create root-relative $ref
+    // pointers (e.g. "#/anyOf/0/...") that are invalid once the schema is
+    // embedded under OpenAPI's "paths" or "components.schemas".
     $refStrategy: 'none',
   }) as OpenAPIV3.SchemaObject;
 

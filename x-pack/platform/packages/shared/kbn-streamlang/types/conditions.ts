@@ -216,10 +216,13 @@ export const conditionSchema = z
     (value) => ensureConditionType(value as LegacyCondition | Condition),
     conditionSchemaInternal
   )
+  // Hint for the Zod → OpenAPI converter that this schema should be exposed
+  // as a reusable OpenAPI component named "StreamlangCondition".
+  .describe('@kbn/oas-component:StreamlangCondition')
   .superRefine((obj, ctx) => {
     if ((obj as any)?.type !== 'filter') return;
 
-    const condition = obj as Record<string, unknown>;
+    const condition = obj as unknown as Record<string, unknown>;
     const hasOperator = BINARY_OPERATORS.some((key) => key in condition);
     const hasExists = 'exists' in condition;
 
