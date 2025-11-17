@@ -51,7 +51,7 @@ export class FilterBar {
     // await this.page.waitForTimeout(100); // wait for input to be ready
     await expect(filterParamsInput).toBeEditable();
     await filterParamsInput.focus();
-    await filterParamsInput.pressSequentially(options.value, { delay: 100 });
+    await this.page.typeWithDelay('[data-test-subj="filterParams"] input', options.value);
     // save filter
     await this.page.testSubj.click('saveFilter');
 
