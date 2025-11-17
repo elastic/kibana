@@ -21,6 +21,12 @@ import { merge } from 'lodash';
 import { DATA_QUALITY_DETAILS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import type { TraceIndexes } from '@kbn/discover-utils/src';
 
+jest.mock('@kbn/presentation-panel-plugin/public/kibana_services', () => ({
+  uiActions: {
+    getAction: jest.fn(),
+  },
+}));
+
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
   EuiCodeBlock: ({
