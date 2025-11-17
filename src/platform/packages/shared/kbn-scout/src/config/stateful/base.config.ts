@@ -185,35 +185,6 @@ export const defaultConfig: ScoutServerConfig = {
           version: 'latest',
         },
       ])}`,
-      `--xpack.fleet.agentPolicies=${JSON.stringify([
-        {
-          name: 'Elastic APM',
-          id: 'policy-elastic-agent-on-cloud',
-          package_policies: [
-            {
-              name: 'Elastic APM',
-              id: 'elastic-cloud-apm',
-              package: { name: 'apm' },
-              inputs: [
-                {
-                  type: 'apm',
-                  keep_enabled: true,
-                  vars: [
-                    { name: 'api_key_enabled', value: true },
-                    { name: 'host', value: '0.0.0.0:8200', frozen: true },
-                    { name: 'secret_token', value: 'foo' },
-                    { name: 'profiling.enabled', value: true },
-                    {
-                      name: 'profiling.metrics.elasticsearch',
-                      value: ['https://elasticsearch:9200'],
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-      ])}`,
       // Fleet configuration
       `--xpack.fleet.fleetServerHosts=${JSON.stringify([
         {

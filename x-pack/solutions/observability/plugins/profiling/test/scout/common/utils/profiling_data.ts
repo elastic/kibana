@@ -16,6 +16,8 @@ import {
 } from '@kbn/profiling-data-access-plugin/common';
 import supertest from 'supertest';
 
+const APM_AGENT_POLICY_ID = 'policy-elastic-agent-on-cloud';
+
 const esArchiversPath = Path.posix.join(
   __dirname,
   '..',
@@ -66,7 +68,33 @@ export async function setupProfiling(
 
   const st = supertest(buildKibanaUrl(config));
 
+  await apiServices.fleet.internal.setup();
+  log('Fleet infrastructure setup completed');
   await apiServices.fleet.agent.setup();
+  log('Fleet agents setup completed');
+  log('Checking if APM agent policy exists, creating if needed...');
+  const getPolicyResponse = await apiServices.fleet.agent_policies.get({
+    page: 1,
+    perPage: 10,
+  });
+  const apmPolicyData = getPolicyResponse.data.items.find(
+    (policy: { id: string }) => policy.id === 'policy-elastic-agent-on-cloud'
+  );
+
+  if (!apmPolicyData) {
+    await apiServices.fleet.agent_policies.create(
+      'Elastic APM',
+      'default',
+      false, // sysMonitoring
+      {
+        id: APM_AGENT_POLICY_ID,
+        description: 'Elastic APM agent policy created via Fleet API',
+      }
+    );
+    log(`APM agent policy '${APM_AGENT_POLICY_ID}' is created`);
+  } else {
+    log(`APM agent policy '${APM_AGENT_POLICY_ID}' already exists`);
+  }
 
   const res = await st
     .get('/api/profiling/setup/es_resources')
@@ -139,7 +167,7 @@ export async function cleanUpProfilingData({
 
 export async function deletePackagePolicy(config: ScoutTestConfig, policy: string) {
   const st = supertest(buildKibanaUrl(config));
-  return st
+  return await st
     .post('/api/fleet/package_policies/delete')
     .set({ 'kbn-xsrf': 'foo' })
     .set('x-elastic-internal-origin', 'Kibana')
