@@ -9,7 +9,7 @@
 
 import { ExecutionStatus } from '@kbn/workflows';
 import type { WorkflowExecutionLoopParams } from './types';
-import { abortableTimeout, generateExecutionTaskScope, TimeoutAbortedError } from '../utils';
+import { abortableTimeout, TimeoutAbortedError } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 
 const SHORT_DURATION_THRESHOLD = 1000 * 5; // 5 seconds
@@ -54,11 +54,6 @@ export async function handleExecutionDelay(
       status: ExecutionStatus.RUNNING,
     });
   } else {
-    await params.workflowTaskManager.scheduleResumeTask({
-      runAt: resumeAt,
-      workflowRunId: workflowExecution.id,
-      spaceId: workflowExecution.spaceId,
-      scope: generateExecutionTaskScope(workflowExecution),
-    });
+    await params.workflowTaskManager.scheduleResumeTask({ workflowExecution, resumeAt });
   }
 }

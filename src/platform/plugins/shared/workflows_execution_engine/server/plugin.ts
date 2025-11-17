@@ -49,6 +49,7 @@ import type {
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
 import { createIndexes } from '../common';
+import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
 
@@ -447,6 +448,7 @@ export class WorkflowsExecutionEnginePlugin
         workflowExecutionId,
         spaceId
       );
+      const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
 
       if (!workflowExecution) {
         throw new WorkflowExecutionNotFoundError(workflowExecutionId);
@@ -461,21 +463,6 @@ export class WorkflowsExecutionEnginePlugin
         return;
       }
 
-      const { taskManager } = plugins;
-
-      const { docs: tasks } = await taskManager.fetch({
-        query: {
-          bool: {
-            must: [
-              {
-                term: {
-                  'task.scope': `workflow:execution:${workflowExecution.id}`,
-                },
-              },
-            ],
-          },
-        },
-      });
       await workflowExecutionRepository.updateWorkflowExecution({
         id: workflowExecution.id,
         cancelRequested: true,
@@ -483,16 +470,7 @@ export class WorkflowsExecutionEnginePlugin
         cancelledAt: new Date().toISOString(),
         cancelledBy: 'system', // TODO: set user if available
       });
-      const idleTasks = tasks.filter((task) => task.status === TaskStatus.Idle);
-
-      if (idleTasks.length) {
-        await taskManager.bulkRemove(idleTasks.map((task) => task.id));
-      }
-
-      // force delayed tasks to run so that internal cancellation logic can proceed
-      if (idleTasks.length > 0) {
-        taskManager.bulkSchedule(idleTasks.map((task) => ({ ...task, runAt: undefined })));
-      }
+      await workflowTaskManager.forceRunIdleTasks(workflowExecution.id);
     };
 
     return {
