@@ -91,37 +91,6 @@ export class SecuritySolutionServerlessPlugin
     // Setup project uiSettings whitelisting
     pluginsSetup.serverless.setupProjectSettings(SECURITY_PROJECT_SETTINGS);
 
-    // use metering check which verifies AI4SOC is enabled
-    if (ai4SocMeteringService.shouldMeter(this.config)) {
-      // Serverless Advanced Settings setup
-      coreSetup
-        .getStartServices()
-        .then(async ([coreStart, depsStart]) => {
-          const isNewDefaultConnectorEnabled = await coreStart.featureFlags.getBooleanValue(
-            AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
-            false
-          );
-
-          try {
-            const unsecuredActionsClient = depsStart.actions.getUnsecuredActionsClient();
-            // using "default" space actually forces the api to use undefined space (see getAllUnsecured)
-            const aiConnectors = (await unsecuredActionsClient.getAll('default')).filter(
-              (connector: Connector) => isSupportedConnector(connector)
-            );
-            const defaultAIConnectorSetting = getDefaultAIConnectorSetting(
-              aiConnectors,
-              isNewDefaultConnectorEnabled ? 'ui' : undefined
-            );
-            if (defaultAIConnectorSetting !== null) {
-              coreSetup.uiSettings.register(defaultAIConnectorSetting);
-            }
-          } catch (error) {
-            this.logger.error(`Error registering default AI connector: ${error}`);
-          }
-        })
-        .catch(() => {}); // it shouldn't reject, but just in case
-    }
-
     // Tasks
     this.cloudSecurityUsageReportingTask = new SecurityUsageReportingTask({
       core: coreSetup,
