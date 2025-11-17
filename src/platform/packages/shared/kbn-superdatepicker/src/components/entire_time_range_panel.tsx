@@ -56,20 +56,20 @@ export const EntireTimeRangePanel = ({
   return (
     <>
       <EuiSpacer size="s" />
-      <EuiFlexGroup alignItems='center' gutterSize='s'>
-      <EuiFlexItem grow={false}>
-        <EuiLink onClick={handleApplyTime} disabled={isLoading}>
-          <FormattedMessage
-            id="kbnSuperDatePicker.entireTimeRangePanel.buttonLabel"
-            defaultMessage="Entire time range"
-          />
-        </EuiLink>
-      </EuiFlexItem>
-      {isLoading && (
+      <EuiFlexGroup alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
-          <EuiLoadingSpinner size="s" />
+          <EuiLink onClick={handleApplyTime} disabled={isLoading}>
+            <FormattedMessage
+              id="kbnSuperDatePicker.entireTimeRangePanel.buttonLabel"
+              defaultMessage="Entire time range"
+            />
+          </EuiLink>
         </EuiFlexItem>
-      )}
+        {isLoading && (
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="s" />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </>
   );
