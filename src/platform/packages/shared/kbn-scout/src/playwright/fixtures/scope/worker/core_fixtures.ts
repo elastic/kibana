@@ -148,8 +148,10 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
 
       const isCustomRoleSet = (roleHash: string) => roleHash === customRoleHash;
 
-      const isElasticsearchRole = (role: any): role is ElasticsearchRoleDescriptor => {
-        return 'applications' in role;
+      const isElasticsearchRole = (
+        role: KibanaRole | ElasticsearchRoleDescriptor
+      ): role is ElasticsearchRoleDescriptor => {
+        return !('kibana' in role);
       };
 
       const setCustomRole = async (role: KibanaRole | ElasticsearchRoleDescriptor) => {
@@ -162,8 +164,10 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
 
         if (isElasticsearchRole(role)) {
           await createElasticsearchCustomRole(esClient, customRoleName, role);
+          log.debug(`Successfully created Elasticsearch custom role: ${customRoleName}`);
         } else {
           await createCustomRole(kbnClient, customRoleName, role);
+          log.debug(`Successfully created Kibana custom role: ${customRoleName}`);
         }
 
         customRoleHash = newRoleHash;

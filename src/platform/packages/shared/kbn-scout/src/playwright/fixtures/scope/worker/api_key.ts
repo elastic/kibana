@@ -53,15 +53,20 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
 
       const createApiKeyPayload = (
         apiKeyName: string,
-        role: string,
+        roleName: string,
         descriptors: Record<string, any>
-      ) => ({
-        name: apiKeyName,
-        metadata: {},
-        ...(role === samlAuth.customRoleName
-          ? { kibana_role_descriptors: descriptors }
-          : { role_descriptors: descriptors }),
-      });
+      ) => {
+        const roleDescriptor = descriptors[roleName];
+        const isKibanaRole = roleDescriptor && 'kibana' in roleDescriptor;
+
+        return {
+          name: apiKeyName,
+          metadata: {},
+          ...(isKibanaRole
+            ? { kibana_role_descriptors: descriptors }
+            : { role_descriptors: descriptors }),
+        };
+      };
 
       const createApiKey = async (roleName: string, roleDescriptors: Record<string, any>) => {
         log.debug(
@@ -94,7 +99,7 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
         const apiKey = response.body as ApiKey;
         const apiKeyHeader = { Authorization: `ApiKey ${apiKey.encoded}` };
 
-        log.info(`Created API key for ${roleName} role: [${roleName}]`);
+        log.info(`Successfully created API key for ${roleName} role: ${apiKey.name}`);
         generatedApiKeys.push(apiKey);
         return { apiKey, apiKeyHeader };
       };
@@ -137,6 +142,7 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
                 }
                 return { [role]: roleDescriptor };
               })();
+        // Regular roles use role_descriptors (not kibana_role_descriptors)
         return await createApiKey(role, roleDescriptors);
       };
 
@@ -145,12 +151,17 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
       ): Promise<RoleApiCredentials> => {
         isCustomRoleCreated = true;
 
-        // create custom role in Elasticsearch (if it doesn't already exist)
-        await samlAuth.setCustomRole(roleDescriptor);
-        const result = await createApiKey(samlAuth.customRoleName, {
-          [samlAuth.customRoleName]: roleDescriptor,
-        });
-        return result;
+        try {
+          await samlAuth.setCustomRole(roleDescriptor);
+
+          const result = await createApiKey(samlAuth.customRoleName, {
+            [samlAuth.customRoleName]: roleDescriptor,
+          });
+          return result;
+        } catch (error: any) {
+          log.error(`Failed to create API key for custom role: ${error.message}`);
+          throw error;
+        }
       };
 
       await use({ getApiKey, getApiKeyForCustomRole });
