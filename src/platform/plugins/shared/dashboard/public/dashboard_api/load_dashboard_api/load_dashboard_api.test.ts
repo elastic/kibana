@@ -12,9 +12,11 @@ import { loadDashboardApi } from './load_dashboard_api';
 
 jest.mock('../performance/query_performance_tracking', () => {
   return {
-    startQueryPerformanceTracking: () => {},
+    startQueryPerformanceTracking: jest.fn(),
   };
 });
+
+import { startQueryPerformanceTracking } from '../performance/query_performance_tracking';
 
 jest.mock('@kbn/content-management-content-insights-public', () => {
   class ContentInsightsClientMock {
@@ -57,6 +59,12 @@ describe('loadDashboardApi', () => {
         query: lastSavedQuery,
       }),
     });
+
+    window.performance.getEntriesByName = jest.fn().mockReturnValue([
+      {
+        startTime: 12345,
+      },
+    ]);
   });
 
   afterEach(() => {
@@ -74,6 +82,15 @@ describe('loadDashboardApi', () => {
       expect(getDashboardApiMock).toHaveBeenCalled();
       // @ts-ignore
       expect(getDashboardApiMock.mock.calls[0][0].initialState).toEqual(DEFAULT_DASHBOARD_STATE);
+
+      expect(window.performance.getEntriesByName).toHaveBeenCalledWith(
+        'dashboard_app_mount',
+        'mark'
+      );
+      expect(startQueryPerformanceTracking).toHaveBeenCalledWith(expect.any(Object), {
+        firstLoad: true,
+        creationStartTime: 12345,
+      });
     });
 
     test('should overwrite saved object state with unsaved state', async () => {

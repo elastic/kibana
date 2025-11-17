@@ -177,7 +177,7 @@ export class ApplicationService {
         if (currentAppId && currentAppId !== app.id) {
           this.appInternalStates.delete(currentAppId);
         }
-        performance.mark('kbnLoad', {
+        window.performance.mark('kbnLoad', {
           detail: 'first_app_nav',
         });
         this.currentAppId$.next(app.id);
