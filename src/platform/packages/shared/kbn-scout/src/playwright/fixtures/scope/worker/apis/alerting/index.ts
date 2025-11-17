@@ -326,6 +326,7 @@ export const getAlertingApiHelper = (
               method: 'POST',
               path: `${buildSpacePath(spaceId)}/api/alerting/rule/${ruleId}/alert/${alertId}/_mute`,
               retries: 3,
+              body: { validate_alerts_existence: false },
             });
           }
         );
