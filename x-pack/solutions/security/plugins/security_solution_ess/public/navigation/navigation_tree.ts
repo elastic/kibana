@@ -24,10 +24,11 @@ import { SOLUTION_NAME } from './translations';
 export const createNavigationTree = (services: Services): NavigationTreeDefinition => ({
   body: [
     {
-      link: securityLink(SecurityPageName.landing),
-      title: SOLUTION_NAME,
+      id: 'security_solution_home',
       icon: 'logoSecurity',
+      link: securityLink(SecurityPageName.landing),
       renderAs: 'home',
+      title: SOLUTION_NAME,
     },
     {
       link: 'discover',
@@ -94,10 +95,12 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
                   link: securityLink(SecurityPageName.landing),
                 },
                 {
+                  id: SecurityPageName.siemReadiness,
                   link: securityLink(SecurityPageName.siemReadiness),
                 },
                 {
                   // value report
+                  id: SecurityPageName.aiValue,
                   link: securityLink(SecurityPageName.aiValue),
                 },
               ],
