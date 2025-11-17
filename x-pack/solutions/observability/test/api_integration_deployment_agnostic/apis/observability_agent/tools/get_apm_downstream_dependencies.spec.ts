@@ -35,7 +35,6 @@ const USER_PROMPT = `What are the downstream dependencies for the service ${SERV
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const log = getService('log');
   const roleScopedSupertest = getService('roleScopedSupertest');
-  const synthtrace = getService('synthtrace');
 
   let llmProxy: LlmProxy;
   let connectorId: string;
