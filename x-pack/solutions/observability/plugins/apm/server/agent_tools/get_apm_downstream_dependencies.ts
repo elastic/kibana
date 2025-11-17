@@ -10,6 +10,7 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
 import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { timeRangeSchema } from '@kbn/observability-agent-plugin/server/utils/tool_schemas';
 import { buildApmToolResources } from './utils/build_apm_tool_resources';
 import { getApmToolAvailability } from './utils/get_apm_tool_availability';
 import { getApmDownstreamDependencies } from '../routes/assistant_functions/get_apm_downstream_dependencies';
@@ -17,6 +18,7 @@ import { OBSERVABILITY_GET_APM_DOWNSTREAM_DEPENDENCIES_TOOL_ID } from '../../com
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../types';
 
 const getApmDownstreamDependenciesToolSchema = z.object({
+  ...timeRangeSchema.shape,
   serviceName: z.string().min(1).describe('The name of the service'),
   serviceEnvironment: z
     .string()
@@ -24,14 +26,6 @@ const getApmDownstreamDependenciesToolSchema = z.object({
     .describe(
       'The environment that the service is running in. Leave empty to query for all environments.'
     ),
-  start: z
-    .string()
-    .min(1)
-    .describe('The start of the time range, in Elasticsearch date math, like `now-24h`.'),
-  end: z
-    .string()
-    .min(1)
-    .describe('The end of the time range, in Elasticsearch date math, like `now`.'),
 });
 
 export function createApmDownstreamDependenciesTool({

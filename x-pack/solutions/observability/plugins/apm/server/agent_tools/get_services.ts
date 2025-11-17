@@ -10,6 +10,7 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
 import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import { timeRangeSchema } from '@kbn/observability-agent-plugin/server/utils/tool_schemas';
 import { buildApmToolResources } from './utils/build_apm_tool_resources';
 import { getApmToolAvailability } from './utils/get_apm_tool_availability';
 import { getApmServiceList } from '../routes/assistant_functions/get_apm_service_list';
@@ -18,14 +19,7 @@ import { ServiceHealthStatus } from '../../common/service_health_status';
 import { OBSERVABILITY_GET_SERVICES_TOOL_ID } from '../../common/observability_agent/agent_tool_ids';
 
 const getServicesSchema = z.object({
-  start: z
-    .string()
-    .min(1)
-    .describe('The start of the time range, in Elasticsearch date math, like `now-24h`.'),
-  end: z
-    .string()
-    .min(1)
-    .describe('The end of the time range, in Elasticsearch date math, like `now`.'),
+  ...timeRangeSchema.shape,
   serviceEnvironment: z
     .string()
     .min(1)
