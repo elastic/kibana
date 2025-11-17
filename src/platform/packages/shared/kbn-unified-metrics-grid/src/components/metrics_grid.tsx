@@ -17,7 +17,6 @@ import type {
   DimensionFilters,
 } from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
-import type { Observable } from 'rxjs';
 import { css } from '@emotion/react';
 import type { ChartSize } from './chart';
 import { Chart } from './chart';
