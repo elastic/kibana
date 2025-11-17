@@ -36,7 +36,7 @@ export function useWorkflowExecutions(
   > = {}
 ) {
   const { http } = useKibana().services;
-  const size = params.size ?? DEFAULT_PAGE_SIZE;
+  const currentSize = params.size ?? DEFAULT_PAGE_SIZE;
 
   const queryFn = useCallback(
     async ({ pageParam = 1 }: { pageParam?: number }) => {
@@ -46,11 +46,11 @@ export function useWorkflowExecutions(
           statuses: params.statuses,
           executionTypes: params.executionTypes,
           page: pageParam,
-          size,
+          currentSize,
         },
       });
     },
-    [http, params.workflowId, params.statuses, params.executionTypes, size]
+    [http, params.workflowId, params.statuses, params.executionTypes, currentSize]
   );
 
   const getNextPageParam = useCallback((lastPage: WorkflowExecutionListDto) => {
