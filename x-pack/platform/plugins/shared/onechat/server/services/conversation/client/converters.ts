@@ -69,6 +69,11 @@ function deserializeStepResults(rounds: PersistentConversationRound[]): Conversa
     started_at: round.started_at ?? new Date(0).toISOString(),
     time_to_first_token: round.time_to_first_token ?? 0,
     time_to_last_token: round.time_to_last_token ?? 0,
+    model_usage: round.model_usage ?? {
+      llm_calls: 0,
+      input_tokens: 0,
+      output_tokens: 0,
+    },
     steps: round.steps.map<ConversationRoundStep>((step) => {
       if (step.type === ConversationRoundStepType.toolCall) {
         return {
