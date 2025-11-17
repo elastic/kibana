@@ -105,7 +105,7 @@ export const withMapCompleteItem: ISuggestionItem = withAutoSuggest({
   label: 'inference_id',
   text: '{ "inference_id": "$0" }',
   asSnippet: true,
-  kind: 'Snippet',
+  kind: 'Reference',
   detail: 'Inference endpoint',
   sortText: '1',
 });
