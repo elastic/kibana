@@ -48,4 +48,6 @@ export interface ComputedData {
   workflowLookup?: WorkflowLookup;
   workflowGraph?: WorkflowGraph; // This will be handled specially for serialization
   workflowDefinition?: WorkflowYaml | null;
+  /** The yamlString that was used to compute this data. Used to detect if computation is stale. */
+  computedFromYamlString?: string;
 }

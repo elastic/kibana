@@ -219,4 +219,81 @@ steps: []
     expect(result?.isInTriggersContext).toBe(false);
     expect(result?.path).toEqual(['inputs', 0, 'type']);
   });
+
+  it('should parse on-demand when computation is stale (yamlString changed)', () => {
+    const initialYaml = `version: "1"
+name: "test"
+inputs:
+  - name: myInput
+    type: string
+steps: []`;
+
+    const updatedYaml = `version: "1"
+name: "test"
+inputs:
+  - name: myInput
+    type: |<-
+steps: []`;
+
+    // Create state with stale computation (yamlString changed but computed hasn't updated)
+    const staleComputedData = performComputation(initialYaml);
+    const mockEditorState = {
+      yamlString: updatedYaml, // Different from what was computed
+      computed: staleComputedData, // Computed from old yamlString
+      connectors: { connectorTypes: {}, totalConnectors: 0 },
+    } as WorkflowDetailState;
+
+    const cursorOffset = updatedYaml.indexOf('|<-');
+    const cleanedYaml = updatedYaml.replace('|<-', '');
+    const mockModel = createFakeMonacoModel(cleanedYaml, cursorOffset);
+    const position = mockModel.getPositionAt(cursorOffset);
+
+    const result = buildAutocompleteContext({
+      editorState: mockEditorState,
+      model: mockModel as unknown as monaco.editor.ITextModel,
+      position: position as monaco.Position,
+      completionContext: {
+        triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+        triggerCharacter: ':',
+      } as monaco.languages.CompletionContext,
+    });
+
+    // Should correctly detect path even with stale computation (parses on-demand)
+    expect(result?.path).toEqual(['inputs', 0, 'type']);
+  });
+
+  it('should use stored document when computation is fresh (yamlString unchanged)', () => {
+    const yaml = `version: "1"
+name: "test"
+inputs:
+  - name: myInput
+    type: |<-
+steps: []`;
+
+    // Create state with fresh computation (yamlString matches computed)
+    const computedData = performComputation(yaml.replace('|<-', ''));
+    const mockEditorState = {
+      yamlString: yaml.replace('|<-', ''), // Same as what was computed
+      computed: computedData, // Computed from same yamlString
+      connectors: { connectorTypes: {}, totalConnectors: 0 },
+    } as WorkflowDetailState;
+
+    const cursorOffset = yaml.indexOf('|<-');
+    const cleanedYaml = yaml.replace('|<-', '');
+    const mockModel = createFakeMonacoModel(cleanedYaml, cursorOffset);
+    const position = mockModel.getPositionAt(cursorOffset);
+
+    const result = buildAutocompleteContext({
+      editorState: mockEditorState,
+      model: mockModel as unknown as monaco.editor.ITextModel,
+      position: position as monaco.Position,
+      completionContext: {
+        triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+        triggerCharacter: ':',
+      } as monaco.languages.CompletionContext,
+    });
+
+    // Should correctly detect path using stored document (no parsing needed)
+    expect(result?.path).toEqual(['inputs', 0, 'type']);
+  });
 });

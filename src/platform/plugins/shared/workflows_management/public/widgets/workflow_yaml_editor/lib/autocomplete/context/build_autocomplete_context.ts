@@ -81,16 +81,21 @@ export function buildAutocompleteContext({
     };
   }
 
-  // Parse YAML document on-demand from current model content to ensure it matches
-  // the current cursor position. The debounced yamlDocument from state may be stale
-  // during fast typing, causing incorrect path calculations.
-  const currentYamlContent = model.getValue();
-  let documentForPath = yamlDocument; // Default to debounced document
-  try {
-    documentForPath = parseDocument(currentYamlContent, { keepSourceTokens: true });
-  } catch (error) {
-    // Fallback to debounced document if parsing fails (e.g., invalid YAML)
-    // documentForPath already set to yamlDocument above
+  // Smart parsing: only parse if yamlString has changed since last computation.
+  // This preserves the performance benefit of debouncing while ensuring accuracy.
+  const yamlString = editorState.yamlString;
+  const computedFromYamlString = editorState.computed?.computedFromYamlString;
+  const isComputationStale = yamlString !== computedFromYamlString;
+
+  let documentForPath = yamlDocument; // Default to stored document
+  // Only parse if the yamlString has changed (debounce is pending or computation failed)
+  if (isComputationStale) {
+    try {
+      documentForPath = parseDocument(yamlString, { keepSourceTokens: true });
+    } catch (error) {
+      // Fallback to stored document if parsing fails (e.g., invalid YAML)
+      // documentForPath already set to yamlDocument above
+    }
   }
 
   // Use the parsed document (current or fallback) for path calculation and other operations
@@ -120,7 +125,7 @@ export function buildAutocompleteContext({
   }
 
   // Check if we're actually inside a liquid block
-  const isInLiquidBlock = isInsideLiquidBlock(currentYamlContent, position);
+  const isInLiquidBlock = isInsideLiquidBlock(yamlString, position);
   const _isInScheduledTriggerWithBlock = isInScheduledTriggerWithBlock(
     documentForPath,
     absoluteOffset
