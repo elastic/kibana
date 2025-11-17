@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-export {
-  createTraceBasedEvaluator,
-  validateAndSanitizeTraceId,
-  type TraceBasedEvaluatorConfig,
-} from './factory';
+export { createTraceBasedEvaluator, type TraceBasedEvaluatorConfig } from './factory';
 export {
   createInputTokensEvaluator,
   createOutputTokensEvaluator,
