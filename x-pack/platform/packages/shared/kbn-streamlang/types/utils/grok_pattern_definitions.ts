@@ -36,7 +36,7 @@ export function unwrapPatternDefinitions(
      * WITHOUT - eliminating the optional branch.
      */
     const WITHOUT_FIELD = /%{([A-Z0-9_]+)}/g; // %{PATTERN}
-    const WITH_FIELD = /%{([A-Z0-9_]+):([^}]*)}/g; // %{PATTERN:field}
+    const WITH_FIELD = /%{([A-Z0-9_]+):([^}]+)}/g; // %{PATTERN:field}
 
     const expand = (match: string, key: string, fieldName?: string): string => {
       if (!pattern_definitions || !pattern_definitions[key]) {
