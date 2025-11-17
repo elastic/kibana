@@ -11,7 +11,11 @@ import React, { useCallback, useMemo, useState, useRef } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { MetricField, DimensionFilters } from '@kbn/metrics-experience-plugin/common/types';
+import type {
+  MetricField,
+  Dimension,
+  DimensionFilters,
+} from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import type { Observable } from 'rxjs';
 import { css } from '@emotion/react';
@@ -29,7 +33,7 @@ export type MetricsGridProps = Pick<
   'searchSessionId' | 'services' | 'onBrushEnd' | 'onFilter' | 'abortController' | 'requestParams'
 > & {
   filters?: DimensionFilters;
-  dimensions: string[];
+  dimensions: Dimension[];
   searchTerm?: string;
   columns: NonNullable<EuiFlexGridProps['columns']>;
   discoverFetch$: Observable<UnifiedHistogramInputMessage>;
@@ -200,7 +204,7 @@ interface ChartItemProps
   metric: MetricField;
   index: number;
   size: ChartSize;
-  dimensions: string[];
+  dimensions: Dimension[];
   filters: DimensionFilters;
   discoverFetch$: Observable<UnifiedHistogramInputMessage>;
   rowIndex: number;

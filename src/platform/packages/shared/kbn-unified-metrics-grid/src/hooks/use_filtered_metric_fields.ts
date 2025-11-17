@@ -9,7 +9,11 @@
 
 import { useMemo, useRef, useEffect } from 'react';
 import type { TimeRange } from '@kbn/es-query';
-import type { MetricField, DimensionFilters } from '@kbn/metrics-experience-plugin/common/types';
+import type {
+  MetricField,
+  Dimension,
+  DimensionFilters,
+} from '@kbn/metrics-experience-plugin/common/types';
 import { useDimensionFilters } from './use_dimension_filters';
 import { useMetricFieldsSearchQuery } from './use_metric_fields_search_query';
 
@@ -22,7 +26,7 @@ export const useFilteredMetricFields = ({
   onFilterComplete,
 }: {
   allFields: MetricField[];
-  dimensions: string[];
+  dimensions: Dimension[];
   searchTerm: string;
   valueFilters: string[];
   timeRange: TimeRange | undefined;
@@ -32,7 +36,7 @@ export const useFilteredMetricFields = ({
 
   // Client-side filtering by dimensions and search term
   const dimensionsSet = useMemo(
-    () => (dimensions.length > 0 ? new Set(dimensions) : null),
+    () => (dimensions.length > 0 ? new Set(dimensions.map((d) => d.name)) : null),
     [dimensions]
   );
   const searchTermLower = useMemo(() => searchTerm?.toLowerCase(), [searchTerm]);
