@@ -228,7 +228,7 @@ const ContextMenu = React.memo(
                 disabled:
                   (enabledWhenFilterable === true &&
                     rowDataViewField &&
-                    rowDataViewField?.filterable) ||
+                    !rowDataViewField?.filterable) ||
                   !row.groupValue,
                 onClick: (action.onClick as MouseEventHandler<Element>)?.bind({
                   rowContext: row,

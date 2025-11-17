@@ -8,6 +8,8 @@
  */
 
 import type { AggregateQuery } from '@kbn/es-query';
+import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
+import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import {
   getESQLStatsQueryMeta,
@@ -49,7 +51,7 @@ describe('cascaded documents helpers utils', () => {
       ]);
     });
 
-    it('should return the appropriate metadata when there are multiple stats commands in the query', () => {
+    it('should return the appropriate metadata from the last STATS command when there are multiple stats commands in the query', () => {
       const queryString = `
         FROM kibana_sample_data_logs
         // First aggregate per client + per URL
@@ -128,29 +130,6 @@ describe('cascaded documents helpers utils', () => {
       expect(result.appliedFunctions).toEqual([{ identifier: 'var0', aggregation: 'AVG' }]);
     });
 
-    it('should return empty arrays if there is a where command targeting a column on the last STATS command in the query', () => {
-      const queryString = `
-        FROM kibana_sample_data_logs
-        | STATS COUNT() BY clientip
-        | WHERE clientip == "192.168.1.1"
-      `;
-
-      const result = getESQLStatsQueryMeta(queryString);
-
-      expect(result.groupByFields).toEqual([
-        {
-          field: 'clientip',
-          type: 'column',
-        },
-      ]);
-      expect(result.appliedFunctions).toEqual([
-        {
-          identifier: 'COUNT()',
-          aggregation: 'COUNT',
-        },
-      ]);
-    });
-
     it('should return a single group by field if there is a where command following a STATS by command targeting a column specified as a grouping option in the operating stats command', () => {
       const queryString = `
      FROM kibana_sample_data_logs
@@ -180,10 +159,10 @@ describe('cascaded documents helpers utils', () => {
   });
 
   describe('constructCascadeQuery', () => {
-    describe('column options', () => {
-      describe('leaf queries', () => {
-        const nodeType = 'leaf';
+    describe('leaf queries', () => {
+      const nodeType = 'leaf';
 
+      describe('record field column group operations', () => {
         it('should construct a valid cascade leaf query for a query with just one column', () => {
           const editorQuery: AggregateQuery = {
             esql: `
@@ -284,143 +263,268 @@ describe('cascaded documents helpers utils', () => {
             'FROM remote_cluster:traces* | EVAL event = CASE(span.duration.us > 100000, "Bad", "Good") | WHERE event == "Bad"'
           );
         });
+
+        it('generate a valid cascade leaf query for a valid stats command that has a parameter value for a grouping option', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+             FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY ??field
+            `,
+          };
+
+          const nodePath = ['??field'];
+          const nodePathMap = { '??field': 'some value' };
+
+          const esqlVariables: ESQLControlVariable[] = [
+            {
+              key: 'field',
+              type: ESQLVariableType.FIELDS,
+              value: 'bytes',
+            },
+          ];
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            dataView: dataViewMock,
+            esqlVariables,
+            nodeType,
+            nodePath,
+            nodePathMap,
+          });
+
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logs | WHERE bytes == "some value"'
+          );
+        });
+
+        it('uses match phrase query when the selected column is a text or keyword field that is not aggregatable', () => {
+          const editorQuery: AggregateQuery = {
+            esql: `
+              FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY message
+            `,
+          };
+
+          const nodePath = ['tags'];
+          const nodePathMap = { tags: 'some random pattern' };
+
+          // only apply this mock for this test
+          jest.spyOn(dataViewMock.fields, 'getByName').mockReturnValueOnce({
+            esTypes: ['text', 'keyword'],
+            aggregatable: false,
+          } as unknown as DataViewField);
+
+          const cascadeQuery = constructCascadeQuery({
+            query: editorQuery,
+            dataView: dataViewMock,
+            esqlVariables: [],
+            nodeType,
+            nodePath,
+            nodePathMap,
+          });
+
+          expect(cascadeQuery).toBeDefined();
+          expect(cascadeQuery!.esql).toBe(
+            'FROM kibana_sample_data_logs | WHERE MATCH_PHRASE(tags, "some random pattern")'
+          );
+        });
       });
-    });
 
-    describe('function options', () => {
-      describe('categorize operation', () => {
-        it('should construct a valid cascade query for an un-named categorize operation', () => {
-          const editorQuery: AggregateQuery = {
-            esql: `
-                  FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY CATEGORIZE(message)
-                `,
-          };
+      describe('function group operations', () => {
+        describe('categorize operation', () => {
+          it('should construct a valid cascade query for an un-named categorize operation', () => {
+            const editorQuery: AggregateQuery = {
+              esql: `
+                    FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY CATEGORIZE(message)
+                  `,
+            };
 
-          const nodeType = 'leaf';
-          const nodePath = ['CATEGORIZE(message)'];
-          const nodePathMap = { 'CATEGORIZE(message)': 'some random pattern' };
+            const nodePath = ['CATEGORIZE(message)'];
+            const nodePathMap = { 'CATEGORIZE(message)': 'some random pattern' };
 
-          const cascadeQuery = constructCascadeQuery({
-            query: editorQuery,
-            dataView: dataViewMock,
-            esqlVariables: [],
-            nodeType,
-            nodePath,
-            nodePathMap,
+            const cascadeQuery = constructCascadeQuery({
+              query: editorQuery,
+              dataView: dataViewMock,
+              esqlVariables: [],
+              nodeType,
+              nodePath,
+              nodePathMap,
+            });
+
+            expect(cascadeQuery).toBeDefined();
+            expect(cascadeQuery!.esql).toBe(
+              'FROM kibana_sample_data_logs | WHERE MATCH(message, "some random pattern", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})'
+            );
           });
 
-          expect(cascadeQuery).toBeDefined();
-          expect(cascadeQuery!.esql).toBe(
-            'FROM kibana_sample_data_logs | WHERE MATCH(message, "some random pattern", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})'
-          );
-        });
+          it('should construct a valid cascade query for a named categorize operation', () => {
+            const editorQuery: AggregateQuery = {
+              esql: `
+                    FROM kibana_sample_data_logs 
+                    | WHERE @timestamp <=?_tend and @timestamp >?_tstart
+                      | SAMPLE .001
+                      | STATS Count=COUNT(*)/.001 BY Pattern=CATEGORIZE(message)
+                      | SORT Count DESC
+                  `,
+            };
 
-        it('should construct a valid cascade query for a named categorize operation', () => {
-          const editorQuery: AggregateQuery = {
-            esql: `
-                  FROM kibana_sample_data_logs 
-                  | WHERE @timestamp <=?_tend and @timestamp >?_tstart
-                    | SAMPLE .001
-                    | STATS Count=COUNT(*)/.001 BY Pattern=CATEGORIZE(message)
-                    | SORT Count DESC
-                `,
-          };
+            const nodePath = ['Pattern'];
+            const nodePathMap = { Pattern: 'some random pattern' };
 
-          const nodeType = 'leaf';
-          const nodePath = ['Pattern'];
-          const nodePathMap = { Pattern: 'some random pattern' };
+            const cascadeQuery = constructCascadeQuery({
+              query: editorQuery,
+              dataView: dataViewMock,
+              esqlVariables: [],
+              nodeType,
+              nodePath,
+              nodePathMap,
+            });
 
-          const cascadeQuery = constructCascadeQuery({
-            query: editorQuery,
-            dataView: dataViewMock,
-            esqlVariables: [],
-            nodeType,
-            nodePath,
-            nodePathMap,
+            expect(cascadeQuery).toBeDefined();
+            expect(cascadeQuery!.esql).toBe(
+              'FROM kibana_sample_data_logs | WHERE @timestamp <= ?_tend AND @timestamp > ?_tstart | SAMPLE 0.001 | WHERE MATCH(message, "some random pattern", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})'
+            );
           });
 
-          expect(cascadeQuery).toBeDefined();
-          expect(cascadeQuery!.esql).toBe(
-            'FROM kibana_sample_data_logs | WHERE @timestamp <= ?_tend AND @timestamp > ?_tstart | SAMPLE 0.001 | WHERE MATCH(message, "some random pattern", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})'
-          );
-        });
+          it('should construct a valid cascade query for an un-named categorize operation with a function as the argument', () => {
+            const editorQuery: AggregateQuery = {
+              esql: `
+                FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY CATEGORIZE(TO_UPPER(message))
+              `,
+            };
 
-        it('should construct a valid cascade query for an un-named categorize operation with a function as the argument', () => {
-          const editorQuery: AggregateQuery = {
-            esql: `
-              FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY CATEGORIZE(TO_UPPER(message))
-            `,
-          };
+            const nodePath = ['CATEGORIZE(TO_UPPER(message))'];
+            const nodePathMap = { 'CATEGORIZE(TO_UPPER(message))': 'some random pattern' };
 
-          const nodeType = 'leaf';
-          const nodePath = ['CATEGORIZE(TO_UPPER(message))'];
-          const nodePathMap = { 'CATEGORIZE(TO_UPPER(message))': 'some random pattern' };
+            const cascadeQuery = constructCascadeQuery({
+              query: editorQuery,
+              dataView: dataViewMock,
+              esqlVariables: [],
+              nodeType,
+              nodePath,
+              nodePathMap,
+            });
 
-          const cascadeQuery = constructCascadeQuery({
-            query: editorQuery,
-            dataView: dataViewMock,
-            esqlVariables: [],
-            nodeType,
-            nodePath,
-            nodePathMap,
+            expect(cascadeQuery).toBeDefined();
+            expect(cascadeQuery!.esql).toBe(
+              'FROM kibana_sample_data_logs | WHERE MATCH(message, "some random pattern", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})'
+            );
           });
 
-          expect(cascadeQuery).toBeDefined();
-          expect(cascadeQuery!.esql).toBe(
-            'FROM kibana_sample_data_logs | WHERE MATCH(message, "some random pattern", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})'
-          );
-        });
+          it('should construct a valid cascade query for a named categorize operation with a function as the argument', () => {
+            const editorQuery: AggregateQuery = {
+              esql: `
+                FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY Pattern = CATEGORIZE(TO_UPPER(message))
+              `,
+            };
 
-        it('should construct a valid cascade query for a named categorize operation with a function as the argument', () => {
-          const editorQuery: AggregateQuery = {
-            esql: `
-              FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY Pattern = CATEGORIZE(TO_UPPER(message))
-            `,
-          };
+            const nodePath = ['Pattern'];
+            const nodePathMap = { Pattern: 'some random pattern' };
 
-          const nodeType = 'leaf';
-          const nodePath = ['Pattern'];
-          const nodePathMap = { Pattern: 'some random pattern' };
+            const cascadeQuery = constructCascadeQuery({
+              query: editorQuery,
+              dataView: dataViewMock,
+              esqlVariables: [],
+              nodeType,
+              nodePath,
+              nodePathMap,
+            });
 
-          const cascadeQuery = constructCascadeQuery({
-            query: editorQuery,
-            dataView: dataViewMock,
-            esqlVariables: [],
-            nodeType,
-            nodePath,
-            nodePathMap,
+            expect(cascadeQuery).toBeDefined();
+            expect(cascadeQuery!.esql).toBe(
+              'FROM kibana_sample_data_logs | WHERE MATCH(message, "some random pattern", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})'
+            );
           });
 
-          expect(cascadeQuery).toBeDefined();
-          expect(cascadeQuery!.esql).toBe(
-            'FROM kibana_sample_data_logs | WHERE MATCH(message, "some random pattern", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})'
-          );
-        });
+          it('should construct a valid cascade query for a named categorize operation with a keyword field as the argument', () => {
+            const editorQuery: AggregateQuery = {
+              esql: `
+                FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY Pattern = CATEGORIZE(message.keyword)
+              `,
+            };
 
-        it('should construct a valid cascade query for a named categorize operation with a keyword field as the argument', () => {
-          const editorQuery: AggregateQuery = {
-            esql: `
-              FROM kibana_sample_data_logs | STATS var0 = AVG(bytes) BY Pattern = CATEGORIZE(message.keyword)
-            `,
-          };
+            const nodePath = ['Pattern'];
+            const nodePathMap = { Pattern: 'some random pattern' };
 
-          const nodeType = 'leaf';
-          const nodePath = ['Pattern'];
-          const nodePathMap = { Pattern: 'some random pattern' };
+            const cascadeQuery = constructCascadeQuery({
+              query: editorQuery,
+              dataView: dataViewMock,
+              esqlVariables: [],
+              nodeType,
+              nodePath,
+              nodePathMap,
+            });
 
-          const cascadeQuery = constructCascadeQuery({
-            query: editorQuery,
-            dataView: dataViewMock,
-            esqlVariables: [],
-            nodeType,
-            nodePath,
-            nodePathMap,
+            expect(cascadeQuery).toBeDefined();
+            expect(cascadeQuery!.esql).toBe(
+              'FROM kibana_sample_data_logs | WHERE MATCH(message, "some random pattern", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})'
+            );
           });
 
-          expect(cascadeQuery).toBeDefined();
-          expect(cascadeQuery!.esql).toBe(
-            'FROM kibana_sample_data_logs | WHERE MATCH(message, "some random pattern", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})'
-          );
+          it('generates a valid cascade leaf query for a valid stats command that has a parameter value for a grouping option in an un-named categorize function', () => {
+            const editorQuery: AggregateQuery = {
+              esql: `
+               FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY CATEGORIZE(??field)
+              `,
+            };
+
+            const nodePath = ['CATEGORIZE(??field)'];
+            const nodePathMap = { 'CATEGORIZE(??field)': 'some random pattern' };
+
+            const esqlVariables: ESQLControlVariable[] = [
+              {
+                key: 'field',
+                type: ESQLVariableType.FIELDS,
+                value: 'message',
+              },
+            ];
+
+            const cascadeQuery = constructCascadeQuery({
+              query: editorQuery,
+              dataView: dataViewMock,
+              esqlVariables,
+              nodeType,
+              nodePath,
+              nodePathMap,
+            });
+
+            expect(cascadeQuery).toBeDefined();
+            expect(cascadeQuery!.esql).toBe(
+              'FROM kibana_sample_data_logs | WHERE MATCH(message, "some random pattern", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})'
+            );
+          });
+
+          it('generates a valid cascade leaf query for a valid stats command that has a parameter value for a grouping option in a named categorize function', () => {
+            const editorQuery: AggregateQuery = {
+              esql: `
+               FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY Pattern = CATEGORIZE(??field)
+              `,
+            };
+
+            const nodePath = ['Pattern'];
+            const nodePathMap = { Pattern: 'some random pattern' };
+
+            const esqlVariables: ESQLControlVariable[] = [
+              {
+                key: 'field',
+                type: ESQLVariableType.FIELDS,
+                value: 'message',
+              },
+            ];
+
+            const cascadeQuery = constructCascadeQuery({
+              query: editorQuery,
+              dataView: dataViewMock,
+              esqlVariables,
+              nodeType,
+              nodePath,
+              nodePathMap,
+            });
+
+            expect(cascadeQuery).toBeDefined();
+            expect(cascadeQuery!.esql).toBe(
+              'FROM kibana_sample_data_logs | WHERE MATCH(message, "some random pattern", {"auto_generate_synonyms_phrase_query": FALSE, "fuzziness": 0, "operator": "AND"})'
+            );
+          });
         });
       });
     });

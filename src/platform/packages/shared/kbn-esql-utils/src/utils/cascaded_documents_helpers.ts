@@ -501,7 +501,7 @@ function handleStatsByCategorizeLeafOperation(
   let categorizedFieldName: string;
 
   if (isFunctionExpression(categorizedField)) {
-    // this assumes that the function invoked is accepts a column as its first argument and is not in itself another function
+    // this assumes that the function invoked is accepts a column as its first argument and is not in itself another function invocation
     categorizedFieldName = ((categorizedField as ESQLFunction).args[0] as ESQLColumn).text;
   } else {
     categorizedFieldName = (categorizedField as ESQLColumn).name;
