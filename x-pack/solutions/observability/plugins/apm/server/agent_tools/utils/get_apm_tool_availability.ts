@@ -9,8 +9,8 @@ import type { CoreSetup, Logger } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { OBSERVABILITY_AGENT_FEATURE_FLAG } from '@kbn/observability-agent-plugin/common/constants';
 import type { ToolAvailabilityResult } from '@kbn/onechat-server';
+import { getIsObservabilityAgentEnabled } from '@kbn/observability-agent-plugin/server/utils/get_is_obs_agent_enabled';
 import type { APMPluginStartDependencies, APMPluginSetupDependencies } from '../../types';
-import { getIsObservabilityAgentEnabled } from './get_is_obs_agent_enabled';
 import { buildApmToolResources } from './build_apm_tool_resources';
 
 export async function getApmToolAvailability({
