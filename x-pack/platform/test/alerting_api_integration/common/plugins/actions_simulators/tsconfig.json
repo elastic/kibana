@@ -19,10 +19,11 @@
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/features-plugin",
     "@kbn/actions-plugin",
-    "@kbn/stack_connectors-plugin",
     "@kbn/alerting-api-integration-helpers",
     "@kbn/expect",
     "@kbn/dev-utils",
     "@kbn/zod",
+    "@kbn/stack-connectors-plugin",
+    "@kbn/connector-specs",
   ],
 }
