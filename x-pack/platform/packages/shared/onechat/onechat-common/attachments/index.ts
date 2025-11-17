@@ -7,12 +7,17 @@
 
 export type {
   Attachment,
+  AttachmentInput,
   TextAttachment,
   ScreenContextAttachment,
-  AttachmentInput,
+  EsqlAttachment,
 } from './attachments';
 export {
   AttachmentType,
+  textAttachmentDataSchema,
+  esqlAttachmentDataSchema,
+  screenContextAttachmentDataSchema,
   type TextAttachmentData,
   type ScreenContextAttachmentData,
+  type EsqlAttachmentData,
 } from './attachment_types';

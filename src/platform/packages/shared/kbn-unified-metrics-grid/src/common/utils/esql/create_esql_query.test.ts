@@ -56,7 +56,7 @@ TS metrics-*
   it('should handle single dimension', () => {
     const query = createESQLQuery({
       metric: mockMetric,
-      dimensions: ['host.name'],
+      dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
     });
     expect(query).toBe(
       `
@@ -70,7 +70,10 @@ TS metrics-*
   it('should handle multiple keyword dimensions without casting', () => {
     const query = createESQLQuery({
       metric: mockMetric,
-      dimensions: ['host.name', 'container.id'],
+      dimensions: [
+        { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'container.id', type: ES_FIELD_TYPES.KEYWORD },
+      ],
     });
     expect(query).toBe(
       `
@@ -86,7 +89,10 @@ TS metrics-*
   it('should cast non-keyword fields in multiple dimensions', () => {
     const query = createESQLQuery({
       metric: mockMetric,
-      dimensions: ['host.ip', 'host.name'],
+      dimensions: [
+        { name: 'host.ip', type: ES_FIELD_TYPES.IP },
+        { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
+      ],
     });
     expect(query).toBe(
       `
@@ -102,7 +108,10 @@ TS metrics-*
   it('should cast numeric fields in multiple dimensions', () => {
     const query = createESQLQuery({
       metric: mockMetric,
-      dimensions: ['cpu.cores', 'host.name'],
+      dimensions: [
+        { name: 'cpu.cores', type: ES_FIELD_TYPES.LONG },
+        { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
+      ],
     });
     expect(query).toBe(
       `
@@ -118,7 +127,11 @@ TS metrics-*
   it('should handle a mix of cast and non-cast fields', () => {
     const query = createESQLQuery({
       metric: mockMetric,
-      dimensions: ['host.ip', 'host.name', 'cpu.cores'],
+      dimensions: [
+        { name: 'host.ip', type: ES_FIELD_TYPES.IP },
+        { name: 'host.name', type: ES_FIELD_TYPES.KEYWORD },
+        { name: 'cpu.cores', type: ES_FIELD_TYPES.LONG },
+      ],
     });
     expect(query).toBe(
       `
@@ -144,8 +157,8 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | WHERE \`host.name\` IN ("host-1", "host-2")
-  | WHERE region IN ("us-east")
+  | WHERE \`host.name\`::STRING IN ("host-1", "host-2")
+  | WHERE region::STRING IN ("us-east")
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
 `.trim()
     );
@@ -200,7 +213,7 @@ TS metrics-*
     expect(query).toBe(
       `
 TS metrics-*
-  | WHERE \`host.name\` IN ("host-1")
+  | WHERE \`host.name\`::STRING IN ("host-1")
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
 `.trim()
     );
@@ -208,14 +221,14 @@ TS metrics-*
   it('should handle undefined metrics dimensions with dimensions and filters', () => {
     const query = createESQLQuery({
       metric: { ...mockMetric, dimensions: undefined as unknown as Dimension[] },
-      dimensions: ['host.name'],
+      dimensions: [{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }],
       filters: [{ field: 'host.name', value: 'host-1' }],
     });
 
     expect(query).toBe(
       `
 TS metrics-*
-  | WHERE \`host.name\` IN ("host-1")
+  | WHERE \`host.name\`::STRING IN ("host-1")
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend), \`host.name\`
 `.trim()
     );
@@ -236,7 +249,7 @@ TS metrics-*
     it('should escape field names with hyphens in single dimension', () => {
       const query = createESQLQuery({
         metric: mockMetricWithSpecialChars,
-        dimensions: ['service-name'],
+        dimensions: [{ name: 'service-name', type: ES_FIELD_TYPES.KEYWORD }],
       });
       expect(query).toBe(
         `
@@ -250,7 +263,10 @@ TS metrics-*
     it('should escape field names with hyphens in multiple dimensions', () => {
       const query = createESQLQuery({
         metric: mockMetricWithSpecialChars,
-        dimensions: ['service-name', 'container-id'],
+        dimensions: [
+          { name: 'service-name', type: ES_FIELD_TYPES.KEYWORD },
+          { name: 'container-id', type: ES_FIELD_TYPES.KEYWORD },
+        ],
       });
       expect(query).toBe(
         `
@@ -266,7 +282,10 @@ TS metrics-*
     it('should escape field names with hyphens and cast non-keyword fields', () => {
       const query = createESQLQuery({
         metric: mockMetricWithSpecialChars,
-        dimensions: ['host-ip', 'service-name'],
+        dimensions: [
+          { name: 'host-ip', type: ES_FIELD_TYPES.IP },
+          { name: 'service-name', type: ES_FIELD_TYPES.KEYWORD },
+        ],
       });
       expect(query).toBe(
         `
@@ -290,8 +309,8 @@ TS metrics-*
       expect(query).toBe(
         `
 TS metrics-*
-  | WHERE \`service-name\` IN ("web-server")
-  | WHERE \`container-id\` IN ("cont-123")
+  | WHERE \`service-name\`::STRING IN ("web-server")
+  | WHERE \`container-id\`::STRING IN ("cont-123")
   | STATS AVG(cpu.usage) BY BUCKET(@timestamp, 100, ?_tstart, ?_tend)
 `.trim()
       );
@@ -307,7 +326,7 @@ TS metrics-*
 
       const query = createESQLQuery({
         metric: mockMetricWithBackticks,
-        dimensions: ['field`with`ticks'],
+        dimensions: [{ name: 'field`with`ticks', type: ES_FIELD_TYPES.KEYWORD }],
       });
       expect(query).toBe(
         `
