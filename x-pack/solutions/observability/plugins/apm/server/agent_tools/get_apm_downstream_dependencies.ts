@@ -16,7 +16,7 @@ import { getApmDownstreamDependencies } from '../routes/assistant_functions/get_
 import { OBSERVABILITY_GET_APM_DOWNSTREAM_DEPENDENCIES_TOOL_ID } from '../../common/observability_agent/agent_tool_ids';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../types';
 
-const schema = z.object({
+const getApmDownstreamDependenciesToolSchema = z.object({
   serviceName: z.string().min(1).describe('The name of the service'),
   serviceEnvironment: z
     .string()
@@ -48,7 +48,7 @@ export function createApmDownstreamDependenciesTool({
     type: ToolType.builtin,
     description:
       'Get downstream dependencies (services or uninstrumented backends) for a given service and time range.',
-    schema,
+    schema: getApmDownstreamDependenciesToolSchema,
     tags: ['observability', 'apm', 'dependencies'],
     availability: {
       cacheMode: 'space',
