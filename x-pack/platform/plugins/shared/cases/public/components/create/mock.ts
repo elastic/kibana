@@ -80,11 +80,3 @@ export const useGetChoicesResponse = {
   isLoading: false,
   data: { data: choices },
 };
-
-export const useGetFieldsResponse = {
-  isLoading: false,
-  isFetching: false,
-  data: {
-    data: resilientFields,
-  },
-};

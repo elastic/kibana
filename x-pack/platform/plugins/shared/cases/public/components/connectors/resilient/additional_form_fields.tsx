@@ -19,7 +19,6 @@ import { AdditionalFormField } from './additional_form_field';
 import type { ConnectorFieldsProps } from '../types';
 import { useGetFields } from './use_get_fields';
 import * as i18n from './translations';
-import type { ResilientFieldMetadata } from './types';
 
 export const AdditionalFormFields = React.memo<{
   field: FieldHook<string, string>;
@@ -34,21 +33,6 @@ export const AdditionalFormFields = React.memo<{
     http,
     connector,
   });
-  const fieldsMetadataRecord = useMemo(() => {
-    return (fieldsData?.data ?? []).reduce((acc, field) => {
-      acc[field.name] = field;
-      return acc;
-    }, {} as Record<string, ResilientFieldMetadata>);
-  }, [fieldsData]);
-
-  const fieldComboOptions: EuiComboBoxOptionOption<string>[] = useMemo(() => {
-    return (
-      fieldsData?.data?.map((field) => ({
-        label: field.text,
-        value: field.name,
-      })) ?? []
-    );
-  }, [fieldsData?.data]);
 
   const [additionalFields, setAdditionalFields] = React.useState<EuiComboBoxOptionOption<string>[]>(
     () => {
@@ -56,7 +40,7 @@ export const AdditionalFormFields = React.memo<{
         ? JSON.parse(additionalFieldsFormField.value)
         : {};
       return Object.keys(parsed).map((key) => ({
-        label: fieldsMetadataRecord[key]?.text ?? key,
+        label: fieldsData?.data?.fieldsObj[key]?.text ?? key,
         value: key,
       }));
     }
@@ -84,6 +68,7 @@ export const AdditionalFormFields = React.memo<{
   const { isInvalid, errorMessage } = getFieldValidityAndErrorMessage(additionalFieldsFormField);
 
   useEffect(() => {
+    const fieldsMetadataRecord = fieldsData?.data?.fieldsObj || {};
     const transformedFields = additionalFields.reduce((acc, field) => {
       const key = field.value;
       const value = fields[key || ''];
@@ -121,13 +106,13 @@ export const AdditionalFormFields = React.memo<{
         additionalFieldsFormField.setValue(newValue);
       }
     }
-  }, [additionalFields, additionalFieldsFormField, fields, fieldsMetadataRecord]);
+  }, [additionalFields, additionalFieldsFormField, fields, fieldsData]);
 
   return (
     <Form form={form}>
       <div>
         {additionalFields.map((field) => {
-          const fieldMetaData = fieldsMetadataRecord[field.value || ''];
+          const fieldMetaData = fieldsData?.data?.fieldsObj[field.value || ''];
           if (!fieldMetaData) {
             return null;
           }
@@ -153,7 +138,7 @@ export const AdditionalFormFields = React.memo<{
           isDisabled={isLoadingFields}
           isLoading={isFetchingFields || isLoadingFields}
           onChange={setAdditionalFields}
-          options={fieldComboOptions}
+          options={(fieldsData?.data?.fields as EuiComboBoxOptionOption<string>[]) || []}
           placeholder={i18n.ADDITIONAL_FIELDS_PLACEHOLDER}
           isInvalid={isInvalid}
           selectedOptions={additionalFields}

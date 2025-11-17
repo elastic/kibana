@@ -10,7 +10,7 @@ import { waitFor, screen, within } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 
 import { connector } from '../mock';
-import { resilientFields } from './mocks';
+import { useGetFieldsResponse } from './mocks';
 import { useGetFields } from './use_get_fields';
 import Fields from './case_fields';
 
@@ -23,14 +23,6 @@ jest.mock('./use_get_fields');
 const useGetFieldsMock = useGetFields as jest.Mock;
 
 describe('ResilientParamsFields renders', () => {
-  const useGetFieldsResponse = {
-    isLoading: false,
-    isFetching: false,
-    data: {
-      data: resilientFields,
-    },
-  };
-
   const fields = {
     severityCode: '6',
     incidentTypes: ['19'],

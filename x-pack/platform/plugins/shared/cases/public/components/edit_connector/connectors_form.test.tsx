@@ -18,7 +18,7 @@ import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { useGetFields } from '../connectors/resilient/use_get_fields';
 import { renderWithTestingProviders } from '../../common/mock';
-import { resilientFields } from '../connectors/resilient/mocks';
+import { useGetFieldsResponse } from '../connectors/resilient/mocks';
 
 jest.mock('../../common/lib/kibana');
 jest.mock('../connectors/servicenow/use_get_choices');
@@ -61,14 +61,6 @@ describe('ConnectorsForm ', () => {
     isLoading: false,
     onSubmit,
     onCancel,
-  };
-
-  const useGetFieldsResponse = {
-    isLoading: false,
-    isFetching: false,
-    data: {
-      data: resilientFields,
-    },
   };
 
   beforeEach(() => {

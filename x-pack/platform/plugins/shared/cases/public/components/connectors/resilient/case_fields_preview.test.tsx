@@ -14,7 +14,7 @@ import FieldsPreview from './case_fields_preview';
 
 import { renderWithTestingProviders } from '../../../common/mock';
 import { tableMatchesExpectedContent } from '../../../common/test_utils';
-import { resilientFields } from './mocks';
+import { useGetFieldsResponse } from './mocks';
 
 jest.mock('../../../common/lib/kibana');
 jest.mock('./use_get_fields');
@@ -22,14 +22,6 @@ jest.mock('./use_get_fields');
 const useGetFieldsMock = useGetFields as jest.Mock;
 
 describe('Resilient Fields: Preview', () => {
-  const useGetFieldsResponse = {
-    isLoading: false,
-    isFetching: false,
-    data: {
-      data: resilientFields,
-    },
-  };
-
   const fields = {
     incidentTypes: ['19', '21'],
     severityCode: '5',

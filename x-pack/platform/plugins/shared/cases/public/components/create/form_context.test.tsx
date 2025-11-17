@@ -27,7 +27,6 @@ import {
   sampleConnectorData,
   sampleData,
   sampleTags,
-  useGetFieldsResponse,
   useGetIssueTypesResponse,
   useGetFieldsByIssueTypeResponse,
   useGetChoicesResponse,
@@ -62,6 +61,7 @@ import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { useBulkPostObservables } from '../../containers/use_bulk_post_observables';
 import { DEFAULT_FEATURES } from '../../../common/constants';
 import { useGetIssueTypes } from '../connectors/jira/use_get_issue_types';
+import { useGetFieldsResponse } from '../connectors/resilient/mocks';
 
 jest.mock('../../containers/use_post_case');
 jest.mock('../../containers/use_create_attachments');

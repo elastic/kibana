@@ -6,6 +6,7 @@
  */
 
 import type { ResilientFieldMetadata } from './types';
+import type { EnhancedFieldMetaData, GetFieldsData } from './use_get_fields';
 
 export const resilientFields: ResilientFieldMetadata[] = [
   {
@@ -265,3 +266,24 @@ export const resilientFields: ResilientFieldMetadata[] = [
     prefix: null,
   },
 ];
+
+const responseData = resilientFields.reduce<GetFieldsData>(
+  (preparedData, currentField) => {
+    const preparedField: EnhancedFieldMetaData = {
+      ...currentField,
+      label: currentField.text,
+      value: currentField.name,
+    };
+    preparedData.fieldsObj[currentField.name] = preparedField;
+    preparedData.fields.push(preparedField);
+    return preparedData;
+  },
+  { fields: [], fieldsObj: {} }
+);
+export const useGetFieldsResponse = {
+  isLoading: false,
+  isFetching: false,
+  data: {
+    data: responseData,
+  },
+};

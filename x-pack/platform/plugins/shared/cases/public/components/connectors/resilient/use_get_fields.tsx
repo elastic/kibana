@@ -21,6 +21,11 @@ interface Props {
   connector?: ActionConnector;
 }
 
+export interface GetFieldsData {
+  fields: EnhancedFieldMetaData[];
+  fieldsObj: Record<string, EnhancedFieldMetaData>;
+}
+
 export interface EnhancedFieldMetaData extends ResilientFieldMetadata {
   label: string;
   value: string;
@@ -28,7 +33,7 @@ export interface EnhancedFieldMetaData extends ResilientFieldMetadata {
 
 export const useGetFields = ({ http, connector }: Props) => {
   const { showErrorToast } = useCasesToast();
-  return useQuery<ActionTypeExecutorResult<EnhancedFieldMetaData[]>, ServerError>(
+  return useQuery<ActionTypeExecutorResult<GetFieldsData>, ServerError>(
     connectorsQueriesKeys.resilientGetFields(connector?.id ?? ''),
     async ({ signal }) => {
       const fields = await getFields({
@@ -37,18 +42,29 @@ export const useGetFields = ({ http, connector }: Props) => {
         connectorId: connector?.id ?? '',
       });
 
-      // prepare data for EuiComboBox
-      const fieldData: EnhancedFieldMetaData[] = fields.data
-        ? fields.data.map((field) => ({
-            ...field,
-            label: field.text,
-            value: field.name,
-          }))
-        : [];
+      // prepare data for EuiComboBox and create a record for easy access
+      const prepared = fields.data
+        ? fields.data.reduce<GetFieldsData>(
+            (preparedData, currentField) => {
+              const preparedField: EnhancedFieldMetaData = {
+                ...currentField,
+                label: currentField.text,
+                value: currentField.name,
+              };
+              preparedData.fieldsObj[currentField.name] = preparedField;
+              preparedData.fields.push(preparedField);
+              return preparedData;
+            },
+            { fields: [], fieldsObj: {} }
+          )
+        : ({ fields: [], fieldsObj: {} } as GetFieldsData);
 
       return {
         ...fields,
-        data: fieldData,
+        data: {
+          fields: prepared.fields,
+          fieldsObj: prepared.fieldsObj,
+        },
       };
     },
     {

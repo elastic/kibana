@@ -32,17 +32,9 @@ const ResilientFieldsComponent: React.FunctionComponent<
     http,
     connector,
   });
-  const fieldsMetadataRecord = useMemo(() => {
-    return (fieldsData?.data ?? []).reduce((acc, field) => {
-      acc[field.name] = field;
-      return acc;
-    }, {} as Record<string, ResilientFieldMetadata>);
-  }, [fieldsData]);
 
   const allIncidentTypes = useMemo(() => {
-    const incidentTypesField = (
-      fieldsData?.data?.filter((field) => field.name === 'incident_type_ids') || []
-    ).pop();
+    const incidentTypesField = fieldsData?.data?.fieldsObj.incident_type_ids;
     if (incidentTypesField == null || !Array.isArray(incidentTypesField.values)) {
       return [];
     } else {
@@ -51,9 +43,7 @@ const ResilientFieldsComponent: React.FunctionComponent<
   }, [fieldsData]);
 
   const severity = useMemo(() => {
-    const severityField = (
-      fieldsData?.data?.filter((field) => field.name === 'severity_code') || []
-    ).pop();
+    const severityField = fieldsData?.data?.fieldsObj.severity_code;
     if (severityField == null || !Array.isArray(severityField.values)) {
       return [];
     } else {
@@ -96,22 +86,15 @@ const ResilientFieldsComponent: React.FunctionComponent<
         : []),
       ...(additionalFields != null && additionalFields.length > 0
         ? Object.keys(additionalFieldsParsed).map((key) => ({
-            title: fieldsMetadataRecord[key]?.text ?? key,
+            title: fieldsData?.data?.fieldsObj[key]?.text ?? key,
             description: renderAddtionalFieldsDescription(
-              fieldsMetadataRecord[key],
+              fieldsData?.data?.fieldsObj[key],
               additionalFieldsParsed[key]
             ),
           }))
         : []),
     ];
-  }, [
-    incidentTypes,
-    severityCode,
-    allIncidentTypes,
-    severity,
-    additionalFields,
-    fieldsMetadataRecord,
-  ]);
+  }, [incidentTypes, severityCode, allIncidentTypes, severity, additionalFields, fieldsData]);
 
   return (
     <ConnectorCard

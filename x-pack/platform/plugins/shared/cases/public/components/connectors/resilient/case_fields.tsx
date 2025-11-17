@@ -35,9 +35,7 @@ const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = 
   });
 
   const allIncidentTypes = useMemo<EuiComboBoxOptionOption<string>[]>(() => {
-    const incidentTypesField = (
-      fieldsData?.data?.filter((field) => field.name === 'incident_type_ids') || []
-    ).pop();
+    const incidentTypesField = fieldsData?.data?.fieldsObj.incident_type_ids;
     if (incidentTypesField == null || !Array.isArray(incidentTypesField.values)) {
       return [];
     }
@@ -48,9 +46,7 @@ const ResilientFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = 
   }, [fieldsData]);
 
   const severity = useMemo<EuiSelectOption[]>(() => {
-    const severityField = (
-      fieldsData?.data?.filter((field) => field.name === 'severity_code') || []
-    ).pop();
+    const severityField = fieldsData?.data?.fieldsObj.severity_code;
     if (severityField == null || !Array.isArray(severityField.values)) {
       return [];
     }
