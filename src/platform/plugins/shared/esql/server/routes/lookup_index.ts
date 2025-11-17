@@ -173,7 +173,7 @@ export const registerLookupIndexRoutes = (
           index: [
             {
               names: ['*', ...indices],
-              privileges: ['create_index', 'read', 'write'],
+              privileges: ['create_index', 'read', 'write', 'delete_index'],
             },
           ],
         });
