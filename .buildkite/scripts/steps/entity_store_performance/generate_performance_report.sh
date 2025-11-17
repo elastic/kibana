@@ -8,11 +8,43 @@ set -euo pipefail
 #   TEST_DURATION - test duration in seconds
 #   TEST_LOG_DIR - path to logs directory
 #   PERF_DATA_FILE - data file used
+#   PERF_TOTAL_ROWS - total number of logs in the data file
 #   PERF_INTERVAL - interval in seconds
 #   PERF_COUNT - number of uploads
 #   CLOUD_DEPLOYMENT_ID - deployment ID
 #   CLOUD_DEPLOYMENT_KIBANA_URL - Kibana URL
 #   CLOUD_DEPLOYMENT_ELASTICSEARCH_URL - Elasticsearch URL
+
+# Function to format large numbers (e.g., 1000000 -> "1m", 7500000 -> "7.5m")
+format_log_count() {
+  local count=$1
+  if [ -z "$count" ] || [ "$count" = "unknown" ]; then
+    echo "unknown"
+    return
+  fi
+  
+  # Convert to integer
+  count=$((count + 0))
+  
+  if [ $count -ge 1000000 ]; then
+    # Format as millions with one decimal place if needed
+    local millions=$(awk "BEGIN {printf \"%.1f\", $count / 1000000}")
+    # Remove trailing .0 if it's a whole number
+    if echo "$millions" | grep -q '\.0$'; then
+      millions=$(echo "$millions" | sed 's/\.0$//')
+    fi
+    echo "${millions}m"
+  elif [ $count -ge 1000 ]; then
+    # Format as thousands
+    local thousands=$(awk "BEGIN {printf \"%.1f\", $count / 1000}")
+    if echo "$thousands" | grep -q '\.0$'; then
+      thousands=$(echo "$thousands" | sed 's/\.0$//')
+    fi
+    echo "${thousands}k"
+  else
+    echo "$count"
+  fi
+}
 
 generate_performance_report() {
   # Validate required environment variables
@@ -20,6 +52,7 @@ generate_performance_report() {
      [ -z "${TEST_DURATION:-}" ] || \
      [ -z "${TEST_LOG_DIR:-}" ] || \
      [ -z "${PERF_DATA_FILE:-}" ] || \
+     [ -z "${PERF_TOTAL_ROWS:-}" ] || \
      [ -z "${PERF_INTERVAL:-}" ] || \
      [ -z "${PERF_COUNT:-}" ] || \
      [ -z "${CLOUD_DEPLOYMENT_ID:-}" ] || \
@@ -38,6 +71,7 @@ generate_performance_report() {
     # Find log files
     CLUSTER_HEALTH_LOG=$(find "$LOG_DIR" -name "*cluster-health.log" | head -1)
     TRANSFORM_STATS_LOG=$(find "$LOG_DIR" -name "*transform-stats.log" | head -1)
+    NODE_STATS_LOG=$(find "$LOG_DIR" -name "*node-stats.log" | head -1)
 
     # Upload log files as artifacts
     if [ -n "$CLUSTER_HEALTH_LOG" ]; then
@@ -49,16 +83,24 @@ generate_performance_report() {
       echo "Found transform stats log: $TRANSFORM_STATS_LOG"
       buildkite-agent artifact upload "$TRANSFORM_STATS_LOG"
     fi
+
+    if [ -n "$NODE_STATS_LOG" ]; then
+      echo "Found node stats log: $NODE_STATS_LOG"
+      buildkite-agent artifact upload "$NODE_STATS_LOG"
+    fi
   fi
 
   echo "--- Generate Performance Report"
   REPORT_FILE=$(mktemp)
+  
+  # Format log count
+  FORMATTED_LOG_COUNT=$(format_log_count "$PERF_TOTAL_ROWS")
 
   cat > "$REPORT_FILE" <<EOF
 # Entity Store Performance Test Report
 
 ## Test Configuration
-- **Data File**: $PERF_DATA_FILE
+- **Data File**: $PERF_DATA_FILE ($FORMATTED_LOG_COUNT logs)
 - **Upload Interval**: ${PERF_INTERVAL}s
 - **Upload Count**: $PERF_COUNT
 - **Total Duration**: ${TEST_DURATION}s
@@ -89,12 +131,6 @@ EOF
         echo "**Active Shards**: $(echo "$LAST_HEALTH" | jq -r '.active_shards // "unknown"')" >> "$REPORT_FILE"
       fi
     fi
-    
-    echo "" >> "$REPORT_FILE"
-    echo "**Recent Cluster Health Log (last 10 entries)**:"
-    echo "\`\`\`" >> "$REPORT_FILE"
-    tail -10 "$CLUSTER_HEALTH_LOG" >> "$REPORT_FILE" || true
-    echo "\`\`\`" >> "$REPORT_FILE"
   fi
 
   # Parse transform stats log if available
@@ -112,12 +148,44 @@ EOF
         echo "**Index Time**: $(echo "$LAST_STATS" | jq -r '.stats.index_time_in_millis // "unknown"')ms" >> "$REPORT_FILE"
       fi
     fi
-    
+  fi
+
+  # Parse node stats log if available
+  if [ -n "${NODE_STATS_LOG:-}" ] && [ -f "$NODE_STATS_LOG" ]; then
+    echo "### Node Stats Metrics" >> "$REPORT_FILE"
     echo "" >> "$REPORT_FILE"
-    echo "**Recent Transform Stats Log (last 10 entries)**:"
-    echo "\`\`\`" >> "$REPORT_FILE"
-    tail -10 "$TRANSFORM_STATS_LOG" >> "$REPORT_FILE" || true
-    echo "\`\`\`" >> "$REPORT_FILE"
+    
+    # Extract key metrics from node stats
+    if command -v jq &> /dev/null; then
+      # Get the last line and extract JSON (format: TIMESTAMP - JSON)
+      LAST_LINE=$(tail -1 "$NODE_STATS_LOG" 2>/dev/null || echo "")
+      if [ -n "$LAST_LINE" ]; then
+        # Extract JSON part after " - " separator, or use whole line if no separator
+        if echo "$LAST_LINE" | grep -q " - "; then
+          JSON_PART=$(echo "$LAST_LINE" | sed 's/^[^ ]* - //')
+        else
+          JSON_PART="$LAST_LINE"
+        fi
+        
+        if echo "$JSON_PART" | jq . > /dev/null 2>&1; then
+          # Get number of nodes
+          NODE_COUNT=$(echo "$JSON_PART" | jq -r '.nodes | length')
+          echo "**Number of Nodes**: $NODE_COUNT" >> "$REPORT_FILE"
+          echo "" >> "$REPORT_FILE"
+          
+          # Extract metrics for each node
+          echo "$JSON_PART" | jq -r '.nodes[] | 
+            "#### \(.node_name) (\(.node_id))",
+            "- **CPU Usage**: \(.cpu.percent)%",
+            "- **JVM Heap Used**: \(.jvm.mem.heap_used_percent)% (\(.jvm.mem.heap_used_in_bytes / 1024 / 1024 | floor)MB / \(.jvm.mem.heap_max_in_bytes / 1024 / 1024 | floor)MB)",
+            "- **OS Memory Used**: \(.os.mem.used_percent)% (\(.os.mem.used_in_bytes / 1024 / 1024 | floor)MB / \(.os.mem.total_in_bytes / 1024 / 1024 | floor)MB)",
+            "- **Load Average (1m/5m/15m)**: \(.os.cpu.load_average."1m" | tostring) / \(.os.cpu.load_average."5m" | tostring) / \(.os.cpu.load_average."15m" | tostring)",
+            "- **GC Young Collections**: \(.jvm.gc.collectors.young.collection_count) (total time: \(.jvm.gc.collectors.young.collection_time_in_millis)ms)",
+            "- **GC Old Collections**: \(.jvm.gc.collectors.old.collection_count) (total time: \(.jvm.gc.collectors.old.collection_time_in_millis)ms)",
+            ""' >> "$REPORT_FILE"
+        fi
+      fi
+    fi
   fi
 
   # Display report

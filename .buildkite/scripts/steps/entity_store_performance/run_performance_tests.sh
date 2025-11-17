@@ -37,9 +37,13 @@ run_performance_tests() {
   PERF_INTERVAL="${PERF_INTERVAL:-30}"
   PERF_COUNT="${PERF_COUNT:-10}"
   PERF_DATA_FILE="big"
+  PERF_ENTITY_COUNT=1000000
+  PERF_LOGS_PER_ENTITY=1
+  PERF_TOTAL_ROWS=$((PERF_ENTITY_COUNT * PERF_LOGS_PER_ENTITY))
 
   echo "--- Run Entity Store Performance Tests"
   echo "Data file: $PERF_DATA_FILE (will be generated)"
+  echo "Entities: $PERF_ENTITY_COUNT, Logs per entity: $PERF_LOGS_PER_ENTITY (Total rows: $PERF_TOTAL_ROWS)"
   echo "Interval: ${PERF_INTERVAL}s"
   echo "Count: $PERF_COUNT"
 
@@ -71,8 +75,8 @@ run_performance_tests() {
 
   # Generate performance data file
   echo "--- Generate Performance Data File"
-  echo "Creating performance data file: $PERF_DATA_FILE with 1000000 entities, 1 log per entity"
-  yarn start create-perf-data "$PERF_DATA_FILE" 1000000 1
+  echo "Creating performance data file: $PERF_DATA_FILE with $PERF_ENTITY_COUNT entities, $PERF_LOGS_PER_ENTITY log per entity"
+  yarn start create-perf-data "$PERF_DATA_FILE" "$PERF_ENTITY_COUNT" "$PERF_LOGS_PER_ENTITY"
 
   # Run the performance test
   TEST_START_TIME=$(date +%s)
@@ -91,6 +95,7 @@ run_performance_tests() {
   export TEST_DURATION
   export TEST_LOG_DIR="${SECURITY_DOCS_GEN_DIR}/logs"
   export PERF_DATA_FILE
+  export PERF_TOTAL_ROWS
 
   echo "Test completed with exit code: $TEST_EXIT_CODE"
   echo "Test duration: ${TEST_DURATION}s"
