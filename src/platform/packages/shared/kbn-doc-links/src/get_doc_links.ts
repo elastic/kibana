@@ -1072,12 +1072,8 @@ export const getDocLinks = ({ kibanaBranch, buildFlavor }: GetDocLinkOptions): D
       failureStore: `${ELASTIC_DOCS}solutions/observability/data-set-quality-monitoring#find-failed-documents-with-failure-store`,
     },
     indexManagement: {
-      componentTemplate: isServerless
-        ? `${ELASTIC_DOCS}manage-data/data-store/templates#component-templates`
-        : `${ELASTIC_DOCS}manage-data/data-store/templates#component-templates`,
-      indexAlias: isServerless
-        ? `${ELASTIC_DOCS}manage-data/data-store/aliases`
-        : `${ELASTIC_DOCS}manage-data/data-store/aliases`,
+      componentTemplate: `${ELASTIC_DOCS}manage-data/data-store/templates#component-templates`,
+      indexAlias: `${ELASTIC_DOCS}manage-data/data-store/aliases`,
     },
   });
 };
