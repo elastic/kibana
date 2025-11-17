@@ -78,7 +78,7 @@ export const ExploreDefaultAgent: React.FC = () => {
           rows={3}
           resize="none"
           fullWidth
-          style={{ border: 'none', boxShadow: 'none', padding: 0 }}
+          style={{ border: 'none', boxShadow: 'none', outline: 'none', padding: 0 }}
         />
 
         <EuiSpacer size="m" />
