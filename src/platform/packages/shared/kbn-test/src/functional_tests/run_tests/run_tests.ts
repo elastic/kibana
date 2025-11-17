@@ -114,10 +114,25 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
         let shutdownDockerServers: (() => Promise<void>) | undefined;
 
         try {
-          log.info('🚀 Starting Elasticsearch, Docker servers, and Kibana in parallel...');
+          // Check if any docker servers are enabled to avoid unnecessary startup time
+          const dockerServerConfigs = config.get('dockerServers') as
+            | Record<string, any>
+            | undefined;
+
+          const hasEnabledDockerServers =
+            dockerServerConfigs &&
+            Object.keys(dockerServerConfigs).length > 0 &&
+            Object.values(dockerServerConfigs).some((cfg) => cfg.enabled === true);
+
+          if (hasEnabledDockerServers) {
+            log.info('🚀 Starting Elasticsearch, Docker servers, and Kibana in parallel...');
+          } else {
+            log.info('🚀 Starting Elasticsearch and Kibana in parallel...');
+          }
 
           // Start ES, Kibana and Docker servers in parallel
           // Use Promise.allSettled to ensure all complete (or fail) before proceeding
+          // All promises start executing immediately when created
           const results = await Promise.allSettled([
             // Start Elasticsearch - this completes when ES cluster health is yellow/green
             withSpan('start_elasticsearch', async () => {
@@ -126,15 +141,6 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
               }
               const shutdown = await runElasticsearch({ ...options, log, config, onEarlyExit });
               log.info('✅ Elasticsearch is ready');
-              return shutdown;
-            }),
-
-            // Start docker servers (e.g., package registry) early alongside ES
-            // Only some tests need this, but if they need it it's faster to start them here.
-            // runDockerServers decides if the test needs docker servers
-            withSpan('start_docker_servers', async () => {
-              const shutdown = await runDockerServers({ log, config, onEarlyExit });
-              log.info('✅ Docker servers are ready');
               return shutdown;
             }),
 
@@ -154,25 +160,43 @@ export async function runTests(log: ToolingLog, options: RunTestsOptions) {
               });
               log.info('✅ Kibana is ready');
             }),
+
+            // Only start docker servers if at least one is enabled
+            ...(hasEnabledDockerServers
+              ? [
+                  withSpan('start_docker_servers', async () => {
+                    const shutdown = await runDockerServers({ log, config, onEarlyExit });
+                    log.info('✅ Docker servers are ready');
+                    return shutdown;
+                  }),
+                ]
+              : []),
           ]);
 
           // Check if any service failed to start
-          const [esResult, dockerResult, kibanaResult] = results;
+          const [esResult, kibanaResult, dockerResult] = results;
 
           if (esResult.status === 'rejected') {
             throw esResult.reason;
-          }
-
-          if (dockerResult.status === 'rejected') {
-            throw dockerResult.reason;
           }
 
           if (kibanaResult.status === 'rejected') {
             throw kibanaResult.reason;
           }
 
-          shutdownEs = esResult.value;
-          shutdownDockerServers = dockerResult.value;
+          if (dockerResult?.status === 'rejected') {
+            throw dockerResult.reason;
+          }
+
+          shutdownEs =
+            esResult.status === 'fulfilled'
+              ? (esResult.value as (() => Promise<void>) | undefined)
+              : undefined;
+
+          shutdownDockerServers =
+            dockerResult && dockerResult.status === 'fulfilled'
+              ? (dockerResult.value as () => Promise<void>)
+              : undefined;
 
           if (abortCtrl.signal.aborted) {
             return;
