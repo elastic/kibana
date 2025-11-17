@@ -8,3 +8,6 @@
  */
 
 export { registerAPIRoutes } from './register_routes';
+
+export type { DashboardCreateRequestBody } from './create';
+export type { DashboardSearchRequestBody, DashboardSearchResponseBody } from './search';
