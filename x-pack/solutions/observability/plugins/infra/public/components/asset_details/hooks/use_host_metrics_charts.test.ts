@@ -208,41 +208,53 @@ describe('getSubtitleFromFormula', () => {
     it('should return "Average" for case-insensitive AVG', () => {
       expect(getSubtitleFromFormula('AVG(system.cpu.user.pct)')).toBe('Average');
     });
+
+    it('should return "Average" when formula starts with "average" (spelled out)', () => {
+      expect(getSubtitleFromFormula('average(system.cpu.user.pct)')).toBe('Average');
+    });
+
+    it('should return "Average" when formula starts with "1 - average"', () => {
+      expect(getSubtitleFromFormula('1 - average(system.memory.actual.free)')).toBe('Average');
+    });
+
+    it('should handle parentheses around average', () => {
+      expect(getSubtitleFromFormula('(average(system.cpu.total))')).toBe('Average');
+    });
   });
 
   describe('formulas without max or avg as first word', () => {
-    it('should return "Average" as fallback when formula does not start with max or avg', () => {
-      expect(getSubtitleFromFormula('sum(system.cpu.user.pct)')).toBe('Average');
+    it('should return empty string when formula does not start with max or avg', () => {
+      expect(getSubtitleFromFormula('sum(system.cpu.user.pct)')).toBe('');
     });
 
     it('should return "Average" when avg is the first function (even with nested max)', () => {
       expect(getSubtitleFromFormula('avg(max(system.cpu.user.pct))')).toBe('Average');
     });
 
-    it('should return "Average" as fallback when avg is not the first function', () => {
-      expect(getSubtitleFromFormula('sum(avg(system.cpu.user.pct))')).toBe('Average');
+    it('should return empty string when avg is not the first function', () => {
+      expect(getSubtitleFromFormula('sum(avg(system.cpu.user.pct))')).toBe('');
     });
 
-    it('should return "Average" as fallback for min formula', () => {
-      expect(getSubtitleFromFormula('min(system.cpu.user.pct)')).toBe('Average');
+    it('should return empty string for min formula', () => {
+      expect(getSubtitleFromFormula('min(system.cpu.user.pct)')).toBe('');
     });
 
-    it('should return "Average" as fallback for count formula', () => {
-      expect(getSubtitleFromFormula('count(system.cpu.cores)')).toBe('Average');
+    it('should return empty string for count formula', () => {
+      expect(getSubtitleFromFormula('count(system.cpu.cores)')).toBe('');
     });
   });
 
   describe('edge cases', () => {
-    it('should return "Average" as fallback for empty formula', () => {
-      expect(getSubtitleFromFormula('')).toBe('Average');
+    it('should return empty string for empty formula', () => {
+      expect(getSubtitleFromFormula('')).toBe('');
     });
 
-    it('should not match max if it is part of a longer word (returns Average fallback)', () => {
-      expect(getSubtitleFromFormula('maximum(system.cpu.user.pct)')).toBe('Average');
+    it('should not match max if it is part of a longer word', () => {
+      expect(getSubtitleFromFormula('maximum(system.cpu.user.pct)')).toBe('');
     });
 
-    it('should not match avg if it is part of a longer word (returns Average fallback)', () => {
-      expect(getSubtitleFromFormula('average(system.cpu.user.pct)')).toBe('Average');
+    it('should not match avg/average if it is part of a longer word', () => {
+      expect(getSubtitleFromFormula('averaging(system.cpu.user.pct)')).toBe('');
     });
   });
 });

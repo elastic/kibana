@@ -28,9 +28,10 @@ export const KUBERNETES_METRIC_TYPES: KubernetesContainerMetrics[] = ['cpu', 'me
 export const APM_HOST_TROUBLESHOOTING_LINK = 'https://ela.st/host-troubleshooting';
 
 // Regex pattern to match formulas where 'avg' is the first function
-// Matches: "avg(...)", "1 - avg(...)", "100 * avg(...)", "(avg(...))", etc.
+// Matches: "avg(...)", "1 - avg(...)", "100 * avg(...)", "(avg(...))",
+// "average(...)", "1 - average(...)", "100 * average(...)", "(average(...))", etc.
 // Allows optional whitespace, numbers, and arithmetic operators before 'avg'
-export const AVG_AS_FIRST_FUNCTION_PATTERN = /^\s*[\d\s\-+*/()]*\bavg\b/i;
+export const AVG_OR_AVERAGE_AS_FIRST_FUNCTION_PATTERN = /^\s*[\d\s\-+*/()]*\b(avg|average)\b/i;
 
 // Regex pattern to match formulas where 'max' is the first function
 // Matches: "max(...)", "1 - max(...)", "100 * max(...)", "(max(...))", etc.
