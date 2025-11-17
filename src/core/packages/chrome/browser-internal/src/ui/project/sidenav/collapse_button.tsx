@@ -29,7 +29,7 @@ const sideNavCollapseButtonStyles = (euiTheme: UseEuiTheme['euiTheme']) => {
       display: flex;
       align-items: center;
       justify-content: center;
-      min-width: 40px;
+      min-width: ${euiTheme.size.xxl};
     `,
     sideNavCollapseButton: css`
       &.euiButtonIcon:hover {

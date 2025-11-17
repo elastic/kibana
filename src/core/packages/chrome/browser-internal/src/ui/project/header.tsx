@@ -52,7 +52,7 @@ const getHeaderCss = ({ size, colors }: EuiThemeComputed) => ({
       display: flex;
       align-items: center;
       justify-content: center;
-      min-width: 40px;
+      min-width: ${size.xxl};
       cursor: pointer;
     `,
     logo: css`
