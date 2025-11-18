@@ -8,7 +8,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 import fs from 'fs';
 import Path from 'path';
-import type { ApiServicesFixture, ScoutTestConfig } from '@kbn/scout-oblt';
+import type { ApiServicesFixture, KbnClient, ScoutTestConfig } from '@kbn/scout-oblt';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   COLLECTOR_PACKAGE_POLICY_NAME,
@@ -60,13 +60,11 @@ export function buildKibanaUrl(config: ScoutTestConfig) {
 }
 
 export async function setupProfiling(
-  config: ScoutTestConfig,
   apiServices: ApiServicesFixture,
+  kbnClient: KbnClient,
   logger: ToolingLog
 ) {
   const log = logWithTimer(logger);
-
-  const st = supertest(buildKibanaUrl(config));
 
   await apiServices.fleet.internal.setup();
   log('Fleet infrastructure setup completed');
@@ -96,17 +94,27 @@ export async function setupProfiling(
     log(`APM agent policy '${APM_AGENT_POLICY_ID}' already exists`);
   }
 
-  const res = await st
-    .get('/api/profiling/setup/es_resources')
-    .set({ 'kbn-xsrf': 'foo' })
-    .set('x-elastic-internal-origin', 'Kibana');
+  const res = await kbnClient.request({
+    path: '/api/profiling/setup/es_resources',
+    method: 'GET',
+  });
+  // const res = await st
+  //   .get('/api/profiling/setup/es_resources')
+  //   .set({ 'kbn-xsrf': 'foo' })
+  //   .set('x-elastic-internal-origin', 'Kibana');
 
-  if (!res.body.has_setup) {
+  if (!res.data.has_setup) {
     log(`Setting up Universal Profiling`);
-    await st
-      .post('/api/profiling/setup/es_resources')
-      .set({ 'kbn-xsrf': 'foo' })
-      .set('x-elastic-internal-origin', 'Kibana');
+    await kbnClient.request({
+      path: '/api/profiling/setup/es_resources',
+      method: 'POST',
+      headers: {
+        'x-elastic-internal-origin': 'Kibana',
+      },
+    });
+    // await st
+    //   .post('/api/profiling/setup/es_resources')
+    //   .set('x-elastic-internal-origin', 'Kibana');
   } else {
     log(`Skipping Universal Profiling set up, already set up`);
   }
