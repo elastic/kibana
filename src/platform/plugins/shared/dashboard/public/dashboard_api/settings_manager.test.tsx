@@ -11,7 +11,7 @@ import { BehaviorSubject } from 'rxjs';
 import { getSampleDashboardState } from '../mocks';
 import type { DashboardState } from '../../common';
 import { initializeSettingsManager } from './settings_manager';
-import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/content_management';
+import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
 
 describe('initializeSettingsManager', () => {
   describe('default values', () => {
