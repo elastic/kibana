@@ -56,6 +56,13 @@ export async function setupDependencies(
     throw new Error(`Workflow execution with ID ${workflowRunId} not found`);
   }
 
+  if (!fakeRequest) {
+    logger.error('Cannot execute a workflow without Kibana Request');
+    throw new Error(
+      `Workflow execution id ${workflowRunId} cannot execute a workflow without Kibana Request`
+    );
+  }
+
   let workflowExecutionGraph = WorkflowGraph.fromWorkflowDefinition(
     workflowExecution.workflowDefinition,
     defaultWorkflowSettings
@@ -66,17 +73,8 @@ export async function setupDependencies(
     workflowExecutionGraph = workflowExecutionGraph.getStepGraph(workflowExecution.stepId);
   }
 
-  // Use scoped actions client when fakeRequest is available to preserve user context
-  // Otherwise fallback to unsecured actions client
-  // TODO(tb): Consider completely disabling connectors when no fakeRequest is available
-  let connectorExecutor: ConnectorExecutor;
-  if (fakeRequest) {
-    const scopedActionsClient = await actionsPlugin.getActionsClientWithRequest(fakeRequest);
-    connectorExecutor = new ConnectorExecutor(scopedActionsClient, true);
-  } else {
-    const unsecuredActionsClient = await actionsPlugin.getUnsecuredActionsClient();
-    connectorExecutor = new ConnectorExecutor(unsecuredActionsClient, false);
-  }
+  const scopedActionsClient = await actionsPlugin.getActionsClientWithRequest(fakeRequest);
+  const connectorExecutor = new ConnectorExecutor(scopedActionsClient, true);
 
   const workflowLogger = new WorkflowEventLogger(
     logsRepository,
