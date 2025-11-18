@@ -49,6 +49,8 @@ import type { MonitoringEntitySourceDataClient } from './lib/entity_analytics/pr
 import type { MlAuthz } from './lib/machine_learning/authz';
 import type { SiemMigrationClients } from './lib/siem_migrations/types';
 import type { EntityStoreCrudClient } from './lib/entity_analytics/entity_store/entity_store_crud_client';
+import { GetInferenceChatModelOptions } from './assistant/types/inference_chat_model';
+import { InferenceChatModel } from '@kbn/inference-langchain';
 
 export { AppClient };
 
@@ -82,6 +84,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getPrivilegedUserMonitoringApiKeyManager: () => PrivilegedUsersApiKeyManager;
   getPadPackageInstallationClient: () => PadPackageInstallationClient;
   siemMigrations: SiemMigrationClients;
+  getInferenceChatModel: (options: GetInferenceChatModelOptions) => Promise<InferenceChatModel>;
   getInferenceClient: () => InferenceClient;
   getAssetInventoryClient: () => AssetInventoryDataClient;
   getProductFeatureService: () => ProductFeaturesService;

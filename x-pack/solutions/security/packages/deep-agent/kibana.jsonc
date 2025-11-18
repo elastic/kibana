@@ -1,0 +1,9 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/securitysolution-deep-agent",
+  "owner": [
+    "@elastic/security-generative-ai"
+  ],
+  "group": "security",
+  "visibility": "private"
+}

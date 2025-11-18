@@ -44,6 +44,8 @@ import { getApiKeyManager as getApiKeyManagerEntityStore } from './lib/entity_an
 import { monitoringEntitySourceType } from './lib/entity_analytics/privilege_monitoring/saved_objects';
 import { getSiemMigrationClients } from './lib/siem_migrations';
 import { EntityStoreCrudClient } from './lib/entity_analytics/entity_store/entity_store_crud_client';
+import { CreateChatModelOptions } from '@kbn/inference-plugin/server/types';
+import { GetInferenceChatModelOptions } from './assistant/types/inference_chat_model';
 
 export interface IRequestContextFactory {
   create(
@@ -257,6 +259,10 @@ export class RequestContextFactory implements IRequestContextFactory {
           packageService: startPlugins.fleet?.packageService,
           telemetry: core.analytics,
         },
+      }),
+
+      getInferenceChatModel: memoize((options: GetInferenceChatModelOptions) => {
+        return startPlugins.inference.getChatModel({ request, ...options });
       }),
 
       getInferenceClient: memoize(() => startPlugins.inference.getClient({ request })),

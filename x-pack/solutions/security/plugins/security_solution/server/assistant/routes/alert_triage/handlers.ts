@@ -30,6 +30,14 @@ export const createAlertTriageJobHandler = (
       const esClient = coreContext.elasticsearch.client.asCurrentUser;
       const savedObjectsClient = coreContext.savedObjects.client;
 
+      // Get the security solution context for inference client
+      const securitySolutionContext = await context.securitySolution;
+
+      const chatModel = await securitySolutionContext.getInferenceChatModel({
+        connectorId: request.body.connectorId,
+        chatModelOptions: { }
+      });
+
       // Extract request parameters
       const { connectorId, alertIds } = request.body;
 
@@ -45,9 +53,13 @@ export const createAlertTriageJobHandler = (
 
         // Create service instance
         const alertTriageService = new AlertTriageService(
-          esClient,
-          savedObjectsClient,
-          logger
+          {
+            esClient,
+            savedObjectsClient,
+            chatModel,
+            request,
+            logger,
+          }
         );
 
         // Fire and forget - don't await the processing

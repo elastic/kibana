@@ -1932,6 +1932,8 @@
       "@kbn/securitysolution-autocomplete/*": ["x-pack/solutions/security/packages/kbn-securitysolution-autocomplete/*"],
       "@kbn/securitysolution-data-table": ["x-pack/solutions/security/packages/data-table"],
       "@kbn/securitysolution-data-table/*": ["x-pack/solutions/security/packages/data-table/*"],
+      "@kbn/securitysolution-deep-agent": ["x-pack/solutions/security/packages/deep-agent"],
+      "@kbn/securitysolution-deep-agent/*": ["x-pack/solutions/security/packages/deep-agent/*"],
       "@kbn/securitysolution-ecs": ["src/platform/packages/shared/kbn-securitysolution-ecs"],
       "@kbn/securitysolution-ecs/*": ["src/platform/packages/shared/kbn-securitysolution-ecs/*"],
       "@kbn/securitysolution-endpoint-exceptions-common": ["x-pack/solutions/security/packages/kbn-securitysolution-endpoint-exceptions-common"],

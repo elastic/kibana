@@ -9,15 +9,19 @@ import type {
   ElasticsearchClient,
   Logger,
   SavedObjectsClientContract,
+  KibanaRequest,
 } from '@kbn/core/server';
 import type { AlertTriageResult } from '../../types/alert_triage';
+import { createDeepAgent } from '@kbn/securitysolution-deep-agent';
+import { InferenceChatModel } from '@kbn/inference-langchain';
 
 export interface AlertTriageJobParams {
-  connectorId: string;
   alertId: string;
   jobId: string;
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract;
+  chatModel: InferenceChatModel;
+  request: KibanaRequest;
   logger: Logger;
 }
 
@@ -26,26 +30,29 @@ export interface AlertTriageJobParams {
  * Encapsulates all logic for processing one alert through the triage workflow.
  */
 export class AlertTriageJob {
-  private readonly connectorId: string;
+  private readonly chatModel: InferenceChatModel;
   private readonly alertId: string;
   private readonly jobId: string;
   private readonly esClient: ElasticsearchClient;
   private readonly savedObjectsClient: SavedObjectsClientContract;
+  private readonly request: KibanaRequest;
   private readonly logger: Logger;
 
   constructor({
-    connectorId,
     alertId,
     jobId,
     esClient,
     savedObjectsClient,
+    chatModel,
+    request,
     logger,
   }: AlertTriageJobParams) {
-    this.connectorId = connectorId;
+    this.chatModel = chatModel;
     this.alertId = alertId;
     this.jobId = jobId;
     this.esClient = esClient;
     this.savedObjectsClient = savedObjectsClient;
+    this.request = request;
     this.logger = logger;
   }
 
@@ -61,8 +68,6 @@ export class AlertTriageJob {
     this.logger.debug(`Executing alert triage job ${this.jobId} for alert ${this.alertId}`);
 
     try {
-      // Step 1: Validate connector
-      await this.validateConnector();
 
       // Step 2: Fetch alert
       const alert = await this.fetchAlert();
@@ -96,18 +101,6 @@ export class AlertTriageJob {
   }
 
   /**
-   * Validate that the connector exists and is accessible
-   * @private
-   */
-  private async validateConnector(): Promise<void> {
-    // TODO: Implement connector validation
-    // - Check if connector exists in saved objects
-    // - Verify user has access to the connector
-    // - Check if connector is the correct type for alert triage
-    this.logger.debug(`Validating connector ${this.connectorId}`);
-  }
-
-  /**
    * Fetch alert details from Elasticsearch
    * @private
    */
@@ -125,12 +118,17 @@ export class AlertTriageJob {
    * @private
    */
   private async analyzeWithLLM(alert: unknown): Promise<unknown> {
-    // TODO: Implement LLM analysis
-    // - Format alert data for LLM
-    // - Call connector with alert context
-    // - Parse and validate LLM response
-    // - Extract triage recommendations
-    this.logger.debug(`Analyzing alert ${this.alertId} with connector ${this.connectorId}`);
+    this.logger.debug(`Analyzing alert ${this.alertId}`);
+
+    const agent = createDeepAgent({
+      systemPrompt: 'You are a security assistant that helps triage alerts.',
+      model: this.chatModel,
+    });
+
+    const result = await agent.invoke({
+      messages: [{ role: 'user', content: 'What is 10 + 10' }],
+    });
+
     return {};
   }
 
@@ -147,4 +145,5 @@ export class AlertTriageJob {
     this.logger.debug(`Storing triage results for job ${this.jobId}`);
   }
 }
+
 
