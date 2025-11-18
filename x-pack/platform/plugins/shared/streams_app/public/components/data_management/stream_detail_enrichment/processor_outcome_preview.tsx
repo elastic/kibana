@@ -132,6 +132,7 @@ const PreviewDocumentsGroupBy = () => {
   return (
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
       <EuiFilterGroup
+        compressed={true}
         aria-label={i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControlsAriaLabel',
           { defaultMessage: 'Filter for all, matching or unmatching previewed documents.' }

@@ -116,6 +116,7 @@ export const ProcessorTypeSelector = ({ disabled = false }: { disabled?: boolean
         onChange={handleChange}
         fullWidth
         singleSelection={{ asPlainText: true }}
+        compressed={true}
         placeholder={i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.typeSelectorPlaceholder',
           { defaultMessage: 'Grok, Dissect ...' }
@@ -249,6 +250,37 @@ const getAvailableProcessors: (
       );
     },
   },
+  replace: {
+    type: 'replace' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.replaceInputDisplay',
+      {
+        defaultMessage: 'Replace',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.replaceHelpText"
+          defaultMessage="{replaceLink} that match a regular expression pattern with a replacement string."
+          values={{
+            replaceLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsReplaceLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.gsub}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.replaceLinkLabel', {
+                  defaultMessage: 'Replaces parts of a string field.',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
   ...configDrivenProcessors,
   ...(isWired
     ? {}
@@ -282,6 +314,7 @@ const PROCESSOR_GROUP_MAP: Record<
   dissect: 'extract',
   convert: 'convert',
   date: 'convert',
+  replace: 'convert',
   append: 'set',
   set: 'set',
   rename: 'set',
