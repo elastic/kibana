@@ -45,7 +45,6 @@
     "@kbn/cloud-security-posture-common",
     "@kbn/dev-utils",
     "@kbn/core-application-browser",
-    "@kbn/inference-common",
     "@kbn/deeplinks-management",
     "@kbn/connector-schemas",
   ]

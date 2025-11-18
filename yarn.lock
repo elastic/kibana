@@ -6263,6 +6263,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/detections-response-ftr-services@link:x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dev-cli-errors@link:src/platform/packages/shared/kbn-dev-cli-errors":
   version "0.0.0"
   uid ""
@@ -6724,6 +6728,10 @@
   uid ""
 
 "@kbn/find-used-node-modules@link:packages/kbn-find-used-node-modules":
+  version "0.0.0"
+  uid ""
+
+"@kbn/fleet-plugin-cypress@link:x-pack/platform/plugins/shared/fleet/cypress":
   version "0.0.0"
   uid ""
 
@@ -7651,6 +7659,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/osquery-plugin-cypress@link:x-pack/platform/plugins/shared/osquery/cypress":
+  version "0.0.0"
+  uid ""
+
 "@kbn/osquery-plugin@link:x-pack/platform/plugins/shared/osquery":
   version "0.0.0"
   uid ""
@@ -8491,6 +8503,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/setup-node-env@link:src/setup_node_env":
+  version "0.0.0"
+  uid ""
+
 "@kbn/share-examples-plugin@link:examples/share_examples":
   version "0.0.0"
   uid ""
@@ -8907,6 +8923,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/test-suites-security-solution-apis@link:x-pack/solutions/security/test/security_solution_api_integration":
+  version "0.0.0"
+  uid ""
+
 "@kbn/test-suites-src@link:src/platform/test":
   version "0.0.0"
   uid ""
@@ -8924,6 +8944,10 @@
   uid ""
 
 "@kbn/test-suites-xpack-search@link:x-pack/solutions/search/test":
+  version "0.0.0"
+  uid ""
+
+"@kbn/test-suites-xpack-security-endpoint@link:x-pack/solutions/security/test/security_solution_endpoint":
   version "0.0.0"
   uid ""
 
@@ -15249,7 +15273,7 @@
   resolved "https://registry.yarnpkg.com/@xtuc/long/-/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
 
-"@xyflow/react@^12.9.0":
+"@xyflow/react@^12.9.2":
   version "12.9.2"
   resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.9.2.tgz#00570f4f96f9892f8b667de7ceb992a9a6e20462"
   integrity sha512-Xr+LFcysHCCoc5KRHaw+FwbqbWYxp9tWtk1mshNcqy25OAPuaKzXSdqIMNOA82TIXF/gFKo0Wgpa6PU7wUUVqw==
