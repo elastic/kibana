@@ -6,6 +6,7 @@
  */
 
 // info on nodemailer: https://nodemailer.com/about/
+import type { SentMessageInfo } from 'nodemailer';
 import nodemailer from 'nodemailer';
 import { default as MarkdownIt } from 'markdown-it';
 
@@ -108,6 +109,8 @@ async function sendEmailWithExchange(
   );
 }
 
+export type SentMessageInfoResult = SentMessageInfo & { message?: unknown };
+
 // send an email using nodemailer
 async function sendEmailWithNodemailer(
   logger: Logger,
@@ -135,7 +138,7 @@ async function sendEmailWithNodemailer(
   // some deep properties, so need to use any here.
   const transportConfig = getTransportConfig(configurationUtilities, logger, transport, hasAuth);
   const nodemailerTransport = nodemailer.createTransport(transportConfig);
-  const result = await nodemailerTransport.sendMail(email);
+  const result: SentMessageInfoResult = await nodemailerTransport.sendMail(email);
 
   if (service === JSON_TRANSPORT_SERVICE) {
     try {
