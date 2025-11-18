@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,
@@ -13,7 +14,6 @@ import {
   deleteAllPrebuiltRuleAssets,
   reviewPrebuiltRulesToUpgrade,
 } from '../../../../utils';
-import { deleteAllRules } from '../../../../../../config/services/detections_response';
 import { createMlRuleThroughAlertingEndpoint } from '../utils';
 import { setUpRuleUpgrade } from '../../../../utils/rules/prebuilt_rules/set_up_rule_upgrade';
 

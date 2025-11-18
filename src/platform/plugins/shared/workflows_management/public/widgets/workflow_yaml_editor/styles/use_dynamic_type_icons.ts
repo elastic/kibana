@@ -32,14 +32,6 @@ export const predefinedStepTypes = [
     actionTypeId: 'kibana',
     displayName: 'Kibana',
   },
-  // {
-  //   actionTypeId: 'slack',
-  //   displayName: 'Slack',
-  // },
-  // {
-  //   actionTypeId: 'inference',
-  //   displayName: 'Inference',
-  // },
   {
     actionTypeId: 'if',
     displayName: 'If',
