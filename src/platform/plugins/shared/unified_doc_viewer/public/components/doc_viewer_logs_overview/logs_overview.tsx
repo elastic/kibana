@@ -36,6 +36,7 @@ import {
 } from '../doc_viewer_source/get_height';
 import { TraceWaterfall } from '../observability/traces/components/trace_waterfall';
 import { DataSourcesProvider } from '../observability/traces/hooks/use_data_sources';
+import { SimilarErrors } from './sub_components/similar_errors';
 
 export type LogsOverviewProps = DocViewRenderProps & {
   renderAIAssistant?: ObservabilityLogsAIAssistantFeature['render'];
@@ -133,16 +134,20 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
               dataView={dataView}
             />
           )}
-          {parsedDoc[TRACE_ID_FIELD] && showTraceWaterfall ? (
-            <DataSourcesProvider indexes={indexes}>
+
+          <DataSourcesProvider indexes={indexes}>
+            {/* TODO decide when to show this section, only when log is an error*/}
+            <SimilarErrors hit={hit} formattedDoc={parsedDoc} />
+            {parsedDoc[TRACE_ID_FIELD] && showTraceWaterfall ? (
               <TraceWaterfall
                 traceId={parsedDoc[TRACE_ID_FIELD]}
                 docId={parsedDoc[TRANSACTION_ID_FIELD] || parsedDoc[SPAN_ID_FIELD]}
                 serviceName={parsedDoc[SERVICE_NAME_FIELD]}
                 dataView={dataView}
               />
-            </DataSourcesProvider>
-          ) : null}
+            ) : null}
+          </DataSourcesProvider>
+
           {LogsOverviewAIAssistant && <LogsOverviewAIAssistant doc={hit} />}
         </div>
       </FieldActionsProvider>
