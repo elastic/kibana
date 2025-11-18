@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { IngestBase, IngestBaseStream } from './base';
+import { IngestBase, IngestBaseStream, IngestBaseUpsertRequest } from './base';
 import type { ClassicIngestStreamEffectiveLifecycle } from './lifecycle';
 import { classicIngestStreamEffectiveLifecycleSchema } from './lifecycle';
 import type { ElasticsearchAssets } from './common';
@@ -41,6 +41,20 @@ export type ClassicIngest = IngestBase & IngestClassic;
 export const ClassicIngest: Validation<IngestBase, ClassicIngest> = validation(
   IngestBase.right,
   z.intersection(IngestBase.right, IngestClassic)
+);
+
+type IngestClassicUpsertRequest = IngestClassic;
+
+const IngestClassicUpsertRequest = IngestClassic;
+
+export type ClassicIngestUpsertRequest = IngestBaseUpsertRequest & IngestClassicUpsertRequest;
+
+export const ClassicIngestUpsertRequest: Validation<
+  IngestBaseUpsertRequest,
+  ClassicIngestUpsertRequest
+> = validation(
+  IngestBaseUpsertRequest.right,
+  z.intersection(IngestBaseUpsertRequest.right, IngestClassicUpsertRequest)
 );
 
 export namespace ClassicStream {

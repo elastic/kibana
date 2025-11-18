@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { z } from '@kbn/zod';
-import { IngestBase, IngestBaseStream } from './base';
+import { IngestBase, IngestBaseStream, IngestBaseUpsertRequest } from './base';
 import type { RoutingDefinition } from './routing';
 import { routingDefinitionListSchema } from './routing';
 import type { WiredIngestStreamEffectiveLifecycle } from './lifecycle';
@@ -43,6 +43,20 @@ export type WiredIngest = IngestBase & IngestWired;
 export const WiredIngest: Validation<IngestBase, WiredIngest> = validation(
   IngestBase.right,
   z.intersection(IngestBase.right, IngestWired)
+);
+
+type IngestWiredUpsertRequest = IngestWired;
+
+const IngestWiredUpsertRequest = IngestWired;
+
+export type WiredIngestUpsertRequest = IngestBaseUpsertRequest & IngestWiredUpsertRequest;
+
+export const WiredIngestUpsertRequest: Validation<
+  IngestBaseUpsertRequest,
+  WiredIngestUpsertRequest
+> = validation(
+  IngestBaseUpsertRequest.right,
+  z.intersection(IngestBaseUpsertRequest.right, IngestWiredUpsertRequest)
 );
 
 export namespace WiredStream {

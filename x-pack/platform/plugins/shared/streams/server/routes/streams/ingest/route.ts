@@ -9,10 +9,9 @@ import { badData, badRequest } from '@hapi/boom';
 import { z } from '@kbn/zod';
 import type { StreamQuery } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
-import { Ingest } from '@kbn/streams-schema/src/models/ingest';
-import { WiredIngest } from '@kbn/streams-schema/src/models/ingest/wired';
-import type { ClassicIngest } from '@kbn/streams-schema/src/models/ingest/classic';
-import _ from 'lodash';
+import { WiredIngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest/wired';
+import type { ClassicIngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest/classic';
+import { IngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest';
 import type { AttachmentClient } from '../../../lib/streams/attachments/attachment_client';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
@@ -65,7 +64,7 @@ async function updateWiredIngest({
   assetClient: AssetClient;
   attachmentClient: AttachmentClient;
   name: string;
-  ingest: WiredIngest;
+  ingest: WiredIngestUpsertRequest;
 }) {
   const { dashboards, queries, rules } = await getAssets({
     name,
@@ -86,7 +85,7 @@ async function updateWiredIngest({
     queries,
     stream: {
       ...stream,
-      ingest: { ...ingest, processing: _.omit(ingest.processing, 'updated_at') },
+      ingest,
     },
     rules,
   };
@@ -108,7 +107,7 @@ async function updateClassicIngest({
   assetClient: AssetClient;
   attachmentClient: AttachmentClient;
   name: string;
-  ingest: ClassicIngest;
+  ingest: ClassicIngestUpsertRequest;
 }) {
   const { dashboards, queries, rules } = await getAssets({
     name,
@@ -129,7 +128,7 @@ async function updateClassicIngest({
     queries,
     stream: {
       ...stream,
-      ingest: { ...ingest, processing: _.omit(ingest.processing, 'updated_at') },
+      ingest,
     },
     rules,
   };
@@ -198,9 +197,8 @@ const upsertIngestRoute = createServerRoute({
     path: z.object({
       name: z.string(),
     }),
-    // TODO: @AlexFernandez Add IngestUpsertRequest schemas
     body: z.object({
-      ingest: Ingest.right,
+      ingest: IngestUpsertRequest.right,
     }),
   }),
   handler: async ({ params, request, getScopedClients }) => {
@@ -217,7 +215,7 @@ const upsertIngestRoute = createServerRoute({
       throw badData(`_ingest is only supported on Wired and Classic streams`);
     }
 
-    if (WiredIngest.is(ingest)) {
+    if (WiredIngestUpsertRequest.is(ingest)) {
       return await updateWiredIngest({
         streamsClient,
         assetClient,

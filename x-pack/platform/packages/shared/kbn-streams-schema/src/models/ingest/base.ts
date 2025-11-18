@@ -18,6 +18,7 @@ import type { FailureStore } from './failure_store';
 import { failureStoreSchema } from './failure_store';
 import type { IngestStreamProcessing } from './processing';
 import { ingestStreamProcessingSchema } from './processing';
+import type { StrictOmit } from '../core';
 
 interface IngestStreamPrivileges {
   // User can change everything about the stream
@@ -63,6 +64,29 @@ export const IngestBase: Validation<unknown, IngestBase> = validation(
     processing: ingestStreamProcessingSchema,
     settings: ingestStreamSettingsSchema,
     failure_store: failureStoreSchema,
+  })
+);
+
+type OmitIngestBaseUpsertProps<
+  T extends {
+    processing: Omit<IngestStreamProcessing, 'updated_at'> & { updated_at?: string };
+  }
+> = Omit<T, 'processing'> & {
+  processing: StrictOmit<IngestBase['processing'], 'updated_at'>;
+};
+
+export type IngestBaseUpsertRequest = OmitIngestBaseUpsertProps<IngestBase>;
+
+export const IngestBaseUpsertRequest: Validation<unknown, IngestBaseUpsertRequest> = validation(
+  z.unknown(),
+  z.object({
+    lifecycle: ingestStreamLifecycleSchema,
+    processing: ingestStreamProcessingSchema.merge(
+      z.object({
+        updated_at: z.undefined().optional(),
+      })
+    ),
+    settings: ingestStreamSettingsSchema,
   })
 );
 

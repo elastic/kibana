@@ -12,8 +12,7 @@ export interface IngestStreamProcessing extends StreamlangDSL {
   updated_at: string;
 }
 
-export const ingestStreamProcessingSchema = z.intersection(
-  streamlangDSLSchema,
+export const ingestStreamProcessingSchema = streamlangDSLSchema.merge(
   z.object({
     updated_at: z.string().datetime(),
   })
