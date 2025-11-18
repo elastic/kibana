@@ -9,6 +9,7 @@
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import axios, { type AxiosRequestConfig } from 'axios';
 import type { GDriveGraphNode } from '@kbn/workflows/graph';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
@@ -16,19 +17,60 @@ import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_
 import type { BaseStep, RunStepResult } from '../node_implementation';
 import { BaseAtomicNodeImplementation } from '../node_implementation';
 import { GoogleDriveClient, type ListFilesOptions } from './google_drive_client';
+import FormData from 'form-data';
 
 export interface GDriveStep extends BaseStep {
   with: {
-    service_credential?: Record<string, any>;
-    operation?: 'list' | 'get' | 'ping' | 'download';
+    service_credential?: Record<string, unknown>;
+    operation?: 'list' | 'get' | 'ping' | 'download' | 'search';
     fileId?: string;
     fileName?: string;
     fileContent?: string;
     folderId?: string;
     mimeType?: string;
     subject?: string;
+    query?: string;
+    doc_limit?: number;
   };
 }
+
+interface GDriveOperationInput {
+  service_credential?: Record<string, unknown>;
+  operation?: 'list' | 'get' | 'ping' | 'download' | 'search';
+  query?: string;
+  fileId?: string;
+  folderId?: string;
+  subject?: string;
+  doc_limit?: number;
+}
+
+interface ListFilesOutput {
+  files: FileMetadata[];
+  count: number;
+  pages: number;
+  incompleteSearch: boolean;
+}
+
+interface DownloadFileOutput {
+  fileId: string;
+  fileName: string;
+  mimeType: string;
+  size: number;
+  content: string;
+  contentEncoding: 'base64' | 'utf8';
+  metadata: {
+    createdTime?: string;
+    modifiedTime?: string;
+    parents?: string[];
+    webViewLink?: string;
+  };
+}
+
+type GDriveOperationOutput =
+  | { kind: string; connected: boolean } // ping
+  | ListFilesOutput // list
+  | FileMetadata // get
+  | DownloadFileOutput; // download
 
 export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
   private driveClient: GoogleDriveClient | null = null;
@@ -54,7 +96,7 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
   }
 
   public getInput() {
-    const { service_credential, operation, fileId, folderId, subject } = this.step.with;
+    const { service_credential, operation, fileId, folderId, subject, query, doc_limit } = this.step.with;
 
     return this.stepExecutionRuntime.contextManager.renderValueAccordingToContext({
       service_credential,
@@ -62,6 +104,8 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
       fileId,
       folderId,
       subject,
+      query,
+      doc_limit
     });
   }
 
@@ -73,8 +117,13 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
     }
   }
 
-  private async executeGDriveOperation(input: any): Promise<RunStepResult> {
-    const { service_credential, operation = 'list', fileId, folderId, subject } = input;
+  private async executeGDriveOperation(input: GDriveOperationInput): Promise<RunStepResult> {
+    // Resolve secrets in input (e.g., ${workplace_connector:id:secret_key})
+    const resolvedInput =
+      await this.stepExecutionRuntime.contextManager.resolveSecretsInValue<GDriveOperationInput>(
+        input
+    );
+    const { operation = 'list', fileId, folderId, subject, query, doc_limit, service_credential } = resolvedInput;
 
     if (!service_credential) {
       throw new Error('service_credential is required for Google Drive operations');
@@ -97,12 +146,16 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
     let output: any;
 
     switch (operation) {
+      case 'search':
+        output = await this.handleSearch(query, doc_limit);
+        break;
+
       case 'ping':
         output = await this.handlePing();
         break;
 
       case 'list':
-        output = await this.handleList(folderId);
+        output = await this.handleList(folderId, doc_limit);
         break;
 
       case 'get':
@@ -148,13 +201,90 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
     };
   }
 
-  private async handleList(folderId?: string): Promise<any> {
+  private async handleSearch(query?: string, limit?: number): Promise<ListFilesOutput> {
     if (!this.driveClient) {
       throw new Error('Google Drive client not initialized');
     }
 
     const allFiles: any[] = [];
     let pageToken: string | undefined;
+    let resultCount = 0;
+    let pageCount = 0;
+    let incompleteSearch = false;
+
+    do {
+      const options: ListFilesOptions = {
+        q: query,
+        pageSize: 100,
+        pageToken,
+      };
+
+      this.workflowLogger.logInfo(
+        `Fetching Google Drive files page ${pageCount + 1}${
+          pageToken ? ` (continuing from previous page)` : ''
+        }`,
+        {
+          workflow: { step_id: this.step.name },
+          event: { action: 'gdrive_list_pagination', outcome: 'unknown' },
+          tags: ['gdrive', 'list', 'pagination'],
+        }
+      );
+
+      const result = await this.driveClient.listFiles(options);
+
+      if (result.files && result.files.length > 0) {
+        allFiles.push(...result.files);
+      }
+
+      pageToken = result.nextPageToken;
+      incompleteSearch = result.incompleteSearch || false;
+      resultCount += result.files.length;
+      pageCount++;
+
+      console.log(`Limit: ${limit}, resultCount: ${resultCount}`);
+
+      if (limit && resultCount > limit) {
+          break
+      }
+
+      // Log progress
+      if (pageToken) {
+        this.workflowLogger.logInfo(
+          `Fetched ${allFiles.length} files so far, more pages available`,
+          {
+            workflow: { step_id: this.step.name },
+            event: { action: 'gdrive_list_pagination', outcome: 'success' },
+            tags: ['gdrive', 'list', 'pagination'],
+          }
+        );
+      }
+    } while (pageToken);
+
+    this.workflowLogger.logInfo(
+      `Completed fetching all Google Drive files: ${allFiles.length} files across ${pageCount} page(s)`,
+      {
+        workflow: { step_id: this.step.name },
+        event: { action: 'gdrive_list_complete', outcome: 'success' },
+        tags: ['gdrive', 'list'],
+      }
+    );
+
+    return {
+      files: allFiles,
+      count: allFiles.length,
+      pages: pageCount,
+      incompleteSearch,
+    };
+  }
+
+  private async handleList(folderId?: string, limit?: number): Promise<ListFilesOutput> {
+    if (!this.driveClient) {
+      throw new Error('Google Drive client not initialized');
+    }
+
+    const allFiles: FileMetadata[] = [];
+    let pageToken: string | undefined;
+    let resultCount = 0;
     let pageCount = 0;
     let incompleteSearch = false;
 
@@ -182,7 +312,12 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
 
       pageToken = result.nextPageToken;
       incompleteSearch = result.incompleteSearch || false;
+      resultCount += result.files.length;
       pageCount++;
+
+      if (limit && resultCount > limit) {
+          break
+      }
 
       // Log progress
       if (pageToken) {
@@ -238,10 +373,11 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
     const fileMetadata = await this.driveClient.getFile(fileId);
 
     // Download the file content
-    const fileContent = await this.driveClient.downloadFile(fileId);
+    const downloadedFile = await this.driveClient.downloadFile(fileId);
+
 
     this.workflowLogger.logInfo(
-      `Successfully downloaded file: ${fileMetadata.name} (${fileContent.size} bytes)`,
+      `Successfully downloaded file: ${fileMetadata.name} (${downloadedFile.size} bytes)`,
       {
         workflow: { step_id: this.step.name },
         event: { action: 'gdrive_download', outcome: 'success' },
@@ -249,13 +385,15 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
       }
     );
 
+    const fileContent = await this.extractContent(downloadedFile, fileMetadata.name, fileMetadata.mimeType);
+
     return {
       fileId: fileMetadata.id,
       fileName: fileMetadata.name,
       mimeType: fileMetadata.mimeType,
-      size: fileContent.size,
-      content: fileContent.content,
-      contentEncoding: fileContent.encoding,
+      size: 999,
+      content: fileContent,
+      contentEncoding: 'utf8',
       metadata: {
         createdTime: fileMetadata.createdTime,
         modifiedTime: fileMetadata.modifiedTime,
@@ -265,7 +403,43 @@ export class GDriveStepImpl extends BaseAtomicNodeImplementation<GDriveStep> {
     };
   }
 
-  protected async handleFailure(input: any, error: any): Promise<RunStepResult> {
+  private async extractContent(
+    buffer: Buffer,
+    fileName: string,
+    contentType: string
+  ): Promise<string> {
+    try {
+      console.log(`Downloading the file ${fileName} with content type {contentType}`);
+
+      const extractedFileContentResponse = await axios.put(
+        'http://localhost:8090/extract_text/',
+        buffer,
+        {
+          headers: { 'Content-Type': 'application/octet-stream' },
+        }
+      );
+
+      console.log(`Subextracted:`);
+      console.log(extractedFileContentResponse);
+
+      return extractedFileContentResponse.data.extracted_text;
+    } catch (error) {
+      if (error.response) {
+        throw new Error(
+          `Error while extracting the content: ${error.response.status} ${
+            error.response.statusText
+          } - ${JSON.stringify(error.response.data)}`
+        );
+      }
+      throw new Error(`Content extraction failed: ${error.message}`);
+    }
+    return "";
+  }
+
+  protected async handleFailure(
+    input: GDriveOperationInput,
+    error: unknown
+  ): Promise<RunStepResult> {
     let errorMessage: string;
 
     if (error instanceof Error) {
