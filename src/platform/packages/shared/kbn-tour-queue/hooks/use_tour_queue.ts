@@ -27,13 +27,13 @@ export const useTourQueue = (tourId: TourId): TourQueueResult => {
 
   useEffect(() => {
     // Register and get tour object
-    const tour = tourQueue.registerTour(tourId);
+    const tour = tourQueue.register(tourId);
     tourRef.current = tour;
     // Set initial isActive state
-    setIsActive(tourQueue.isTourActive(tourId));
+    setIsActive(tourQueue.isActive(tourId));
     // Subscribe to state changes and get cleanup function
     const stopListening = tourQueue.subscribe(() => {
-      setIsActive(tourQueue.isTourActive(tourId));
+      setIsActive(tourQueue.isActive(tourId));
     });
     return () => {
       tourRef.current?.complete();

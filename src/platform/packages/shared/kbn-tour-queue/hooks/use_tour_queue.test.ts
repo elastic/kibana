@@ -76,7 +76,7 @@ describe('useTourQueue', () => {
 
     // Skip all tours
     act(() => {
-      tourQueue.skipAllTours();
+      tourQueue.skipAll();
     });
 
     // All tours should be false

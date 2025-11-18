@@ -29,44 +29,44 @@ jest.mock('..', () => {
 });
 
 describe('TourQueueStateManager', () => {
-  let manager: TourQueueStateManager;
+  let tourQueue: TourQueueStateManager;
   let subscriber: jest.Mock;
 
   beforeEach(() => {
-    manager = new TourQueueStateManager();
+    tourQueue = new TourQueueStateManager();
     subscriber = jest.fn();
   });
 
-  describe('registerTour', () => {
+  describe('register', () => {
     it('should register tours with provided ids and in priority order', () => {
-      manager.registerTour(TOUR_2); // priority 2
-      manager.registerTour(TOUR_1); // priority 1
+      tourQueue.register(TOUR_2); // priority 2
+      tourQueue.register(TOUR_1); // priority 1
 
-      const state = manager.getState();
+      const state = tourQueue.getState();
       expect(state.registeredTourIds[0]).toBe(TOUR_1);
       expect(state.registeredTourIds[1]).toBe(TOUR_2);
     });
 
     it('should not register the same tour twice', () => {
-      manager.registerTour(TOUR_1);
-      manager.registerTour(TOUR_1);
+      tourQueue.register(TOUR_1);
+      tourQueue.register(TOUR_1);
 
-      const state = manager.getState();
+      const state = tourQueue.getState();
       expect(state.registeredTourIds.filter((id) => id === TOUR_1)).toHaveLength(1);
     });
 
     it('should notify subscribers when a tour is registered', () => {
-      manager.subscribe(subscriber);
+      tourQueue.subscribe(subscriber);
 
-      manager.registerTour(TOUR_1);
-      manager.registerTour(TOUR_2);
+      tourQueue.register(TOUR_1);
+      tourQueue.register(TOUR_2);
 
       expect(subscriber).toHaveBeenCalledTimes(2);
     });
 
     it('should notify subscribers when a tour is unregistered', () => {
-      const tour = manager.registerTour(TOUR_1);
-      manager.subscribe(subscriber);
+      const tour = tourQueue.register(TOUR_1);
+      tourQueue.subscribe(subscriber);
 
       tour.complete();
 
@@ -74,120 +74,120 @@ describe('TourQueueStateManager', () => {
     });
   });
 
-  describe('getActiveTour', () => {
+  describe('getActive', () => {
     it('should return the first in priority order registered tour', () => {
-      manager.registerTour(TOUR_2);
-      manager.registerTour(TOUR_1);
+      tourQueue.register(TOUR_2);
+      tourQueue.register(TOUR_1);
 
-      expect(manager.getActiveTour()).toBe(TOUR_1);
+      expect(tourQueue.getActive()).toBe(TOUR_1);
     });
 
     it('should return the next tour after the first is completed', () => {
-      manager.registerTour(TOUR_1);
-      manager.registerTour(TOUR_2);
+      tourQueue.register(TOUR_1);
+      tourQueue.register(TOUR_2);
 
-      manager.completeTour(TOUR_1);
+      tourQueue.complete(TOUR_1);
 
-      expect(manager.getActiveTour()).toBe(TOUR_2);
+      expect(tourQueue.getActive()).toBe(TOUR_2);
     });
 
     it('should return null when all tours are completed', () => {
-      manager.registerTour(TOUR_1);
-      manager.registerTour(TOUR_2);
+      tourQueue.register(TOUR_1);
+      tourQueue.register(TOUR_2);
 
-      manager.completeTour(TOUR_1);
-      manager.completeTour(TOUR_2);
+      tourQueue.complete(TOUR_1);
+      tourQueue.complete(TOUR_2);
 
-      expect(manager.getActiveTour()).toBeNull();
+      expect(tourQueue.getActive()).toBeNull();
     });
 
     it('should return null when queue is skipped', () => {
-      manager.registerTour(TOUR_1);
-      manager.skipAllTours();
+      tourQueue.register(TOUR_1);
+      tourQueue.skipAll();
 
-      expect(manager.getActiveTour()).toBeNull();
+      expect(tourQueue.getActive()).toBeNull();
     });
   });
 
-  describe('isTourActive', () => {
+  describe('isActive', () => {
     it('should return true for the active tour and false for a waiting tour', () => {
-      manager.registerTour(TOUR_1);
-      manager.registerTour(TOUR_2);
+      tourQueue.register(TOUR_1);
+      tourQueue.register(TOUR_2);
 
-      expect(manager.isTourActive(TOUR_1)).toBe(true);
-      expect(manager.isTourActive(TOUR_2)).toBe(false);
+      expect(tourQueue.isActive(TOUR_1)).toBe(true);
+      expect(tourQueue.isActive(TOUR_2)).toBe(false);
     });
 
     it('should return false for a completed tour', () => {
-      manager.registerTour(TOUR_1);
-      manager.completeTour(TOUR_1);
+      tourQueue.register(TOUR_1);
+      tourQueue.complete(TOUR_1);
 
-      expect(manager.isTourActive(TOUR_1)).toBe(false);
+      expect(tourQueue.isActive(TOUR_1)).toBe(false);
     });
 
     it('should return false when queue is skipped', () => {
-      manager.registerTour(TOUR_1);
-      manager.skipAllTours();
+      tourQueue.register(TOUR_1);
+      tourQueue.skipAll();
 
-      expect(manager.isTourActive(TOUR_1)).toBe(false);
+      expect(tourQueue.isActive(TOUR_1)).toBe(false);
     });
   });
 
-  describe('completeTour', () => {
+  describe('complete', () => {
     it('should mark a tour as completed', () => {
-      manager.registerTour(TOUR_1);
-      manager.registerTour(TOUR_2);
-      manager.completeTour(TOUR_1);
+      tourQueue.register(TOUR_1);
+      tourQueue.register(TOUR_2);
+      tourQueue.complete(TOUR_1);
 
-      const state = manager.getState();
+      const state = tourQueue.getState();
       expect(state.completedTourIds.size).toBe(1);
       expect(state.completedTourIds.has(TOUR_1)).toBe(true);
     });
 
     it('should notify subscribers', () => {
-      manager.registerTour(TOUR_1);
-      manager.subscribe(subscriber);
+      tourQueue.register(TOUR_1);
+      tourQueue.subscribe(subscriber);
 
-      manager.completeTour(TOUR_1);
+      tourQueue.complete(TOUR_1);
 
       expect(subscriber).toHaveBeenCalledTimes(1);
     });
 
     it('should allow the next tour to become active', () => {
-      manager.registerTour(TOUR_1);
-      manager.registerTour(TOUR_2);
+      tourQueue.register(TOUR_1);
+      tourQueue.register(TOUR_2);
 
-      expect(manager.getActiveTour()).toBe(TOUR_1);
+      expect(tourQueue.getActive()).toBe(TOUR_1);
 
-      manager.completeTour(TOUR_1);
+      tourQueue.complete(TOUR_1);
 
-      expect(manager.getActiveTour()).toBe(TOUR_2);
+      expect(tourQueue.getActive()).toBe(TOUR_2);
     });
   });
 
-  describe('skipAllTours', () => {
+  describe('skipAll', () => {
     it('should set isQueueSkipped to true', () => {
-      manager.registerTour(TOUR_1);
-      manager.skipAllTours();
+      tourQueue.register(TOUR_1);
+      tourQueue.skipAll();
 
-      expect(manager.getState().isQueueSkipped).toBe(true);
+      expect(tourQueue.getState().isQueueSkipped).toBe(true);
     });
 
     it('should notify subscribers', () => {
-      manager.subscribe(subscriber);
-      manager.skipAllTours();
+      tourQueue.subscribe(subscriber);
+      tourQueue.skipAll();
 
       expect(subscriber).toHaveBeenCalledTimes(1);
     });
 
     it('should prevent all tours from showing', () => {
-      manager.registerTour(TOUR_1);
-      manager.registerTour(TOUR_2);
+      tourQueue.register(TOUR_1);
+      tourQueue.register(TOUR_2);
 
-      manager.skipAllTours();
+      tourQueue.skipAll();
 
-      expect(manager.isTourActive(TOUR_1)).toBe(false);
-      expect(manager.isTourActive(TOUR_2)).toBe(false);
+      expect(tourQueue.isActive(TOUR_1)).toBe(false);
+      expect(tourQueue.isActive(TOUR_2)).toBe(false);
     });
   });
 });

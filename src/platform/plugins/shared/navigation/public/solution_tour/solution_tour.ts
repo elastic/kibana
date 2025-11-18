@@ -33,8 +33,8 @@ export class SolutionNavigationTourManager {
     const tourQueue = getTourQueue();
     // Register and get tour object
     const navTourId = 'solutionNavigationTour';
-    const tour = tourQueue.registerTour(navTourId);
-    const isActive = tourQueue.isTourActive(navTourId);
+    const tour = tourQueue.register(navTourId);
+    const isActive = tourQueue.isActive(navTourId);
     if (!isActive) {
       tour.complete();
       return;

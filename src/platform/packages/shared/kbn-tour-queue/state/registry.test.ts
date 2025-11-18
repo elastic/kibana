@@ -23,41 +23,41 @@ describe('Registry: getTourQueue', () => {
   });
 
   it('should store the instance in globalThis registry', () => {
-    const manager = getTourQueue();
+    const tourQueue = getTourQueue();
 
     expect((globalThis as any)[REGISTRY_KEY]).toBeDefined();
-    expect((globalThis as any)[REGISTRY_KEY].tourQueueStateManager).toBe(manager);
+    expect((globalThis as any)[REGISTRY_KEY].tourQueueStateManager).toBe(tourQueue);
   });
 
   it('should return the same instance on multiple calls', () => {
-    const manager1 = getTourQueue();
-    const manager2 = getTourQueue();
-    const manager3 = getTourQueue();
+    const tourQueue1 = getTourQueue();
+    const tourQueue2 = getTourQueue();
+    const tourQueue3 = getTourQueue();
 
-    expect(manager2).toBe(manager1);
-    expect(manager3).toBe(manager1);
+    expect(tourQueue2).toBe(tourQueue1);
+    expect(tourQueue3).toBe(tourQueue1);
   });
 
   it('should share state across multiple calls', () => {
-    const manager1 = getTourQueue();
-    manager1.registerTour(TOUR_1);
+    const tourQueue1 = getTourQueue();
+    tourQueue1.register(TOUR_1);
 
-    const manager2 = getTourQueue();
-    const manager2State = manager2.getState();
+    const tourQueue2 = getTourQueue();
+    const tourQueue2State = tourQueue2.getState();
 
-    expect(manager2State.registeredTourIds).toContain(TOUR_1);
+    expect(tourQueue2State.registeredTourIds).toContain(TOUR_1);
   });
 
   it('should reuse existing instance from registry if already created', () => {
     // First call creates the instance
-    const firstManager = getTourQueue();
+    const firstTourQueue = getTourQueue();
 
     // Verify it's in the registry
     const registryInstance = (globalThis as any)[REGISTRY_KEY]?.tourQueueStateManager;
-    expect(registryInstance).toBe(firstManager);
+    expect(registryInstance).toBe(firstTourQueue);
 
     // Second call should return the same instance
-    const secondManager = getTourQueue();
-    expect(secondManager).toBe(registryInstance);
+    const secondTourQueue = getTourQueue();
+    expect(secondTourQueue).toBe(registryInstance);
   });
 });

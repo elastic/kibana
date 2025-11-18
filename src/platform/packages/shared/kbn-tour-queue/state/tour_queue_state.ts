@@ -28,7 +28,7 @@ export class TourQueueStateManager {
 
   constructor() {}
 
-  registerTour(tourId: TourId): Tour {
+  register(tourId: TourId): Tour {
     const exists = this.registeredTourIds.includes(tourId);
     if (exists) {
       // Return no-op if already exists
@@ -46,15 +46,15 @@ export class TourQueueStateManager {
 
     return {
       skip: () => {
-        this.skipAllTours();
+        this.skipAll();
       },
       complete: () => {
-        this.completeTour(tourId);
+        this.complete(tourId);
       },
     };
   }
 
-  getActiveTour(): TourId | null {
+  getActive(): TourId | null {
     if (this.isQueueSkipped) {
       return null;
     }
@@ -67,11 +67,11 @@ export class TourQueueStateManager {
     return activeTour ?? null;
   }
 
-  isTourActive(tourId: TourId): boolean {
-    return this.getActiveTour() === tourId;
+  isActive(tourId: TourId): boolean {
+    return this.getActive() === tourId;
   }
 
-  completeTour(tourId: TourId): void {
+  complete(tourId: TourId): void {
     this.completedTourIds.add(tourId);
     this.registeredTourIds = this.registeredTourIds.filter(
       (registeredTourId) => registeredTourId !== tourId
@@ -79,7 +79,7 @@ export class TourQueueStateManager {
     this.notifySubscribers();
   }
 
-  skipAllTours(): void {
+  skipAll(): void {
     this.isQueueSkipped = true;
     this.notifySubscribers();
   }
