@@ -173,7 +173,7 @@ export const getRuleExecutor = (basePath: IBasePath) =>
             ? SUPPRESSED_PRIORITY_ACTION.id
             : windowDef.actionGroup;
 
-          const apmFields = extractApmFieldsFromSummary(sloSummary);
+          const apmFields = extractApmFieldsFromSLOSummary(sloSummary);
 
           const { uuid } = alertsClient.report({
             id: alertId,
@@ -316,7 +316,7 @@ function buildReason(
   });
 }
 
-function extractApmFieldsFromSummary(
+function extractApmFieldsFromSLOSummary(
   sloSummary: EsSummaryDocument | undefined
 ): Record<string, string> {
   const apmFields: Record<string, string> = {};
