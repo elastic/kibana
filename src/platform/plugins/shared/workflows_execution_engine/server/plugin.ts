@@ -287,7 +287,7 @@ export class WorkflowsExecutionEnginePlugin
                 taskManager,
                 logger,
                 config,
-                fakeRequest: fakeRequest || ({} as any), // will be undefined if not available
+                fakeRequest: fakeRequest!,
                 dependencies,
               });
 

@@ -64,20 +64,25 @@ export function registerPostRunWorkflowRoute({ router, api, logger, spaces }: Ro
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
         let processedInputs = inputs;
-        try {
-          processedInputs = await preprocessAlertInputs(
-            inputs,
-            spaceId,
-            esClient,
-            logger,
-            workflow.id
-          );
-        } catch (preprocessError) {
-          logger.debug(
-            `Alert preprocessing failed, using original inputs: ${
-              preprocessError instanceof Error ? preprocessError.message : String(preprocessError)
-            }`
-          );
+        const hasAlertTrigger = workflow.definition.triggers?.some(
+          (trigger) => trigger.type === 'alert'
+        );
+        if (hasAlertTrigger) {
+          try {
+            processedInputs = await preprocessAlertInputs(
+              inputs,
+              spaceId,
+              esClient,
+              logger,
+              workflow.id
+            );
+          } catch (preprocessError) {
+            logger.error(
+              `Alert preprocessing failed, using original inputs: ${
+                preprocessError instanceof Error ? preprocessError.message : String(preprocessError)
+              }`
+            );
+          }
         }
 
         const workflowForExecution: WorkflowExecutionEngineModel = {

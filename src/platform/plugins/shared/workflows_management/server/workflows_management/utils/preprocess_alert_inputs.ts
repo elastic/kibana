@@ -14,28 +14,12 @@ import type { Logger } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { set } from '@kbn/safer-lodash-set';
 import signalAadMapping from './signal_aad_mapping.json';
-import { getWorkflowsConnectorAdapter } from '../../connectors/workflows';
-
-interface AlertSelection {
-  _id: string;
-  _index: string;
-}
-
-interface AlertTriggerInput {
-  event: {
-    alertIds: AlertSelection[];
-    triggerType: 'alert';
-  };
-}
-
-interface Rule {
-  id: string;
-  name: string;
-  tags: string[];
-  consumer: string;
-  producer: string;
-  ruleTypeId: string;
-}
+import type {
+  AlertEventRule,
+  AlertSelection,
+  AlertTriggerInput,
+} from '../../../common/types/alert_types';
+import { buildAlertEvent } from '../../../common/utils/build_alert_event';
 
 /**
  * Constructs the signal object from kibana.alert fields (legacy format for security alerts).
@@ -61,7 +45,7 @@ function constructSignalObject(
 /**
  * Extracts rule information from an alert's _source
  */
-function extractRuleFromAlert(alert: Record<string, unknown>): Rule | null {
+function extractRuleFromAlert(alert: Record<string, unknown>): AlertEventRule | null {
   const ruleKeys = ['uuid', 'name', 'consumer', 'producer', 'rule_type_id'];
   const ruleValues = ruleKeys.reduce((acc, key) => {
     acc[key] = get(alert, `kibana.alert.rule.${key}`);
@@ -87,8 +71,8 @@ function extractRuleFromAlert(alert: Record<string, unknown>): Rule | null {
 /**
  * Extracts all unique rules from alert hits
  */
-function extractRulesFromAlerts(alertHits: AlertHit[]): Map<string, Rule> {
-  const rulesByUuid = new Map<string, Rule>();
+function extractRulesFromAlerts(alertHits: AlertHit[]): Map<string, AlertEventRule> {
+  const rulesByUuid = new Map<string, AlertEventRule>();
   for (const alert of alertHits) {
     const rule = extractRuleFromAlert(alert as Record<string, unknown>);
     if (rule && !rulesByUuid.has(rule.id)) {
@@ -101,7 +85,10 @@ function extractRulesFromAlerts(alertHits: AlertHit[]): Map<string, Rule> {
 /**
  * Selects the primary rule from a map of rules, logging warnings if multiple rules exist
  */
-function selectPrimaryRule(rulesByUuid: Map<string, Rule>, logger: Logger): Rule {
+function selectPrimaryRule(
+  rulesByUuid: Map<string, AlertEventRule>,
+  logger: Logger
+): AlertEventRule {
   if (rulesByUuid.size === 0) {
     throw new Error('Could not extract rule information from alerts');
   }
@@ -151,7 +138,7 @@ async function fetchAlerts(
       if ('found' in doc && doc.found && '_source' in doc && doc._source) {
         const source = doc._source as Record<string, unknown>;
         const expandedSource = expandFlattenedAlert(source);
-        const signalObject = constructSignalObject(expandedSource);
+        const signalObject = {}; // constructSignalObject(expandedSource);
 
         const alertHit = {
           _id: alertIds[i]._id,
@@ -176,7 +163,7 @@ async function fetchAlerts(
 
 /**
  * Preprocesses alert inputs by fetching full alert documents and transforming them
- * using the same logic as buildActionParams from getWorkflowsConnectorAdapter
+ * into the standardized alert event format using buildAlertEvent
  */
 export async function preprocessAlertInputs(
   inputs: Record<string, unknown>,
@@ -220,29 +207,15 @@ export async function preprocessAlertInputs(
     },
   };
 
-  const adapter = getWorkflowsConnectorAdapter();
-  const transformedParams = adapter.buildActionParams({
+  const alertEvent = buildAlertEvent({
     alerts: summarizedAlerts,
     rule: primaryRule,
-    params: {
-      subAction: 'run' as const,
-      subActionParams: {
-        workflowId: workflowId || 'test',
-      },
-    },
-    spaceId,
     ruleUrl: undefined,
+    spaceId,
   });
-
-  const transformedEvent = (transformedParams.subActionParams?.inputs as { event?: unknown })
-    ?.event;
-
-  if (!transformedEvent) {
-    throw new Error('Failed to transform alert inputs using buildActionParams');
-  }
 
   return {
     ...inputs,
-    event: transformedEvent,
+    event: alertEvent,
   };
 }

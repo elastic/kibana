@@ -23,6 +23,7 @@ import type { Query, TimeRange } from '@kbn/data-plugin/common';
 import { buildEsQuery } from '@kbn/es-query';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { i18n } from '@kbn/i18n';
+import type { AlertSelection, AlertTriggerInput } from '../../../../common/types/alert_types';
 import { useKibana } from '../../../hooks/use_kibana';
 
 interface Alert {
@@ -36,18 +37,6 @@ interface Alert {
     'kibana.alert.status': string;
     'kibana.alert.reason': string;
     [key: string]: unknown;
-  };
-}
-
-interface AlertSelection {
-  _id: string;
-  _index: string;
-}
-
-interface AlertTriggerInput {
-  event: {
-    alertIds: AlertSelection[];
-    triggerType: 'alert';
   };
 }
 
