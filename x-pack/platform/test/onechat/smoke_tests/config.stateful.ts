@@ -18,7 +18,7 @@ export default async function (ftrContext: FtrConfigProviderContext) {
     services: oneChatApiServices,
     testFiles: [require.resolve('./tests')],
     junit: {
-      reportName: 'X-Pack Agent Builder Stateful API Integration Tests',
+      reportName: 'Agent Builder - Smoke Tests - API Integration',
     },
     // @ts-expect-error
     kbnTestServer: {
