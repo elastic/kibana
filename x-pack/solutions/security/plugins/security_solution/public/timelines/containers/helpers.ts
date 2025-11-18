@@ -23,7 +23,11 @@ export const getTimelineQueryTypes = (timeline: TimelineResponse) => ({
     timeline.eqlOptions.query.length > 0,
 });
 
-export const detectionsTimelineIds = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage];
+export const detectionsTimelineIds = [
+  TableId.alertsOnAlertsPage,
+  TableId.alertsOnAttacksPage,
+  TableId.alertsOnRuleDetailsPage,
+];
 
 export const skipQueryForDetectionsPage = (
   id: string,

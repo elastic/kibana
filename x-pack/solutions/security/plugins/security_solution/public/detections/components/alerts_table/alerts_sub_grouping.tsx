@@ -35,6 +35,7 @@ import { useQueryAlerts } from '../../containers/detection_engine/alerts/use_que
 import { ALERTS_QUERY_NAMES } from '../../containers/detection_engine/alerts/constants';
 import { getAlertsGroupingQuery } from './grouping_settings';
 import { useBrowserFields } from '../../../data_view_manager/hooks/use_browser_fields';
+import { fetchQueryUnifiedAlerts } from '../../containers/detection_engine/alerts/api';
 
 const ALERTS_GROUPING_ID = 'alerts-grouping';
 const DEFAULT_FILTERS: Filter[] = [];
@@ -83,6 +84,11 @@ interface OwnProps {
    * in 2 groups: one for mac1 and a second formac2.
    */
   multiValueFieldsToFlatten?: string[];
+
+  /**
+   * Data view scope
+   */
+  pageScope?: PageScope;
 }
 
 export type AlertsTableComponentProps = OwnProps;
@@ -110,17 +116,18 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   tableId,
   to,
   multiValueFieldsToFlatten,
+  pageScope = PageScope.alerts,
 }) => {
   const {
     services: { uiSettings },
   } = useKibana();
   const { browserFields: oldBrowserFields, sourcererDataView: oldSourcererDataView } =
-    useSourcererDataView(PageScope.alerts);
+    useSourcererDataView(pageScope);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView: experimentalDataView } = useDataView(PageScope.alerts);
-  const experimentalBrowserFields = useBrowserFields(PageScope.alerts);
+  const { dataView: experimentalDataView } = useDataView(pageScope);
+  const experimentalBrowserFields = useBrowserFields(pageScope);
 
   const sourcererDataView = oldSourcererDataView;
   const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
@@ -215,6 +222,10 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     endDate: to,
   });
 
+  const fetchMethod = useMemo(() => {
+    return pageScope === PageScope.attacks ? fetchQueryUnifiedAlerts : undefined;
+  }, [pageScope]);
+
   const {
     data: alertsGroupsData,
     loading: isLoadingGroups,
@@ -223,6 +234,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     response,
     setQuery: setAlertsQuery,
   } = useQueryAlerts<{}, GroupingAggregation<AlertsGroupingAggregation>>({
+    fetchMethod,
     query: queryGroups,
     indexName: signalIndexName,
     queryName: ALERTS_QUERY_NAMES.ALERTS_GROUPING,

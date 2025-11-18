@@ -18,7 +18,6 @@ import {
 import { useGetGroupSelectorStateless } from '@kbn/grouping/src/hooks/use_get_group_selector';
 import { getTelemetryEvent } from '@kbn/grouping/src/telemetry/const';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { PageScope } from '../../../data_view_manager/constants';
 import type { GetSecurityAlertsTableProp } from './types';
 import { groupIdSelector } from '../../../common/store/grouping/selectors';
 import { useSourcererDataView } from '../../../sourcerer/containers';
@@ -36,19 +35,20 @@ const { changeViewMode } = dataTableActions;
 
 const AdditionalToolbarControlsComponent = ({
   tableType,
+  pageScope,
 }: Pick<
   ComponentProps<GetSecurityAlertsTableProp<'renderAdditionalToolbarControls'>>,
-  'tableType'
+  'tableType' | 'pageScope'
 >) => {
   const dispatch = useDispatch();
   const {
     services: { telemetry },
   } = useKibana();
 
-  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(PageScope.alerts);
+  const { sourcererDataView: oldSourcererDataView } = useSourcererDataView(pageScope);
 
   const isNewDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(PageScope.alerts);
+  const { dataView: experimentalDataView } = useDataView(pageScope);
 
   const groupId = useMemo(() => groupIdSelector(), []);
   const { options } = useDeepEqualSelector((state) => groupId(state, tableType)) ?? {
@@ -138,7 +138,11 @@ const AdditionalToolbarControlsComponent = ({
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="m">
-      {[TableId.alertsOnRuleDetailsPage, TableId.alertsOnAlertsPage].includes(tableType) && (
+      {[
+        TableId.alertsOnRuleDetailsPage,
+        TableId.alertsOnAlertsPage,
+        TableId.alertsOnAttacksPage,
+      ].includes(tableType) && (
         <EuiFlexItem grow={false} data-test-subj="summary-view-selector">
           <SummaryViewSelector viewSelected={tableView} onViewChange={handleChangeTableView} />
         </EuiFlexItem>

@@ -41,7 +41,7 @@ export type RenderCellValueProps = Pick<
   | 'colIndex'
   | 'setCellProps'
   | 'truncate'
-  | 'sourcererScope'
+  | 'pageScope'
   | 'userProfiles'
 > &
   Partial<Omit<CellValueElementProps, 'browserFields'>>;
@@ -49,7 +49,7 @@ export type RenderCellValueProps = Pick<
 export const CellValue = memo(function RenderCellValue({
   columnId,
   rowIndex,
-  sourcererScope,
+  pageScope,
   tableId,
   tableType,
   header,
@@ -148,7 +148,7 @@ export const CellValue = memo(function RenderCellValue({
         colIndex={colIndex}
         rowRenderers={rowRenderers ?? defaultRowRenderers}
         setCellProps={setCellProps}
-        scopeId={sourcererScope}
+        scopeId={pageScope}
         truncate={truncate}
         asPlainText={false}
         context={userProfiles}
@@ -170,7 +170,7 @@ export const CellValue = memo(function RenderCellValue({
     colIndex,
     rowRenderers,
     setCellProps,
-    sourcererScope,
+    pageScope,
     truncate,
     userProfiles,
   ]);

@@ -17,6 +17,7 @@ import type { StartPlugins } from '../types';
 export const DETECTIONS_TABLE_IDS: TableIdLiteral[] = [
   TableId.alertsOnRuleDetailsPage,
   TableId.alertsOnAlertsPage,
+  TableId.alertsOnAttacksPage,
 ];
 
 export class Detections {

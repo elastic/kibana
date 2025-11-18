@@ -522,6 +522,7 @@ export const VIEW_SELECTION = {
 
 export const ALERTS_TABLE_REGISTRY_CONFIG_IDS = {
   ALERTS_PAGE: `${APP_ID}-alerts-page`,
+  ATTACKS_PAGE: `${APP_ID}-attacks-page`,
   RULE_DETAILS: `${APP_ID}-rule-details`,
   CASE: `${APP_ID}-case`,
   RISK_INPUTS: `${APP_ID}-risk-inputs`,

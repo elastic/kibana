@@ -39,7 +39,11 @@ import { useFetchNotes } from '../../../notes/hooks/use_fetch_notes';
 
 export type InspectResponse = Inspect & { response: string[] };
 
-export const detectionsTimelineIds = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage];
+export const detectionsTimelineIds = [
+  TableId.alertsOnAlertsPage,
+  TableId.alertsOnAttacksPage,
+  TableId.alertsOnRuleDetailsPage,
+];
 
 export type Refetch = () => void;
 

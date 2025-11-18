@@ -222,7 +222,9 @@ export const addFieldToColumns = ({
   const allColumns = getAllFieldsByName(browserFields);
   const column = allColumns[fieldId];
   const initColumnHeader =
-    scopeId === TableId.alertsOnAlertsPage || scopeId === TableId.alertsOnRuleDetailsPage
+    scopeId === TableId.alertsOnAlertsPage ||
+    scopeId === TableId.alertsOnAttacksPage ||
+    scopeId === TableId.alertsOnRuleDetailsPage
       ? defaultsHeader.find((c) => c.id === fieldId) ?? {}
       : {};
 

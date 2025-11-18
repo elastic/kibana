@@ -23,6 +23,7 @@ import type { SetOptional } from 'type-fest';
 import { noop } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
 import { AlertsTable as ResponseOpsAlertsTable } from '@kbn/response-ops-alerts-table';
+import { ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID } from '@kbn/elastic-assistant-common';
 import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import { useAlertsContext } from './alerts_context';
@@ -127,7 +128,7 @@ interface AlertTableProps
   extends SetOptional<SecurityAlertsTableProps, 'id' | 'ruleTypeIds' | 'query'> {
   inputFilters?: Filter[];
   tableType?: TableId;
-  sourcererScope?: PageScope;
+  pageScope?: PageScope;
   isLoading?: boolean;
   onRuleChange?: () => void;
   disableAdditionalToolbarControls?: boolean;
@@ -151,7 +152,7 @@ const emptyInputFilters: Filter[] = [];
 const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
   inputFilters = emptyInputFilters,
   tableType = TableId.alertsOnAlertsPage,
-  sourcererScope = PageScope.alerts,
+  pageScope = PageScope.alerts,
   isLoading,
   onRuleChange,
   disableAdditionalToolbarControls,
@@ -185,11 +186,11 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
     onRuleChange,
   });
   const { browserFields: oldBrowserFields, sourcererDataView: oldSourcererDataView } =
-    useSourcererDataView(sourcererScope);
+    useSourcererDataView(pageScope);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView: experimentalDataView } = useDataView(sourcererScope);
-  const experimentalBrowserFields = useBrowserFields(sourcererScope);
+  const { dataView: experimentalDataView } = useDataView(pageScope);
+  const experimentalBrowserFields = useBrowserFields(pageScope);
   const runtimeMappings = useMemo(
     () =>
       newDataViewPickerEnabled
@@ -369,9 +370,9 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
       leadingControlColumn,
       userProfiles,
       tableType,
-      sourcererScope,
+      pageScope,
     }),
-    [leadingControlColumn, sourcererScope, tableType, userProfiles]
+    [leadingControlColumn, pageScope, tableType, userProfiles]
   );
 
   const refreshAlertsTable = useCallback(() => {
@@ -379,7 +380,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
   }, [alertsTableRef]);
 
   const fieldsBrowserOptions = useAlertsTableFieldsBrowserOptions(
-    PageScope.alerts,
+    pageScope,
     alertsTableRef.current?.toggleColumn
   );
   const cellActionsOptions = useCellActionsOptions(tableType, tableContext);
@@ -450,6 +451,13 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
   const shouldRenderAdditionalToolbarControls =
     disableAdditionalToolbarControls || tableType === TableId.alertsOnCasePage;
 
+  const ruleTypeIds = useMemo(() => {
+    if (pageScope === PageScope.attacks) {
+      return [...SECURITY_SOLUTION_RULE_TYPE_IDS, ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID];
+    }
+    return SECURITY_SOLUTION_RULE_TYPE_IDS;
+  }, [pageScope]);
+
   if (isLoading) {
     return null;
   }
@@ -458,12 +466,12 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
     <FullWidthFlexGroupTable gutterSize="none">
       <StatefulEventContext.Provider value={activeStatefulEventContext}>
         <EuiDataGridContainer hideLastPage={false}>
-          <AlertTableCellContextProvider tableId={tableType} sourcererScope={PageScope.alerts}>
+          <AlertTableCellContextProvider tableId={tableType} sourcererScope={pageScope}>
             <ResponseOpsAlertsTable<SecurityAlertsTableContext>
               ref={alertsTableRef}
               // Stores separate configuration based on the view of the table
               id={id ?? `detection-engine-alert-table-${tableType}-${tableView}`}
-              ruleTypeIds={SECURITY_SOLUTION_RULE_TYPE_IDS}
+              ruleTypeIds={ruleTypeIds}
               consumers={ALERT_TABLE_CONSUMERS}
               query={finalBoolQuery}
               sort={sort}
@@ -489,6 +497,7 @@ const AlertsTableComponent: FC<Omit<AlertTableProps, 'services'>> = ({
               additionalBulkActions={bulkActions}
               fieldsBrowserOptions={
                 tableType === TableId.alertsOnAlertsPage ||
+                tableType === TableId.alertsOnAttacksPage ||
                 tableType === TableId.alertsOnRuleDetailsPage
                   ? fieldsBrowserOptions
                   : undefined
