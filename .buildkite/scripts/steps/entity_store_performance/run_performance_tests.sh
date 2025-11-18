@@ -96,6 +96,8 @@ run_performance_tests() {
   export TEST_LOG_DIR="${SECURITY_DOCS_GEN_DIR}/logs"
   export PERF_DATA_FILE
   export PERF_TOTAL_ROWS
+  export PERF_ENTITY_COUNT
+  export PERF_LOGS_PER_ENTITY
 
   echo "Test completed with exit code: $TEST_EXIT_CODE"
   echo "Test duration: ${TEST_DURATION}s"

@@ -78,6 +78,11 @@ steps:
           SECURITY_DOCS_GEN_BRANCH: dg-update-entity-store-perf #TODO: Remove this after debugging
           PERF_INTERVAL: 150
           PERF_COUNT: 1
+          # Optional: Baseline comparison configuration
+          PERF_BASELINE_FILE: baselines/baseline-v1  # Optional: specific baseline file to use
+          PERF_DEGRADATION_THRESHOLD: 30  # Optional: degradation threshold % (default: 25)
+          PERF_WARNING_THRESHOLD: 20  # Optional: warning threshold % (default: 15)
+          PERF_IMPROVEMENT_THRESHOLD: 20  # Optional: improvement threshold % (default: 15)
         agents:
           provider: gcp
           image: family/kibana-ubuntu-2404

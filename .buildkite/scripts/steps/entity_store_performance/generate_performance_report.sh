@@ -47,6 +47,15 @@ format_log_count() {
 }
 
 generate_performance_report() {
+  # Ensure KIBANA_DIR is set
+  if [ -z "${KIBANA_DIR:-}" ]; then
+    source .buildkite/scripts/common/env.sh 2>/dev/null || true
+    if [ -z "${KIBANA_DIR:-}" ]; then
+      KIBANA_DIR=$(pwd)
+      export KIBANA_DIR
+    fi
+  fi
+
   # Validate required environment variables
   if [ -z "${TEST_EXIT_CODE:-}" ] || \
      [ -z "${TEST_DURATION:-}" ] || \
@@ -88,6 +97,17 @@ generate_performance_report() {
       echo "Found node stats log: $NODE_STATS_LOG"
       buildkite-agent artifact upload "$NODE_STATS_LOG"
     fi
+  fi
+
+  # Compare with baseline if available
+  echo "--- Compare with Baseline"
+  source "$KIBANA_DIR/.buildkite/scripts/steps/entity_store_performance/compare_with_baseline.sh"
+  compare_with_baseline
+
+  # Upload comparison report as artifact if available
+  if [ -n "${COMPARISON_FILE:-}" ] && [ -f "$COMPARISON_FILE" ] && [ -s "$COMPARISON_FILE" ]; then
+    echo "Uploading comparison report as artifact"
+    buildkite-agent artifact upload "$COMPARISON_FILE"
   fi
 
   echo "--- Generate Performance Report"
@@ -218,6 +238,16 @@ EOF
         fi
       fi
     fi
+  fi
+
+  # Add comparison results to annotation if available
+  if [ -n "${COMPARISON_OUTPUT:-}" ] && [ -n "$COMPARISON_OUTPUT" ]; then
+    echo "" >> "$REPORT_FILE"
+    echo "### Baseline Comparison" >> "$REPORT_FILE"
+    echo "" >> "$REPORT_FILE"
+    echo "\`\`\`" >> "$REPORT_FILE"
+    echo "$COMPARISON_OUTPUT" >> "$REPORT_FILE"
+    echo "\`\`\`" >> "$REPORT_FILE"
   fi
 
   # Display report
