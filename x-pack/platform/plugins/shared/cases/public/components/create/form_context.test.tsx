@@ -62,6 +62,7 @@ import { useBulkPostObservables } from '../../containers/use_bulk_post_observabl
 import { DEFAULT_FEATURES } from '../../../common/constants';
 import { useGetIssueTypes } from '../connectors/jira/use_get_issue_types';
 import { useGetFieldsResponse } from '../connectors/resilient/mocks';
+import { useAttachEventsEBT } from '../../analytics/use_attach_events_ebt';
 
 jest.mock('../../containers/use_post_case');
 jest.mock('../../containers/use_create_attachments');
@@ -80,6 +81,7 @@ jest.mock('../../containers/user_profiles/api');
 jest.mock('../../common/use_license');
 jest.mock('../../containers/use_get_categories');
 jest.mock('../app/use_available_owners');
+jest.mock('../../analytics/use_attach_events_ebt');
 
 const useGetConnectorsMock = useGetSupportedActionConnectors as jest.Mock;
 const useGetAllCaseConfigurationsMock = useGetAllCaseConfigurations as jest.Mock;
@@ -97,6 +99,7 @@ const useKibanaMock = useKibana as jest.Mocked<typeof useKibana>;
 const useLicenseMock = useLicense as jest.Mock;
 const useGetCategoriesMock = useGetCategories as jest.Mock;
 const useAvailableOwnersMock = useAvailableCasesOwners as jest.Mock;
+const useAttachEventsEBTMock = jest.mocked(useAttachEventsEBT);
 
 const sampleId = 'case-id';
 
@@ -948,6 +951,9 @@ describe('Create case', () => {
       attachments,
       caseOwner: 'securitySolution',
     });
+
+    // ebt should be called
+    expect(useAttachEventsEBTMock()).toHaveBeenCalled();
   });
 
   it('should NOT call createAttachments if the attachments are an empty array', async () => {
