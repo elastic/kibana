@@ -75,7 +75,7 @@ apiTest.describe('APM integration not installed but setup completed', { tag: ['@
 });
 
 apiTest.describe('Profiling is setup', { tag: ['@ess'] }, () => {
-  apiTest.beforeEach(async ({ esClient, apiServices, config, log }) => {
+  apiTest.beforeAll(async ({ esClient, apiServices, config, log }) => {
     await cleanUpProfilingData({
       es: esClient,
       config,
@@ -83,17 +83,18 @@ apiTest.describe('Profiling is setup', { tag: ['@ess'] }, () => {
     });
     await setupProfiling(config, apiServices, log);
   });
-  apiTest.afterEach(async ({ esClient, config, log }) => {
+  apiTest.afterAll(async ({ esClient, config, log }) => {
     await cleanUpProfilingData({
       es: esClient,
       config,
       logger: log,
     });
   });
-  apiTest('without data', async ({ roleBasedApiClient }) => {
+  apiTest('without data', async ({ roleBasedApiClient, log }) => {
     const adminRes = await roleBasedApiClient.adminUser({
       endpoint: 'GET /api/profiling/setup/es_resources',
     });
+    log.info('Admin user response: %o', adminRes.body);
     const adminStatus = adminRes.body;
     expect(adminStatus.has_setup).toBeTruthy();
     expect(adminStatus.has_data).toBeFalsy();
@@ -102,6 +103,7 @@ apiTest.describe('Profiling is setup', { tag: ['@ess'] }, () => {
     const readRes = await roleBasedApiClient.viewerUser({
       endpoint: 'GET /api/profiling/setup/es_resources',
     });
+    log.info('read user response: %o', readRes.body);
     const readStatus = readRes.body;
     expect(readStatus.has_setup).toBeTruthy();
     expect(readStatus.has_data).toBeFalsy();
@@ -114,17 +116,20 @@ apiTest.describe('Profiling is setup', { tag: ['@ess'] }, () => {
     const adminRes = await roleBasedApiClient.adminUser({
       endpoint: 'GET /api/profiling/setup/es_resources',
     });
+    log.info('Admin user response: %o', adminRes.body);
     const adminStatus = adminRes.body;
     expect(adminStatus.has_setup).toBeTruthy();
     expect(adminStatus.has_data).toBeTruthy();
     expect(adminStatus.pre_8_9_1_data).toBeFalsy();
   });
 
-  apiTest('Viewer user with data', async ({ esClient, roleBasedApiClient, log }) => {
-    await loadProfilingData(esClient, log);
+  apiTest('Viewer user with data', async ({ roleBasedApiClient, log }) => {
     const readRes = await roleBasedApiClient.viewerUser({
       endpoint: 'GET /api/profiling/setup/es_resources',
     });
+
+    log.info('Read user response: %o', readRes.body);
+
     const readStatus = readRes.body;
     expect(readStatus.has_setup).toBeTruthy();
     expect(readStatus.has_data).toBeTruthy();
