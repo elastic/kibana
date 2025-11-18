@@ -69,7 +69,6 @@ export const fetchQueryExtendedAlerts = async <Hit, Aggregations>({
   query,
   signal,
 }: QueryAlerts): Promise<AlertSearchResponse<Hit, Aggregations>> => {
-  console.log(`[TEST] fetchQueryExtendedAlerts`);
   return KibanaServices.get().http.fetch<AlertSearchResponse<Hit, Aggregations>>(
     DETECTION_ENGINE_QUERY_EXTENDED_ALERTS_URL,
     {
