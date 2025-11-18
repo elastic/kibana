@@ -16,6 +16,7 @@ import { useFormState } from './use_form_state';
 import type { WidgetType } from './widgets';
 import { getWidget } from './widgets';
 import { INVALID_VALUE_ERROR } from './translations';
+import { getDefaultWidgetForSchema } from './widgets/get_default_widget_by_schema';
 
 /**
  * Key used for root-level field validation errors.
@@ -30,9 +31,9 @@ export interface FieldDefinition {
   initialValue?: unknown;
   value?: unknown;
   validate: (value: unknown) => Record<string, string | string[]> | undefined;
-  schema?: z.ZodTypeAny;
+  schema: z.ZodTypeAny;
   widget?: WidgetType | string;
-  meta?: BaseMetadata;
+  meta: BaseMetadata;
 }
 
 const getFieldsFromSchema = <T extends z.ZodRawShape>(schema: z.ZodObject<T>) => {
@@ -42,15 +43,12 @@ const getFieldsFromSchema = <T extends z.ZodRawShape>(schema: z.ZodObject<T>) =>
     const schemaAny = subSchema as z.ZodTypeAny;
 
     const metaInfo = getMeta(schemaAny);
-    if (!metaInfo) {
-      throw new Error(`Metadata is missing for field: ${key}`);
-    }
 
     fields.push({
       id: key,
       initialValue: metaInfo.default,
       schema: schemaAny,
-      widget: metaInfo.widget,
+      widget: metaInfo.widget || getDefaultWidgetForSchema(schemaAny),
       meta: metaInfo,
       validate: (value: unknown) => {
         try {
@@ -120,8 +118,8 @@ export const Form = <TSchema extends z.ZodObject<z.ZodRawShape>>({
             key={id}
             fieldId={id}
             value={form.values[id]}
-            label={meta?.label || id}
-            placeholder={meta?.placeholder}
+            label={meta.label}
+            placeholder={meta.placeholder}
             fullWidth={true}
             error={form.errors[id]}
             isInvalid={Boolean(form.errors[id])}

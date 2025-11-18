@@ -11,7 +11,8 @@ import React from 'react';
 import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type { EuiFieldTextProps } from '@elastic/eui';
 import type { BaseMetadata, StripFormProps } from '../../schema_metadata';
-import type { BaseWidgetProps, WidgetType } from '../types';
+import type { BaseWidgetProps } from '../types';
+import type { WidgetType } from '../types';
 
 export type TextWidgetMeta = BaseMetadata & {
   widget: WidgetType.Text;

@@ -11,7 +11,8 @@ import React from 'react';
 import { EuiFieldPassword, EuiFormRow } from '@elastic/eui';
 import type { EuiFieldPasswordProps } from '@elastic/eui';
 import type { BaseMetadata, StripFormProps } from '../../schema_metadata';
-import type { BaseWidgetProps, WidgetType } from '../types';
+import type { BaseWidgetProps } from '../types';
+import type { WidgetType } from '../types';
 
 export type PasswordWidgetMeta = BaseMetadata & {
   widget: WidgetType.Password;

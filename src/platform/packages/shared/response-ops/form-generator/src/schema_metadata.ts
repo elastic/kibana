@@ -20,6 +20,7 @@ export interface BaseMetadata {
   default?: unknown;
   helpText?: string;
   isDisabled?: boolean;
+  sensitive?: boolean;
 }
 
 // Allow additional properties while maintaining type safety for known properties
@@ -29,6 +30,6 @@ declare module '@kbn/zod/v4' {
   }
 }
 
-export function getMeta(schema: z.ZodTypeAny): BaseMetadata | undefined {
-  return z.globalRegistry.get(schema) as BaseMetadata | undefined;
+export function getMeta(schema: z.ZodTypeAny): BaseMetadata {
+  return z.globalRegistry.get(schema) ?? {};
 }

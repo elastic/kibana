@@ -18,9 +18,11 @@ export const getDefaultWidgetForSchema = (schema: z.ZodTypeAny) => {
       return WidgetType.Password;
     }
     return WidgetType.Text;
+  } else if (schema instanceof z.ZodEnum) {
+    return WidgetType.Select;
   } else if (schema instanceof z.ZodDiscriminatedUnion) {
     return WidgetType.FormFieldset;
-  } else if (schema instanceof z.ZodObject) {
+  } else if (schema instanceof z.ZodRecord) {
     return WidgetType.KeyValue;
   }
 

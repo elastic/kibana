@@ -185,9 +185,10 @@ describe('Form', () => {
     });
   });
 
-  it('throws error when widget type is missing', () => {
+  it('throws error when widget type is missing and no default is implemented', () => {
     const schema = z.object({
-      username: z.string(),
+      // use another one if a default widget is defined for this type
+      username: z.object(/^[a-zA-Z0-9_]+$/),
     });
 
     // Suppress console errors for this test
@@ -195,7 +196,7 @@ describe('Form', () => {
 
     expect(() => {
       render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
-    }).toThrow('Metadata is missing for field: username');
+    }).toThrow('Widget type is required for field: username');
 
     consoleError.mockRestore();
   });

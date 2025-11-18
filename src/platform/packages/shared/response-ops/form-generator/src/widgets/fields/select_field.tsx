@@ -12,7 +12,8 @@ import { z } from '@kbn/zod/v4';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import type { EuiSelectProps } from '@elastic/eui';
 import type { BaseMetadata, StripFormProps } from '../../schema_metadata';
-import type { BaseWidgetProps, WidgetType } from '../types';
+import type { BaseWidgetProps } from '../types';
+import type { WidgetType } from '../types';
 
 export type SelectWidgetMeta = BaseMetadata & {
   widget: WidgetType.Select;
