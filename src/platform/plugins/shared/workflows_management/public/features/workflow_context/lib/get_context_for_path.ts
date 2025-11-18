@@ -8,6 +8,7 @@
  */
 
 import _ from 'lodash';
+import type { Document } from 'yaml';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { DynamicStepContextSchema } from '@kbn/workflows';
 import { isEnterForeach, type WorkflowGraph } from '@kbn/workflows/graph';
@@ -31,10 +32,14 @@ type WorkflowDefinitionForContext =
 export function getContextSchemaForPath(
   definition: WorkflowDefinitionForContext,
   workflowGraph: WorkflowGraph,
-  path: Array<string | number>
+  path: Array<string | number>,
+  yamlDocument?: Document | null
 ): typeof DynamicStepContextSchema {
   // getWorkflowContextSchema normalizes inputs internally, so it can handle both formats
-  let schema = DynamicStepContextSchema.merge(getWorkflowContextSchema(definition as WorkflowYaml));
+  // Pass yamlDocument to allow extraction of inputs if definition.inputs is undefined
+  let schema = DynamicStepContextSchema.merge(
+    getWorkflowContextSchema(definition as WorkflowYaml, yamlDocument)
+  );
 
   const nearestStepPath = getNearestStepPath(path);
   if (!nearestStepPath) {

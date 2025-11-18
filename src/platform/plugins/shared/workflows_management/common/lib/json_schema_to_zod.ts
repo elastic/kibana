@@ -22,14 +22,15 @@ function convertJsonSchemaToZodRecursive(jsonSchema: JSONSchema7): z.ZodType {
       const prop = propSchema as JSONSchema7;
       let zodProp = convertJsonSchemaToZodRecursive(prop);
 
-      // Apply default if present
-      if (prop.default !== undefined) {
-        zodProp = zodProp.default(prop.default);
-      }
-
       // Check if required - use the parent schema's required array
       const isRequired = jsonSchema.required?.includes(key) ?? false;
-      if (!isRequired) {
+
+      // Apply default if present (default() automatically makes the field optional)
+      if (prop.default !== undefined) {
+        zodProp = zodProp.default(prop.default);
+      } else if (!isRequired) {
+        // Only apply optional if no default and not required
+        // (default() already makes it optional, so we don't need both)
         zodProp = zodProp.optional();
       }
 

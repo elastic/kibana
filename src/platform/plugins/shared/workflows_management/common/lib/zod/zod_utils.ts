@@ -47,12 +47,17 @@ export function getSchemaAtPath(
     let current = schema;
 
     for (const [index, segment] of segments.entries()) {
-      if (current instanceof z.ZodOptional) {
-        current = current.unwrap();
+      // Keep unwrapping ZodOptional and ZodDefault until we get to the base type
+      // This handles cases like ZodDefault(ZodOptional(ZodObject)) or ZodOptional(ZodDefault(ZodObject))
+      while (current instanceof z.ZodOptional || current instanceof z.ZodDefault) {
+        if (current instanceof z.ZodOptional) {
+          current = current.unwrap();
+        }
+        if (current instanceof z.ZodDefault) {
+          current = current.removeDefault();
+        }
       }
-      if (current instanceof z.ZodDefault) {
-        current = current.removeDefault();
-      }
+
       if (current instanceof z.ZodObject) {
         const shape = current.shape;
         if (!(segment in shape)) {
@@ -61,6 +66,16 @@ export function getSchemaAtPath(
             : { schema: null, scopedToPath: null };
         }
         current = shape[segment];
+        // After accessing a property, unwrap any optional/default wrappers
+        // This is important for nested objects that might be wrapped
+        while (current instanceof z.ZodOptional || current instanceof z.ZodDefault) {
+          if (current instanceof z.ZodOptional) {
+            current = current.unwrap();
+          }
+          if (current instanceof z.ZodDefault) {
+            current = current.removeDefault();
+          }
+        }
       } else if (current instanceof z.ZodUnion) {
         const branches = current.options;
         const validBranch = branches.find((branch: z.ZodType) =>

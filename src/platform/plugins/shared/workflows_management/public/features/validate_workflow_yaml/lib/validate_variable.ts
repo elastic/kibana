@@ -95,6 +95,16 @@ export function validateVariable(
 
   const { schema: refSchema } = getSchemaAtPath(context, parsedPath.propertyPath);
 
+  // Debug logging (only in development)
+  if (process.env.NODE_ENV === 'development' && !refSchema) {
+    // eslint-disable-next-line no-console
+    console.log('[Variable Validation] Schema not found for path:', {
+      path: parsedPath.propertyPath,
+      contextType: context ? getZodTypeName(context) : 'null',
+      contextShape: context && 'shape' in context ? Object.keys(context.shape) : 'no shape',
+    });
+  }
+
   if (!refSchema) {
     return {
       ...variableItem,

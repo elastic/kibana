@@ -107,7 +107,7 @@ export function useYamlValidation(
 
     const validationResults: YamlValidationResult[] = [
       validateStepNameUniqueness(yamlDocument),
-      validateVariablesInternal(variableItems, workflowGraph, workflowDefinition),
+      validateVariablesInternal(variableItems, workflowGraph, workflowDefinition, yamlDocument),
       validateLiquidTemplate(model.getValue()),
       validateConnectorIds(connectorIdItems, dynamicConnectorTypes, connectorsManagementUrl),
     ].flat();

@@ -96,6 +96,19 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
       const hasInputs =
         normalizedInputs?.properties && Object.keys(normalizedInputs.properties).length > 0;
 
+      // Debug logging (only in development)
+      if (process.env.NODE_ENV === 'development') {
+        // eslint-disable-next-line no-console
+        console.log('[WorkflowExecuteModal] shouldAutoRun check:', {
+          hasAlertTrigger,
+          hasInputs,
+          normalizedInputs,
+          inputsKeys: normalizedInputs?.properties ? Object.keys(normalizedInputs.properties) : [],
+          definitionInputs: definition.inputs,
+          shouldAutoRun: !hasAlertTrigger && !hasInputs,
+        });
+      }
+
       if (!hasAlertTrigger && !hasInputs) {
         return true;
       }
