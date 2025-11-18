@@ -3998,36 +3998,8 @@ paths:
                   runtime_mappings: {}
                   size: 0
             schema:
+              $ref: '#/components/schemas/QueryAlertsBodyParams'
               description: Elasticsearch query and aggregation request
-              type: object
-              properties:
-                _source:
-                  oneOf:
-                    - type: boolean
-                    - type: string
-                    - items:
-                        type: string
-                      type: array
-                aggs:
-                  additionalProperties: true
-                  type: object
-                fields:
-                  items:
-                    type: string
-                  type: array
-                query:
-                  additionalProperties: true
-                  type: object
-                runtime_mappings:
-                  additionalProperties: true
-                  type: object
-                size:
-                  minimum: 0
-                  type: integer
-                sort:
-                  $ref: '#/components/schemas/AlertsSort'
-                track_total_hits:
-                  type: boolean
         description: Search and/or aggregation query
         required: true
       responses:
@@ -7793,6 +7765,36 @@ components:
       required:
         - command
         - config
+    QueryAlertsBodyParams:
+      type: object
+      properties:
+        _source:
+          oneOf:
+            - type: boolean
+            - type: string
+            - items:
+                type: string
+              type: array
+        aggs:
+          additionalProperties: true
+          type: object
+        fields:
+          items:
+            type: string
+          type: array
+        query:
+          additionalProperties: true
+          type: object
+        runtime_mappings:
+          additionalProperties: true
+          type: object
+        size:
+          minimum: 0
+          type: integer
+        sort:
+          $ref: '#/components/schemas/AlertsSort'
+        track_total_hits:
+          type: boolean
     QueryRule:
       allOf:
         - type: object
