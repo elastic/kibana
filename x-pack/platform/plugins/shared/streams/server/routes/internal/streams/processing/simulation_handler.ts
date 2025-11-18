@@ -95,7 +95,7 @@ export type SimulationError = BaseSimulationError &
       }
   );
 
-export type DocSimulationStatus = 'parsed' | 'partially_parsed' | 'skipped' | 'failed';
+export type DocSimulationStatus = 'parsed' | 'partially_parsed' | 'skipped' | 'failed' | 'dropped';
 
 export interface SimulationDocReport {
   detected_fields: Array<{ processor_id: string; name: string }>;
@@ -110,6 +110,7 @@ export interface ProcessorMetrics {
   failed_rate: number;
   skipped_rate: number;
   parsed_rate: number;
+  dropped_rate: number;
 }
 
 // Narrow down the type to only successful processor results
@@ -600,6 +601,10 @@ const computePipelineSimulationResult = (
       if (procId && isSkippedProcessor(processor)) {
         processorsMap[procId].skipped_rate++;
       }
+
+      if (procId && isDroppedProcessor(processor)) {
+        processorsMap[procId].dropped_rate++;
+      }
     });
 
     diff.detected_fields.forEach(({ processor_id, name }) => {
@@ -660,6 +665,7 @@ const initProcessorMetricsMap = (
       failed_rate: 0,
       skipped_rate: 0,
       parsed_rate: 1,
+      dropped_rate: 0,
     },
   ]);
 
@@ -677,6 +683,7 @@ const extractProcessorMetrics = ({
     const failureRate = metrics.failed_rate / sampleSize;
     const skippedRate = metrics.skipped_rate / sampleSize;
     const parsedRate = 1 - skippedRate - failureRate;
+    const droppedRate = metrics.dropped_rate / sampleSize;
     const detected_fields = uniq(metrics.detected_fields);
     const errors = uniqBy(metrics.errors, (error) => error.message);
 
@@ -686,6 +693,7 @@ const extractProcessorMetrics = ({
       failed_rate: parseFloat(failureRate.toFixed(3)),
       skipped_rate: parseFloat(skippedRate.toFixed(3)),
       parsed_rate: parseFloat(parsedRate.toFixed(3)),
+      dropped_rate: parseFloat(droppedRate.toFixed(3)),
     };
   });
 };
@@ -702,6 +710,10 @@ const getDocumentStatus = (
 
   if (processorResults.every(isSkippedProcessor)) {
     return 'skipped';
+  }
+
+  if (processorResults.every(isDroppedProcessor)) {
+    return 'dropped';
   }
 
   if (processorResults.every((proc) => isSuccessfulProcessor(proc) || isSkippedProcessor(proc))) {
@@ -1032,6 +1044,11 @@ const isSkippedProcessor = (
   processor: IngestPipelineProcessorResult
 ): processor is WithRequired<IngestPipelineProcessorResult, 'tag'> =>
   processor.status === 'skipped';
+
+const isDroppedProcessor = (
+  processor: IngestPipelineProcessorResult
+): processor is WithRequired<IngestPipelineProcessorResult, 'tag'> =>
+  processor.status === 'dropped';
 
 const isMappingFailure = (entry: SimulateIngestSimulateIngestDocumentResult) =>
   entry.doc?.error?.type === 'document_parsing_exception';
