@@ -146,8 +146,7 @@ export {
 
 export type { ExecutionContextSearch } from './src/expressions/types';
 
-// SimplifiedFilter API for Dashboards as Code
-export type { ValidationResult, ValidationError } from './src/as_code_filters';
+// As Code Filters
 export {
   FilterConversionError,
   // Conversion utilities

@@ -14,13 +14,7 @@
  * as Code API endpoints, including type definitions and conversion utilities.
  */
 
-// Core types and interfaces
-export type { ValidationResult, ValidationError } from './types';
-
 // Conversion utilities
 export { FilterConversionError } from './errors';
 export { fromStoredFilter } from './from_stored_filter';
 export { toStoredFilter } from './to_stored_filter';
-
-// Type guards
-export { isAsCodeFilter } from './type_guards';

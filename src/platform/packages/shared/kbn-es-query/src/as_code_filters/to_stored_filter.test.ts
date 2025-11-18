@@ -802,4 +802,187 @@ describe('toStoredFilter', () => {
       expect(roundTrip.query?.range?.['@timestamp'].lte).toBe('now');
     });
   });
+
+  describe('Negated phrases filter conversion', () => {
+    it('should convert IS_NOT_ONE_OF condition to phrases filter with negate', () => {
+      const asCodeFilter: AsCodeFilter = {
+        condition: {
+          field: 'Carrier',
+          operator: 'is_not_one_of',
+          value: ['ES-Air', 'Kibana Airlines', 'Logstash Airways'],
+        },
+      };
+
+      const storedFilter = toStoredFilter(asCodeFilter);
+
+      expect(storedFilter.meta.type).toBe('phrases');
+      expect(storedFilter.meta.negate).toBe(true);
+      expect(storedFilter.meta.key).toBe('Carrier');
+      expect(storedFilter.meta.field).toBe('Carrier');
+      expect(storedFilter.meta.params).toEqual(['ES-Air', 'Kibana Airlines', 'Logstash Airways']);
+
+      // Should use bool/should structure with match_phrase queries
+      expect(storedFilter.query).toHaveProperty('bool.should');
+      expect(storedFilter.query?.bool?.should).toHaveLength(3);
+      expect(storedFilter.query?.bool?.should?.[0]).toEqual({
+        match_phrase: { Carrier: 'ES-Air' },
+      });
+      expect(storedFilter.query?.bool?.minimum_should_match).toBe(1);
+    });
+
+    it('should preserve "is not one of" filter through round-trip conversion', () => {
+      // Original phrases filter with negation (like "Carrier is not one of...")
+      const originalFilter: StoredFilter = {
+        $state: { store: FilterStateStore.APP_STATE },
+        meta: {
+          alias: null,
+          disabled: false,
+          negate: true,
+          type: 'phrases',
+          key: 'Carrier',
+          field: 'Carrier',
+          params: ['ES-Air', 'Kibana Airlines', 'Logstash Airways'],
+          index: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+        },
+        query: {
+          bool: {
+            should: [
+              { match_phrase: { Carrier: 'ES-Air' } },
+              { match_phrase: { Carrier: 'Kibana Airlines' } },
+              { match_phrase: { Carrier: 'Logstash Airways' } },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      };
+
+      // Convert to AsCodeFilter
+      const asCodeFilter = fromStoredFilter(originalFilter);
+
+      // Verify it converted to IS_NOT_ONE_OF
+      expect('condition' in asCodeFilter).toBe(true);
+      if ('condition' in asCodeFilter) {
+        expect(asCodeFilter.condition.operator).toBe('is_not_one_of');
+        expect(asCodeFilter.condition.field).toBe('Carrier');
+        if ('value' in asCodeFilter.condition) {
+          expect(asCodeFilter.condition.value).toEqual([
+            'ES-Air',
+            'Kibana Airlines',
+            'Logstash Airways',
+          ]);
+        }
+      }
+
+      // Convert back to StoredFilter
+      const roundTripFilter = toStoredFilter(asCodeFilter);
+
+      // Should still be a phrases filter with negate: true
+      expect(roundTripFilter.meta.type).toBe('phrases');
+      expect(roundTripFilter.meta.negate).toBe(true);
+      expect(roundTripFilter.meta.params).toEqual([
+        'ES-Air',
+        'Kibana Airlines',
+        'Logstash Airways',
+      ]);
+
+      // Should NOT be a combined filter
+      expect(roundTripFilter.meta.type).not.toBe('combined');
+    });
+
+    it('should convert OR group of IS_NOT conditions to phrases filter with negate', () => {
+      // Group filter like "Carrier is not A OR Carrier is not B OR Carrier is not C"
+      const asCodeFilter: AsCodeFilter = {
+        group: {
+          type: 'or',
+          conditions: [
+            {
+              field: 'Carrier',
+              operator: 'is_not',
+              value: 'ES-Air',
+            },
+            {
+              field: 'Carrier',
+              operator: 'is_not',
+              value: 'Kibana Airlines',
+            },
+            {
+              field: 'Carrier',
+              operator: 'is_not',
+              value: 'Logstash Airways',
+            },
+          ],
+        },
+      };
+
+      const storedFilter = toStoredFilter(asCodeFilter);
+
+      // Should be converted to a phrases filter with negate
+      expect(storedFilter.meta.type).toBe('phrases');
+      expect(storedFilter.meta.negate).toBe(true);
+      expect(storedFilter.meta.key).toBe('Carrier');
+      expect(storedFilter.meta.params).toEqual(['ES-Air', 'Kibana Airlines', 'Logstash Airways']);
+
+      // Should have bool/should structure
+      expect(storedFilter.query).toHaveProperty('bool.should');
+      expect(storedFilter.query?.bool?.should).toHaveLength(3);
+    });
+  });
+
+  describe('Round-trip conversion', () => {
+    it('should preserve phrases filter structure through round-trip conversion', () => {
+      // This is the exact stored filter from the dashboard
+      const originalStoredFilter: StoredFilter = {
+        meta: {
+          disabled: false,
+          negate: true,
+          alias: null,
+          index: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+          key: 'Carrier',
+          field: 'Carrier',
+          params: ['ES-Air', 'JetBeats', 'Kibana Airlines'],
+          type: 'phrases',
+        },
+        query: {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              { match_phrase: { Carrier: 'ES-Air' } },
+              { match_phrase: { Carrier: 'JetBeats' } },
+              { match_phrase: { Carrier: 'Kibana Airlines' } },
+            ],
+          },
+        },
+        $state: {
+          store: FilterStateStore.APP_STATE,
+        },
+      };
+
+      // Convert to AsCodeFilter
+      const asCodeFilter = fromStoredFilter(originalStoredFilter);
+
+      // Convert back to StoredFilter
+      const roundTripFilter = toStoredFilter(asCodeFilter);
+
+      // The structure should remain the same
+      expect(roundTripFilter.meta.type).toBe('phrases');
+      expect(roundTripFilter.meta.negate).toBe(true);
+      expect(roundTripFilter.meta.key).toBe('Carrier');
+      expect(roundTripFilter.meta.params).toEqual(['ES-Air', 'JetBeats', 'Kibana Airlines']);
+
+      // Should have the same bool/should/match_phrase structure
+      expect(roundTripFilter.query).toHaveProperty('bool.should');
+      expect(roundTripFilter.query?.bool?.minimum_should_match).toBe(1);
+
+      const should = roundTripFilter.query?.bool?.should as Array<{
+        match_phrase: Record<string, unknown>;
+      }>;
+      expect(should).toHaveLength(3);
+      expect(should[0]).toEqual({ match_phrase: { Carrier: 'ES-Air' } });
+      expect(should[1]).toEqual({ match_phrase: { Carrier: 'JetBeats' } });
+      expect(should[2]).toEqual({ match_phrase: { Carrier: 'Kibana Airlines' } });
+
+      // Should NOT have a terms query
+      expect(roundTripFilter.query).not.toHaveProperty('terms');
+    });
+  });
 });
