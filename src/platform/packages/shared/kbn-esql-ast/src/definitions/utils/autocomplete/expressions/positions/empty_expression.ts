@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLVariableType } from '@kbn/esql-types';
+import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
 import { uniq } from 'lodash';
 import { matchesSpecialFunction } from '../utils';
 import { shouldSuggestComma, type CommaContext } from '../comma_decision_engine';
@@ -290,7 +290,11 @@ async function handleDefaultContext(ctx: ExpressionContext): Promise<ISuggestion
           ?.filter(({ type }) => type === controlType)
           .map(({ key }) => `${prefix}${key}`) ?? [];
 
-      const controlSuggestions = getControlSuggestion(controlType, variableNames);
+      const controlSuggestions = getControlSuggestion(
+        controlType,
+        ControlTriggerSource.SMART_SUGGESTION,
+        variableNames
+      );
       suggestions.push(...controlSuggestions);
     }
   }
