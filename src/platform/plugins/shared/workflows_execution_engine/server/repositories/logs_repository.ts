@@ -8,6 +8,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import type { ExecutionError } from '@kbn/workflows';
 import { WORKFLOWS_EXECUTION_LOGS_INDEX } from '../../common';
 
 export interface WorkflowLogEvent {
@@ -33,11 +34,7 @@ export interface WorkflowLogEvent {
     start?: string;
     end?: string;
   };
-  error?: {
-    message?: string;
-    type?: string;
-    stack_trace?: string;
-  };
+  error?: ExecutionError;
   tags?: string[];
   [key: string]: unknown;
 }

@@ -178,19 +178,7 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
 
     if (axios.isAxiosError(error)) {
       executionError = this.mapAxiosError(error);
-    }
-    // else if (error instanceof AggregateError) {
-    //   executionError = {
-    //     type: 'AggregateError',
-    //     message: error.message,
-    //     details: error.errors.map((err) =>
-    //       err instanceof Error
-    //         ? { type: err.name, message: err.message }
-    //         : { type: 'UnknownError', message: String(err) }
-    //     ),
-    //   };
-    // }
-    else if (error instanceof Error) {
+    } else if (error instanceof Error) {
       executionError = {
         type: error.name,
         message: error.message,
@@ -202,15 +190,11 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
       };
     }
 
-    // this.workflowLogger.logError(
-    //   `HTTP request failed: ${executionError.message}`,
-    //   error instanceof Error ? error : new Error(errorMessage),
-    //   {
-    //     workflow: { step_id: this.step.name },
-    //     event: { action: 'http_request', outcome: 'failure' },
-    //     tags: ['http', 'error', executionError.type],
-    //   }
-    // );
+    this.workflowLogger.logError(`HTTP request failed: ${executionError.message}`, executionError, {
+      workflow: { step_id: this.step.name },
+      event: { action: 'http_request', outcome: 'failure' },
+      tags: ['http', 'error', executionError.type],
+    });
 
     return {
       input,
@@ -225,6 +209,13 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
       return {
         type: 'ConnectionRefused',
         message: `Connection refused to ${url.origin}`,
+      };
+    }
+
+    if (error.code === 'ERR_CANCELED') {
+      return {
+        type: 'HttpRequestCancelledError',
+        message: 'HTTP request was cancelled',
       };
     }
 

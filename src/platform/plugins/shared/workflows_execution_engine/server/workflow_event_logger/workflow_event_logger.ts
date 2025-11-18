@@ -10,6 +10,8 @@
 import { merge } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import type { LogsRepository, WorkflowLogEvent } from '../repositories/logs_repository';
+import { ExecutionError } from '@kbn/workflows';
+import { mapError } from '../utils';
 
 export interface WorkflowEventLoggerContext {
   workflowId?: string;
@@ -29,7 +31,11 @@ export interface WorkflowEventLoggerOptions {
 export interface IWorkflowEventLogger {
   logEvent(event: WorkflowLogEvent): void;
   logInfo(message: string, additionalData?: Partial<WorkflowLogEvent>): void;
-  logError(message: string, error?: Error, additionalData?: Partial<WorkflowLogEvent>): void;
+  logError(
+    message: string,
+    error: Error | ExecutionError,
+    additionalData?: Partial<WorkflowLogEvent>
+  ): void;
   logWarn(message: string, additionalData?: Partial<WorkflowLogEvent>): void;
   logDebug(message: string, additionalData?: Partial<WorkflowLogEvent>): void;
   startTiming(event: WorkflowLogEvent): void;
@@ -84,17 +90,13 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
 
   public logError(
     message: string,
-    error?: Error,
+    error: Error | ExecutionError,
     additionalData: Partial<WorkflowLogEvent> = {}
   ): void {
     const errorData: Partial<WorkflowLogEvent> = {};
 
     if (error) {
-      errorData.error = {
-        message: error.message,
-        type: error.name,
-        stack_trace: error.stack,
-      };
+      errorData.error = mapError(error);
     }
 
     this.logEvent({

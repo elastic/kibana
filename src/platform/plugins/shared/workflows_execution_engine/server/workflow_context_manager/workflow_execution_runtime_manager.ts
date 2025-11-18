@@ -12,16 +12,15 @@
 
 import agent from 'elastic-apm-node';
 import type { CoreStart } from '@kbn/core/server';
-import type { EsWorkflowExecution, StackFrame } from '@kbn/workflows';
+import type { EsWorkflowExecution, ExecutionError, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import { buildWorkflowContext } from './build_workflow_context';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
-import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
-import { ExecutionError } from '@kbn/workflows';
 import { mapError } from '../utils';
+import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 
 interface WorkflowExecutionRuntimeManagerInit {
   workflowExecutionState: WorkflowExecutionState;
