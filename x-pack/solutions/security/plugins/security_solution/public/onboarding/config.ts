@@ -43,6 +43,6 @@ export const onboardingConfig: TopicConfig[] = [
     }),
     body: siemMigrationsBodyConfig,
     disabledExperimentalFlagRequired: 'siemMigrationsDisabled',
-    capabilitiesRequired: RULES_UI_DETECTIONS_PRIVILEGE,
+    capabilitiesRequired: [[`dashboard_v2.show`],[RULES_UI_DETECTIONS_PRIVILEGE]],
   },
 ];
