@@ -20,19 +20,5 @@
     "@kbn/dev-cli-runner",
     "@kbn/repo-packages",
     "@kbn/tooling-log"
-  ],
-  "references": [
-    {
-      "path": "../../src/platform/packages/private/kbn-repo-packages"
-    },
-    {
-      "path": "../../src/platform/packages/shared/kbn-dev-cli-runner"
-    },
-    {
-      "path": "../../src/platform/packages/shared/kbn-repo-info"
-    },
-    {
-      "path": "../../src/platform/packages/shared/kbn-tooling-log"
-    }
   ]
 }
