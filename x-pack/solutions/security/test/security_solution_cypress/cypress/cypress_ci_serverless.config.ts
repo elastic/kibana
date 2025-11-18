@@ -29,6 +29,7 @@ export default defineCypressConfig({
     runMode: 1,
   },
   screenshotsFolder: '../../../../../../target/kibana-security-solution/cypress/screenshots',
+  screenshotOnRunFailure: true,
   trashAssetsBeforeRuns: false,
   video: false,
   videosFolder: '../../../../../../target/kibana-security-solution/cypress/videos',
