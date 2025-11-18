@@ -87771,6 +87771,10 @@ components:
               description: The Slack channel identifier.
               example: C123ABC456
     params_property_apm_anomaly:
+      title: APM anomaly
+      description: |
+        The parameters for the APM anomaly rule. These parameters are appropriate when `rule_type_id` is `apm.rules.anomaly`.
+      type: object
       required:
         - windowSize
         - windowUnit
@@ -87809,6 +87813,10 @@ components:
             - minor
             - warning
     params_property_apm_error_count:
+      title: APM error count
+      description: |
+        The parameters for the APM error count rule. These parameters are appropriate when `rule_type_id` is `apm.error_rate`.
+      type: object
       required:
         - windowSize
         - windowUnit
@@ -87857,6 +87865,10 @@ components:
           description: |
             Filter the errors coming from your application to apply the rule to a specific error grouping key, which is a hash of the stack trace and other properties.
     params_property_apm_transaction_duration:
+      title: APM transaction duration
+      description: |
+        The parameters for the APM transaction duration rule. These parameters are appropriate when `rule_type_id` is `apm.transaction_duration`.
+      type: object
       required:
         - windowSize
         - windowUnit
@@ -87916,6 +87928,10 @@ components:
             - 99th
           description: The type of aggregation to perform.
     params_property_apm_transaction_error_rate:
+      title: APM transaction error rate
+      description: |
+        The parameters for the APM transaction error rate rule. These parameters are appropriate when `rule_type_id` is `apm.transaction_error_rate`.
+      type: object
       required:
         - windowSize
         - windowUnit
