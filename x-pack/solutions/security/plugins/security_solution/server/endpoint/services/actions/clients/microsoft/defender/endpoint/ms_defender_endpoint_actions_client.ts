@@ -1336,6 +1336,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
         this.log.debug(
           `Download stream for machine action ${machineActionId} exceeds max size of ${RUNSCRIPT_OUTPUT_FILE_MAX_SIZE_BYTES} bytes`
         );
+        downloadStream.destroy();
         return {
           stdout: '',
           stderr: 'The output file is too large to download and display.',
