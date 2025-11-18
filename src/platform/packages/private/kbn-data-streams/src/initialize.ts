@@ -17,7 +17,7 @@ import { retryEs } from './retry_es';
 import type { DataStreamDefinition } from './types';
 import { defaultDataStreamDefinition } from './constants';
 
-function applyDefaults(def: DataStreamDefinition): DataStreamDefinition {
+function applyDefaults(def: DataStreamDefinition<any, any>): DataStreamDefinition<any, any> {
   return defaultsDeep(def, defaultDataStreamDefinition());
 }
 
@@ -32,7 +32,7 @@ export async function initialize({
   elasticsearchClient,
 }: {
   logger: Logger;
-  dataStream: DataStreamDefinition;
+  dataStream: DataStreamDefinition<any, any, any>;
   elasticsearchClient: ElasticsearchClient;
 }) {
   logger = logger.get('data-streams-setup');

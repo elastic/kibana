@@ -138,3 +138,17 @@ export type EnsureSubsetOf<
         UnionKeys<AllFields>
       >
     >;
+
+export type IsSubsetOf<
+  SubsetDefinition extends AnyMappingDefinition,
+  AllFields extends GetFieldsOf<SubsetDefinition>
+> = Exact<GetFieldsOf<SubsetDefinition>, Partial<AllFields>> extends true
+  ? true
+  : MissingKeysError<
+      Exclude<
+        UnionKeys<GetFieldsOf<SubsetDefinition>> extends string
+          ? UnionKeys<GetFieldsOf<SubsetDefinition>>
+          : never,
+        UnionKeys<AllFields>
+      >
+    >;

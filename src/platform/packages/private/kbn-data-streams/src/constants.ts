@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AnyDataStreamDefinition } from './types';
+import type { DataStreamDefinition } from './types';
 
 /**
  * Do not change these defaults lightly... They applied to all data streams and may
  * result in a large number of updated data streams when this code is released.
  */
-export const defaultDataStreamDefinition: () => Partial<AnyDataStreamDefinition> = () => ({
+export const defaultDataStreamDefinition: () => Partial<DataStreamDefinition<any, any>> = () => ({
   hidden: true,
   template: {
     priority: 100,

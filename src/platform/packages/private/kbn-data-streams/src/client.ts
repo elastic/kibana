@@ -8,7 +8,10 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { Client, TransportRequestOptionsWithOutMeta } from '@elastic/elasticsearch';
+import type {
+  Client as ElasticsearchClient,
+  TransportRequestOptionsWithOutMeta,
+} from '@elastic/elasticsearch';
 import type api from '@elastic/elasticsearch/lib/api/types';
 import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 
@@ -25,22 +28,20 @@ import type {
 import { initialize } from './initialize';
 import { validateClientArgs } from './validate_client_args';
 
-type ElasticsearchClient = Omit<
-  Client,
-  'connectionPool' | 'serializer' | 'extend' | 'close' | 'diagnostic'
->;
-
 export class DataStreamClient<
-  Definition extends DataStreamDefinition,
-  MappingsInDefinition extends MappingsDefinition = NonNullable<Definition['template']['mappings']>,
+  MappingsInDefinition extends MappingsDefinition,
   FullDocumentType extends GetFieldsOf<MappingsInDefinition> = GetFieldsOf<MappingsInDefinition>,
   SRM extends BaseSearchRuntimeMappings = never
-> implements IDataStreamClient<Definition, MappingsInDefinition, FullDocumentType, SRM>
+> implements IDataStreamClient<MappingsInDefinition, FullDocumentType, SRM>
 {
   private readonly runtimeFields: string[];
   private constructor(
     private readonly client: ElasticsearchClient,
-    private readonly dataStreamDefinition: DataStreamDefinition
+    private readonly dataStreamDefinition: DataStreamDefinition<
+      MappingsInDefinition,
+      FullDocumentType,
+      SRM
+    >
   ) {
     this.runtimeFields = Object.keys(dataStreamDefinition.searchRuntimeMappings ?? {});
   }
@@ -52,31 +53,17 @@ export class DataStreamClient<
    *         data stream. However, it should be idempotent.
    */
   public static async initialize<
-    Definition extends DataStreamDefinition,
-    FullDocumentType extends GetFieldsOf<
-      NonNullable<Definition['template']['mappings']>
-    > = GetFieldsOf<NonNullable<Definition['template']['mappings']>>,
+    MappingsInDefinition extends MappingsDefinition,
+    FullDocumentType extends GetFieldsOf<MappingsInDefinition> = GetFieldsOf<MappingsInDefinition>,
     SRM extends BaseSearchRuntimeMappings = never
   >(args: {
-    dataStream: DataStreamDefinition;
+    dataStream: DataStreamDefinition<MappingsInDefinition, FullDocumentType, SRM>;
     elasticsearchClient: ElasticsearchClient;
     logger: Logger;
-  }): Promise<
-    DataStreamClient<
-      Definition,
-      NonNullable<Definition['template']['mappings']>,
-      FullDocumentType,
-      SRM
-    >
-  > {
+  }) {
     validateClientArgs(args);
     await initialize(args);
-    return new DataStreamClient<
-      Definition,
-      NonNullable<Definition['template']['mappings']>,
-      FullDocumentType,
-      SRM
-    >(args.elasticsearchClient, args.dataStream);
+    return new DataStreamClient(args.elasticsearchClient, args.dataStream);
   }
 
   public helpers: ClientHelpers<SRM> = {
@@ -86,15 +73,15 @@ export class DataStreamClient<
     },
   };
 
-  public async index(args: ClientIndexRequest<any>) {
-    return this.client.index({
-      index: this.dataStreamDefinition.name,
+  public async index(args: ClientIndexRequest<FullDocumentType>) {
+    return this.client.index<FullDocumentType>({
       ...args,
+      index: this.dataStreamDefinition.name,
     });
   }
 
   public async bulk(args: ClientBulkRequest<FullDocumentType>) {
-    return this.client.bulk({
+    return this.client.bulk<FullDocumentType>({
       index: this.dataStreamDefinition.name,
       ...args,
     });

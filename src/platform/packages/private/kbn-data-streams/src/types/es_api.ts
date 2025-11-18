@@ -27,46 +27,41 @@ export type ClientSearchResponse<
   TSearchRequest extends OmitIndexProp<api.SearchRequest>
 > = api.SearchResponse<TDocument, TSearchRequest>;
 
-export type ClientBulkOperation<TDocument extends { _id?: string }> =
+export type ClientGetRequest = OmitIndexProp<api.GetRequest & api.SearchRequest>;
+export type ClientGetResponse<TDocument> = api.GetResponse<TDocument>;
+export type ClientGet<TDocumentType> = (
+  request: ClientGetRequest
+) => Promise<ClientGetResponse<TDocumentType>>;
+
+export type ClientIndexRequest<TDocument> = api.IndexRequest<TDocument>;
+export type ClientIndexResponse = api.IndexResponse;
+export type ClientIndex<FullDocumentType> = (
+  request: ClientIndexRequest<FullDocumentType>
+) => Promise<ClientIndexResponse>;
+
+export type ClientBulkOperation<TDocument> =
   | {
       index: { document: Omit<TDocument, '_id'>; _id?: string };
     }
   | { delete: { _id: string } };
 
-export type ClientBulkRequest<TDocument extends { _id?: string }> = Omit<
-  OmitIndexProp<api.BulkRequest>,
+export type ClientBulkRequest<TDocument> = Omit<
+  OmitIndexProp<api.BulkRequest<TDocument>>,
   'operations'
 > & {
   operations: Array<ClientBulkOperation<TDocument>>;
 };
-
-export type ClientGetRequest = OmitIndexProp<api.GetRequest & api.SearchRequest>;
-export type ClientGetResponse<TDocument extends { _id?: string }> = api.GetResponse<TDocument>;
-
-export type ClientIndexRequest<TDocument extends { _id?: string }> = Omit<
-  api.IndexRequest<TDocument>,
-  'index'
->;
-export type ClientIndexResponse = api.IndexResponse;
-
-export type ClientBulk<TDocumentType extends { _id?: string } = never> = (
+export type ClientBulkResponse = api.BulkResponse;
+export type ClientBulk<TDocumentType> = (
   request: ClientBulkRequest<TDocumentType>
-) => Promise<api.BulkResponse>;
-
-export type ClientIndex<S extends MappingsDefinition> = (
-  request: ClientIndexRequest<GetFieldsOf<S>>
-) => Promise<ClientIndexResponse>;
-
-export type ClientGet<TDocumentType extends { _id?: string } = never> = (
-  request: ClientGetRequest
-) => Promise<ClientGetResponse<TDocumentType>>;
+) => Promise<ClientBulkResponse>;
 
 export type ClientExistsIndex = () => Promise<boolean>;
 
 export interface InternalIDataStreamClient<
   S extends MappingsDefinition,
-  SRM extends BaseSearchRuntimeMappings = {},
-  FullDocumentType extends { _id?: string } = GetFieldsOf<S>
+  FullDocumentType = GetFieldsOf<S>,
+  SRM extends BaseSearchRuntimeMappings = never
 > {
   search: <Agg extends Record<string, api.AggregationsAggregate> = {}>(
     req: ClientSearchRequest<SRM>,
@@ -74,7 +69,7 @@ export interface InternalIDataStreamClient<
   ) => Promise<api.SearchResponse<GetFieldsOf<S>, Agg>>;
 
   bulk: ClientBulk<FullDocumentType>;
-  index: ClientIndex<S>;
+  index: ClientIndex<FullDocumentType>;
   get: ClientGet<FullDocumentType>;
   existsIndex: ClientExistsIndex;
 }

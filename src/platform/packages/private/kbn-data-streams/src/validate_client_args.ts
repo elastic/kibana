@@ -7,10 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataStreamClientArgs } from './client';
+import type { Client as ElasticsearchClient } from '@elastic/elasticsearch';
+import type { Logger } from '@kbn/logging';
+import type { DataStreamDefinition } from './types';
 
-export function validateClientArgs(args: DataStreamClientArgs<any, any>) {
-  if (args.dataStreams.version <= 0) {
+export function validateClientArgs(args: {
+  dataStream: DataStreamDefinition<any, any, any>;
+  elasticsearchClient: ElasticsearchClient;
+  logger: Logger;
+}) {
+  if (args.dataStream.version <= 0) {
     throw new Error('Template version must be greater than 0');
   }
 }

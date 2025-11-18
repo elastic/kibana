@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MappingsDefinition } from '@kbn/es-mappings';
+import type { IsSubsetOf, GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 import type * as api from '@elastic/elasticsearch/lib/api/types';
 import type { BaseSearchRuntimeMappings } from './runtime';
 
 export interface DataStreamDefinition<
-  SearchRuntimeMappings extends BaseSearchRuntimeMappings = {}
+  Mappings extends MappingsDefinition,
+  FullMappings extends GetFieldsOf<Mappings> = GetFieldsOf<Mappings>,
+  SearchRuntimeMappings extends BaseSearchRuntimeMappings = never
 > {
   /**
    * @remark Once released this should never change.
@@ -57,7 +59,7 @@ export interface DataStreamDefinition<
       [key: string]: unknown;
     };
 
-    mappings?: MappingsDefinition & { dynamic?: 'strict' | false };
+    mappings?: IsSubsetOf<Mappings, FullMappings> extends true ? Mappings : never;
 
     /**
      * @remark "hidden" defaults to true for the data stream and the backing indices

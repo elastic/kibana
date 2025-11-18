@@ -14,9 +14,5 @@ export type {
   IDataStreamClient,
   DataStreamDefinition,
   BaseSearchRuntimeMappings,
-  ClientHelpers,
   DataStreamClient,
-  DataStreamClientArgs,
-  IDataStreamClientIndexRequest,
-  SearchRequestImproved,
 } from '@kbn/data-streams';

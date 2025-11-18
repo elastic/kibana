@@ -9,7 +9,7 @@
 
 import { mappings } from '@kbn/es-mappings';
 
-import type { MappingsDefinition, GetFieldsOf } from '@kbn/es-mappings';
+import type { MappingsDefinition } from '@kbn/es-mappings';
 
 import type { Logger } from '@kbn/logging';
 import type { Client as ElasticsearchClient } from '@elastic/elasticsearch';
@@ -17,7 +17,7 @@ import { DataStreamClient } from '../client';
 import type { DataStreamDefinition } from '../types';
 
 const dataStreamMapping = {
-  dynamic: false as const,
+  dynamic: false,
   properties: {
     name: mappings.text(),
     age: mappings.integer(),
@@ -25,40 +25,64 @@ const dataStreamMapping = {
   },
 } satisfies MappingsDefinition;
 
-export type ExactDataStreamDocument = GetFieldsOf<typeof dataStreamMapping>;
 export interface FullDataStreamDocument {
-  _id?: string;
   name: string;
   age: number;
-  email: string;
-  isActive: boolean;
+  email?: string;
+  unmappedField?: string;
   '@timestamp': string;
 }
 
-const dataStreamDefinition: DataStreamDefinition = {
-  name: 'test-data-stream',
-  version: 1,
-  template: {
-    mappings: dataStreamMapping,
-  },
-};
+const dataStreamDefinition: DataStreamDefinition<typeof dataStreamMapping, FullDataStreamDocument> =
+  {
+    name: 'test-data-stream',
+    version: 1,
+    template: {
+      mappings: dataStreamMapping,
+    },
+  };
 
 export const exampleDataStreamClientOperations = async (
   elasticsearchClient: ElasticsearchClient,
   logger: Logger
 ) => {
-  const client = await DataStreamClient.initialize<typeof dataStreamDefinition>({
+  const client = await DataStreamClient.initialize<
+    typeof dataStreamMapping,
+    FullDataStreamDocument
+  >({
     dataStream: dataStreamDefinition,
     elasticsearchClient,
     logger,
   });
 
-  client.index({
+  await client.index({
+    index: dataStreamDefinition.name,
     document: {
-      keywordField: 'anyvalue',
-      unknownField: 'anyvalue',
-      dateField: new Date().toISOString(),
+      name: 'John Doe',
+      age: 30,
+      unmappedField: 'Unmapped but defined in the document interface',
+      '@timestamp': new Date().toISOString(),
     },
+  });
+
+  await client.bulk({
+    operations: [
+      {
+        index: {
+          document: {
+            name: 'John Doe',
+            age: 30,
+            unmappedField: 'Unmapped but defined in the document interface',
+            '@timestamp': new Date().toISOString(),
+          },
+        },
+      },
+      {
+        delete: {
+          _id: '123',
+        },
+      },
+    ],
   });
 
   const response = await client.search({
@@ -70,6 +94,17 @@ export const exampleDataStreamClientOperations = async (
   });
 
   return response.hits.hits.map((hit) => {
-    return hit._source!.name;
+    if (!hit._source) {
+      return null;
+    }
+
+    return {
+      '@timestamp': hit._source['@timestamp'],
+      name: hit._source.name,
+      age: hit._source.age,
+      unmappedField: hit._source.unmappedField,
+      // @ts-expect-error - unknown field
+      unknownField: hit._source.unknownField,
+    };
   });
 };
