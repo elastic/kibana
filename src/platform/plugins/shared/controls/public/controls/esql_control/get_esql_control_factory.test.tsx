@@ -12,9 +12,16 @@ import { fireEvent, render, waitFor } from '@testing-library/react';
 import { EsqlControlType, type ESQLControlState } from '@kbn/esql-types';
 import { getMockedFinalizeApi } from '../mocks/control_mocks';
 import { getESQLControlFactory } from './get_esql_control_factory';
+import { BehaviorSubject } from 'rxjs';
 
 const mockGetESQLSingleColumnValues = jest.fn(() => ({ options: ['option1', 'option2'] }));
 const mockIsSuccess = jest.fn(() => true);
+
+const mockFetch$ = new BehaviorSubject({});
+jest.mock('@kbn/presentation-publishing', () => ({
+  ...jest.requireActual('@kbn/presentation-publishing'),
+  fetch$: () => mockFetch$,
+}));
 
 jest.mock('./utils/get_esql_single_column_values', () => {
   const getESQLSingleColumnValues = () => mockGetESQLSingleColumnValues();
@@ -54,6 +61,9 @@ describe('ESQLControlApi', () => {
       key: 'variable1',
       type: 'values',
       value: 'option1',
+      meta: {
+        controlledBy: 'myESQLControl',
+      },
     });
   });
 
@@ -77,13 +87,11 @@ describe('ESQLControlApi', () => {
         availableOptions: ['option1', 'option2'],
         controlType: 'STATIC_VALUES',
         esqlQuery: 'FROM foo | WHERE column = ?variable1',
-        grow: false,
         selectedOptions: ['option1'],
         title: '',
         variableName: 'variable1',
         variableType: 'values',
         singleSelect: true,
-        width: 'medium',
       },
       references: [],
     });
@@ -109,7 +117,7 @@ describe('ESQLControlApi', () => {
         expect(mockGetESQLSingleColumnValues).toHaveBeenCalledTimes(1);
         expect(mockIsSuccess).toHaveBeenCalledTimes(1);
       });
-
+      mockFetch$.next({});
       await waitFor(() => {
         expect(mockGetESQLSingleColumnValues).toHaveBeenCalledTimes(2);
         expect(mockIsSuccess).toHaveBeenCalledTimes(2);
@@ -138,6 +146,9 @@ describe('ESQLControlApi', () => {
         key: 'variable1',
         type: 'values',
         value: 'option1',
+        meta: {
+          controlledBy: 'myESQLControl',
+        },
       });
 
       const { findByTestId, findByTitle } = render(<Component />);
@@ -149,6 +160,9 @@ describe('ESQLControlApi', () => {
           key: 'variable1',
           type: 'values',
           value: 'option2',
+          meta: {
+            controlledBy: 'myESQLControl',
+          },
         });
       });
     });
