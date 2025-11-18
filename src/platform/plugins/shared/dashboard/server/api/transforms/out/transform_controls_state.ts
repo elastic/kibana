@@ -12,12 +12,9 @@ import { flow } from 'lodash';
 import type { Reference } from '@kbn/content-management-utils';
 import type { SerializableRecord } from '@kbn/utility-types';
 
-import type {
-  StoredControlGroupInput,
-  StoredControlState,
-} from '../../../../dashboard_saved_object';
-import { embeddableService, logger } from '../../../../kibana_services';
-import type { DashboardControlsState } from '../../types';
+import type { DashboardControlsState } from '../../../../common';
+import type { StoredControlGroupInput, StoredControlState } from '../../../dashboard_saved_object';
+import { embeddableService, logger } from '../../../kibana_services';
 
 /**
  * Transform functions for serialized controls state.

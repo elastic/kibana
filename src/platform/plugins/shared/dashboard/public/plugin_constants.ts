@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../common/content_management';
+import { DEFAULT_PANEL_HEIGHT, DEFAULT_PANEL_WIDTH } from '../common/constants';
 import type { PanelPlacementSettings } from './panel_placement/types';
 
 export enum PanelPlacementStrategy {

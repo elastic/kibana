@@ -8,7 +8,7 @@
  */
 
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '@kbn/controls-constants';
-import type { StoredControlGroupInput } from '../../../../dashboard_saved_object';
+import type { StoredControlGroupInput } from '../../../dashboard_saved_object';
 import {
   transformControlObjectToArray,
   transformControlProperties,
