@@ -72,7 +72,7 @@ export const getTagsNode = ({ savedObjectsClient, model, rulesClient }: GetTagsN
     } catch (error) {
       return {
         ...state,
-        errors: [...state.errors, `Failed to fetch and process tags: ${error.message}`],
+        errors: [`Failed to fetch and process tags: ${error.message}`],
       };
     }
   };

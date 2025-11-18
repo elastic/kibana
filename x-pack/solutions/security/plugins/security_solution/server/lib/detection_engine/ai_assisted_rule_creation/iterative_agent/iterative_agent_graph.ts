@@ -23,7 +23,6 @@ import { createRuleNameAndDescriptionNode } from './nodes/create_rule_name_and_d
 import { getTagsNode } from './nodes/get_tags';
 import { getEsqlQueryGraph } from './sub_graphs/esql/esql_query_graph';
 import { getIndexPatternNode } from './nodes/get_index_patterns';
-import { createProcessKnowledgeBaseNode } from './nodes/process_knowledge_base';
 import { addScheduleNode } from './nodes/add_schedule';
 
 export const RULE_CREATION_NODE_NAMES = {
@@ -50,7 +49,6 @@ export const RULE_CREATION_NODE_ORDER = [
 ] as const;
 
 const {
-  PROCESS_KNOWLEDGE_BASE,
   GET_INDEX_PATTERN,
   ESQL_QUERY_CREATION,
   GET_TAGS,
@@ -94,27 +92,14 @@ export const getIterativeRuleCreationAgent = async ({
     createLlmInstance,
   });
 
-  // const ruleCreationAgentGraph = new StateGraph(RuleCreationAnnotation)
-  //   .addNode(
-  //     PROCESS_KNOWLEDGE_BASE,
-  //     createProcessKnowledgeBaseNode({ model, logger, kbDataClient })
-  //   )
-  //   .addEdge(START, PROCESS_KNOWLEDGE_BASE)
-  //   .addEdge(PROCESS_KNOWLEDGE_BASE, END);
-
   const ruleCreationAgentGraph = new StateGraph(RuleCreationAnnotation)
-    .addNode(
-      PROCESS_KNOWLEDGE_BASE,
-      createProcessKnowledgeBaseNode({ model, logger, kbDataClient })
-    )
     .addNode(GET_INDEX_PATTERN, getIndexPatternNode({ createLlmInstance, esClient }))
     .addNode(ESQL_QUERY_CREATION, esqlQuerySubGraph)
     .addNode(GET_TAGS, getTagsNode({ rulesClient, savedObjectsClient, model }))
     .addNode(CREATE_RULE_NAME_AND_DESCRIPTION, createRuleNameAndDescriptionNode({ model }))
     .addNode(ADD_DEFAULT_FIELDS_TO_RULES, addDefaultFieldsToRulesNode({ model }))
     .addNode(ADD_SCHEDULE, addScheduleNode({ model, logger }))
-    .addEdge(START, PROCESS_KNOWLEDGE_BASE)
-    .addEdge(PROCESS_KNOWLEDGE_BASE, GET_INDEX_PATTERN)
+    .addEdge(START, GET_INDEX_PATTERN)
     .addEdge(GET_INDEX_PATTERN, ESQL_QUERY_CREATION)
     .addEdge(ESQL_QUERY_CREATION, GET_TAGS)
     .addEdge(GET_TAGS, CREATE_RULE_NAME_AND_DESCRIPTION)

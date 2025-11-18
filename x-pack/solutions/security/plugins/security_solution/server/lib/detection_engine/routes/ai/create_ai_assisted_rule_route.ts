@@ -149,7 +149,6 @@ export const createAIAssistedRuleRoute = (router: SecuritySolutionPluginRouter, 
             esClient,
             savedObjectsClient,
             rulesClient,
-            kbDataClient,
           });
 
           const result = await iterativeAgent.invoke({ userQuery });
