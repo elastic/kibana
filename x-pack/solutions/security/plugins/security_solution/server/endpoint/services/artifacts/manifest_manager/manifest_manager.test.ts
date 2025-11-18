@@ -6,7 +6,7 @@
  */
 
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { ENDPOINT_LIST_ID, ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { getExceptionListItemSchemaMock } from '@kbn/lists-plugin/common/schemas/response/exception_list_item_schema.mock';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common/types/models';
 import { getEmptyInternalArtifactMock } from '../../../schemas/artifacts/saved_objects.mock';
@@ -460,7 +460,7 @@ describe('ManifestManager', () => {
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
-        [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: { macos: [exceptionListItem] },
         [ENDPOINT_ARTIFACT_LISTS.trustedApps.id]: { linux: [trustedAppListItem] },
         [ENDPOINT_ARTIFACT_LISTS.eventFilters.id]: { linux: [eventFiltersListItem] },
         [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]: {
@@ -544,7 +544,7 @@ describe('ManifestManager', () => {
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
-        [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: { macos: [exceptionListItem] },
       });
       context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
         TEST_POLICY_ID_1,
@@ -553,7 +553,7 @@ describe('ManifestManager', () => {
       const oldManifest = await manifestManager.buildNewManifest();
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
-        [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: { macos: [exceptionListItem] },
         [ENDPOINT_ARTIFACT_LISTS.trustedApps.id]: { linux: [trustedAppListItem] },
         [ENDPOINT_ARTIFACT_LISTS.eventFilters.id]: { linux: [eventFiltersListItem] },
         [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]: {
@@ -639,7 +639,7 @@ describe('ManifestManager', () => {
         os_types: ['windows'],
       };
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
-        [ENDPOINT_LIST_ID]: {
+        [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: {
           macos: [exceptionListItem, exceptionListItem],
           windows: [duplicatedEndpointExceptionInDifferentOS],
         },
@@ -767,7 +767,7 @@ describe('ManifestManager', () => {
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
-        [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: { macos: [exceptionListItem] },
         [ENDPOINT_ARTIFACT_LISTS.trustedApps.id]: {
           linux: [trustedAppListItem, trustedAppListItemPolicy2],
         },
@@ -872,7 +872,7 @@ describe('ManifestManager', () => {
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
-        [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: { macos: [exceptionListItem] },
         [ENDPOINT_ARTIFACT_LISTS.trustedApps.id]: { linux: [trustedAppListItem] },
         [ENDPOINT_ARTIFACT_LISTS.eventFilters.id]: { linux: [eventFiltersListItem] },
         [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]: {
@@ -953,7 +953,7 @@ describe('ManifestManager', () => {
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
-        [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: { macos: [exceptionListItem] },
         [ENDPOINT_ARTIFACT_LISTS.trustedApps.id]: { linux: [trustedAppListItem] },
         [ENDPOINT_ARTIFACT_LISTS.eventFilters.id]: { linux: [eventFiltersListItem] },
         [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]: {
@@ -1037,7 +1037,7 @@ describe('ManifestManager', () => {
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
-        [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: { macos: [exceptionListItem] },
         [ENDPOINT_ARTIFACT_LISTS.trustedApps.id]: { linux: [trustedAppListItem] },
         [ENDPOINT_ARTIFACT_LISTS.eventFilters.id]: { linux: [eventFiltersListItem] },
         [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]: {
@@ -1220,7 +1220,7 @@ describe('ManifestManager', () => {
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
-        [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: { macos: [exceptionListItem] },
       });
 
       context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([
@@ -1260,7 +1260,7 @@ describe('ManifestManager', () => {
       const manifestManager = new ManifestManager(context);
 
       context.exceptionListClient.findExceptionListItem = mockFindExceptionListItemResponses({
-        [ENDPOINT_LIST_ID]: { macos: [exceptionListItem] },
+        [ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id]: { macos: [exceptionListItem] },
       });
 
       context.packagePolicyService.fetchAllItemIds = getMockPolicyFetchAllItemIds([

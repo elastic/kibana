@@ -14,7 +14,7 @@ import {
   type ElasticsearchClient,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
-import { ENDPOINT_ARTIFACT_LISTS, ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import type { Artifact, PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { ExceptionListClient } from '@kbn/lists-plugin/server';
@@ -231,7 +231,9 @@ export class ManifestManager {
         : exception.tags.includes('policy:all');
 
     const exceptions: ExceptionListItemSchema[] =
-      listId === ENDPOINT_LIST_ID ? allExceptionsByListId : allExceptionsByListId.filter(filter);
+      listId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+        ? allExceptionsByListId
+        : allExceptionsByListId.filter(filter);
 
     return convertExceptionsToEndpointFormat(exceptions, schemaVersion, this.experimentalFeatures);
   }
@@ -318,12 +320,12 @@ export class ManifestManager {
     };
 
     const buildArtifactsForOsOptions: BuildArtifactsForOsOptions = {
-      listId: ENDPOINT_LIST_ID,
-      name: ArtifactConstants.GLOBAL_ALLOWLIST_NAME,
+      listId: ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id,
+      name: ArtifactConstants.GLOBAL_ENDPOINT_EXCEPTIONS_NAME,
       exceptionItemDecorator: decorateWildcardOnlyExceptionItem,
     };
 
-    for (const os of ArtifactConstants.SUPPORTED_OPERATING_SYSTEMS) {
+    for (const os of ArtifactConstants.SUPPORTED_ENDPOINT_EXCEPTIONS_OPERATING_SYSTEMS) {
       defaultArtifacts.push(await this.buildArtifactsForOs({ os, ...buildArtifactsForOsOptions }));
     }
 
