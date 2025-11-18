@@ -306,4 +306,309 @@ steps: []
     // Should return null because computed (and thus yamlDocument) is undefined
     expect(result).toBeNull();
   });
+
+  describe('edge cases for stale data detection', () => {
+    it('should return null when model text is longer than computedFromYamlString', () => {
+      const computedYaml = 'name: "test"';
+      const currentModelText = 'name: "test"\nsteps: []';
+      const mockModel = createFakeMonacoModel(currentModelText, 0);
+      const position = mockModel.getPositionAt(0);
+      const computedData = performComputation(computedYaml);
+
+      const mockEditorState = {
+        yamlString: computedYaml,
+        computed: computedData,
+        connectors: { connectorTypes: {}, totalConnectors: 0 },
+      } as WorkflowDetailState;
+
+      const result = buildAutocompleteContext({
+        model: mockModel as unknown as monaco.editor.ITextModel,
+        position: position as monaco.Position,
+        completionContext: {
+          triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+          triggerCharacter: undefined,
+        } as monaco.languages.CompletionContext,
+        editorState: mockEditorState,
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('should return null when model text is shorter than computedFromYamlString', () => {
+      const computedYaml = 'name: "test"\nsteps: []';
+      const currentModelText = 'name: "test"';
+      const mockModel = createFakeMonacoModel(currentModelText, 0);
+      const position = mockModel.getPositionAt(0);
+      const computedData = performComputation(computedYaml);
+
+      const mockEditorState = {
+        yamlString: computedYaml,
+        computed: computedData,
+        connectors: { connectorTypes: {}, totalConnectors: 0 },
+      } as WorkflowDetailState;
+
+      const result = buildAutocompleteContext({
+        model: mockModel as unknown as monaco.editor.ITextModel,
+        position: position as monaco.Position,
+        completionContext: {
+          triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+          triggerCharacter: undefined,
+        } as monaco.languages.CompletionContext,
+        editorState: mockEditorState,
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('should return null when model text has whitespace differences', () => {
+      const computedYaml = 'name: "test"';
+      const currentModelText = 'name: "test"  '; // Extra spaces
+      const mockModel = createFakeMonacoModel(currentModelText, 0);
+      const position = mockModel.getPositionAt(0);
+      const computedData = performComputation(computedYaml);
+
+      const mockEditorState = {
+        yamlString: computedYaml,
+        computed: computedData,
+        connectors: { connectorTypes: {}, totalConnectors: 0 },
+      } as WorkflowDetailState;
+
+      const result = buildAutocompleteContext({
+        model: mockModel as unknown as monaco.editor.ITextModel,
+        position: position as monaco.Position,
+        completionContext: {
+          triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+          triggerCharacter: undefined,
+        } as monaco.languages.CompletionContext,
+        editorState: mockEditorState,
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('should return null when computedFromYamlString is empty string but model has content', () => {
+      const computedYaml = '';
+      const currentModelText = 'name: "test"';
+      const mockModel = createFakeMonacoModel(currentModelText, 0);
+      const position = mockModel.getPositionAt(0);
+      const computedData = performComputation(computedYaml);
+
+      const mockEditorState = {
+        yamlString: computedYaml,
+        computed: computedData,
+        connectors: { connectorTypes: {}, totalConnectors: 0 },
+      } as WorkflowDetailState;
+
+      const result = buildAutocompleteContext({
+        model: mockModel as unknown as monaco.editor.ITextModel,
+        position: position as monaco.Position,
+        completionContext: {
+          triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+          triggerCharacter: undefined,
+        } as monaco.languages.CompletionContext,
+        editorState: mockEditorState,
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('should return null when yamlDocument exists but computedFromYamlString is empty', () => {
+      const currentModelText = 'name: "test"';
+      const mockModel = createFakeMonacoModel(currentModelText, 0);
+      const position = mockModel.getPositionAt(0);
+      const computedData = performComputation(currentModelText);
+
+      // Override computedFromYamlString to be empty
+      const mockEditorState = {
+        yamlString: currentModelText,
+        computed: {
+          ...computedData,
+          computedFromYamlString: '',
+        },
+        connectors: { connectorTypes: {}, totalConnectors: 0 },
+      } as WorkflowDetailState;
+
+      const result = buildAutocompleteContext({
+        model: mockModel as unknown as monaco.editor.ITextModel,
+        position: position as monaco.Position,
+        completionContext: {
+          triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+          triggerCharacter: undefined,
+        } as monaco.languages.CompletionContext,
+        editorState: mockEditorState,
+      });
+
+      expect(result).toBeNull();
+    });
+
+    it('should handle model text with special characters correctly', () => {
+      const yamlWithSpecialChars = 'name: "test@#$%^&*()"\nsteps: []';
+      const mockModel = createFakeMonacoModel(yamlWithSpecialChars, 0);
+      const position = mockModel.getPositionAt(0);
+      const computedData = performComputation(yamlWithSpecialChars);
+
+      const mockEditorState = {
+        yamlString: yamlWithSpecialChars,
+        computed: computedData,
+        connectors: { connectorTypes: {}, totalConnectors: 0 },
+      } as WorkflowDetailState;
+
+      const result = buildAutocompleteContext({
+        model: mockModel as unknown as monaco.editor.ITextModel,
+        position: position as monaco.Position,
+        completionContext: {
+          triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+          triggerCharacter: undefined,
+        } as monaco.languages.CompletionContext,
+        editorState: mockEditorState,
+      });
+
+      // Should work when strings match exactly, even with special chars
+      expect(result).not.toBeNull();
+    });
+
+    it('should handle model text with unicode characters', () => {
+      const yamlWithUnicode = 'name: "test 🚀 测试"\nsteps: []';
+      const mockModel = createFakeMonacoModel(yamlWithUnicode, 0);
+      const position = mockModel.getPositionAt(0);
+      const computedData = performComputation(yamlWithUnicode);
+
+      const mockEditorState = {
+        yamlString: yamlWithUnicode,
+        computed: computedData,
+        connectors: { connectorTypes: {}, totalConnectors: 0 },
+      } as WorkflowDetailState;
+
+      const result = buildAutocompleteContext({
+        model: mockModel as unknown as monaco.editor.ITextModel,
+        position: position as monaco.Position,
+        completionContext: {
+          triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+          triggerCharacter: undefined,
+        } as monaco.languages.CompletionContext,
+        editorState: mockEditorState,
+      });
+
+      expect(result).not.toBeNull();
+    });
+
+    it('should handle very large YAML documents', () => {
+      // Create a large YAML document
+      const largeYaml = `name: "test"\nsteps:\n${Array.from(
+        { length: 100 },
+        (_, i) => `  - name: step${i}\n    type: console\n    with:\n      message: "Step ${i}"`
+      ).join('\n')}`;
+      const mockModel = createFakeMonacoModel(largeYaml, 0);
+      const position = mockModel.getPositionAt(0);
+      const computedData = performComputation(largeYaml);
+
+      const mockEditorState = {
+        yamlString: largeYaml,
+        computed: computedData,
+        connectors: { connectorTypes: {}, totalConnectors: 0 },
+      } as WorkflowDetailState;
+
+      const result = buildAutocompleteContext({
+        model: mockModel as unknown as monaco.editor.ITextModel,
+        position: position as monaco.Position,
+        completionContext: {
+          triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+          triggerCharacter: undefined,
+        } as monaco.languages.CompletionContext,
+        editorState: mockEditorState,
+      });
+
+      expect(result).not.toBeNull();
+    });
+
+    it('should handle position at end of very long line', () => {
+      const longLine = `name: "${'a'.repeat(1000)}"`;
+      const yaml = `${longLine}\nsteps: []`;
+      const mockModel = createFakeMonacoModel(yaml, longLine.length);
+      const position = mockModel.getPositionAt(longLine.length);
+      const computedData = performComputation(yaml);
+
+      const mockEditorState = {
+        yamlString: yaml,
+        computed: computedData,
+        connectors: { connectorTypes: {}, totalConnectors: 0 },
+      } as WorkflowDetailState;
+
+      const result = buildAutocompleteContext({
+        model: mockModel as unknown as monaco.editor.ITextModel,
+        position: position as monaco.Position,
+        completionContext: {
+          triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+          triggerCharacter: undefined,
+        } as monaco.languages.CompletionContext,
+        editorState: mockEditorState,
+      });
+
+      expect(result).not.toBeNull();
+    });
+
+    it('should handle model text with only whitespace', () => {
+      const whitespaceOnly = '   \n\t  \n';
+      const mockModel = createFakeMonacoModel(whitespaceOnly, 0);
+      const position = mockModel.getPositionAt(0);
+      const computedData = performComputation(whitespaceOnly);
+
+      const mockEditorState = {
+        yamlString: whitespaceOnly,
+        computed: computedData,
+        connectors: { connectorTypes: {}, totalConnectors: 0 },
+      } as WorkflowDetailState;
+
+      const result = buildAutocompleteContext({
+        model: mockModel as unknown as monaco.editor.ITextModel,
+        position: position as monaco.Position,
+        completionContext: {
+          triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+          triggerCharacter: undefined,
+        } as monaco.languages.CompletionContext,
+        editorState: mockEditorState,
+      });
+
+      // Whitespace-only YAML creates an empty document, but yamlDocument might not be null
+      // The function will return a context with empty path if yamlDocument exists
+      // This is acceptable behavior - empty documents can still have autocomplete context
+      if (computedData?.yamlDocument) {
+        // If document exists, context should be returned (even if empty)
+        expect(result).not.toBeNull();
+        expect(result?.path).toEqual([]);
+      } else {
+        // If document is null/undefined, should return null
+        expect(result).toBeNull();
+      }
+    });
+
+    it('should handle case where computedFromYamlString matches but yamlDocument is undefined', () => {
+      const yaml = 'name: "test"';
+      const mockModel = createFakeMonacoModel(yaml, 0);
+      const position = mockModel.getPositionAt(0);
+
+      const mockEditorState = {
+        yamlString: yaml,
+        computed: {
+          computedFromYamlString: yaml,
+          yamlDocument: undefined, // yamlDocument is undefined
+        },
+        connectors: { connectorTypes: {}, totalConnectors: 0 },
+        isTestModalOpen: false,
+        schema: undefined,
+      } as unknown as WorkflowDetailState;
+
+      const result = buildAutocompleteContext({
+        model: mockModel as unknown as monaco.editor.ITextModel,
+        position: position as monaco.Position,
+        completionContext: {
+          triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+          triggerCharacter: undefined,
+        } as monaco.languages.CompletionContext,
+        editorState: mockEditorState,
+      });
+
+      expect(result).toBeNull();
+    });
+  });
 });

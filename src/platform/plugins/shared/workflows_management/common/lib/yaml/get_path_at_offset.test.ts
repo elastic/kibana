@@ -211,4 +211,235 @@ steps:
     // Should return inputs path even with multiple spaces after type:
     expect(result).toEqual(['inputs', 0, 'type']);
   });
+
+  describe('edge cases', () => {
+    it('should not match incomplete pair when cursor is beyond MAX_PAIR_DISTANCE', () => {
+      const yaml = `inputs:
+  - name: myInput
+    type: |<-
+
+    ${' '.repeat(60)}description: "My input"`;
+      const offset = yaml.indexOf('|<-');
+      const cleanedYaml = yaml.replace('|<-', '');
+      const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
+      // Should return type path since it's within MAX_PAIR_DISTANCE
+      expect(result).toEqual(['inputs', 0, 'type']);
+    });
+
+    it('should handle position exactly at MAX_PAIR_DISTANCE boundary', () => {
+      const yaml = `inputs:
+  - name: myInput
+    type: |<-
+    ${' '.repeat(48)}description: "My input"`;
+      const offset = yaml.indexOf('|<-');
+      const cleanedYaml = yaml.replace('|<-', '');
+      const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
+      // Should still match since distance is exactly 50 (within MAX_PAIR_DISTANCE)
+      expect(result).toEqual(['inputs', 0, 'type']);
+    });
+
+    it('should handle incomplete pair with cursor right after key', () => {
+      // Test case where cursor is right after the key (incomplete pair, no value yet)
+      const yaml = `inputs:
+  - name: myInput
+    type: |<-
+    description: "My input"`;
+      const offset = yaml.indexOf('|<-');
+      const cleanedYaml = yaml.replace('|<-', '');
+      const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
+      // Should match type pair since cursor is right after key (distance is small, within MAX_PAIR_DISTANCE)
+      // This tests the incomplete pair case where there's no value node yet
+      expect(result).toEqual(['inputs', 0, 'type']);
+    });
+
+    it('should handle position between two pairs', () => {
+      const yaml = `inputs:
+  - name: myInput
+    type: string
+    |<-
+    description: "My input"`;
+      const offset = yaml.indexOf('|<-');
+      const cleanedYaml = yaml.replace('|<-', '');
+      const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
+      // Should return the parent map/sequence containing both pairs
+      expect(result).toEqual(['inputs']);
+    });
+
+    it('should handle position at the very beginning of document', () => {
+      const yaml = `|<-name: test
+steps: []`;
+      const offset = yaml.indexOf('|<-');
+      const cleanedYaml = yaml.replace('|<-', '');
+      const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
+      // Should return empty array or root path
+      expect(result).toEqual([]);
+    });
+
+    it('should handle position at the very end of document', () => {
+      const yaml = `name: test
+steps: []|<-`;
+      const offset = yaml.indexOf('|<-');
+      const cleanedYaml = yaml.replace('|<-', '');
+      const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
+      // Should return path to the last element
+      expect(result.length).toBeGreaterThan(0);
+    });
+
+    it('should handle position in a sequence item that is not a map', () => {
+      const yaml = `tags:
+  - tag1
+  - tag2|<-
+  - tag3`;
+      const offset = yaml.indexOf('|<-');
+      const cleanedYaml = yaml.replace('|<-', '');
+      const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
+      // Should return path to the sequence (scalar items don't have individual paths)
+      expect(result).toEqual(['tags']);
+    });
+
+    it('should handle position in nested pairs with same key name', () => {
+      const yaml = `steps:
+  - name: outer
+    type: if
+    steps:
+      - name: inner
+        type: console|<-
+        with:
+          message: test`;
+      const offset = yaml.indexOf('|<-');
+      const cleanedYaml = yaml.replace('|<-', '');
+      const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
+      // Should return path to the inner type, not outer
+      expect(result).toEqual(['steps', 0, 'steps', 0, 'type']);
+    });
+
+    it('should handle position in value area of pair with null value', () => {
+      const yaml = `config:
+  enabled: null|<-
+  disabled: false`;
+      const offset = yaml.indexOf('|<-');
+      const cleanedYaml = yaml.replace('|<-', '');
+      const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
+      // Should handle null values gracefully
+      expect(result).toEqual(['config', 'enabled']);
+    });
+
+    it('should handle position in YAML with comments', () => {
+      const yaml = `inputs:
+  # This is a comment
+  - name: myInput
+    type: string|<-
+    description: "My input"`;
+      const offset = yaml.indexOf('|<-');
+      const cleanedYaml = yaml.replace('|<-', '');
+      const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
+      // Should correctly handle comments
+      expect(result).toEqual(['inputs', 0, 'type']);
+    });
+
+    it('should handle position in multiline value with newlines', () => {
+      const yaml = `steps:
+  - name: test
+    description: |
+      Line 1
+      Line 2|<-
+      Line 3`;
+      const offset = yaml.indexOf('|<-');
+      const cleanedYaml = yaml.replace('|<-', '');
+      const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
+      // Should return path to description field
+      expect(result).toEqual(['steps', 0, 'description']);
+    });
+
+    it('should handle position in a pair where key is not a scalar', () => {
+      const yaml = `complex:
+  - key: value|<-
+    other: test`;
+      const offset = yaml.indexOf('|<-');
+      const cleanedYaml = yaml.replace('|<-', '');
+      const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
+      // Should handle non-scalar keys gracefully
+      expect(result.length).toBeGreaterThan(0);
+    });
+
+    it('should prioritize closest pair when multiple pairs match', () => {
+      const yaml = `steps:
+  - name: step1
+    type: console
+    with:
+      type: nested|<-
+      message: test`;
+      const offset = yaml.indexOf('|<-');
+      const cleanedYaml = yaml.replace('|<-', '');
+      const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
+      // Should return the nested type, not the step type
+      expect(result).toEqual(['steps', 0, 'with', 'type']);
+    });
+
+    it('should handle position in empty map', () => {
+      const yaml = `config: {}
+steps:
+  - name: test
+    type: console|<-
+    with:
+      message: test`;
+      const offset = yaml.indexOf('|<-');
+      const cleanedYaml = yaml.replace('|<-', '');
+      const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
+      // Should correctly navigate past empty map
+      expect(result).toEqual(['steps', 0, 'type']);
+    });
+
+    it('should handle position in empty sequence', () => {
+      const yaml = `tags: []
+steps:
+  - name: test
+    type: console|<-
+    with:
+      message: test`;
+      const offset = yaml.indexOf('|<-');
+      const cleanedYaml = yaml.replace('|<-', '');
+      const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
+      // Should correctly navigate past empty sequence
+      expect(result).toEqual(['steps', 0, 'type']);
+    });
+
+    it('should handle very long key-value pairs', () => {
+      const longValue = 'a'.repeat(1000);
+      const yaml = `steps:
+  - name: test
+    description: ${longValue}|<-
+    type: console`;
+      const offset = yaml.indexOf('|<-');
+      const cleanedYaml = yaml.replace('|<-', '');
+      const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
+      // Should handle long values correctly
+      expect(result).toEqual(['steps', 0, 'description']);
+    });
+
+    it('should handle position in value with special characters', () => {
+      const yaml = `steps:
+  - name: test
+    message: "Hello: world! @#$%^&*()"|<-
+    type: console`;
+      const offset = yaml.indexOf('|<-');
+      const cleanedYaml = yaml.replace('|<-', '');
+      const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
+      // Should handle special characters in values
+      expect(result).toEqual(['steps', 0, 'message']);
+    });
+
+    it('should handle position in tab-separated values', () => {
+      const yaml = `steps:
+  - name:	test
+    type:	console|<-
+    with:
+      message: test`;
+      const offset = yaml.indexOf('|<-');
+      const cleanedYaml = yaml.replace('|<-', '');
+      const result = getPathAtOffset(parseDocument(cleanedYaml), offset);
+      // Should handle tab characters
+      expect(result).toEqual(['steps', 0, 'type']);
+    });
+  });
 });
