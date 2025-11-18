@@ -12,7 +12,6 @@ import type { DataDriftSpec, IndexDataVisualizerSpec } from '../application';
 let loadModulesPromise: Promise<LazyLoadedModules>;
 
 interface LazyLoadedModules {
-  // FileDataVisualizer: FileDataVisualizerSpec; // / remove !!!!!!!!!!!!!!!
   IndexDataVisualizer: IndexDataVisualizerSpec;
   DataDrift: DataDriftSpec;
   resultsLinks: ResultLinks;

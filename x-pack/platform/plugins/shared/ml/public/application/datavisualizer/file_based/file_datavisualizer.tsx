@@ -46,10 +46,6 @@ export const FileDataVisualizerPage: FC = () => {
 
   const getDependencies = useCallback(async () => buildDependencies(services), [services]);
 
-  // const [FileDataVisualizer, setFileDataVisualizer] = useState<FileDataVisualizerSpec | null>(null);
-  // resultLinks is for filebeat !!!!!!!!!!!!!!!
-  // const [resultLinks, setResultLinks] = useState<ResultLinks | null>(null);
-
   const getAdditionalLinks: GetAdditionalLinks = useMemo(
     () => [
       async ({ dataViewId, globalState }: GetAdditionalLinksParams) => [

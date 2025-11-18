@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// export type { FileDataVisualizerSpec } from './file_data_visualizer';
-// export { FileDataVisualizer } from './file_data_visualizer';
 export type {
   IndexDataVisualizerSpec,
   IndexDataVisualizerViewProps,
