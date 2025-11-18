@@ -63,15 +63,6 @@ describe('TourQueueStateManager', () => {
 
       expect(subscriber).toHaveBeenCalledTimes(2);
     });
-
-    it('should notify subscribers when a tour is unregistered', () => {
-      const tour = tourQueue.register(TOUR_1);
-      tourQueue.subscribe(subscriber);
-
-      tour.complete();
-
-      expect(subscriber).toHaveBeenCalledTimes(1);
-    });
   });
 
   describe('getActive', () => {
@@ -83,27 +74,27 @@ describe('TourQueueStateManager', () => {
     });
 
     it('should return the next tour after the first is completed', () => {
-      tourQueue.register(TOUR_1);
+      const tour1 = tourQueue.register(TOUR_1);
       tourQueue.register(TOUR_2);
 
-      tourQueue.complete(TOUR_1);
+      tour1.complete();
 
       expect(tourQueue.getActive()).toBe(TOUR_2);
     });
 
     it('should return null when all tours are completed', () => {
-      tourQueue.register(TOUR_1);
-      tourQueue.register(TOUR_2);
+      const tour1 = tourQueue.register(TOUR_1);
+      const tour2 = tourQueue.register(TOUR_2);
 
-      tourQueue.complete(TOUR_1);
-      tourQueue.complete(TOUR_2);
+      tour1.complete();
+      tour2.complete();
 
       expect(tourQueue.getActive()).toBeNull();
     });
 
     it('should return null when queue is skipped', () => {
-      tourQueue.register(TOUR_1);
-      tourQueue.skipAll();
+      const tour = tourQueue.register(TOUR_1);
+      tour.skip();
 
       expect(tourQueue.getActive()).toBeNull();
     });
@@ -119,75 +110,65 @@ describe('TourQueueStateManager', () => {
     });
 
     it('should return false for a completed tour', () => {
-      tourQueue.register(TOUR_1);
-      tourQueue.complete(TOUR_1);
+      const tour = tourQueue.register(TOUR_1);
+      tour.complete();
 
       expect(tourQueue.isActive(TOUR_1)).toBe(false);
     });
 
     it('should return false when queue is skipped', () => {
-      tourQueue.register(TOUR_1);
-      tourQueue.skipAll();
+      const tour = tourQueue.register(TOUR_1);
+      tour.skip();
 
       expect(tourQueue.isActive(TOUR_1)).toBe(false);
     });
   });
 
-  describe('complete', () => {
-    it('should mark a tour as completed', () => {
-      tourQueue.register(TOUR_1);
-      tourQueue.register(TOUR_2);
-      tourQueue.complete(TOUR_1);
+  describe('Tour object', () => {
+    describe('complete', () => {
+      it('should mark the tour as completed and unregister it', () => {
+        const tour = tourQueue.register(TOUR_1);
 
-      const state = tourQueue.getState();
-      expect(state.completedTourIds.size).toBe(1);
-      expect(state.completedTourIds.has(TOUR_1)).toBe(true);
+        expect(tourQueue.getState().registeredTourIds).toContain(TOUR_1);
+        expect(tourQueue.getState().completedTourIds.has(TOUR_1)).toBe(false);
+
+        tour.complete();
+
+        expect(tourQueue.getState().completedTourIds.has(TOUR_1)).toBe(true);
+        expect(tourQueue.getState().registeredTourIds).not.toContain(TOUR_1);
+      });
+
+      it('should notify subscribers when completed', () => {
+        const tour = tourQueue.register(TOUR_1);
+        tourQueue.subscribe(subscriber);
+
+        tour.complete();
+
+        expect(subscriber).toHaveBeenCalledTimes(1);
+      });
     });
 
-    it('should notify subscribers', () => {
-      tourQueue.register(TOUR_1);
-      tourQueue.subscribe(subscriber);
+    describe('skip', () => {
+      it('should skip all tours in the queue', () => {
+        const tour1 = tourQueue.register(TOUR_1);
+        tourQueue.register(TOUR_2);
 
-      tourQueue.complete(TOUR_1);
+        expect(tourQueue.getActive()).toBe(TOUR_1);
 
-      expect(subscriber).toHaveBeenCalledTimes(1);
-    });
+        tour1.skip();
 
-    it('should allow the next tour to become active', () => {
-      tourQueue.register(TOUR_1);
-      tourQueue.register(TOUR_2);
+        expect(tourQueue.getState().isQueueSkipped).toBe(true);
+        expect(tourQueue.getActive()).toBeNull();
+      });
 
-      expect(tourQueue.getActive()).toBe(TOUR_1);
+      it('should notify subscribers when skipped', () => {
+        const tour = tourQueue.register(TOUR_1);
+        tourQueue.subscribe(subscriber);
 
-      tourQueue.complete(TOUR_1);
+        tour.skip();
 
-      expect(tourQueue.getActive()).toBe(TOUR_2);
-    });
-  });
-
-  describe('skipAll', () => {
-    it('should set isQueueSkipped to true', () => {
-      tourQueue.register(TOUR_1);
-      tourQueue.skipAll();
-
-      expect(tourQueue.getState().isQueueSkipped).toBe(true);
-    });
-
-    it('should notify subscribers', () => {
-      tourQueue.subscribe(subscriber);
-      tourQueue.skipAll();
-
-      expect(subscriber).toHaveBeenCalledTimes(1);
-    });
-
-    it('should prevent all tours from showing', () => {
-      tourQueue.register(TOUR_1);
-      tourQueue.register(TOUR_2);
-
-      tourQueue.skipAll();
-
-      expect(tourQueue.isActive(TOUR_1)).toBe(false);
-      expect(tourQueue.isActive(TOUR_2)).toBe(false);
+        expect(subscriber).toHaveBeenCalledTimes(1);
+      });
     });
   });
 });
