@@ -128,7 +128,6 @@ export async function setupDependencies(
     connectorExecutor,
     workflowRuntime,
     workflowLogger,
-    workflowTaskManager,
     urlValidator,
     workflowExecutionGraph,
     stepExecutionRuntimeFactory
