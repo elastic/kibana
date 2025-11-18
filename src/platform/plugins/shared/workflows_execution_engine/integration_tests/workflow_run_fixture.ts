@@ -151,7 +151,6 @@ export class WorkflowRunFixture {
       logsRepository: this.logsRepositoryMock as any,
       taskAbortController: this.taskAbortController,
       coreStart: this.coreStartMock,
-      esClient: this.esClientMock,
       actions: this.actionsClientMock,
       taskManager: this.taskManagerMock,
       logger: this.loggerMock,
