@@ -69,8 +69,8 @@ describe('updateAlertsWithAttackIds', () => {
       esClient.updateByQuery.mockReset();
     });
 
-    it('should throw if an empty spaceId is being used', () => {
-      expect(async () => {
+    it('should throw if an empty spaceId is being used', async () => {
+      await expect(async () => {
         await updateAlertsWithAttackIds({ esClient, alertIdToAttackIdsMap, spaceId: '' });
       }).rejects.toThrow();
     });
