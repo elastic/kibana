@@ -324,76 +324,198 @@ const replaceDefinitionRefs = <T>(schema: T): T => {
 
 const COMPONENT_PREFIX = '@kbn/oas-component:';
 
-const getComponentId = (type: z.ZodTypeAny): string | undefined => {
-  // Direct marker on this schema
-  if (type.description?.startsWith(COMPONENT_PREFIX)) {
-    return type.description.slice(COMPONENT_PREFIX.length);
+/**
+ * Walk a JSON Schema produced by zod-to-json-schema, extract any sub-schemas that
+ * carry an "@kbn/oas-component:<Name>" description as reusable OpenAPI components,
+ * and replace those inlined sub-schemas with $ref pointers.
+ */
+const extractComponentsFromSchema = (
+  schema: unknown,
+  components: { [id: string]: OpenAPIV3.SchemaObject }
+): unknown => {
+  if (schema === null || typeof schema !== 'object') {
+    return schema;
   }
 
-  // Unwrap lazy
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodLazy)) {
-    return getComponentId(unwrapZodLazy(type));
+  if (Array.isArray(schema)) {
+    return (schema as unknown[]).map((item) => extractComponentsFromSchema(item, components));
   }
 
-  // Unwrap optional/default
-  if (
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodOptional) ||
-    instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodDefault)
-  ) {
-    const { innerType } = unwrapZodOptionalDefault(type);
-    return getComponentId(innerType);
-  }
+  const obj = schema as Record<string, unknown>;
 
-  // Unwrap effects (preprocess / refinement / transform)
-  if (instanceofZodTypeKind(type, z.ZodFirstPartyTypeKind.ZodEffects)) {
-    return getComponentId(type._def.schema);
-  }
+  const description = obj.description;
+  if (typeof description === 'string' && description.startsWith(COMPONENT_PREFIX)) {
+    const componentId = description.slice(COMPONENT_PREFIX.length);
 
-  return undefined;
-};
+    // Drop the synthetic description and recursively process the component body
+    // so nested components (if any) are also extracted.
+    const { description: _ignored, ...rest } = obj;
+    const processedComponent = extractComponentsFromSchema(
+      rest,
+      components
+    ) as OpenAPIV3.SchemaObject;
 
-export const convert = (schema: z.ZodTypeAny) => {
-  const componentId = getComponentId(schema);
+    if (!components[componentId]) {
+      components[componentId] = processedComponent;
 
-  if (componentId) {
-    // Special path for schemas that opt in as reusable OpenAPI components
-    // (e.g. StreamlangCondition). We let zod-to-json-schema build a root
-    // definition tree and then expose those definitions as components.
-    const rawJsonSchema = zodToJsonSchema(unwrapZodType(schema, true), {
-      target: 'openApi3',
-      $refStrategy: 'root',
-      name: componentId,
-    }) as OpenAPIV3.SchemaObject & {
-      definitions?: Record<string, OpenAPIV3.SchemaObject>;
-    };
+      // Special-case fixups for well-known components whose recursive positions
+      // are otherwise erased by zod-to-json-schema. StreamlangCondition is a
+      // discriminated union over itself, but the generated JSON Schema uses
+      // `{}` in recursive positions (e.g. "and.items": {}, "or.items": {}, "not": {}).
+      // Replace those with self-refs so downstream generators (like oapi-codegen)
+      // see a properly-typed recursive union.
+      if (componentId === 'StreamlangCondition') {
+        const ensureSelfRef = (value: unknown): OpenAPIV3.ReferenceObject | undefined => {
+          if (
+            value &&
+            typeof value === 'object' &&
+            Object.keys(value as Record<string, unknown>).length === 0
+          ) {
+            return { $ref: '#/components/schemas/StreamlangCondition' };
+          }
+          return undefined;
+        };
 
-    const { definitions = {} } = rawJsonSchema;
+        const condition = components[componentId] as OpenAPIV3.SchemaObject;
+        if (condition && Array.isArray((condition as any).anyOf)) {
+          for (const variant of (condition as any).anyOf as Array<OpenAPIV3.SchemaObject>) {
+            if (!variant || typeof variant !== 'object') continue;
 
-    const shared: { [id: string]: OpenAPIV3.SchemaObject } = {};
-    for (const [id, definitionSchema] of Object.entries(definitions)) {
-      shared[id] = replaceDefinitionRefs(definitionSchema) as OpenAPIV3.SchemaObject;
+            const props = (variant as any).properties as
+              | { [key: string]: OpenAPIV3.SchemaObject }
+              | undefined;
+            const typeEnum = (props as any)?.type?.enum as unknown;
+
+            // and-condition: properties.type.enum includes "and"
+            if (
+              Array.isArray(typeEnum) &&
+              typeEnum.includes('and') &&
+              props?.and &&
+              typeof props.and === 'object'
+            ) {
+              const andSchema = props.and as OpenAPIV3.ArraySchemaObject;
+              const replacement = ensureSelfRef(andSchema.items as unknown);
+              if (replacement) {
+                andSchema.items = replacement;
+              }
+            }
+
+            // or-condition: properties.type.enum includes "or"
+            if (
+              Array.isArray(typeEnum) &&
+              typeEnum.includes('or') &&
+              props?.or &&
+              typeof props.or === 'object'
+            ) {
+              const orSchema = props.or as OpenAPIV3.ArraySchemaObject;
+              const replacement = ensureSelfRef(orSchema.items as unknown);
+              if (replacement) {
+                orSchema.items = replacement;
+              }
+            }
+
+            // not-condition: properties.type.enum includes "not"
+            if (Array.isArray(typeEnum) && typeEnum.includes('not') && props && 'not' in props) {
+              const replacement = ensureSelfRef(props.not as unknown);
+              if (replacement) {
+                props.not = replacement as OpenAPIV3.SchemaObject;
+              }
+            }
+          }
+        }
+      }
     }
 
     return {
-      shared,
-      schema: {
-        $ref: `#/components/schemas/${componentId}`,
-      },
+      $ref: `#/components/schemas/${componentId}`,
     };
   }
 
+  const result: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    result[key] = extractComponentsFromSchema(value, components);
+  }
+
+  return result;
+};
+
+export const convert = (schema: z.ZodTypeAny) => {
   const rawJsonSchema = zodToJsonSchema(schema, {
     target: 'openApi3',
-    // Use a non-ref strategy here so we don't leak internal zod-to-json-schema
-    // definition graphs into the OpenAPI bundle or create root-relative $ref
-    // pointers (e.g. "#/anyOf/0/...") that are invalid once the schema is
-    // embedded under OpenAPI's "paths" or "components.schemas".
     $refStrategy: 'none',
   }) as OpenAPIV3.SchemaObject;
 
+  const shared: { [id: string]: OpenAPIV3.SchemaObject } = {};
+  const schemaWithRefs = extractComponentsFromSchema(
+    rawJsonSchema,
+    shared
+  ) as OpenAPIV3.SchemaObject;
+
+  // Final fix-up pass for well-known components where recursive positions
+  // may still appear as "{}" after extraction. This is intentionally
+  // conservative and only touches the specific StreamlangCondition shape.
+  const streamlangCondition = shared['StreamlangCondition'] as OpenAPIV3.SchemaObject | undefined;
+  if (streamlangCondition && Array.isArray((streamlangCondition as any).anyOf)) {
+    const ensureSelfRef = (value: unknown): OpenAPIV3.ReferenceObject | undefined => {
+      if (
+        value &&
+        typeof value === 'object' &&
+        Object.keys(value as Record<string, unknown>).length === 0
+      ) {
+        return { $ref: '#/components/schemas/StreamlangCondition' };
+      }
+      return undefined;
+    };
+
+    for (const variant of (streamlangCondition as any).anyOf as Array<OpenAPIV3.SchemaObject>) {
+      if (!variant || typeof variant !== 'object') continue;
+
+      const props = (variant as any).properties as
+        | { [key: string]: OpenAPIV3.SchemaObject }
+        | undefined;
+      const typeEnum = (props as any)?.type?.enum as unknown;
+
+      // and-condition
+      if (
+        Array.isArray(typeEnum) &&
+        typeEnum.includes('and') &&
+        props?.and &&
+        typeof props.and === 'object'
+      ) {
+        const andSchema = props.and as OpenAPIV3.ArraySchemaObject;
+        const replacement = ensureSelfRef(andSchema.items as unknown);
+        if (replacement) {
+          andSchema.items = replacement;
+        }
+      }
+
+      // or-condition
+      if (
+        Array.isArray(typeEnum) &&
+        typeEnum.includes('or') &&
+        props?.or &&
+        typeof props.or === 'object'
+      ) {
+        const orSchema = props.or as OpenAPIV3.ArraySchemaObject;
+        const replacement = ensureSelfRef(orSchema.items as unknown);
+        if (replacement) {
+          orSchema.items = replacement;
+        }
+      }
+
+      // not-condition
+      if (Array.isArray(typeEnum) && typeEnum.includes('not') && props && 'not' in props) {
+        const replacement = ensureSelfRef(props.not as unknown);
+        if (replacement) {
+          props.not = replacement as OpenAPIV3.SchemaObject;
+        }
+      }
+    }
+  }
+
   return {
-    shared: {},
-    schema: replaceDefinitionRefs(rawJsonSchema) as OpenAPIV3.SchemaObject,
+    shared,
+    schema: replaceDefinitionRefs(schemaWithRefs) as OpenAPIV3.SchemaObject,
   };
 };
 
