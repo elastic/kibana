@@ -16,8 +16,6 @@ import {
   CHILD_ID,
   EVENT_OUTCOME,
   FAAS_COLDSTART,
-  LINKS_SPAN_ID,
-  LINKS_TRACE_ID,
   OTEL_SPAN_LINKS_SPAN_ID,
   OTEL_SPAN_LINKS_TRACE_ID,
   PARENT_ID,
@@ -154,8 +152,8 @@ export async function getTraceDocsPerPage({
         'span' in hit._source
           ? hit._source.span?.links
           : mapOtelToSpanLink({
-              span_id: fields[LINKS_SPAN_ID],
-              trace_id: fields[LINKS_TRACE_ID],
+              span_id: fields[OTEL_SPAN_LINKS_SPAN_ID],
+              trace_id: fields[OTEL_SPAN_LINKS_TRACE_ID],
             });
 
       if (fields[PROCESSOR_EVENT] === ProcessorEvent.span) {
