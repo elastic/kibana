@@ -9,7 +9,7 @@ A TypeScript library for generating type-safe Elasticsearch mappings with full t
 - **Default values**: Sensible defaults for common mapping types (e.g., text fields include keyword sub-fields)
 - **Flexible configuration**: Override defaults or omit properties as needed
 
-## Usage
+## Mappings
 
 ### Basic Mapping Types
 
@@ -26,7 +26,7 @@ const keywordMapping = mappings.keyword();
 
 // Date field
 const dateMapping = mappings.date();
-// Result: { type: 'date' }
+const dateNanosMapping = mappings.dateNanos();
 
 // Numeric fields
 const integerMapping = mappings.integer();
@@ -35,9 +35,6 @@ const shortMapping = mappings.short();
 
 // Boolean field
 const booleanMapping = mappings.boolean();
-
-// Date nanos field
-const dateNanosMapping = mappings.dateNanos();
 
 // Flattened field
 const flattenedMapping = mappings.flattened();
@@ -123,61 +120,11 @@ const userMapping = mappings.object({
 });
 ```
 
-### Type Inference
-
-The package provides type utilities to infer TypeScript types from mapping definitions:
-
-```typescript
-import { mappings } from '@kbn/es-mappings';
-import type { MappingsToProperties } from '@kbn/es-mappings';
-
-// Define your mapping
-const userMappingDefinition = {
-  properties: {
-    name: mappings.text(),
-    age: mappings.integer(),
-    email: mappings.keyword(),
-    isActive: mappings.boolean(),
-    address: mappings.object({
-      street: mappings.text(),
-      city: mappings.keyword(),
-    }),
-  },
-};
-
-// Infer the document type from the mapping
-type UserDocument = MappingsToProperties<typeof userMappingDefinition>;
-
-// TypeScript will infer:
-// type UserDocument = {
-//   name: string;
-//   age: number;
-//   email: string;
-//   isActive: boolean;
-//   address: {
-//     street: string;
-//     city: string;
-//   };
-// }
-
-// Use the type for type-safe document creation
-const user: UserDocument = {
-  name: 'John Doe',
-  age: 30,
-  email: 'john@example.com',
-  isActive: true,
-  address: {
-    street: '123 Main St',
-    city: 'New York',
-  },
-};
-```
-
 ### Complete Example
 
 ```typescript
 import { mappings } from '@kbn/es-mappings';
-import type { MappingsToProperties } from '@kbn/es-mappings';
+import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 
 // Define a complete mapping structure
 const productMapping = {
@@ -196,10 +143,10 @@ const productMapping = {
       name: mappings.text(),
     }),
   },
-};
+} satisfies MappingsDefinition;
 
 // Infer document type
-type Product = MappingsToProperties<typeof productMapping>;
+type Product = GetFieldsOf<typeof productMapping>;
 
 // Create a type-safe document
 const product: Product = {
@@ -224,29 +171,227 @@ const esMapping = {
 };
 ```
 
-## API Reference
+## Types
 
-### Mapping Functions
+### MappingsDefinition
 
-All mapping functions accept an optional configuration object that allows you to override or extend the default mapping properties.
+`MappingsDefinition` is a type that represents a valid Elasticsearch mapping definition with properties. It ensures type safety by constraining the properties to only supported mapping types.
 
-- `mappings.text(def?)` - Creates a text mapping with keyword sub-field
-- `mappings.keyword(def?)` - Creates a keyword mapping
-- `mappings.date(def?)` - Creates a date mapping
-- `mappings.dateNanos(def?)` - Creates a date_nanos mapping
-- `mappings.integer(def?)` - Creates an integer mapping
-- `mappings.long(def?)` - Creates a long mapping
-- `mappings.short(def?)` - Creates a short mapping
-- `mappings.boolean(def?)` - Creates a boolean mapping
-- `mappings.flattened(def?)` - Creates a flattened mapping
-- `mappings.object(properties, def?)` - Creates an object mapping with properties
+```typescript
+import type { MappingsDefinition } from '@kbn/es-mappings';
+import { mappings } from '@kbn/es-mappings';
 
-### Type Utilities
+// Create a mapping definition
+const userMapping = {
+  properties: {
+    name: mappings.text(),
+    age: mappings.integer(),
+    email: mappings.keyword(),
+  },
+} satisfies MappingsDefinition;
 
-- `MappingsToProperties<M>` - Infers TypeScript document types from mapping definitions
-- `Strict<P>` - Creates a strict mapping type (restricts `dynamic` to `false | 'strict'`)
+// MappingsDefinition ensures only valid mapping properties are used
+const invalidMapping: MappingsDefinition = {
+  properties: {
+    // @ts-expect-error - invalid_type is not a supported mapping type
+    invalidField: { type: 'invalid_type' },
+  },
+};
+```
+
+### GetFieldsOf
+
+`GetFieldsOf` is a utility type that infers the TypeScript document type from a mapping definition. It converts mapping definitions to their corresponding primitive TypeScript types (string, number, boolean, etc.).
+
+```typescript
+import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
+import { mappings } from '@kbn/es-mappings';
+
+// Define your mapping
+const userMapping = {
+  properties: {
+    name: mappings.text(),
+    age: mappings.integer(),
+    email: mappings.keyword(),
+    isActive: mappings.boolean(),
+    createdAt: mappings.date(),
+    address: mappings.object({
+      street: mappings.text(),
+      city: mappings.keyword(),
+    }),
+  },
+} satisfies MappingsDefinition;
+
+// Infer the document type from the mapping
+type UserDocument = GetFieldsOf<typeof userMapping>;
+
+// TypeScript will infer:
+// type UserDocument = {
+//   name?: string;
+//   age?: number;
+//   email?: string;
+//   isActive?: boolean;
+//   createdAt?: string | number;
+//   address?: {
+//     street?: string;
+//     city?: string;
+//   };
+// }
+
+// Use the type for type-safe document creation
+const user: UserDocument = {
+  name: 'John Doe',
+  age: 30,
+  email: 'john@example.com',
+  isActive: true,
+  createdAt: '2024-01-01T00:00:00Z',
+  address: {
+    street: '123 Main St',
+    city: 'New York',
+  },
+};
+
+// Partial documents are also valid (all fields are optional)
+const partialUser: UserDocument = {
+  name: 'Jane Doe',
+  age: 25,
+};
+```
+
+### EnsureSubsetOf
+
+`EnsureSubsetOf` is a type utility that ensures a subset mapping definition only contains fields that exist in a full document type. This is useful for validating that partial mapping definitions are valid subsets of a complete mapping.
+
+```typescript
+import type { EnsureSubsetOf, GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
+import { mappings } from '@kbn/es-mappings';
+
+// Define the full document fields type
+interface FullEsDocumentFields {
+  name: string;
+  age: number;
+  email: string;
+  isActive: boolean;
+  createdAt: string | number;
+}
+
+// Define a full mapping definition
+const fullMapping = {
+  properties: {
+    name: mappings.text(),
+    age: mappings.integer(),
+    email: mappings.keyword(),
+    isActive: mappings.boolean(),
+    createdAt: mappings.date(),
+  },
+} satisfies MappingsDefinition;
+
+// Define a subset mapping (only some fields)
+const subsetMapping = {
+  properties: {
+    name: mappings.text(),
+    age: mappings.integer(),
+    email: mappings.keyword(),
+  },
+} satisfies MappingsDefinition;
+
+// Ensure the subset is valid - this will compile successfully
+type ValidSubset = EnsureSubsetOf<
+  typeof subsetMapping,
+  FullEsDocumentFields,
+  'Subset is valid'
+>;
+
+const valid: ValidSubset = 'Subset is valid';
+
+// If the subset contains fields not in the full document, it will fail
+const invalidSubsetMapping = {
+  properties: {
+    name: mappings.text(),
+    age: mappings.integer(),
+    email: mappings.keyword(),
+    extraField: mappings.keyword(), // This field doesn't exist in FullEsDocumentFields
+  },
+} satisfies MappingsDefinition;
+
+// This will cause a TypeScript error
+type InvalidSubset = EnsureSubsetOf<
+  typeof invalidSubsetMapping,
+  FullEsDocumentFields,
+  'This will fail'
+>;
+// Error: The following keys are missing from the document fields: extraField
+```
+
+## Adding a New Mapping Type
+
+If you need to add support for an Elasticsearch mapping type that exists in ES but is not yet supported by this library (either because it wasn't needed before or it's a new type from a recent Elasticsearch upgrade), follow these steps:
+
+### Step 1: Add the type to `SupportedMappingPropertyType`
+
+In `src/types.ts`, add the new mapping type to the `SupportedMappingPropertyType` union:
+
+```typescript
+type SupportedMappingPropertyType = AllMappingPropertyType &
+  (
+    | 'text'
+    | 'integer'
+    | 'keyword'
+    | 'boolean'
+    | 'date'
+    | 'short'
+    | 'byte'
+    | 'float'
+    | 'date_nanos'
+    | 'double'
+    | 'long'
+    | 'object'
+    | 'your_new_type' // Add your new type here
+  );
+```
+
+### Step 2: Update `ToPrimitives` to map it to a primitive type
+
+In `src/types.ts`, update the `ToPrimitives` type to map your new mapping type to its corresponding TypeScript primitive type (string, number, boolean, etc.):
+
+```typescript
+export type ToPrimitives<O extends { properties: Record<string, MappingProperty> }> = {} extends O
+  ? never
+  : {
+      [K in keyof O['properties']]: {} extends O['properties'][K]
+        ? never
+        : O['properties'][K] extends { type: infer T }
+        ? T extends 'keyword'
+          ? // ... existing mappings ...
+          : T extends 'your_new_type'
+          ? string // or number, boolean, etc. - choose the appropriate primitive
+          : // ... rest of mappings ...
+        : never;
+    };
+```
+
+### Step 3: (Optional) Add a mapping function
+
+If you want to provide a convenient function for creating this mapping type, add it to `src/mappings.ts`:
+
+```typescript
+export function yourNewType(def?: WithoutTypeField<YourNewTypeMapping>): YourNewTypeMapping {
+  const defaults: YourNewTypeMapping = omitUnsetKeys(
+    {
+      type: 'your_new_type',
+      // Add any default properties here
+    },
+    def
+  );
+
+  return merge(defaults, def);
+}
+```
+
+Don't forget to:
+- Export the type alias for your mapping type in `src/types.ts` (e.g., `export type YourNewTypeMapping = Strict<api.MappingYourNewTypeProperty>;`)
+- Import and export the function in the appropriate files
 
 ## Notes
 
 ⚠️ **Important**: Default mappings are carefully chosen and used in production. Changing defaults may affect live mappings. Always test mapping changes thoroughly before deploying.
-

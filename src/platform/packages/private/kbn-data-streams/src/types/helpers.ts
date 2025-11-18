@@ -7,9 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DataStreamClient } from './src/client';
-export type {
-  DataStreamDefinition,
-  IDataStreamClient,
-  BaseSearchRuntimeMappings,
-} from './src/types';
+export type OmitIndexProp<T> = Omit<T, 'index'>;

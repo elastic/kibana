@@ -8,11 +8,17 @@
  */
 
 export type UnionKeys<T> = T extends T ? keyof T : never;
+
+// This is a helper type to check if two types are exactly the same
 export type Exact<T, U> = T extends U
   ? Exclude<UnionKeys<T>, UnionKeys<U>> extends never
     ? true
     : false
   : false;
 
+// This is a helper type to show clearly the missing keys
 export type MissingKeysError<T extends string> = Error &
   `The following keys are missing from the document fields: ${T}`;
+
+// This is a helper type to omit the type field from a type
+export type WithoutTypeField<T> = Omit<T, 'type'>;

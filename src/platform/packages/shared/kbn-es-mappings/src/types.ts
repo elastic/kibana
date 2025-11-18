@@ -46,8 +46,10 @@ type SupportedMappingPropertyType = AllMappingPropertyType &
     | 'keyword'
     | 'boolean'
     | 'date'
+    | 'short'
     | 'byte'
     | 'float'
+    | 'date_nanos'
     | 'double'
     | 'long'
     | 'object'
@@ -78,6 +80,12 @@ export type ToPrimitives<O extends { properties: Record<string, MappingProperty>
           : T extends 'long'
           ? number
           : T extends 'short'
+          ? number
+          : T extends 'float'
+          ? number
+          : T extends 'double'
+          ? number
+          : T extends 'byte'
           ? number
           : T extends 'boolean'
           ? boolean

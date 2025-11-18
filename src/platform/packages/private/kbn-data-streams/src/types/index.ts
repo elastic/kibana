@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { DataStreamClient } from './src/client';
-export type {
-  DataStreamDefinition,
-  IDataStreamClient,
-  BaseSearchRuntimeMappings,
-} from './src/types';
+export type { BaseSearchRuntimeMappings } from './runtime';
+export type { DataStreamDefinition } from './definition';
+export type { InternalIDataStreamClient } from './es_api';
+
+export type { IDataStreamClient } from './client';

@@ -9,14 +9,15 @@
 
 import invariant from 'node:assert';
 import type api from '@elastic/elasticsearch/lib/api/types';
+import type { Client as ElasticsearchClient } from '@elastic/elasticsearch';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { defaultsDeep } from 'lodash';
+import type { Logger } from '@kbn/logging';
 import { retryEs } from './retry_es';
-import type { DataStreamClientArgs } from './client';
-import type { AnyDataStreamDefinition } from './types';
+import type { DataStreamDefinition } from './types';
 import { defaultDataStreamDefinition } from './constants';
 
-function applyDefaults(def: AnyDataStreamDefinition): AnyDataStreamDefinition {
+function applyDefaults(def: DataStreamDefinition): DataStreamDefinition {
   return defaultsDeep(def, defaultDataStreamDefinition());
 }
 
@@ -27,13 +28,17 @@ function applyDefaults(def: AnyDataStreamDefinition): AnyDataStreamDefinition {
  */
 export async function initialize({
   logger,
-  dataStreams,
+  dataStream,
   elasticsearchClient,
-}: DataStreamClientArgs<any>) {
+}: {
+  logger: Logger;
+  dataStream: DataStreamDefinition;
+  elasticsearchClient: ElasticsearchClient;
+}) {
   logger = logger.get('data-streams-setup');
-  logger.debug(`Setting up index template for data stream: ${dataStreams.name}`);
+  logger.debug(`Setting up index template for data stream: ${dataStream.name}`);
 
-  if (!dataStreams.name) {
+  if (!dataStream.name) {
     throw new Error('Data stream name is required');
   }
 
@@ -43,7 +48,7 @@ export async function initialize({
       index_templates: [existingIndexTemplate],
     } = await retryEs(() =>
       elasticsearchClient.indices.getIndexTemplate({
-        name: dataStreams.name,
+        name: dataStream.name,
       })
     ));
   } catch (error) {
@@ -54,15 +59,15 @@ export async function initialize({
     }
   }
 
-  const version = dataStreams.version;
+  const version = dataStream.version;
   const previousVersions: number[] = [];
-  dataStreams = applyDefaults(dataStreams);
+  dataStream = applyDefaults(dataStream);
 
   if (existingIndexTemplate) {
     const deployedVersion = existingIndexTemplate.index_template?._meta?.version;
     invariant(
       typeof deployedVersion === 'number' && deployedVersion > 0,
-      `Datastream ${dataStreams.name} metadata is in an unexpected state, expected version to be a number but got ${deployedVersion}`
+      `Datastream ${dataStream.name} metadata is in an unexpected state, expected version to be a number but got ${deployedVersion}`
     );
 
     if (deployedVersion >= version) {
@@ -77,20 +82,20 @@ export async function initialize({
   // Should be idempotent
   await retryEs(() =>
     elasticsearchClient.indices.putIndexTemplate({
-      name: dataStreams.name,
-      priority: dataStreams.template.priority,
-      index_patterns: [`${dataStreams.name}*`],
-      composed_of: dataStreams.template.composedOf,
+      name: dataStream.name,
+      priority: dataStream.template.priority,
+      index_patterns: [`${dataStream.name}*`],
+      composed_of: dataStream.template.composedOf,
       data_stream: {
-        hidden: dataStreams.hidden,
+        hidden: dataStream.hidden,
       },
       template: {
-        aliases: dataStreams.template.aliases,
-        mappings: dataStreams.template.mappings,
-        settings: dataStreams.template.settings,
+        aliases: dataStream.template.aliases,
+        mappings: dataStream.template.mappings,
+        settings: dataStream.template.settings,
       },
       _meta: {
-        ...dataStreams.template._meta,
+        ...dataStream.template._meta,
         version,
         previousVersions,
       },
@@ -101,7 +106,7 @@ export async function initialize({
   try {
     ({
       data_streams: [existingDataStream],
-    } = await retryEs(() => elasticsearchClient.indices.getDataStream({ name: dataStreams.name })));
+    } = await retryEs(() => elasticsearchClient.indices.getDataStream({ name: dataStream.name })));
   } catch (error) {
     if (error instanceof EsErrors.ResponseError && error.statusCode === 404) {
       // Data stream does not exist, we will create it
@@ -111,11 +116,11 @@ export async function initialize({
   }
 
   if (!existingDataStream) {
-    logger.debug(`Creating data stream: ${dataStreams.name}`);
+    logger.debug(`Creating data stream: ${dataStream.name}`);
     try {
       await retryEs(() =>
         elasticsearchClient.indices.createDataStream({
-          name: dataStreams.name,
+          name: dataStream.name,
         })
       );
     } catch (error) {
@@ -125,14 +130,14 @@ export async function initialize({
         error.body?.error.type === 'resource_already_exists_exception'
       ) {
         // Data stream already exists, we can ignore this error, probably racing another create call
-        logger.debug(`Data stream already exists: ${dataStreams.name}`);
+        logger.debug(`Data stream already exists: ${dataStream.name}`);
       } else {
         throw error;
       }
     }
   } else {
     logger.debug(
-      `Data stream already exists: ${dataStreams.name}, applying mappings to write index`
+      `Data stream already exists: ${dataStream.name}, applying mappings to write index`
     );
 
     // https://www.elastic.co/docs/api/doc/elasticsearch/operation/operation-indices-get-data-stream#operation-indices-get-data-stream-200-body-application-json-data_streams-indices
@@ -141,14 +146,14 @@ export async function initialize({
     const writeIndex = indices[indices.length - 1];
     if (!writeIndex) {
       logger.debug(
-        `Data stream ${dataStreams.name} has no write index yet, cannot apply mappings or settings.`
+        `Data stream ${dataStream.name} has no write index yet, cannot apply mappings or settings.`
       );
       return;
     } else {
       const {
         template: { mappings },
       } = await retryEs(() =>
-        elasticsearchClient.indices.simulateIndexTemplate({ name: dataStreams.name })
+        elasticsearchClient.indices.simulateIndexTemplate({ name: dataStream.name })
       );
       logger.debug(`Applying mappings to write index: ${writeIndex}`);
       await retryEs(() =>

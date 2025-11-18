@@ -107,9 +107,9 @@ export const groupDiagnosticsByLine = (filePath: string, diagnostics: readonly t
       const tsErrorLine = [
         sourceCode
           .split('\n')
-          [line - 1].replace(/\/\/ @ts-disabled-diagnostic/g, '')
+          [line - 1].replace(/\/\/ @ts-disabled-diagnostic ?-?/g, 'Type Error Explanation:')
           .trim(),
-        sourceCode.split('\n')[line],
+        `Error Line [${lineNumber}]: ${sourceCode.split('\n')[line].trim()}`,
       ];
 
       errorsByLine.push({

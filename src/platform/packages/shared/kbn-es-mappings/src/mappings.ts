@@ -22,8 +22,7 @@ import type {
   ObjectMapping,
 } from './types';
 import { omitUnsetKeys } from './utils';
-
-type WithoutTypeField<T> = Omit<T, 'type'>;
+import type { WithoutTypeField } from './types_helpers';
 
 export function object(def: WithoutTypeField<ObjectMapping>): ObjectMapping {
   const defaults: ObjectMapping = omitUnsetKeys(

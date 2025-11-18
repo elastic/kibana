@@ -65,7 +65,6 @@ describe('mappings', () => {
     `);
     expect(mappings.object({})).toMatchInlineSnapshot(`
       Object {
-        "properties": Object {},
         "type": "object",
       }
     `);
