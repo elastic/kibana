@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { isScalar, parseDocument } from 'yaml';
+import { isScalar } from 'yaml';
 import type { monaco } from '@kbn/monaco';
 import { DynamicStepContextSchema } from '@kbn/workflows';
 import type { z } from '@kbn/zod';
@@ -52,14 +52,23 @@ export function buildAutocompleteContext({
   const word = model.getWordAtPosition(position) || model.getWordUntilPosition(position);
   const { startColumn, endColumn } = word;
 
+  // Get current model text - this is always up-to-date
+  const currentModelText = model.getValue();
+  const computedFromYamlString = editorState?.computed?.computedFromYamlString;
+
+  // CRITICAL: The yamlDocument must match the current model text for offset calculations to work
+  // If computedFromYamlString doesn't match currentModelText, the offsets in yamlDocument
+  // won't align with the model, and getPathAtOffset will return the wrong path
+  if (!yamlDocument || computedFromYamlString !== currentModelText) {
+    // Return null to avoid showing suggestions based on stale data
+    // The debounced computation will complete soon and trigger a refresh
+    return null;
+  }
+
   const focusedStepInfo: StepInfo | null = focusedStepId
     ? workflowLookup?.steps[focusedStepId] ?? null
     : null;
   const focusedYamlPair = getFocusedYamlPair(workflowLookup, focusedStepId, absoluteOffset);
-
-  if (!yamlDocument) {
-    return null;
-  }
 
   let range: monaco.IRange;
   if (completionContext.triggerCharacter === ' ') {
@@ -81,26 +90,10 @@ export function buildAutocompleteContext({
     };
   }
 
-  // Smart parsing: only parse if yamlString has changed since last computation.
-  // This preserves the performance benefit of debouncing while ensuring accuracy.
-  const yamlString = editorState.yamlString;
-  const computedFromYamlString = editorState.computed?.computedFromYamlString;
-  const isComputationStale = yamlString !== computedFromYamlString;
-
-  let documentForPath = yamlDocument; // Default to stored document
-  // Only parse if the yamlString has changed (debounce is pending or computation failed)
-  if (isComputationStale) {
-    try {
-      documentForPath = parseDocument(yamlString, { keepSourceTokens: true });
-    } catch (error) {
-      // Fallback to stored document if parsing fails (e.g., invalid YAML)
-      // documentForPath already set to yamlDocument above
-    }
-  }
-
-  // Use the parsed document (current or fallback) for path calculation and other operations
-  const path = getPathAtOffset(documentForPath, absoluteOffset);
-  const yamlNode = documentForPath.getIn(path, true);
+  // Use currentModelText for liquid block detection (always up-to-date and matches yamlDocument)
+  const yamlString = currentModelText;
+  const path = getPathAtOffset(yamlDocument, absoluteOffset);
+  const yamlNode = yamlDocument.getIn(path, true);
   const scalarType = isScalar(yamlNode) ? yamlNode.type ?? null : null;
 
   let contextSchema: z.ZodType = DynamicStepContextSchema;
@@ -127,7 +120,7 @@ export function buildAutocompleteContext({
   // Check if we're actually inside a liquid block
   const isInLiquidBlock = isInsideLiquidBlock(yamlString, position);
   const _isInScheduledTriggerWithBlock = isInScheduledTriggerWithBlock(
-    documentForPath,
+    yamlDocument,
     absoluteOffset
   );
 

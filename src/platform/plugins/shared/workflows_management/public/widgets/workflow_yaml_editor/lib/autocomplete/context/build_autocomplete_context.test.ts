@@ -220,80 +220,90 @@ steps: []
     expect(result?.path).toEqual(['inputs', 0, 'type']);
   });
 
-  it('should parse on-demand when computation is stale (yamlString changed)', () => {
-    const initialYaml = `version: "1"
-name: "test"
-inputs:
-  - name: myInput
-    type: string
-steps: []`;
+  it('should return null when computedFromYamlString does not match current model text', () => {
+    const yamlContent = 'name: "test"';
+    const cleanedYaml = yamlContent.replace('|<-', '');
+    const mockModel = createFakeMonacoModel(cleanedYaml, 0);
+    const position = mockModel.getPositionAt(0);
+    const computedData = performComputation(cleanedYaml);
 
-    const updatedYaml = `version: "1"
-name: "test"
-inputs:
-  - name: myInput
-    type: |<-
-steps: []`;
+    // Create a stale state where computedFromYamlString doesn't match model text
+    const staleModelText = 'name: "different"';
+    const staleModel = createFakeMonacoModel(staleModelText, 0);
 
-    // Create state with stale computation (yamlString changed but computed hasn't updated)
-    const staleComputedData = performComputation(initialYaml);
     const mockEditorState = {
-      yamlString: updatedYaml, // Different from what was computed
-      computed: staleComputedData, // Computed from old yamlString
+      yamlString: cleanedYaml,
+      computed: computedData, // This was computed from cleanedYaml, not staleModelText
       connectors: { connectorTypes: {}, totalConnectors: 0 },
     } as WorkflowDetailState;
 
-    const cursorOffset = updatedYaml.indexOf('|<-');
-    const cleanedYaml = updatedYaml.replace('|<-', '');
-    const mockModel = createFakeMonacoModel(cleanedYaml, cursorOffset);
-    const position = mockModel.getPositionAt(cursorOffset);
-
     const result = buildAutocompleteContext({
-      editorState: mockEditorState,
-      model: mockModel as unknown as monaco.editor.ITextModel,
+      model: staleModel as unknown as monaco.editor.ITextModel,
       position: position as monaco.Position,
       completionContext: {
         triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
-        triggerCharacter: ':',
+        triggerCharacter: undefined,
       } as monaco.languages.CompletionContext,
+      editorState: mockEditorState,
     });
 
-    // Should correctly detect path even with stale computation (parses on-demand)
-    expect(result?.path).toEqual(['inputs', 0, 'type']);
+    // Should return null because computedFromYamlString (cleanedYaml) doesn't match staleModelText
+    expect(result).toBeNull();
   });
 
-  it('should use stored document when computation is fresh (yamlString unchanged)', () => {
-    const yaml = `version: "1"
-name: "test"
-inputs:
-  - name: myInput
-    type: |<-
-steps: []`;
+  it('should return null when computedFromYamlString is undefined', () => {
+    const yamlContent = 'name: "test"';
+    const cleanedYaml = yamlContent.replace('|<-', '');
+    const mockModel = createFakeMonacoModel(cleanedYaml, 0);
+    const position = mockModel.getPositionAt(0);
 
-    // Create state with fresh computation (yamlString matches computed)
-    const computedData = performComputation(yaml.replace('|<-', ''));
+    // Create state where computed exists but computedFromYamlString is undefined
     const mockEditorState = {
-      yamlString: yaml.replace('|<-', ''), // Same as what was computed
-      computed: computedData, // Computed from same yamlString
+      yamlString: cleanedYaml,
+      computed: {
+        // yamlDocument exists but computedFromYamlString is missing
+        yamlDocument: performComputation(cleanedYaml).yamlDocument,
+      },
       connectors: { connectorTypes: {}, totalConnectors: 0 },
     } as WorkflowDetailState;
 
-    const cursorOffset = yaml.indexOf('|<-');
-    const cleanedYaml = yaml.replace('|<-', '');
-    const mockModel = createFakeMonacoModel(cleanedYaml, cursorOffset);
-    const position = mockModel.getPositionAt(cursorOffset);
-
     const result = buildAutocompleteContext({
-      editorState: mockEditorState,
       model: mockModel as unknown as monaco.editor.ITextModel,
       position: position as monaco.Position,
       completionContext: {
         triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
-        triggerCharacter: ':',
+        triggerCharacter: undefined,
       } as monaco.languages.CompletionContext,
+      editorState: mockEditorState,
     });
 
-    // Should correctly detect path using stored document (no parsing needed)
-    expect(result?.path).toEqual(['inputs', 0, 'type']);
+    // Should return null because computedFromYamlString is undefined
+    expect(result).toBeNull();
+  });
+
+  it('should return null when computed is undefined', () => {
+    const yamlContent = 'name: "test"';
+    const cleanedYaml = yamlContent.replace('|<-', '');
+    const mockModel = createFakeMonacoModel(cleanedYaml, 0);
+    const position = mockModel.getPositionAt(0);
+
+    const mockEditorState = {
+      yamlString: cleanedYaml,
+      computed: undefined,
+      connectors: { connectorTypes: {}, totalConnectors: 0 },
+    } as WorkflowDetailState;
+
+    const result = buildAutocompleteContext({
+      model: mockModel as unknown as monaco.editor.ITextModel,
+      position: position as monaco.Position,
+      completionContext: {
+        triggerKind: monaco.languages.CompletionTriggerKind.TriggerCharacter,
+        triggerCharacter: undefined,
+      } as monaco.languages.CompletionContext,
+      editorState: mockEditorState,
+    });
+
+    // Should return null because computed (and thus yamlDocument) is undefined
+    expect(result).toBeNull();
   });
 });
