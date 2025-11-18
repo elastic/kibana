@@ -61,11 +61,8 @@ export const productDocumentationTool = (
         const model = await modelProvider.getDefaultModel();
         const connector = model.connector;
 
-        // Try to get inferenceId from the connector, fall back to default ELSER endpoint
-        let inferenceId = defaultInferenceEndpoints.ELSER;
-        if (connector.type === InferenceConnectorType.Inference && connector.config?.inferenceId) {
-          inferenceId = connector.config.inferenceId;
-        }
+        // TODO make this configurable, we need a platform level setting for the embedding model
+        const inferenceId = defaultInferenceEndpoints.ELSER;
 
         // Retrieve documentation
         const result = await llmTasks.retrieveDocumentation({
