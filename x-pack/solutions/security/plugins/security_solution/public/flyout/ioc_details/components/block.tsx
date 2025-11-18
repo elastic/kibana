@@ -8,15 +8,15 @@
 import { EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
-import type { Indicator } from '../../../../../../common/threat_intelligence/types/indicator';
-import { IndicatorFieldValue } from '../common/field_value';
-import { IndicatorFieldLabel } from '../common/field_label';
+import type { Indicator } from '../../../../common/threat_intelligence/types/indicator';
+import { IndicatorFieldValue } from '../../../threat_intelligence/modules/indicators/components/common/field_value';
+import { IndicatorFieldLabel } from '../../../threat_intelligence/modules/indicators/components/common/field_label';
 import {
   CellActionsMode,
   SecurityCellActions,
   SecurityCellActionsTrigger,
-} from '../../../../../common/components/cell_actions';
-import { getIndicatorFieldAndValue } from '../../utils/field_value';
+} from '../../../common/components/cell_actions';
+import { getIndicatorFieldAndValue } from '../../../threat_intelligence/modules/indicators/utils/field_value';
 
 const panelProps = {
   color: 'subdued' as const,
