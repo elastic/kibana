@@ -30,12 +30,6 @@ export const basicTagcloudWithAdHocDataView = {
     suggested_interval: 'd',
     use_original_time_range: false,
     include_empty_rows: true,
-    drop_partial_intervals: false,
-    color: {
-      mode: 'categorical',
-      palette: 'default',
-      mapping: [],
-    },
   },
   sampling: 1,
   ignore_global_filters: false,
@@ -61,12 +55,6 @@ export const basicTagcloudWithDataView = {
     suggested_interval: 'd',
     use_original_time_range: false,
     include_empty_rows: true,
-    drop_partial_intervals: false,
-    color: {
-      mode: 'categorical',
-      palette: 'default',
-      mapping: [],
-    },
   },
   sampling: 1,
   ignore_global_filters: false,
@@ -89,11 +77,6 @@ export const basicEsqlTagcloud = {
   tag_by: {
     operation: 'value',
     column: 'geo.dest',
-    color: {
-      mode: 'categorical',
-      palette: 'default',
-      mapping: [],
-    },
   },
   sampling: 1,
   ignore_global_filters: false,
