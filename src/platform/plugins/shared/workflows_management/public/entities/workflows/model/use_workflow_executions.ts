@@ -46,7 +46,7 @@ export function useWorkflowExecutions(
           statuses: params.statuses,
           executionTypes: params.executionTypes,
           page: pageParam,
-          currentSize,
+          size: currentSize,
         },
       });
     },
