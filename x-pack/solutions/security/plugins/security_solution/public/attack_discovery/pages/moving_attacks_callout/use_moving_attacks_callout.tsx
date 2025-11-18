@@ -11,6 +11,7 @@ import {
   DEFAULT_ASSISTANT_NAMESPACE,
   MOVING_ATTACKS_CALLOUT_LOCAL_STORAGE_KEY,
 } from '@kbn/elastic-assistant';
+import { useCallback } from 'react';
 
 /**
  * Hook to manage the visibility of the moving attacks callout
@@ -21,9 +22,15 @@ export const useMovingAttacksCallout = () => {
     true
   );
 
-  const hideMovingAttacksCallout = () => setMovingAttacksCalloutVisible(false);
+  const hideMovingAttacksCallout = useCallback(
+    () => setMovingAttacksCalloutVisible(false),
+    [setMovingAttacksCalloutVisible]
+  );
 
-  const showMovingAttacksCallout = () => setMovingAttacksCalloutVisible(true);
+  const showMovingAttacksCallout = useCallback(
+    () => setMovingAttacksCalloutVisible(true),
+    [setMovingAttacksCalloutVisible]
+  );
 
   return {
     isMovingAttacksCalloutVisible,
