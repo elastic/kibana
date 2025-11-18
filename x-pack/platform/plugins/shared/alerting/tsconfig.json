@@ -82,7 +82,8 @@
     "@kbn/es-types",
     "@kbn/lazy-object",
     "@kbn/react-query",
-    "@kbn/maintenance-windows-plugin"
+    "@kbn/maintenance-windows-plugin",
+    "@kbn/config"
   ],
   "exclude": ["target/**/*"]
 }
