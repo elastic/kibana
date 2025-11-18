@@ -8,22 +8,24 @@
  */
 
 import expect from '@kbn/expect';
-import snapshot from './schema_snapshot.json';
 import type { FtrProviderContext } from '../../../ftr_provider_context';
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const snapshot = require('./schema_snapshot.json');
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   describe('dashboard REST schema', () => {
     /**
      * Only additive changes are allowed to Dashboard REST schemas
-     * 
-     * This test exists to ping #kibana-presentation of any embeddable schema changes 
+     *
+     * This test exists to ping #kibana-presentation of any embeddable schema changes
      * since the dashboard schema includes embeddable schemas.
-     * 
+     *
      * If this test is failing, the changed embeddable schema needs to be be reviewed
      * to ensure its ready for public distribution.
-     * 
-     * Once an embeddable schema has been published, 
+     *
+     * Once an embeddable schema has been published,
      * it can only be changed with additive changes.
      */
     it('Registered embeddable schemas have not changed', async () => {
@@ -32,9 +34,14 @@ export default function ({ getService }: FtrProviderContext) {
         .send();
 
       expect(response.status).to.be(200);
-      const createBodySchema = response.body.paths['/api/dashboards/dashboard'].post.requestBody.content['application/json; Elastic-Api-Version=1'].schema;
+      const createBodySchema =
+        response.body.paths['/api/dashboards/dashboard'].post.requestBody.content[
+          'application/json; Elastic-Api-Version=1'
+        ].schema;
       const panelsSchema = createBodySchema.properties.data.properties.panels;
-      const panelSchema = panelsSchema.items.anyOf.find((schema: any) => 'config' in schema.properties);
+      const panelSchema = panelsSchema.items.anyOf.find(
+        (schema: any) => 'config' in schema.properties
+      );
       const configSchema = panelSchema.properties.config;
       expect(configSchema.anyOf.length).to.be(2);
 
