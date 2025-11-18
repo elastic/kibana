@@ -32,4 +32,5 @@ export enum ControlTriggerSource {
 
 export enum TelemetryControlCancelledReason {
   CANCEL_BUTTON = 'cancel_button',
+  CLOSE_BUTTON = 'close_button',
 }
