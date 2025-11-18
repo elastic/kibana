@@ -28,7 +28,7 @@ export function getRuleType(): RuleTypeModel<ESQLRuleParams> {
         ES|QL alert is {{status}}:
 
         - Rule ID: {{rule.id}}
-        - Family ID: {{rule.familyId}}
+        - Parent ID: {{rule.parentId}}
         - Timestamp: {{date}}
         - Attributes: {{attrs}}`,
       }

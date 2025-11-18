@@ -33,7 +33,7 @@ export interface ActionContextVariables {
   date: string;
   rule?: {
     id: string;
-    familyId: string;
+    parentId: string;
   };
   status?: string;
 }

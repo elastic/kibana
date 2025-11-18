@@ -71,7 +71,7 @@ const AlertRequired = rt.type({
   '@timestamp': schemaDate,
   'status': schemaString,
   'rule.id': schemaString,
-  'rule.family_id': schemaString,
+  'rule.parent_id': schemaString,
   'attrs': schemaUnknown,
 });
 // prettier-ignore

@@ -13,6 +13,6 @@ indexing:
 # The sequence of states and their duration
 schedule:
   - template: 'bad'
-    duration: '5m'
+    duration: '2m'
   - template: 'good'
-    duration: '5m'
+    duration: '2m'

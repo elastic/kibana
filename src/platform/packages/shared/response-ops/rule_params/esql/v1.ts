@@ -23,7 +23,7 @@ const ESQLParamsSchemaProperties = {
     minLength: 1,
   }),
   esqlQuery: schema.object({ esql: schema.string({ minLength: 1 }) }),
-  familyId: schema.string({ minLength: 1 }),
+  parentId: schema.string({ minLength: 1 }),
 };
 
 export type ESQLParams = TypeOf<typeof ESQLParamsSchema>;

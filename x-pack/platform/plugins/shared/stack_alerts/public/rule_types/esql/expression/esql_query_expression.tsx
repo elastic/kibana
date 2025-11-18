@@ -38,14 +38,14 @@ export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<ESQLRuleParams, ESQLRuleMetaData>
 > = ({ ruleParams, setRuleParams, setRuleProperty, errors, data }) => {
   const { http, dataViews } = useTriggerUiActionServices();
-  const { esqlQuery, timeWindowSize, timeWindowUnit, timeField, familyId } = ruleParams;
+  const { esqlQuery, timeWindowSize, timeWindowUnit, timeField, parentId } = ruleParams;
 
   const [currentRuleParams, setCurrentRuleParams] = useState<ESQLRuleParams>({
     ...ruleParams,
     timeWindowSize: timeWindowSize ?? DEFAULT_VALUES.TIME_WINDOW_SIZE,
     timeWindowUnit: timeWindowUnit ?? DEFAULT_VALUES.TIME_WINDOW_UNIT,
     esqlQuery: esqlQuery ?? { esql: '' },
-    familyId: 'esql-family-id',
+    parentId: 'esql-parent-id',
   });
   const [query, setQuery] = useState<AggregateQuery>(esqlQuery ?? { esql: '' });
   const [timeFieldOptions, setTimeFieldOptions] = useState([firstFieldOption]);
@@ -270,21 +270,21 @@ export const EsqlQueryExpression: React.FC<
       </EuiFlexGroup>
       <EuiSpacer />
       <EuiFormRow
-        id="familyId"
+        id="parentId"
         fullWidth
         // @ts-expect-error upgrade typescript v5.1.6
-        isInvalid={errors.familyId.length > 0 && familyId !== undefined}
-        error={errors.familyId as string[]}
+        isInvalid={errors.parentId.length > 0 && parentId !== undefined}
+        error={errors.parentId as string[]}
         label={
           <FormattedMessage
-            id="xpack.stackAlerts.esql.ui.selectEsqlQueryFamilyIdFieldPrompt"
-            defaultMessage="Family ID"
+            id="xpack.stackAlerts.esql.ui.selectEsqlQueryParentIdFieldPrompt"
+            defaultMessage="Parent ID"
           />
         }
       >
         <EuiFieldText
-          value={familyId || ''}
-          onChange={(e) => setParam('familyId', e.target.value)}
+          value={parentId || ''}
+          onChange={(e) => setParam('parentId', e.target.value)}
         />
       </EuiFormRow>
     </Fragment>
