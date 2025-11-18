@@ -6,7 +6,7 @@
  */
 
 import type { RoleApiCredentials } from '@kbn/scout';
-import { apiTest, expect } from '@kbn/scout';
+import { apiTest, expect, tags } from '@kbn/scout';
 import { COMMON_HEADERS, TEST_INPUT } from '../fixtures/constants';
 
 apiTest.describe(
@@ -14,14 +14,8 @@ apiTest.describe(
   { tag: ['@ess', '@svlSecurity', '@svlOblt'] },
   () => {
     let adminApiCredentials: RoleApiCredentials;
-    let painlessExecuteClusterPrivilegesCredentials: RoleApiCredentials;
-
     apiTest.beforeAll(async ({ requestAuth }) => {
       adminApiCredentials = await requestAuth.getApiKey('admin');
-
-      painlessExecuteClusterPrivilegesCredentials = await requestAuth.getApiKeyForCustomRole({
-        cluster: ['cluster:admin/scripts/painless/execute'],
-      });
     });
 
     apiTest(
@@ -31,24 +25,6 @@ apiTest.describe(
           headers: {
             ...COMMON_HEADERS,
             ...adminApiCredentials.apiKeyHeader,
-          },
-          responseType: 'json',
-          body: TEST_INPUT.script,
-        });
-        expect(response.statusCode).toBe(200);
-        expect(response.body).toStrictEqual({
-          result: 'true',
-        });
-      }
-    );
-
-    apiTest(
-      'should execute a valid painless script using cluster:admin/scripts/painless/execute credentials',
-      async ({ apiClient }) => {
-        const response = await apiClient.post('api/painless_lab/execute', {
-          headers: {
-            ...COMMON_HEADERS,
-            ...painlessExecuteClusterPrivilegesCredentials.apiKeyHeader,
           },
           responseType: 'json',
           body: TEST_INPUT.script,
@@ -73,5 +49,37 @@ apiTest.describe(
       expect(response.statusCode).toBe(200);
       expect(response.body.error.reason).toBe('compile error');
     });
+  }
+);
+
+apiTest.describe(
+  'POST api/painless_lab/execute with only cluster:admin/scripts/painless/execute privileges',
+  { tag: tags.ESS_ONLY },
+  () => {
+    let adminPainlessExecuteClusterPrivilegesCredentials: RoleApiCredentials;
+
+    apiTest.beforeAll(async ({ requestAuth }) => {
+      adminPainlessExecuteClusterPrivilegesCredentials = await requestAuth.getApiKeyForCustomRole({
+        cluster: ['cluster:admin/scripts/painless/execute'],
+      });
+    });
+
+    apiTest(
+      'should execute a valid painless script using cluster:admin/scripts/painless/execute credentials',
+      async ({ apiClient }) => {
+        const response = await apiClient.post('api/painless_lab/execute', {
+          headers: {
+            ...COMMON_HEADERS,
+            ...adminPainlessExecuteClusterPrivilegesCredentials.apiKeyHeader,
+          },
+          responseType: 'json',
+          body: TEST_INPUT.script,
+        });
+        expect(response.statusCode).toBe(200);
+        expect(response.body).toStrictEqual({
+          result: 'true',
+        });
+      }
+    );
   }
 );
