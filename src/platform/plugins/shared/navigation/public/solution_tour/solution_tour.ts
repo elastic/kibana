@@ -12,12 +12,14 @@ import type { NavigationTourManager } from '@kbn/core-chrome-navigation-tour';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
+import { getTourQueue } from '@kbn/tour-queue';
 
 /**
  * This tour combines the spaces solution view tour and new navigation tour into a single
  * multi-step tour.
  */
 export class SolutionNavigationTourManager {
+  private tourQueue = getTourQueue();
   constructor(
     private deps: {
       navigationTourManager: NavigationTourManager;
@@ -29,12 +31,10 @@ export class SolutionNavigationTourManager {
   ) {}
 
   async startTour(): Promise<void> {
-    const { getTourQueue } = await import('@kbn/tour-queue');
-    const tourQueue = getTourQueue();
     // Register and get tour object
     const navTourId = 'solutionNavigationTour';
-    const tour = tourQueue.register(navTourId);
-    const isActive = tourQueue.isActive(navTourId);
+    const tour = this.tourQueue.register(navTourId);
+    const isActive = this.tourQueue.isActive(navTourId);
     if (!isActive) {
       tour.complete();
       return;
