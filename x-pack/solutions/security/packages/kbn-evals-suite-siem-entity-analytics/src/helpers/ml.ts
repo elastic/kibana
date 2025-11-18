@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { executeSetupModuleRequest } from '@kbn/test-suites-xpack-security/security_solution_api_integration/test_suites/detections_response/utils/machine_learning/machine_learning_setup';
+import { executeSetupModuleRequest } from '@kbn/test-suites-security-solution-apis/test_suites/detections_response/utils/machine_learning/machine_learning_setup';
 import pRetry from 'p-retry';
 import type supertest from 'supertest';
 import type { ToolingLog } from '@kbn/tooling-log';
