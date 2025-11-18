@@ -12,12 +12,10 @@ import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_objec
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
 import { getDashboardCRUResponseBody } from '../saved_object_utils';
 import type { DashboardReadResponseBody } from './types';
-import { stripUnmappedKeys } from '../scope_tooling';
 
 export async function read(
   requestCtx: RequestHandlerContext,
   id: string,
-  allowUnmappedKeys: boolean
 ): Promise<DashboardReadResponseBody> {
   const { core } = await requestCtx.resolve(['core']);
   const {
@@ -31,18 +29,13 @@ export async function read(
   );
 
   const response = getDashboardCRUResponseBody(savedObject, 'read');
-  const { data, warnings } = !allowUnmappedKeys
-    ? stripUnmappedKeys(response.data)
-    : { data: response.data, warnings: [] };
   return {
     ...response,
-    data,
     meta: {
       ...response.meta,
       ...(aliasPurpose && { aliasPurpose }),
       ...(aliasTargetId && { aliasTargetId }),
       outcome,
     },
-    ...(warnings?.length && { warnings }),
   };
 }
