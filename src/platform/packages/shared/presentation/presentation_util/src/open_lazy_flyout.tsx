@@ -49,7 +49,7 @@ interface OpenLazyFlyoutParams {
  * @param params.loadContent - Async function that loads the flyout content. Must return a valid React element.
  *                             If it resolves to `null` or `undefined`, the flyout will close automatically.
  * @param params.flyoutProps - Optional props passed to `openFlyout` (e.g. size, className, etc).
- *                             Supports `OverlayFlyoutOpenOptions`.
+ *                             Supports `OverlaySystemFlyoutOpenOptions`.
  * @param params.parentApi - Optional parent API to track opened overlays (e.g. dashboardsApi).
  *
  * @returns A handle to the opened flyout (`OverlayRef`).
