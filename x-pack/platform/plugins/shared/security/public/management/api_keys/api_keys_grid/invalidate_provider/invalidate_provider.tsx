@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiCallOut, EuiConfirmModal, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import React, { Fragment, useRef, useState } from 'react';
 
 import type { NotificationsStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { APIKeysAPIClient } from '@kbn/security-api-key-management';
-import type { ApiKeyToInvalidate } from '@kbn/security-plugin-types-common';
+import type { ApiKeyToInvalidate, CategorizedApiKey } from '@kbn/security-plugin-types-common';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 interface Props {
@@ -22,7 +22,7 @@ interface Props {
 }
 
 export type InvalidateApiKeys = (
-  apiKeys: ApiKeyToInvalidate[],
+  apiKeys: CategorizedApiKey[],
   onSuccess?: OnSuccessCallback
 ) => void;
 
@@ -34,8 +34,9 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
   notifications,
   apiKeysAPIClient,
 }) => {
-  const [apiKeys, setApiKeys] = useState<ApiKeyToInvalidate[]>([]);
+  const [apiKeys, setApiKeys] = useState<CategorizedApiKey[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
+  const [alertingRuleKeys, setAlertingRuleKeys] = useState<CategorizedApiKey[]>([]);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);
   const modalTitleId = useGeneratedHtmlId();
 
@@ -45,12 +46,14 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
     }
     setIsModalOpen(true);
     setApiKeys(keys);
+    setAlertingRuleKeys(keys.filter((key) => key.metadata?.kibana?.type === 'alerting_rule'));
     onSuccessCallback.current = onSuccess;
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
     setApiKeys([]);
+    setAlertingRuleKeys([]);
   };
 
   const invalidateApiKey = async () => {
@@ -59,7 +62,10 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
     let errors;
 
     try {
-      result = await apiKeysAPIClient.invalidateApiKeys(apiKeys, isAdmin);
+      result = await apiKeysAPIClient.invalidateApiKeys(
+        apiKeys.map(({ name, id }) => ({ name, id })),
+        isAdmin
+      );
     } catch (e) {
       error = e;
     }
@@ -89,6 +95,7 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
               }
             );
         notifications.toasts.addSuccess(successMessage);
+
         if (onSuccessCallback.current) {
           onSuccessCallback.current([...itemsInvalidated]);
         }
@@ -166,8 +173,41 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
         buttonColor="danger"
         data-test-subj="invalidateApiKeyConfirmationModal"
       >
+        {alertingRuleKeys.length > 0 && (
+          <>
+            <EuiCallOut
+              announceOnMount
+              title={i18n.translate(
+                'xpack.security.management.apiKeys.deleteApiKey.confirmModal.alertingRuleWarningTitle',
+                {
+                  defaultMessage:
+                    '{count, plural, one {API key {names} is in use by an alerting rule} other {API keys {names} are in use by alerting rules}}',
+                  values: {
+                    count: alertingRuleKeys.length,
+                    names: alertingRuleKeys.map((key) => key.name).join(', '),
+                  },
+                }
+              )}
+              color="warning"
+              iconType="alert"
+              size="s"
+            >
+              <p>
+                {i18n.translate(
+                  'xpack.security.management.apiKeys.deleteApiKey.confirmModal.alertingRuleWarningDescription',
+                  {
+                    defaultMessage:
+                      '{count, plural, one {Deleting this API key may cause the associated alerting rule to stop working.} other {Deleting these API keys may cause the associated alerting rules to stop working.}}',
+                    values: { count: alertingRuleKeys.length },
+                  }
+                )}
+              </p>
+            </EuiCallOut>
+            <EuiSpacer />
+          </>
+        )}
         {!isSingle ? (
-          <Fragment>
+          <>
             <p>
               {i18n.translate(
                 'xpack.security.management.apiKeys.deleteApiKey.confirmModal.deleteMultipleListDescription',
@@ -179,7 +219,7 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
                 <li key={id}>{name}</li>
               ))}
             </ul>
-          </Fragment>
+          </>
         ) : null}
       </EuiConfirmModal>
     );
