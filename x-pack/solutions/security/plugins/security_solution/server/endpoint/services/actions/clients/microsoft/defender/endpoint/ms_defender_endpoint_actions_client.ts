@@ -1322,7 +1322,6 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     machineActionId: string
   ): Promise<ResponseActionRunScriptOutputContent | null> {
     try {
-      // Download the file content
       const { data: downloadStream } = await this.sendAction<Readable>(
         MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
         { id: machineActionId }
@@ -1334,10 +1333,14 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
       }
 
       if (downloadStream.readableLength > RUNSCRIPT_OUTPUT_FILE_MAX_SIZE_BYTES) {
-        throw new ResponseActionsClientError(
-          'The output file is too large to download and display.',
-          413
+        this.log.debug(
+          `Download stream for machine action ${machineActionId} exceeds max size of ${RUNSCRIPT_OUTPUT_FILE_MAX_SIZE_BYTES} bytes`
         );
+        return {
+          stdout: '',
+          stderr: 'The output file is too large to download and display.',
+          code: '413',
+        };
       }
 
       return this.getFormattedOutput(downloadStream);
@@ -1346,7 +1349,6 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
         `Failed to fetch runscript output for machine action ${machineActionId}: ${message}`
       );
 
-      // Return error information as output
       return {
         stdout: '',
         stderr: message,
@@ -1372,9 +1374,9 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
         stderr: (output.script_errors ?? '') + (stderr ? `\n${stderr}` : ''),
         code: output.exit_code ?? 0,
       };
-    } catch ({ message }) {
-      const error = `Failed to process runscript output file: ${message}`;
-      this.log.error(error);
+    } catch (_error) {
+      const error = `Failed to process runscript output file: ${_error.message}`;
+      this.log.error(error, { error: _error });
 
       return {
         stdout: '',
