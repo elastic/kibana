@@ -186,7 +186,7 @@ export const transformToBaseAlertDocument = ({
     /**
      * This field is shared with security solution alerts.
      * We want both attacks and alerts to have this field so
-     * we can filter and group them in the security alerts
+     * we can filter and group them in the security attacks
      * page using both the attacks and the alerts indexes.
      *
      * @see https://github.com/elastic/kibana/issues/232341
