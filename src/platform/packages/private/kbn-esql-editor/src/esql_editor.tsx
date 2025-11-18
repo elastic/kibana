@@ -253,7 +253,9 @@ const ESQLEditorInternal = function ESQLEditor({
   const onUpdateAndSubmitQuery = useCallback(
     (newQuery: string, querySource: QuerySource) => {
       // notify telemetry that a query has been submitted from the history panel
-      telemetryService.trackQueryHistoryClicked(querySource === QuerySource.STARRED);
+      if (querySource === QuerySource.HISTORY || querySource === QuerySource.STARRED) {
+        telemetryService.trackQueryHistoryClicked(querySource === QuerySource.STARRED);
+      }
       // update the query first
       onQueryUpdate(newQuery);
       setTimeout(() => {

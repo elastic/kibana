@@ -76,6 +76,12 @@ export function QuickSearchVisor({
     }, 150);
   }, []);
 
+  const onVisorClose = useCallback(() => {
+    onClose();
+    // Reset user selection tracking when visor closes
+    userSelectedSourceRef.current = false;
+  }, [onClose]);
+
   const onSearchKeyDown = useCallback(
     (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === 'Enter' && selectedSources.length > 0 && searchValue.trim()) {
@@ -87,6 +93,8 @@ export function QuickSearchVisor({
           onUpdateAndSubmitQuery(newQuery);
           // Clear the search value after submitting the query
           setSearchValue('');
+          // Reset user selection tracking when visor closes
+          userSelectedSourceRef.current = false;
         }
       }
     },
@@ -113,13 +121,6 @@ export function QuickSearchVisor({
   useEffect(() => {
     if (isVisible && searchInputRef.current) {
       searchInputRef.current.focus();
-    }
-  }, [isVisible]);
-
-  useEffect(() => {
-    // Reset user selection tracking when visor becomes visible
-    if (isVisible) {
-      userSelectedSourceRef.current = false;
     }
   }, [isVisible]);
 
@@ -162,7 +163,7 @@ export function QuickSearchVisor({
                 <EuiButtonIcon
                   color="text"
                   iconSize="m"
-                  onClick={onClose}
+                  onClick={onVisorClose}
                   iconType="cross"
                   aria-label={clearSearchAriaLabel}
                 />
