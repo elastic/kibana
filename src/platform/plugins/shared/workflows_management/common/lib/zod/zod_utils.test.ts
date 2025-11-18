@@ -182,6 +182,22 @@ describe('getZodTypeName', () => {
     expect(getZodTypeName(schema)).toBe('string');
   });
 
+  it('should return string for ZodEnum types', () => {
+    const enumSchema = z.enum(['option1', 'option2', 'option3']);
+    expect(getZodTypeName(enumSchema)).toBe('string');
+  });
+
+  it('should unwrap ZodDefault and ZodOptional wrappers for ZodEnum', () => {
+    const enumSchema = z.enum(['low', 'medium', 'high']).default('medium');
+    expect(getZodTypeName(enumSchema)).toBe('string');
+
+    const optionalEnumSchema = z.enum(['a', 'b', 'c']).optional();
+    expect(getZodTypeName(optionalEnumSchema)).toBe('string');
+
+    const defaultOptionalEnumSchema = z.enum(['x', 'y', 'z']).default('x').optional();
+    expect(getZodTypeName(defaultOptionalEnumSchema)).toBe('string');
+  });
+
   it('should return unknown for truly unknown types', () => {
     // Create a custom schema that doesn't match any known types
     const customSchema = z.tuple([z.string(), z.number()]);

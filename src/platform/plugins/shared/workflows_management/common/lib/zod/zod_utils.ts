@@ -237,6 +237,9 @@ export function getZodTypeName(schema: z.ZodType) {
       return 'unknown';
     case 'ZodLiteral':
       return 'literal';
+    case 'ZodEnum':
+      // Enums are string-based, so return 'string' for type checking
+      return 'string';
     case 'ZodUnion': {
       // Check if all union members are arrays - if so, treat as array type
       const unionSchema = unwrappedSchema as z.ZodUnion<[z.ZodType, ...z.ZodType[]]>;
