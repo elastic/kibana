@@ -378,6 +378,8 @@ function visitOnFailure(
     graph = createFallback(stepId, graph, onFailureConfiguration.fallback, context);
   }
 
+  // Here we can statically determine that 'continue' is needed if "continue" is boolean.
+  // If condition is a string (expression), we need to evaluate it at runtime, so we always create the continue node.
   if (
     typeof onFailureConfiguration.continue === 'string' ||
     onFailureConfiguration.continue === true
