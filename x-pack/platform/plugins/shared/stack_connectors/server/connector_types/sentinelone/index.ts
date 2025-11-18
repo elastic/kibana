@@ -7,10 +7,7 @@
 
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import {
-  EndpointSecurityConnectorFeatureId,
-  WorkflowsConnectorFeatureId,
-} from '@kbn/actions-plugin/common';
+import { EndpointSecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator, ActionExecutionSourceType } from '@kbn/actions-plugin/server';
 import {
   ENDPOINT_SECURITY_EXECUTE_PRIVILEGE,
@@ -39,7 +36,7 @@ export const getSentinelOneConnectorType = (): SubActionConnectorType<
     secrets: SentinelOneSecretsSchema,
   },
   validators: [{ type: ValidatorType.CONFIG, validator: urlAllowListValidator('url') }],
-  supportedFeatureIds: [EndpointSecurityConnectorFeatureId, WorkflowsConnectorFeatureId],
+  supportedFeatureIds: [EndpointSecurityConnectorFeatureId],
   minimumLicenseRequired: 'enterprise' as const,
   renderParameterTemplates,
   subFeature: 'endpointSecurity',

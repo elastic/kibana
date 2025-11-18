@@ -7,10 +7,7 @@
 
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import {
-  EndpointSecurityConnectorFeatureId,
-  WorkflowsConnectorFeatureId,
-} from '@kbn/actions-plugin/common';
+import { EndpointSecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { ActionExecutionSourceType, urlAllowListValidator } from '@kbn/actions-plugin/server';
 import {
   ENDPOINT_SECURITY_EXECUTE_PRIVILEGE,
@@ -47,7 +44,7 @@ export const getMicrosoftDefenderEndpointConnectorType = (): SubActionConnectorT
     { type: ValidatorType.CONFIG, validator: urlAllowListValidator('oAuthServerUrl') },
     { type: ValidatorType.CONFIG, validator: urlAllowListValidator('apiUrl') },
   ],
-  supportedFeatureIds: [EndpointSecurityConnectorFeatureId, WorkflowsConnectorFeatureId],
+  supportedFeatureIds: [EndpointSecurityConnectorFeatureId],
   minimumLicenseRequired: 'enterprise' as const,
   subFeature: 'endpointSecurity',
   getKibanaPrivileges: (args) => {
