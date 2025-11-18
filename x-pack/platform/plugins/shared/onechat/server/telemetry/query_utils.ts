@@ -7,7 +7,19 @@
 
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { chatSystemIndex } from '@kbn/onechat-server';
-import { isIndexNotFoundError } from '@kbn/security-solution-plugin/public/common/utils/exceptions';
+
+export const isIndexNotFoundError = (error: unknown): boolean => {
+  const castError = error as {
+    attributes?: {
+      caused_by?: { type?: string };
+      error?: { caused_by?: { type?: string } };
+    };
+  };
+  return (
+    castError.attributes?.caused_by?.type === 'index_not_found_exception' ||
+    castError.attributes?.error?.caused_by?.type === 'index_not_found_exception'
+  );
+};
 
 /**
  * Usage counter data from saved objects
