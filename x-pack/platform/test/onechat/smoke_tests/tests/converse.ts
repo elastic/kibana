@@ -34,7 +34,7 @@ export const converseApiSuite = (
 
   describe('Converse API', () => {
     describe('sync', () => {
-      it('returns a answer for a simple message', async () => {
+      it('returns an answer for a simple message', async () => {
         const response = await converse({
           input: 'Hello',
           connector_id: connectorId,
