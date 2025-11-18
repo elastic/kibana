@@ -48,8 +48,8 @@ import type { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
-import type { TelemetryQuerySubmittedProps } from '@kbn/esql-types/src/esql_telemetry_types';
-import { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
+import type { TelemetryQuerySubmittedProps } from '@kbn/esql-types';
+import { QuerySource, ControlTriggerSource } from '@kbn/esql-types';
 import { useCanCreateLookupIndex, useLookupIndexCommand } from './custom_commands';
 import { EditorFooter } from './editor_footer';
 import {
@@ -91,6 +91,7 @@ const triggerControl = async (
   variableType: ESQLVariableType,
   position: monaco.Position | null | undefined,
   uiActions: ESQLEditorDeps['uiActions'],
+  triggerSource: ControlTriggerSource,
   esqlVariables?: ESQLControlVariable[],
   onSaveControl?: ControlsContext['onSaveControl'],
   onCancelControl?: ControlsContext['onCancelControl']
@@ -99,6 +100,7 @@ const triggerControl = async (
     queryString,
     variableType,
     cursorPosition: position,
+    triggerSource,
     esqlVariables,
     onSaveControl,
     onCancelControl,
@@ -357,12 +359,21 @@ const ESQLEditorInternal = function ESQLEditor({
 
   controlCommands.forEach(({ command, variableType }) => {
     monaco.editor.registerCommand(command, async (...args) => {
+      const [, { triggerSource }] = args;
+      const prefilled = triggerSource !== ControlTriggerSource.QUESTION_MARK;
+      telemetryService.trackEsqlControlFlyoutOpened(
+        prefilled,
+        variableType,
+        triggerSource,
+        fixedQuery
+      );
       const position = editor1.current?.getPosition();
       await triggerControl(
         fixedQuery,
         variableType,
         position,
         uiActions,
+        triggerSource,
         esqlVariables,
         controlsContext?.onSaveControl,
         controlsContext?.onCancelControl
@@ -530,8 +541,8 @@ const ESQLEditorInternal = function ESQLEditor({
     () => ({
       onDecorationHoverShown: (hoverMessage: string) =>
         telemetryService.trackLookupJoinHoverActionShown(hoverMessage),
-      onSuggestionsWithCustomCommandShown: (commandIds: string[]) =>
-        telemetryService.trackSuggestionsWithCustomCommandShown(commandIds),
+      onSuggestionsWithCustomCommandShown: (commands) =>
+        telemetryService.trackSuggestionsWithCustomCommandShown(commands),
     }),
     [telemetryService]
   );
@@ -698,15 +709,18 @@ const ESQLEditorInternal = function ESQLEditor({
     };
   }, [allowQueryCancellation, code, codeWhenSubmitted, isLoading]);
 
-  const parseMessages = useCallback(async () => {
-    if (editorModel.current) {
-      return await ESQLLang.validate(editorModel.current, code, esqlCallbacks);
-    }
-    return {
-      errors: [],
-      warnings: [],
-    };
-  }, [esqlCallbacks, code]);
+  const parseMessages = useCallback(
+    async (options?: { invalidateColumnsCache?: boolean }) => {
+      if (editorModel.current) {
+        return await ESQLLang.validate(editorModel.current, code, esqlCallbacks, options);
+      }
+      return {
+        errors: [],
+        warnings: [],
+      };
+    },
+    [esqlCallbacks, code]
+  );
 
   useEffect(() => {
     const setQueryToTheCache = async () => {
@@ -738,10 +752,18 @@ const ESQLEditorInternal = function ESQLEditor({
   }, [isLoading, isQueryLoading, parseMessages, code]);
 
   const queryValidation = useCallback(
-    async ({ active }: { active: boolean }) => {
+    async ({
+      active,
+      invalidateColumnsCache,
+    }: {
+      active: boolean;
+      invalidateColumnsCache?: boolean;
+    }) => {
       if (!editorModel.current || editorModel.current.isDisposed()) return;
       monaco.editor.setModelMarkers(editorModel.current, 'Unified search', []);
-      const { warnings: parserWarnings, errors: parserErrors } = await parseMessages();
+      const { warnings: parserWarnings, errors: parserErrors } = await parseMessages({
+        invalidateColumnsCache,
+      });
 
       let allErrors = parserErrors;
       let allWarnings = parserWarnings;
@@ -803,9 +825,11 @@ const ESQLEditorInternal = function ESQLEditor({
   );
 
   // Refresh the fields cache when a new field has been added to the lookup index
-  const onNewFieldsAddedToLookupIndex = useCallback(() => {
+  const onNewFieldsAddedToLookupIndex = useCallback(async () => {
     esqlFieldsCache.clear?.();
-  }, [esqlFieldsCache]);
+
+    await queryValidation({ active: true, invalidateColumnsCache: true });
+  }, [esqlFieldsCache, queryValidation]);
 
   const { lookupIndexBadgeStyle, addLookupIndicesDecorator } = useLookupIndexCommand(
     editor1,
