@@ -259,6 +259,32 @@ EOF
   # Upload report as artifact
   buildkite-agent artifact upload "$REPORT_FILE"
 
+  # Create formatted PR comment with collapsible section
+  echo "--- Create PR Comment"
+  PR_COMMENT_FILE="entity-store-performance-pr-comment.txt"
+  
+  # Determine status emoji
+  STATUS_EMOJI=$([ $TEST_EXIT_CODE -eq 0 ] && echo "✅" || echo "❌")
+  STATUS_TEXT=$([ $TEST_EXIT_CODE -eq 0 ] && echo "PASSED" || echo "FAILED")
+  
+  {
+    echo "## ${STATUS_EMOJI} Entity Store Performance Tests ${STATUS_TEXT}"
+    echo ""
+    echo "**Build**: [${BUILDKITE_BUILD_NUMBER:-N/A}](${BUILDKITE_BUILD_URL:-})"
+    echo "**Duration**: ${TEST_DURATION}s"
+    echo "**Data File**: ${PERF_DATA_FILE} ($(format_log_count "$PERF_TOTAL_ROWS") logs)"
+    echo ""
+    echo "<details>"
+    echo "<summary>Click to expand full performance report</summary>"
+    echo ""
+    cat "$REPORT_FILE"
+    echo ""
+    echo "</details>"
+  } > "$PR_COMMENT_FILE"
+  
+  # Upload PR comment file as artifact
+  buildkite-agent artifact upload "$PR_COMMENT_FILE"
+
   # Set metadata for PR comment
   if [ $TEST_EXIT_CODE -eq 0 ]; then
     buildkite-agent meta-data set "entity_store_performance_status" "passed"

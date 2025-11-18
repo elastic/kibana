@@ -79,10 +79,10 @@ steps:
           PERF_INTERVAL: 150
           PERF_COUNT: 1
           # Optional: Baseline comparison configuration
-          PERF_BASELINE_FILE: baselines/baseline-v1  # Optional: specific baseline file to use
-          PERF_DEGRADATION_THRESHOLD: 30  # Optional: degradation threshold % (default: 25)
-          PERF_WARNING_THRESHOLD: 20  # Optional: warning threshold % (default: 15)
-          PERF_IMPROVEMENT_THRESHOLD: 20  # Optional: improvement threshold % (default: 15)
+          PERF_BASELINE_FILE: baselines/baseline-v1 # Optional: specific baseline file to use
+          PERF_DEGRADATION_THRESHOLD: 30 # Optional: degradation threshold % (default: 25)
+          PERF_WARNING_THRESHOLD: 20 # Optional: warning threshold % (default: 15)
+          PERF_IMPROVEMENT_THRESHOLD: 20 # Optional: improvement threshold % (default: 15)
         agents:
           provider: gcp
           image: family/kibana-ubuntu-2404
@@ -97,10 +97,20 @@ steps:
       - wait: ~
 
       - command: |
-          ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
-            --message "Entity store performance tests completed, see results at: $BUILDKITE_BUILD_URL" \
-            --context "entity-store-performance-job" \
-            --clear-previous
+          # Download PR comment artifact if available
+          if buildkite-agent artifact download "entity-store-performance-pr-comment.txt" . 2>/dev/null; then
+            echo "Posting detailed performance report to PR"
+            ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+              --message "$(cat entity-store-performance-pr-comment.txt)" \
+              --context "entity-store-performance-job" \
+              --clear-previous
+          else
+            echo "PR comment file not found, posting simple message"
+            ts-node .buildkite/scripts/lifecycle/comment_on_pr.ts \
+              --message "Entity store performance tests completed, see results at: $BUILDKITE_BUILD_URL" \
+              --context "entity-store-performance-job" \
+              --clear-previous
+          fi
         label: Comment with results
         agents:
           provider: gcp
