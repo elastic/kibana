@@ -752,6 +752,9 @@ paths:
         - description: >-
             The entity type of the engine ('user', 'host', 'service',
             'generic').
+          examples:
+            hostAndService:
+              value: host,service
           in: query
           name: entityTypes
           required: false
@@ -821,6 +824,9 @@ paths:
       operationId: DeleteEntityEngine
       parameters:
         - description: The entity type of the engine (either 'user' or 'host').
+          examples:
+            host:
+              value: host
           in: path
           name: entityType
           required: true
