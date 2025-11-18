@@ -41,11 +41,13 @@ import type {
   WorkflowsExecutionEnginePluginStartDeps,
 } from './types';
 
+import { generateExecutionTaskScope } from './utils';
 import type { ContextDependencies } from './workflow_context_manager/types';
 import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
 } from './workflow_task_manager/types';
+import { WorkflowTaskManager } from './workflow_task_manager/workflow_task_manager';
 import { createIndexes } from '../common';
 
 type SetupDependencies = Pick<ContextDependencies, 'cloudSetup'>;
@@ -439,7 +441,7 @@ export class WorkflowsExecutionEnginePlugin
       };
       await workflowExecutionRepository.createWorkflowExecution(workflowExecution);
       const taskInstance = {
-        id: `workflow:${workflowExecution.id}:${context.triggeredBy}`,
+        id: `workflow:${workflowExecution.id}:${workflowExecution.triggeredBy}`,
         taskType: 'workflow:run',
         params: {
           workflowRunId: workflowExecution.id,
@@ -450,7 +452,7 @@ export class WorkflowsExecutionEnginePlugin
           lastRunStatus: null,
           lastRunError: null,
         },
-        scope: ['workflows'],
+        scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
         enabled: true,
       };
 
@@ -485,6 +487,7 @@ export class WorkflowsExecutionEnginePlugin
         workflowExecutionId,
         spaceId
       );
+      const workflowTaskManager = new WorkflowTaskManager(plugins.taskManager);
 
       if (!workflowExecution) {
         throw new WorkflowExecutionNotFoundError(workflowExecutionId);
@@ -499,7 +502,6 @@ export class WorkflowsExecutionEnginePlugin
         return;
       }
 
-      // Request cancellation
       await workflowExecutionRepository.updateWorkflowExecution({
         id: workflowExecution.id,
         cancelRequested: true,
@@ -507,15 +509,7 @@ export class WorkflowsExecutionEnginePlugin
         cancelledAt: new Date().toISOString(),
         cancelledBy: 'system', // TODO: set user if available
       });
-
-      if (
-        [ExecutionStatus.WAITING, ExecutionStatus.WAITING_FOR_INPUT].includes(
-          workflowExecution.status
-        )
-      ) {
-        // TODO: handle WAITING states
-        // It should clean up resume tasks, etc
-      }
+      await workflowTaskManager.forceRunIdleTasks(workflowExecution.id);
     };
 
     return {
