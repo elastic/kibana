@@ -148,4 +148,5 @@ module.exports = {
 
   testResultsProcessor:
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/result_processors/logging_result_processor.js',
+  workerIdleMemoryLimit: process.env.CI_FORCE_NODE_POINTER_COMPRESSION === 'true' ? '2048MB' : undefined,
 };
