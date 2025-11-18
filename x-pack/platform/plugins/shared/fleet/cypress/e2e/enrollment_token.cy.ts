@@ -8,7 +8,7 @@
 import { cleanupAgentPolicies } from '../tasks/cleanup';
 import { ENROLLMENT_TOKENS } from '../screens/fleet';
 
-import { API_VERSIONS } from '../../common/constants';
+import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
 import { request } from '../tasks/common';
 import { login } from '../tasks/login';
 

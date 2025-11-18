@@ -17,12 +17,12 @@
     "@kbn/apm-types",
     "@kbn/core-http-server-mocks",
     "@kbn/apm-utils",
-    "@kbn/core-http-server",
     "@kbn/security-plugin-types-server",
     "@kbn/utility-types",
     "@kbn/elastic-agent-utils",
     "@kbn/observability-utils-common",
     "@kbn/apm-sources-access-plugin",
+    "@kbn/metrics-data-access-plugin",
     "@kbn/safer-lodash-set"
   ]
 }
