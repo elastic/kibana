@@ -25,7 +25,7 @@ export const ConversationHeader: React.FC<ConversationHeaderProps> = ({
   ariaLabelledBy,
 }) => {
   return (
-    <EuiFlexGroup alignItems="center">
+    <EuiFlexGroup alignItems="center" responsive={false}>
       <EuiFlexItem grow={false}>
         <ConversationLeftActions />
       </EuiFlexItem>
