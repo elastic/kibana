@@ -198,7 +198,7 @@ export const MetricsExperienceGridContent = ({
           onBrushEnd={onBrushEnd}
           onFilter={onFilter}
           discoverFetch$={discoverFetch$}
-          requestParams={requestParams}
+          timeRange={timeRange}
           abortController={abortController}
           searchTerm={searchTerm}
         />

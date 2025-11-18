@@ -38,7 +38,7 @@ describe('useLensProps', () => {
     },
   ];
   let discoverFetch$: BehaviorSubject<UnifiedHistogramInputMessage>;
-  const getTimeRange = (): TimeRange => ({ from: 'now-1h', to: 'now' });
+  const timeRange: TimeRange = { from: 'now-1h', to: 'now' };
 
   const createMockChartRef = () => {
     return React.createRef<HTMLDivElement>();
@@ -102,7 +102,7 @@ describe('useLensProps', () => {
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
-        getTimeRange,
+        timeRange,
         discoverFetch$,
         chartRef,
         chartLayers: mockChartLayers,
@@ -134,7 +134,7 @@ describe('useLensProps', () => {
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
-        getTimeRange,
+        timeRange,
         discoverFetch$,
         chartRef,
         chartLayers: mockChartLayers,
@@ -181,7 +181,7 @@ describe('useLensProps', () => {
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
-        getTimeRange,
+        timeRange,
         discoverFetch$,
         chartRef,
         chartLayers: mockChartLayers,
@@ -199,7 +199,7 @@ describe('useLensProps', () => {
         id: 'metricsExperienceLensComponent',
         noPadding: true,
         searchSessionId: undefined,
-        timeRange: getTimeRange(),
+        timeRange,
         viewMode: 'view',
       });
     });
@@ -211,7 +211,7 @@ describe('useLensProps', () => {
         title: 'Test Chart',
         query: 'FROM metrics-*',
         services: servicesMock as UnifiedHistogramServices,
-        getTimeRange,
+        timeRange,
         discoverFetch$,
         chartRef: undefined,
         chartLayers: mockChartLayers,

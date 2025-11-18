@@ -98,6 +98,7 @@ describe('MetricsExperienceGrid', () => {
       renderToggleActions: () => <div data-test-subj="toggleActions" />,
       chartToolbarCss: { name: '', styles: '' },
       histogramCss: { name: '', styles: '' },
+      timeRange: { from: 'now-15m', to: 'now' },
       requestParams: {
         getTimeRange: () => ({ from: 'now-15m', to: 'now' }),
         filters: [],

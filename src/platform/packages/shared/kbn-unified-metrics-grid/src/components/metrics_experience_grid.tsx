@@ -50,7 +50,7 @@ export const MetricsExperienceGrid = ({
   const { toggleActions, leftSideActions, rightSideActions } = useToolbarActions({
     fields,
     renderToggleActions,
-    requestParams,
+    timeRange,
   });
 
   const onKeyDown = useCallback(

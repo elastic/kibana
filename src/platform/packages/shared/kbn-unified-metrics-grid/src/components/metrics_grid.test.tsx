@@ -35,16 +35,7 @@ describe('MetricsGrid', () => {
     discoverFetch$.complete();
   });
 
-  const requestParams: MetricsGridProps['requestParams'] = {
-    filters: [],
-    getTimeRange: () => ({ from: 'now-1h', to: 'now' }),
-    query: {
-      esql: 'FROM metrics-*',
-    },
-    esqlVariables: [],
-    relativeTimeRange: { from: 'now-1h', to: 'now' },
-    updateTimeRange: () => {},
-  };
+  const timeRange: MetricsGridProps['timeRange'] = { from: 'now-1h', to: 'now' };
 
   const services = {
     fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
@@ -72,7 +63,7 @@ describe('MetricsGrid', () => {
         dimensions={[]}
         discoverFetch$={discoverFetch$}
         fields={fields}
-        requestParams={requestParams}
+        timeRange={timeRange}
         services={services}
       />
     );
@@ -88,7 +79,7 @@ describe('MetricsGrid', () => {
         dimensions={[{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }]}
         discoverFetch$={discoverFetch$}
         fields={fields}
-        requestParams={requestParams}
+        timeRange={timeRange}
         services={services}
       />
     );
@@ -101,7 +92,7 @@ describe('MetricsGrid', () => {
         dimensions={[{ name: 'host.name', type: ES_FIELD_TYPES.KEYWORD }]}
         discoverFetch$={discoverFetch$}
         fields={fields}
-        requestParams={requestParams}
+        timeRange={timeRange}
         services={services}
       />
     );
@@ -126,7 +117,7 @@ describe('MetricsGrid', () => {
           dimensions={[]}
           discoverFetch$={discoverFetch$}
           fields={fields}
-          requestParams={requestParams}
+          timeRange={timeRange}
           services={services}
         />
       );
@@ -149,7 +140,7 @@ describe('MetricsGrid', () => {
           dimensions={[]}
           discoverFetch$={discoverFetch$}
           fields={fields}
-          requestParams={requestParams}
+          timeRange={timeRange}
           services={services}
         />
       );
@@ -177,7 +168,7 @@ describe('MetricsGrid', () => {
           dimensions={[]}
           discoverFetch$={discoverFetch$}
           fields={fields}
-          requestParams={requestParams}
+          timeRange={timeRange}
           services={services}
         />
       );
@@ -208,7 +199,7 @@ describe('MetricsGrid', () => {
           dimensions={[]}
           discoverFetch$={discoverFetch$}
           fields={fields}
-          requestParams={requestParams}
+          timeRange={timeRange}
           services={services}
         />
       );
@@ -246,7 +237,7 @@ describe('MetricsGrid', () => {
           dimensions={[]}
           discoverFetch$={discoverFetch$}
           fields={multipleFields}
-          requestParams={requestParams}
+          timeRange={timeRange}
           services={services}
         />
       );
@@ -291,7 +282,7 @@ describe('MetricsGrid', () => {
             dimensions={[]}
             discoverFetch$={discoverFetch$}
             fields={fields}
-            requestParams={requestParams}
+            timeRange={timeRange}
             services={services}
           />
         );
@@ -310,7 +301,7 @@ describe('MetricsGrid', () => {
             dimensions={[]}
             discoverFetch$={discoverFetch$}
             fields={fields}
-            requestParams={requestParams}
+            timeRange={timeRange}
             services={services}
           />
         );
@@ -341,7 +332,7 @@ describe('MetricsGrid', () => {
             dimensions={[]}
             discoverFetch$={discoverFetch$}
             fields={fields}
-            requestParams={requestParams}
+            timeRange={timeRange}
             services={services}
           />
         );
@@ -363,7 +354,7 @@ describe('MetricsGrid', () => {
             dimensions={[]}
             discoverFetch$={discoverFetch$}
             fields={fields}
-            requestParams={requestParams}
+            timeRange={timeRange}
             services={services}
           />
         );

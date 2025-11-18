@@ -30,7 +30,7 @@ import { useChartLayers } from './chart/hooks/use_chart_layers';
 
 export type MetricsGridProps = Pick<
   ChartSectionProps,
-  'searchSessionId' | 'services' | 'onBrushEnd' | 'onFilter' | 'abortController' | 'requestParams'
+  'searchSessionId' | 'services' | 'onBrushEnd' | 'onFilter' | 'abortController' | 'timeRange'
 > & {
   filters?: DimensionFilters;
   dimensions: Dimension[];
@@ -52,7 +52,7 @@ export const MetricsGrid = ({
   services,
   columns,
   abortController,
-  requestParams,
+  timeRange,
   discoverFetch$,
   searchTerm,
   filters = {},
@@ -169,7 +169,7 @@ export const MetricsGrid = ({
                   onBrushEnd={onBrushEnd}
                   onFilter={onFilter}
                   abortController={abortController}
-                  requestParams={requestParams}
+                  timeRange={timeRange}
                   discoverFetch$={discoverFetch$}
                   rowIndex={rowIndex}
                   colIndex={colIndex}
@@ -198,7 +198,7 @@ export const MetricsGrid = ({
 interface ChartItemProps
   extends Pick<
     ChartSectionProps,
-    'searchSessionId' | 'services' | 'onBrushEnd' | 'onFilter' | 'abortController' | 'requestParams'
+    'searchSessionId' | 'services' | 'onBrushEnd' | 'onFilter' | 'abortController' | 'timeRange'
   > {
   id: string;
   metric: MetricField;
@@ -230,7 +230,7 @@ const ChartItem = React.memo(
         onBrushEnd,
         onFilter,
         abortController,
-        requestParams,
+        timeRange,
         discoverFetch$,
         rowIndex,
         colIndex,
@@ -279,7 +279,7 @@ const ChartItem = React.memo(
             esqlQuery={esqlQuery}
             size={size}
             discoverFetch$={discoverFetch$}
-            requestParams={requestParams}
+            timeRange={timeRange}
             services={services}
             abortController={abortController}
             searchSessionId={searchSessionId}

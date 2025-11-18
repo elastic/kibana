@@ -26,7 +26,6 @@ import {
   combineLatest,
   map,
 } from 'rxjs';
-import type { TimeRange } from '@kbn/data-plugin/common';
 import { useEuiTheme } from '@elastic/eui';
 import type {
   LensYBoundsConfig,
@@ -48,7 +47,7 @@ export const useLensProps = ({
   title,
   query,
   services,
-  getTimeRange,
+  timeRange,
   searchSessionId,
   discoverFetch$,
   chartRef,
@@ -58,11 +57,10 @@ export const useLensProps = ({
   title: string;
   query: string;
   discoverFetch$: Observable<UnifiedHistogramInputMessage>;
-  getTimeRange: () => TimeRange;
   chartRef?: React.RefObject<HTMLDivElement>;
   chartLayers: LensSeriesLayer[];
   yBounds?: LensYBoundsConfig;
-} & Pick<ChartSectionProps, 'services' | 'searchSessionId'>) => {
+} & Pick<ChartSectionProps, 'services' | 'searchSessionId' | 'timeRange'>) => {
   const { euiTheme } = useEuiTheme();
   const chartConfigUpdates$ = useRef<BehaviorSubject<void>>(new BehaviorSubject<void>(undefined));
 
@@ -87,11 +85,11 @@ export const useLensProps = ({
     (attributes: LensAttributes) => {
       return getLensProps({
         searchSessionId,
-        getTimeRange,
+        timeRange,
         attributes,
       });
     },
-    [searchSessionId, getTimeRange]
+    [searchSessionId, timeRange]
   );
 
   const [lensPropsContext, setLensPropsContext] = useState<ReturnType<typeof buildLensProps>>();
@@ -183,16 +181,15 @@ const buildLensParams = ({
 
 const getLensProps = ({
   searchSessionId,
-  getTimeRange,
+  timeRange,
   attributes,
 }: {
   searchSessionId?: string;
   attributes: LensAttributes;
-  getTimeRange: () => TimeRange;
-}): LensProps => ({
+} & Pick<ChartSectionProps, 'timeRange'>) => ({
   id: 'metricsExperienceLensComponent',
-  viewMode: 'view',
-  timeRange: getTimeRange(),
+  viewMode: 'view' as const,
+  timeRange,
   attributes,
   noPadding: true,
   searchSessionId,

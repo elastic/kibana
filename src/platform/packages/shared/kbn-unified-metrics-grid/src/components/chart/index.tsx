@@ -25,7 +25,7 @@ export const ChartSizes = {
 };
 
 export type ChartSize = keyof typeof ChartSizes;
-export type ChartProps = Pick<ChartSectionProps, 'searchSessionId' | 'requestParams'> &
+export type ChartProps = Pick<ChartSectionProps, 'searchSessionId' | 'timeRange'> &
   Omit<LensWrapperProps, 'lensProps' | 'onViewDetails' | 'onCopyToDashboard' | 'description'> & {
     size?: ChartSize;
     discoverFetch$: Observable<UnifiedHistogramInputMessage>;
@@ -44,7 +44,7 @@ export const Chart = ({
   onBrushEnd,
   onFilter,
   onViewDetails,
-  requestParams,
+  timeRange,
   titleHighlight,
   discoverFetch$,
   size = 'm',
@@ -60,7 +60,6 @@ export const Chart = ({
 
   const [isSaveModalVisible, { toggle: toggleSaveModalVisible }] = useBoolean(false);
   const { SaveModalComponent } = services.lens;
-  const { getTimeRange } = requestParams;
 
   const lensProps = useLensProps({
     title,
@@ -68,7 +67,7 @@ export const Chart = ({
     services,
     searchSessionId,
     discoverFetch$,
-    getTimeRange,
+    timeRange,
     chartRef,
     chartLayers,
     yBounds,
