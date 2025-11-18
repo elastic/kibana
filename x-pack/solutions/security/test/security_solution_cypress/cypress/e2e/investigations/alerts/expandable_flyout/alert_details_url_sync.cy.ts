@@ -33,7 +33,7 @@ describe('Expandable flyout state sync', { tags: ['@ess', '@serverless'] }, () =
     cy.log('should serialize its state to url');
 
     cy.url().should('include', 'right');
-    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('have.text', 'teeeest name');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('have.text', rule.name);
 
     cy.log('should reopen the flyout after browser refresh');
 

@@ -20,7 +20,6 @@ export default defineCypressConfig({
   pageLoadTimeout: 60000,
   responseTimeout: 60000,
   screenshotsFolder: '../../../../../target/kibana-security-solution/cypress/screenshots',
-  screenshotOnRunFailure: true,
   trashAssetsBeforeRuns: false,
   video: false,
   videosFolder: '../../../../../target/kibana-security-solution/cypress/videos',
