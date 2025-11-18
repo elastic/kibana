@@ -58,48 +58,37 @@ export const FileUploadView: FC<Props> = ({ reset, getAdditionalLinks }) => {
     <div data-test-subj="dataVisualizerPageFileUpload">
       <>
         {uploadStatus.overallImportStatus === STATUS.NOT_STARTED ? (
-          <EuiFlexGroup
-            direction="column"
-            gutterSize="m"
-            style={{
-              maxWidth: '60%',
-            }}
-          >
-            <EuiFlexItem grow={false}>
-              <EuiText size="s" color="subdued">
-                <p>
-                  <FormattedMessage
-                    id="xpack.dataVisualizer.file.uploadView.uploadFileDescription"
-                    defaultMessage="Upload your file, analyze its data, and import the data into an Elasticsearch index."
-                  />
-                </p>
-              </EuiText>
-            </EuiFlexItem>
+          <>
+            <EuiText size="s" color="subdued">
+              <p>
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.uploadView.uploadFileDescription"
+                  defaultMessage="Upload your file, analyze its data, and import the data into an Elasticsearch index."
+                />
+              </p>
+            </EuiText>
 
-            <EuiFlexItem grow={false}>
-              <IndexSelection />
-            </EuiFlexItem>
+            <EuiSpacer size="m" />
 
-            <EuiFlexItem grow={false}>
-              <FilePicker
-                fileUploadManager={fileUploadManager}
-                fullWidth={true}
-                large={filesStatus.length === 0}
-              />
-            </EuiFlexItem>
+            <IndexSelection />
+
+            <EuiSpacer size="m" />
+
+            <FilePicker
+              fileUploadManager={fileUploadManager}
+              fullWidth={true}
+              large={filesStatus.length === 0}
+            />
+
+            <EuiSpacer />
 
             {filesStatus.map((status, i) => (
-              <EuiFlexItem grow={false}>
-                <FileStatus key={i} index={i} lite={false} showOverrideButton={true} />
-              </EuiFlexItem>
+              <FileStatus key={i} index={i} lite={false} showOverrideButton={true} />
             ))}
 
-            {fileClashes ? (
-              <EuiFlexItem grow={false}>
-                <FileClashWarning />
-              </EuiFlexItem>
-            ) : null}
-          </EuiFlexGroup>
+            {fileClashes ? <FileClashWarning /> : null}
+            <EuiSpacer />
+          </>
         ) : null}
 
         {showImportControls ? <AdvancedSection /> : null}
