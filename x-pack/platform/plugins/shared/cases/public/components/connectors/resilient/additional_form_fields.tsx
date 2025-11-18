@@ -112,20 +112,6 @@ export const AdditionalFormFields = React.memo<{
 
   return (
     <Form form={form}>
-      <EuiFlexGrid columns={isInSidebarForm ? 1 : 3}>
-        {additionalFields.map((field) => {
-          const fieldMetaData = fieldsData?.data?.fieldsObj[field.value || ''];
-          if (!fieldMetaData) {
-            return null;
-          }
-          return (
-            <EuiFlexItem key={fieldMetaData.name}>
-              <AdditionalFormField field={fieldMetaData} />
-            </EuiFlexItem>
-          );
-        })}
-      </EuiFlexGrid>
-      {additionalFields.length > 0 ? <EuiSpacer size="m" /> : null}
       <EuiFormRow
         label={i18n.ADDITIONAL_FIELDS_LABEL}
         helpText={i18n.ADDITIONAL_FIELDS_HELP_TEXT}
@@ -146,6 +132,20 @@ export const AdditionalFormFields = React.memo<{
           selectedOptions={additionalFields}
         />
       </EuiFormRow>
+      {additionalFields.length > 0 ? <EuiSpacer size="m" /> : null}
+      <EuiFlexGrid columns={isInSidebarForm ? 1 : 3}>
+        {additionalFields.map((field) => {
+          const fieldMetaData = fieldsData?.data?.fieldsObj[field.value || ''];
+          if (!fieldMetaData) {
+            return null;
+          }
+          return (
+            <EuiFlexItem key={fieldMetaData.name}>
+              <AdditionalFormField field={fieldMetaData} />
+            </EuiFlexItem>
+          );
+        })}
+      </EuiFlexGrid>
     </Form>
   );
 });
