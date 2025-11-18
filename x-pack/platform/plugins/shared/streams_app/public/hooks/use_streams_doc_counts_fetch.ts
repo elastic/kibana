@@ -8,6 +8,7 @@
 import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 import { useEffect, useRef } from 'react';
 import type { StreamDocsStat } from '@kbn/streams-plugin/common';
+import type { UnparsedEsqlResponse } from '@kbn/traced-es-client';
 import { useKibana } from './use_kibana';
 import { useTimefilter } from './use_timefilter';
 
@@ -20,13 +21,16 @@ export interface StreamDocCountsFetch {
 interface UseDocCountFetchProps {
   groupTotalCountByTimestamp: boolean;
   canReadFailureStore: boolean;
+  numDataPoints: number;
 }
 
 export function useStreamDocCountsFetch({
   groupTotalCountByTimestamp: _groupTotalCountByTimestamp,
   canReadFailureStore,
+  numDataPoints,
 }: UseDocCountFetchProps): {
   getStreamDocCounts(): StreamDocCountsFetch;
+  getStreamHistogram(streamName: string): Promise<UnparsedEsqlResponse>;
 } {
   const { timeState, timeState$ } = useTimefilter();
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
@@ -92,15 +96,12 @@ export function useStreamDocCountsFetch({
         types,
       };
 
-      const countPromise = streamsRepositoryClient.fetch(
-        'GET /internal/streams/doc_counts/total',
-        {
-          params: {
-            query: commonQueryParams,
-          },
-          signal: abortController.signal,
-        }
-      );
+      const countPromise = streamsRepositoryClient.fetch('GET /internal/streams/doc_counts/total', {
+        params: {
+          query: commonQueryParams,
+        },
+        signal: abortController.signal,
+      });
 
       const failedCountPromise = canReadFailureStore
         ? streamsRepositoryClient.fetch('GET /internal/streams/doc_counts/failed', {
@@ -130,6 +131,28 @@ export function useStreamDocCountsFetch({
       promiseCache.current = histogramFetch;
 
       return histogramFetch;
+    },
+    getStreamHistogram(streamName: string): Promise<UnparsedEsqlResponse> {
+      const abortController = abortControllerRef.current;
+      if (!abortController) {
+        throw new Error('Abort controller not set');
+      }
+
+      const minInterval = Math.floor((timeState.end - timeState.start) / numDataPoints);
+
+      const source = canReadFailureStore ? `${streamName},${streamName}::failures` : streamName;
+
+      return streamsRepositoryClient.fetch('POST /internal/streams/esql', {
+        params: {
+          body: {
+            operationName: 'get_doc_count_for_stream',
+            query: `FROM ${source} | STATS doc_count = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${minInterval} ms)`,
+            start: timeState.start,
+            end: timeState.end,
+          },
+        },
+        signal: abortController.signal,
+      }) as Promise<UnparsedEsqlResponse>;
     },
   };
 }

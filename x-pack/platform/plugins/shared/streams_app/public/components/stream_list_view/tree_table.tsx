@@ -22,6 +22,7 @@ import { css } from '@emotion/css';
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common';
 import { Streams } from '@kbn/streams-schema';
+import useAsync from 'react-use/lib/useAsync';
 import type { TableRow, SortableField } from './utils';
 import {
   buildStreamRows,
@@ -36,6 +37,7 @@ import { DocumentsColumn } from './documents_column';
 import { DataQualityColumn } from './data_quality_column';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { useStreamDocCountsFetch } from '../../hooks/use_streams_doc_counts_fetch';
+import { useTimefilter } from '../../hooks/use_timefilter';
 import { RetentionColumn } from './retention_column';
 import { calculateDataQuality } from '../../util/calculate_data_quality';
 import {
@@ -50,7 +52,6 @@ import {
   FAILURE_STORE_PERMISSIONS_ERROR,
 } from './translations';
 import { DiscoverBadgeButton } from '../stream_badges';
-import useAsync from 'react-use/lib/useAsync';
 
 const datePickerStyle = css`
   .euiFormControlLayout {
@@ -72,6 +73,7 @@ export function StreamsTreeTable({
 }) {
   const router = useStreamsAppRouter();
   const { euiTheme } = useEuiTheme();
+  const { timeState } = useTimefilter();
 
   const [searchQuery, setSearchQuery] = useState<Query | undefined>();
   const [sortField, setSortField] = useState<SortableField>('nameSortKey');
@@ -83,19 +85,19 @@ export function StreamsTreeTable({
     pageSize: 25,
   });
 
-  const { getStreamDocCounts } = useStreamDocCountsFetch({
+  const numDataPoints = 25;
+
+  const { getStreamDocCounts, getStreamHistogram } = useStreamDocCountsFetch({
     groupTotalCountByTimestamp: true,
     canReadFailureStore,
+    numDataPoints,
   });
 
   const docCountsFetch = getStreamDocCounts();
 
   const totalDocsResult = useAsync(() => docCountsFetch.docCount, [docCountsFetch]);
   const failedDocsResult = useAsync(() => docCountsFetch.failedDocCount, [docCountsFetch]);
-  const degradedDocsResult = useAsync(
-    () => docCountsFetch.degradedDocCount,
-    [docCountsFetch]
-  );
+  const degradedDocsResult = useAsync(() => docCountsFetch.degradedDocCount, [docCountsFetch]);
 
   const docsByStream = React.useMemo(() => {
     if (!totalDocsResult.value) {
@@ -162,18 +164,14 @@ export function StreamsTreeTable({
   };
 
   // Filter streams by query, including ancestors of matches
-  const filteredStreams = React.useMemo(
-    () =>
-    {
-      const dataQualityPattern = /dataQuality:\((.*)\)/;
-      const freeText = searchQuery?.text?.replace(dataQualityPattern, '').trim() ?? '';
-      return filterStreamsByQuery(
-        streams.filter((stream) => Streams.ingest.all.Definition.is(stream.stream)),
-        freeText
-      )
-    },
-    [streams, searchQuery]
-  );
+  const filteredStreams = React.useMemo(() => {
+    const dataQualityPattern = /dataQuality:\((.*)\)/;
+    const freeText = searchQuery?.text?.replace(dataQualityPattern, '').trim() ?? '';
+    return filterStreamsByQuery(
+      streams.filter((stream) => Streams.ingest.all.Definition.is(stream.stream)),
+      freeText
+    );
+  }, [streams, searchQuery]);
 
   const enrichedStreams = React.useMemo(() => {
     const streamList = shouldComposeTree(sortField) ? asTrees(filteredStreams) : filteredStreams;
@@ -185,15 +183,18 @@ export function StreamsTreeTable({
     [collapsed, sortField]
   );
 
-  const qualityFiters = searchQuery?.ast?.clauses.filter((clause) => clause.type === 'field' && clause.field === 'dataQuality') ?? [];
-
-  const allRows = React.useMemo(
-    () => {
-      const rows = buildStreamRows(enrichedStreams, sortField, sortDirection, qualityByStream);
-      return qualityFiters.length > 0 ? rows.filter((row) => qualityFiters.some((filter) => filter.value.includes(row.dataQuality))) : rows;
-    },
-    [enrichedStreams, sortField, sortDirection, qualityByStream]
-  );
+  const allRows = React.useMemo(() => {
+    const rows = buildStreamRows(enrichedStreams, sortField, sortDirection, qualityByStream);
+    const qualityFiters =
+      searchQuery?.ast?.clauses.filter(
+        (clause) => clause.type === 'field' && clause.field === 'dataQuality'
+      ) ?? [];
+    return qualityFiters.length > 0
+      ? rows.filter((row) =>
+          qualityFiters.some((filter: any) => filter.value.includes(row.dataQuality))
+        )
+      : rows;
+  }, [enrichedStreams, sortField, sortDirection, qualityByStream, searchQuery?.ast?.clauses]);
 
   // Only pass filtered rows if tree mode is active
   const items = React.useMemo(
@@ -371,7 +372,7 @@ export function StreamsTreeTable({
                     data-test-subj={`streamsNameLink-${item.stream.name}`}
                     href={router.link('/{key}', { path: { key: item.stream.name } })}
                   >
-                    <EuiHighlight search={searchQuery}>{item.stream.name}</EuiHighlight>
+                    <EuiHighlight search={searchQuery?.text ?? ''}>{item.stream.name}</EuiHighlight>
                   </EuiLink>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -394,18 +395,16 @@ export function StreamsTreeTable({
             </EuiFlexGroup>
           ),
           width: '180px',
-          sortable: docCountsLoaded
-            ? (row: TableRow) => docsByStream[row.stream.name] ?? 0
-            : false,
+          sortable: docCountsLoaded ? (row: TableRow) => docsByStream[row.stream.name] ?? 0 : false,
           align: 'right',
           dataType: 'number',
           render: (_: unknown, item: TableRow) =>
             item.data_stream ? (
               <DocumentsColumn
                 indexPattern={item.stream.name}
-                docCount={docsByStream[item.stream.name] ?? 0}
-                isLoading={totalDocsResult.loading}
-                error={totalDocsResult.error as Error | undefined}
+                histogramQueryFetch={getStreamHistogram(item.stream.name)}
+                timeState={timeState}
+                numDataPoints={numDataPoints}
               />
             ) : null,
         },
@@ -426,8 +425,7 @@ export function StreamsTreeTable({
           ),
           width: '150px',
           sortable: qualityLoaded
-            ? (item: TableRow) =>
-                qualityRank[item.dataQuality as QualityIndicators]
+            ? (item: TableRow) => qualityRank[item.dataQuality as QualityIndicators]
             : false,
           dataType: 'string',
           render: (_: unknown, item: TableRow) =>
@@ -436,9 +434,7 @@ export function StreamsTreeTable({
                 streamName={item.stream.name}
                 quality={item.dataQuality as QualityIndicators}
                 isLoading={
-                  totalDocsResult.loading ||
-                  failedDocsResult.loading ||
-                  degradedDocsResult.loading
+                  totalDocsResult.loading || failedDocsResult.loading || degradedDocsResult.loading
                 }
               />
             ) : null,
@@ -506,42 +502,42 @@ export function StreamsTreeTable({
             <StreamsAppSearchBar showDatePicker />
           </div>
         ),
-        filters: (qualityLoaded && canReadFailureStore)
-          ? [
-              {
-                type: 'field_value_selection',
-                name: i18n.translate(
-                  'xpack.streams.streamsTreeTable.dataQualityFilter.label',
-                  { defaultMessage: 'Data quality' }
-                ),
-                field: 'dataQuality',
-                multiSelect: 'or',
-                options: [
-                  {
-                    value: 'good',
-                    name: i18n.translate(
-                      'xpack.streams.streamsTreeTable.dataQualityFilter.goodLabel',
-                      { defaultMessage: 'Good' }
-                    ),
-                  },
-                  {
-                    value: 'degraded',
-                    name: i18n.translate(
-                      'xpack.streams.streamsTreeTable.dataQualityFilter.degradedLabel',
-                      { defaultMessage: 'Degraded' }
-                    ),
-                  },
-                  {
-                    value: 'poor',
-                    name: i18n.translate(
-                      'xpack.streams.streamsTreeTable.dataQualityFilter.poorLabel',
-                      { defaultMessage: 'Poor' }
-                    ),
-                  },
-                ],
-              },
-            ]
-          : [],
+        filters:
+          qualityLoaded && canReadFailureStore
+            ? [
+                {
+                  type: 'field_value_selection',
+                  name: i18n.translate('xpack.streams.streamsTreeTable.dataQualityFilter.label', {
+                    defaultMessage: 'Data quality',
+                  }),
+                  field: 'dataQuality',
+                  multiSelect: 'or',
+                  options: [
+                    {
+                      value: 'good',
+                      name: i18n.translate(
+                        'xpack.streams.streamsTreeTable.dataQualityFilter.goodLabel',
+                        { defaultMessage: 'Good' }
+                      ),
+                    },
+                    {
+                      value: 'degraded',
+                      name: i18n.translate(
+                        'xpack.streams.streamsTreeTable.dataQualityFilter.degradedLabel',
+                        { defaultMessage: 'Degraded' }
+                      ),
+                    },
+                    {
+                      value: 'poor',
+                      name: i18n.translate(
+                        'xpack.streams.streamsTreeTable.dataQualityFilter.poorLabel',
+                        { defaultMessage: 'Poor' }
+                      ),
+                    },
+                  ],
+                },
+              ]
+            : [],
       }}
       tableCaption={STREAMS_TABLE_CAPTION_ARIA_LABEL}
     />

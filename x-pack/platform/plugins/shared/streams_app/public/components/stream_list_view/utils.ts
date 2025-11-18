@@ -9,8 +9,8 @@ import { getAncestors, getSegments, isRootStreamDefinition, Streams } from '@kbn
 import type { ListStreamDetail } from '@kbn/streams-plugin/server/routes/internal/streams/crud/route';
 import { isDslLifecycle, isIlmLifecycle } from '@kbn/streams-schema';
 import type { Direction } from '@elastic/eui';
+import type { QualityIndicators } from '@kbn/dataset-quality-plugin/common/types';
 import { parseDurationInSeconds } from '../data_management/stream_detail_lifecycle/helpers/helpers';
-import { QualityIndicators } from '@kbn/dataset-quality-plugin/common/types';
 
 const SORTABLE_FIELDS = ['nameSortKey', 'retentionMs'] as const;
 
@@ -120,7 +120,12 @@ export function buildStreamRows(
     level: number,
     rootMeta: Pick<TableRow, 'rootNameSortKey' | 'rootDocumentsCount' | 'rootRetentionMs'>
   ) => {
-    result.push({ ...node, level, ...rootMeta, dataQuality: qualityByStream[node.stream.name] ?? 'good' });
+    result.push({
+      ...node,
+      level,
+      ...rootMeta,
+      dataQuality: qualityByStream[node.stream.name] ?? 'good',
+    });
     if (node.children) {
       node.children.sort(compare).forEach((child) => pushNode(child, level + 1, rootMeta));
     }

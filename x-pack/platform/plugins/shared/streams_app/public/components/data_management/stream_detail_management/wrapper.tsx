@@ -82,13 +82,9 @@ export function Wrapper({
 
   const countResult = useAsync(() => docCountsFetch.docCount, [docCountsFetch]);
   const failedDocsResult = useAsync(() => docCountsFetch.failedDocCount, [docCountsFetch]);
-  const degradedDocsResult = useAsync(
-    () => docCountsFetch.degradedDocCount,
-    [docCountsFetch]
-  );
+  const degradedDocsResult = useAsync(() => docCountsFetch.degradedDocCount, [docCountsFetch]);
 
-  const docCount =
-    countResult?.value?.find((stat) => stat.dataset === streamId)?.count ?? 0;
+  const docCount = countResult?.value?.find((stat) => stat.dataset === streamId)?.count ?? 0;
   const degradedDocCount =
     degradedDocsResult?.value?.find((stat) => stat.dataset === streamId)?.count ?? 0;
   const failedDocCount =
