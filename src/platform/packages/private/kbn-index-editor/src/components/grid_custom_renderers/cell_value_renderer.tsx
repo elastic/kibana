@@ -13,6 +13,7 @@ import { type EuiDataGridRefProps } from '@kbn/unified-data-table';
 import { type DataGridCellValueElementProps } from '@kbn/unified-data-table';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { getCellValue } from '../../utils';
 
 export const getCellValueRenderer =
   (
@@ -22,8 +23,7 @@ export const getCellValueRenderer =
   ): FunctionComponent<DataGridCellValueElementProps> =>
   ({ rowIndex, colIndex, columnId }) => {
     const row = rows[rowIndex];
-
-    const cellValue = row.flattened[columnId]?.toString();
+    const cellValue = getCellValue(row.flattened[columnId]);
 
     const onEditStartHandler = () => {
       dataTableRef.current?.openCellPopover({

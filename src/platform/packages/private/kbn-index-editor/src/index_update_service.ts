@@ -45,6 +45,7 @@ import type { ESQLOrderExpression } from '@kbn/esql-ast/src/types';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import type { IndicesAutocompleteResult } from '@kbn/esql-types';
+import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
 import { isPlaceholderColumn } from './utils';
 import type { IndexEditorError } from './types';
 import { IndexEditorErrors } from './types';
@@ -412,11 +413,8 @@ export class IndexUpdateService {
       const unsavedFields = pendingColumnsToBeSaved
         .filter((column) => !dataView.fields.getByName(column.name))
         .map((column) => {
-          let type = column.fieldType ?? KBN_FIELD_TYPES.UNKNOWN;
-          if (type === 'integer') {
-            // HD Change!!!!
-            type = 'number';
-          }
+          const type = esFieldTypeToKibanaFieldType(column.fieldType ?? KBN_FIELD_TYPES.UNKNOWN);
+
           return dataView.fields.create({
             name: column.name,
             type,
@@ -749,7 +747,6 @@ export class IndexUpdateService {
         .subscribe({
           next: (response) => {
             const { documents_found: total, values, columns } = response.rawResponse;
-
             const columnNames = columns.map(({ name }) => name);
             const resultRows: DataTableRecord[] = values
               .map((row) => zipObject(columnNames, row))

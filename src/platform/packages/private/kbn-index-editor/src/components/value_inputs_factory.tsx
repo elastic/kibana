@@ -9,7 +9,6 @@
 
 import React, { useCallback } from 'react';
 import { EuiFieldText, EuiFieldNumber } from '@elastic/eui';
-import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { i18n } from '@kbn/i18n';
 
 export interface ValueInputProps {
@@ -58,10 +57,17 @@ export const BooleanInput = ({ onError, onChange, ...restOfProps }: ValueInputPr
   );
 };
 
-export function getInputComponentForType(
-  type: DatatableColumnType | undefined
-): React.FC<ValueInputProps> {
+export function getInputComponentForType(type: string | undefined): React.FC<ValueInputProps> {
   switch (type) {
+    case 'byte':
+    case 'double':
+    case 'float':
+    case 'half_float':
+    case 'integer':
+    case 'long':
+    case 'scaled_float':
+    case 'short':
+    case 'unsigned_long':
     case 'number':
       return NumberInput;
     case 'boolean':

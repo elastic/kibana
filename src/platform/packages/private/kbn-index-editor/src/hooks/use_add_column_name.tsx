@@ -36,7 +36,7 @@ export const useAddColumnName = (initialColumnName = '', initialColumnType?: str
   const columns = useObservable(indexUpdateService.dataTableColumns$, []);
 
   const [columnType, setColumnType] = useState(
-    initialColumnType !== KBN_FIELD_TYPES.UNKNOWN ? initialColumnType : undefined
+    initialColumnType !== KBN_FIELD_TYPES.UNKNOWN ? initialColumnType : null
   );
 
   const initialInputValue = isPlaceholderColumn(initialColumnName) ? '' : initialColumnName;
