@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -122,7 +122,9 @@
     "@kbn/licensing-types",
     "@kbn/apm-types",
     "@kbn/control-group-renderer",
-    "@kbn/react-query"
+    "@kbn/react-query",
+    "@kbn/deeplinks-analytics",
+    "@kbn/esql-composer",
   ],
   "exclude": ["target/**/*"]
 }

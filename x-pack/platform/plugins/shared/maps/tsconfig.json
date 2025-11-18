@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "allowJs": true
@@ -100,7 +100,8 @@
     "@kbn/es-query-server",
     "@kbn/data-service-server",
     "@kbn/visualizations-common",
-    "@kbn/lens-common"
+    "@kbn/lens-common",
+    "@kbn/crypto-browser",
   ],
   "exclude": ["target/**/*"]
 }

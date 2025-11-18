@@ -115,4 +115,138 @@ describe('parseWorkflowYamlToJSON', () => {
     expect(result.success).toBe(false);
     expect(result.error?.message).toContain('Invalid key type: map in range');
   });
+
+  describe('dynamic value filtering (${{ }} syntax)', () => {
+    it('should suppress validation errors for dynamic values', () => {
+      const schema = z.object({
+        steps: z.array(
+          z.object({
+            name: z.string(),
+            type: z.string(),
+            with: z.object({
+              count: z.number(),
+              cases: z.array(
+                z.object({
+                  severity: z.enum(['low', 'medium', 'high', 'critical']),
+                })
+              ),
+            }),
+          })
+        ),
+      });
+
+      const yaml = `steps:
+        - name: step1
+          type: noop
+          with:
+            count: $\{\{ inputs.count \}\}
+            cases:
+              - severity: $\{\{ inputs.severity \}\}
+      `;
+      const result = parseWorkflowYamlToJSON(yaml, schema);
+      expect(result.success).toBe(true);
+    });
+
+    it('should still show validation errors for non-dynamic invalid values', () => {
+      const schema = z.object({
+        steps: z.array(
+          z.object({
+            name: z.string(),
+            type: z.string(),
+            with: z.object({
+              count: z.number(),
+            }),
+          })
+        ),
+      });
+
+      const yaml = `steps:
+        - name: step1
+          type: noop
+          with:
+            count: invalid
+      `;
+      const result = parseWorkflowYamlToJSON(yaml, schema);
+      expect(result.success).toBe(false);
+      expect(result.error).toBeDefined();
+    });
+
+    it('should filter dynamic value errors but keep other errors', () => {
+      const schema = z.object({
+        steps: z.array(
+          z.object({
+            name: z.string(),
+            type: z.string(),
+            with: z.object({
+              message: z.string(),
+              count: z.number(),
+            }),
+          })
+        ),
+      });
+
+      const yaml = `steps:
+        - name: step1
+          type: noop
+          with:
+            message: $\{\{ inputs.message \}\}
+            count: invalid
+      `;
+      const result = parseWorkflowYamlToJSON(yaml, schema);
+      expect(result.success).toBe(false);
+      expect(result.error?.message).toContain('number');
+    });
+
+    it('should also suppress errors for regular {{ }} template syntax', () => {
+      const schema = z.object({
+        steps: z.array(
+          z.object({
+            name: z.string(),
+            type: z.string(),
+            with: z.object({
+              count: z.number(),
+              cases: z.array(
+                z.object({
+                  severity: z.enum(['low', 'medium', 'high', 'critical']),
+                })
+              ),
+            }),
+          })
+        ),
+      });
+
+      const yaml = `steps:
+        - name: step1
+          type: noop
+          with:
+            count: "{{ inputs.count }}"
+            cases:
+              - severity: "{{ inputs.severity }}"
+      `;
+      const result = parseWorkflowYamlToJSON(yaml, schema);
+      expect(result.success).toBe(true);
+    });
+
+    it('should not suppress errors if the variable is inside a string and field should be a number', () => {
+      const schema = z.object({
+        steps: z.array(
+          z.object({
+            name: z.string(),
+            type: z.string(),
+            with: z.object({
+              count: z.number(),
+            }),
+          })
+        ),
+      });
+      const yaml = `steps:
+        - name: step1
+          type: noop
+          with:
+            count: "some string with a variable {{ inputs.count }}"
+      `;
+      const result = parseWorkflowYamlToJSON(yaml, schema);
+      expect(result.success).toBe(false);
+    });
+  });
 });
