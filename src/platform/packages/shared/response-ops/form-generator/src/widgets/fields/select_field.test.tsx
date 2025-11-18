@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { z } from '@kbn/zod/v4';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { SelectField } from './select_field';
@@ -27,14 +28,12 @@ describe('SelectField', () => {
   });
 
   it('renders with label from props', () => {
-    const schema = z.enum(['option1', 'option2', 'option3']);
-
     render(
       <SelectField
         fieldId="country"
         value="option1"
         label="Country"
-        schema={schema}
+        schema={z.enum(['option1', 'option2', 'option3'])}
         onChange={mockOnChange}
         onBlur={mockOnBlur}
       />,
@@ -45,14 +44,12 @@ describe('SelectField', () => {
   });
 
   it('renders options from z.enum schema', () => {
-    const schema = z.enum(['US', 'UK', 'CA']);
-
     render(
       <SelectField
         fieldId="country"
         value="US"
         label="Country"
-        schema={schema}
+        schema={z.enum(['US', 'UK', 'CA'])}
         onChange={mockOnChange}
         onBlur={mockOnBlur}
       />,
@@ -95,14 +92,12 @@ describe('SelectField', () => {
   });
 
   it('displays the selected value', () => {
-    const schema = z.enum(['option1', 'option2', 'option3']);
-
     render(
       <SelectField
         fieldId="choice"
         value="option2"
         label="Choice"
-        schema={schema}
+        schema={z.enum(['option1', 'option2', 'option3'])}
         onChange={mockOnChange}
         onBlur={mockOnBlur}
       />,
@@ -113,15 +108,14 @@ describe('SelectField', () => {
     expect(select.value).toBe('option2');
   });
 
-  it('calls onChange when value changes', () => {
-    const schema = z.enum(['option1', 'option2', 'option3']);
-
+  it('calls onChange when value changes', async () => {
+    const user = userEvent.setup();
     render(
       <SelectField
         fieldId="choice"
         value="option1"
         label="Choice"
-        schema={schema}
+        schema={z.enum(['option1', 'option2', 'option3'])}
         onChange={mockOnChange}
         onBlur={mockOnBlur}
       />,
@@ -129,20 +123,19 @@ describe('SelectField', () => {
     );
 
     const select = screen.getByRole('combobox');
-    fireEvent.change(select, { target: { value: 'option3' } });
+    await user.selectOptions(select, 'option3');
 
     expect(mockOnChange).toHaveBeenCalledWith('choice', 'option3');
   });
 
-  it('calls onBlur when field loses focus', () => {
-    const schema = z.enum(['option1', 'option2', 'option3']);
-
+  it('calls onBlur when field loses focus', async () => {
+    const user = userEvent.setup();
     render(
       <SelectField
         fieldId="choice"
         value="option1"
         label="Choice"
-        schema={schema}
+        schema={z.enum(['option1', 'option2', 'option3'])}
         onChange={mockOnChange}
         onBlur={mockOnBlur}
       />,
@@ -150,20 +143,19 @@ describe('SelectField', () => {
     );
 
     const select = screen.getByRole('combobox');
-    fireEvent.blur(select);
+    await user.click(select);
+    await user.tab();
 
     expect(mockOnBlur).toHaveBeenCalledWith('choice', 'option1');
   });
 
   it('displays error message when invalid', () => {
-    const schema = z.enum(['option1', 'option2', 'option3']);
-
     render(
       <SelectField
         fieldId="choice"
         value=""
         label="Choice"
-        schema={schema}
+        schema={z.enum(['option1', 'option2', 'option3'])}
         error="Selection is required"
         isInvalid={true}
         onChange={mockOnChange}
@@ -176,7 +168,6 @@ describe('SelectField', () => {
   });
 
   it('throws error when schema is not z.enum and no options provided', () => {
-    const schema = z.string();
     const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
     expect(() => {
@@ -185,13 +176,12 @@ describe('SelectField', () => {
           fieldId="choice"
           value=""
           label="Choice"
-          schema={schema}
           onChange={mockOnChange}
           onBlur={mockOnBlur}
         />,
         { wrapper }
       );
-    }).toThrow('SelectField requires z.enum() schema or explicit options prop');
+    }).toThrow('SelectField requires options either from schema or props');
 
     consoleError.mockRestore();
   });

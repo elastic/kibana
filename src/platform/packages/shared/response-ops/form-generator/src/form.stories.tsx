@@ -102,16 +102,6 @@ const webhookConnectorFormSchema = z.object({
           }),
         })
         .meta({ label: 'Bearer Token' }),
-      z
-        .object({
-          type: z.literal('headers'),
-          headers: z.record(z.string(), z.string()).meta({
-            label: 'Headers',
-          }),
-        })
-        .meta({
-          label: 'Headers',
-        }),
     ])
     .meta({
       label: 'Authentication',
@@ -123,7 +113,7 @@ const abuseIPDBConnectorSchema = z.object({
   authType: z.discriminatedUnion('type', [
     z
       .object({
-        type: z.literal('apiKey'), // this literal is irrelevant
+        type: z.literal('apiKey'),
         Key: z.string().min(1, { message: 'API Key cannot be empty' }).meta({
           widget: 'password',
           label: 'API Key',
@@ -152,7 +142,7 @@ const GreyNoiseConnectorSchema = z.object({
   authType: z.discriminatedUnion('type', [
     z
       .object({
-        type: z.literal('apiKey'), // this literal is irrelevant
+        type: z.literal('apiKey'),
         key: z.string().min(1, { message: 'API Key cannot be empty' }).meta({
           widget: 'password',
           label: 'API Key',
@@ -168,7 +158,7 @@ const ShodanConnectorSchema = z.object({
   authType: z.discriminatedUnion('type', [
     z
       .object({
-        type: z.literal('apiKey'), // this literal is irrelevant
+        type: z.literal('apiKey'),
         'X-Api-Key': z.string().min(1, { message: 'API Key cannot be empty' }).meta({
           widget: 'password',
           label: 'API Key',
@@ -184,7 +174,7 @@ const UrlVoidConnectorSchema = z.object({
   authType: z.discriminatedUnion('type', [
     z
       .object({
-        type: z.literal('apiKey'), // this literal is irrelevant
+        type: z.literal('apiKey'),
         'X-Api-Key': z.string().min(1, { message: 'API Key cannot be empty' }).meta({
           widget: 'password',
           label: 'API Key',
@@ -201,7 +191,7 @@ const VirusTotalConnectorSchema = z.object({
     .discriminatedUnion('type', [
       z
         .object({
-          type: z.literal('apiKey'), // this literal is irrelevant
+          type: z.literal('apiKey'),
           'x-apikey': z.string().min(1, { message: 'API Key cannot be empty' }).meta({
             widget: 'password',
             label: 'API Key',

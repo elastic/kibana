@@ -8,7 +8,9 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { PasswordField } from './password_field';
 
@@ -75,7 +77,8 @@ describe('PasswordField', () => {
     expect(mockOnChange).toHaveBeenCalledWith('password', 'newpassword');
   });
 
-  it('calls onBlur when field loses focus', () => {
+  it('calls onBlur when field loses focus', async () => {
+    const user = userEvent.setup();
     render(
       <PasswordField
         fieldId="password"
@@ -88,7 +91,8 @@ describe('PasswordField', () => {
     );
 
     const input = screen.getByLabelText('Password');
-    fireEvent.blur(input);
+    await user.click(input);
+    await user.tab();
 
     expect(mockOnBlur).toHaveBeenCalledWith('password', '');
   });

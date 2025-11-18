@@ -15,7 +15,7 @@ import type { BaseMetadata } from './schema_metadata';
 import { useFormState } from './use_form_state';
 import type { WidgetType } from './widgets';
 import { INVALID_VALUE_ERROR } from './translations';
-import { getWidgetComponent } from './widgets/registry';
+import { getWidgetComponent, getDefaultValueNormalizer } from './widgets/registry';
 
 /**
  * Key used for root-level field validation errors.
@@ -43,9 +43,14 @@ const getFieldsFromSchema = <T extends z.ZodRawShape>(schema: z.ZodObject<T>) =>
 
     const metaInfo = getMeta(schemaAny);
 
+    const normalizer = getDefaultValueNormalizer(schemaAny);
+    const initialValue = normalizer
+      ? normalizer(schemaAny, metaInfo.default) ?? metaInfo.default
+      : metaInfo.default;
+
     fields.push({
       id: key,
-      initialValue: metaInfo.default,
+      initialValue,
       schema: schemaAny,
       widget: metaInfo.widget,
       meta: metaInfo,

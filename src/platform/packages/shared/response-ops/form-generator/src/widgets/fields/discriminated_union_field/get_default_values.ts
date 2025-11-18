@@ -9,41 +9,20 @@
 
 import { z } from '@kbn/zod/v4';
 
-export const getDefaultValuesForOption = (
-  optionSchema: z.ZodObject<z.ZodRawShape>,
+export const getDefaultValuesFromSchema = (
+  schema: z.ZodObject<z.ZodRawShape>,
   discriminatorKey?: string
 ) => {
   const defaultValues: Record<string, any> = {};
-
   const discriminator = discriminatorKey || 'type';
-  if (discriminator in optionSchema.shape) {
-    const discriminatorField = optionSchema.shape[discriminator] as z.ZodLiteral<string>;
-    defaultValues[discriminator] = discriminatorField.value;
-  }
 
-  Object.entries(optionSchema.shape).forEach(([fieldKey, fieldSchema]) => {
-    if (fieldKey === discriminator) return;
-
+  Object.entries(schema.shape).forEach(([fieldKey, fieldSchema]) => {
     const zodFieldSchema = fieldSchema as z.ZodTypeAny;
 
-    try {
-      // Try to parse undefined - this works if schema has .default() or .optional()
-      defaultValues[fieldKey] = zodFieldSchema.parse(undefined);
-    } catch {
-      // Fallback to type-based defaults using instanceof checks
-      if (zodFieldSchema instanceof z.ZodString) {
-        defaultValues[fieldKey] = '';
-      } else if (zodFieldSchema instanceof z.ZodNumber) {
-        defaultValues[fieldKey] = 0;
-      } else if (zodFieldSchema instanceof z.ZodBoolean) {
-        defaultValues[fieldKey] = false;
-      } else if (zodFieldSchema instanceof z.ZodArray) {
-        defaultValues[fieldKey] = [];
-      } else if (zodFieldSchema instanceof z.ZodObject) {
-        defaultValues[fieldKey] = {};
-      } else {
-        defaultValues[fieldKey] = '';
-      }
+    if (fieldKey === discriminator && zodFieldSchema instanceof z.ZodLiteral) {
+      defaultValues[fieldKey] = zodFieldSchema.value;
+    } else {
+      defaultValues[fieldKey] = '';
     }
   });
 

@@ -10,7 +10,7 @@
 import { z } from '@kbn/zod/v4';
 import type { WidgetType } from './widgets';
 
-/** Utility type to strip form-specific props (value, onChange, onBlur) from EUI component props */
+// Utility type to strip form-specific props (value, onChange, onBlur) from EUI component props
 export type StripFormProps<T> = Partial<Omit<T, 'value' | 'onChange' | 'onBlur'>>;
 
 export interface BaseMetadata {
@@ -23,7 +23,6 @@ export interface BaseMetadata {
   sensitive?: boolean;
 }
 
-// Allow additional properties while maintaining type safety for known properties
 declare module '@kbn/zod/v4' {
   interface GlobalMeta extends BaseMetadata {
     [key: string]: unknown;

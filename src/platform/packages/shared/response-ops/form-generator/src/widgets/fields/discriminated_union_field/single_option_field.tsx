@@ -7,21 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useCallback } from 'react';
-import { z } from '@kbn/zod/v4';
+import React, { useMemo } from 'react';
+import type { z } from '@kbn/zod/v4';
 import { EuiFormFieldset, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import { INVALID_VALUE_ERROR } from '../../../translations';
-import { getMeta } from '../../../schema_metadata';
-import type { DiscriminatedUnionWidgetProps } from './discriminated_union_field';
-import { getDiscriminatorKey } from './discriminated_union_field';
+import type { BaseMetadata } from '../../../schema_metadata';
 import { getWidgetComponent } from '../../registry';
-
-const getDiscriminatorFieldValue = (
-  optionSchema: z.ZodObject<z.ZodRawShape>,
-  discriminatorKey: string
-) => {
-  return (optionSchema.shape[discriminatorKey] as z.ZodLiteral<string>).value;
-};
+import type { DiscriminatedUnionWidgetProps } from './discriminated_union_field';
 
 export const SingleOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
   fieldId,
@@ -29,56 +20,46 @@ export const SingleOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = (
   label,
   onChange,
   onBlur,
-  schema,
+  unionOptions,
   fullWidth,
   setFieldError,
   setFieldTouched,
   errors = {},
   touched = {},
   meta,
+  validateField,
 }) => {
-  const discriminatedSchema = schema as z.ZodDiscriminatedUnion<z.ZodObject<z.ZodRawShape>[]>;
-  const singleOptionSchema = discriminatedSchema.options[0];
-  const discriminatorKey = getDiscriminatorKey(discriminatedSchema);
-  const discriminatorValue = getDiscriminatorFieldValue(singleOptionSchema, discriminatorKey);
+  if (!unionOptions) {
+    throw new Error('SingleOptionUnionField requires unionOptions prop');
+  }
 
-  const [internalTouched, setInternalTouched] = React.useState<boolean>(false);
-  const [fieldErrors, setFieldErrors] = React.useState<Record<string, string[] | undefined>>({});
-
-  const validateField = useCallback(
-    (fieldValue: unknown, subSchema: z.ZodTypeAny): string[] | undefined => {
-      try {
-        subSchema.parse(fieldValue);
-        return undefined;
-      } catch (validationError) {
-        if (validationError instanceof z.ZodError) {
-          return validationError.issues.map((issue) => issue.message);
-        }
-        return [INVALID_VALUE_ERROR];
-      }
-    },
-    []
-  );
+  const { discriminatorKey, options } = unionOptions;
+  const singleOption = options[0];
 
   const valueObj = useMemo(() => {
     return typeof value === 'object' && value !== null
       ? value
-      : { [discriminatorKey]: discriminatorValue };
-  }, [value, discriminatorValue, discriminatorKey]);
+      : { [discriminatorKey]: singleOption.value };
+  }, [value, discriminatorKey, singleOption.value]);
 
   const fields = useMemo(() => {
-    return Object.entries(singleOptionSchema.shape).map(([fieldKey, subSchema], index: number) => {
-      if (fieldKey === discriminatorKey) return null; // Skip discriminator field
-
-      const fieldSchema = subSchema as z.ZodTypeAny;
-      const metaInfo = getMeta(fieldSchema);
+    return singleOption.fields.map((field, index: number) => {
+      const {
+        id: fieldKey,
+        schema: fieldSchema,
+        meta: fieldMeta,
+      }: {
+        id: string;
+        schema: z.ZodTypeAny;
+        meta: BaseMetadata;
+      } = field;
       const fieldValue = valueObj[fieldKey] ?? '';
 
       const WidgetComponent = getWidgetComponent(fieldSchema);
 
       const subFieldId = `${fieldId}.${fieldKey}`;
-      const isTouched = touched[subFieldId] || touched[fieldId] || internalTouched;
-      const error = errors[subFieldId] || fieldErrors[fieldKey];
+      const isTouched = touched[subFieldId] || touched[fieldId];
+      const error = errors[subFieldId];
       const isInvalid = !!(isTouched && error);
 
       const handleChange = (_: string, newValue: unknown) => {
@@ -87,35 +68,24 @@ export const SingleOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = (
           [fieldKey]: newValue,
         };
 
-        onChange(fieldId, updatedValue);
-
-        const validationErrors = validateField(newValue, fieldSchema);
-        setFieldErrors((prev) => ({
-          ...prev,
-          [fieldKey]: validationErrors,
-        }));
-
-        if (setFieldError) {
-          setFieldError(subFieldId, validationErrors);
-        }
-      };
-
-      const handleBlur = () => {
-        setInternalTouched(true);
-
         if (setFieldTouched) {
           setFieldTouched(subFieldId, true);
         }
 
-        const validationErrors = validateField(valueObj[fieldKey], fieldSchema);
+        onChange(fieldId, updatedValue);
 
-        setFieldErrors((prev) => ({
-          ...prev,
-          [fieldKey]: validationErrors,
-        }));
+        if (validateField && setFieldError) {
+          const validationError = validateField(fieldId, updatedValue, []);
+          setFieldError(subFieldId, validationError);
+        }
+      };
 
-        if (setFieldError) {
-          setFieldError(subFieldId, validationErrors);
+      const handleBlur = () => {
+        const wasTouched = touched[subFieldId];
+
+        if (wasTouched && validateField && setFieldError) {
+          const validationError = validateField(fieldId, valueObj, []);
+          setFieldError(subFieldId, validationError);
         }
 
         onBlur(subFieldId, value);
@@ -123,37 +93,34 @@ export const SingleOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = (
 
       return (
         <React.Fragment key={fieldKey}>
-          {index > 1 && <EuiSpacer size="s" />}
+          {index > 0 && <EuiSpacer size="s" />}
           <WidgetComponent
             fieldId={subFieldId}
             value={fieldValue}
-            label={metaInfo?.label || fieldKey}
+            label={fieldMeta?.label || fieldKey}
             error={error}
             isInvalid={isInvalid}
             onChange={handleChange}
             onBlur={handleBlur}
             schema={fieldSchema}
-            meta={metaInfo}
+            meta={fieldMeta}
             fullWidth
           />
         </React.Fragment>
       );
     });
   }, [
-    singleOptionSchema.shape,
+    singleOption.fields,
     fieldId,
     value,
     valueObj,
     touched,
-    internalTouched,
     errors,
-    fieldErrors,
     onChange,
     validateField,
     setFieldError,
     setFieldTouched,
     onBlur,
-    discriminatorKey,
   ]);
 
   return (

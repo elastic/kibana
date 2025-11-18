@@ -10,7 +10,7 @@
 import React from 'react';
 import { z } from '@kbn/zod/v4';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
-import type { EuiSelectProps } from '@elastic/eui';
+import type { EuiSelectOption, EuiSelectProps } from '@elastic/eui';
 import type { BaseMetadata, StripFormProps } from '../../schema_metadata';
 import type { BaseWidgetProps } from '../types';
 import type { WidgetType } from '../types';
@@ -20,6 +20,16 @@ export type SelectWidgetMeta = BaseMetadata & {
 } & StripFormProps<EuiSelectProps>;
 
 export type SelectWidgetProps = BaseWidgetProps<string, SelectWidgetMeta>;
+
+export const getSelectOptions = (schema: z.ZodTypeAny): EuiSelectOption[] | undefined => {
+  if (schema instanceof z.ZodEnum) {
+    return schema.options.map((option) => ({
+      value: String(option),
+      text: String(option),
+    }));
+  }
+  return undefined;
+};
 
 export const SelectField: React.FC<SelectWidgetProps> = ({
   fieldId,
@@ -36,18 +46,9 @@ export const SelectField: React.FC<SelectWidgetProps> = ({
   helpText,
 }) => {
   const { options: metaOptions, hasNoInitialSelection, isDisabled } = meta || {};
-  let options = metaOptions;
 
-  if (!options && schema) {
-    if (schema instanceof z.ZodEnum) {
-      options = schema.options.map((option) => ({
-        value: String(option),
-        text: String(option),
-      }));
-    } else {
-      throw new Error(`SelectField requires z.enum() schema or explicit options prop`);
-    }
-  }
+  const selectOptions = schema ? getSelectOptions(schema) : undefined;
+  const options = selectOptions || metaOptions;
 
   if (!options || options.length === 0) {
     throw new Error(`SelectField requires options either from schema or props`);

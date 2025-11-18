@@ -16,7 +16,6 @@ export enum WidgetType {
   Password = 'password',
   Select = 'select',
   FormFieldset = 'formFieldset',
-  KeyValue = 'keyValue',
 }
 
 export interface BaseWidgetProps<T = unknown, TMeta extends BaseMetadata = BaseMetadata> {

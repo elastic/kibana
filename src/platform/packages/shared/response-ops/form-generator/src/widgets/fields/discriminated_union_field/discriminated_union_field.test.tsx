@@ -8,17 +8,44 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, waitFor, fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { z } from '@kbn/zod/v4';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import {
-  DiscriminatedUnionField,
-  getDiscriminatedUnionInitialValue,
-} from './discriminated_union_field';
+import { DiscriminatedUnionField, getUnionOptions } from './discriminated_union_field';
+import { getDefaultValuesFromSchema } from './get_default_values';
+import { getMeta } from '../../../schema_metadata';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
 );
+
+const getDiscriminatedUnionInitialValue = (schema: z.ZodTypeAny, defaultValue?: unknown) => {
+  const unionOpts = getUnionOptions(schema);
+  if (!unionOpts) {
+    throw new Error('Schema is not a discriminated union');
+  }
+
+  const { discriminatorKey, options } = unionOpts;
+  const metaInfo = getMeta(schema);
+  const metadataDefault = metaInfo?.default;
+  const valueToUse = metadataDefault ?? defaultValue;
+
+  if (valueToUse) {
+    const matchingOption = options.find((opt) => opt.value === valueToUse);
+    if (matchingOption) {
+      return getDefaultValuesFromSchema(matchingOption.schema, discriminatorKey);
+    }
+  }
+
+  return getDefaultValuesFromSchema(options[0].schema, discriminatorKey);
+};
+
+const renderDiscriminatedUnionField = (props: any) => {
+  return render(<DiscriminatedUnionField {...props} />, {
+    wrapper,
+  });
+};
 
 describe('DiscriminatedUnionField', () => {
   const mockOnChange = jest.fn();
@@ -44,17 +71,14 @@ describe('DiscriminatedUnionField', () => {
       option2.meta({ label: 'OAuth' }),
     ]);
 
-    render(
-      <DiscriminatedUnionField
-        fieldId="auth"
-        value={{ type: 'basic', username: '' }}
-        label="Authentication"
-        schema={schema}
-        onChange={mockOnChange}
-        onBlur={mockOnBlur}
-      />,
-      { wrapper }
-    );
+    renderDiscriminatedUnionField({
+      fieldId: 'auth',
+      value: { type: 'basic', username: '' },
+      label: 'Authentication',
+      schema,
+      onChange: mockOnChange,
+      onBlur: mockOnBlur,
+    });
 
     expect(screen.getByText('Authentication')).toBeDefined();
     expect(screen.getByText('Basic Auth')).toBeDefined();
@@ -77,17 +101,14 @@ describe('DiscriminatedUnionField', () => {
       option2.meta({ label: 'OAuth' }),
     ]);
 
-    render(
-      <DiscriminatedUnionField
-        fieldId="auth"
-        value={{ type: 'oauth', token: '' }}
-        label="Authentication"
-        schema={schema}
-        onChange={mockOnChange}
-        onBlur={mockOnBlur}
-      />,
-      { wrapper }
-    );
+    renderDiscriminatedUnionField({
+      fieldId: 'auth',
+      value: { type: 'oauth', token: '' },
+      label: 'Authentication',
+      schema,
+      onChange: mockOnChange,
+      onBlur: mockOnBlur,
+    });
 
     const oauthCard = screen.getByLabelText('OAuth') as HTMLInputElement;
     expect(oauthCard.checked).toBe(true);
@@ -110,17 +131,14 @@ describe('DiscriminatedUnionField', () => {
       option2.meta({ label: 'OAuth' }),
     ]);
 
-    render(
-      <DiscriminatedUnionField
-        fieldId="auth"
-        value={{ type: 'basic', username: '', password: '' }}
-        label="Authentication"
-        schema={schema}
-        onChange={mockOnChange}
-        onBlur={mockOnBlur}
-      />,
-      { wrapper }
-    );
+    renderDiscriminatedUnionField({
+      fieldId: 'auth',
+      value: { type: 'basic', username: '', password: '' },
+      label: 'Authentication',
+      schema,
+      onChange: mockOnChange,
+      onBlur: mockOnBlur,
+    });
 
     expect(screen.getByText('Username')).toBeDefined();
     expect(screen.getByText('Password')).toBeDefined();
@@ -128,6 +146,7 @@ describe('DiscriminatedUnionField', () => {
   });
 
   it('calls onChange when switching options', async () => {
+    const user = userEvent.setup();
     const option1 = z.object({
       type: z.literal('basic'),
       username: z.string().meta({ widget: 'text', label: 'Username' }),
@@ -143,20 +162,17 @@ describe('DiscriminatedUnionField', () => {
       option2.meta({ label: 'OAuth' }),
     ]);
 
-    render(
-      <DiscriminatedUnionField
-        fieldId="auth"
-        value={{ type: 'basic', username: '' }}
-        label="Authentication"
-        schema={schema}
-        onChange={mockOnChange}
-        onBlur={mockOnBlur}
-      />,
-      { wrapper }
-    );
+    renderDiscriminatedUnionField({
+      fieldId: 'auth',
+      value: { type: 'basic', username: '' },
+      label: 'Authentication',
+      schema,
+      onChange: mockOnChange,
+      onBlur: mockOnBlur,
+    });
 
     const oauthCard = screen.getByLabelText('OAuth');
-    fireEvent.click(oauthCard);
+    await user.click(oauthCard);
 
     await waitFor(() => {
       expect(mockOnChange).toHaveBeenCalledWith('auth', {
@@ -167,6 +183,7 @@ describe('DiscriminatedUnionField', () => {
   });
 
   it('calls onChange when option field changes', async () => {
+    const user = userEvent.setup();
     const option1 = z.object({
       type: z.literal('basic'),
       username: z.string().meta({ widget: 'text', label: 'Username' }),
@@ -174,17 +191,14 @@ describe('DiscriminatedUnionField', () => {
 
     const schema = z.discriminatedUnion('type', [option1.meta({ label: 'Basic Auth' })]);
 
-    render(
-      <DiscriminatedUnionField
-        fieldId="auth"
-        value={{ type: 'basic', username: '' }}
-        label="Authentication"
-        schema={schema}
-        onChange={mockOnChange}
-        onBlur={mockOnBlur}
-      />,
-      { wrapper }
-    );
+    renderDiscriminatedUnionField({
+      fieldId: 'auth',
+      value: { type: 'basic', username: '' },
+      label: 'Authentication',
+      schema,
+      onChange: mockOnChange,
+      onBlur: mockOnBlur,
+    });
 
     const usernameInput = screen.getByRole('textbox');
     fireEvent.change(usernameInput, { target: { value: 'testuser' } });
@@ -195,6 +209,7 @@ describe('DiscriminatedUnionField', () => {
   });
 
   it('validates option fields on blur', async () => {
+    const user = userEvent.setup();
     const option1 = z.object({
       type: z.literal('basic'),
       username: z.string().min(3).meta({ widget: 'text', label: 'Username' }),
@@ -202,99 +217,21 @@ describe('DiscriminatedUnionField', () => {
 
     const schema = z.discriminatedUnion('type', [option1.meta({ label: 'Basic Auth' })]);
 
-    render(
-      <DiscriminatedUnionField
-        fieldId="auth"
-        value={{ type: 'basic', username: 'ab' }}
-        label="Authentication"
-        schema={schema}
-        onChange={mockOnChange}
-        onBlur={mockOnBlur}
-      />,
-      { wrapper }
-    );
+    renderDiscriminatedUnionField({
+      fieldId: 'auth',
+      value: { type: 'basic', username: 'ab' },
+      label: 'Authentication',
+      schema,
+      onChange: mockOnChange,
+      onBlur: mockOnBlur,
+    });
 
     const usernameInput = screen.getByDisplayValue('ab');
-    fireEvent.blur(usernameInput);
+    await user.click(usernameInput);
+    await user.tab();
 
     await waitFor(() => {
       expect(mockOnBlur).toHaveBeenCalledWith('auth.username', { type: 'basic', username: 'ab' });
-    });
-  });
-
-  it('should not show validation error for untouched fields when tabbing through', async () => {
-    const option1 = z.object({
-      type: z.literal('basic'),
-      username: z.string().min(3).meta({ widget: 'text', label: 'Username' }),
-      password: z.string().min(3).meta({ widget: 'password', label: 'Password' }),
-    });
-
-    const schema = z.discriminatedUnion('type', [option1.meta({ label: 'Basic Auth' })]);
-
-    render(
-      <DiscriminatedUnionField
-        fieldId="auth"
-        value={{ type: 'basic', username: 'ab', password: 'xy' }}
-        label="Authentication"
-        schema={schema}
-        onChange={mockOnChange}
-        onBlur={mockOnBlur}
-      />,
-      { wrapper }
-    );
-
-    expect(screen.queryByText(/>=3 characters/i)).toBeNull();
-
-    const usernameInput = screen.getByDisplayValue('ab');
-    const passwordInput = screen.getByDisplayValue('xy');
-
-    fireEvent.blur(usernameInput);
-
-    await waitFor(() => {
-      const errors = screen.queryAllByText(/>=3 characters/i);
-      expect(errors.length).toBe(1);
-    });
-
-    const passwordLabel = screen.getByText('Password');
-    const passwordFormRow = passwordLabel.closest('.euiFormRow');
-    const passwordError = passwordFormRow?.querySelector('.euiFormErrorText');
-    expect(passwordError).toBeNull();
-
-    fireEvent.blur(passwordInput);
-
-    await waitFor(() => {
-      const errors = screen.queryAllByText(/>=3 characters/i);
-      expect(errors.length).toBe(2);
-    });
-  });
-
-  it('displays validation errors for option fields', async () => {
-    const option1 = z.object({
-      type: z.literal('basic'),
-      username: z.string().min(3).meta({ widget: 'text', label: 'Username' }),
-    });
-
-    const schema = z.discriminatedUnion('type', [option1.meta({ label: 'Basic Auth' })]);
-
-    render(
-      <DiscriminatedUnionField
-        fieldId="auth"
-        value={{ type: 'basic', username: 'ab' }}
-        label="Authentication"
-        schema={schema}
-        error={['String must contain at least 3 character(s)']}
-        isInvalid={true}
-        onChange={mockOnChange}
-        onBlur={mockOnBlur}
-      />,
-      { wrapper }
-    );
-
-    const usernameInput = screen.getByTestId('auth.username');
-    fireEvent.blur(usernameInput);
-
-    await waitFor(() => {
-      expect(screen.getByText(/>=3 characters/i)).toBeDefined();
     });
   });
 
@@ -306,17 +243,14 @@ describe('DiscriminatedUnionField', () => {
 
     const schema = z.discriminatedUnion('type', [option1]);
 
-    render(
-      <DiscriminatedUnionField
-        fieldId="auth"
-        value={{ type: 'basic', username: '' }}
-        label="Authentication"
-        schema={schema}
-        onChange={mockOnChange}
-        onBlur={mockOnBlur}
-      />,
-      { wrapper }
-    );
+    renderDiscriminatedUnionField({
+      fieldId: 'auth',
+      value: { type: 'basic', username: '' },
+      label: 'Authentication',
+      schema,
+      onChange: mockOnChange,
+      onBlur: mockOnBlur,
+    });
 
     expect(screen.queryByLabelText('basic')).toBeNull();
 
@@ -338,17 +272,14 @@ describe('DiscriminatedUnionField', () => {
 
     const schema = z.discriminatedUnion('type', [option1]);
 
-    render(
-      <DiscriminatedUnionField
-        fieldId="apiKey"
-        value={{ type: 'headers', key: '' }}
-        label="Authentication"
-        schema={schema}
-        onChange={mockOnChange}
-        onBlur={mockOnBlur}
-      />,
-      { wrapper }
-    );
+    renderDiscriminatedUnionField({
+      fieldId: 'apiKey',
+      value: { type: 'headers', key: '' },
+      label: 'Authentication',
+      schema,
+      onChange: mockOnChange,
+      onBlur: mockOnBlur,
+    });
 
     expect(screen.getByText('Authentication')).toBeInTheDocument();
 
@@ -357,6 +288,7 @@ describe('DiscriminatedUnionField', () => {
     const apiKeyInput = screen.getByTestId('apiKey.key');
     expect(apiKeyInput).toBeInTheDocument();
 
+    // Use a single change event instead of per-character typing to avoid multiple handler calls
     fireEvent.change(apiKeyInput, { target: { value: 'my-secret-api-key' } });
 
     await waitFor(() => {
@@ -366,7 +298,9 @@ describe('DiscriminatedUnionField', () => {
       });
     });
 
-    fireEvent.blur(apiKeyInput);
+    const user = userEvent.setup();
+    await user.click(apiKeyInput);
+    await user.tab();
 
     await waitFor(() => {
       expect(mockOnBlur).toHaveBeenCalled();
@@ -397,17 +331,14 @@ describe('DiscriminatedUnionField', () => {
 
     const initialValue = getDiscriminatedUnionInitialValue(schema);
 
-    render(
-      <DiscriminatedUnionField
-        fieldId="auth"
-        value={initialValue}
-        label="Authentication"
-        schema={schema}
-        onChange={mockOnChange}
-        onBlur={mockOnBlur}
-      />,
-      { wrapper }
-    );
+    renderDiscriminatedUnionField({
+      fieldId: 'auth',
+      value: initialValue,
+      label: 'Authentication',
+      schema,
+      onChange: mockOnChange,
+      onBlur: mockOnBlur,
+    });
 
     const basicAuthCard = screen.getByLabelText('Basic Auth') as HTMLInputElement;
     expect(basicAuthCard.checked).toBe(true);
@@ -448,17 +379,14 @@ describe('DiscriminatedUnionField', () => {
 
     const initialValue = getDiscriminatedUnionInitialValue(schema);
 
-    render(
-      <DiscriminatedUnionField
-        fieldId="auth"
-        value={initialValue}
-        label="Authentication"
-        schema={schema}
-        onChange={mockOnChange}
-        onBlur={mockOnBlur}
-      />,
-      { wrapper }
-    );
+    renderDiscriminatedUnionField({
+      fieldId: 'auth',
+      value: initialValue,
+      label: 'Authentication',
+      schema,
+      onChange: mockOnChange,
+      onBlur: mockOnBlur,
+    });
 
     const oauthCard = screen.getByLabelText('OAuth') as HTMLInputElement;
     expect(oauthCard.checked).toBe(true);
@@ -489,17 +417,14 @@ describe('DiscriminatedUnionField', () => {
       option2.meta({ label: 'SMS Notification' }),
     ]);
 
-    render(
-      <DiscriminatedUnionField
-        fieldId="notification"
-        value={{ kind: 'email', address: '' }}
-        label="Notification Method"
-        schema={schema}
-        onChange={mockOnChange}
-        onBlur={mockOnBlur}
-      />,
-      { wrapper }
-    );
+    renderDiscriminatedUnionField({
+      fieldId: 'notification',
+      value: { kind: 'email', address: '' },
+      label: 'Notification Method',
+      schema,
+      onChange: mockOnChange,
+      onBlur: mockOnBlur,
+    });
 
     expect(screen.getByText('Notification Method')).toBeDefined();
     expect(screen.getByText('Email Notification')).toBeDefined();
@@ -510,140 +435,5 @@ describe('DiscriminatedUnionField', () => {
 
     expect(screen.getByText('Email Address')).toBeDefined();
     expect(screen.queryByText('Phone Number')).toBeNull();
-  });
-});
-
-describe('getDiscriminatedUnionInitialValue', () => {
-  it('returns initial value from first option when no default provided', () => {
-    const option1 = z.object({
-      type: z.literal('basic'),
-      username: z.string(),
-      password: z.string(),
-    });
-
-    const option2 = z.object({
-      type: z.literal('oauth'),
-      token: z.string(),
-    });
-
-    const schema = z.discriminatedUnion('type', [option1, option2]);
-
-    const result = getDiscriminatedUnionInitialValue(schema);
-
-    expect(result).toEqual({
-      type: 'basic',
-      username: '',
-      password: '',
-    });
-  });
-
-  it('returns initial value matching the default discriminator value', () => {
-    const option1 = z.object({
-      type: z.literal('basic'),
-      username: z.string(),
-    });
-
-    const option2 = z.object({
-      type: z.literal('oauth'),
-      token: z.string(),
-    });
-
-    const schema = z.discriminatedUnion('type', [option1, option2]);
-
-    const result = getDiscriminatedUnionInitialValue(schema, 'oauth');
-
-    expect(result).toEqual({
-      type: 'oauth',
-      token: '',
-    });
-  });
-
-  it('returns first option when default does not match any option', () => {
-    const option1 = z.object({
-      type: z.literal('basic'),
-      username: z.string(),
-    });
-
-    const option2 = z.object({
-      type: z.literal('oauth'),
-      token: z.string(),
-    });
-
-    const schema = z.discriminatedUnion('type', [option1, option2]);
-
-    const result = getDiscriminatedUnionInitialValue(schema, 'nonexistent');
-
-    expect(result).toEqual({
-      type: 'basic',
-      username: '',
-    });
-  });
-
-  it('handles number fields with default value 0', () => {
-    const option1 = z.object({
-      type: z.literal('config'),
-      port: z.number(),
-      timeout: z.number(),
-    });
-
-    const schema = z.discriminatedUnion('type', [option1]);
-
-    const result = getDiscriminatedUnionInitialValue(schema);
-
-    expect(result).toEqual({
-      type: 'config',
-      port: 0,
-      timeout: 0,
-    });
-  });
-
-  it('handles boolean fields with default value false', () => {
-    const option1 = z.object({
-      type: z.literal('settings'),
-      enabled: z.boolean(),
-      debug: z.boolean(),
-    });
-
-    const schema = z.discriminatedUnion('type', [option1]);
-
-    const result = getDiscriminatedUnionInitialValue(schema);
-
-    expect(result).toEqual({
-      type: 'settings',
-      enabled: false,
-      debug: false,
-    });
-  });
-
-  it('handles array fields with default empty array', () => {
-    const option1 = z.object({
-      type: z.literal('config'),
-      tags: z.array(z.string()),
-    });
-
-    const schema = z.discriminatedUnion('type', [option1]);
-
-    const result = getDiscriminatedUnionInitialValue(schema);
-
-    expect(result).toEqual({
-      type: 'config',
-      tags: [],
-    });
-  });
-
-  it('handles object fields with default empty object', () => {
-    const option1 = z.object({
-      type: z.literal('config'),
-      metadata: z.object({ key: z.string() }),
-    });
-
-    const schema = z.discriminatedUnion('type', [option1]);
-
-    const result = getDiscriminatedUnionInitialValue(schema);
-
-    expect(result).toEqual({
-      type: 'config',
-      metadata: {},
-    });
   });
 });

@@ -9,50 +9,27 @@
 
 import type React from 'react';
 import { z } from '@kbn/zod/v4';
+import { WidgetType, type BaseWidgetProps } from './types';
+import { getMeta } from '../schema_metadata';
 import { TextField } from './fields/text_field';
 import { SelectField } from './fields/select_field';
 import { PasswordField } from './fields/password_field';
-import { DiscriminatedUnionField } from './fields/discriminated_union_field';
-import { KeyValueField } from './fields/key_value_field';
-import { WidgetType, type BaseWidgetProps } from './types';
-import { getMeta } from '../schema_metadata';
+import {
+  DiscriminatedUnionField,
+  normalizeDiscriminatedUnionDefault,
+} from './fields/discriminated_union_field';
 
-const widgetComponents = {
-  [WidgetType.Text]: TextField,
-  [WidgetType.Password]: PasswordField,
-  [WidgetType.Select]: SelectField,
-  [WidgetType.FormFieldset]: DiscriminatedUnionField,
-  [WidgetType.KeyValue]: KeyValueField,
-} as const;
+export type DefaultValueNormalizer = (
+  schema: z.ZodTypeAny,
+  defaultValue: unknown
+) => unknown | undefined;
 
-export const WIDGET_REGISTRY: Record<
-  WidgetType,
-  React.ComponentType<BaseWidgetProps>
-> = widgetComponents as Record<WidgetType, React.ComponentType<BaseWidgetProps>>;
-
-export function getWidgetComponent(schema: z.ZodTypeAny): React.ComponentType<BaseWidgetProps> {
-  const { widget } = getMeta(schema);
-
-  if (widget) {
-    const component = WIDGET_REGISTRY[widget as WidgetType];
-    if (!component) {
-      throw new Error(
-        `Widget "${widget}" specified in ${schema.def.type} metadata is not registered in the widget registry.`
-      );
-    }
-
-    return component;
-  }
-
-  const defaultWidget = getDefaultWidgetForSchema(schema);
-  if (defaultWidget) {
-    return WIDGET_REGISTRY[defaultWidget];
-  }
-
-  throw new Error(
-    `No widget found for schema type: ${schema.def.type}. Please specify a widget in the schema metadata.`
-  );
-}
+export const WIDGET_REGISTRY: Record<WidgetType, React.ComponentType<BaseWidgetProps>> = {
+  [WidgetType.Text]: TextField as React.ComponentType<BaseWidgetProps>,
+  [WidgetType.Password]: PasswordField as React.ComponentType<BaseWidgetProps>,
+  [WidgetType.Select]: SelectField as React.ComponentType<BaseWidgetProps>,
+  [WidgetType.FormFieldset]: DiscriminatedUnionField as React.ComponentType<BaseWidgetProps>,
+};
 
 const getDefaultWidgetForSchema = (schema: z.ZodTypeAny) => {
   if (schema instanceof z.ZodString) {
@@ -65,9 +42,46 @@ const getDefaultWidgetForSchema = (schema: z.ZodTypeAny) => {
     return WidgetType.Select;
   } else if (schema instanceof z.ZodDiscriminatedUnion) {
     return WidgetType.FormFieldset;
-  } else if (schema instanceof z.ZodRecord) {
-    return WidgetType.KeyValue;
   }
 
   return undefined;
 };
+
+function getWidgetType(schema: z.ZodTypeAny): WidgetType | undefined {
+  const { widget } = getMeta(schema);
+  return (widget as WidgetType) || getDefaultWidgetForSchema(schema);
+}
+
+export function getWidgetComponent(schema: z.ZodTypeAny): React.ComponentType<BaseWidgetProps> {
+  const widgetType = getWidgetType(schema);
+
+  if (!widgetType) {
+    throw new Error(
+      `No widget found for schema type: ${schema.def.type}. Please specify a widget in the schema metadata.`
+    );
+  }
+
+  const component = WIDGET_REGISTRY[widgetType];
+  if (!component) {
+    throw new Error(
+      `Widget "${widgetType}" specified in ${schema.def.type} metadata is not registered in the widget registry.`
+    );
+  }
+
+  return component;
+}
+
+/**
+ * Used to return the default value for a schema.
+ * Widgets can optionally provide a normalizer function.
+ */
+const DEFAULT_VALUE_NORMALIZER_REGISTRY: Partial<Record<WidgetType, DefaultValueNormalizer>> = {
+  [WidgetType.FormFieldset]: normalizeDiscriminatedUnionDefault,
+};
+
+export function getDefaultValueNormalizer(
+  schema: z.ZodTypeAny
+): DefaultValueNormalizer | undefined {
+  const widgetType = getWidgetType(schema);
+  return widgetType ? DEFAULT_VALUE_NORMALIZER_REGISTRY[widgetType] : undefined;
+}

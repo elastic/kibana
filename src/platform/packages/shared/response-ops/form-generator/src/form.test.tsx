@@ -280,19 +280,6 @@ describe('Form', () => {
     expect(input.value).toBe('defaultUser');
   });
 
-  it('renders keyValue widget with empty object as initial value', () => {
-    const schema = z.object({
-      headers: z.record(z.string(), z.string()).meta({
-        widget: 'keyValue',
-        label: 'Headers',
-      }),
-    });
-
-    render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
-
-    expect(screen.getByText('Headers')).toBeDefined();
-  });
-
   it('handles form submission when onSubmit is not provided', async () => {
     const schema = z.object({
       username: z.string().meta({
@@ -353,52 +340,27 @@ describe('Authentication Form Integration Tests', () => {
           .meta({
             label: 'Bearer Token',
           }),
-        z
-          .object({
-            type: z.literal('headers'),
-            headers: z.record(z.string().min(1, 'Header key cannot be empty.'), z.string()).meta({
-              widget: 'keyValue',
-              label: 'Headers',
-            }),
-          })
-          .meta({
-            label: 'Headers',
-          }),
       ])
       .meta({
         widget: 'formFieldset',
         label: 'Authentication',
-        default: 'none',
+        default: 'basic',
       }),
   });
 
-  it('submits form with headers authentication containing multiple unique headers', async () => {
+  it('initializes with default discriminated union option when specified', async () => {
     render(<Form connectorSchema={authSchema} onSubmit={mockOnSubmit} />, { wrapper });
 
-    const headersCard = screen.getByLabelText('Headers');
-    fireEvent.click(headersCard);
+    const usernameInput = screen.getByTestId('authType.username') as HTMLInputElement;
+    const passwordInput = screen.getByTestId('authType.password') as HTMLInputElement;
+    const noneCard = screen.getByLabelText('None') as HTMLInputElement;
+    const bearerCard = screen.getByLabelText('Bearer Token') as HTMLInputElement;
 
-    await waitFor(() => {
-      expect(screen.queryByTestId('authType.headers-key-0')).toBeDefined();
-    });
+    expect(noneCard.checked).toBe(false);
+    expect(bearerCard.checked).toBe(false);
 
-    const keyInput0 = screen.getByTestId('authType.headers-key-0');
-    const valueInput0 = screen.getByTestId('authType.headers-value-0');
-    fireEvent.change(keyInput0, { target: { value: 'Authorization' } });
-    fireEvent.change(valueInput0, { target: { value: 'Bearer token123' } });
-
-    const addButton = screen.getByTestId('authType.headers-add');
-    fireEvent.click(addButton);
-
-    await waitFor(async () => {
-      const key1 = await screen.findByTestId('authType.headers-key-1');
-      expect(key1).toBeDefined();
-    });
-
-    const keyInput1 = screen.getByTestId('authType.headers-key-1');
-    const valueInput1 = screen.getByTestId('authType.headers-value-1');
-    fireEvent.change(keyInput1, { target: { value: 'Content-Type' } });
-    fireEvent.change(valueInput1, { target: { value: 'application/json' } });
+    fireEvent.change(usernameInput, { target: { value: 'admin' } });
+    fireEvent.change(passwordInput, { target: { value: 'secret123' } });
 
     const submitButton = screen.getByRole('button', { name: 'Submit' });
     fireEvent.click(submitButton);
@@ -407,11 +369,9 @@ describe('Authentication Form Integration Tests', () => {
       expect(mockOnSubmit).toHaveBeenCalledWith({
         data: {
           authType: {
-            type: 'headers',
-            headers: {
-              Authorization: 'Bearer token123',
-              'Content-Type': 'application/json',
-            },
+            type: 'basic',
+            username: 'admin',
+            password: 'secret123',
           },
         },
       });
@@ -472,38 +432,6 @@ describe('Authentication Form Integration Tests', () => {
           authType: {
             type: 'bearer',
             token: 'my-secret-token',
-          },
-        },
-      });
-    });
-  });
-
-  it('submits form with only valid headers when some keys are empty', async () => {
-    render(<Form connectorSchema={authSchema} onSubmit={mockOnSubmit} />, { wrapper });
-
-    const headersCard = screen.getByLabelText('Headers');
-    fireEvent.click(headersCard);
-
-    await waitFor(() => {
-      expect(screen.queryByTestId('authType.headers-key-0')).toBeDefined();
-    });
-
-    const keyInput0 = screen.getByTestId('authType.headers-key-0');
-    const valueInput0 = screen.getByTestId('authType.headers-value-0');
-    fireEvent.change(keyInput0, { target: { value: 'Valid-Header' } });
-    fireEvent.change(valueInput0, { target: { value: 'valid value' } });
-
-    const submitButton = screen.getByRole('button', { name: 'Submit' });
-    fireEvent.click(submitButton);
-
-    await waitFor(() => {
-      expect(mockOnSubmit).toHaveBeenCalledWith({
-        data: {
-          authType: {
-            type: 'headers',
-            headers: {
-              'Valid-Header': 'valid value',
-            },
           },
         },
       });

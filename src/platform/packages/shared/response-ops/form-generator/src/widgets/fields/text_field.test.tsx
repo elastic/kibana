@@ -8,7 +8,9 @@
  */
 
 import React from 'react';
-import { render, screen, fireEvent } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { TextField } from './text_field';
 
@@ -75,7 +77,8 @@ describe('TextField', () => {
     expect(mockOnChange).toHaveBeenCalledWith('username', 'newvalue');
   });
 
-  it('calls onBlur when field loses focus', () => {
+  it('calls onBlur when field loses focus', async () => {
+    const user = userEvent.setup();
     render(
       <TextField
         fieldId="username"
@@ -88,7 +91,8 @@ describe('TextField', () => {
     );
 
     const input = screen.getByLabelText('Username');
-    fireEvent.blur(input);
+    await user.click(input);
+    await user.tab();
 
     expect(mockOnBlur).toHaveBeenCalledWith('username', '');
   });
