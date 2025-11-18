@@ -397,7 +397,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('get by kuery', function () {
-      let agentPolicyId: string;
+      let endpointAgentPolicyId: string;
       let endpointPackagePolicyId: string;
 
       before(async function () {
@@ -414,7 +414,7 @@ export default function (providerContext: FtrProviderContext) {
             name: 'Test policy',
             namespace: 'default',
           });
-        agentPolicyId = agentPolicyResponse.item.id;
+        endpointAgentPolicyId = agentPolicyResponse.item.id;
 
         const { body: endpointPackagePolicyResponse } = await supertest
           .post(`/api/fleet/package_policies`)
@@ -423,7 +423,7 @@ export default function (providerContext: FtrProviderContext) {
             name: 'endpoint-1',
             description: '',
             namespace: 'default',
-            policy_id: agentPolicyId,
+            policy_id: endpointAgentPolicyId,
             enabled: true,
             inputs: [],
             force: true,
@@ -458,6 +458,84 @@ export default function (providerContext: FtrProviderContext) {
 
         expect(packagePolicyResponse.items[0].id).to.eql(endpointPackagePolicyId);
       });
+
+      describe('Endpoint package integration', () => {
+        let dummyAgentPolicyId: string;
+        let dummyPackagePolicyId: string;
+
+        before(async function () {
+          const { body: dummyAgentPolicyResponse } = await supertest
+            .post(`/api/fleet/agent_policies`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: 'Test policy with filetest',
+              namespace: 'default',
+            });
+          dummyAgentPolicyId = dummyAgentPolicyResponse.item.id;
+
+          const { body: dummyPackagePolicyResponse } = await supertest
+            .post(`/api/fleet/package_policies`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({
+              name: 'filetest-1',
+              description: '',
+              namespace: 'default',
+              policy_id: dummyAgentPolicyId,
+              enabled: true,
+              inputs: [],
+              force: true,
+              package: {
+                name: 'filetest',
+                title: 'For File Tests',
+                version: '0.1.0',
+              },
+            });
+          dummyPackagePolicyId = dummyPackagePolicyResponse.item.id;
+        });
+
+        after(async function () {
+          await supertest
+            .post(`/api/fleet/package_policies/delete`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ packagePolicyIds: [dummyPackagePolicyId] })
+            .expect(200);
+
+          await supertest
+            .delete(`/api/fleet/epm/packages/filetest/0.1.0`)
+            .set('kbn-xsrf', 'xxxx')
+            .send({ force: true })
+            .expect(200);
+        });
+
+        for (const [privilege, userName] of endpointIntegrationTestUsers) {
+          it(`should return 200 when requesting Endpoint package policies with "${privilege}" READ privilege`, async function () {
+            const { body: packagePolicyResponse } = await superTestWithoutAuth
+              .get(
+                `/api/fleet/package_policies?kuery=ingest-package-policies.package.name:endpoint`
+              )
+              .set('kbn-xsrf', 'xxxx')
+              .auth(testUsers[userName].username, testUsers[userName].password)
+              .expect(200);
+
+            expect(packagePolicyResponse.items[0].id).to.eql(endpointPackagePolicyId);
+          });
+
+          it(`should return 403 when requesting non-endpoint packages with "${privilege}" READ privilege`, async function () {
+            await superTestWithoutAuth
+              .get(
+                `/api/fleet/package_policies?kuery=ingest-package-policies.package.name:filetest`
+              )
+              .set('kbn-xsrf', 'xxxx')
+              .auth(testUsers[userName].username, testUsers[userName].password)
+              .expect(403, {
+                statusCode: 403,
+                error: 'Forbidden',
+                message: 'Authorization denied to package: filetest. Allowed package(s): endpoint',
+              });
+          });
+        }
+      });
+
       it('should return 400 if the passed kuery does not have prefix ingest-package-policies', async () => {
         await supertest
           .get(`/api/fleet/package_policies?kuery=package.name:endpoint`)
