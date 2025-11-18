@@ -54,7 +54,7 @@ describe('transformDashboardOut', () => {
       title: 'my title',
       description: 'my description',
     };
-    expect(transformDashboardOut(input, [])).toEqual<DashboardState>({
+    expect(transformDashboardOut(input)).toEqual<DashboardState>({
       controlGroupInput: {
         chainingSystem: DEFAULT_CONTROLS_CHAINING,
         labelPosition: DEFAULT_CONTROLS_LABEL_POSITION,
