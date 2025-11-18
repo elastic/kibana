@@ -12,10 +12,6 @@ import {
   scoreDelimiterQuality,
   countOccurrences,
   calculatePositionScore,
-  analyzeBracketMismatches,
-  analyzeBracketStructure,
-  analyzeBracketOrdering,
-  variance,
 } from './utils';
 
 interface DelimiterCandidate {
@@ -91,10 +87,7 @@ export function findDelimiterSequences(
   // Step 3: Filter to likely delimiters
   const likelyDelimiters = commonSubstrings.filter(isLikelyDelimiter);
 
-  // Detect bracket mismatches (simple) and full structure (crossing + depth variance)
-  const mismatchedBrackets = analyzeBracketMismatches(messages);
-  const bracketStructure = analyzeBracketStructure(messages);
-  const unstableOrderingBrackets = analyzeBracketOrdering(messages);
+  // No bracket scoring heuristics: keep logic minimal; rely only on position score + symmetry cleanup
 
   // Step 4: Score each delimiter by ALL occurrences, not just the first
   // This ensures delimiters with consistent 2nd/3rd occurrences aren't filtered out
@@ -123,61 +116,8 @@ export function findDelimiterSequences(
 
       // Only consider this occurrence if it exists in all messages
       if (!positions.some((pos) => pos === -1)) {
-        let score = calculatePositionScore(positions);
-
-        // Penalize delimiters that contain mismatched bracket characters
-        if ([...delimiter].some((c) => mismatchedBrackets.has(c))) {
-          score *= 0.2; // heavy penalty
-        }
-
-        // Advanced structural penalties
-        const chars = [...delimiter];
-        const structuralBracketChars = chars.filter((c) => '()[]{}'.includes(c));
-        if (structuralBracketChars.length) {
-          // Unmatched openers or mismatched closers (already mostly captured, but we apply again if detected structurally)
-          if (
-            structuralBracketChars.some(
-              (c) =>
-                bracketStructure.unmatchedOpeners.has(c) ||
-                bracketStructure.mismatchedClosers.has(c)
-            )
-          ) {
-            score *= 0.2; // reinforce heavy penalty
-          }
-
-          // Crossing patterns: if any crossing pair involves a char in this delimiter
-          if (
-            structuralBracketChars.some((c) =>
-              Array.from(bracketStructure.crossingPairs).some((pair) => pair.includes(c))
-            )
-          ) {
-            score *= 0.15; // even stronger reduction for crossing involvement
-          }
-
-          // Ordering instability: penalize brackets whose relative ordering flips
-          if (structuralBracketChars.some((c) => unstableOrderingBrackets.has(c))) {
-            score *= 0.25; // moderate penalty to drop inconsistent early bracket usage
-          }
-
-          // Depth variance: highly inconsistent nesting depth suggests unreliable structural delimiter usage
-          let depthPenaltyApplied = false;
-          for (const c of structuralBracketChars) {
-            const samples = bracketStructure.depthSamples[c];
-            if (samples && samples.length > 3) {
-              const depthVar = variance(samples);
-              if (depthVar > 6) {
-                score *= 0.4; // strong penalty for very high variance
-                depthPenaltyApplied = true;
-              } else if (depthVar > 3) {
-                score *= 0.7; // moderate penalty
-                depthPenaltyApplied = true;
-              }
-            }
-            if (depthPenaltyApplied) {
-              break; // apply only once per delimiter
-            }
-          }
-        }
+        // Score purely on positional consistency.
+        const score = calculatePositionScore(positions);
 
         // Only add this occurrence if it meets the minimum score
         if (score >= minScore) {

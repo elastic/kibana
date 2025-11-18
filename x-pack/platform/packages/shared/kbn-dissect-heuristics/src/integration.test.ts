@@ -1136,10 +1136,10 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       // After normalization: correctly detects ':' as delimiter
       // With lenient position scoring, the colon is detected despite varying process name lengths
       // Ordering inconsistency penalty removes early bracket delimiters, simplifying pattern
-      // Updated expectation after symmetry enforcement dropping orphan ')' delimiter and
-      // simplifying bracket segment; number of extracted fields decreased accordingly.
+      // Updated expectation after removing bracket scoring penalties: additional
+      // bracket delimiters are retained, increasing field count.
       expect(getPattern(result)).toBe(
-        '- %{field_1} %{field_2} %{field_3->} %{field_4->} %{field_5->} %{field_6->} %{field_7} %{field_8->}]: %{field_9} %{field_10} %{field_11} %{field_12}'
+        '- %{field_1} %{field_2} %{field_3->} %{field_4->} %{field_5->} %{field_6->} %{field_7} %{field_8->}(%{field_9->}[%{field_10->})%{field_11->}]: %{field_12} %{field_13} %{field_14} %{field_15}'
       );
     });
   });

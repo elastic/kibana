@@ -18,12 +18,9 @@ The extraction algorithm supports a subset of Dissect modifiers:
 
 ## Delimiter Reliability Heuristics
 
-During delimiter detection the algorithm applies layered reliability penalties to structural bracket characters, plus a final symmetry filter:
+The current approach keeps delimiter scoring deliberately simple:
 
-1. Balance scan: For each message a lightweight pass over `()`, `[]`, `{}` records any unmatched opener or stray closer. Delimiters containing those characters have their position score heavily reduced (×0.2) so they rarely pass the threshold.
-2. Crossing pattern detection: A second pass builds a simple stack and records pairs like `([)` where the closer does not match the most recent opener (improper nesting order). Delimiters containing characters involved in any crossing pair receive an additional strong penalty (×0.15).
-3. Depth variance analysis: For each bracket character we collect its nesting depth samples. Highly unstable structural usage (variance > 6) triggers a strong penalty (×0.4); moderate instability (variance > 3) a lighter penalty (×0.7). This filters out delimiters drawn from erratic bracket usage while keeping consistently nested ones.
-4. Relative ordering instability: First-occurrence ordering of different opener types `(`, `[`, `{` is compared across messages. If the relative order flips (e.g. sometimes `(` precedes `[` and sometimes the reverse) those bracket characters receive a penalty (×0.25) to reduce adoption of inconsistent early structural tokens.
-5. Symmetry enforcement: After scoring, pure single-character closing brackets `)`, `]`, `}` are removed unless their matching opener also survived selection. Multi-character tokens containing a closer (e.g. `]:`, `] `) are retained since they often act as natural end delimiters. This prevents orphan closing brackets from fragmenting bracketed content.
+- Position consistency: Delimiters are scored only by how consistently they appear at similar character offsets across messages (variance-based exponential decay).
+- Symmetry enforcement: After scoring, any single-character closing bracket `)`, `]`, `}` is discarded unless its matching opener `(`, `[`, `{` was also selected. This avoids generating patterns that fragment bracketed content using an orphan closer.
 
-Only characters directly implicated (unmatched, crossing, unstable ordering, high-variance, or orphaned) are penalized or filtered; properly balanced and consistently nested bracket delimiters in well‑formed logs remain eligible.
+No additional bracket penalties (mismatch, crossing, depth variance, ordering instability) are applied—favoring simpler, more predictable behavior while still preventing obviously broken delimiter choices.
