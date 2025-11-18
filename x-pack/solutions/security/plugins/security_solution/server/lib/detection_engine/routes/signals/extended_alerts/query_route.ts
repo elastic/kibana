@@ -8,20 +8,21 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { SearchAlertsRequestBody } from '../../../../../common/api/detection_engine/signals';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '../../../../../common/constants';
-import { buildSiemResponse } from '../utils';
-import { searchAlerts } from './utils/search_alerts';
+import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
+import { SearchExtendedAlertsRequestBody } from '../../../../../../common/api/detection_engine/extended_alerts';
+import type { SecuritySolutionPluginRouter } from '../../../../../types';
+import { DETECTION_ENGINE_QUERY_EXTENDED_ALERTS_URL } from '../../../../../../common/constants';
+import { buildSiemResponse } from '../../utils';
+import { searchAlerts } from '../utils/search_alerts';
 
-export const querySignalsRoute = (
+export const queryExtendedAlertsRoute = (
   router: SecuritySolutionPluginRouter,
   ruleDataClient: IRuleDataClient | null
 ) => {
   router.versioned
     .post({
-      path: DETECTION_ENGINE_QUERY_SIGNALS_URL,
-      access: 'public',
+      path: DETECTION_ENGINE_QUERY_EXTENDED_ALERTS_URL,
+      access: 'internal',
       security: {
         authz: {
           requiredPrivileges: ['securitySolution'],
@@ -30,10 +31,10 @@ export const querySignalsRoute = (
     })
     .addVersion(
       {
-        version: '2023-10-31',
+        version: '1',
         validate: {
           request: {
-            body: buildRouteValidationWithZod(SearchAlertsRequestBody),
+            body: buildRouteValidationWithZod(SearchExtendedAlertsRequestBody),
           },
         },
       },
@@ -66,7 +67,11 @@ export const querySignalsRoute = (
         }
         try {
           const spaceId = (await context.securitySolution).getSpaceId();
-          const indexPattern = ruleDataClient?.indexNameWithNamespace(spaceId);
+          const alertsIndex = ruleDataClient?.indexNameWithNamespace(spaceId);
+          const indexPattern = [
+            ...(alertsIndex ? [alertsIndex] : []), // Detection alerts
+            `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}`, // Attack alerts
+          ];
 
           const result = await searchAlerts({ esClient, queryParams: request.body, indexPattern });
 

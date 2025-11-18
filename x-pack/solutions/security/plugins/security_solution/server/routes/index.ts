@@ -52,6 +52,7 @@ import { registerEntityAnalyticsRoutes } from '../lib/entity_analytics/register_
 import { registerSiemMigrationsRoutes } from '../lib/siem_migrations/routes';
 import { registerAssetInventoryRoutes } from '../lib/asset_inventory/routes';
 import { registerSiemReadinessRoutes } from '../lib/siem_readiness';
+import { queryExtendedAlertsRoute } from '../lib/detection_engine/routes/signals/extended_alerts/query_route';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -106,6 +107,9 @@ export const initRoutes = (
   finalizeSignalsMigrationRoute(router, ruleDataService, docLinks);
   deleteSignalsMigrationRoute(router, docLinks);
   suggestUserProfilesRoute(router, getStartServices);
+
+  // Detection Engine Extended Alerts routes that have the REST endpoints of /internal/detection_engine/extended_alerts
+  queryExtendedAlertsRoute(router, ruleDataClient);
 
   // Detection Engine index routes that have the REST endpoints of /api/detection_engine/index
   // All REST index creation, policy management for spaces

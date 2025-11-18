@@ -9,7 +9,7 @@ import { isEmpty } from 'lodash';
 import { useMemo, useEffect, useState } from 'react';
 import type { SetStateAction } from 'react';
 import type React from 'react';
-import type { fetchQueryRuleRegistryAlerts } from './api';
+import type { fetchQueryExtendedAlerts, fetchQueryRuleRegistryAlerts } from './api';
 import { fetchQueryAlerts } from './api';
 import type { AlertSearchResponse, QueryAlerts } from './types';
 import { useTrackHttpRequest } from '../../../../common/lib/apm/use_track_http_request';
@@ -28,7 +28,10 @@ export interface ReturnQueryAlerts<Hit, Aggs> {
 
 type AlertsQueryName = (typeof ALERTS_QUERY_NAMES)[keyof typeof ALERTS_QUERY_NAMES];
 
-type FetchMethod = typeof fetchQueryAlerts | typeof fetchQueryRuleRegistryAlerts;
+type FetchMethod =
+  | typeof fetchQueryAlerts
+  | typeof fetchQueryRuleRegistryAlerts
+  | typeof fetchQueryExtendedAlerts;
 export interface AlertsQueryParams {
   fetchMethod?: FetchMethod;
   query: object;
