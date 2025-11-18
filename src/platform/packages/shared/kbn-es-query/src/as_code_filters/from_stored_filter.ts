@@ -268,7 +268,6 @@ export function convertToSimpleCondition(
   }
 
   // Fallback - try to extract from meta.params
-  // Note: params can be various types; checking for object with query property
   const params = meta.params as { query?: unknown } | undefined;
   if (params && typeof params === 'object' && 'query' in params && params.query !== undefined) {
     return {
