@@ -14,6 +14,7 @@ import { BASE_RAC_ALERTS_API_PATH } from '../../common/constants';
 import {
   MAX_ALERT_IDS_PER_REQUEST,
   MAX_INDEX_NAME,
+  MAX_QUERY_LENGTH,
   MAX_TAGS_TO_UPDATE,
 } from '../alert_data_client/constants';
 
@@ -26,7 +27,7 @@ const bodySchema = schema.object({
   alertIds: schema.maybe(
     schema.arrayOf(schema.string(), { minSize: 1, maxSize: MAX_ALERT_IDS_PER_REQUEST })
   ),
-  query: schema.maybe(schema.string()),
+  query: schema.maybe(schema.string({ maxLength: MAX_QUERY_LENGTH })),
 });
 
 export const bulkUpdateTagsRoute = (router: IRouter<RacRequestHandlerContext>) => {

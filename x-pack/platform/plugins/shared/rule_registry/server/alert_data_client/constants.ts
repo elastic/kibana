@@ -41,3 +41,8 @@ export const MAX_TAGS_TO_UPDATE = 100;
  * The maximum length of an index name as allowed by Elasticsearch
  */
 export const MAX_INDEX_NAME = 255;
+
+/**
+ * The maximum length of a KQL query string
+ */
+export const MAX_QUERY_LENGTH = 10000;

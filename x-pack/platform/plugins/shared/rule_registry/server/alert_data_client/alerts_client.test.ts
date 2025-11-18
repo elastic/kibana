@@ -632,6 +632,62 @@ describe('AlertsClient', () => {
         expect(esClientMock.updateByQuery).toHaveBeenCalledTimes(1);
       });
 
+      it('should construct the query and aggs correctly when getting the rule type ids and consumers', async () => {
+        await alertsClient.bulkUpdateTags({
+          alertIds: ['alert-1', 'alert-2'],
+          index: '.alerts-security.alerts-default',
+          add: ['urgent', 'production'],
+          remove: ['outdated', 'test'],
+        });
+
+        expect(esClientMock.search).toHaveBeenCalledTimes(1);
+
+        expect(esClientMock.search.mock.calls[0][0]).toMatchInlineSnapshot(`
+          Object {
+            "aggs": Object {
+              "ruleTypeIds": Object {
+                "aggs": Object {
+                  "consumers": Object {
+                    "terms": Object {
+                      "field": "kibana.alert.rule.consumer",
+                      "size": 100,
+                    },
+                  },
+                },
+                "terms": Object {
+                  "field": "kibana.alert.rule.rule_type_id",
+                  "size": 100,
+                },
+              },
+            },
+            "index": ".alerts-security.alerts-default",
+            "query": Object {
+              "bool": Object {
+                "filter": Array [
+                  Object {
+                    "terms": Object {
+                      "kibana.space_ids": Array [
+                        "space-1",
+                        "*",
+                      ],
+                    },
+                  },
+                  Object {
+                    "ids": Object {
+                      "values": Array [
+                        "alert-1",
+                        "alert-2",
+                      ],
+                    },
+                  },
+                ],
+              },
+            },
+            "size": 0,
+          }
+        `);
+      });
+
       it('should format the response correctly with success and error', async () => {
         esClientMock.updateByQuery.mockResolvedValue({
           total: 2,
@@ -675,16 +731,58 @@ describe('AlertsClient', () => {
           updated: 1,
         });
       });
+
+      it('should throw if no rule type ids are found by the auth aggs', async () => {
+        // @ts-expect-error: only the aggregations field is needed for this test
+        esClientMock.search.mockResolvedValue({
+          aggregations: {
+            ruleTypeIds: {
+              buckets: [
+                {
+                  key: 'rule-type-id-1',
+                  consumers: { buckets: [] },
+                },
+              ],
+            },
+          },
+        });
+
+        await expect(
+          alertsClient.bulkUpdateTags({
+            alertIds: ['alert-1', 'alert-2'],
+            index: '.alerts-security.alerts-default',
+            add: ['urgent', 'production'],
+            remove: ['outdated', 'test'],
+          })
+        ).rejects.toMatchInlineSnapshot(
+          `[Error: Not authorized to access any of the requested alerts]`
+        );
+      });
+
+      it('should throw if no consumers are found by the auth aggs', async () => {
+        // @ts-expect-error: only the aggregations field is needed for this test
+        esClientMock.search.mockResolvedValue({
+          aggregations: {
+            ruleTypeIds: {
+              buckets: [],
+            },
+          },
+        });
+
+        await expect(
+          alertsClient.bulkUpdateTags({
+            alertIds: ['alert-1', 'alert-2'],
+            index: '.alerts-security.alerts-default',
+            add: ['urgent', 'production'],
+            remove: ['outdated', 'test'],
+          })
+        ).rejects.toMatchInlineSnapshot(
+          `[Error: Not authorized to access any of the requested alerts]`
+        );
+      });
     });
 
     describe('With query', () => {
-      beforeEach(() => {
-        esClientMock.search.mockResolvedValue({
-          // @ts-expect-error: only the aggregations field is needed for this test
-          hits: { hits: [{ _id: 'alert-1' }, { _id: 'alert-2' }] },
-        });
-      });
-
       it('authorizes the alerts correctly', async () => {
         await alertsClient.bulkUpdateTags({
           query: 'some-query',
@@ -694,7 +792,7 @@ describe('AlertsClient', () => {
         });
       });
 
-      it('should bulk update alerts correctly', async () => {
+      it('should bulk update alerts correctly with the correct filters', async () => {
         await alertsClient.bulkUpdateTags({
           query: 'some-query',
           index: '.alerts-security.alerts-default',
@@ -703,6 +801,65 @@ describe('AlertsClient', () => {
         });
 
         expect(esClientMock.updateByQuery).toHaveBeenCalledTimes(1);
+
+        const query = esClientMock.updateByQuery.mock.calls[0][0].query;
+
+        expect(query).toMatchInlineSnapshot(`
+          Object {
+            "bool": Object {
+              "filter": Array [
+                Object {
+                  "multi_match": Object {
+                    "lenient": true,
+                    "query": "some-query",
+                    "type": "best_fields",
+                  },
+                },
+                Object {
+                  "arguments": Array [
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "alert.attributes.alertTypeId",
+                        },
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "test-rule-type-1",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                    Object {
+                      "arguments": Array [
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "alert.attributes.consumer",
+                        },
+                        Object {
+                          "isQuoted": false,
+                          "type": "literal",
+                          "value": "foo",
+                        },
+                      ],
+                      "function": "is",
+                      "type": "function",
+                    },
+                  ],
+                  "function": "and",
+                  "type": "function",
+                },
+              ],
+              "must": Array [],
+              "must_not": Array [],
+              "should": Array [],
+            },
+          }
+        `);
       });
 
       it('should format the response correctly with success and error', async () => {

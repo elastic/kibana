@@ -124,13 +124,13 @@ export interface BulkUpdateTagArgs {
   query?: string | null;
 }
 
-interface BulkUpdateTagByIdsArgs {
+interface BulkUpdateTagsByIdsArgs {
   alertIds: string[];
   index: string;
   script: estypes.Script;
 }
 
-interface BulkUpdateTagByQueryArgs {
+interface BulkUpdateTagsByQueryArgs {
   query: string;
   index: string;
   script: estypes.Script;
@@ -200,7 +200,7 @@ interface SearchAlertsParams {
   runtimeMappings?: MappingRuntimeFields;
 }
 
-interface RuleTypeConsumersAggsResponse {
+interface RuleTypeIdsConsumersAggsResponse {
   ruleTypeIds: {
     buckets: Array<{
       key: string;
@@ -653,160 +653,6 @@ export class AlertsClient {
     }
   }
 
-  private async ensureAllAlertsAuthorizedByAggs({
-    alertIds,
-    operation,
-    index,
-  }: EnsureAllAlertsAuthorizedByAggsArgs) {
-    const res = await this.getAuthorizedRuleTypeIdsConsumersPairs({ alertIds, index });
-    const ruleTypeIdConsumersPairs = this.parseRuleTypeIdsConsumersAggsResponse(res);
-
-    this.validateRuleTypeIdConsumersPairs(ruleTypeIdConsumersPairs);
-
-    await this.bulkEnsureAuthorizedAndAuditLog({ alertIds, operation, ruleTypeIdConsumersPairs });
-  }
-
-  private parseRuleTypeIdsConsumersAggsResponse = (
-    res: estypes.SearchResponse<unknown, RuleTypeConsumersAggsResponse>
-  ) => {
-    const ruleTypeIdConsumersMap: Map<string, string[]> = new Map(
-      res.aggregations?.ruleTypeIds.buckets.map((bucket) => [
-        bucket.key,
-        bucket.consumers.buckets.map((consumerBucket) => consumerBucket.key),
-      ])
-    );
-
-    const ruleTypeIdConsumersPairs = Array.from(ruleTypeIdConsumersMap.entries()).map(
-      ([ruleTypeId, consumers]) => ({
-        ruleTypeId,
-        consumers,
-      })
-    );
-
-    return ruleTypeIdConsumersPairs;
-  };
-
-  private getAuthorizedRuleTypeIdsConsumersPairs = async ({
-    alertIds,
-    index,
-    query,
-  }: {
-    alertIds?: string[];
-    query?: string;
-    index: string;
-  }) => {
-    const spacesFilter = getSpacesFilter(this.spaceId);
-    const filters: estypes.QueryDslBoolQuery['filter'] = [];
-    const finalQuery: {
-      bool: Omit<NonNullable<estypes.QueryDslBoolQuery>, 'filter'> & {
-        filter: estypes.QueryDslQueryContainer[];
-      };
-    } = {
-      bool: { filter: [] },
-    };
-
-    if (spacesFilter != null) {
-      filters.push(spacesFilter);
-    }
-
-    if (alertIds != null) {
-      filters.push({
-        ids: {
-          values: alertIds,
-        },
-      });
-    }
-
-    if (query != null) {
-      const config = getEsQueryConfig();
-      const kqlQueryAsDsl = buildEsQuery(undefined, { query, language: 'kuery' }, [], config);
-
-      finalQuery.bool = { ...finalQuery.bool, ...kqlQueryAsDsl.bool };
-    }
-
-    finalQuery.bool.filter = [...finalQuery.bool.filter, ...filters];
-
-    /**
-     * Here we are using the internal user to perform the aggregation query
-     * to retrieve the ruleTypeId and consumer for the provided alertIds.
-     *
-     * We do this because the scoped user may not have access to all the
-     * alerts being checked, which would lead to incomplete aggregation results
-     * and incorrect authorization decisions.
-     */
-    return this.esClient.search<unknown, RuleTypeConsumersAggsResponse>({
-      index,
-      query: finalQuery,
-      aggs: {
-        ruleTypeIds: {
-          terms: { field: ALERT_RULE_TYPE_ID, size: 100 },
-          aggs: { consumers: { terms: { field: ALERT_RULE_CONSUMER, size: 100 } } },
-        },
-      },
-      // We do not need any hits back. We care about the aggs only.
-      size: 0,
-    });
-  };
-
-  /**
-   * Rule type id and consumers pairs should always have at least one entry
-   * In the rare scenario where the alert documents do not have the info needed
-   * to perform authorization, we throw a forbidden error
-   */
-  private validateRuleTypeIdConsumersPairs = (
-    ruleTypeIdConsumersPairs: Array<{ ruleTypeId: string; consumers: string[] }>
-  ) => {
-    if (ruleTypeIdConsumersPairs.length === 0) {
-      throw Boom.forbidden('Not authorized to access any of the requested alerts');
-    }
-
-    for (const { consumers } of ruleTypeIdConsumersPairs) {
-      if (consumers.length === 0) {
-        throw Boom.forbidden('Not authorized to access any of the requested alerts');
-      }
-    }
-  };
-
-  private bulkEnsureAuthorizedAndAuditLog = async ({
-    ruleTypeIdConsumersPairs,
-    operation,
-    alertIds,
-  }: {
-    ruleTypeIdConsumersPairs: Array<{ ruleTypeId: string; consumers: string[] }>;
-    operation: EnsureAllAlertsAuthorizedByAggsArgs['operation'];
-    alertIds: string[];
-  }) => {
-    try {
-      await this.authorization.bulkEnsureAuthorized({
-        ruleTypeIdConsumersPairs,
-        operation,
-        entity: AlertingAuthorizationEntity.Alert,
-      });
-
-      for (const alertId of alertIds) {
-        this.auditLogger?.log(
-          alertAuditEvent({
-            action: operationAlertAuditActionMap[operation],
-            id: alertId,
-            ...this.getOutcome(operation),
-          })
-        );
-      }
-    } catch (error) {
-      for (const alertId of alertIds) {
-        this.auditLogger?.log(
-          alertAuditEvent({
-            action: operationAlertAuditActionMap[operation],
-            id: alertId,
-            error,
-          })
-        );
-      }
-
-      throw error;
-    }
-  };
-
   public async ensureAllAlertsAuthorizedRead({ alerts }: { alerts: MgetAndAuditAlert[] }) {
     try {
       await this.ensureAllAlertsAuthorized({ alerts, operation: ReadOperations.Get });
@@ -1066,15 +912,14 @@ export class AlertsClient {
 
     if (
       (isEmpty(add) && isEmpty(remove)) ||
-      (add != null && add.length === 0) ||
-      (remove != null && remove.length === 0)
+      (add != null && isEmpty(add)) ||
+      (remove != null && isEmpty(remove))
     ) {
       throw Boom.badRequest('No tags to add or remove were provided');
     }
 
     const script = getBulkUpdateTagsPainlessScript(add, remove);
 
-    // rejects at the route level if more than 1000 id's are passed in
     if (alertIds && alertIds.length > 0) {
       const bulkUpdateTagsByIdsResponse = await this.bulkUpdateTagsByIds({
         alertIds,
@@ -1102,7 +947,7 @@ export class AlertsClient {
     alertIds,
     script,
     index,
-  }: BulkUpdateTagByIdsArgs): Promise<estypes.UpdateByQueryResponse> {
+  }: BulkUpdateTagsByIdsArgs): Promise<estypes.UpdateByQueryResponse> {
     await this.ensureAllAlertsAuthorizedByAggs({
       alertIds,
       operation: WriteOperations.Update,
@@ -1125,7 +970,7 @@ export class AlertsClient {
     query,
     script,
     index,
-  }: BulkUpdateTagByQueryArgs): Promise<estypes.UpdateByQueryResponse> {
+  }: BulkUpdateTagsByQueryArgs): Promise<estypes.UpdateByQueryResponse> {
     try {
       const config = getEsQueryConfig();
       const authzFilter = (await getAuthzFilter(
@@ -1140,12 +985,17 @@ export class AlertsClient {
         config
       );
 
-      this.auditLogger?.log(
-        alertAuditEvent({
-          action: operationAlertAuditActionMap[WriteOperations.Update],
-          ...this.getOutcome(WriteOperations.Update),
-        })
-      );
+      const auditEvent = alertAuditEvent({
+        action: operationAlertAuditActionMap[WriteOperations.Update],
+        ...this.getOutcome(WriteOperations.Update),
+      });
+
+      const finalAuditMessage = `${auditEvent.message}. Bulk updating tags for alerts matching query: ${query}`;
+
+      this.auditLogger?.log({
+        ...auditEvent,
+        message: finalAuditMessage,
+      });
 
       const bulkUpdateResponse = await this.esClient.updateByQuery({
         query: finalQuery,
@@ -1168,6 +1018,160 @@ export class AlertsClient {
       throw error;
     }
   }
+
+  private async ensureAllAlertsAuthorizedByAggs({
+    alertIds,
+    operation,
+    index,
+  }: EnsureAllAlertsAuthorizedByAggsArgs) {
+    const res = await this.getAuthorizedRuleTypeIdsConsumersPairs({ alertIds, index });
+    const ruleTypeIdConsumersPairs = this.parseRuleTypeIdsConsumersAggsResponse(res);
+
+    this.validateRuleTypeIdConsumersPairs(ruleTypeIdConsumersPairs);
+
+    await this.bulkEnsureAuthorizedAndAuditLog({ alertIds, operation, ruleTypeIdConsumersPairs });
+  }
+
+  private getAuthorizedRuleTypeIdsConsumersPairs = async ({
+    alertIds,
+    index,
+    query,
+  }: {
+    alertIds?: string[];
+    query?: string;
+    index: string;
+  }) => {
+    const spacesFilter = getSpacesFilter(this.spaceId);
+    const filters: estypes.QueryDslBoolQuery['filter'] = [];
+    const finalQuery: {
+      bool: Omit<NonNullable<estypes.QueryDslBoolQuery>, 'filter'> & {
+        filter: estypes.QueryDslQueryContainer[];
+      };
+    } = {
+      bool: { filter: [] },
+    };
+
+    if (spacesFilter != null) {
+      filters.push(spacesFilter);
+    }
+
+    if (alertIds != null) {
+      filters.push({
+        ids: {
+          values: alertIds,
+        },
+      });
+    }
+
+    if (query != null) {
+      const config = getEsQueryConfig();
+      const kqlQueryAsDsl = buildEsQuery(undefined, { query, language: 'kuery' }, [], config);
+
+      finalQuery.bool = { ...finalQuery.bool, ...kqlQueryAsDsl.bool };
+    }
+
+    finalQuery.bool.filter = [...finalQuery.bool.filter, ...filters];
+
+    /**
+     * Here we are using the internal user to perform the aggregation query
+     * to retrieve the ruleTypeId and consumer for the provided alertIds.
+     *
+     * We do this because the scoped user may not have access to all the
+     * alerts being checked, which would lead to incomplete aggregation results
+     * and incorrect authorization decisions.
+     */
+    return this.esClient.search<unknown, RuleTypeIdsConsumersAggsResponse>({
+      index,
+      query: finalQuery,
+      aggs: {
+        ruleTypeIds: {
+          terms: { field: ALERT_RULE_TYPE_ID, size: 100 },
+          aggs: { consumers: { terms: { field: ALERT_RULE_CONSUMER, size: 100 } } },
+        },
+      },
+      // We do not need any hits back. We care about the aggs only.
+      size: 0,
+    });
+  };
+
+  private parseRuleTypeIdsConsumersAggsResponse = (
+    res: estypes.SearchResponse<unknown, RuleTypeIdsConsumersAggsResponse>
+  ) => {
+    const ruleTypeIdConsumersMap: Map<string, string[]> = new Map(
+      res.aggregations?.ruleTypeIds.buckets.map((bucket) => [
+        bucket.key,
+        bucket.consumers.buckets.map((consumerBucket) => consumerBucket.key),
+      ])
+    );
+
+    const ruleTypeIdConsumersPairs = Array.from(ruleTypeIdConsumersMap.entries()).map(
+      ([ruleTypeId, consumers]) => ({
+        ruleTypeId,
+        consumers,
+      })
+    );
+
+    return ruleTypeIdConsumersPairs;
+  };
+
+  /**
+   * Rule type id and consumers pairs should always have at least one entry
+   * In the rare scenario where the alert documents do not have the info needed
+   * to perform authorization, we throw a forbidden error
+   */
+  private validateRuleTypeIdConsumersPairs = (
+    ruleTypeIdConsumersPairs: Array<{ ruleTypeId: string; consumers: string[] }>
+  ) => {
+    if (ruleTypeIdConsumersPairs.length === 0) {
+      throw Boom.forbidden('Not authorized to access any of the requested alerts');
+    }
+
+    for (const { consumers } of ruleTypeIdConsumersPairs) {
+      if (consumers.length === 0) {
+        throw Boom.forbidden('Not authorized to access any of the requested alerts');
+      }
+    }
+  };
+
+  private bulkEnsureAuthorizedAndAuditLog = async ({
+    ruleTypeIdConsumersPairs,
+    operation,
+    alertIds,
+  }: {
+    ruleTypeIdConsumersPairs: Array<{ ruleTypeId: string; consumers: string[] }>;
+    operation: EnsureAllAlertsAuthorizedByAggsArgs['operation'];
+    alertIds: string[];
+  }) => {
+    try {
+      await this.authorization.bulkEnsureAuthorized({
+        ruleTypeIdConsumersPairs,
+        operation,
+        entity: AlertingAuthorizationEntity.Alert,
+      });
+
+      for (const alertId of alertIds) {
+        this.auditLogger?.log(
+          alertAuditEvent({
+            action: operationAlertAuditActionMap[operation],
+            id: alertId,
+            ...this.getOutcome(operation),
+          })
+        );
+      }
+    } catch (error) {
+      for (const alertId of alertIds) {
+        this.auditLogger?.log(
+          alertAuditEvent({
+            action: operationAlertAuditActionMap[operation],
+            id: alertId,
+            error,
+          })
+        );
+      }
+
+      throw error;
+    }
+  };
 
   /**
    * This function updates the case ids of multiple alerts per index.
