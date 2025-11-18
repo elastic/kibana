@@ -150,11 +150,9 @@ export async function suggest(
       ];
     }
 
-    const processingCommands = suggestions.filter(
+    return suggestions.filter(
       (def) => !isSourceCommandSuggestion(def) && !isHeaderCommandSuggestion(def)
     );
-
-    return processingCommands.sort((a, b) => a.label.localeCompare(b.label));
   }
 
   // ToDo: Reconsider where it belongs when this is resolved https://github.com/elastic/kibana/issues/216492

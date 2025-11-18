@@ -17,23 +17,19 @@ const BASE_PRIORITIES: Record<SuggestionCategory, number> = {
   // Critical UI elements (eg. create control)
   [SuggestionCategory.CRITICAL_ACTION]: 0,
 
-  // User-defined columns
   [SuggestionCategory.USER_DEFINED_COLUMN]: 50,
 
-  // Structural elements
   [SuggestionCategory.PIPE]: 100,
   [SuggestionCategory.COMMA]: 150,
 
   // Time parameters (?_tstart, ?_tend)
   [SuggestionCategory.TIME_PARAM]: 200,
 
-  // All fields/columns
   [SuggestionCategory.RECOMMENDED_FIELD]: 250,
   [SuggestionCategory.TIME_FIELD]: 300,
   [SuggestionCategory.ECS_FIELD]: 350,
   [SuggestionCategory.FIELD]: 400,
 
-  // Operators
   [SuggestionCategory.OPERATOR_ARITHMETIC]: 410,
   [SuggestionCategory.OPERATOR_LOGICAL]: 420,
   [SuggestionCategory.OPERATOR_COMPARISON]: 430,
@@ -42,15 +38,12 @@ const BASE_PRIORITIES: Record<SuggestionCategory, number> = {
   [SuggestionCategory.OPERATOR_PATTERN]: 460,
   [SuggestionCategory.OPERATOR]: 490, // Fallback
 
-  // All functions (after operators as requested)
   [SuggestionCategory.FUNCTION_TIME_SERIES_AGG]: 500,
   [SuggestionCategory.FUNCTION_AGG]: 550,
   [SuggestionCategory.FUNCTION_SCALAR]: 600,
 
-  // Processing commands and keywords
-  [SuggestionCategory.PROCESSING_COMMAND]: 650,
-  [SuggestionCategory.KEYWORD]: 700,
-  [SuggestionCategory.UNKNOWN]: 750,
+  [SuggestionCategory.KEYWORD]: 650,
+  [SuggestionCategory.UNKNOWN]: 700,
 };
 
 // Context-specific priority adjustments (negative = boost up, positive = push down)

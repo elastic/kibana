@@ -73,9 +73,6 @@ function detectFromKind(kind: ISuggestionItem['kind'], label: string): Suggestio
     case 'Operator':
       return getOperatorCategory(label);
 
-    case 'Method':
-      return SuggestionCategory.PROCESSING_COMMAND;
-
     default:
       return SuggestionCategory.UNKNOWN;
   }

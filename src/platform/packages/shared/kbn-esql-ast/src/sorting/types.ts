@@ -27,7 +27,6 @@ export enum SuggestionCategory {
   FUNCTION_TIME_SERIES_AGG = 'function_ts_agg',
   FUNCTION_AGG = 'function_agg',
   FUNCTION_SCALAR = 'function_scalar',
-  PROCESSING_COMMAND = 'processing_command',
   KEYWORD = 'keyword',
   PIPE = 'pipe',
   COMMA = 'comma',
