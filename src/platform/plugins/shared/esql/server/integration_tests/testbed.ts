@@ -143,4 +143,8 @@ export class EsqlServiceTestbed {
   public readonly GET = (path: string) => {
     return request.get(this.kibana!.root, path).set('x-elastic-internal-origin', 'esql-test');
   };
+
+  public readonly POST = (path: string) => {
+    return request.post(this.kibana!.root, path).set('x-elastic-internal-origin', 'esql-test');
+  };
 }
