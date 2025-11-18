@@ -15,9 +15,6 @@ import {
   EuiTitle,
   EuiText,
   EuiSpacer,
-  EuiEmptyPrompt,
-  EuiLoadingLogo,
-  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
@@ -44,10 +41,11 @@ import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_
 import { SchemaChangesReviewModal, getChanges } from '../schema_editor/schema_changes_review_modal';
 import { getDefinitionFields } from '../schema_editor/hooks/use_schema_fields';
 import { useAIFeatures } from '../../../hooks/use_ai_features';
-import { useSuggestProcessingPipeline } from './use_suggest_processing_pipeline';
+import { useSuggestProcessingPipeline } from './processing_pipeline_suggestions/use_suggest_processing_pipeline';
 import { GenerateSuggestionButton } from '../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
 import { useStreamDetail } from '../../../hooks/use_stream_detail';
-import { ProcessingSuggestion } from './processing_suggestion';
+import { ProcessingPipelineSuggestion } from './processing_pipeline_suggestions/processing_pipeline_suggestion';
+import { LoadingPrompt } from './processing_pipeline_suggestions/loading_prompt';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -234,49 +232,43 @@ const StepsEditor = React.memo(() => {
 
   const abortController = useAbortController();
   const aiFeatures = useAIFeatures();
-  const [suggestionsState, suggestProcessing] = useSuggestProcessingPipeline(abortController);
+  const [suggestionsState, suggestPipeline] = useSuggestProcessingPipeline(abortController);
   const {
     definition: { stream },
   } = useStreamDetail();
 
-  if (suggestionsState.loading) {
-    return (
-      <EuiEmptyPrompt
-        icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
-        body={
-          <>
-            <EuiText>
-              {i18n.translate('xpack.streams.stepsEditor.loadingDashboardsLabel', {
-                defaultMessage: 'Analysing your documents...',
-              })}
-            </EuiText>
-            <EuiLink
-              onClick={() => {
-                abortController.abort();
-                abortController.refresh();
-              }}
-            >
-              {i18n.translate('xpack.streams.stepsEditor.cancelLabel', {
-                defaultMessage: 'Cancel',
-              })}
-            </EuiLink>
-          </>
-        }
-      />
-    );
-  }
+  if (aiFeatures && aiFeatures.enabled) {
+    if (suggestionsState.loading) {
+      return (
+        <LoadingPrompt
+          onCancel={() => {
+            abortController.abort();
+            abortController.refresh();
+          }}
+        />
+      );
+    }
 
-  if (suggestionsState.value) {
-    return (
-      <ProcessingSuggestion
-        pipeline={suggestionsState.value}
-        onAccept={() => {
-          reassignSteps(suggestionsState.value.steps);
-          suggestProcessing(null);
-        }}
-        onDismiss={() => suggestProcessing(null)}
-      />
-    );
+    if (suggestionsState.value) {
+      return (
+        <ProcessingPipelineSuggestion
+          aiFeatures={aiFeatures}
+          pipeline={suggestionsState.value}
+          onAccept={() => {
+            reassignSteps(suggestionsState.value.steps);
+            suggestPipeline(null);
+          }}
+          onDismiss={() => suggestPipeline(null)}
+          onRegenerate={(connectorId) => {
+            suggestPipeline({
+              connectorId,
+              streamName: stream.name,
+              fieldName: 'body.text',
+            });
+          }}
+        />
+      );
+    }
   }
 
   return (
@@ -285,7 +277,7 @@ const StepsEditor = React.memo(() => {
         <RootSteps stepRefs={stepRefs} />
       ) : (
         <NoStepsEmptyPrompt>
-          {aiFeatures && (
+          {aiFeatures && aiFeatures.enabled && (
             <EuiPanel
               hasBorder
               grow={false}
@@ -309,7 +301,7 @@ const StepsEditor = React.memo(() => {
               <GenerateSuggestionButton
                 aiFeatures={aiFeatures}
                 onClick={(connectorId) => {
-                  suggestProcessing({
+                  suggestPipeline({
                     connectorId,
                     streamName: stream.name,
                     fieldName: 'body.text',

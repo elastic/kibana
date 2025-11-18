@@ -17,9 +17,9 @@ import {
   euiTextTruncate,
   EuiText,
   useEuiTheme,
+  EuiButtonEmpty,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { UseFormSetValue, FieldValues } from 'react-hook-form';
 import type {
   StreamlangDSL,
   StreamlangProcessorDefinition,
@@ -27,90 +27,27 @@ import type {
 } from '@kbn/streamlang';
 import { isActionBlock } from '@kbn/streamlang';
 import { css } from '@emotion/react';
-import { useAbortController } from '@kbn/react-hooks';
-import { useStreamDetail } from '../../../hooks/use_stream_detail';
-import { AdditionalChargesCallout } from './steps/blocks/action/grok/additional_charges_callout';
-import { GenerateSuggestionButton } from '../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
-import { useSuggestProcessingPipeline } from './use_suggest_processing_pipeline';
-import type { AIFeatures } from '../../../hooks/use_ai_features';
-import { getStepDescription } from './steps/blocks/action/utils';
+import { getStepDescription } from '../steps/blocks/action/utils';
+import type { AIFeatures } from '../../../../hooks/use_ai_features';
+import { GenerateSuggestionButton } from '../../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
 
-export const ProcessingPipelineAISuggestions = ({
-  aiFeatures,
-  setValue,
-}: {
+export interface ProcessingPipielineSuggestionProps {
   aiFeatures: AIFeatures;
-  setValue: UseFormSetValue<FieldValues>;
-}) => {
-  const {
-    definition: { stream },
-  } = useStreamDetail();
-
-  const abortController = useAbortController();
-  const [suggestionsState, suggestProcessing] = useSuggestProcessingPipeline(abortController);
-
-  if (suggestionsState.value) {
-    return (
-      <ProcessingSuggestion
-        pipeline={suggestionsState.value}
-        onAccept={() => {}}
-        onDismiss={() => suggestProcessing(null)}
-      />
-    );
-  }
-
-  return (
-    <>
-      <EuiFlexGroup gutterSize="l" alignItems="center">
-        {aiFeatures.enabled && (
-          <EuiFlexItem grow={false}>
-            <GenerateSuggestionButton
-              aiFeatures={aiFeatures}
-              onClick={(connectorId) => {
-                suggestProcessing({
-                  connectorId,
-                  streamName: stream.name,
-                  fieldName: 'body.text',
-                });
-              }}
-              isLoading={suggestionsState.loading}
-            >
-              {i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.refreshSuggestions',
-                {
-                  defaultMessage: 'Suggest pipeline',
-                }
-              )}
-            </GenerateSuggestionButton>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-      {aiFeatures &&
-        aiFeatures.enabled &&
-        aiFeatures.isManagedAIConnector &&
-        !aiFeatures.hasAcknowledgedAdditionalCharges && (
-          <>
-            <EuiSpacer size="s" />
-            <AdditionalChargesCallout aiFeatures={aiFeatures} />
-          </>
-        )}
-    </>
-  );
-};
-
-export interface ProcessingSuggestionProps {
   pipeline: StreamlangDSL;
   // simulationResult: APIReturnType<'POST /internal/streams/{name}/processing/_simulate'>;
   onAccept(): void;
   onDismiss(): void;
+  onRegenerate(connectorId: string): void;
 }
 
-export function ProcessingSuggestion({
+export function ProcessingPipelineSuggestion({
+  aiFeatures,
   pipeline,
   // simulationResult,
   onAccept,
   onDismiss,
-}: ProcessingSuggestionProps) {
+  onRegenerate,
+}: ProcessingPipielineSuggestionProps) {
   // const processorMetrics = simulationResult.processors_metrics['grok-processor'];
   return (
     <EuiCallOut
@@ -138,45 +75,12 @@ export function ProcessingSuggestion({
         ) : null
       )}
       <EuiSpacer size="s" />
-      <EuiFlexGroup
-        gutterSize="m"
-        responsive={false}
-        wrap={false}
-        alignItems="flexStart"
-        direction="column"
-      >
-        {/* <EuiFlexItem grow={false}>
-          <EuiBadgeGroup>
-            <EuiBadge color="hollow">
-              {i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.grokPatternSuggestion.matchRateBadge',
-                {
-                  defaultMessage: '{percentage}% Matched',
-                  values: {
-                    percentage: (processorMetrics.parsed_rate * 100).toFixed(),
-                  },
-                }
-              )}
-            </EuiBadge>
-            <EuiBadge color="hollow">
-              {i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.grokPatternSuggestion.fieldCountBadge',
-                {
-                  defaultMessage: '{count} Fields',
-                  values: {
-                    count: processorMetrics.detected_fields.length,
-                  },
-                }
-              )}
-            </EuiBadge>
-          </EuiBadgeGroup>
-        </EuiFlexItem> */}
-        {/* <EuiFlexItem grow={false}>
+      <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween">
+        <EuiFlexItem>
           <GenerateSuggestionButton
             iconType="refresh"
             size="s"
             onClick={onRegenerate}
-            isLoading={isLoadingSuggestions}
             aiFeatures={aiFeatures}
           >
             {i18n.translate(
@@ -186,7 +90,17 @@ export function ProcessingSuggestion({
               }
             )}
           </GenerateSuggestionButton>
-        </EuiFlexItem> */}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButtonEmpty onClick={onDismiss} color="primary" size="s">
+            {i18n.translate(
+              'xpack.streams.streamDetailView.managementTab.enrichment.grokPatternSuggestion.rejectButton',
+              {
+                defaultMessage: 'Reject',
+              }
+            )}
+          </EuiButtonEmpty>
+        </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiButton iconType="check" onClick={onAccept} color="primary" size="s" fill>
             {i18n.translate(
@@ -237,6 +151,32 @@ const ActionBlock = ({ step }: { step: StreamlangProcessorDefinition }) => {
                 </EuiText>
               </EuiFlexGroup>
             </EuiFlexItem>
+            {/* <EuiFlexItem grow={false}>
+          <EuiBadgeGroup>
+            <EuiBadge color="hollow">
+              {i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.grokPatternSuggestion.matchRateBadge',
+                {
+                  defaultMessage: '{percentage}% Matched',
+                  values: {
+                    percentage: (processorMetrics.parsed_rate * 100).toFixed(),
+                  },
+                }
+              )}
+            </EuiBadge>
+            <EuiBadge color="hollow">
+              {i18n.translate(
+                'xpack.streams.streamDetailView.managementTab.enrichment.grokPatternSuggestion.fieldCountBadge',
+                {
+                  defaultMessage: '{count} Fields',
+                  values: {
+                    count: processorMetrics.detected_fields.length,
+                  },
+                }
+              )}
+            </EuiBadge>
+          </EuiBadgeGroup>
+        </EuiFlexItem> */}
             {/* <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize="xs">
                 {processorMetrics && (

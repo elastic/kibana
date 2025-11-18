@@ -9,14 +9,14 @@ import type { useAbortController } from '@kbn/react-hooks';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { lastValueFrom, map } from 'rxjs';
 import { streamlangDSLSchema, type StreamlangDSL } from '@kbn/streamlang';
-import { useKibana } from '../../../hooks/use_kibana';
-import { selectPreviewRecords } from './state_management/simulation_state_machine/selectors';
-import { useSimulatorSelector } from './state_management/stream_enrichment_state_machine';
-import { useGrokPatternSuggestion } from './steps/blocks/action/grok/use_grok_pattern_suggestion';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { selectPreviewRecords } from '../state_management/simulation_state_machine/selectors';
+import { useSimulatorSelector } from '../state_management/stream_enrichment_state_machine';
+import { useGrokPatternSuggestion } from '../steps/blocks/action/grok/use_grok_pattern_suggestion';
 
 export const SUGGESTED_GROK_PROCESSOR_ID = 'grok-processor';
 
-export interface SuggestProcessingParams {
+export interface SuggestProcessingPipelineParams {
   streamName: string;
   connectorId: string;
   fieldName: string;
@@ -40,8 +40,8 @@ export function useSuggestProcessingPipeline(
   const [, suggestGrokPattern] = useGrokPatternSuggestion(abortController);
 
   async function suggestProcessing(params: null): Promise<undefined>;
-  async function suggestProcessing(params: SuggestProcessingParams): Promise<StreamlangDSL>;
-  async function suggestProcessing(params: SuggestProcessingParams | null) {
+  async function suggestProcessing(params: SuggestProcessingPipelineParams): Promise<StreamlangDSL>;
+  async function suggestProcessing(params: SuggestProcessingPipelineParams | null) {
     if (params === null) {
       return Promise.resolve(undefined); // Reset to initial value
     }
