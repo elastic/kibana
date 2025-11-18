@@ -216,7 +216,7 @@ export function LayerTabs({
             getRemoveOperation(
               activeVisualization,
               visualization.state,
-              selectedLayerId ?? '',
+              layerConfig.layerId,
               layerIds.length
             ) === 'clear',
           isTextBasedLanguage,
@@ -257,7 +257,6 @@ export function LayerTabs({
     layerLabels,
     onRemoveLayer,
     registerLibraryAnnotationGroupFunction,
-    selectedLayerId,
     visibleLayerConfigs,
     visualization,
   ]);
