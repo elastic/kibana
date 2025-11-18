@@ -9,7 +9,7 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { useTourQueue } from './use_tour_queue';
-import { getTourQueueStateManager } from '../state/registry';
+import { getTourQueue } from '../state/registry';
 import type { TourId } from '..';
 
 describe('useTourQueue', () => {
@@ -25,24 +25,24 @@ describe('useTourQueue', () => {
     }
   });
 
-  it('should return shouldShow as true for the active tour', () => {
+  it('should return isActive as true for the active tour', () => {
     const { result } = renderHook(() => useTourQueue(TOUR_1));
 
-    expect(result.current.shouldShow).toBe(true);
+    expect(result.current.isActive).toBe(true);
   });
 
-  it('should return shouldShow as false for a waiting tour', () => {
+  it('should return isActive as false for a waiting tour', () => {
     renderHook(() => useTourQueue(TOUR_1));
     const tour2Hook = renderHook(() => useTourQueue(TOUR_2));
 
-    expect(tour2Hook.result.current.shouldShow).toBe(false);
+    expect(tour2Hook.result.current.isActive).toBe(false);
   });
 
-  it('should update shouldShow when the tour becomes active', () => {
+  it('should update isActive when the tour becomes active', () => {
     const tour1Hook = renderHook(() => useTourQueue(TOUR_1));
     const tour2Hook = renderHook(() => useTourQueue(TOUR_2));
 
-    expect(tour2Hook.result.current.shouldShow).toBe(false);
+    expect(tour2Hook.result.current.isActive).toBe(false);
 
     // Complete the first tour
     act(() => {
@@ -50,37 +50,37 @@ describe('useTourQueue', () => {
     });
 
     // Second tour should now be active
-    expect(tour2Hook.result.current.shouldShow).toBe(true);
+    expect(tour2Hook.result.current.isActive).toBe(true);
   });
 
-  it('should update shouldShow to false when tour is completed', () => {
+  it('should update isActive to false when tour is completed', () => {
     const { result } = renderHook(() => useTourQueue(TOUR_1));
 
-    expect(result.current.shouldShow).toBe(true);
+    expect(result.current.isActive).toBe(true);
 
     act(() => {
       result.current.onComplete();
     });
 
-    expect(result.current.shouldShow).toBe(false);
+    expect(result.current.isActive).toBe(false);
   });
 
-  it('should update shouldShow to false when queue is skipped', () => {
+  it('should update isActive to false when queue is skipped', () => {
     const tour1Hook = renderHook(() => useTourQueue(TOUR_1));
     const tour2Hook = renderHook(() => useTourQueue(TOUR_2));
-    const manager = getTourQueueStateManager();
+    const tourQueue = getTourQueue();
 
     // Initial state
-    expect(tour1Hook.result.current.shouldShow).toBe(true);
-    expect(tour2Hook.result.current.shouldShow).toBe(false);
+    expect(tour1Hook.result.current.isActive).toBe(true);
+    expect(tour2Hook.result.current.isActive).toBe(false);
 
     // Skip all tours
     act(() => {
-      manager.skipAllTours();
+      tourQueue.skipAllTours();
     });
 
     // All tours should be false
-    expect(tour1Hook.result.current.shouldShow).toBe(false);
-    expect(tour2Hook.result.current.shouldShow).toBe(false);
+    expect(tour1Hook.result.current.isActive).toBe(false);
+    expect(tour2Hook.result.current.isActive).toBe(false);
   });
 });

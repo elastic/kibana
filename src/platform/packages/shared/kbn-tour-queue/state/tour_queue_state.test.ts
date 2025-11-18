@@ -109,27 +109,27 @@ describe('TourQueueStateManager', () => {
     });
   });
 
-  describe('shouldShowTour', () => {
+  describe('isTourActive', () => {
     it('should return true for the active tour and false for a waiting tour', () => {
       manager.registerTour(TOUR_1);
       manager.registerTour(TOUR_2);
 
-      expect(manager.shouldShowTour(TOUR_1)).toBe(true);
-      expect(manager.shouldShowTour(TOUR_2)).toBe(false);
+      expect(manager.isTourActive(TOUR_1)).toBe(true);
+      expect(manager.isTourActive(TOUR_2)).toBe(false);
     });
 
     it('should return false for a completed tour', () => {
       manager.registerTour(TOUR_1);
       manager.completeTour(TOUR_1);
 
-      expect(manager.shouldShowTour(TOUR_1)).toBe(false);
+      expect(manager.isTourActive(TOUR_1)).toBe(false);
     });
 
     it('should return false when queue is skipped', () => {
       manager.registerTour(TOUR_1);
       manager.skipAllTours();
 
-      expect(manager.shouldShowTour(TOUR_1)).toBe(false);
+      expect(manager.isTourActive(TOUR_1)).toBe(false);
     });
   });
 
@@ -186,8 +186,8 @@ describe('TourQueueStateManager', () => {
 
       manager.skipAllTours();
 
-      expect(manager.shouldShowTour(TOUR_1)).toBe(false);
-      expect(manager.shouldShowTour(TOUR_2)).toBe(false);
+      expect(manager.isTourActive(TOUR_1)).toBe(false);
+      expect(manager.isTourActive(TOUR_2)).toBe(false);
     });
   });
 });

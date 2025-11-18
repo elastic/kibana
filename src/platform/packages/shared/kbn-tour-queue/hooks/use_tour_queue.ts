@@ -13,7 +13,7 @@ import type { TourId } from '..';
 import type { Tour } from '../state/tour_queue_state';
 
 export interface TourQueueResult {
-  shouldShow: boolean;
+  isActive: boolean;
   onComplete: () => void;
 }
 
@@ -22,18 +22,18 @@ export interface TourQueueResult {
  * */
 export const useTourQueue = (tourId: TourId): TourQueueResult => {
   const tourQueue = getTourQueue();
-  const [shouldShow, setShouldShow] = useState(false);
+  const [isActive, setIsActive] = useState(false);
   const tourRef = useRef<Tour | null>(null);
 
   useEffect(() => {
     // Register and get tour object
     const tour = tourQueue.registerTour(tourId);
     tourRef.current = tour;
-    // Set initial shouldShow state
-    setShouldShow(tourQueue.shouldShowTour(tourId));
+    // Set initial isActive state
+    setIsActive(tourQueue.isTourActive(tourId));
     // Subscribe to state changes and get cleanup function
     const stopListening = tourQueue.subscribe(() => {
-      setShouldShow(tourQueue.shouldShowTour(tourId));
+      setIsActive(tourQueue.isTourActive(tourId));
     });
     return () => {
       tourRef.current?.complete();
@@ -46,7 +46,7 @@ export const useTourQueue = (tourId: TourId): TourQueueResult => {
   }, []);
 
   return {
-    shouldShow,
+    isActive,
     onComplete,
   };
 };

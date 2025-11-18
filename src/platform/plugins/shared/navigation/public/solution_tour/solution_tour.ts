@@ -29,12 +29,13 @@ export class SolutionNavigationTourManager {
   ) {}
 
   async startTour(): Promise<void> {
-    const { getTourQueue, TOURS } = await import('@kbn/tour-queue');
+    const { getTourQueue } = await import('@kbn/tour-queue');
     const tourQueue = getTourQueue();
     // Register and get tour object
-    const tour = tourQueue.registerTour(TOURS.NAVIGATION);
-    const shouldShow = tourQueue.shouldShowTour(TOURS.NAVIGATION);
-    if (!shouldShow) {
+    const navTourId = 'solutionNavigationTour';
+    const tour = tourQueue.registerTour(navTourId);
+    const isActive = tourQueue.isTourActive(navTourId);
+    if (!isActive) {
       tour.complete();
       return;
     }

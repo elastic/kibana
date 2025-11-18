@@ -67,7 +67,7 @@ export class TourQueueStateManager {
     return activeTour ?? null;
   }
 
-  shouldShowTour(tourId: TourId): boolean {
+  isTourActive(tourId: TourId): boolean {
     return this.getActiveTour() === tourId;
   }
 
