@@ -138,7 +138,7 @@ async function fetchAlerts(
       if ('found' in doc && doc.found && '_source' in doc && doc._source) {
         const source = doc._source as Record<string, unknown>;
         const expandedSource = expandFlattenedAlert(source);
-        const signalObject = {}; // constructSignalObject(expandedSource);
+        const signalObject = constructSignalObject(expandedSource);
 
         const alertHit = {
           _id: alertIds[i]._id,
