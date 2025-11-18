@@ -67,9 +67,7 @@ export class MaintenanceWindowsPlugin
       };
     });
 
-    if (this.config.enabled) {
-      plugins.features.registerKibanaFeature(maintenanceWindowFeature);
-    }
+    plugins.features.registerKibanaFeature(maintenanceWindowFeature);
 
     registerSavedObject(core.savedObjects, this.logger);
 

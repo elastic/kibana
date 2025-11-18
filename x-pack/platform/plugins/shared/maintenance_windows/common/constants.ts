@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LicenseType } from '@kbn/licensing-types';
+import type { LicenseType } from '@kbn/licensing-types';
 
 export enum MaintenanceWindowStatus {
   Running = 'running',

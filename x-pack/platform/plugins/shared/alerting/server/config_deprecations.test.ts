@@ -12,7 +12,7 @@ import { autocompleteConfigDeprecationProvider } from './config_deprecations';
 
 const deprecationContext = configDeprecationsMock.createContext();
 
-const applyConfigDeprecations = (settings: Record<string, any> = {}) => {
+const applyConfigDeprecations = (settings = {}) => {
   const deprecations = autocompleteConfigDeprecationProvider(configDeprecationFactory);
   const deprecationMessages: string[] = [];
   const migrated = applyDeprecations(

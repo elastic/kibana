@@ -8,7 +8,7 @@
 import type { IUiSettingsClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import type { FilterStateStore } from '@kbn/es-query';
 import type { WeekdayStr, Options } from '@kbn/rrule';
-import { MAINTENANCE_WINDOW_DEEP_LINK_IDS, MaintenanceWindowStatus } from './constants';
+import type { MAINTENANCE_WINDOW_DEEP_LINK_IDS, MaintenanceWindowStatus } from './constants';
 
 export type RRuleParams = Partial<RRuleRecord> & Pick<RRuleRecord, 'dtstart' | 'tzid'>;
 
