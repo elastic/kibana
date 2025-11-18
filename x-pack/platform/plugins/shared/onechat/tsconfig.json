@@ -94,6 +94,5 @@
     "@kbn/shared-ux-utility",
     "@kbn/usage-collection-plugin",
     "@kbn/core-notifications-browser",
-    "@kbn/security-solution-plugin"
   ]
 }
