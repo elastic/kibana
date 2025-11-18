@@ -422,6 +422,10 @@ export const Message = z.object({
    */
   content: z.string(),
   /**
+   * Refusal reason returned by the model when content is filtered.
+   */
+  refusal: z.string().optional(),
+  /**
    * Message content.
    */
   reader: Reader.optional(),

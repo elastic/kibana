@@ -212,6 +212,7 @@ export const chatCompleteRoute = (
 
           const onLlmResponse: OnLlmResponse = async ({
             content,
+            refusal,
             traceData = {},
             isError = false,
           }): Promise<void> => {
@@ -225,6 +226,7 @@ export const chatCompleteRoute = (
                 conversationId,
                 conversationsDataClient,
                 messageContent: prunedContent,
+                messageRefusal: refusal,
                 replacements: latestReplacements,
                 isError,
                 traceData,
