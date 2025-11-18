@@ -26,6 +26,7 @@ import type {
   SetProcessor,
   RemoveProcessor,
   RemoveByPrefixProcessor,
+  ReplaceProcessor,
 } from '../../types/processors';
 import type { StreamlangStep } from '../../types/streamlang';
 import {
@@ -140,6 +141,12 @@ const actionStepValidators: {
   remove_by_prefix: (step: RemoveByPrefixProcessor, errors: string[]) =>
     checkFieldName(step.from, errors),
   remove: (step: RemoveProcessor, errors: string[]) => checkFieldName(step.from, errors),
+  replace: (step: ReplaceProcessor, errors: string[]) => {
+    checkFieldName(step.from, errors);
+    if ('to' in step && step.to) {
+      checkFieldName(step.to, errors);
+    }
+  },
   drop_document: noop, // 'where' condition is already validated in validateSteps function
   // fields referenced in manual ingest pipelines are not validated here because
   // the interface is Elasticsearch directly here, which has its own validation
