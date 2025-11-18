@@ -102,18 +102,26 @@ export const useCopyToLanguage = ({
         return;
       }
 
-      toasts.addSuccess({
-        title: i18n.translate('console.consoleMenu.copyToSuccessMessage', {
-          defaultMessage:
-            '{requestsCount, plural, one {Request} other {Requests}} copied to clipboard as {language}',
-          values: {
-            language: getLanguageLabelByValue(withLanguage),
-            requestsCount: requests.length,
-          },
-        }),
-      });
+      try {
+        await copyText(requestsAsCode);
 
-      await copyText(requestsAsCode);
+        toasts.addSuccess({
+          title: i18n.translate('console.consoleMenu.copyToSuccessMessage', {
+            defaultMessage:
+              '{requestsCount, plural, one {Request} other {Requests}} copied to clipboard as {language}',
+            values: {
+              language: getLanguageLabelByValue(withLanguage),
+              requestsCount: requests.length,
+            },
+          }),
+        });
+      } catch (e) {
+        toasts.addDanger({
+          title: i18n.translate('console.consoleMenu.copyToClipboardFailedMessage', {
+            defaultMessage: 'Could not copy to clipboard',
+          }),
+        });
+      }
     },
     [currentLanguage, getRequestsCallback, esHostService, toasts]
   );

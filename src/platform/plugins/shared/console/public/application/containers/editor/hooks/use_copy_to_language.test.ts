@@ -234,4 +234,27 @@ describe('useCopyToLanguage', () => {
       requests: [{ method: 'GET', url: 'kbn:/api/spaces/space', data: [] }],
     });
   });
+
+  it('should handle clipboard write errors gracefully', async () => {
+    mockClipboard.writeText.mockRejectedValue(new Error('Clipboard error'));
+
+    const { result } = renderHook(() =>
+      useCopyToLanguage({
+        storage: mockStorage,
+        esHostService: mockEsHostService,
+        toasts: mockToasts,
+        getRequestsCallback: mockGetRequestsCallback,
+        isKbnRequestSelectedCallback: mockIsKbnRequestSelectedCallback,
+      })
+    );
+
+    await act(async () => {
+      await result.current.copyToLanguage('python');
+    });
+
+    expect(mockToasts.addDanger).toHaveBeenCalledWith({
+      title: 'Could not copy to clipboard',
+    });
+    expect(mockToasts.addSuccess).not.toHaveBeenCalled();
+  });
 });
