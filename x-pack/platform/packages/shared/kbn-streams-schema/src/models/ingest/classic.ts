@@ -12,7 +12,7 @@ import type { ElasticsearchAssets } from './common';
 import { elasticsearchAssetsSchema } from './common';
 import type { Validation } from '../validation/validation';
 import { validation } from '../validation/validation';
-import type { ModelValidation } from '../validation/model_validation';
+import type { ModelOfSchema, ModelValidation } from '../validation/model_validation';
 import { modelValidation } from '../validation/model_validation';
 import { BaseStream } from '../base';
 import type { IngestStreamSettings } from './settings';
@@ -58,7 +58,7 @@ export namespace ClassicStream {
     effective_settings: IngestStreamSettings;
   }
 
-  export type UpsertRequest = IngestBaseStream.UpsertRequest<Definition>;
+  export type UpsertRequest = IngestBaseStream.UpsertRequest<OmitUpsertProps<Definition>>;
 
   export interface Model {
     Definition: ClassicStream.Definition;
@@ -68,27 +68,52 @@ export namespace ClassicStream {
   }
 }
 
+const ClassicStreamSchema = {
+  Definition: z.object({
+    ingest: ClassicIngest.right,
+  }),
+  Source: z.intersection(IngestBaseStream.Source.right, z.object({})),
+  GetResponse: z.intersection(
+    IngestBaseStream.GetResponse.right,
+    z.object({
+      elasticsearch_assets: z.optional(elasticsearchAssetsSchema),
+      data_stream_exists: z.boolean(),
+      effective_lifecycle: classicIngestStreamEffectiveLifecycleSchema,
+      effective_settings: ingestStreamSettingsSchema,
+      effective_failure_store: effectiveFailureStoreSchema,
+    })
+  ),
+  UpsertRequest: z.intersection(IngestBaseStream.UpsertRequest.right, z.object({})),
+};
+type IClassicStreamSchema = typeof ClassicStreamSchema;
+
 export const ClassicStream: ModelValidation<BaseStream.Model, ClassicStream.Model> =
-  modelValidation(BaseStream, {
-    Definition: z.intersection(
-      IngestBaseStream.Definition.right,
-      z.object({
-        ingest: IngestClassic,
-      })
-    ),
-    Source: z.intersection(IngestBaseStream.Source.right, z.object({})),
-    GetResponse: z.intersection(
-      IngestBaseStream.GetResponse.right,
-      z.object({
-        elasticsearch_assets: z.optional(elasticsearchAssetsSchema),
-        data_stream_exists: z.boolean(),
-        effective_lifecycle: classicIngestStreamEffectiveLifecycleSchema,
-        effective_settings: ingestStreamSettingsSchema,
-        effective_failure_store: effectiveFailureStoreSchema,
-      })
-    ),
-    UpsertRequest: z.intersection(IngestBaseStream.UpsertRequest.right, z.object({})),
-  });
+  modelValidation<BaseStream.Model, IClassicStreamSchema, WithDefaults>(
+    BaseStream,
+    ClassicStreamSchema
+  );
+
+type WithDefaults = {
+  Source: z.input<IClassicStreamSchema['Definition']>;
+  GetResponse: {
+    stream: z.input<IClassicStreamSchema['Definition']>;
+  };
+  UpsertRequest: {
+    stream: OmitUpsertProps<{} & z.input<IClassicStreamSchema['Definition']>>;
+  };
+} & ModelOfSchema<IClassicStreamSchema>;
+
+type OmitUpsertProps<
+  T extends {
+    ingest: Omit<ClassicIngest, 'processing'> & {
+      processing: Omit<ClassicIngest['processing'], 'updated_at'> & { updated_at?: string };
+    };
+  }
+> = Omit<T, 'ingest'> & {
+  ingest: Omit<ClassicIngest, 'processing'> & {
+    processing: Omit<ClassicIngest['processing'], 'updated_at'> & { updated_at?: never };
+  };
+};
 
 // Optimized implementation for Definition check - the fallback is a zod-based check
 ClassicStream.Definition.is = (

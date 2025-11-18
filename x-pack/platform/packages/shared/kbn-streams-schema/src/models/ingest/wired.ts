@@ -14,7 +14,7 @@ import type { FieldDefinition, InheritedFieldDefinition } from '../../fields';
 import { fieldDefinitionSchema, inheritedFieldDefinitionSchema } from '../../fields';
 import type { Validation } from '../validation/validation';
 import { validation } from '../validation/validation';
-import type { ModelValidation } from '../validation/model_validation';
+import type { ModelOfSchema, ModelValidation } from '../validation/model_validation';
 import { modelValidation } from '../validation/model_validation';
 import { BaseStream } from '../base';
 import type { WiredIngestStreamEffectiveSettings } from './settings';
@@ -66,31 +66,54 @@ export namespace WiredStream {
     effective_failure_store: WiredIngestStreamEffectiveFailureStore;
   }
 
-  export type UpsertRequest = IngestBaseStream.UpsertRequest<Definition>;
+  export type UpsertRequest = IngestBaseStream.UpsertRequest<OmitUpsertProps<Definition>>;
 }
 
-export const WiredStream: ModelValidation<BaseStream.Model, WiredStream.Model> = modelValidation(
-  BaseStream,
-  {
-    Definition: z.intersection(
-      IngestBaseStream.Definition.right,
-      z.object({
-        ingest: IngestWired,
-      })
-    ),
-    Source: z.intersection(IngestBaseStream.Definition.right, z.object({})),
-    GetResponse: z.intersection(
-      IngestBaseStream.GetResponse.right,
-      z.object({
-        inherited_fields: inheritedFieldDefinitionSchema,
-        effective_lifecycle: wiredIngestStreamEffectiveLifecycleSchema,
-        effective_settings: wiredIngestStreamEffectiveSettingsSchema,
-        effective_failure_store: wiredIngestStreamEffectiveFailureStoreSchema,
-      })
-    ),
-    UpsertRequest: z.intersection(IngestBaseStream.UpsertRequest.right, z.object({})),
+const WiredStreamSchema = {
+  Definition: z.object({
+    ingest: WiredIngest.right,
+  }),
+  Source: z.intersection(IngestBaseStream.Definition.right, z.object({})),
+  GetResponse: z.intersection(
+    IngestBaseStream.GetResponse.right,
+    z.object({
+      inherited_fields: inheritedFieldDefinitionSchema,
+      effective_lifecycle: wiredIngestStreamEffectiveLifecycleSchema,
+      effective_settings: wiredIngestStreamEffectiveSettingsSchema,
+      effective_failure_store: wiredIngestStreamEffectiveFailureStoreSchema,
+    })
+  ),
+  UpsertRequest: z.intersection(IngestBaseStream.UpsertRequest.right, z.object({})),
+};
+type IWiredStreamSchema = typeof WiredStreamSchema;
+
+export const WiredStream: ModelValidation<BaseStream.Model, WiredStream.Model> = modelValidation<
+  BaseStream.Model,
+  IWiredStreamSchema,
+  WithDefaults
+>(BaseStream, WiredStreamSchema);
+
+type WithDefaults = {
+  Source: z.input<IWiredStreamSchema['Definition']>;
+  GetResponse: {
+    stream: z.input<IWiredStreamSchema['Definition']>;
+  };
+  UpsertRequest: {
+    stream: OmitUpsertProps<{} & z.input<IWiredStreamSchema['Definition']>>;
+  };
+} & ModelOfSchema<IWiredStreamSchema>;
+
+type OmitUpsertProps<
+  T extends {
+    ingest: Omit<WiredIngest, 'processing'> & {
+      processing: Omit<WiredIngest['processing'], 'updated_at'> & { updated_at?: string };
+    };
   }
-);
+> = Omit<T, 'ingest'> & {
+  ingest: Omit<WiredIngest, 'processing'> & {
+    processing: Omit<WiredIngest['processing'], 'updated_at'> & { updated_at?: never };
+  };
+};
 
 // Optimized implementation for Definition check - the fallback is a zod-based check
 WiredStream.Definition.is = (

@@ -17,7 +17,7 @@ describe('ClassicStream', () => {
         updated_at: new Date().toISOString(),
         ingest: {
           lifecycle: { inherit: {} },
-          processing: { steps: [] },
+          processing: { steps: [], updated_at: new Date().toISOString() },
           settings: {},
           classic: {},
           failure_store: { inherit: {} },
@@ -29,7 +29,7 @@ describe('ClassicStream', () => {
         updated_at: new Date().toISOString(),
         ingest: {
           lifecycle: { inherit: {} },
-          processing: { steps: [] },
+          processing: { steps: [], updated_at: new Date().toISOString() },
           settings: {},
           classic: {
             field_overrides: {
@@ -41,7 +41,7 @@ describe('ClassicStream', () => {
           failure_store: { inherit: {} },
         },
       },
-    ])('is valid', (val) => {
+    ] satisfies ClassicStream.Definition[])('is valid', (val) => {
       expect(ClassicStream.Definition.asserts(val)).toBe(true);
       expect(ClassicStream.Definition.right.parse(val)).toEqual(val);
     });
@@ -102,7 +102,7 @@ describe('ClassicStream', () => {
           updated_at: new Date().toISOString(),
           ingest: {
             lifecycle: { inherit: {} },
-            processing: { steps: [] },
+            processing: { steps: [], updated_at: new Date().toISOString() },
             settings: {},
             classic: {},
             failure_store: { inherit: {} },
@@ -182,7 +182,7 @@ describe('ClassicStream', () => {
         },
         ...emptyAssets,
       },
-    ])('is valid', (val) => {
+    ] satisfies ClassicStream.UpsertRequest[])('is valid', (val) => {
       expect(ClassicStream.UpsertRequest.is(val)).toBe(true);
       expect(ClassicStream.UpsertRequest.right.parse(val)).toEqual(val);
     });
@@ -212,6 +212,24 @@ describe('ClassicStream', () => {
             settings: {},
             classic: {},
           },
+        },
+        ...emptyAssets,
+      },
+      {
+        stream: {
+          description: 'ingest.processing.updated_at should not be present',
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [], updated_at: new Date().toISOString() },
+            settings: {},
+            classic: {},
+          },
+        },
+        ...emptyAssets,
+      },
+      {
+        stream: {
+          description: 'missing ingest',
         },
         ...emptyAssets,
       },

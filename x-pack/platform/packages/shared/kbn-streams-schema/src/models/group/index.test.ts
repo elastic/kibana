@@ -21,7 +21,7 @@ describe('GroupStream', () => {
           members: [],
         },
       },
-    ])('is valid', (val) => {
+    ] satisfies GroupStream.Definition[])('is valid', (val) => {
       expect(GroupStream.Definition.is(val)).toBe(true);
       expect(GroupStream.Definition.right.parse(val)).toEqual(val);
     });
@@ -78,7 +78,7 @@ describe('GroupStream', () => {
         },
         ...emptyAssets,
       },
-    ])('is valid', (val) => {
+    ] satisfies GroupStream.GetResponse[])('is valid', (val) => {
       expect(GroupStream.GetResponse.is(val)).toBe(true);
       expect(GroupStream.GetResponse.right.parse(val)).toEqual(val);
     });
@@ -130,7 +130,7 @@ describe('GroupStream', () => {
         },
         ...emptyAssets,
       },
-    ])('is valid', (val) => {
+    ] satisfies GroupStream.UpsertRequest[])('is valid', (val) => {
       expect(GroupStream.UpsertRequest.is(val)).toBe(true);
       expect(GroupStream.UpsertRequest.right.parse(val)).toEqual(val);
     });

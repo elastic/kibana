@@ -112,15 +112,33 @@ export function modelValidation(...args: [ModelValidation, ModelSchema] | [Model
         z.object({
           // upsert doesn't allow name or updated_at to be set
           stream: z
-            .object({ name: z.undefined().optional(), updated_at: z.undefined().optional() })
+            .object({
+              name: z.undefined().optional(),
+              updated_at: z.undefined().optional(),
+              ingest: z
+                .object({
+                  processing: z.object({ updated_at: z.undefined().optional() }).passthrough(),
+                })
+                .passthrough()
+                .optional(),
+            })
             .passthrough()
             // but the definition requires them, so we set a default
-            .transform((prev) => ({ ...prev, name: '.', updated_at: new Date().toISOString() }))
+            .transform((prev) => ({
+              ...prev,
+              name: '.',
+              updated_at: new Date().toISOString(),
+              ingest: {
+                ...prev.ingest,
+                processing: { ...prev.ingest?.processing, updated_at: new Date().toISOString() },
+              },
+            }))
             .pipe(rightPartial.Definition)
             // that should be removed after
             .transform((prev) => {
               delete prev.name;
               delete prev.updated_at;
+              delete prev.ingest?.processing?.updated_at;
               return prev;
             }),
         }),
