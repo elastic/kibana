@@ -169,20 +169,11 @@ export const ContextMenu = ({
         ? [
             {
               name: (
-                <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-                  <EuiFlexItem grow={false}>
-                    <FormattedMessage
-                      id="console.monaco.requestOptions.copyToLanguageButtonLabel"
-                      defaultMessage="Copy to {language}"
-                      values={{ language: getLanguageLabelByValue(currentLanguage) }}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge color="hollow" data-test-subj="consoleMenuLanguageBadge">
-                      {getLanguageLabelByValue(currentLanguage)}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <FormattedMessage
+                  id="console.monaco.requestOptions.copyToLanguageButtonLabel"
+                  defaultMessage="Copy to {language}"
+                  values={{ language: getLanguageLabelByValue(currentLanguage) }}
+                />
               ),
               key: 'copyToLanguage',
               'data-test-subj': 'consoleMenuCopyToLanguage',

@@ -117,10 +117,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           return await testSubjects.exists('consoleMenuCopyToLanguage');
         });
 
-        // Check default language badge shows "curl"
-        let languageBadge = await testSubjects.find('consoleMenuLanguageBadge');
-        let badgeText = await languageBadge.getVisibleText();
-        expect(badgeText.toLowerCase()).to.equal('curl');
+        // Check default language shows "Copy to curl"
+        let copyMenuItem = await testSubjects.find('consoleMenuCopyToLanguage');
+        let menuItemText = await copyMenuItem.getVisibleText();
+        expect(menuItemText.toLowerCase()).to.contain('copy to curl');
 
         // Change default language to Python
         await PageObjects.console.changeDefaultLanguage('python');
@@ -133,10 +133,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Wait for panel animation to complete
         await PageObjects.common.sleep(300);
 
-        // Check that the language badge now shows "Python"
-        languageBadge = await testSubjects.find('consoleMenuLanguageBadge');
-        badgeText = await languageBadge.getVisibleText();
-        expect(badgeText).to.equal('Python');
+        // Check that the menu item now shows "Copy to Python"
+        copyMenuItem = await testSubjects.find('consoleMenuCopyToLanguage');
+        menuItemText = await copyMenuItem.getVisibleText();
+        expect(menuItemText).to.contain('Copy to Python');
       });
 
       it('allows to select a different language to copy as and should copy it right away to clipboard', async () => {
