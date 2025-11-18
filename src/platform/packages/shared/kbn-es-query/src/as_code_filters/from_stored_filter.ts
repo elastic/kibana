@@ -16,7 +16,6 @@
  * 3. Filter Groups: Combined/bool filters with multiple conditions - recursively converts nested filters
  * 4. Fallback DSL: Any remaining filters preserved as raw DSL to prevent data loss
  *
- * See: fromStoredFilter() for the main entry point
  */
 
 import type {
@@ -184,26 +183,16 @@ export function convertToSimpleCondition(
   }
 
   if (hasRangeQuery(query)) {
-    const rangeQuery = query.range[field] as unknown;
-    const rangeValue: {
-      gte?: number | string;
-      lte?: number | string;
-      gt?: number | string;
-      lt?: number | string;
-    } = {};
-
-    if (typeof rangeQuery === 'object' && rangeQuery !== null) {
-      const range = rangeQuery as Record<string, unknown>;
-      if (range.gte !== undefined) rangeValue.gte = range.gte as number | string;
-      if (range.lte !== undefined) rangeValue.lte = range.lte as number | string;
-      if (range.gt !== undefined) rangeValue.gt = range.gt as number | string;
-      if (range.lt !== undefined) rangeValue.lt = range.lt as number | string;
-    }
-
+    const range = query.range[field] as Record<string, unknown>;
     return {
       field,
       operator: ASCODE_FILTER_OPERATOR.RANGE,
-      value: rangeValue,
+      value: {
+        ...(range.gte !== undefined && { gte: range.gte as number | string }),
+        ...(range.lte !== undefined && { lte: range.lte as number | string }),
+        ...(range.gt !== undefined && { gt: range.gt as number | string }),
+        ...(range.lt !== undefined && { lt: range.lt as number | string }),
+      },
     };
   }
 
@@ -298,7 +287,7 @@ export function convertToFilterGroup(storedFilter: StoredFilter): AsCodeGroupFil
       throw new FilterConversionError('Combined filter params must be StoredFilter array');
     }
 
-    const conditions = (params as StoredFilter[]).map((param) => {
+    const conditions = params.map((param) => {
       // Special handling for phrases filters with bool wrappers - treat as groups
       // This preserves the bool structure which is semantically important even for single values
       if (isPhrasesFilter(param)) {
@@ -352,7 +341,7 @@ export function convertToFilterGroup(storedFilter: StoredFilter): AsCodeGroupFil
           }
         : storedFilter.meta;
 
-    const clauseFilter: StoredFilter = {
+    const clauseFilter = {
       meta: simplifiedMeta,
       query: clause as Record<string, unknown>,
     };
@@ -383,7 +372,7 @@ export function convertWithEnhancement(
   // Handle match_phrase queries
   if (hasMatchPhraseQuery(query)) {
     const field = Object.keys(query.match_phrase)[0];
-    const value = query.match_phrase[field] as unknown;
+    const value = query.match_phrase[field];
 
     return {
       field,
@@ -397,7 +386,7 @@ export function convertWithEnhancement(
   // Handle match queries with phrase type
   if (hasMatchQuery(query)) {
     const field = Object.keys(query.match)[0];
-    const config = query.match[field] as unknown;
+    const config = query.match[field];
 
     // Check if this is a phrase-type match query
     if (typeof config === 'object' && config !== null) {
@@ -415,7 +404,7 @@ export function convertWithEnhancement(
   // Handle range queries
   if (hasRangeQuery(query)) {
     const field = Object.keys(query.range)[0];
-    const rangeConfig = query.range[field] as unknown;
+    const rangeConfig = query.range[field];
 
     return {
       field,
@@ -427,7 +416,7 @@ export function convertWithEnhancement(
   // Handle term queries
   if (hasTermQuery(query)) {
     const field = Object.keys(query.term)[0];
-    const value = query.term[field] as unknown;
+    const value = query.term[field];
 
     return {
       field,

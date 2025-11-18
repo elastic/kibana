@@ -98,7 +98,7 @@ export function convertFromSimpleCondition(
   baseStored: StoredFilter
 ): StoredFilter {
   // Base meta that all operators share
-  const baseMeta: Record<string, unknown> = {
+  const baseMeta = {
     ...baseStored.meta,
     key: condition.field,
     field: condition.field,
@@ -241,7 +241,7 @@ export function convertFromFilterGroup(
       })
       .filter(Boolean);
 
-    const boolQuery: Record<string, unknown> = {
+    const boolQuery = {
       should: values.map((value) => ({
         match_phrase: {
           [field]: value,
@@ -271,7 +271,7 @@ export function convertFromFilterGroup(
       | AsCodeGroupFilter['group'];
 
     // Create a clean base for sub-filters
-    const cleanBase: StoredFilter = {
+    const cleanBase = {
       $state: baseStored.$state,
       meta: {
         index: baseStored.meta.index,
