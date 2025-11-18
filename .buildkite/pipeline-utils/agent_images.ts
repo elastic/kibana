@@ -14,6 +14,11 @@ import { BuildkiteClient } from './buildkite';
 const ELASTIC_IMAGES_QA_PROJECT = 'elastic-images-qa';
 const ELASTIC_IMAGES_PROD_PROJECT = 'elastic-images-prod';
 
+enum FIPS_VERSION {
+  TWO = '140-2',
+  THREE = '140-3',
+}
+
 // constrain AgentImageConfig to the type that doesn't have the `queue` property
 const DEFAULT_AGENT_IMAGE_CONFIG: BuildkiteAgentTargetingRule = {
   provider: 'gcp',
@@ -21,15 +26,32 @@ const DEFAULT_AGENT_IMAGE_CONFIG: BuildkiteAgentTargetingRule = {
   imageProject: ELASTIC_IMAGES_PROD_PROJECT,
 };
 
-const FIPS_AGENT_IMAGE_CONFIG: BuildkiteAgentTargetingRule = {
-  provider: 'gcp',
-  image: 'family/kibana-fips-140-3-ubuntu-2404',
-  imageProject: ELASTIC_IMAGES_PROD_PROJECT,
-};
-
 const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
 const TEST_ENABLE_FIPS_AGENT = process.env.TEST_ENABLE_FIPS_AGENT?.toLowerCase() === 'true';
 const USE_QA_IMAGE_FOR_PR = process.env.USE_QA_IMAGE_FOR_PR?.match(/(1|true)/i);
+const FIPS_GH_LABELS = {
+  [FIPS_VERSION.TWO]: 'ci:enable-fips-140-2-agent',
+  [FIPS_VERSION.THREE]: 'ci:enable-fips-140-3-agent',
+};
+
+const getFIPSImage = () => {
+  let image: string;
+
+  if (
+    process.env.KBN_FIPS_VERSION === FIPS_VERSION.THREE ||
+    GITHUB_PR_LABELS.includes(FIPS_GH_LABELS[FIPS_VERSION.THREE])
+  ) {
+    image = 'family/kibana-fips-140-3-ubuntu-2404';
+  } else {
+    image = 'family/kibana-fips-140-2-ubuntu-2404';
+  }
+
+  return {
+    provider: 'gcp',
+    image,
+    imageProject: ELASTIC_IMAGES_PROD_PROJECT,
+  };
+};
 
 // Narrow the return type with overloads
 function getAgentImageConfig(): BuildkiteAgentTargetingRule;
@@ -38,13 +60,16 @@ function getAgentImageConfig({ returnYaml = false } = {}): string | BuildkiteAge
   const bk = new BuildkiteClient();
   let config: BuildkiteAgentTargetingRule;
 
-  if (TEST_ENABLE_FIPS_AGENT || GITHUB_PR_LABELS.includes('ci:enable-fips-agent')) {
-    config = FIPS_AGENT_IMAGE_CONFIG;
+  if (
+    TEST_ENABLE_FIPS_AGENT ||
+    Object.values(FIPS_GH_LABELS).some((label) => GITHUB_PR_LABELS.includes(label))
+  ) {
+    config = getFIPSImage();
 
     bk.setAnnotation(
       'agent image config',
       'info',
-      `#### FIPS Agents Enabled<br />\nFIPS mode can produce new test failures. If you did not intend this remove \`\`\`TEST_ENABLE_FIPS_AGENT\`\`\` environment variable and/or the \`\`\`ci:enable-fips-agent\`\`\` Github label.`
+      `#### FIPS Agents Enabled<br />\nFIPS mode can produce new test failures. If you did not intend this remove \`\`\`TEST_ENABLE_FIPS_AGENT\`\`\` environment variable and/or the \`\`\`ci:enable-fips-<version>-agent\`\`\` Github label.`
     );
   } else {
     config = DEFAULT_AGENT_IMAGE_CONFIG;
