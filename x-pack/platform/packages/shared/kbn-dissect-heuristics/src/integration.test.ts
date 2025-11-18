@@ -455,7 +455,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
   });
 
   describe('Complex Real-World Logs', () => {
-    it('handles complex syslog messages with varying structure', () => {
+    it('extracts pattern from heterogeneous cron and system activity syslog batch', () => {
       const logs = [
         '- 1763056460 2005.11.09 eadmin2 Nov 9 12:01:01 src@eadmin2 crond(pam_unix)[12636]: session closed for user root',
         '- 1763056460 2005.11.09 dn228 Nov 9 12:01:01 dn228/dn228 crond[2916]: (root) CMD (run-parts /etc/cron.hourly)',
@@ -572,7 +572,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       expect(result.fields.length).toBe(12);
     });
 
-    it('handles uniform syslog messages successfully', () => {
+    it('extracts pattern from uniform cron session syslog', () => {
       // More uniform messages where heuristic can succeed
       const logs = [
         'Nov 9 12:01:01 server1 crond[2920]: session opened for user root',
@@ -594,7 +594,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       expect(monthField).toBeDefined();
     });
 
-    it('handles wahtever this is', () => {
+    it('extracts pattern from extended ganglia and cluster service logs', () => {
       const logs = [
         '- 1763064638 2005.11.09 tbird-admin1 Nov 9 12:10:54 local@tbird-admin1 /apps/x86_64/system/ganglia-3.0.1/sbin/gmetad[1691]: data_thread() got not answer from any [Thunderbird_B3] datasource',
         '- 1763064638 2005.11.09 tbird-admin1 Nov 9 12:10:54 local@tbird-admin1 gmetad: Warning: we failed to resolve data source name cn910 cn911 cn912 cn913 cn914 cn915 cn916 cn917 cn918 cn919 cn920 cn921 cn922 cn923 cn924 cn925 cn926 cn927 cn928 cn929 cn930 cn931 cn932 cn933 cn934 cn935 cn936 cn937 cn938 cn939 cn940 cn941 cn942 cn943 cn944 cn945 cn946 cn947 cn948 cn949 cn950 cn951 cn952 cn953 cn954 cn955 cn956 cn957 cn958 cn959 cn960 cn961 cn962 cn963 cn964 cn965 cn966 cn967 cn968 cn969 cn970 cn971 cn972 cn973 cn974 cn975 cn976 cn977 cn978 cn979 cn980 cn981 cn982 cn983 cn984 cn985 cn986 cn987 cn988 cn989 cn990 cn991 cn992 cn993 cn994 cn995 cn996 cn997 cn998 cn999 cn1000 cn1001 cn1002 cn1003 cn1004 cn1005 cn1006 cn1007 cn1008 cn1009 cn1010 cn1011 cn1012 cn1013 cn1014 cn1015 cn1016 cn1017 cn1018 cn1019 cn1020 cn1021 cn1022 cn1023 cn1024',
@@ -704,7 +704,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       );
     });
 
-    it('handles this case', () => {
+    it('extracts pattern from HTTP proxy connection activity logs', () => {
       const logs = [
         '[11.13 18:56:54] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 451 bytes sent, 18846 bytes (18.4 KB) received, lifetime <1 sec',
         '[11.13 18:56:54] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 1682 bytes (1.64 KB) sent, 472 bytes received, lifetime <1 sec',
@@ -813,7 +813,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       );
     });
 
-    it('handles this fun case', () => {
+    it('extracts pattern from mixed application proxy and error logs', () => {
       const logs = [
         '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
         '[11.13 20:08:27] YodaoDict.exe - oimagec3.ydstatic.com:80 close, 358 bytes sent, 48647 bytes (47.5 KB) received, lifetime 00:30',
@@ -924,7 +924,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       );
     });
 
-    it('handles this other case', () => {
+    it('extracts pattern from authentication failure and FTP connection syslog', () => {
       const logs = [
         'Nov 13 20:10:41 combo sshd(pam_unix)[11741]: authentication failure; logname= uid=0 euid=0 tty=NODEVssh ruser= rhost=202-132-40-29.adsl.ttn.net  user=root',
         'Nov 13 20:10:39 combo su(pam_unix)[10583]: session closed for user news',
@@ -1036,7 +1036,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       expect(result.fields.length).toBe(7);
     });
 
-    it('handles this third case', () => {
+    it('extracts pattern from cron session open/close syslog variant', () => {
       const logs = [
         '- 1763468956 2005.11.09 dn700 Nov 9 12:01:01 dn700/dn700 crond(pam_unix)[2912]: session closed for user root',
         '- 1763468957 2005.11.09 dn978 Nov 9 12:01:01 dn978/dn978 crond[2921]: (root) CMD (run-parts /etc/cron.hourly)',
@@ -1133,12 +1133,6 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         '- 1763468956 2005.11.09 dn978 Nov 9 12:01:01 dn978/dn978 crond(pam_unix)[2920]: session closed for user root',
       ];
       const result = extractDissectPattern(logs);
-      // After normalization: correctly detects ':' as delimiter
-      // With lenient position scoring, the colon is detected despite varying process name lengths
-      // Ordering inconsistency penalty removes early bracket delimiters, simplifying pattern
-      // Updated expectation after removing bracket scoring penalties: additional
-      // bracket delimiters are retained, increasing field count.
-      // After cross-delimiter mismatch sanitization, mixed bracket cluster removed and field count reduced.
       expect(getPattern(result)).toBe(
         '- %{field_1} %{field_2} %{field_3->} %{field_4->} %{field_5->} %{field_6} %{field_7}] %{field_8->}: %{field_9} %{field_10} %{field_11} %{field_12}'
       );

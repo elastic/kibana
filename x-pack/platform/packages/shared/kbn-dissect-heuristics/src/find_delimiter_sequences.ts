@@ -153,83 +153,11 @@ export function findDelimiterSequences(
 
   // Return unique delimiter literals (may have multiple occurrences, but buildDelimiterTree handles that)
   let uniqueDelimiters = Array.from(new Set(filteredDelimiters.map((d) => d.literal)));
-  // Consolidated bracket sanitization:
-  // 1. Remove delimiters that contain unbalanced bracket types (entire delimiter removal)
-  // 2. Detect mixed bracket characters (per-message stack mismatches)
-  // 3. Detect cluster patterns (closing immediately followed by different opening inside same delimiter)
-  // 4. Detect cross-delimiter ordering mismatches (median-order stack scan)
-  // 5. Strip all bracket characters flagged by 2–4 in a single pass
 
-  // (1) Unbalanced pair whole-delimiter removal
-  const bracketPairs: Array<[string, string]> = [
-    ['(', ')'],
-    ['[', ']'],
-    ['{', '}'],
-  ];
-  for (const [open, close] of bracketPairs) {
-    const hasOpen = uniqueDelimiters.some((d) => d.includes(open));
-    const hasClose = uniqueDelimiters.some((d) => d.includes(close));
-    if (hasOpen && !hasClose) {
-      uniqueDelimiters = uniqueDelimiters.filter((d) => !d.includes(open));
-    } else if (hasClose && !hasOpen) {
-      uniqueDelimiters = uniqueDelimiters.filter((d) => !d.includes(close));
-    }
-  }
+  // Bracket sanitization (2 phases):
+  // 1. Cross-delimiter ordering mismatch scan (median-order stack)
+  // 2. Strip bracket characters flagged by phase 1
 
-  // Precompute occurrences for subsequent analyses
-  const delimiterOccurrencesPerMessage = messages.map((msg) => {
-    const occurrences: Array<{ pos: number; literal: string }> = [];
-    for (const delim of uniqueDelimiters) {
-      let idx = msg.indexOf(delim);
-      while (idx !== -1) {
-        occurrences.push({ pos: idx, literal: delim });
-        idx = msg.indexOf(delim, idx + delim.length);
-      }
-    }
-    occurrences.sort((a, b) => a.pos - b.pos);
-    return occurrences;
-  });
-
-  const openerFor: Record<string, string> = { ')': '(', ']': '[', '}': '{' };
-  const closerFor: Record<string, string> = { '(': ')', '[': ']', '{': '}' };
-  const mixedBracketChars = new Set<string>();
-
-  // (2) Mixed bracket detection (stack mismatches within messages)
-  for (const occ of delimiterOccurrencesPerMessage) {
-    const stack: string[] = [];
-    for (const { literal } of occ) {
-      for (const ch of literal) {
-        if (closerFor[ch]) {
-          stack.push(ch); // opener
-        } else if (openerFor[ch]) {
-          if (stack.length === 0) {
-            mixedBracketChars.add(ch);
-          } else {
-            const top = stack[stack.length - 1];
-            if (openerFor[ch] !== top) {
-              mixedBracketChars.add(ch);
-              mixedBracketChars.add(top);
-              stack.pop();
-            } else {
-              stack.pop();
-            }
-          }
-        }
-      }
-    }
-    for (const remaining of stack) mixedBracketChars.add(remaining);
-  }
-
-  // (3) Cluster pattern detection: mark bracket chars in such delimiters
-  const clusterPattern = /[)\]}][({\[]/;
-  const clusterChars = new Set<string>();
-  for (const d of uniqueDelimiters) {
-    if (clusterPattern.test(d)) {
-      for (const ch of d) if ('()[]{}'.includes(ch)) clusterChars.add(ch);
-    }
-  }
-
-  // (4) Cross-delimiter mismatch ordering scan (median ordering)
   const orderedForScan = uniqueDelimiters
     .map((lit) => {
       const positions = messages.map((msg) => msg.indexOf(lit));
@@ -262,20 +190,14 @@ export function findDelimiterSequences(
       }
     }
   }
+  // Any unmatched openers on stack
   for (const remaining of openerStack) crossMismatchChars.add(remaining);
 
-  // (5) Single sanitization pass stripping bracket chars flagged by (2)-(4)
-  const charsToStrip = new Set<string>([
-    ...mixedBracketChars,
-    ...clusterChars,
-    ...crossMismatchChars,
-  ]);
-
-  if (charsToStrip.size) {
+  if (crossMismatchChars.size) {
     uniqueDelimiters = uniqueDelimiters
       .map((d) => {
         const sanitized = [...d]
-          .filter((c) => !('()[]{}'.includes(c) && charsToStrip.has(c)))
+          .filter((c) => !('()[]{}'.includes(c) && crossMismatchChars.has(c)))
           .join('');
         return sanitized;
       })

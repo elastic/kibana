@@ -107,11 +107,6 @@ export async function evaluateDissectSuggestions() {
         return { stream, pattern: '', processor: null };
       }
 
-      console.log(` Messages in largest group: ${largestGroup.messages.length}`);
-      largestGroup.messages.slice(0, 100).forEach((msg, idx) => {
-        console.log(`  '${chalk.dim(msg)}',`);
-      });
-
       const dissectPattern = extractDissectPattern(largestGroup.messages);
       const reviewFields = getReviewFields(dissectPattern, 10);
       console.log(`- ${stream}: ${chalk.dim(serializeAST(dissectPattern.ast))}`);
