@@ -107,7 +107,7 @@ export const bedrockClaudeAdapter: InferenceConnectorAdapter = {
 };
 
 const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
-  return messages.map<BedRockMessage>((message) => {
+  const converseMessages: BedRockMessage[] = messages.map((message): BedRockMessage => {
     switch (message.role) {
       case MessageRole.User:
         return {
@@ -177,4 +177,25 @@ const messagesToBedrock = (messages: Message[]): BedRockMessage[] => {
         };
     }
   });
+
+  // Combine consecutive user tool result messages into a single message. This format is required by Bedrock.
+  const combinedConverseMessages = converseMessages.reduce<BedRockMessage[]>((acc, curr) => {
+    const lastMessage = acc[acc.length - 1];
+
+    if (
+      lastMessage &&
+      lastMessage.role === 'user' &&
+      lastMessage.rawContent?.some((c) => 'toolResult' in c) &&
+      curr.role === 'user' &&
+      curr.rawContent?.some((c) => 'toolResult' in c)
+    ) {
+      lastMessage.rawContent = lastMessage.rawContent.concat(curr.rawContent);
+    } else {
+      acc.push(curr);
+    }
+
+    return acc;
+  }, []);
+
+  return combinedConverseMessages;
 };
