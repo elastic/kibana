@@ -13,4 +13,3 @@ import { internalNamespaces } from '@kbn/onechat-common/base/namespaces';
 export const securityTool = (toolName: string): string => {
   return `${internalNamespaces.coreSecurity}.${toolName}`;
 };
-

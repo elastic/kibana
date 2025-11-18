@@ -6,3 +6,4 @@
  */
 
 export { alertsTool, SECURITY_ALERTS_TOOL_ID } from './alerts/alerts_tool';
+export { evaluateAlertTool, EVALUATE_ALERT_TOOL_ID } from './alerts/evaluate_alert_tool';

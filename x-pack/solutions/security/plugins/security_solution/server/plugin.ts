@@ -147,7 +147,7 @@ import type { HealthDiagnosticService } from './lib/telemetry/diagnostic/health_
 import { ENTITY_RISK_SCORE_TOOL_ID } from './assistant/tools/entity_risk_score/entity_risk_score';
 import type { TelemetryQueryConfiguration } from './lib/telemetry/types';
 import { createAlertAttachmentType } from './agent_builder/attachments';
-import { alertsTool } from './agent_builder/tools';
+import { alertsTool, evaluateAlertTool } from './agent_builder/tools';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -626,6 +626,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       }
       if (plugins.onechat.tools) {
         plugins.onechat.tools.register(alertsTool());
+        plugins.onechat.tools.register(evaluateAlertTool());
       }
     }
 

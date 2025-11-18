@@ -8,7 +8,7 @@
 import type { AlertAttachmentData } from '@kbn/onechat-common/attachments';
 import { AttachmentType, alertAttachmentDataSchema } from '@kbn/onechat-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/onechat-server/attachments';
-import { SECURITY_ALERTS_TOOL_ID } from '../tools';
+import { EVALUATE_ALERT_TOOL_ID } from '../tools';
 
 /**
  * Creates the definition for the `alert` attachment type.
@@ -34,9 +34,9 @@ export const createAlertAttachmentType = (): AttachmentTypeDefinition<
         },
       };
     },
-    getTools: () => [SECURITY_ALERTS_TOOL_ID],
+    getTools: () => [EVALUATE_ALERT_TOOL_ID],
     getAgentDescription: () => {
-      return `Alert attachments contain security alert data. Use the alerts tool (${SECURITY_ALERTS_TOOL_ID}) to search for related alerts or additional context. The alerts tool automatically filters fields to reduce response size.`;
+      return `Alert attachments contain security alert data. Use the ${EVALUATE_ALERT_TOOL_ID} tool to generate a comprehensive evaluation report. IMPORTANT: When the evaluation tool returns results, return them EXACTLY as provided without summarization or modification.`;
     },
   };
 };
@@ -88,30 +88,20 @@ const filterEssentialFields = (alertData: string): string => {
 };
 
 /**
- * Formats alert data with minimal context about the index pattern.
+ * Formats alert data for display.
  * The alert data is filtered to include only essential fields to reduce token usage.
  *
- * @param data - The alert attachment data containing indexPattern and alert string
- * @returns Formatted string representation of the alert
+ * @param data - The alert attachment data containing the alert string
+ * @returns Formatted string representation of the filtered alert data
  */
 const formatAlertData = (data: AlertAttachmentData): string => {
   const filteredAlert = filterEssentialFields(data.alert);
 
-  // Extract alert ID if available
-  const alertIdMatch = data.alert.match(/_id,([^\n]+)/);
-  const alertId = alertIdMatch ? alertIdMatch[1] : null;
-
-  return `SECURITY ALERT DATA (ALREADY PROVIDED)
+  return `SECURITY ALERT DATA
 
 ${filteredAlert}
 
-CRITICAL: This alert is already provided above. DO NOT query for this exact alert (matching host.name, user.name, source.ip, destination.ip, or _id="${
-    alertId || 'N/A'
-  }").
+---
 
-ONLY search if the user explicitly requests related alerts or additional context. Do NOT automatically search for related data unless specifically asked.
-
-When searching:
-- Use index "${data.indexPattern}" as the "index" parameter (NOT in query string)
-- Exclude _id="${alertId || 'N/A'}" from results`;
+To evaluate this alert, use the ${EVALUATE_ALERT_TOOL_ID} tool with the alertData parameter set to the filtered alert data shown above.`;
 };

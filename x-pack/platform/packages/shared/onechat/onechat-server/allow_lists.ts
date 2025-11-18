@@ -20,6 +20,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   'observability.get_alerts',
   // Security Solution
   'core.security.alerts',
+  'core.security.evaluate-alert',
 ];
 
 /**

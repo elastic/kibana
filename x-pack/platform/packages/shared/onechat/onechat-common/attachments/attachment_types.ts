@@ -80,7 +80,6 @@ export interface ScreenContextAttachmentData {
 }
 
 export const alertAttachmentDataSchema = z.object({
-  indexPattern: z.string(),
   alert: z.string(),
 });
 
@@ -88,8 +87,6 @@ export const alertAttachmentDataSchema = z.object({
  * Data for an alert attachment.
  */
 export interface AlertAttachmentData {
-  /** The index pattern to search (e.g., `.alert-security.alerts-default*`) */
-  indexPattern: string;
   /** The condensed alert data in key-value format (comma-separated, newline-delimited) */
   alert: string;
 }
