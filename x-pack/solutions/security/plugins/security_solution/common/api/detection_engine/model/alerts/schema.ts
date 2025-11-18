@@ -85,6 +85,7 @@ import type {
   ALERT_ORIGINAL_DATA_STREAM_DATASET,
   ALERT_ORIGINAL_DATA_STREAM_NAMESPACE,
   ALERT_ORIGINAL_DATA_STREAM_TYPE,
+  ALERT_ATTACK_IDS,
 } from '../../../../field_maps/field_names';
 // TODO: Create and import 8.0.0 versioned RuleAlertAction type
 import type { SearchTypes } from '../../../../detection_engine/types';
@@ -99,6 +100,7 @@ type Version8130 = '8.13.0';
 type Version8160 = '8.16.0';
 type Version8180 = '8.18.0';
 type Version8190 = '8.19.0';
+type Version930 = '9.3.0';
 
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 type AlertAncestorSchema = {
@@ -586,6 +588,10 @@ type DetectionAlertSchema = {
   [ALERT_UPDATED_BY_USER_NAME]?: {
     type: string | undefined;
     version: Version8190;
+  };
+  [ALERT_ATTACK_IDS]?: {
+    type: string[] | undefined;
+    version: Version930;
   };
 };
 

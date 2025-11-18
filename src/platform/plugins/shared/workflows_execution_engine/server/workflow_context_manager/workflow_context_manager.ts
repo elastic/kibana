@@ -12,12 +12,13 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { StackFrame, StepContext, WorkflowContext } from '@kbn/workflows';
 import { parseJsPropertyAccess } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import { buildWorkflowContext } from './build_workflow_context';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { RunStepResult } from '../step/node_implementation';
 import type { WorkflowTemplatingEngine } from '../templating_engine';
-import { buildStepExecutionId, buildWorkflowExecutionUrl, getKibanaUrl } from '../utils';
+import { buildStepExecutionId } from '../utils';
 
 export interface ContextManagerInit {
   // New properties for logging
@@ -190,32 +191,7 @@ export class WorkflowContextManager {
 
   private buildWorkflowContext(): WorkflowContext {
     const workflowExecution = this.workflowExecutionState.getWorkflowExecution();
-    const kibanaUrl = getKibanaUrl(this.coreStart, this.dependencies.cloudSetup);
-    const executionUrl = buildWorkflowExecutionUrl(
-      kibanaUrl,
-      workflowExecution.spaceId,
-      workflowExecution.workflowId,
-      workflowExecution.id
-    );
-
-    return {
-      execution: {
-        id: workflowExecution.id,
-        isTestRun: !!workflowExecution.isTestRun,
-        startedAt: new Date(workflowExecution.startedAt),
-        url: executionUrl,
-      },
-      workflow: {
-        id: workflowExecution.workflowId,
-        name: workflowExecution.workflowDefinition.name,
-        enabled: workflowExecution.workflowDefinition.enabled,
-        spaceId: workflowExecution.spaceId,
-      },
-      kibanaUrl,
-      consts: workflowExecution.workflowDefinition.consts || {},
-      event: workflowExecution.context?.event,
-      inputs: workflowExecution.context?.inputs,
-    };
+    return buildWorkflowContext(workflowExecution, this.coreStart, this.dependencies);
   }
 
   private enrichStepContextWithMockedData(stepContext: StepContext): void {
