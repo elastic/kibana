@@ -373,15 +373,6 @@ export class ActionsPlugin
       actionsConfigUtils,
     });
 
-    const getAxiosInstanceFn = getAxiosInstanceWithAuth({
-      authTypeRegistry: this.authTypeRegistry!,
-      configurationUtilities: actionsConfigUtils,
-      logger: this.logger,
-    });
-    const getAxiosInstanceWithAuthHelper = async (validatedSecrets: Record<string, unknown>) => {
-      return await getAxiosInstanceFn(validatedSecrets);
-    };
-
     // Routes
     defineRoutes({
       router: core.http.createRouter<ActionsRequestHandlerContext>(),
