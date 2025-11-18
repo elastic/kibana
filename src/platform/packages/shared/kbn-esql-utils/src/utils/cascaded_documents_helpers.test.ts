@@ -10,7 +10,7 @@
 import type { AggregateQuery } from '@kbn/es-query';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
-import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
+import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import {
   getESQLStatsQueryMeta,
   constructCascadeQuery,
@@ -19,6 +19,10 @@ import {
 } from './cascaded_documents_helpers';
 
 describe('cascaded documents helpers utils', () => {
+  const dataViewMock = createStubDataView({
+    spec: {},
+  });
+
   describe('getESQLStatsQueryMeta', () => {
     it('should return an array of the columns the query has been denoted to be grouped by with the STATS command', () => {
       const queryString = `
@@ -300,7 +304,7 @@ describe('cascaded documents helpers utils', () => {
         it('uses match phrase query when the selected column is a text or keyword field that is not aggregatable', () => {
           const editorQuery: AggregateQuery = {
             esql: `
-              FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY message
+              FROM kibana_sample_data_logs | STATS count = COUNT(bytes), average = AVG(memory) BY tags
             `,
           };
 

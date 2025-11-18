@@ -29,7 +29,6 @@
     "@kbn/datemath",
     "@kbn/es-query",
     "@kbn/monaco",
-    "@kbn/core",
-    "@kbn/discover-utils",
+    "@kbn/core"
   ]
 }
