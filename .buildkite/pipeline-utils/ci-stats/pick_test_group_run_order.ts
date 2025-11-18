@@ -347,7 +347,7 @@ export async function pickTestGroupRunOrder() {
             env: {
               SCOUT_TARGET_TYPE: 'local',
             },
-            depends_on: JEST_CONFIGS_DEPS,
+            // depends_on: JEST_CONFIGS_DEPS,
             // retry: {
             //   automatic: [
             //     { exit_status: '-1', limit: 3 },
@@ -369,7 +369,7 @@ export async function pickTestGroupRunOrder() {
             env: {
               SCOUT_TARGET_TYPE: 'local',
             },
-            depends_on: JEST_CONFIGS_DEPS,
+            // depends_on: JEST_CONFIGS_DEPS,
             // retry: {
             //   automatic: [
             //     { exit_status: '-1', limit: 3 },
