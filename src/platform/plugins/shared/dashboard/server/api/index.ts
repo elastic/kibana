@@ -7,4 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { registerAPIRoutes } from './register_routes';
+export { registerRoutes } from './register_routes';
+
+export type { DashboardCreateRequestBody, DashboardCreateResponseBody } from './create';
+export type { DashboardReadResponseBody } from './read';
+export type { DashboardSearchRequestBody, DashboardSearchResponseBody } from './search';
+export type { DashboardUpdateResponseBody } from './update';
+export type {
+  DashboardState,
+  DashboardControlsState,
+  DashboardPanel,
+  DashboardSection,
+  DashboardFilter,
+  DashboardOptions,
+  DashboardQuery,
+  GridData,
+} from './types';

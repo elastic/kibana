@@ -32,7 +32,8 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 import { MountPointPortal } from '@kbn/react-kibana-mount';
 
-import { DASHBOARD_APP_ID, UI_SETTINGS } from '../../common/constants';
+import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
+import { UI_SETTINGS } from '../../common/constants';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import {
   dashboardManagedBadge,
@@ -99,6 +100,8 @@ export function InternalDashboardTopNav({
     unpublishedChildFilters,
     publishedTimeslice,
     unpublishedTimeslice,
+    publishedEsqlVariables,
+    unpublishedEsqlVariables,
   ] = useBatchedPublishingSubjects(
     dashboardApi.dataViews$,
     dashboardApi.fullScreenMode$,
@@ -110,7 +113,9 @@ export function InternalDashboardTopNav({
     dashboardApi.publishedChildFilters$,
     dashboardApi.unpublishedChildFilters$,
     dashboardApi.publishedTimeslice$,
-    dashboardApi.unpublishedTimeslice$
+    dashboardApi.unpublishedTimeslice$,
+    dashboardApi.publishedEsqlVariables$,
+    dashboardApi.unpublishedEsqlVariables$
   );
 
   const hasUnpublishedFilters = useMemo(() => {
@@ -119,6 +124,9 @@ export function InternalDashboardTopNav({
   const hasUnpublishedTimeslice = useMemo(() => {
     return !deepEqual(publishedTimeslice, unpublishedTimeslice);
   }, [publishedTimeslice, unpublishedTimeslice]);
+  const hasUnpublishedVariables = useMemo(() => {
+    return !deepEqual(publishedEsqlVariables, unpublishedEsqlVariables);
+  }, [publishedEsqlVariables, unpublishedEsqlVariables]);
 
   const [savedQueryId, setSavedQueryId] = useState<string | undefined>();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -398,16 +406,16 @@ export function InternalDashboardTopNav({
           if (isUpdate === false) {
             dashboardApi.forceRefresh();
           }
-          dashboardApi.publishFilters();
-          dashboardApi.publishTimeslice();
+          if (hasUnpublishedFilters) dashboardApi.publishFilters();
+          if (hasUnpublishedTimeslice) dashboardApi.publishTimeslice();
+          if (hasUnpublishedVariables) dashboardApi.publishVariables();
         }}
         onSavedQueryIdChange={setSavedQueryId}
-        hasDirtyState={hasUnpublishedFilters || hasUnpublishedTimeslice}
+        hasDirtyState={hasUnpublishedFilters || hasUnpublishedTimeslice || hasUnpublishedVariables}
         useBackgroundSearchButton={
           dataService.search.isBackgroundSearchEnabled &&
           getDashboardCapabilities().storeSearchSession
         }
-        showProjectPicker
       />
       {viewMode !== 'print' && isLabsEnabled && isLabsShown ? (
         <LabsFlyout solutions={['dashboard']} onClose={() => setIsLabsShown(false)} />

@@ -45,10 +45,9 @@ export async function loadDashboardApi({
     embeddable.size = panelPlacementSettings;
   }
 
-  const savedObjectResult = savedObjectId ? await dashboardClient.get(savedObjectId) : undefined;
+  const readResult = savedObjectId ? await dashboardClient.get(savedObjectId) : undefined;
 
-  const validationResult =
-    savedObjectResult && creationOptions?.validateLoadedSavedObject?.(savedObjectResult);
+  const validationResult = readResult && creationOptions?.validateLoadedSavedObject?.(readResult);
   if (validationResult === 'invalid') {
     // throw error to stop the rest of Dashboard loading and make the factory throw an Error
     throw new Error('Dashboard failed saved object result validation');
@@ -75,11 +74,11 @@ export async function loadDashboardApi({
     incomingEmbeddables,
     initialState: {
       ...DEFAULT_DASHBOARD_STATE,
-      ...savedObjectResult?.data,
+      ...readResult?.data,
       ...unsavedChanges,
       ...overrideState,
     },
-    savedObjectResult,
+    readResult,
     savedObjectId,
   });
 

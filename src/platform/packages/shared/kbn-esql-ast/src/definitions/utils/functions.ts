@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLControlVariable, RecommendedField } from '@kbn/esql-types';
-import { ESQLVariableType } from '@kbn/esql-types';
+import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
 import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import {
   type FunctionDefinition,
@@ -433,6 +433,7 @@ export const buildColumnSuggestions = (
     const controlSuggestions = columns.length
       ? getControlSuggestion(
           variableType,
+          ControlTriggerSource.SMART_SUGGESTION,
           userDefinedColumns?.map((v) => `${getVariablePrefix(variableType)}${v.key}`)
         )
       : [];

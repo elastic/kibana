@@ -7,9 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const LANDING_PAGE_PATH = '/list';
-export const DASHBOARD_APP_ID = 'dashboards';
-export const SEARCH_SESSION_ID = 'searchSessionId';
+import { DASHBOARD_GRID_COLUMN_COUNT } from './page_bundle_constants';
+
+export const DASHBOARD_API_VERSION = '1';
+
+export const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
+
+export const DEFAULT_PANEL_WIDTH = DASHBOARD_GRID_COLUMN_COUNT / 2;
+export const DEFAULT_PANEL_HEIGHT = 15;
+
+export const DEFAULT_DASHBOARD_OPTIONS = {
+  hidePanelTitles: false,
+  useMargins: true,
+  autoApplyFilters: true,
+  syncColors: true,
+  syncCursor: true,
+  syncTooltips: true,
+} as const;
+
 export const UI_SETTINGS = {
   ENABLE_LABS_UI: 'labs:dashboard:enable_ui',
 };

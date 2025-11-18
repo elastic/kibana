@@ -81,6 +81,7 @@ export interface GrokProcessor extends ProcessorBaseWithWhere {
   action: 'grok';
   from: string;
   patterns: string[];
+  pattern_definitions?: Record<string, string>;
   ignore_missing?: boolean;
 }
 
@@ -88,6 +89,7 @@ export const grokProcessorSchema = processorBaseWithWhereSchema.extend({
   action: z.literal('grok'),
   from: StreamlangSourceField,
   patterns: z.array(NonEmptyString).nonempty(),
+  pattern_definitions: z.optional(z.record(z.string())),
   ignore_missing: z.optional(z.boolean()),
 }) satisfies z.Schema<GrokProcessor>;
 
@@ -266,9 +268,26 @@ export const removeProcessorSchema = processorBaseWithWhereSchema.extend({
   ignore_missing: z.optional(z.boolean()),
 }) satisfies z.Schema<RemoveProcessor>;
 
+/**
+ * Drop processor
+ */
+
+export interface DropDocumentProcessor extends ProcessorBaseWithWhere {
+  action: 'drop_document';
+}
+
+export const dropDocumentProcessorSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('drop_document'),
+  })
+  .refine((schema) => schema.where !== undefined, {
+    message: 'where clause is required in drop_document.',
+  }) satisfies z.Schema<DropDocumentProcessor>;
+
 export type StreamlangProcessorDefinition =
   | DateProcessor
   | DissectProcessor
+  | DropDocumentProcessor
   | GrokProcessor
   | RenameProcessor
   | SetProcessor
@@ -282,6 +301,7 @@ export const streamlangProcessorSchema = z.union([
   grokProcessorSchema,
   dissectProcessorSchema,
   dateProcessorSchema,
+  dropDocumentProcessorSchema,
   renameProcessorSchema,
   setProcessorSchema,
   appendProcessorSchema,

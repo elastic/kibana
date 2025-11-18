@@ -16,7 +16,7 @@ import { createQueryParamObservable, getQueryParams } from '@kbn/kibana-utils-pl
 import type { History } from 'history';
 import { map } from 'rxjs';
 import type { SerializableRecord } from '@kbn/utility-types';
-import { SEARCH_SESSION_ID } from '../../../common/constants';
+import { SEARCH_SESSION_ID } from '../../../common/page_bundle_constants';
 import type { DashboardLocatorParams, DashboardState } from '../../../common/types';
 import type { DashboardApi, DashboardInternalApi } from '../../dashboard_api/types';
 import { dataService } from '../../services/kibana_services';
