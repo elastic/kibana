@@ -27,12 +27,8 @@ export interface ExecuteActionHostResponseProps {
   canAccessFileDownloadLink: boolean;
   'data-test-subj'?: string;
   textSize?: Exclude<EuiTextProps['size'], 'm' | 'relative'>;
-  hideFile?: boolean;
-  hideContext?: boolean;
-  showPasscode?: boolean;
 }
 
-// Note: also used for RunScript command
 export const ExecuteActionHostResponse = memo<ExecuteActionHostResponseProps>(
   ({
     action,
@@ -40,9 +36,6 @@ export const ExecuteActionHostResponse = memo<ExecuteActionHostResponseProps>(
     canAccessFileDownloadLink,
     textSize = 's',
     'data-test-subj': dataTestSubj,
-    hideFile,
-    hideContext,
-    showPasscode,
   }) => {
     const outputContent = useMemo(
       () =>
@@ -54,19 +47,18 @@ export const ExecuteActionHostResponse = memo<ExecuteActionHostResponseProps>(
 
     return (
       <>
-        {!hideFile && (
-          <EuiFlexItem>
-            <ResponseActionFileDownloadLink
-              action={action}
-              agentId={agentId}
-              buttonTitle={EXECUTE_FILE_LINK_TITLE}
-              canAccessFileDownloadLink={canAccessFileDownloadLink}
-              data-test-subj={`${dataTestSubj}-getExecuteLink`}
-              textSize={textSize}
-              showPasscode={showPasscode}
-            />
-          </EuiFlexItem>
-        )}
+        <EuiFlexItem>
+          <ResponseActionFileDownloadLink
+            action={action}
+            agentId={agentId}
+            buttonTitle={EXECUTE_FILE_LINK_TITLE}
+            canAccessFileDownloadLink={canAccessFileDownloadLink}
+            data-test-subj={`${dataTestSubj}-getExecuteLink`}
+            textSize={textSize}
+            showPasscode={true}
+          />
+        </EuiFlexItem>
+
         {outputContent && (
           <>
             <EuiSpacer size="l" />
@@ -74,7 +66,6 @@ export const ExecuteActionHostResponse = memo<ExecuteActionHostResponseProps>(
               outputContent={outputContent}
               data-test-subj={`${dataTestSubj}-executeResponseOutput`}
               textSize={textSize}
-              hideContext={hideContext}
             />
           </>
         )}
