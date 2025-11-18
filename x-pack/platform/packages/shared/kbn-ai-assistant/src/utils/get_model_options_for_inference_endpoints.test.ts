@@ -61,7 +61,7 @@ describe('getModelOptionsForInferenceEndpoints', () => {
     ]);
   });
 
-  it('does not show any EIS models even if EIS pre-configured endpoints are available', () => {
+  it('shows ELSER in EIS and hides ELSER on ML-node if both are available', () => {
     const endpoints = [
       { inference_id: ELSER_IN_EIS_INFERENCE_ID },
       { inference_id: ELSER_ON_ML_NODE_INFERENCE_ID },
@@ -72,9 +72,6 @@ describe('getModelOptionsForInferenceEndpoints', () => {
       endpoints,
     });
 
-    expect(options.map((o) => o.key)).toEqual([
-      ELSER_ON_ML_NODE_INFERENCE_ID,
-      E5_SMALL_INFERENCE_ID,
-    ]);
+    expect(options.map((o) => o.key)).toEqual([ELSER_IN_EIS_INFERENCE_ID, E5_SMALL_INFERENCE_ID]);
   });
 });
