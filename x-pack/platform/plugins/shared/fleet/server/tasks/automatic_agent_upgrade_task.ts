@@ -368,9 +368,9 @@ export class AutomaticAgentUpgradeTask {
   }
 
   private updatingQuery(version: string) {
-    const oldStuckInUpdatingKuery = `(NOT upgrade_details:* AND status:updating AND NOT upgraded_at:* AND upgrade_started_at < now-2h)`; // agents pre 8.12.0 (without upgrade_details)
-    const newStuckInUpdatingKuery = `(upgrade_details.target_version:${version} AND upgrade_details.state:UPG_FAILED)`;
-    return `(${oldStuckInUpdatingKuery} OR ${newStuckInUpdatingKuery})`;
+    const stuckInUpdatingKuery = `(NOT upgrade_details:* AND status:updating AND NOT upgraded_at:* AND upgrade_started_at < now-2h)`; // agents without upgrade_details
+    const updateFailedKuery = `(upgrade_details.target_version:${version} AND upgrade_details.state:UPG_FAILED)`;
+    return `(${stuckInUpdatingKuery} OR ${updateFailedKuery})`;
   }
 
   private async processRequiredVersion(
