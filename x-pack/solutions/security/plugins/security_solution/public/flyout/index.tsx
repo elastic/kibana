@@ -258,7 +258,7 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     key: AttackDetailsRightPanelKey,
     component: (props) => (
       <AttackDetailsProvider {...(props as AttackDetailsProps).params}>
-        <AttackDetailsPanel />
+        <AttackDetailsPanel path={props.path as AttackDetailsProps['path']} />
       </AttackDetailsProvider>
     ),
   },
