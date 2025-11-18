@@ -112,7 +112,7 @@ export class WorkflowsExecutionEnginePlugin
                 stepExecutionRepository, // TODO: remove from params, can be created inside
                 taskAbortController,
                 taskManager, // TODO: move to dependencies
-                esClient, // TODO: remove from params, can be created inside
+                unscopedEsClient: esClient, // TODO: remove from params, can be created inside
                 actions, // TODO: move to dependencies
                 coreStart, // TODO: move to dependencies
                 config,
@@ -148,10 +148,10 @@ export class WorkflowsExecutionEnginePlugin
               const dependencies: ContextDependencies = setupDependencies; // TODO: append start dependencies
               const { actions, taskManager } = pluginsStart;
               // Get ES client from core services (guaranteed to be available at task execution time)
-              const esClient = coreStart.elasticsearch.client.asInternalUser as Client;
-              const workflowExecutionRepository = new WorkflowExecutionRepository(esClient);
-              const stepExecutionRepository = new StepExecutionRepository(esClient);
-              const logsRepository = new LogsRepository(esClient);
+              const unscopedEsClient = coreStart.elasticsearch.client.asInternalUser as Client;
+              const workflowExecutionRepository = new WorkflowExecutionRepository(unscopedEsClient);
+              const stepExecutionRepository = new StepExecutionRepository(unscopedEsClient);
+              const logsRepository = new LogsRepository(unscopedEsClient);
 
               await resumeWorkflow({
                 workflowRunId,
@@ -161,7 +161,6 @@ export class WorkflowsExecutionEnginePlugin
                 logsRepository,
                 taskAbortController,
                 taskManager,
-                esClient,
                 actions,
                 coreStart,
                 config,
@@ -273,7 +272,7 @@ export class WorkflowsExecutionEnginePlugin
                 logsRepository,
                 taskAbortController,
                 coreStart,
-                esClient,
+                unscopedEsClient: esClient,
                 actions,
                 taskManager,
                 logger,
@@ -357,7 +356,7 @@ export class WorkflowsExecutionEnginePlugin
           logsRepository,
           taskAbortController: new AbortController(), // TODO: We need to think how to pass this properly from outer task
           coreStart,
-          esClient,
+          unscopedEsClient: esClient,
           actions: plugins.actions,
           taskManager: plugins.taskManager,
           logger: this.logger,

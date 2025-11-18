@@ -36,7 +36,6 @@ export async function setupDependencies(
   spaceId: string,
   actionsPlugin: ActionsPluginStartContract,
   taskManagerPlugin: TaskManagerStartContract,
-  esClient: ElasticsearchClient,
   logger: Logger,
   config: WorkflowsExecutionEngineConfig,
   workflowExecutionRepository: WorkflowExecutionRepository,
@@ -74,7 +73,7 @@ export async function setupDependencies(
   }
 
   const scopedActionsClient = await actionsPlugin.getActionsClientWithRequest(fakeRequest);
-  const connectorExecutor = new ConnectorExecutor(scopedActionsClient, true);
+  const connectorExecutor = new ConnectorExecutor(scopedActionsClient);
 
   const workflowLogger = new WorkflowEventLogger(
     logsRepository,
@@ -106,11 +105,8 @@ export async function setupDependencies(
     dependencies,
   });
 
-  // Use user-scoped ES client if fakeRequest is available, otherwise fallback to regular client
-  let clientToUse: ElasticsearchClient = esClient; // fallback
-  if (fakeRequest && coreStart) {
-    clientToUse = coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
-  }
+  const esClient: ElasticsearchClient =
+    coreStart.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
 
   const workflowTaskManager = new WorkflowTaskManager(taskManagerPlugin);
 
@@ -122,7 +118,7 @@ export async function setupDependencies(
     workflowExecutionGraph,
     workflowExecutionState,
     workflowLogger,
-    esClient: clientToUse,
+    esClient,
     fakeRequest,
     coreStart,
     dependencies,
@@ -150,7 +146,7 @@ export async function setupDependencies(
     workflowTaskManager,
     nodesFactory,
     fakeRequest,
-    clientToUse,
+    esClient,
     coreStart,
   };
 }
