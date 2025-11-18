@@ -25,8 +25,6 @@ import {
   getApmIndicesSavedObject,
 } from './saved_objects/apm_indices';
 import { getServices } from './services/get_services';
-import type { ApmDataAccessPrivilegesCheck } from './lib/check_privileges';
-import { checkPrivileges } from './lib/check_privileges';
 
 export class ApmDataAccessPlugin
   implements Plugin<ApmDataAccessPluginSetup, ApmDataAccessPluginStart>
@@ -57,28 +55,8 @@ export class ApmDataAccessPlugin
     };
   }
 
-  public start(core: CoreStart, plugins: ApmDataAccessServerDependencies) {
-    // TODO: remove in 9.0
-    migrateLegacyAPMIndicesToSpaceAware({ coreStart: core, logger: this.logger }).catch((e) => {
-      this.logger.error('Failed to run migration making APM indices space aware');
-      this.logger.error(e);
-    });
-
-    const getApmIndicesWithInternalUserFn = async () => {
-      const soClient = core.savedObjects.createInternalRepository();
-      return this.getApmIndices(soClient);
-    };
-
-    const startServices = {
-      hasPrivileges: ({ request }: Pick<ApmDataAccessPrivilegesCheck, 'request'>) =>
-        checkPrivileges({
-          request,
-          getApmIndices: getApmIndicesWithInternalUserFn,
-          security: plugins.security,
-        }),
-    };
-
-    return { ...startServices };
+  public start(_core: CoreStart): ApmDataAccessPluginStart {
+    return {};
   }
 
   public stop() {}
