@@ -25,6 +25,10 @@ import type {
   SetAlertTagsRequestBodyInput,
   SetAlertTagsResponse,
 } from './detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
+import type {
+  SearchExtendedAlertsRequestBodyInput,
+  SearchExtendedAlertsResponse,
+} from './detection_engine/extended_alerts/query/query_route.gen';
 import type { CreateAlertsIndexResponse } from './detection_engine/index_management/create_index/create_index.gen';
 import type { DeleteAlertsIndexResponse } from './detection_engine/index_management/delete_index/delete_index.gen';
 import type { ReadAlertsIndexResponse } from './detection_engine/index_management/read_index/read_index.gen';
@@ -2785,6 +2789,22 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Find and/or aggregate detection and attack alerts that match the given query.
+   */
+  async searchExtendedAlerts(props: SearchExtendedAlertsProps) {
+    this.log.info(`${new Date().toISOString()} Calling API SearchExtendedAlerts`);
+    return this.kbnClient
+      .request<SearchExtendedAlertsResponse>({
+        path: '/internal/detection_engine/extended_alerts/search',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async searchPrivilegesIndices(props: SearchPrivilegesIndicesProps) {
     this.log.info(`${new Date().toISOString()} Calling API SearchPrivilegesIndices`);
     return this.kbnClient
@@ -3533,6 +3553,9 @@ export interface RunScriptActionProps {
 }
 export interface SearchAlertsProps {
   body: SearchAlertsRequestBodyInput;
+}
+export interface SearchExtendedAlertsProps {
+  body: SearchExtendedAlertsRequestBodyInput;
 }
 export interface SearchPrivilegesIndicesProps {
   query: SearchPrivilegesIndicesRequestQueryInput;

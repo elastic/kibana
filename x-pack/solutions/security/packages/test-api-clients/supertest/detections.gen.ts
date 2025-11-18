@@ -54,6 +54,7 @@ import type {
   RulePreviewRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_preview/rule_preview.gen';
 import type { SearchAlertsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/query_signals/query_signals_route.gen';
+import type { SearchExtendedAlertsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/extended_alerts/query/query_route.gen';
 import type { SetAlertAssigneesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_assignees/set_alert_assignees_route.gen';
 import type { SetAlertsStatusRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
 import type { SetAlertTagsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
@@ -464,6 +465,17 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       .send(props.body as object);
   },
   /**
+   * Find and/or aggregate detection and attack alerts that match the given query.
+   */
+  searchExtendedAlerts(props: SearchExtendedAlertsProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/internal/detection_engine/extended_alerts/search', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
       * Assign users to detection alerts, and unassign them from alerts.
 > info
 > You cannot add and remove the same assignee in the same request.
@@ -601,6 +613,9 @@ export interface RulePreviewProps {
 }
 export interface SearchAlertsProps {
   body: SearchAlertsRequestBodyInput;
+}
+export interface SearchExtendedAlertsProps {
+  body: SearchExtendedAlertsRequestBodyInput;
 }
 export interface SetAlertAssigneesProps {
   body: SetAlertAssigneesRequestBodyInput;
