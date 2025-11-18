@@ -11,14 +11,16 @@ import type { FleetRequestHandlerContext } from '../..';
 
 import { xpackMocks } from '../../mocks';
 
-import { ListDataStreamsResponseSchema } from '.';
-import { getListHandler } from './handlers';
+import { ListDataStreamsResponseSchema, DeprecatedILMCheckResponseSchema } from '.';
+import { getListHandler, getDeprecatedILMCheckHandler } from './handlers';
 
 jest.mock('./handlers', () => ({
   getListHandler: jest.fn(),
+  getDeprecatedILMCheckHandler: jest.fn(),
 }));
 
 const getListHandlerMock = getListHandler as jest.Mock;
+const getDeprecatedILMCheckHandlerMock = getDeprecatedILMCheckHandler as jest.Mock;
 
 describe('schema validation', () => {
   let context: FleetRequestHandlerContext;
@@ -64,6 +66,44 @@ describe('schema validation', () => {
     });
 
     const validateResp = ListDataStreamsResponseSchema.validate(expectedResponse);
+    expect(validateResp).toEqual(expectedResponse);
+  });
+
+  it('deprecated ILM check should return valid response', async () => {
+    const expectedResponse = {
+      deprecatedPolicies: [
+        {
+          policyName: 'logs',
+          version: 2,
+          componentTemplates: ['logs-settings', 'logs-mappings'],
+        },
+      ],
+    };
+    getDeprecatedILMCheckHandlerMock.mockImplementation((ctx, request, res) => {
+      return res.ok({ body: expectedResponse });
+    });
+    await getDeprecatedILMCheckHandler(context, {} as any, response);
+    expect(response.ok).toHaveBeenCalledWith({
+      body: expectedResponse,
+    });
+
+    const validateResp = DeprecatedILMCheckResponseSchema.validate(expectedResponse);
+    expect(validateResp).toEqual(expectedResponse);
+  });
+
+  it('deprecated ILM check should return valid response when no deprecated policies', async () => {
+    const expectedResponse = {
+      deprecatedPolicies: [],
+    };
+    getDeprecatedILMCheckHandlerMock.mockImplementation((ctx, request, res) => {
+      return res.ok({ body: expectedResponse });
+    });
+    await getDeprecatedILMCheckHandler(context, {} as any, response);
+    expect(response.ok).toHaveBeenCalledWith({
+      body: expectedResponse,
+    });
+
+    const validateResp = DeprecatedILMCheckResponseSchema.validate(expectedResponse);
     expect(validateResp).toEqual(expectedResponse);
   });
 });

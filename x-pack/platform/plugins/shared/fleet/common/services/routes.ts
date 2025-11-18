@@ -281,6 +281,9 @@ export const dataStreamRouteService = {
   getListPath: () => {
     return DATA_STREAM_API_ROUTES.LIST_PATTERN;
   },
+  getDeprecatedILMCheckPath: () => {
+    return DATA_STREAM_API_ROUTES.DEPRECATED_ILM_CHECK_PATTERN;
+  },
 };
 
 export const fleetSetupRouteService = {

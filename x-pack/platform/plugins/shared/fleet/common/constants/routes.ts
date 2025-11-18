@@ -64,6 +64,7 @@ export const EPM_API_ROUTES = {
 // Data stream API routes
 export const DATA_STREAM_API_ROUTES = {
   LIST_PATTERN: `${DATA_STREAM_API_ROOT}`,
+  DEPRECATED_ILM_CHECK_PATTERN: `${DATA_STREAM_API_ROOT}/deprecated_ilm_check`,
 };
 
 // Package policy API routes

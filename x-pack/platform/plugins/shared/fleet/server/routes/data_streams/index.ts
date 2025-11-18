@@ -14,7 +14,7 @@ import { DATA_STREAM_API_ROUTES } from '../../constants';
 
 import { genericErrorResponse } from '../schema/errors';
 
-import { getListHandler } from './handlers';
+import { getListHandler, getDeprecatedILMCheckHandler } from './handlers';
 
 export const ListDataStreamsResponseSchema = schema.object({
   data_streams: schema.arrayOf(
@@ -40,6 +40,16 @@ export const ListDataStreamsResponseSchema = schema.object({
           serviceName: schema.string(),
         })
       ),
+    })
+  ),
+});
+
+export const DeprecatedILMCheckResponseSchema = schema.object({
+  deprecatedPolicies: schema.arrayOf(
+    schema.object({
+      policyName: schema.string(),
+      version: schema.number(),
+      componentTemplates: schema.arrayOf(schema.string()),
     })
   ),
 });
@@ -81,5 +91,43 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
         },
       },
       getListHandler
+    );
+
+  // Check for deprecated ILM policies
+  router.versioned
+    .get({
+      path: DATA_STREAM_API_ROUTES.DEPRECATED_ILM_CHECK_PATTERN,
+      security: {
+        authz: {
+          requiredPrivileges: [
+            FLEET_API_PRIVILEGES.AGENTS.ALL,
+            FLEET_API_PRIVILEGES.AGENT_POLICIES.ALL,
+            FLEET_API_PRIVILEGES.SETTINGS.ALL,
+          ],
+        },
+      },
+      summary: `Check for deprecated ILM policies in use`,
+      options: {
+        tags: ['oas-tag:Data streams'],
+      },
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {
+          request: {},
+          response: {
+            200: {
+              description: 'OK: A successful request.',
+              body: () => DeprecatedILMCheckResponseSchema,
+            },
+            400: {
+              description: 'A bad request.',
+              body: genericErrorResponse,
+            },
+          },
+        },
+      },
+      getDeprecatedILMCheckHandler
     );
 };

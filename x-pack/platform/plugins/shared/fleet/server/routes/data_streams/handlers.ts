@@ -257,3 +257,72 @@ export const getListHandler: RequestHandler = async (context, request, response)
     throw err;
   }
 };
+
+export const getDeprecatedILMCheckHandler: RequestHandler = async (context, request, response) => {
+  try {
+    const { elasticsearch } = await context.core;
+    const esClient = elasticsearch.client.asCurrentUser;
+
+    const DEPRECATED_ILM_POLICIES = ['logs', 'logs@lifecycle'];
+
+    // Fetch ILM policies and component templates in parallel
+    const [ilmResponse, componentTemplatesResponse] = await Promise.all([
+      esClient.ilm.getLifecycle(),
+      esClient.cluster.getComponentTemplate(),
+    ]);
+
+    // Find deprecated policies that have been modified (version > 1)
+    const modifiedDeprecatedPolicies = DEPRECATED_ILM_POLICIES.filter((policyName) => {
+      const policy = ilmResponse[policyName];
+      return policy && policy.version > 1;
+    }).map((policyName) => ({
+      name: policyName,
+      version: ilmResponse[policyName].version,
+    }));
+
+    if (modifiedDeprecatedPolicies.length === 0) {
+      return response.ok({
+        body: {
+          deprecatedPolicies: [],
+        },
+      });
+    }
+
+    // Check which component templates use these deprecated ILM policies
+    const componentTemplatesUsingDeprecatedILM: Record<string, string[]> = {};
+
+    componentTemplatesResponse.component_templates.forEach((template) => {
+      const ilmPolicyName = template.component_template?.template?.settings?.index?.lifecycle?.name;
+
+      if (ilmPolicyName && DEPRECATED_ILM_POLICIES.includes(ilmPolicyName)) {
+        if (!componentTemplatesUsingDeprecatedILM[ilmPolicyName]) {
+          componentTemplatesUsingDeprecatedILM[ilmPolicyName] = [];
+        }
+        componentTemplatesUsingDeprecatedILM[ilmPolicyName].push(template.name);
+      }
+    });
+
+    // Only return policies that are both modified AND used by component templates
+    const deprecatedPolicies = modifiedDeprecatedPolicies
+      .filter((policy) => componentTemplatesUsingDeprecatedILM[policy.name]?.length > 0)
+      .map((policy) => ({
+        policyName: policy.name,
+        version: policy.version,
+        componentTemplates: componentTemplatesUsingDeprecatedILM[policy.name],
+      }));
+
+    return response.ok({
+      body: {
+        deprecatedPolicies,
+      },
+    });
+  } catch (err) {
+    const isResponseError = err instanceof errors.ResponseError;
+    if (isResponseError && err?.body?.error?.type === 'security_exception') {
+      throw new FleetUnauthorizedError(
+        `Not enough permissions to query ILM policies: ${err.message}`
+      );
+    }
+    throw err;
+  }
+};

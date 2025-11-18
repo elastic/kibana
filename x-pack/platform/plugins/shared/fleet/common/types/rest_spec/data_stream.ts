@@ -10,3 +10,11 @@ import type { DataStream } from '../models';
 export interface GetDataStreamsResponse {
   data_streams: DataStream[];
 }
+
+export interface DeprecatedILMPolicyCheckResponse {
+  deprecatedPolicies: Array<{
+    policyName: string;
+    version: number;
+    componentTemplates: string[];
+  }>;
+}
