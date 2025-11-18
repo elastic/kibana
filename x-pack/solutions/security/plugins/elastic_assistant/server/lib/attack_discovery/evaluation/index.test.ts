@@ -7,7 +7,7 @@
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
-import type { ActionsClientLlm } from '@kbn/langchain/server';
+import { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
@@ -154,5 +154,42 @@ describe('evaluateAttackDiscovery', () => {
         tags: ['evaluation', graphs[0].llmType ?? ''],
       }
     );
+  });
+
+  it('creates ActionsClientLlm without temperature parameter (allows connector config to be used)', async () => {
+    await evaluateAttackDiscovery({
+      actionsClient,
+      attackDiscoveryGraphs,
+      alertsIndexPattern,
+      connectors,
+      connectorTimeout,
+      datasetName,
+      esClient: mockEsClient,
+      esClientInternalUser: mockEsClientInternalUser,
+      evaluationId,
+      evaluatorConnectorId,
+      langSmithApiKey,
+      langSmithProject,
+      logger,
+      runName,
+      size: 20,
+    });
+
+    // Verify ActionsClientLlm was called
+    expect(ActionsClientLlm).toHaveBeenCalled();
+
+    // Get all calls to ActionsClientLlm
+    const actionsClientLlmCalls = (ActionsClientLlm as jest.Mock).mock.calls;
+
+    // Find the call for the experiment connector (not the evaluator)
+    // The evaluator LLM is created separately via getEvaluatorLlm
+    // We're looking for the LLM created for the attack discovery graph
+    const experimentConnectorLlmCall = actionsClientLlmCalls.find(
+      (call) => call[0]?.connectorId === connectors[0].id
+    );
+
+    expect(experimentConnectorLlmCall).toBeDefined();
+    // Verify temperature is not in the constructor arguments
+    expect(experimentConnectorLlmCall[0]).not.toHaveProperty('temperature');
   });
 });

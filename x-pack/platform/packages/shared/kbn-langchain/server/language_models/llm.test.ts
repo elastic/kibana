@@ -80,6 +80,74 @@ describe('ActionsClientLlm', () => {
         },
       });
     });
+
+    it('executes without temperature when temperature is undefined (allows connector config to be used)', async () => {
+      const actionsClientLlm = new ActionsClientLlm({
+        actionsClient,
+        connectorId,
+        logger: mockLogger,
+        temperature: undefined,
+      });
+      await actionsClientLlm._call(prompt);
+
+      const executeCalls = actionsClient.execute.mock.calls[0][0];
+      const subActionParams = executeCalls.params.subActionParams;
+
+      // Verify temperature is not in the params
+      expect(subActionParams).not.toHaveProperty('temperature');
+      // Verify other expected params are present
+      expect(subActionParams.messages).toBeDefined();
+      expect(subActionParams.n).toBe(1);
+    });
+
+    it('executes with temperature: 0 when explicitly set to 0', async () => {
+      const actionsClientLlm = new ActionsClientLlm({
+        actionsClient,
+        connectorId,
+        logger: mockLogger,
+        temperature: 0,
+      });
+      await actionsClientLlm._call(prompt);
+
+      const executeCalls = actionsClient.execute.mock.calls[0][0];
+      const subActionParams = executeCalls.params.subActionParams;
+
+      // Verify temperature: 0 is included
+      expect(subActionParams.temperature).toBe(0);
+    });
+
+    it('executes with temperature when explicitly set to non-zero value', async () => {
+      const actionsClientLlm = new ActionsClientLlm({
+        actionsClient,
+        connectorId,
+        logger: mockLogger,
+        temperature: 0.7,
+      });
+      await actionsClientLlm._call(prompt);
+
+      const executeCalls = actionsClient.execute.mock.calls[0][0];
+      const subActionParams = executeCalls.params.subActionParams;
+
+      // Verify temperature is included
+      expect(subActionParams.temperature).toBe(0.7);
+    });
+
+    it('executes without temperature when temperature parameter is not provided', async () => {
+      const actionsClientLlm = new ActionsClientLlm({
+        actionsClient,
+        connectorId,
+        logger: mockLogger,
+        // temperature not provided
+      });
+      await actionsClientLlm._call(prompt);
+
+      const executeCalls = actionsClient.execute.mock.calls[0][0];
+      const subActionParams = executeCalls.params.subActionParams;
+
+      // Verify temperature is not in the params
+      expect(subActionParams).not.toHaveProperty('temperature');
+    });
+
     it('executes with the expected arguments when llmType is inference', async () => {
       actionsClient.execute.mockImplementation(
         jest.fn().mockImplementation(() => ({

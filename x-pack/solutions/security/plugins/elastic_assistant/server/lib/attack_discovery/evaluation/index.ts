@@ -92,7 +92,6 @@ export const evaluateAttackDiscovery = async ({
         connectorId: connector.id,
         llmType,
         logger,
-        temperature: 0, // zero temperature for attack discovery, because we want structured JSON output
         timeout: connectorTimeout,
         traceOptions,
         telemetryMetadata: {
