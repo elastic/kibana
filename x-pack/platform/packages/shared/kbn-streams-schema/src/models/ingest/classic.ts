@@ -57,6 +57,28 @@ export const ClassicIngestUpsertRequest: Validation<
   z.intersection(IngestBaseUpsertRequest.right, IngestClassicUpsertRequest)
 );
 
+type OmitClassicStreamUpsertProps<
+  T extends {
+    ingest: Omit<ClassicIngest, 'processing'> & {
+      processing: Omit<ClassicIngest['processing'], 'updated_at'> & { updated_at?: string };
+    };
+  }
+> = Omit<T, 'ingest'> & {
+  ingest: Omit<ClassicIngest, 'processing'> & {
+    processing: Omit<ClassicIngest['processing'], 'updated_at'> & { updated_at?: never };
+  };
+};
+
+type ClassicStreamDefaults = {
+  Source: z.input<IClassicStreamSchema['Definition']>;
+  GetResponse: {
+    stream: z.input<IClassicStreamSchema['Definition']>;
+  };
+  UpsertRequest: {
+    stream: OmitClassicStreamUpsertProps<{} & z.input<IClassicStreamSchema['Definition']>>;
+  };
+} & ModelOfSchema<IClassicStreamSchema>;
+
 export namespace ClassicStream {
   export interface Definition extends IngestBaseStream.Definition {
     ingest: ClassicIngest;
@@ -72,7 +94,9 @@ export namespace ClassicStream {
     effective_settings: IngestStreamSettings;
   }
 
-  export type UpsertRequest = IngestBaseStream.UpsertRequest<OmitUpsertProps<Definition>>;
+  export type UpsertRequest = IngestBaseStream.UpsertRequest<
+    OmitClassicStreamUpsertProps<Definition>
+  >;
 
   export interface Model {
     Definition: ClassicStream.Definition;
@@ -102,32 +126,10 @@ const ClassicStreamSchema = {
 type IClassicStreamSchema = typeof ClassicStreamSchema;
 
 export const ClassicStream: ModelValidation<BaseStream.Model, ClassicStream.Model> =
-  modelValidation<BaseStream.Model, IClassicStreamSchema, WithDefaults>(
+  modelValidation<BaseStream.Model, IClassicStreamSchema, ClassicStreamDefaults>(
     BaseStream,
     ClassicStreamSchema
   );
-
-type WithDefaults = {
-  Source: z.input<IClassicStreamSchema['Definition']>;
-  GetResponse: {
-    stream: z.input<IClassicStreamSchema['Definition']>;
-  };
-  UpsertRequest: {
-    stream: OmitUpsertProps<{} & z.input<IClassicStreamSchema['Definition']>>;
-  };
-} & ModelOfSchema<IClassicStreamSchema>;
-
-type OmitUpsertProps<
-  T extends {
-    ingest: Omit<ClassicIngest, 'processing'> & {
-      processing: Omit<ClassicIngest['processing'], 'updated_at'> & { updated_at?: string };
-    };
-  }
-> = Omit<T, 'ingest'> & {
-  ingest: Omit<ClassicIngest, 'processing'> & {
-    processing: Omit<ClassicIngest['processing'], 'updated_at'> & { updated_at?: never };
-  };
-};
 
 // Optimized implementation for Definition check - the fallback is a zod-based check
 ClassicStream.Definition.is = (

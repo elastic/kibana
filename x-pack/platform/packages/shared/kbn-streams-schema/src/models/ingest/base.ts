@@ -90,6 +90,28 @@ export const IngestBaseUpsertRequest: Validation<unknown, IngestBaseUpsertReques
   })
 );
 
+type OmitIngestBaseStreamUpsertProps<
+  T extends {
+    ingest: Omit<IngestBase, 'processing'> & {
+      processing: Omit<IngestBase['processing'], 'updated_at'> & { updated_at?: string };
+    };
+  }
+> = Omit<T, 'ingest'> & {
+  ingest: Omit<IngestBase, 'processing'> & {
+    processing: Omit<IngestBase['processing'], 'updated_at'> & { updated_at?: never };
+  };
+};
+
+type IngestBaseStreamDefaults = {
+  Source: z.input<IIngestBaseStreamSchema['Definition']>;
+  GetResponse: {
+    stream: z.input<IIngestBaseStreamSchema['Definition']>;
+  };
+  UpsertRequest: {
+    stream: OmitIngestBaseStreamUpsertProps<{} & z.input<IIngestBaseStreamSchema['Definition']>>;
+  };
+} & ModelOfSchema<IIngestBaseStreamSchema>;
+
 /* eslint-disable @typescript-eslint/no-namespace */
 export namespace IngestBaseStream {
   export interface Definition extends BaseStream.Definition {
@@ -107,7 +129,7 @@ export namespace IngestBaseStream {
   }
 
   export type UpsertRequest<
-    TDefinition extends OmitUpsertProps<IngestBaseStream.Definition> = OmitUpsertProps<IngestBaseStream.Definition>
+    TDefinition extends OmitIngestBaseStreamUpsertProps<IngestBaseStream.Definition> = OmitIngestBaseStreamUpsertProps<IngestBaseStream.Definition>
   > = BaseStream.UpsertRequest<TDefinition>;
 
   export interface Model {
@@ -131,29 +153,7 @@ const IngestBaseStreamSchema = {
 type IIngestBaseStreamSchema = typeof IngestBaseStreamSchema;
 
 export const IngestBaseStream: ModelValidation<BaseStream.Model, IngestBaseStream.Model> =
-  modelValidation<BaseStream.Model, IIngestBaseStreamSchema, WithDefaults>(
+  modelValidation<BaseStream.Model, IIngestBaseStreamSchema, IngestBaseStreamDefaults>(
     BaseStream,
     IngestBaseStreamSchema
   );
-
-type WithDefaults = {
-  Source: z.input<IIngestBaseStreamSchema['Definition']>;
-  GetResponse: {
-    stream: z.input<IIngestBaseStreamSchema['Definition']>;
-  };
-  UpsertRequest: {
-    stream: OmitUpsertProps<{} & z.input<IIngestBaseStreamSchema['Definition']>>;
-  };
-} & ModelOfSchema<IIngestBaseStreamSchema>;
-
-type OmitUpsertProps<
-  T extends {
-    ingest: Omit<IngestBase, 'processing'> & {
-      processing: Omit<IngestBase['processing'], 'updated_at'> & { updated_at?: string };
-    };
-  }
-> = Omit<T, 'ingest'> & {
-  ingest: Omit<IngestBase, 'processing'> & {
-    processing: Omit<IngestBase['processing'], 'updated_at'> & { updated_at?: never };
-  };
-};

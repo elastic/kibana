@@ -59,6 +59,28 @@ export const WiredIngestUpsertRequest: Validation<
   z.intersection(IngestBaseUpsertRequest.right, IngestWiredUpsertRequest)
 );
 
+type OmitWiredStreamUpsertProps<
+  T extends {
+    ingest: Omit<WiredIngest, 'processing'> & {
+      processing: Omit<WiredIngest['processing'], 'updated_at'> & { updated_at?: string };
+    };
+  }
+> = Omit<T, 'ingest'> & {
+  ingest: Omit<WiredIngest, 'processing'> & {
+    processing: Omit<WiredIngest['processing'], 'updated_at'> & { updated_at?: never };
+  };
+};
+
+type WiredStreamsDefaults = {
+  Source: z.input<IWiredStreamSchema['Definition']>;
+  GetResponse: {
+    stream: z.input<IWiredStreamSchema['Definition']>;
+  };
+  UpsertRequest: {
+    stream: OmitWiredStreamUpsertProps<{} & z.input<IWiredStreamSchema['Definition']>>;
+  };
+} & ModelOfSchema<IWiredStreamSchema>;
+
 export namespace WiredStream {
   export interface Model {
     Definition: WiredStream.Definition;
@@ -80,7 +102,9 @@ export namespace WiredStream {
     effective_failure_store: WiredIngestStreamEffectiveFailureStore;
   }
 
-  export type UpsertRequest = IngestBaseStream.UpsertRequest<OmitUpsertProps<Definition>>;
+  export type UpsertRequest = IngestBaseStream.UpsertRequest<
+    OmitWiredStreamUpsertProps<Definition>
+  >;
 }
 
 const WiredStreamSchema = {
@@ -104,30 +128,8 @@ type IWiredStreamSchema = typeof WiredStreamSchema;
 export const WiredStream: ModelValidation<BaseStream.Model, WiredStream.Model> = modelValidation<
   BaseStream.Model,
   IWiredStreamSchema,
-  WithDefaults
+  WiredStreamsDefaults
 >(BaseStream, WiredStreamSchema);
-
-type WithDefaults = {
-  Source: z.input<IWiredStreamSchema['Definition']>;
-  GetResponse: {
-    stream: z.input<IWiredStreamSchema['Definition']>;
-  };
-  UpsertRequest: {
-    stream: OmitUpsertProps<{} & z.input<IWiredStreamSchema['Definition']>>;
-  };
-} & ModelOfSchema<IWiredStreamSchema>;
-
-type OmitUpsertProps<
-  T extends {
-    ingest: Omit<WiredIngest, 'processing'> & {
-      processing: Omit<WiredIngest['processing'], 'updated_at'> & { updated_at?: string };
-    };
-  }
-> = Omit<T, 'ingest'> & {
-  ingest: Omit<WiredIngest, 'processing'> & {
-    processing: Omit<WiredIngest['processing'], 'updated_at'> & { updated_at?: never };
-  };
-};
 
 // Optimized implementation for Definition check - the fallback is a zod-based check
 WiredStream.Definition.is = (
