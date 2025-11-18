@@ -14,6 +14,9 @@ export const LABEL_MAPPING: Record<string, Record<string, string>> = {
   'ci:use-chrome-beta': {
     USE_CHROME_BETA: 'true', // Use if you want to run tests with Chrome Beta
   },
+  'ci:beta-faster-pr-build': {
+    KIBANA_CI_PIPELINE_TYPE: 'faster_pr_build', // Tracks the optimized PR build pipeline
+  },
 };
 
 /**
