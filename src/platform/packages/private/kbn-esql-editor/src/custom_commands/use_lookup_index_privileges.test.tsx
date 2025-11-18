@@ -12,6 +12,7 @@ import { renderHook, act } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { useLookupIndexPrivileges } from './use_lookup_index_privileges';
 import { coreMock } from '@kbn/core/public/mocks';
+import { LOOKUP_INDEX_PRIVILEGES_ROUTE } from '@kbn/esql-types';
 
 describe('useLookupIndexPrivileges', () => {
   const services = coreMock.createStart();
@@ -47,7 +48,7 @@ describe('useLookupIndexPrivileges', () => {
       permissions = await result.current.getPermissions(indexNames);
     });
 
-    expect(services.http.get).toHaveBeenCalledWith('/internal/esql/lookup_index/privileges', {
+    expect(services.http.get).toHaveBeenCalledWith(LOOKUP_INDEX_PRIVILEGES_ROUTE, {
       query: { indexName: 'index-1,index-2' },
     });
     expect(permissions).toEqual({
@@ -77,7 +78,7 @@ describe('useLookupIndexPrivileges', () => {
       permissions = await result.current.getPermissions();
     });
 
-    expect(services.http.get).toHaveBeenCalledWith('/internal/esql/lookup_index/privileges', {});
+    expect(services.http.get).toHaveBeenCalledWith(LOOKUP_INDEX_PRIVILEGES_ROUTE, {});
     expect(permissions).toEqual({
       '*': {
         canCreateIndex: false,

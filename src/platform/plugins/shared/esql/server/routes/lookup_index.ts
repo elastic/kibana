@@ -9,6 +9,12 @@
 
 import type { IRouter, PluginInitializerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import {
+  LOOKUP_INDEX_CREATE_ROUTE,
+  LOOKUP_INDEX_PRIVILEGES_ROUTE,
+  LOOKUP_INDEX_RECREATE_ROUTE,
+  LOOKUP_INDEX_UPDATE_ROUTE,
+} from '@kbn/esql-types';
 
 export const registerLookupIndexRoutes = (
   router: IRouter,
@@ -16,7 +22,7 @@ export const registerLookupIndexRoutes = (
 ) => {
   router.post(
     {
-      path: '/internal/esql/lookup_index/{indexName}/update',
+      path: `${LOOKUP_INDEX_UPDATE_ROUTE}/{indexName}`,
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -59,7 +65,7 @@ export const registerLookupIndexRoutes = (
 
   router.post(
     {
-      path: '/internal/esql/lookup_index/{indexName}',
+      path: `${LOOKUP_INDEX_CREATE_ROUTE}/{indexName}`,
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -101,7 +107,7 @@ export const registerLookupIndexRoutes = (
 
   router.post(
     {
-      path: '/internal/esql/lookup_index/{indexName}/recreate',
+      path: `${LOOKUP_INDEX_RECREATE_ROUTE}/{indexName}`,
       validate: {
         params: schema.object({
           indexName: schema.string(),
@@ -148,7 +154,7 @@ export const registerLookupIndexRoutes = (
 
   router.get(
     {
-      path: '/internal/esql/lookup_index/privileges',
+      path: LOOKUP_INDEX_PRIVILEGES_ROUTE,
       validate: {
         query: schema.object({ indexName: schema.maybe(schema.string()) }),
       },

@@ -22,6 +22,7 @@ import {
 import { IndexEditorTelemetryService } from './telemetry/telemetry_service';
 import type { AnalyticsServiceStart } from '@kbn/core/server';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
+import { LOOKUP_INDEX_RECREATE_ROUTE, LOOKUP_INDEX_UPDATE_ROUTE } from '@kbn/esql-types';
 
 jest.mock('@kbn/esql-utils', () => ({
   getESQLAdHocDataview: jest.fn(),
@@ -169,7 +170,7 @@ describe('IndexUpdateService', () => {
 
       expect(http.post).toHaveBeenCalledTimes(1);
       const [url, options] = (http.post as jest.Mock).mock.calls[0];
-      expect(url).toBe('/internal/esql/lookup_index/my-index/update');
+      expect(url).toBe(`${LOOKUP_INDEX_UPDATE_ROUTE}/my-index`);
 
       const body = JSON.parse(options.body);
       expect(Array.isArray(body.operations)).toBe(true);
@@ -270,7 +271,7 @@ describe('IndexUpdateService', () => {
       await service.resetIndexMapping();
 
       // Verify the recreate endpoint was called
-      expect(http.post).toHaveBeenCalledWith('/internal/esql/lookup_index/my-index/recreate');
+      expect(http.post).toHaveBeenCalledWith(`${LOOKUP_INDEX_RECREATE_ROUTE}/my-index`);
 
       // Verify unsaved changes were discarded
       const hasChangesAfterReset = await firstValueFrom(service.hasUnsavedChanges$);

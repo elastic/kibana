@@ -48,7 +48,13 @@ import { esql } from '@kbn/esql-ast';
 import type { ESQLOrderExpression } from '@kbn/esql-ast/src/types';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
-import type { IndicesAutocompleteResult } from '@kbn/esql-types';
+import {
+  LOOKUP_INDEX_CREATE_ROUTE,
+  LOOKUP_INDEX_PRIVILEGES_ROUTE,
+  LOOKUP_INDEX_RECREATE_ROUTE,
+  LOOKUP_INDEX_UPDATE_ROUTE,
+  type IndicesAutocompleteResult,
+} from '@kbn/esql-types';
 import { isPlaceholderColumn } from './utils';
 import type { IndexEditorError } from './types';
 import { IndexEditorErrors } from './types';
@@ -898,9 +904,7 @@ export class IndexUpdateService {
   /** Reset index to original state */
   public async resetIndexMapping() {
     if (this.isIndexCreated()) {
-      await this.http.post<BulkResponse>(
-        `/internal/esql/lookup_index/${this.getIndexName()}/recreate`
-      );
+      await this.http.post<BulkResponse>(`${LOOKUP_INDEX_RECREATE_ROUTE}/${this.getIndexName()}`);
 
       // Refresh dataview fields
       const dataView = await firstValueFrom(this.dataView$);
@@ -975,7 +979,7 @@ export class IndexUpdateService {
     });
 
     const bulkResponse = await this.http.post<BulkResponse>(
-      `/internal/esql/lookup_index/${this.getIndexName()}/update`,
+      `${LOOKUP_INDEX_UPDATE_ROUTE}/${this.getIndexName()}`,
       {
         body,
       }
@@ -1053,7 +1057,7 @@ export class IndexUpdateService {
   public async createIndex({ exitAfterFlush = false }) {
     try {
       this._isSaving$.next(true);
-      await this.http.post(`/internal/esql/lookup_index/${this.getIndexName()}`);
+      await this.http.post(`${LOOKUP_INDEX_CREATE_ROUTE}/${this.getIndexName()}`);
 
       this.setIndexCreated(true);
       this.flush({ exitAfterFlush });
@@ -1101,7 +1105,7 @@ export class IndexUpdateService {
 
   private async fetchUserCanResetIndex(indexName: string): Promise<boolean> {
     const lookupIndexesResult = await this.http.get<SecurityHasPrivilegesResponse['index']>(
-      '/internal/esql/lookup_index/privileges',
+      LOOKUP_INDEX_PRIVILEGES_ROUTE,
       {
         query: {
           indexName,
