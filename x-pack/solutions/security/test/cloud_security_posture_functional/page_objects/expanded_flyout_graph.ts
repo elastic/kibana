@@ -34,6 +34,8 @@ const {
   GRAPH_IPS_POPOVER_IP_ID,
   PREVIEW_SECTION_BANNER_PANEL,
   GRAPH_GROUPED_NODE_TEST_ID,
+  GRAPH_NODE_ENTITY_DETAILS_ID,
+  GRAPH_NODE_ENTITY_TAG_TEXT_ID,
 } = testSubjectIds;
 
 type Filter = Parameters<FilterBarService['addFilter']>[0];
@@ -239,5 +241,20 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
       const ipText = await popoverContent.getVisibleText();
       expect(ipText).to.contain(expectedIp);
     }
+  }
+
+  async assertNodeEntityTag(nodeId: string, expectedTagValue: string): Promise<void> {
+    const node = await this.selectNode(nodeId);
+    const tagWrapper = await node.findByTestSubject(GRAPH_NODE_ENTITY_TAG_TEXT_ID);
+    const tagText = await tagWrapper.getVisibleText();
+    expect(tagText.toLowerCase()).to.contain(expectedTagValue.toLowerCase());
+  }
+
+  async assertNodeEntityDetails(nodeId: string, expectedDetails: string): Promise<void> {
+    const node = await this.selectNode(nodeId);
+    const detailsElement = await node.findByTestSubject(GRAPH_NODE_ENTITY_DETAILS_ID);
+    const fullTextElement = await detailsElement.findByTestSubject('fullText');
+    const detailsText = await fullTextElement.getVisibleText();
+    expect(detailsText).to.be(expectedDetails);
   }
 }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getEnrichPolicyId } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { waitForPluginInitialized } from '../../cloud_security_posture_api/utils';
 import type { SecurityTelemetryFtrProviderContext } from '../config';
 
@@ -16,6 +17,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const ebtUIHelper = getService('kibana_ebt_ui');
+  const kibanaServer = getService('kibanaServer');
   const pageObjects = getPageObjects([
     'common',
     'header',
@@ -45,8 +47,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
     });
 
     after(async () => {
-      // Using unload destroys index's alias of .alerts-security.alerts-default which causes a failure in other tests
-      // Instead we delete all alerts from the index
       await es.deleteByQuery({
         index: '.internal.alerts-*',
         query: { match_all: {} },
@@ -229,130 +229,275 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       await alertsPage.flyout.assertPreviewPanelGroupedItemsNumber(2);
     });
 
-    it('expanded flyout - new ECS schema fields (user.entity.id, service.entity.id, entity.target.id)', async () => {
-      // Setting the timerange to fit the data and open the flyout for a specific alert with new ECS schema
-      await alertsPage.navigateToAlertsPage(
-        `${alertsPage.getAbsoluteTimerangeFilter(
-          '2024-09-01T00:00:00.000Z',
-          '2024-09-02T00:00:00.000Z'
-        )}&${alertsPage.getFlyoutFilter(
-          'new-schema-alert-789xyz456abc123def789ghi012jkl345mno678pqr901stu234vwx567'
-        )}`
-      );
-      await alertsPage.waitForListToHaveAlerts(20000);
+    describe('ECS fields only', function () {
+      const entitiesIndex = '.entities.v1.latest.security_*';
+      const enrichPolicyName = getEnrichPolicyId(); // defaults to 'default' space
+      const enrichIndexName = `.enrich-${enrichPolicyName}`;
 
-      await alertsPage.flyout.expandVisualizations();
-      await alertsPage.flyout.assertGraphPreviewVisible();
-      await alertsPage.flyout.assertGraphNodesNumber(3);
+      /**
+       * Helper to clean up entity store resources
+       */
+      const cleanupEntityStore = async () => {
+        try {
+          await supertest
+            .delete('/api/entity_store/engines/generic?data=true')
+            .set('kbn-xsrf', 'xxxx')
+            .expect(200);
+          logger.debug('Deleted entity store engine');
+        } catch (e) {
+          // Ignore 404 errors if the engine doesn't exist
+          if (e.status !== 404) {
+            logger.debug(`Error deleting entity store engine: ${e.message || JSON.stringify(e)}`);
+          }
+        }
+      };
 
-      await expandedFlyoutGraph.expandGraph();
-      await expandedFlyoutGraph.waitGraphIsLoaded();
-      await expandedFlyoutGraph.assertGraphNodesNumber(3);
-      await expandedFlyoutGraph.toggleSearchBar();
+      /**
+       * Helper to wait for enrich index to be populated
+       */
+      const waitForEnrichIndexPopulated = async () => {
+        await retry.waitFor('enrich index to be created and populated', async () => {
+          try {
+            const count = await es.count({
+              index: enrichIndexName,
+            });
+            logger.debug(`Enrich index count: ${count.count}`);
+            return count.count > 0;
+          } catch (e) {
+            logger.debug(`Waiting for enrich index: ${e.message}`);
+            return false;
+          }
+        });
+      };
 
-      // Show actions by entity (user.entity.id)
-      await expandedFlyoutGraph.showActionsByEntity('serviceaccount@example.com');
-      await expandedFlyoutGraph.showSearchBar();
-      await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
-      await expandedFlyoutGraph.expectFilterTextEquals(
-        0,
-        'user.entity.id: serviceaccount@example.com'
-      );
-      await expandedFlyoutGraph.expectFilterPreviewEquals(
-        0,
-        'user.entity.id: serviceaccount@example.com'
-      );
+      before(async () => {
+        await es.deleteByQuery({
+          index: '.internal.alerts-*',
+          query: { match_all: {} },
+          conflicts: 'proceed',
+        });
 
-      // Show actions on entity (entity.target.id)
-      await expandedFlyoutGraph.showActionsOnEntity(
-        'projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com'
-      );
-      await expandedFlyoutGraph.expectFilterTextEquals(
-        0,
-        'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com'
-      );
-      await expandedFlyoutGraph.expectFilterPreviewEquals(
-        0,
-        'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com'
-      );
+        await esArchiver.load(
+          'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/security_alerts_ecs_only_mappings'
+        );
 
-      // Explore related entities
-      await expandedFlyoutGraph.exploreRelatedEntities('serviceaccount@example.com');
-      await expandedFlyoutGraph.expectFilterTextEquals(
-        0,
-        'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com OR related.entity: serviceaccount@example.com'
-      );
-      await expandedFlyoutGraph.expectFilterPreviewEquals(
-        0,
-        'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com OR related.entity: serviceaccount@example.com'
-      );
+        // Clean up any leftover resources from previous runs
+        await cleanupEntityStore();
 
-      // Show events with the same action
-      await expandedFlyoutGraph.showEventsOfSameAction(
-        'a(serviceaccount@example.com)-b(projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com)label(google.iam.admin.v1.UpdateServiceAccount)oe(1)oa(1)'
-      );
-      await expandedFlyoutGraph.expectFilterTextEquals(
-        0,
-        'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com OR related.entity: serviceaccount@example.com OR event.action: google.iam.admin.v1.UpdateServiceAccount'
-      );
-      await expandedFlyoutGraph.expectFilterPreviewEquals(
-        0,
-        'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com OR related.entity: serviceaccount@example.com OR event.action: google.iam.admin.v1.UpdateServiceAccount'
-      );
+        // Enable asset inventory setting
+        await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': true });
 
-      await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
+        // CRITICAL: Load entity data BEFORE enabling asset inventory
+        // Otherwise the enrich policy will execute with no data
+        await esArchiver.load(
+          'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store'
+        );
 
-      // Hide events with the same action
-      await expandedFlyoutGraph.hideEventsOfSameAction(
-        'a(serviceaccount@example.com)-b(projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com)label(google.iam.admin.v1.UpdateServiceAccount)oe(1)oa(1)'
-      );
-      await expandedFlyoutGraph.expectFilterTextEquals(
-        0,
-        'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com OR related.entity: serviceaccount@example.com'
-      );
-      await expandedFlyoutGraph.expectFilterPreviewEquals(
-        0,
-        'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com OR related.entity: serviceaccount@example.com'
-      );
+        // Wait for entity data to be fully indexed
+        await retry.waitFor('entity data to be indexed', async () => {
+          try {
+            const response = await es.count({
+              index: entitiesIndex,
+            });
+            logger.debug(`Entity count: ${response.count}`);
+            return response.count === 3;
+          } catch (e) {
+            logger.debug(`Error counting entities: ${e.message}`);
+            return false;
+          }
+        });
 
-      // Hide actions on entity
-      await expandedFlyoutGraph.hideActionsOnEntity(
-        'projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com'
-      );
-      await expandedFlyoutGraph.expectFilterTextEquals(
-        0,
-        'user.entity.id: serviceaccount@example.com OR related.entity: serviceaccount@example.com'
-      );
-      await expandedFlyoutGraph.expectFilterPreviewEquals(
-        0,
-        'user.entity.id: serviceaccount@example.com OR related.entity: serviceaccount@example.com'
-      );
+        // Enable asset inventory which creates the enrich policy
+        await supertest
+          .post('/api/asset_inventory/enable')
+          .set('kbn-xsrf', 'xxxx')
+          .send({})
+          .expect(200);
 
-      // Clear filters
-      await expandedFlyoutGraph.clearAllFilters();
-
-      // Add custom filter
-      await expandedFlyoutGraph.addFilter({
-        field: 'user.entity.id',
-        operation: 'is',
-        value: 'serviceaccount@example.com',
+        // Wait for enrich index to be created and populated with data
+        await waitForEnrichIndexPopulated();
       });
-      await pageObjects.header.waitUntilLoadingHasFinished();
 
-      await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
-      await expandedFlyoutGraph.assertGraphNodesNumber(5);
+      after(async () => {
+        // Clean up entity store resources
+        await cleanupEntityStore();
 
-      // Open timeline
-      await expandedFlyoutGraph.clickOnInvestigateInTimelineButton();
-      await timelinePage.ensureTimelineIsOpen();
-      await timelinePage.waitForEvents();
-      await timelinePage.closeTimeline();
+        // Disable asset inventory setting
+        await kibanaServer.uiSettings.update({ 'securitySolution:enableAssetInventory': false });
 
-      // Test query bar
-      await expandedFlyoutGraph.setKqlQuery('cannotFindThis');
-      await expandedFlyoutGraph.clickOnInvestigateInTimelineButton();
-      await timelinePage.ensureTimelineIsOpen();
-      await timelinePage.waitForEvents();
+        // Unload the entity store archive
+        try {
+          await esArchiver.unload(
+            'x-pack/solutions/security/test/cloud_security_posture_functional/es_archives/entity_store'
+          );
+        } catch (e) {
+          logger.debug(`Error unloading entity store archive: ${e.message}`);
+        }
+      });
+
+      it('expanded flyout - new ECS schema fields (user.entity.id, entity.target.id)', async () => {
+        await alertsPage.navigateToAlertsPage(
+          `${alertsPage.getAbsoluteTimerangeFilter(
+            '2024-09-01T00:00:00.000Z',
+            '2024-09-02T00:00:00.000Z'
+          )}&${alertsPage.getFlyoutFilter(
+            'new-schema-alert-789xyz456abc123def789ghi012jkl345mno678pqr901stu234vwx567'
+          )}`
+        );
+        await alertsPage.waitForListToHaveAlerts();
+
+        await alertsPage.flyout.expandVisualizations();
+        await alertsPage.flyout.assertGraphPreviewVisible();
+        await alertsPage.flyout.assertGraphNodesNumber(3);
+
+        await expandedFlyoutGraph.expandGraph();
+        await expandedFlyoutGraph.waitGraphIsLoaded();
+        await expandedFlyoutGraph.assertGraphNodesNumber(3);
+        await expandedFlyoutGraph.toggleSearchBar();
+
+        // Show actions by entity (user.entity.id)
+        await expandedFlyoutGraph.showActionsByEntity('serviceaccount@example.com');
+        await expandedFlyoutGraph.showSearchBar();
+        await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
+        await expandedFlyoutGraph.expectFilterTextEquals(
+          0,
+          'user.entity.id: serviceaccount@example.com'
+        );
+        await expandedFlyoutGraph.expectFilterPreviewEquals(
+          0,
+          'user.entity.id: serviceaccount@example.com'
+        );
+
+        // Show actions on entity (entity.target.id)
+        await expandedFlyoutGraph.showActionsOnEntity(
+          'projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com'
+        );
+        await expandedFlyoutGraph.expectFilterTextEquals(
+          0,
+          'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com'
+        );
+        await expandedFlyoutGraph.expectFilterPreviewEquals(
+          0,
+          'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com'
+        );
+
+        // Explore related entities
+        await expandedFlyoutGraph.exploreRelatedEntities('serviceaccount@example.com');
+        await expandedFlyoutGraph.expectFilterTextEquals(
+          0,
+          'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com OR related.entity: serviceaccount@example.com'
+        );
+        await expandedFlyoutGraph.expectFilterPreviewEquals(
+          0,
+          'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com OR related.entity: serviceaccount@example.com'
+        );
+
+        // Show events with the same action
+        await expandedFlyoutGraph.showEventsOfSameAction(
+          'a(serviceaccount@example.com)-b(projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com)label(google.iam.admin.v1.UpdateServiceAccount)oe(1)oa(1)'
+        );
+        await expandedFlyoutGraph.expectFilterTextEquals(
+          0,
+          'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com OR related.entity: serviceaccount@example.com OR event.action: google.iam.admin.v1.UpdateServiceAccount'
+        );
+        await expandedFlyoutGraph.expectFilterPreviewEquals(
+          0,
+          'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com OR related.entity: serviceaccount@example.com OR event.action: google.iam.admin.v1.UpdateServiceAccount'
+        );
+
+        await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
+
+        // Hide events with the same action
+        await expandedFlyoutGraph.hideEventsOfSameAction(
+          'a(serviceaccount@example.com)-b(projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com)label(google.iam.admin.v1.UpdateServiceAccount)oe(1)oa(1)'
+        );
+        await expandedFlyoutGraph.expectFilterTextEquals(
+          0,
+          'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com OR related.entity: serviceaccount@example.com'
+        );
+        await expandedFlyoutGraph.expectFilterPreviewEquals(
+          0,
+          'user.entity.id: serviceaccount@example.com OR entity.target.id: projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com OR related.entity: serviceaccount@example.com'
+        );
+
+        // Hide actions on entity
+        await expandedFlyoutGraph.hideActionsOnEntity(
+          'projects/your-project-id/serviceAccounts/api-service@your-project-id.iam.gserviceaccount.com'
+        );
+        await expandedFlyoutGraph.expectFilterTextEquals(
+          0,
+          'user.entity.id: serviceaccount@example.com OR related.entity: serviceaccount@example.com'
+        );
+        await expandedFlyoutGraph.expectFilterPreviewEquals(
+          0,
+          'user.entity.id: serviceaccount@example.com OR related.entity: serviceaccount@example.com'
+        );
+
+        // Clear filters
+        await expandedFlyoutGraph.clearAllFilters();
+
+        // Add custom filter
+        await expandedFlyoutGraph.addFilter({
+          field: 'user.entity.id',
+          operation: 'is',
+          value: 'serviceaccount@example.com',
+        });
+        await pageObjects.header.waitUntilLoadingHasFinished();
+
+        await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
+        await expandedFlyoutGraph.assertGraphNodesNumber(5);
+
+        // Open timeline
+        await expandedFlyoutGraph.clickOnInvestigateInTimelineButton();
+        await timelinePage.ensureTimelineIsOpen();
+        await timelinePage.waitForEvents();
+        await timelinePage.closeTimeline();
+
+        // Test query bar
+        await expandedFlyoutGraph.setKqlQuery('cannotFindThis');
+        await expandedFlyoutGraph.clickOnInvestigateInTimelineButton();
+        await timelinePage.ensureTimelineIsOpen();
+        await timelinePage.waitForEvents();
+      });
+
+      it('should show entity enrichment for service actor with multiple host targets', async () => {
+        // Navigate to alerts page with the multi-target alert
+        await alertsPage.navigateToAlertsPage(
+          `${alertsPage.getAbsoluteTimerangeFilter(
+            '2024-09-01T00:00:00.000Z',
+            '2024-09-02T00:00:00.000Z'
+          )}&${alertsPage.getFlyoutFilter(
+            'multi-target-alert-id-xyz123abc456def789ghi012jkl345mno678pqr901stu234'
+          )}`
+        );
+        await alertsPage.waitForListToHaveAlerts();
+
+        await alertsPage.flyout.expandVisualizations();
+        await alertsPage.flyout.assertGraphPreviewVisible();
+        // Should have 1 service actor (1 node) + 2 host targets grouped (1 node) + 1 label (1 node) = 3 nodes
+        await alertsPage.flyout.assertGraphNodesNumber(3);
+
+        await expandedFlyoutGraph.expandGraph();
+        await expandedFlyoutGraph.waitGraphIsLoaded();
+        await expandedFlyoutGraph.assertGraphNodesNumber(3);
+
+        // Verify first entity node - Service actor
+        await expandedFlyoutGraph.assertNodeEntityTag(
+          'api-service@your-project-id.iam.gserviceaccount.com',
+          'service'
+        );
+        await expandedFlyoutGraph.assertNodeEntityDetails(
+          'api-service@your-project-id.iam.gserviceaccount.com',
+          'GCP Service Account'
+        );
+
+        // Verify second entity node - Host target
+        await expandedFlyoutGraph.assertNodeEntityTag('host-instance-1', 'host');
+        await expandedFlyoutGraph.assertNodeEntityDetails(
+          'host-instance-1',
+          'GCP Compute Instance'
+        );
+      });
     });
   });
 }
