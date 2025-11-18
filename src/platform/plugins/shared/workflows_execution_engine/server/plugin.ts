@@ -355,7 +355,7 @@ export class WorkflowsExecutionEnginePlugin
 
       // Use Task Manager's first-class API key support by passing the request
       // Task Manager will automatically create and manage the API key
-      if (request) {
+      if (request && !request.isFakeRequest) {
         // Debug: Log the user info from the original request
         this.logger.debug(`Scheduling workflow task with user context for workflow ${workflow.id}`);
         await plugins.taskManager.schedule(taskInstance, { request });
