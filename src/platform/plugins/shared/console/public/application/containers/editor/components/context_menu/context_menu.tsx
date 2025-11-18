@@ -44,6 +44,11 @@ const getLanguageLabelByValue = (value: string) => {
   return AVAILABLE_LANGUAGES.find((lang) => lang.value === value)?.label || DEFAULT_LANGUAGE;
 };
 
+const getModifierKey = () => {
+  const isMac = navigator.platform.toLowerCase().includes('mac');
+  return isMac ? '⌘' : 'Ctrl';
+};
+
 export const ContextMenu = ({
   getDocumentation,
   autoIndent,
@@ -60,8 +65,7 @@ export const ContextMenu = ({
   } = useServicesContext();
 
   // Detect OS for keyboard shortcut display
-  const isMac = navigator.platform.toLowerCase().includes('mac');
-  const modifierKey = isMac ? '⌘' : 'Ctrl';
+  const modifierKey = useMemo(() => getModifierKey(), []);
 
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [isRequestConverterLoading, setRequestConverterLoading] = useState(false);

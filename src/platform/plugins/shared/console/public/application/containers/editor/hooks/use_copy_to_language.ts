@@ -54,13 +54,13 @@ export const useCopyToLanguage = ({
     }
   }, [defaultLanguage, isKbnRequestSelected]);
 
-  const copyText = async (text: string) => {
+  const copyText = useCallback(async (text: string) => {
     if (window.navigator?.clipboard) {
       await window.navigator.clipboard.writeText(text);
       return;
     }
     throw new Error('Could not copy to clipboard!');
-  };
+  }, []);
 
   // This function will convert all the selected requests to the language by
   // calling convertRequestToLanguage and then copy the data to clipboard.
@@ -115,7 +115,7 @@ export const useCopyToLanguage = ({
 
       await copyText(requestsAsCode);
     },
-    [currentLanguage, getRequestsCallback, esHostService, toasts]
+    [currentLanguage, getRequestsCallback, esHostService, toasts, copyText]
   );
 
   const checkIsKbnRequestSelected = useCallback(async () => {
@@ -126,9 +126,12 @@ export const useCopyToLanguage = ({
     // Check if current request is a Kibana request
     const isKbn = await isKbnRequestSelectedCallback();
     // If it's a Kibana request, use curl; otherwise use the current language
-    const languageToUse = isKbn ? DEFAULT_LANGUAGE : currentLanguage;
-    await copyToLanguage(languageToUse);
-  }, [isKbnRequestSelectedCallback, currentLanguage, copyToLanguage]);
+    if (isKbn) {
+      await copyToLanguage(DEFAULT_LANGUAGE);
+    } else {
+      await copyToLanguage(); // Uses current language from copyToLanguage closure
+    }
+  }, [isKbnRequestSelectedCallback, copyToLanguage]);
 
   const handleLanguageChange = useCallback(
     (language: string) => {
