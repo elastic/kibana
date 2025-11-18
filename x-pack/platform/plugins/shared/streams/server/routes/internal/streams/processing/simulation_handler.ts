@@ -853,6 +853,7 @@ const prepareSimulationResponse = async (
   const partiallyParsedRate = calculateRateByStatus('partially_parsed');
   const skippedRate = calculateRateByStatus('skipped');
   const failureRate = calculateRateByStatus('failed');
+  const droppedRate = calculateRateByStatus('dropped');
 
   return {
     detected_fields: detectedFields,
@@ -864,6 +865,7 @@ const prepareSimulationResponse = async (
       partially_parsed_rate: parseFloat(partiallyParsedRate.toFixed(3)),
       skipped_rate: parseFloat(skippedRate.toFixed(3)),
       parsed_rate: parseFloat(parsedRate.toFixed(3)),
+      dropped_rate: parseFloat(droppedRate.toFixed(3)),
     },
   };
 };
