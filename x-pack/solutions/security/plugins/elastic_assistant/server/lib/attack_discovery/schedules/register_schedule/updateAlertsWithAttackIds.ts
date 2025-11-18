@@ -8,20 +8,33 @@
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { ALERT_ATTACK_IDS } from '../fields';
 
+export const ALERTS_INDEX_PATTERN = '.alerts-security.alerts-';
+
 export interface UpdateAlertsWithAttackIdsParams {
   esClient: ElasticsearchClient;
   alertIdToAttackIdsMap: Record<string, string[]>;
+  spaceId: string;
 }
 
 export async function updateAlertsWithAttackIds({
   esClient,
   alertIdToAttackIdsMap,
+  spaceId,
 }: UpdateAlertsWithAttackIdsParams) {
+  if (!spaceId) {
+    throw new Error('Param `spaceId` cannot be empty');
+  }
+
+  const alertIdsToUpdate = Array.from(Object.keys(alertIdToAttackIdsMap));
+  if (!alertIdsToUpdate.length) {
+    return;
+  }
+
   await esClient.updateByQuery({
-    index: '.alerts-security.alerts-default',
+    index: `${ALERTS_INDEX_PATTERN}${spaceId}`,
     query: {
       ids: {
-        values: Array.from(Object.keys(alertIdToAttackIdsMap)),
+        values: alertIdsToUpdate,
       },
     },
     script: {

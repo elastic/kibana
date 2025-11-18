@@ -200,7 +200,11 @@ export const attackDiscoveryScheduleExecutor = async ({
       })
     );
 
-    await updateAlertsWithAttackIds({ alertIdToAttackIdsMap: alertIdToAttackIds, esClient });
+    await updateAlertsWithAttackIds({
+      alertIdToAttackIdsMap: alertIdToAttackIds,
+      esClient,
+      spaceId,
+    });
   } catch (error) {
     logger.error(error);
     const transformedError = transformError(error);
