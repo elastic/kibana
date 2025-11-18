@@ -210,7 +210,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       // Symmetry enforcement removed the isolated closing ')' delimiter; we accept
       // that the final status field now absorbs the closing parenthesis character.
       expect(getPattern(result)).toBe(
-        '%{field_1}@%{field_2} -> /%{field_3}/%{field_4} (%{field_5}'
+        '%{field_1}@%{field_2} -> /%{field_3}/%{field_4} (%{field_5})'
       );
       expect(result.fields).toHaveLength(5);
     });
@@ -1138,8 +1138,9 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       // Ordering inconsistency penalty removes early bracket delimiters, simplifying pattern
       // Updated expectation after removing bracket scoring penalties: additional
       // bracket delimiters are retained, increasing field count.
+      // After cross-delimiter mismatch sanitization, mixed bracket cluster removed and field count reduced.
       expect(getPattern(result)).toBe(
-        '- %{field_1} %{field_2} %{field_3->} %{field_4->} %{field_5->} %{field_6->} %{field_7} %{field_8->}(%{field_9->}[%{field_10->})%{field_11->}]: %{field_12} %{field_13} %{field_14} %{field_15}'
+        '- %{field_1} %{field_2} %{field_3->} %{field_4->} %{field_5->} %{field_6} %{field_7}] %{field_8->}: %{field_9} %{field_10} %{field_11} %{field_12}'
       );
     });
   });
