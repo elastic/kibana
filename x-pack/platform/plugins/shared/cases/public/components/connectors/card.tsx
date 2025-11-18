@@ -85,7 +85,7 @@ const ConnectorCardDisplay: React.FC<ConnectorCardProps> = ({
       isLoading={isLoading}
       data-test-subj="connector-card-loading"
     >
-      <EuiFlexGroup direction="column" data-test-subj="connector-card">
+      <EuiFlexGroup direction="column" data-test-subj="connector-card" gutterSize="s">
         <EuiFlexGroup direction="row" justifyContent="spaceBetween" alignItems="center">
           <EuiFlexItem>
             <EuiText size="s" data-test-subj="connector-card-title">
