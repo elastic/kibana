@@ -91,4 +91,119 @@ describe('Autocomplete endpoints', () => {
       task_type: 'rerank',
     });
   });
+
+  describe('get timefield route', () => {
+    it('should return the time field when specified in the query', async () => {
+      const query = 'FROM lookup_index1 | WHERE my_time_field >= ?_tstart';
+      const url = `/internal/esql/get_timefield/${encodeURIComponent(query)}`;
+      const result = await testbed.GET(url).send().expect(200);
+
+      expect(result.body.timeField).toBe('my_time_field');
+    });
+
+    it('should return @timestamp when no time field in query but index has @timestamp', async () => {
+      const indexName = 'test_timefield_index';
+      const client = testbed.esClient();
+
+      await client.indices.create({
+        index: indexName,
+        mappings: {
+          properties: {
+            '@timestamp': { type: 'date' },
+            message: { type: 'text' },
+          },
+        },
+      });
+
+      const query = `FROM ${indexName}`;
+      const url = `/internal/esql/get_timefield/${encodeURIComponent(query)}`;
+      const result = await testbed.GET(url).send().expect(200);
+
+      expect(result.body.timeField).toBe('@timestamp');
+
+      // Cleanup
+      await client.indices.delete({ index: indexName });
+    });
+
+    it('should return undefined when no time field in query and index has no @timestamp', async () => {
+      const query = 'FROM lookup_index1';
+      const url = `/internal/esql/get_timefield/${encodeURIComponent(query)}`;
+      const result = await testbed.GET(url).send().expect(200);
+
+      expect(result.body.timeField).toBe(undefined);
+    });
+
+    it('should return @timestamp for subqueries when all indices have @timestamp', async () => {
+      // Create indices with @timestamp for subquery test
+      const index1 = 'subquery_index1';
+      const index2 = 'subquery_index2';
+      const client = testbed.esClient();
+
+      await client.indices.create({
+        index: index1,
+        mappings: {
+          properties: {
+            '@timestamp': { type: 'date' },
+            field1: { type: 'keyword' },
+          },
+        },
+      });
+
+      await client.indices.create({
+        index: index2,
+        mappings: {
+          properties: {
+            '@timestamp': { type: 'date' },
+            field2: { type: 'keyword' },
+          },
+        },
+      });
+
+      const query = `FROM ${index1}, (FROM ${index2})`;
+      const url = `/internal/esql/get_timefield/${encodeURIComponent(query)}`;
+      const result = await testbed.GET(url).send().expect(200);
+
+      expect(result.body.timeField).toBe('@timestamp');
+
+      // Cleanup
+      await client.indices.delete({ index: index1 });
+      await client.indices.delete({ index: index2 });
+    });
+
+    it('should return undefined for subqueries when not all indices have @timestamp', async () => {
+      const index1 = 'subquery_with_ts_index1';
+      const index2 = 'subquery_no_ts_index2';
+      const client = testbed.esClient();
+
+      await client.indices.create({
+        index: index1,
+        mappings: {
+          properties: {
+            '@timestamp': { type: 'date' },
+            field1: { type: 'keyword' },
+          },
+        },
+      });
+
+      await client.indices.create({
+        index: index2,
+        mappings: {
+          properties: {
+            created_at: { type: 'date' }, // Different time field
+            field2: { type: 'keyword' },
+          },
+        },
+      });
+
+      const query = `FROM ${index1}, (FROM ${index2})`;
+      const url = `/internal/esql/get_timefield/${encodeURIComponent(query)}`;
+      const result = await testbed.GET(url).send().expect(200);
+
+      expect(result.body.timeField).toBe(undefined);
+
+      // Cleanup
+      await client.indices.delete({ index: index1 });
+      await client.indices.delete({ index: index2 });
+    });
+  });
 });

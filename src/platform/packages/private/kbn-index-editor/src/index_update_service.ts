@@ -448,10 +448,13 @@ export class IndexUpdateService {
 
     const esqlQuery = esql`FROM ${indexName}`.print();
 
-    const newDataView = await getESQLAdHocDataview(esqlQuery, this.data.dataViews, {
-      allowNoIndex: true,
+    const newDataView = await getESQLAdHocDataview({
+      dataViewsService: this.data.dataViews,
+      query: esqlQuery,
+      options: {
+        allowNoIndex: true,
+      },
     });
-
     // If at some point the index existed, the dataView fields are present in the browser cache, we need to force refresh it.
     await this.data.dataViews.refreshFields(newDataView, false, true);
 
