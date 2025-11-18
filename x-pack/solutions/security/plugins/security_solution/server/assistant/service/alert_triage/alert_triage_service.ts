@@ -11,6 +11,7 @@ import type {
     SavedObjectsClientContract,
     KibanaRequest,
 } from '@kbn/core/server';
+import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import { AlertTriageJob } from './alert_triage_job';
 import type { AlertTriageResult } from '../../types/alert_triage';
 import { InferenceChatModel } from '@kbn/inference-langchain';
@@ -24,6 +25,8 @@ export interface AlertTriageServiceParams {
 type AlertTriageServiceConstructorParams = {
     esClient: ElasticsearchClient;
     savedObjectsClient: SavedObjectsClientContract;
+    alertsClient: AlertsClient;
+    alertsIndex: string;
     chatModel: InferenceChatModel;
     request: KibanaRequest;
     logger: Logger;
@@ -35,6 +38,8 @@ type AlertTriageServiceConstructorParams = {
 export class AlertTriageService {
     private readonly esClient: ElasticsearchClient;
     private readonly savedObjectsClient: SavedObjectsClientContract;
+    private readonly alertsClient: AlertsClient;
+    private readonly alertsIndex: string;
     private readonly chatModel: InferenceChatModel;
     private readonly request: KibanaRequest;
     private readonly logger: Logger;
@@ -44,6 +49,8 @@ export class AlertTriageService {
     ) {
         this.esClient = options.esClient;
         this.savedObjectsClient = options.savedObjectsClient;
+        this.alertsClient = options.alertsClient;
+        this.alertsIndex = options.alertsIndex;
         this.chatModel = options.chatModel;
         this.request = options.request;
         this.logger = options.logger;
@@ -63,6 +70,8 @@ export class AlertTriageService {
             jobId,
             esClient: this.esClient,
             savedObjectsClient: this.savedObjectsClient,
+            alertsClient: this.alertsClient,
+            alertsIndex: this.alertsIndex,
             chatModel: this.chatModel,
             request: this.request,
             logger: this.logger,
@@ -85,6 +94,8 @@ export class AlertTriageService {
             jobId,
             esClient: this.esClient,
             savedObjectsClient: this.savedObjectsClient,
+            alertsClient: this.alertsClient,
+            alertsIndex: this.alertsIndex,
             chatModel: this.chatModel,
             request: this.request,
             logger: this.logger,

@@ -38,6 +38,13 @@ export const createAlertTriageJobHandler = (
         chatModelOptions: { }
       });
 
+      // Get the alerts client
+      const alertsClient = await securitySolutionContext.getRacClient(request);
+
+      // Get the app client for alerts index
+      const appClient = securitySolutionContext.getAppClient();
+      const alertsIndex = appClient.getAlertsIndex();
+
       // Extract request parameters
       const { connectorId, alertIds } = request.body;
 
@@ -56,6 +63,8 @@ export const createAlertTriageJobHandler = (
           {
             esClient,
             savedObjectsClient,
+            alertsClient,
+            alertsIndex,
             chatModel,
             request,
             logger,
@@ -76,6 +85,7 @@ export const createAlertTriageJobHandler = (
             // TODO: Store results, update status, write event logs
           })
           .catch((error) => {
+            console.error(error)
             logger.error(
               `Alert triage job ${jobId} for alert ${alertId} failed: ${error.message}`,
               error

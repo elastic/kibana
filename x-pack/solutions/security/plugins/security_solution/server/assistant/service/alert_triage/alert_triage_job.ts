@@ -11,15 +11,19 @@ import type {
   SavedObjectsClientContract,
   KibanaRequest,
 } from '@kbn/core/server';
+import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { AlertTriageResult } from '../../types/alert_triage';
 import { createDeepAgent } from '@kbn/securitysolution-deep-agent';
 import { InferenceChatModel } from '@kbn/inference-langchain';
+import { created_at } from '@kbn/securitysolution-io-ts-list-types';
 
 export interface AlertTriageJobParams {
   alertId: string;
   jobId: string;
   esClient: ElasticsearchClient;
   savedObjectsClient: SavedObjectsClientContract;
+  alertsClient: AlertsClient;
+  alertsIndex: string;
   chatModel: InferenceChatModel;
   request: KibanaRequest;
   logger: Logger;
@@ -35,6 +39,8 @@ export class AlertTriageJob {
   private readonly jobId: string;
   private readonly esClient: ElasticsearchClient;
   private readonly savedObjectsClient: SavedObjectsClientContract;
+  private readonly alertsClient: AlertsClient;
+  private readonly alertsIndex: string;
   private readonly request: KibanaRequest;
   private readonly logger: Logger;
 
@@ -43,6 +49,8 @@ export class AlertTriageJob {
     jobId,
     esClient,
     savedObjectsClient,
+    alertsClient,
+    alertsIndex,
     chatModel,
     request,
     logger,
@@ -52,6 +60,8 @@ export class AlertTriageJob {
     this.jobId = jobId;
     this.esClient = esClient;
     this.savedObjectsClient = savedObjectsClient;
+    this.alertsClient = alertsClient;
+    this.alertsIndex = alertsIndex;
     this.request = request;
     this.logger = logger;
   }
@@ -86,31 +96,68 @@ export class AlertTriageJob {
         success: true,
       };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      
       this.logger.error(
-        `Error executing alert triage job ${this.jobId} for alert ${this.alertId}:`,
-        error
+        `Error executing alert triage job ${this.jobId} for alert ${this.alertId}: ${errorMessage}`,
+        errorStack ? { error: errorStack } : { error }
       );
 
       return {
         jobId: this.jobId,
         alertId: this.alertId,
         success: false,
-        error: error instanceof Error ? error.message : 'Unknown error',
+        error: errorMessage,
       };
     }
   }
 
   /**
-   * Fetch alert details from Elasticsearch
+   * Fetch alert details using AlertsClient
    * @private
    */
   private async fetchAlert(): Promise<unknown> {
-    // TODO: Implement alert fetching
-    // - Query Elasticsearch for the alert by ID
-    // - Ensure alert exists and is accessible
-    // - Return alert document with all necessary fields
     this.logger.debug(`Fetching alert ${this.alertId}`);
-    return {};
+
+    try {
+      const response = await this.alertsClient.find({
+        index: this.alertsIndex,
+        query: {
+          bool: {
+            filter: [
+              {
+                term: {
+                  _id: this.alertId,
+                },
+              },
+            ],
+          },
+        },
+        size: 1,
+      });
+
+      if (!response.hits.hits || response.hits.hits.length === 0) {
+        throw new Error(`Alert with ID ${this.alertId} not found`);
+      }
+
+      const alert = response.hits.hits[0];
+      this.logger.debug(`Successfully fetched alert ${this.alertId}`);
+
+      return {
+        ...alert._source,
+        _id: alert._id,
+        _index: alert._index,
+      };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      const errorStack = error instanceof Error ? error.stack : undefined;
+      this.logger.error(
+        `Failed to fetch alert ${this.alertId}: ${errorMessage}`,
+        errorStack ? { error: errorStack } : { error }
+      );
+      throw error;
+    }
   }
 
   /**
@@ -121,12 +168,20 @@ export class AlertTriageJob {
     this.logger.debug(`Analyzing alert ${this.alertId}`);
 
     const agent = createDeepAgent({
-      systemPrompt: 'You are a security assistant that helps triage alerts.',
+      systemPrompt: 'You are a security assistant that helps triage alerts. The alert has been loaded into the file system. Create a todo list of steps to investigate the alert and spawn tasks to perform each step. Provide a final determination of true positive or false positive based on the findings.',
       model: this.chatModel,
+      
     });
 
     const result = await agent.invoke({
-      messages: [{ role: 'user', content: 'What is 10 + 10' }],
+      messages: [{ role: 'user', content: `Triage the alert stored at /alert.json` }],
+      files: {
+        "/alert.json": {
+          content: [JSON.stringify(alert, null, 2)],
+          created_at: new Date().toISOString(),
+          modified_at: new Date().toISOString(),
+        },
+      }
     });
 
     return {};
