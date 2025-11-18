@@ -42,7 +42,7 @@ export default function updateMaintenanceWindowTests({ getService }: FtrProvider
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe.only('updateMaintenanceWindow', () => {
+  describe('updateMaintenanceWindow', () => {
     const objectRemover = new ObjectRemover(supertest);
     const createParams = {
       title: 'test-maintenance-window',
