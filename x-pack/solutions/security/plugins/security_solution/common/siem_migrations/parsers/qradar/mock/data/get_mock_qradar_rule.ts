@@ -7,9 +7,8 @@
 
 const getRandomNumberId = () => Math.floor(Math.random() * 1000000);
 
-const getMockQRadarRuleDataXml = (
-  ruleName: string
-) => `<rule buildingBlock="true" enabled="true" id="${getRandomNumberId()}" name="BB:CategoryDefinition: Authentication Success" origin="SYSTEM" owner="admin" roleDefinition="false" scope="LOCAL" type="EVENT">
+const getMockQRadarRuleDataXml = (ruleName: string) =>
+  `<rule buildingBlock="true" enabled="true" id="${getRandomNumberId()}" name="BB:CategoryDefinition: Authentication Success" origin="SYSTEM" owner="admin" roleDefinition="false" scope="LOCAL" type="EVENT">
   <name>${ruleName}</name>
   <notes>Edit this BB to include all events that indicate successful attempts to access the network.</notes>
   <testDefinitions>
@@ -32,9 +31,11 @@ const getMockQRadarRuleDataXml = (
 </rule>
 `;
 
-export const getMockQRadarXml = (ruleName: string) => {
-  const mockRuleDataXml = getMockQRadarRuleDataXml(ruleName);
-  const mockRuleDataBase64 = Buffer.from(mockRuleDataXml).toString('base64');
+export const getMockQRadarXml = (ruleNames: string[]) => {
+  const mockRuleDataXmls = ruleNames.map((ruleName) => getMockQRadarRuleDataXml(ruleName));
+  const mockRuleDataBase64s = mockRuleDataXmls.map((mockRuleDataXml) =>
+    Buffer.from(mockRuleDataXml).toString('base64')
+  );
   return {
     mockQradarXml: `<content>
                 <qradarversion>2021.6.12.20250509154206</qradarversion>
@@ -69,6 +70,9 @@ export const getMockQRadarXml = (ruleName: string) => {
                   <gateway>false</gateway>
                   <spconfig>0</spconfig>
                 </sensordevice>
+                ${mockRuleDataBase64s
+                  .map(
+                    (mockRuleDataBase64) => `
                 <custom_rule>
                   <origin>SYSTEM</origin>
                   <mod_date>2025-03-26T16:11:26.275+01:00</mod_date>
@@ -79,9 +83,11 @@ export const getMockQRadarXml = (ruleName: string) => {
                   <id>1220</id>
                   <create_date>2005-12-08T00:36:08.061+01:00</create_date>
                 </custom_rule>
-          </content>
-`,
-    mockRuleDataBase64,
-    mockRuleDataXml,
+                `
+                  )
+                  .join('\n')}
+          </content> `,
+    mockRuleDataBase64s,
+    mockRuleDataXmls,
   };
 };

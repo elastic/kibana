@@ -414,7 +414,6 @@ export const ruleMigrationRouteHelpersFactory = (supertest: SuperTest.Agent) => 
       const route = replaceParams(SIEM_RULE_MIGRATION_RULES_ENHANCE_PATH, {
         migration_id: migrationId,
       });
-      console.log({ route, payload });
       const response = await supertest
         .post(route)
         .set('kbn-xsrf', 'true')

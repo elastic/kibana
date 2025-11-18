@@ -20,27 +20,11 @@ export interface VendorProcessorContext {
   logger: Logger;
 }
 
-/**
- * Result of processing vendor enhancement data
- */
-export interface VendorProcessorResult {
-  /** Number of rules successfully updated */
-  updated: number;
-  /** Errors encountered during processing */
-  errors: Array<{
-    rule_name: string;
-    message: string;
-  }>;
-}
+type GenericGetProcessor<GetProcessorType extends Function> = (type: string) => GetProcessorType;
 
 /**
  * Base interface for vendor-specific processors
  */
-export interface VendorProcessor<TData = unknown> {
-  /**
-   * Process vendor-specific enhancement data and update rules
-   * @param data The vendor-specific data to process
-   * @returns Result of the processing operation
-   */
-  process(data: TData): Promise<VendorProcessorResult>;
+export interface VendorProcessor<GetProcessorType extends Function = () => {}> {
+  getProcessor: GetProcessorType;
 }

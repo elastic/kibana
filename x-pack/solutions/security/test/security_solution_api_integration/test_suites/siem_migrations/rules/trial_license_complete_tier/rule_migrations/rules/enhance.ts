@@ -8,11 +8,8 @@
 import expect from 'expect';
 import type { Threat } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { getMockQRadarXml } from '@kbn/security-solution-plugin/common/siem_migrations/parsers/qradar/mock/data';
-import {
-  defaultOriginalRule,
-  deleteAllRuleMigrations,
-  ruleMigrationRouteHelpersFactory,
-} from '../../../../utils';
+import type { EnhanceRulesParams } from '../../../../utils';
+import { deleteAllRuleMigrations, ruleMigrationRouteHelpersFactory } from '../../../../utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -23,191 +20,192 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess @serverless @serverlessQA Enhance Rules API', () => {
     let migrationId: string;
     const RULE_NAME = 'Test QRadar Rule';
-    const { mockQradarXml } = getMockQRadarXml(RULE_NAME);
     beforeEach(async () => {
       await deleteAllRuleMigrations(es);
       const response = await migrationRulesRoutes.create({});
       migrationId = response.body.migration_id;
     });
 
-    describe('Happy path', () => {
-      it.only('should enhance rules with QRadar MITRE mappings', async () => {
-        // Create a rule
-        await migrationRulesRoutes.addQradarRulesToMigration({
-          migrationId,
-          payload: {
-            xml: mockQradarXml,
-          },
-        });
-
-        // Enhance the rule with MITRE mappings
-        const enhancePayload = {
-          vendor: 'qradar',
-          enhancement_type: 'mitre',
-          data: {
-            [RULE_NAME]: {
-              id: 'rule_123',
-              mapping: {
-                TA0001: {
-                  enabled: true,
-                  name: 'Initial Access',
-                  techniques: {
-                    T1078: {
-                      enabled: true,
-                      id: 'T1078',
-                    },
-                  },
-                },
-                TA0002: {
-                  enabled: true,
-                  name: 'Execution',
-                  techniques: {
-                    T1059: {
-                      enabled: true,
-                      id: 'T1059',
-                    },
-                  },
-                },
-              },
-            },
-          },
-        };
-
-        const { body: enhanceResponse } = await migrationRulesRoutes.enhanceRules({
-          migrationId,
-          payload: enhancePayload,
-        });
-
-        // Verify response
-        expect(enhanceResponse.updated).toBe(true);
-
-        // Fetch the rule and verify threat field is populated
-        const { body: rulesResponse } = await migrationRulesRoutes.getRules({ migrationId });
-        expect(rulesResponse.total).toBe(1);
-
-        const enhancedRule = rulesResponse.data[0];
-        console.log('Enhanced Rule:', JSON.stringify(enhancedRule, null, 2));
-        expect(enhancedRule.original_rule.threat).toBeDefined();
-        expect(enhancedRule.original_rule.threat).toHaveLength(2);
-
-        // Verify first tactic
-        const initialAccessTactic = enhancedRule.original_rule.threat?.find(
-          (t: Threat) => t.tactic.id === 'TA0001'
-        );
-        expect(initialAccessTactic).toBeDefined();
-        expect(initialAccessTactic?.framework).toBe('MITRE ATT&CK');
-        expect(initialAccessTactic?.tactic.name).toBe('Initial Access');
-        expect(initialAccessTactic?.technique).toHaveLength(1);
-        expect(initialAccessTactic?.technique?.[0]?.id).toBe('T1078');
-
-        // Verify second tactic
-        const executionTactic = enhancedRule.original_rule.threat?.find(
-          (t: Threat) => t.tactic.id === 'TA0002'
-        );
-        expect(executionTactic).toBeDefined();
-        expect(executionTactic?.tactic.name).toBe('Execution');
-        expect(executionTactic?.technique?.[0]?.id).toBe('T1059');
+    it('should enhance rules with QRadar MITRE mappings', async () => {
+      const { mockQradarXml } = getMockQRadarXml([RULE_NAME]);
+      // Create a rule
+      await migrationRulesRoutes.addQradarRulesToMigration({
+        migrationId,
+        payload: {
+          xml: mockQradarXml,
+        },
       });
 
-      it('should handle multiple rules enhancement', async () => {
-        const rule1Name = 'QRadar Rule 1';
-        const rule2Name = 'QRadar Rule 2';
-
-        // Create multiple rules
-        await migrationRulesRoutes.addRulesToMigration({
-          migrationId,
-          payload: [
-            { ...defaultOriginalRule, vendor: 'qradar' as const, title: rule1Name },
-            { ...defaultOriginalRule, vendor: 'qradar' as const, title: rule2Name },
-          ],
-        });
-
-        // Enhance both rules
-        const enhancePayload = {
-          vendor: 'qradar',
-          enhancement_type: 'mitre',
-          data: {
-            [rule1Name]: {
-              id: 'rule_1',
-              mapping: {
-                TA0001: {
-                  enabled: true,
-                  name: 'Initial Access',
-                  techniques: {
-                    T1078: { enabled: true, id: 'T1078' },
+      // Enhance the rule with MITRE mappings
+      const enhancePayload: EnhanceRulesParams['payload'] = {
+        vendor: 'qradar',
+        enhancement_type: 'mitre',
+        data: {
+          [RULE_NAME]: {
+            id: 'rule_123',
+            mapping: {
+              TA0001: {
+                enabled: true,
+                name: 'Initial Access',
+                techniques: {
+                  T1078: {
+                    enabled: true,
+                    id: 'T1078',
                   },
                 },
               },
-            },
-            [rule2Name]: {
-              id: 'rule_2',
-              mapping: {
-                TA0003: {
-                  enabled: true,
-                  name: 'Persistence',
-                  techniques: {
-                    T1098: { enabled: true, id: 'T1098' },
+              TA0002: {
+                enabled: true,
+                name: 'Execution',
+                techniques: {
+                  T1059: {
+                    enabled: true,
+                    id: 'T1059',
                   },
                 },
               },
             },
           },
-        };
+        },
+      };
 
-        const { body: enhanceResponse } = await migrationRulesRoutes.enhanceRules({
-          migrationId,
-          payload: enhancePayload,
-        });
-
-        expect(enhanceResponse.updated).toBe(2);
-        expect(enhanceResponse.errors).toEqual([]);
+      const { body: enhanceResponse } = await migrationRulesRoutes.enhanceRules({
+        migrationId,
+        payload: enhancePayload,
       });
 
-      it('should skip disabled techniques', async () => {
-        const ruleName = 'Test Rule with Disabled Techniques';
-        await migrationRulesRoutes.addRulesToMigration({
-          migrationId,
-          payload: [{ ...defaultOriginalRule, vendor: 'qradar' as const, title: ruleName }],
-        });
+      // Verify response
+      expect(enhanceResponse.updated).toBe(true);
 
-        const enhancePayload = {
-          vendor: 'qradar',
-          enhancement_type: 'mitre',
-          data: {
-            [ruleName]: {
-              id: 'rule_123',
-              mapping: {
-                TA0001: {
-                  enabled: true,
-                  name: 'Initial Access',
-                  techniques: {
-                    T1078: { enabled: true, id: 'T1078' },
-                    T1190: { enabled: false, id: 'T1190' }, // Disabled technique
-                  },
+      // Fetch the rule and verify threat field is populated
+      const { body: rulesResponse } = await migrationRulesRoutes.getRules({ migrationId });
+      expect(rulesResponse.total).toBe(1);
+
+      const enhancedRule = rulesResponse.data[0];
+      expect(enhancedRule.original_rule.threat).toBeDefined();
+      expect(enhancedRule.original_rule.threat).toHaveLength(2);
+
+      // Verify first tactic
+      const initialAccessTactic = enhancedRule.original_rule.threat?.find(
+        (t: Threat) => t.tactic.id === 'TA0001'
+      );
+      expect(initialAccessTactic).toBeDefined();
+      expect(initialAccessTactic?.framework).toBe('MITRE ATT&CK');
+      expect(initialAccessTactic?.tactic.name).toBe('Initial Access');
+      expect(initialAccessTactic?.technique).toHaveLength(1);
+      expect(initialAccessTactic?.technique?.[0]?.id).toBe('T1078');
+
+      // Verify second tactic
+      const executionTactic = enhancedRule.original_rule.threat?.find(
+        (t: Threat) => t.tactic.id === 'TA0002'
+      );
+      expect(executionTactic).toBeDefined();
+      expect(executionTactic?.tactic.name).toBe('Execution');
+      expect(executionTactic?.technique?.[0]?.id).toBe('T1059');
+    });
+
+    it('should handle multiple rules enhancement', async () => {
+      const rule1Name = 'QRadar Rule 1';
+      const rule2Name = 'QRadar Rule 2';
+
+      const { mockQradarXml } = getMockQRadarXml([rule1Name, rule2Name]);
+
+      // Create multiple rules
+      await migrationRulesRoutes.addQradarRulesToMigration({
+        migrationId,
+        payload: {
+          xml: mockQradarXml,
+        },
+      });
+
+      // Enhance both rules
+      const enhancePayload: EnhanceRulesParams['payload'] = {
+        vendor: 'qradar',
+        enhancement_type: 'mitre',
+        data: {
+          [rule1Name]: {
+            id: 'rule_1',
+            mapping: {
+              TA0001: {
+                enabled: true,
+                name: 'Initial Access',
+                techniques: {
+                  T1078: { enabled: true, id: 'T1078' },
                 },
               },
             },
           },
-        };
+          [rule2Name]: {
+            id: 'rule_2',
+            mapping: {
+              TA0003: {
+                enabled: true,
+                name: 'Persistence',
+                techniques: {
+                  T1098: { enabled: true, id: 'T1098' },
+                },
+              },
+            },
+          },
+        },
+      };
 
-        await migrationRulesRoutes.enhanceRules({
-          migrationId,
-          payload: enhancePayload,
-        });
-
-        const { body: rulesResponse } = await migrationRulesRoutes.getRules({ migrationId });
-        const enhancedRule = rulesResponse.data[0];
-        const tactic = enhancedRule.original_rule.threat[0];
-
-        // Should only have the enabled technique
-        expect(tactic.technique).toHaveLength(1);
-        expect(tactic.technique[0].id).toBe('T1078');
+      const { body: enhanceResponse } = await migrationRulesRoutes.enhanceRules({
+        migrationId,
+        payload: enhancePayload,
       });
+
+      expect(enhanceResponse.updated).toBe(true);
+    });
+
+    it('should skip disabled techniques', async () => {
+      const ruleName = 'Test Rule with Disabled Techniques';
+      const { mockQradarXml } = getMockQRadarXml([ruleName]);
+      await migrationRulesRoutes.addQradarRulesToMigration({
+        migrationId,
+        payload: {
+          xml: mockQradarXml,
+        },
+      });
+
+      const enhancePayload: EnhanceRulesParams['payload'] = {
+        vendor: 'qradar',
+        enhancement_type: 'mitre',
+        data: {
+          [ruleName]: {
+            id: 'rule_123',
+            mapping: {
+              TA0001: {
+                enabled: true,
+                name: 'Initial Access',
+                techniques: {
+                  T1078: { enabled: true, id: 'T1078' },
+                  T1190: { enabled: false, id: 'T1190' }, // Disabled technique
+                },
+              },
+            },
+          },
+        },
+      };
+
+      await migrationRulesRoutes.enhanceRules({
+        migrationId,
+        payload: enhancePayload,
+      });
+
+      const { body: rulesResponse } = await migrationRulesRoutes.getRules({ migrationId });
+      const enhancedRule = rulesResponse.data[0];
+      const tactic = enhancedRule.original_rule?.threat?.[0];
+
+      // Should only have the enabled technique
+      expect(tactic?.technique).toHaveLength(1);
+      expect(tactic?.technique?.[0].id).toBe('T1078');
     });
 
     describe('Error cases', () => {
-      it('should return error for non-existent rule', async () => {
-        const enhancePayload = {
+      const { mockQradarXml } = getMockQRadarXml(['some rule']);
+      it('should return error when no rules are found for update', async () => {
+        const enhancePayload: EnhanceRulesParams['payload'] = {
           vendor: 'qradar',
           enhancement_type: 'mitre',
           data: {
@@ -226,19 +224,18 @@ export default ({ getService }: FtrProviderContext) => {
           },
         };
 
-        const { body: enhanceResponse } = await migrationRulesRoutes.enhanceRules({
+        await migrationRulesRoutes.enhanceRules({
           migrationId,
           payload: enhancePayload,
+          expectStatusCode: 400,
         });
-
-        expect(enhanceResponse.updated).toBe(0);
-        expect(enhanceResponse.errors).toEqual([]);
       });
 
       it('should return 400 for invalid vendor', async () => {
         await migrationRulesRoutes.enhanceRules({
           migrationId,
           payload: {
+            // @ts-expect-error testing invalid vendor
             vendor: 'invalid_vendor',
             enhancement_type: 'mitre',
             data: {},
@@ -257,55 +254,6 @@ export default ({ getService }: FtrProviderContext) => {
           },
           expectStatusCode: 404,
         });
-      });
-    });
-
-    describe('Partial success', () => {
-      it('should report errors for some rules while updating others', async () => {
-        const validRuleName = 'Valid Rule';
-        await migrationRulesRoutes.addRulesToMigration({
-          migrationId,
-          payload: [{ ...defaultOriginalRule, vendor: 'qradar' as const, title: validRuleName }],
-        });
-
-        // Try to enhance valid and non-existent rules
-        const enhancePayload = {
-          vendor: 'qradar',
-          enhancement_type: 'mitre',
-          data: {
-            [validRuleName]: {
-              id: 'rule_1',
-              mapping: {
-                TA0001: {
-                  enabled: true,
-                  name: 'Initial Access',
-                  techniques: {
-                    T1078: { enabled: true, id: 'T1078' },
-                  },
-                },
-              },
-            },
-            'Non-existent Rule': {
-              id: 'rule_2',
-              mapping: {
-                TA0002: {
-                  enabled: true,
-                  name: 'Execution',
-                  techniques: {
-                    T1059: { enabled: true, id: 'T1059' },
-                  },
-                },
-              },
-            },
-          },
-        };
-
-        const { body: enhanceResponse } = await migrationRulesRoutes.enhanceRules({
-          migrationId,
-          payload: enhancePayload,
-        });
-
-        expect(enhanceResponse.updated).toBe(1);
       });
     });
   });

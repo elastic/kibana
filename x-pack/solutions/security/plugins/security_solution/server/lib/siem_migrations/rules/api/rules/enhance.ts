@@ -17,12 +17,11 @@ import { authz } from '../../../common/api/util/authz';
 import { SiemMigrationAuditLogger } from '../../../common/api/util/audit';
 import { withLicense } from '../../../common/api/util/with_license';
 import { withExistingMigration } from '../../../common/api/util/with_existing_migration_id';
-import { QRadarMitreProcessor } from '../../vendors/qradar/qradar_mitre_processor';
-import type { VendorProcessor } from '../../vendors/types';
 import {
   EnhanceRuleMigrationsRequestBody,
   EnhanceRuleMigrationsRequestParams,
 } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import { getVendorProcessor } from '../../vendors/get_vendor_processor';
 
 export const registerSiemRuleMigrationsEnhanceRoute = (
   router: SecuritySolutionPluginRouter,
@@ -48,7 +47,11 @@ export const registerSiemRuleMigrationsEnhanceRoute = (
         withExistingMigration(
           async (context, req, res): Promise<IKibanaResponse<EnhanceRuleMigrationResponse>> => {
             const { migration_id: migrationId } = req.params;
-            const requestBody = req.body as EnhanceRuleMigrationQRadarMitreRequest;
+            const {
+              vendor,
+              enhancement_type: enhancementType,
+              data,
+            } = req.body as EnhanceRuleMigrationQRadarMitreRequest;
 
             const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
               context.securitySolution,
@@ -60,35 +63,28 @@ export const registerSiemRuleMigrationsEnhanceRoute = (
               const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
               const dataClient = ruleMigrationsClient.data.items;
 
-              // Create vendor processor based on request
-              let processor: VendorProcessor;
-
-              if (requestBody.vendor === 'qradar' && requestBody.enhancement_type === 'mitre') {
-                processor = new QRadarMitreProcessor({
-                  migrationId,
-                  dataClient,
-                  logger,
-                });
-              } else {
-                return res.badRequest({
-                  body: {
-                    message: `Unsupported vendor/enhancement combination: ${requestBody.vendor}/${requestBody.enhancement_type}`,
-                  },
-                });
-              }
+              const VendorProcessor = getVendorProcessor(vendor);
+              const processor = new VendorProcessor({
+                migrationId,
+                dataClient,
+                logger,
+              }).getProcessor(enhancementType);
 
               await siemMigrationAuditLogger.logEnhanceRules({
                 migrationId,
-                vendor: requestBody.vendor,
-                enhancementType: requestBody.enhancement_type,
+                vendor,
+                enhancementType,
               });
 
               // Process the enhancement data
-              const result = await processor.process(requestBody.data);
+              const rulesToBeUpdate = await processor(data);
+              if (rulesToBeUpdate.length === 0) {
+                return res.badRequest({
+                  body: { message: 'No rules to enhance' },
+                });
+              }
 
-              logger.info(
-                `Enhanced ${result.updated} rules for migration ${migrationId}, ${result.errors.length} errors`
-              );
+              await dataClient.update(rulesToBeUpdate);
 
               return res.ok({
                 body: {
@@ -100,11 +96,12 @@ export const registerSiemRuleMigrationsEnhanceRoute = (
               logger.error(`Error enhancing rules for migration ${migrationId}: ${errorMessage}`);
               await siemMigrationAuditLogger.logEnhanceRules({
                 migrationId,
-                vendor: requestBody.vendor,
-                enhancementType: requestBody.enhancement_type,
+                vendor,
+                enhancementType,
                 error,
               });
-              return res.badRequest({
+              return res.customError({
+                statusCode: 500,
                 body: { message: `Failed to enhance rules: ${errorMessage}` },
               });
             }
