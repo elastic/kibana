@@ -12,6 +12,7 @@ import { esqlCommandRegistry } from '.';
 import { buildDocumentation } from '../definitions/utils/documentation';
 import { TIME_SYSTEM_PARAMS } from '../definitions/utils/literals';
 import { withAutoSuggest } from '../definitions/utils/autocomplete/helpers';
+import type { SuggestionCategory } from '../sorting/types';
 
 const techPreviewLabel = i18n.translate('kbn-esql-ast.esql.autocomplete.techPreviewLabel', {
   defaultMessage: `Technical Preview`,
@@ -24,7 +25,13 @@ function buildCharCompleteItem(
     sortText,
     quoted,
     advanceCursorAndOpenSuggestions,
-  }: { sortText?: string; quoted: boolean; advanceCursorAndOpenSuggestions?: boolean } = {
+    category,
+  }: {
+    sortText?: string;
+    quoted: boolean;
+    advanceCursorAndOpenSuggestions?: boolean;
+    category?: SuggestionCategory;
+  } = {
     quoted: false,
   }
 ): ISuggestionItem {
@@ -34,6 +41,7 @@ function buildCharCompleteItem(
     kind: 'Keyword',
     detail,
     sortText,
+    ...(category && { category }),
   };
   return advanceCursorAndOpenSuggestions ? withAutoSuggest(suggestion) : suggestion;
 }
@@ -46,6 +54,7 @@ export const pipeCompleteItem: ISuggestionItem = withAutoSuggest({
     defaultMessage: 'Pipe (|)',
   }),
   sortText: 'C',
+  category: 'pipe',
 });
 
 export const allStarConstant: ISuggestionItem = {
@@ -65,7 +74,7 @@ export const commaCompleteItem = buildCharCompleteItem(
   i18n.translate('kbn-esql-ast.esql.autocomplete.commaDoc', {
     defaultMessage: 'Comma (,)',
   }),
-  { sortText: 'B', quoted: false }
+  { sortText: 'B', quoted: false, category: 'comma' }
 );
 
 export const byCompleteItem: ISuggestionItem = withAutoSuggest({
@@ -74,6 +83,7 @@ export const byCompleteItem: ISuggestionItem = withAutoSuggest({
   kind: 'Reference',
   detail: 'By',
   sortText: '1',
+  category: 'keyword_clause',
 });
 
 export const whereCompleteItem: ISuggestionItem = withAutoSuggest({
@@ -82,6 +92,7 @@ export const whereCompleteItem: ISuggestionItem = withAutoSuggest({
   kind: 'Reference',
   detail: 'Where',
   sortText: '1',
+  category: 'keyword_clause',
 });
 
 export const onCompleteItem: ISuggestionItem = withAutoSuggest({
@@ -90,6 +101,7 @@ export const onCompleteItem: ISuggestionItem = withAutoSuggest({
   kind: 'Reference',
   detail: 'On',
   sortText: '1',
+  category: 'keyword_clause',
 });
 
 export const withCompleteItem: ISuggestionItem = withAutoSuggest({
@@ -99,6 +111,7 @@ export const withCompleteItem: ISuggestionItem = withAutoSuggest({
   kind: 'Reference',
   detail: 'With',
   sortText: '1',
+  category: 'keyword_clause',
 });
 
 export const withMapCompleteItem: ISuggestionItem = withAutoSuggest({
@@ -119,6 +132,7 @@ export const subqueryCompleteItem: ISuggestionItem = withAutoSuggest({
     defaultMessage: 'Adds a nested ES|QL query to your current query',
   }),
   sortText: '1',
+  category: 'critical_action',
 });
 
 export const minMaxValueCompleteItem: ISuggestionItem = {
@@ -127,6 +141,7 @@ export const minMaxValueCompleteItem: ISuggestionItem = {
   kind: 'Value',
   detail: 'minmax',
   sortText: '1',
+  category: 'keyword',
 };
 
 export const noneValueCompleteItem: ISuggestionItem = {
@@ -135,6 +150,7 @@ export const noneValueCompleteItem: ISuggestionItem = {
   kind: 'Value',
   detail: 'none',
   sortText: '1',
+  category: 'keyword',
 };
 
 export const getNewUserDefinedColumnSuggestion = (label: string): ISuggestionItem => {
@@ -146,6 +162,7 @@ export const getNewUserDefinedColumnSuggestion = (label: string): ISuggestionIte
       defaultMessage: 'Define a new column',
     }),
     sortText: '1',
+    category: 'user_defined_column',
   });
 };
 
@@ -157,6 +174,7 @@ export const assignCompletionItem: ISuggestionItem = withAutoSuggest({
   kind: 'Variable',
   sortText: '1',
   text: '= ',
+  category: 'user_defined_column',
 });
 
 export const asCompletionItem: ISuggestionItem = {
@@ -167,6 +185,7 @@ export const asCompletionItem: ISuggestionItem = {
   label: 'AS',
   sortText: '1',
   text: 'AS ',
+  category: 'keyword_clause',
 };
 
 export const colonCompleteItem = buildCharCompleteItem(
@@ -254,4 +273,5 @@ export const getDateHistogramCompletionItem: (histogramBarTarget?: number) => IS
       defaultMessage: 'Add date histogram using bucket()',
     }),
     sortText: '1',
+    category: 'critical_action',
   });

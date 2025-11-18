@@ -25,6 +25,7 @@ export function getSettingsCompletionItems(isServerless?: boolean): ISuggestionI
           kind: 'Reference',
           detail: setting.description,
           sortText: '1',
+          category: 'keyword',
         })
       )
   );

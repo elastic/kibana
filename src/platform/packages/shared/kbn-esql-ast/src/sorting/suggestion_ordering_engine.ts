@@ -13,13 +13,18 @@ import { calculatePriority } from './priority_provider';
 
 export class SuggestionOrderingEngine {
   /**
-   * Sorts suggestions and assigns sortText for Monaco editor.
+   * Sorts suggestions based on their inferred category and context.
    * Lower priority number = appears first in list.
    */
   sort(suggestions: ISuggestionItem[], context: SortingContext): ISuggestionItem[] {
-    // Early return for empty or single-item arrays
-    if (suggestions.length <= 1) {
-      return suggestions.map((s, i) => ({ ...s, sortText: '0000' }));
+    if (suggestions.length === 0) {
+      return suggestions;
+    }
+
+    // Single item doesn't need sorting but still gets sortText for compatibility
+    if (suggestions.length === 1) {
+      suggestions[0].sortText = '0000';
+      return suggestions;
     }
 
     const withPriorities = suggestions.map((suggestion) => {
@@ -41,10 +46,10 @@ export class SuggestionOrderingEngine {
       return a.suggestion.label.localeCompare(b.suggestion.label);
     });
 
-    return withPriorities.map(({ suggestion }, index) => ({
-      ...suggestion,
-      // Zero-pad to ensure "0001" < "0010" < "0100" lexicographically
-      sortText: index.toString().padStart(4, '0'),
-    }));
+    return withPriorities.map(({ suggestion }, index) => {
+      suggestion.sortText = index.toString().padStart(4, '0');
+
+      return suggestion;
+    });
   }
 }

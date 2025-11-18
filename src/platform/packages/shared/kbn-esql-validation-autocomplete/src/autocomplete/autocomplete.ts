@@ -167,7 +167,7 @@ export async function suggest(
       false
     );
 
-    return controlSuggestions;
+    return orderingEngine.sort(controlSuggestions, { command: '' });
   }
 
   if (astContext.type === 'expression') {

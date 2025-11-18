@@ -123,6 +123,7 @@ export const noPoliciesAvailableSuggestion: ISuggestionItem = {
     defaultMessage: 'Click to create',
   }),
   sortText: 'D',
+  category: 'critical_action',
   command: {
     id: 'esql.policies.create',
     title: i18n.translate('kbn-esql-ast.esql.autocomplete.createNewPolicy', {
@@ -187,5 +188,6 @@ export const buildMatchingFieldsDefinition = (
         },
       }),
       sortText: 'D',
+      category: 'field',
     })
   );

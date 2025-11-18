@@ -7,31 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export enum SuggestionCategory {
-  CRITICAL_ACTION = 'critical_action',
-  USER_DEFINED_COLUMN = 'user_defined_column',
-  TIME_PARAM = 'time_param',
-  RECOMMENDED_FIELD = 'recommended_field',
-  ECS_FIELD = 'ecs_field',
-  TIME_FIELD = 'time_field',
-  FIELD = 'field',
+export const SuggestionCategory = {
+  CRITICAL_ACTION: 'critical_action',
+  KEYWORD_CLAUSE: 'keyword_clause', // BY, WHERE, ON, WITH, AS
+  CONSTANT_VALUE: 'constant_value', // Prompt text, query text constants
+  USER_DEFINED_COLUMN: 'user_defined_column',
+  TIME_PARAM: 'time_param',
+  RECOMMENDED_FIELD: 'recommended_field',
+  ECS_FIELD: 'ecs_field',
+  TIME_FIELD: 'time_field',
+  FIELD: 'field',
 
-  OPERATOR_COMPARISON = 'operator_comparison',
-  OPERATOR_NULL_CHECK = 'operator_null_check',
-  OPERATOR_IN = 'operator_in',
-  OPERATOR_PATTERN = 'operator_pattern',
-  OPERATOR_ARITHMETIC = 'operator_arithmetic',
-  OPERATOR_LOGICAL = 'operator_logical',
-  OPERATOR = 'operator', // Fallback for unrecognized operators
+  OPERATOR: 'operator', // All operators
 
-  FUNCTION_TIME_SERIES_AGG = 'function_ts_agg',
-  FUNCTION_AGG = 'function_agg',
-  FUNCTION_SCALAR = 'function_scalar',
-  KEYWORD = 'keyword',
-  PIPE = 'pipe',
-  COMMA = 'comma',
-  UNKNOWN = 'unknown',
-}
+  FUNCTION_TIME_SERIES_AGG: 'function_ts_agg',
+  FUNCTION_AGG: 'function_agg',
+  FUNCTION_SCALAR: 'function_scalar',
+
+  RECOMMENDED_QUERY_SEARCH: 'recommended_query_search', // Search query (highest priority recommended query)
+  RECOMMENDED_QUERY: 'recommended_query',
+
+  KEYWORD: 'keyword', // METADATA, settings, special keywords
+  PIPE: 'pipe',
+  COMMA: 'comma',
+  UNKNOWN: 'unknown',
+} as const;
+
+export type SuggestionCategory = (typeof SuggestionCategory)[keyof typeof SuggestionCategory];
 
 export interface SortingContext {
   command: string;

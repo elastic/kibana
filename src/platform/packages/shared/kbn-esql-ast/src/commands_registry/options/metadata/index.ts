@@ -33,6 +33,7 @@ export const metadataSuggestion: ISuggestionItem = withAutoSuggest({
     defaultMessage: 'Metadata',
   }),
   sortText: 'C',
+  category: 'keyword',
 });
 
 export const getMetadataSuggestions = (command: ESQLAstAllCommands, queryText: string) => {

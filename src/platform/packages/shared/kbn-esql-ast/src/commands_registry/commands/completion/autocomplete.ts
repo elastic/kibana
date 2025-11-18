@@ -207,7 +207,7 @@ export async function autocomplete(
 
       if (!lastWord) {
         suggestions.push({
-          ...buildConstantsDefinitions([promptSnippetText], '', '1')[0],
+          ...buildConstantsDefinitions([promptSnippetText], '', '1', undefined, undefined, 'constant_value')[0],
           label: promptText,
           asSnippet: true,
         });

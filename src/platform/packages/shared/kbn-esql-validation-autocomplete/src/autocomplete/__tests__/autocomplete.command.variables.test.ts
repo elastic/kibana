@@ -39,7 +39,8 @@ describe('autocomplete.suggest', () => {
           id: 'esql.control.values.create',
           title: 'Click to create',
         },
-        sortText: '1',
+        category: 'critical_action',
+        sortText: '0000',
       });
 
       expect(suggestions).toContainEqual({
@@ -47,8 +48,8 @@ describe('autocomplete.suggest', () => {
         text: 'value',
         kind: 'Constant',
         detail: 'Named parameter',
-        command: undefined,
-        sortText: '1A',
+        category: 'user_defined_column',
+        sortText: '0001',
       });
     });
 
@@ -74,7 +75,8 @@ describe('autocomplete.suggest', () => {
           id: 'esql.control.functions.create',
           title: 'Click to create',
         },
-        sortText: '1',
+        category: 'critical_action',
+        sortText: '0000',
       });
     });
 
@@ -101,8 +103,8 @@ describe('autocomplete.suggest', () => {
         text: '??function',
         kind: 'Constant',
         detail: 'Named parameter',
-        command: undefined,
-        sortText: '1A',
+        category: 'user_defined_column',
+        sortText: '0001',
       });
     });
 
@@ -128,7 +130,8 @@ describe('autocomplete.suggest', () => {
           id: 'esql.control.fields.create',
           title: 'Click to create',
         },
-        sortText: '11',
+        category: 'critical_action',
+        sortText: '0001',
       });
     });
 
@@ -155,8 +158,8 @@ describe('autocomplete.suggest', () => {
         text: '??field',
         kind: 'Constant',
         detail: 'Named parameter',
-        command: undefined,
-        sortText: '11A',
+        category: 'user_defined_column',
+        sortText: '0002',
       });
     });
 
@@ -183,8 +186,8 @@ describe('autocomplete.suggest', () => {
         text: '?interval',
         kind: 'Constant',
         detail: 'Named parameter',
-        command: undefined,
-        sortText: '1A',
+        category: 'user_defined_column',
+        sortText: '0001',
       });
     });
 
@@ -216,8 +219,8 @@ describe('autocomplete.suggest', () => {
         text: '?multiValue',
         kind: 'Constant',
         detail: 'Named parameter',
-        command: undefined,
-        sortText: '11A',
+        category: 'user_defined_column',
+        sortText: '0004',
       });
     });
 
@@ -243,7 +246,8 @@ describe('autocomplete.suggest', () => {
           id: 'esql.control.values.create',
           title: 'Click to create',
         },
-        sortText: '1',
+        category: 'critical_action',
+        sortText: '0000',
       });
     });
 
@@ -269,7 +273,8 @@ describe('autocomplete.suggest', () => {
           id: 'esql.control.values.create',
           title: 'Click to create',
         },
-        sortText: '11',
+        category: 'critical_action',
+        sortText: '0000',
       });
     });
 
@@ -296,8 +301,8 @@ describe('autocomplete.suggest', () => {
         text: '?value',
         kind: 'Constant',
         detail: 'Named parameter',
-        command: undefined,
-        sortText: '11A',
+        category: 'user_defined_column',
+        sortText: '0001',
       });
     });
 
@@ -323,7 +328,8 @@ describe('autocomplete.suggest', () => {
           id: 'esql.control.values.create',
           title: 'Click to create',
         },
-        sortText: '1',
+        category: 'critical_action',
+        sortText: '0000',
       });
     });
   });

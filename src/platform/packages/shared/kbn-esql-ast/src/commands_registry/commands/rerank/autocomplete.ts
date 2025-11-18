@@ -60,7 +60,7 @@ export async function autocomplete(
       return [
         targetField,
         {
-          ...buildConstantsDefinitions([QUERY_TEXT_SNIPPET], '', '1')[0],
+          ...buildConstantsDefinitions([QUERY_TEXT_SNIPPET], '', '1', undefined, undefined, 'constant_value')[0],
           label: QUERY_TEXT,
           asSnippet: true,
         },
@@ -74,7 +74,7 @@ export async function autocomplete(
     case CaretPosition.RERANK_AFTER_TARGET_ASSIGNMENT: {
       return [
         {
-          ...buildConstantsDefinitions([QUERY_TEXT_SNIPPET], '', '1')[0],
+          ...buildConstantsDefinitions([QUERY_TEXT_SNIPPET], '', '1', undefined, undefined, 'constant_value')[0],
           label: QUERY_TEXT,
           asSnippet: true,
         },

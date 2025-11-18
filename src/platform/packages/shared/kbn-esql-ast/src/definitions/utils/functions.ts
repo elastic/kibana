@@ -32,6 +32,7 @@ import { removeFinalUnknownIdentiferArg } from './shared';
 import { getTestFunctions } from './test_functions';
 import { getMatchingSignatures } from './expressions';
 import { isLiteral } from '../../ast/is';
+import type { SuggestionCategory } from '../../sorting/types';
 
 const techPreviewLabel = i18n.translate('kbn-esql-ast.esql.autocomplete.techPreviewLabel', {
   defaultMessage: `Technical Preview`,
@@ -76,6 +77,7 @@ export const buildFieldsDefinitions = (
         defaultMessage: `Field specified by the input table`,
       }),
       sortText: 'D',
+      category: 'field',
     };
     return openSuggestions ? withAutoSuggest(suggestion) : suggestion;
   });
@@ -279,6 +281,17 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
   if (fn.type === FunctionDefinitionTypes.TIME_SERIES_AGG) {
     functionsPriority = '1A';
   }
+
+  // Determine function category explicitly
+  let category: SuggestionCategory;
+  if (fn.type === FunctionDefinitionTypes.TIME_SERIES_AGG) {
+    category = 'function_ts_agg';
+  } else if (fn.type === FunctionDefinitionTypes.AGG) {
+    category = 'function_agg';
+  } else {
+    category = 'function_scalar';
+  }
+
   return withAutoSuggest({
     label: fn.name.toUpperCase(),
     text,
@@ -299,6 +312,7 @@ export function getFunctionSuggestion(fn: FunctionDefinition): ISuggestionItem {
     },
     // time_series_agg functions have priority over everything else
     sortText: functionsPriority,
+    category,
   });
 }
 
@@ -410,6 +424,20 @@ export const buildColumnSuggestions = (
       !column.userDefined && Boolean(column.isEcs),
       Boolean(fieldIsRecommended)
     );
+    // Determine the category explicitly based on column properties
+    let category: SuggestionCategory;
+    if (column.userDefined) {
+      category = 'user_defined_column';
+    } else if (fieldIsRecommended) {
+      category = 'recommended_field';
+    } else if (column.type === 'date' || column.type === 'date_nanos') {
+      category = 'time_field';
+    } else if (column.isEcs) {
+      category = 'ecs_field';
+    } else {
+      category = 'field';
+    }
+
     const suggestion: ISuggestionItem = {
       label: column.name,
       text:
@@ -419,6 +447,7 @@ export const buildColumnSuggestions = (
       kind: 'Variable',
       detail: titleCaseType,
       sortText,
+      category,
     };
 
     return options?.openSuggestions ? withAutoSuggest(suggestion) : suggestion;

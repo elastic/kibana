@@ -12,60 +12,54 @@ import type { SortingContext } from './types';
 import { SuggestionCategory } from './types';
 import { detectCategory } from './utils/category_rules';
 
-// Lower number = higher priority (appears first)
-const BASE_PRIORITIES: Record<SuggestionCategory, number> = {
-  // Critical UI elements (eg. create control)
+const CATEGORY_PRIORITIES: Record<SuggestionCategory, number> = {
   [SuggestionCategory.CRITICAL_ACTION]: 0,
+  [SuggestionCategory.KEYWORD_CLAUSE]: 50, // BY, WHERE, ON, WITH
 
-  [SuggestionCategory.USER_DEFINED_COLUMN]: 50,
+  [SuggestionCategory.TIME_PARAM]: 100,
 
-  [SuggestionCategory.PIPE]: 100,
-  [SuggestionCategory.COMMA]: 150,
+  [SuggestionCategory.COMMA]: 200,
+  [SuggestionCategory.PIPE]: 200,
+  [SuggestionCategory.KEYWORD]: 200,
 
-  // Time parameters (?_tstart, ?_tend)
-  [SuggestionCategory.TIME_PARAM]: 200,
+  [SuggestionCategory.CONSTANT_VALUE]: 250, // Prompt text, query text constants
 
-  [SuggestionCategory.RECOMMENDED_FIELD]: 250,
-  [SuggestionCategory.TIME_FIELD]: 300,
-  [SuggestionCategory.ECS_FIELD]: 350,
-  [SuggestionCategory.FIELD]: 400,
+  [SuggestionCategory.USER_DEFINED_COLUMN]: 300,
+  [SuggestionCategory.RECOMMENDED_FIELD]: 310,
+  [SuggestionCategory.ECS_FIELD]: 330,
+  [SuggestionCategory.TIME_FIELD]: 350,
+  [SuggestionCategory.FIELD]: 350,
 
-  [SuggestionCategory.OPERATOR_ARITHMETIC]: 410,
-  [SuggestionCategory.OPERATOR_LOGICAL]: 420,
-  [SuggestionCategory.OPERATOR_COMPARISON]: 430,
-  [SuggestionCategory.OPERATOR_NULL_CHECK]: 440,
-  [SuggestionCategory.OPERATOR_IN]: 450,
-  [SuggestionCategory.OPERATOR_PATTERN]: 460,
-  [SuggestionCategory.OPERATOR]: 490, // Fallback
+  [SuggestionCategory.OPERATOR]: 400,
 
   [SuggestionCategory.FUNCTION_TIME_SERIES_AGG]: 500,
-  [SuggestionCategory.FUNCTION_AGG]: 550,
-  [SuggestionCategory.FUNCTION_SCALAR]: 600,
+  [SuggestionCategory.FUNCTION_AGG]: 500,
+  [SuggestionCategory.FUNCTION_SCALAR]: 500,
 
-  [SuggestionCategory.KEYWORD]: 650,
-  [SuggestionCategory.UNKNOWN]: 700,
+  [SuggestionCategory.RECOMMENDED_QUERY_SEARCH]: 590, // Search query (higher priority)
+  [SuggestionCategory.RECOMMENDED_QUERY]: 600,
+
+  [SuggestionCategory.UNKNOWN]: 900,
 };
 
 // Context-specific priority adjustments (negative = boost up, positive = push down)
 const CONTEXT_BOOSTS: Record<string, Partial<Record<SuggestionCategory, number>>> = {
   STATS: {
-    [SuggestionCategory.FUNCTION_SCALAR]: +300, // 600 + 300 = 900 (push down scalar functions)
-  },
-  EVAL: {
-    [SuggestionCategory.FUNCTION_SCALAR]: -400, // scalar functions before fields
+    //  example: [SuggestionCategory.FUNCTION_SCALAR]: +380, // Push down scalar functions in STATS
   },
 };
 
 export function calculatePriority(item: ISuggestionItem, context: SortingContext): number {
   const category = detectCategory(item);
-  const basePriority = BASE_PRIORITIES[category] ?? BASE_PRIORITIES[SuggestionCategory.UNKNOWN];
 
+  // Step 1: Get base priority from category
+  const basePriority =
+    CATEGORY_PRIORITIES[category] ?? CATEGORY_PRIORITIES[SuggestionCategory.UNKNOWN];
+
+  // Step 2: Apply context-specific boosts
   const commandBoosts = CONTEXT_BOOSTS[context.command.toUpperCase()];
-  if (!commandBoosts) {
-    return basePriority;
-  }
+  const contextBoost = commandBoosts?.[category] ?? 0;
 
-  const contextBoost = commandBoosts[category] ?? 0;
-
+  // Final priority = base + context boost
   return basePriority + contextBoost;
 }

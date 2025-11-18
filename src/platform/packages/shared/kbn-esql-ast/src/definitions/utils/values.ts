@@ -24,6 +24,7 @@ export const buildValueDefinitions = (
         defaultMessage: 'Literal value',
       }),
       kind: 'Value',
+      category: 'keyword',
     };
 
     return options?.advanceCursorAndOpenSuggestions ? withAutoSuggest(suggestion) : suggestion;

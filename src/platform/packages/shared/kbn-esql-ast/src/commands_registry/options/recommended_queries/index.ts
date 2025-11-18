@@ -11,10 +11,19 @@ import type { RecommendedQuery, RecommendedField } from '@kbn/esql-types';
 import type { GetColumnsByTypeFn, ISuggestionItem } from '../../types';
 import { METADATA_FIELDS } from '../metadata';
 import { prettifyQueryTemplate, prettifyQuery } from './utils';
+import type { SuggestionCategory } from '../../../sorting/types';
 
 export interface EditorExtensions {
   recommendedQueries: RecommendedQuery[];
   recommendedFields: RecommendedField[];
+}
+
+interface QueryTemplate {
+  label: string;
+  description: string;
+  queryString: string;
+  sortText?: string;
+  category?: SuggestionCategory;
 }
 
 // Order starts with the simple ones and goes to more complex ones
@@ -28,7 +37,7 @@ export const getRecommendedQueriesTemplates = ({
   timeField?: string;
   categorizationField?: string;
 }) => {
-  const queries = [
+  const queries: QueryTemplate[] = [
     {
       label: i18n.translate('kbn-esql-ast.recommendedQueries.searchExample.label', {
         defaultMessage: 'Search all fields',
@@ -38,6 +47,7 @@ export const getRecommendedQueriesTemplates = ({
       }),
       queryString: `${fromCommand}\n  | WHERE KQL("term") /* Search all fields using KQL – e.g. WHERE KQL("debug") */`,
       sortText: 'D',
+      category: 'recommended_query_search',
     },
     {
       label: i18n.translate('kbn-esql-ast.recommendedQueries.aggregateExample.label', {
@@ -201,6 +211,7 @@ export const getRecommendedQueriesSuggestionsFromStaticTemplates = async (
       kind: 'Issue',
       detail: query.description,
       sortText: query?.sortText ?? 'E',
+      category: query.category ?? 'recommended_query',
       command: {
         id: 'esql.recommendedQuery.accept',
         title: 'Accept recommended query',
