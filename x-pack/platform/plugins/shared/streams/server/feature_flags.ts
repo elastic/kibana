@@ -70,24 +70,6 @@ export function registerFeatureFlags(
   });
 
   core.uiSettings.register({
-    [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: {
-      category: ['observability'],
-      name: i18n.translate('xpack.streams.queryStreamsSettingsName', {
-        defaultMessage: 'Query streams',
-      }) as string,
-      value: false,
-      description: i18n.translate('xpack.streams.queryStreamsSettingsDescription', {
-        defaultMessage: 'Enable Query streams.',
-      }),
-      type: 'boolean',
-      schema: schema.boolean(),
-      requiresPageReload: true,
-      solutionViews: ['classic', 'oblt'],
-      technicalPreview: true,
-    },
-  });
-
-  core.uiSettings.register({
     [OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS]: {
       category: ['observability'],
       name: i18n.translate('xpack.streams.streamsContentPacksSettingsName', {
@@ -119,6 +101,21 @@ export function registerFeatureFlags(
       technicalPreview: true,
       readonly: true,
       readonlyMode: 'ui',
+    },
+    [OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS]: {
+      category: ['observability'],
+      name: i18n.translate('xpack.streams.queryStreamsSettingsName', {
+        defaultMessage: 'Query streams',
+      }) as string,
+      value: false,
+      description: i18n.translate('xpack.streams.queryStreamsSettingsDescription', {
+        defaultMessage: 'Enable Query streams.',
+      }),
+      type: 'boolean',
+      schema: schema.boolean(),
+      requiresPageReload: true,
+      solutionViews: ['classic', 'oblt'],
+      technicalPreview: true,
     },
   });
 }

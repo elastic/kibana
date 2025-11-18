@@ -17,15 +17,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { useStreamsRoutingSelector } from './state_management/stream_routing_state_machine';
 
-interface StreamNameFormRowProps {
+export interface StreamNameFormRowProps {
   value: string;
   onChange?: (value: string) => void;
   readOnly?: boolean;
   autoFocus?: boolean;
   error?: string;
   isInvalid?: boolean;
+  parentStreamName?: string;
 }
 
 const MAX_NAME_LENGTH = 200;
@@ -38,16 +38,17 @@ export function StreamNameFormRow({
   autoFocus = false,
   error,
   isInvalid = false,
+  parentStreamName,
 }: StreamNameFormRowProps) {
   const descriptionId = useGeneratedHtmlId();
 
-  const parentStreamName = useStreamsRoutingSelector((snapshot) => snapshot.context.definition)
-    .stream.name;
+  const prefix = parentStreamName ? parentStreamName + '.' : parentStreamName;
+  const partitionName = prefix ? value.replace(prefix, '') : value;
+  const isLessThanMaxLength = value.length <= MAX_NAME_LENGTH;
 
-  const prefix = parentStreamName + '.';
-  const partitionName = value.replace(prefix, '');
-
-  const isLengthValid = value.length > prefix.length && value.length <= MAX_NAME_LENGTH;
+  const isLengthValid = prefix
+    ? isLessThanMaxLength && value.length > prefix.length
+    : isLessThanMaxLength;
 
   const helpText =
     value.length >= MAX_NAME_LENGTH && !readOnly
@@ -57,7 +58,7 @@ export function StreamNameFormRow({
             maxLength: MAX_NAME_LENGTH,
           },
         })
-      : value.length <= prefix.length && !readOnly
+      : value === prefix && !readOnly
       ? i18n.translate('xpack.streams.streamDetailRouting.minimumNameHelpText', {
           defaultMessage: `Stream name is required.`,
         })
@@ -73,7 +74,11 @@ export function StreamNameFormRow({
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newPartitionName = e.target.value;
 
-    onChange(`${prefix}${newPartitionName}`);
+    if (prefix) {
+      onChange(`${prefix}${newPartitionName}`);
+    } else {
+      onChange(newPartitionName);
+    }
   };
 
   return (
@@ -96,25 +101,29 @@ export function StreamNameFormRow({
         readOnly={readOnly}
         autoFocus={autoFocus}
         onChange={handleChange}
-        maxLength={MAX_NAME_LENGTH - prefix.length}
-        prepend={[
-          <EuiIcon type="streamsWired" />,
-          <EuiFormLabel
-            css={css`
-              inline-size: min(${prefix.length}ch, ${PREFIX_MAX_VISIBLE_CHARACTERS}ch);
-            `}
-            id={descriptionId}
-          >
-            <EuiScreenReaderOnly>
-              <span>
-                {i18n.translate('xpack.streams.streamDetailRouting.screenReaderPrefixLabel', {
-                  defaultMessage: 'Stream prefix:',
-                })}
-              </span>
-            </EuiScreenReaderOnly>
-            <EuiTextTruncate text={prefix} truncation="start" />
-          </EuiFormLabel>,
-        ]}
+        maxLength={prefix ? MAX_NAME_LENGTH - prefix.length : MAX_NAME_LENGTH}
+        prepend={
+          prefix
+            ? [
+                <EuiIcon type="streamsWired" />,
+                <EuiFormLabel
+                  css={css`
+                    inline-size: min(${prefix.length}ch, ${PREFIX_MAX_VISIBLE_CHARACTERS}ch);
+                  `}
+                  id={descriptionId}
+                >
+                  <EuiScreenReaderOnly>
+                    <span>
+                      {i18n.translate('xpack.streams.streamDetailRouting.screenReaderPrefixLabel', {
+                        defaultMessage: 'Stream prefix:',
+                      })}
+                    </span>
+                  </EuiScreenReaderOnly>
+                  <EuiTextTruncate text={prefix} truncation="start" />
+                </EuiFormLabel>,
+              ]
+            : undefined
+        }
       />
     </EuiFormRow>
   );

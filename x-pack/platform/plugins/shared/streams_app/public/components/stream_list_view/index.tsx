@@ -38,6 +38,7 @@ import { StreamsAppContextProvider } from '../streams_app_context_provider';
 import { StreamsSettingsFlyout } from './streams_settings_flyout';
 import { FeedbackButton } from '../feedback_button';
 import { AssetImage } from '../asset_image';
+import { CreateQueryStreamFlyout } from '../query_streams/create_query_stream_flyout';
 
 export function StreamListView() {
   const { euiTheme } = useEuiTheme();
@@ -65,7 +66,7 @@ export function StreamListView() {
   );
 
   const {
-    features: { groupStreams },
+    features: { groupStreams, queryStreams },
   } = useStreamsPrivileges();
 
   const overlayRef = React.useRef<OverlayRef | null>(null);
@@ -114,15 +115,6 @@ export function StreamListView() {
                 })}
               </EuiFlexGroup>
             </EuiFlexItem>
-            {groupStreams?.enabled && (
-              <EuiFlexItem grow={false}>
-                <EuiButton onClick={openGroupStreamModificationFlyout} size="s">
-                  {i18n.translate('xpack.streams.streamsListView.createGroupStreamButtonLabel', {
-                    defaultMessage: 'Create Group stream',
-                  })}
-                </EuiButton>
-              </EuiFlexItem>
-            )}
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 iconType="gear"
@@ -138,6 +130,20 @@ export function StreamListView() {
               </EuiButtonEmpty>
             </EuiFlexItem>
             <FeedbackButton />
+            {groupStreams?.enabled && (
+              <EuiFlexItem grow={false}>
+                <EuiButton onClick={openGroupStreamModificationFlyout} size="s">
+                  {i18n.translate('xpack.streams.streamsListView.createGroupStreamButtonLabel', {
+                    defaultMessage: 'Create Group stream',
+                  })}
+                </EuiButton>
+              </EuiFlexItem>
+            )}
+            {queryStreams?.enabled && (
+              <EuiFlexItem grow={false}>
+                <CreateQueryStreamFlyout onQueryStreamCreated={streamsListFetch.refresh} />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         }
       />

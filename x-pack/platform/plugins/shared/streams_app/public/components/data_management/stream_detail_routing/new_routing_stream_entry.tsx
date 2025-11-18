@@ -15,7 +15,7 @@ import {
   useStreamsRoutingSelector,
 } from './state_management/stream_routing_state_machine';
 import { RoutingConditionEditor } from './routing_condition_editor';
-import { StreamNameFormRow } from './stream_name_form_row';
+import { RoutingStreamNameFormRow } from './routing_stream_name_form_row';
 
 export function NewRoutingStreamEntry() {
   const panelRef = useRef<HTMLDivElement>(null);
@@ -33,7 +33,7 @@ export function NewRoutingStreamEntry() {
     <div ref={panelRef}>
       <EuiPanel hasShadow={false} hasBorder paddingSize="m">
         <EuiFlexGroup gutterSize="m" direction="column">
-          <StreamNameFormRow
+          <RoutingStreamNameFormRow
             value={currentRule.destination}
             onChange={(value) => changeRule({ destination: value })}
             autoFocus

@@ -10,6 +10,7 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
   OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
+  OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS,
 } from '@kbn/management-settings-ids';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '@kbn/streams-plugin/common';
 import type { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
@@ -25,6 +26,9 @@ export interface StreamsFeatures {
     enabled: boolean;
   };
   groupStreams?: {
+    enabled: boolean;
+  };
+  queryStreams?: {
     enabled: boolean;
   };
   contentPacks?: {
@@ -62,6 +66,8 @@ export function useStreamsPrivileges(): StreamsPrivileges {
 
   const groupStreamsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS, false);
 
+  const queryStreamsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_QUERY_STREAMS, false);
+
   const significantEventsEnabled = uiSettings.get<boolean>(
     OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
     false // Default to false if the setting is not defined or not available
@@ -93,6 +99,9 @@ export function useStreamsPrivileges(): StreamsPrivileges {
       },
       groupStreams: {
         enabled: groupStreamsEnabled,
+      },
+      queryStreams: {
+        enabled: queryStreamsEnabled,
       },
       contentPacks: {
         enabled: contentPacksEnabled,
