@@ -37,6 +37,7 @@ export const TextField: React.FC<TextWidgetProps> = ({
 
   return (
     <EuiFormRow
+      aria-label={label}
       label={label}
       error={error}
       isInvalid={isInvalid}

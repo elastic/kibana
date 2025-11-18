@@ -69,7 +69,7 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
               const optionFieldId = `${fieldId}.${fieldKey}`;
               const optionFieldTouched = touched[optionFieldId] || touched[fieldId];
               const optionFieldError = errors[optionFieldId];
-              const optionFieldIsInvalid = !!(optionFieldTouched && optionFieldError);
+              const optionFieldIsInvalid = optionFieldTouched && optionFieldError;
 
               const handleOptionChange = (_optionFieldIdArg: string, newValue: unknown) => {
                 const currentValueObj =
@@ -109,9 +109,10 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
                 <React.Fragment key={fieldKey}>
                   <EuiSpacer size="s" />
                   <OptionWidgetComponent
+                    aria-label={fieldMeta.label}
                     fieldId={optionFieldId}
                     value={optionValue}
-                    label={fieldMeta?.label || fieldKey}
+                    label={fieldMeta.label}
                     error={optionFieldError}
                     isInvalid={optionFieldIsInvalid}
                     onChange={handleOptionChange}
@@ -130,6 +131,7 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
       return (
         <React.Fragment key={discriminatorValue}>
           <EuiCheckableCard
+            aria-label={cardLabel}
             id={checkableCardId}
             label={cardLabel}
             value={discriminatorValue}

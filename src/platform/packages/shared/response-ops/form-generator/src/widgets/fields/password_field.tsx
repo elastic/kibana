@@ -44,6 +44,7 @@ export const PasswordField: React.FC<PasswordWidgetProps> = ({
       helpText={helpText}
     >
       <EuiFieldPassword
+        aria-label={label}
         data-test-subj={fieldId}
         type={passwordType ?? 'dual'}
         value={value}

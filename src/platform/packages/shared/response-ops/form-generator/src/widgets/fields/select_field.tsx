@@ -56,6 +56,7 @@ export const SelectField: React.FC<SelectWidgetProps> = ({
 
   return (
     <EuiFormRow
+      aria-label={label}
       label={label}
       error={error}
       isInvalid={isInvalid}
