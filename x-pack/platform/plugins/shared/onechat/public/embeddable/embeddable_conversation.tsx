@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 import type { EmbeddableConversationInternalProps } from './types';
 import { EmbeddableConversationsProvider } from '../application/context/conversation/embeddable_conversations_provider';
 import { Conversation } from '../application/components/conversations/conversation';
-import { EmbeddableConversationHeader } from './embeddable_conversation_header';
+import { ConversationHeader } from '../application/components/conversations/conversation_header/conversation_header';
 
 export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInternalProps> = (
   props
@@ -25,8 +25,6 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
 
   const headerStyles = css`
     ${backgroundStyles}
-    display: flex;
-    align-items: center;
     &.euiFlyoutHeader {
       padding-inline: 0;
       padding-block-start: 0;
@@ -36,6 +34,7 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
   const bodyStyles = css`
     ${backgroundStyles}
     flex: 1;
+    padding: 0 ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.base};
 
     .euiFlyoutBody__overflow {
       overflow: hidden;
@@ -56,7 +55,7 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
   return (
     <EmbeddableConversationsProvider {...props}>
       <EuiFlyoutHeader css={headerStyles}>
-        <EmbeddableConversationHeader onClose={onClose} ariaLabelledBy={ariaLabelledBy} />
+        <ConversationHeader onClose={onClose} ariaLabelledBy={ariaLabelledBy} />
       </EuiFlyoutHeader>
       <EuiFlyoutBody css={bodyStyles}>
         <Conversation />
