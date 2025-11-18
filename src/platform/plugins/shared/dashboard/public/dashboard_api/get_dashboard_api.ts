@@ -91,11 +91,7 @@ export function getDashboardApi({
     incomingControlGroup
   );
 
-  const controlGroupManager = initializeControlGroupManager(
-    mergedControlGroupState,
-    getReferences,
-    viewModeManager.api.viewMode$.value
-  );
+  const controlGroupManager = initializeControlGroupManager(mergedControlGroupState, getReferences);
 
   const dataLoadingManager = initializeDataLoadingManager(layoutManager.api.children$);
   const dataViewsManager = initializeDataViewsManager(

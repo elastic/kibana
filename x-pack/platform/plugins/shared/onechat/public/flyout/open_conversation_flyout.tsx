@@ -66,7 +66,7 @@ export function openConversationFlyout(
     ),
     {
       'data-test-subj': 'onechat-conversation-flyout-wrapper',
-      ownFocus: false,
+      ownFocus: true,
       isResizable: true,
       type: 'push',
       hideCloseButton: true,

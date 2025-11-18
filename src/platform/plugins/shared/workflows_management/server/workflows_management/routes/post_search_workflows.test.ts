@@ -48,9 +48,11 @@ describe('POST /api/workflows/search', () => {
 
     it('should return workflow search results successfully', async () => {
       const mockSearchResults = {
-        page: 1,
-        size: 10,
-        total: 2,
+        _pagination: {
+          page: 0,
+          limit: 10,
+          total: 2,
+        },
         results: [
           {
             id: 'workflow-1',
@@ -88,8 +90,8 @@ describe('POST /api/workflows/search', () => {
       const mockContext = {};
       const mockRequest = {
         body: {
-          size: 10,
-          page: 1,
+          limit: 10,
+          page: 0,
           query: 'test',
           enabled: [true, false],
           createdBy: ['user1@example.com', 'user2@example.com'],
@@ -103,8 +105,8 @@ describe('POST /api/workflows/search', () => {
 
       expect(workflowsApi.getWorkflows).toHaveBeenCalledWith(
         {
-          size: 10,
-          page: 1,
+          limit: 10,
+          page: 0,
           query: 'test',
           enabled: [true, false],
           createdBy: ['user1@example.com', 'user2@example.com'],
@@ -121,8 +123,8 @@ describe('POST /api/workflows/search', () => {
       const mockContext = {};
       const mockRequest = {
         body: {
-          size: 10,
-          page: 1,
+          limit: 10,
+          page: 0,
         },
         headers: {},
         url: { pathname: '/api/workflows/search' },
@@ -141,9 +143,11 @@ describe('POST /api/workflows/search', () => {
 
     it('should work with different space contexts', async () => {
       const mockSearchResults = {
-        page: 1,
-        size: 10,
-        total: 1,
+        _pagination: {
+          page: 0,
+          limit: 10,
+          total: 1,
+        },
         results: [
           {
             id: 'workflow-1',
@@ -168,8 +172,8 @@ describe('POST /api/workflows/search', () => {
       const mockContext = {};
       const mockRequest = {
         body: {
-          size: 10,
-          page: 1,
+          limit: 10,
+          page: 0,
           query: 'space-specific',
         },
         headers: {},
@@ -181,8 +185,8 @@ describe('POST /api/workflows/search', () => {
 
       expect(workflowsApi.getWorkflows).toHaveBeenCalledWith(
         {
-          size: 10,
-          page: 1,
+          limit: 10,
+          page: 0,
           query: 'space-specific',
         },
         'custom-space'
@@ -199,8 +203,8 @@ describe('POST /api/workflows/search', () => {
       const mockContext = {};
       const mockRequest = {
         body: {
-          size: 10,
-          page: 1,
+          limit: 10,
+          page: 0,
         },
         headers: {},
         url: { pathname: '/api/workflows/search' },

@@ -12,7 +12,7 @@ import fs from 'fs';
 import fetch from 'node-fetch';
 import { createEsClientForTesting } from '@kbn/test';
 
-import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
+import { API_VERSIONS } from '../../common/constants';
 
 const plugin: Cypress.PluginConfig = (on, config) => {
   const client = createEsClientForTesting({

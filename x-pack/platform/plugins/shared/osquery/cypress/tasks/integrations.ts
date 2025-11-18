@@ -6,7 +6,7 @@
  */
 
 import satisfies from 'semver/functions/satisfies';
-import { API_VERSIONS } from '@kbn/osquery-plugin/common/constants';
+import { API_VERSIONS } from '../../common/constants';
 import { DEFAULT_POLICY } from '../screens/fleet';
 import {
   ADD_POLICY_BTN,

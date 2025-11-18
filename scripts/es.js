@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/setup-node-env');
+require('../src/setup_node_env');
 
 var resolve = require('path').resolve;
 var pkg = require('../package.json');

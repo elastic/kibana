@@ -17,7 +17,6 @@ import {
   CasesConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
-  WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import {
   ExternalIncidentServiceSecretConfigurationSchema,
@@ -78,7 +77,6 @@ export function getServiceNowITSMConnectorType(): ServiceNowConnectorType<
       CasesConnectorFeatureId,
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
-      WorkflowsConnectorFeatureId,
     ],
     validate: {
       config: {

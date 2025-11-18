@@ -15,7 +15,6 @@ import type {
   RenameProcessor,
   SetProcessor,
   DropDocumentProcessor,
-  ReplaceProcessor,
 } from '../../../../types/processors';
 import type { StreamlangDSL } from '../../../../types/streamlang';
 
@@ -39,18 +38,6 @@ export const comprehensiveTestDSL: StreamlangDSL = {
         eq: 404,
       },
     } as ConvertProcessor,
-    // Replace a string pattern
-    {
-      action: 'replace',
-      from: 'message',
-      pattern: 'error',
-      replacement: 'warning',
-      to: 'clean_message',
-      where: {
-        field: 'log_level',
-        eq: 'ERROR',
-      },
-    } as ReplaceProcessor,
     // Rename a field
     {
       action: 'rename',

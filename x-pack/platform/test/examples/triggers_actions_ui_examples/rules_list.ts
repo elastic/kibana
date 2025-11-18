@@ -28,8 +28,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('should load from shareable lazy loader', async () => {
-      await testSubjects.find('rulesListSection');
-      const exists = await testSubjects.exists('rulesListSection');
+      await testSubjects.find('rulesList');
+      const exists = await testSubjects.exists('rulesList');
       expect(exists).to.be(true);
     });
   });

@@ -16,8 +16,8 @@ import { useAbortController, useAbortableAsync } from '@kbn/react-hooks';
 import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../../hooks/use_kibana';
-import type { MappedSchemaField, SchemaField, SchemaEditorField } from '../types';
-import { convertToFieldDefinitionConfig, isFieldUncommitted } from '../utils';
+import type { MappedSchemaField, SchemaField } from '../types';
+import { convertToFieldDefinitionConfig } from '../utils';
 import { getFormattedError } from '../../../../util/errors';
 
 export const useSchemaFields = ({
@@ -225,18 +225,8 @@ export const useSchemaFields = ({
     refreshFields,
   ]);
 
-  // Mark fields with uncommitted property for display
-  const fieldsWithUncommittedStatus = useMemo<SchemaEditorField[]>(
-    () =>
-      fields.map((field) => ({
-        ...field,
-        uncommitted: isFieldUncommitted(field, storedFields),
-      })),
-    [fields, storedFields]
-  );
-
   return {
-    fields: fieldsWithUncommittedStatus,
+    fields,
     storedFields,
     isLoadingFields: isLoadingUnmappedFields || isLoadingDataViewFields,
     refreshFields,

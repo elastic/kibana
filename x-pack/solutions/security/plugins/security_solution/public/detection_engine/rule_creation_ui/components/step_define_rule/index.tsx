@@ -92,6 +92,7 @@ import { usePersistentQuery } from './use_persistent_query';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { usePersistentMachineLearningState } from './use_persistent_machine_learning_state';
 import { usePersistentThreatMatchState } from './use_persistent_threat_match_state';
+import { AiAssistantLabelAppend } from '../ai_assistant_label_append';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -114,6 +115,7 @@ export interface StepDefineRuleProps extends RuleStepProps {
   shouldLoadQueryDynamically: boolean;
   queryBarTitle: string | undefined;
   queryBarSavedId: string | null | undefined;
+  aiAssistedUserQuery?: string;
 }
 
 interface StepDefineRuleReadOnlyProps {
@@ -143,6 +145,7 @@ const RuleTypeEuiFormRow = styled(EuiFormRow).attrs<{ $isVisible: boolean }>(({ 
   },
 }))<{ $isVisible: boolean }>``;
 
+// eslint-disable-next-line complexity
 const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   dataSourceType,
   defaultSavedQuery,
@@ -160,6 +163,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   setIsQueryBarValid,
   shouldLoadQueryDynamically,
   threatIndex,
+  aiAssistedUserQuery,
 }) => {
   const [{ ruleType, queryBar, machineLearningJobId, threshold }] = useFormData<DefineStepRule>({
     form,
@@ -531,6 +535,12 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     [hasMlAdminPermissions, hasMlLicense, isUpdateView]
   );
 
+  const ruleContext = {
+    type: ruleType,
+    query: queryBar?.query?.query as string,
+    index,
+  };
+
   return (
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
@@ -584,19 +594,39 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   disabled={isLoading}
                   loading={isLoading}
                   onValidityChange={setIsQueryBarValid}
+                  labelAppend={
+                    aiAssistedUserQuery ? (
+                      <AiAssistantLabelAppend
+                        getFields={getFields}
+                        setFieldValue={form.setFieldValue}
+                        fieldName="queryBar"
+                        aiAssistedUserQuery={aiAssistedUserQuery}
+                        ruleContext={ruleContext}
+                        getValue={() =>
+                          (form.getFields().queryBar.value as DefineStepRule['queryBar']).query
+                            .query
+                        }
+                      />
+                    ) : (
+                      <></>
+                    )
+                  }
                 />
               ) : (
                 QueryBarMemo
               )}
             </>
           </RuleTypeEuiFormRow>
-          {!isMlRule(ruleType) && !isQueryBarValid && queryBar?.query?.query && (
-            <AiAssistant
-              getFields={form.getFields}
-              setFieldValue={form.setFieldValue}
-              language={queryBar?.query?.language}
-            />
-          )}
+          {!isMlRule(ruleType) &&
+            !isQueryBarValid &&
+            queryBar?.query?.query &&
+            !aiAssistedUserQuery && (
+              <AiAssistant
+                getFields={form.getFields}
+                setFieldValue={form.setFieldValue}
+                language={queryBar?.query?.language}
+              />
+            )}
           {isQueryRule(ruleType) && (
             <>
               <EuiSpacer size="s" />

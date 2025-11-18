@@ -36,14 +36,18 @@ export const initServicesRoute = (libs: InfraBackendLibs) => {
       const { from, to, size = 10, validatedFilters } = request.query;
 
       const apmDataAccessClient = getApmDataAccessClient({ request, libs, context });
+      const hasApmPrivileges = await apmDataAccessClient.hasPrivileges();
 
-      const apmDataAccessServices = await apmDataAccessClient.getServices();
-
-      if (!apmDataAccessServices) {
-        return response.ok({
-          body: ServicesAPIResponseRT.encode({ services: [] }),
+      if (!hasApmPrivileges) {
+        return response.customError({
+          statusCode: 403,
+          body: {
+            message: 'APM data access service is not available',
+          },
         });
       }
+
+      const apmDataAccessServices = await apmDataAccessClient.getServices();
 
       const apmDocumentSources = await apmDataAccessServices.getDocumentSources({
         start: from,
@@ -57,7 +61,6 @@ export const initServicesRoute = (libs: InfraBackendLibs) => {
         filters: validatedFilters!,
         size,
       });
-
       return response.ok({
         body: ServicesAPIResponseRT.encode(services),
       });

@@ -9,7 +9,6 @@ import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
 import { ONECHAT_USAGE_DOMAIN, trackLLMUsage as trackLLMUsageCounter } from './usage_counters';
-import { normalizeErrorType, sanitizeForCounterName } from './error_utils';
 /**
  * Tool call source - identifies where the tool was called from
  */
@@ -35,7 +34,6 @@ export enum ToolCallSource {
 export class TrackingService {
   // In-memory tracking for query times (request ID → start time)
   private queryStartTimes = new Map<string, number>();
-  private conversationsWithErrors = new Set<string>();
 
   constructor(private readonly usageCounter: UsageCounter, private readonly logger: Logger) {}
 
@@ -159,8 +157,8 @@ export class TrackingService {
       const normalizedProvider = provider || 'unknown';
       const normalizedModel = model || 'unknown';
 
-      const sanitizedProvider = sanitizeForCounterName(normalizedProvider);
-      const sanitizedModel = sanitizeForCounterName(normalizedModel);
+      const sanitizedProvider = normalizedProvider.replace(/[^a-zA-Z0-9_-]/g, '_');
+      const sanitizedModel = normalizedModel.replace(/[^a-zA-Z0-9_-]/g, '_');
 
       trackLLMUsageCounter(this.usageCounter, sanitizedProvider, sanitizedModel);
 
@@ -169,45 +167,6 @@ export class TrackingService {
       );
     } catch (error) {
       this.logger.error(`Failed to track LLM usage: ${error.message}`);
-    }
-  }
-
-  /**
-   * Track an error surfaced to users
-   * @param error - Error object
-   * @param conversationId - Optional conversation ID (used only to track unique conversations with errors, not logged/stored)
-   */
-  trackError(error: unknown, conversationId?: string): void {
-    try {
-      const errorType = normalizeErrorType(error);
-      const sanitizedType = sanitizeForCounterName(errorType);
-
-      this.usageCounter.incrementCounter({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_error_total`,
-        counterType: 'count',
-        incrementBy: 1,
-      });
-
-      this.usageCounter.incrementCounter({
-        counterName: `${ONECHAT_USAGE_DOMAIN}_error_by_type_${sanitizedType}`,
-        counterType: 'count',
-        incrementBy: 1,
-      });
-
-      if (conversationId && !this.conversationsWithErrors.has(conversationId)) {
-        this.conversationsWithErrors.add(conversationId);
-        this.usageCounter.incrementCounter({
-          counterName: `${ONECHAT_USAGE_DOMAIN}_error_conversations_with_errors`,
-          counterType: 'count',
-          incrementBy: 1,
-        });
-      }
-
-      this.logger.debug(`Tracked error: type=${sanitizedType}`);
-    } catch (err) {
-      this.logger.error(
-        `Failed to track error: ${err instanceof Error ? err.message : String(err)}`
-      );
     }
   }
 }

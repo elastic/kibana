@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/setup-node-env');
+require('../../../setup_node_env');
 
 const test = require('tape');
 

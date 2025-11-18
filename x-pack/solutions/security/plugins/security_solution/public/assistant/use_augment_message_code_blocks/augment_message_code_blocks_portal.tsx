@@ -63,6 +63,7 @@ export const AugmentMessageCodeBlocksPortal = () => {
               <AugmentMessageCodeBlockButton
                 currentConversation={currentConversation}
                 codeBlockDetails={codeBlock}
+                messageIndex={messageIndex}
               />
             </InPortal>
           );

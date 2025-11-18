@@ -244,7 +244,6 @@ function buildEuiGridColumn({
                 defaultMessage: 'Remove column',
               }),
               iconType: 'cross',
-              'data-test-subj': 'unifiedDataTableRemoveColumn',
             },
       showMoveLeft: !defaultColumns,
       showMoveRight: !defaultColumns,

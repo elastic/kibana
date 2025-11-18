@@ -17,6 +17,7 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    { "path": "../../../../../src/setup_node_env/tsconfig.json" },
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json
@@ -81,8 +82,6 @@
     "@kbn/core-saved-objects-api-server-internal",
     "@kbn/core-http-server-utils",
     "@kbn/spaces-utils",
-    "@kbn/core-http-server",
-    "@kbn/setup-node-env",
     "@kbn/core-http-server",
     "@kbn/react-query"
   ]

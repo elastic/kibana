@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-require('@kbn/setup-node-env');
+require('../../../../../../../src/setup_node_env');
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { bundle } = require('@kbn/openapi-bundler');
 // eslint-disable-next-line @typescript-eslint/no-var-requires

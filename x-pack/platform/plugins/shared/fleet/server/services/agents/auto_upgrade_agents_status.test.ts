@@ -76,27 +76,6 @@ describe('getAutoUpgradeAgentsStatus', () => {
             },
           },
           total: 15,
-        })
-        .mockResolvedValueOnce({
-          aggregations: {
-            action_id_versions: {
-              buckets: [
-                {
-                  key: ['0.0.1', '1.0.0', 'action-1'],
-                  doc_count: 1,
-                },
-                {
-                  key: ['1.0.0', '1.0.0', 'action-1'],
-                  doc_count: 2,
-                },
-                {
-                  key: ['0.0.1', '1.0.0', 'action-2'],
-                  doc_count: 2,
-                },
-              ],
-            },
-          },
-          total: 5,
         }),
     } as any;
 
@@ -113,10 +92,6 @@ describe('getAutoUpgradeAgentsStatus', () => {
               "action-1",
             ],
             "failedUpgradeAgents": 10,
-            "inProgressUpgradeActionIds": Array [
-              "action-1",
-            ],
-            "inProgressUpgradeAgents": 1,
             "version": "1.0.0",
           },
         ],

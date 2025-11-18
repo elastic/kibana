@@ -59,4 +59,3 @@ export const MISCONFIGURATION_HISTORY_ROW_TEST_ID =
   `${FLYOUT_HISTORY_TEST_ID}MisconfigurationRow` as const;
 export const VULNERABILITY_HISTORY_ROW_TEST_ID =
   `${FLYOUT_HISTORY_TEST_ID}VulnerabilityRow` as const;
-export const IOC_HISTORY_ROW_TEST_ID = `${FLYOUT_HISTORY_TEST_ID}IoCRow` as const;

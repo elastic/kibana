@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import {
   EuiDataGrid,
@@ -17,6 +17,7 @@ import {
   EuiProgress,
   EuiSpacer,
 } from '@elastic/eui';
+
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiDataGridColumn } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { useKibana } from '../../../../../common/lib/kibana';
@@ -29,6 +30,7 @@ import { RawIndicatorFieldId } from '../../../../../../common/threat_intelligenc
 import { EmptyState } from '../../../../components/empty_state';
 import type { IndicatorsTableContextValue } from '../../hooks/use_table_context';
 import { IndicatorsTableContext } from '../../hooks/use_table_context';
+import { IndicatorsFlyout } from '../flyout/flyout';
 import type { ColumnSettingsValue } from '../../hooks/use_column_settings';
 import { useToolbarOptions } from '../../hooks/use_toolbar_options';
 import { useFieldTypes } from '../../../../hooks/use_field_types';
@@ -78,6 +80,8 @@ export const IndicatorsTable: FC<IndicatorsTableProps> = ({
 
   const { read: hasAccessToTimeline } = extractTimelineCapabilities(capabilities);
 
+  const [expanded, setExpanded] = useState<Indicator>();
+
   const fieldTypes = useFieldTypes();
 
   const renderCellValue = useMemo(
@@ -91,8 +95,8 @@ export const IndicatorsTable: FC<IndicatorsTableProps> = ({
   );
 
   const indicatorTableContextValue = useMemo<IndicatorsTableContextValue>(
-    () => ({ indicators }),
-    [indicators]
+    () => ({ expanded, setExpanded, indicators }),
+    [expanded, indicators]
   );
 
   const start = pagination.pageIndex * pagination.pageSize;
@@ -147,6 +151,14 @@ export const IndicatorsTable: FC<IndicatorsTableProps> = ({
     onResetColumns: handleResetColumns,
     onToggleColumn: handleToggleColumn,
   });
+
+  const flyoutFragment = useMemo(
+    () =>
+      expanded ? (
+        <IndicatorsFlyout indicator={expanded} closeFlyout={() => setExpanded(undefined)} />
+      ) : null,
+    [expanded]
+  );
 
   const gridFragment = useMemo(() => {
     if (isLoading) {
@@ -215,7 +227,10 @@ export const IndicatorsTable: FC<IndicatorsTableProps> = ({
 
   return (
     <IndicatorsTableContext.Provider value={indicatorTableContextValue}>
-      <div css={{ position: 'relative' }}>{gridFragment}</div>
+      <div css={{ position: 'relative' }}>
+        {flyoutFragment}
+        {gridFragment}
+      </div>
     </IndicatorsTableContext.Provider>
   );
 };

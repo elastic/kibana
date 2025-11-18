@@ -1,0 +1,27 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "checkJs": true,
+    "module": "ESNext"
+  },
+  "include": [
+    "src/**/*.mjs",
+    "src/**/*.js",
+    "src/**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/babel-register",
+    "@kbn/repo-info",
+    "@kbn/yarn-lock-validator",
+    "@kbn/get-repo-files",
+    "@kbn/sort-package-json",
+    { "path": "../src/dev/tsconfig.json" },
+    "@kbn/ci-stats-reporter",
+    "@kbn/repo-packages",
+    "@kbn/some-dev-log",
+  ]
+}

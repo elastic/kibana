@@ -150,7 +150,6 @@ export class FeatureClient {
           },
         };
       }),
-      throwOnFail: true,
     });
   }
 

@@ -15,11 +15,6 @@ import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 
 import {
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-} from '@kbn/detections-response-ftr-services';
-import {
   fetchRule,
   createExceptionList,
   removeServerGeneratedProperties,
@@ -29,6 +24,11 @@ import {
   getPrebuiltRulesAndTimelinesStatus,
   SAMPLE_PREBUILT_RULES,
 } from '../../../../utils';
+import {
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../../config/services/detections_response';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 

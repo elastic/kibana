@@ -746,60 +746,6 @@ paths:
       tags:
         - Security Entity Analytics API
   /api/entity_store/engines:
-    delete:
-      operationId: DeleteEntityEngines
-      parameters:
-        - description: >-
-            The entity type of the engine ('user', 'host', 'service',
-            'generic').
-          examples:
-            hostAndService:
-              value: host,service
-          in: query
-          name: entityTypes
-          required: false
-          schema:
-            description: >-
-              Array of engine types to delete. Empty by default, which results
-              in all the engines being deleted.
-            items:
-              $ref: '#/components/schemas/EntityType'
-            type: array
-        - description: Control flag to also delete the entity data.
-          in: query
-          name: delete_data
-          required: false
-          schema:
-            type: boolean
-      responses:
-        '200':
-          content:
-            application/json:
-              examples:
-                deleteEntityEnginesExample:
-                  description: Example response after deleting 'host' engine
-                  value:
-                    deleted:
-                      - host
-                    still_running:
-                      - generic
-                      - user
-                      - service
-              schema:
-                type: object
-                properties:
-                  deleted:
-                    items:
-                      $ref: '#/components/schemas/EntityType'
-                    type: array
-                  still_running:
-                    items:
-                      $ref: '#/components/schemas/EntityType'
-                    type: array
-          description: Successful response
-      summary: Delete Entity Engines
-      tags:
-        - Security Entity Analytics API
     get:
       operationId: ListEntityEngines
       responses:
@@ -824,22 +770,12 @@ paths:
       operationId: DeleteEntityEngine
       parameters:
         - description: The entity type of the engine (either 'user' or 'host').
-          examples:
-            host:
-              value: host
           in: path
           name: entityType
           required: true
           schema:
             $ref: '#/components/schemas/EntityType'
         - description: Control flag to also delete the entity data.
-          in: query
-          name: delete_data
-          required: false
-          schema:
-            type: boolean
-        - deprecated: true
-          description: Control flag to also delete the entity data.
           in: query
           name: data
           required: false
@@ -849,11 +785,6 @@ paths:
         '200':
           content:
             application/json:
-              examples:
-                deleteEntityEngineExample:
-                  description: Example response after deleting 'host' engine
-                  value:
-                    deleted: true
               schema:
                 type: object
                 properties:

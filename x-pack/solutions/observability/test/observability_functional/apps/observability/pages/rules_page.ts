@@ -303,7 +303,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
 
       it('shows the rules table ', async () => {
-        await testSubjects.existOrFail('rulesListSection');
+        await testSubjects.existOrFail('rulesList');
         await testSubjects.waitForDeleted('centerJustifiedSpinner');
         const tableRows = await find.allByCssSelector('.euiTableRow');
         const rows = await getRulesList(tableRows);

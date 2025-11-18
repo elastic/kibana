@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../../../ftr_provider_context';
 import { deleteAllPrebuiltRuleAssets } from '../../../../../../utils';
+import { deleteAllRules } from '../../../../../../../../config/services/detections_response';
 import { nameField } from './name';
 import { descriptionField } from './description';
 import { tagsField } from './tags';

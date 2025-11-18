@@ -40,7 +40,7 @@ class SecurityTelemetry {
   private readonly privilegeRegistrationDuration: Histogram<Attributes>;
 
   constructor() {
-    this.loginDuration = this.meter.createHistogram('auth.login.duration', {
+    this.loginDuration = this.meter.createHistogram('auth.saml.login.duration', {
       description: 'Duration of login attempts',
       unit: 'ms',
       valueType: ValueType.DOUBLE,

@@ -33,7 +33,6 @@ import { isSpaceAwarenessEnabled } from '../spaces/helpers';
 import { DEFAULT_NAMESPACES_FILTER, isAgentInNamespace } from '../spaces/agent_namespaces';
 import { addNamespaceFilteringToQuery } from '../spaces/query_namespaces_filtering';
 import { createEsSearchIterable } from '../utils/create_es_search_iterable';
-import { retryTransientEsErrors } from '../epm/elasticsearch/retry';
 
 import { searchHitToAgent, agentSOAttributesToFleetServerAgentDoc } from './helpers';
 import { buildAgentStatusRuntimeField } from './build_status_runtime_field';
@@ -52,7 +51,7 @@ export function _joinFilters(
   try {
     return filters
       .filter((filter) => filter !== undefined)
-      .reduce<KueryNode | undefined>(
+      .reduce(
         (
           acc: KueryNode | undefined,
           kuery: string | KueryNode | undefined
@@ -73,7 +72,7 @@ export function _joinFilters(
             arguments: [acc, kueryNode],
           };
         },
-        undefined
+        undefined as KueryNode | undefined
       );
   } catch (err) {
     throw new FleetError(`Kuery is malformed: ${err.message}`);
@@ -124,12 +123,10 @@ export async function openPointInTime(
   keepAlive: string = '10m',
   index: string = AGENTS_INDEX
 ): Promise<string> {
-  const pitRes = await retryTransientEsErrors(() =>
-    esClient.openPointInTime({
-      index,
-      keep_alive: keepAlive,
-    })
-  );
+  const pitRes = await esClient.openPointInTime({
+    index,
+    keep_alive: keepAlive,
+  });
 
   auditLoggingService.writeCustomAuditLog({
     message: `User opened point in time query [index=${index}] [keepAlive=${keepAlive}] [pitId=${pitRes.id}]`,
@@ -144,7 +141,7 @@ export async function closePointInTime(esClient: ElasticsearchClient, pitId: str
   });
 
   try {
-    await retryTransientEsErrors(() => esClient.closePointInTime({ id: pitId }));
+    await esClient.closePointInTime({ id: pitId });
   } catch (error) {
     appContextService
       .getLogger()
@@ -177,20 +174,18 @@ export async function getAgentTags(
   const query = kueryNode ? { query: toElasticsearchQuery(kueryNode) } : {};
   const runtimeFields = await buildAgentStatusRuntimeField(soClient);
   try {
-    const result = await retryTransientEsErrors(() =>
-      esClient.search<{}, { tags: { buckets: Array<{ key: string }> } }>({
-        index: AGENTS_INDEX,
-        size: 0,
-        ...query,
-        fields: Object.keys(runtimeFields),
-        runtime_mappings: runtimeFields,
-        aggs: {
-          tags: {
-            terms: { field: 'tags', size: SO_SEARCH_LIMIT },
-          },
+    const result = await esClient.search<{}, { tags: { buckets: Array<{ key: string }> } }>({
+      index: AGENTS_INDEX,
+      size: 0,
+      ...query,
+      fields: Object.keys(runtimeFields),
+      runtime_mappings: runtimeFields,
+      aggs: {
+        tags: {
+          terms: { field: 'tags', size: SO_SEARCH_LIMIT },
         },
-      })
-    );
+      },
+    });
     const buckets = result.aggregations?.tags.buckets;
     return (buckets?.map((bucket) => bucket.key) ?? []).sort((a, b) =>
       a.toLowerCase().localeCompare(b.toLowerCase())
@@ -351,10 +346,8 @@ export async function getAgentsByKuery(
   let res;
 
   try {
-    res = await retryTransientEsErrors(() =>
-      queryAgents(
-        searchAfter ? { searchAfter, size: perPage } : { from: (page - 1) * perPage, size: perPage }
-      )
+    res = await queryAgents(
+      searchAfter ? { searchAfter, size: perPage } : { from: (page - 1) * perPage, size: perPage }
     );
   } catch (err) {
     appContextService.getLogger().error(`Error getting agents by kuery: ${JSON.stringify(err)}`);
@@ -571,20 +564,18 @@ async function _filterAgents(
 
   let res;
   try {
-    res = await retryTransientEsErrors(async () =>
-      esClient.search<FleetServerAgent, {}>({
-        from: (page - 1) * perPage,
-        size: perPage,
-        track_total_hits: true,
-        rest_total_hits_as_int: true,
-        runtime_mappings: runtimeFields,
-        fields: Object.keys(runtimeFields),
-        sort: [{ [sortField]: { order: sortOrder } }],
-        query: await addNamespaceFilteringToQuery({ bool: { filter: [query] } }, currentSpaceId),
-        index: AGENTS_INDEX,
-        ignore_unavailable: true,
-      })
-    );
+    res = await esClient.search<FleetServerAgent, {}>({
+      from: (page - 1) * perPage,
+      size: perPage,
+      track_total_hits: true,
+      rest_total_hits_as_int: true,
+      runtime_mappings: runtimeFields,
+      fields: Object.keys(runtimeFields),
+      sort: [{ [sortField]: { order: sortOrder } }],
+      query: await addNamespaceFilteringToQuery({ bool: { filter: [query] } }, currentSpaceId),
+      index: AGENTS_INDEX,
+      ignore_unavailable: true,
+    });
   } catch (err) {
     appContextService.getLogger().error(`Error querying agents: ${JSON.stringify(err)}`);
     throw err;
@@ -640,26 +631,24 @@ export async function getAgentVersionsForAgentPolicyIds(
   try {
     const {
       hits: { hits },
-    } = await retryTransientEsErrors(() =>
-      esClient.search<
-        FleetServerAgent,
-        Record<'agent_versions', { buckets: Array<{ key: string; doc_count: number }> }>
-      >({
-        query: {
-          bool: {
-            filter: [
-              {
-                terms: {
-                  policy_id: agentPolicyIds,
-                },
+    } = await esClient.search<
+      FleetServerAgent,
+      Record<'agent_versions', { buckets: Array<{ key: string; doc_count: number }> }>
+    >({
+      query: {
+        bool: {
+          filter: [
+            {
+              terms: {
+                policy_id: agentPolicyIds,
               },
-            ],
-          },
+            },
+          ],
         },
-        index: AGENTS_INDEX,
-        ignore_unavailable: true,
-      })
-    );
+      },
+      index: AGENTS_INDEX,
+      ignore_unavailable: true,
+    });
 
     const groupedHits = groupBy(hits, (hit) => hit._source?.policy_id);
 
@@ -723,14 +712,12 @@ export async function updateAgent(
     message: `User updated agent [id=${agentId}]`,
   });
 
-  await retryTransientEsErrors(() =>
-    esClient.update({
-      id: agentId,
-      index: AGENTS_INDEX,
-      doc: agentSOAttributesToFleetServerAgentDoc(data),
-      refresh: 'wait_for',
-    })
-  );
+  await esClient.update({
+    id: agentId,
+    index: AGENTS_INDEX,
+    doc: agentSOAttributesToFleetServerAgentDoc(data),
+    refresh: 'wait_for',
+  });
 }
 
 export async function bulkUpdateAgents(
@@ -757,13 +744,11 @@ export async function bulkUpdateAgents(
     },
   ]);
 
-  const res = await retryTransientEsErrors(() =>
-    esClient.bulk({
-      operations,
-      index: AGENTS_INDEX,
-      refresh: 'wait_for',
-    })
-  );
+  const res = await esClient.bulk({
+    operations,
+    index: AGENTS_INDEX,
+    refresh: 'wait_for',
+  });
 
   res.items
     .filter((item) => item.update!.error)
@@ -775,13 +760,11 @@ export async function bulkUpdateAgents(
 
 export async function deleteAgent(esClient: ElasticsearchClient, agentId: string) {
   try {
-    await retryTransientEsErrors(() =>
-      esClient.update({
-        id: agentId,
-        index: AGENTS_INDEX,
-        doc: { active: false },
-      })
-    );
+    await esClient.update({
+      id: agentId,
+      index: AGENTS_INDEX,
+      doc: { active: false },
+    });
   } catch (err) {
     if (isESClientError(err) && err.meta.statusCode === 404) {
       throw new AgentNotFoundError('Agent not found');
@@ -792,12 +775,10 @@ export async function deleteAgent(esClient: ElasticsearchClient, agentId: string
 
 async function _getAgentDocById(esClient: ElasticsearchClient, agentId: string) {
   try {
-    const res = await retryTransientEsErrors(() =>
-      esClient.get<FleetServerAgent>({
-        id: agentId,
-        index: AGENTS_INDEX,
-      })
-    );
+    const res = await esClient.get<FleetServerAgent>({
+      id: agentId,
+      index: AGENTS_INDEX,
+    });
 
     if (!res._source) {
       throw new AgentNotFoundError(`Agent ${agentId} not found`);

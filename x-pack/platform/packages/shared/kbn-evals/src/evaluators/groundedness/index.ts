@@ -12,24 +12,6 @@ import type { Evaluator } from '../../types';
 import { LlmGroundednessEvaluationPrompt } from './prompt';
 import { calculateGroundednessScore } from './scoring';
 import type { GroundednessAnalysis } from './types';
-import { parseSelectedEvaluators } from '../filter';
-
-const QUALITATIVE_EVALUATOR_NAME = 'Groundedness Analysis';
-const QUANTITATIVE_EVALUATOR_NAME = 'Groundedness';
-
-/**
- * Avoiding cost and lantecy by running qualitative analysis only when either qualitative or quantitative evaluator for groundedness is selected,
- */
-function shouldRunGroundednessAnalysis() {
-  const evaluatorSelection = parseSelectedEvaluators();
-
-  return (
-    // Default to running qualitative analysis if no specific evaluators are selected
-    !evaluatorSelection ||
-    evaluatorSelection.includes(QUALITATIVE_EVALUATOR_NAME) ||
-    evaluatorSelection.includes(QUANTITATIVE_EVALUATOR_NAME)
-  );
-}
 
 export function createGroundednessAnalysisEvaluator({
   inferenceClient,
@@ -40,10 +22,6 @@ export function createGroundednessAnalysisEvaluator({
 }): Evaluator {
   return {
     evaluate: async ({ input, output }) => {
-      if (!shouldRunGroundednessAnalysis()) {
-        return {};
-      }
-
       async function runGroundednessAnalysis(): Promise<GroundednessAnalysis> {
         const userQuery = (input as any)?.question;
         const messages = (output as any)?.messages ?? [];
@@ -105,7 +83,7 @@ export function createGroundednessAnalysisEvaluator({
       };
     },
     kind: 'LLM',
-    name: QUALITATIVE_EVALUATOR_NAME,
+    name: 'Groundedness Analysis',
   };
 }
 
@@ -135,6 +113,6 @@ export function createQuantitativeGroundednessEvaluator(): Evaluator {
       };
     },
     kind: 'LLM',
-    name: QUANTITATIVE_EVALUATOR_NAME,
+    name: 'Groundedness',
   };
 }

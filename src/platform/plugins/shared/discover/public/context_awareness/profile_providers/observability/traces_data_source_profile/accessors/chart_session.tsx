@@ -26,7 +26,7 @@ export const createChartSection = (
           <TraceMetricsGrid {...props} dataSource={dataSource} />
         ),
         replaceDefaultChart: true,
-        defaultTopPanelHeight: 300,
+        defaultTopPanelHeight: 'max-content',
       };
     })
   );

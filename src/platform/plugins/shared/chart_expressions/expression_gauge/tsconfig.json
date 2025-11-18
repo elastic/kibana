@@ -10,6 +10,7 @@
     "server/**/*",
   ],
   "kbn_references": [
+    { "path": "../tsconfig.json" },
     "@kbn/core",
     "@kbn/expressions-plugin",
     "@kbn/usage-collection-plugin",

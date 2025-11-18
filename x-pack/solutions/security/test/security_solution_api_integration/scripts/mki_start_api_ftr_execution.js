@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-require('@kbn/setup-node-env');
+require('../../../../../../src/setup_node_env');
 require('./mki_api_ftr_execution').cli();

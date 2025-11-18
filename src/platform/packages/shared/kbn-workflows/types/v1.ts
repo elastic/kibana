@@ -179,9 +179,13 @@ export type WorkflowExecutionListItemDto = Omit<
 
 export interface WorkflowExecutionListDto {
   results: WorkflowExecutionListItemDto[];
-  page: number;
-  size: number;
-  total: number;
+  _pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    next?: string;
+    prev?: string;
+  };
 }
 
 // TODO: convert to actual elastic document spec
@@ -224,8 +228,8 @@ export const UpdateWorkflowCommandSchema = z.object({
 
 export const SearchWorkflowCommandSchema = z.object({
   triggerType: z.string().optional(),
-  size: z.number().default(100),
-  page: z.number().default(1),
+  limit: z.number().default(100),
+  page: z.number().default(0),
   createdBy: z.array(z.string()).optional(),
   // bool or number transformed to boolean
   enabled: z.array(z.union([z.boolean(), z.number().transform((val) => val === 1)])).optional(),
@@ -299,9 +303,13 @@ export interface WorkflowListItemDto {
 }
 
 export interface WorkflowListDto {
-  page: number;
-  size: number;
-  total: number;
+  _pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    next?: string;
+    prev?: string;
+  };
   results: WorkflowListItemDto[];
 }
 export interface WorkflowExecutionEngineModel
@@ -366,6 +374,8 @@ export interface ConnectorTypeInfo {
   subActions: ConnectorSubAction[];
 }
 
+export type ConnectorTypeInfoMinimal = Pick<ConnectorTypeInfo, 'actionTypeId' | 'displayName'>;
+
 export interface ConnectorContract {
   type: string;
   paramsSchema: z.ZodType;
@@ -424,7 +434,7 @@ export interface EnhancedInternalConnectorContract extends InternalConnectorCont
 export type ConnectorContractUnion = DynamicConnectorContract | EnhancedInternalConnectorContract;
 
 export interface WorkflowsSearchParams {
-  size: number;
+  limit: number;
   page: number;
   query?: string;
   createdBy?: string[];

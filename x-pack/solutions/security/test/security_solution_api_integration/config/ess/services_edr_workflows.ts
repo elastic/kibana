@@ -14,9 +14,9 @@ import { SecuritySolutionApiProvider as DetectionsApiProvider } from '@kbn/secur
 import { SecuritySolutionApiProvider as EntityAnalyticsApiProvider } from '@kbn/security-solution-test-api-clients/supertest/entity_analytics.gen';
 import { SecuritySolutionApiProvider as ExceptionsApiProvider } from '@kbn/security-solution-test-api-clients/supertest/exceptions.gen';
 
-import { EndpointTestResourcesProvider } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint';
-import { EndpointArtifactsTestResourcesProvider } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_artifacts';
-import { EndpointPolicyTestResourcesProvider } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_policy';
+import { EndpointTestResourcesProvider } from '../../../security_solution_endpoint/services/endpoint';
+import { EndpointArtifactsTestResourcesProvider } from '../../../security_solution_endpoint/services/endpoint_artifacts';
+import { EndpointPolicyTestResourcesProvider } from '../../../security_solution_endpoint/services/endpoint_policy';
 
 import { ResolverGeneratorProvider } from '../services/security_solution_edr_workflows_resolver';
 import { RolesUsersProvider } from '../services/security_solution_edr_workflows_roles_users';

@@ -8,7 +8,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 
-import { countDownTest } from '@kbn/detections-response-ftr-services';
+import { countDownTest } from '../../../../config/services/detections_response';
 import { getConversationsApis } from './apis';
 import { getSimpleConversation } from '../mocks';
 

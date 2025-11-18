@@ -1,0 +1,43 @@
+openapi: 3.0.0
+info:
+  title: AI assisted rule creation API endpoints
+  version: '1'
+paths:
+  /internal/detection_engine/ai_assisted/_create:
+    summary: Suggests user profiles based on provided search term
+    post:
+      x-labels: [ess, serverless]
+      x-internal: true
+      x-codegen-enabled: true
+      operationId: AIAssistedCreateRule
+      description: AI assisted rule creation
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - user_query
+                - connector_id
+              properties:
+                user_query:
+                  type: string
+                  description: The user query to assist in rule creation.
+                connector_id:
+                  type: string
+                  description: The ID of the connector to use for rule creation.
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  rule:
+                    $ref: '../model/rule_schema/rule_schemas.schema.yaml#/components/schemas/RuleResponse'
+                required:
+                  - rule
+        400:
+          description: Invalid request.

@@ -26,6 +26,7 @@ interface EsqlQueryEditProps {
   loading?: boolean;
   disabled?: boolean;
   onValidityChange?: (arg: boolean) => void;
+  labelAppend?: React.JSX.Element;
 }
 
 export const EsqlQueryEdit = memo(function EsqlQueryEdit({
@@ -36,6 +37,7 @@ export const EsqlQueryEdit = memo(function EsqlQueryEdit({
   loading = false,
   disabled = false,
   onValidityChange,
+  labelAppend,
 }: EsqlQueryEditProps): JSX.Element {
   const queryClient = useQueryClient();
   const componentProps = useMemo(
@@ -52,7 +54,13 @@ export const EsqlQueryEdit = memo(function EsqlQueryEdit({
   const fieldConfig: FieldConfig<FieldValueQueryBar> = useMemo(
     () => ({
       label: i18n.ESQL_QUERY,
-      labelAppend: <EsqlInfoIcon />,
+      labelAppend: (
+        <div>
+          {labelAppend ?? null}
+          {'   '}
+          <EsqlInfoIcon />
+        </div>
+      ),
       fieldsToValidateOnChange: fieldsToValidateOnChange
         ? [path, fieldsToValidateOnChange].flat()
         : undefined,
@@ -70,7 +78,8 @@ export const EsqlQueryEdit = memo(function EsqlQueryEdit({
         },
       ],
     }),
-    [required, path, fieldsToValidateOnChange, queryClient]
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [fieldsToValidateOnChange, path, required, queryClient]
   );
 
   return (

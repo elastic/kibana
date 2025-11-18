@@ -7,10 +7,7 @@
 
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import {
-  SecurityConnectorFeatureId,
-  WorkflowsConnectorFeatureId,
-} from '@kbn/actions-plugin/common';
+import { SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import type { Config, Secrets } from '@kbn/connector-schemas/xsoar';
 import {
@@ -30,7 +27,7 @@ export function getConnectorType(): XSOARConnectorType {
     minimumLicenseRequired: 'platinum',
     name: CONNECTOR_NAME,
     getService: (params) => new XSOARConnector(params),
-    supportedFeatureIds: [SecurityConnectorFeatureId, WorkflowsConnectorFeatureId],
+    supportedFeatureIds: [SecurityConnectorFeatureId],
     schema: {
       config: ConfigSchema,
       secrets: SecretsSchema,

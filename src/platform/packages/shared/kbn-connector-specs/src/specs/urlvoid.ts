@@ -30,7 +30,7 @@ export const URLVoidConnector: ConnectorSpec = {
     displayName: 'URLVoid',
     description: 'Domain and URL reputation checking via multi-engine scanning',
     minimumLicense: 'gold',
-    supportedFeatureIds: ['workflows'],
+    supportedFeatureIds: ['alerting', 'siem'],
   },
 
   schema: z.discriminatedUnion('method', [

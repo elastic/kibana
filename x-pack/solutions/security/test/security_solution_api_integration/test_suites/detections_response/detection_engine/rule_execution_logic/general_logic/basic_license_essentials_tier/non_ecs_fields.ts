@@ -7,16 +7,16 @@
 
 import expect from 'expect';
 import {
-  deleteAllRules,
-  deleteAllAlerts,
-  getRuleForAlertTesting,
-} from '@kbn/detections-response-ftr-services';
-import {
   getPreviewAlerts,
   previewRule,
   dataGeneratorFactory,
   enhanceDocument,
 } from '../../../../utils';
+import {
+  deleteAllRules,
+  deleteAllAlerts,
+  getRuleForAlertTesting,
+} from '../../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 const getQueryRule = (docIdToQuery: string) => ({

@@ -15,7 +15,7 @@ import {
   API_VERSIONS,
 } from '@kbn/security-solution-plugin/common/constants';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { routeWithNamespace } from '@kbn/detections-response-ftr-services';
+import { routeWithNamespace } from '../../../config/services/detections_response';
 
 export const entityAnalyticsRouteHelpersFactory = (
   supertest: SuperTest.Agent,

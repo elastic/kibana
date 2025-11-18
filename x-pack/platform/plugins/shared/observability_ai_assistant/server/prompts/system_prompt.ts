@@ -59,7 +59,7 @@ export function getSystemPrompt({
     // Section One: Core Introduction
     promptSections.push(
       dedent(`
-        # System Prompt: Elastic ${isObservabilityDeployment ? 'Observability ' : ''}Assistant
+        # System Prompt: Elastic Observability Assistant
 
         <RoleAndGoal>
 

@@ -16,7 +16,7 @@ import {
 } from '@kbn/alerting-plugin/common';
 import type { ScheduleBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/schedule';
 import type { FindBackfillResponse } from '@kbn/alerting-plugin/common/routes/backfill/apis/find';
-import { waitFor } from '@kbn/detections-response-ftr-services';
+import { waitFor } from '../../../../config/services/detections_response';
 export interface TimeRange {
   startDate: moment.Moment;
   endDate: moment.Moment;

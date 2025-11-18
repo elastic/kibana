@@ -12,11 +12,14 @@
 
 import { validate as validateUuid } from 'uuid';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { ActionsClient, IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 
 export class ConnectorExecutor {
-  constructor(private actionsClient: ActionsClient) {}
+  constructor(
+    private actionsClient: IUnsecuredActionsClient | ActionsClient,
+    private isScoped: boolean = false
+  ) {}
 
   public async execute(
     connectorType: string,
@@ -52,9 +55,18 @@ export class ConnectorExecutor {
   ): Promise<ActionTypeExecutorResult<unknown>> {
     const connectorId = await this.resolveConnectorId(connectorName, spaceId);
 
-    return (this.actionsClient as ActionsClient).execute({
-      actionId: connectorId,
+    if (this.isScoped) {
+      return (this.actionsClient as ActionsClient).execute({
+        actionId: connectorId,
+        params: connectorParams,
+      });
+    }
+
+    return (this.actionsClient as IUnsecuredActionsClient).execute({
+      id: connectorId,
       params: connectorParams,
+      spaceId,
+      requesterId: 'background_task',
     });
   }
 
@@ -63,7 +75,9 @@ export class ConnectorExecutor {
       return connectorName;
     }
 
-    const allConnectors = await (this.actionsClient as ActionsClient).getAll();
+    const allConnectors = this.isScoped
+      ? await (this.actionsClient as ActionsClient).getAll()
+      : await (this.actionsClient as IUnsecuredActionsClient).getAll(spaceId);
 
     const connector = allConnectors.find(
       (c: ConnectorWithExtraFindData) => c.name === connectorName

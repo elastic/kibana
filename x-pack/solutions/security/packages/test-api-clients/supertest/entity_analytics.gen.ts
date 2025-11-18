@@ -40,7 +40,6 @@ import type { DeleteAssetCriticalityRecordRequestQueryInput } from '@kbn/securit
 import type {
   DeleteEntityEngineRequestQueryInput,
   DeleteEntityEngineRequestParamsInput,
-  DeleteEntityEnginesRequestQueryInput,
 } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/delete.gen';
 import type { DeleteMonitoringEngineRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/engine/delete.gen';
 import type { DeletePrivMonUserRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/monitoring/users/delete.gen';
@@ -207,14 +206,6 @@ If a record already exists for the specified entity, that record is overwritten 
           kibanaSpace
         )
       )
-      .set('kbn-xsrf', 'true')
-      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-      .query(props.query);
-  },
-  deleteEntityEngines(props: DeleteEntityEnginesProps, kibanaSpace: string = 'default') {
-    return supertest
-      .delete(getRouteUrlForSpace('/api/entity_store/engines', kibanaSpace))
       .set('kbn-xsrf', 'true')
       .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
@@ -734,9 +725,6 @@ export interface DeleteAssetCriticalityRecordProps {
 export interface DeleteEntityEngineProps {
   query: DeleteEntityEngineRequestQueryInput;
   params: DeleteEntityEngineRequestParamsInput;
-}
-export interface DeleteEntityEnginesProps {
-  query: DeleteEntityEnginesRequestQueryInput;
 }
 export interface DeleteEntitySourceProps {
   params: DeleteEntitySourceRequestParamsInput;

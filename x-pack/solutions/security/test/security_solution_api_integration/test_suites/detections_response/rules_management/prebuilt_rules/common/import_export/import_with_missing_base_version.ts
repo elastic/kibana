@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import {
   createHistoricalPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,
@@ -14,6 +13,7 @@ import {
   importRulesWithSuccess,
   assertImportedRule,
 } from '../../../../utils';
+import { deleteAllRules } from '../../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {

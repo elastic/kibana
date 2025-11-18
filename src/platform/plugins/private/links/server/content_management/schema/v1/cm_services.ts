@@ -41,27 +41,21 @@ export const dashboardLinkSchema = schema.object({
   options: schema.maybe(
     schema.object(
       {
-        openInNewTab: schema.maybe(
-          schema.boolean({
-            meta: {
-              description: 'Whether to open this link in a new tab when clicked',
-            },
-          })
-        ),
-        useCurrentFilters: schema.maybe(
-          schema.boolean({
-            meta: {
-              description: 'Whether to use the filters and query from the origin dashboard',
-            },
-          })
-        ),
-        useCurrentDateRange: schema.maybe(
-          schema.boolean({
-            meta: {
-              description: 'Whether to use the date range from the origin dashboard',
-            },
-          })
-        ),
+        openInNewTab: schema.boolean({
+          meta: {
+            description: 'Whether to open this link in a new tab when clicked',
+          },
+        }),
+        useCurrentFilters: schema.boolean({
+          meta: {
+            description: 'Whether to use the filters and query from the origin dashboard',
+          },
+        }),
+        useCurrentDateRange: schema.boolean({
+          meta: {
+            description: 'Whether to use the date range from the origin dashboard',
+          },
+        }),
       },
       { unknowns: 'forbid' }
     )
@@ -75,20 +69,16 @@ export const externalLinkSchema = schema.object({
   options: schema.maybe(
     schema.object(
       {
-        openInNewTab: schema.maybe(
-          schema.boolean({
-            meta: {
-              description: 'Whether to open this link in a new tab when clicked',
-            },
-          })
-        ),
-        encodeUrl: schema.maybe(
-          schema.boolean({
-            meta: {
-              description: 'Whether to escape the URL with percent encoding',
-            },
-          })
-        ),
+        openInNewTab: schema.boolean({
+          meta: {
+            description: 'Whether to open this link in a new tab when clicked',
+          },
+        }),
+        encodeUrl: schema.boolean({
+          meta: {
+            description: 'Whether to escape the URL with percent encoding',
+          },
+        }),
       },
       { unknowns: 'forbid' }
     )

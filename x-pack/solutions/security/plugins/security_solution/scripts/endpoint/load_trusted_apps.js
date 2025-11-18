@@ -7,5 +7,5 @@
  * 2.0.
  */
 
-require('@kbn/setup-node-env');
+require('../../../../../../../src/setup_node_env');
 require('./trusted_apps').cli();

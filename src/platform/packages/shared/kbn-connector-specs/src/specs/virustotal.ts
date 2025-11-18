@@ -29,7 +29,7 @@ export const VirusTotalConnector: ConnectorSpec = {
     displayName: 'VirusTotal',
     description: 'File scanning, URL analysis, and threat intelligence lookups',
     minimumLicense: 'gold',
-    supportedFeatureIds: ['workflows'],
+    supportedFeatureIds: ['alerting', 'siem'],
   },
 
   schema: z.discriminatedUnion('method', [

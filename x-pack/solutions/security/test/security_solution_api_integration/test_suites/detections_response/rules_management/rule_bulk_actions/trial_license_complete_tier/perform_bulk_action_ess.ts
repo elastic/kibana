@@ -16,7 +16,7 @@ import {
   createRule,
   deleteAllRules,
   waitForRuleSuccess,
-} from '@kbn/detections-response-ftr-services';
+} from '../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   binaryToString,

@@ -48,9 +48,11 @@ describe('GET /api/workflowExecutions', () => {
 
     it('should return workflow executions successfully', async () => {
       const mockExecutions = {
-        page: 1,
-        size: 10,
-        total: 2,
+        _pagination: {
+          page: 1,
+          limit: 10,
+          total: 2,
+        },
         results: [
           {
             id: 'execution-123',
@@ -103,7 +105,7 @@ describe('GET /api/workflowExecutions', () => {
           workflowId: 'workflow-123',
           statuses: ['completed', 'failed'],
           page: 1,
-          size: 10,
+          perPage: 10,
         },
         headers: {},
         url: { pathname: '/api/workflowExecutions' },
@@ -117,7 +119,7 @@ describe('GET /api/workflowExecutions', () => {
           workflowId: 'workflow-123',
           statuses: ['completed', 'failed'],
           page: 1,
-          size: 10,
+          perPage: 10,
         },
         'default'
       );
@@ -150,9 +152,11 @@ describe('GET /api/workflowExecutions', () => {
 
     it('should work with different space contexts', async () => {
       const mockExecutions = {
-        page: 1,
-        size: 10,
-        total: 1,
+        _pagination: {
+          page: 1,
+          limit: 10,
+          total: 1,
+        },
         results: [
           {
             id: 'execution-789',
@@ -189,7 +193,7 @@ describe('GET /api/workflowExecutions', () => {
           workflowId: 'workflow-123',
           statuses: ['completed'],
           page: undefined,
-          size: undefined,
+          perPage: undefined,
         },
         'custom-space'
       );
@@ -224,9 +228,11 @@ describe('GET /api/workflowExecutions', () => {
 
     it('should handle pagination parameters', async () => {
       const mockExecutions = {
-        page: 2,
-        size: 5,
-        total: 15,
+        _pagination: {
+          page: 2,
+          limit: 5,
+          total: 15,
+        },
         results: [],
       };
 
@@ -237,7 +243,7 @@ describe('GET /api/workflowExecutions', () => {
         query: {
           workflowId: 'workflow-123',
           page: 2,
-          size: 5,
+          perPage: 5,
         },
         headers: {},
         url: { pathname: '/api/workflowExecutions' },
@@ -250,7 +256,7 @@ describe('GET /api/workflowExecutions', () => {
         {
           workflowId: 'workflow-123',
           page: 2,
-          size: 5,
+          perPage: 5,
         },
         'default'
       );

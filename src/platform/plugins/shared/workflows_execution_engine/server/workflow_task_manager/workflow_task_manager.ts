@@ -7,60 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
-import type { EsWorkflowExecution } from '@kbn/workflows';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { ResumeWorkflowExecutionParams } from './types';
-import { generateExecutionTaskScope } from '../utils';
 
 export class WorkflowTaskManager {
   constructor(private taskManager: TaskManagerStartContract) {}
 
   async scheduleResumeTask({
-    workflowExecution,
-    resumeAt,
+    runAt,
+    workflowRunId,
+    spaceId,
   }: {
-    workflowExecution: EsWorkflowExecution;
-    resumeAt: Date;
+    runAt: Date;
+    workflowRunId: string;
+    spaceId: string;
   }): Promise<{ taskId: string }> {
     const task = await this.taskManager.schedule({
       taskType: 'workflow:resume',
       params: {
-        workflowRunId: workflowExecution.id,
-        spaceId: workflowExecution.spaceId,
+        workflowRunId,
+        spaceId,
       } as ResumeWorkflowExecutionParams,
       state: {},
-      runAt: resumeAt,
-      scope: generateExecutionTaskScope(workflowExecution as EsWorkflowExecution),
+      runAt,
     });
-
     return {
       taskId: task.id,
     };
-  }
-
-  async forceRunIdleTasks(workflowExecutionId: string): Promise<void> {
-    const { docs: idleTasks } = await this.taskManager.fetch({
-      query: {
-        bool: {
-          must: [
-            {
-              term: {
-                'task.status': TaskStatus.Idle,
-              },
-            },
-            {
-              term: {
-                'task.scope': `workflow:execution:${workflowExecutionId}`,
-              },
-            },
-          ],
-        },
-      },
-    });
-
-    if (idleTasks.length) {
-      // TODO: To use bulkRunSoon once available
-      await Promise.all(idleTasks.map((idleTask) => this.taskManager.runSoon(idleTask.id)));
-    }
   }
 }

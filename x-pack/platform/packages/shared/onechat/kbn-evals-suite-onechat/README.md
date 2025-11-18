@@ -93,9 +93,6 @@ node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kb
 
 # Run with LLM-as-a-judge for consistent evaluation results
 EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/playwright.config.ts
-
-# Run only selected evaluators
-SELECTED_EVALUATORS="Factuality,Relevance,Groundedness" node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/playwright.config.ts
 ```
 
 ### Run Evaluation Comparisons

@@ -10,14 +10,16 @@
 import type { WorkflowsSearchParams } from '@kbn/workflows';
 
 export interface WorkflowsData {
-  total: number;
+  _pagination: {
+    total: number;
+  };
 }
 
 export function shouldShowWorkflowsEmptyState(
   workflows: WorkflowsData | undefined,
   search: WorkflowsSearchParams
 ): boolean {
-  const hasNoWorkflows = workflows?.total === 0;
+  const hasNoWorkflows = workflows?._pagination.total === 0;
   const hasNoFilters =
     !search.query &&
     (!search.enabled || search.enabled.length === 0) &&

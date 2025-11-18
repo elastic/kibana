@@ -34,7 +34,6 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
   const bodyStyles = css`
     ${backgroundStyles}
     flex: 1;
-    padding: 0 ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.base};
 
     .euiFlyoutBody__overflow {
       overflow: hidden;

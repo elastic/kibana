@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/setup-node-env');
+require('../src/setup_node_env');
 process.argv.push('--runInBand');
 require('@kbn/test').runJest('jest.integration.config.js');

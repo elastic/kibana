@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, useEuiScrollBar } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme, useEuiScrollBar } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useRef } from 'react';
 import { useHasActiveConversation } from '../../hooks/use_conversation';
@@ -24,6 +24,7 @@ import { ScrollButton } from './scroll_button';
 export const Conversation: React.FC<{}> = () => {
   const conversationId = useConversationId();
   const hasActiveConversation = useHasActiveConversation();
+  const { euiTheme } = useEuiTheme();
   const { isResponseLoading } = useSendMessage();
   const { isFetched } = useConversationStatus();
   const shouldStickToBottom = useShouldStickToBottom();
@@ -55,6 +56,7 @@ export const Conversation: React.FC<{}> = () => {
 
   const containerStyles = css`
     ${fullWidthAndHeightStyles}
+    padding-bottom: ${euiTheme.size.l};
   `;
 
   // Necessary to position the scroll button absolute to the container.

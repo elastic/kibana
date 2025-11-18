@@ -7,13 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-var pkg =
-  __filename.indexOf('node_modules') === -1
-    ? // when running from src/
-      require('../../package.json')
-    : // when installed as a package
-      // eslint-disable-next-line @kbn/imports/no_unresolvable_imports
-      require('../../../package.json');
+var pkg = require('../../package.json');
 
 if (!process.env.UNSAFE_DISABLE_NODE_VERSION_VALIDATION) {
   // Note: This is written in ES5 so we can run this before anything else

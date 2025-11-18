@@ -15,7 +15,6 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { navigationPluginMock } from '@kbn/navigation-plugin/public/mocks';
 import { serverlessMock } from '@kbn/serverless/public/mocks';
 import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
-import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 export const createStartServicesMock = () => ({
@@ -28,5 +27,4 @@ export const createStartServicesMock = () => ({
   unifiedSearch: unifiedSearchPluginMock.createStartContract(),
   data: dataPluginMock.createStartContract(),
   spaces: spacesPluginMock.createStartContract(),
-  triggersActionsUi: triggersActionsUiMock.createStart(),
 });

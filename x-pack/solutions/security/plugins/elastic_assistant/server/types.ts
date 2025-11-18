@@ -69,6 +69,7 @@ import { CallbackIds } from './services/app_context';
 import type { AIAssistantDataClient } from './ai_assistant_data_clients';
 import type { DefendInsightsDataClient } from './lib/defend_insights/persistence';
 import type { AttackDiscoveryScheduleDataClient } from './lib/attack_discovery/schedules/data_client';
+import type { AIAssistantService } from './ai_assistant_service';
 
 export const PLUGIN_ID = 'elasticAssistant' as const;
 export { CallbackIds };
@@ -124,6 +125,8 @@ export interface ElasticAssistantPluginStart {
    * @param callback
    */
   registerCallback: (callbackId: CallbackIds, callback: Function) => void;
+
+  getAIAssistantService: () => AIAssistantService | undefined;
 }
 
 export interface ElasticAssistantPluginSetupDependencies {

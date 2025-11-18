@@ -12,7 +12,7 @@ Hook to search and fetch workflows.
 import { useWorkflows } from '@kbn/workflows-ui';
 import type { WorkflowsSearchParams } from '@kbn/workflows';
 
-const params: WorkflowsSearchParams = { size: 20, page: 1 };
+const params: WorkflowsSearchParams = { limit: 20, page: 1 };
 const { data, isLoading, error } = useWorkflows(params);
 ```
 

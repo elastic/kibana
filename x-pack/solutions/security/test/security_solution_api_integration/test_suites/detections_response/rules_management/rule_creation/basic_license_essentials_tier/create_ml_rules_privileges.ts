@@ -9,12 +9,12 @@ import expect from 'expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 
+import { removeServerGeneratedProperties, getSimpleMlRule, updateUsername } from '../../../utils';
 import {
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-} from '@kbn/detections-response-ftr-services';
-import { removeServerGeneratedProperties, getSimpleMlRule, updateUsername } from '../../../utils';
+} from '../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 

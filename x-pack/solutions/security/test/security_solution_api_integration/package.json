@@ -1,6 +1,6 @@
 {
   "author": "Elastic",
-  "name": "@kbn/test-suites-security-solution-apis",
+  "name": "@kbn/security_solution_api_integration",
   "version": "1.0.0",
   "private": true,
   "license": "Elastic License 2.0",

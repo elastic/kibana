@@ -175,8 +175,7 @@
     "@kbn/visualizations-common",
     "@kbn/test-subj-selector",
     "@kbn/onechat-server",
-    "@kbn/setup-node-env",
-    "@kbn/connector-schemas",
     "@kbn/es-types",
+    "@kbn/connector-schemas",
   ]
 }

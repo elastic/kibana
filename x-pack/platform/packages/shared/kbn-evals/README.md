@@ -233,33 +233,6 @@ The helper will spin up one `local` project per available connector so results a
 node scripts/playwright test --config x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/playwright.config.ts --project azure-gpt4o
 ```
 
-### Selecting specific evaluators
-
-To enable selective evaluator execution, wrap your evaluators with the `selectEvaluators` function:
-
-```ts
-import { selectEvaluators } from '@kbn/evals';
-
-await phoenixClient.runExperiment(
-  {
-    dataset,
-    task: myTask,
-  },
-  selectEvaluators([
-    ...createQuantitativeCorrectnessEvaluators(),
-    createQuantitativeGroundednessEvaluator(),
-  ])
-);
-```
-
-Then control which evaluators run using the `SELECTED_EVALUATORS` environment variable with a comma-separated list of evaluator names:
-
-```bash
-SELECTED_EVALUATORS="Factuality,Relevance" node scripts/playwright test --config x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/playwright.config.ts
-```
-
-If not specified, all evaluators will run by default.
-
 ### Repeated evaluations
 
 For statistical analysis and reliability testing, you can run the same evaluation examples multiple times.

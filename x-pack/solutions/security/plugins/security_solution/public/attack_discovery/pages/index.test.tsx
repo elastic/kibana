@@ -24,9 +24,6 @@ import { mockFindAnonymizationFieldsResponse } from './mock/mock_find_anonymizat
 import { ATTACK_DISCOVERY_PAGE_TITLE } from './page_title/translations';
 import { useAttackDiscovery } from './use_attack_discovery';
 import { useLoadConnectors } from '@kbn/elastic-assistant/impl/connectorland/use_load_connectors';
-import { CALLOUT_TEST_DATA_ID } from './moving_attacks_callout';
-import { useMovingAttacksCallout } from './moving_attacks_callout/use_moving_attacks_callout';
-import { mockUseMovingAttacksCallout } from './moving_attacks_callout/use_moving_attacks_callout.mock';
 
 const mockConnectors: unknown[] = [
   {
@@ -106,9 +103,6 @@ jest.mock('./use_attack_discovery', () => ({
   }),
 }));
 
-jest.mock('./moving_attacks_callout/use_moving_attacks_callout');
-const useMovingAttacksCalloutMock = useMovingAttacksCallout as jest.Mock;
-
 const mockFilterManager = createFilterManagerMock();
 
 const mockDataViewsService = dataViewPluginMocks.createStartContract();
@@ -155,9 +149,6 @@ const mockUseKibanaReturnValue = {
           privileges: 'link',
         },
       },
-    },
-    featureFlags: {
-      getBooleanValue: jest.fn().mockReturnValue(false),
     },
     lens: {
       EmbeddableComponent: () => null,
@@ -228,8 +219,6 @@ describe('AttackDiscovery', () => {
       isFetched: true,
       data: mockConnectors,
     });
-
-    useMovingAttacksCalloutMock.mockReturnValue(mockUseMovingAttacksCallout());
   });
 
   describe('page layout', () => {
@@ -318,40 +307,6 @@ describe('AttackDiscovery', () => {
         size: 100,
         start: 'now-24h',
       });
-    });
-  });
-
-  describe('`attacksAlertsAlignmentEnabled` feature', () => {
-    it('renders callout about new Attacks page when feature is enabled', () => {
-      mockUseKibanaReturnValue.services.featureFlags.getBooleanValue.mockReturnValue(true);
-
-      render(
-        <TestProviders>
-          <Router history={historyMock}>
-            <UpsellingProvider upsellingService={mockUpselling}>
-              <AttackDiscoveryPage />
-            </UpsellingProvider>
-          </Router>
-        </TestProviders>
-      );
-
-      expect(screen.getByTestId(CALLOUT_TEST_DATA_ID)).toBeInTheDocument();
-    });
-
-    it('does not render callout about new Attacks page when feature is disabled', () => {
-      mockUseKibanaReturnValue.services.featureFlags.getBooleanValue.mockReturnValue(false);
-
-      render(
-        <TestProviders>
-          <Router history={historyMock}>
-            <UpsellingProvider upsellingService={mockUpselling}>
-              <AttackDiscoveryPage />
-            </UpsellingProvider>
-          </Router>
-        </TestProviders>
-      );
-
-      expect(screen.queryByTestId(CALLOUT_TEST_DATA_ID)).not.toBeInTheDocument();
     });
   });
 });

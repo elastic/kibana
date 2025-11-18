@@ -23,7 +23,6 @@ export const processorFieldRenames: Record<string, Record<string, string>> = {
   convert: { from: 'field', to: 'target_field', where: 'if' },
   remove_by_prefix: { from: 'fields' },
   remove: { from: 'field', where: 'if' },
-  replace: { from: 'field', to: 'target_field', where: 'if' },
   manual_ingest_pipeline: { where: 'if' },
 };
 
@@ -45,8 +44,8 @@ export function renameFields<T extends Record<string, any>>(
  * Mapping of Streamlang action names to Ingest Pipeline processor names. Maps only when they differ.
  */
 const processorRenames: Record<string, string> = {
-  drop_document: 'drop',
   replace: 'gsub',
+  drop_document: 'drop',
 };
 
 function renameProcessor(action: string) {

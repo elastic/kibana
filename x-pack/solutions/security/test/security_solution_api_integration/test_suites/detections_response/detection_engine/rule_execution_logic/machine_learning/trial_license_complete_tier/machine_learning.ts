@@ -31,13 +31,6 @@ import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solut
 import { expect } from 'expect';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
-  createRule,
-  deleteAllRules,
-  deleteAllAlerts,
-  waitForRuleFailure,
-  routeWithNamespace,
-} from '@kbn/detections-response-ftr-services';
-import {
   createListsIndex,
   deleteAllExceptions,
   deleteListsIndex,
@@ -51,6 +44,13 @@ import {
   previewRuleWithExceptionEntries,
   setupMlModulesWithRetry,
 } from '../../../../utils';
+import {
+  createRule,
+  deleteAllRules,
+  deleteAllAlerts,
+  waitForRuleFailure,
+  routeWithNamespace,
+} from '../../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 import { getMetricsRequest, getMetricsWithRetry } from '../../utils';

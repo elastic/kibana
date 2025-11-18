@@ -29,7 +29,7 @@ IF EXIST "%CONFIG_DIR%\node.options" (
 )
 
 TITLE Health Gateway
-"%NODE%" "%DIR%\src\cli\health_gateway\dist" %*
+"%NODE%" "%DIR%\src\cli_health_gateway\dist" %*
 
 :finally
 

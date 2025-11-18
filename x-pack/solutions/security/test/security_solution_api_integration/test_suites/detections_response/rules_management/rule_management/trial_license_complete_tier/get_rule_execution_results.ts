@@ -17,6 +17,11 @@ import {
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
 import {
+  deleteAllEventLogExecutionEvents,
+  indexEventLogExecutionEvents,
+  waitForEventLogExecuteComplete,
+} from '../../../utils';
+import {
   createRule,
   createAlertsIndex,
   deleteAllRules,
@@ -25,12 +30,7 @@ import {
   waitForRulePartialFailure,
   waitForRuleSuccess,
   manualRuleRun,
-} from '@kbn/detections-response-ftr-services';
-import {
-  deleteAllEventLogExecutionEvents,
-  indexEventLogExecutionEvents,
-  waitForEventLogExecuteComplete,
-} from '../../../utils';
+} from '../../../../../config/services/detections_response';
 import {
   failedGapExecution,
   failedRanAfterDisabled,

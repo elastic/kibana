@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { Dispatch, SetStateAction } from 'react';
-import React, { memo, useCallback, useMemo } from 'react';
+import type { FC } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import type { EntriesArray, ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useKibana } from '../../../../common/lib/kibana';
 import { BlockListForm } from '../../../../management/pages/blocklist/view/components/blocklist_form';
 import { ArtifactFlyout } from '../../../../management/components/artifact_list_page/components/artifact_flyout';
+import { useBlockListContext } from '../../indicators/hooks/use_block_list_context';
 import { ADD_TO_BLOCKLIST_FLYOUT_TITLE } from './translations';
 import { BlocklistsApiClient } from '../../../../management/pages/blocklist/services';
 
@@ -24,10 +25,6 @@ export interface BlockListFlyoutProps {
    * Indicator file-hash value (sha256, sh1 or md5) to pass to the block list flyout.
    */
   indicatorFileHash: string;
-  /**
-   * Allows to clear the blocklist value to hide the flyout
-   */
-  setBlockListIndicatorValue: Dispatch<SetStateAction<string>>;
 }
 
 /**
@@ -36,57 +33,54 @@ export interface BlockListFlyoutProps {
  * - the flyout component: x-pack/solutions/security/plugins/security_solution/public/management/components/artifact_list_page/components/artifact_flyout.tsx
  * - the form component: x-pack/solutions/security/plugins/security_solution/public/management/pages/blocklist/view/components/blocklist_form.tsx
  */
-export const BlockListFlyout = memo(
-  ({ indicatorFileHash, setBlockListIndicatorValue }: BlockListFlyoutProps) => {
-    const { http } = useKibana().services;
-    const exceptionListApiClient = BlocklistsApiClient.getInstance(http);
+export const BlockListFlyout: FC<BlockListFlyoutProps> = ({ indicatorFileHash }) => {
+  const { http } = useKibana().services;
+  const { setBlockListIndicatorValue } = useBlockListContext();
+  const exceptionListApiClient = BlocklistsApiClient.getInstance(http);
 
-    // prepopulate the for with the indicator file hash
-    const entries: EntriesArray = useMemo(
-      () => [
-        {
-          field: 'file.hash.*',
-          operator: 'included',
-          type: 'match_any',
-          value: [indicatorFileHash],
-        },
-      ],
-      [indicatorFileHash]
-    );
+  // prepopulate the for with the indicator file hash
+  const entries: EntriesArray = useMemo(
+    () => [
+      {
+        field: 'file.hash.*',
+        operator: 'included',
+        type: 'match_any',
+        value: [indicatorFileHash],
+      },
+    ],
+    [indicatorFileHash]
+  );
 
-    // prepare the payload to pass to the form (and then sent to the blocklist endpoint)
-    const item: ExceptionListItemSchema = useMemo(
-      () =>
-        ({
-          description: '',
-          entries,
-          list_id: 'endpoint_blocklists',
-          name: '',
-          namespace_type: 'agnostic',
-          os_types: ['windows'],
-          tags: ['policy:all'],
-          type: 'simple',
-        } as unknown as ExceptionListItemSchema),
-      [entries]
-    );
+  // prepare the payload to pass to the form (and then sent to the blocklist endpoint)
+  const item: ExceptionListItemSchema = useMemo(
+    () =>
+      ({
+        description: '',
+        entries,
+        list_id: 'endpoint_blocklists',
+        name: '',
+        namespace_type: 'agnostic',
+        os_types: ['windows'],
+        tags: ['policy:all'],
+        type: 'simple',
+      } as unknown as ExceptionListItemSchema),
+    [entries]
+  );
 
-    const clearBlockListIndicatorValue = useCallback(
-      () => setBlockListIndicatorValue(''),
-      [setBlockListIndicatorValue]
-    );
-    const onSuccess = useCallback(() => null, []);
+  const clearBlockListIndicatorValue = useCallback(
+    () => setBlockListIndicatorValue(''),
+    [setBlockListIndicatorValue]
+  );
+  const onSuccess = useCallback(() => null, []);
 
-    return (
-      <ArtifactFlyout
-        apiClient={exceptionListApiClient}
-        labels={labels}
-        item={item}
-        FormComponent={BlockListForm}
-        onClose={clearBlockListIndicatorValue}
-        onSuccess={onSuccess}
-      />
-    );
-  }
-);
-
-BlockListFlyout.displayName = 'BlockListFlyout';
+  return (
+    <ArtifactFlyout
+      apiClient={exceptionListApiClient}
+      labels={labels}
+      item={item}
+      FormComponent={BlockListForm}
+      onClose={clearBlockListIndicatorValue}
+      onSuccess={onSuccess}
+    />
+  );
+};

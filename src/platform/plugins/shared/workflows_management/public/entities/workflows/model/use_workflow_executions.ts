@@ -12,14 +12,14 @@ import { useInfiniteQuery, type UseInfiniteQueryOptions } from '@kbn/react-query
 import type { ExecutionStatus, ExecutionType, WorkflowExecutionListDto } from '@kbn/workflows';
 import { useKibana } from '../../../hooks/use_kibana';
 
-const DEFAULT_PAGE_SIZE = 100;
+const DEFAULT_PAGE_SIZE = 20;
 const MAX_RETRIES = 3;
 
 interface UseWorkflowExecutionsParams {
   workflowId: string | null;
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
-  size?: number;
+  perPage?: number;
 }
 
 export function useWorkflowExecutions(
@@ -36,7 +36,7 @@ export function useWorkflowExecutions(
   > = {}
 ) {
   const { http } = useKibana().services;
-  const currentSize = params.size ?? DEFAULT_PAGE_SIZE;
+  const perPage = params.perPage ?? DEFAULT_PAGE_SIZE;
 
   const queryFn = useCallback(
     async ({ pageParam = 1 }: { pageParam?: number }) => {
@@ -46,16 +46,16 @@ export function useWorkflowExecutions(
           statuses: params.statuses,
           executionTypes: params.executionTypes,
           page: pageParam,
-          size: currentSize,
+          perPage,
         },
       });
     },
-    [http, params.workflowId, params.statuses, params.executionTypes, currentSize]
+    [http, params.workflowId, params.statuses, params.executionTypes, perPage]
   );
 
   const getNextPageParam = useCallback((lastPage: WorkflowExecutionListDto) => {
-    const { page, size, total } = lastPage;
-    const totalPages = Math.ceil(total / size);
+    const { page, limit, total } = lastPage._pagination;
+    const totalPages = Math.ceil(total / limit);
 
     if (page >= totalPages) {
       return undefined;
@@ -81,7 +81,7 @@ export function useWorkflowExecutions(
       'executions',
       params.statuses,
       params.executionTypes,
-      currentSize,
+      perPage,
     ],
     queryFn,
     getNextPageParam,
@@ -105,9 +105,11 @@ export function useWorkflowExecutions(
 
     return {
       results: allResults,
-      page: data.pages.length, // Number of pages loaded
-      size: firstPage.size, // Keep original page size
-      total: firstPage.total, // Total available
+      _pagination: {
+        page: data.pages.length, // Number of pages loaded
+        limit: firstPage._pagination.limit, // Keep original page size
+        total: firstPage._pagination.total, // Total available
+      },
     };
   }, [data]);
 

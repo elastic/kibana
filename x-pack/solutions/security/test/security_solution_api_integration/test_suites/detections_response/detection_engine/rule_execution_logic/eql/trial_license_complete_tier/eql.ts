@@ -38,13 +38,6 @@ import {
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
-  createRule,
-  deleteAllRules,
-  deleteAllAlerts,
-  waitForRuleFailure,
-  routeWithNamespace,
-} from '@kbn/detections-response-ftr-services';
-import {
   getEqlRuleForAlertTesting,
   getAlerts,
   getPreviewAlerts,
@@ -56,6 +49,13 @@ import {
   setBrokenRuntimeField,
   unsetBrokenRuntimeField,
 } from '../../../../utils';
+import {
+  createRule,
+  deleteAllRules,
+  deleteAllAlerts,
+  waitForRuleFailure,
+  routeWithNamespace,
+} from '../../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 import { getMetricsRequest, getMetricsWithRetry } from '../../utils';

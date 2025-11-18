@@ -90,6 +90,13 @@ import {
   SwimlaneResponseSchema,
   CasesWebhookCreateCaseParamsSchema,
   CasesWebhookResponseSchema,
+  SentinelOneIsolateHostParamsSchema,
+  SentinelOneReleaseHostParamsSchema,
+  SentinelOneGetAgentsParamsSchema,
+  SentinelOneResponseSchema,
+  CrowdStrikeHostActionsParamsSchema,
+  CrowdStrikeGetAgentOnlineStatusParamsSchema,
+  CrowdStrikeResponseSchema,
   SlackApiPostMessageParamsSchema,
   SlackApiGetChannelsParamsSchema,
   SlackApiGetUsersParamsSchema,
@@ -104,6 +111,21 @@ import {
   JiraServiceManagementCreateAlertParamsSchema,
   JiraServiceManagementCloseAlertParamsSchema,
   JiraServiceManagementResponseSchema,
+  // Updated SentinelOne schemas
+  SentinelOneExecuteScriptParamsSchema,
+  SentinelOneGetRemoteScriptsParamsSchema,
+  SentinelOneGetRemoteScriptStatusParamsSchema,
+  SentinelOneGetRemoteScriptResultsParamsSchema,
+  SentinelOneDownloadRemoteScriptResultsParamsSchema,
+  SentinelOneFetchAgentFilesParamsSchema,
+  SentinelOneDownloadAgentFileParamsSchema,
+  SentinelOneGetActivitiesParamsSchema,
+  // Updated CrowdStrike schemas
+  CrowdStrikeGetAgentDetailsParamsSchema,
+  CrowdStrikeExecuteRTRCommandParamsSchema,
+  CrowdStrikeExecuteActiveResponderRTRParamsSchema,
+  CrowdStrikeExecuteAdminRTRParamsSchema,
+  CrowdStrikeGetRTRCloudScriptsParamsSchema,
   // TheHive connector schemas
   TheHivePushToServiceParamsSchema,
   TheHiveCreateAlertParamsSchema,
@@ -276,6 +298,54 @@ function getSubActionParamsSchema(actionTypeId: string, subActionName: string): 
     switch (subActionName) {
       case 'pushToService':
         return CasesWebhookCreateCaseParamsSchema;
+    }
+  }
+
+  // Handle SentinelOne sub-actions
+  if (actionTypeId === '.sentinelone') {
+    switch (subActionName) {
+      case 'isolateHost':
+        return SentinelOneIsolateHostParamsSchema;
+      case 'releaseHost':
+        return SentinelOneReleaseHostParamsSchema;
+      case 'getAgents':
+        return SentinelOneGetAgentsParamsSchema;
+      case 'executeScript':
+        return SentinelOneExecuteScriptParamsSchema;
+      case 'getRemoteScripts':
+        return SentinelOneGetRemoteScriptsParamsSchema;
+      case 'getRemoteScriptStatus':
+        return SentinelOneGetRemoteScriptStatusParamsSchema;
+      case 'getRemoteScriptResults':
+        return SentinelOneGetRemoteScriptResultsParamsSchema;
+      case 'downloadRemoteScriptResults':
+        return SentinelOneDownloadRemoteScriptResultsParamsSchema;
+      case 'fetchAgentFiles':
+        return SentinelOneFetchAgentFilesParamsSchema;
+      case 'downloadAgentFile':
+        return SentinelOneDownloadAgentFileParamsSchema;
+      case 'getActivities':
+        return SentinelOneGetActivitiesParamsSchema;
+    }
+  }
+
+  // Handle CrowdStrike sub-actions
+  if (actionTypeId === '.crowdstrike') {
+    switch (subActionName) {
+      case 'hostActions':
+        return CrowdStrikeHostActionsParamsSchema;
+      case 'getAgentDetails':
+        return CrowdStrikeGetAgentDetailsParamsSchema;
+      case 'getAgentOnlineStatus':
+        return CrowdStrikeGetAgentOnlineStatusParamsSchema;
+      case 'executeRTRCommand':
+        return CrowdStrikeExecuteRTRCommandParamsSchema;
+      case 'batchActiveResponderExecuteRTR':
+        return CrowdStrikeExecuteActiveResponderRTRParamsSchema;
+      case 'batchAdminExecuteRTR':
+        return CrowdStrikeExecuteAdminRTRParamsSchema;
+      case 'getRTRCloudScripts':
+        return CrowdStrikeGetRTRCloudScriptsParamsSchema;
     }
   }
 
@@ -488,6 +558,16 @@ function getSubActionOutputSchema(actionTypeId: string, subActionName: string): 
   // Handle Cases Webhook sub-actions
   if (actionTypeId === '.cases-webhook') {
     return CasesWebhookResponseSchema;
+  }
+
+  // Handle SentinelOne sub-actions
+  if (actionTypeId === '.sentinelone') {
+    return SentinelOneResponseSchema;
+  }
+
+  // Handle CrowdStrike sub-actions
+  if (actionTypeId === '.crowdstrike') {
+    return CrowdStrikeResponseSchema;
   }
 
   // Handle Slack API sub-actions

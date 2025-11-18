@@ -14,6 +14,7 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
+import { getAlerts, getEqlRuleForAlertTesting } from '../../../../utils';
 import {
   createAlertsIndex,
   deleteAllRules,
@@ -24,8 +25,7 @@ import {
   getRuleForAlertTesting,
   getAlertsByIds,
   waitForRulePartialFailure,
-} from '@kbn/detections-response-ftr-services';
-import { getAlerts, getEqlRuleForAlertTesting } from '../../../../utils';
+} from '../../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 

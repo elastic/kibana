@@ -10,7 +10,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type { GetEvaluateResponse } from '@kbn/elastic-assistant-common';
 import { API_VERSIONS, ELASTIC_AI_ASSISTANT_EVALUATE_URL } from '@kbn/elastic-assistant-common';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-import { routeWithNamespace, waitFor } from '@kbn/detections-response-ftr-services';
+import { routeWithNamespace, waitFor } from '../../../../config/services/detections_response';
 
 export const waitForEvaluationComplete = async ({
   evaluationId,

@@ -140,7 +140,7 @@ describe('WorkflowsParamsFields', () => {
     await waitFor(() => {
       expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search', {
         body: JSON.stringify({
-          size: 1000,
+          limit: 1000,
           page: 1,
           query: '',
         }),
@@ -163,7 +163,7 @@ describe('WorkflowsParamsFields', () => {
     await waitFor(() => {
       expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search', {
         body: JSON.stringify({
-          size: 1000,
+          limit: 1000,
           page: 1,
           query: '',
         }),
@@ -521,7 +521,7 @@ describe('WorkflowsParamsFields', () => {
     await waitFor(() => {
       expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search', {
         body: JSON.stringify({
-          size: 1000,
+          limit: 1000,
           page: 1,
           query: '',
         }),
@@ -606,7 +606,7 @@ describe('WorkflowsParamsFields', () => {
     await waitFor(() => {
       expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search', {
         body: JSON.stringify({
-          size: 1000,
+          limit: 1000,
           page: 1,
           query: '',
         }),
@@ -688,7 +688,7 @@ describe('WorkflowsParamsFields', () => {
     await waitFor(() => {
       expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search', {
         body: JSON.stringify({
-          size: 1000,
+          limit: 1000,
           page: 1,
           query: '',
         }),
@@ -757,7 +757,7 @@ describe('WorkflowsParamsFields', () => {
     await waitFor(() => {
       expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search', {
         body: JSON.stringify({
-          size: 1000,
+          limit: 1000,
           page: 1,
           query: '',
         }),

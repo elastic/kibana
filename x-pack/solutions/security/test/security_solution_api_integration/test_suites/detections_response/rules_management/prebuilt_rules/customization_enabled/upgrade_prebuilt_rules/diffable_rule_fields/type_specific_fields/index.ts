@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../../../ftr_provider_context';
 import { deleteAllPrebuiltRuleAssets } from '../../../../../../utils';
+import { deleteAllRules } from '../../../../../../../../config/services/detections_response';
 import { inlineQueryKqlQueryField } from './kql_query.inline_query';
 // import { savedQueryKqlQueryField } from './kql_query.saved_query';
 import { eqlQueryField } from './eql_query';

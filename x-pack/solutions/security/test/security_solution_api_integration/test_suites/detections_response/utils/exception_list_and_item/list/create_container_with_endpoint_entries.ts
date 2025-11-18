@@ -15,8 +15,8 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import { EXCEPTION_LIST_ITEM_URL } from '@kbn/securitysolution-list-constants';
-import { waitFor } from '@kbn/detections-response-ftr-services';
 import { createExceptionListItem } from '../item/create_exception_list_item';
+import { waitFor } from '../../../../../config/services/detections_response';
 import { createExceptionList } from './create_exception_list';
 
 /**

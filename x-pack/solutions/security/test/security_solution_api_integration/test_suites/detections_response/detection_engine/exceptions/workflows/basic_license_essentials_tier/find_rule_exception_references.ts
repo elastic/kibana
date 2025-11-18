@@ -16,15 +16,15 @@ import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/commo
 import type { RuleReferencesSchema } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_exceptions';
 import { DETECTION_ENGINE_RULES_EXCEPTIONS_REFERENCE_URL } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_exceptions';
 
+import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
+
+import { getSimpleRule, createExceptionList } from '../../../../utils';
 import {
   createRule,
   deleteAllRules,
   deleteAllAlerts,
   createAlertsIndex,
-} from '@kbn/detections-response-ftr-services';
-import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
-
-import { getSimpleRule, createExceptionList } from '../../../../utils';
+} from '../../../../../../config/services/detections_response';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 
 export default ({ getService }: FtrProviderContext) => {

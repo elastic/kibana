@@ -22,6 +22,13 @@ import {
   getInitialSingleEventMetric,
 } from '@kbn/security-solution-plugin/server/usage/detections/rules/get_initial_usage';
 import {
+  getEqlRuleForAlertTesting,
+  getSimpleThreatMatch,
+  getStats,
+  getThresholdRuleForAlertTesting,
+  deleteAllEventLogExecutionEvents,
+} from '../../../utils';
+import {
   createRule,
   createAlertsIndex,
   deleteAllRules,
@@ -29,14 +36,7 @@ import {
   getRuleForAlertTesting,
   waitForRuleSuccess,
   waitForAlertsToBePresent,
-} from '@kbn/detections-response-ftr-services';
-import {
-  getEqlRuleForAlertTesting,
-  getSimpleThreatMatch,
-  getStats,
-  getThresholdRuleForAlertTesting,
-  deleteAllEventLogExecutionEvents,
-} from '../../../utils';
+} from '../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {

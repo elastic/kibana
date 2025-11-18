@@ -178,9 +178,8 @@ export function getSchemaFieldsFromSimulation(context: SimulationContext): {
       // └─────────────────────────────────────────────────────────────────────────────────┘
       // Detected field already inherited
       if ('from' in field) {
-        const { from, alias_for: _, ...rest } = field;
         fieldSchema = {
-          ...rest,
+          ...field,
           status: 'inherited',
           parent: field.from,
         };

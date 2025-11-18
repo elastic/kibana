@@ -14,7 +14,6 @@ import {
   DETECTION_ENGINE_RULES_URL,
   UPDATE_OR_CREATE_LEGACY_ACTIONS,
 } from '@kbn/security-solution-plugin/common/constants';
-import { createRule, deleteAllRules } from '@kbn/detections-response-ftr-services';
 import {
   createRuleThroughAlertingEndpoint,
   getSimpleRule,
@@ -26,6 +25,7 @@ import {
   getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
   checkInvestigationFieldSoValue,
 } from '../../../utils';
+import { createRule, deleteAllRules } from '../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {

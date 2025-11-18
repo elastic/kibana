@@ -33,7 +33,7 @@ import { AGENT_POLICY_NAME_LINK } from '../../screens/integrations';
 import { cleanupAgentPolicies, unenrollAgent } from '../../tasks/cleanup';
 import { setFleetServerHost } from '../../tasks/fleet_server';
 
-import { API_VERSIONS } from '@kbn/fleet-plugin/common/constants';
+import { API_VERSIONS } from '../../../common/constants';
 import { login } from '../../tasks/login';
 import { request } from '../../tasks/common';
 

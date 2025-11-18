@@ -17,15 +17,6 @@ import type { RulesTypeUsage } from '@kbn/security-solution-plugin/server/usage/
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import type { CreateRuleExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import {
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-  waitForRuleSuccess,
-  waitForAlertsToBePresent,
-  getRuleForAlertTesting,
-} from '@kbn/detections-response-ftr-services';
-import {
   createLegacyRuleAction,
   createWebHookRuleAction,
   getEqlRuleForAlertTesting,
@@ -44,6 +35,15 @@ import {
   createRuleThroughAlertingEndpoint,
   getCustomQueryRuleParams,
 } from '../../../utils';
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+  waitForRuleSuccess,
+  waitForAlertsToBePresent,
+  getRuleForAlertTesting,
+} from '../../../../../config/services/detections_response';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';

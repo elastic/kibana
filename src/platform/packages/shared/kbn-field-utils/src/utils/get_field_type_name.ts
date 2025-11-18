@@ -88,14 +88,6 @@ export function getFieldTypeName(type?: string) {
       return i18n.translate('fieldUtils.fieldNameIcons.histogramFieldAriaLabel', {
         defaultMessage: 'Histogram',
       });
-    case KNOWN_FIELD_TYPES.EXPONENTIAL_HISTOGRAM:
-      return i18n.translate('fieldUtils.fieldNameIcons.exponentialHistogramFieldAriaLabel', {
-        defaultMessage: 'Exponential histogram',
-      });
-    case KNOWN_FIELD_TYPES.TDIGEST:
-      return i18n.translate('fieldUtils.fieldNameIcons.tdigestFieldAriaLabel', {
-        defaultMessage: 'T-Digest',
-      });
     case KNOWN_FIELD_TYPES.IP:
       return i18n.translate('fieldUtils.fieldNameIcons.ipAddressFieldAriaLabel', {
         defaultMessage: 'IP address',

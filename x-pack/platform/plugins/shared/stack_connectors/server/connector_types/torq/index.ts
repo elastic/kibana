@@ -20,7 +20,6 @@ import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
-  WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { renderMustacheObject } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
@@ -64,7 +63,6 @@ export function getActionType(): TorqConnectorType {
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
-      WorkflowsConnectorFeatureId,
     ],
     validate: {
       config: {

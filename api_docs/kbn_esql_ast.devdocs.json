@@ -16933,21 +16933,6 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/esql-ast",
-        "id": "def-common.withMapCompleteItem",
-        "type": "Object",
-        "tags": [],
-        "label": "withMapCompleteItem",
-        "description": [],
-        "signature": [
-          "ISuggestionItem"
-        ],
-        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
       }
     ]
   }

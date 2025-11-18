@@ -20859,38 +20859,6 @@
           },
           {
             "parentPluginId": "@kbn/lens-common",
-            "id": "def-common.Visualization.isSubtypeSupported",
-            "type": "Function",
-            "tags": [],
-            "label": "isSubtypeSupported",
-            "description": [],
-            "signature": [
-              "((subtype: string) => boolean) | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-lens-common/visualizations/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/lens-common",
-                "id": "def-common.Visualization.isSubtypeSupported.$1",
-                "type": "string",
-                "tags": [],
-                "label": "subtype",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "src/platform/packages/shared/kbn-lens-common/visualizations/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/lens-common",
             "id": "def-common.Visualization.getCustomLayerHeader",
             "type": "Function",
             "tags": [],

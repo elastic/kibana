@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('../src/cli/encryption_keys/dev');
+require('../src/cli_encryption_keys/dev');

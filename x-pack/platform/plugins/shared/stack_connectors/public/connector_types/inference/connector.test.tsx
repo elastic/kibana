@@ -27,7 +27,7 @@ const providersSchemas = [
         required: true,
         sensitive: true,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'rerank', 'completion'],
       },
       'rate_limit.requests_per_minute': {
@@ -64,7 +64,7 @@ const providersSchemas = [
         required: true,
         sensitive: false,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['sparse_embedding'],
       },
       max_input_tokens: {
@@ -91,7 +91,7 @@ const providersSchemas = [
         required: true,
         sensitive: false,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding'],
       },
       model_id: {
@@ -101,7 +101,7 @@ const providersSchemas = [
         required: true,
         sensitive: false,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding'],
       },
       api_version: {
@@ -111,7 +111,7 @@ const providersSchemas = [
         required: true,
         sensitive: false,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding'],
       },
       max_input_tokens: {
@@ -131,7 +131,7 @@ const providersSchemas = [
         required: true,
         sensitive: false,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding'],
       },
     },
@@ -148,7 +148,7 @@ const providersSchemas = [
         required: true,
         sensitive: false,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'completion'],
       },
       provider: {
@@ -158,7 +158,7 @@ const providersSchemas = [
         required: true,
         sensitive: false,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'completion'],
       },
       api_key: {
@@ -168,7 +168,7 @@ const providersSchemas = [
         required: true,
         sensitive: true,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'completion'],
       },
       'rate_limit.requests_per_minute': {
@@ -188,7 +188,7 @@ const providersSchemas = [
         required: true,
         sensitive: false,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'completion'],
       },
     },
@@ -205,7 +205,7 @@ const providersSchemas = [
         required: true,
         sensitive: true,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'sparse_embedding'],
       },
       'rate_limit.requests_per_minute': {
@@ -225,7 +225,7 @@ const providersSchemas = [
         required: true,
         sensitive: false,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'sparse_embedding'],
       },
     },
@@ -242,7 +242,7 @@ const providersSchemas = [
         required: true,
         sensitive: true,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'completion'],
       },
       provider: {
@@ -252,7 +252,7 @@ const providersSchemas = [
         required: true,
         sensitive: false,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'completion'],
       },
       access_key: {
@@ -262,7 +262,7 @@ const providersSchemas = [
         required: true,
         sensitive: true,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'completion'],
       },
       model: {
@@ -272,7 +272,7 @@ const providersSchemas = [
         required: true,
         sensitive: false,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'completion'],
       },
       'rate_limit.requests_per_minute': {
@@ -293,7 +293,7 @@ const providersSchemas = [
         required: true,
         sensitive: false,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'completion'],
       },
     },
@@ -310,7 +310,7 @@ const providersSchemas = [
         required: true,
         sensitive: true,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['completion'],
       },
       'rate_limit.requests_per_minute': {
@@ -331,7 +331,7 @@ const providersSchemas = [
         required: true,
         sensitive: false,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['completion'],
       },
     },
@@ -348,7 +348,7 @@ const providersSchemas = [
         required: true,
         sensitive: true,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'completion'],
       },
       'rate_limit.requests_per_minute': {
@@ -368,7 +368,7 @@ const providersSchemas = [
         required: true,
         sensitive: false,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'completion'],
       },
     },
@@ -406,7 +406,7 @@ const providersSchemas = [
         required: true,
         sensitive: false,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'sparse_embedding', 'rerank'],
       },
     },
@@ -424,7 +424,7 @@ const providersSchemas = [
         required: true,
         sensitive: true,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'completion'],
       },
       organization_id: {
@@ -434,7 +434,7 @@ const providersSchemas = [
         required: false,
         sensitive: false,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'completion'],
       },
       'rate_limit.requests_per_minute': {
@@ -455,7 +455,7 @@ const providersSchemas = [
         required: true,
         sensitive: false,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'completion'],
       },
       url: {
@@ -466,17 +466,7 @@ const providersSchemas = [
         required: true,
         sensitive: false,
         updatable: true,
-        type: 'str',
-        supported_task_types: ['text_embedding', 'completion'],
-      },
-      unknown_field: {
-        default_value: null,
-        description: 'Field used to test unknown field handling in the UI.',
-        label: 'Unknown Field',
-        required: true,
-        sensitive: false,
-        updatable: true,
-        type: 'unknown',
+        type: 'string',
         supported_task_types: ['text_embedding', 'completion'],
       },
     },
@@ -493,7 +483,7 @@ const providersSchemas = [
         required: true,
         sensitive: true,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'completion'],
       },
       entra_id: {
@@ -503,7 +493,7 @@ const providersSchemas = [
         required: false,
         sensitive: true,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'completion'],
       },
       'rate_limit.requests_per_minute': {
@@ -524,7 +514,7 @@ const providersSchemas = [
         required: true,
         sensitive: false,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'completion'],
       },
       resource_name: {
@@ -534,7 +524,7 @@ const providersSchemas = [
         required: true,
         sensitive: false,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'completion'],
       },
       api_version: {
@@ -544,7 +534,7 @@ const providersSchemas = [
         required: true,
         sensitive: false,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'completion'],
       },
     },
@@ -561,7 +551,7 @@ const providersSchemas = [
         required: true,
         sensitive: true,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding'],
       },
       model: {
@@ -572,7 +562,7 @@ const providersSchemas = [
         required: true,
         sensitive: false,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding'],
       },
       'rate_limit.requests_per_minute': {
@@ -609,7 +599,7 @@ const providersSchemas = [
         required: true,
         sensitive: true,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'rerank'],
       },
       project_id: {
@@ -620,7 +610,7 @@ const providersSchemas = [
         required: true,
         sensitive: false,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'rerank'],
       },
       location: {
@@ -631,7 +621,7 @@ const providersSchemas = [
         required: true,
         sensitive: false,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'rerank'],
       },
       'rate_limit.requests_per_minute': {
@@ -651,7 +641,7 @@ const providersSchemas = [
         required: true,
         sensitive: false,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'rerank'],
       },
     },
@@ -668,7 +658,7 @@ const providersSchemas = [
         required: true,
         sensitive: false,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'sparse_embedding', 'rerank', 'completion'],
       },
       api_key: {
@@ -678,7 +668,7 @@ const providersSchemas = [
         required: true,
         sensitive: true,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'sparse_embedding', 'rerank', 'completion'],
       },
       service_id: {
@@ -688,7 +678,7 @@ const providersSchemas = [
         required: true,
         sensitive: false,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'sparse_embedding', 'rerank', 'completion'],
       },
       host: {
@@ -699,7 +689,7 @@ const providersSchemas = [
         required: true,
         sensitive: false,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'sparse_embedding', 'rerank', 'completion'],
       },
       'rate_limit.requests_per_minute': {
@@ -719,7 +709,7 @@ const providersSchemas = [
         required: true,
         sensitive: false,
         updatable: true,
-        type: 'str',
+        type: 'string',
         supported_task_types: ['text_embedding', 'sparse_embedding', 'rerank', 'completion'],
       },
     },
@@ -807,20 +797,6 @@ describe('ConnectorFields renders', () => {
     expect(getAllByTestId('url-input')[0]).toHaveValue(openAiConnector.config?.providerConfig?.url);
     expect(getAllByTestId('taskTypeSelectDisabled')[0]).toBeInTheDocument();
     expect(getAllByTestId('taskTypeSelectDisabled')[0]).toHaveTextContent('completion');
-  });
-
-  test('openai provider unknown fields are not rendered', () => {
-    const { getAllByTestId, queryByTestId } = render(
-      <ConnectorFormTestProvider connector={openAiConnector}>
-        <ConnectorFields readOnly={false} isEdit={true} registerPreSubmitValidator={() => {}} />
-      </ConnectorFormTestProvider>
-    );
-    expect(getAllByTestId('provider-select')[0]).toBeInTheDocument();
-    expect(getAllByTestId('provider-select')[0]).toHaveValue('OpenAI');
-
-    expect(queryByTestId('unknown_field-input')).not.toBeInTheDocument();
-    expect(getAllByTestId('url-input')[0]).toBeInTheDocument();
-    expect(getAllByTestId('url-input')[0]).toHaveValue(openAiConnector.config?.providerConfig?.url);
   });
 
   test('googleaistudio provider fields are rendered', () => {

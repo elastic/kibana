@@ -113,6 +113,34 @@ export {
   CasesWebhookResponseSchema,
 } from './cases_webhook';
 
+// SentinelOne connector schemas
+export {
+  SentinelOneIsolateHostParamsSchema,
+  SentinelOneReleaseHostParamsSchema,
+  SentinelOneGetAgentsParamsSchema,
+  SentinelOneExecuteScriptParamsSchema,
+  SentinelOneGetRemoteScriptsParamsSchema,
+  SentinelOneGetRemoteScriptStatusParamsSchema,
+  SentinelOneGetRemoteScriptResultsParamsSchema,
+  SentinelOneDownloadRemoteScriptResultsParamsSchema,
+  SentinelOneFetchAgentFilesParamsSchema,
+  SentinelOneDownloadAgentFileParamsSchema,
+  SentinelOneGetActivitiesParamsSchema,
+  SentinelOneResponseSchema,
+} from './sentinelone';
+
+// CrowdStrike connector schemas
+export {
+  CrowdStrikeHostActionsParamsSchema,
+  CrowdStrikeGetAgentDetailsParamsSchema,
+  CrowdStrikeGetAgentOnlineStatusParamsSchema,
+  CrowdStrikeExecuteRTRCommandParamsSchema,
+  CrowdStrikeExecuteActiveResponderRTRParamsSchema,
+  CrowdStrikeExecuteAdminRTRParamsSchema,
+  CrowdStrikeGetRTRCloudScriptsParamsSchema,
+  CrowdStrikeResponseSchema,
+} from './crowdstrike';
+
 // Slack API connector schemas
 export {
   SlackApiPostMessageParamsSchema,

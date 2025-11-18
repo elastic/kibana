@@ -19,6 +19,7 @@ import {
   closingReason,
   type DetectionAlert,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { refreshIndex, setAlertStatus } from '../../../../utils';
 import {
   createAlertsIndex,
   deleteAllAlerts,
@@ -29,8 +30,7 @@ import {
   getAlertsByIds,
   waitForRuleSuccess,
   getRuleForAlertTesting,
-} from '@kbn/detections-response-ftr-services';
-import { refreshIndex, setAlertStatus } from '../../../../utils';
+} from '../../../../../../config/services/detections_response';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../../config/services/common';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';

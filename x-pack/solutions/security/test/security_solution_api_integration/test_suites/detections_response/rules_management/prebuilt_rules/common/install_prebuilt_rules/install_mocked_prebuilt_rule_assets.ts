@@ -6,7 +6,6 @@
  */
 
 import expect from 'expect';
-import { deleteAllRules, deleteRule } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   deleteAllTimelines,
@@ -20,6 +19,7 @@ import {
   installPrebuiltRules,
   getInstalledRules,
 } from '../../../../utils';
+import { deleteAllRules, deleteRule } from '../../../../../../config/services/detections_response';
 
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');

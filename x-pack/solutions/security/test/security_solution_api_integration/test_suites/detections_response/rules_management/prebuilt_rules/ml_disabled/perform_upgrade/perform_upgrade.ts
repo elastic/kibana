@@ -7,7 +7,6 @@
 
 import expect from 'expect';
 import { ModeEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
   createPrebuiltRuleAssetSavedObjects,
@@ -15,6 +14,7 @@ import {
   deleteAllPrebuiltRuleAssets,
   performUpgradePrebuiltRules,
 } from '../../../../utils';
+import { deleteAllRules } from '../../../../../../config/services/detections_response';
 import { setUpRuleUpgrade } from '../../../../utils/rules/prebuilt_rules/set_up_rule_upgrade';
 import { createMlRuleThroughAlertingEndpoint } from '../utils';
 

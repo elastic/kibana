@@ -13,10 +13,10 @@ const { UndiciInstrumentation } = require('@opentelemetry/instrumentation-undici
 const { HttpInstrumentation } = require('@opentelemetry/instrumentation-http');
 const { registerInstrumentations } = require('@opentelemetry/instrumentation');
 
-require('@kbn/setup-node-env');
+require('../../../../../../../src/setup_node_env');
 // we send an empty process.argv argument, as playwright uses the same --config
 // flag as kibana, leading it to not read from kibana.{dev.}yml
-require('../../../../../../../src/cli/kibana/apm')('playwright', []);
+require('../../../../../../../src/cli/apm')('playwright', []);
 
 registerInstrumentations({
   instrumentations: [

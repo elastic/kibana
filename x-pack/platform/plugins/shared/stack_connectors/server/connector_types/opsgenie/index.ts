@@ -9,7 +9,6 @@ import {
   AlertingConnectorFeatureId,
   SecurityConnectorFeatureId,
   UptimeConnectorFeatureId,
-  WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
@@ -36,7 +35,6 @@ export const getOpsgenieConnectorType = (): SubActionConnectorType<Config, Secre
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
-      WorkflowsConnectorFeatureId,
     ],
     renderParameterTemplates,
   };

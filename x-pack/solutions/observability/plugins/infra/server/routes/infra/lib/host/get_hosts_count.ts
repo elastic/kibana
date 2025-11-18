@@ -19,7 +19,7 @@ export async function getHostsCount({
   query,
   from,
   to,
-  schema = 'ecs',
+  schema,
 }: GetInfraEntityCountRequestBodyPayload & {
   infraMetricsClient: InfraMetricsClient;
   apmDataAccessServices?: ApmDataAccessServicesWrapper;

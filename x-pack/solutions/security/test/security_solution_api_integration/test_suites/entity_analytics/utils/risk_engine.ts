@@ -40,7 +40,7 @@ import {
   countDownTest,
   waitFor,
   routeWithNamespace,
-} from '@kbn/detections-response-ftr-services';
+} from '../../../config/services/detections_response';
 
 const sanitizeScore = (score: Partial<EntityRiskScoreRecord>): Partial<EntityRiskScoreRecord> => {
   const {

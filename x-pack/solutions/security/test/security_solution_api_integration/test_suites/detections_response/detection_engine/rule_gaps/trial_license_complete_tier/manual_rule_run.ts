@@ -9,14 +9,14 @@ import expect from 'expect';
 
 import moment from 'moment';
 import type { BackfillResponse } from '@kbn/alerting-plugin/common/routes/backfill/response';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { getCustomQueryRuleParams, scheduleRuleRun } from '../../../utils';
 import {
   createAlertsIndex,
   deleteAllRules,
   createRule,
   deleteAllAlerts,
-} from '@kbn/detections-response-ftr-services';
-import type { FtrProviderContext } from '../../../../../ftr_provider_context';
-import { getCustomQueryRuleParams, scheduleRuleRun } from '../../../utils';
+} from '../../../../../config/services/detections_response';
 
 const buildSchedule = (
   startDate: moment.Moment,

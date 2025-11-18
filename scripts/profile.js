@@ -7,6 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/setup-node-env');
+require('../src/setup_node_env');
 
 require('@kbn/profiler-cli/cli');

@@ -33,7 +33,7 @@ export interface APMDownstreamDependency {
   'span.subtype'?: string | undefined;
 }
 
-export async function getApmDownstreamDependencies({
+export async function getAssistantDownstreamDependencies({
   arguments: args,
   apmEventClient,
   randomSampler,

@@ -6,7 +6,6 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useAttachEventsEBT } from '../../../analytics/use_attach_events_ebt';
 import { useApplication } from '../../../common/lib/kibana/use_application';
 import { CaseStatuses } from '../../../../common/types/domain';
 import type { AllCasesSelectorModalProps } from '.';
@@ -76,8 +75,6 @@ export const useCasesAddToExistingCaseModal = ({
     });
   }, [dispatch]);
 
-  const trackAttachEvents = useAttachEventsEBT();
-
   const handleOnRowClick = useCallback(
     async (
       theCase: CaseUI | undefined,
@@ -113,8 +110,6 @@ export const useCasesAddToExistingCaseModal = ({
           attachments,
         });
 
-        trackAttachEvents(window.location.pathname, attachments);
-
         if (theCase.settings?.extractObservables && observables.length > 0) {
           await bulkPostObservables({ caseId: theCase.id, observables });
         }
@@ -134,19 +129,18 @@ export const useCasesAddToExistingCaseModal = ({
       }
     },
     [
-      closeModal,
-      openCreateNewCaseFlyout,
-      startTransaction,
       appId,
-      createAttachments,
-      trackAttachEvents,
-      onSuccess,
       casesToasts,
+      closeModal,
+      createAttachments,
+      bulkPostObservables,
+      openCreateNewCaseFlyout,
       successToaster?.title,
       successToaster?.content,
       noAttachmentsToaster?.title,
       noAttachmentsToaster?.content,
-      bulkPostObservables,
+      onSuccess,
+      startTransaction,
     ]
   );
 

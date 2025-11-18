@@ -47,13 +47,6 @@ import {
   DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
-import {
-  createRule,
-  deleteAllRules,
-  deleteAllAlerts,
-  getRuleForAlertTesting,
-  getLuceneRuleForTesting,
-} from '@kbn/detections-response-ftr-services';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 import {
   createExceptionList,
@@ -72,6 +65,13 @@ import {
   stopAllManualRuns,
   waitForBackfillExecuted,
 } from '../../../../utils';
+import {
+  createRule,
+  deleteAllRules,
+  deleteAllAlerts,
+  getRuleForAlertTesting,
+  getLuceneRuleForTesting,
+} from '../../../../../../config/services/detections_response';
 
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';

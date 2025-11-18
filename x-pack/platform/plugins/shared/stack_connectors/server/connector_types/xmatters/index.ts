@@ -13,11 +13,7 @@ import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,
 } from '@kbn/actions-plugin/server/types';
-import {
-  AlertingConnectorFeatureId,
-  SecurityConnectorFeatureId,
-  WorkflowsConnectorFeatureId,
-} from '@kbn/actions-plugin/common';
+import { AlertingConnectorFeatureId, SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type {
   ActionParamsType,
   ConnectorTypeConfigType,
@@ -50,11 +46,7 @@ export function getConnectorType(): XmattersConnectorType {
     id: CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
     name: CONNECTOR_NAME,
-    supportedFeatureIds: [
-      AlertingConnectorFeatureId,
-      SecurityConnectorFeatureId,
-      WorkflowsConnectorFeatureId,
-    ],
+    supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
     validate: {
       config: {
         schema: ConfigSchema,

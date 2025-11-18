@@ -15,42 +15,9 @@ import { StepExecutionRuntime } from './step_execution_runtime';
 import type { ContextDependencies } from './types';
 import { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
-import { WorkflowScopeStack } from './workflow_scope_stack';
 import { WorkflowTemplatingEngine } from '../templating_engine';
 import { buildStepExecutionId } from '../utils';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
-
-/**
- * Guards against duplicate node entries in stack frames by removing the current node if it exists on top.
- *
- * This defensive function ensures stack frame consistency before creating a step execution runtime.
- * During workflow execution, scope entry (via `enterScope()`) can occur for the same node that is
- * about to execute, resulting in the node appearing on top of its own stack frames. This function
- * detects and removes such self-references to prevent context resolution issues and maintain clean
- * execution state.
- *
- * @param nodeId - The ID of the node for which the step execution runtime is being created
- * @param stackFrames - The current stack frames from the workflow execution
- * @returns Modified stack frames with the current node removed if it was on top, otherwise unchanged
- *
- * @example
- * ```typescript
- * // Scenario: "enter-foreach" node just called enterScope() for itself
- * // stackFrames = [{stepId: "loop", nestedScopes: [{nodeId: "enter-foreach", ...}]}]
- * const cleaned = removeCurrentNodeFromStackFrames("enter-foreach", stackFrames);
- * // cleaned = [] - the self-reference is removed
- * ```
- */
-function removeCurrentNodeFromStackFrames(nodeId: string, stackFrames: StackFrame[]): StackFrame[] {
-  const workflowScopeStack = WorkflowScopeStack.fromStackFrames(stackFrames);
-  const onTop = workflowScopeStack.getCurrentScope();
-
-  if (onTop?.nodeId === nodeId) {
-    return workflowScopeStack.exitScope().stackFrames;
-  }
-
-  return stackFrames;
-}
 
 /**
  * Factory class responsible for creating StepExecutionRuntime instances.
@@ -99,18 +66,7 @@ export class StepExecutionRuntimeFactory {
   }): StepExecutionRuntime {
     const node = this.params.workflowExecutionGraph.getNode(nodeId);
     const workflowExecution = this.params.workflowExecutionState.getWorkflowExecution();
-
-    // Guard against duplicate node entries in stack frames by removing self-references.
-    // During workflow execution, a node may call enterScope() for itself before executing,
-    // causing the node to appear on top of its own stack frames. This removes such self-references
-    // to prevent context resolution issues during step execution.
-    const modifiedStackFrames = removeCurrentNodeFromStackFrames(nodeId, stackFrames);
-
-    const stepExecutionId = buildStepExecutionId(
-      workflowExecution.id,
-      node.stepId,
-      modifiedStackFrames
-    );
+    const stepExecutionId = buildStepExecutionId(workflowExecution.id, node.stepId, stackFrames);
 
     const stepLogger = this.params.workflowLogger.createStepLogger(
       stepExecutionId,
@@ -123,7 +79,7 @@ export class StepExecutionRuntimeFactory {
       workflowExecutionGraph: this.params.workflowExecutionGraph,
       workflowExecutionState: this.params.workflowExecutionState,
       node,
-      stackFrames: modifiedStackFrames,
+      stackFrames,
       esClient: this.params.esClient,
       fakeRequest: this.params.fakeRequest,
       coreStart: this.params.coreStart,
@@ -134,7 +90,7 @@ export class StepExecutionRuntimeFactory {
       workflowExecutionGraph: this.params.workflowExecutionGraph,
       workflowExecutionState: this.params.workflowExecutionState,
       stepLogger,
-      stackFrames: modifiedStackFrames,
+      stackFrames,
       node,
       contextManager,
     });

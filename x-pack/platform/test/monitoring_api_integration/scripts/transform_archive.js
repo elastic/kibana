@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-require('@kbn/setup-node-env');
+require('../../../../../src/setup_node_env');
 
 const { createReadStream, createWriteStream } = require('fs');
 const { mkdir, rm } = require('fs/promises');

@@ -8,7 +8,10 @@
 import expect from 'expect';
 import type { DeprecationsDetails } from '@kbn/core/server';
 
-import { createAlertsIndex, deleteAllAlerts } from '@kbn/detections-response-ftr-services';
+import {
+  createAlertsIndex,
+  deleteAllAlerts,
+} from '../../../../../../../config/services/detections_response';
 
 import type { FtrProviderContext } from '../../../../../../../ftr_provider_context';
 

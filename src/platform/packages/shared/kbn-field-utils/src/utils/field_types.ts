@@ -26,8 +26,6 @@ export enum KNOWN_FIELD_TYPES {
   GEO_POINT = 'geo_point',
   GEO_SHAPE = 'geo_shape',
   HISTOGRAM = 'histogram',
-  EXPONENTIAL_HISTOGRAM = 'exponential_histogram',
-  TDIGEST = 'tdigest',
   IP = 'ip',
   IP_RANGE = 'ip_range',
   FLATTENED = 'flattened',

@@ -10,11 +10,6 @@ import expect from 'expect';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
-  deleteAllRules,
-  deleteAllAlerts,
-  waitForRuleSuccess,
-} from '@kbn/detections-response-ftr-services';
-import {
   getRuleWithWebHookAction,
   updateRule,
   installMockPrebuiltRules,
@@ -25,6 +20,11 @@ import {
   getCustomQueryRuleParams,
   getPrebuiltRulesAndTimelinesStatus,
 } from '../../../utils';
+import {
+  deleteAllRules,
+  deleteAllAlerts,
+  waitForRuleSuccess,
+} from '../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {

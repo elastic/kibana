@@ -25,6 +25,7 @@
     "types/**/*"
   ],
   "kbn_references": [
+    { "path": "../../../../../src/setup_node_env/tsconfig.json" },
     "@kbn/core",
     "@kbn/charts-plugin",
     "@kbn/data-plugin",

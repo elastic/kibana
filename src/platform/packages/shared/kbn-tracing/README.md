@@ -41,7 +41,7 @@ See those types for a full list of allowed fields.
 
 ## 2. What happens at runtime?
 
-1. `src/cli/kibana/apm.js` calls `initTracing()` early in process start-up.
+1. `src/cli/apm.js` calls `initTracing()` early in process start-up.
 2. `initTracing()`
    - installs `AsyncLocalStorage` context management,
    - applies the configured sample rate (parent-based),

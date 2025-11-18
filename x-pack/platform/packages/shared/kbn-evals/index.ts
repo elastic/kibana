@@ -34,5 +34,3 @@ export type {
   DatasetScoreWithStats,
   EvaluatorStats,
 } from './src/utils/evaluation_stats';
-
-export { parseSelectedEvaluators, selectEvaluators } from './src/evaluators/filter';

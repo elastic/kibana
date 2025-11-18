@@ -11,14 +11,19 @@ import type { CodeBlockDetails, Conversation } from '@kbn/elastic-assistant';
 import { DETECTION_RULES_CREATE_FORM_CONVERSATION_ID } from '../../detection_engine/rule_creation_ui/components/ai_assistant/translations';
 import { sendToTimelineEligibleQueryTypes } from '../helpers';
 import { SendToTimelineButton } from '../send_to_timeline';
-import { UpdateQueryInFormButton } from '../update_query_in_form';
+import { UpdateFieldInFormButton, hasSuggestedAllowedField } from '../update_field_in_form';
 
 interface Props {
   currentConversation: Conversation;
   codeBlockDetails: CodeBlockDetails;
+  messageIndex: number;
 }
 
-export const AugmentMessageCodeBlockButton = ({ currentConversation, codeBlockDetails }: Props) => {
+export const AugmentMessageCodeBlockButton = ({
+  currentConversation,
+  codeBlockDetails,
+  messageIndex,
+}: Props) => {
   const sendToTimeline = sendToTimelineEligibleQueryTypes.includes(codeBlockDetails.type) && (
     <SendToTimelineButton
       asEmptyButton={true}
@@ -44,13 +49,23 @@ export const AugmentMessageCodeBlockButton = ({ currentConversation, codeBlockDe
     </SendToTimelineButton>
   );
 
-  const updateQueryInForm = DETECTION_RULES_CREATE_FORM_CONVERSATION_ID ===
-    currentConversation.title && <UpdateQueryInFormButton query={codeBlockDetails.content ?? ''} />;
+  const currentMessage = currentConversation.messages?.[messageIndex]?.content ?? '';
+
+  const updateFieldInForm = currentConversation.title.startsWith(
+    DETECTION_RULES_CREATE_FORM_CONVERSATION_ID
+  ) &&
+    hasSuggestedAllowedField(currentMessage, currentConversation.title) && (
+      <UpdateFieldInFormButton
+        query={codeBlockDetails.content ?? ''}
+        title={currentConversation.title}
+        messageContent={currentMessage}
+      />
+    );
 
   return (
     <>
       {sendToTimeline}
-      {updateQueryInForm}
+      {updateFieldInForm}
     </>
   );
 };

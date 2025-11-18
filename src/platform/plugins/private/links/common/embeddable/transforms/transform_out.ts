@@ -8,14 +8,13 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import type { LinksEmbeddableState, StoredLinksEmbeddableState } from '../types';
+import type { StoredLinksEmbeddableState } from '../types';
 import { type StoredLinksByValueState910, isLegacyState, transformLegacyState } from './bwc';
 import { LINKS_SAVED_OBJECT_TYPE } from '../../constants';
 import { injectReferences } from './references';
-import { getOptions } from './get_options';
 
 export function transformOut(
-  storedState: LinksEmbeddableState | StoredLinksEmbeddableState | StoredLinksByValueState910,
+  storedState: StoredLinksEmbeddableState | StoredLinksByValueState910,
   references?: Reference[]
 ) {
   const state = isLegacyState(storedState)
@@ -36,9 +35,6 @@ export function transformOut(
   // inject dashboard references when by-value
   return {
     ...state,
-    links: injectReferences(state.links, references).map((link) => ({
-      ...link,
-      ...(link.options && { options: getOptions(link.type, link.options) }),
-    })),
+    links: injectReferences(state.links, references),
   };
 }

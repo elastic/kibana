@@ -9,18 +9,18 @@ import expect from '@kbn/expect';
 import type { Rule } from '@kbn/alerting-plugin/common';
 import type { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import {
-  createRule,
-  createAlertsIndex,
-  deleteAllRules,
-  deleteAllAlerts,
-} from '@kbn/detections-response-ftr-services';
-import {
   getSimpleRule,
   removeServerGeneratedProperties,
   createRuleThroughAlertingEndpoint,
   getRuleSavedObjectWithLegacyInvestigationFields,
   getRuleSavedObjectWithLegacyInvestigationFieldsEmptyArray,
 } from '../../../utils';
+import {
+  createRule,
+  createAlertsIndex,
+  deleteAllRules,
+  deleteAllAlerts,
+} from '../../../../../config/services/detections_response';
 
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 

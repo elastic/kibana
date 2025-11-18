@@ -63,8 +63,6 @@ export enum ES_FIELD_TYPES {
   MURMUR3 = 'murmur3',
 
   HISTOGRAM = 'histogram',
-  EXPONENTIAL_HISTOGRAM = 'exponential_histogram',
-  TDIGEST = 'tdigest',
 }
 
 /** @public **/
@@ -87,7 +85,5 @@ export enum KBN_FIELD_TYPES {
   OBJECT = 'object',
   NESTED = 'nested',
   HISTOGRAM = 'histogram',
-  EXPONENTIAL_HISTOGRAM = 'exponential_histogram',
-  TDIGEST = 'tdigest',
   MISSING = 'missing',
 }

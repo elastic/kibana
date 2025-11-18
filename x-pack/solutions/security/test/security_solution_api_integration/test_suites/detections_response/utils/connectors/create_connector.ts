@@ -6,7 +6,7 @@
  */
 
 import type SuperTest from 'supertest';
-import { withSpaceUrl } from '@kbn/detections-response-ftr-services';
+import { withSpaceUrl } from '../../../../config/services/detections_response';
 
 export interface CreateConnectorBody {
   readonly name: string;

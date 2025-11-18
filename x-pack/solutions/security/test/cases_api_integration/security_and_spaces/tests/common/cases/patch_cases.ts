@@ -61,7 +61,7 @@ import {
   getAlertsByIds,
   createRule,
   getQueryAlertIds,
-} from '@kbn/detections-response-ftr-services';
+} from '../../../../../security_solution_api_integration/config/services/detections_response';
 import { getSignalsWithES } from '../../../../common/lib/api';
 
 export default ({ getService }: FtrProviderContext): void => {

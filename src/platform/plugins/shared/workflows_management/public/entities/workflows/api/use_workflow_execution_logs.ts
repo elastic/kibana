@@ -24,15 +24,15 @@ interface WorkflowExecutionLogEntry {
 interface WorkflowExecutionLogsResponse {
   logs: WorkflowExecutionLogEntry[];
   total: number;
-  size: number;
-  page: number;
+  limit: number;
+  offset: number;
 }
 
 interface UseWorkflowExecutionLogsParams {
   executionId: string;
   stepExecutionId?: string;
-  size?: number;
-  page?: number;
+  limit?: number;
+  offset?: number;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
   enabled?: boolean;
@@ -41,8 +41,8 @@ interface UseWorkflowExecutionLogsParams {
 export function useWorkflowExecutionLogs({
   executionId,
   stepExecutionId,
-  size = 100,
-  page = 1,
+  limit = 100,
+  offset = 0,
   sortField = 'timestamp',
   sortOrder = 'desc',
   enabled = true,
@@ -54,8 +54,8 @@ export function useWorkflowExecutionLogs({
       'workflowExecutionLogs',
       executionId,
       stepExecutionId,
-      size,
-      page,
+      limit,
+      offset,
       sortField,
       sortOrder,
     ],
@@ -65,8 +65,8 @@ export function useWorkflowExecutionLogs({
         {
           query: {
             stepExecutionId,
-            size,
-            page,
+            limit,
+            offset,
             sortField,
             sortOrder,
           },

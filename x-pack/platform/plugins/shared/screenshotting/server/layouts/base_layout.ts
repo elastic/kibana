@@ -16,7 +16,7 @@ export interface ViewZoomWidthHeight {
 
 export interface PdfImageSize {
   width: number;
-  height: number;
+  height?: number;
 }
 
 export interface PageSizeParams {
@@ -40,7 +40,6 @@ export abstract class BaseLayout {
   }
 
   public abstract getPdfImageSize(): PdfImageSize;
-  public abstract setPdfImageSize({ height, width }: PdfImageSize): void;
 
   public abstract getPdfPageOrientation(): 'portrait' | 'landscape' | undefined;
 

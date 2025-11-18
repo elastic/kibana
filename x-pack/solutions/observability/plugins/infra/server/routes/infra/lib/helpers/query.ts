@@ -8,10 +8,10 @@
 import type { MetricsUIAggregation } from '@kbn/metrics-data-access-plugin/common';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { ApmDocumentType, type TimeRangeMetadata } from '@kbn/apm-data-access-plugin/common';
-import { getDatasetFilterForSchema } from '@kbn/apm-data-access-plugin/server/lib/helpers/create_es_client/document_type';
 import type { estypes } from '@elastic/elasticsearch';
 import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
 import type { ApmDataAccessServicesWrapper } from '../../../../lib/helpers/get_apm_data_access_client';
+
 import type { InfraEntityMetricType } from '../../../../../common/http_api/infra';
 
 const getApmDocumentsFilter = async ({
@@ -19,13 +19,11 @@ const getApmDocumentsFilter = async ({
   apmDocumentSources,
   start,
   end,
-  schema,
 }: {
-  apmDataAccessServices: NonNullable<ApmDataAccessServicesWrapper>;
+  apmDataAccessServices: ApmDataAccessServicesWrapper;
   apmDocumentSources: TimeRangeMetadata['sources'];
   start: number;
   end: number;
-  schema: DataSchemaFormat;
 }) => {
   const { preferredSource, documentTypeConfig } = apmDataAccessServices.getDocumentTypeConfig({
     start,
@@ -34,22 +32,9 @@ const getApmDocumentsFilter = async ({
     documentSources: apmDocumentSources,
   });
 
-  const query =
-    'getQuery' in documentTypeConfig
-      ? documentTypeConfig.getQuery(preferredSource.source.rollupInterval)
-      : undefined;
-
-  const schemaFilter = getDatasetFilterForSchema(
-    preferredSource.source.documentType,
-    preferredSource.source.rollupInterval,
-    schema
-  );
-
-  return {
-    bool: {
-      filter: query ? [query, ...schemaFilter] : schemaFilter,
-    },
-  };
+  return 'getQuery' in documentTypeConfig
+    ? documentTypeConfig.getQuery(preferredSource.source.rollupInterval)
+    : undefined;
 };
 
 export const getDocumentsFilter = async ({
@@ -63,7 +48,7 @@ export const getDocumentsFilter = async ({
   apmDocumentSources?: TimeRangeMetadata['sources'];
   from: number;
   to: number;
-  schema: DataSchemaFormat;
+  schema?: DataSchemaFormat;
 }) => {
   const inventoryModel = findInventoryModel('host');
   const filters: estypes.QueryDslQueryContainer[] =
@@ -78,7 +63,6 @@ export const getDocumentsFilter = async ({
           apmDocumentSources,
           start: from,
           end: to,
-          schema,
         })
       : undefined;
 

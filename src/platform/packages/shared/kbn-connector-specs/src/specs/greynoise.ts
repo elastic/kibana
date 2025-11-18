@@ -29,7 +29,7 @@ export const GreyNoiseConnector: ConnectorSpec = {
     displayName: 'GreyNoise',
     description: 'Internet scanning noise detection and classification',
     minimumLicense: 'gold',
-    supportedFeatureIds: ['workflows'],
+    supportedFeatureIds: ['alerting', 'siem'],
   },
 
   schema: z.discriminatedUnion('method', [

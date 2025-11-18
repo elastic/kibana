@@ -15,11 +15,7 @@ const cssProp = css`
   width: 100vw;
   min-height: 100%;
   min-width: 100%;
-
-  @media screen {
-    // do not restrict height when printing
-    overflow: hidden;
-  }
+  overflow: hidden;
 
   display: grid;
 

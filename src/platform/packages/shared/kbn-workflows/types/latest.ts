@@ -48,6 +48,7 @@ export type {
   ConnectorSubAction,
   ConnectorInstance,
   ConnectorTypeInfo,
+  ConnectorTypeInfoMinimal,
   ConnectorContractUnion,
   EnhancedInternalConnectorContract,
   InternalConnectorContract,

@@ -12,7 +12,7 @@ import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 
 import {
   downstreamDependenciesRouteRt,
-  getApmDownstreamDependencies,
+  getAssistantDownstreamDependencies,
   type APMDownstreamDependency,
 } from './get_apm_downstream_dependencies';
 import { getApmTimeseries, getApmTimeseriesRt, type ApmTimeseries } from './get_apm_timeseries';
@@ -66,7 +66,7 @@ const getDownstreamDependenciesRoute = createApmServerRoute({
     const { query } = params;
 
     return {
-      content: await getApmDownstreamDependencies({
+      content: await getAssistantDownstreamDependencies({
         arguments: query,
         apmEventClient,
         randomSampler,

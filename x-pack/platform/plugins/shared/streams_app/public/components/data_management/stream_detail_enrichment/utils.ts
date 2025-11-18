@@ -16,7 +16,6 @@ import type {
   ConvertProcessor,
   GrokProcessor,
   ProcessorType,
-  ReplaceProcessor,
   StreamlangProcessorDefinition,
   StreamlangProcessorDefinitionWithUIAttributes,
   StreamlangStepWithUIAttributes,
@@ -37,7 +36,6 @@ import type {
   DateFormState,
   ManualIngestPipelineFormState,
   EnrichmentDataSourceWithUIAttributes,
-  ReplaceFormState,
   SetFormState,
   WhereBlockFormState,
   ConvertFormState,
@@ -54,7 +52,7 @@ import type { ProcessorResources } from './state_management/steps_state_machine'
 /**
  * These are processor types with specialised UI. Other processor types are handled by a generic config-driven UI.
  */
-export const SPECIALISED_TYPES = ['convert', 'date', 'dissect', 'grok', 'set', 'replace'];
+export const SPECIALISED_TYPES = ['convert', 'date', 'dissect', 'grok', 'set'];
 
 interface FormStateDependencies {
   grokCollection: StreamEnrichmentContextType['grokCollection'];
@@ -171,16 +169,6 @@ const defaultSetProcessorFormState = (): SetFormState => ({
   where: ALWAYS_CONDITION,
 });
 
-const defaultReplaceProcessorFormState = (): ReplaceFormState => ({
-  action: 'replace' as const,
-  from: '',
-  pattern: '',
-  replacement: '',
-  ignore_missing: true,
-  ignore_failure: true,
-  where: ALWAYS_CONDITION,
-});
-
 const configDrivenDefaultFormStates = mapValues(
   configDrivenProcessors,
   (config) => () => config.defaultFormState
@@ -198,7 +186,6 @@ const defaultProcessorFormStateByType: Record<
   drop_document: defaultDropProcessorFormState,
   grok: defaultGrokProcessorFormState,
   manual_ingest_pipeline: defaultManualIngestPipelineProcessorFormState,
-  replace: defaultReplaceProcessorFormState,
   set: defaultSetProcessorFormState,
   ...configDrivenDefaultFormStates,
 };
@@ -237,8 +224,7 @@ export const getFormStateFromActionStep = (
     step.action === 'date' ||
     step.action === 'drop_document' ||
     step.action === 'set' ||
-    step.action === 'convert' ||
-    step.action === 'replace'
+    step.action === 'convert'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
     return structuredClone({
@@ -397,23 +383,6 @@ export const convertFormStateToProcessor = (
           ignore_missing,
           where: 'where' in formState ? formState.where : undefined,
         } as ConvertProcessor,
-      };
-    }
-
-    if (formState.action === 'replace') {
-      const { from, pattern, replacement, to, ignore_failure, ignore_missing } = formState;
-
-      return {
-        processorDefinition: {
-          action: 'replace',
-          from,
-          pattern: isEmpty(pattern) ? '' : pattern,
-          replacement: isEmpty(replacement) ? '' : replacement,
-          to: isEmpty(to) ? undefined : to,
-          ignore_failure,
-          ignore_missing,
-          where: 'where' in formState ? formState.where : undefined,
-        } as ReplaceProcessor,
       };
     }
 

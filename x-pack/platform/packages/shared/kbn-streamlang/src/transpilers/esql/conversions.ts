@@ -21,7 +21,6 @@ import type {
   RemoveByPrefixProcessor,
   RemoveProcessor,
   DropDocumentProcessor,
-  ReplaceProcessor,
 } from '../../../types/processors';
 import { type StreamlangProcessorDefinition } from '../../../types/processors';
 import { convertRenameProcessorToESQL } from './processors/rename';
@@ -34,7 +33,6 @@ import { convertConvertProcessorToESQL } from './processors/convert';
 import { convertRemoveByPrefixProcessorToESQL } from './processors/remove_by_prefix';
 import { convertRemoveProcessorToESQL } from './processors/remove';
 import { convertDropDocumentProcessorToESQL } from './processors/drop_document';
-import { convertReplaceProcessorToESQL } from './processors/replace';
 
 function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLAstCommand[] | null {
   switch (processor.action) {
@@ -67,9 +65,6 @@ function convertProcessorToESQL(processor: StreamlangProcessorDefinition): ESQLA
 
     case 'drop_document':
       return convertDropDocumentProcessorToESQL(processor as DropDocumentProcessor);
-
-    case 'replace':
-      return convertReplaceProcessorToESQL(processor as ReplaceProcessor);
 
     case 'manual_ingest_pipeline':
       return [

@@ -146,16 +146,9 @@ class ChatServiceImpl implements ChatService {
           });
 
           // Merge all event streams
-          const effectiveConversationId =
-            context.conversation.operation === 'CREATE' ? context.conversation.id : conversationId;
-
           return merge(conversationIdEvent$, agentEvents$, persistenceEvents$).pipe(
             handleCancellation(abortSignal),
-            convertErrors({
-              logger: this.dependencies.logger,
-              trackingService,
-              conversationId: effectiveConversationId,
-            }),
+            convertErrors({ logger: this.dependencies.logger }),
             tap((event) => {
               // Track round completion and query-to-result time
               try {

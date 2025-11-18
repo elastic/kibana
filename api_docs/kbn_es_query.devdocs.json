@@ -4226,56 +4226,6 @@
       },
       {
         "parentPluginId": "@kbn/es-query",
-        "id": "def-common.termsQuery",
-        "type": "Function",
-        "tags": [],
-        "label": "termsQuery",
-        "description": [],
-        "signature": [
-          "(field: T, values: (string | number | boolean)[]) => ",
-          "QueryDslQueryContainer",
-          "[]"
-        ],
-        "path": "src/platform/packages/shared/kbn-es-query/src/es_query/helpers/terms_query.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.termsQuery.$1",
-            "type": "Uncategorized",
-            "tags": [],
-            "label": "field",
-            "description": [],
-            "signature": [
-              "T"
-            ],
-            "path": "src/platform/packages/shared/kbn-es-query/src/es_query/helpers/terms_query.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/es-query",
-            "id": "def-common.termsQuery.$2",
-            "type": "Array",
-            "tags": [],
-            "label": "values",
-            "description": [],
-            "signature": [
-              "(string | number | boolean)[]"
-            ],
-            "path": "src/platform/packages/shared/kbn-es-query/src/es_query/helpers/terms_query.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/es-query",
         "id": "def-common.toElasticsearchQuery",
         "type": "Function",
         "tags": [

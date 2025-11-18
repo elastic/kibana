@@ -33,7 +33,7 @@ import type {
   IndicesIndexSettings,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
-import { routeWithNamespace, waitFor } from '@kbn/detections-response-ftr-services';
+import { routeWithNamespace, waitFor } from '../../../config/services/detections_response';
 
 export const getAssetCriticalityIndex = (namespace?: string) =>
   `.asset-criticality.asset-criticality-${namespace ?? 'default'}`;

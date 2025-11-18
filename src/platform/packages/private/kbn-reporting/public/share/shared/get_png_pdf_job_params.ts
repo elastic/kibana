@@ -11,19 +11,14 @@ import type { ReportParamsGetter, ReportParamsGetterOptions } from '../../types'
 import type { JobParamsProviderOptions } from '../share_context_menu';
 
 const getBaseParams = (objectType: string) => {
-  const viewportWidth = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
-
   const el = document.querySelector('[data-shared-items-container]');
   const { height, width } = el ? el.getBoundingClientRect() : { height: 768, width: 1024 };
-
+  const dimensions = { height, width };
   return {
     objectType,
     layout: {
       id: 'preserve_layout' as 'preserve_layout' | 'print',
-      dimensions: {
-        height,
-        width: viewportWidth || width,
-      },
+      dimensions,
     },
   };
 };

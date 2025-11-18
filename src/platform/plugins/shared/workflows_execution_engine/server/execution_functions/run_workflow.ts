@@ -26,7 +26,7 @@ export async function runWorkflow({
   stepExecutionRepository,
   logsRepository,
   coreStart,
-  unscopedEsClient,
+  esClient,
   actions,
   taskManager,
   logger,
@@ -38,7 +38,7 @@ export async function runWorkflow({
   spaceId: string;
   taskAbortController: AbortController;
   coreStart: CoreStart;
-  unscopedEsClient: ElasticsearchClient;
+  esClient: ElasticsearchClient;
   workflowExecutionRepository: WorkflowExecutionRepository;
   stepExecutionRepository: StepExecutionRepository;
   logsRepository?: LogsRepository;
@@ -49,7 +49,7 @@ export async function runWorkflow({
   fakeRequest: KibanaRequest;
   dependencies: ContextDependencies;
 }): Promise<void> {
-  const logsRepositoryToUse = logsRepository ?? new LogsRepository(unscopedEsClient);
+  const logsRepositoryToUse = logsRepository ?? new LogsRepository(esClient);
   const {
     workflowRuntime,
     stepExecutionRuntimeFactory,
@@ -57,15 +57,15 @@ export async function runWorkflow({
     workflowLogger,
     nodesFactory,
     workflowExecutionGraph,
-    esClient,
+    clientToUse,
     fakeRequest: fakeRequestFromContainer,
     coreStart: coreStartFromContainer,
-    workflowTaskManager,
   } = await setupDependencies(
     workflowRunId,
     spaceId,
     actions,
     taskManager,
+    esClient,
     logger,
     config,
     workflowExecutionRepository,
@@ -85,10 +85,9 @@ export async function runWorkflow({
     workflowLogger,
     nodesFactory,
     workflowExecutionGraph,
-    esClient,
+    esClient: clientToUse,
     fakeRequest: fakeRequestFromContainer,
     coreStart: coreStartFromContainer,
     taskAbortController,
-    workflowTaskManager,
   });
 }

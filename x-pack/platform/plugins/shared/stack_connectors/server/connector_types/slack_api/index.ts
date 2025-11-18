@@ -10,7 +10,6 @@ import {
   UptimeConnectorFeatureId,
   AlertingConnectorFeatureId,
   SecurityConnectorFeatureId,
-  WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import type { Logger } from '@kbn/core/server';
 import { renderMustacheString } from '@kbn/actions-plugin/server/lib/mustache_renderer';
@@ -43,7 +42,6 @@ export const getConnectorType = (): SlackApiConnectorType => {
       UptimeConnectorFeatureId,
       AlertingConnectorFeatureId,
       SecurityConnectorFeatureId,
-      WorkflowsConnectorFeatureId,
     ],
     validate: {
       config: { schema: SlackApiConfigSchema },

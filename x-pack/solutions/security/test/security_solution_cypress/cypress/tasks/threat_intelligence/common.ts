@@ -16,8 +16,7 @@ import {
   BARCHART_POPOVER_BUTTON,
   BARCHART_WRAPPER,
   FLYOUT_CLOSE_BUTTON,
-  FLYOUT_JSON_TAB,
-  FLYOUT_TABLE_TAB,
+  FLYOUT_TABS,
   FLYOUT_TAKE_ACTION_BUTTON,
   INDICATORS_TABLE,
   INDICATORS_TABLE_MORE_ACTION_BUTTON_ICON,
@@ -71,14 +70,14 @@ export const openFlyoutTakeAction = () => {
  * Navigate to Table tab in indicators flyout
  */
 export const navigateToFlyoutTableTab = () => {
-  cy.get(FLYOUT_TABLE_TAB).click();
+  cy.get(`${FLYOUT_TABS} button:nth-child(2)`).click();
 };
 
 /**
  * Navigate to Json tab in indicators flyout
  */
 export const navigateToFlyoutJsonTab = () => {
-  cy.get(FLYOUT_JSON_TAB).click();
+  cy.get(`${FLYOUT_TABS} button:nth-child(3)`).click();
 };
 
 /**

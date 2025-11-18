@@ -17,13 +17,6 @@ import {
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
-import {
-  deleteAllRules,
-  waitForRuleSuccess,
-  waitForAlertsToBePresent,
-  waitForRulePartialFailure,
-  deleteAllAlerts,
-} from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   getActionsWithFrequencies,
@@ -38,6 +31,13 @@ import {
   waitForAlertToComplete,
   refreshIndex,
 } from '../../../utils';
+import {
+  deleteAllRules,
+  waitForRuleSuccess,
+  waitForAlertsToBePresent,
+  waitForRulePartialFailure,
+  deleteAllAlerts,
+} from '../../../../../config/services/detections_response';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
 
 export default ({ getService }: FtrProviderContext) => {

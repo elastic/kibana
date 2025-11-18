@@ -21,6 +21,15 @@ import type {
   ThresholdRuleCreateProps,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
+  finalizeAlertsMigration,
+  getEqlRuleForAlertTesting,
+  getSavedQueryRuleForAlertTesting,
+  getThreatMatchRuleForAlertTesting,
+  getThresholdRuleForAlertTesting,
+  startAlertsMigration,
+  removeRandomValuedPropertiesFromAlert,
+} from '../../../../utils';
+import {
   createRule,
   createAlertsIndex,
   deleteAllRules,
@@ -30,16 +39,7 @@ import {
   waitForRuleSuccess,
   waitForAlertsToBePresent,
   getRuleForAlertTesting,
-} from '@kbn/detections-response-ftr-services';
-import {
-  finalizeAlertsMigration,
-  getEqlRuleForAlertTesting,
-  getSavedQueryRuleForAlertTesting,
-  getThreatMatchRuleForAlertTesting,
-  getThresholdRuleForAlertTesting,
-  startAlertsMigration,
-  removeRandomValuedPropertiesFromAlert,
-} from '../../../../utils';
+} from '../../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {

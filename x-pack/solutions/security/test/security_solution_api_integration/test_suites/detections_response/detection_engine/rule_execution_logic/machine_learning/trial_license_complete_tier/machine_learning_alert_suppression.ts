@@ -21,12 +21,6 @@ import {
 } from '@kbn/rule-data-utils';
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import { DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
-import {
-  createRule,
-  deleteAllAlerts,
-  deleteAllAnomalies,
-  deleteAllRules,
-} from '@kbn/detections-response-ftr-services';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 import {
@@ -41,6 +35,12 @@ import {
   setAlertStatus,
   setupMlModulesWithRetry,
 } from '../../../../utils';
+import {
+  createRule,
+  deleteAllAlerts,
+  deleteAllAnomalies,
+  deleteAllRules,
+} from '../../../../../../config/services/detections_response';
 import { deleteAllExceptions } from '../../../../../lists_and_exception_lists/utils';
 
 export default ({ getService }: FtrProviderContext) => {

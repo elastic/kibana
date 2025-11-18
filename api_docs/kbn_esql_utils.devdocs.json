@@ -699,11 +699,9 @@
         "type": "Function",
         "tags": [],
         "label": "getESQLAdHocDataview",
-        "description": [
-          "\nCreates an ad-hoc DataView for ES|QL queries.\n\nSome applications need to have a DataView to work properly with ES|QL queries.\nThis helper creates an ad-hoc DataView with an ID constructed from the index pattern.\nSince there are no runtime fields, field formatters, or default time fields,\nthe same ad-hoc DataView can be constructed/reused, which solves caching issues\ndescribed in https://github.com/elastic/kibana/issues/168131.\n\nThe function automatically detects the time field by making an HTTP request to determine\nif '@timestamp' exists across all indices in the query. If all indices contain the field,\nit sets '@timestamp' as the time field; otherwise, no time field is set.\n"
-        ],
+        "description": [],
         "signature": [
-          "({\n  dataViewsService,\n  query,\n  options,\n  http,\n}: { dataViewsService: ",
+          "(query: string, dataViewsService: ",
           {
             "pluginId": "dataViews",
             "scope": "public",
@@ -711,9 +709,7 @@
             "section": "def-public.DataViewsServicePublic",
             "text": "DataViewsServicePublic"
           },
-          "; query: string; options?: { allowNoIndex?: boolean | undefined; createNewInstanceEvenIfCachedOneAvailable?: boolean | undefined; skipFetchFields?: boolean | undefined; } | undefined; http?: ",
-          "HttpSetup",
-          " | undefined; }) => Promise<",
+          ", options: { allowNoIndex?: boolean | undefined; createNewInstanceEvenIfCachedOneAvailable?: boolean | undefined; skipFetchFields?: boolean | undefined; } | undefined) => Promise<",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -730,9 +726,45 @@
           {
             "parentPluginId": "@kbn/esql-utils",
             "id": "def-common.getESQLAdHocDataview.$1",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getESQLAdHocDataview.$2",
             "type": "Object",
             "tags": [],
-            "label": "{\n  dataViewsService,\n  query,\n  options,\n  http,\n}",
+            "label": "dataViewsService",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "public",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-public.DataViewsServicePublic",
+                "text": "DataViewsServicePublic"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/esql-utils",
+            "id": "def-common.getESQLAdHocDataview.$3",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
             "description": [],
             "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
             "deprecated": false,
@@ -740,19 +772,13 @@
             "children": [
               {
                 "parentPluginId": "@kbn/esql-utils",
-                "id": "def-common.getESQLAdHocDataview.$1.dataViewsService",
-                "type": "Object",
+                "id": "def-common.getESQLAdHocDataview.$3.allowNoIndex",
+                "type": "CompoundType",
                 "tags": [],
-                "label": "dataViewsService",
+                "label": "allowNoIndex",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "dataViews",
-                    "scope": "public",
-                    "docId": "kibDataViewsPluginApi",
-                    "section": "def-public.DataViewsServicePublic",
-                    "text": "DataViewsServicePublic"
-                  }
+                  "boolean | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
                 "deprecated": false,
@@ -760,24 +786,13 @@
               },
               {
                 "parentPluginId": "@kbn/esql-utils",
-                "id": "def-common.getESQLAdHocDataview.$1.query",
-                "type": "string",
+                "id": "def-common.getESQLAdHocDataview.$3.createNewInstanceEvenIfCachedOneAvailable",
+                "type": "CompoundType",
                 "tags": [],
-                "label": "query",
-                "description": [],
-                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/esql-utils",
-                "id": "def-common.getESQLAdHocDataview.$1.options",
-                "type": "Object",
-                "tags": [],
-                "label": "options",
+                "label": "createNewInstanceEvenIfCachedOneAvailable",
                 "description": [],
                 "signature": [
-                  "{ allowNoIndex?: boolean | undefined; createNewInstanceEvenIfCachedOneAvailable?: boolean | undefined; skipFetchFields?: boolean | undefined; } | undefined"
+                  "boolean | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
                 "deprecated": false,
@@ -785,14 +800,13 @@
               },
               {
                 "parentPluginId": "@kbn/esql-utils",
-                "id": "def-common.getESQLAdHocDataview.$1.http",
-                "type": "Object",
+                "id": "def-common.getESQLAdHocDataview.$3.skipFetchFields",
+                "type": "CompoundType",
                 "tags": [],
-                "label": "http",
+                "label": "skipFetchFields",
                 "description": [],
                 "signature": [
-                  "HttpSetup",
-                  " | undefined"
+                  "boolean | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_adhoc_dataview.ts",
                 "deprecated": false,
@@ -801,9 +815,7 @@
             ]
           }
         ],
-        "returnComment": [
-          "Promise that resolves to the created DataView with the detected time field (if any)"
-        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -1778,13 +1790,11 @@
         "type": "Function",
         "tags": [],
         "label": "getIndexPatternFromESQLQuery",
-        "description": [
-          "\nRetrieves the index pattern from an ES|QL query using AST parsing.\nHandles both main queries and subqueries within FROM/TS commands.\n"
-        ],
+        "description": [],
         "signature": [
           "(esql: string | undefined) => string"
         ],
-        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_index_pattern_from_query.ts",
+        "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1794,21 +1804,17 @@
             "type": "string",
             "tags": [],
             "label": "esql",
-            "description": [
-              "- The ES|QL query string to parse"
-            ],
+            "description": [],
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_index_pattern_from_query.ts",
+            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
           }
         ],
-        "returnComment": [
-          "Comma-separated string of unique index names, or empty string if no sources found"
-        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {

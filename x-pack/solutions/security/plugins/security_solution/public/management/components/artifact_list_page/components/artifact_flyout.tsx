@@ -20,7 +20,6 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
-  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
@@ -198,12 +197,6 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
         links: { securitySolution },
       },
     } = useKibana().services;
-
-    const { euiTheme } = useEuiTheme();
-    const maskProps = useMemo(
-      () => ({ style: `z-index: ${(euiTheme.levels.flyout as number) + 4}` }), // we need this flyout to be above the timeline flyout (which has a z-index of 1003)
-      [euiTheme.levels.flyout]
-    );
 
     const location = useLocation<WorkflowInsightRouteState>();
     const [sourceInsight, setSourceInsight] = useState<{ id: string; back_url: string } | null>(
@@ -462,7 +455,6 @@ export const ArtifactFlyout = memo<ArtifactFlyoutProps>(
         onClose={handleFlyoutClose}
         data-test-subj={dataTestSubj}
         aria-labelledby={artifactFlyoutTitleId}
-        maskProps={maskProps}
       >
         <EuiFlyoutHeader hasBorder>
           <EuiTitle size="m">

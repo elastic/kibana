@@ -41,14 +41,12 @@ describe('useWorkflows', () => {
   it('calls the API with correct params', async () => {
     const mockData: WorkflowListDto = {
       results: [],
-      page: 1,
-      size: 10,
-      total: 0,
+      _pagination: { page: 1, limit: 10, total: 0 },
     };
 
     const params: WorkflowsSearchParams = {
       page: 1,
-      size: 10,
+      limit: 10,
       query: 'test',
     };
 
@@ -72,7 +70,7 @@ describe('useWorkflows', () => {
       },
     } as any);
 
-    const params: WorkflowsSearchParams = { page: 1, size: 10 };
+    const params: WorkflowsSearchParams = { page: 1, limit: 10 };
     const { result } = renderHook(() => useWorkflows(params), { wrapper });
 
     await waitFor(() => expect(result.current.isError).toBe(true));

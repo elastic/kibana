@@ -279,7 +279,6 @@ export class AssetClient {
           },
         };
       }),
-      throwOnFail: true,
     });
   }
 

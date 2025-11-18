@@ -29,15 +29,13 @@ import { NetworkPanelKey } from '../../network_details';
 import {
   DOCUMENT_DETAILS_HISTORY_ROW_TEST_ID,
   GENERIC_HISTORY_ROW_TEST_ID,
-  HISTORY_ROW_LOADING_TEST_ID,
   HOST_HISTORY_ROW_TEST_ID,
-  IOC_HISTORY_ROW_TEST_ID,
   NETWORK_HISTORY_ROW_TEST_ID,
   RULE_HISTORY_ROW_TEST_ID,
   USER_HISTORY_ROW_TEST_ID,
+  HISTORY_ROW_LOADING_TEST_ID,
 } from './test_ids';
 import { HostPanelKey, UserPanelKey } from '../../entity_details/shared/constants';
-import { IOCRightPanelKey } from '../../ioc_details/constants/panel_keys';
 
 jest.mock('@kbn/expandable-flyout', () => ({
   useExpandableFlyoutApi: jest.fn(),
@@ -93,13 +91,6 @@ const rowItems: { [id: string]: FlyoutPanelHistory } = {
     panel: {
       id: NetworkPanelKey,
       params: { ip: 'ip' },
-    },
-  },
-  ioc: {
-    lastOpen: Date.now(),
-    panel: {
-      id: IOCRightPanelKey,
-      params: { id: 'iocId' },
     },
   },
   unsupported: {
@@ -185,16 +176,6 @@ describe('FlyoutHistoryRow', () => {
     );
     expect(getByTestId(`${4}-${NETWORK_HISTORY_ROW_TEST_ID}`)).toBeInTheDocument();
     expect(getByTestId(`${4}-${NETWORK_HISTORY_ROW_TEST_ID}`)).toHaveTextContent('Network: ip');
-  });
-
-  it('should render generic network history row when key is ioc', () => {
-    const { getByTestId } = render(
-      <TestProviders>
-        <FlyoutHistoryRow item={rowItems.ioc} index={5} />
-      </TestProviders>
-    );
-    expect(getByTestId(`${5}-${IOC_HISTORY_ROW_TEST_ID}`)).toBeInTheDocument();
-    expect(getByTestId(`${5}-${IOC_HISTORY_ROW_TEST_ID}`)).toHaveTextContent('Document: Indicator');
   });
 
   it('should render null when key is not supported', () => {

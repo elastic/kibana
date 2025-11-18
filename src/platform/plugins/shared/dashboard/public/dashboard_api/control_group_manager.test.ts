@@ -22,7 +22,7 @@ describe('initializeControlGroupManager', () => {
 
   describe('get state for control group', () => {
     it('should return default state when no initial state is provided', () => {
-      const { internalApi } = initializeControlGroupManager(undefined, getReferences, 'view');
+      const { internalApi } = initializeControlGroupManager(undefined, getReferences);
       const state = internalApi.getStateForControlGroup();
       expect(state.rawState).toBeDefined();
       expect(state.rawState.controls).toEqual([]);
@@ -43,25 +43,15 @@ describe('initializeControlGroupManager', () => {
         },
         labelPosition: 'oneLine',
       };
-      const { internalApi } = initializeControlGroupManager(initialState, getReferences, 'view');
+      const { internalApi } = initializeControlGroupManager(initialState, getReferences);
       const state = internalApi.getStateForControlGroup();
       expect(state.rawState).toEqual(initialState);
     });
   });
 
   describe('initialization', () => {
-    it('isFetchPaused$ should emit false before the control group is set when the Dashboard is in print mode.', async () => {
-      const { api } = initializeControlGroupManager(undefined, getReferences, 'print');
-      const firstEmit = await firstValueFrom(api.isFetchPaused$);
-      expect(firstEmit).toBe(true);
-
-      const lastEmitPromise = lastValueFrom(api.isFetchPaused$.pipe(take(2)));
-      const lastEmit = await lastEmitPromise;
-      expect(lastEmit).toBe(false);
-    });
-
     it('isFetchPaused$ should emit true initially, then false after controls are initialized', async () => {
-      const { api, internalApi } = initializeControlGroupManager(undefined, getReferences, 'view');
+      const { api, internalApi } = initializeControlGroupManager(undefined, getReferences);
       const mockControlGroupApi = {
         untilFiltersPublished: jest.fn().mockResolvedValue(undefined),
       } as unknown as ControlGroupApi;
@@ -77,7 +67,7 @@ describe('initializeControlGroupManager', () => {
     });
 
     it('should publish controlGroupApi when it becomes available', async () => {
-      const { api, internalApi } = initializeControlGroupManager(undefined, getReferences, 'view');
+      const { api, internalApi } = initializeControlGroupManager(undefined, getReferences);
       const mockControlGroupApi = {
         untilFiltersPublished: jest.fn().mockResolvedValue(undefined),
       } as unknown as ControlGroupApi;
@@ -93,7 +83,7 @@ describe('initializeControlGroupManager', () => {
 
   describe('serialize control group state', () => {
     it('should serialize control group state', () => {
-      const { internalApi } = initializeControlGroupManager(undefined, getReferences, 'view');
+      const { internalApi } = initializeControlGroupManager(undefined, getReferences);
       const mockSerializedState = {
         rawState: { controls: [{ id: '1' }] },
         references: [{ id: 'ref1', name: 'refName' }],
@@ -112,7 +102,7 @@ describe('initializeControlGroupManager', () => {
     });
 
     it('should return empty state when serializing with no control group api', () => {
-      const { internalApi } = initializeControlGroupManager(undefined, getReferences, 'view');
+      const { internalApi } = initializeControlGroupManager(undefined, getReferences);
       const serialized = internalApi.serializeControlGroup();
       expect(serialized.controlGroupInput).toBeUndefined();
       expect(serialized.controlGroupReferences).toEqual([]);

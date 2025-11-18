@@ -1644,51 +1644,6 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES",
-        "type": "string",
-        "tags": [],
-        "label": "SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES",
-        "description": [],
-        "signature": [
-          "\"securitySolution:defaultValueReportMinutes\""
-        ],
-        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE",
-        "type": "string",
-        "tags": [],
-        "label": "SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE",
-        "description": [],
-        "signature": [
-          "\"securitySolution:defaultValueReportRate\""
-        ],
-        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE",
-        "type": "string",
-        "tags": [],
-        "label": "SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE",
-        "description": [],
-        "signature": [
-          "\"securitySolution:defaultValueReportTitle\""
-        ],
-        "path": "src/platform/packages/shared/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.SECURITY_SOLUTION_ENABLE_ASSET_CRITICALITY_SETTING",
         "type": "string",
         "tags": [],

@@ -40,6 +40,7 @@ import { MultiSelectFieldsAutocomplete } from '../multi_select_fields';
 import { useAllEsqlRuleFields } from '../../hooks';
 import { MaxSignals } from '../max_signals';
 import { ThreatMatchIndicatorPathEdit } from '../../../rule_creation/components/threat_match_indicator_path_edit';
+import { AiAssistantLabelAppend } from '../ai_assistant_label_append';
 
 const CommonUseField = getUseField({ component: Field });
 
@@ -52,6 +53,7 @@ interface StepAboutRuleProps extends RuleStepProps {
   form: FormHook<AboutStepRule>;
   esqlQuery?: string | undefined;
   ruleSource?: RuleSource;
+  aiAssistedUserQuery?: string;
 }
 
 interface StepAboutRuleReadOnlyProps {
@@ -83,6 +85,7 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
   form,
   esqlQuery,
   ruleSource,
+  aiAssistedUserQuery,
 }) => {
   const { data } = useKibana().services;
 
@@ -137,6 +140,11 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
       indexPatternsFields: indexPattern.fields,
     });
 
+  const ruleContext = {
+    type: ruleType,
+    query: esqlQuery,
+    index,
+  };
   return (
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
@@ -150,6 +158,15 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 fullWidth: true,
                 disabled: isLoading,
               },
+              labelAppend: aiAssistedUserQuery ? (
+                <AiAssistantLabelAppend
+                  getFields={getFields}
+                  aiAssistedUserQuery={aiAssistedUserQuery}
+                  setFieldValue={form.setFieldValue}
+                  fieldName="name"
+                  ruleContext={ruleContext}
+                />
+              ) : null,
             }}
           />
           <EuiSpacer size="l" />
@@ -163,6 +180,15 @@ const StepAboutRuleComponent: FC<StepAboutRuleProps> = ({
                 compressed: true,
                 fullWidth: true,
               },
+              labelAppend: aiAssistedUserQuery ? (
+                <AiAssistantLabelAppend
+                  getFields={getFields}
+                  aiAssistedUserQuery={aiAssistedUserQuery}
+                  setFieldValue={form.setFieldValue}
+                  fieldName="description"
+                  ruleContext={ruleContext}
+                />
+              ) : null,
             }}
           />
           <EuiSpacer size="l" />

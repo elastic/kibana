@@ -22,6 +22,7 @@
   "exclude": ["target/**/*", "*/plugins/**/*", "plugins/**/*"],
   "kbn_references": [
     "@kbn/core",
+    { "path": "../../../src/setup_node_env/tsconfig.json" },
     "@kbn/dashboard-plugin",
     "@kbn/expressions-plugin",
     "@kbn/saved-objects-management-plugin",
@@ -80,7 +81,6 @@
     "@kbn/field-formats-common",
     "@kbn/ai-assistant-management-plugin",
     "@kbn/core-chrome-navigation-tour",
-    "@kbn/setup-node-env",
     "@kbn/visualizations-common",
   ]
 }

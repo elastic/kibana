@@ -10,7 +10,7 @@ import { omit } from 'lodash';
 import datemath from '@elastic/datemath';
 import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
-import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
+import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
 import {
   ALERT_STATUS,
@@ -71,7 +71,7 @@ const OMITTED_ALERT_FIELDS = [
   'kibana.version',
 ] as const;
 
-const getAlertsSchema = z.object({
+const alertsSchema = z.object({
   start: z
     .string()
     .describe('The start of the time range, in Elasticsearch date math, like `now-24h`.')
@@ -96,12 +96,12 @@ export function createGetAlertsTool({
 }: {
   core: CoreSetup<ObservabilityAgentPluginStartDependencies, ObservabilityAgentPluginStart>;
   logger: Logger;
-}): StaticToolRegistration<typeof getAlertsSchema> {
-  const toolDefinition: BuiltinToolDefinition<typeof getAlertsSchema> = {
+}) {
+  const toolDefinition: BuiltinToolDefinition<typeof alertsSchema> = {
     id: OBSERVABILITY_GET_ALERTS_TOOL_ID,
     type: ToolType.builtin,
     description: `Retrieve Observability alerts and relevant fields for a given time range. Defaults to active alerts (set includeRecovered to true to include recovered alerts).`,
-    schema: getAlertsSchema,
+    schema: alertsSchema,
     tags: ['observability', 'alerts'],
     handler: async (
       { start: startAsDatemath, end: endAsDatemath, kqlFilter, includeRecovered, query },

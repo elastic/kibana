@@ -123,7 +123,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             indexPatterns: ['logs-*-*', 'logs-*', 'filebeat-*'],
           },
           metrics: {
-            indexPatterns: ['metrics-*', 'metricbeat-*'],
+            indexPatterns: ['metrics-*'],
           },
           alerts: {
             indexPattern: ['alerts-observability-*'],

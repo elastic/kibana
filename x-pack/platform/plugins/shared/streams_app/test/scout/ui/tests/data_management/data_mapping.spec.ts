@@ -47,9 +47,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     await expect(page.getByRole('columnheader').getByText('Type', { exact: true })).toBeVisible();
     await expect(page.getByRole('columnheader').getByText('Format', { exact: true })).toBeVisible();
     await expect(page.getByRole('columnheader').getByText('Field Parent')).toBeVisible();
-    await expect(
-      page.getByRole('columnheader').getByText('Mapping status', { exact: true })
-    ).toBeVisible();
+    await expect(page.getByRole('columnheader').getByText('Status', { exact: true })).toBeVisible();
 
     // Verify at least one field is displayed (fields from the stream setup)
     const rows = await pageObjects.streams.getPreviewTableRows();
@@ -142,7 +140,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     await pageObjects.streams.expectCellValueContains({
       columnName: 'status',
       rowIndex: 0,
-      value: 'Unmapped',
+      value: 'Unmanaged',
     });
 
     // Open the field actions menu
@@ -184,7 +182,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     await pageObjects.streams.expectCellValueContains({
       columnName: 'status',
       rowIndex: 0,
-      value: 'Unmapped',
+      value: 'Unmanaged',
     });
 
     // Open the field actions menu
@@ -227,7 +225,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     await pageObjects.streams.expectCellValueContains({
       columnName: 'status',
       rowIndex: 0,
-      value: 'Unmapped',
+      value: 'Unmanaged',
     });
   });
 

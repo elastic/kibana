@@ -16,7 +16,6 @@ import {
   AlertingConnectorFeatureId,
   CasesConnectorFeatureId,
   SecurityConnectorFeatureId,
-  WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import {
   ExternalIncidentServiceSecretConfigurationSchema,
@@ -75,7 +74,6 @@ export function getServiceNowSIRConnectorType(): ServiceNowConnectorType<
       AlertingConnectorFeatureId,
       CasesConnectorFeatureId,
       SecurityConnectorFeatureId,
-      WorkflowsConnectorFeatureId,
     ],
     validate: {
       config: {

@@ -124,7 +124,7 @@ export const ServicesContent = ({
         <p>
           <FormattedMessage
             id="xpack.infra.assetDetails.services.noServicesMsg"
-            defaultMessage="We were unable to find services running on this host. Click {apmTutorialLink} to instrument your services with APM."
+            defaultMessage="No services found on this host. Click {apmTutorialLink} to instrument your services with APM."
             values={{
               apmTutorialLink: (
                 <EuiLink

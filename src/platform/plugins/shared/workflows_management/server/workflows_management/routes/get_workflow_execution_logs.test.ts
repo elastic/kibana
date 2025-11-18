@@ -93,8 +93,8 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}/logs', () => {
           },
         ],
         total: 2,
-        size: 100,
-        page: 1,
+        limit: 100,
+        offset: 0,
       };
 
       workflowsApi.getWorkflowExecutionLogs = jest.fn().mockResolvedValue(mockLogs);
@@ -103,8 +103,8 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}/logs', () => {
       const mockRequest = {
         params: { workflowExecutionId: 'execution-123' },
         query: {
-          size: 100,
-          page: 1,
+          limit: 100,
+          offset: 0,
           sortField: 'timestamp',
           sortOrder: 'desc',
         },
@@ -118,8 +118,8 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}/logs', () => {
       expect(workflowsApi.getWorkflowExecutionLogs).toHaveBeenCalledWith(
         {
           executionId: 'execution-123',
-          size: 100,
-          page: 1,
+          limit: 100,
+          offset: 0,
           sortField: 'timestamp',
           sortOrder: 'desc',
           stepExecutionId: undefined,
@@ -156,8 +156,8 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}/logs', () => {
       const mockLogs = {
         logs: [],
         total: 0,
-        size: 100,
-        page: 1,
+        limit: 100,
+        offset: 0,
       };
 
       workflowsApi.getWorkflowExecutionLogs = jest.fn().mockResolvedValue(mockLogs);
@@ -209,8 +209,8 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}/logs', () => {
           },
         ],
         total: 1,
-        size: 10,
-        page: 3,
+        limit: 10,
+        offset: 20,
       };
 
       workflowsApi.getWorkflowExecutionLogs = jest.fn().mockResolvedValue(mockLogs);
@@ -219,8 +219,8 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}/logs', () => {
       const mockRequest = {
         params: { workflowExecutionId: 'execution-123' },
         query: {
-          size: 10,
-          page: 3,
+          limit: 10,
+          offset: 20,
           sortField: 'level',
           sortOrder: 'asc',
         },
@@ -234,8 +234,8 @@ describe('GET /api/workflowExecutions/{workflowExecutionId}/logs', () => {
       expect(workflowsApi.getWorkflowExecutionLogs).toHaveBeenCalledWith(
         {
           executionId: 'execution-123',
-          size: 10,
-          page: 3,
+          limit: 10,
+          offset: 20,
           sortField: 'level',
           sortOrder: 'asc',
         },

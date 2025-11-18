@@ -29,7 +29,7 @@ export const ShodanConnector: ConnectorSpec = {
     displayName: 'Shodan',
     description: 'Internet-wide asset discovery and vulnerability scanning',
     minimumLicense: 'gold',
-    supportedFeatureIds: ['workflows'],
+    supportedFeatureIds: ['alerting', 'siem'],
   },
 
   schema: z.discriminatedUnion('method', [

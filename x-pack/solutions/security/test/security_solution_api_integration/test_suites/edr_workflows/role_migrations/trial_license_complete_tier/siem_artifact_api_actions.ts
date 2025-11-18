@@ -10,7 +10,7 @@ import type { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-cons
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { Role } from '@kbn/security-plugin-types-common';
 import { GLOBAL_ARTIFACT_TAG } from '@kbn/security-solution-plugin/common/endpoint/service/artifacts';
-import type { ArtifactTestData } from '@kbn/test-suites-xpack-security-endpoint/services/endpoint_artifacts';
+import type { ArtifactTestData } from '../../../../../security_solution_endpoint/services/endpoint_artifacts';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 
 type ArtifactListsWithRequiredPrivileges = Array<{

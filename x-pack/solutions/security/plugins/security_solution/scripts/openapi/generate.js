@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-require('@kbn/setup-node-env');
+require('../../../../../../../src/setup_node_env');
 const { generate } = require('@kbn/openapi-generator');
 const { REPO_ROOT } = require('@kbn/repo-info');
 const { resolve, join } = require('path');

@@ -24,16 +24,11 @@ import {
   useStreamEnrichmentSelector,
 } from './state_management/stream_enrichment_state_machine';
 import { DetectedFieldsEditor } from './detected_fields_editor';
-import type { SchemaEditorField } from '../schema_editor/types';
 import { DataSourcesControls } from './data_sources_controls';
 import { getActiveDataSourceRef } from './state_management/stream_enrichment_state_machine/utils';
 import { useDataSourceSelector } from './state_management/data_source_state_machine';
 
-export const SimulationPlayground = ({
-  schemaEditorFields,
-}: {
-  schemaEditorFields: SchemaEditorField[];
-}) => {
+export const SimulationPlayground = () => {
   const { refreshSimulation, viewSimulationPreviewData, viewSimulationDetectedFields } =
     useStreamEnrichmentEvents();
 
@@ -95,7 +90,7 @@ export const SimulationPlayground = ({
               >
                 {i18n.translate(
                   'xpack.streams.streamDetailView.managementTab.enrichment.simulationPlayground.detectedFields',
-                  { defaultMessage: 'Modified fields' }
+                  { defaultMessage: 'Detected fields' }
                 )}
               </EuiTab>
             </EuiTabs>
@@ -108,7 +103,7 @@ export const SimulationPlayground = ({
       </EuiFlexItem>
       <EuiSpacer size="m" />
       {isViewingDataPreview && <ProcessorOutcomePreview />}
-      {isViewingDetectedFields && <DetectedFieldsEditor schemaEditorFields={schemaEditorFields} />}
+      {isViewingDetectedFields && <DetectedFieldsEditor detectedFields={detectedFields} />}
     </>
   );
 };

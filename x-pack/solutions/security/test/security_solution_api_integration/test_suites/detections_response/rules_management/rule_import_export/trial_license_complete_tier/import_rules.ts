@@ -19,8 +19,6 @@ import type {
   ReadExceptionListItemRequestQueryInput,
   ReadExceptionListRequestQueryInput,
 } from '@kbn/securitysolution-exceptions-common/api';
-import { createRule } from '@kbn/detections-response-ftr-services';
-import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import { PRECONFIGURED_EMAIL_ACTION_CONNECTOR_ID } from '../../../../../config/shared';
 import {
   fetchRule,
@@ -29,6 +27,8 @@ import {
   importRules,
   importRulesWithSuccess,
 } from '../../../utils';
+import { createRule } from '../../../../../config/services/detections_response';
+import { deleteAllRules } from '../../../../../config/services/detections_response';
 import { deleteAllExceptions } from '../../../../lists_and_exception_lists/utils';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import { getWebHookConnectorParams } from '../../../utils/connectors/get_web_hook_connector_params';

@@ -333,6 +333,18 @@ export const GetAgentPolicyResponseSchema = schema.object({
   item: AgentPolicyResponseSchema,
 });
 
+export const GetAutoUpgradeAgentsStatusResponseSchema = schema.object({
+  currentVersions: schema.arrayOf(
+    schema.object({
+      version: schema.string(),
+      agents: schema.number(),
+      failedUpgradeAgents: schema.number(),
+      failedUpgradeActionIds: schema.maybe(schema.arrayOf(schema.string())),
+    })
+  ),
+  totalAgents: schema.number(),
+});
+
 export const OTelCollectorPipelineIDSchema = schema.oneOf([
   schema.literal('logs'),
   schema.literal('metrics'),

@@ -1,7 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/setup-node-env",
-  "owner": "@elastic/kibana-operations",
-  "group": "platform",
-  "visibility": "shared"
-}

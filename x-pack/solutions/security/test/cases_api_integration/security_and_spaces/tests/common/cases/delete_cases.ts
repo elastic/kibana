@@ -68,7 +68,7 @@ import {
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-} from '@kbn/detections-response-ftr-services';
+} from '../../../../../security_solution_api_integration/config/services/detections_response';
 import {
   createSecuritySolutionAlerts,
   getSecuritySolutionAlerts,

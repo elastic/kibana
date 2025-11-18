@@ -85,11 +85,6 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
       storeState.app.enableExperimental.newDataViewPickerEnabled;
 
     let experimentalSelectedPatterns: string[] = [];
-    let dataViewId: string | null = null;
-
-    if (!experimentalIsDataViewEnabled) {
-      dataViewId = selectedDataViewIdSourcerer;
-    }
 
     // NOTE: remove eslint override above after the experimental picker is stabilized
     if (experimentalIsDataViewEnabled && experimentalDataViewId) {
@@ -100,8 +95,13 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
       if (plugins.dataViews.found) {
         const experimentalDataView = await plugins.dataViews.contract.get(experimentalDataViewId);
 
-        if (experimentalDataView.isPersisted()) {
-          dataViewId = experimentalDataViewId;
+        if (!experimentalDataView.isPersisted()) {
+          return kibana.notifications.toasts.addError(
+            new Error('Persisting timelines with adhoc data views is not allowed'),
+            {
+              title: 'Error persisting timeline',
+            }
+          );
         }
 
         experimentalSelectedPatterns = experimentalDataView.getIndexPattern().split(',');
@@ -111,6 +111,9 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
     const indexNames = experimentalIsDataViewEnabled
       ? experimentalSelectedPatterns
       : selectedPatternsSourcerer;
+    const dataViewId = experimentalIsDataViewEnabled
+      ? experimentalDataViewId
+      : selectedDataViewIdSourcerer;
 
     store.dispatch(startTimelineSaving({ id: localTimelineId }));
 

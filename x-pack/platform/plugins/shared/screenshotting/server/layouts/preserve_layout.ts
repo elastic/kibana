@@ -10,7 +10,7 @@ import type { LayoutSelectorDictionary, Size } from '../../common/layout';
 import { DEFAULT_SELECTORS } from '.';
 import type { Layout } from '.';
 import { BaseLayout } from './base_layout';
-import type { PageSizeParams, PdfImageSize } from './base_layout';
+import type { PageSizeParams } from './base_layout';
 
 // We use a zoom of two to bump up the resolution of the screenshot a bit.
 const ZOOM: number = 2;
@@ -21,7 +21,6 @@ export class PreserveLayout extends BaseLayout implements Layout {
   public readonly width: number;
   private readonly scaledHeight: number;
   private readonly scaledWidth: number;
-  private imageSize: PdfImageSize = { height: 0, width: 0 };
 
   constructor(size: Size, selectors?: Partial<LayoutSelectorDictionary>) {
     super('preserve_layout');
@@ -57,12 +56,11 @@ export class PreserveLayout extends BaseLayout implements Layout {
     };
   }
 
-  public setPdfImageSize({ height, width }: PdfImageSize): void {
-    this.imageSize = { height, width };
-  }
-
   public getPdfImageSize() {
-    return this.imageSize;
+    return {
+      height: this.height,
+      width: this.width,
+    };
   }
 
   public getPdfPageOrientation() {
@@ -72,16 +70,13 @@ export class PreserveLayout extends BaseLayout implements Layout {
   public getPdfPageSize(pageSizeParams: PageSizeParams): CustomPageSize {
     return {
       height:
-        this.imageSize.height +
+        this.height +
         pageSizeParams.pageMarginTop +
         pageSizeParams.pageMarginBottom +
         pageSizeParams.tableBorderWidth * 2 +
         pageSizeParams.headingHeight +
         pageSizeParams.subheadingHeight,
-      width:
-        this.imageSize.width +
-        pageSizeParams.pageMarginWidth * 2 +
-        pageSizeParams.tableBorderWidth * 2,
+      width: this.width + pageSizeParams.pageMarginWidth * 2 + pageSizeParams.tableBorderWidth * 2,
     };
   }
 }

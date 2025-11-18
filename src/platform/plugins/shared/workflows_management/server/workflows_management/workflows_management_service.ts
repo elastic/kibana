@@ -11,7 +11,6 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { v4 as generateUuid } from 'uuid';
-import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
 import type {
   ActionsClient,
   PluginStartContract as ActionsPluginStartContract,
@@ -60,6 +59,7 @@ import type {
   GetWorkflowsParams,
 } from './workflows_management_api';
 import {
+  UNSUPPORTED_CONNECTOR_TYPES,
   WORKFLOWS_EXECUTION_LOGS_INDEX,
   WORKFLOWS_EXECUTIONS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
@@ -80,13 +80,13 @@ import { createStorage } from '../storage/workflow_storage';
 import type { WorkflowProperties, WorkflowStorage } from '../storage/workflow_storage';
 import type { WorkflowTaskScheduler } from '../tasks/workflow_task_scheduler';
 
-const DEFAULT_PAGE_SIZE = 100;
+const DEFAULT_PAGE_SIZE = 20;
 export interface SearchWorkflowExecutionsParams {
   workflowId: string;
   statuses?: ExecutionStatus[];
   executionTypes?: ExecutionType[];
   page?: number;
-  size?: number;
+  perPage?: number;
 }
 
 export class WorkflowsService {
@@ -512,8 +512,8 @@ export class WorkflowsService {
       throw new Error('WorkflowsService not initialized');
     }
 
-    const { size = 100, page = 1, enabled, createdBy, query } = params;
-    const from = (page - 1) * size;
+    const { limit = 20, page = 1, enabled, createdBy, query } = params;
+    const from = (page - 1) * limit;
 
     const must: estypes.QueryDslQueryContainer[] = [];
 
@@ -609,7 +609,7 @@ export class WorkflowsService {
     }
 
     const searchResponse = await this.workflowStorage.getClient().search({
-      size,
+      size: limit,
       from,
       track_total_hits: true,
       query: {
@@ -645,12 +645,14 @@ export class WorkflowsService {
     }
 
     return {
-      page,
-      size,
-      total:
-        typeof searchResponse.hits.total === 'number'
-          ? searchResponse.hits.total
-          : searchResponse.hits.total?.value || 0,
+      _pagination: {
+        page,
+        limit,
+        total:
+          typeof searchResponse.hits.total === 'number'
+            ? searchResponse.hits.total
+            : searchResponse.hits.total?.value || 0,
+      },
       results: workflows,
     };
   }
@@ -870,8 +872,8 @@ export class WorkflowsService {
     }
 
     const page = params.page ?? 1;
-    const size = params.size ?? DEFAULT_PAGE_SIZE;
-    const from = (page - 1) * size;
+    const perPage = params.perPage ?? DEFAULT_PAGE_SIZE;
+    const from = (page - 1) * perPage;
 
     return searchWorkflowExecutions({
       esClient: this.esClient,
@@ -882,9 +884,10 @@ export class WorkflowsService {
           must,
         },
       },
-      size,
+      size: perPage,
       from,
       page,
+      perPage,
     });
   }
 
@@ -1126,10 +1129,7 @@ export class WorkflowsService {
     // Get both connectors and action types
     const [connectors, actionTypes] = await Promise.all([
       actionsClient.getAll(spaceId),
-      actionsClientWithRequest.listTypes({
-        featureId: WorkflowsConnectorFeatureId,
-        includeSystemActionTypes: false,
-      }),
+      actionsClientWithRequest.listTypes({ includeSystemActionTypes: false }),
     ]);
 
     // Note: We now get display names directly from actionTypes, no need for the map
@@ -1139,6 +1139,11 @@ export class WorkflowsService {
 
     // First, add all action types (even those without instances), excluding filtered types
     actionTypes.forEach((actionType) => {
+      // Skip filtered connector types
+      if (UNSUPPORTED_CONNECTOR_TYPES.includes(actionType.id)) {
+        return;
+      }
+
       // Get sub-actions from our static mapping
       const subActions = CONNECTOR_SUB_ACTIONS_MAP[actionType.id];
 

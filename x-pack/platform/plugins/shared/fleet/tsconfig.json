@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "exclude": ["target/**/*"],
+  "exclude": ["cypress.config.ts", "cypress.config.space_awareness.ts", "target/**/*"],
   "include": [
     // add all the folders containing files to be compiled
     ".storybook/**/*",
@@ -13,10 +13,13 @@
     "server/**/*.json",
     "scripts/**/*",
     "package.json",
+    "cypress.config.ts",
+    "cypress.config.space_awareness.ts",
     "../../../../../typings/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
+    { "path": "../../../../../src/setup_node_env/tsconfig.json" },
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json
@@ -122,7 +125,6 @@
     "@kbn/licensing-types",
     "@kbn/alerting-plugin",
     "@kbn/spaces-utils",
-    "@kbn/setup-node-env",
-    "@kbn/react-query"
+    "@kbn/react-query",
   ]
 }

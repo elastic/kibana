@@ -19,8 +19,10 @@
   ],
   "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
   "kbn_references": [
-    "@kbn/setup-node-env",
     "@kbn/core",
+    {
+      "path": "../../../../../src/setup_node_env/tsconfig.json"
+    },
     "@kbn/data-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/files-plugin",
@@ -257,6 +259,7 @@
     "@kbn/onechat-server",
     "@kbn/core-analytics-server-mocks",
     "@kbn/object-utils",
+    "@kbn/ml-response-stream",
     "@kbn/react-query",
     "@kbn/core-chrome-layout-constants",
     "@kbn/response-ops-rule-form",

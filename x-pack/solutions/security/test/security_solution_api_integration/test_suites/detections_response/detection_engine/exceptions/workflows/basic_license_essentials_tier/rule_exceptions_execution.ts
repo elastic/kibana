@@ -20,15 +20,6 @@ import type {
 import { getCreateExceptionListItemMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_item_schema.mock';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 
-import {
-  createAlertsIndex,
-  createRule,
-  deleteAllRules,
-  waitForRuleSuccess,
-  waitForAlertsToBePresent,
-  getAlertsByIds,
-  deleteAllAlerts,
-} from '@kbn/detections-response-ftr-services';
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 import {
   getSimpleRule,
@@ -39,6 +30,15 @@ import {
   createRuleWithExceptionEntries,
   getEqlRuleForAlertTesting,
 } from '../../../../utils';
+import {
+  createAlertsIndex,
+  createRule,
+  deleteAllRules,
+  waitForRuleSuccess,
+  waitForAlertsToBePresent,
+  getAlertsByIds,
+  deleteAllAlerts,
+} from '../../../../../../config/services/detections_response';
 import {
   createListsIndex,
   deleteAllExceptions,

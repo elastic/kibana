@@ -20,6 +20,10 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import { catchAxiosErrorFormatAndThrow } from '@kbn/securitysolution-utils';
 
+import type {
+  AIAssistedCreateRuleRequestBodyInput,
+  AIAssistedCreateRuleResponse,
+} from './detection_engine/ai_assisted/index.gen';
 import type { SetAlertAssigneesRequestBodyInput } from './detection_engine/alert_assignees/set_alert_assignees_route.gen';
 import type {
   SetAlertTagsRequestBodyInput,
@@ -231,8 +235,6 @@ import type {
   DeleteEntityEngineRequestQueryInput,
   DeleteEntityEngineRequestParamsInput,
   DeleteEntityEngineResponse,
-  DeleteEntityEnginesRequestQueryInput,
-  DeleteEntityEnginesResponse,
 } from './entity_analytics/entity_store/engine/delete.gen';
 import type { EntityStoreGetPrivilegesResponse } from './entity_analytics/entity_store/engine/get_privileges.gen';
 import type {
@@ -506,6 +508,22 @@ export class Client {
   constructor(options: ClientOptions) {
     this.kbnClient = options.kbnClient;
     this.log = options.log;
+  }
+  /**
+   * AI assisted rule creation
+   */
+  async aiAssistedCreateRule(props: AIAssistedCreateRuleProps) {
+    this.log.info(`${new Date().toISOString()} Calling API AIAssistedCreateRule`);
+    return this.kbnClient
+      .request<AIAssistedCreateRuleResponse>({
+        path: '/internal/detection_engine/ai_assisted/_create',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
   }
   /**
     * Migrations favor data integrity over shard size. Consequently, unused or orphaned indices are artifacts of
@@ -996,20 +1014,6 @@ For detailed information on Kibana actions and alerting, and additional API call
     return this.kbnClient
       .request<DeleteEntityEngineResponse>({
         path: replaceParams('/api/entity_store/engines/{entityType}', props.params),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
-        },
-        method: 'DELETE',
-
-        query: props.query,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  async deleteEntityEngines(props: DeleteEntityEnginesProps) {
-    this.log.info(`${new Date().toISOString()} Calling API DeleteEntityEngines`);
-    return this.kbnClient
-      .request<DeleteEntityEnginesResponse>({
-        path: '/api/entity_store/engines',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -3201,6 +3205,9 @@ If the specified entity already exists, it is updated with the provided values. 
   }
 }
 
+export interface AIAssistedCreateRuleProps {
+  body: AIAssistedCreateRuleRequestBodyInput;
+}
 export interface AlertsMigrationCleanupProps {
   body: AlertsMigrationCleanupRequestBodyInput;
 }
@@ -3271,9 +3278,6 @@ export interface DeleteDashboardMigrationProps {
 export interface DeleteEntityEngineProps {
   query: DeleteEntityEngineRequestQueryInput;
   params: DeleteEntityEngineRequestParamsInput;
-}
-export interface DeleteEntityEnginesProps {
-  query: DeleteEntityEnginesRequestQueryInput;
 }
 export interface DeleteEntitySourceProps {
   params: DeleteEntitySourceRequestParamsInput;

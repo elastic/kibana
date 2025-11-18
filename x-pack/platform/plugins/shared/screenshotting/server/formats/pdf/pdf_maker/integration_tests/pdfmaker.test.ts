@@ -28,7 +28,6 @@ describe('PdfMaker', () => {
 
   beforeEach(() => {
     layout = createMockLayout();
-    layout.setPdfImageSize({ height: 100, width: 100 });
     logger = loggingSystemMock.createLogger();
     packageInfo = {
       branch: 'screenshot-test',

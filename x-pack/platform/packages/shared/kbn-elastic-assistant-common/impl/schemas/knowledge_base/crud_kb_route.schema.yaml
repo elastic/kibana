@@ -8,8 +8,8 @@ paths:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       operationId: CreateKnowledgeBase
-      summary: Create a KnowledgeBase for a resource
-      description: Create a knowledge base with a specific resource identifier.
+      summary: Create a KnowledgeBase
+      description: Create a KnowledgeBase
       tags:
         - KnowledgeBase API
       parameters:
@@ -19,7 +19,6 @@ paths:
           schema:
             type: string
           example: "kb12345"
-          required: true
         - name: modelId
           in: query
           description: ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
@@ -42,30 +41,31 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseResponse'
-              examples:
-                KnowledgeBaseResponse200Example1:
-                  summary: A response that indicates that the request was successful.
-                  value:
-                    success: true
         400:
           description: Generic Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/KnowledgeBaseResponse400'
-              examples:
-                KnowledgeBaseResponse400Example1:
-                  summary: A response for a request that failed due to an invalid query parameter value.
-                  value: >
-                    statusCode: 400
-                    error: Bad Request
-                    message: "[request query]: ignoreSecurityLabs: Invalid enum value. Expected 'true' | 'false', received 'yes', ignoreSecurityLabs: Expected boolean, received string"
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                    description: The HTTP status code of the error.
+                    example: 400
+                  error:
+                    type: string
+                    description: A short description of the error.
+                    example: "Bad Request"
+                  message:
+                    type: string
+                    description: A detailed error message.
+                    example: "Invalid resource ID provided."
     get:
       x-codegen-enabled: true
       x-labels: [ess, serverless]
       operationId: ReadKnowledgeBase
-      description: Read a knowledge base with a specific resource identifier.
-      summary: Read a KnowledgeBase for a resource
+      description: Read a single KB
+      summary: Read a KnowledgeBase
       tags:
         - KnowledgeBase API
       parameters:
@@ -75,113 +75,62 @@ paths:
           schema:
             type: string
           example: "kb12345"
-          required: true
       responses:
         200:
           description: Indicates a successful call.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/KnowledgeBaseReadResponse200'
-              examples:
-                KnowledgeBaseReadResponse200Example1:
-                  summary: A response that returns information about the knowledge base.
-                  value:
-                    elser_exists: false
-                    is_setup_in_progress: true
-                    is_setup_available: true
-                    security_labs_exists: false
-                    defend_insights_exists: true
-                    user_data_exists: true
-                    product_documentation_status: installed
+                type: object
+                properties:
+                  elser_exists:
+                    type: boolean
+                    description: Indicates if the ELSER model exists for the KnowledgeBase.
+                    example: true
+                  is_setup_available:
+                    type: boolean
+                    description: Indicates if the setup process is available for the KnowledgeBase.
+                    example: true
+                  is_setup_in_progress:
+                    type: boolean
+                    description: Indicates if the setup process is currently in progress.
+                    example: false
+                  security_labs_exists:
+                    type: boolean
+                    description: Indicates if Security Labs documentation exists in the KnowledgeBase.
+                    example: true
+                  defend_insights_exists:
+                    type: boolean
+                    description: Indicates if Defend Insights documentation exists in the KnowledgeBase.
+                    example: true
+                  user_data_exists:
+                    type: boolean
+                    description: Indicates if user data exists in the KnowledgeBase.
+                    example: false
+                  product_documentation_status:
+                    type: string
+                    description: The status of the product documentation in the KnowledgeBase.
+                    example: "complete"
         400:
           description: Generic Error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/KnowledgeBaseResponse400'
-  /api/security_ai_assistant/knowledge_base:
-    post:
-      x-codegen-enabled: true
-      x-labels: [ess, serverless]
-      operationId: PostKnowledgeBase
-      summary: Create a KnowledgeBase
-      # description:
-      tags:
-        - KnowledgeBase API
-      parameters:
-        - name: modelId
-          in: query
-          description: ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
-          required: false
-          schema:
-            type: string
-          example: "elser-model-001"
-        - name: ignoreSecurityLabs
-          in: query
-          description: Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base. Defaults to `false`.
-          required: false
-          schema:
-            type: boolean
-            default: false
-          example: true
-      responses:
-        200:
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/KnowledgeBaseResponse'
-              examples:
-                KnowledgeBaseResponse200Example2:
-                  summary: A response that indicates that the request was successful.
-                  value:
-                    success: true
-        400:
-          description: Generic Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/KnowledgeBaseResponse400'
-              examples:
-                KnowledgeBaseResponse400Example2:
-                  summary: A response for a request that failed due to an invalid query parameter value.
-                  value: >
-                    statusCode: 400
-                    error: Bad Request
-                    message: "[request query]: ignoreSecurityLabs: Invalid enum value. Expected 'true' | 'false', received 'yes', ignoreSecurityLabs: Expected boolean, received string"
-    get:
-      x-codegen-enabled: true
-      x-labels: [ess, serverless]
-      operationId: GetKnowledgeBase
-      description: Read a single KB
-      summary: Read a KnowledgeBase
-      tags:
-        - KnowledgeBase API
-      responses:
-        200:
-          description: Indicates a successful call.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/KnowledgeBaseReadResponse200'
-              examples:
-                KnowledgeBaseReadResponse200Example2:
-                  summary: A response that returns information about the knowledge base.
-                  value:
-                    elser_exists: false
-                    is_setup_in_progress: true
-                    is_setup_available: true
-                    security_labs_exists: false
-                    defend_insights_exists: true
-                    user_data_exists: true
-                    product_documentation_status: installed
-        400:
-          description: Generic Error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/KnowledgeBaseResponse400'
+                type: object
+                properties:
+                  statusCode:
+                    type: number
+                    description: The HTTP status code of the error.
+                    example: 400
+                  error:
+                    type: string
+                    description: A short description of the error.
+                    example: "Bad Request"
+                  message:
+                    type: string
+                    description: A detailed error message.
+                    example: "Invalid resource ID provided."
+
 components:
   schemas:
     KnowledgeBaseResponse:
@@ -192,50 +141,3 @@ components:
           type: boolean
           description: Identify the success of the method execution.
           example: true
-    KnowledgeBaseResponse400:
-      type: object
-      properties:
-        statusCode:
-          type: number
-          description: The HTTP status code of the error.
-          example: 400
-        error:
-          type: string
-          description: A short description of the error.
-          example: "Bad Request"
-        message:
-          type: string
-          description: A detailed error message.
-          example: "Invalid resource ID provided."
-    KnowledgeBaseReadResponse200:
-      type: object
-      properties:
-        elser_exists:
-          type: boolean
-          description: Indicates if the ELSER model exists for the KnowledgeBase.
-          example: true
-        is_setup_available:
-          type: boolean
-          description: Indicates if the setup process is available for the KnowledgeBase.
-          example: true
-        is_setup_in_progress:
-          type: boolean
-          description: Indicates if the setup process is currently in progress.
-          example: false
-        security_labs_exists:
-          type: boolean
-          description: Indicates if Security Labs documentation exists in the KnowledgeBase.
-          example: true
-        defend_insights_exists:
-          type: boolean
-          description: Indicates if Defend Insights documentation exists in the KnowledgeBase.
-          example: true
-        user_data_exists:
-          type: boolean
-          description: Indicates if user data exists in the KnowledgeBase.
-          example: false
-        product_documentation_status:
-          type: string
-          description: The status of the product documentation in the KnowledgeBase.
-          example: "complete"
-

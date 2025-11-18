@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiButtonSize } from '@elastic/eui';
 import { EuiButtonEmpty, EuiLink } from '@elastic/eui';
 import React, { useCallback, useMemo, useEffect } from 'react';
 import { useAssistantContext } from '../..';
@@ -31,7 +32,9 @@ export type Props = Omit<PromptContext, 'id'> & {
   /** Optional callback when overlay shows */
   onShowOverlay?: () => void;
   /** Optional callback that returns copied code block */
-  onExportCodeBlock?: (codeBlock: string) => void;
+  onExportCodeBlock?: (codeBlock: string, suggestedFieldName: string | null) => void;
+  /** Optional size of the button */
+  size?: EuiButtonSize;
 };
 
 const NewChatComponent: React.FC<Props> = ({
@@ -49,6 +52,7 @@ const NewChatComponent: React.FC<Props> = ({
   asLink = false,
   onShowOverlay,
   onExportCodeBlock,
+  size,
 }) => {
   const { showAssistantOverlay } = useAssistantOverlay(
     category,
@@ -71,16 +75,18 @@ const NewChatComponent: React.FC<Props> = ({
   }, [showAssistantOverlay, onShowOverlay]);
 
   useEffect(() => {
+    const current = codeBlockRef.current;
+    const codeBlockKey = conversationTitle ?? category;
     if (onExportCodeBlock) {
-      codeBlockRef.current = onExportCodeBlock;
+      current[codeBlockKey] = onExportCodeBlock;
     }
 
     return () => {
       if (onExportCodeBlock) {
-        codeBlockRef.current = () => {};
+        delete current[codeBlockKey];
       }
     };
-  }, [codeBlockRef, onExportCodeBlock]);
+  }, [category, codeBlockRef, conversationTitle, onExportCodeBlock]);
 
   const icon = useMemo(() => {
     if (iconType === null) {
@@ -102,11 +108,12 @@ const NewChatComponent: React.FC<Props> = ({
           data-test-subj="newChat"
           onClick={showOverlay}
           iconType={icon}
+          size={size}
         >
           {children}
         </EuiButtonEmpty>
       ),
-    [children, icon, showOverlay, color, asLink]
+    [children, icon, showOverlay, color, asLink, size]
   );
 
   if (!isAssistantVisible) {

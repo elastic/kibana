@@ -38,9 +38,6 @@ export const fieldTypes: readonly string[] = [
   'function_named_parameters',
   'aggregate_metric_double',
   'dense_vector',
-  'histogram',
-  'exponential_histogram',
-  'tdigest',
 ] as const;
 
 export type FieldType = (typeof fieldTypes)[number];
@@ -74,9 +71,6 @@ export const userDefinedTypes = [
   'time_duration',
   'date_period',
   'param', // Defines a named param such as ?value or ??field
-  'histogram',
-  'exponential_histogram',
-  'tdigest',
 ] as const;
 
 /**

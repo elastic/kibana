@@ -15,7 +15,7 @@ export const ConversationLeftActions: React.FC<{}> = () => {
   const hasActiveConversation = useHasActiveConversation();
 
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+    <EuiFlexGroup gutterSize="s" alignItems="center">
       <ConversationsHistoryButton />
       {hasActiveConversation && <NewConversationButton />}
     </EuiFlexGroup>

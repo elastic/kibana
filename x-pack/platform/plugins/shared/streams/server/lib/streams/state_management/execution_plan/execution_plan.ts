@@ -424,7 +424,6 @@ export class ExecutionPlan {
     return this.dependencies.storageClient.bulk({
       operations: actions.map(dotDocumentActionToBulkOperation),
       refresh: true,
-      throwOnFail: true,
     });
   }
 

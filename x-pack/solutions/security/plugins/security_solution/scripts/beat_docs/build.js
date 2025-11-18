@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-require('@kbn/setup-node-env');
+require('../../../../../../../src/setup_node_env');
 
 // eslint-disable-next-line import/no-extraneous-dependencies
 const extract = require('extract-zip');

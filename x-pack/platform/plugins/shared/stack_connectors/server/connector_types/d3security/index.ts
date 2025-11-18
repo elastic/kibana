@@ -8,11 +8,7 @@
 import type { SubActionConnectorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/types';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
-import {
-  AlertingConnectorFeatureId,
-  SecurityConnectorFeatureId,
-  WorkflowsConnectorFeatureId,
-} from '@kbn/actions-plugin/common';
+import { AlertingConnectorFeatureId, SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
 import {
   CONNECTOR_ID,
   CONNECTOR_NAME,
@@ -30,11 +26,7 @@ export function getConnectorType(): D3SecurityConnectorType {
     minimumLicenseRequired: 'gold',
     name: CONNECTOR_NAME,
     getService: (params) => new D3SecurityConnector(params),
-    supportedFeatureIds: [
-      AlertingConnectorFeatureId,
-      SecurityConnectorFeatureId,
-      WorkflowsConnectorFeatureId,
-    ],
+    supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
     schema: {
       config: D3SecurityConfigSchema,
       secrets: D3SecuritySecretsSchema,

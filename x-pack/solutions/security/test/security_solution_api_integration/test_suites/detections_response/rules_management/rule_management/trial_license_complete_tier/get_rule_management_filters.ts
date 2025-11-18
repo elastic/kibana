@@ -10,12 +10,12 @@ import expect from '@kbn/expect';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { RULE_MANAGEMENT_FILTERS_URL } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
 
-import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import {
   getSimpleRule,
   installMockPrebuiltRules,
   deleteAllPrebuiltRuleAssets,
 } from '../../../utils';
+import { deleteAllRules } from '../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {

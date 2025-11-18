@@ -7,7 +7,7 @@
 
 import { encode } from '@kbn/rison';
 
-import { API_VERSIONS } from '@kbn/fleet-plugin/common';
+import { API_VERSIONS } from '../../common';
 
 import type { ROLES } from './privileges';
 

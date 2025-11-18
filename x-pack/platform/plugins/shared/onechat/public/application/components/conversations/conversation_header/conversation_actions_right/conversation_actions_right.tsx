@@ -31,7 +31,6 @@ export const ConversationRightActions: React.FC<ConversationRightActionsProps> =
       justifyContent="flexEnd"
       alignItems="center"
       aria-label={labels.container}
-      responsive={false}
     >
       {isEmbeddedContext ? <EmbeddedActionsRight onClose={onClose} /> : <FullScreenActionsRight />}
     </EuiFlexGroup>

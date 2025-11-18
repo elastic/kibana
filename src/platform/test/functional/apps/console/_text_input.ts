@@ -58,7 +58,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('console history', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/193895
+    describe.skip('console history', () => {
       const sendRequest = async (request: string) => {
         await PageObjects.console.enterText(request);
         await PageObjects.console.clickPlay();

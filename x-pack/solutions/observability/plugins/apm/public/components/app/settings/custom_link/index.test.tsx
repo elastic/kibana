@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RenderResult } from '@testing-library/react';
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
@@ -200,6 +201,77 @@ describe('CustomLink', () => {
         fireEvent.submit(component.getByText('Save'));
       });
       expect(saveCustomLinkSpy).toHaveBeenCalledTimes(1);
+    });
+
+    describe('Filters', () => {
+      const addFilterField = (component: RenderResult, amount: number) => {
+        for (let i = 1; i <= amount; i++) {
+          fireEvent.click(component.getByText('Add another filter'));
+        }
+      };
+      it('checks if add filter button is disabled after all elements have been added', () => {
+        const component = openFlyout();
+        expect(component.getAllByText('service.name').length).toEqual(1);
+        addFilterField(component, 1);
+        expect(component.getAllByText('service.name').length).toEqual(2);
+        addFilterField(component, 2);
+        expect(component.getAllByText('service.name').length).toEqual(4);
+        // After 4 items, the button is disabled
+        addFilterField(component, 2);
+        expect(component.getAllByText('service.name').length).toEqual(4);
+      });
+      it('removes items already selected', () => {
+        const component = openFlyout();
+
+        const addFieldAndCheck = (
+          fieldName: string,
+          selectValue: string,
+          addNewFilter: boolean,
+          optionsExpected: string[]
+        ) => {
+          if (addNewFilter) {
+            addFilterField(component, 1);
+          }
+          const field = component.getByTestId(fieldName) as HTMLSelectElement;
+          const optionsAvailable = Object.values(field)
+            .map((option) => (option as HTMLOptionElement).text)
+            .filter((option) => option);
+
+          act(() => {
+            fireEvent.change(field, {
+              target: { value: selectValue },
+            });
+          });
+          expect(field.value).toEqual(selectValue);
+          expect(optionsAvailable).toEqual(optionsExpected);
+        };
+
+        addFieldAndCheck('filter-0', 'transaction.name', false, [
+          'Select field...',
+          'service.name',
+          'service.environment',
+          'transaction.type',
+          'transaction.name',
+        ]);
+
+        addFieldAndCheck('filter-1', 'service.name', true, [
+          'Select field...',
+          'service.name',
+          'service.environment',
+          'transaction.type',
+        ]);
+
+        addFieldAndCheck('filter-2', 'transaction.type', true, [
+          'Select field...',
+          'service.environment',
+          'transaction.type',
+        ]);
+
+        addFieldAndCheck('filter-3', 'service.environment', true, [
+          'Select field...',
+          'service.environment',
+        ]);
+      });
     });
   });
 

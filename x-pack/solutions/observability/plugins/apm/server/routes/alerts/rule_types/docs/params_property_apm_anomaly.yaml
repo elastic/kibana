@@ -1,10 +1,6 @@
 # @kbn-doc-linker partial
 
-title: APM anomaly
-description: >
-  The parameters for the APM anomaly rule.
-  These parameters are appropriate when `rule_type_id` is `apm.rules.anomaly`.
-type: object
+
 required:
   - windowSize
   - windowUnit

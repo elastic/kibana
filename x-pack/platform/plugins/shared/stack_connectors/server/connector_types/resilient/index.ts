@@ -11,7 +11,6 @@ import {
   AlertingConnectorFeatureId,
   CasesConnectorFeatureId,
   SecurityConnectorFeatureId,
-  WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 
@@ -41,7 +40,6 @@ export const getResilientConnectorType = (): SubActionConnectorType<
     AlertingConnectorFeatureId,
     CasesConnectorFeatureId,
     SecurityConnectorFeatureId,
-    WorkflowsConnectorFeatureId,
   ],
   validators: [{ type: ValidatorType.CONFIG, validator: urlAllowListValidator('apiUrl') }],
 });
