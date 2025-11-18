@@ -27,11 +27,6 @@ export const useActionStyles = () => {
         ${euiTheme.colors.lightShade};
       padding-top: calc(${euiTheme.size.base} * 0.1);
       overflow-y: auto;
-
-      button {
-        height: calc(${euiTheme.size.base} * 1.1);
-        width: calc(${euiTheme.size.base} * 1.1);
-      }
     `,
   };
 };

@@ -48,6 +48,11 @@ const useStyles = () => {
     outputActions: css`
       ${actions}
 
+      button {
+        height: calc(${euiTheme.size.base} * 1.1);
+        width: calc(${euiTheme.size.base} * 1.1);
+      }
+
       // For IE11
       min-width: ${euiTheme.size.l};
     `,

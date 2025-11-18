@@ -53,15 +53,6 @@ const useStyles = () => {
       // For IE11
       min-width: calc(${euiTheme.size.l} * 2);
     `,
-    actionButton: css`
-      height: ${euiTheme.size.l} !important;
-      width: ${euiTheme.size.l} !important;
-    `,
-    playButton: css`
-      margin-left: ${euiTheme.size.xs} !important;
-      height: ${euiTheme.size.l} !important;
-      width: ${euiTheme.size.l} !important;
-    `,
   };
 };
 
@@ -315,7 +306,6 @@ export const MonacoEditor = ({
               aria-label={i18n.translate('console.monaco.sendRequestButtonTooltipAriaLabel', {
                 defaultMessage: 'Click to send request',
               })}
-              css={styles.playButton}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -332,9 +322,9 @@ export const MonacoEditor = ({
           >
             <EuiButtonIcon
               display="empty"
-              size="m"
               color="text"
               iconType="copyClipboard"
+              iconSize="m"
               onClick={onCopyToLanguageSubmit}
               onMouseEnter={checkIsKbnRequestSelected}
               onFocus={checkIsKbnRequestSelected}
@@ -348,7 +338,6 @@ export const MonacoEditor = ({
                 },
               })}
               disabled={!window.navigator?.clipboard}
-              css={styles.actionButton}
             />
           </EuiToolTip>
         </EuiFlexItem>
@@ -362,7 +351,6 @@ export const MonacoEditor = ({
             isKbnRequestSelected={isKbnRequestSelected}
             onMenuOpen={checkIsKbnRequestSelected}
             onCopyAs={copyToLanguage}
-            buttonCss={styles.actionButton}
           />
         </EuiFlexItem>
       </EuiFlexGroup>
