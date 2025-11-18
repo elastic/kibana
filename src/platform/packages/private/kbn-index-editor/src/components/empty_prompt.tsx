@@ -118,8 +118,8 @@ export const EmptyPrompt: FC = () => {
               <EuiButton onClick={() => setIsResetMappingsWarningModalOpen(true)}>
                 <EuiText size="xs">
                   <FormattedMessage
-                    id="indexEditor.emptyPrompt.dropAllColumns"
-                    defaultMessage="Drop all columns"
+                    id="indexEditor.emptyPrompt.resetIndex"
+                    defaultMessage="Reset index"
                   />
                 </EuiText>
               </EuiButton>
@@ -131,7 +131,7 @@ export const EmptyPrompt: FC = () => {
               title={
                 <FormattedMessage
                   id="indexEditor.mappingsWarningModal.title"
-                  defaultMessage="Drop all columns?"
+                  defaultMessage="Reset index?"
                 />
               }
               onCancel={() => setIsResetMappingsWarningModalOpen(false)}
@@ -145,7 +145,7 @@ export const EmptyPrompt: FC = () => {
               confirmButtonText={
                 <FormattedMessage
                   id="indexEditor.mappingsWarningModal.continue"
-                  defaultMessage="Continue"
+                  defaultMessage="Reset index"
                 />
               }
               buttonColor="danger"
@@ -155,7 +155,7 @@ export const EmptyPrompt: FC = () => {
               <p>
                 <FormattedMessage
                   id="indexEditor.mappingsWarningModal.body"
-                  defaultMessage="All columns will be permanently deleted, and the index mappings and configuration will be reset."
+                  defaultMessage="This action will permanently delete all existing columns of the lookup index and reset its configuration."
                 />
               </p>
             </EuiConfirmModal>
