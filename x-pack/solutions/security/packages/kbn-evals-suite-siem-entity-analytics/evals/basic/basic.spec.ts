@@ -12,15 +12,12 @@ import {
   waitForRiskScoresToBePresent,
   dataViewRouteHelpersFactory,
   deleteAllRiskScores,
-} from '@kbn/test-suites-xpack-security/security_solution_api_integration/test_suites/entity_analytics/utils';
+} from '@kbn/test-suites-security-solution-apis/test_suites/entity_analytics/utils';
 import { DEFAULT_ANOMALY_SCORE } from '@kbn/security-solution-plugin/common/constants';
-import { EsArchivePathBuilder } from '@kbn/test-suites-xpack-security/security_solution_api_integration/es_archive_path_builder';
-import { deleteAllRules } from '@kbn/test-suites-xpack-security/security_solution_api_integration/config/services/detections_response/rules';
-import { dataGeneratorFactory } from '@kbn/test-suites-xpack-security/security_solution_api_integration/test_suites/detections_response/utils';
-import {
-  deleteAllAlerts,
-  createAlertsIndex,
-} from '@kbn/test-suites-xpack-security/security_solution_api_integration/config/services/detections_response/alerts';
+import { EsArchivePathBuilder } from '@kbn/test-suites-security-solution-apis/es_archive_path_builder';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services/rules';
+import { dataGeneratorFactory } from '@kbn/test-suites-security-solution-apis/test_suites/detections_response/utils';
+import { deleteAllAlerts, createAlertsIndex } from '@kbn/detections-response-ftr-services/alerts';
 import {
   setupMlModulesWithRetry,
   forceStartDatafeeds,
