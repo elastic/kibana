@@ -8,10 +8,12 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import {
+  EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiImage,
   EuiPanel,
   EuiText,
   EuiTitle,
@@ -21,6 +23,7 @@ import { css } from '@emotion/react';
 import { useIndicesStats } from '../../hooks/api/use_indices_stats';
 import { useDashboardsStats } from '../../hooks/api/use_dashboards_stats';
 import { useDataViewsStats } from '../../hooks/api/use_data_views_stats';
+import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 
 interface MetricPanelProps {
   title: string;
@@ -32,6 +35,110 @@ interface MetricPanelProps {
   addButtonAriaLabel: string;
   dataTestSubj: string;
 }
+
+export type MetricPanelType = 'indices' | 'agents' | 'dashboards';
+
+const MetricPanelEmpty = ({ type }: { type: MetricPanelType }) => {
+  const assetBasePath = useAssetBasePath();
+  const { euiTheme } = useEuiTheme();
+
+  const METRIC_PANEL_ITEMS: Record<
+    MetricPanelType,
+    {
+      imageUrl: string;
+      metricDescription: string;
+      createText: string;
+      metricTitle: string;
+      createAction: () => void;
+    }
+  > = {
+    indices: {
+      imageUrl: `${assetBasePath}/search_indexing_folder.svg`,
+      metricDescription: i18n.translate('xpack.searchHomepage.metricPanels.empty.indices.desc', {
+        defaultMessage:
+          'An index is a fundamental unit of storage in Elasticsearch with documents and metadata.',
+      }),
+      createText: i18n.translate('xpack.searchHomepage.metricPanels.empty.indices.create', {
+        defaultMessage: 'Create an index',
+      }),
+      metricTitle: i18n.translate('xpack.searchHomepage.metricPanels.empty.indices.title', {
+        defaultMessage: 'Indices',
+      }),
+      createAction: () => {},
+    },
+    dashboards: {
+      imageUrl: `${assetBasePath}/search_analytics.svg`,
+      metricDescription: i18n.translate('xpack.searchHomepage.metricPanels.empty.dashboards.desc', {
+        defaultMessage:
+          'Dashboards are the best way to visualize and share insights from your Elasticsearch data.',
+      }),
+      createText: i18n.translate('xpack.searchHomepage.metricPanels.empty.dashboards.create', {
+        defaultMessage: 'Create a dashboard',
+      }),
+      metricTitle: i18n.translate('xpack.searchHomepage.metricPanels.empty.dashboards.title', {
+        defaultMessage: 'Dashboards',
+      }),
+      createAction: () => {},
+    },
+    agents: {
+      imageUrl: `${assetBasePath}/search_relevance.svg`,
+      metricDescription: i18n.translate('xpack.searchHomepage.metricPanels.empty.agents.desc', {
+        defaultMessage:
+          'An AI layer in Elasticsearch, agents provide a framework for building agentic workflows.',
+      }),
+      createText: i18n.translate('xpack.searchHomepage.metricPanels.empty.agents.create', {
+        defaultMessage: 'Create an agent',
+      }),
+      metricTitle: i18n.translate('xpack.searchHomepage.metricPanels.empty.agents.title', {
+        defaultMessage: 'Agents',
+      }),
+      createAction: () => {},
+    },
+  };
+
+  const { imageUrl, metricTitle, metricDescription, createText, createAction } =
+    METRIC_PANEL_ITEMS[type];
+  return (
+    <EuiPanel
+      color="subdued"
+      hasBorder
+      css={css({
+        padding: `${euiTheme.size.xl} ${euiTheme.base}px`,
+      })}
+    >
+      <EuiFlexGroup direction="column" alignItems="center" gutterSize="s">
+        <EuiFlexItem grow={false}>
+          <div>
+            <EuiImage size={68} src={imageUrl} alt="" />
+          </div>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="s">
+            <h5>{metricTitle}</h5>
+          </EuiTitle>
+        </EuiFlexItem>
+
+        <EuiFlexItem>
+          <EuiText color="subdued" textAlign="center" size="s">
+            <p>{metricDescription}</p>
+          </EuiText>
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false} css={css({ padding: euiTheme.size.s })}>
+          <EuiButton
+            data-test-subj="searchHomepageMetricPanelEmptyButton"
+            iconType="plusInCircle"
+            onClick={createAction}
+            color="text"
+          >
+            {createText}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+};
 
 const MetricPanel = ({
   title,
@@ -98,54 +205,18 @@ export const MetricPanels = () => {
   const { data: dataViewStats } = useDataViewsStats();
   const { data: dashboardStats } = useDashboardsStats();
 
-  const panels: Array<MetricPanelProps & { id: string }> = [
+  const panels: Array<{ id: string; type: MetricPanelType }> = [
     {
-      id: 'dashboardPanel',
-      title: i18n.translate('xpack.searchHomepage.metrics.dashboards.title', {
-        defaultMessage: 'Dashboards',
-      }),
-      metric: {
-        value: dashboardStats?.totalDashboards ?? 0,
-        detail: i18n.translate('xpack.searchHomepage.metrics.dashboards.detail', {
-          defaultMessage: 'Dashboard count',
-        }),
-      },
-      addButtonAriaLabel: i18n.translate('xpack.searchHomepage.metrics.dashboards.add', {
-        defaultMessage: 'Create new dashboard',
-      }),
-      dataTestSubj: 'search-homepage-dashboards-add-button',
+      id: 'indices',
+      type: 'indices',
     },
     {
-      id: 'dataViewPanel',
-      title: i18n.translate('xpack.searchHomepage.metrics.dataViewPanel.title', {
-        defaultMessage: 'Data Views',
-      }),
-      metric: {
-        value: dataViewStats?.userDataViews ?? 0,
-        detail: i18n.translate('xpack.searchHomepage.metrics.dataViewPanel.detail', {
-          defaultMessage: 'Data view count',
-        }),
-      },
-      addButtonAriaLabel: i18n.translate('xpack.searchHomepage.metrics.dataViewPanel.add', {
-        defaultMessage: 'Create new data view',
-      }),
-      dataTestSubj: 'search-homepage-dataViewPanel-add-button',
+      id: 'dashboards',
+      type: 'dashboards',
     },
     {
-      id: 'panel3',
-      title: i18n.translate('xpack.searchHomepage.metrics.indices.title', {
-        defaultMessage: 'Indices',
-      }),
-      metric: {
-        value: indexStats?.normalIndices ?? 0,
-        detail: i18n.translate('xpack.searchHomepage.metrics.indices.detail', {
-          defaultMessage: 'Index count',
-        }),
-      },
-      addButtonAriaLabel: i18n.translate('xpack.searchHomepage.metrics.indices.add', {
-        defaultMessage: 'Create new index',
-      }),
-      dataTestSubj: 'search-homepage-indices-add-button',
+      id: 'agents',
+      type: 'agents',
     },
   ];
 
@@ -153,13 +224,14 @@ export const MetricPanels = () => {
     <EuiFlexGroup gutterSize="m">
       {panels.map((panel) => (
         <EuiFlexItem key={panel.id}>
-          <MetricPanel
+          <MetricPanelEmpty type={panel.type} />
+          {/* <MetricPanel
             title={panel.title}
             onClick={panel?.onClick}
             metric={panel.metric}
             addButtonAriaLabel={panel.addButtonAriaLabel}
             dataTestSubj={panel.dataTestSubj}
-          />
+          /> */}
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>

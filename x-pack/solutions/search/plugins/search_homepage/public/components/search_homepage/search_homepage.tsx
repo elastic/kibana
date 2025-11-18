@@ -114,23 +114,25 @@ export const SearchHomepagePage = () => {
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiFlexGroup responsive={false}>
-              <EuiFlexItem>
-                <EuiText>
-                  <p>
-                    {i18n.translate('xpack.searchHomepage.searchHomepagePage.p.youHaveLabel', {
-                      defaultMessage: 'You have {daysLeft} days remaining your trial.',
-                      values: {
-                        daysLeft,
-                      },
-                    })}
-                  </p>
-                </EuiText>
-              </EuiFlexItem>
-              <EuiFlexItem />
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          {isTrial && (
+            <EuiFlexItem>
+              <EuiFlexGroup responsive={false}>
+                <EuiFlexItem>
+                  <EuiText>
+                    <p>
+                      {i18n.translate('xpack.searchHomepage.searchHomepagePage.p.youHaveLabel', {
+                        defaultMessage: 'You have {daysLeft} days remaining your trial.',
+                        values: {
+                          daysLeft,
+                        },
+                      })}
+                    </p>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem />
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
 
         <EuiHorizontalRule margin="none" />
