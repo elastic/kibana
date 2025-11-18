@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { omit } from 'lodash';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 import {
   DEFAULT_AUTO_APPLY_SELECTIONS,
@@ -20,23 +19,28 @@ export function extractControlGroupState(state: { [key: string]: unknown }): {
   controlGroupState?: DashboardState['controlGroupInput'];
   autoApplyFilters?: boolean;
 } {
-  let convertedState: { [key: string]: unknown } = state;
+  // >9.3 the `autoApplySelections` control group setting became the `autoApplyFilters` dashboard setting
+  let autoApplySelections: boolean = DEFAULT_AUTO_APPLY_SELECTIONS;
+  if (typeof state.autoApplySelections === 'boolean') {
+    autoApplySelections = state.autoApplySelections;
+  } else if (typeof state.showApplySelections === 'boolean') {
+    // <8.16 autoApplySelections exported as !showApplySelections
+    autoApplySelections = !state.showApplySelections;
+  }
 
   if (
-    convertedState.controlGroupState &&
-    typeof convertedState.controlGroupState === 'object' &&
-    'initialChildControlState' in convertedState.controlGroupState &&
-    typeof convertedState.controlGroupState.initialChildControlState === 'object'
+    state.controlGroupState &&
+    typeof state.controlGroupState === 'object' &&
+    'initialChildControlState' in state.controlGroupState &&
+    typeof state.controlGroupState.initialChildControlState === 'object'
   ) {
     // URL state created in 8.16 through 8.18 passed control group runtime state in with controlGroupState key
     const {
       controlGroupState: { initialChildControlState },
-      ...rest
-    } = convertedState;
-    convertedState = {
-      ...rest,
-      controlGroupInput: {
-        ...omit(convertedState.controlGroupState, 'initialChildControlState'),
+    } = state;
+    return {
+      autoApplyFilters: autoApplySelections,
+      controlGroupState: {
         controls:
           typeof initialChildControlState === 'object'
             ? Object.entries(initialChildControlState ?? {})
@@ -58,11 +62,11 @@ export function extractControlGroupState(state: { [key: string]: unknown }): {
     };
   }
 
-  if (!convertedState.controlGroupInput || typeof convertedState.controlGroupInput !== 'object') {
-    return {};
+  if (!state.controlGroupInput || typeof state.controlGroupInput !== 'object') {
+    return { autoApplyFilters: autoApplySelections, controls: [] };
   }
 
-  const controlGroupInput = convertedState.controlGroupInput as { [key: string]: unknown };
+  const controlGroupInput = state.controlGroupInput as { [key: string]: unknown };
   let standardizedControls: ControlsGroupState['controls'] = [];
   if (controlGroupInput.panels && typeof controlGroupInput.panels === 'object') {
     // <8.16 controls exported as panels
@@ -87,14 +91,6 @@ export function extractControlGroupState(state: { [key: string]: unknown }): {
     });
   }
 
-  let autoApplySelections: boolean = DEFAULT_AUTO_APPLY_SELECTIONS;
-  if (typeof controlGroupInput.autoApplySelections === 'boolean') {
-    autoApplySelections = controlGroupInput.autoApplySelections;
-  } else if (typeof controlGroupInput.showApplySelections === 'boolean') {
-    // <8.16 autoApplySelections exported as !showApplySelections
-    autoApplySelections = !controlGroupInput.showApplySelections;
-  }
-
   if (typeof controlGroupInput.ignoreParentSettings === 'object') {
     // >9.3 control group `ignoreParentSettings` gets translated to individual control settings and/or dashboard settings
     const ignoreParentSettings = controlGroupInput.ignoreParentSettings ?? {};
@@ -115,7 +111,7 @@ export function extractControlGroupState(state: { [key: string]: unknown }): {
   }
 
   return {
-    autoApplyFilters: autoApplySelections, // >9.3 this control group setting became a dashboard setting
+    autoApplyFilters: autoApplySelections,
     controlGroupState: {
       controls: standardizedControls,
     },
