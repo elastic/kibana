@@ -14,7 +14,7 @@ spaceTest.describe(
   'AI Assistant Conversations - No connectors or conversations exist',
   { tag: ['@ess'] },
   () => {
-    spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
+    spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace: _scoutSpace }) => {
       await browserAuth.loginAsAdmin();
       await apiServices.connectors.deleteAll();
       await apiServices.assistant.deleteAllConversations();
@@ -60,7 +60,7 @@ spaceTest.describe(
   () => {
     let azureConnectorName: string;
 
-    spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace }) => {
+    spaceTest.beforeEach(async ({ browserAuth, apiServices, scoutSpace: _scoutSpace }) => {
       await browserAuth.loginAsAdmin();
       await apiServices.connectors.deleteAll();
       await apiServices.assistant.deleteAllConversations();
@@ -90,7 +90,7 @@ spaceTest.describe(
 
     spaceTest(
       'When invoked from rules page',
-      async ({ page, pageObjects, apiServices, scoutSpace }) => {
+      async ({ page: _page, pageObjects, apiServices, scoutSpace }) => {
         const ruleName = `Rule 1_${scoutSpace.id}_${Date.now()}`;
         const rule = {
           ...CUSTOM_QUERY_RULE,
@@ -123,7 +123,7 @@ spaceTest.describe(
 
     spaceTest(
       'When invoked from alert details',
-      async ({ page, pageObjects, apiServices, scoutSpace }) => {
+      async ({ page: _page, pageObjects, apiServices, scoutSpace }) => {
         const ruleName = `New Rule Test_${scoutSpace.id}_${Date.now()}`;
 
         // Generate test data FIRST before creating the rule
@@ -169,7 +169,7 @@ spaceTest.describe(
 
     spaceTest(
       'Shows empty connector callout when a conversation that had a connector no longer does',
-      async ({ page, pageObjects, browserScopedApis, apiServices, scoutSpace }) => {
+      async ({ page, pageObjects, browserScopedApis, apiServices: _apiServices, scoutSpace }) => {
         // Create conversation with connector reference using browser-scoped API
         // Use unique title to avoid conflicts with other tests
         const conversationTitle = `Spooky convo_${scoutSpace.id}_${Date.now()}`;
