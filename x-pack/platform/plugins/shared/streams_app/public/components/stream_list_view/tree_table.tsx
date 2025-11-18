@@ -6,7 +6,7 @@
  */
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { Direction, EuiSearchBarProps, CriteriaWithPagination } from '@elastic/eui';
+import type { Direction, EuiSearchBarProps, CriteriaWithPagination, Query } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -73,7 +73,7 @@ export function StreamsTreeTable({
   const router = useStreamsAppRouter();
   const { euiTheme } = useEuiTheme();
 
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState<Query | undefined>();
   const [sortField, setSortField] = useState<SortableField>('nameSortKey');
   const [sortDirection, setSortDirection] = useState<Direction>('asc');
   // Collapsed state: Set of collapsed node names
@@ -165,8 +165,8 @@ export function StreamsTreeTable({
   const filteredStreams = React.useMemo(
     () =>
     {
-      const dataQualityPattern = /dataQuality:\((good|degraded|poor)\)/;
-      const freeText = searchQuery.replace(dataQualityPattern, '').trim();
+      const dataQualityPattern = /dataQuality:\((.*)\)/;
+      const freeText = searchQuery?.text?.replace(dataQualityPattern, '').trim() ?? '';
       return filterStreamsByQuery(
         streams.filter((stream) => Streams.ingest.all.Definition.is(stream.stream)),
         freeText
@@ -185,8 +185,13 @@ export function StreamsTreeTable({
     [collapsed, sortField]
   );
 
+  const qualityFiters = searchQuery?.ast?.clauses.filter((clause) => clause.type === 'field' && clause.field === 'dataQuality') ?? [];
+
   const allRows = React.useMemo(
-    () => buildStreamRows(enrichedStreams, sortField, sortDirection, qualityByStream),
+    () => {
+      const rows = buildStreamRows(enrichedStreams, sortField, sortDirection, qualityByStream);
+      return qualityFiters.length > 0 ? rows.filter((row) => qualityFiters.some((filter) => filter.value.includes(row.dataQuality))) : rows;
+    },
     [enrichedStreams, sortField, sortDirection, qualityByStream]
   );
 
@@ -197,13 +202,7 @@ export function StreamsTreeTable({
   );
 
   const handleQueryChange: EuiSearchBarProps['onChange'] = ({ query }) => {
-    if (query){
-      // Strip out the structured "Data quality" filter expression from the free-text
-      // query, so we only use the remaining text for name search.
-      // const dataQualityPattern = /dataQuality:\((good|degraded|poor)\)/;
-      // const freeText = query.text.replace(dataQualityPattern, '').trim();
-      setSearchQuery(query.text);
-    }
+    if (query) setSearchQuery(query);
   };
 
   const handleTableChange = ({ sort, page }: CriteriaWithPagination<TableRow>) => {
@@ -516,7 +515,7 @@ export function StreamsTreeTable({
                   { defaultMessage: 'Data quality' }
                 ),
                 field: 'dataQuality',
-                // multiSelect: 'or',
+                multiSelect: 'or',
                 options: [
                   {
                     value: 'good',
