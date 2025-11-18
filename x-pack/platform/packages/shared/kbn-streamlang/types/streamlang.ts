@@ -16,6 +16,14 @@ import type { StreamlangStepWithUIAttributes } from './ui';
 // Recursive schema for ConditionWithSteps
 export type ConditionWithSteps = Condition & { steps: StreamlangStep[] };
 
+export type StreamlangProcessorStep = StreamlangProcessorDefinition & {
+  /**
+   * Discriminator for step-level unions.
+   * Optional for backwards compatibility; we normalize it on read.
+   */
+  kind?: 'processor';
+};
+
 export const conditionWithStepsSchema: z.ZodType<ConditionWithSteps> = z.lazy(() =>
   z.intersection(
     conditionSchema,
@@ -29,6 +37,11 @@ export const conditionWithStepsSchema: z.ZodType<ConditionWithSteps> = z.lazy(()
  * Nested where block (recursive)
  */
 export interface StreamlangWhereBlock {
+  /**
+   * Discriminator for step-level unions.
+   * Optional for backwards compatibility; we normalize it on read.
+   */
+  kind?: 'where';
   customIdentifier?: string;
   where: ConditionWithSteps;
 }
@@ -37,6 +50,7 @@ export interface StreamlangWhereBlock {
  * Zod schema for a where block
  */
 export const streamlangWhereBlockSchema: z.ZodType<StreamlangWhereBlock> = z.object({
+  kind: z.literal('where').optional(),
   customIdentifier: z.string().optional(),
   where: conditionWithStepsSchema,
 });
@@ -54,11 +68,18 @@ export const isWhereBlock = (obj: any): obj is StreamlangWhereBlock => {
 /**
  * A step can be either a processor or a where block (optionally recursive)
  */
-export type StreamlangStep = StreamlangProcessorDefinition | StreamlangWhereBlock;
+export type StreamlangStep = StreamlangProcessorStep | StreamlangWhereBlock;
 
-export const streamlangStepSchema: z.ZodType<StreamlangStep> = z.lazy(() =>
-  z.union([streamlangProcessorSchema, streamlangWhereBlockSchema])
+const streamlangProcessorStepSchema: z.ZodType<StreamlangProcessorStep> = z.intersection(
+  streamlangProcessorSchema,
+  z.object({
+    kind: z.literal('processor').optional(),
+  })
 ) as any;
+
+export const streamlangStepSchema: z.ZodType<StreamlangStep> = z
+  .lazy(() => z.union([streamlangProcessorStepSchema, streamlangWhereBlockSchema]))
+  .describe('@kbn/oas-component:StreamlangStep') as any;
 
 export const isActionBlockSchema = (obj: any): obj is StreamlangProcessorDefinition => {
   return isSchema(streamlangProcessorSchema, obj);
@@ -97,6 +118,7 @@ const ensureConditionWithStepsHasType = (condition: ConditionWithSteps): Conditi
 
 const ensureWhereBlockHasTypedConditions = (block: StreamlangWhereBlock): StreamlangWhereBlock => ({
   ...block,
+  kind: block.kind ?? 'where',
   where: ensureConditionWithStepsHasType(block.where),
 });
 
@@ -104,13 +126,17 @@ const ensureProcessorHasTypedCondition = <TProcessor extends StreamlangProcessor
   processor: TProcessor
 ): TProcessor => {
   if (!(processor as any).where) {
-    return processor;
+    return {
+      ...(processor as any),
+      kind: (processor as any).kind ?? 'processor',
+    };
   }
 
   return {
-    ...processor,
+    ...(processor as any),
+    kind: (processor as any).kind ?? 'processor',
     where: ensureConditionType((processor as any).where as Condition),
-  };
+  } as TProcessor;
 };
 
 const ensureStreamlangStepHasTypedConditions = (step: StreamlangStep): StreamlangStep => {

@@ -513,6 +513,51 @@ export const convert = (schema: z.ZodTypeAny) => {
     }
   }
 
+  const streamlangStep = shared['StreamlangStep'] as OpenAPIV3.SchemaObject | undefined;
+  if (streamlangStep && Array.isArray((streamlangStep as any).anyOf)) {
+    for (const variant of (streamlangStep as any).anyOf as Array<OpenAPIV3.SchemaObject>) {
+      if (!variant || typeof variant !== 'object') continue;
+
+      const props = (variant as any).properties as
+        | { [key: string]: OpenAPIV3.SchemaObject }
+        | undefined;
+      const kindEnum = (props as any)?.kind?.enum as unknown;
+
+      // We are only interested in the "where" step variant, which is modeled as
+      // an object with kind === 'where' and a "where" property that is an allOf
+      // of StreamlangCondition plus an object that adds "steps".
+      if (
+        Array.isArray(kindEnum) &&
+        kindEnum.includes('where') &&
+        props?.where &&
+        typeof props.where === 'object'
+      ) {
+        const whereSchema = props.where as OpenAPIV3.SchemaObject;
+        const allOf = (whereSchema as any).allOf as Array<OpenAPIV3.SchemaObject> | undefined;
+        if (!Array.isArray(allOf)) {
+          continue;
+        }
+
+        for (const augmentation of allOf) {
+          if (!augmentation || typeof augmentation !== 'object') continue;
+
+          const augProps = (augmentation as any).properties as
+            | { [key: string]: OpenAPIV3.SchemaObject }
+            | undefined;
+          const stepsSchema = augProps?.steps as OpenAPIV3.ArraySchemaObject | undefined;
+          if (
+            stepsSchema &&
+            stepsSchema.items &&
+            typeof stepsSchema.items === 'object' &&
+            Object.keys(stepsSchema.items as Record<string, unknown>).length === 0
+          ) {
+            stepsSchema.items = { $ref: '#/components/schemas/StreamlangStep' };
+          }
+        }
+      }
+    }
+  }
+
   return {
     shared,
     schema: replaceDefinitionRefs(schemaWithRefs) as OpenAPIV3.SchemaObject,
