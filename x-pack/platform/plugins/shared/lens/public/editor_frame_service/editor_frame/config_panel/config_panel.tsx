@@ -80,7 +80,7 @@ export function ConfigPanel(
   const focusLayerTabsContent = () => {
     setTimeout(() => {
       const element = document.getElementById(LENS_LAYER_TABS_CONTENT_ID);
-      element?.focus();
+      element?.focus({ preventScroll: true });
     }, 0);
   };
 
