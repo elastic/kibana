@@ -59,10 +59,9 @@ export const useWorkflowJsonSchema = ({
       const jsonSchema = getJsonSchemaFromYamlSchema(zodSchema);
 
       // Post-process to improve validation messages and add display names for connectors
+      // Note: improveTypeFieldDescriptions only modifies descriptions/titles, not structure
+      // fixInputsSchemaForMonaco (called in getJsonSchemaFromYamlSchema) already handles inputs schema structure
       const processedSchema = improveTypeFieldDescriptions(jsonSchema, connectorsData);
-
-      // Ensure inputs schema doesn't have array format (fix after all post-processing)
-      ensureInputsSchemaIsObjectFormat(processedSchema);
 
       // Ensure steps schema is always an array type (fix after all post-processing)
       ensureStepsSchemaIsArrayFormat(processedSchema);
@@ -177,47 +176,6 @@ function improveTypeFieldDescriptions(schema: any, connectorsData?: any): any {
   }
 
   return enhanceSchema(schema);
-}
-
-/**
- * Ensure the inputs schema properly handles both array and object formats
- * This ensures backward compatibility - we keep both formats in the schema
- * so Monaco accepts both, while the Zod schema transforms array to object
- */
-function ensureInputsSchemaIsObjectFormat(schema: any): void {
-  if (!schema?.definitions?.WorkflowSchema?.properties?.inputs) {
-    return;
-  }
-
-  const inputsSchema = schema.definitions.WorkflowSchema.properties.inputs;
-
-  // We need to keep both array and object formats for backward compatibility
-  // The Zod schema will transform array to object during parsing
-  // But Monaco needs to accept both formats during validation
-
-  // If inputs has anyOf, ensure both formats are properly represented
-  if (inputsSchema.anyOf && Array.isArray(inputsSchema.anyOf)) {
-    // Fix object schemas to have proper structure
-
-    inputsSchema.anyOf.forEach((subSchema: any) => {
-      // Keep array schemas (legacy format) - don't filter them out!
-      // Only fix object schemas to ensure proper structure
-      if (subSchema?.type === 'object' && subSchema?.properties?.properties?.type === 'array') {
-        subSchema.properties.properties.type = 'object';
-        if (!subSchema.properties.properties.additionalProperties) {
-          subSchema.properties.properties.additionalProperties = true;
-        }
-      }
-    });
-  } else {
-    // Not wrapped in anyOf, check directly
-    if (inputsSchema.properties?.properties?.type === 'array') {
-      inputsSchema.properties.properties.type = 'object';
-      if (!inputsSchema.properties.properties.additionalProperties) {
-        inputsSchema.properties.properties.additionalProperties = true;
-      }
-    }
-  }
 }
 
 /**

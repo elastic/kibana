@@ -18,7 +18,21 @@ describe('getJsonSchemaFromYamlSchema - Inputs Schema Fix', () => {
     const jsonSchema = getJsonSchemaFromYamlSchema(workflowZodSchema);
 
     // Check that the inputs schema has the correct structure
-    const inputsSchema = jsonSchema?.definitions?.WorkflowSchema?.properties?.inputs;
+    // The schema might be at top level or in allOf structure (from .pipe())
+    const workflowSchema = jsonSchema?.definitions?.WorkflowSchema;
+    expect(workflowSchema).toBeDefined();
+
+    let inputsSchema = workflowSchema?.properties?.inputs;
+
+    // If inputs is not at top level, check inside allOf (from .pipe() transformation)
+    if (!inputsSchema && workflowSchema?.allOf && Array.isArray(workflowSchema.allOf)) {
+      for (const allOfItem of workflowSchema.allOf) {
+        if (allOfItem?.properties?.inputs) {
+          inputsSchema = allOfItem.properties.inputs;
+          break;
+        }
+      }
+    }
 
     expect(inputsSchema).toBeDefined();
 

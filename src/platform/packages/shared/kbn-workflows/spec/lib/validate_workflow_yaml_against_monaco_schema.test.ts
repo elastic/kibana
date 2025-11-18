@@ -43,10 +43,9 @@ describe('Validate security_workflow_example.yaml against Monaco Schema', () => 
     const validate = ajv.compile(workflowSchemaDef);
     const valid = validate(workflowData);
 
-    if (!valid) {
-      // Log validation errors for debugging
-      // eslint-disable-next-line no-console
-      console.error('Validation errors:', JSON.stringify(validate.errors, null, 2));
+    if (!valid && validate.errors) {
+      // Validation errors are available in validate.errors for debugging
+      // but we don't log them in tests to avoid console noise
     }
 
     expect(valid).toBe(true);
