@@ -1977,13 +1977,7 @@ export default function (providerContext: FtrProviderContext) {
           action_id: 'test-action-automatic',
         });
 
-        await generateAgent(
-          providerContext,
-          'uninstalled',
-          'agent-3',
-          policyWithAgents.id,
-          '8.16.1'
-        );
+        await generateAgent(providerContext, 'inactive', 'agent-3', policyWithAgents.id, '8.16.1');
         await es.index({
           index: '.fleet-actions',
           refresh: 'wait_for',
