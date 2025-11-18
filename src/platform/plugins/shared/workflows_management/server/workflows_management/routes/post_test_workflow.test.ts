@@ -147,7 +147,7 @@ describe('POST /api/workflows/test', () => {
       expect(mockEsClient.mget).toHaveBeenCalled();
       expect(workflowsApi.testWorkflow).toHaveBeenCalled();
       const testWorkflowCall = (workflowsApi.testWorkflow as jest.Mock).mock.calls[0];
-      const processedInputs = testWorkflowCall[1];
+      const processedInputs = testWorkflowCall[0].inputs;
       // Verify that inputs were transformed
       expect(processedInputs.event.alerts).toBeDefined();
       expect(processedInputs.event.rule).toBeDefined();
@@ -194,12 +194,13 @@ describe('POST /api/workflows/test', () => {
       await routeHandler(mockContext, mockRequest, mockResponse);
 
       // Should fall back to original inputs when preprocessing fails
-      expect(workflowsApi.testWorkflow).toHaveBeenCalledWith(
-        mockRequest.body.workflowYaml,
-        mockRequest.body.inputs,
-        'default',
-        mockRequest
-      );
+      expect(workflowsApi.testWorkflow).toHaveBeenCalledWith({
+        workflowId: undefined,
+        workflowYaml: mockRequest.body.workflowYaml,
+        inputs: mockRequest.body.inputs,
+        spaceId: 'default',
+        request: mockRequest,
+      });
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: {
           workflowExecutionId: mockExecutionId,

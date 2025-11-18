@@ -13,7 +13,6 @@ import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
 import { WORKFLOW_EXECUTE_SECURITY } from './route_security';
 import type { RouteDependencies } from './types';
-import { parseYamlToJSONWithoutValidation } from '../../../common/lib/yaml/parse_workflow_yaml_to_json_without_validation';
 import { preprocessAlertInputs } from '../utils/preprocess_alert_inputs';
 
 export function registerPostTestWorkflowRoute({ router, api, logger, spaces }: RouteDependencies) {
@@ -43,17 +42,11 @@ export function registerPostTestWorkflowRoute({ router, api, logger, spaces }: R
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
         let processedInputs = request.body.inputs;
-        const parsedYaml = parseYamlToJSONWithoutValidation(request.body.workflowYaml || '');
+        const event = request.body.inputs.event as
+          | { triggerType?: string; alertIds?: unknown[] }
+          | undefined;
         const hasAlertTrigger =
-          parsedYaml.success &&
-          Array.isArray(parsedYaml.json.triggers) &&
-          parsedYaml.json.triggers.some(
-            (trigger: unknown) =>
-              typeof trigger === 'object' &&
-              trigger !== null &&
-              'type' in trigger &&
-              trigger.type === 'alert'
-          );
+          event?.triggerType === 'alert' && event?.alertIds && event.alertIds.length > 0;
         if (hasAlertTrigger) {
           try {
             processedInputs = await preprocessAlertInputs(

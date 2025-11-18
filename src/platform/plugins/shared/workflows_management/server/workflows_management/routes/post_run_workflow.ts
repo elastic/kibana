@@ -64,9 +64,9 @@ export function registerPostRunWorkflowRoute({ router, api, logger, spaces }: Ro
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
         let processedInputs = inputs;
-        const hasAlertTrigger = workflow.definition.triggers?.some(
-          (trigger) => trigger.type === 'alert'
-        );
+        const event = inputs.event as { triggerType?: string; alertIds?: unknown[] } | undefined;
+        const hasAlertTrigger =
+          event?.triggerType === 'alert' && event?.alertIds && event.alertIds.length > 0;
         if (hasAlertTrigger) {
           try {
             processedInputs = await preprocessAlertInputs(
