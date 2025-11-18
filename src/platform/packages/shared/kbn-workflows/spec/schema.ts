@@ -9,6 +9,7 @@
 
 import moment from 'moment-timezone';
 import { z } from '@kbn/zod';
+import { convertLegacyInputsToJsonSchema } from './lib/input_conversion';
 import { isValidJsonSchema } from './lib/validate_json_schema';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
@@ -495,25 +496,69 @@ export const BuiltInStepTypes = [
 export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 
 /* --- Workflow --- */
-export const WorkflowSchema = z.object({
-  version: z.literal('1').default('1').describe('The version of the workflow schema'),
-  name: z.string().min(1),
-  description: z.string().optional(),
-  settings: WorkflowSettingsSchema.optional(),
-  enabled: z.boolean().default(true),
-  tags: z.array(z.string()).optional(),
-  triggers: z.array(TriggerSchema).min(1),
-  inputs: WorkflowInputsJsonSchema.optional(),
-  consts: WorkflowConstsSchema.optional(),
-  steps: z.array(StepSchema).min(1),
-});
+export const WorkflowSchema = z
+  .object({
+    version: z.literal('1').default('1').describe('The version of the workflow schema'),
+    name: z.string().min(1),
+    description: z.string().optional(),
+    settings: WorkflowSettingsSchema.optional(),
+    enabled: z.boolean().default(true),
+    tags: z.array(z.string()).optional(),
+    triggers: z.array(TriggerSchema).min(1),
+    inputs: z
+      .union([
+        // New JSON Schema format
+        WorkflowInputsJsonSchema,
+        // Legacy array format (for backward compatibility)
+        z.array(WorkflowInputSchema),
+      ])
+      .optional()
+      .transform((inputs) => {
+        // Transform legacy array format to new JSON Schema format
+        if (!inputs) {
+          return undefined;
+        }
+        // If it's already in the new format (has properties), return as-is
+        if ('properties' in inputs && typeof inputs === 'object' && !Array.isArray(inputs)) {
+          return inputs as z.infer<typeof WorkflowInputsJsonSchema>;
+        }
+        // If it's an array (legacy format), convert it
+        if (Array.isArray(inputs)) {
+          return convertLegacyInputsToJsonSchema(inputs);
+        }
+        return undefined;
+      }),
+    consts: WorkflowConstsSchema.optional(),
+    steps: z.array(StepSchema).min(1),
+  })
+  .pipe(
+    z.object({
+      version: z.literal('1'),
+      name: z.string(),
+      description: z.string().optional(),
+      settings: WorkflowSettingsSchema.optional(),
+      enabled: z.boolean(),
+      tags: z.array(z.string()).optional(),
+      triggers: z.array(TriggerSchema),
+      inputs: WorkflowInputsJsonSchema.optional(),
+      consts: WorkflowConstsSchema.optional(),
+      steps: z.array(StepSchema),
+    })
+  );
 
 export type WorkflowYaml = z.infer<typeof WorkflowSchema>;
 
 // Schema is required for autocomplete because WorkflowGraph and WorkflowDefinition use it to build the autocomplete context.
 // The schema captures all possible fields and passes them through for consumption by WorkflowGraph.
-export const WorkflowSchemaForAutocomplete = WorkflowSchema.partial()
-  .extend({
+// We build this from the base object schema (before the pipe) to avoid issues with .partial() on piped schemas
+export const WorkflowSchemaForAutocomplete = z
+  .object({
+    version: z.literal('1').optional(),
+    name: z.string().min(1).optional(),
+    description: z.string().optional(),
+    settings: WorkflowSettingsSchema.optional(),
+    enabled: z.boolean().default(true).optional(),
+    tags: z.array(z.string()).optional(),
     triggers: z
       .array(z.object({ type: z.string().catch('') }).passthrough())
       .catch([])
@@ -534,6 +579,7 @@ export const WorkflowSchemaForAutocomplete = WorkflowSchema.partial()
       ])
       .optional()
       .catch(undefined),
+    consts: WorkflowConstsSchema.optional(),
     steps: z
       .array(
         z

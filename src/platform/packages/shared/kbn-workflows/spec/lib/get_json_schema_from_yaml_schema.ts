@@ -39,8 +39,21 @@ export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType): WorkflowJson
   // This prevents Monaco from showing "Expected array" errors
   fixStepsSchemaForMonaco(fixedSchema);
 
+  // Ensure version field is optional for Monaco validation (allows workflows without version)
+  // This must be done here, before returning, to ensure it's applied to all schemas
+  ensureVersionIsOptional(fixedSchema);
+
   // Add fetcher parameter to all Kibana connector steps
   addFetcherToKibanaConnectors(fixedSchema);
+
+  // Final safety check: ensure version is optional one more time after all processing
+  // This is critical because addFetcherToKibanaConnectors might modify the schema
+  ensureVersionIsOptional(fixedSchema);
+
+  // CRITICAL: Monaco resolves $ref, so we need to ensure the referenced schema is correct
+  // But we also need to check if the root schema (the one with $ref) has any required fields
+  // that might be causing issues. However, since we're using $ref, Monaco will validate
+  // against the resolved schema in definitions.WorkflowSchema, which we've already fixed.
 
   return fixedSchema;
 }
@@ -287,37 +300,137 @@ function fixInputsSchemaForMonaco(schema: any): void {
   };
 
   // Handle optional schemas (they might be wrapped in anyOf with null/undefined)
+  // IMPORTANT: We keep both array and object formats for backward compatibility
+  // The Zod schema accepts both and transforms array to object, so Monaco should too
   if (inputsSchema.anyOf && Array.isArray(inputsSchema.anyOf)) {
-    // Filter out array schemas (legacy format) and keep only object schemas (new format)
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const filteredAnyOf = inputsSchema.anyOf.filter((subSchema: any) => {
-      // Keep null/undefined (for optional)
-      if (subSchema.type === 'null' || subSchema.type === 'undefined') {
-        return true;
-      }
-      // Remove array schemas (legacy format)
-      if (subSchema.type === 'array') {
-        return false;
-      }
-      // Keep object schemas (new format)
-      return true;
-    });
-
-    // If we filtered out array schemas, update the anyOf
-    if (filteredAnyOf.length !== inputsSchema.anyOf.length) {
-      inputsSchema.anyOf = filteredAnyOf;
-    }
-
+    // DO NOT filter out array schemas - we need them for backward compatibility!
     // Find and fix all non-null schemas in the anyOf
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     inputsSchema.anyOf.forEach((subSchema: any) => {
       if (subSchema && subSchema.type !== 'null' && subSchema.type !== 'undefined') {
-        fixSchemaObject(subSchema);
+        // Only fix object schemas, leave array schemas as-is for backward compatibility
+        if (subSchema.type === 'object') {
+          fixSchemaObject(subSchema);
+        }
       }
     });
   } else {
-    // Not wrapped in anyOf, fix directly
-    fixSchemaObject(inputsSchema);
+    // Not wrapped in anyOf, fix directly (only if it's an object)
+    if (inputsSchema.type === 'object') {
+      fixSchemaObject(inputsSchema);
+    }
+  }
+}
+
+/**
+ * Ensure the version field is optional in the Monaco schema
+ * This allows workflows without an explicit version field (backward compatibility)
+ *
+ * CRITICAL: This function MUST remove version from the required array.
+ * If version is in required, Monaco will show "Missing property 'version'" error.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function ensureVersionIsOptional(schema: any): void {
+  if (!schema || typeof schema !== 'object') {
+    return;
+  }
+
+  const workflowSchema = schema?.definitions?.WorkflowSchema;
+  if (!workflowSchema || typeof workflowSchema !== 'object') {
+    return;
+  }
+
+  // CRITICAL: Handle allOf structure (zod-to-json-schema creates allOf for piped schemas)
+  // The properties and required fields are inside allOf[0], not directly in workflowSchema
+  if (workflowSchema.allOf && Array.isArray(workflowSchema.allOf)) {
+    // Process each item in allOf array
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    workflowSchema.allOf.forEach((allOfItem: any) => {
+      if (!allOfItem || typeof allOfItem !== 'object') {
+        return;
+      }
+
+      // Remove version from required array in allOf item
+      if (allOfItem.required && Array.isArray(allOfItem.required)) {
+        const beforeLength = allOfItem.required.length;
+        allOfItem.required = allOfItem.required.filter((field: string) => field !== 'version');
+        // If we removed version and the array is now empty, delete it
+        if (allOfItem.required.length === 0 && beforeLength > 0) {
+          delete allOfItem.required;
+        }
+      }
+
+      // Make version property optional in allOf item
+      const versionSchema = allOfItem.properties?.version;
+      if (versionSchema && typeof versionSchema === 'object') {
+        // If version is not wrapped in anyOf, wrap it to make it optional
+        if (!versionSchema.anyOf || !Array.isArray(versionSchema.anyOf)) {
+          const originalSchema = { ...versionSchema };
+          versionSchema.anyOf = [originalSchema, { type: 'undefined' }];
+          // Remove the direct properties since we're using anyOf now
+          delete versionSchema.type;
+          delete versionSchema.const;
+          delete versionSchema.default;
+        } else {
+          // If already wrapped in anyOf, ensure undefined option exists
+          const hasUndefinedOption = versionSchema.anyOf.some(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            (subSchema: any) =>
+              subSchema &&
+              typeof subSchema === 'object' &&
+              (subSchema.type === 'null' || subSchema.type === 'undefined')
+          );
+          if (!hasUndefinedOption) {
+            versionSchema.anyOf.push({ type: 'undefined' });
+          }
+        }
+      }
+    });
+  } else {
+    // Fallback: Handle direct properties structure (if allOf doesn't exist)
+    // CRITICAL: Always ensure version is not in the required array
+    // This is the most important fix - if version is in required, Monaco will show the error
+    // We must do this FIRST, before any other processing
+    if (workflowSchema.required && Array.isArray(workflowSchema.required)) {
+      const beforeLength = workflowSchema.required.length;
+      workflowSchema.required = workflowSchema.required.filter(
+        (field: string) => field !== 'version'
+      );
+      // If we removed version and the array is now empty, delete it
+      if (workflowSchema.required.length === 0 && beforeLength > 0) {
+        delete workflowSchema.required;
+      }
+    }
+
+    // If version property exists, make it optional by wrapping in anyOf with undefined
+    const versionSchema = workflowSchema.properties?.version;
+    if (versionSchema && typeof versionSchema === 'object') {
+      // If version is wrapped in anyOf (for optional), ensure it's truly optional
+      if (versionSchema.anyOf && Array.isArray(versionSchema.anyOf)) {
+        // Check if there's already a null/undefined option
+        const hasNullOption = versionSchema.anyOf.some(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (subSchema: any) =>
+            subSchema &&
+            typeof subSchema === 'object' &&
+            (subSchema.type === 'null' || subSchema.type === 'undefined')
+        );
+
+        // If not, add undefined option to make it truly optional
+        if (!hasNullOption) {
+          versionSchema.anyOf.push({ type: 'undefined' });
+        }
+      } else {
+        // If version is not wrapped in anyOf, wrap it to make it optional
+        // Keep the original schema and add undefined option
+        const originalSchema = { ...versionSchema };
+        versionSchema.anyOf = [originalSchema, { type: 'undefined' }];
+        // Remove the direct properties since we're using anyOf now
+        delete versionSchema.type;
+        delete versionSchema.const;
+        delete versionSchema.default;
+      }
+    }
   }
 }
 

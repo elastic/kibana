@@ -15,9 +15,20 @@ import { z } from '@kbn/zod';
 import { convertJsonSchemaToZod } from '../../../../common/lib/json_schema_to_zod';
 import { inferZodType } from '../../../../common/lib/zod';
 
-export function getWorkflowContextSchema(definition: WorkflowYaml) {
+// Type that accepts both WorkflowYaml (transformed) and raw definition (may have legacy inputs)
+type WorkflowDefinitionForContext =
+  | WorkflowYaml
+  | (Omit<WorkflowYaml, 'inputs'> & {
+      inputs?:
+        | WorkflowYaml['inputs']
+        | Array<{ name: string; type: string; [key: string]: unknown }>;
+    });
+
+export function getWorkflowContextSchema(definition: WorkflowDefinitionForContext) {
   // Normalize inputs to the new JSON Schema format (handles backward compatibility)
-  const normalizedInputs = normalizeInputsToJsonSchema(definition.inputs);
+  // This handles both array (legacy) and object (new) formats
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const normalizedInputs = normalizeInputsToJsonSchema(definition.inputs as any);
 
   // Build the inputs object from the normalized JSON Schema structure
   const inputsObject: Record<string, z.ZodType> = {};
