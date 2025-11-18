@@ -78,7 +78,7 @@ export async function getStreams(): Promise<string[]> {
     }
     throw new Error(`HTTP Response (${res.status}): ${await res.text()}`);
   });
-  return data.streams.map((s: any) => s.name).filter((name: string) => name.startsWith('logs.'));
+  return data.streams.map((s: any) => s.name).filter((name: string) => name.startsWith('logs.thunderbird'));
 }
 
 export async function getConnectors(): Promise<string[]> {

@@ -12,6 +12,10 @@ import {
   scoreDelimiterQuality,
   countOccurrences,
   calculatePositionScore,
+  analyzeBracketMismatches,
+  analyzeBracketStructure,
+  analyzeBracketOrdering,
+  variance,
 } from './utils';
 
 interface DelimiterCandidate {
@@ -87,6 +91,11 @@ export function findDelimiterSequences(
   // Step 3: Filter to likely delimiters
   const likelyDelimiters = commonSubstrings.filter(isLikelyDelimiter);
 
+  // Detect bracket mismatches (simple) and full structure (crossing + depth variance)
+  const mismatchedBrackets = analyzeBracketMismatches(messages);
+  const bracketStructure = analyzeBracketStructure(messages);
+  const unstableOrderingBrackets = analyzeBracketOrdering(messages);
+
   // Step 4: Score each delimiter by ALL occurrences, not just the first
   // This ensures delimiters with consistent 2nd/3rd occurrences aren't filtered out
   const scoredDelimiters: DelimiterCandidate[] = [];
@@ -114,7 +123,61 @@ export function findDelimiterSequences(
 
       // Only consider this occurrence if it exists in all messages
       if (!positions.some((pos) => pos === -1)) {
-        const score = calculatePositionScore(positions);
+        let score = calculatePositionScore(positions);
+
+        // Penalize delimiters that contain mismatched bracket characters
+        if ([...delimiter].some((c) => mismatchedBrackets.has(c))) {
+          score *= 0.2; // heavy penalty
+        }
+
+        // Advanced structural penalties
+        const chars = [...delimiter];
+        const structuralBracketChars = chars.filter((c) => '()[]{}'.includes(c));
+        if (structuralBracketChars.length) {
+          // Unmatched openers or mismatched closers (already mostly captured, but we apply again if detected structurally)
+          if (
+            structuralBracketChars.some(
+              (c) =>
+                bracketStructure.unmatchedOpeners.has(c) ||
+                bracketStructure.mismatchedClosers.has(c)
+            )
+          ) {
+            score *= 0.2; // reinforce heavy penalty
+          }
+
+          // Crossing patterns: if any crossing pair involves a char in this delimiter
+          if (
+            structuralBracketChars.some((c) =>
+              Array.from(bracketStructure.crossingPairs).some((pair) => pair.includes(c))
+            )
+          ) {
+            score *= 0.15; // even stronger reduction for crossing involvement
+          }
+
+          // Ordering instability: penalize brackets whose relative ordering flips
+          if (structuralBracketChars.some((c) => unstableOrderingBrackets.has(c))) {
+            score *= 0.25; // moderate penalty to drop inconsistent early bracket usage
+          }
+
+          // Depth variance: highly inconsistent nesting depth suggests unreliable structural delimiter usage
+          let depthPenaltyApplied = false;
+          for (const c of structuralBracketChars) {
+            const samples = bracketStructure.depthSamples[c];
+            if (samples && samples.length > 3) {
+              const depthVar = variance(samples);
+              if (depthVar > 6) {
+                score *= 0.4; // strong penalty for very high variance
+                depthPenaltyApplied = true;
+              } else if (depthVar > 3) {
+                score *= 0.7; // moderate penalty
+                depthPenaltyApplied = true;
+              }
+            }
+            if (depthPenaltyApplied) {
+              break; // apply only once per delimiter
+            }
+          }
+        }
 
         // Only add this occurrence if it meets the minimum score
         if (score >= minScore) {
@@ -149,7 +212,27 @@ export function findDelimiterSequences(
   const filteredDelimiters = removeDuplicateSubstrings(sortedByLength);
 
   // Return unique delimiter literals (may have multiple occurrences, but buildDelimiterTree handles that)
-  const uniqueDelimiters = Array.from(new Set(filteredDelimiters.map((d) => d.literal)));
+  let uniqueDelimiters = Array.from(new Set(filteredDelimiters.map((d) => d.literal)));
+
+  // Symmetry enforcement: drop orphan single-character closing brackets if their opener
+  // was filtered out by structural penalties. This prevents patterns that fragment
+  // bracketed content using only a stray ')' or ']' as a delimiter.
+  const closerToOpener: Record<string, string> = {
+    ')': '(',
+    ']': '[',
+    '}': '{',
+  };
+  const openerSet = new Set(uniqueDelimiters.filter((d) => ['(', '[', '{'].includes(d)));
+  uniqueDelimiters = uniqueDelimiters.filter((d) => {
+    // Only consider pure single-character closers; multi-char tokens like "] " or "]:" can remain
+    if (d.length === 1 && closerToOpener[d]) {
+      const opener = closerToOpener[d];
+      if (!openerSet.has(opener)) {
+        return false; // orphan closer - remove
+      }
+    }
+    return true;
+  });
   return uniqueDelimiters;
 }
 

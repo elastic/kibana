@@ -117,6 +117,171 @@ export function scoreDelimiterQuality(delimiter: string): number {
 }
 
 /**
+ * Analyze messages for bracket/parenthesis mismatches.
+ * Returns a set of bracket characters that participate in unmatched pairs
+ * across any message (either an opener without closer or an unexpected closer).
+ * Supported bracket types: (), [], {}.
+ */
+export function analyzeBracketMismatches(messages: string[]): Set<string> {
+  const mismatched = new Set<string>();
+  const openForClose: Record<string, string> = { ')': '(', ']': '[', '}': '{' };
+  const closeForOpen: Record<string, string> = { '(': ')', '[': ']', '{': '}' };
+
+  for (const msg of messages) {
+    const stack: string[] = [];
+    for (const ch of msg) {
+      if (closeForOpen[ch]) {
+        stack.push(ch);
+      } else if (openForClose[ch]) {
+        if (stack.length === 0) {
+          // stray closer
+          mismatched.add(ch);
+        } else {
+          const top = stack[stack.length - 1];
+          if (top === openForClose[ch]) {
+            stack.pop();
+          } else {
+            // wrong closer
+            mismatched.add(ch);
+          }
+        }
+      }
+    }
+    // Any remaining openers are unmatched
+    for (const opener of stack) {
+      mismatched.add(opener);
+    }
+  }
+
+  return mismatched;
+}
+
+/**
+ * Analyze bracket structure for: unmatched openers, mismatched closers, crossing patterns, and depth variance.
+ * Returns detailed structure info used for advanced delimiter penalties.
+ */
+export interface BracketStructureInfo {
+  unmatchedOpeners: Set<string>;
+  mismatchedClosers: Set<string>;
+  crossingPairs: Set<string>; // encoded as opener+closer e.g. '[)'
+  depthSamples: Record<string, number[]>; // depth at each occurrence
+}
+
+export function analyzeBracketStructure(messages: string[]): BracketStructureInfo {
+  const unmatchedOpeners = new Set<string>();
+  const mismatchedClosers = new Set<string>();
+  const crossingPairs = new Set<string>();
+  const depthSamples: Record<string, number[]> = {
+    '(': [],
+    ')': [],
+    '[': [],
+    ']': [],
+    '{': [],
+    '}': [],
+  };
+
+  const openForClose: Record<string, string> = { ')': '(', ']': '[', '}': '{' };
+  const closeForOpen: Record<string, string> = { '(': ')', '[': ']', '{': '}' };
+
+  for (const msg of messages) {
+    const stack: string[] = [];
+    for (const ch of msg) {
+      if (closeForOpen[ch]) {
+        // opening
+        stack.push(ch);
+        depthSamples[ch].push(stack.length); // depth after push
+      } else if (openForClose[ch]) {
+        // closing
+        depthSamples[ch].push(stack.length); // depth before pop (approx nesting)
+        if (stack.length === 0) {
+          mismatchedClosers.add(ch);
+          continue;
+        }
+        const top = stack[stack.length - 1];
+        if (top === openForClose[ch]) {
+          stack.pop();
+        } else {
+          // crossing pattern: closer does not match top
+          mismatchedClosers.add(ch);
+          unmatchedOpeners.add(top); // mark the opener as implicated
+          crossingPairs.add(`${top}${ch}`);
+          // attempt recovery: pop until we either find matching opener or stack empty
+          let recovered = false;
+          for (let i = stack.length - 2; i >= 0; i--) {
+            if (stack[i] === openForClose[ch]) {
+              // Remove intervening unmatched openers
+              for (let j = stack.length - 1; j >= i; j--) {
+                const removed = stack.pop();
+                if (removed && removed !== openForClose[ch]) {
+                  unmatchedOpeners.add(removed);
+                }
+              }
+              recovered = true;
+              break;
+            }
+          }
+          if (!recovered) {
+            // Could not find matching opener; treat closer as stray
+            continue;
+          }
+        }
+      }
+    }
+    // Remaining openers at end are unmatched
+    for (const opener of stack) {
+      unmatchedOpeners.add(opener);
+    }
+  }
+
+  return { unmatchedOpeners, mismatchedClosers, crossingPairs, depthSamples };
+}
+
+/**
+ * Analyze ordering consistency between bracket characters. We look at the first occurrence
+ * position of each structural bracket character per message. For each pair ( ( vs [, ( vs {, [ vs { )
+ * we record the relative ordering among messages that contain both. If both orderings occur
+ * (A before B and B before A) across the corpus, we mark both characters as unstable.
+ */
+export function analyzeBracketOrdering(messages: string[]): Set<string> {
+  const chars = ['(', '[', '{'];
+  const firstPos: Record<string, number[]> = { '(': [], '[': [], '{': [] };
+
+  for (const msg of messages) {
+    for (const c of chars) {
+      const idx = msg.indexOf(c);
+      firstPos[c].push(idx); // -1 if absent
+    }
+  }
+
+  const unstable = new Set<string>();
+  // Helper to decide instability for a pair
+  function checkPair(a: string, b: string) {
+    const orderAFirst: boolean[] = [];
+    for (let i = 0; i < messages.length; i++) {
+      const pa = firstPos[a][i];
+      const pb = firstPos[b][i];
+      if (pa !== -1 && pb !== -1 && pa !== pb) {
+        orderAFirst.push(pa < pb);
+      }
+    }
+    if (orderAFirst.length === 0) {
+      return; // Never co-occur
+    }
+    const hasTrue = orderAFirst.some(Boolean);
+    const hasFalse = orderAFirst.some((v) => !v);
+    if (hasTrue && hasFalse) {
+      unstable.add(a);
+      unstable.add(b);
+    }
+  }
+
+  checkPair('(', '[');
+  checkPair('(', '{');
+  checkPair('[', '{');
+  return unstable;
+}
+
+/**
  * Find the common character-by-character prefix across multiple messages
  */
 export function findCommonPrefix(messages: string[]): {

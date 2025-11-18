@@ -72,6 +72,48 @@ describe('extractDissectPattern', () => {
       expect(serializeAST(result.ast)).toContain(',');
       expect(result.fields.length).toBeGreaterThanOrEqual(4);
     });
+
+    it('penalizes mismatched parentheses so ( is not chosen as delimiter when alternatives exist', () => {
+      const messages = [
+        'func(arg one two', // missing closing parenthesis
+        'func(arg three four',
+        'func(arg five six',
+      ];
+      const result = extractDissectPattern(messages);
+      const pattern = serializeAST(result.ast);
+      // Expect spaces used but standalone '(' not treated as a structural delimiter
+      // Pattern should not contain a literal '(' immediately followed by a field boundary (e.g., "(%{field}")
+      expect(pattern).not.toMatch(/\(%\{field_/);
+    });
+
+    it('penalizes crossing bracket sequences so opener characters are avoided', () => {
+      // Crossing pattern: ([ ) ] ordering causes structural unreliability
+      const messages = [
+        'prefix ([ value ) more ] suffix',
+        'prefix ([ other ) more ] suffix',
+        'prefix ([ another ) more ] suffix',
+      ];
+      const result = extractDissectPattern(messages);
+      const pattern = serializeAST(result.ast);
+      // Should avoid choosing '(' or '[' as delimiters at field boundaries because they participate in crossing
+      expect(pattern).not.toMatch(/\(%\{field_/);
+      expect(pattern).not.toMatch(/\[%\{field_/);
+    });
+
+    it('keeps properly nested bracket delimiters when balanced', () => {
+      const messages = [
+        '[{(INFO)}] alpha beta',
+        '[{(WARN)}] gamma delta',
+        '[{(ERROR)}] epsilon zeta',
+      ];
+      const result = extractDissectPattern(messages);
+      const pattern = serializeAST(result.ast);
+      // Properly nested so bracket characters may appear as part of delimiters
+      expect(pattern).toContain('[');
+      expect(pattern).toContain(']');
+      expect(pattern).toContain('(');
+      expect(pattern).toContain(')');
+    });
   });
 
   describe('field extraction', () => {
