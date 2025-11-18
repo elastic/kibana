@@ -20,7 +20,7 @@ export const useActionStyles = () => {
       top: 0;
       // Adjust for possible scrollbars
       right: ${euiTheme.size.base};
-      height: calc(${euiTheme.size.l} + ${euiTheme.size.s});
+      height: ${euiTheme.size.xl};
       background-color: ${euiTheme.colors.emptyShade};
       border-radius: ${euiTheme.size.xs};
       box-shadow: 0 0 calc(${euiTheme.size.xs} * 0.5) calc(${euiTheme.size.xs} * 0.5)
