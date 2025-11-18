@@ -37,6 +37,7 @@ function TraceMetricsGrid({
   chartToolbarCss,
   isComponentVisible,
   dataView,
+  timeRange,
 }: ChartSectionProps & {
   dataSource: DataSource;
 }) {
@@ -92,7 +93,7 @@ function TraceMetricsGrid({
           dataSource,
           indexes: indexPattern,
           filters,
-          requestParams,
+          timeRange,
           services,
           searchSessionId,
           abortController,

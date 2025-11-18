@@ -19,7 +19,7 @@ const ERROR_RATE_Y_BOUNDS: LensYBoundsConfig = { mode: 'custom', lowerBound: 0, 
 export const ErrorRateChart = () => {
   const {
     filters,
-    requestParams,
+    timeRange,
     services,
     abortController,
     discoverFetch$,
@@ -29,7 +29,6 @@ export const ErrorRateChart = () => {
     onBrushEnd,
     onFilter,
   } = useTraceMetricsContext();
-  const { getTimeRange } = requestParams;
 
   const { esqlQuery, seriesType, unit, color, title } = getErrorRateChart({
     dataSource,
@@ -41,7 +40,7 @@ export const ErrorRateChart = () => {
     query: esqlQuery,
     seriesType,
     services,
-    getTimeRange,
+    timeRange,
     unit,
     color,
     abortController,
@@ -52,7 +51,7 @@ export const ErrorRateChart = () => {
       esqlQuery={esqlQuery}
       size="s"
       discoverFetch$={discoverFetch$}
-      requestParams={requestParams}
+      timeRange={timeRange}
       services={services}
       abortController={abortController}
       searchSessionId={searchSessionId}

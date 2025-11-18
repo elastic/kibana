@@ -19,7 +19,7 @@ type TraceMetricsContextProps = {
   discoverFetch$: Observable<UnifiedHistogramInputMessage>;
 } & Pick<
   ChartSectionProps,
-  'requestParams' | 'services' | 'searchSessionId' | 'abortController' | 'onBrushEnd' | 'onFilter'
+  'services' | 'searchSessionId' | 'abortController' | 'onBrushEnd' | 'onFilter' | 'timeRange'
 >;
 
 export const TraceMetricsContext = createContext<TraceMetricsContextProps | undefined>(undefined);

@@ -11,7 +11,6 @@ import type { LensBaseLayer, LensSeriesLayer } from '@kbn/lens-embeddable-utils'
 import type { ChartSectionProps } from '@kbn/unified-histogram/types';
 import useAsync from 'react-use/lib/useAsync';
 import { useMemo } from 'react';
-import type { TimeRange } from '@kbn/data-plugin/common';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
 import type { MetricUnit } from '@kbn/metrics-experience-plugin/common/types';
 import { useEsqlQueryInfo } from '../../../hooks';
@@ -19,7 +18,7 @@ import { DIMENSIONS_COLUMN, getLensMetricFormat } from '../../../common/utils';
 
 export const useChartLayersFromEsql = ({
   query,
-  getTimeRange,
+  timeRange,
   color,
   seriesType,
   services,
@@ -29,11 +28,10 @@ export const useChartLayersFromEsql = ({
   query: string;
   color?: string;
   unit?: MetricUnit;
-  getTimeRange: () => TimeRange;
   seriesType: LensSeriesLayer['seriesType'];
   services: ChartSectionProps['services'];
   abortController?: AbortController;
-} & Pick<ChartSectionProps, 'services'>): LensSeriesLayer[] => {
+} & Pick<ChartSectionProps, 'services' | 'timeRange'>): LensSeriesLayer[] => {
   const queryInfo = useEsqlQueryInfo({ query });
 
   const { value: columns = [] } = useAsync(
@@ -42,10 +40,10 @@ export const useChartLayersFromEsql = ({
         esqlQuery: query,
         search: services.data.search.search,
         signal: abortController?.signal,
-        timeRange: getTimeRange(),
+        timeRange,
       }),
 
-    [query, services.data.search, abortController, getTimeRange]
+    [query, services.data.search, abortController, timeRange]
   );
 
   const layers = useMemo<LensSeriesLayer[]>(() => {
