@@ -34,8 +34,8 @@ describe('useLookupIndexPrivileges', () => {
   it('should fetch permissions for a list of index names', async () => {
     const indexNames = ['index-1', 'index-2'];
     const mockPrivileges = {
-      'index-1': { create_index: true, write: true, read: true, delete_index: true },
-      'index-2': { create_index: false, write: false, read: true, delete_index: false },
+      'index-1': { create_index: true, write: true, read: true },
+      'index-2': { create_index: false, write: false, read: true },
     };
     services.http.get.mockResolvedValue(mockPrivileges);
 
