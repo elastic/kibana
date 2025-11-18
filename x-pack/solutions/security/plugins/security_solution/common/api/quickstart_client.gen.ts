@@ -235,6 +235,8 @@ import type {
   DeleteEntityEngineRequestQueryInput,
   DeleteEntityEngineRequestParamsInput,
   DeleteEntityEngineResponse,
+  DeleteEntityEnginesRequestQueryInput,
+  DeleteEntityEnginesResponse,
 } from './entity_analytics/entity_store/engine/delete.gen';
 import type { EntityStoreGetPrivilegesResponse } from './entity_analytics/entity_store/engine/get_privileges.gen';
 import type {
@@ -1014,6 +1016,20 @@ For detailed information on Kibana actions and alerting, and additional API call
     return this.kbnClient
       .request<DeleteEntityEngineResponse>({
         path: replaceParams('/api/entity_store/engines/{entityType}', props.params),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'DELETE',
+
+        query: props.query,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async deleteEntityEngines(props: DeleteEntityEnginesProps) {
+    this.log.info(`${new Date().toISOString()} Calling API DeleteEntityEngines`);
+    return this.kbnClient
+      .request<DeleteEntityEnginesResponse>({
+        path: '/api/entity_store/engines',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -3278,6 +3294,9 @@ export interface DeleteDashboardMigrationProps {
 export interface DeleteEntityEngineProps {
   query: DeleteEntityEngineRequestQueryInput;
   params: DeleteEntityEngineRequestParamsInput;
+}
+export interface DeleteEntityEnginesProps {
+  query: DeleteEntityEnginesRequestQueryInput;
 }
 export interface DeleteEntitySourceProps {
   params: DeleteEntitySourceRequestParamsInput;
