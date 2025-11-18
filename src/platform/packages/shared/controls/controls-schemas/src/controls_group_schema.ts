@@ -71,21 +71,24 @@ export const ignoreParentSettingsSchema = schema.object({
   ),
 });
 
-export const controlsGroupSchema = schema.object({
-  controls: schema.arrayOf(controlSchema, {
-    defaultValue: [],
-    meta: { description: 'An array of control panels and their state in the control group.' },
-  }),
-  labelPosition: labelPositionSchema,
-  chainingSystem: chainingSchema,
-  enhancements: schema.maybe(schema.recordOf(schema.string(), schema.any())),
-  ignoreParentSettings: schema.maybe(ignoreParentSettingsSchema),
-  autoApplySelections: schema.boolean({
-    meta: { description: 'Show apply selections button in controls.' },
-    defaultValue: DEFAULT_AUTO_APPLY_SELECTIONS,
-  }),
-}, {
-  meta: {
-    deprecated: true,
+export const controlsGroupSchema = schema.object(
+  {
+    controls: schema.arrayOf(controlSchema, {
+      defaultValue: [],
+      meta: { description: 'An array of control panels and their state in the control group.' },
+    }),
+    labelPosition: labelPositionSchema,
+    chainingSystem: chainingSchema,
+    enhancements: schema.maybe(schema.recordOf(schema.string(), schema.any())),
+    ignoreParentSettings: schema.maybe(ignoreParentSettingsSchema),
+    autoApplySelections: schema.boolean({
+      meta: { description: 'Show apply selections button in controls.' },
+      defaultValue: DEFAULT_AUTO_APPLY_SELECTIONS,
+    }),
+  },
+  {
+    meta: {
+      deprecated: true,
+    },
   }
-});
+);

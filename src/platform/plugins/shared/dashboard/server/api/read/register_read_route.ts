@@ -60,7 +60,7 @@ export function registerReadRoute(router: VersionedRouter<RequestHandlerContext>
             ...result,
             data,
             ...(warnings?.length && { warnings }),
-          }
+          },
         });
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 404) {
