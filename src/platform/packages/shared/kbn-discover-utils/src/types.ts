@@ -96,11 +96,14 @@ export interface LogDocumentOverview
 export interface ApmErrorLogFields {
   'processor.event': string;
   'error.log.level'?: string;
+  'error.exception.type'?: string;
   'error.exception.message'?: string;
+  'error.culprit'?: string;
 }
 
 export interface OtelExceptionLogFields {
   event_name: string; // OTEL-specific field
+  'exception.type'?: string;
 }
 
 export interface LogResourceFields {
