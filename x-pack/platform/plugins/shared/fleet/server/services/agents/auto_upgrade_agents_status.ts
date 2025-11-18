@@ -14,10 +14,11 @@ import type {
   GetAutoUpgradeAgentsStatusResponse,
 } from '../../../common/types/rest_spec/agent_policy';
 import { appContextService } from '../app_context';
-import { MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20 } from '../../constants';
 
 import { getAgentActions } from './actions';
 import type { AgentClient } from './agent_service';
+
+const MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS_20 = 20;
 
 export async function getAutoUpgradeAgentsStatus(
   agentClient: AgentClient,
