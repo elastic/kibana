@@ -33,7 +33,7 @@ export const SiemMigrationSetupTour: React.FC<SetupTourProps> = React.memo(({ ch
     return tourConfig;
   });
 
-  const { shouldShow, onComplete } = useTourQueue(TOURS.SECURITY_SIEM_MIGRATION);
+  const { isActive: isActiveInQueue, onComplete } = useTourQueue(TOURS.SECURITY_SIEM_MIGRATION);
 
   const onTourFinished = useCallback(() => {
     setTourState({
@@ -57,9 +57,12 @@ export const SiemMigrationSetupTour: React.FC<SetupTourProps> = React.memo(({ ch
 
   const showTour = useMemo(() => {
     return (
-      siemMigrations.rules.isAvailable() && tourState.isTourActive && tourDelayElapsed && shouldShow
+      siemMigrations.rules.isAvailable() &&
+      tourState.isTourActive &&
+      tourDelayElapsed &&
+      isActiveInQueue
     );
-  }, [siemMigrations.rules, tourDelayElapsed, tourState.isTourActive, shouldShow]);
+  }, [siemMigrations.rules, tourDelayElapsed, tourState.isTourActive, isActiveInQueue]);
 
   return (
     <EuiTourStep
