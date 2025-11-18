@@ -374,7 +374,7 @@ export const useEsqlDataCascadeRowActionHelpers = ({
   };
 };
 
-const metaSlotStyles = {
+const textSlotStyles = {
   textWrapper: css({
     minWidth: 0,
     textWrap: 'nowrap',
@@ -390,6 +390,10 @@ export function useEsqlDataCascadeRowHeaderComponents(
   selectedColumns: string[],
   togglePopover: ReturnType<typeof useEsqlDataCascadeRowActionHelpers>['togglePopover']
 ) {
+  const namedColumnsFromQuery = useMemo(() => {
+    return editorQueryMeta.appliedFunctions.map(({ identifier }) => identifier);
+  }, [editorQueryMeta.appliedFunctions]);
+
   /**
    * Renders the title part of the row header.
    */
@@ -416,6 +420,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
       return (
         <EuiText size="s">
           <EuiTextTruncate
+            truncation="end"
             text={
               (rowData[rowGroup] ??
                 i18n.translate('discover.esql_data_cascade.row.action.no_value', {
@@ -424,7 +429,7 @@ export function useEsqlDataCascadeRowHeaderComponents(
             }
           >
             {(truncatedText) => {
-              return <h4>{truncatedText}</h4>;
+              return <h4 css={textSlotStyles.textInner}>{truncatedText}</h4>;
             }}
           </EuiTextTruncate>
         </EuiText>
@@ -432,10 +437,6 @@ export function useEsqlDataCascadeRowHeaderComponents(
     },
     [editorQueryMeta.groupByFields]
   );
-
-  const namedColumnsFromQuery = useMemo(() => {
-    return editorQueryMeta.appliedFunctions.map(({ identifier }) => identifier);
-  }, [editorQueryMeta.appliedFunctions]);
 
   /**
    * Renders the meta part of the row header.
@@ -459,8 +460,8 @@ export function useEsqlDataCascadeRowHeaderComponents(
                   selectedColumn,
                   selectedColumnValue: rowData[selectedColumn] as string | number,
                   bold: (chunks) => (
-                    <EuiFlexItem grow={false} css={metaSlotStyles.textWrapper}>
-                      <span css={metaSlotStyles.textInner}>{chunks}</span>
+                    <EuiFlexItem grow={false} css={textSlotStyles.textWrapper}>
+                      <span css={textSlotStyles.textInner}>{chunks}</span>
                     </EuiFlexItem>
                   ),
                   badge: ([chunk]) => {

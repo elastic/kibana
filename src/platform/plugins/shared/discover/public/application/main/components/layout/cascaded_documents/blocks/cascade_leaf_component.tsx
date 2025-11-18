@@ -9,7 +9,13 @@
 
 import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { EuiPanel, EuiText, type EuiDataGridCustomBodyProps } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiText,
+  type EuiDataGridCustomBodyProps,
+  useEuiTheme,
+  type UseEuiTheme,
+} from '@elastic/eui';
 import { useVirtualizer } from '@tanstack/react-virtual';
 import {
   getRenderCustomToolbarWithElements,
@@ -50,8 +56,25 @@ interface CustomCascadeGridBodyProps
   data: DataTableRecord[];
 }
 
-const customCascadeGridBodyStyle = {
-  wrapper: css({ overflow: 'hidden', position: 'relative', height: '100%' }),
+const getCustomCascadeGridBodyStyle = (euiTheme: UseEuiTheme['euiTheme']) => ({
+  wrapper: css({
+    overflow: 'hidden',
+    position: 'relative',
+    height: '100%',
+    '& .euiDataGridHeader': {
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+    },
+    '& .euiDataGridRow': {
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+    },
+    '.unifiedDataTableToolbar:has(+ .euiDataGrid__content &)': {
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
+    },
+    '.unifiedDataTableToolbar:has(+ .euiDataGrid__content &) .unifiedDataTableToolbarControlGroup':
+      {
+        backgroundColor: euiTheme.colors.backgroundBasePlain,
+      },
+  }),
   headerRow: css({
     position: 'sticky',
     top: 0,
@@ -75,7 +98,7 @@ const customCascadeGridBodyStyle = {
     },
   }),
   displayFlex: css({ display: 'flex' }),
-};
+});
 
 /**
  * A custom grid body implementation for the unified data table to be used in the cascade leaf cells
@@ -98,6 +121,13 @@ export const CustomCascadeGridBodyMemoized = React.memo(function CustomCascadeGr
     [data, visibleRowData.startRow, visibleRowData.endRow]
   );
   const customGridBodyScrollContainerRef = useRef<HTMLDivElement | null>(null);
+
+  const { euiTheme } = useEuiTheme();
+
+  const customCascadeGridBodyStyle = useMemo(
+    () => getCustomCascadeGridBodyStyle(euiTheme),
+    [euiTheme]
+  );
 
   const scrollMargin = useMemo(() => getScrollMargin(), [getScrollMargin]);
 
