@@ -55,13 +55,11 @@ describe('useLookupIndexPrivileges', () => {
         canCreateIndex: true,
         canEditIndex: true,
         canReadIndex: true,
-        canRecreateIndex: true,
       },
       'index-2': {
         canCreateIndex: false,
         canEditIndex: false,
         canReadIndex: true,
-        canRecreateIndex: false,
       },
     });
   });
@@ -85,7 +83,6 @@ describe('useLookupIndexPrivileges', () => {
         canCreateIndex: false,
         canEditIndex: false,
         canReadIndex: false,
-        canRecreateIndex: false,
       },
     });
   });
@@ -104,7 +101,6 @@ describe('useLookupIndexPrivileges', () => {
         canCreateIndex: false,
         canEditIndex: false,
         canReadIndex: false,
-        canRecreateIndex: false,
       },
     });
   });
@@ -142,7 +138,6 @@ describe('useLookupIndexPrivileges', () => {
         canCreateIndex: false,
         canEditIndex: false,
         canReadIndex: false,
-        canRecreateIndex: false,
       },
     });
   });

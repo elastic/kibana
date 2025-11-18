@@ -32,7 +32,6 @@ export interface LookupIndexPrivileges {
   canCreateIndex: boolean;
   canEditIndex: boolean;
   canReadIndex: boolean;
-  canRecreateIndex: boolean;
 }
 
 export const useLookupIndexPrivileges = () => {
@@ -73,12 +72,10 @@ export const useLookupIndexPrivileges = () => {
     const privileges = await memoizedFetchPrivileges.current(indexNames);
 
     const permissions = (indexNames.length ? indexNames : ['*']).reduce((acc, indexName) => {
-      const canCreateIndex = hasPrivilege(privileges, indexName, 'create_index');
       acc[indexName] = {
-        canCreateIndex,
+        canCreateIndex: hasPrivilege(privileges, indexName, 'create_index'),
         canEditIndex: hasPrivilege(privileges, indexName, 'write'),
         canReadIndex: hasPrivilege(privileges, indexName, 'read'),
-        canRecreateIndex: canCreateIndex && hasPrivilege(privileges, indexName, 'delete_index'),
       };
       return acc;
     }, {} as Record<string, LookupIndexPrivileges>);

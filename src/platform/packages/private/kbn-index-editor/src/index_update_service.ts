@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BulkRequest, BulkResponse } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  BulkRequest,
+  BulkResponse,
+  SecurityHasPrivilegesResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { type DataPublicPluginStart, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -120,12 +124,12 @@ export class IndexUpdateService {
     private readonly data: DataPublicPluginStart,
     private readonly notifications: NotificationsStart,
     private readonly telemetry: IndexEditorTelemetryService,
-    public readonly canEditIndex: boolean,
-    public readonly canRecreateIndex: boolean
+    public readonly canEditIndex: boolean
   ) {
     this.listenForUpdates();
   }
 
+  public userCanResetIndex: boolean = false;
   private indexHasNewFields: boolean = false;
 
   /** Indicates the service has been completed */
@@ -797,6 +801,18 @@ export class IndexUpdateService {
         )
         .subscribe(this._pendingColumnsToBeSaved$)
     );
+
+    // Checks if user can reset the given index
+    this._subscription.add(
+      this.indexName$
+        .pipe(
+          filter((indexName) => indexName !== null),
+          switchMap((indexName) => from(this.fetchUserCanResetIndex(indexName!)))
+        )
+        .subscribe((result) => {
+          this.userCanResetIndex = result;
+        })
+    );
   }
 
   private summarizeSavingUpdates(savingDocs: PendingSave, updates: BulkUpdateOperations) {
@@ -1081,6 +1097,21 @@ export class IndexUpdateService {
     );
 
     return lookupIndexesResult.indices.some((index) => index.name === indexName);
+  }
+
+  private async fetchUserCanResetIndex(indexName: string): Promise<boolean> {
+    const lookupIndexesResult = await this.http.get<SecurityHasPrivilegesResponse['index']>(
+      '/internal/esql/lookup_index/privileges',
+      {
+        query: {
+          indexName,
+        },
+      }
+    );
+    return (
+      (lookupIndexesResult[indexName]?.delete_index || lookupIndexesResult['*']?.delete_index) &&
+      (lookupIndexesResult[indexName]?.create_index || lookupIndexesResult['*']?.create_index)
+    );
   }
 
   public exit(onExitCallback?: () => void) {

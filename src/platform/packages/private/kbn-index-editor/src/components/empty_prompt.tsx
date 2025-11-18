@@ -37,8 +37,9 @@ export const EmptyPrompt: FC = () => {
 
   const allowMappingsReset = useMemo(
     () =>
-      indexUpdateService.canRecreateIndex && columns?.some((col) => !isPlaceholderColumn(col.name)),
-    [columns, indexUpdateService.canRecreateIndex]
+      indexUpdateService.userCanResetIndex &&
+      columns?.some((col) => !isPlaceholderColumn(col.name)),
+    [columns, indexUpdateService.userCanResetIndex]
   );
 
   const [isResettingMappings, setIsResettingMappings] = useState(false);
