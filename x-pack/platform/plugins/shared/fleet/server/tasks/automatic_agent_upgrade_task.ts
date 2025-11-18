@@ -23,6 +23,8 @@ import { errors } from '@elastic/elasticsearch';
 import semverGt from 'semver/functions/gt';
 import moment from 'moment';
 
+import { isStuckInUpdating } from '../../common/services/agent_status';
+
 import { AUTO_UPGRADE_DEFAULT_RETRIES } from '../../common/constants';
 import type {
   Agent,
@@ -41,7 +43,7 @@ import { AGENT_POLICY_SAVED_OBJECT_TYPE } from '../constants';
 import { AgentStatusKueryHelper, isAgentUpgradeable } from '../../common/services';
 
 export const TYPE = 'fleet:automatic-agent-upgrade-task';
-export const VERSION = '1.0.2';
+export const VERSION = '1.0.3';
 const TITLE = 'Fleet Automatic agent upgrades';
 const SCOPE = ['fleet'];
 const DEFAULT_INTERVAL = '30m';
@@ -413,9 +415,9 @@ export class AutomaticAgentUpgradeTask {
     const statusKuery =
       '(status:online OR status:offline OR status:enrolling OR status:degraded OR status:error OR status:orphaned)'; // active status except updating
     const oldStuckInUpdatingKuery = `(NOT upgrade_details:* AND status:updating AND NOT upgraded_at:* AND upgrade_started_at < now-2h)`; // agents pre 8.12.0 (without upgrade_details)
-    const newStuckInUpdatingKuery = `(upgrade_details.target_version:${requiredVersion.version} AND upgrade_details.state:UPG_FAILED)`;
+    const newStuckInUpdatingKuery = `(upgrade_details.target_version:${requiredVersion.version} AND upgrade_details.state:UPG_FAILED AND (NOT upgrade_attempts:*))`;
     const agentsFetcher = await fetchAllAgentsByKuery(esClient, soClient, {
-      kuery: `policy_id:${agentPolicy.id} AND (NOT upgrade_attempts:*) AND (${statusKuery} OR ${oldStuckInUpdatingKuery} OR ${newStuckInUpdatingKuery})`,
+      kuery: `policy_id:${agentPolicy.id} AND (${statusKuery} OR ${oldStuckInUpdatingKuery} OR ${newStuckInUpdatingKuery})`,
       perPage: AGENTS_BATCHSIZE,
       sortField: 'agent.version',
       sortOrder: 'asc',
@@ -554,6 +556,7 @@ export class AutomaticAgentUpgradeTask {
         version,
         spaceIds: agentPolicy.space_ids,
         ...this.getUpgradeDurationSeconds(agentsForUpgrade.length),
+        force: true, // to restart agents stuck in updating
       });
     }
 
@@ -561,7 +564,10 @@ export class AutomaticAgentUpgradeTask {
   }
 
   private isAgentEligibleForUpgrade(agent: AgentWithDefinedVersion, version: string) {
-    return isAgentUpgradeable(agent) && semverGt(version, agent.agent.version);
+    return (
+      (isAgentUpgradeable(agent) || isStuckInUpdating(agent)) &&
+      semverGt(version, agent.agent.version)
+    );
   }
 
   private getUpgradeDurationSeconds(nAgents: number) {
