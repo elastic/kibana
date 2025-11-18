@@ -28,7 +28,7 @@ export const AlienVaultOTXConnector: ConnectorSpec = {
     displayName: 'AlienVault OTX',
     description: 'Community-driven threat intelligence from Open Threat Exchange',
     minimumLicense: 'gold',
-    supportedFeatureIds: ['alerting', 'siem'],
+    supportedFeatureIds: ['workflows'],
   },
 
   authTypes: [
