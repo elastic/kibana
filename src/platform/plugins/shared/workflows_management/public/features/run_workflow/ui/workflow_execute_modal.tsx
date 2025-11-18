@@ -24,6 +24,7 @@ import {
 import { css, Global } from '@emotion/react';
 import capitalize from 'lodash/capitalize';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { parseDocument } from 'yaml';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { normalizeInputsToJsonSchema } from '@kbn/workflows/spec/lib/input_conversion';
@@ -55,11 +56,12 @@ function getDefaultTrigger(definition: WorkflowYaml | null): TriggerType {
 interface WorkflowExecuteModalProps {
   definition: WorkflowYaml | null;
   workflowId?: string;
+  yamlString?: string | null;
   onClose: () => void;
   onSubmit: (data: Record<string, unknown>) => void;
 }
 export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
-  ({ definition, workflowId, onClose, onSubmit }) => {
+  ({ definition, workflowId, yamlString, onClose, onSubmit }) => {
     const modalTitleId = useGeneratedHtmlId();
     const enabledTriggers = ['alert', 'index', 'manual'];
     const defaultTrigger = useMemo(() => getDefaultTrigger(definition), [definition]);
@@ -92,28 +94,31 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         return false;
       }
       const hasAlertTrigger = definition.triggers?.some((trigger) => trigger.type === 'alert');
-      const normalizedInputs = normalizeInputsToJsonSchema(definition.inputs);
+
+      // Try to get inputs from definition, or extract from YAML if available
+      let inputs = definition.inputs;
+      if (inputs === undefined && yamlString) {
+        try {
+          const yamlDoc = parseDocument(yamlString);
+          const yamlJson = yamlDoc.toJSON();
+          if (yamlJson && typeof yamlJson === 'object' && 'inputs' in yamlJson) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            inputs = (yamlJson as any).inputs;
+          }
+        } catch (e) {
+          // Ignore errors when extracting from YAML
+        }
+      }
+
+      const normalizedInputs = normalizeInputsToJsonSchema(inputs);
       const hasInputs =
         normalizedInputs?.properties && Object.keys(normalizedInputs.properties).length > 0;
-
-      // Debug logging (only in development)
-      if (process.env.NODE_ENV === 'development') {
-        // eslint-disable-next-line no-console
-        console.log('[WorkflowExecuteModal] shouldAutoRun check:', {
-          hasAlertTrigger,
-          hasInputs,
-          normalizedInputs,
-          inputsKeys: normalizedInputs?.properties ? Object.keys(normalizedInputs.properties) : [],
-          definitionInputs: definition.inputs,
-          shouldAutoRun: !hasAlertTrigger && !hasInputs,
-        });
-      }
 
       if (!hasAlertTrigger && !hasInputs) {
         return true;
       }
       return false;
-    }, [definition]);
+    }, [definition, yamlString]);
 
     useEffect(() => {
       if (shouldAutoRun) {
@@ -126,13 +131,27 @@ export const WorkflowExecuteModal = React.memo<WorkflowExecuteModalProps>(
         setSelectedTrigger('alert');
         return;
       }
-      const normalizedInputs = definition
-        ? normalizeInputsToJsonSchema(definition.inputs)
-        : undefined;
+
+      // Try to get inputs from definition, or extract from YAML if available
+      let inputs = definition?.inputs;
+      if (inputs === undefined && yamlString && definition) {
+        try {
+          const yamlDoc = parseDocument(yamlString);
+          const yamlJson = yamlDoc.toJSON();
+          if (yamlJson && typeof yamlJson === 'object' && 'inputs' in yamlJson) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            inputs = (yamlJson as any).inputs;
+          }
+        } catch (e) {
+          // Ignore errors when extracting from YAML
+        }
+      }
+
+      const normalizedInputs = inputs ? normalizeInputsToJsonSchema(inputs) : undefined;
       if (normalizedInputs?.properties && Object.keys(normalizedInputs.properties).length > 0) {
         setSelectedTrigger('manual');
       }
-    }, [shouldAutoRun, onSubmit, onClose, definition]);
+    }, [shouldAutoRun, onSubmit, onClose, definition, yamlString]);
 
     if (shouldAutoRun) {
       // Not rendered if the workflow should auto run, will close the modal automatically

@@ -29,23 +29,6 @@ export function getWorkflowContextSchema(
   definition: WorkflowDefinitionForContext,
   yamlDocument?: Document | null
 ) {
-  // Debug logging (only in development)
-  if (process.env.NODE_ENV === 'development') {
-    // eslint-disable-next-line no-console
-    console.log('[getWorkflowContextSchema] Received definition:', {
-      hasInputs: 'inputs' in definition,
-      inputsValue: definition.inputs,
-      inputsType: typeof definition.inputs,
-      inputsIsArray: Array.isArray(definition.inputs),
-      inputsIsObject:
-        definition.inputs &&
-        typeof definition.inputs === 'object' &&
-        !Array.isArray(definition.inputs),
-      definitionKeys: Object.keys(definition),
-      hasYamlDocument: !!yamlDocument,
-    });
-  }
-
   // If inputs is undefined, try to extract it from the YAML document
   let inputs = definition.inputs;
   if (inputs === undefined && yamlDocument) {
@@ -54,17 +37,9 @@ export function getWorkflowContextSchema(
       if (yamlJson && typeof yamlJson === 'object' && 'inputs' in yamlJson) {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         inputs = (yamlJson as any).inputs;
-        if (process.env.NODE_ENV === 'development') {
-          // eslint-disable-next-line no-console
-          console.log('[getWorkflowContextSchema] Extracted inputs from YAML:', inputs);
-        }
       }
     } catch (e) {
       // Ignore errors when extracting from YAML
-      if (process.env.NODE_ENV === 'development') {
-        // eslint-disable-next-line no-console
-        console.warn('[getWorkflowContextSchema] Failed to extract inputs from YAML:', e);
-      }
     }
   }
 
@@ -99,25 +74,6 @@ export function getWorkflowContextSchema(
 
       inputsObject[propertyName] = valueSchema;
     }
-  }
-
-  // Debug logging (only in development)
-  if (process.env.NODE_ENV === 'development') {
-    // eslint-disable-next-line no-console
-    console.log('[getWorkflowContextSchema] Generated schema:', {
-      normalizedInputs,
-      inputsObjectKeys: Object.keys(inputsObject),
-      inputsObjectTypes: Object.fromEntries(
-        Object.entries(inputsObject).map(([key, schema]) => [
-          key,
-          {
-            type: schema instanceof z.ZodObject ? 'ZodObject' : schema.constructor.name,
-            hasShape: schema instanceof z.ZodObject,
-            shapeKeys: schema instanceof z.ZodObject ? Object.keys(schema.shape) : undefined,
-          },
-        ])
-      ),
-    });
   }
 
   // Use DynamicWorkflowContextSchema instead of WorkflowContextSchema

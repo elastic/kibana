@@ -68,6 +68,7 @@ export function getSchemaAtPath(
         current = shape[segment];
         // After accessing a property, unwrap any optional/default wrappers
         // This is important for nested objects that might be wrapped
+        // Keep unwrapping until we get to a non-wrapper type
         while (current instanceof z.ZodOptional || current instanceof z.ZodDefault) {
           if (current instanceof z.ZodOptional) {
             current = current.unwrap();
@@ -76,6 +77,10 @@ export function getSchemaAtPath(
             current = current.removeDefault();
           }
         }
+        // After unwrapping, if we have more segments and current is still a ZodObject,
+        // we can continue traversing. Otherwise, if there are more segments, we need to check
+        // if the unwrapped type is something we can traverse (like ZodObject)
+        // This is handled by the next iteration of the loop
       } else if (current instanceof z.ZodUnion) {
         const branches = current.options;
         const validBranch = branches.find((branch: z.ZodType) =>
