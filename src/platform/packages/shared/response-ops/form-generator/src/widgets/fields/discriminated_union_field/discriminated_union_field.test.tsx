@@ -110,7 +110,7 @@ describe('DiscriminatedUnionField', () => {
       onBlur: mockOnBlur,
     });
 
-    const oauthCard = screen.getByLabelText('OAuth') as HTMLInputElement;
+    const oauthCard = screen.getByLabelText('OAuth', { selector: 'input' }) as HTMLInputElement;
     expect(oauthCard.checked).toBe(true);
   });
 
@@ -171,7 +171,7 @@ describe('DiscriminatedUnionField', () => {
       onBlur: mockOnBlur,
     });
 
-    const oauthCard = screen.getByLabelText('OAuth');
+    const oauthCard = screen.getByLabelText('OAuth', { selector: 'input' });
     await user.click(oauthCard);
 
     await waitFor(() => {
@@ -340,11 +340,15 @@ describe('DiscriminatedUnionField', () => {
       onBlur: mockOnBlur,
     });
 
-    const basicAuthCard = screen.getByLabelText('Basic Auth') as HTMLInputElement;
+    const basicAuthCard = screen.getByLabelText('Basic Auth', {
+      selector: 'input',
+    }) as HTMLInputElement;
     expect(basicAuthCard.checked).toBe(true);
 
-    const oauthCard = screen.getByLabelText('OAuth') as HTMLInputElement;
-    const apiKeyCard = screen.getByLabelText('API Key Auth') as HTMLInputElement;
+    const oauthCard = screen.getByLabelText('OAuth', { selector: 'input' }) as HTMLInputElement;
+    const apiKeyCard = screen.getByLabelText('API Key Auth', {
+      selector: 'input',
+    }) as HTMLInputElement;
     expect(oauthCard.checked).toBe(false);
     expect(apiKeyCard.checked).toBe(false);
 
@@ -388,11 +392,15 @@ describe('DiscriminatedUnionField', () => {
       onBlur: mockOnBlur,
     });
 
-    const oauthCard = screen.getByLabelText('OAuth') as HTMLInputElement;
+    const oauthCard = screen.getByLabelText('OAuth', { selector: 'input' }) as HTMLInputElement;
     expect(oauthCard.checked).toBe(true);
 
-    const basicAuthCard = screen.getByLabelText('Basic Auth') as HTMLInputElement;
-    const apiKeyCard = screen.getByLabelText('API Key Auth') as HTMLInputElement;
+    const basicAuthCard = screen.getByLabelText('Basic Auth', {
+      selector: 'input',
+    }) as HTMLInputElement;
+    const apiKeyCard = screen.getByLabelText('API Key Auth', {
+      selector: 'input',
+    }) as HTMLInputElement;
     expect(basicAuthCard.checked).toBe(false);
     expect(apiKeyCard.checked).toBe(false);
 
@@ -430,7 +438,9 @@ describe('DiscriminatedUnionField', () => {
     expect(screen.getByText('Email Notification')).toBeDefined();
     expect(screen.getByText('SMS Notification')).toBeDefined();
 
-    const emailCard = screen.getByLabelText('Email Notification') as HTMLInputElement;
+    const emailCard = screen.getByLabelText('Email Notification', {
+      selector: 'input',
+    }) as HTMLInputElement;
     expect(emailCard.checked).toBe(true);
 
     expect(screen.getByText('Email Address')).toBeDefined();

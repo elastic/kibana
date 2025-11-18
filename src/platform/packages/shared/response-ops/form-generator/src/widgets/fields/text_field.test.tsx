@@ -71,7 +71,7 @@ describe('TextField', () => {
       { wrapper }
     );
 
-    const input = screen.getByLabelText('Username');
+    const input = screen.getByLabelText('Username', { selector: 'input' });
     fireEvent.change(input, { target: { value: 'newvalue' } });
 
     expect(mockOnChange).toHaveBeenCalledWith('username', 'newvalue');
@@ -90,7 +90,7 @@ describe('TextField', () => {
       { wrapper }
     );
 
-    const input = screen.getByLabelText('Username');
+    const input = screen.getByLabelText('Username', { selector: 'input' });
     await user.click(input);
     await user.tab();
 

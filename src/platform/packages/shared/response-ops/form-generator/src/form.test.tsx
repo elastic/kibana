@@ -87,7 +87,7 @@ describe('Form', () => {
 
     render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
 
-    const input = screen.getByLabelText('Username');
+    const input = screen.getByLabelText('Username', { selector: 'input' });
     fireEvent.change(input, { target: { value: 'testuser' } });
 
     const submitButton = screen.getByRole('button', { name: 'Submit' });
@@ -110,7 +110,7 @@ describe('Form', () => {
 
     render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
 
-    const input = screen.getByLabelText('Email');
+    const input = screen.getByLabelText('Email', { selector: 'input' });
     fireEvent.change(input, { target: { value: 'invalid-email' } });
 
     const submitButton = screen.getByRole('button', { name: 'Submit' });
@@ -131,7 +131,7 @@ describe('Form', () => {
 
     render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
 
-    const input = screen.getByLabelText('Email');
+    const input = screen.getByLabelText('Email', { selector: 'input' });
     fireEvent.change(input, { target: { value: 'invalid' } });
     fireEvent.blur(input);
 
@@ -148,7 +148,7 @@ describe('Form', () => {
 
     render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
 
-    const input = screen.getByLabelText('Email');
+    const input = screen.getByLabelText('Email', { selector: 'input' });
 
     fireEvent.change(input, { target: { value: 'invalid' } });
     fireEvent.blur(input);
@@ -172,7 +172,7 @@ describe('Form', () => {
 
     render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
 
-    const input = screen.getByLabelText('Username') as HTMLInputElement;
+    const input = screen.getByLabelText('Username', { selector: 'input' }) as HTMLInputElement;
     fireEvent.change(input, { target: { value: 'testuser' } });
     expect(input.value).toBe('testuser');
 
@@ -276,7 +276,7 @@ describe('Form', () => {
 
     render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
 
-    const input = screen.getByLabelText('Username') as HTMLInputElement;
+    const input = screen.getByLabelText('Username', { selector: 'input' }) as HTMLInputElement;
     expect(input.value).toBe('defaultUser');
   });
 
@@ -290,7 +290,7 @@ describe('Form', () => {
 
     render(<Form connectorSchema={schema} />, { wrapper });
 
-    const input = screen.getByLabelText('Username');
+    const input = screen.getByLabelText('Username', { selector: 'input' });
     fireEvent.change(input, { target: { value: 'testuser' } });
 
     const submitButton = screen.getByRole('button', { name: 'Submit' });
@@ -353,8 +353,10 @@ describe('Authentication Form Integration Tests', () => {
 
     const usernameInput = screen.getByTestId('authType.username') as HTMLInputElement;
     const passwordInput = screen.getByTestId('authType.password') as HTMLInputElement;
-    const noneCard = screen.getByLabelText('None') as HTMLInputElement;
-    const bearerCard = screen.getByLabelText('Bearer Token') as HTMLInputElement;
+    const noneCard = screen.getByLabelText('None', { selector: 'input' }) as HTMLInputElement;
+    const bearerCard = screen.getByLabelText('Bearer Token', {
+      selector: 'input',
+    }) as HTMLInputElement;
 
     expect(noneCard.checked).toBe(false);
     expect(bearerCard.checked).toBe(false);
@@ -381,9 +383,9 @@ describe('Authentication Form Integration Tests', () => {
   it('switches between authentication types correctly', async () => {
     render(<Form connectorSchema={authSchema} onSubmit={mockOnSubmit} />, { wrapper });
 
-    expect(screen.getByLabelText('None')).toBeInTheDocument();
+    expect(screen.getByLabelText('None', { selector: 'input' })).toBeInTheDocument();
 
-    const basicCard = screen.getByLabelText('Basic Auth');
+    const basicCard = screen.getByLabelText('Basic Auth', { selector: 'input' });
     fireEvent.click(basicCard);
 
     await waitFor(() => {
@@ -415,7 +417,7 @@ describe('Authentication Form Integration Tests', () => {
   it('submits form with bearer token authentication', async () => {
     render(<Form connectorSchema={authSchema} onSubmit={mockOnSubmit} />, { wrapper });
 
-    const bearerCard = screen.getByLabelText('Bearer Token');
+    const bearerCard = screen.getByLabelText('Bearer Token', { selector: 'input' });
     fireEvent.click(bearerCard);
 
     await screen.findByTestId('authType.token');
@@ -441,7 +443,7 @@ describe('Authentication Form Integration Tests', () => {
   it('displays validation errors when submitting basic auth with empty username/password', async () => {
     render(<Form connectorSchema={authSchema} onSubmit={mockOnSubmit} />, { wrapper });
 
-    const basicCard = screen.getByLabelText('Basic Auth');
+    const basicCard = screen.getByLabelText('Basic Auth', { selector: 'input' });
     fireEvent.click(basicCard);
 
     await screen.findByTestId('authType.username');
@@ -459,7 +461,7 @@ describe('Authentication Form Integration Tests', () => {
   it('shows only username error on blur, not password error', async () => {
     render(<Form connectorSchema={authSchema} onSubmit={mockOnSubmit} />, { wrapper });
 
-    const basicCard = screen.getByLabelText('Basic Auth');
+    const basicCard = screen.getByLabelText('Basic Auth', { selector: 'input' });
     fireEvent.click(basicCard);
 
     await screen.findByTestId('authType.username');
@@ -551,7 +553,7 @@ describe('Authentication Form Integration Tests', () => {
 
     render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
 
-    const basicCard = screen.getByLabelText('Basic Auth');
+    const basicCard = screen.getByLabelText('Basic Auth', { selector: 'input' });
     fireEvent.click(basicCard);
 
     await screen.findByTestId('authType.username');
