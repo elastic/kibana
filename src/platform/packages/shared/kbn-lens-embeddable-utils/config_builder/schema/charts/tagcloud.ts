@@ -35,7 +35,7 @@ const tagcloudStateTagsByOptionsSchema = schema.object({
   /**
    * Color configuration
    */
-  color: colorMappingSchema,
+  color: schema.maybe(colorMappingSchema),
 });
 
 const tagcloudStateSharedOptionsSchema = {

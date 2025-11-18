@@ -36,10 +36,6 @@ describe('Tagcloud Schema', () => {
         tag_by: {
           operation: 'terms',
           fields: ['category'],
-          color: {
-            mode: 'gradient',
-            palette: 'kibana_palette',
-          },
         },
       };
 
@@ -63,10 +59,6 @@ describe('Tagcloud Schema', () => {
         tag_by: {
           operation: 'terms',
           fields: ['category'],
-          color: {
-            mode: 'gradient',
-            palette: 'kibana_palette',
-          },
         },
       };
 
@@ -124,10 +116,6 @@ describe('Tagcloud Schema', () => {
           tag_by: {
             operation: 'terms',
             fields: ['category'],
-            color: {
-              mode: 'gradient',
-              palette: 'kibana_palette',
-            },
           },
           orientation: 'horizontal',
         };
@@ -152,10 +140,6 @@ describe('Tagcloud Schema', () => {
           tag_by: {
             operation: 'terms',
             fields: ['category'],
-            color: {
-              mode: 'gradient',
-              palette: 'kibana_palette',
-            },
           },
           orientation: 'vertical',
         };
@@ -180,10 +164,6 @@ describe('Tagcloud Schema', () => {
           tag_by: {
             operation: 'terms',
             fields: ['category'],
-            color: {
-              mode: 'gradient',
-              palette: 'kibana_palette',
-            },
           },
           orientation: 'angled',
         };
@@ -214,10 +194,6 @@ describe('Tagcloud Schema', () => {
           tag_by: {
             operation: 'terms',
             fields: ['category'],
-            color: {
-              mode: 'gradient',
-              palette: 'kibana_palette',
-            },
           },
         };
 
@@ -241,10 +217,6 @@ describe('Tagcloud Schema', () => {
           tag_by: {
             operation: 'terms',
             fields: ['category'],
-            color: {
-              mode: 'gradient',
-              palette: 'kibana_palette',
-            },
           },
           font_size: {},
         };
@@ -266,6 +238,10 @@ describe('Tagcloud Schema', () => {
           metric: {
             field: 'test_field',
           },
+          tag_by: {
+            operation: 'terms',
+            fields: ['category'],
+          },
         };
 
         expect(() => tagcloudStateSchema.validate(input)).toThrow();
@@ -283,23 +259,6 @@ describe('Tagcloud Schema', () => {
         expect(() => tagcloudStateSchema.validate(input)).toThrow();
       });
 
-      it('throws on missing tag_by color', () => {
-        const input = {
-          ...baseTagcloudConfig,
-          metric: {
-            operation: 'count',
-            field: 'test_field',
-          },
-          tag_by: {
-            operation: 'terms',
-            fields: ['category'],
-            size: 5,
-          },
-        };
-
-        expect(() => tagcloudStateSchema.validate(input)).toThrow();
-      });
-
       it('throws on invalid orientation value', () => {
         const input = {
           ...baseTagcloudConfig,
@@ -307,6 +266,10 @@ describe('Tagcloud Schema', () => {
             operation: 'count',
             field: 'test_field',
             show_metric_label: false,
+          },
+          tag_by: {
+            operation: 'terms',
+            fields: ['category'],
           },
           orientation: 'invalid',
         };
@@ -321,6 +284,10 @@ describe('Tagcloud Schema', () => {
             operation: 'count',
             field: 'test_field',
             show_metric_label: false,
+          },
+          tag_by: {
+            operation: 'terms',
+            fields: ['category'],
           },
           font_size: {
             min: 0,
@@ -338,6 +305,10 @@ describe('Tagcloud Schema', () => {
             operation: 'count',
             field: 'test_field',
             show_metric_label: false,
+          },
+          tag_by: {
+            operation: 'terms',
+            fields: ['category'],
           },
           font_size: {
             min: 14,
