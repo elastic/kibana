@@ -62,8 +62,7 @@ describe('WorkflowTaskManager', () => {
     mockTaskManager = {
       schedule: jest.fn(),
       fetch: jest.fn(),
-      bulkRemove: jest.fn(),
-      bulkSchedule: jest.fn(),
+      runSoon: jest.fn(),
     } as any;
 
     workflowTaskManager = new WorkflowTaskManager(mockTaskManager);
@@ -195,8 +194,7 @@ describe('WorkflowTaskManager', () => {
       await workflowTaskManager.forceRunIdleTasks(workflowExecutionId);
 
       expect(mockTaskManager.fetch).toHaveBeenCalledTimes(1);
-      expect(mockTaskManager.bulkRemove).not.toHaveBeenCalled();
-      expect(mockTaskManager.bulkSchedule).not.toHaveBeenCalled();
+      expect(mockTaskManager.runSoon).not.toHaveBeenCalled();
     });
 
     it('should remove and reschedule idle tasks when found', async () => {
@@ -220,27 +218,13 @@ describe('WorkflowTaskManager', () => {
       ];
 
       mockTaskManager.fetch.mockResolvedValue({ docs: mockIdleTasks } as any);
-      mockTaskManager.bulkRemove.mockResolvedValue(undefined as any);
-      mockTaskManager.bulkSchedule.mockResolvedValue(undefined as any);
 
       await workflowTaskManager.forceRunIdleTasks(workflowExecutionId);
 
-      expect(mockTaskManager.bulkRemove).toHaveBeenCalledTimes(1);
-      expect(mockTaskManager.bulkRemove).toHaveBeenCalledWith(['task-1', 'task-2']);
-
-      expect(mockTaskManager.bulkSchedule).toHaveBeenCalledTimes(1);
-      expect(mockTaskManager.bulkSchedule).toHaveBeenCalledWith([
-        {
-          ...mockIdleTasks[0],
-          id: 'mocked-uuid',
-          runAt: undefined,
-        },
-        {
-          ...mockIdleTasks[1],
-          id: 'mocked-uuid',
-          runAt: undefined,
-        },
-      ]);
+      ['task-1', 'task-2'].forEach((taskId) => {
+        expect(mockTaskManager.runSoon).toHaveBeenCalledWith(taskId);
+      });
+      expect(mockTaskManager.runSoon).toHaveBeenCalledTimes(2);
     });
 
     it('should generate new UUIDs for each rescheduled task', async () => {
@@ -250,15 +234,12 @@ describe('WorkflowTaskManager', () => {
       ];
 
       mockTaskManager.fetch.mockResolvedValue({ docs: mockIdleTasks } as any);
-      mockTaskManager.bulkRemove.mockResolvedValue(undefined as any);
-      mockTaskManager.bulkSchedule.mockResolvedValue(undefined as any);
 
       await workflowTaskManager.forceRunIdleTasks(workflowExecutionId);
 
-      expect(mockTaskManager.bulkSchedule).toHaveBeenCalledWith([
-        expect.objectContaining({ id: 'mocked-uuid', runAt: undefined }),
-        expect.objectContaining({ id: 'mocked-uuid', runAt: undefined }),
-      ]);
+      mockIdleTasks.forEach((task) => {
+        expect(mockTaskManager.runSoon).toHaveBeenCalledWith(task.id);
+      });
     });
   });
 });
