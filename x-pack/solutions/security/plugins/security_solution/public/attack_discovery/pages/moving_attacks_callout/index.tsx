@@ -17,7 +17,7 @@ export const CALLOUT_TEST_DATA_ID = 'moving-attacks-callout' as string;
 /**
  * Component to display a moving attacks callout
  */
-export const MovingAttacksCallout = () => {
+export const MovingAttacksCallout: React.FC = React.memo(() => {
   const { isMovingAttacksCalloutVisible, hideMovingAttacksCallout } = useMovingAttacksCallout();
 
   return isMovingAttacksCalloutVisible ? (
@@ -51,4 +51,5 @@ export const MovingAttacksCallout = () => {
       <EuiSpacer size="l" />
     </>
   ) : null;
-};
+});
+MovingAttacksCallout.displayName = 'MovingAttacksCallout';
