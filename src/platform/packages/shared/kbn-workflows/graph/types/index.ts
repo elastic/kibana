@@ -20,6 +20,8 @@ export type {
   ElasticsearchGraphNodeSchema,
   KibanaGraphNode,
   KibanaGraphNodeSchema,
+  RerankGraphNode,
+  RerankGraphNodeSchema,
   SlackSearchNode,
 } from './nodes/base';
 export type {
@@ -74,6 +76,7 @@ export {
   isHttp,
   isGDrive,
   isWait,
+  isRerank,
   isEnterForeach,
   isEnterIf,
   isEnterRetry,

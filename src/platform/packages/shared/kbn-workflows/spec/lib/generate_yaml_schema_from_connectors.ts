@@ -19,6 +19,7 @@ import {
   getOnFailureStepSchema,
   getParallelStepSchema,
   getWorkflowSettingsSchema,
+  RerankStepSchema,
   WaitStepSchema,
   WorkflowSchema,
 } from '../schema';
@@ -66,6 +67,7 @@ function createRecursiveStepSchema(
       WaitStepSchema,
       httpSchema,
       gdriveSchema,
+      RerankStepSchema,
       ...connectorSchemas,
     ]);
   });

@@ -23,6 +23,7 @@ import type {
   GDriveGraphNode,
   GraphNodeUnion,
   HttpGraphNode,
+  RerankGraphNode,
   SlackSearchNode,
   WorkflowGraph,
 } from '@kbn/workflows/graph';
@@ -57,6 +58,7 @@ import {
   ExitTryBlockNodeImpl,
 } from './on_failure/fallback-step';
 import { EnterRetryNodeImpl, ExitRetryNodeImpl } from './on_failure/retry_step';
+import { RerankStepImpl } from './rerank_step';
 import { SlackSearchStepImpl } from './slack';
 import {
   EnterStepTimeoutZoneNodeImpl,
@@ -254,6 +256,13 @@ export class NodesFactory {
           node as GDriveGraphNode,
           stepExecutionRuntime,
           stepLogger,
+          this.workflowRuntime
+        );
+      case 'rerank':
+        return new RerankStepImpl(
+          node as RerankGraphNode,
+          stepExecutionRuntime,
+          this.workflowLogger,
           this.workflowRuntime
         );
       default:

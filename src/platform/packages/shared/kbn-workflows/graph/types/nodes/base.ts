@@ -13,6 +13,7 @@ import {
   GDriveStepSchema,
   HttpStepSchema,
   KibanaStepSchema,
+  RerankStepSchema,
   SlackSearchStepSchema,
   WaitStepSchema,
 } from '../../../spec/schema';
@@ -57,6 +58,13 @@ export const SlackSearchNodeSchema = GraphNodeSchema.extend({
   configuration: SlackSearchStepSchema,
 });
 export type SlackSearchNode = z.infer<typeof SlackSearchNodeSchema>;
+
+export const RerankGraphNodeSchema = GraphNodeSchema.extend({
+  id: z.string(),
+  type: z.literal('rerank'),
+  configuration: RerankStepSchema,
+});
+export type RerankGraphNode = z.infer<typeof RerankGraphNodeSchema>;
 
 export const ElasticsearchGraphNodeSchema = GraphNodeSchema.extend({
   id: z.string(),

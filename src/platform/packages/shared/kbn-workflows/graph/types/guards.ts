@@ -13,6 +13,7 @@ import type {
   GDriveGraphNode,
   HttpGraphNode,
   KibanaGraphNode,
+  RerankGraphNode,
   WaitGraphNode,
 } from './nodes/base';
 import type {
@@ -49,6 +50,8 @@ export const isHttp = (node: GraphNodeUnion): node is HttpGraphNode => node.type
 export const isGDrive = (node: GraphNodeUnion): node is GDriveGraphNode => node.type === 'gdrive';
 
 export const isWait = (node: GraphNodeUnion): node is WaitGraphNode => node.type === 'wait';
+
+export const isRerank = (node: GraphNodeUnion): node is RerankGraphNode => node.type === 'rerank';
 
 export const isEnterIf = (node: GraphNodeUnion): node is EnterIfNode => node.type === 'enter-if';
 

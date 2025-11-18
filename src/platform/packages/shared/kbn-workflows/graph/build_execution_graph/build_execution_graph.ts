@@ -17,6 +17,7 @@ import type {
   HttpStep,
   IfStep,
   KibanaStep,
+  RerankStep,
   StepWithForeach,
   StepWithIfCondition,
   StepWithOnFailure,
@@ -52,6 +53,7 @@ import type {
   GraphNodeUnion,
   HttpGraphNode,
   KibanaGraphNode,
+  RerankGraphNode,
   WaitGraphNode,
   WorkflowGraphType,
 } from '../types';
@@ -146,6 +148,10 @@ function visitAbstractStep(currentStep: BaseStep, context: GraphBuildContext): W
     return visitGDriveStep(currentStep as GDriveStep, context);
   }
 
+  if ((currentStep as any).type === 'rerank') {
+    return visitRerankStep(currentStep as any, context);
+  }
+
   if ((currentStep as ElasticsearchStep).type?.startsWith('elasticsearch.')) {
     return visitElasticsearchStep(currentStep as ElasticsearchStep, context);
   }
@@ -213,6 +219,26 @@ export function visitGDriveStep(
     },
   };
   graph.setNode(gdriveNode.id, gdriveNode);
+
+  return graph;
+}
+
+export function visitRerankStep(
+  currentStep: RerankStep,
+  context: GraphBuildContext
+): WorkflowGraphType {
+  const stepId = getStepId(currentStep, context);
+  const graph = createTypedGraph({ directed: true });
+  const rerankNode: RerankGraphNode = {
+    id: getStepId(currentStep, context),
+    type: 'rerank',
+    stepId,
+    stepType: currentStep.type,
+    configuration: {
+      ...currentStep,
+    },
+  };
+  graph.setNode(rerankNode.id, rerankNode);
 
   return graph;
 }

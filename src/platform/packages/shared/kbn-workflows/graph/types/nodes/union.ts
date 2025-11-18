@@ -14,6 +14,7 @@ import {
   GDriveGraphNodeSchema,
   HttpGraphNodeSchema,
   KibanaGraphNodeSchema,
+  RerankGraphNodeSchema,
   WaitGraphNodeSchema,
 } from './base';
 import {
@@ -47,6 +48,7 @@ const GraphNodeUnionSchema = z.discriminatedUnion('type', [
   KibanaGraphNodeSchema,
   HttpGraphNodeSchema,
   GDriveGraphNodeSchema,
+  RerankGraphNodeSchema,
   WaitGraphNodeSchema,
   EnterIfNodeSchema,
   ExitIfNodeSchema,
