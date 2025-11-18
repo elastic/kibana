@@ -33,7 +33,7 @@ export interface IWorkflowEventLogger {
   logInfo(message: string, additionalData?: Partial<WorkflowLogEvent>): void;
   logError(
     message: string,
-    error: Error | ExecutionError,
+    error?: Error | ExecutionError,
     additionalData?: Partial<WorkflowLogEvent>
   ): void;
   logWarn(message: string, additionalData?: Partial<WorkflowLogEvent>): void;
@@ -90,7 +90,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
 
   public logError(
     message: string,
-    error: Error | ExecutionError,
+    error?: Error | ExecutionError,
     additionalData: Partial<WorkflowLogEvent> = {}
   ): void {
     const errorData: Partial<WorkflowLogEvent> = {};
