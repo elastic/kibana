@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-export type ResilientIncidentTypes = Array<{ id: number; name: string }>;
-export type ResilientSeverity = ResilientIncidentTypes;
-
 export interface ResilientFieldMetadata {
   input_type: string;
   name: string;
