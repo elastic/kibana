@@ -193,48 +193,6 @@ export const getDiscoverAppStateContainer = ({
         return;
       }
 
-      if (
-        isOfAggregateQueryType(appState.query) &&
-        services.discoverFeatureFlags.getCascadeLayoutEnabled()
-      ) {
-        const currentTabState = selectTab(internalState.getState(), tabId);
-
-        const availableCascadeGroups = getESQLStatsQueryMeta(
-          (appState.query as AggregateQuery).esql
-        ).groupByFields.map((group) => group.field);
-
-        const computeSelectedCascadeGroups = (cascadeGroups: string[]) => {
-          if (
-            !currentTabState.uiState.cascadedDocuments ||
-            (currentTabState.uiState.cascadedDocuments &&
-              // if the proposed available groups is different in length or contains a value the existing one doesn't have, we want to reset by defaulting to the first group
-              (cascadeGroups.length !==
-                currentTabState.uiState.cascadedDocuments.availableCascadeGroups.length ||
-                cascadeGroups.some(
-                  (group) =>
-                    (
-                      currentTabState.uiState.cascadedDocuments?.availableCascadeGroups ?? []
-                    ).indexOf(group) < 0
-                )))
-          ) {
-            return [cascadeGroups[0]].filter(Boolean);
-          }
-
-          // return existing selection since we've asserted that there's been no change to the available groups default
-          return currentTabState.uiState.cascadedDocuments!.selectedCascadeGroups;
-        };
-
-        // compute and set cascade groupings when state updates happen
-        internalState.dispatch(
-          injectCurrentTab(internalStateActions.setCascadeUiState)({
-            cascadeUiState: {
-              availableCascadeGroups,
-              selectedCascadeGroups: computeSelectedCascadeGroups(availableCascadeGroups),
-            },
-          })
-        );
-      }
-
       internalState.dispatch(injectCurrentTab(internalStateActions.setAppState)({ appState }));
     },
     state$: from(internalState).pipe(map(getAppState), distinctUntilChanged(isEqual)),
@@ -335,6 +293,26 @@ export const getDiscoverAppStateContainer = ({
           ? createDataViewDataSource({ dataViewId: savedSearchDataView.id })
           : undefined,
       });
+    }
+
+    if (
+      isOfAggregateQueryType(appState.query) &&
+      services.discoverFeatureFlags.getCascadeLayoutEnabled()
+    ) {
+      // on first load if teh data cascade layout feature flag is enabled,
+      // we need to set the available cascade groups from the user's query and selected cascade groups
+      const availableCascadeGroups = getESQLStatsQueryMeta(
+        (appState.query as AggregateQuery).esql
+      ).groupByFields.map((group) => group.field);
+
+      internalState.dispatch(
+        injectCurrentTab(internalStateActions.setCascadeUiState)({
+          cascadeUiState: {
+            availableCascadeGroups,
+            selectedCascadeGroups: [availableCascadeGroups[0]].filter(Boolean),
+          },
+        })
+      );
     }
 
     // syncs `_a` portion of url with query services
