@@ -107,8 +107,31 @@ export function SchemaChangesReviewModal({
           setSimulationError(simulationResults.simulationError);
         }
       } catch (err) {
-        setHasSimulationErrors(true);
-        setSimulationError(getFormattedError(err).message);
+        const errorMessage = getFormattedError(err).message;
+
+        // Check if error is caused by expensive queries being disabled
+        const isExpensiveQueriesError =
+          errorMessage.includes('allow_expensive_queries') ||
+          errorMessage.includes('runtime_mappings') ||
+          errorMessage.includes('runtime fields');
+
+        if (isExpensiveQueriesError) {
+          // Show warning but don't block submission
+          setSimulationError(
+            i18n.translate(
+              'xpack.streams.schemaEditor.confirmChangesModal.expensiveQueriesDisabledWarning',
+              {
+                defaultMessage:
+                  'Field simulation is unavailable because expensive queries are disabled on your cluster. ' +
+                  'The schema changes can still be applied, but field compatibility cannot be verified in advance. ' +
+                  'Proceed with caution - incompatible field types may cause ingestion errors.',
+              }
+            )
+          );
+        } else {
+          setHasSimulationErrors(true);
+          setSimulationError(errorMessage);
+        }
       } finally {
         setIsSimulating(false);
       }
@@ -312,7 +335,7 @@ export function SchemaChangesReviewModal({
           )}
         </EuiText>
         <EuiSpacer size="m" />
-        {hasSimulationErrors && (
+        {(hasSimulationErrors || simulationError) && (
           <>
             <EuiCallOut
               announceOnMount
