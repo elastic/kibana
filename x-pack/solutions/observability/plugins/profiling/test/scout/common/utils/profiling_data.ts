@@ -15,6 +15,7 @@ import {
   SYMBOLIZER_PACKAGE_POLICY_NAME,
 } from '@kbn/profiling-data-access-plugin/common';
 import supertest from 'supertest';
+import type { AxiosResponse } from 'axios';
 
 const APM_AGENT_POLICY_ID = 'policy-elastic-agent-on-cloud';
 
@@ -94,7 +95,7 @@ export async function setupProfiling(
     log(`APM agent policy '${APM_AGENT_POLICY_ID}' already exists`);
   }
 
-  const res = await kbnClient.request({
+  const res: AxiosResponse = await kbnClient.request({
     path: '/api/profiling/setup/es_resources',
     method: 'GET',
   });
