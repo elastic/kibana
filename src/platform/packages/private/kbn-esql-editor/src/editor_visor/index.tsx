@@ -6,24 +6,22 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useState, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiToolTip,
   useEuiTheme,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
-import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { isEqual } from 'lodash';
 import { SourcesDropdown } from './sources_dropdown';
 import { visorStyles } from './visor.styles';
-
-const COMBOBOX_MAX_WIDTH = 400;
 
 export interface QuickSearchVisorProps {
   // Current ESQL query
@@ -39,7 +37,15 @@ export interface QuickSearchVisorProps {
 }
 
 const searchPlaceholder = i18n.translate('esqlEditor.visor.searchPlaceholder', {
-  defaultMessage: 'Search ...',
+  defaultMessage: 'Search...',
+});
+
+const clearSearchAriaLabel = i18n.translate('esqlEditor.visor.searchClearLabel', {
+  defaultMessage: 'Clear the search',
+});
+
+const closeQuickSearchLabel = i18n.translate('esqlEditor.visor.closeSearchLabel', {
+  defaultMessage: 'Close quick search',
 });
 
 export function QuickSearchVisor({
@@ -117,18 +123,7 @@ export function QuickSearchVisor({
     }
   }, [isVisible]);
 
-  const comboBoxWidth = useMemo(() => {
-    const labelLength = selectedSources.map((s) => s.label).join(', ').length || 0;
-    return calculateWidthFromCharCount(labelLength, { maxWidth: COMBOBOX_MAX_WIDTH });
-  }, [selectedSources]);
-
-  const styles = visorStyles(
-    euiTheme,
-    comboBoxWidth,
-    Boolean(isSpaceReduced),
-    isVisible,
-    isDarkMode
-  );
+  const styles = visorStyles(euiTheme, Boolean(isSpaceReduced), isVisible, isDarkMode);
 
   return (
     <div css={styles.visorContainer} data-test-subj="ESQLEditor-quick-search-visor">
@@ -163,15 +158,15 @@ export function QuickSearchVisor({
             css={styles.searchFieldStyles}
             data-test-subj="ESQLEditor-visor-search-input"
             append={
-              <EuiButtonIcon
-                color="text"
-                iconSize="m"
-                onClick={onClose}
-                iconType="cross"
-                aria-label={i18n.translate('esqlEditor.visor.searchClearLabel', {
-                  defaultMessage: 'Clear the search',
-                })}
-              />
+              <EuiToolTip position="top" content={closeQuickSearchLabel} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  color="text"
+                  iconSize="m"
+                  onClick={onClose}
+                  iconType="cross"
+                  aria-label={clearSearchAriaLabel}
+                />
+              </EuiToolTip>
             }
           />
         </EuiFlexItem>

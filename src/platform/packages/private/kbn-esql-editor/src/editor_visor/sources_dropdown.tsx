@@ -30,17 +30,30 @@ import type { ESQLEditorDeps } from '../types';
 import { DataSourcesList } from './datasources_list';
 import { generateIndexPatterns } from './utils';
 
+const POPOVER_WIDTH = 350;
+
+const sourcesDropdownCss = css`
+  box-shadow: none;
+  &:focus,
+          &: focus-within,
+          &:hover,
+          &:active {
+    box-shadow: none !important;
+    outline: none !important;
+  }
+`;
+
+const shrinkableContainerCss = css`
+  min-width: 0;
+  flex-direction: row;
+`;
+
 interface SourcesDropdownProps {
   // Currently selected data sources
   currentSources: string[];
   // Callback when the selected data sources change
   onChangeSources: (newSources: string[]) => void;
 }
-
-const shrinkableContainerCss = css`
-  min-width: 0;
-  flex-direction: row;
-`;
 
 export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDropdownProps) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
@@ -95,22 +108,13 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
             <span className="eui-textTruncate">{currentSources.join(', ')}</span>
           </EuiFlexGroup>
         }
-        css={css`
-          box-shadow: none;
-          &:focus,
-          &: focus-within,
-          &:hover,
-          &:active {
-            box-shadow: none !important;
-            outline: none !important;
-          }
-        `}
+        css={sourcesDropdownCss}
         onClick={() => {
           setPopoverIsOpen(!isPopoverOpen);
         }}
       >
         {Boolean(currentSources.length) && (
-          <EuiNotificationBadge color="accent">{currentSources.length}</EuiNotificationBadge>
+          <EuiNotificationBadge color="subdued">{currentSources.length}</EuiNotificationBadge>
         )}
       </EuiFormControlButton>
     );
@@ -155,6 +159,7 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
               closePopover={() => setPopoverIsOpen(false)}
               panelPaddingSize="none"
               display="block"
+              panelStyle={{ width: POPOVER_WIDTH }}
             >
               <EuiContextMenuPanel size="s" items={items} />
             </EuiPopover>

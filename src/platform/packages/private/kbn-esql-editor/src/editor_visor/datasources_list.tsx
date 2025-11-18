@@ -15,6 +15,7 @@ import {
   EuiPanel,
   EuiButtonIcon,
   type EuiSelectableListProps,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -42,13 +43,13 @@ export function DataSourcesList({
 }: DataSourcesListProps) {
   const [showOnlySelected, setShowOnlySelected] = useState(false);
 
-  const filterToggleAriaLabel = useMemo(() => {
+  const filterToggleLabel = useMemo(() => {
     return showOnlySelected
-      ? i18n.translate('esqlEditor.visor.showSelectedOptionsAriaLabel', {
-          defaultMessage: 'Show selected options',
-        })
-      : i18n.translate('esqlEditor.visor.showAllOptionsAriaLabel', {
+      ? i18n.translate('esqlEditor.visor.showAllOptionsAriaLabel', {
           defaultMessage: 'Show all options',
+        })
+      : i18n.translate('esqlEditor.visor.showSelectedOptionsAriaLabel', {
+          defaultMessage: 'Show selected options',
         });
   }, [showOnlySelected]);
 
@@ -131,15 +132,17 @@ export function DataSourcesList({
             >
               <EuiFlexItem>{search}</EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <EuiButtonIcon
-                  size="xs"
-                  iconType="list"
-                  aria-pressed={showOnlySelected}
-                  color={showOnlySelected ? 'primary' : 'text'}
-                  display={showOnlySelected ? 'base' : 'empty'}
-                  onClick={onFilterToggleClick}
-                  aria-label={filterToggleAriaLabel}
-                />
+                <EuiToolTip position="top" content={filterToggleLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    size="xs"
+                    iconType="list"
+                    aria-pressed={showOnlySelected}
+                    color={showOnlySelected ? 'primary' : 'text'}
+                    display={showOnlySelected ? 'base' : 'empty'}
+                    onClick={onFilterToggleClick}
+                    aria-label={filterToggleLabel}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiPanel>
