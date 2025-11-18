@@ -156,12 +156,12 @@ export function isFullyCompatible(storedFilter: unknown): boolean {
     return false;
   }
 
-  const meta = storedFilter.meta || {};
-
   // Combined filter format
   if (isCombinedFilter(storedFilter)) {
     return true;
   }
+
+  const meta = storedFilter.meta || {};
 
   // Phrases filter
   if (meta.type === 'phrases' && meta.params && Array.isArray(meta.params)) {
@@ -199,33 +199,30 @@ export function isPhraseFilterWithQuery(storedFilter: unknown): boolean {
     return true;
   }
 
-  // match queries with phrase type that can be simplified
-  if (storedFilter.query?.match) {
-    const matchValues = Object.values(storedFilter.query.match);
-    const isSimplePhrase = matchValues.some((value: unknown) => {
-      // Type guard for match query value
-      if (typeof value !== 'object' || value === null) {
-        return false;
-      }
-      const v = value as {
-        type?: string;
-        analyzer?: unknown;
-        fuzziness?: unknown;
-        minimum_should_match?: unknown;
-      };
-      return v.type === 'phrase' && !v.analyzer && !v.fuzziness && !v.minimum_should_match;
-    });
-    if (isSimplePhrase) {
-      return true;
-    }
-  }
-
   // meta.type indicates this should be treated as phrase filter
   if (storedFilter.meta?.type === 'phrase' && storedFilter.query) {
     return true;
   }
 
-  return false;
+  // match queries with phrase type that can be simplified
+  if (!storedFilter.query?.match) {
+    return false;
+  }
+
+  const matchValues = Object.values(storedFilter.query.match);
+  return matchValues.some((value: unknown) => {
+    // Type guard for match query value
+    if (typeof value !== 'object' || value === null) {
+      return false;
+    }
+    const v = value as {
+      type?: string;
+      analyzer?: unknown;
+      fuzziness?: unknown;
+      minimum_should_match?: unknown;
+    };
+    return v.type === 'phrase' && !v.analyzer && !v.fuzziness && !v.minimum_should_match;
+  });
 }
 
 /**
@@ -248,9 +245,10 @@ export function isEnhancedCompatible(storedFilter: unknown): boolean {
     return true;
   }
 
-  // Legacy range format (without query wrapper)
-  // Check for legacy properties
+  // Legacy filters (without query wrapper)
   const legacyFilter = storedFilter as { range?: unknown; exists?: unknown; query?: unknown };
+
+  // Legacy range format
   if (legacyFilter.range && !legacyFilter.query) {
     return true;
   }
