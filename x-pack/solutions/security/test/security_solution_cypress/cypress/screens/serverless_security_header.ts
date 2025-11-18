@@ -9,7 +9,9 @@ import { getDataTestSubjectSelectorMatch } from '../helpers/common';
 
 export const MORE_MENU_BTN = getDataTestSubjectSelectorMatch('kbnChromeNav-moreMenuTrigger');
 
-export const FOOTER_LAUNCHPAD = getDataTestSubjectSelectorMatch('nav-item-id-launchpad');
+export const FOOTER_LAUNCHPAD = getDataTestSubjectSelectorMatch(
+  'nav-item-id-securityGroup:launchpad'
+);
 
 // main panels links
 export const INVESTIGATIONS_PANEL_BTN =
