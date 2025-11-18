@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useEffect, useState } from 'react';
-import { getTourQueueStateManager } from '../state/registry';
+import { useCallback, useEffect, useRef, useState } from 'react';
+import { getTourQueue } from '../state/registry';
 import type { TourId } from '..';
+import type { Tour } from '../state/tour_queue_state';
 
 export interface TourQueueResult {
   shouldShow: boolean;
@@ -20,27 +21,29 @@ export interface TourQueueResult {
  * Hook to manage tour queue state
  * */
 export const useTourQueue = (tourId: TourId): TourQueueResult => {
-  const tourQueueStateManager = getTourQueueStateManager();
+  const tourQueue = getTourQueue();
   const [shouldShow, setShouldShow] = useState(false);
+  const tourRef = useRef<Tour | null>(null);
 
   useEffect(() => {
-    // Register and get cleanup function
-    const removeTour = tourQueueStateManager.registerTour(tourId);
+    // Register and get tour object
+    const tour = tourQueue.registerTour(tourId);
+    tourRef.current = tour;
     // Set initial shouldShow state
-    setShouldShow(tourQueueStateManager.shouldShowTour(tourId));
+    setShouldShow(tourQueue.shouldShowTour(tourId));
     // Subscribe to state changes and get cleanup function
-    const stopListening = tourQueueStateManager.subscribe(() => {
-      setShouldShow(tourQueueStateManager.shouldShowTour(tourId));
+    const stopListening = tourQueue.subscribe(() => {
+      setShouldShow(tourQueue.shouldShowTour(tourId));
     });
     return () => {
-      removeTour();
+      tourRef.current?.complete();
       stopListening();
     };
-  }, [tourId, tourQueueStateManager]);
+  }, [tourId, tourQueue]);
 
   const onComplete = useCallback(() => {
-    tourQueueStateManager.completeTour(tourId);
-  }, [tourId, tourQueueStateManager]);
+    tourRef.current?.complete();
+  }, []);
 
   return {
     shouldShow,

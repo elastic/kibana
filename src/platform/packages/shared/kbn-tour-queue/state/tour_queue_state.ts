@@ -9,6 +9,11 @@
 
 import { getTourPriority, type TourId } from '..';
 
+export interface Tour {
+  skip: () => void;
+  complete: () => void;
+}
+
 export interface TourQueueState {
   registeredTourIds: TourId[];
   completedTourIds: Set<TourId>;
@@ -23,10 +28,14 @@ export class TourQueueStateManager {
 
   constructor() {}
 
-  registerTour(tourId: TourId): () => void {
+  registerTour(tourId: TourId): Tour {
     const exists = this.registeredTourIds.includes(tourId);
     if (exists) {
-      return () => {}; // Return no-op if already exists
+      // Return no-op if already exists
+      return {
+        skip: () => {},
+        complete: () => {},
+      };
     }
 
     // Sort by priority (lower number = higher priority = shown first)
@@ -35,11 +44,13 @@ export class TourQueueStateManager {
     );
     this.notifySubscribers();
 
-    return () => {
-      this.registeredTourIds = this.registeredTourIds.filter(
-        (registeredTourId) => registeredTourId !== tourId
-      );
-      this.notifySubscribers();
+    return {
+      skip: () => {
+        this.skipAllTours();
+      },
+      complete: () => {
+        this.completeTour(tourId);
+      },
     };
   }
 
@@ -62,6 +73,9 @@ export class TourQueueStateManager {
 
   completeTour(tourId: TourId): void {
     this.completedTourIds.add(tourId);
+    this.registeredTourIds = this.registeredTourIds.filter(
+      (registeredTourId) => registeredTourId !== tourId
+    );
     this.notifySubscribers();
   }
 

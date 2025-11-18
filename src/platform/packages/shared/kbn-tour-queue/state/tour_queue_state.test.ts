@@ -55,16 +55,6 @@ describe('TourQueueStateManager', () => {
       expect(state.registeredTourIds.filter((id) => id === TOUR_1)).toHaveLength(1);
     });
 
-    it('should remove tour when cleanup function is called', () => {
-      const cleanup = manager.registerTour(TOUR_1);
-
-      expect(manager.getState().registeredTourIds).toContain(TOUR_1);
-
-      cleanup();
-
-      expect(manager.getState().registeredTourIds).not.toContain(TOUR_1);
-    });
-
     it('should notify subscribers when a tour is registered', () => {
       manager.subscribe(subscriber);
 
@@ -75,10 +65,10 @@ describe('TourQueueStateManager', () => {
     });
 
     it('should notify subscribers when a tour is unregistered', () => {
-      const cleanup = manager.registerTour(TOUR_1);
+      const tour = manager.registerTour(TOUR_1);
       manager.subscribe(subscriber);
 
-      cleanup();
+      tour.complete();
 
       expect(subscriber).toHaveBeenCalledTimes(1);
     });

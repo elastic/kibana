@@ -31,11 +31,11 @@ export class SolutionNavigationTourManager {
   async startTour(): Promise<void> {
     const { getTourQueue, TOURS } = await import('@kbn/tour-queue');
     const tourQueue = getTourQueue();
-    // Register and get cleanup function
-    const removeTour = tourQueue.registerTour(TOURS.NAVIGATION);
+    // Register and get tour object
+    const tour = tourQueue.registerTour(TOURS.NAVIGATION);
     const shouldShow = tourQueue.shouldShowTour(TOURS.NAVIGATION);
     if (!shouldShow) {
-      removeTour();
+      tour.complete();
       return;
     }
 
@@ -51,7 +51,7 @@ export class SolutionNavigationTourManager {
       // when completes, maybe start the navigation tour (if applicable)
       const hasCompletedTour = await checkTourCompletion(this.deps.userProfile);
       if (hasCompletedTour) {
-        tourQueue.completeTour(TOURS.NAVIGATION);
+        tour.complete();
         return;
       }
       this.deps.navigationTourManager.startTour();
@@ -59,12 +59,11 @@ export class SolutionNavigationTourManager {
 
       // If skipped, notify queue to skip all remaining tours for the current page load only
       if (navigationTourResult === 'skipped') {
-        tourQueue.skipAllTours();
+        tour.skip();
       }
       await preserveTourCompletion(this.deps.userProfile);
-      tourQueue.completeTour(TOURS.NAVIGATION);
     } finally {
-      removeTour();
+      tour.complete();
     }
   }
 }
