@@ -12,11 +12,70 @@ import type { JSONSchema7 } from 'json-schema';
 import { z } from '@kbn/zod';
 
 /**
+ * Recursively converts a JSON Schema object to a Zod object schema
+ * This is a fallback when @n8n/json-schema-to-zod fails
+ */
+function convertJsonSchemaToZodRecursive(jsonSchema: JSONSchema7): z.ZodType {
+  if (jsonSchema.type === 'object' && jsonSchema.properties) {
+    const shape: Record<string, z.ZodType> = {};
+    for (const [key, propSchema] of Object.entries(jsonSchema.properties)) {
+      const prop = propSchema as JSONSchema7;
+      let zodProp = convertJsonSchemaToZodRecursive(prop);
+
+      // Apply default if present
+      if (prop.default !== undefined) {
+        zodProp = zodProp.default(prop.default);
+      }
+
+      // Check if required - use the parent schema's required array
+      const isRequired = jsonSchema.required?.includes(key) ?? false;
+      if (!isRequired) {
+        zodProp = zodProp.optional();
+      }
+
+      shape[key] = zodProp;
+    }
+    return z.object(shape);
+  }
+
+  if (jsonSchema.type === 'array' && jsonSchema.items) {
+    const itemsSchema = convertJsonSchemaToZodRecursive(jsonSchema.items as JSONSchema7);
+    return z.array(itemsSchema);
+  }
+
+  if (jsonSchema.type === 'string') {
+    let schema = z.string();
+    if (jsonSchema.enum && Array.isArray(jsonSchema.enum) && jsonSchema.enum.length > 0) {
+      // z.enum requires at least one element
+      schema = z.enum(jsonSchema.enum as [string, ...string[]]);
+    }
+    return schema;
+  }
+
+  if (jsonSchema.type === 'number' || jsonSchema.type === 'integer') {
+    return z.number();
+  }
+
+  if (jsonSchema.type === 'boolean') {
+    return z.boolean();
+  }
+
+  // Fallback to any for unsupported types
+  return z.any();
+}
+
+/**
  * Converts a JSON Schema to a Zod schema
  * @param jsonSchema - The JSON Schema to convert
  * @returns A Zod schema equivalent to the JSON Schema
  */
 export function convertJsonSchemaToZod(jsonSchema: JSONSchema7): z.ZodType {
+  // For nested objects, always use our recursive converter to ensure proper structure
+  // This is critical for variable validation to work correctly with nested paths
+  if (jsonSchema.type === 'object' && jsonSchema.properties) {
+    return convertJsonSchemaToZodRecursive(jsonSchema);
+  }
+
   try {
     // @n8n/json-schema-to-zod returns a string of Zod code
     const zodCode = jsonSchemaToZod(jsonSchema);
@@ -40,9 +99,15 @@ export function convertJsonSchemaToZod(jsonSchema: JSONSchema7): z.ZodType {
 
     return zodSchema as z.ZodType;
   } catch (error) {
-    // If conversion fails, fallback to z.any() to avoid breaking the workflow
-    // This can happen with complex schemas that the converter doesn't support
-    // console.warn('Failed to convert JSON Schema to Zod:', error);
-    return z.any();
+    // If conversion fails, try recursive fallback
+    // This ensures nested objects are properly converted even if the library fails
+    // This is important for variable validation to work correctly
+    try {
+      return convertJsonSchemaToZodRecursive(jsonSchema);
+    } catch (fallbackError) {
+      // If even the fallback fails, return z.any() as last resort
+      // This can happen with very complex schemas that we don't support
+      return z.any();
+    }
   }
 }

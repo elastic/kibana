@@ -52,6 +52,7 @@ export const useWorkflowJsonSchema = ({
           ? WorkflowSchemaUriLooseWithDynamicConnectors
           : WorkflowSchemaUriStrictWithDynamicConnectors;
       }
+
       const zodSchema = loose
         ? getWorkflowZodSchemaLoose(connectorsData?.connectorTypes ?? {})
         : getWorkflowZodSchema(connectorsData?.connectorTypes ?? {}); // TODO: remove this once we move the schema generation up to detail page or some wrapper component
@@ -63,8 +64,15 @@ export const useWorkflowJsonSchema = ({
       // Ensure inputs schema doesn't have array format (fix after all post-processing)
       ensureInputsSchemaIsObjectFormat(processedSchema);
 
+      // Ensure steps schema is always an array type (fix after all post-processing)
+      ensureStepsSchemaIsArrayFormat(processedSchema);
+
+      // Deep clone the schema to ensure React sees it as a new object
+      // This forces Monaco to re-register the schema when it changes
+      const clonedSchema = JSON.parse(JSON.stringify(processedSchema));
+
       return {
-        jsonSchema: processedSchema ?? null,
+        jsonSchema: clonedSchema ?? null,
         uri,
       };
     } catch (error) {
@@ -189,5 +197,57 @@ function ensureInputsSchemaIsObjectFormat(schema: any): void {
         inputsSchema.properties.properties.additionalProperties = true;
       }
     }
+  }
+}
+
+/**
+ * Ensure the steps schema is always an array type for Monaco editor
+ * This is a safety net that runs after all other post-processing
+ * to ensure steps schema is correctly recognized as an array type
+ */
+function ensureStepsSchemaIsArrayFormat(schema: any): void {
+  if (!schema?.definitions?.WorkflowSchema?.properties?.steps) {
+    return;
+  }
+
+  const stepsSchema = schema.definitions.WorkflowSchema.properties.steps;
+
+  // Helper to fix a single steps schema object
+
+  const fixStepsSchemaObject = (schemaObj: any): void => {
+    if (!schemaObj || typeof schemaObj !== 'object') {
+      return;
+    }
+
+    // Ensure it's an array type
+    if (schemaObj.type && schemaObj.type !== 'array') {
+      schemaObj.type = 'array';
+    }
+
+    // Ensure items exists and is an object (not an array)
+    // The items should be the step schema (an object), not an array
+    if (schemaObj.type === 'array') {
+      if (!schemaObj.items) {
+        schemaObj.items = { type: 'object' };
+      } else if (Array.isArray(schemaObj.items)) {
+        // If items is an array, convert it to an object (shouldn't happen, but fix it)
+        schemaObj.items = { type: 'object' };
+      } else if (schemaObj.items.type === 'array') {
+        // If items.type is array, that's wrong - items should be the step object schema
+        schemaObj.items.type = 'object';
+      }
+    }
+  };
+
+  // If steps is wrapped in anyOf (due to being optional), ensure the non-null schema is an array
+  if (stepsSchema.anyOf && Array.isArray(stepsSchema.anyOf)) {
+    stepsSchema.anyOf.forEach((subSchema: any) => {
+      if (subSchema && subSchema.type !== 'null' && subSchema.type !== 'undefined') {
+        fixStepsSchemaObject(subSchema);
+      }
+    });
+  } else {
+    // Not wrapped in anyOf, fix directly
+    fixStepsSchemaObject(stepsSchema);
   }
 }

@@ -9,7 +9,7 @@
 
 import type { JSONSchema7 } from 'json-schema';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { WorkflowContextSchema } from '@kbn/workflows';
+import { DynamicWorkflowContextSchema } from '@kbn/workflows';
 import { normalizeInputsToJsonSchema } from '@kbn/workflows/spec/lib/input_conversion';
 import { z } from '@kbn/zod';
 import { convertJsonSchemaToZod } from '../../../../common/lib/json_schema_to_zod';
@@ -44,10 +44,14 @@ export function getWorkflowContextSchema(definition: WorkflowYaml) {
     }
   }
 
-  return WorkflowContextSchema.extend({
+  // Use DynamicWorkflowContextSchema instead of WorkflowContextSchema
+  // This ensures compatibility with DynamicStepContextSchema.merge() in getContextSchemaForPath
+  // The merge() method requires both schemas to have the same base structure
+  return DynamicWorkflowContextSchema.extend({
     // transform inputs properties to an object
     // with the property name as the key and the Zod schema as the value
-    inputs: z.object(inputsObject),
+    // Always create an object, even if empty, to ensure proper schema structure
+    inputs: Object.keys(inputsObject).length > 0 ? z.object(inputsObject) : z.object({}),
     // transform an object of consts to an object
     // with the const name as the key and inferred type as the value
     consts: z.object({

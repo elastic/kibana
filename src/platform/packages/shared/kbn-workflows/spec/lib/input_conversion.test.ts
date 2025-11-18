@@ -8,7 +8,11 @@
  */
 
 import type { z } from '@kbn/zod';
-import { convertLegacyInputsToJsonSchema, normalizeInputsToJsonSchema } from './input_conversion';
+import {
+  applyInputDefaults,
+  convertLegacyInputsToJsonSchema,
+  normalizeInputsToJsonSchema,
+} from './input_conversion';
 import type { WorkflowInputSchema } from '../schema';
 
 describe('convertLegacyInputsToJsonSchema', () => {
@@ -188,5 +192,192 @@ describe('normalizeInputsToJsonSchema', () => {
 
     const result = normalizeInputsToJsonSchema(inputs);
     expect(result).toEqual(inputs);
+  });
+});
+
+describe('applyInputDefaults', () => {
+  it('should apply defaults when inputs are undefined', () => {
+    const inputsSchema = normalizeInputsToJsonSchema({
+      properties: {
+        name: { type: 'string', default: 'Default Name' },
+        age: { type: 'number', default: 25 },
+      },
+      required: ['name'],
+      additionalProperties: false,
+    });
+
+    const result = applyInputDefaults(undefined, inputsSchema);
+    expect(result).toEqual({
+      name: 'Default Name',
+      age: 25,
+    });
+  });
+
+  it('should apply defaults for missing properties', () => {
+    const inputsSchema = normalizeInputsToJsonSchema({
+      properties: {
+        name: { type: 'string', default: 'Default Name' },
+        age: { type: 'number', default: 25 },
+      },
+      required: ['name'],
+      additionalProperties: false,
+    });
+
+    const result = applyInputDefaults({ name: 'Custom Name' }, inputsSchema);
+    expect(result).toEqual({
+      name: 'Custom Name',
+      age: 25,
+    });
+  });
+
+  it('should apply defaults for nested objects', () => {
+    const inputsSchema = normalizeInputsToJsonSchema({
+      properties: {
+        analyst: {
+          type: 'object',
+          properties: {
+            email: { type: 'string', default: 'analyst@security.com' },
+            name: { type: 'string', default: 'Security Analyst' },
+            team: { type: 'string', default: 'SOC' },
+          },
+          required: ['email', 'name', 'team'],
+          additionalProperties: false,
+        },
+      },
+      required: ['analyst'],
+      additionalProperties: false,
+    });
+
+    const result = applyInputDefaults(undefined, inputsSchema);
+    expect(result).toEqual({
+      analyst: {
+        email: 'analyst@security.com',
+        name: 'Security Analyst',
+        team: 'SOC',
+      },
+    });
+  });
+
+  it('should apply defaults for partial nested objects', () => {
+    const inputsSchema = normalizeInputsToJsonSchema({
+      properties: {
+        analyst: {
+          type: 'object',
+          properties: {
+            email: { type: 'string', default: 'analyst@security.com' },
+            name: { type: 'string', default: 'Security Analyst' },
+            team: { type: 'string', default: 'SOC' },
+          },
+          required: ['email', 'name', 'team'],
+          additionalProperties: false,
+        },
+      },
+      required: ['analyst'],
+      additionalProperties: false,
+    });
+
+    const result = applyInputDefaults({ analyst: { email: 'custom@example.com' } }, inputsSchema);
+    expect(result).toEqual({
+      analyst: {
+        email: 'custom@example.com',
+        name: 'Security Analyst',
+        team: 'SOC',
+      },
+    });
+  });
+
+  it('should apply defaults for arrays', () => {
+    const inputsSchema = normalizeInputsToJsonSchema({
+      properties: {
+        notifyTeams: {
+          type: 'array',
+          items: { type: 'string' },
+          default: ['SOC', 'Management'],
+        },
+      },
+      additionalProperties: false,
+    });
+
+    const result = applyInputDefaults(undefined, inputsSchema);
+    expect(result).toEqual({
+      notifyTeams: ['SOC', 'Management'],
+    });
+  });
+
+  it('should handle the security workflow example with all defaults', () => {
+    const inputsSchema = normalizeInputsToJsonSchema({
+      properties: {
+        analyst: {
+          type: 'object',
+          properties: {
+            email: { type: 'string', default: 'analyst@security.com' },
+            name: { type: 'string', default: 'Security Analyst' },
+            team: { type: 'string', default: 'SOC' },
+          },
+          required: ['email', 'name', 'team'],
+          additionalProperties: false,
+        },
+        threatIndicator: {
+          type: 'object',
+          properties: {
+            type: { type: 'string', default: 'ip' },
+            value: { type: 'string', default: '192.168.1.100' },
+            severity: { type: 'string', default: 'medium' },
+          },
+          required: ['type', 'value', 'severity'],
+          additionalProperties: false,
+        },
+        incidentMetadata: {
+          type: 'object',
+          properties: {
+            incidentId: { type: 'string', default: 'INC-20241118-0001' },
+            source: { type: 'string', default: 'SIEM Alert' },
+          },
+          required: ['incidentId', 'source'],
+          additionalProperties: false,
+        },
+        responseActions: {
+          type: 'object',
+          properties: {
+            blockIndicator: { type: 'boolean', default: false },
+            quarantineHosts: { type: 'boolean', default: false },
+            createTicket: { type: 'boolean', default: true },
+            notifyTeams: {
+              type: 'array',
+              items: { type: 'string' },
+              default: ['SOC', 'Management'],
+            },
+          },
+          required: ['createTicket'],
+          additionalProperties: false,
+        },
+      },
+      required: ['analyst', 'threatIndicator', 'incidentMetadata'],
+      additionalProperties: false,
+    });
+
+    const result = applyInputDefaults(undefined, inputsSchema);
+    expect(result).toEqual({
+      analyst: {
+        email: 'analyst@security.com',
+        name: 'Security Analyst',
+        team: 'SOC',
+      },
+      threatIndicator: {
+        type: 'ip',
+        value: '192.168.1.100',
+        severity: 'medium',
+      },
+      incidentMetadata: {
+        incidentId: 'INC-20241118-0001',
+        source: 'SIEM Alert',
+      },
+      responseActions: {
+        blockIndicator: false,
+        quarantineHosts: false,
+        createTicket: true,
+        notifyTeams: ['SOC', 'Management'],
+      },
+    });
   });
 });

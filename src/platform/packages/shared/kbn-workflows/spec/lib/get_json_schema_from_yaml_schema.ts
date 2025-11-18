@@ -35,6 +35,10 @@ export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType): WorkflowJson
   // {properties: {...}, required: [...], additionalProperties: boolean}
   fixInputsSchemaForMonaco(fixedSchema);
 
+  // Ensure steps schema is always an array type (even when optional/wrapped in anyOf)
+  // This prevents Monaco from showing "Expected array" errors
+  fixStepsSchemaForMonaco(fixedSchema);
+
   // Add fetcher parameter to all Kibana connector steps
   addFetcherToKibanaConnectors(fixedSchema);
 
@@ -314,6 +318,66 @@ function fixInputsSchemaForMonaco(schema: any): void {
   } else {
     // Not wrapped in anyOf, fix directly
     fixSchemaObject(inputsSchema);
+  }
+}
+
+/**
+ * Ensure steps schema is always an array type for Monaco editor
+ * When WorkflowSchemaForAutocomplete uses .partial(), steps becomes optional
+ * and zod-to-json-schema wraps it in anyOf with null/undefined.
+ * We need to ensure the non-null schema is always an array type.
+ */
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function fixStepsSchemaForMonaco(schema: any): void {
+  const workflowSchema = schema?.definitions?.WorkflowSchema;
+  if (!workflowSchema) {
+    return;
+  }
+
+  const stepsSchema = workflowSchema.properties?.steps;
+  if (!stepsSchema) {
+    return;
+  }
+
+  // Helper to fix a single steps schema object
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const fixStepsSchemaObject = (schemaObj: any): void => {
+    if (!schemaObj || typeof schemaObj !== 'object') {
+      return;
+    }
+
+    // Ensure it's an array type
+    if (schemaObj.type && schemaObj.type !== 'array') {
+      schemaObj.type = 'array';
+    }
+
+    // Ensure items exists and is an object (not an array)
+    // The items should be the step schema (an object), not an array
+    if (schemaObj.type === 'array') {
+      if (!schemaObj.items) {
+        schemaObj.items = { type: 'object' };
+      } else if (Array.isArray(schemaObj.items)) {
+        // If items is an array, convert it to an object (shouldn't happen, but fix it)
+        schemaObj.items = { type: 'object' };
+      } else if (schemaObj.items.type === 'array') {
+        // If items.type is array, that's wrong - items should be the step object schema
+        schemaObj.items.type = 'object';
+      }
+    }
+  };
+
+  // If steps is wrapped in anyOf (due to being optional), ensure the non-null schema is an array
+  if (stepsSchema.anyOf && Array.isArray(stepsSchema.anyOf)) {
+    // Find non-null schemas and ensure they're arrays
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    stepsSchema.anyOf.forEach((subSchema: any) => {
+      if (subSchema && subSchema.type !== 'null' && subSchema.type !== 'undefined') {
+        fixStepsSchemaObject(subSchema);
+      }
+    });
+  } else {
+    // Not wrapped in anyOf, fix directly
+    fixStepsSchemaObject(stepsSchema);
   }
 }
 

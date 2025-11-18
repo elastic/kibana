@@ -12,6 +12,10 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { StackFrame, StepContext, WorkflowContext } from '@kbn/workflows';
 import { parseJsPropertyAccess } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
+import {
+  applyInputDefaults,
+  normalizeInputsToJsonSchema,
+} from '@kbn/workflows/spec/lib/input_conversion';
 import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
@@ -198,6 +202,15 @@ export class WorkflowContextManager {
       workflowExecution.id
     );
 
+    // Apply default values from JSON Schema to inputs
+    const normalizedInputsSchema = normalizeInputsToJsonSchema(
+      workflowExecution.workflowDefinition.inputs
+    );
+    const inputsWithDefaults = applyInputDefaults(
+      workflowExecution.context?.inputs as Record<string, unknown> | undefined,
+      normalizedInputsSchema
+    );
+
     return {
       execution: {
         id: workflowExecution.id,
@@ -214,7 +227,7 @@ export class WorkflowContextManager {
       kibanaUrl,
       consts: workflowExecution.workflowDefinition.consts || {},
       event: workflowExecution.context?.event,
-      inputs: workflowExecution.context?.inputs,
+      inputs: inputsWithDefaults,
     };
   }
 

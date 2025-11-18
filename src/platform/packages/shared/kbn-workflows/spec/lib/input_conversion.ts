@@ -128,3 +128,153 @@ export function normalizeInputsToJsonSchema(
   // Fallback: return undefined
   return undefined;
 }
+
+/**
+ * Applies defaults to a nested object property
+ * @param prop - The property schema
+ * @param currentValue - The current value for this property
+ * @returns The value with defaults applied
+ */
+function applyDefaultToObjectProperty(prop: JSONSchema7, currentValue: unknown): unknown {
+  if (currentValue === undefined) {
+    if (prop.default !== undefined) {
+      return prop.default;
+    }
+    if (prop.type === 'object' && prop.properties) {
+      return applyDefaultFromSchema(prop, undefined);
+    }
+    return undefined;
+  }
+
+  if (
+    prop.type === 'object' &&
+    prop.properties &&
+    typeof currentValue === 'object' &&
+    !Array.isArray(currentValue)
+  ) {
+    return applyDefaultFromSchema(prop, currentValue);
+  }
+
+  return currentValue;
+}
+
+/**
+ * Applies defaults to all properties of an object
+ * @param schema - The object schema
+ * @param value - The current object value
+ * @returns The object with defaults applied
+ */
+function applyDefaultsToObjectProperties(
+  schema: JSONSchema7,
+  value: Record<string, unknown>
+): Record<string, unknown> {
+  const result: Record<string, unknown> = { ...value };
+  for (const [key, propSchema] of Object.entries(schema.properties || {})) {
+    const prop = propSchema as JSONSchema7;
+    const currentValue = result[key];
+    const defaultValue = applyDefaultToObjectProperty(prop, currentValue);
+    if (defaultValue !== undefined) {
+      result[key] = defaultValue;
+    }
+  }
+  return result;
+}
+
+/**
+ * Creates an object with defaults for required properties
+ * @param schema - The object schema
+ * @returns An object with defaults applied, or undefined if no defaults
+ */
+function createObjectWithDefaults(schema: JSONSchema7): Record<string, unknown> | undefined {
+  const result: Record<string, unknown> = {};
+  for (const [key, propSchema] of Object.entries(schema.properties || {})) {
+    const prop = propSchema as JSONSchema7;
+    const isRequired = schema.required?.includes(key) ?? false;
+    if (isRequired || prop.default !== undefined) {
+      const defaultValue = applyDefaultFromSchema(prop, undefined);
+      if (defaultValue !== undefined) {
+        result[key] = defaultValue;
+      }
+    }
+  }
+  return Object.keys(result).length > 0 ? result : undefined;
+}
+
+/**
+ * Recursively applies default values from JSON Schema to input values
+ * @param schema - The JSON Schema property definition
+ * @param value - The current input value (may be undefined)
+ * @returns The value with defaults applied
+ */
+function applyDefaultFromSchema(schema: JSONSchema7, value: unknown): unknown {
+  // If value is already provided, use it (unless it's undefined/null for objects)
+  if (value !== undefined && value !== null) {
+    // For objects, recursively apply defaults to nested properties
+    if (
+      schema.type === 'object' &&
+      schema.properties &&
+      typeof value === 'object' &&
+      !Array.isArray(value)
+    ) {
+      return applyDefaultsToObjectProperties(schema, value as Record<string, unknown>);
+    }
+    return value;
+  }
+
+  // If value is not provided, use default if available
+  if (schema.default !== undefined) {
+    return schema.default;
+  }
+
+  // For objects, create object with defaults for required properties
+  if (schema.type === 'object' && schema.properties) {
+    return createObjectWithDefaults(schema);
+  }
+
+  // For arrays, return empty array if no default
+  if (schema.type === 'array') {
+    return schema.default ?? [];
+  }
+
+  return undefined;
+}
+
+/**
+ * Applies default values from JSON Schema to workflow inputs
+ * @param inputs - The actual input values provided (may be partial or undefined)
+ * @param inputsSchema - The normalized JSON Schema inputs definition
+ * @returns The inputs with defaults applied
+ */
+export function applyInputDefaults(
+  inputs: Record<string, unknown> | undefined,
+  inputsSchema: ReturnType<typeof normalizeInputsToJsonSchema>
+): Record<string, unknown> | undefined {
+  if (!inputsSchema?.properties) {
+    return inputs;
+  }
+
+  const result: Record<string, unknown> = { ...(inputs || {}) };
+
+  for (const [propertyName, propertySchema] of Object.entries(inputsSchema.properties)) {
+    const jsonSchema = propertySchema as JSONSchema7;
+    const currentValue = result[propertyName];
+
+    // Apply defaults if value is missing or undefined
+    if (currentValue === undefined) {
+      const defaultValue = applyDefaultFromSchema(jsonSchema, undefined);
+      if (defaultValue !== undefined) {
+        result[propertyName] = defaultValue;
+      }
+    } else if (
+      jsonSchema.type === 'object' &&
+      jsonSchema.properties &&
+      typeof currentValue === 'object' &&
+      !Array.isArray(currentValue)
+    ) {
+      // Recursively apply defaults to nested objects
+      result[propertyName] = applyDefaultFromSchema(jsonSchema, currentValue);
+    }
+  }
+
+  return result;
+}

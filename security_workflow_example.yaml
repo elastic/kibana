@@ -14,11 +14,13 @@ inputs:
           type: string
           format: email
           description: Analyst email address
+          default: "analyst@security.com"
         name:
           type: string
           minLength: 2
           maxLength: 100
           description: Analyst full name
+          default: "Security Analyst"
         team:
           type: string
           enum:
@@ -27,6 +29,7 @@ inputs:
             - Incident Response
             - Forensics
           description: Security team
+          default: "SOC"
       required:
         - email
         - name
@@ -47,9 +50,11 @@ inputs:
             - url
             - email
           description: Type of threat indicator
+          default: "ip"
         value:
           type: string
           description: The indicator value
+          default: "8.8.8.8"
         # IP address with regex pattern validation
         ipAddress:
           type: string
@@ -88,6 +93,7 @@ inputs:
           type: string
           pattern: "^INC-\\d{8}-\\d{4}$"
           description: "Incident ID (format: INC-YYYYMMDD-####)"
+          default: "INC-20241118-0001"
         source:
           type: string
           enum:
@@ -96,6 +102,7 @@ inputs:
             - Manual Report
             - EDR Detection
           description: Source of the incident
+          default: "SIEM Alert"
         affectedSystems:
           type: array
           items:
@@ -182,6 +189,9 @@ inputs:
               - Legal
               - Compliance
           description: Teams to notify
+          default:
+            - SOC
+            - Management
       required:
         - createTicket
       additionalProperties: false

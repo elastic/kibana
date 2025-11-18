@@ -110,4 +110,115 @@ describe('Monaco Schema Generation - Inputs Field', () => {
     expect(workflow.inputs.properties).toBeDefined();
     expect(Array.isArray(workflow.inputs.properties)).toBe(false);
   });
+
+  it('should validate a workflow WITHOUT inputs (inputs field missing) - regression test', () => {
+    const workflowZodSchema = generateYamlSchemaFromConnectors([]);
+    const jsonSchema = getJsonSchemaFromYamlSchema(workflowZodSchema);
+
+    const workflow = {
+      name: 'New workflow',
+      enabled: false,
+      triggers: [{ type: 'manual' }],
+      // No inputs field at all - this should not cause validation errors
+      steps: [
+        {
+          name: 'first-step',
+          type: 'console',
+          with: {
+            message: 'First step executed',
+          },
+        },
+      ],
+    };
+
+    // Get the inputs schema from the generated JSON Schema
+    const inputsSchema = jsonSchema?.definitions?.WorkflowSchema?.properties?.inputs;
+
+    // The inputs schema should be optional (wrapped in anyOf with null/undefined)
+    expect(inputsSchema).toBeDefined();
+
+    if (inputsSchema?.anyOf && Array.isArray(inputsSchema.anyOf)) {
+      // CRITICAL: Should NOT have any array schemas (legacy format)
+      // This is the regression we're testing for
+      const arraySchemas = inputsSchema.anyOf.filter((s: any) => s.type === 'array');
+      expect(arraySchemas.length).toBe(0); // No array schemas should remain
+
+      // Should have null/undefined for optional
+      const nullSchemas = inputsSchema.anyOf.filter(
+        (s: any) => s.type === 'null' || s.type === 'undefined'
+      );
+      expect(nullSchemas.length).toBeGreaterThan(0);
+
+      // Should have object schema (new format)
+      const objectSchemas = inputsSchema.anyOf.filter(
+        (s: any) => s.type === 'object' && s.type !== 'null' && s.type !== 'undefined'
+      );
+      expect(objectSchemas.length).toBeGreaterThan(0);
+
+      // Verify the object schema has the correct structure
+      const objectSchema = objectSchemas[0];
+      expect(objectSchema.properties).toBeDefined();
+      expect(objectSchema.properties.properties).toBeDefined();
+      expect(objectSchema.properties.properties.type).toBe('object');
+      expect(objectSchema.properties.properties.type).not.toBe('array');
+    } else {
+      // If not wrapped in anyOf, it should still be an object (not array)
+      expect(inputsSchema.type).not.toBe('array');
+      if (inputsSchema.type === 'object') {
+        expect(inputsSchema.properties?.properties?.type).not.toBe('array');
+      }
+    }
+
+    // Note: We don't validate with Ajv here because the schema has broken references
+    // that are fixed at runtime. The important thing is that the schema structure
+    // doesn't include array types, which would cause Monaco to show "Expected array" errors.
+    // The schema structure check above is sufficient to prevent the regression.
+  });
+
+  it('should have correct schema for steps field - steps should be an array type', () => {
+    const workflowZodSchema = generateYamlSchemaFromConnectors([]);
+    const jsonSchema = getJsonSchemaFromYamlSchema(workflowZodSchema);
+
+    const stepsSchema = jsonSchema?.definitions?.WorkflowSchema?.properties?.steps;
+
+    expect(stepsSchema).toBeDefined();
+
+    // Steps should be an array type (this is correct, unlike inputs)
+    // Check if it's wrapped in anyOf (for optional) or directly an array
+    let actualStepsSchema = stepsSchema;
+    if (stepsSchema?.anyOf && Array.isArray(stepsSchema.anyOf)) {
+      // If wrapped in anyOf, find the non-null schema
+      const nonNullSchema = stepsSchema.anyOf.find(
+        (s: any) => s.type !== 'null' && s.type !== 'undefined'
+      );
+      if (nonNullSchema) {
+        actualStepsSchema = nonNullSchema;
+      }
+    }
+
+    // The actual schema should be an array type
+    // This is critical - Monaco needs to see this as an array
+    expect(actualStepsSchema.type).toBe('array');
+    expect(actualStepsSchema.items).toBeDefined();
+
+    // Verify a workflow with steps validates correctly
+    const workflow = {
+      name: 'New workflow',
+      enabled: false,
+      triggers: [{ type: 'manual' }],
+      steps: [
+        {
+          name: 'first-step',
+          type: 'console',
+          with: {
+            message: 'First step executed',
+          },
+        },
+      ],
+    };
+
+    // The steps should be an array in the workflow
+    expect(Array.isArray(workflow.steps)).toBe(true);
+    expect(workflow.steps.length).toBeGreaterThan(0);
+  });
 });

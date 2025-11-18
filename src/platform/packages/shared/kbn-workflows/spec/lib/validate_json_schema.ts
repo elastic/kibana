@@ -52,8 +52,11 @@ export function isValidJsonSchema(schema: unknown): schema is JSONSchema7 {
   try {
     ajv.compile(schemaObj);
     return true;
-  } catch {
+  } catch (error) {
     // If compilation fails, it's not a valid schema
+    // Suppress console errors for very large/complex schemas that might fail compilation
+    // but are still structurally valid JSON Schema
+    // The error is expected for some complex nested schemas and doesn't affect functionality
     return false;
   }
 }
