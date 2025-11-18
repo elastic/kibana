@@ -244,6 +244,7 @@ export function DashboardApp({
         <>
           <DashboardTabTitleSetter dashboardApi={dashboardApi} />
           <DashboardTopNav
+            key={dashboardApi.uuid}
             redirectTo={redirectTo}
             embedSettings={embedSettings}
             dashboardApi={dashboardApi}
@@ -256,7 +257,7 @@ export function DashboardApp({
         key={regenerateId}
         locator={locator}
         onApiAvailable={(dashboard) => {
-          if (dashboard && !dashboardApi) {
+          if (dashboard && dashboard.uuid !== dashboardApi?.uuid) {
             setDashboardApi(dashboard);
             if (expandedPanelId) {
               dashboard?.expandPanel(expandedPanelId);

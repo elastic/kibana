@@ -37,7 +37,20 @@ export function extractControlGroupState(state: { [key: string]: unknown }): {
       ...rest,
       controlGroupInput: {
         ...omit(convertedState.controlGroupState, 'initialChildControlState'),
-        controls: initialChildControlState,
+        controls:
+          typeof initialChildControlState === 'object'
+            ? Object.entries(initialChildControlState ?? {}).map(([controlId, value]) => {
+                const { grow, order, type, width, ...config } = value;
+                return {
+                  uid: controlId,
+                  grow,
+                  order,
+                  type,
+                  width,
+                  config,
+                };
+              })
+            : [],
       },
     };
   }
