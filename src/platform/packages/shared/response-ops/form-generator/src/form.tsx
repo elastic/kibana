@@ -14,9 +14,8 @@ import { getMeta } from './schema_metadata';
 import type { BaseMetadata } from './schema_metadata';
 import { useFormState } from './use_form_state';
 import type { WidgetType } from './widgets';
-import { getWidget } from './widgets';
 import { INVALID_VALUE_ERROR } from './translations';
-import { getDefaultWidgetForSchema } from './widgets/get_default_widget_by_schema';
+import { getWidgetComponent } from './widgets/registry';
 
 /**
  * Key used for root-level field validation errors.
@@ -48,7 +47,7 @@ const getFieldsFromSchema = <T extends z.ZodRawShape>(schema: z.ZodObject<T>) =>
       id: key,
       initialValue: metaInfo.default,
       schema: schemaAny,
-      widget: metaInfo.widget || getDefaultWidgetForSchema(schemaAny),
+      widget: metaInfo.widget,
       meta: metaInfo,
       validate: (value: unknown) => {
         try {
@@ -101,17 +100,9 @@ export const Form = <TSchema extends z.ZodObject<z.ZodRawShape>>({
   return (
     <EuiForm component="form" onSubmit={form.handleSubmit(_onSubmit)} noValidate>
       {fields.map((field) => {
-        const { id, widget, schema: fieldSchema, meta } = field;
+        const { id, schema: fieldSchema, meta } = field;
 
-        if (!widget) {
-          throw new Error(`Widget type is required for field: ${id}`);
-        }
-
-        const WidgetComponent = getWidget(widget);
-
-        if (!WidgetComponent) {
-          throw new Error(`Unsupported widget type: ${widget}`);
-        }
+        const WidgetComponent = getWidgetComponent(fieldSchema);
 
         return (
           <WidgetComponent

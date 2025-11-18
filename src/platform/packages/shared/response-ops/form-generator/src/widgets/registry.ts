@@ -8,12 +8,14 @@
  */
 
 import type React from 'react';
+import { z } from '@kbn/zod/v4';
 import { TextField } from './fields/text_field';
 import { SelectField } from './fields/select_field';
 import { PasswordField } from './fields/password_field';
 import { DiscriminatedUnionField } from './fields/discriminated_union_field';
 import { KeyValueField } from './fields/key_value_field';
 import { WidgetType, type BaseWidgetProps } from './types';
+import { getMeta } from '../schema_metadata';
 
 const widgetComponents = {
   [WidgetType.Text]: TextField,
@@ -28,8 +30,44 @@ export const WIDGET_REGISTRY: Record<
   React.ComponentType<BaseWidgetProps>
 > = widgetComponents as Record<WidgetType, React.ComponentType<BaseWidgetProps>>;
 
-export function getWidget(
-  widgetType: WidgetType | string
-): React.ComponentType<BaseWidgetProps> | undefined {
-  return WIDGET_REGISTRY[widgetType as WidgetType];
+export function getWidgetComponent(schema: z.ZodTypeAny): React.ComponentType<BaseWidgetProps> {
+  const { widget } = getMeta(schema);
+
+  if (widget) {
+    const component = WIDGET_REGISTRY[widget as WidgetType];
+    if (!component) {
+      throw new Error(
+        `Widget "${widget}" specified in ${schema.def.type} metadata is not registered in the widget registry.`
+      );
+    }
+
+    return component;
+  }
+
+  const defaultWidget = getDefaultWidgetForSchema(schema);
+  if (defaultWidget) {
+    return WIDGET_REGISTRY[defaultWidget];
+  }
+
+  throw new Error(
+    `No widget found for schema type: ${schema.def.type}. Please specify a widget in the schema metadata.`
+  );
 }
+
+const getDefaultWidgetForSchema = (schema: z.ZodTypeAny) => {
+  if (schema instanceof z.ZodString) {
+    const metaInfo = getMeta(schema);
+    if (metaInfo?.sensitive) {
+      return WidgetType.Password;
+    }
+    return WidgetType.Text;
+  } else if (schema instanceof z.ZodEnum) {
+    return WidgetType.Select;
+  } else if (schema instanceof z.ZodDiscriminatedUnion) {
+    return WidgetType.FormFieldset;
+  } else if (schema instanceof z.ZodRecord) {
+    return WidgetType.KeyValue;
+  }
+
+  return undefined;
+};

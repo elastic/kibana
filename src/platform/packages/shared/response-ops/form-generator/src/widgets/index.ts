@@ -8,4 +8,4 @@
  */
 
 export { WidgetType } from './types';
-export { WIDGET_REGISTRY, getWidget } from './registry';
+export { WIDGET_REGISTRY, getWidgetComponent } from './registry';

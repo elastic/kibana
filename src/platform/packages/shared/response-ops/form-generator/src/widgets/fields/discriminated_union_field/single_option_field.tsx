@@ -14,8 +14,7 @@ import { INVALID_VALUE_ERROR } from '../../../translations';
 import { getMeta } from '../../../schema_metadata';
 import type { DiscriminatedUnionWidgetProps } from './discriminated_union_field';
 import { getDiscriminatorKey } from './discriminated_union_field';
-import { getWidget } from '../..';
-import { getDefaultWidgetForSchema } from '../../get_default_widget_by_schema';
+import { getWidgetComponent } from '../../registry';
 
 const getDiscriminatorFieldValue = (
   optionSchema: z.ZodObject<z.ZodRawShape>,
@@ -73,17 +72,9 @@ export const SingleOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = (
 
       const fieldSchema = subSchema as z.ZodTypeAny;
       const metaInfo = getMeta(fieldSchema);
-      const widget = metaInfo.widget || getDefaultWidgetForSchema(fieldSchema);
       const fieldValue = valueObj[fieldKey] ?? '';
 
-      if (!widget) {
-        throw new Error(`No widget defined for field: ${fieldId}.${fieldKey}`);
-      }
-
-      const WidgetComponent = getWidget(widget);
-      if (!WidgetComponent) {
-        throw new Error(`Unsupported widget type: ${widget}`);
-      }
+      const WidgetComponent = getWidgetComponent(fieldSchema);
 
       const subFieldId = `${fieldId}.${fieldKey}`;
       const isTouched = touched[subFieldId] || touched[fieldId] || internalTouched;

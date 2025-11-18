@@ -196,7 +196,9 @@ describe('Form', () => {
 
     expect(() => {
       render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
-    }).toThrow('Widget type is required for field: username');
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"No widget found for schema type: object. Please specify a widget in the schema metadata."`
+    );
 
     consoleError.mockRestore();
   });
@@ -213,7 +215,9 @@ describe('Form', () => {
 
     expect(() => {
       render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
-    }).toThrow('Unsupported widget type: fakeWidget');
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"Widget \\"fakeWidget\\" specified in string metadata is not registered in the widget registry."`
+    );
 
     consoleError.mockRestore();
   });
