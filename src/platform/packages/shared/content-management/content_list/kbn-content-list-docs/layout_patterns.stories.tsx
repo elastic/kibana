@@ -285,9 +285,9 @@ export const MultiTable: StoryObj = {
 
     const findItems = createCombinedFindItems();
 
-    // Custom transform that preserves visualization-specific fields (icon, typeTitle)
+    // Custom transform that preserves visualization-specific fields (icon, typeTitle).
     // The default transform only extracts title/description from attributes,
-    // losing other fields like icon and typeTitle
+    // losing other fields like icon and typeTitle.
     const transform: TransformFunction<UserContentCommonSchema> = (item) => {
       const { attributes, references, updatedAt, createdAt, managed, ...rest } = item;
       return {
@@ -296,13 +296,13 @@ export const MultiTable: StoryObj = {
         description: attributes.description,
         updatedAt: updatedAt ? new Date(updatedAt) : undefined,
         createdAt: createdAt ? new Date(createdAt) : undefined,
-        // Preserve visualization-specific fields at top level for easy access
+        // Preserve visualization-specific fields at top level for easy access.
         icon: (attributes as { icon?: string }).icon,
         typeTitle: (attributes as { typeTitle?: string }).typeTitle,
         tags: references?.filter((ref) => ref.type === 'tag').map((ref) => ref.id) ?? [],
         references,
         isManaged: managed,
-        canStar: managed ? false : undefined,
+        canStar: managed ? false : undefined, // Managed items cannot be starred.
       };
     };
 
@@ -320,7 +320,7 @@ export const MultiTable: StoryObj = {
           },
         }}
         features={{
-          favorites: true,
+          starred: true,
           tags: true,
           search: { placeholder: 'Search all content...' },
           sorting: { initialSort: { field: 'updatedAt', direction: 'desc' } },

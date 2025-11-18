@@ -24,10 +24,11 @@
   "kbn_references": [
     "@kbn/content-list-mock-data",
     "@kbn/content-list-provider",
-    "@kbn/content-list-table",
-    "@kbn/content-list-toolbar",
     "@kbn/content-management-table-list-view-common",
     "@kbn/content-management-tags",
-    "@kbn/content-management-favorites-public"
+    "@kbn/content-management-favorites-public",
+    "@kbn/content-list-toolbar",
+    "@kbn/content-list-table",
+    "@kbn/content-list-grid"
   ]
 }

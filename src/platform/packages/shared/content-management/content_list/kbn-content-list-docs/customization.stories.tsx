@@ -290,8 +290,8 @@ export const CustomFilters: StoryObj = {
       tags: item.references?.filter((r) => r.type === 'tag').map((r) => r.id) ?? [],
       references: item.references,
       isManaged: item.managed,
-      canStar: item.managed ? false : undefined,
-      status: item.status,
+      canStar: item.managed ? false : undefined, // Managed items cannot be starred.
+      status: item.status, // Preserve status for the Status column.
     });
 
     return (
