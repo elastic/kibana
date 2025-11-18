@@ -22,7 +22,7 @@ export class WaitStepImpl implements NodeImplementation {
 
   async run(): Promise<void> {
     if (this.stepExecutionRuntime.tryEnterDelay(this.node.configuration.with.duration)) {
-      this.workflowLogger.logInfo(
+      this.workflowLogger.logDebug(
         `Waiting for ${this.node.configuration.with.duration} in step ${this.node.id}`
       );
       return;
@@ -33,7 +33,7 @@ export class WaitStepImpl implements NodeImplementation {
 
   private async exitWait(): Promise<void> {
     await this.stepExecutionRuntime.finishStep();
-    this.workflowLogger.logInfo(
+    this.workflowLogger.logDebug(
       `Finished waiting for ${this.node.configuration.with.duration} in step ${this.node.id}`
     );
     this.workflowRuntime.navigateToNextNode();

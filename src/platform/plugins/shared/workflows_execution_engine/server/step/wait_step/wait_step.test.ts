@@ -46,7 +46,6 @@ describe('WaitStepImpl', () => {
     } as any;
 
     workflowLogger = {
-      logInfo: jest.fn(),
       logDebug: jest.fn(),
     } as unknown as IWorkflowEventLogger;
 
@@ -71,7 +70,7 @@ describe('WaitStepImpl', () => {
 
       await underTest.run();
 
-      expect(workflowLogger.logInfo).toHaveBeenCalledWith('Waiting for 3s in step wait-step');
+      expect(workflowLogger.logDebug).toHaveBeenCalledWith('Waiting for 3s in step wait-step');
     });
 
     it('should not finish step or navigate when entering delay', async () => {
@@ -103,7 +102,7 @@ describe('WaitStepImpl', () => {
 
       await underTest.run();
 
-      expect(workflowLogger.logInfo).toHaveBeenCalledWith(
+      expect(workflowLogger.logDebug).toHaveBeenCalledWith(
         'Finished waiting for 2m in step wait-step'
       );
     });
