@@ -8,7 +8,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { searchRequestBody, searchResponseBody } from './schemas';
+import type { searchRequestBodySchema, searchResponseBodySchema } from './schemas';
 
-export type DashboardSearchRequestBody = TypeOf<typeof searchRequestBody>;
-export type DashboardSearchResponseBody = TypeOf<typeof searchResponseBody>;
+export type DashboardSearchRequestBody = TypeOf<typeof searchRequestBodySchema>;
+export type DashboardSearchResponseBody = TypeOf<typeof searchResponseBodySchema>;
