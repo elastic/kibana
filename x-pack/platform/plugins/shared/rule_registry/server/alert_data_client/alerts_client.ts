@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import Boom from '@hapi/boom';
 import { v4 as uuidv4 } from 'uuid';
 import type { estypes } from '@elastic/elasticsearch';
@@ -102,7 +103,6 @@ export interface ConstructorOptions {
   auditLogger?: AuditLogger;
   esClient: ElasticsearchClient;
   esClientScoped: ElasticsearchClient;
-  esClientAsInternalUser: ElasticsearchClient;
   ruleDataService: IRuleDataService;
   getRuleType: RuleTypeRegistry['get'];
   getRuleList: RuleTypeRegistry['list'];
@@ -220,7 +220,6 @@ export class AlertsClient {
   private readonly authorization: PublicMethodsOf<AlertingAuthorization>;
   private readonly esClient: ElasticsearchClient;
   private readonly esClientScoped: ElasticsearchClient;
-  private readonly esClientAsInternalUser: ElasticsearchClient;
   private readonly spaceId: string | undefined;
   private readonly ruleDataService: IRuleDataService;
   private readonly getRuleList: RuleTypeRegistry['list'];
@@ -231,7 +230,6 @@ export class AlertsClient {
     this.authorization = options.authorization;
     this.esClient = options.esClient;
     this.esClientScoped = options.esClientScoped;
-    this.esClientAsInternalUser = options.esClientAsInternalUser;
     this.auditLogger = options.auditLogger;
     // If spaceId is undefined, it means that spaces is disabled
     // Otherwise, if space is enabled and not specified, it is "default"
@@ -736,7 +734,7 @@ export class AlertsClient {
      * alerts being checked, which would lead to incomplete aggregation results
      * and incorrect authorization decisions.
      */
-    return this.esClientAsInternalUser.search<unknown, RuleTypeConsumersAggsResponse>({
+    return this.esClient.search<unknown, RuleTypeConsumersAggsResponse>({
       index,
       query: finalQuery,
       aggs: {

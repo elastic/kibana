@@ -51,7 +51,6 @@ describe('AlertsClient', () => {
       logger: loggingSystemMock.create().get(),
       authorization: alertingAuthMock,
       esClient: esClientMock,
-      esClientAsInternalUser: esClientMock,
       esClientScoped: esClientScopedMock,
       ruleDataService,
       getRuleType: jest.fn(),

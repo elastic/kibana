@@ -17,7 +17,6 @@ export interface AlertsClientFactoryProps {
   logger: Logger;
   esClient: ElasticsearchClient;
   getEsClientScoped: (request: KibanaRequest) => Promise<ElasticsearchClient>;
-  getEsClientAsInternalUser: () => Promise<ElasticsearchClient>;
   getAlertingAuthorization: (
     request: KibanaRequest
   ) => Promise<PublicMethodsOf<AlertingAuthorization>>;
@@ -33,7 +32,6 @@ export class AlertsClientFactory {
   private logger!: Logger;
   private esClient!: ElasticsearchClient;
   private getEsClientScoped!: (request: KibanaRequest) => Promise<ElasticsearchClient>;
-  private getEsClientAsInternalUser!: () => Promise<ElasticsearchClient>;
   private getAlertingAuthorization!: (
     request: KibanaRequest
   ) => Promise<PublicMethodsOf<AlertingAuthorization>>;
@@ -56,7 +54,6 @@ export class AlertsClientFactory {
     this.logger = options.logger;
     this.esClient = options.esClient;
     this.getEsClientScoped = options.getEsClientScoped;
-    this.getEsClientAsInternalUser = options.getEsClientAsInternalUser;
     this.securityPluginSetup = options.securityPluginSetup;
     this.ruleDataService = options.ruleDataService;
     this.getRuleType = options.getRuleType;
@@ -68,7 +65,6 @@ export class AlertsClientFactory {
     const { securityPluginSetup, getAlertingAuthorization, logger } = this;
     const authorization = await getAlertingAuthorization(request);
     const esClientScoped = await this.getEsClientScoped(request);
-    const esClientAsInternalUser = await this.getEsClientAsInternalUser();
 
     return new AlertsClient({
       logger,
@@ -76,7 +72,6 @@ export class AlertsClientFactory {
       auditLogger: securityPluginSetup?.audit.asScoped(request),
       esClient: this.esClient,
       esClientScoped,
-      esClientAsInternalUser,
       ruleDataService: this.ruleDataService!,
       getRuleType: this.getRuleType,
       getRuleList: this.getRuleList,

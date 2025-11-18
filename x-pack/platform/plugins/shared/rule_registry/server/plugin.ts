@@ -169,9 +169,6 @@ export class RuleRegistryPlugin
       async getEsClientScoped(request: KibanaRequest) {
         return core.elasticsearch.client.asScoped(request).asCurrentUser;
       },
-      getEsClientAsInternalUser: async () => {
-        return core.elasticsearch.client.asInternalUser;
-      },
       securityPluginSetup: security,
       ruleDataService,
       getRuleType: plugins.alerting.getType,
