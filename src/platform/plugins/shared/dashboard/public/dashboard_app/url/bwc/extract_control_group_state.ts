@@ -39,17 +39,20 @@ export function extractControlGroupState(state: { [key: string]: unknown }): {
         ...omit(convertedState.controlGroupState, 'initialChildControlState'),
         controls:
           typeof initialChildControlState === 'object'
-            ? Object.entries(initialChildControlState ?? {}).map(([controlId, value]) => {
-                const { grow, order, type, width, ...config } = value;
-                return {
-                  uid: controlId,
-                  grow,
-                  order,
-                  type,
-                  width,
-                  config,
-                };
-              })
+            ? Object.entries(initialChildControlState ?? {})
+                .sort(([, value1], [, value2]) => {
+                  return value1.order - value2.order;
+                })
+                .map(([controlId, value]) => {
+                  const { grow, order, type, width, ...config } = value; // drop order
+                  return {
+                    uid: controlId,
+                    type,
+                    ...(grow !== undefined && { grow }),
+                    ...(width !== undefined && { width }),
+                    config,
+                  };
+                })
             : [],
       },
     };
