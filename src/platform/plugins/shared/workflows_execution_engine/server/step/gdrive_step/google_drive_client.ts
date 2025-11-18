@@ -19,7 +19,7 @@ const DRIVE_SCOPES = [
 ];
 
 export interface GoogleDriveClientConfig {
-  serviceCredential?: Record<string, unknown>; // Service account JSON (optional)
+  service_credential?: Record<string, unknown>; // Service account JSON (optional)
   accessToken?: string; // OAuth access token (optional, alternative to service_credential)
   subject?: string; // For domain-wide delegation
 }

@@ -199,7 +199,7 @@ export const GDriveStepSchema = BaseStepSchema.extend({
   type: z.literal('gdrive'),
   with: z.object({
     // Service account credentials (JSON object) - optional, for backward compatibility
-    serviceCredential: z.record(z.string(), z.any()).optional(),
+    service_credential: z.record(z.string(), z.any()).optional(),
     // OAuth access token - preferred method from SavedObject
     accessToken: z.string().optional(),
     // Operation to perform
@@ -212,7 +212,6 @@ export const GDriveStepSchema = BaseStepSchema.extend({
     query: z.string().optional(), // Required for search operation
     mimeType: z.string().optional(), // MIME type for upload
     subject: z.string().optional(), // For domain-wide delegation
-    query: z.string().optional(), // For search action
     doc_limit: z.number().optional(), // For search and list to limit the number of results returned
   }),
 })
