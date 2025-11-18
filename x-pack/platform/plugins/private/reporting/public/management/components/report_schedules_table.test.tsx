@@ -365,6 +365,76 @@ describe('ReportSchedulesTable', () => {
     });
   });
 
+  it('shows view schedule config when manageReporting is false', async () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        ...coreStart,
+        application: {
+          capabilities: { ...application.capabilities, manageReporting: { show: false } },
+        },
+        http,
+        notifications: notificationServiceMock.createStartContract(),
+        userProfile: userProfileServiceMock.create(),
+        actions: {
+          validateEmailAddresses: mockValidateEmailAddresses,
+        },
+      },
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={queryClient}>
+          <ReportSchedulesTable {...defaultProps} />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
+
+    expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(3);
+
+    await user.click((await screen.findAllByTestId('euiCollapsedItemActionsButton'))[0]);
+
+    await waitForEuiPopoverOpen();
+
+    expect(
+      await screen.findByTestId(`reportViewConfig-${mockScheduledReports[0].id}`)
+    ).toHaveTextContent('View schedule config');
+  });
+
+  it('shows edit schedule config when manageReporting is true', async () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        ...coreStart,
+        application: {
+          capabilities: { ...application.capabilities, manageReporting: { show: true } },
+        },
+        http,
+        notifications: notificationServiceMock.createStartContract(),
+        userProfile: userProfileServiceMock.create(),
+        actions: {
+          validateEmailAddresses: mockValidateEmailAddresses,
+        },
+      },
+    });
+
+    render(
+      <IntlProvider locale="en">
+        <QueryClientProvider client={queryClient}>
+          <ReportSchedulesTable {...defaultProps} />
+        </QueryClientProvider>
+      </IntlProvider>
+    );
+
+    expect(await screen.findAllByTestId('scheduledReportRow')).toHaveLength(3);
+
+    await user.click((await screen.findAllByTestId('euiCollapsedItemActionsButton'))[0]);
+
+    await waitForEuiPopoverOpen();
+
+    expect(
+      await screen.findByTestId(`reportEditConfig-${mockScheduledReports[0].id}`)
+    ).toHaveTextContent('Edit schedule config');
+  });
+
   it('should show edit flyout correctly', async () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {

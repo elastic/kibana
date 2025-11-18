@@ -148,12 +148,26 @@ export const ScheduledReportForm = ({
   const defaultStartDateValue = useMemo(() => now.toISOString(), [now]);
 
   useEffect(() => {
-    if (!editMode && !readOnly && !hasManageReportingPrivilege && userProfile?.user.email) {
-      form.setFieldValue('emailRecipients', [userProfile?.user.email]);
+    if (
+      !editMode &&
+      !readOnly &&
+      !hasManageReportingPrivilege &&
+      !isUserProfileLoading &&
+      userProfile?.user.email
+    ) {
+      form.setFieldValue('emailRecipients', [userProfile.user.email]);
+      form.validate();
     }
-  }, [form, editMode, readOnly, hasManageReportingPrivilege, userProfile?.user.email]);
+  }, [
+    form,
+    editMode,
+    readOnly,
+    hasManageReportingPrivilege,
+    isUserProfileLoading,
+    userProfile?.user.email,
+  ]);
 
-  const isEmailActive = sendByEmail || false;
+  const isEmailActive = Boolean(sendByEmail);
 
   const onSubmit = async () => {
     try {
@@ -348,6 +362,7 @@ export const ScheduledReportForm = ({
                   euiFieldProps: {
                     compressed: true,
                     'data-test-subj': 'sendByEmailToggle',
+                    isLoading: isUserProfileLoading,
                     disabled:
                       readOnly ||
                       editMode ||

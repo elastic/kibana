@@ -10,9 +10,9 @@ import { useMutation, useQueryClient } from '@kbn/react-query';
 import { mutationKeys } from '../mutation_keys';
 import type { UpdateScheduleReportRequestParams } from '../apis/update_schedule_report';
 import { updateScheduleReport } from '../apis/update_schedule_report';
-import { queryKeys } from '../query_keys';
+import { root } from '../query_keys';
 
-export const getKey = mutationKeys.scheduleReport;
+export const getKey = mutationKeys.updateScheduleReport;
 
 export const useUpdateScheduleReport = ({ http }: { http: HttpSetup }) => {
   const queryClient = useQueryClient();
@@ -23,7 +23,7 @@ export const useUpdateScheduleReport = ({ http }: { http: HttpSetup }) => {
       updateScheduleReport({ http, params }),
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: queryKeys.getScheduledList({}),
+        queryKey: [root, 'scheduledList'],
         refetchType: 'active',
       });
     },
