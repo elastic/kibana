@@ -63,23 +63,24 @@ export function extractControlGroupState(state: { [key: string]: unknown }): {
   }
 
   if (!state.controlGroupInput || typeof state.controlGroupInput !== 'object') {
-    return { autoApplyFilters: autoApplySelections, controls: [] };
+    return { autoApplyFilters: autoApplySelections };
   }
 
   const controlGroupInput = state.controlGroupInput as { [key: string]: unknown };
   let standardizedControls: ControlsGroupState['controls'] = [];
   if (controlGroupInput.panels && typeof controlGroupInput.panels === 'object') {
     // <8.16 controls exported as panels
-    standardizedControls = Object.keys(controlGroupInput.panels).map((controlId) => {
-      const panels = controlGroupInput.panels as {
-        [key: string]: { [key: string]: unknown } | undefined;
-      };
-      const { explicitInput, ...restOfControlState } = panels[controlId] ?? {};
-      return {
-        ...restOfControlState,
-        config: explicitInput,
-      };
-    }) as ControlsGroupState['controls'];
+    standardizedControls = Object.values(controlGroupInput.panels)
+      .sort((controlA, controlB) => {
+        return controlA.order - controlB.order;
+      })
+      .map((control) => {
+        const { explicitInput, order, ...restOfControlState } = control ?? {};
+        return {
+          ...restOfControlState,
+          config: explicitInput,
+        };
+      }) as ControlsGroupState['controls'];
   } else if (Array.isArray(controlGroupInput.controls)) {
     standardizedControls = controlGroupInput.controls.map((control) => {
       if ('controlConfig' in control) {

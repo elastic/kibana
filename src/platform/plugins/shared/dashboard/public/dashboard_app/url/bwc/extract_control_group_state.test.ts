@@ -21,9 +21,18 @@ describe('extractDashboardState', () => {
               selectedOptions: ['win 7'],
             },
             grow: true,
-            order: 0,
             type: 'optionsListControl',
             width: 'small',
+          },
+          {
+            config: {
+              dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+              fieldName: 'name.keyword',
+              selectedOptions: ['US'],
+            },
+            grow: false,
+            type: 'optionsListControl',
+            width: 'medium',
           },
         ],
       };
@@ -46,7 +55,6 @@ describe('extractDashboardState', () => {
                 selectedOptions: ['win 7'],
               },
               grow: true,
-              order: 0,
               type: 'optionsListControl',
               width: 'small',
             },
@@ -61,7 +69,6 @@ describe('extractDashboardState', () => {
             selectedOptions: ['win 7'],
           },
           grow: true,
-          order: 0,
           type: 'optionsListControl',
           width: 'small',
         },
@@ -70,7 +77,7 @@ describe('extractDashboardState', () => {
   });
 
   describe('>= 8.16 to < 8.19 state', () => {
-    test('should convert controlGroupState to controlGroupInput', () => {
+    test('should convert controlGroupState to controlGroupInput and preserve order', () => {
       const dashboardState = extractDashboardState({
         controlGroupState: {
           autoApplySelections: false,
@@ -81,6 +88,16 @@ describe('extractDashboardState', () => {
               grow: false,
               selectedOptions: ['win 7'],
               type: 'optionsListControl',
+              order: 2,
+            },
+            ['d3d7af60-4c81-11e8-b3d7-01146121b73d']: {
+              dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+              fieldName: 'name.keyword',
+              grow: true,
+              width: 'small',
+              selectedOptions: ['US', 'Canada'],
+              type: 'optionsListControl',
+              order: 1,
             },
           },
           labelPosition: 'twoLine',
@@ -88,6 +105,17 @@ describe('extractDashboardState', () => {
       });
 
       expect(dashboardState.controlGroupInput?.controls).toEqual([
+        {
+          config: {
+            dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
+            fieldName: 'name.keyword',
+            selectedOptions: ['US', 'Canada'],
+          },
+          type: 'optionsListControl',
+          grow: true,
+          width: 'small',
+          uid: 'd3d7af60-4c81-11e8-b3d7-01146121b73d',
+        },
         {
           config: {
             dataViewId: '90943e30-9a47-11e8-b64d-95841ca0b247',
@@ -114,7 +142,6 @@ describe('extractDashboardState', () => {
                 selectedOptions: ['win 7'],
               },
               grow: true,
-              order: 0,
               type: 'optionsListControl',
               width: 'small',
             },
@@ -129,7 +156,6 @@ describe('extractDashboardState', () => {
             selectedOptions: ['win 7'],
           },
           grow: true,
-          order: 0,
           type: 'optionsListControl',
           width: 'small',
         },
