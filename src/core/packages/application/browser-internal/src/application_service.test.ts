@@ -529,8 +529,6 @@ describe('#start()', () => {
       analytics: analyticsServiceMock.createAnalyticsServiceStart(),
     };
     service = new ApplicationService();
-
-    window.performance.mark = jest.fn();
   });
 
   afterEach(() => {
