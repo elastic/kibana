@@ -157,11 +157,15 @@ const ECSComboboxFieldComponent: React.FC<ECSComboboxFieldProps> = ({
         <EuiFlexItem grow={false}>
           {
             // @ts-expect-error update types
-            <FieldIcon type={typeMap[option.value.type] ?? option.value.type} />
+            <FieldIcon type={typeMap[option.value.type] ?? option.value.type} aria-hidden="true" />
           }
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <span css={fieldSpanCss} className="euiSuggestItem__label euiSuggestItem__label--expand">
+          <span
+            css={fieldSpanCss}
+            className="euiSuggestItem__label euiSuggestItem__label--expand"
+            aria-hidden="true"
+          >
             <b>{option.value.field}</b>
           </span>
         </EuiFlexItem>
