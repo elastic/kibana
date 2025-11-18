@@ -143,6 +143,9 @@ describe('initializeESQLControlSelections', () => {
           key: 'myVariable',
           value: 'option1',
           type: 'values',
+          meta: {
+            controlledBy: 'myESQLControl',
+          },
         });
       });
     });
@@ -171,6 +174,9 @@ describe('initializeESQLControlSelections', () => {
           key: 'myVariable',
           value: ['option1', 'option2'],
           type: 'values',
+          meta: {
+            controlledBy: 'myESQLControl',
+          },
         });
       });
     });
