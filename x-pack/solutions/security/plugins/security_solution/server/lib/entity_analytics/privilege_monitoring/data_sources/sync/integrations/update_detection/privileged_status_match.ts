@@ -54,17 +54,36 @@ export interface PrivMatchersAggregation {
   };
 }
 
-const isTimestampGreaterThan = (date1: string, date2: string) => {
-  const m1 = moment(date1);
-  const m2 = moment(date2);
-  if (!m1.isValid()) return false;
-  if (!m2.isValid()) return true;
-  return m1.isAfter(m2);
+type PrivMatcherMode = 'index' | 'integrations';
+
+interface PrivMatcherModeConfig {
+  useTimestamps: boolean;
+  emptyMatcherPolicy: 'none' | 'all';
+}
+
+const PRIV_MATCHER_MODE_CONFIG: Record<PrivMatcherMode, PrivMatcherModeConfig> = {
+  /**
+   * - Uses lastProcessedTimestamp
+   * - If no matchers → return 0 privileged users
+   */
+  integrations: {
+    useTimestamps: true,
+    emptyMatcherPolicy: 'none',
+  },
+  /**
+   * - Ignores timestamps (full scan style)
+   * - If no matchers → treat all as privileged
+   */
+  index: {
+    useTimestamps: false,
+    emptyMatcherPolicy: 'all',
+  },
 };
 
 export const createPatternMatcherService = (
   dataClient: PrivilegeMonitoringDataClient,
-  soClient: SavedObjectsClientContract
+  soClient: SavedObjectsClientContract,
+  matcherMode: PrivMatcherMode = 'integrations'
 ) => {
   const searchService = createSearchService(dataClient);
   const syncMarkerService = createSyncMarkersService(dataClient, soClient);
@@ -72,17 +91,10 @@ export const createPatternMatcherService = (
   const findPrivilegedUsersFromMatchers = async (
     source: MonitoringEntitySource
   ): Promise<PrivMonBulkUser[]> => {
-    /**
-     * Empty matchers policy: SAFE DEFAULT
-     * If no matchers are configured, we *cannot* infer privileged users.
-     * Return none and log a warning so UI can prompt configuration.
-     */
+    const config = PRIV_MATCHER_MODE_CONFIG[matcherMode];
+
     if (!source.matchers?.length) {
-      dataClient.log(
-        'info',
-        `No matchers for source id=${source.id ?? '(unknown)'}. Returning 0 privileged users`
-      );
-      return [];
+      defaultMatchersPolicy(config.emptyMatcherPolicy, dataClient, source, matcherMode); // TODO: too many params
     }
 
     const esClient = dataClient.deps.clusterClient.asCurrentUser;
@@ -179,3 +191,29 @@ export const createPatternMatcherService = (
 
   return { findPrivilegedUsersFromMatchers };
 };
+function defaultMatchersPolicy(
+  emptyMatcherPolicy: string,
+  dataClient: PrivilegeMonitoringDataClient,
+  source: MonitoringEntitySource,
+  mode: PrivMatcherMode
+) {
+  if (emptyMatcherPolicy === 'none') {
+    dataClient.log(
+      'info',
+      `No matchers for source id=${
+        source.id ?? '(unknown)'
+      } (mode=${mode}). Returning 0 privileged users.`
+    );
+    return [];
+  }
+  if (emptyMatcherPolicy === 'all') {
+    dataClient.log(
+      'info',
+      `No matchers for source id=${
+        source.id ?? '(unknown)'
+      } (mode=${mode}). Treating ALL users as privileged.`
+    );
+    // You’ll plug in whatever “fetch all users” logic makes sense here:
+    return fetchAllUsersAsPrivileged(esClient, source); // TODO: implement this function
+  }
+}
