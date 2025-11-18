@@ -244,7 +244,6 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
             },
           },
         } as any)
-        // Mock the query for minimum revisions used by agents
         .mockResolvedValueOnce({
           aggregations: {
             min_used_revisions_by_policy_id: {
@@ -313,7 +312,6 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
             },
           },
         } as any)
-        // Mock the query for minimum revisions used by agents
         .mockResolvedValueOnce({
           aggregations: {
             min_used_revisions_by_policy_id: {
@@ -362,7 +360,48 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
       );
     });
 
-    it('should skip deletions of a policy revision if the calculated cutoff idx from minimum used revision is equal or below 1', async () => {
+    // Important case: We do not want deleteByQuery to be called with an empty bool.should, this can result in all revision docs being deleted
+    it('should skip deletions of a policy revision if the calculated cutoff idx from minimum used revision is equal or below 0', async () => {
+      mockEsClient.search
+        .mockResolvedValueOnce({
+          aggregations: {
+            latest_revisions_by_policy_id: {
+              buckets: [
+                {
+                  key: 'policy-1',
+                  doc_count: 15,
+                  latest_revision: { value: 15 },
+                },
+              ],
+            },
+          },
+        } as any)
+        .mockResolvedValueOnce({
+          aggregations: {
+            min_used_revisions_by_policy_id: {
+              buckets: [
+                {
+                  key: 'policy-1',
+                  doc_count: 100,
+                  min_used_revision: { value: 5 }, // Cutoff will be -5 (5 - 10 = -5)
+                },
+              ],
+            },
+          },
+        } as any);
+
+      mockEsClient.deleteByQuery.mockResolvedValue({
+        deleted: 5,
+      } as any);
+
+      await mockTask.runTask(taskInstance, mockCore, abortController);
+
+      expect(logger.debug).toHaveBeenCalledWith(
+        '[FleetPolicyRevisionsCleanupTask] No policy revisions to delete after evaluating agent usage.'
+      );
+      expect(mockEsClient.deleteByQuery).not.toHaveBeenCalledWith();
+    });
+    it('should never run deleteByQuery if after calculating revision cutoff indexes from minimum used by agents results in no revisions to delete', async () => {
       mockEsClient.search
         .mockResolvedValueOnce({
           aggregations: {
@@ -382,7 +421,6 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
             },
           },
         } as any)
-        // Mock the query for minimum revisions used by agents
         .mockResolvedValueOnce({
           aggregations: {
             min_used_revisions_by_policy_id: {
@@ -436,7 +474,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
       );
     });
 
-    it('should calculate the deletion cutoff for a policy from the latest revision if not use by agents', async () => {
+    it('should calculate the deletion cutoff for a policy from the latest revision if not used by agents', async () => {
       mockEsClient.search
         .mockResolvedValueOnce({
           aggregations: {
@@ -514,6 +552,7 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
       expect(mockEsClient.search).toHaveBeenCalledWith(
         {
           index: '.fleet-policies',
+          ignore_unavailable: true,
           size: 0,
           aggs: {
             latest_revisions_by_policy_id: {
