@@ -24,6 +24,8 @@ export const platformCoreTools = {
   generateEsql: platformCoreTool('generate_esql'),
   executeEsql: platformCoreTool('execute_esql'),
   createVisualization: platformCoreTool('create_visualization'),
+  createDashboard: platformCoreTool('create_dashboard'),
+  updateDashboard: platformCoreTool('update_dashboard'),
 } as const;
 
 /**
@@ -40,6 +42,7 @@ export const defaultAgentToolIds = [
   platformCoreTools.listIndices,
   platformCoreTools.getIndexMapping,
   platformCoreTools.getDocumentById,
+  platformCoreTools.createDashboard,
 ];
 
 /**

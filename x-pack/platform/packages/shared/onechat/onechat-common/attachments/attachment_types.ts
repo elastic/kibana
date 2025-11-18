@@ -16,12 +16,14 @@ export enum AttachmentType {
   screenContext = 'screen_context',
   text = 'text',
   esql = 'esql',
+  dashboard = 'dashboard',
 }
 
 interface AttachmentDataMap {
   [AttachmentType.esql]: EsqlAttachmentData;
   [AttachmentType.text]: TextAttachmentData;
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
+  [AttachmentType.dashboard]: DashboardAttachmentData;
 }
 
 export const esqlAttachmentDataSchema = z.object({
@@ -75,6 +77,26 @@ export interface ScreenContextAttachmentData {
   description?: string;
   /** arbitrary additional context data */
   additional_data?: Record<string, string>;
+}
+
+export const dashboardAttachmentDataSchema = z.object({
+  dashboardId: z.string().describe('The dashboard ID'),
+  title: z.string().describe('Dashboard title'),
+  description: z.string().optional().describe('Dashboard description'),
+  // TODO: Perhaps we should add the panels configuration here
+});
+
+/**
+ * Data for a dashboard attachment.
+ */
+export interface DashboardAttachmentData {
+  /** the dashboard ID */
+  dashboardId: string;
+  /** dashboard title */
+  title: string;
+  /** optional description */
+  description?: string;
+  // TODO: Perhaps we should add the panels configuration here
 }
 
 export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];

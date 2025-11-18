@@ -7,6 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
+import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import type { Runner } from '@kbn/onechat-server';
@@ -19,6 +20,7 @@ export interface RunnerFactoryDeps {
   // core services
   logger: Logger;
   elasticsearch: ElasticsearchServiceStart;
+  savedObjects: SavedObjectsServiceStart;
   security: SecurityServiceStart;
   // plugin deps
   inference: InferenceServerStart;

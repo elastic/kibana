@@ -27,6 +27,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
   const {
     request,
     elasticsearch,
+    savedObjects,
     modelProvider,
     toolsService,
     attachmentsService,
@@ -38,6 +39,7 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
     logger,
     modelProvider,
     esClient: elasticsearch.client.asScoped(request),
+    savedObjectsClient: savedObjects.getScopedClient(request),
     runner: manager.getRunner(),
     toolProvider: registryToProvider({
       registry: await toolsService.getRegistry({ request }),

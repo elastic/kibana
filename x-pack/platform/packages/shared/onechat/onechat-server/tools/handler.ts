@@ -8,6 +8,7 @@
 import type { MaybePromise } from '@kbn/utility-types';
 import type { Logger } from '@kbn/logging';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 import type {
@@ -53,6 +54,11 @@ export interface ToolHandlerContext {
    * Can be used to access ES on behalf of either the current user or the system user.
    */
   esClient: IScopedClusterClient;
+  /**
+   * Saved objects client scoped to the current user.
+   * Can be used to interact with saved objects on behalf of the current user.
+   */
+  savedObjectsClient: SavedObjectsClientContract;
   /**
    * Inference model provider scoped to the current user.
    * Can be used to access the inference APIs or chatModel.
