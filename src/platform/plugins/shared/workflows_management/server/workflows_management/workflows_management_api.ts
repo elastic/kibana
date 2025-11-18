@@ -26,6 +26,7 @@ import type {
   WorkflowYaml,
 } from '@kbn/workflows';
 import { getJsonSchemaFromYamlSchema, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { WorkflowsExecutionEnginePluginStart } from '@kbn/workflows-execution-engine/server';
 import type { LogSearchResult } from './lib/workflow_logger';
 import type {
@@ -34,11 +35,11 @@ import type {
 } from './workflows_management_service';
 import { WorkflowValidationError } from '../../common/lib/errors';
 import { validateStepNameUniqueness } from '../../common/lib/validate_step_names';
-import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml_utils';
+import { parseWorkflowYamlToJSON, stringifyWorkflowDefinition } from '../../common/lib/yaml';
 
 export interface GetWorkflowsParams {
   triggerType?: 'schedule' | 'event' | 'manual';
-  limit: number;
+  size: number;
   page: number;
   createdBy?: string[];
   enabled?: boolean[];
@@ -49,8 +50,8 @@ export interface GetWorkflowsParams {
 export interface GetWorkflowExecutionLogsParams {
   executionId: string;
   stepExecutionId?: string;
-  limit?: number;
-  offset?: number;
+  size?: number;
+  page?: number;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
 }
@@ -70,8 +71,8 @@ export interface WorkflowExecutionLogEntry {
 export interface WorkflowExecutionLogsDto {
   logs: WorkflowExecutionLogEntry[];
   total: number;
-  limit: number;
-  offset: number;
+  size: number;
+  page: number;
 }
 
 export interface GetStepExecutionParams {
@@ -81,16 +82,16 @@ export interface GetStepExecutionParams {
 
 export interface GetExecutionLogsParams {
   executionId: string;
-  limit?: number;
-  offset?: number;
+  size?: number;
+  page?: number;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
 }
 
 export interface GetStepLogsParams {
   executionId: string;
-  limit?: number;
-  offset?: number;
+  size?: number;
+  page?: number;
   sortField?: string;
   sortOrder?: 'asc' | 'desc';
   stepExecutionId: string;
@@ -103,6 +104,14 @@ export interface GetAvailableConnectorsParams {
 export interface GetAvailableConnectorsResponse {
   connectorsByType: Record<string, ConnectorTypeInfo>;
   totalConnectors: number;
+}
+
+export interface TestWorkflowParams {
+  workflowId?: string;
+  workflowYaml?: string;
+  inputs: Record<string, any>;
+  spaceId: string;
+  request: KibanaRequest;
 }
 
 export class WorkflowsManagementApi {
@@ -134,7 +143,7 @@ export class WorkflowsManagementApi {
   ): Promise<WorkflowDetailDto> {
     // Parse and update the YAML to change the name
     const zodSchema = await this.workflowsService.getWorkflowZodSchema(
-      { loose: true },
+      { loose: false },
       spaceId,
       request
     );
@@ -197,18 +206,38 @@ export class WorkflowsManagementApi {
     return executeResponse.workflowExecutionId;
   }
 
-  public async testWorkflow(
-    workflowYaml: string,
-    inputs: Record<string, any>,
-    spaceId: string,
-    request: KibanaRequest
-  ): Promise<string> {
+  public async testWorkflow({
+    workflowId,
+    workflowYaml,
+    inputs,
+    spaceId,
+    request,
+  }: TestWorkflowParams): Promise<string> {
+    let resolvedYaml = workflowYaml;
+    let resolvedWorkflowId = workflowId;
+
+    if (workflowId && !workflowYaml) {
+      const existingWorkflow = await this.workflowsService.getWorkflow(workflowId, spaceId);
+      if (!existingWorkflow) {
+        throw new WorkflowNotFoundError(workflowId);
+      }
+      resolvedYaml = existingWorkflow.yaml;
+    }
+
+    if (!resolvedWorkflowId) {
+      resolvedWorkflowId = 'test-workflow';
+    }
+
+    if (!resolvedYaml) {
+      throw new Error('Either workflowId or workflowYaml must be provided');
+    }
+
     const zodSchema = await this.workflowsService.getWorkflowZodSchema(
-      { loose: true },
+      { loose: false },
       spaceId,
       request
     );
-    const parsedYaml = parseWorkflowYamlToJSON(workflowYaml, zodSchema);
+    const parsedYaml = parseWorkflowYamlToJSON(resolvedYaml, zodSchema);
 
     if (parsedYaml.error) {
       // TODO: handle error properly
@@ -226,7 +255,7 @@ export class WorkflowsManagementApi {
       );
     }
 
-    const workflowToCreate = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
+    const workflowJson = transformWorkflowYamlJsontoEsWorkflow(parsedYaml.data as WorkflowYaml);
     const { event, ...manualInputs } = inputs;
     const context = {
       event,
@@ -236,11 +265,11 @@ export class WorkflowsManagementApi {
     const workflowsExecutionEngine = await this.getWorkflowsExecutionEngine();
     const executeResponse = await workflowsExecutionEngine.executeWorkflow(
       {
-        id: 'test-workflow',
-        name: workflowToCreate.name,
-        enabled: workflowToCreate.enabled,
-        definition: workflowToCreate.definition,
-        yaml: workflowYaml,
+        id: resolvedWorkflowId,
+        name: workflowJson.name,
+        enabled: workflowJson.enabled,
+        definition: workflowJson.definition,
+        yaml: resolvedYaml,
         isTestRun: true,
       },
       context,
@@ -258,7 +287,7 @@ export class WorkflowsManagementApi {
   ): Promise<string> {
     const parsedYaml = parseWorkflowYamlToJSON(
       workflowYaml,
-      await this.workflowsService.getWorkflowZodSchema({ loose: true }, spaceId, request)
+      await this.workflowsService.getWorkflowZodSchema({ loose: false }, spaceId, request)
     );
 
     if (parsedYaml.error) {
@@ -278,7 +307,8 @@ export class WorkflowsManagementApi {
         spaceId,
       },
       stepId,
-      contextOverride
+      contextOverride,
+      request
     );
     return executeResponse.workflowExecutionId;
   }
@@ -307,8 +337,8 @@ export class WorkflowsManagementApi {
         {
           executionId: params.executionId,
           stepExecutionId: params.stepExecutionId,
-          limit: params.limit,
-          offset: params.offset,
+          size: params.size,
+          page: params.page,
           sortField: params.sortField,
           sortOrder: params.sortOrder,
         },
@@ -317,6 +347,9 @@ export class WorkflowsManagementApi {
     } else {
       result = await this.workflowsService.getExecutionLogs(params, spaceId);
     }
+
+    const size = params.size || 100;
+    const page = params.page || 1;
 
     // Transform the logs to match our API format
     return {
@@ -345,8 +378,8 @@ export class WorkflowsManagementApi {
           },
         })),
       total: result.total,
-      limit: params.limit || 100,
-      offset: params.offset || 0,
+      size,
+      page,
     };
   }
 
@@ -385,7 +418,11 @@ export class WorkflowsManagementApi {
     spaceId: string,
     request: KibanaRequest
   ): Promise<JsonSchema7Type> {
-    const zodSchema = await this.workflowsService.getWorkflowZodSchema({ loose }, spaceId, request);
+    const zodSchema = await this.workflowsService.getWorkflowZodSchema(
+      { loose: false },
+      spaceId,
+      request
+    );
     return getJsonSchemaFromYamlSchema(zodSchema);
   }
 }

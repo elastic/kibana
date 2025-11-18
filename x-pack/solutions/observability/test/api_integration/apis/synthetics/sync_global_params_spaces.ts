@@ -21,7 +21,8 @@ import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_pol
 import { omitMonitorKeys } from './add_monitor';
 
 export default function ({ getService }: FtrProviderContext) {
-  describe('SyncGlobalParamsSpaces', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/241106
+  describe.skip('SyncGlobalParamsSpaces', function () {
     this.tags('skipCloud');
     const supertestAPI = getService('supertest');
     const retry = getService('retry');

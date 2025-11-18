@@ -46,6 +46,7 @@ export {
   type TabularDataResult,
   type OtherResult,
   type IndexSearchToolDefinitionWithSchema,
+  type BrowserApiToolMetadata,
 } from './tools';
 export {
   OnechatErrorCode,
@@ -98,6 +99,7 @@ export {
   type ConversationRoundStep,
   type ReasoningStepData,
   type ReasoningStep,
+  type RoundModelUsageStats,
   ConversationRoundStepType,
   isToolCallStep,
   isReasoningStep,
@@ -117,6 +119,8 @@ export {
   type ToolResultEventData,
   type ToolCallEvent,
   type ToolCallEventData,
+  type BrowserToolCallEvent,
+  type BrowserToolCallEventData,
   type ReasoningEvent,
   type ReasoningEventData,
   type MessageChunkEventData,
@@ -129,6 +133,7 @@ export {
   type RoundCompleteEvent,
   type ToolCallProgress,
   isToolCallEvent,
+  isBrowserToolCallEvent,
   isToolResultEvent,
   isReasoningEvent,
   isMessageChunkEvent,

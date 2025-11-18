@@ -105,7 +105,7 @@ export function ToggleSLOView({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiFlexItem>
-        <HealthCallout />
+        <HealthCallout sloList={sloList} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
