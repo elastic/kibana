@@ -487,7 +487,9 @@ function createContinue(
     stepId,
     stepType: 'continue',
     exitNodeId,
-    condition,
+    configuration: {
+      condition,
+    },
   };
   const exitContinueNode: ExitContinueNode = {
     type: 'exit-continue',

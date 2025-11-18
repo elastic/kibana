@@ -26,7 +26,7 @@ export class EnterContinueNodeImpl implements NodeImplementation, NodeWithErrorC
 
   public async catchError(failedContext: StepExecutionRuntime): Promise<void> {
     const shouldContinue = failedContext.contextManager.renderValueAccordingToContext(
-      this.node.condition,
+      this.node.configuration.condition,
       {
         error: failedContext.stepExecution?.error,
       }
