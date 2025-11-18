@@ -87,8 +87,7 @@ export class SearchSessionService implements ISearchSessionService {
   private setupCompleted = false;
 
   private taskManager!: TaskManagerStartContract;
-  private internalEsClient!: ElasticsearchClient;
-  private internalSavedObjectsClient!: SavedObjectsClientContract;
+  private core!: CoreStart;
 
   constructor(
     private readonly logger: Logger,
@@ -102,10 +101,13 @@ export class SearchSessionService implements ISearchSessionService {
     deps.taskManager.registerTaskDefinitions({
       'backgroundSearch:updateStatus': {
         title: 'Poll background search status and update if needed',
-        createTaskRunner: ({ taskInstance }) => ({
+        createTaskRunner: ({ taskInstance, fakeRequest }) => ({
           run: async () => {
-            await this.runTask(taskInstance.params.sessionId);
-            return { state: taskInstance.state };
+            const hasFinished = await this.runTask(taskInstance.params.sessionId, fakeRequest!);
+            return {
+              shouldDeleteTask: hasFinished,
+              state: {},
+            };
           },
         }),
       },
@@ -118,10 +120,7 @@ export class SearchSessionService implements ISearchSessionService {
       throw new Error('SearchSessionService setup() must be called before start()');
 
     this.taskManager = deps.taskManager;
-    this.internalSavedObjectsClient = core.savedObjects.createInternalRepository([
-      SEARCH_SESSION_TYPE,
-    ]);
-    this.internalEsClient = core.elasticsearch.client.asInternalUser;
+    this.core = core;
   }
 
   public stop() {}
@@ -323,6 +322,7 @@ export class SearchSessionService implements ISearchSessionService {
   public trackId = async (
     deps: SearchSessionDependencies,
     user: AuthenticatedUser | null,
+    request: KibanaRequest,
     searchRequest: IKibanaSearchRequest,
     searchResponse: IKibanaSearchResponse,
     options: ISearchOptions
@@ -333,7 +333,7 @@ export class SearchSessionService implements ISearchSessionService {
     if (!this.sessionConfig.enabled || !sessionId || !searchId) return;
     if (!searchRequest.params) return;
 
-    this.registerTask(sessionId);
+    this.registerTask(sessionId, request);
 
     const requestHash = createRequestHash(searchRequest.params);
 
@@ -483,7 +483,7 @@ export class SearchSessionService implements ISearchSessionService {
       };
       return {
         getId: this.getId.bind(this, deps, user),
-        trackId: this.trackId.bind(this, deps, user),
+        trackId: this.trackId.bind(this, deps, user, request),
         getSearchIdMapping: this.getSearchIdMapping.bind(this, deps, user),
         save: this.save.bind(this, deps, user),
         get: this.get.bind(this, deps, user),
@@ -519,31 +519,20 @@ export class SearchSessionService implements ISearchSessionService {
     return `backgroundSearch:updateStatus:${sessionId}`;
   };
 
-  private registerTask = async (sessionId: string) => {
+  private registerTask = async (sessionId: string, request: KibanaRequest) => {
     const taskId = this.getTaskId(sessionId);
 
-    if (await this.taskExists(taskId)) {
-      // If the sessionId is already queued for updates we don't need to queue it again
-      return;
-    }
-
     this.logger.debug(`Registering background search status update task for session ${sessionId}`);
-    await this.taskManager.schedule({
-      taskType: 'backgroundSearch:updateStatus',
-      state: {},
-      params: { sessionId },
-      id: taskId,
-      schedule: { interval: '10s' },
-    });
-  };
-
-  private taskExists = async (taskId: string) => {
-    try {
-      await this.taskManager.get(taskId);
-      return true;
-    } catch (e) {
-      return false;
-    }
+    await this.taskManager.ensureScheduled(
+      {
+        taskType: 'backgroundSearch:updateStatus',
+        state: {},
+        params: { sessionId },
+        id: taskId,
+        schedule: { interval: '10s' },
+      },
+      { request }
+    );
   };
 
   private async getSavedObject(deps: SearchSessionDependencies, sessionId: string) {
@@ -554,17 +543,20 @@ export class SearchSessionService implements ISearchSessionService {
     }
   }
 
-  private runTask = async (sessionId: string) => {
+  private runTask = async (sessionId: string, request: KibanaRequest) => {
     const deps = {
-      asCurrentUserElasticsearchClient: this.internalEsClient,
-      savedObjectsClient: this.internalSavedObjectsClient,
+      asCurrentUserElasticsearchClient:
+        this.core.elasticsearch.client.asScoped(request).asCurrentUser,
+      savedObjectsClient: this.core.savedObjects.getScopedClient(request, {
+        includedHiddenTypes: [SEARCH_SESSION_TYPE],
+      }),
     };
 
     const savedObject = await this.getSavedObject(deps, sessionId);
     if (!savedObject) {
       this.logger.debug(`Search session ${sessionId} not found, removing background update task`);
       await this.taskManager.remove(this.getTaskId(sessionId));
-      return;
+      return true;
     }
 
     const sessionStatus = await getSessionStatus(
@@ -578,17 +570,10 @@ export class SearchSessionService implements ISearchSessionService {
       savedObject,
       sessionStatus.searchStatuses || []
     );
+    const hasUpdatedToComplete =
+      sessionStatus.status === SearchSessionStatus.COMPLETE && !savedObject.attributes.completed;
 
     if (!!updatedIdMapping || sessionStatus.status !== savedObject.attributes.status) {
-      const hasUpdatedToComplete =
-        sessionStatus.status === SearchSessionStatus.COMPLETE && !savedObject.attributes.completed;
-      if (hasUpdatedToComplete) {
-        this.logger.debug(
-          `Search session ${sessionId} is completed, removing background update task`
-        );
-        await this.taskManager.remove(this.getTaskId(sessionId));
-      }
-
       const latestCompletion = Object.values(updatedIdMapping || {}).reduce<string | undefined>(
         (res, curr) => {
           if (!curr.completionTime) return res;
@@ -605,7 +590,7 @@ export class SearchSessionService implements ISearchSessionService {
       });
     }
 
-    return sessionStatus;
+    return hasUpdatedToComplete;
   };
 
   private getUpdatedIdMappings(
