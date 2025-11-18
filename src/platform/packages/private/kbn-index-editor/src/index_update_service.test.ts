@@ -56,14 +56,7 @@ describe('IndexUpdateService', () => {
       },
     });
 
-    service = new IndexUpdateService(
-      http,
-      data,
-      notifications,
-      indexEditorTelemetryService,
-      true,
-      true
-    );
+    service = new IndexUpdateService(http, data, notifications, indexEditorTelemetryService, true);
   });
 
   afterEach(() => {
