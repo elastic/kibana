@@ -49,6 +49,10 @@ export const InputType = z.object({
 export type DataStream = z.infer<typeof DataStream>;
 export const DataStream = z.object({
   /**
+   * The data stream id
+   */
+  data_stream_id: NonEmptyString.optional(),
+  /**
    * The title of the data stream
    */
   title: NonEmptyString.optional(),
@@ -56,6 +60,10 @@ export const DataStream = z.object({
    * The description of the data stream
    */
   description: NonEmptyString.optional(),
+  /**
+   * The status of the data stream
+   */
+  status: NonEmptyString.optional(),
   /**
    * The input types of the data stream
    */

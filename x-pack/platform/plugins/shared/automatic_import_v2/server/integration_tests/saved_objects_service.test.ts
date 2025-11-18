@@ -17,6 +17,7 @@ import type {
   IntegrationAttributes,
   DataStreamAttributes,
 } from '../services/saved_objects/schemas/types';
+import type { Integration } from '../../common';
 import {
   DATA_STREAM_SAVED_OBJECT_TYPE,
   INPUT_TYPES,
@@ -111,22 +112,24 @@ describe('AutomaticImportSavedObjectService', () => {
 
     describe('insertIntegration', () => {
       it('should create integration with service-managed defaults', async () => {
-        const result = await savedObjectService.insertIntegration(mockRequest, {
-          ...mockIntegrationData,
+        const integrationData: Integration = {
           integration_id: 'test-integration-1',
-        });
+          title: mockIntegrationData.metadata?.title,
+          description: mockIntegrationData.metadata?.description,
+        };
+
+        const result = await savedObjectService.insertIntegration(mockRequest, integrationData);
 
         expect(result.id).toBe('test-integration-1');
         expect(result.attributes.created_by).toBe('test-user');
         expect(result.attributes.metadata?.created_at).toBeDefined();
-        expect(result.attributes.metadata?.version).toBe('0.0.0');
+        expect(result.attributes.metadata?.version).toBe('1.0.0');
 
         await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'test-integration-1');
       });
 
       it('should throw error when integration_id is missing', async () => {
-        const invalidData = {
-          ...mockIntegrationData,
+        const invalidData: Integration = {
           integration_id: '',
         };
 
@@ -136,9 +139,9 @@ describe('AutomaticImportSavedObjectService', () => {
       });
 
       it('should throw error when integration already exists', async () => {
-        const integrationData: IntegrationAttributes = {
-          ...mockIntegrationData,
+        const integrationData: Integration = {
           integration_id: 'duplicate-integration',
+          title: 'Test Integration',
         };
 
         await savedObjectService.insertIntegration(mockRequest, integrationData);
@@ -155,17 +158,17 @@ describe('AutomaticImportSavedObjectService', () => {
 
     describe('getIntegration', () => {
       it('should retrieve an existing integration', async () => {
-        await savedObjectService.insertIntegration(mockRequest, {
-          ...mockIntegrationData,
+        const integrationData: Integration = {
           integration_id: 'test-get-integration',
-          data_stream_count: 5,
-          metadata: { ...mockIntegrationData.metadata, title: 'Get Test Integration' },
-        });
+          title: 'Get Test Integration',
+        };
+
+        await savedObjectService.insertIntegration(mockRequest, integrationData);
 
         const result = await savedObjectService.getIntegration('test-get-integration');
 
         expect(result.id).toBe('test-get-integration');
-        expect(result.attributes.data_stream_count).toBe(5);
+        expect(result.attributes.data_stream_count).toBe(0);
 
         await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'test-get-integration');
       });
@@ -179,55 +182,65 @@ describe('AutomaticImportSavedObjectService', () => {
 
     describe('updateIntegration', () => {
       it('should update an existing integration', async () => {
-        await savedObjectService.insertIntegration(mockRequest, {
-          ...mockIntegrationData,
+        const integrationData: Integration = {
           integration_id: 'test-update-integration',
-          data_stream_count: 1,
-          metadata: { ...mockIntegrationData.metadata, title: 'Original Title' },
-        });
+          title: 'Original Title',
+        };
+
+        await savedObjectService.insertIntegration(mockRequest, integrationData);
 
         const result = await savedObjectService.updateIntegration(
           {
-            ...mockIntegrationData,
             integration_id: 'test-update-integration',
             data_stream_count: 3,
+            created_by: 'test-user',
             status: TASK_STATUSES.completed,
-            metadata: { ...mockIntegrationData.metadata, title: 'Updated Title' },
+            metadata: { title: 'Updated Title', version: '1.0.0' },
           },
-          '0.0.0'
+          '1.0.0'
         );
 
         expect(result.attributes.data_stream_count).toBe(3);
         expect(result.attributes.status).toBe(TASK_STATUSES.completed);
-        expect(result.attributes.metadata?.version).toBe('0.0.1');
+        expect(result.attributes.metadata?.version).toBe('1.0.1');
 
         await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'test-update-integration');
       });
 
       it('should increment version on update', async () => {
-        const integrationData: IntegrationAttributes = {
-          ...mockIntegrationData,
+        const integrationData: Integration = {
           integration_id: 'test-version-integration',
-          data_stream_count: 1,
         };
 
         // Create integration
         const created = await savedObjectService.insertIntegration(mockRequest, integrationData);
-        expect(created.attributes.metadata?.version).toBe('0.0.0');
+        expect(created.attributes.metadata?.version).toBe('1.0.0');
 
         // First update
         const firstUpdate = await savedObjectService.updateIntegration(
-          { ...integrationData, data_stream_count: 2 },
-          '0.0.0'
+          {
+            integration_id: 'test-version-integration',
+            data_stream_count: 2,
+            created_by: 'test-user',
+            status: TASK_STATUSES.pending,
+            metadata: { version: '1.0.0' },
+          },
+          '1.0.0'
         );
-        expect(firstUpdate.attributes.metadata?.version).toBe('0.0.1');
+        expect(firstUpdate.attributes.metadata?.version).toBe('1.0.1');
 
         // Second update
         const secondUpdate = await savedObjectService.updateIntegration(
-          { ...integrationData, data_stream_count: 3 },
-          '0.0.1'
+          {
+            integration_id: 'test-version-integration',
+            data_stream_count: 3,
+            created_by: 'test-user',
+            status: TASK_STATUSES.pending,
+            metadata: { version: '1.0.1' },
+          },
+          '1.0.1'
         );
-        expect(secondUpdate.attributes.metadata?.version).toBe('0.0.2');
+        expect(secondUpdate.attributes.metadata?.version).toBe('1.0.2');
 
         // Cleanup
         await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'test-version-integration');
@@ -260,126 +273,182 @@ describe('AutomaticImportSavedObjectService', () => {
       });
 
       it('should throw version conflict when expectedVersion does not match', async () => {
-        const integrationData: IntegrationAttributes = {
+        const integrationData: Integration = {
           integration_id: 'test-app-version-conflict',
-          data_stream_count: 1,
-          created_by: 'test-user',
-          status: TASK_STATUSES.pending,
-          metadata: {},
         };
 
         await savedObjectService.insertIntegration(mockRequest, integrationData);
 
         await savedObjectService.updateIntegration(
-          { ...integrationData, data_stream_count: 2 },
-          '0.0.0'
+          {
+            integration_id: 'test-app-version-conflict',
+            data_stream_count: 2,
+            created_by: 'test-user',
+            status: TASK_STATUSES.pending,
+            metadata: { version: '1.0.0' },
+          },
+          '1.0.0'
         );
 
         // Meta data version increments automatically as patch version
         await expect(
           savedObjectService.updateIntegration(
-            { ...integrationData, data_stream_count: 3 },
-            '0.0.0'
+            {
+              integration_id: 'test-app-version-conflict',
+              data_stream_count: 3,
+              created_by: 'test-user',
+              status: TASK_STATUSES.pending,
+              metadata: { version: '1.0.0' },
+            },
+            '1.0.0'
           )
         ).rejects.toThrow(
-          'Version conflict: Integration test-app-version-conflict has been updated. Expected version 0.0.0, but current version is 0.0.1'
+          'Version conflict: Integration test-app-version-conflict has been updated. Expected version 1.0.0, but current version is 1.0.1'
         );
 
         await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'test-app-version-conflict');
       });
 
       it('should increment major version', async () => {
-        const integrationData: IntegrationAttributes = {
+        const integrationData: Integration = {
           integration_id: 'test-major-version',
-          data_stream_count: 1,
-          created_by: 'test-user',
-          status: TASK_STATUSES.pending,
-          metadata: {},
         };
 
         await savedObjectService.insertIntegration(mockRequest, integrationData);
 
         const updated = await savedObjectService.updateIntegration(
-          { ...integrationData, data_stream_count: 2 },
-          '0.0.0',
+          {
+            integration_id: 'test-major-version',
+            data_stream_count: 2,
+            created_by: 'test-user',
+            status: TASK_STATUSES.pending,
+            metadata: { version: '1.0.0' },
+          },
+          '1.0.0',
           'major'
         );
 
-        expect(updated.attributes.metadata?.version).toBe('1.0.0');
+        expect(updated.attributes.metadata?.version).toBe('2.0.0');
 
         await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'test-major-version');
       });
 
       it('should increment minor version', async () => {
-        const integrationData: IntegrationAttributes = {
+        const integrationData: Integration = {
           integration_id: 'test-minor-version',
-          data_stream_count: 1,
-          created_by: 'test-user',
-          status: TASK_STATUSES.pending,
-          metadata: {},
         };
 
         await savedObjectService.insertIntegration(mockRequest, integrationData);
 
         const updated = await savedObjectService.updateIntegration(
-          { ...integrationData, data_stream_count: 2 },
-          '0.0.0',
+          {
+            integration_id: 'test-minor-version',
+            data_stream_count: 2,
+            created_by: 'test-user',
+            status: TASK_STATUSES.pending,
+            metadata: { version: '1.0.0' },
+          },
+          '1.0.0',
           'minor'
         );
 
-        expect(updated.attributes.metadata?.version).toBe('0.1.0');
+        expect(updated.attributes.metadata?.version).toBe('1.1.0');
 
         await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'test-minor-version');
       });
 
       it('should reset minor and patch when incrementing major version', async () => {
-        const integrationData: IntegrationAttributes = {
+        const integrationData: Integration = {
           integration_id: 'test-major-reset',
-          data_stream_count: 1,
-          created_by: 'test-user',
-          status: TASK_STATUSES.pending,
-          metadata: {},
         };
 
         await savedObjectService.insertIntegration(mockRequest, integrationData);
 
-        await savedObjectService.updateIntegration({ ...integrationData }, '0.0.0', 'minor');
+        await savedObjectService.updateIntegration(
+          {
+            integration_id: 'test-major-reset',
+            data_stream_count: 1,
+            created_by: 'test-user',
+            status: TASK_STATUSES.pending,
+            metadata: { version: '1.0.0' },
+          },
+          '1.0.0',
+          'minor'
+        );
 
-        await savedObjectService.updateIntegration({ ...integrationData }, '0.1.0', 'patch');
+        await savedObjectService.updateIntegration(
+          {
+            integration_id: 'test-major-reset',
+            data_stream_count: 1,
+            created_by: 'test-user',
+            status: TASK_STATUSES.pending,
+            metadata: { version: '1.1.0' },
+          },
+          '1.1.0',
+          'patch'
+        );
 
         const updated = await savedObjectService.updateIntegration(
-          { ...integrationData },
-          '0.1.1',
+          {
+            integration_id: 'test-major-reset',
+            data_stream_count: 1,
+            created_by: 'test-user',
+            status: TASK_STATUSES.pending,
+            metadata: { version: '1.1.1' },
+          },
+          '1.1.1',
           'major'
         );
 
-        expect(updated.attributes.metadata?.version).toBe('1.0.0');
+        expect(updated.attributes.metadata?.version).toBe('2.0.0');
 
         await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'test-major-reset');
       });
 
       it('should reset patch when incrementing minor version', async () => {
-        const integrationData: IntegrationAttributes = {
+        const integrationData: Integration = {
           integration_id: 'test-minor-reset',
-          data_stream_count: 1,
-          created_by: 'test-user',
-          status: TASK_STATUSES.pending,
-          metadata: {},
         };
 
         await savedObjectService.insertIntegration(mockRequest, integrationData);
 
-        await savedObjectService.updateIntegration({ ...integrationData }, '0.0.0', 'patch');
+        await savedObjectService.updateIntegration(
+          {
+            integration_id: 'test-minor-reset',
+            data_stream_count: 1,
+            created_by: 'test-user',
+            status: TASK_STATUSES.pending,
+            metadata: { version: '1.0.0' },
+          },
+          '1.0.0',
+          'patch'
+        );
 
-        await savedObjectService.updateIntegration({ ...integrationData }, '0.0.1', 'patch');
+        await savedObjectService.updateIntegration(
+          {
+            integration_id: 'test-minor-reset',
+            data_stream_count: 1,
+            created_by: 'test-user',
+            status: TASK_STATUSES.pending,
+            metadata: { version: '1.0.1' },
+          },
+          '1.0.1',
+          'patch'
+        );
 
         const updated = await savedObjectService.updateIntegration(
-          { ...integrationData },
-          '0.0.2',
+          {
+            integration_id: 'test-minor-reset',
+            data_stream_count: 1,
+            created_by: 'test-user',
+            status: TASK_STATUSES.pending,
+            metadata: { version: '1.0.2' },
+          },
+          '1.0.2',
           'minor'
         );
 
-        expect(updated.attributes.metadata?.version).toBe('0.1.0');
+        expect(updated.attributes.metadata?.version).toBe('1.1.0');
 
         await savedObjectsClient.delete(INTEGRATION_SAVED_OBJECT_TYPE, 'test-minor-reset');
       });
@@ -388,20 +457,12 @@ describe('AutomaticImportSavedObjectService', () => {
     describe('getAllIntegrations', () => {
       it('should retrieve all integrations', async () => {
         // Create multiple integrations
-        const integration1: IntegrationAttributes = {
+        const integration1: Integration = {
           integration_id: 'test-getall-1',
-          data_stream_count: 1,
-          created_by: 'test-user',
-          status: TASK_STATUSES.pending,
-          metadata: {},
         };
 
-        const integration2: IntegrationAttributes = {
+        const integration2: Integration = {
           integration_id: 'test-getall-2',
-          data_stream_count: 2,
-          created_by: 'test-user',
-          status: TASK_STATUSES.completed,
-          metadata: {},
         };
 
         try {
@@ -443,12 +504,10 @@ describe('AutomaticImportSavedObjectService', () => {
         const integrationId = 'test-cascade-delete-integration';
 
         // Create integrations for testing cascade deletion
-        await savedObjectService.insertIntegration(mockRequest, {
+        const integrationData: Integration = {
           integration_id: integrationId,
-          created_by: 'test-user',
-          status: TASK_STATUSES.pending,
-          metadata: {},
-        });
+        };
+        await savedObjectService.insertIntegration(mockRequest, integrationData);
 
         await savedObjectService.insertDataStream(mockRequest, {
           integration_id: integrationId,
@@ -532,12 +591,10 @@ describe('AutomaticImportSavedObjectService', () => {
 
     describe('insertDataStream', () => {
       it('should create a new data stream with existing integration', async () => {
-        await savedObjectService.insertIntegration(mockRequest, {
+        const integrationData: Integration = {
           integration_id: 'test-ds-integration-1',
-          created_by: 'test-user',
-          status: TASK_STATUSES.pending,
-          metadata: {},
-        });
+        };
+        await savedObjectService.insertIntegration(mockRequest, integrationData);
 
         const result = await savedObjectService.insertDataStream(mockRequest, {
           ...mockDataStreamData,
@@ -959,10 +1016,10 @@ describe('AutomaticImportSavedObjectService', () => {
           await savedObjectService.insertDataStream(mockRequest, dataStream1);
           await savedObjectService.insertDataStream(mockRequest, dataStream2);
 
-          const result = await savedObjectService.getAllDataStreams();
+          const result = await savedObjectService.getAllDataStreams('getall-ds-integration');
 
-          // Check that we have at least the 2 data streams we created
-          expect(result.total).toBeGreaterThanOrEqual(2);
+          // Check that we have the 2 data streams we created
+          expect(result.total).toBe(2);
           const ids = result.saved_objects.map((obj) => obj.id);
           expect(ids).toContain('test-getall-ds-1');
           expect(ids).toContain('test-getall-ds-2');
@@ -1086,12 +1143,10 @@ describe('AutomaticImportSavedObjectService', () => {
         const integrationId = 'delete-multiple-ds-integration';
 
         // Create integration
-        await savedObjectService.insertIntegration(mockRequest, {
+        const integrationData: Integration = {
           integration_id: integrationId,
-          created_by: 'test-user',
-          status: TASK_STATUSES.pending,
-          metadata: {},
-        });
+        };
+        await savedObjectService.insertIntegration(mockRequest, integrationData);
 
         // Create 3 data streams
         await savedObjectService.insertDataStream(mockRequest, {
@@ -1182,15 +1237,9 @@ describe('AutomaticImportSavedObjectService', () => {
     it('should handle complete workflow: create integration, add data streams, update, and query', async () => {
       const integrationId = 'workflow-integration';
 
-      const integrationData: IntegrationAttributes = {
+      const integrationData: Integration = {
         integration_id: integrationId,
-        data_stream_count: 0,
-        created_by: 'test-user',
-        status: TASK_STATUSES.pending,
-        metadata: {
-          title: 'Workflow Test Integration',
-          version: '0.0.0',
-        },
+        title: 'Workflow Test Integration',
       };
       const createdIntegration = await savedObjectService.insertIntegration(
         mockRequest,
@@ -1257,10 +1306,10 @@ describe('AutomaticImportSavedObjectService', () => {
           status: TASK_STATUSES.completed,
           metadata: {
             title: 'Workflow Test Integration - Completed',
-            version: '0.0.2',
+            version: integration.attributes.metadata?.version || '1.0.0',
           },
         },
-        integration.attributes.metadata?.version || '0.0.0'
+        integration.attributes.metadata?.version || '1.0.0'
       );
 
       const finalIntegration = await savedObjectService.getIntegration(integrationId);

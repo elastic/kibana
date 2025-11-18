@@ -5,15 +5,9 @@
  * 2.0.
  */
 
-import type {
-  PluginInitializerContext,
-  CoreStart,
-  Plugin,
-  Logger,
-  ElasticsearchClient,
-} from '@kbn/core/server';
-
-import { ReplaySubject, type Subject } from 'rxjs';
+import type { PluginInitializerContext, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import { ReplaySubject } from 'rxjs';
+import { registerRoutes } from './routes';
 import type {
   AutomaticImportV2PluginCoreSetupDependencies,
   AutomaticImportV2PluginSetup,
@@ -35,7 +29,7 @@ export class AutomaticImportV2Plugin
     >
 {
   private readonly logger: Logger;
-  private pluginStop$: Subject<void>;
+  private readonly pluginStop$: ReplaySubject<void>;
   private readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   private automaticImportService: AutomaticImportService | null = null;
 
@@ -58,7 +52,7 @@ export class AutomaticImportV2Plugin
     this.logger.debug('automaticImportV2: Setup');
 
     const coreStartServices = core.getStartServices().then(([coreStart]) => ({
-      esClient: coreStart.elasticsearch.client.asInternalUser as ElasticsearchClient,
+      esClient: coreStart.elasticsearch.client.asInternalUser,
     }));
     const esClientPromise = coreStartServices.then(({ esClient }) => esClient);
 
@@ -80,6 +74,11 @@ export class AutomaticImportV2Plugin
       AutomaticImportV2PluginRequestHandlerContext,
       'automaticImportv2'
     >('automaticImportv2', (context, request) => requestContextFactory.create(context, request));
+
+    const router = core.http.createRouter<AutomaticImportV2PluginRequestHandlerContext>();
+    this.logger.debug('automaticImportV2 api: Setup');
+    registerRoutes(router, this.logger);
+
     return {
       actions: plugins.actions,
     };

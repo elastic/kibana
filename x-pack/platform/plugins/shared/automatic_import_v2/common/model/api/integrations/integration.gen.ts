@@ -17,7 +17,7 @@
 import { z } from '@kbn/zod';
 
 import { NonEmptyString } from '../../primitive.gen';
-import { InputType, Integration } from '../../common_attributes.gen';
+import { InputType, Integration, DataStream } from '../../common_attributes.gen';
 
 export type CreateAutoImportIntegrationRequestBody = z.infer<
   typeof CreateAutoImportIntegrationRequestBody
@@ -93,6 +93,30 @@ export const DeleteAutoImportIntegrationRequestParams = z.object({
 export type DeleteAutoImportIntegrationRequestParamsInput = z.input<
   typeof DeleteAutoImportIntegrationRequestParams
 >;
+
+export type GetAutoImportDataStreamRequestParams = z.infer<
+  typeof GetAutoImportDataStreamRequestParams
+>;
+export const GetAutoImportDataStreamRequestParams = z.object({
+  /**
+   * The integration identifier
+   */
+  integration_id: NonEmptyString,
+  /**
+   * The data stream identifier
+   */
+  data_stream_id: NonEmptyString,
+});
+export type GetAutoImportDataStreamRequestParamsInput = z.input<
+  typeof GetAutoImportDataStreamRequestParams
+>;
+
+export type GetAutoImportDataStreamResponse = z.infer<typeof GetAutoImportDataStreamResponse>;
+export const GetAutoImportDataStreamResponse = z
+  .object({
+    dataStream: DataStream.optional(),
+  })
+  .strict();
 
 export type GetAutoImportIntegrationRequestParams = z.infer<
   typeof GetAutoImportIntegrationRequestParams

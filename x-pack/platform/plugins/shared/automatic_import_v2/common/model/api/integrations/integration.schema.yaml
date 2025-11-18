@@ -218,3 +218,38 @@ paths:
           description: The integration is deleted.
         404:
           description: The integration is not found.
+  /internal/automatic_import/integrations/{integration_id}/data_streams/{data_stream_id}:
+    get:
+      summary: Retrieves a data stream by its id.
+      operationId: GetAutoImportDataStream
+      x-codegen-enabled: true
+      x-internal: true
+      description: >-
+        Retrieves a data stream by its id.
+      tags:
+        - Automatic Import Integrations
+      parameters:
+        - name: integration_id
+          in: path
+          required: true
+          description: The integration identifier
+          schema:
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+        - name: data_stream_id
+          in: path
+          required: true
+          description: The data stream identifier
+          schema:
+            $ref: "../../../model/primitive.schema.yaml#/components/schemas/NonEmptyString"
+      responses:
+        200:
+          description: >-
+            The data stream is returned.
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                properties:
+                  dataStream:
+                    $ref: "../../../model/common_attributes.schema.yaml#/components/schemas/DataStream"

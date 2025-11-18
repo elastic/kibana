@@ -18,4 +18,4 @@ export type {
 
 export type { DataStreamSamples } from './model/index_samples.gen';
 
-export type { Integration } from './model/common_attributes.gen';
+export type { Integration, DataStream } from './model/common_attributes.gen';

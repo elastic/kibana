@@ -24,6 +24,7 @@ import {
   INTEGRATION_SAVED_OBJECT_TYPE,
   TASK_STATUSES,
 } from './constants';
+import type { Integration } from '../../../common';
 
 export class AutomaticImportSavedObjectService {
   private savedObjectsClient: SavedObjectsClientContract;
@@ -97,36 +98,29 @@ export class AutomaticImportSavedObjectService {
    */
   public async insertIntegration(
     request: KibanaRequest,
-    data: IntegrationAttributes,
+    data: Integration,
     options?: SavedObjectsCreateOptions
   ): Promise<SavedObject<IntegrationAttributes>> {
     const authenticatedUser = this.security?.authc.getCurrentUser(request);
     if (!authenticatedUser) {
       throw new Error('No user authenticated');
     }
-
-    const {
-      integration_id: integrationId,
-      data_stream_count: dataStreamCount = 0,
-      metadata = {},
-    } = data;
-
-    if (!integrationId) {
-      throw new Error('Integration ID is required');
-    }
+    const integrationId = data.integration_id;
 
     try {
       this.logger.debug(`Creating integration: ${integrationId}`);
 
       const initialIntegrationData: IntegrationAttributes = {
         integration_id: integrationId,
-        data_stream_count: dataStreamCount,
+        data_stream_count: data.dataStreams?.length || 0,
         created_by: authenticatedUser.username,
         status: TASK_STATUSES.pending,
         metadata: {
-          ...metadata,
+          title: data.title,
+          logo: data.logo,
+          description: data.description,
           created_at: new Date().toISOString(),
-          version: '0.0.0',
+          version: '1.0.0',
         },
       };
 
@@ -627,14 +621,21 @@ export class AutomaticImportSavedObjectService {
    * Get all data streams
    * @returns All data streams
    */
-  public async getAllDataStreams(): Promise<SavedObjectsFindResponse<DataStreamAttributes>> {
+  public async getAllDataStreams(
+    integrationId: string
+  ): Promise<SavedObjectsFindResponse<DataStreamAttributes>> {
     try {
       this.logger.debug('Getting all data streams');
       return await this.savedObjectsClient.find<DataStreamAttributes>({
         type: DATA_STREAM_SAVED_OBJECT_TYPE,
+        filter: `${DATA_STREAM_SAVED_OBJECT_TYPE}.attributes.integration_id: ${JSON.stringify(
+          integrationId
+        )}`,
       });
     } catch (error) {
-      this.logger.error(`Failed to get all data streams: ${error}`);
+      this.logger.error(
+        `Failed to get all data streams for integration ${integrationId}: ${error}`
+      );
       throw error;
     }
   }

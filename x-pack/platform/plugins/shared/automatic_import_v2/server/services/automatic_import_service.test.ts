@@ -117,7 +117,7 @@ describe('AutomaticImportSetupService', () => {
     });
 
     it('should throw error when calling getIntegration before initialize', async () => {
-      await expect(service.getIntegration('test-id')).rejects.toThrow(
+      await expect(service.getIntegrationById('test-id')).rejects.toThrow(
         'Saved Objects service not initialized.'
       );
     });

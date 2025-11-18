@@ -20,7 +20,7 @@ import type {
   SavedObjectsServiceSetup,
   SavedObjectsServiceStart,
 } from '@kbn/core/server';
-import type { DataStreamSamples } from '../../common';
+import type { DataStreamSamples, Integration, DataStream } from '../../common';
 import type { IntegrationAttributes, DataStreamAttributes } from './saved_objects/schemas/types';
 import { AutomaticImportSamplesIndexService } from './samples_index/index_service';
 import { getAuthenticatedUser } from './lib/get_user';
@@ -74,7 +74,7 @@ export class AutomaticImportService {
 
   public async insertIntegration(
     request: KibanaRequest,
-    data: IntegrationAttributes,
+    data: Integration,
     options?: SavedObjectsCreateOptions
   ): Promise<SavedObject<IntegrationAttributes>> {
     if (!this.savedObjectService) {
@@ -95,18 +95,38 @@ export class AutomaticImportService {
     return this.savedObjectService.updateIntegration(data, expectedVersion, versionUpdate, options);
   }
 
-  public async getIntegration(integrationId: string): Promise<SavedObject<IntegrationAttributes>> {
+  public async getIntegrationById(integrationId: string): Promise<Integration> {
     if (!this.savedObjectService) {
       throw new Error('Saved Objects service not initialized.');
     }
-    return this.savedObjectService.getIntegration(integrationId);
+    const integration = await this.savedObjectService.getIntegration(integrationId);
+    const dataStreams = await this.getAllDataStreams(integrationId);
+    return {
+      integration_id: integrationId,
+      dataStreams,
+      title: integration.attributes.metadata.title,
+      logo: integration.attributes.metadata.logo,
+      description: integration.attributes.metadata.description,
+    };
   }
 
-  public async getAllIntegrations(): Promise<SavedObjectsFindResponse<IntegrationAttributes>> {
+  public async getAllIntegrations(): Promise<Integration[]> {
     if (!this.savedObjectService) {
       throw new Error('Saved Objects service not initialized.');
     }
-    return this.savedObjectService.getAllIntegrations();
+    const integrations = await this.savedObjectService.getAllIntegrations();
+    return Promise.all(
+      integrations.saved_objects.map(async (integration) => {
+        const dataStreams = await this.getAllDataStreams(integration.attributes.integration_id);
+        return {
+          integration_id: integration.attributes.integration_id,
+          dataStreams,
+          title: integration.attributes.metadata.title,
+          logo: integration.attributes.metadata.logo,
+          description: integration.attributes.metadata.description,
+        };
+      })
+    );
   }
 
   public async deleteIntegration(
@@ -153,11 +173,16 @@ export class AutomaticImportService {
     return this.savedObjectService.getDataStream(dataStreamId);
   }
 
-  public async getAllDataStreams(): Promise<SavedObjectsFindResponse<DataStreamAttributes>> {
+  public async getAllDataStreams(integrationId: string): Promise<DataStream[]> {
     if (!this.savedObjectService) {
       throw new Error('Saved Objects service not initialized.');
     }
-    return this.savedObjectService.getAllDataStreams();
+    const dataStreams = await this.savedObjectService.getAllDataStreams(integrationId);
+    return dataStreams.saved_objects.map((dataStream) => ({
+      dataStreamId: dataStream.attributes.data_stream_id,
+      status: dataStream.attributes.job_info.status,
+      metadata: dataStream.attributes.metadata,
+    }));
   }
 
   public async findAllDataStreamsByIntegrationId(

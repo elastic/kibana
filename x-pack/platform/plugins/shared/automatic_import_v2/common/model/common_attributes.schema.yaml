@@ -37,11 +37,17 @@ components:
       allOf:
         - type: object
           properties:
+            data_stream_id:
+              description: The data stream id
+              $ref: '../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString'
             title:
               description: The title of the data stream
               $ref: '../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString'
             description:
               description: The description of the data stream
+              $ref: '../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString'
+            status:
+              description: The status of the data stream # TODO: Add enum
               $ref: '../../common/model/primitive.schema.yaml#/components/schemas/NonEmptyString'
             inputTypes:
               type: array

@@ -19,6 +19,7 @@ export const integrationSchemaV1 = schema.object({
   metadata: schema.object(
     {
       title: schema.maybe(schema.string()),
+      logo: schema.maybe(schema.string()),
       version: schema.maybe(
         schema.string({
           minLength: 5,
