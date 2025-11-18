@@ -42,12 +42,12 @@ describe('Type Guards', () => {
       expect(isFullyCompatible(filter)).toBe(true);
     });
 
-    it('should reject complex filters with queries', () => {
+    it('should accept phrase filters with query properties', () => {
       const filter = {
         meta: { type: 'phrase', params: { query: 'test' } },
         query: { match_phrase: { field: 'test' } },
       };
-      expect(isFullyCompatible(filter)).toBe(false);
+      expect(isFullyCompatible(filter)).toBe(true);
     });
 
     it('should reject filters without meta', () => {
@@ -55,7 +55,6 @@ describe('Type Guards', () => {
       expect(isFullyCompatible(filter)).toBe(false);
     });
   });
-
   describe('isEnhancedCompatible', () => {
     it('should detect match_phrase queries', () => {
       const filter = {

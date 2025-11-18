@@ -10,8 +10,9 @@
 import {
   fromStoredFilter,
   convertToSimpleCondition,
-  parseQueryFilter,
+  convertWithEnhancement,
   extractFieldFromQuery,
+  convertToFilterGroup,
 } from './from_stored_filter';
 import { FilterConversionError } from './errors';
 import { isConditionFilter, isGroupFilter, isDSLFilter } from './type_guards';
@@ -298,6 +299,134 @@ describe('fromStoredFilter', () => {
       });
     });
 
+    it('should convert combined queries', () => {
+      const storedFilter = {
+        $state: {
+          store: 'appState',
+        },
+        meta: {
+          type: 'combined',
+          relation: 'AND',
+          params: [
+            {
+              query: {
+                match_phrase: {
+                  'machine.os.keyword': 'win 7',
+                },
+              },
+              meta: {
+                negate: true,
+                index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                key: 'machine.os.keyword',
+                field: 'machine.os.keyword',
+                params: {
+                  query: 'win 7',
+                },
+                type: 'phrase',
+                disabled: false,
+              },
+            },
+            {
+              $state: {
+                store: 'appState',
+              },
+              meta: {
+                type: 'combined',
+                relation: 'OR',
+                params: [
+                  {
+                    query: {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            match_phrase: {
+                              'geo.src': 'US',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    meta: {
+                      negate: false,
+                      index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                      key: 'geo.src',
+                      field: 'geo.src',
+                      params: ['US'],
+                      value: ['US'],
+                      type: 'phrases',
+                      disabled: false,
+                    },
+                  },
+                  {
+                    meta: {
+                      negate: false,
+                      index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                      key: 'host.keyword',
+                      field: 'host.keyword',
+                      params: {
+                        query: 'www.elastic.co',
+                      },
+                      type: 'phrase',
+                      disabled: false,
+                    },
+                    query: {
+                      match_phrase: {
+                        'host.keyword': 'www.elastic.co',
+                      },
+                    },
+                  },
+                ],
+                index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                disabled: false,
+                negate: false,
+              },
+            },
+          ],
+          index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+          disabled: false,
+          negate: false,
+          alias: null,
+        },
+        query: {},
+      } as StoredFilter;
+
+      const result = convertToFilterGroup(storedFilter);
+
+      expect(result).toMatchInlineSnapshot(`
+        Object {
+          "conditions": Array [
+            Object {
+              "field": "machine.os.keyword",
+              "operator": "is_not",
+              "value": "win 7",
+            },
+            Object {
+              "conditions": Array [
+                Object {
+                  "conditions": Array [
+                    Object {
+                      "field": "geo.src",
+                      "operator": "is",
+                      "value": "US",
+                    },
+                  ],
+                  "type": "or",
+                },
+                Object {
+                  "field": "host.keyword",
+                  "operator": "is",
+                  "value": "www.elastic.co",
+                },
+              ],
+              "type": "or",
+            },
+          ],
+          "type": "and",
+        }
+      `);
+    });
+
     it('should convert terms queries', () => {
       const storedFilter = {
         meta: { key: 'status' },
@@ -369,7 +498,7 @@ describe('fromStoredFilter', () => {
     });
   });
 
-  describe('parseQueryFilter', () => {
+  describe('convertWithEnhancement', () => {
     it('should parse match_phrase queries', () => {
       const storedFilter = {
         meta: {},
@@ -380,7 +509,7 @@ describe('fromStoredFilter', () => {
         },
       } as StoredFilter;
 
-      const result = parseQueryFilter(storedFilter);
+      const result = convertWithEnhancement(storedFilter);
 
       expect(result).toEqual({
         field: 'message',
@@ -399,7 +528,7 @@ describe('fromStoredFilter', () => {
         },
       } as StoredFilter;
 
-      const result = parseQueryFilter(storedFilter);
+      const result = convertWithEnhancement(storedFilter);
 
       expect(result).toEqual({
         field: 'message',
@@ -421,7 +550,7 @@ describe('fromStoredFilter', () => {
         },
       } as StoredFilter;
 
-      const result = parseQueryFilter(storedFilter);
+      const result = convertWithEnhancement(storedFilter);
 
       expect(result).toEqual({
         field: 'message',

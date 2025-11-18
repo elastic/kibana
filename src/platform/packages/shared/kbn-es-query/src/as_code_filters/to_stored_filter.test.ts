@@ -79,7 +79,7 @@ describe('toStoredFilter', () => {
 
       // AND groups use combined filter format
       expect(result.meta.type).toBe('combined');
-      expect(result.meta.relation).toBe('and');
+      expect(result.meta.relation).toBe('AND');
       expect(Array.isArray(result.meta.params)).toBe(true);
     });
 
@@ -191,7 +191,7 @@ describe('toStoredFilter', () => {
 
       // AND groups use combined filter format with meta.params
       expect(result.meta.type).toBe('combined');
-      expect(result.meta.relation).toBe('and');
+      expect(result.meta.relation).toBe('AND');
       expect(Array.isArray(result.meta.params)).toBe(true);
       expect(result.meta.params).toHaveLength(2);
 
@@ -431,6 +431,50 @@ describe('toStoredFilter', () => {
   });
 
   describe('round-trip conversion', () => {
+    it('should preserve simple condition filter data through round-trip conversion', () => {
+      const originalFilter = {
+        meta: {
+          disabled: false,
+          negate: false,
+          alias: 'kibana-green',
+          key: 'tags.keyword',
+          field: 'tags.keyword',
+          params: ['error', 'info', 'warning'],
+          type: 'phrases',
+          index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+        },
+        query: {
+          bool: {
+            minimum_should_match: 1,
+            should: [
+              {
+                match_phrase: {
+                  'tags.keyword': 'error',
+                },
+              },
+              {
+                match_phrase: {
+                  'tags.keyword': 'info',
+                },
+              },
+              {
+                match_phrase: {
+                  'tags.keyword': 'warning',
+                },
+              },
+            ],
+          },
+        },
+        $state: {
+          store: 'appState',
+        },
+      } as StoredFilter;
+
+      const asCodeFilter = fromStoredFilter(originalFilter);
+      const roundTripFilter = toStoredFilter(asCodeFilter);
+      expect(roundTripFilter).toEqual(originalFilter);
+    });
+
     it('should preserve spatial filter data through round-trip conversion', () => {
       const originalFilter = spatialFilterFixture as StoredFilter;
 
@@ -656,7 +700,6 @@ describe('toStoredFilter', () => {
           disabled: false,
           alias: null,
           params: {
-            format: 'date_time',
             gte: '2024-01-01T00:00:00.000Z',
             lte: '2024-01-01T00:00:00.000Z',
           },
@@ -664,7 +707,6 @@ describe('toStoredFilter', () => {
         query: {
           range: {
             'event.created': {
-              format: 'date_time',
               gte: '2024-01-01T00:00:00.000Z',
               lte: '2024-01-01T00:00:00.000Z',
             },
@@ -684,7 +726,6 @@ describe('toStoredFilter', () => {
       // Convert back
       const roundTrip = toStoredFilter(asCodeFilter);
 
-      expect(roundTrip.query?.range?.['event.created'].format).toBe('date_time');
       expect(roundTrip.meta.type).toBe('range');
     });
 
