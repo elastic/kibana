@@ -952,15 +952,7 @@
         ]
       },
       "service": {
-        "entity": {
-          "id": "api-service@your-project-id.iam.gserviceaccount.com"
-        },
         "name": "iam.googleapis.com"
-      },
-      "user": {
-        "entity": {
-          "id": "serviceaccount@example.com"
-        }
       },
       "entity": {
         "target": {
@@ -1081,9 +1073,6 @@
         ]
       },
       "service": {
-        "entity": {
-          "id": "new-service@your-project-id.iam.gserviceaccount.com"
-        },
         "name": "iam.googleapis.com"
       },
       "entity": {
@@ -1093,6 +1082,111 @@
       },
       "source": {
         "ip": "10.0.0.5"
+      },
+      "tags": [
+        "_geoip_database_unavailable_GeoLite2-City.mmdb",
+        "_geoip_database_unavailable_GeoLite2-ASN.mmdb"
+      ],
+      "user_agent": {
+        "device": {
+          "name": "Other"
+        },
+        "name": "Other",
+        "original": "google-cloud-sdk/350.0.0"
+      }
+    }
+  }
+}
+
+{
+  "type": "doc",
+  "value": {
+    "data_stream": "logs-gcp.audit-default",
+    "id": "MultiTargetEventDoc789",
+    "index": ".ds-logs-gcp.audit-default-2024.10.13-000001",
+    "source": {
+      "@timestamp": "2024-09-01T13:10:00.000Z",
+      "service": {
+        "entity": {
+          "id": "api-service@your-project-id.iam.gserviceaccount.com"
+        },
+        "name": "iam.googleapis.com"
+      },
+      "client": {
+        "user": {
+          "email": "api-service@your-project-id.iam.gserviceaccount.com"
+        }
+      },
+      "cloud": {
+        "project": {
+          "id": "your-project-id"
+        },
+        "provider": "gcp"
+      },
+      "ecs": {
+        "version": "8.11.0"
+      },
+      "event": {
+        "action": "google.compute.v1.Instances.start",
+        "agent_id_status": "missing",
+        "category": [
+          "process",
+          "host"
+        ],
+        "id": "multi-target-event-id",
+        "ingested": "2024-10-07T17:47:35Z",
+        "kind": "event",
+        "outcome": "success",
+        "provider": "activity",
+        "type": [
+          "start",
+          "access",
+          "allowed"
+        ]
+      },
+      "gcp": {
+        "audit": {
+          "authorization_info": [
+            {
+              "granted": true,
+              "permission": "compute.instances.start",
+              "resource": "projects/your-project-id"
+            }
+          ],
+          "logentry_operation": {
+            "id": "operation-multi-target-123"
+          },
+          "request": {
+            "@type": "type.googleapis.com/google.compute.v1.StartInstanceRequest",
+            "parent": "projects/your-project-id/zones/us-central1-a"
+          },
+          "type": "type.googleapis.com/google.cloud.audit.AuditLog"
+        }
+      },
+      "host": {
+        "target": {
+          "entity": {
+            "id": ["host-instance-1", "host-instance-2"]
+          }
+        }
+      },
+      "log": {
+        "level": "NOTICE",
+        "logger": "projects/your-project-id/logs/cloudaudit.googleapis.com%2Factivity"
+      },
+      "related": {
+        "entity": [
+          "10.0.0.6",
+          "api-service@your-project-id.iam.gserviceaccount.com",
+          "host-instance-1",
+          "host-instance-2"
+        ],
+        "ip": [
+          "10.0.0.6"
+        ]
+      },
+      "source": {
+        "ip": "10.0.0.6"
       },
       "tags": [
         "_geoip_database_unavailable_GeoLite2-City.mmdb",
