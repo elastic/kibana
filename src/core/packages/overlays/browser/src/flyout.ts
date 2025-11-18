@@ -46,5 +46,5 @@ export type OverlayFlyoutOpenOptions = Omit<
   /**
    * @deprecated Use `resizable` instead.
    */
-  isResizable?: boolean;
+  resizable?: boolean;
 };

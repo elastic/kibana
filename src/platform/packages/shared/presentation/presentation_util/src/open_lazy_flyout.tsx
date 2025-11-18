@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React from 'react';
-import type { CoreStart, OverlayFlyoutOpenOptions } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
+import type { OverlaySystemFlyoutOpenOptions } from '@kbn/core-overlays-browser';
 import { htmlIdGenerator } from '@elastic/eui';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import useAsync from 'react-use/lib/useAsync';
 import { i18n } from '@kbn/i18n';
 import { skip, take } from 'rxjs';
@@ -28,7 +28,10 @@ interface OpenLazyFlyoutParams {
   core: CoreStart;
   parentApi?: unknown;
   loadContent: (args: LoadContentArgs) => Promise<JSX.Element | null | void>;
-  flyoutProps?: Partial<OverlayFlyoutOpenOptions> & { triggerId?: string; focusedPanelId?: string };
+  flyoutProps?: Partial<OverlaySystemFlyoutOpenOptions> & {
+    triggerId?: string;
+    focusedPanelId?: string;
+  };
 }
 
 /**
@@ -74,34 +77,6 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
     onClose();
   });
 
-  //   const flyoutRef = core.overlays.openFlyout(
-  //     toMountPoint(
-  //       <LazyFlyout
-  //         closeFlyout={onClose}
-  //         loadContent={loadContent}
-  //         core={core}
-  //         ariaLabelledBy={ariaLabelledBy}
-  //       />,
-  //       core
-  //     ),
-  //     {
-  //       size: 500,
-  //       type: 'push',
-  //       paddingSize: 'm',
-  //       maxWidth: 800,
-  //       ownFocus: true,
-  //       isResizable: true,
-  //       outsideClickCloses: true,
-  //       className: 'kbnPresentationLazyFlyout',
-  //       'aria-labelledby': ariaLabelledBy,
-  //       onClose,
-  //       ...flyoutProps,
-  //     }
-  //   );
-  //   overlayTracker?.openOverlay(flyoutRef, { focusedPanelId });
-  //   return flyoutRef;
-  // };
-
   const flyoutRef = core.overlays.openSystemFlyout(
     <LazyFlyout
       closeFlyout={onClose}
@@ -115,13 +90,13 @@ export const openLazyFlyout = (params: OpenLazyFlyoutParams) => {
       type: 'push',
       paddingSize: 'm',
       maxWidth: 800,
+      resizable: true,
       ownFocus: true,
-      isResizable: true,
       outsideClickCloses: true,
       className: 'kbnPresentationLazyFlyout',
       'aria-labelledby': ariaLabelledBy,
-      'aria-label': 'Test title',
       onClose,
+      title: 'title placeholder',
       ...flyoutProps,
     }
   );

@@ -110,7 +110,7 @@ export class CreateESQLControlAction implements Action<Context> {
       },
       flyoutProps: {
         'data-test-subj': 'create_esql_control_flyout',
-        isResizable: true,
+        resizable: true,
         maxWidth: 800,
         triggerId: 'dashboard-controls-menu-button',
         // When queryString is present (i.e. flyout opened from the ES|QL editor),
