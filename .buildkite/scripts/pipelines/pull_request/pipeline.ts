@@ -16,7 +16,6 @@
         ] */
 
 import fs from 'fs';
-import { dump } from 'js-yaml';
 import prConfigs from '../../../pull_requests.json';
 import { runPreBuild } from './pre_build';
 import {
@@ -24,7 +23,6 @@ import {
   doAnyChangesMatch,
   getAgentImageConfig,
   emitPipeline,
-  collectEnvFromLabels,
 } from '#pipeline-utils';
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
@@ -67,11 +65,6 @@ const getPipeline = (filename: string, removeSteps = true) => {
 
     if (GITHUB_PR_LABELS.includes('ci:beta-faster-pr-build')) {
       await runPreBuild();
-      // KIBANA_CI_PIPELINE_TYPE is auto-set from the label via LABEL_MAPPING
-      const envFromLabels = collectEnvFromLabels(GITHUB_PR_LABELS);
-      if (Object.keys(envFromLabels).length > 0) {
-        pipeline.push(dump({ env: envFromLabels }));
-      }
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base_merged_phases.yml', false));
     } else {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/base.yml', false));
