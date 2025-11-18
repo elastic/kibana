@@ -40,7 +40,7 @@ describe('gemini action params validation', () => {
       subActionParams: { body: '{"message": "test"}' },
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams, null)).toEqual({
       errors: { body: [], subAction: [] },
     });
   });
@@ -51,7 +51,7 @@ describe('gemini action params validation', () => {
       subActionParams: { body: 'message {test}' },
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams, null)).toEqual({
       errors: { body: ['Body does not have a valid JSON format.'], subAction: [] },
     });
   });
@@ -61,7 +61,7 @@ describe('gemini action params validation', () => {
       subActionParams: { body: '{"message": "test"}' },
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         body: [],
         subAction: ['Action is required.'],
@@ -75,7 +75,7 @@ describe('gemini action params validation', () => {
       subActionParams: {},
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         body: ['Body is required.'],
         subAction: [],

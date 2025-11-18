@@ -11,13 +11,7 @@ import { setupConnector, teardownConnector } from '../utils/connector_helpers';
 
 export default function ({ loadTestFile, getService }: OneChatUiFtrProviderContext) {
   describe('Agent Builder', function () {
-    describe('converse', function () {
-      loadTestFile(require.resolve('./converse/conversation_flow.ts'));
-      loadTestFile(require.resolve('./converse/conversation_history.ts'));
-      loadTestFile(require.resolve('./converse/conversation_error_handling.ts'));
-    });
-
-    describe('tools', function () {
+    function llmSetup() {
       let llmProxy: LlmProxy;
 
       before(async () => {
@@ -27,10 +21,27 @@ export default function ({ loadTestFile, getService }: OneChatUiFtrProviderConte
       after(async () => {
         await teardownConnector(getService, llmProxy);
       });
+    }
 
+    describe('converse', function () {
+      loadTestFile(require.resolve('./converse/conversation_flow.ts'));
+      loadTestFile(require.resolve('./converse/conversation_history.ts'));
+      loadTestFile(require.resolve('./converse/conversation_error_handling.ts'));
+    });
+
+    describe('tools', function () {
+      llmSetup();
       loadTestFile(require.resolve('./tools/create_tool.ts'));
       loadTestFile(require.resolve('./tools/landing_page.ts'));
       loadTestFile(require.resolve('./tools/manage_tool.ts'));
+      loadTestFile(require.resolve('./agents/agents_list.ts'));
+    });
+
+    describe('agents', function () {
+      llmSetup();
+      loadTestFile(require.resolve('./agents/agents_list.ts'));
+      loadTestFile(require.resolve('./agents/create_agent.ts'));
+      loadTestFile(require.resolve('./agents/edit_agent.ts'));
     });
   });
 }
