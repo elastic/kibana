@@ -119,27 +119,12 @@ export type GetFieldsOf<Definition extends MappingsDefinition<MappingProperty>> 
   }>
 >;
 
-// The definition need to support the document payload, but it's OK if the
-// document can hold more fields than the definition.
-// To keep the type safety of the document payload in the consuming code, both the definition and the document payload are passed to the EnsureSubsetOf type.
-// The EnsureSubsetOf type then checks if the document payload is a subset of the definition.
+// The schema definition need to support the _source document, it's OK if the
+// _source can hold more fields than the schema.
+// To keep the type safety of the document payload in the consuming code, both the schema definition and the document _source are passed to the EnsureSubsetOf type.
+// The EnsureSubsetOf type then checks if the document _source is a subset of the definition.
 // If this is not the case, the EnsureSubsetOf type is set to never, which will cause a type error in the consuming code.
 export type EnsureSubsetOf<
-  SubsetDefinition extends AnyMappingDefinition,
-  AllFields extends GetFieldsOf<SubsetDefinition>,
-  SubsetType
-> = Exact<GetFieldsOf<SubsetDefinition>, Partial<AllFields>> extends true
-  ? SubsetType
-  : MissingKeysError<
-      Exclude<
-        UnionKeys<GetFieldsOf<SubsetDefinition>> extends string
-          ? UnionKeys<GetFieldsOf<SubsetDefinition>>
-          : never,
-        UnionKeys<AllFields>
-      >
-    >;
-
-export type IsSubsetOf<
   SubsetDefinition extends AnyMappingDefinition,
   AllFields extends GetFieldsOf<SubsetDefinition>
 > = Exact<GetFieldsOf<SubsetDefinition>, Partial<AllFields>> extends true

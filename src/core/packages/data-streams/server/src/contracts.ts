@@ -12,6 +12,7 @@ import type {
   DataStreamDefinition,
   IDataStreamClient,
 } from '@kbn/data-streams';
+import type { MappingsDefinition, GetFieldsOf } from '@kbn/es-mappings';
 
 /** @public */
 export interface DataStreamsSetup {
@@ -22,13 +23,23 @@ export interface DataStreamsSetup {
    *
    * @public
    */
-  registerDataStream: (dataStreams: DataStreamDefinition<any, any>) => void;
+  registerDataStream<
+    MappingsInDefinition extends MappingsDefinition,
+    FullDocumentType extends GetFieldsOf<MappingsInDefinition>,
+    SRM extends BaseSearchRuntimeMappings
+  >(
+    dataStreams: DataStreamDefinition<MappingsInDefinition, FullDocumentType, SRM>
+  ): void;
 }
 
 /** @public */
 export interface DataStreamsStart {
   /** @public */
-  getClient<S extends {}, SRM extends BaseSearchRuntimeMappings>(
+  getClient<
+    S extends MappingsDefinition,
+    FullDocumentType extends GetFieldsOf<S> = GetFieldsOf<S>,
+    SRM extends BaseSearchRuntimeMappings = never
+  >(
     dataStream: string
-  ): IDataStreamClient<S, SRM>;
+  ): IDataStreamClient<S, FullDocumentType, SRM>;
 }

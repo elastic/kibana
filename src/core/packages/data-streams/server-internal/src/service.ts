@@ -16,7 +16,12 @@ import {
 import type { InternalElasticsearchServiceStart } from '@kbn/core-elasticsearch-server-internal';
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
-import type { DataStreamsSetup, DataStreamsStart } from '@kbn/core-data-streams-server';
+import type {
+  BaseSearchRuntimeMappings,
+  DataStreamsSetup,
+  DataStreamsStart,
+} from '@kbn/core-data-streams-server';
+import type { MappingsDefinition } from '@kbn/es-mappings';
 
 interface StartDeps {
   elasticsearch: InternalElasticsearchServiceStart;
@@ -26,8 +31,8 @@ interface StartDeps {
 export class DataStreamsService implements CoreService<DataStreamsSetup, DataStreamsStart> {
   private readonly logger: Logger;
   private readonly dataStreams: Map<
-    DataStreamDefinition<any, any>,
-    undefined | IDataStreamClient<any, any>
+    DataStreamDefinition<any, any, any>,
+    undefined | IDataStreamClient<any, any, any>
   > = new Map();
 
   constructor(private readonly coreContext: CoreContext) {
@@ -36,7 +41,7 @@ export class DataStreamsService implements CoreService<DataStreamsSetup, DataStr
 
   setup() {
     return {
-      registerDataStream: (dataStreamDefinition: DataStreamDefinition) => {
+      registerDataStream: (dataStreamDefinition: DataStreamDefinition<any, any, any>) => {
         this.dataStreams.set(dataStreamDefinition, undefined);
       },
     };
@@ -64,9 +69,13 @@ export class DataStreamsService implements CoreService<DataStreamsSetup, DataStr
     await Promise.all(setupPromises);
 
     return {
-      getClient: <S extends {}, SRM extends {}>(
-        dataStreamDefinition: DataStreamDefinition<S, SRM>
-      ): IDataStreamClient<S, SRM> => {
+      getClient: <
+        S extends MappingsDefinition,
+        FullDocumentType extends GetFieldsOf<S> = GetFieldsOf<S>,
+        SRM extends BaseSearchRuntimeMappings = never
+      >(
+        dataStreamDefinition: DataStreamDefinition<S, FullDocumentType, SRM>
+      ): IDataStreamClient<S, FullDocumentType, SRM> => {
         if (!this.dataStreams.has(dataStreamDefinition)) {
           throw new Error(`Data stream ${dataStreamDefinition.name} is not registered.`);
         }

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IsSubsetOf, GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
+import type { EnsureSubsetOf, GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 import type * as api from '@elastic/elasticsearch/lib/api/types';
 import type { BaseSearchRuntimeMappings } from './runtime';
 
@@ -59,7 +59,7 @@ export interface DataStreamDefinition<
       [key: string]: unknown;
     };
 
-    mappings?: IsSubsetOf<Mappings, FullMappings> extends true ? Mappings : never;
+    mappings?: EnsureSubsetOf<Mappings, FullMappings> extends true ? Mappings : never;
 
     /**
      * @remark "hidden" defaults to true for the data stream and the backing indices

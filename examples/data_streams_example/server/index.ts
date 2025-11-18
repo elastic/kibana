@@ -8,16 +8,20 @@
  */
 
 import { type DataStreamDefinition } from '@kbn/core-data-streams-server';
-import { mappings, type MappingsToProperties } from '@kbn/es-mappings';
+import type { MappingsDefinition } from '@kbn/es-mappings';
+import { mappings, type GetFieldsOf } from '@kbn/es-mappings';
 import type { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
 
 const dataStreamMappings = {
   dynamic: false,
   properties: {
-    '@timestamp': mappings.date(),
+    name: mappings.text(),
     description: mappings.text(),
+    age: mappings.integer(),
+    isActive: mappings.boolean(),
+    '@timestamp': mappings.date(),
   },
-};
+} satisfies MappingsDefinition;
 
 const dataStream: DataStreamDefinition<typeof dataStreamMappings> = {
   name: '.kibana-my-data-stream',
@@ -27,19 +31,31 @@ const dataStream: DataStreamDefinition<typeof dataStreamMappings> = {
   },
 };
 
-type DataStreamDocument = MappingsToProperties<typeof dataStreamMappings>;
+interface DataStreamDocument extends GetFieldsOf<typeof dataStreamMappings> {
+  name: string;
+  description: string;
+  age: number;
+  isActive?: boolean;
+  unMappedField?: string;
+  '@timestamp': number;
+}
 
 export const plugin = (ctx: PluginInitializerContext) => {
   return {
     setup({ dataStreams }: CoreSetup) {
       dataStreams.registerDataStream(dataStream);
     },
-    start({ dataStreams, elasticsearch }: CoreStart) {
-      const client = dataStreams.getClient<typeof dataStreamMappings, {}>(dataStream.name);
+    start({ dataStreams }: CoreStart) {
+      const client = dataStreams.getClient<typeof dataStreamMappings, DataStreamDocument>(
+        dataStream.name
+      );
 
       const document: DataStreamDocument = {
-        '@timestamp': new Date().toISOString(),
+        '@timestamp': +new Date(),
+        name: 'John Doe',
         description: 'This is a test document for my data stream.',
+        age: 30,
+        unMappedField: 'Unmapped field but exists in the document _source',
       };
 
       void client
@@ -53,10 +69,8 @@ export const plugin = (ctx: PluginInitializerContext) => {
       return {
         getDocument: async (id: string) => {
           const result = await client.search({
-            body: {
-              query: {
-                term: { description: 'This is a test document for my data stream.' },
-              },
+            query: {
+              term: { description: 'This is a test document for my data stream.' },
             },
           });
 

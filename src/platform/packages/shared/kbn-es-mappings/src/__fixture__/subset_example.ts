@@ -35,14 +35,10 @@ interface FullDefinition {
   };
 }
 
-type DefinitionIsExact = EnsureSubsetOf<
-  FullDefinition,
-  FullEsDocumentFields,
-  'Should succeed. Exact match between definition and document fields'
->;
+// Test: Should succeed. Exact match between definition and document fields
+type DefinitionIsExact = EnsureSubsetOf<FullDefinition, FullEsDocumentFields>;
 
-export const testDefinitionIsExact: DefinitionIsExact =
-  'Should succeed. Exact match between definition and document fields';
+export const testDefinitionIsExact: DefinitionIsExact = true;
 
 // Test: Definition has a subset of the fields in the full document fields
 interface SubsetDefinition {
@@ -53,14 +49,10 @@ interface SubsetDefinition {
   };
 }
 
-type DefinitionIsSubset = EnsureSubsetOf<
-  SubsetDefinition,
-  FullEsDocumentFields,
-  'Should succeed. Definition is a subset of the full document fields'
->;
+// Test: Should succeed. Definition is a subset of the full document fields
+type DefinitionIsSubset = EnsureSubsetOf<SubsetDefinition, FullEsDocumentFields>;
 
-export const testDefinitionIsSubset: DefinitionIsSubset =
-  'Should succeed. Definition is a subset of the full document fields';
+export const testDefinitionIsSubset: DefinitionIsSubset = true;
 
 // Test: Definition has extra fields not in the full document fields
 interface ExcessDefinition {
@@ -75,11 +67,8 @@ interface ExcessDefinition {
   };
 }
 
-type DefinitionHasExtraFields = EnsureSubsetOf<
-  ExcessDefinition,
-  FullEsDocumentFields,
-  'Should fail. Definition has extra fields not in the full document fields'
->;
+// Test: Should fail. Definition has extra fields not in the full document fields
+type DefinitionHasExtraFields = EnsureSubsetOf<ExcessDefinition, FullEsDocumentFields>;
 
 export const testDefinitionHasExtraFields: DefinitionHasExtraFields[] = [
   // @ts-expect-error - createdAt is in the definition, this checks that an error is not thrown for defined keys
@@ -111,10 +100,10 @@ interface ExcessAndMissingDefinition {
   };
 }
 
+// Test: Should fail. Definition has extra fields and missing fields compared to full document fields
 type DefinitionHasExcessAndMissingFields = EnsureSubsetOf<
   ExcessAndMissingDefinition,
-  FullEsDocumentFields,
-  'Should fail. Definition has extra fields not in the full document fields'
+  FullEsDocumentFields
 >;
 
 export const testDefinitionHasExcessAndMissingFields: DefinitionHasExcessAndMissingFields[] = [
@@ -153,8 +142,8 @@ interface IncompatibleDefinition {
 type DefinitionHasIncompatibleFields = EnsureSubsetOf<
   IncompatibleDefinition,
   // @ts-expect-error - createdAt is in the definition, this checks that an error is not thrown for defined keys
-  FullEsDocumentFields,
-  'Should fail. Definition has incompatible fields with full document fields'
+  FullEsDocumentFields
 >;
 
+// type never because the definition has incompatible fields with the full document fields
 export let testDefinitionHasIncompatibleFields: DefinitionHasIncompatibleFields;

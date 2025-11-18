@@ -298,11 +298,10 @@ const subsetMapping = {
 // Ensure the subset is valid - this will compile successfully
 type ValidSubset = EnsureSubsetOf<
   typeof subsetMapping,
-  FullEsDocumentFields,
-  'Subset is valid'
+  FullEsDocumentFields
 >;
 
-const valid: ValidSubset = 'Subset is valid';
+const valid: ValidSubset = true;
 
 // If the subset contains fields not in the full document, it will fail
 const invalidSubsetMapping = {
@@ -317,8 +316,7 @@ const invalidSubsetMapping = {
 // This will cause a TypeScript error
 type InvalidSubset = EnsureSubsetOf<
   typeof invalidSubsetMapping,
-  FullEsDocumentFields,
-  'This will fail'
+  FullEsDocumentFields
 >;
 // Error: The following keys are missing from the document fields: extraField
 ```

@@ -33,7 +33,7 @@ export type ClientGet<TDocumentType> = (
   request: ClientGetRequest
 ) => Promise<ClientGetResponse<TDocumentType>>;
 
-export type ClientIndexRequest<TDocument> = api.IndexRequest<TDocument>;
+export type ClientIndexRequest<TDocument> = OmitIndexProp<api.IndexRequest<TDocument>>;
 export type ClientIndexResponse = api.IndexResponse;
 export type ClientIndex<FullDocumentType> = (
   request: ClientIndexRequest<FullDocumentType>
