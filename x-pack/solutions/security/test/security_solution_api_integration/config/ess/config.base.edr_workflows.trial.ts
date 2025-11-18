@@ -11,7 +11,7 @@ import { services } from './services_edr_workflows';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const xPackAPITestsConfig = await readConfigFile(
-    require.resolve('../../../api_integration/config.ts')
+    require.resolve('@kbn/test-suites-xpack-security/api_integration/config')
   );
 
   return generateConfig({
