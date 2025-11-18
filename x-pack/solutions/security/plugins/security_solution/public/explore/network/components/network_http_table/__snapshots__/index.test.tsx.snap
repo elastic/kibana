@@ -306,6 +306,7 @@ exports[`NetworkHttp Table Component rendering it renders the default NetworkHtt
             >
               <span
                 class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                id="generated-id-wrapper"
               >
                 <button
                   class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"

@@ -143,6 +143,7 @@ exports[`Paginated Table Component rendering it renders the default load more ta
                           </span>
                           <span
                             class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+                            id="generated-id-wrapper"
                           >
                             <span
                               color="subdued"
