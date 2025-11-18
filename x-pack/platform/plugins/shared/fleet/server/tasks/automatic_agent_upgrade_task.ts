@@ -23,8 +23,6 @@ import { errors } from '@elastic/elasticsearch';
 import semverGt from 'semver/functions/gt';
 import moment from 'moment';
 
-import { isStuckInUpdating } from '../../common/services/agent_status';
-
 import { AUTO_UPGRADE_DEFAULT_RETRIES } from '../../common/constants';
 import type {
   Agent,
@@ -575,10 +573,7 @@ export class AutomaticAgentUpgradeTask {
   }
 
   private isAgentEligibleForUpgrade(agent: AgentWithDefinedVersion, version: string) {
-    return (
-      (isAgentUpgradeable(agent) || isStuckInUpdating(agent)) &&
-      semverGt(version, agent.agent.version)
-    );
+    return isAgentUpgradeable(agent) && semverGt(version, agent.agent.version);
   }
 
   private getUpgradeDurationSeconds(nAgents: number) {
