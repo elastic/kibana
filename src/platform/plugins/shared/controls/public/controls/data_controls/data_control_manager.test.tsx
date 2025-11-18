@@ -85,7 +85,7 @@ describe('initializeDataControlManager', () => {
           typeDisplayName: 'My Control Type',
         }).then((controlManager) => {
           dataControlManager = controlManager;
-          dataControlManager.api.defaultTitle$!.pipe(skip(1), first()).subscribe(() => {
+          dataControlManager.api.defaultTitle$!.pipe(first()).subscribe(() => {
             done();
           });
         });
@@ -124,7 +124,7 @@ describe('initializeDataControlManager', () => {
           typeDisplayName: 'My Control Type',
         }).then((controlManager) => {
           dataControlManager = controlManager;
-          dataControlManager.api.defaultTitle$!.pipe(skip(1), first()).subscribe(() => {
+          dataControlManager.api.defaultTitle$!.pipe(first()).subscribe(() => {
             done();
           });
         });
