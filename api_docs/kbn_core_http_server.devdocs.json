@@ -4173,6 +4173,10 @@
                 "path": "src/platform/plugins/shared/esql/server/routes/get_all_sources.ts"
               },
               {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_timefield.ts"
+              },
+              {
                 "plugin": "observability",
                 "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
               },
@@ -6146,7 +6150,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/routes/run_soon.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/run_soon/run_soon_route.ts"
               },
               {
                 "plugin": "alerting",
@@ -6747,6 +6751,10 @@
               {
                 "plugin": "onechat",
                 "path": "x-pack/platform/plugins/shared/onechat/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/internal/conversations.ts"
               },
               {
                 "plugin": "sampleDataIngest",
@@ -7518,18 +7526,6 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/routes/run_soon.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/routes/run_soon.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/routes/run_soon.test.ts"
-              },
-              {
-                "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/update_flapping_settings.test.ts"
               },
               {
@@ -7919,6 +7915,22 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/mute_all/mute_all_rule.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/run_soon/run_soon_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/run_soon/run_soon_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/run_soon/run_soon_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/run_soon/run_soon_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -14539,11 +14551,7 @@
               },
               {
                 "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/api/register_routes.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/api/register_routes.ts"
+                "path": "src/platform/plugins/shared/dashboard/server/api/read/register_read_route.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -15802,7 +15810,7 @@
               },
               {
                 "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/api/register_routes.ts"
+                "path": "src/platform/plugins/shared/dashboard/server/api/update/register_update_route.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -16222,6 +16230,10 @@
               {
                 "plugin": "dashboard",
                 "path": "src/platform/plugins/shared/dashboard/server/api/create/register_create_route.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/platform/plugins/shared/dashboard/server/api/search/register_search_route.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -17157,6 +17169,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/rules/qradar/create.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/update_index_pattern.ts"
               },
               {
@@ -17611,7 +17627,7 @@
               },
               {
                 "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/api/register_routes.ts"
+                "path": "src/platform/plugins/shared/dashboard/server/api/delete/register_delete_route.ts"
               },
               {
                 "plugin": "@kbn/core",
