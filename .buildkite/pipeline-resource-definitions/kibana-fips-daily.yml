@@ -21,25 +21,52 @@ spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-fips'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+        DISABLE_CI_STATS_SHIPPING: 'true'
+        TEST_ENABLE_FIPS_AGENT: 'true'
+        TEST_BROWSER_HEADLESS: '1'
       repository: elastic/kibana
       branch_configuration: main 9.1 8.19
       default_branch: main
-      pipeline_file: '.buildkite/pipelines/fips.yml'
+      pipeline_file: .buildkite/pipelines/fips/fips_pipeline.sh
       provider_settings:
         trigger_mode: none
       schedules:
-        Daily build (main):
-          message: Daily build
+        '140-2 Daily build (main)':
+          message: 140-2 Daily build
           branch: main
           cronline: 0 5 * * * America/New_York
-        Daily build (9.1):
-          message: Daily build
+          env:
+            KBN_FIPS_VERSION: '140-2'
+        '140-2 Daily build (9.1)':
+          message: 140-2 Daily build
           branch: '9.1'
           cronline: 0 5 * * * America/New_York
-        Daily build (8.19):
-          message: Daily build
+          env:
+            KBN_FIPS_VERSION: '140-2'
+        '140-2 Daily build (8.19)':
+          message: 140-2 Daily build
           branch: '8.19'
           cronline: 0 5 * * * America/New_York
+          env:
+            KBN_FIPS_VERSION: '140-2'
+        '140-3 Daily build (main)':
+          message: 140-3 Daily build
+          branch: main
+          cronline: 0 5 * * * America/New_York
+          env:
+            KBN_FIPS_VERSION: '140-3'
+        '140-3 Daily build (9.1)':
+          message: 140-3 Daily build
+          branch: '9.1'
+          cronline: 0 5 * * * America/New_York
+          env:
+            KBN_FIPS_VERSION: '140-3'
+        '140-3 Daily build (8.19)':
+          message: 140-3 Daily build
+          branch: '8.19'
+          cronline: 0 5 * * * America/New_York
+          env:
+            KBN_FIPS_VERSION: '140-3'
       teams:
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ
