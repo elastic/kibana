@@ -28,6 +28,11 @@ export function collapseRepeats(ast: DissectAST): DissectAST {
   // Then, collapse middle repeats
   nodes = collapseMiddleRepeats(nodes);
 
+  // Finally, remove redundant append modifiers: if a field has the append (+)
+  // modifier but only a single occurrence of that field name remains in the
+  // AST, the '+' serves no purpose and should be removed.
+  nodes = removeRedundantAppend(nodes);
+
   return { nodes };
 }
 
@@ -139,16 +144,33 @@ function collapseMiddleRepeats(nodes: DissectASTNode[]): DissectASTNode[] {
       const sequence = findRepeatSequence(nodes, i);
 
       if (sequence && sequence.repeatCount > 1 && sequence.hasFollowingDelimiter) {
-        // Found a collapsible sequence
-        // Keep the first field as-is (it already has the right modifiers from transformASTWithReview)
-        result.push(field);
-
-        // Add the following delimiter (the different one that marks the end)
-        result.push(nodes[sequence.end]);
-
-        // Skip past both the repeated sequence AND the following delimiter
+        const followingDelimiterNode = nodes[sequence.end];
+        const followingDelimiter =
+          followingDelimiterNode.type === 'literal'
+            ? (followingDelimiterNode as { type: 'literal'; value: string }).value
+            : undefined;
+        const shouldCollapse =
+          sequence.repeatCount === 2 ||
+          (followingDelimiter !== undefined && followingDelimiter !== sequence.repeatDelimiter);
+        if (shouldCollapse) {
+          // Keep the first field as-is
+          result.push(field);
+          // Add the following delimiter (the different one that marks the end)
+          result.push(nodes[sequence.end]);
+          // Skip past both the repeated sequence AND the following delimiter
+          i = sequence.end + 1;
+          continue;
+        }
+        // Not collapsing (e.g. triple+ with same delimiter). Emit full sequence verbatim and skip its interior.
+        // Sequence layout: field (i), then (repeatCount-1) times: delimiter, field, ending delimiter at sequence.end.
+        // Collect slice from start field up to the delimiter at sequence.end (inclusive)
+        for (let j = i; j <= sequence.end; j++) {
+          result.push(nodes[j]);
+        }
         i = sequence.end + 1;
-      } else {
+        continue;
+      }
+      {
         // Not a repeating sequence, just add the node
         result.push(node);
         i++;
@@ -163,6 +185,38 @@ function collapseMiddleRepeats(nodes: DissectASTNode[]): DissectASTNode[] {
 }
 
 /**
+ * Remove append modifiers from fields that only appear once.
+ * This is run AFTER collapsing repeats so we correctly handle grouped fields
+ * that started with multiple + occurrences but collapsed to a single one.
+ */
+function removeRedundantAppend(nodes: DissectASTNode[]): DissectASTNode[] {
+  const nameCounts = new Map<string, number>();
+
+  // Count occurrences of each field name (excluding skip fields which have empty name)
+  for (const node of nodes) {
+    if (node.type === 'field' && node.name) {
+      nameCounts.set(node.name, (nameCounts.get(node.name) || 0) + 1);
+    }
+  }
+
+  return nodes.map((node) => {
+    if (node.type !== 'field' || !node.modifiers?.append) {
+      return node;
+    }
+    const occurrences = nameCounts.get(node.name) || 0;
+    if (occurrences === 1) {
+      // Drop append modifier; preserve other modifiers
+      const { append, ...rest } = node.modifiers;
+      return {
+        ...node,
+        modifiers: Object.keys(rest).length > 0 ? rest : undefined,
+      };
+    }
+    return node;
+  });
+}
+
+/**
  * Find a repeating sequence starting at index
  * Returns null if no valid sequence found
  *
@@ -173,7 +227,12 @@ function collapseMiddleRepeats(nodes: DissectASTNode[]): DissectASTNode[] {
 function findRepeatSequence(
   nodes: DissectASTNode[],
   startIndex: number
-): { repeatCount: number; end: number; hasFollowingDelimiter: boolean } | null {
+): {
+  repeatCount: number;
+  end: number;
+  hasFollowingDelimiter: boolean;
+  repeatDelimiter: string;
+} | null {
   if (startIndex >= nodes.length || nodes[startIndex].type !== 'field') {
     return null;
   }
@@ -220,6 +279,16 @@ function findRepeatSequence(
       : currentField.name === fieldName;
 
     if (!isMatchingField) {
+      // Different field name - end of sequence
+      // Check if there's a delimiter before this different field
+      if (currentIndex > startIndex + 2) {
+        return {
+          repeatCount,
+          end: currentIndex - 1,
+          hasFollowingDelimiter: true,
+          repeatDelimiter,
+        };
+      }
       break;
     }
 
@@ -248,6 +317,7 @@ function findRepeatSequence(
         repeatCount,
         end: currentIndex,
         hasFollowingDelimiter: true,
+        repeatDelimiter,
       };
     }
   }

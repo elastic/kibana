@@ -22,7 +22,7 @@ import { generateAST } from './generate_ast';
  *
  * This function performs multiple passes to identify consistent delimiter patterns
  * and normalize the data into a structured format. It is computationally intensive
- * and should not be run on the main thread.
+ * (O(n × m²) complexity) and should not be run on the main thread.
  *
  * Steps:
  * 1. Find common delimiter sequences that appear in all messages.
@@ -34,7 +34,7 @@ import { generateAST } from './generate_ast';
  * @param messages - Array of log message strings to analyze
  * @returns DissectPattern object with pattern string and field metadata
  */
-export function extractDissectPatternDangerouslySlow(messages: string[]): DissectPattern {
+export function extractDissectPattern(messages: string[]): DissectPattern {
   if (!messages.length) {
     return {
       ast: { nodes: [] },

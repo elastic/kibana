@@ -9,7 +9,7 @@ import useAsyncFn from 'react-use/lib/useAsyncFn';
 import {
   getReviewFields,
   getDissectProcessorWithReview,
-  extractDissectPatternDangerouslySlow,
+  extractDissectPattern,
   groupMessagesByPattern,
 } from '@kbn/dissect-heuristics';
 import { lastValueFrom } from 'rxjs';
@@ -67,7 +67,7 @@ export function useDissectPatternSuggestion() {
       const largestGroup = groupedMessages[0]; // Groups are already sorted by probability (descending)
 
       // Extract dissect pattern from the largest group
-      const dissectPattern = extractDissectPatternDangerouslySlow(largestGroup.messages);
+      const dissectPattern = extractDissectPattern(largestGroup.messages);
 
       // The only reason we're streaming the response here is to avoid timeout issues prevalent with long-running requests to LLMs.
       // There is only ever going to be a single event emitted so we can safely use `lastValueFrom`.

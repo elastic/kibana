@@ -6,6 +6,8 @@
  */
 
 import { getDissectProcessorWithReview } from './get_dissect_processor_with_review';
+import { collapseRepeats } from './collapse_repeats';
+import { serializeAST } from '../serialize_ast';
 import type { DissectPattern, DissectAST } from '../types';
 import type { NormalizedReviewResult } from './get_review_fields';
 
@@ -86,17 +88,14 @@ describe('getDissectProcessorWithReview', () => {
         {
           ecs_field: 'source.ip',
           columns: ['field_1'],
-          join_strategy: 'skip',
         },
         {
           ecs_field: 'http.request.method',
           columns: ['field_2'],
-          join_strategy: 'skip',
         },
         {
           ecs_field: 'http.response.status_code',
           columns: ['field_3'],
-          join_strategy: 'skip',
         },
       ],
     };
@@ -110,7 +109,7 @@ describe('getDissectProcessorWithReview', () => {
     );
   });
 
-  it('groups adjacent fields into single field using skip strategy (default)', () => {
+  it('groups adjacent fields into single field using append strategy', () => {
     const pattern: DissectPattern = {
       ast: parsePattern('%{field_1}-%{field_2}-%{field_3} %{field_4}'),
       fields: [
@@ -143,22 +142,21 @@ describe('getDissectProcessorWithReview', () => {
         {
           ecs_field: '@timestamp',
           columns: ['field_1', 'field_2', 'field_3'],
-          join_strategy: 'skip',
         },
         {
           ecs_field: 'log.level',
           columns: ['field_4'],
-          join_strategy: 'skip',
         },
       ],
     };
 
     const result = getDissectProcessorWithReview(pattern, reviewResult);
 
-    // The collapse logic removes consecutive skip fields AND their delimiters
+    // Multiple fields mapped to same ECS field with append all get +modifier
+    // Collapse logic removes consecutive identical append fields
     expect(result.pattern).toBe('%{@timestamp} %{log.level}');
     expect(result.metadata.fieldCount).toBe(2);
-    expect(result.processor.dissect.append_separator).toBeUndefined();
+    expect(result.processor.dissect.append_separator).toBe(' ');
   });
 
   it('groups adjacent fields using append strategy', () => {
@@ -189,19 +187,17 @@ describe('getDissectProcessorWithReview', () => {
         {
           ecs_field: '@timestamp',
           columns: ['field_1', 'field_2'],
-          join_strategy: 'append',
         },
         {
           ecs_field: 'log.level',
           columns: ['field_3'],
-          join_strategy: 'skip',
         },
       ],
     };
 
     const result = getDissectProcessorWithReview(pattern, reviewResult);
 
-    expect(result.pattern).toBe('%{+@timestamp} %{+@timestamp} %{log.level}');
+    expect(result.pattern).toBe('%{@timestamp} %{log.level}');
     expect(result.processor.dissect.append_separator).toBe(' ');
     expect(result.metadata.fieldCount).toBe(2);
   });
@@ -235,23 +231,21 @@ describe('getDissectProcessorWithReview', () => {
         {
           ecs_field: 'user.full_name',
           columns: ['field_1', 'field_2'],
-          join_strategy: 'append',
         },
         {
           ecs_field: 'log.level',
           columns: ['field_3'],
-          join_strategy: 'skip',
         },
       ],
     };
 
     const result = getDissectProcessorWithReview(pattern, reviewResult);
 
-    expect(result.pattern).toBe('%{+user.full_name->} %{+user.full_name} %{log.level}');
+    expect(result.pattern).toBe('%{user.full_name->} %{log.level}');
     expect(result.processor.dissect.append_separator).toBe(' ');
   });
 
-  it('handles mixed append and skip strategies', () => {
+  it('handles multi-column append fields', () => {
     const pattern: DissectPattern = {
       ast: parsePattern('%{field_1} %{field_2} [%{field_3}] %{field_4}'),
       fields: [
@@ -284,17 +278,14 @@ describe('getDissectProcessorWithReview', () => {
         {
           ecs_field: '@timestamp',
           columns: ['field_1', 'field_2'],
-          join_strategy: 'append',
         },
         {
           ecs_field: 'log.level',
           columns: ['field_3'],
-          join_strategy: 'skip',
         },
         {
           ecs_field: 'message',
           columns: ['field_4'],
-          join_strategy: 'skip',
         },
       ],
     };
@@ -302,7 +293,7 @@ describe('getDissectProcessorWithReview', () => {
     const result = getDissectProcessorWithReview(pattern, reviewResult);
 
     // The collapse logic removes consecutive repeated append fields AND their delimiters
-    expect(result.pattern).toBe('%{+@timestamp} [%{log.level}] %{message}');
+    expect(result.pattern).toBe('%{@timestamp} [%{log.level}] %{message}');
     expect(result.processor.dissect.append_separator).toBe(' ');
   });
 
@@ -330,12 +321,10 @@ describe('getDissectProcessorWithReview', () => {
         {
           ecs_field: 'log.level',
           columns: ['field_1'],
-          join_strategy: 'skip',
         },
         {
           ecs_field: 'message',
           columns: ['field_2'],
-          join_strategy: 'skip',
         },
       ],
     };
@@ -345,7 +334,7 @@ describe('getDissectProcessorWithReview', () => {
     expect(result.pattern).toBe('%{log.level->} %{message}');
   });
 
-  it('keeps unmapped fields as-is', () => {
+  it('converts unmapped fields to skip fields %{?}', () => {
     const pattern: DissectPattern = {
       ast: parsePattern('%{field_1} %{field_2} %{field_3}'),
       fields: [
@@ -373,18 +362,16 @@ describe('getDissectProcessorWithReview', () => {
         {
           ecs_field: 'custom.field',
           columns: ['field_1'],
-          join_strategy: 'skip',
         },
-        // field_2 not mapped
+        // field_2 and field_3 not mapped
       ],
     };
 
     const result = getDissectProcessorWithReview(pattern, reviewResult);
 
-    // field_2 and field_3 should remain as-is since they weren't mapped
-    expect(result.pattern).toContain('%{custom.field}');
-    expect(result.pattern).toContain('%{field_2}');
-    expect(result.pattern).toContain('%{field_3}');
+    // field_2 and field_3 should be converted to skip fields
+    // Consecutive skip fields collapse to one
+    expect(result.pattern).toBe('%{custom.field} %{?}');
   });
 
   it('collapses trailing repeated append fields', () => {
@@ -425,12 +412,10 @@ describe('getDissectProcessorWithReview', () => {
         {
           ecs_field: 'log.level',
           columns: ['field_1'],
-          join_strategy: 'skip',
         },
         {
           ecs_field: 'message',
           columns: ['field_2', 'field_3', 'field_4', 'field_5'],
-          join_strategy: 'append',
         },
       ],
     };
@@ -439,5 +424,29 @@ describe('getDissectProcessorWithReview', () => {
 
     expect(result.pattern).toBe('%{log.level} %{message}');
     expect(result.processor.dissect.append_separator).toBe(' ');
+  });
+
+  it('collapses repeated append field with following different delimiter', () => {
+    const patternString =
+      '%{+attributes.custom.timestamp} %{+attributes.custom.timestamp}, %{severity_text->} %{resource.attributes.service.name->} %{body.text}';
+    const ast = parsePattern(patternString);
+    const collapsed = collapseRepeats(ast);
+    const serialized = serializeAST(collapsed);
+    // After collapse we expect a single timestamp field (append removed) followed by comma
+    expect(serialized).toBe(
+      '%{attributes.custom.timestamp}, %{severity_text->} %{resource.attributes.service.name->} %{body.text}'
+    );
+  });
+
+  it('handles triple timestamp append fields and host name pair collapse', () => {
+    const patternString =
+      '%{+attributes.custom.timestamp} %{+attributes.custom.timestamp} %{+attributes.custom.timestamp} %{+resource.attributes.host.name}-%{+resource.attributes.host.name->} %{attributes.process.name} %{body.text}';
+    const ast = parsePattern(patternString);
+    const collapsed = collapseRepeats(ast);
+    const serialized = serializeAST(collapsed);
+    // Expect host name pair collapsed, timestamps untouched (no differing following delimiter)
+    expect(serialized).toBe(
+      '%{+attributes.custom.timestamp} %{+attributes.custom.timestamp} %{+attributes.custom.timestamp} %{resource.attributes.host.name} %{attributes.process.name} %{body.text}'
+    );
   });
 });

@@ -12,7 +12,6 @@ import {
   scoreDelimiterQuality,
   countOccurrences,
   calculatePositionScore,
-  containsIPAddress,
 } from './utils';
 
 interface DelimiterCandidate {
@@ -117,27 +116,13 @@ export function findDelimiterSequences(
       if (!positions.some((pos) => pos === -1)) {
         const score = calculatePositionScore(positions);
 
-        // Apply penalty for delimiters that appear multiple times in the same message
-        // BUT only if the messages contain IP addresses (to avoid penalizing CSV/pipe delimiters)
-        let multipleOccurrencePenalty = 1.0;
-
-        if (maxOccurrences > 1) {
-          // Only penalize if messages contain IP addresses (likely the delimiter is '.' or ':')
-          const messagesHaveIPs = messages.some((msg) => containsIPAddress(msg));
-          if (messagesHaveIPs && (delimiter === '.' || delimiter === ':')) {
-            multipleOccurrencePenalty = 0.3;
-          }
-        }
-
-        const finalScore = score * multipleOccurrencePenalty;
-
         // Only add this occurrence if it meets the minimum score
-        if (finalScore >= minScore) {
+        if (score >= minScore) {
           scoredDelimiters.push({
             literal: delimiter,
             frequency: countOccurrences(messages, delimiter),
             positions,
-            score: finalScore,
+            score,
           });
         }
       }

@@ -40,21 +40,8 @@ export function getDissectProcessorWithReview(
     }
   });
 
-  // Track join strategies for multi-column fields
-  const joinStrategyMap = new Map<string, 'append' | 'skip'>();
-  reviewResult.fields.forEach((field) => {
-    if (field.columns.length > 1 && field.join_strategy) {
-      joinStrategyMap.set(field.ecs_field, field.join_strategy);
-    }
-  });
-
   // Transform the AST with ECS field names and handle grouping
-  const transformedAST = transformASTWithReview(
-    pattern.ast,
-    fieldNameMap,
-    fieldGroupMap,
-    joinStrategyMap
-  );
+  const transformedAST = transformASTWithReview(pattern.ast, fieldNameMap, fieldGroupMap);
 
   // Collapse repeated field sequences
   const collapsedAST = collapseRepeats(transformedAST);
@@ -116,9 +103,6 @@ export function getDissectProcessorWithReview(
     }
   });
 
-  // Check if any field uses append strategy
-  const usesAppend = reviewResult.fields.some((field) => field.join_strategy === 'append');
-
   const dissectConfig: {
     field: string;
     pattern: string;
@@ -130,8 +114,9 @@ export function getDissectProcessorWithReview(
     ignore_missing: true,
   };
 
-  // Add append_separator if any field uses append strategy
-  if (usesAppend) {
+  // Add append_separator since all multi-column fields use append strategy
+  const hasMultiColumnFields = reviewResult.fields.some((field) => field.columns.length > 1);
+  if (hasMultiColumnFields) {
     dissectConfig.append_separator = ' ';
   }
 
@@ -155,8 +140,7 @@ export function getDissectProcessorWithReview(
 function transformASTWithReview(
   ast: DissectAST,
   fieldNameMap: Map<string, string>,
-  fieldGroupMap: Map<string, string[]>,
-  joinStrategyMap: Map<string, 'append' | 'skip'>
+  fieldGroupMap: Map<string, string[]>
 ): DissectAST {
   const transformedNodes: DissectASTNode[] = [];
 
@@ -174,46 +158,30 @@ function transformASTWithReview(
     const ecsFieldName = fieldNameMap.get(originalName);
 
     if (!ecsFieldName) {
-      // Field not mapped, keep original
-      transformedNodes.push(fieldNode);
+      // Field not mapped by LLM, convert to skip field %{?}
+      transformedNodes.push({
+        type: 'field',
+        name: '',
+        modifiers: {
+          skip: true,
+          namedSkip: true,
+        },
+      });
       continue;
     }
 
     const fieldGroup = fieldGroupMap.get(ecsFieldName);
 
     if (fieldGroup && fieldGroup.length > 1) {
-      // This is part of a multi-column group
-      const joinStrategy = joinStrategyMap.get(ecsFieldName)!;
-      const fieldIndex = fieldGroup.indexOf(originalName);
-
-      if (joinStrategy === 'append') {
-        // All fields in the group use append modifier
-        transformedNodes.push({
-          type: 'field',
-          name: ecsFieldName,
-          modifiers: {
-            ...fieldNode.modifiers,
-            append: true,
-          },
-        });
-      } else {
-        // skip strategy: first field gets the name, rest become empty skip fields
-        if (fieldIndex === 0) {
-          transformedNodes.push({
-            type: 'field',
-            name: ecsFieldName,
-            modifiers: fieldNode.modifiers,
-          });
-        } else {
-          transformedNodes.push({
-            type: 'field',
-            name: '',
-            modifiers: {
-              skip: true,
-            },
-          });
-        }
-      }
+      // This is part of a multi-column group - all fields use append modifier
+      transformedNodes.push({
+        type: 'field',
+        name: ecsFieldName,
+        modifiers: {
+          ...fieldNode.modifiers,
+          append: true,
+        },
+      });
     } else {
       // Single-column field, just rename it
       transformedNodes.push({

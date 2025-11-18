@@ -62,24 +62,8 @@ export const ReviewDissectFieldsPrompt = createPrompt({
                 properties: {
                   ecs_field: { type: 'string' },
                   columns: { type: 'array', items: { type: 'string' } },
-                  join_strategy: {
-                    type: 'string',
-                    enum: ['append', 'skip'],
-                    description:
-                      'How to combine multiple columns: append (join with separator) or skip (discard subsequent fields)',
-                  },
-                  is_static: {
-                    type: 'boolean',
-                    description:
-                      'If true, this field always has the same value and should be a literal in the pattern, not extracted as a field',
-                  },
-                  static_value: {
-                    type: 'string',
-                    description:
-                      'The literal value to use in the pattern when is_static is true (e.g., "user" for key=value patterns)',
-                  },
                 },
-                required: ['ecs_field', 'columns', 'join_strategy'],
+                required: ['ecs_field', 'columns'],
               },
             },
           },

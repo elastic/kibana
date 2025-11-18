@@ -24,12 +24,9 @@ For every field in the log:
    * Separate timestamps must remain separate groups.  
    * Epoch time values (seconds or milliseconds) can be mapped to `@timestamp` as a single field.
 
-2. **Choose the grouping strategy** for multi-column fields:
-   * **append**: Join the field values together with a space separator  
-     * Use for: timestamps (date + time), full names (first + last), file paths (dir + file), multi-word values  
-     * Example: `field_1="2024-01-15"` + `field_2="10:30:45"` → `@timestamp="2024-01-15 10:30:45"`  
-   * **skip**: Keep only the first field, discard the rest  
-     * Use for: redundant data, unwanted delimiters, formatting characters  
+2. For multi-column fields, they will be joined together with a space separator using the **append** strategy
+   * Use for: timestamps (date + time), full names (first + last), file paths (dir + file), multi-word values  
+   * Example: `field_1="2024-01-15"` + `field_2="10:30:45"` → `@timestamp="2024-01-15 10:30:45"`  
 
 3. For **each final field** (combined or uncombined):
 
@@ -57,29 +54,25 @@ Return a JSON object in the following format:
                 "field_1",
                 "field_2",
                 "field_3"
-            ],
-            "join_strategy": "append"
+            ]
         },
         {
             "ecs_field": "log.level",
             "columns": [
                 "field_4"
-            ],
-            "join_strategy": "skip"
+            ]
         },
         {
             "ecs_field": "user.name",
             "columns": [
                 "field_5"
-            ],
-            "join_strategy": "skip"
+            ]
         },
         {
             "ecs_field": "message",
             "columns": [
                 "field_6"
-            ],
-            "join_strategy": "skip"
+            ]
         }
     ]
 }

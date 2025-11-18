@@ -29,7 +29,7 @@ import yargs from 'yargs/yargs';
 import {
   getReviewFields,
   getDissectProcessorWithReview,
-  extractDissectPatternDangerouslySlow,
+  extractDissectPattern,
   serializeAST,
 } from '@kbn/dissect-heuristics';
 import { groupMessagesByPattern } from '@kbn/grok-heuristics';
@@ -107,7 +107,7 @@ export async function evaluateDissectSuggestions() {
         return { stream, pattern: '', processor: null };
       }
 
-      const dissectPattern = extractDissectPatternDangerouslySlow(largestGroup.messages);
+      const dissectPattern = extractDissectPattern(largestGroup.messages);
       const reviewFields = getReviewFields(dissectPattern, 10);
       console.log(`- ${stream}: ${chalk.dim(serializeAST(dissectPattern.ast))}`);
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export { extractDissectPatternDangerouslySlow } from './src/extract_dissect_pattern';
+export { extractDissectPattern } from './src/extract_dissect_pattern';
 export { getDissectProcessor } from './src/get_dissect_processor';
 export { getReviewFields, type ReviewFields } from './src/review/get_review_fields';
 export { getDissectProcessorWithReview } from './src/review/get_dissect_processor_with_review';

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { extractDissectPatternDangerouslySlow } from './extract_dissect_pattern';
+import { extractDissectPattern } from './extract_dissect_pattern';
 import { getDissectProcessor } from './get_dissect_processor';
 import { serializeAST } from './serialize_ast';
 
 // Helper function to get pattern string from result
-const getPattern = (result: ReturnType<typeof extractDissectPatternDangerouslySlow>) =>
+const getPattern = (result: ReturnType<typeof extractDissectPattern>) =>
   serializeAST(result.ast);
 
 describe('Dissect Pattern Extraction - Integration Tests', () => {
@@ -22,7 +22,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         '192.168.1.102 - - [11/Oct/2000:14:22:05 -0700] "GET /index.html HTTP/1.0" 304 0',
       ];
 
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
 
       expect(getPattern(result)).toBe(
         '%{field_1} - %{field_2} [%{field_3}/%{field_4}/%{field_5->} %{field_6}] "%{field_7} /%{field_8->} %{field_9}/%{field_10->}" %{field_11} %{field_12}'
@@ -37,7 +37,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         'Mar 10 15:45:25 hostname kernel[4321]: Memory allocation',
       ];
 
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
 
       expect(getPattern(result)).toBe(
         '%{field_1} %{field_2} %{field_3} %{field_4} %{field_5}[%{field_6}]: %{field_7->} %{field_8}'
@@ -52,7 +52,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         '{"time":"10:30:02","level":"ERROR","msg":"Database fail"}',
       ];
 
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
 
       expect(getPattern(result)).toBe(
         '{"%{field_1}":"%{field_2}","%{field_3}":"%{field_4}","%{field_5}":"%{field_6->} %{field_7}"}'
@@ -67,7 +67,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         '24680,bobsmith,denver,active,pending',
       ];
 
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
 
       expect(getPattern(result)).toBe('%{field_1},%{field_2},%{field_3},%{field_4},%{field_5}');
       expect(result.fields).toHaveLength(5);
@@ -80,7 +80,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         'entry|ERROR|DatabaseService|timeout',
       ];
 
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
 
       expect(getPattern(result)).toBe('%{field_1}|%{field_2}|%{field_3}|%{field_4}');
       expect(result.fields).toHaveLength(4);
@@ -89,7 +89,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
     it('extracts pattern from tab-delimited logs', () => {
       const logs = ['alpha\tbeta\tgamma', 'delta\tepsilon\tzeta', 'theta\tiota\tkappa'];
 
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
 
       expect(getPattern(result)).toBe('%{field_1}\t%{field_2->}\t%{field_3}');
       expect(result.fields).toHaveLength(3);
@@ -100,7 +100,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
     it('detects whitespace delimiters for variable spacing', () => {
       const logs = ['INFO    message', 'WARN  message', 'ERROR   message', 'DEBUG     message'];
 
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
 
       // Whitespace varies, so field_1 needs right-padding
       expect(getPattern(result)).toBe('%{field_1->} %{field_2}');
@@ -114,7 +114,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         '172.16.0.1 - - [timestamp] PUT',
       ];
 
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
 
       expect(getPattern(result)).toBe('%{field_1} - - [%{field_2}] %{field_3}');
       expect(result.fields).toHaveLength(3);
@@ -127,7 +127,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         'ERROR  - - [2024-01-03] Request received',
       ];
 
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
 
       // After whitespace normalization: correctly detects varying log level lengths
       // and applies right-padding modifier. Date is kept as single field.
@@ -140,7 +140,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
 
   describe('Edge Cases', () => {
     it('handles empty input array', () => {
-      const result = extractDissectPatternDangerouslySlow([]);
+      const result = extractDissectPattern([]);
 
       expect(getPattern(result)).toBe('');
       expect(result.fields).toEqual([]);
@@ -149,7 +149,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
     it('handles a single message (ensures no crash)', () => {
       const logs = ['This is a single log message with some data'];
 
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
 
       expect(getPattern(result)).toBe(
         '%{field_1} %{field_2} %{field_3} %{field_4} %{field_5} %{field_6} %{field_7} %{field_8} %{field_9}'
@@ -160,7 +160,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
     it('handles identical messages', () => {
       const logs = ['alpha beta', 'alpha beta', 'alpha beta'];
 
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
 
       expect(getPattern(result)).toBe('%{field_1} %{field_2}');
       expect(result.fields).toHaveLength(2);
@@ -169,7 +169,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
     it('handles messages with no common delimiters', () => {
       const logs = ['abc123', 'xyz789', 'def456'];
 
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
 
       expect(getPattern(result)).toBe('%{message}');
       expect(result.fields).toHaveLength(1);
@@ -178,7 +178,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
     it('handles messages with only whitespace differences', () => {
       const logs = ['word1 word2 word3', 'word1  word2  word3', 'word1   word2   word3'];
 
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
 
       // Right-padding modifier correctly handles varying whitespace
       expect(getPattern(result)).toBe('%{field_1->} %{field_2->} %{field_3}');
@@ -193,7 +193,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         `prefix ${longPart} middle ${longPart} suffix`,
       ];
 
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
 
       expect(getPattern(result)).toBe('%{field_1} %{field_2} %{field_3} %{field_4} %{field_5}');
       expect(result.fields).toHaveLength(5);
@@ -206,7 +206,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         'guest@domain.org -> /data/output.csv (pending)',
       ];
 
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
 
       expect(getPattern(result)).toBe(
         '%{field_1}@%{field_2} -> /%{field_3}/%{field_4} (%{field_5})'
@@ -221,7 +221,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         '2024-01-15 [ERROR] (module) - {action: fail} Message',
       ];
 
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
 
       expect(getPattern(result)).toBe(
         '%{field_1}-%{field_2}-%{field_3} [%{field_4}] (%{field_5}) - {%{field_6}: %{field_7}} %{field_8}'
@@ -236,7 +236,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         'PUT https://example.com/api/v1/update 200 180ms',
       ];
 
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
 
       expect(getPattern(result)).toBe(
         '%{field_1->} %{field_2}://%{field_3}/%{field_4}/%{field_5}/%{field_6->} %{field_7->} %{field_8}'
@@ -251,7 +251,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         '2024-01-15T10:30:02.000Z ERROR Message',
       ];
 
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
 
       expect(getPattern(result)).toBe('%{field_1}-%{field_2}-%{field_3} %{field_4->} %{field_5}');
       expect(result.fields).toHaveLength(5);
@@ -267,7 +267,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       ];
 
       testCases.forEach((logs) => {
-        const result = extractDissectPatternDangerouslySlow(logs);
+        const result = extractDissectPattern(logs);
         expect(getPattern(result)).not.toContain('%{*');
         expect(getPattern(result)).not.toContain('%{&');
       });
@@ -280,7 +280,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       ];
 
       testCases.forEach((logs) => {
-        const result = extractDissectPatternDangerouslySlow(logs);
+        const result = extractDissectPattern(logs);
         expect(getPattern(result)).not.toContain('%{+');
       });
     });
@@ -288,7 +288,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
     it('produces valid field names', () => {
       const logs = ['field1 field2 field3', 'value1 value2 value3', 'data1 data2 data3'];
 
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
 
       result.fields.forEach((field) => {
         expect(field.name).toBeTruthy();
@@ -304,7 +304,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       ];
 
       testCases.forEach((logs) => {
-        const result = extractDissectPatternDangerouslySlow(logs);
+        const result = extractDissectPattern(logs);
 
         // Pattern should have matching %{ and }
         const openCount = (getPattern(result).match(/%\{/g) || []).length;
@@ -323,7 +323,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         '172.16.0.1 PUT /update 200',
       ];
 
-      const pattern = extractDissectPatternDangerouslySlow(logs);
+      const pattern = extractDissectPattern(logs);
       const processor = getDissectProcessor(pattern, 'message');
 
       expect(processor.processor.dissect.field).toBe('message');
@@ -335,7 +335,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
     it('handles whitespace delimiters in processor config', () => {
       const logs = ['INFO    message', 'WARN  message', 'ERROR   message'];
 
-      const pattern = extractDissectPatternDangerouslySlow(logs);
+      const pattern = extractDissectPattern(logs);
       const processor = getDissectProcessor(pattern);
 
       // Right-padding modifier correctly handles variable spacing
@@ -352,7 +352,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         '172.16.0.1 - - [15/Jan/2024:10:30:02 +0000] "PUT /api/update HTTP/1.1" 200 128 "https://site.com" "Safari/14.0"',
       ];
 
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
 
       expect(getPattern(result)).toBe(
         '%{field_1} - %{field_2} [%{field_3}/%{field_4}/%{field_5} +%{field_6}] "%{field_7} /%{field_8}/%{field_9} %{field_10}/%{field_11}" %{field_12} %{field_13} "%{field_14}://%{field_15}" "%{field_16}/%{field_17}"'
@@ -367,7 +367,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         '[2024-01-15 10:30:02] ERROR: File not found exception',
       ];
 
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
 
       expect(getPattern(result)).toBe(
         '[%{field_1}-%{field_2}-%{field_3} %{field_4}] %{field_5}: %{field_6->} %{field_7} %{field_8}'
@@ -382,7 +382,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         '2024-01-15T10:30:02.000Z stdout F Request processed',
       ];
 
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
 
       expect(getPattern(result)).toBe(
         '%{field_1}-%{field_2}-%{field_3} %{field_4} %{field_5} %{field_6->} %{field_7}'
@@ -397,7 +397,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         'Event ID: 4634 | Source: Security | Level: Information | User: Guest',
       ];
 
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
 
       expect(getPattern(result)).toBe(
         '%{field_1} %{field_2}: %{field_3} | %{field_4}: %{field_5} | %{field_6}: %{field_7} | %{field_8}: %{field_9}'
@@ -412,7 +412,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         'timestamp=2024-01-15T10:30:02 level=ERROR service=api action=failed user_id=789',
       ];
 
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
 
       expect(getPattern(result)).toBe(
         '%{field_1}=%{field_2}-%{field_3}-%{field_4} %{field_5}=%{field_6->} %{field_7}=%{field_8->} %{field_9}=%{field_10->} %{field_11}_%{field_12}=%{field_13}'
@@ -429,7 +429,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
       );
 
       const start = performance.now();
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
       const duration = performance.now() - start;
 
       expect(getPattern(result)).toBeTruthy();
@@ -444,7 +444,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         'mmm|nnn|ooo|uuu|vvv|www|jjj|kkk',
       ];
 
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
 
       expect(getPattern(result)).toBe(
         '%{field_1}|%{field_2}|%{field_3}|%{field_4}|%{field_5}|%{field_6}|%{field_7}|%{field_8}'
@@ -558,7 +558,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         '- 1763056455 2005.11.09 en74 Nov 9 12:01:01 en74/en74 crond[3081]: (root) CMD (run-parts /etc/cron.hourly)',
       ];
 
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
 
       // These messages have very high structural variability (different timestamps,
       // hostnames, separators, processes, etc.). The heuristic should use space-based
@@ -581,7 +581,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         'Nov 9 12:01:05 server5 crond[2924]: session opened for user admin',
       ];
 
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
 
       // With uniform structure, heuristic should extract clear delimiters
       expect(getPattern(result)).toBeTruthy();
@@ -696,7 +696,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         '- 1763064496 2005.11.09 tbird-admin1 Nov 9 12:12:16 local@tbird-admin1 /apps/x86_64/system/ganglia-3.0.1/sbin/gmetad[1682]: data_thread() got not answer from any [Thunderbird_A4] datasource',
         '- 1763064495 2005.11.09 dn669 Nov 9 12:12:11 dn669/dn669 ntpd[504]: synchronized to 10.100.28.250, stratum 3',
       ];
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
       // After normalization: correctly detects '-' and ':' as delimiters
       expect(getPattern(result)).toBe(
         '- %{field_1} %{field_2} %{field_3->} %{field_4->} %{field_5->} %{field_6->} %{field_7->}: %{field_8} %{field_9}'
@@ -806,7 +806,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         '[11.13 18:56:50] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 974 bytes sent, 9624 bytes (9.39 KB) received, lifetime <1 sec',
         '[11.13 18:56:50] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
       ];
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
       expect(getPattern(result)).toBe(
         '[%{field_1} %{field_2}] %{field_3} - %{field_4} %{field_5->} %{field_6->} %{field_7->} %{field_8} %{field_9}'
       );
@@ -915,7 +915,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 open through proxy proxy.cse.cuhk.edu.hk:5070 HTTPS',
         '[11.13 20:08:27] chrome.exe - proxy.cse.cuhk.edu.hk:5070 close, 508 bytes sent, 47293 bytes (46.1 KB) received, lifetime <1 sec',
       ];
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
       // Note: field_3 does not use right-padding because ` - ` is a non-whitespace delimiter
       // The space is part of the delimiter, not padding. Fields naturally vary in length.
       expect(getPattern(result)).toBe(
@@ -1026,7 +1026,7 @@ describe('Dissect Pattern Extraction - Integration Tests', () => {
         'Nov 13 20:10:18 combo ftpd[23147]: connection from 211.167.68.59 () at Sat Jul  9 12:16:49 2005',
         'Nov 13 20:10:18 combo ftpd[23152]: connection from 211.167.68.59 () at Sat Jul  9 12:16:51 2005',
       ];
-      const result = extractDissectPatternDangerouslySlow(logs);
+      const result = extractDissectPattern(logs);
       // After normalization: correctly detects ':' as delimiter
       // With lenient position scoring, the colon is detected despite varying process name lengths
       expect(getPattern(result)).toBe(

@@ -41,6 +41,5 @@ export interface NormalizedReviewResult {
   fields: Array<{
     ecs_field: string;
     columns: string[];
-    join_strategy: 'append' | 'skip';
   }>;
 }

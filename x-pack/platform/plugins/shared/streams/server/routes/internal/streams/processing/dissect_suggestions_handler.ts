@@ -107,9 +107,6 @@ export function mapFields(
     return {
       ecs_field: ecsField,
       columns: field.columns,
-      join_strategy: field.join_strategy,
-      is_static: field.is_static,
-      static_value: field.static_value,
     };
   });
 }
