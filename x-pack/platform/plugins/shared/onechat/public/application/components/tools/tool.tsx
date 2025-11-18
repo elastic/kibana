@@ -25,7 +25,7 @@ import type { ToolDefinitionWithSchema, ToolType } from '@kbn/onechat-common';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { defer } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -128,6 +128,47 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
   } = services;
 
   const currentToolId = watch('toolId');
+  const isSyncingSourceToolRef = useRef(false);
+  const hasSourceTool = mode === ToolFormMode.Create && Boolean(tool);
+
+  useEffect(() => {
+    if (hasSourceTool) {
+      isSyncingSourceToolRef.current = true;
+    }
+  }, [hasSourceTool]);
+
+  useEffect(() => {
+    if (tool) {
+      const toolTypeConfig = getToolTypeConfig(tool.type);
+      if (toolTypeConfig) {
+        const { toolToFormData } = toolTypeConfig;
+        reset(toolToFormData(tool));
+      }
+    }
+  }, [tool, reset]);
+
+  // Switching tool types clears tool-specific fields
+  useEffect(() => {
+    if (!urlToolType || mode !== ToolFormMode.Create) {
+      return;
+    }
+    if (isSyncingSourceToolRef.current) {
+      isSyncingSourceToolRef.current = false;
+      return;
+    }
+
+    const currentValues = getValues();
+    const newDefaultValues = getToolTypeDefaultValues(urlToolType);
+
+    const mergedValues: ToolFormData = {
+      ...newDefaultValues,
+      toolId: currentValues.toolId,
+      description: currentValues.description,
+      labels: currentValues.labels,
+    };
+
+    reset(mergedValues);
+  }, [urlToolType, initialToolType, mode, getValues, reset]);
 
   // Handle opening test tool flyout on navigation
   useEffect(() => {
@@ -181,33 +222,6 @@ export const Tool: React.FC<ToolProps> = ({ mode, tool, isLoading, isSubmitting,
     },
     [handleSave, handleTestTool]
   );
-
-  useEffect(() => {
-    if (tool) {
-      const toolTypeConfig = getToolTypeConfig(tool.type);
-      if (toolTypeConfig) {
-        const { toolToFormData } = toolTypeConfig;
-        reset(toolToFormData(tool));
-      }
-    }
-  }, [tool, reset]);
-
-  // Switching tool types clears tool-specific fields
-  useEffect(() => {
-    if (!urlToolType) return;
-    if (mode !== ToolFormMode.Create) return;
-    const currentValues = getValues();
-    const newDefaultValues = getToolTypeDefaultValues(urlToolType);
-
-    const mergedValues: ToolFormData = {
-      ...newDefaultValues,
-      toolId: currentValues.toolId,
-      description: currentValues.description,
-      labels: currentValues.labels,
-    };
-
-    reset(mergedValues);
-  }, [urlToolType, initialToolType, mode, getValues, reset]);
 
   const toolFormId = useGeneratedHtmlId({
     prefix: 'toolForm',
