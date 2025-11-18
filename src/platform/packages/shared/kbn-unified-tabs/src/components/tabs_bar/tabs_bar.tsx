@@ -35,7 +35,7 @@ import { TabsEventName } from '../../types';
 import { getTabIdAttribute } from '../../utils/get_tab_attributes';
 import { useResponsiveTabs } from '../../hooks/use_responsive_tabs';
 import { TabsBarWithBackground } from '../tabs_visual_glue_to_header/tabs_bar_with_background';
-import { TabsBarMenu, type TabsBarMenuProps } from '../tabs_bar_menu';
+import { TabsMenu, type TabsMenuProps } from '../tabs_menu';
 import { TabsEventDataKeys } from '../../event_data_keys';
 import { OptionalDraggable } from './optional_draggable';
 import { OptionalDroppable } from './optional_droppable';
@@ -71,12 +71,12 @@ export type TabsBarProps = Pick<
   maxItemsCount?: number;
   services: TabsServices;
   onAdd: () => Promise<void>;
-  onSelectRecentlyClosed: TabsBarMenuProps['onSelectRecentlyClosed'];
+  onSelectRecentlyClosed: TabsMenuProps['onSelectRecentlyClosed'];
   onReorder: (items: TabItem[], movedTabId: string) => void;
   onEBTEvent: (event: TabsEBTEvent) => void;
-  onClearRecentlyClosed: TabsBarMenuProps['onClearRecentlyClosed'];
+  onClearRecentlyClosed: TabsMenuProps['onClearRecentlyClosed'];
   customNewTabButton?: React.ReactElement;
-  disableTabsBarMenu?: boolean;
+  disableTabsMenu?: boolean;
 };
 
 export interface TabsBarApi {
@@ -107,7 +107,7 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
       disableCloseButton = false,
       disableInlineLabelEditing = false,
       disableDragAndDrop = false,
-      disableTabsBarMenu = false,
+      disableTabsMenu = false,
     },
     componentRef
   ) => {
@@ -342,9 +342,9 @@ export const TabsBar = forwardRef<TabsBarApi, TabsBarProps>(
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        {!disableTabsBarMenu && (
+        {!disableTabsMenu && (
           <EuiFlexItem grow={false}>
-            <TabsBarMenu
+            <TabsMenu
               items={items}
               selectedItem={selectedItem}
               recentlyClosedItems={recentlyClosedItems}

@@ -141,7 +141,7 @@ describe('TabsBar', () => {
     expect(onAdd).not.toHaveBeenCalled();
   });
 
-  it('does not render tabs bar menu when disableTabsBarMenu=true', () => {
+  it('does not render tabs menu when disableTabsMenu=true', () => {
     const selectedItem = items[0];
 
     render(
@@ -160,7 +160,7 @@ describe('TabsBar', () => {
         onReorder={onReorder}
         getPreviewData={getPreviewData}
         onEBTEvent={onEBTEvent}
-        disableTabsBarMenu={true}
+        disableTabsMenu={true}
       />
     );
 
@@ -168,12 +168,12 @@ describe('TabsBar', () => {
     const tabs = screen.getAllByRole('tab');
     expect(tabs).toHaveLength(items.length);
 
-    // Verify tabs bar menu is not rendered
-    const tabsBarMenu = screen.queryByTestId('unifiedTabs_tabsBarMenu');
-    expect(tabsBarMenu).not.toBeInTheDocument();
+    // Verify tabs menu is not rendered
+    const tabsMenu = screen.queryByTestId('unifiedTabs_tabsMenu');
+    expect(tabsMenu).not.toBeInTheDocument();
 
     // Verify menu button is not rendered
-    const menuButton = screen.queryByTestId('unifiedTabs_tabsBarMenuButton');
+    const menuButton = screen.queryByTestId('unifiedTabs_tabsMenuButton');
     expect(menuButton).not.toBeInTheDocument();
   });
 });

@@ -293,23 +293,23 @@ export class UnifiedTabsPageObject extends FtrService {
     return content;
   }
 
-  public async openTabsBarMenu() {
-    await this.testSubjects.click('unifiedTabs_tabsBarMenuButton');
-    await this.retry.waitFor('the tabs bar menu to open', async () => {
-      return await this.testSubjects.exists('unifiedTabs_tabsBarMenuPanel');
+  public async openTabsMenu() {
+    await this.testSubjects.click('unifiedTabs_tabsMenuButton');
+    await this.retry.waitFor('the tabs menu to open', async () => {
+      return await this.testSubjects.exists('unifiedTabs_tabsMenuPanel');
     });
   }
 
-  public async closeTabsBarMenu() {
-    await this.testSubjects.click('unifiedTabs_tabsBarMenuButton');
-    await this.retry.waitFor('the tabs bar menu to close', async () => {
-      return !(await this.testSubjects.exists('unifiedTabs_tabsBarMenuPanel'));
+  public async closeTabsMenu() {
+    await this.testSubjects.click('unifiedTabs_tabsMenuButton');
+    await this.retry.waitFor('the tabs menu to close', async () => {
+      return !(await this.testSubjects.exists('unifiedTabs_tabsMenuPanel'));
     });
     await this.browser.pressKeys(this.browser.keys.ESCAPE); // cancel the tooltip if it is open
   }
 
   public async getRecentlyClosedTabLabels() {
-    await this.openTabsBarMenu();
+    await this.closeTabsMenu();
     const recentlyClosedItems = await this.find.allByCssSelector(
       '[data-test-subj^="unifiedTabs_tabsMenu_recentlyClosedTab_"]'
     );
@@ -317,13 +317,13 @@ export class UnifiedTabsPageObject extends FtrService {
     for (const item of recentlyClosedItems) {
       labels.push(await item.getVisibleText());
     }
-    await this.closeTabsBarMenu();
+    await this.closeTabsMenu();
     return labels;
   }
 
   public async restoreRecentlyClosedTab(index: number) {
     const currentNumberOfTabs = await this.getNumberOfTabs();
-    await this.openTabsBarMenu();
+    await this.openTabsMenu();
     const recentlyClosedItems = await this.find.allByCssSelector(
       '[data-test-subj^="unifiedTabs_tabsMenu_recentlyClosedTab_"]'
     );
@@ -338,7 +338,7 @@ export class UnifiedTabsPageObject extends FtrService {
   }
 
   public async clearRecentlyClosedTabs() {
-    await this.openTabsBarMenu();
+    await this.openTabsMenu();
     const buttonTestId = 'unifiedTabs_tabsMenu_clearRecentlyClosed';
     const clearButtonExists = await this.testSubjects.exists(buttonTestId);
     if (clearButtonExists) {
@@ -347,6 +347,6 @@ export class UnifiedTabsPageObject extends FtrService {
         return !(await this.testSubjects.exists(buttonTestId));
       });
     }
-    await this.closeTabsBarMenu();
+    await this.closeTabsMenu();
   }
 }
