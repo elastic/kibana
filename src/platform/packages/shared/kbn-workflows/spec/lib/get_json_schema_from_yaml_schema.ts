@@ -234,7 +234,21 @@ function fixInputsSchemaForMonaco(schema: any): void {
     return;
   }
 
-  const inputsSchema = workflowSchema.properties?.inputs;
+  // CRITICAL: Handle allOf structure (zod-to-json-schema creates allOf for piped schemas)
+  // The inputs schema might be inside allOf[0].properties.inputs, not directly in workflowSchema.properties.inputs
+  let inputsSchema = workflowSchema.properties?.inputs;
+
+  // If inputs is not at top level, check inside allOf
+  if (!inputsSchema && workflowSchema.allOf && Array.isArray(workflowSchema.allOf)) {
+    // Find inputs in any allOf item
+    for (const allOfItem of workflowSchema.allOf) {
+      if (allOfItem?.properties?.inputs) {
+        inputsSchema = allOfItem.properties.inputs;
+        break;
+      }
+    }
+  }
+
   if (!inputsSchema) {
     return;
   }
@@ -312,6 +326,19 @@ function fixInputsSchemaForMonaco(schema: any): void {
         if (subSchema.type === 'object') {
           fixSchemaObject(subSchema);
         }
+        // Ensure array schemas have proper items schema (for legacy format)
+        if (subSchema.type === 'array' && !subSchema.items) {
+          // If array schema doesn't have items, add a basic one
+          // This ensures Monaco can validate array items correctly
+          subSchema.items = {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+              type: { type: 'string' },
+            },
+            additionalProperties: true,
+          };
+        }
       }
     });
   } else {
@@ -319,6 +346,110 @@ function fixInputsSchemaForMonaco(schema: any): void {
     if (inputsSchema.type === 'object') {
       fixSchemaObject(inputsSchema);
     }
+    // If it's an array without items, add items schema
+    if (inputsSchema.type === 'array' && !inputsSchema.items) {
+      inputsSchema.items = {
+        type: 'object',
+        properties: {
+          name: { type: 'string' },
+          type: { type: 'string' },
+        },
+        additionalProperties: true,
+      };
+    }
+  }
+
+  // Also fix inputs schema in allOf items if they exist
+  // CRITICAL: allOf[1] (from .pipe()) only accepts object format, but we need backward compatibility
+  // We must ensure allOf[1].inputs also accepts array format, otherwise arrays will fail validation
+  if (workflowSchema.allOf && Array.isArray(workflowSchema.allOf)) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    workflowSchema.allOf.forEach((allOfItem: any, index: number) => {
+      if (allOfItem?.properties?.inputs) {
+        const allOfInputsSchema = allOfItem.properties.inputs;
+
+        // If this is allOf[1] (the piped schema) and it only accepts object format,
+        // we need to wrap it in a union that also accepts array format for backward compatibility
+        if (index === 1) {
+          // Check if it's a $ref pointing to only the object schema
+          if (allOfInputsSchema.$ref) {
+            // Replace the $ref with an anyOf that includes both object (via ref) and array formats
+            allOfItem.properties.inputs = {
+              anyOf: [
+                { $ref: allOfInputsSchema.$ref }, // Keep the original object schema reference
+                {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      name: { type: 'string' },
+                      type: { type: 'string' },
+                    },
+                    additionalProperties: true,
+                  },
+                },
+              ],
+            };
+          } else if (allOfInputsSchema.type === 'object' && !allOfInputsSchema.anyOf) {
+            // Wrap the object schema in anyOf with array schema for backward compatibility
+            const objectSchema = { ...allOfInputsSchema };
+            allOfItem.properties.inputs = {
+              anyOf: [
+                objectSchema,
+                {
+                  type: 'array',
+                  items: {
+                    type: 'object',
+                    properties: {
+                      name: { type: 'string' },
+                      type: { type: 'string' },
+                    },
+                    additionalProperties: true,
+                  },
+                },
+              ],
+            };
+            // Update reference for further processing
+            const updatedInputsSchema = allOfItem.properties.inputs;
+            // Fix the object schema in the anyOf
+            fixSchemaObject(updatedInputsSchema.anyOf[0]);
+          }
+        } else {
+          // Apply the same fixes to inputs schema in allOf items
+          if (allOfInputsSchema.anyOf && Array.isArray(allOfInputsSchema.anyOf)) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            allOfInputsSchema.anyOf.forEach((subSchema: any) => {
+              if (subSchema && subSchema.type !== 'null' && subSchema.type !== 'undefined') {
+                if (subSchema.type === 'object') {
+                  fixSchemaObject(subSchema);
+                }
+                if (subSchema.type === 'array' && !subSchema.items) {
+                  subSchema.items = {
+                    type: 'object',
+                    properties: {
+                      name: { type: 'string' },
+                      type: { type: 'string' },
+                    },
+                    additionalProperties: true,
+                  };
+                }
+              }
+            });
+          } else if (allOfInputsSchema.type === 'object') {
+            fixSchemaObject(allOfInputsSchema);
+          } else if (allOfInputsSchema.type === 'array' && !allOfInputsSchema.items) {
+            allOfInputsSchema.items = {
+              type: 'object',
+              properties: {
+                name: { type: 'string' },
+                type: { type: 'string' },
+              },
+              additionalProperties: true,
+            };
+          }
+        }
+      }
+    });
   }
 }
 

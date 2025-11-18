@@ -58,17 +58,6 @@ export const useWorkflowJsonSchema = ({
         : getWorkflowZodSchema(connectorsData?.connectorTypes ?? {}); // TODO: remove this once we move the schema generation up to detail page or some wrapper component
       const jsonSchema = getJsonSchemaFromYamlSchema(zodSchema);
 
-      // Debug: Log schema generation (only in development)
-      if (process.env.NODE_ENV === 'development') {
-        // eslint-disable-next-line no-console
-        console.log('[Workflow Schema] Schema generated, checking version field...', {
-          uri,
-          hasDefinitions: !!jsonSchema?.definitions,
-          hasWorkflowSchema: !!jsonSchema?.definitions?.WorkflowSchema,
-          requiredBeforeFix: jsonSchema?.definitions?.WorkflowSchema?.required || [],
-        });
-      }
-
       // Post-process to improve validation messages and add display names for connectors
       const processedSchema = improveTypeFieldDescriptions(jsonSchema, connectorsData);
 
@@ -102,50 +91,7 @@ export const useWorkflowJsonSchema = ({
           if (workflowSchemaFinal.required.length === 0) {
             delete workflowSchemaFinal.required;
           }
-          // eslint-disable-next-line no-console
-          console.warn('[Workflow Schema] Removed version from required array (should not happen)');
         }
-      }
-
-      // Debug: Verify version is not in required (only in development)
-      if (process.env.NODE_ENV === 'development') {
-        const finalRequired = workflowSchemaFinal?.required || [];
-        // eslint-disable-next-line no-console
-        console.log('[Workflow Schema] Final schema check:', {
-          uri,
-          requiredFields: finalRequired,
-          hasVersion: finalRequired.includes('version'),
-          hasVersionProperty: !!workflowSchemaFinal?.properties?.version,
-          versionSchemaType: workflowSchemaFinal?.properties?.version?.type,
-          versionSchemaAnyOf: !!workflowSchemaFinal?.properties?.version?.anyOf,
-          allProperties: Object.keys(workflowSchemaFinal?.properties || {}),
-          schemaHasRef: !!clonedSchema?.$ref,
-          refTarget: clonedSchema?.$ref,
-        });
-        if (finalRequired.includes('version')) {
-          // eslint-disable-next-line no-console
-          console.error('[Workflow Schema] ERROR: version is still in required array!', {
-            required: finalRequired,
-            hasVersionProperty: !!workflowSchemaFinal?.properties?.version,
-            schemaStructure: JSON.stringify(workflowSchemaFinal, null, 2).substring(0, 500),
-          });
-        }
-      }
-
-      // Debug: Log the actual schema structure being passed to Monaco (only in development)
-      if (process.env.NODE_ENV === 'development') {
-        // eslint-disable-next-line no-console
-        console.log('[Workflow Schema] Schema being passed to Monaco:', {
-          uri,
-          hasRef: !!clonedSchema?.$ref,
-          refTarget: clonedSchema?.$ref,
-          hasDefinitions: !!clonedSchema?.definitions,
-          workflowSchemaRequired: clonedSchema?.definitions?.WorkflowSchema?.required || [],
-          workflowSchemaProperties: Object.keys(
-            clonedSchema?.definitions?.WorkflowSchema?.properties || {}
-          ),
-          fullSchemaStructure: JSON.stringify(clonedSchema, null, 2).substring(0, 1000),
-        });
       }
 
       // Return the schema with the original URI (no query parameters)
