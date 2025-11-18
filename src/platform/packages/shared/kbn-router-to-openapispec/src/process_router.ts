@@ -25,6 +25,7 @@ import {
   prepareRoutes,
   setXState,
 } from './util';
+import { isVoidRequestBodySchema } from './oas_converter/common';
 import type { Env, GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 import type { CustomOperationObject, InternalRouterRoute } from './type';
 import { extractAuthzDescription } from './extract_authz_description';
@@ -83,13 +84,21 @@ export const processRouter = async ({
 
       const hasDeprecations = !!route.options.deprecated;
 
+      const bodySchema =
+        validationSchemas?.body !== undefined
+          ? converter.convert(validationSchemas.body)
+          : undefined;
+
+      const hasNonVoidBody =
+        !!bodySchema && !isVoidRequestBodySchema(bodySchema as OpenAPIV3.SchemaObject);
+
       const operation: CustomOperationObject = {
         summary: route.options.summary ?? '',
         tags: route.options.tags ? extractTags(route.options.tags) : [],
         ...(description ? { description } : {}),
         ...(hasDeprecations ? { deprecated: true } : {}),
         ...(route.options.discontinued ? { 'x-discontinued': route.options.discontinued } : {}),
-        requestBody: !!validationSchemas?.body
+        requestBody: hasNonVoidBody
           ? {
               content: {
                 [getVersionedContentTypeString(
@@ -97,7 +106,7 @@ export const processRouter = async ({
                   'public',
                   contentType
                 )]: {
-                  schema: converter.convert(validationSchemas.body),
+                  schema: bodySchema!,
                 },
               },
             }

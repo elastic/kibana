@@ -30,7 +30,7 @@ import {
   getXsrfHeaderForMethod,
   setXState,
 } from './util';
-import { isReferenceObject } from './oas_converter/common';
+import { isReferenceObject, isVoidRequestBodySchema } from './oas_converter/common';
 import { mergeOperation } from './merge_operation';
 
 export interface ProcessVersionedRouterOptions {
@@ -113,7 +113,12 @@ export const processVersionedRouter = async ({
         }`;
       }
 
-      const hasBody = Boolean(extractValidationSchemaFromVersionedHandler(handler)?.request?.body);
+      const bodyValidationSchema =
+        extractValidationSchemaFromVersionedHandler(handler)?.request?.body;
+      const bodySchema =
+        bodyValidationSchema !== undefined ? converter.convert(bodyValidationSchema) : undefined;
+      const hasBody =
+        !!bodySchema && !isVoidRequestBodySchema(bodySchema as OpenAPIV3.SchemaObject);
       const contentType = extractContentType(route.options.options?.body);
       // If any handler is deprecated we show deprecated: true in the spec
       const hasDeprecations = route.handlers.some(({ options }) => !!options.options?.deprecated);
@@ -124,13 +129,19 @@ export const processVersionedRouter = async ({
         ...(description ? { description } : {}),
         ...(hasDeprecations ? { deprecated: true } : {}),
         ...(route.options.discontinued ? { 'x-discontinued': route.options.discontinued } : {}),
-        requestBody: hasBody
-          ? {
-              content: hasVersionFilter
-                ? extractVersionedRequestBody(handler, route.options.access, converter, contentType)
-                : extractVersionedRequestBodies(route, converter, contentType),
-            }
-          : undefined,
+        requestBody:
+          hasBody && bodyValidationSchema
+            ? {
+                content: hasVersionFilter
+                  ? extractVersionedRequestBody(
+                      handler,
+                      route.options.access,
+                      converter,
+                      contentType
+                    )
+                  : extractVersionedRequestBodies(route, converter, contentType),
+              }
+            : undefined,
         responses: hasVersionFilter
           ? extractVersionedResponse(handler, route.options.access, converter, contentType)
           : extractVersionedResponses(route, converter, contentType),

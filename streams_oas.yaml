@@ -15,11 +15,6 @@ paths:
       tags:
         - streams
       description: 'Fetches all dashboards linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              not: {}
       responses: {}
       parameters:
         - name: name
@@ -35,11 +30,6 @@ paths:
       tags:
         - streams
       description: 'Links a dashboard to a stream. Noop if the dashboard is already linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              not: {}
       responses: {}
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -66,11 +56,6 @@ paths:
       tags:
         - streams
       description: 'Unlinks a dashboard from a stream. Noop if the dashboard is not linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              not: {}
       responses: {}
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -159,11 +144,6 @@ paths:
       tags:
         - streams
       description: 'Fetches a stream definition and associated dashboards<br/><br/>[Required authorization] Route required privileges: read_stream.'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              not: {}
       responses: {}
       parameters:
         - name: name
@@ -1288,11 +1268,6 @@ paths:
       tags:
         - streams
       description: 'Deletes a stream definition and the underlying data stream<br/><br/>[Required authorization] Route required privileges: manage_stream.'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              not: {}
       responses: {}
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1315,11 +1290,6 @@ paths:
       tags:
         - streams
       description: 'Fetches list of all streams<br/><br/>[Required authorization] Route required privileges: read_stream.'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              not: {}
       responses: {}
       parameters: []
       operationId: get-streams
@@ -1330,11 +1300,6 @@ paths:
       tags:
         - streams
       description: 'Enables wired streams<br/><br/>[Required authorization] Route required privileges: manage_stream.'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              not: {}
       responses: {}
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1352,11 +1317,6 @@ paths:
       tags:
         - streams
       description: 'Disables wired streams and deletes all existing stream definitions. The data of wired streams is deleted, but the data of classic streams is preserved.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              not: {}
       responses: {}
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1421,11 +1381,6 @@ paths:
       tags:
         - streams
       description: 'Resyncs all streams, making sure that Elasticsearch assets are up to date<br/><br/>[Required authorization] Route required privileges: manage_stream.'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              not: {}
       responses: {}
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -1443,11 +1398,6 @@ paths:
       tags:
         - streams
       description: 'Fetches the ingest settings of an ingest stream definition<br/><br/>[Required authorization] Route required privileges: read_stream.'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              not: {}
       responses: {}
       parameters:
         - name: name
@@ -1839,11 +1789,6 @@ paths:
       tags:
         - streams
       description: 'Fetches the group settings of a group stream definition<br/><br/>[Required authorization] Route required privileges: read_stream.'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              not: {}
       responses: {}
       parameters:
         - name: name
@@ -2035,11 +1980,6 @@ paths:
       tags:
         - streams
       description: 'Read the significant events<br/><br/>[Required authorization] Route required privileges: read_stream.'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              not: {}
       responses: {}
       parameters:
         - name: name
@@ -2206,11 +2146,6 @@ paths:
       tags:
         - streams
       description: 'Fetches all queries linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              not: {}
       responses: {}
       parameters:
         - name: name
@@ -2285,11 +2220,6 @@ paths:
       tags:
         - streams
       description: 'Remove a query from a stream. Noop if the query is not found on the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              not: {}
       responses: {}
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -2407,11 +2337,6 @@ paths:
       tags:
         - streams
       description: 'Fetches all rules linked to a stream that are visible to the current user in the current space.<br/><br/>[Required authorization] Route required privileges: read_stream.'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              not: {}
       responses: {}
       parameters:
         - name: name
@@ -2427,11 +2352,6 @@ paths:
       tags:
         - streams
       description: 'Links a rule to a stream. Noop if the rule is already linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              not: {}
       responses: {}
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -2458,11 +2378,6 @@ paths:
       tags:
         - streams
       description: 'Unlinks a rule from a stream. Noop if the rule is not linked to the stream.<br/><br/>[Required authorization] Route required privileges: manage_stream.'
-      requestBody:
-        content:
-          application/json:
-            schema:
-              not: {}
       responses: {}
       parameters:
         - description: A required header to protect against CSRF attacks
