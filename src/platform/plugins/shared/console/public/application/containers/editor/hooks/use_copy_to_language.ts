@@ -24,6 +24,14 @@ const getLanguageLabelByValue = (value: string) => {
   return AVAILABLE_LANGUAGES.find((lang) => lang.value === value)?.label || DEFAULT_LANGUAGE;
 };
 
+const copyText = async (text: string) => {
+  if (window.navigator?.clipboard) {
+    await window.navigator.clipboard.writeText(text);
+    return;
+  }
+  throw new Error('Could not copy to clipboard!');
+};
+
 interface UseCopyToLanguageProps {
   storage: Storage;
   esHostService: EsHostService;
@@ -53,14 +61,6 @@ export const useCopyToLanguage = ({
       setCurrentLanguage(defaultLanguage);
     }
   }, [defaultLanguage, isKbnRequestSelected]);
-
-  const copyText = useCallback(async (text: string) => {
-    if (window.navigator?.clipboard) {
-      await window.navigator.clipboard.writeText(text);
-      return;
-    }
-    throw new Error('Could not copy to clipboard!');
-  }, []);
 
   // This function will convert all the selected requests to the language by
   // calling convertRequestToLanguage and then copy the data to clipboard.
@@ -115,7 +115,7 @@ export const useCopyToLanguage = ({
 
       await copyText(requestsAsCode);
     },
-    [currentLanguage, getRequestsCallback, esHostService, toasts, copyText]
+    [currentLanguage, getRequestsCallback, esHostService, toasts]
   );
 
   const checkIsKbnRequestSelected = useCallback(async () => {
