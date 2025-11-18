@@ -100,8 +100,8 @@ const MDE_ACTION_FETCH_RETRY_CONFIG = {
 
 // max size of script output file to retrieve
 // little more than endpoint execute stderr/stdout threshold of 2kB
-// to account for mde output file containing extra metadata
-const RUNSCRIPT_OUTPUT_FILE_MAX_SIZE_BYTES = 2.5 * 1024; // 2.5 KB
+// to account for mde output file containing extra metadata and both stderr and stdout
+const RUNSCRIPT_OUTPUT_FILE_MAX_SIZE_BYTES = 4.5 * 1024; // 4.5 KB
 
 export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClientImpl {
   protected readonly agentType: ResponseActionAgentType = 'microsoft_defender_endpoint';
