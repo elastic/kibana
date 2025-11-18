@@ -426,6 +426,15 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     [selectedRowIndex, onRowSelected]
   );
 
+  const viewToggleMode = useMemo(
+    () => ({
+      currentMode: userSelectedViewMode ?? 'summary',
+      setViewMode,
+      isDisabled: isViewModeForced,
+    }),
+    [userSelectedViewMode, isViewModeForced, setViewMode]
+  );
+
   return (
     <>
       <RowSelectionContext.Provider value={rowSelectionContextValue}>
@@ -441,11 +450,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
           renderCellValue={renderCellValue}
           mode={effectiveViewMode}
           streamName={streamName}
-          viewModeToggle={{
-            currentMode: userSelectedViewMode ?? 'summary',
-            setViewMode,
-            isDisabled: isViewModeForced,
-          }}
+          viewModeToggle={viewToggleMode}
           dataViewFieldTypes={dataViewFieldTypes}
         />
       </RowSelectionContext.Provider>

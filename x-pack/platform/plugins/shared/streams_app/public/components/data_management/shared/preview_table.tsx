@@ -31,14 +31,11 @@ import type {
   IgnoredField,
   DocumentWithIgnoredFields,
 } from '@kbn/streams-schema/src/shared/record_types';
-import { LazySummaryColumn } from '@kbn/discover-contextual-components';
-import { DataGridDensity, ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import useAsync from 'react-use/lib/useAsync';
 import { recalcColumnWidths } from '../stream_detail_enrichment/utils';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { SimulationContext } from '../stream_detail_enrichment/state_management/simulation_state_machine';
-
-const emptyCell = <>&nbsp;</>;
+import { PreviewTableCell, isDocumentWithIgnoredFields } from './preview_table_cell';
 
 export type PreviewTableMode = 'columns' | 'summary';
 
@@ -83,12 +80,6 @@ function RowSelectionButton({ rowIndex }: { rowIndex: number }) {
 }
 
 export const MemoPreviewTable = React.memo(PreviewTable);
-
-function isDocumentWithIgnoredFields(
-  doc: SampleDocument | DocumentWithIgnoredFields
-): doc is DocumentWithIgnoredFields {
-  return 'ignored_fields' in doc && Array.isArray(doc.ignored_fields);
-}
 
 export function PreviewTable({
   documents,
@@ -142,9 +133,9 @@ export function PreviewTable({
 
   // Create dataView for summary mode
   const { value: dataView } = useAsync(async () => {
-    if (mode !== 'summary' || !streamName) return undefined;
+    if (!streamName) return undefined;
     return data.dataViews.create({ title: streamName });
-  }, [mode, streamName, data.dataViews]);
+  }, [streamName, data.dataViews]);
   const { euiTheme: theme } = useEuiTheme();
 
   // Create a map of field names to their ES types for quick lookup from DataView
@@ -512,102 +503,19 @@ export function PreviewTable({
         },
       }}
       onColumnResize={onColumnResize}
-      renderCellValue={({
-        rowIndex,
-        columnId,
-        setCellProps,
-        isDetails,
-        isExpanded,
-        isExpandable,
-        colIndex,
-      }) => {
-        // eslint-disable-next-line react-hooks/rules-of-hooks
-        const { selectedRowIndex } = useRowSelection();
-
-        if (selectedRowIndex === rowIndex) {
-          setCellProps({
-            style: {
-              backgroundColor: theme.colors.highlight,
-            },
-          });
-        } else {
-          setCellProps({
-            style: {},
-          });
-        }
-
-        const doc = documents[rowIndex];
-        const document = isDocumentWithIgnoredFields(doc) ? doc.values : doc;
-        const ignoredFields = isDocumentWithIgnoredFields(doc) ? doc.ignored_fields : [];
-
-        if (!document || typeof document !== 'object') {
-          return emptyCell;
-        }
-
-        // Special rendering for summary column
-        if (columnId === SUMMARY_COLUMN_ID && mode === 'summary' && dataView) {
-          // Convert to DataTableRecord format expected by SummaryColumn
-          // No normalization - pass documents as-is with OTel fields
-          // The kbn-discover-utils will handle OTel field fallbacks
-          const dataTableRecord = {
-            raw: document,
-            flattened: document,
-            id: `${rowIndex}-summary`,
-          };
-
-          let rowHeight: number | undefined;
-          if (currentRowHeights) {
-            const { defaultHeight } = currentRowHeights;
-            if (defaultHeight === 'auto') {
-              rowHeight = ROWS_HEIGHT_OPTIONS.auto;
-            } else if (
-              defaultHeight &&
-              typeof defaultHeight === 'object' &&
-              'lineCount' in defaultHeight &&
-              defaultHeight.lineCount
-            ) {
-              rowHeight = defaultHeight.lineCount;
-            }
-          }
-
-          return (
-            <LazySummaryColumn
-              dataView={dataView}
-              row={dataTableRecord}
-              rowIndex={rowIndex}
-              columnId={columnId}
-              isDetails={isDetails}
-              setCellProps={setCellProps}
-              isExpandable={isExpandable}
-              isExpanded={isExpanded}
-              colIndex={colIndex}
-              closePopover={() => {}}
-              density={DataGridDensity.COMPACT}
-              rowHeight={rowHeight}
-              shouldShowFieldHandler={() => true}
-              core={core}
-              share={share}
-              fieldFormats={fieldFormats}
-            />
-          );
-        }
-
-        if (renderCellValue) {
-          const renderedValue = renderCellValue(document, columnId, ignoredFields);
-          if (renderedValue !== undefined) {
-            return renderedValue;
-          }
-        }
-
-        const value = document[columnId];
-        if (value === undefined || value === null) {
-          return emptyCell;
-        }
-        if (typeof value === 'object') {
-          return JSON.stringify(value);
-        }
-        return String(value) || emptyCell;
-      }}
+      renderCellValue={(props) => (
+        <PreviewTableCell
+          {...props}
+          documents={documents}
+          mode={mode}
+          dataView={dataView}
+          currentRowHeights={currentRowHeights}
+          renderCellValue={renderCellValue}
+          core={core}
+          share={share}
+          fieldFormats={fieldFormats}
+        />
+      )}
     />
   );
 }
