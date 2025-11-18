@@ -51,13 +51,13 @@ export function toStoredFilter(simplified: AsCodeFilter): StoredFilter {
         alias: simplified.label || null,
         disabled: simplified.disabled || false,
         negate: simplified.negate || false,
-        controlledBy: simplified.controlledBy,
-        index: simplified.dataViewId,
-        // Preserve metadata properties for round-trip compatibility
-        isMultiIndex: simplified.isMultiIndex,
-        type: simplified.filterType,
-        key: simplified.key,
-        value: simplified.value,
+        // Only add optional properties if they have defined values (round-trip compatibility)
+        ...(simplified.controlledBy !== undefined ? { controlledBy: simplified.controlledBy } : {}),
+        ...(simplified.dataViewId !== undefined ? { index: simplified.dataViewId } : {}),
+        ...(simplified.isMultiIndex !== undefined ? { isMultiIndex: simplified.isMultiIndex } : {}),
+        ...(simplified.filterType !== undefined ? { type: simplified.filterType } : {}),
+        ...(simplified.key !== undefined ? { key: simplified.key } : {}),
+        ...(simplified.value !== undefined ? { value: simplified.value } : {}),
       },
     };
 
@@ -153,20 +153,32 @@ export function convertFromSimpleCondition(
         lt?: number | string;
       };
 
-      // Build range query, preserving format for timestamp fields
+      // Determine format - use existing meta.params.format if available, otherwise default for @timestamp
+      const existingFormat =
+        typeof baseStored.meta.params === 'object' &&
+        baseStored.meta.params !== null &&
+        'format' in baseStored.meta.params
+          ? (baseStored.meta.params as { format?: string }).format
+          : undefined;
+      const format =
+        existingFormat ||
+        (condition.field === '@timestamp' ? 'strict_date_optional_time' : undefined);
+
+      // Build range query, including format if present
       const rangeQuery: Record<string, unknown> = { ...rangeValue };
-      if (condition.field === '@timestamp') {
-        rangeQuery.format = 'strict_date_optional_time';
+      if (format) {
+        rangeQuery.format = format;
       }
 
       query = { range: { [condition.field]: rangeQuery } };
 
-      // Only put range values (not format) in meta.params
+      // Build meta.params with range values and format
       const paramsValue: Record<string, unknown> = {};
       if (rangeValue.gte !== undefined) paramsValue.gte = rangeValue.gte;
       if (rangeValue.lte !== undefined) paramsValue.lte = rangeValue.lte;
       if (rangeValue.gt !== undefined) paramsValue.gt = rangeValue.gt;
       if (rangeValue.lt !== undefined) paramsValue.lt = rangeValue.lt;
+      if (format) paramsValue.format = format;
 
       meta = { ...meta, params: paramsValue };
       break;
@@ -223,6 +235,7 @@ export function convertFromFilterGroup(
     meta = {
       ...meta,
       key: field,
+      field, // Add field property for round-trip compatibility
       type: 'phrases',
       params: values,
     };
@@ -275,12 +288,13 @@ export function convertFromFilterGroup(
   });
 
   // Create combined filter format with meta.params
+  // Note: Normalize relation to uppercase to match UI expectations ('OR'/'AND')
   meta = {
     ...meta,
     type: 'combined',
-    relation: group.type,
+    relation: group.type.toUpperCase() as 'AND' | 'OR',
     params: filterParams,
-  } as typeof meta & { relation: 'and' | 'or'; params: StoredFilter[] };
+  } as typeof meta & { relation: 'AND' | 'OR'; params: StoredFilter[] };
 
   // Combined filters don't have a query property - filters are in meta.params
   return {

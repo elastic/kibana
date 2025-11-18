@@ -59,6 +59,50 @@ function isStoredFilter(value: unknown): value is StoredFilter {
 }
 
 /**
+ * Type guard for query objects with term property
+ */
+export function hasTermQuery(query: unknown): query is { term: Record<string, unknown> } {
+  return typeof query === 'object' && query !== null && 'term' in query;
+}
+
+/**
+ * Type guard for query objects with terms property
+ */
+export function hasTermsQuery(query: unknown): query is { terms: Record<string, unknown> } {
+  return typeof query === 'object' && query !== null && 'terms' in query;
+}
+
+/**
+ * Type guard for query objects with range property
+ */
+export function hasRangeQuery(query: unknown): query is { range: Record<string, unknown> } {
+  return typeof query === 'object' && query !== null && 'range' in query;
+}
+
+/**
+ * Type guard for query objects with exists property
+ */
+export function hasExistsQuery(query: unknown): query is { exists: { field: string } } {
+  return typeof query === 'object' && query !== null && 'exists' in query;
+}
+
+/**
+ * Type guard for query objects with match property
+ */
+export function hasMatchQuery(query: unknown): query is { match: Record<string, unknown> } {
+  return typeof query === 'object' && query !== null && 'match' in query;
+}
+
+/**
+ * Type guard for query objects with match_phrase property
+ */
+export function hasMatchPhraseQuery(
+  query: unknown
+): query is { match_phrase: Record<string, unknown> } {
+  return typeof query === 'object' && query !== null && 'match_phrase' in query;
+}
+
+/**
  * TIER 1: Full Compatibility - Can be directly converted to SimpleFilter
  */
 export function isFullyCompatible(storedFilter: unknown): boolean {
@@ -68,18 +112,28 @@ export function isFullyCompatible(storedFilter: unknown): boolean {
 
   const meta = storedFilter.meta || {};
 
-  // Simple phrase filter without complex query structure
-  if (meta.type === 'phrase' && !storedFilter.query && meta.params) {
+  // Combined filter format
+  if (meta.type === 'combined' && Array.isArray(meta.params) && meta.params.length > 0) {
+    return true;
+  }
+
+  // Phrases filter
+  if (meta.type === 'phrases' && meta.params && Array.isArray(meta.params)) {
+    return true;
+  }
+
+  // Simple phrase filter
+  if (meta.type === 'phrase' && meta.params) {
     return true;
   }
 
   // Simple exists filter
-  if (meta.type === 'exists' && !storedFilter.query) {
+  if (meta.type === 'exists') {
     return true;
   }
 
-  // Simple range filter without complex query structure
-  if (meta.type === 'range' && !storedFilter.query && meta.params) {
+  // Simple range filter
+  if (meta.type === 'range' && meta.params) {
     return true;
   }
 
@@ -129,55 +183,6 @@ export function isPhraseFilterWithQuery(storedFilter: unknown): boolean {
 }
 
 /**
- * Determine if a stored filter requires high-fidelity preservation (DSL format)
- * Checks for complex query features that can't be simplified
- */
-export function requiresHighFidelity(storedFilter: unknown): boolean {
-  if (!isStoredFilter(storedFilter)) {
-    return false;
-  }
-
-  if (!storedFilter.query) {
-    return false;
-  }
-
-  // Check for multi-match queries
-  if (storedFilter.query.multi_match) {
-    return true;
-  }
-
-  // Check for match queries with complexity
-  if (storedFilter.query?.match) {
-    const matchValues = Object.values(storedFilter.query.match);
-    const hasComplexMatch = matchValues.some((value: unknown) => {
-      // Type guard for match query value
-      if (typeof value !== 'object' || value === null) {
-        return false;
-      }
-      return Boolean(
-        'analyzer' in value || 'fuzziness' in value || 'minimum_should_match' in value
-      );
-    });
-    if (hasComplexMatch) {
-      return true;
-    }
-  }
-
-  // Check for bool queries with multiple clauses
-  if (storedFilter.query.bool) {
-    const clauseTypes = ['must', 'must_not', 'should', 'filter'] as const;
-    const presentClauses = clauseTypes.filter((type) => Boolean(storedFilter.query?.bool[type]));
-
-    // Complex bool with multiple clause types or minimum_should_match
-    if (presentClauses.length > 1 || 'minimum_should_match' in storedFilter.query.bool) {
-      return true;
-    }
-  }
-
-  return false;
-}
-
-/**
  * TIER 2: Enhanced Compatibility - Can be parsed and simplified
  */
 export function isEnhancedCompatible(storedFilter: unknown): boolean {
@@ -185,39 +190,15 @@ export function isEnhancedCompatible(storedFilter: unknown): boolean {
     return false;
   }
 
-  // Exclude high-fidelity cases from simple conversion
-  if (requiresHighFidelity(storedFilter)) {
-    return false;
-  }
-
-  // Try to convert phrase filters with queries
-  if (isPhraseFilterWithQuery(storedFilter)) {
-    return true;
-  }
-
-  // Match queries can be parsed into phrase/range conditions
-  if (storedFilter.query?.match) {
-    const matchValues = Object.values(storedFilter.query.match);
-    return matchValues.some((value) => typeof value === 'string' || typeof value === 'number');
-  }
-
-  // Term queries
-  if (storedFilter.query?.term) {
-    return true;
-  }
-
-  // Terms queries (multi-value conditions)
-  if (storedFilter.query?.terms) {
-    return true;
-  }
-
-  // Range queries
-  if (storedFilter.query?.range) {
-    return true;
-  }
-
-  // Exists queries
-  if (storedFilter.query?.exists) {
+  // Query-based filters that can be parsed into conditions
+  // Simple checks first for performance (most common cases)
+  if (
+    hasTermQuery(storedFilter.query) ||
+    hasTermsQuery(storedFilter.query) ||
+    hasRangeQuery(storedFilter.query) ||
+    hasExistsQuery(storedFilter.query) ||
+    isPhraseFilterWithQuery(storedFilter)
+  ) {
     return true;
   }
 
