@@ -159,7 +159,7 @@ function buildBaseProjectConfig(
         kibanaJsonc.type,
         kibanaJsonc.type === 'plugin' ? MOON_CONST.TAG_PLUGIN : MOON_CONST.TAG_PACKAGE,
         kibanaJsonc.devOnly ? MOON_CONST.TAG_DEV : MOON_CONST.TAG_PROD,
-        `${MOON_CONST.TAG_GROUP}_${kibanaJsonc.group}`,
+        `${MOON_CONST.TAG_GROUP}-${kibanaJsonc.group}`,
         kibanaJsonc.visibility,
       ].filter(Boolean)
     ),
