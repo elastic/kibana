@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  AggregationsAggregate,
+  FieldValue,
+  TransformGetTransformStatsTransformStats,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { FetchSLOHealthParams, FetchSLOHealthResponse } from '@kbn/slo-schema';
 import { fetchSLOHealthResponseSchema } from '@kbn/slo-schema';
@@ -17,7 +21,6 @@ import {
   getSLOTransformId,
 } from '../../common/constants';
 import type { HealthStatus, State } from '../domain/models/health';
-import type { SLORepository } from './slo_repository';
 import type { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 
 const LAG_THRESHOLD_MINUTES = 10;
@@ -42,17 +45,11 @@ function getAfterKey(
 }
 
 export class GetSLOHealth {
-  constructor(
-    private scopedClusterClient: IScopedClusterClient,
-    private repository: SLORepository
-  ) {}
+  constructor(private scopedClusterClient: IScopedClusterClient) {}
 
   public async execute(params: FetchSLOHealthParams): Promise<FetchSLOHealthResponse> {
     let afterKey: AggregationsAggregate | undefined;
     let sloKeysFromES: Array<SloData> = [];
-
-    const page = params.page ?? 0;
-    const perPage = params.perPage ?? 100;
 
     do {
       const sloIdCompositeQueryResponse = await this.scopedClusterClient.asCurrentUser.search({
