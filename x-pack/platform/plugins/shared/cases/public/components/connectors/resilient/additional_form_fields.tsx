@@ -8,7 +8,7 @@ import React, { useEffect, useMemo } from 'react';
 import { isObject } from 'lodash';
 import {
   EuiComboBox,
-  EuiFlexGroup,
+  EuiFlexGrid,
   EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
@@ -112,7 +112,7 @@ export const AdditionalFormFields = React.memo<{
 
   return (
     <Form form={form}>
-      <EuiFlexGroup direction={isInSidebarForm ? 'column' : 'row'}>
+      <EuiFlexGrid columns={isInSidebarForm ? 1 : 3}>
         {additionalFields.map((field) => {
           const fieldMetaData = fieldsData?.data?.fieldsObj[field.value || ''];
           if (!fieldMetaData) {
@@ -124,7 +124,7 @@ export const AdditionalFormFields = React.memo<{
             </EuiFlexItem>
           );
         })}
-      </EuiFlexGroup>
+      </EuiFlexGrid>
       {additionalFields.length > 0 ? <EuiSpacer size="m" /> : null}
       <EuiFormRow
         label={i18n.ADDITIONAL_FIELDS_LABEL}
