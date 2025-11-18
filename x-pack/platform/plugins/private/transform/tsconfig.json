@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -83,7 +83,8 @@
     "@kbn/response-ops-rule-form",
     "@kbn/response-ops-rule-params",
     "@kbn/fields-metadata-plugin",
-    "@kbn/licensing-types"
+    "@kbn/licensing-types",
+    "@kbn/react-query"
   ],
   "exclude": ["target/**/*"]
 }

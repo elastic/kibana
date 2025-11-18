@@ -6,6 +6,9 @@
  */
 
 import { useMemo } from 'react';
+import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common';
+import type { EntityDetailsHighlightsResponse } from '../../../common/api/entity_analytics/entity_details/highlights.gen';
+import { ENTITY_DETAILS_HIGHLIGH_INTERNAL_URL } from '../../../common/entity_analytics/entity_analytics/constants';
 import type {
   AssetCriticalityRecord,
   CreateEntitySourceResponse,
@@ -32,6 +35,7 @@ import type {
   SearchPrivilegesIndicesResponse,
   UpdateEntitySourceResponse,
   UploadAssetCriticalityRecordsResponse,
+  ConfigureRiskEngineSavedObjectRequestBodyInput,
 } from '../../../common/api/entity_analytics';
 import {
   API_VERSIONS,
@@ -437,11 +441,31 @@ export const useEntityAnalyticsRoutes = () => {
         method: 'DELETE',
       });
 
-    const updateSavedObjectConfiguration = (params: {}) =>
+    const updateSavedObjectConfiguration = (
+      params: ConfigureRiskEngineSavedObjectRequestBodyInput
+    ) =>
       http.fetch(RISK_ENGINE_CONFIGURE_SO_URL, {
         version: API_VERSIONS.public.v1,
         method: 'PUT',
         body: JSON.stringify(params),
+      });
+
+    const fetchEntityDetailsHighlights = (
+      params: {
+        entityType: string;
+        entityIdentifier: string;
+        anonymizationFields: AnonymizationFieldResponse[];
+        from: number;
+        to: number;
+        connectorId: string;
+      },
+      signal?: AbortSignal
+    ): Promise<EntityDetailsHighlightsResponse> =>
+      http.fetch(ENTITY_DETAILS_HIGHLIGH_INTERNAL_URL, {
+        version: API_VERSIONS.internal.v1,
+        method: 'POST',
+        body: JSON.stringify(params),
+        signal,
       });
 
     return {
@@ -473,6 +497,7 @@ export const useEntityAnalyticsRoutes = () => {
       fetchEntitiesList,
       updateSavedObjectConfiguration,
       listPrivMonMonitoredIndices,
+      fetchEntityDetailsHighlights,
     };
   }, [http]);
 };

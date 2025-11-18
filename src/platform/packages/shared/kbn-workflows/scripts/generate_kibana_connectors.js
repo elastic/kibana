@@ -14,9 +14,9 @@
  * This reads the Kibana OpenAPI spec and generates static connector data for the browser
  */
 
+const { execSync } = require('child_process');
 const fs = require('fs');
 const path = require('path');
-const { execSync } = require('child_process');
 
 /**
  * Helper function to safely quote parameter names if needed
@@ -34,9 +34,9 @@ const KIBANA_OPENAPI_SPEC_PATH = path.resolve(
   __dirname,
   '../../../../../../oas_docs/output/kibana.yaml'
 );
-const OUTPUT_PATH = path.resolve(__dirname, '../common/generated_kibana_connectors.ts');
-const SCHEMAS_OUTPUT_PATH = path.resolve(__dirname, '../common/generated_kibana_schemas.ts');
-const TEMP_OUTPUT_PATH = path.resolve(__dirname, '../common/temp_kibana_api.ts');
+const OUTPUT_PATH = path.resolve(__dirname, '../common/generated/kibana_connectors.ts');
+const SCHEMAS_OUTPUT_PATH = path.resolve(__dirname, '../common/generated/kibana_schemas.ts');
+const TEMP_OUTPUT_PATH = path.resolve(__dirname, '../common/generated/temp_kibana_api.ts');
 
 console.log('🔧 Generating Kibana connectors from OpenAPI spec...');
 console.log(`📁 Reading from: ${KIBANA_OPENAPI_SPEC_PATH}`);
@@ -341,6 +341,7 @@ function parseExampleForParams(exampleContent) {
 
       for (const line of lines) {
         const trimmed = line.trim();
+        // eslint-disable-next-line no-continue
         if (!trimmed || trimmed.startsWith('#')) continue;
 
         const indent = line.length - line.trimLeft().length;
@@ -358,7 +359,7 @@ function parseExampleForParams(exampleContent) {
 
           if (value && !value.startsWith('-')) {
             // Store the parameter value
-            const fullKey = currentPath.length > 0 ? currentPath.join('.') + '.' + key : key;
+            const fullKey = currentPath.length > 0 ? `${currentPath.join('.')}.${key}` : key;
             params[fullKey] = value.replace(/['"]/g, '');
           }
 
@@ -435,7 +436,7 @@ function extractEndpointInfo(content) {
       currentObject = line;
       braceDepth = openBraces - closeBraces;
     } else if (inObject) {
-      currentObject += '\n' + line;
+      currentObject += `\n${line}`;
       braceDepth += openBraces - closeBraces;
 
       // Check if we've closed the object
@@ -544,66 +545,6 @@ function extractBodySchemaName(endpoint) {
     }
   }
   return null;
-}
-
-/**
- * Recursively collect all schema dependencies
- */
-function collectSchemaDependencies(schemaName, visited = new Set()) {
-  if (visited.has(schemaName)) {
-    return new Set(); // Avoid infinite recursion
-  }
-  visited.add(schemaName);
-
-  const dependencies = new Set([schemaName]);
-
-  try {
-    if (!fs.existsSync(SCHEMAS_OUTPUT_PATH)) {
-      return dependencies;
-    }
-
-    const schemasContent = fs.readFileSync(SCHEMAS_OUTPUT_PATH, 'utf8');
-    const escapedSchemaName = schemaName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-    const schemaRegex = new RegExp(
-      `export const ${escapedSchemaName} = ([\\s\\S]*?)(?=\\nexport const |\\n$)`,
-      'm'
-    );
-
-    const match = schemasContent.match(schemaRegex);
-    if (match) {
-      const schemaDefinition = match[1];
-
-      // Find all schema references in this definition
-      const depRegex = /([A-Z][a-zA-Z0-9_]*(?:_[A-Z][a-zA-Z0-9_]*)*)/g;
-      let depMatch;
-
-      while ((depMatch = depRegex.exec(schemaDefinition)) !== null) {
-        const depName = depMatch[1];
-        // Skip common zod methods and the schema itself
-        if (
-          depName !== schemaName &&
-          ![
-            'ZodType',
-            'ZodObject',
-            'ZodString',
-            'ZodNumber',
-            'ZodBoolean',
-            'ZodArray',
-            'ZodUnion',
-            'ZodEnum',
-          ].includes(depName)
-        ) {
-          // Recursively collect dependencies
-          const subDeps = collectSchemaDependencies(depName, visited);
-          subDeps.forEach((dep) => dependencies.add(dep));
-        }
-      }
-    }
-  } catch (error) {
-    console.warn(`⚠️ Error collecting dependencies for ${schemaName}:`, error.message);
-  }
-
-  return dependencies;
 }
 
 /**
@@ -760,11 +701,11 @@ function extractTopLevelFieldsFromSchema(schemaName) {
   return topLevelFields;
 }
 
-// Note: Complex schema parsing functions removed - now using hardcoded mappings like ES connectors
-
 /**
  * Convert Kibana API endpoint to connector definition
  */
+
+// eslint-disable-next-line complexity
 function convertToConnectorDefinition(endpoint, index, tagDocs, summary) {
   const { method, path, operationId, parameters = [], examples = {} } = endpoint;
 
@@ -953,6 +894,7 @@ ${allFields.join(',\n')}
         if (nonBodyFields.length > 0) {
           // Check if this is a union schema by examining the schema structure
           // We'll use a runtime check to determine if it's a union and handle accordingly
+          // TODO: refactor this to be type safe
           paramsSchemaSection = `paramsSchema: (() => {
           const baseSchema = ${schemaName};
           const additionalFields = z.object({
@@ -960,13 +902,13 @@ ${nonBodyFields.join('\n')}
           });
           
           // If it's a union, extend each option with the additional fields
-          if (baseSchema._def && baseSchema._def.options) {
+          if (baseSchema._def && (baseSchema._def as any).options) {
             // Check if this is a discriminated union by looking for a common 'type' field
-            const hasTypeDiscriminator = baseSchema._def.options.every((option: any) => 
+            const hasTypeDiscriminator = (baseSchema._def as any).options.every((option: any) => 
               option instanceof z.ZodObject && option.shape.type && option.shape.type._def.value
             );
             
-            const extendedOptions = baseSchema._def.options.map((option: any) => 
+            const extendedOptions = (baseSchema._def as any).options.map((option: any) => 
               option.extend ? option.extend(additionalFields.shape) : z.intersection(option, additionalFields)
             );
             
@@ -1043,10 +985,12 @@ function copyClientAsSchemas() {
     // Skip the endpoints and API client sections
     if (line.includes('const endpoints = makeApi')) {
       inEndpointsSection = true;
+      // eslint-disable-next-line no-continue
       continue;
     }
 
     if (inEndpointsSection) {
+      // eslint-disable-next-line no-continue
       continue; // Skip everything after endpoints definition
     }
 
@@ -1088,8 +1032,8 @@ function copyClientAsSchemas() {
     let processedLine = line;
 
     // Patch 1: Replace problematic discriminatedUnion calls with regular union
-    if (processedLine.includes("z.discriminatedUnion('type',")) {
-      processedLine = processedLine.replace(/z\.discriminatedUnion\('type',/g, 'z.union(');
+    if (processedLine.includes('z.discriminatedUnion(')) {
+      processedLine = processedLine.replace(/z\.discriminatedUnion\([^,]+,/g, 'z.union(');
     }
 
     // Patch 2: Replace references to browser/Node built-in types that don't exist in zod
@@ -1168,6 +1112,15 @@ function copyClientAsSchemas() {
   // No safe schema wrapper needed - fix the root cause instead
 
   const schemaFileContent = `/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/*
  * AUTO-GENERATED FILE - DO NOT EDIT
  * 
  * This file contains Zod schema definitions extracted from the Kibana OpenAPI specification.
@@ -1176,6 +1129,8 @@ function copyClientAsSchemas() {
  * 
  * To regenerate: npm run generate:kibana-connectors
  */
+
+// @ts-nocheck
 
 import { z } from '@kbn/zod';
 
@@ -1191,6 +1146,7 @@ ${schemaLines.filter((line) => !line.includes("import { z } from '@kbn/zod';")).
 /**
  * Generate Kibana connectors from the temporary API client file
  */
+// eslint-disable-next-line complexity
 function generateKibanaConnectors() {
   try {
     console.log('🔄 Generating Kibana connectors from temporary API client file');
@@ -1277,15 +1233,13 @@ function generateKibanaConnectors() {
       }
     }
 
-    // Collect all dependencies for each directly referenced schema
-    for (const schemaName of directSchemas) {
-      const dependencies = collectSchemaDependencies(schemaName);
-      dependencies.forEach((dep) => usedSchemas.add(dep));
-    }
+    // Don't collect transitive dependencies - only import schemas directly used in connectors
+    // Dependencies are already available from kibana_schemas.ts, no need to re-import them
+    directSchemas.forEach((schema) => usedSchemas.add(schema));
 
     // Schemas already copied earlier
 
-    // Generate schema imports section - only import schemas that actually exist
+    // Generate schema imports section - only import schemas that actually exist and are directly used
     const actualUsedSchemas = Array.from(usedSchemas).filter(
       (s) => s !== 'z' && s !== 'ZodType' && s !== 'ZodSchema'
     );
@@ -1295,7 +1249,34 @@ function generateKibanaConnectors() {
     const existingSchemas = actualUsedSchemas.filter((schemaName) => {
       const escapedSchemaName = schemaName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
       const schemaRegex = new RegExp(`export const ${escapedSchemaName}(?:\\s*:[^=]+)?\\s*=`, 'm');
-      return schemaRegex.test(schemasFileContent);
+      const schemaExistsInFile = schemaRegex.test(schemasFileContent);
+
+      // Check if the schema is actually used in connector definitions
+      // Exclude schemas that ONLY appear in string literals (like bodyParams: ["schemaName"])
+      const escapedForRegex = schemaName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+      // Check if schema appears in actual code usage (not just in string arrays or import statements)
+      const usedInParamsSchema = new RegExp(`paramsSchema:\\s*${escapedForRegex}\\b`).test(
+        connectorContent
+      );
+      const usedInOutputSchema = new RegExp(`outputSchema:\\s*${escapedForRegex}\\b`).test(
+        connectorContent
+      );
+      const usedInZodOps = new RegExp(`z\\.\\w+.*${escapedForRegex}\\b`).test(connectorContent);
+      const usedInFieldAccess = new RegExp(`${escapedForRegex}\\.shape\\b`).test(connectorContent);
+      const usedInVariableAssignment = new RegExp(
+        `const\\s+\\w+\\s*=\\s*${escapedForRegex}\\b`
+      ).test(connectorContent);
+
+      // Check if it's used in any code context (not just string arrays or import statements)
+      const usedInCode =
+        usedInParamsSchema ||
+        usedInOutputSchema ||
+        usedInZodOps ||
+        usedInFieldAccess ||
+        usedInVariableAssignment;
+
+      return schemaExistsInFile && usedInCode;
     });
 
     const missingSchemas = actualUsedSchemas.filter(
@@ -1314,11 +1295,19 @@ function generateKibanaConnectors() {
       existingSchemas.length > 0
         ? `\n// Import schemas from generated schemas file\nimport {\n  ${existingSchemas.join(
             ',\n  '
-          )}\n} from './generated_kibana_schemas';\n`
+          )}\n} from './kibana_schemas';\n`
         : '';
 
     // Generate the TypeScript file
-    let fileContent = `// @ts-nocheck
+    let fileContent = `/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
 /*
  * AUTO-GENERATED FILE - DO NOT EDIT
  * 
@@ -1329,10 +1318,10 @@ function generateKibanaConnectors() {
  * To regenerate: npm run generate:kibana-connectors
  */
 
-/* eslint-disable @typescript-eslint/no-unused-vars */
+// @ts-nocheck - Suppress type errors for unused imports in generated code
 
 import { z } from '@kbn/zod';
-import type { InternalConnectorContract } from '../spec/lib/generate_yaml_schema';${schemaImportsSection}
+import type { InternalConnectorContract } from '../../types/v1';${schemaImportsSection}
 export const GENERATED_KIBANA_CONNECTORS: InternalConnectorContract[] = [
 ${connectorDefinitions.join(',\n')}
 ];

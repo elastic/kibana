@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { type Type, schema } from '@kbn/config-schema';
+import { schema, type Type } from '@kbn/config-schema';
 import type { ExecutionStatus, ExecutionType } from '@kbn/workflows';
 import { ExecutionStatusValues, ExecutionTypeValues } from '@kbn/workflows';
-import type { SearchWorkflowExecutionsParams } from '../workflows_management_service';
-import { parseExecutionStatuses, MAX_PAGE_SIZE } from './types';
-import type { RouteDependencies } from './types';
 import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
-import { WORKFLOW_EXECUTION_READ_SECURITY } from './route_security';
 import { handleRouteError } from './route_error_handlers';
+import { WORKFLOW_EXECUTION_READ_SECURITY } from './route_security';
+import { MAX_PAGE_SIZE, parseExecutionStatuses, parseExecutionTypes } from './types';
+import type { RouteDependencies } from './types';
+import type { SearchWorkflowExecutionsParams } from '../workflows_management_service';
 
 export function registerGetWorkflowExecutionsRoute({
   router,
@@ -81,8 +81,7 @@ export function registerGetWorkflowExecutionsRoute({
         const params: SearchWorkflowExecutionsParams = {
           workflowId: request.query.workflowId,
           statuses: parseExecutionStatuses(request.query.statuses),
-          // Execution type filter is not supported yet
-          // executionTypes: parseExecutionTypes(request.query.executionTypes),
+          executionTypes: parseExecutionTypes(request.query.executionTypes),
           page: request.query.page,
           perPage: request.query.perPage,
         };

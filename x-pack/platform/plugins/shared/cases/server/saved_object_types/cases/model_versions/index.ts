@@ -11,3 +11,5 @@ export { modelVersion3 } from './model_version_3';
 export { modelVersion4 } from './model_version_4';
 export { modelVersion5 } from './model_version_5';
 export { modelVersion6 } from './model_version_6';
+export { modelVersion7 } from './model_version_7';
+export { modelVersion8 } from './model_version_8';

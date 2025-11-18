@@ -436,8 +436,9 @@ describe('autocomplete', () => {
         'boolean',
         {
           operators: true,
+          skipAssign: true,
         },
-        undefined,
+        ['keyword'],
         ['and', 'or', 'not']
       )
     );
@@ -572,6 +573,7 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM /',
         [
+          withAutoSuggest({ text: '(FROM $0)' } as ISuggestionItem),
           withAutoSuggest({ text: 'index1' } as ISuggestionItem),
           withAutoSuggest({ text: 'index2' } as ISuggestionItem),
         ],
@@ -641,6 +643,7 @@ describe('autocomplete', () => {
       testSuggestions(
         'FROM index1, index2/',
         [
+          withAutoSuggest({ text: '(FROM $0)' } as ISuggestionItem),
           withAutoSuggest({
             text: 'index2 | ',
             filterText: 'index2',
@@ -851,7 +854,7 @@ describe('autocomplete', () => {
       ),
     ]);
 
-    // WHERE argument comparison
+    // WHERE argument comparison (keyword fields get only string operators)
     testSuggestions(
       'FROM a | WHERE keywordField /',
       getFunctionSignaturesByReturnType(
@@ -859,6 +862,7 @@ describe('autocomplete', () => {
         'boolean',
         {
           operators: true,
+          skipAssign: true,
         },
         ['keyword']
       ).map((s) => (s.text.toLowerCase().includes('null') ? s : attachTriggerCommand(s)))

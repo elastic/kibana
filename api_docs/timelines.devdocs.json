@@ -5,41 +5,6 @@
     "functions": [
       {
         "parentPluginId": "timelines",
-        "id": "def-public.arrayIndexToAriaIndex",
-        "type": "Function",
-        "tags": [],
-        "label": "arrayIndexToAriaIndex",
-        "description": [
-          "Converts an array index, which starts at zero, to an aria index, which starts at one"
-        ],
-        "signature": [
-          "(arrayIndex: number) => number"
-        ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "timelines",
-            "id": "def-public.arrayIndexToAriaIndex.$1",
-            "type": "number",
-            "tags": [],
-            "label": "arrayIndex",
-            "description": [],
-            "signature": [
-              "number"
-            ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "timelines",
         "id": "def-public.elementOrChildrenHasFocus",
         "type": "Function",
         "tags": [],
@@ -224,97 +189,6 @@
       },
       {
         "parentPluginId": "timelines",
-        "id": "def-public.getFocusedDataColindexCell",
-        "type": "Function",
-        "tags": [],
-        "label": "getFocusedDataColindexCell",
-        "description": [
-          "\nReturns the focused cell for tables that use `data-colindex`"
-        ],
-        "signature": [
-          "({ containerElement, tableClassName, }: { containerElement: HTMLElement | null; tableClassName: string; }) => HTMLDivElement | null"
-        ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "timelines",
-            "id": "def-public.getFocusedDataColindexCell.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  containerElement,\n  tableClassName,\n}",
-            "description": [],
-            "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "timelines",
-                "id": "def-public.getFocusedDataColindexCell.$1.containerElement",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "containerElement",
-                "description": [],
-                "signature": [
-                  "HTMLElement | null"
-                ],
-                "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "timelines",
-                "id": "def-public.getFocusedDataColindexCell.$1.tableClassName",
-                "type": "string",
-                "tags": [],
-                "label": "tableClassName",
-                "description": [],
-                "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "timelines",
-        "id": "def-public.getNotesContainerClassName",
-        "type": "Function",
-        "tags": [],
-        "label": "getNotesContainerClassName",
-        "description": [],
-        "signature": [
-          "(ariaRowindex: number) => string"
-        ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "timelines",
-            "id": "def-public.getNotesContainerClassName.$1",
-            "type": "number",
-            "tags": [],
-            "label": "ariaRowindex",
-            "description": [],
-            "signature": [
-              "number"
-            ],
-            "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "timelines",
         "id": "def-public.getRowRendererClassName",
         "type": "Function",
         "tags": [],
@@ -356,10 +230,7 @@
           "\nThis function, which works with tables that use the `aria-colindex` or\n`data-colindex` attributes, examines the focus state of the table, and\nreturns a `SkipFocus` enumeration.\n\nThe `SkipFocus` return value indicates whether the caller should skip focus\nto \"before\" the table, \"after\" the table, or take no action, and let the\nbrowser's \"natural\" focus management manage focus."
         ],
         "signature": [
-          "({ containerElement, getFocusedCell, shiftKey, tableHasFocus, tableClassName, }: { containerElement: HTMLElement | null; getFocusedCell: ",
-          "GetFocusedCell",
-          "; shiftKey: boolean; tableHasFocus: (containerElement: HTMLElement | null) => boolean; tableClassName: string; }) => ",
-          "SkipFocus"
+          "({ containerElement, getFocusedCell, shiftKey, tableHasFocus, tableClassName, }: { containerElement: HTMLElement | null; getFocusedCell: GetFocusedCell; shiftKey: boolean; tableHasFocus: (containerElement: HTMLElement | null) => boolean; tableClassName: string; }) => SkipFocus"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
@@ -491,9 +362,7 @@
           "\nIf the value of `skipFocus` is `SKIP_FOCUS_BACKWARDS` or `SKIP_FOCUS_FORWARD`\nthis function will invoke the provided `onSkipFocusBackwards` or\n`onSkipFocusForward` functions respectively.\n\nIf `skipFocus` is `SKIP_FOCUS_NOOP`, the `onSkipFocusBackwards` and\n`onSkipFocusForward` functions will not be invoked."
         ],
         "signature": [
-          "({ onSkipFocusBackwards, onSkipFocusForward, skipFocus, }: { onSkipFocusBackwards: () => void; onSkipFocusForward: () => void; skipFocus: ",
-          "SkipFocus",
-          "; }) => void"
+          "({ onSkipFocusBackwards, onSkipFocusForward, skipFocus, }: { onSkipFocusBackwards: () => void; onSkipFocusForward: () => void; skipFocus: SkipFocus; }) => void"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
@@ -697,144 +566,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "timelines",
-        "id": "def-public.onKeyDownFocusHandler",
-        "type": "Function",
-        "tags": [],
-        "label": "onKeyDownFocusHandler",
-        "description": [
-          "\nThis function adds keyboard accessability to any `containerElement` that\nrenders its rows with support for `aria-colindex` and `aria-rowindex`.\n\nTo use this function, invoke it in the `onKeyDown` handler of the specified\n`containerElement`.\n\nSee the `Keyboard Support` section of\nhttps://www.w3.org/TR/wai-aria-practices-1.1/examples/grid/dataGrids.html\nfor details of the behavior."
-        ],
-        "signature": [
-          "({ colindexAttribute, containerElement, event, maxAriaColindex, maxAriaRowindex, onColumnFocused, rowindexAttribute, }: { colindexAttribute: string; containerElement: HTMLDivElement | null; event: React.KeyboardEvent<Element>; maxAriaColindex: number; maxAriaRowindex: number; onColumnFocused: ",
-          "OnColumnFocused",
-          "; rowindexAttribute: string; }) => void"
-        ],
-        "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "timelines",
-            "id": "def-public.onKeyDownFocusHandler.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{\n  colindexAttribute,\n  containerElement,\n  event,\n  maxAriaColindex,\n  maxAriaRowindex,\n  onColumnFocused,\n  rowindexAttribute,\n}",
-            "description": [],
-            "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "timelines",
-                "id": "def-public.onKeyDownFocusHandler.$1.colindexAttribute",
-                "type": "string",
-                "tags": [],
-                "label": "colindexAttribute",
-                "description": [],
-                "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "timelines",
-                "id": "def-public.onKeyDownFocusHandler.$1.containerElement",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "containerElement",
-                "description": [],
-                "signature": [
-                  "HTMLDivElement | null"
-                ],
-                "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "timelines",
-                "id": "def-public.onKeyDownFocusHandler.$1.event",
-                "type": "Object",
-                "tags": [],
-                "label": "event",
-                "description": [],
-                "signature": [
-                  "React.KeyboardEvent<Element>"
-                ],
-                "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "timelines",
-                "id": "def-public.onKeyDownFocusHandler.$1.maxAriaColindex",
-                "type": "number",
-                "tags": [],
-                "label": "maxAriaColindex",
-                "description": [],
-                "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "timelines",
-                "id": "def-public.onKeyDownFocusHandler.$1.maxAriaRowindex",
-                "type": "number",
-                "tags": [],
-                "label": "maxAriaRowindex",
-                "description": [],
-                "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "timelines",
-                "id": "def-public.onKeyDownFocusHandler.$1.onColumnFocused",
-                "type": "Function",
-                "tags": [],
-                "label": "onColumnFocused",
-                "description": [],
-                "signature": [
-                  "({ newFocusedColumn, newFocusedColumnAriaColindex, }: { newFocusedColumn: HTMLDivElement | null; newFocusedColumnAriaColindex: number | null; }) => void"
-                ],
-                "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "returnComment": [],
-                "children": [
-                  {
-                    "parentPluginId": "timelines",
-                    "id": "def-public.onKeyDownFocusHandler.$1.onColumnFocused.$1",
-                    "type": "Object",
-                    "tags": [],
-                    "label": "__0",
-                    "description": [],
-                    "signature": [
-                      "{ newFocusedColumn: HTMLDivElement | null; newFocusedColumnAriaColindex: number | null; }"
-                    ],
-                    "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
-                    "deprecated": false,
-                    "trackAdoption": false
-                  }
-                ]
-              },
-              {
-                "parentPluginId": "timelines",
-                "id": "def-public.onKeyDownFocusHandler.$1.rowindexAttribute",
-                "type": "string",
-                "tags": [],
-                "label": "rowindexAttribute",
-                "description": [],
-                "path": "x-pack/platform/plugins/shared/timelines/common/utils/accessibility/helpers.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
           }
         ],
         "returnComment": [],
@@ -1766,19 +1497,19 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/events_viewer/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/events_viewer/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/cases/components/case_events/table.tsx"
           },
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/cases/components/case_events/table.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/events_viewer/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/events_viewer/index.tsx"
           }
         ],
         "children": [
@@ -3689,19 +3420,19 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/common/types/header_actions/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/common/types/header_actions/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/common/types/timeline/cells/index.ts"
           },
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/common/types/timeline/cells/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/common/types/header_actions/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/common/types/header_actions/index.ts"
           },
           {
             "plugin": "securitySolution",
@@ -3793,18 +3524,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/store/model.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/store/model.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/store/model.ts"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/data_view_manager/utils/build_browser_fields.ts"
           },
           {
@@ -3822,6 +3541,18 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/data_view_manager/hooks/use_browser_fields.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/store/model.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/store/model.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/store/model.ts"
           },
           {
             "plugin": "securitySolution",
@@ -4013,14 +3744,6 @@
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/detections/configurations/security_solution_detections/cell_value_context.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/public/detections/configurations/security_solution_detections/cell_value_context.tsx"
-          },
-          {
-            "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/right/utils/enriched_field_info.ts"
           },
           {
@@ -4034,6 +3757,14 @@
           {
             "plugin": "securitySolution",
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/tabs/shared/utils.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/detections/configurations/security_solution_detections/cell_value_context.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/detections/configurations/security_solution_detections/cell_value_context.tsx"
           },
           {
             "plugin": "securitySolution",
@@ -4367,7 +4098,19 @@
             "section": "def-common.Direction",
             "text": "Direction"
           },
-          "; type?: string | undefined; esTypes?: string[] | undefined; }[]; language: \"eql\"; fieldRequested: string[]; params?: any; id?: string | undefined; size?: number | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; format?: string | undefined; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; indexType?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; timestampField?: string | undefined; defaultIndex?: string[] | undefined; entityType?: \"events\" | \"sessions\" | undefined; pagination?: Zod.objectInputType<{ activePage: Zod.ZodNumber; cursorStart: Zod.ZodOptional<Zod.ZodNumber>; querySize: Zod.ZodNumber; }, Zod.ZodTypeAny, \"passthrough\"> | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; gte: number; lte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { query: string; operator: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; should: {}[]; must: {}[]; must_not: {}[]; }; } | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; eventCategoryField?: string | undefined; tiebreakerField?: string | undefined; runTimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; format?: string | undefined; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; }"
+          "; type?: string | undefined; esTypes?: string[] | undefined; }[]; language: \"eql\"; fieldRequested: string[]; params?: any; id?: string | undefined; size?: number | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; format?: string | undefined; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; indexType?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; timestampField?: string | undefined; defaultIndex?: string[] | undefined; entityType?: \"events\" | \"sessions\" | undefined; pagination?: ",
+          "objectInputType",
+          "<{ activePage: ",
+          "ZodNumber",
+          "; cursorStart: ",
+          "ZodOptional",
+          "<",
+          "ZodNumber",
+          ">; querySize: ",
+          "ZodNumber",
+          "; }, ",
+          "ZodTypeAny",
+          ", \"passthrough\"> | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; gte: number; lte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { query: string; operator: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; should: {}[]; must: {}[]; must_not: {}[]; }; } | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; eventCategoryField?: string | undefined; tiebreakerField?: string | undefined; runTimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; format?: string | undefined; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/api/search_strategy/timeline/eql.ts",
         "deprecated": false,
@@ -4398,7 +4141,19 @@
             "section": "def-common.TimelineEventsQueries",
             "text": "TimelineEventsQueries"
           },
-          ".all; params?: any; id?: string | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; format?: string | undefined; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; indexType?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; entityType?: \"events\" | \"sessions\" | undefined; pagination?: Zod.objectInputType<{ activePage: Zod.ZodNumber; cursorStart: Zod.ZodOptional<Zod.ZodNumber>; querySize: Zod.ZodNumber; }, Zod.ZodTypeAny, \"passthrough\"> | undefined; filterQuery?: any; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; authFilter?: {} | undefined; excludeEcsData?: boolean | undefined; }"
+          ".all; params?: any; id?: string | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; format?: string | undefined; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; indexType?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; entityType?: \"events\" | \"sessions\" | undefined; pagination?: ",
+          "objectInputType",
+          "<{ activePage: ",
+          "ZodNumber",
+          "; cursorStart: ",
+          "ZodOptional",
+          "<",
+          "ZodNumber",
+          ">; querySize: ",
+          "ZodNumber",
+          "; }, ",
+          "ZodTypeAny",
+          ", \"passthrough\"> | undefined; filterQuery?: any; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; authFilter?: {} | undefined; excludeEcsData?: boolean | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/api/search_strategy/timeline/events_all.ts",
         "deprecated": false,
@@ -4421,7 +4176,19 @@
             "section": "def-common.TimelineEventsQueries",
             "text": "TimelineEventsQueries"
           },
-          ".details; params?: any; id?: string | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; format?: string | undefined; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; indexType?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; entityType?: \"events\" | \"sessions\" | undefined; pagination?: Zod.objectInputType<{ activePage: Zod.ZodNumber; cursorStart: Zod.ZodOptional<Zod.ZodNumber>; querySize: Zod.ZodNumber; }, Zod.ZodTypeAny, \"passthrough\"> | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; gte: number; lte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { query: string; operator: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; should: {}[]; must: {}[]; must_not: {}[]; }; } | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; authFilter?: {} | undefined; }"
+          ".details; params?: any; id?: string | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; format?: string | undefined; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; indexType?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; entityType?: \"events\" | \"sessions\" | undefined; pagination?: ",
+          "objectInputType",
+          "<{ activePage: ",
+          "ZodNumber",
+          "; cursorStart: ",
+          "ZodOptional",
+          "<",
+          "ZodNumber",
+          ">; querySize: ",
+          "ZodNumber",
+          "; }, ",
+          "ZodTypeAny",
+          ", \"passthrough\"> | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; gte: number; lte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { query: string; operator: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; should: {}[]; must: {}[]; must_not: {}[]; }; } | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; authFilter?: {} | undefined; }"
         ],
         "path": "x-pack/platform/plugins/shared/timelines/common/api/search_strategy/timeline/events_details.ts",
         "deprecated": false,

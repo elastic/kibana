@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import React from 'react';
 import { JSONDataView } from './json_data_view';
 
 // Mock the child components
@@ -19,14 +19,14 @@ const mockJsonDataCode = jest.fn();
 jest.mock('./json_data_table', () => ({
   JSONDataTable: (props: any) => {
     mockJSONDataTable(props);
-    return <div data-test-subj="mocked-json-data-table">Table View</div>;
+    return <div data-test-subj="mocked-json-data-table">{'Table View'}</div>;
   },
 }));
 
 jest.mock('./json_data_code', () => ({
   JsonDataCode: (props: any) => {
     mockJsonDataCode(props);
-    return <div data-test-subj="mocked-json-data-code">JSON View</div>;
+    return <div data-test-subj="mocked-json-data-code">{'JSON View'}</div>;
   },
 }));
 

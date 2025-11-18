@@ -114,6 +114,7 @@ export function AgentConfigurationCreateEdit({
       {isEditMode && existingConfigResult?.data?.error ? (
         <>
           <EuiCallOut
+            announceOnMount
             title={i18n.translate(
               'xpack.apm.agentConfigurationCreateEdit.euiCallOut.errorApplyingConfigurationLabel',
               { defaultMessage: 'Error applying configuration' }

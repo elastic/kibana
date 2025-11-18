@@ -206,7 +206,7 @@ export const metricStateSchemaNoESQL = schema.object({
   ),
 });
 
-const esqlMetricState = schema.object({
+export const esqlMetricState = schema.object({
   type: schema.literal('metric'),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,

@@ -8,7 +8,7 @@
  */
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { coreMock } from '@kbn/core/public/mocks';
-import { ESQLVariableType } from '@kbn/esql-types';
+import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
 import { dismissAllFlyoutsExceptFor, DiscoverFlyouts } from '@kbn/discover-utils';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import { BehaviorSubject } from 'rxjs';
@@ -41,6 +41,7 @@ describe('CreateESQLControlAction', () => {
     onSaveControl: jest.fn(),
     onCancelControl: jest.fn(),
     parentApi: {},
+    triggerSource: ControlTriggerSource.QUESTION_MARK,
   };
 
   beforeEach(() => {
@@ -98,6 +99,7 @@ describe('CreateESQLControlAction', () => {
           isResizable: true,
           maxWidth: 800,
           triggerId: 'dashboard-controls-menu-button',
+          onClose: expect.any(Function),
         },
       });
     });

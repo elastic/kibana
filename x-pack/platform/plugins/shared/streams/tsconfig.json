@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -67,6 +67,9 @@
     "@kbn/otel-semantic-conventions",
     "@kbn/streams-ai",
     "@kbn/spaces-plugin",
-    "@kbn/usage-collection-plugin"
+    "@kbn/usage-collection-plugin",
+    "@kbn/utility-types",
+    "@kbn/console-plugin",
+    "@kbn/actions-plugin",
   ]
 }

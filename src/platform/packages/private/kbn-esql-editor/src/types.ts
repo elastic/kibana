@@ -8,7 +8,6 @@
  */
 
 import type { CoreStart } from '@kbn/core/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery } from '@kbn/es-query';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { ILicense } from '@kbn/licensing-types';
@@ -91,6 +90,8 @@ export interface ESQLEditorProps {
   disableAutoFocus?: boolean;
   /** Enables the creation of controls from the editor **/
   controlsContext?: ControlsContext;
+  /** Opens the given query in a new Discover tab **/
+  onOpenQueryInNewTab?: (tabName: string, esqlQuery: string) => Promise<void>;
   /** The available ESQL variables from the page context this editor was opened in */
   esqlVariables?: ESQLControlVariable[];
   /** Resize the editor to fit the initially passed query on mount */
@@ -122,11 +123,11 @@ export interface EsqlPluginStartBase {
   variablesService: ESQLVariableService;
   getLicense: () => Promise<ILicense | undefined>;
   getInferenceEndpointsAutocomplete: () => Promise<InferenceEndpointsAutocompleteResult>;
+  isServerless: boolean;
 }
 
 export interface ESQLEditorDeps {
   core: CoreStart;
-  dataViews: DataViewsPublicPluginStart;
   data: DataPublicPluginStart;
   storage: Storage;
   uiActions: UiActionsStart;

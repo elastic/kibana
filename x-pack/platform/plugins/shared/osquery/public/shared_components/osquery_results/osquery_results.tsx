@@ -7,7 +7,7 @@
 
 import { EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import type { CoreStart } from '@kbn/core/public';
 
 import { EmptyPrompt } from '../../routes/components/empty_prompt';

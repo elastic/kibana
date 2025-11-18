@@ -109,8 +109,8 @@ describe('UrlValidator', () => {
       expect(validator.isUrlAllowed('https://example.com/path/to/resource#anchor')).toBe(true);
     });
 
-    it('should handle protocol-relative URLs', () => {
-      expect(validator.isUrlAllowed('//example.com/test')).toBe(true);
+    it('should reject protocol-relative URLs', () => {
+      expect(validator.isUrlAllowed('//example.com/test')).toBe(false);
       expect(validator.isUrlAllowed('//malicious.com/test')).toBe(false);
     });
   });

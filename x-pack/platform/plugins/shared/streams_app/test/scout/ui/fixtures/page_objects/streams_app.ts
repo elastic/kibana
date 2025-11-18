@@ -8,14 +8,15 @@
 /* eslint-disable playwright/no-nth-methods */
 
 import type { ScoutPage } from '@kbn/scout';
-import { expect } from '@kbn/scout';
-import { EuiComboBoxWrapper } from '@kbn/scout';
-import type { ProcessorType } from '@kbn/streamlang';
+import { EuiComboBoxWrapper, expect } from '@kbn/scout';
 import type { FieldTypeOption } from '../../../../../public/components/data_management/schema_editor/constants';
 
 export class StreamsApp {
   public readonly processorFieldComboBox;
   public readonly conditionEditorFieldComboBox;
+  public readonly conditionEditorValueComboBox;
+  public readonly processorTypeComboBox;
+
   constructor(private readonly page: ScoutPage) {
     this.processorFieldComboBox = new EuiComboBoxWrapper(
       this.page,
@@ -24,6 +25,14 @@ export class StreamsApp {
     this.conditionEditorFieldComboBox = new EuiComboBoxWrapper(
       this.page,
       'streamsAppConditionEditorFieldText'
+    );
+    this.conditionEditorValueComboBox = new EuiComboBoxWrapper(
+      this.page,
+      'streamsAppConditionEditorValueText'
+    );
+    this.processorTypeComboBox = new EuiComboBoxWrapper(
+      this.page,
+      'streamsAppProcessorTypeSelector'
     );
   }
 
@@ -68,16 +77,16 @@ export class StreamsApp {
     await this.gotoStreamManagementTab(streamName, 'advanced');
   }
 
-  async clickGoBackToStreams() {
-    await this.page.getByTestId('backToStreamsButton').click();
-  }
-
   async clickStreamNameLink(streamName: string) {
     await this.page.getByTestId(`streamsNameLink-${streamName}`).click();
   }
 
   async clickDataQualityTab() {
     await this.page.getByTestId('dataQualityTab').click();
+  }
+
+  async clickRootBreadcrumb() {
+    await this.page.getByTestId('breadcrumb first').click();
   }
 
   // Streams table utility methods
@@ -212,7 +221,7 @@ export class StreamsApp {
   }
 
   async updateRoutingRule() {
-    await this.page.getByRole('button', { name: 'Change routing' }).click();
+    await this.page.getByRole('button', { name: 'Update' }).click();
   }
 
   async cancelRoutingRule() {
@@ -259,7 +268,7 @@ export class StreamsApp {
       await this.conditionEditorFieldComboBox.setCustomSingleOption(field);
     }
     if (value) {
-      await this.page.getByTestId('streamsAppConditionEditorValueText').fill(value);
+      await this.conditionEditorValueComboBox.setCustomSingleOption(value);
     }
     if (operator) {
       await this.page.getByTestId('streamsAppConditionEditorOperator').selectOption(operator);
@@ -489,9 +498,8 @@ export class StreamsApp {
     await expect(this.getModal()).toBeHidden();
   }
 
-  async selectProcessorType(value: ProcessorType) {
-    await this.page.getByTestId('streamsAppProcessorTypeSelector').click();
-    await this.page.getByRole('dialog').getByRole('option').getByText(value).click();
+  async selectProcessorType(value: string) {
+    await this.processorTypeComboBox.selectSingleOption(value);
   }
 
   async fillProcessorFieldInput(value: string, options?: { isCustomValue: boolean }) {
@@ -511,6 +519,34 @@ export class StreamsApp {
     await this.page.getByTestId('streamsAppPatternExpression').getByRole('textbox').fill(value);
   }
 
+  async fillDateProcessorSourceFieldInput(value: string) {
+    await this.page.getByLabel('Source Field').fill(value);
+  }
+
+  async fillDateProcessorFormatInput(value: string) {
+    await this.page.getByPlaceholder('Type and then hit "Enter"').fill(value);
+  }
+
+  async fillDateProcessorTargetFieldInput(value: string) {
+    await this.page.getByLabel('Target field').fill(value);
+  }
+
+  async fillDateProcessorTimezoneInput(value: string) {
+    await this.page.getByLabel('Timezone').fill(value);
+  }
+
+  async fillDateProcessorLocaleInput(value: string) {
+    await this.page.getByLabel('Locale').fill(value);
+  }
+
+  async fillDateProcessorOutputFormatInput(value: string) {
+    await this.page.getByLabel('Output format').fill(value);
+  }
+
+  async clickDateProcessorAdvancedSettings() {
+    await this.page.getByRole('button', { name: 'Advanced settings' }).click();
+  }
+
   async fillCustomSamplesEditor(value: string) {
     // Clean previous content
     await this.page.getByTestId('streamsAppCustomSamplesDataSourceEditor').click();
@@ -526,7 +562,7 @@ export class StreamsApp {
   async fillCondition(field: string, operator: string, value: string) {
     await this.conditionEditorFieldComboBox.setCustomSingleOption(field);
     await this.page.getByTestId('streamsAppConditionEditorOperator').selectOption(operator);
-    await this.page.getByTestId('streamsAppConditionEditorValueText').fill(value);
+    await this.conditionEditorValueComboBox.setCustomSingleOption(value);
   }
 
   async removeProcessor(pos: number) {
@@ -585,6 +621,12 @@ export class StreamsApp {
 
   getDataSourcesList() {
     return this.page.getByTestId('streamsAppProcessingDataSourcesList');
+  }
+
+  async getDataSourcesSelector() {
+    const dataSourcesSelector = this.page.getByTestId('streamsAppProcessingDataSourceSelector');
+    await expect(dataSourcesSelector).toBeVisible();
+    return dataSourcesSelector;
   }
 
   getDataSourcesListItems() {

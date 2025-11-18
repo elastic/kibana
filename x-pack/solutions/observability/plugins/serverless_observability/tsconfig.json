@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -31,5 +31,6 @@
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/cases-plugin",
     "@kbn/observability-nav-icons",
+    "@kbn/deeplinks-management",
   ]
 }

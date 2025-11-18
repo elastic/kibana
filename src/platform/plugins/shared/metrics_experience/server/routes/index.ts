@@ -9,12 +9,10 @@
 
 import { dimensionsRoutes } from './dimensions/route';
 import { fieldsRoutes } from './fields/route';
-import { indexPatternMetadataRoutes } from './index_pattern/route';
 
 export const routeRepository = {
   ...dimensionsRoutes,
   ...fieldsRoutes,
-  ...indexPatternMetadataRoutes,
 };
 
 export type MetricsExperienceRouteRepository = typeof routeRepository;

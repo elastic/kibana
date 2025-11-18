@@ -12,3 +12,27 @@ export type { KibanaPhoenixClient } from './src/kibana_phoenix_client/client';
 export { createQuantitativeCorrectnessEvaluators } from './src/evaluators/correctness';
 export { createQuantitativeGroundednessEvaluator } from './src/evaluators/groundedness';
 export type { EvaluationDataset, EvaluationWorkerFixtures } from './src/types';
+
+export {
+  createDefaultTerminalReporter,
+  createEvaluationReportTable,
+  formatReportData,
+  type EvaluationReporter,
+  type EvaluationReport,
+  type EvaluationTableOptions,
+} from './src/utils/report_model_score';
+
+export {
+  EvaluationScoreRepository,
+  type EvaluationScoreDocument,
+  parseScoreDocuments,
+} from './src/utils/score_repository';
+
+export { getUniqueEvaluatorNames, calculateOverallStats } from './src/utils/evaluation_stats';
+export type {
+  DatasetScore,
+  DatasetScoreWithStats,
+  EvaluatorStats,
+} from './src/utils/evaluation_stats';
+
+export { parseSelectedEvaluators, selectEvaluators } from './src/evaluators/filter';

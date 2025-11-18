@@ -795,7 +795,7 @@
           "\nGet the processor type (action) from a processor definition"
         ],
         "signature": [
-          "(processor: TProcessorDefinition) => \"date\" | \"append\" | \"set\" | \"rename\" | \"grok\" | \"dissect\" | \"manual_ingest_pipeline\""
+          "(processor: TProcessorDefinition) => \"date\" | \"append\" | \"set\" | \"rename\" | \"remove\" | \"grok\" | \"dissect\" | \"drop_document\" | \"convert\" | \"remove_by_prefix\" | \"manual_ingest_pipeline\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
         "deprecated": false,
@@ -969,14 +969,17 @@
         "label": "isActionBlock",
         "description": [],
         "signature": [
-          "(obj: any) => obj is ",
+          "<TBlock extends ",
+          "StreamlangStep",
+          " | ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
             "docId": "kibKbnStreamlangPluginApi",
-            "section": "def-common.StreamlangProcessorDefinition",
-            "text": "StreamlangProcessorDefinition"
-          }
+            "section": "def-common.StreamlangStepWithUIAttributes",
+            "text": "StreamlangStepWithUIAttributes"
+          },
+          ">(obj?: TBlock | undefined) => obj is Extract<TBlock, { action: string; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
         "deprecated": false,
@@ -985,17 +988,17 @@
           {
             "parentPluginId": "@kbn/streamlang",
             "id": "def-common.isActionBlock.$1",
-            "type": "Any",
+            "type": "Uncategorized",
             "tags": [],
             "label": "obj",
             "description": [],
             "signature": [
-              "any"
+              "TBlock | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/streamlang.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "isRequired": true
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -1911,6 +1914,92 @@
       },
       {
         "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.BaseConvertProcessor",
+        "type": "Interface",
+        "tags": [],
+        "label": "BaseConvertProcessor",
+        "description": [
+          "\nConvert processor"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.BaseConvertProcessor",
+            "text": "BaseConvertProcessor"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.ProcessorBase",
+            "text": "ProcessorBase"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.BaseConvertProcessor.action",
+            "type": "string",
+            "tags": [],
+            "label": "action",
+            "description": [],
+            "signature": [
+              "\"convert\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.BaseConvertProcessor.from",
+            "type": "string",
+            "tags": [],
+            "label": "from",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.BaseConvertProcessor.type",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "type",
+            "description": [],
+            "signature": [
+              "\"string\" | \"boolean\" | \"integer\" | \"long\" | \"double\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.BaseConvertProcessor.ignore_missing",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignore_missing",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
         "id": "def-common.DateProcessor",
         "type": "Interface",
         "tags": [],
@@ -1998,6 +2087,34 @@
             "type": "string",
             "tags": [],
             "label": "output_format",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.DateProcessor.timezone",
+            "type": "string",
+            "tags": [],
+            "label": "timezone",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.DateProcessor.locale",
+            "type": "string",
+            "tags": [],
+            "label": "locale",
             "description": [],
             "signature": [
               "string | undefined"
@@ -2108,6 +2225,53 @@
       },
       {
         "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.DropDocumentProcessor",
+        "type": "Interface",
+        "tags": [],
+        "label": "DropDocumentProcessor",
+        "description": [
+          "\nDrop processor"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.DropDocumentProcessor",
+            "text": "DropDocumentProcessor"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.ProcessorBaseWithWhere",
+            "text": "ProcessorBaseWithWhere"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.DropDocumentProcessor.action",
+            "type": "string",
+            "tags": [],
+            "label": "action",
+            "description": [],
+            "signature": [
+              "\"drop_document\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
         "id": "def-common.GrokProcessor",
         "type": "Interface",
         "tags": [],
@@ -2170,6 +2334,20 @@
             "description": [],
             "signature": [
               "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.GrokProcessor.pattern_definitions",
+            "type": "Object",
+            "tags": [],
+            "label": "pattern_definitions",
+            "description": [],
+            "signature": [
+              "Record<string, string> | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
             "deprecated": false,
@@ -2636,6 +2814,136 @@
               " | undefined"
             ],
             "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.RemoveByPrefixProcessor",
+        "type": "Interface",
+        "tags": [],
+        "label": "RemoveByPrefixProcessor",
+        "description": [
+          "\nRemoveByPrefix processor"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.RemoveByPrefixProcessor",
+            "text": "RemoveByPrefixProcessor"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.ProcessorBase",
+            "text": "ProcessorBase"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.RemoveByPrefixProcessor.action",
+            "type": "string",
+            "tags": [],
+            "label": "action",
+            "description": [],
+            "signature": [
+              "\"remove_by_prefix\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.RemoveByPrefixProcessor.from",
+            "type": "string",
+            "tags": [],
+            "label": "from",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.RemoveProcessor",
+        "type": "Interface",
+        "tags": [],
+        "label": "RemoveProcessor",
+        "description": [
+          "\nRemove processor"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.RemoveProcessor",
+            "text": "RemoveProcessor"
+          },
+          " extends ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.ProcessorBaseWithWhere",
+            "text": "ProcessorBaseWithWhere"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.RemoveProcessor.action",
+            "type": "string",
+            "tags": [],
+            "label": "action",
+            "description": [],
+            "signature": [
+              "\"remove\""
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.RemoveProcessor.from",
+            "type": "string",
+            "tags": [],
+            "label": "from",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/streamlang",
+            "id": "def-common.RemoveProcessor.ignore_missing",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "ignore_missing",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3294,6 +3602,51 @@
       },
       {
         "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.ConvertProcessor",
+        "type": "Type",
+        "tags": [],
+        "label": "ConvertProcessor",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.BaseConvertProcessor",
+            "text": "BaseConvertProcessor"
+          },
+          " & ({ to?: string | undefined; } | { to: string; where: ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.Condition",
+            "text": "Condition"
+          },
+          "; })"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.convertProcessorSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "convertProcessorSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
         "id": "def-common.dateProcessorSchema",
         "type": "Any",
         "tags": [],
@@ -3324,13 +3677,28 @@
       },
       {
         "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.dropDocumentProcessorSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "dropDocumentProcessorSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
         "id": "def-common.ElasticsearchProcessor",
         "type": "Type",
         "tags": [],
         "label": "ElasticsearchProcessor",
         "description": [],
         "signature": [
-          "{ sort?: unknown; split?: unknown; trim?: unknown; date?: unknown; join?: unknown; enrich?: unknown; inference?: unknown; append?: unknown; set?: unknown; lowercase?: unknown; script?: unknown; circle?: unknown; user_agent?: unknown; pipeline?: unknown; json?: unknown; csv?: unknown; attachment?: unknown; rename?: unknown; drop?: unknown; bytes?: unknown; uppercase?: unknown; remove?: unknown; geo_grid?: unknown; fail?: unknown; foreach?: unknown; grok?: unknown; reroute?: unknown; fingerprint?: unknown; dissect?: unknown; community_id?: unknown; convert?: unknown; date_index_name?: unknown; dot_expander?: unknown; ip_location?: unknown; geoip?: unknown; gsub?: unknown; html_strip?: unknown; kv?: unknown; network_direction?: unknown; redact?: unknown; registered_domain?: unknown; set_security_user?: unknown; terminate?: unknown; urldecode?: unknown; uri_parts?: unknown; }"
+          "{ sort?: unknown; split?: unknown; trim?: unknown; date?: unknown; join?: unknown; enrich?: unknown; inference?: unknown; append?: unknown; set?: unknown; lowercase?: unknown; script?: unknown; circle?: unknown; user_agent?: unknown; pipeline?: unknown; json?: unknown; csv?: unknown; attachment?: unknown; rename?: unknown; drop?: unknown; bytes?: unknown; uppercase?: unknown; remove?: unknown; geo_grid?: unknown; fail?: unknown; foreach?: unknown; grok?: unknown; reroute?: unknown; fingerprint?: unknown; dissect?: unknown; convert?: unknown; community_id?: unknown; date_index_name?: unknown; dot_expander?: unknown; ip_location?: unknown; geoip?: unknown; gsub?: unknown; html_strip?: unknown; kv?: unknown; network_direction?: unknown; redact?: unknown; registered_domain?: unknown; set_security_user?: unknown; terminate?: unknown; urldecode?: unknown; uri_parts?: unknown; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
         "deprecated": false,
@@ -3421,7 +3789,7 @@
           "\nProcessorType is the union of all possible 'action' values"
         ],
         "signature": [
-          "\"date\" | \"append\" | \"set\" | \"rename\" | \"grok\" | \"dissect\" | \"manual_ingest_pipeline\""
+          "\"date\" | \"append\" | \"set\" | \"rename\" | \"remove\" | \"grok\" | \"dissect\" | \"drop_document\" | \"convert\" | \"remove_by_prefix\" | \"manual_ingest_pipeline\""
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
         "deprecated": false,
@@ -3438,7 +3806,37 @@
           "\nGet all processor types as a string array (derived from the Zod schema)"
         ],
         "signature": [
-          "(\"date\" | \"append\" | \"set\" | \"rename\" | \"grok\" | \"dissect\" | \"manual_ingest_pipeline\")[]"
+          "(\"date\" | \"append\" | \"set\" | \"rename\" | \"remove\" | \"grok\" | \"dissect\" | \"drop_document\" | \"convert\" | \"remove_by_prefix\" | \"manual_ingest_pipeline\")[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.removeByPrefixProcessorSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "removeByPrefixProcessorSchema",
+        "description": [],
+        "signature": [
+          "any"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/streamlang",
+        "id": "def-common.removeProcessorSchema",
+        "type": "Any",
+        "tags": [],
+        "label": "removeProcessorSchema",
+        "description": [],
+        "signature": [
+          "any"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/processors/index.ts",
         "deprecated": false,
@@ -3533,6 +3931,14 @@
             "pluginId": "@kbn/streamlang",
             "scope": "common",
             "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.DropDocumentProcessor",
+            "text": "DropDocumentProcessor"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
             "section": "def-common.GrokProcessor",
             "text": "GrokProcessor"
           },
@@ -3559,6 +3965,30 @@
             "docId": "kibKbnStreamlangPluginApi",
             "section": "def-common.AppendProcessor",
             "text": "AppendProcessor"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.ConvertProcessor",
+            "text": "ConvertProcessor"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.RemoveByPrefixProcessor",
+            "text": "RemoveByPrefixProcessor"
+          },
+          " | ",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.RemoveProcessor",
+            "text": "RemoveProcessor"
           },
           " | ",
           {
@@ -3770,7 +4200,14 @@
         "label": "alwaysConditionSchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ always: Zod.ZodObject<{}, \"strict\", Zod.ZodTypeAny, {}, {}>; }, \"strip\", Zod.ZodTypeAny, { always: {}; }, { always: {}; }>"
+          "ZodObject",
+          "<{ always: ",
+          "ZodObject",
+          "<{}, \"strict\", ",
+          "ZodTypeAny",
+          ", {}, {}>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { always: {}; }, { always: {}; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "deprecated": false,
@@ -3785,7 +4222,12 @@
         "label": "andConditionSchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ and: Zod.ZodArray<Zod.ZodType<",
+          "ZodObject",
+          "<{ and: ",
+          "ZodArray",
+          "<",
+          "ZodType",
+          "<",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3793,7 +4235,9 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ", Zod.ZodTypeDef, ",
+          ", ",
+          "ZodTypeDef",
+          ", ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3801,7 +4245,9 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ">, \"many\">; }, \"strip\", Zod.ZodTypeAny, { and: ",
+          ">, \"many\">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { and: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3832,7 +4278,8 @@
         "label": "conditionSchema",
         "description": [],
         "signature": [
-          "Zod.ZodType<",
+          "ZodType",
+          "<",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3840,7 +4287,9 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ", Zod.ZodTypeDef, ",
+          ", ",
+          "ZodTypeDef",
+          ", ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3863,7 +4312,166 @@
         "label": "filterConditionSchema",
         "description": [],
         "signature": [
-          "Zod.ZodUnion<[Zod.ZodEffects<Zod.ZodObject<{ field: Zod.ZodEffects<Zod.ZodString, string, string>; eq: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; neq: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; lt: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; lte: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; gt: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; gte: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; contains: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; startsWith: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; endsWith: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; range: Zod.ZodOptional<Zod.ZodObject<{ gt: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; gte: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; lt: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; lte: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; }, \"strip\", Zod.ZodTypeAny, { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }, { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>, Zod.ZodObject<{ field: Zod.ZodEffects<Zod.ZodString, string, string>; exists: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { field: string; exists?: boolean | undefined; }, { field: string; exists?: boolean | undefined; }>]>"
+          "ZodUnion",
+          "<[",
+          "ZodEffects",
+          "<",
+          "ZodObject",
+          "<{ field: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; eq: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; neq: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; lt: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; lte: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; gt: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; gte: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; contains: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; startsWith: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; endsWith: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; range: ",
+          "ZodOptional",
+          "<",
+          "ZodObject",
+          "<{ gt: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; gte: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; lt: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; lte: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }, { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }>>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>, ",
+          "ZodObject",
+          "<{ field: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; exists: ",
+          "ZodOptional",
+          "<",
+          "ZodBoolean",
+          ">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { field: string; exists?: boolean | undefined; }, { field: string; exists?: boolean | undefined; }>]>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "deprecated": false,
@@ -3899,7 +4507,14 @@
         "label": "neverConditionSchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ never: Zod.ZodObject<{}, \"strict\", Zod.ZodTypeAny, {}, {}>; }, \"strip\", Zod.ZodTypeAny, { never: {}; }, { never: {}; }>"
+          "ZodObject",
+          "<{ never: ",
+          "ZodObject",
+          "<{}, \"strict\", ",
+          "ZodTypeAny",
+          ", {}, {}>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { never: {}; }, { never: {}; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "deprecated": false,
@@ -3914,7 +4529,12 @@
         "label": "notConditionSchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ not: Zod.ZodLazy<Zod.ZodType<",
+          "ZodObject",
+          "<{ not: ",
+          "ZodLazy",
+          "<",
+          "ZodType",
+          "<",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3922,7 +4542,9 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ", Zod.ZodTypeDef, ",
+          ", ",
+          "ZodTypeDef",
+          ", ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -3930,7 +4552,9 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ">>; }, \"strip\", Zod.ZodTypeAny, { not: ",
+          ">>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { not: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -4085,7 +4709,12 @@
         "label": "orConditionSchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ or: Zod.ZodArray<Zod.ZodType<",
+          "ZodObject",
+          "<{ or: ",
+          "ZodArray",
+          "<",
+          "ZodType",
+          "<",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -4093,7 +4722,9 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ", Zod.ZodTypeDef, ",
+          ", ",
+          "ZodTypeDef",
+          ", ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -4101,7 +4732,9 @@
             "section": "def-common.Condition",
             "text": "Condition"
           },
-          ">, \"many\">; }, \"strip\", Zod.ZodTypeAny, { or: ",
+          ">, \"many\">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { or: ",
           {
             "pluginId": "@kbn/streamlang",
             "scope": "common",
@@ -4132,7 +4765,50 @@
         "label": "rangeConditionSchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ gt: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; gte: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; lt: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; lte: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; }, \"strip\", Zod.ZodTypeAny, { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }, { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }>"
+          "ZodObject",
+          "<{ gt: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; gte: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; lt: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; lte: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }, { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "deprecated": false,
@@ -4147,7 +4823,152 @@
         "label": "shorthandBinaryFilterConditionSchema",
         "description": [],
         "signature": [
-          "Zod.ZodEffects<Zod.ZodObject<{ field: Zod.ZodEffects<Zod.ZodString, string, string>; eq: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; neq: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; lt: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; lte: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; gt: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; gte: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; contains: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; startsWith: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; endsWith: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; range: Zod.ZodOptional<Zod.ZodObject<{ gt: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; gte: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; lt: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; lte: Zod.ZodOptional<Zod.ZodUnion<[Zod.ZodString, Zod.ZodNumber, Zod.ZodBoolean]>>; }, \"strip\", Zod.ZodTypeAny, { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }, { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }>>; }, \"strip\", Zod.ZodTypeAny, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>"
+          "ZodEffects",
+          "<",
+          "ZodObject",
+          "<{ field: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; eq: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; neq: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; lt: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; lte: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; gt: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; gte: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; contains: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; startsWith: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; endsWith: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; range: ",
+          "ZodOptional",
+          "<",
+          "ZodObject",
+          "<{ gt: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; gte: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; lt: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; lte: ",
+          "ZodOptional",
+          "<",
+          "ZodUnion",
+          "<[",
+          "ZodString",
+          ", ",
+          "ZodNumber",
+          ", ",
+          "ZodBoolean",
+          "]>>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }, { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; }>>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }, { field: string; endsWith?: string | number | boolean | undefined; startsWith?: string | number | boolean | undefined; gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; range?: { gte?: string | number | boolean | undefined; lte?: string | number | boolean | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; } | undefined; gt?: string | number | boolean | undefined; lt?: string | number | boolean | undefined; eq?: string | number | boolean | undefined; contains?: string | number | boolean | undefined; neq?: string | number | boolean | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "deprecated": false,
@@ -4162,7 +4983,18 @@
         "label": "shorthandUnaryFilterConditionSchema",
         "description": [],
         "signature": [
-          "Zod.ZodObject<{ field: Zod.ZodEffects<Zod.ZodString, string, string>; exists: Zod.ZodOptional<Zod.ZodBoolean>; }, \"strip\", Zod.ZodTypeAny, { field: string; exists?: boolean | undefined; }, { field: string; exists?: boolean | undefined; }>"
+          "ZodObject",
+          "<{ field: ",
+          "ZodEffects",
+          "<",
+          "ZodString",
+          ", string, string>; exists: ",
+          "ZodOptional",
+          "<",
+          "ZodBoolean",
+          ">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { field: string; exists?: boolean | undefined; }, { field: string; exists?: boolean | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-streamlang/types/conditions.ts",
         "deprecated": false,
@@ -4179,11 +5011,20 @@
           "\nZod schema for the Streamlang DSL root"
         ],
         "signature": [
-          "Zod.ZodObject<{ steps: Zod.ZodArray<Zod.ZodType<",
+          "ZodObject",
+          "<{ steps: ",
+          "ZodArray",
+          "<",
+          "ZodType",
+          "<",
           "StreamlangStep",
-          ", Zod.ZodTypeDef, ",
+          ", ",
+          "ZodTypeDef",
+          ", ",
           "StreamlangStep",
-          ">, \"many\">; }, \"strip\", Zod.ZodTypeAny, { steps: ",
+          ">, \"many\">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { steps: ",
           "StreamlangStep",
           "[]; }, { steps: ",
           "StreamlangStep",

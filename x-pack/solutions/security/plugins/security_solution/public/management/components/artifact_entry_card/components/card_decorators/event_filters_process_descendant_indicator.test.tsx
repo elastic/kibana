@@ -44,25 +44,13 @@ describe('EventFiltersProcessDescendantIndicator', () => {
     };
   });
 
-  it('should not display anything if feature flag is disabled', () => {
-    appTestContext.setExperimentalFlag({ filterProcessDescendantsForEventFiltersEnabled: false });
-
-    render({ item: getProcessDescendantEventFilter() });
-
-    expect(renderResult.queryByTestId('test-processDescendantIndication')).not.toBeInTheDocument();
-  });
-
   it('should not display anything if Event Filter is not for process descendants', () => {
-    appTestContext.setExperimentalFlag({ filterProcessDescendantsForEventFiltersEnabled: true });
-
     render({ item: getStandardEventFilter() });
 
     expect(renderResult.queryByTestId('test-processDescendantIndication')).not.toBeInTheDocument();
   });
 
   it('should display indication if Event Filter is for process descendants', () => {
-    appTestContext.setExperimentalFlag({ filterProcessDescendantsForEventFiltersEnabled: true });
-
     render({ item: getProcessDescendantEventFilter() });
 
     expect(renderResult.getByTestId('test-processDescendantIndication')).toBeInTheDocument();
@@ -70,7 +58,6 @@ describe('EventFiltersProcessDescendantIndicator', () => {
 
   it('should mention additional `event.category is process` entry in tooltip', async () => {
     const prefix = 'test-processDescendantIndicationTooltip';
-    appTestContext.setExperimentalFlag({ filterProcessDescendantsForEventFiltersEnabled: true });
     render({ item: getProcessDescendantEventFilter() });
 
     expect(renderResult.queryByTestId(`${prefix}-tooltipText`)).not.toBeInTheDocument();

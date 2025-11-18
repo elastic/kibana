@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { esqlFunctionNames } from '@kbn/esql-ast/src/definitions/generated/function_names';
 import { monarch } from '@elastic/monaco-esql';
 import * as monarchDefinitions from '@elastic/monaco-esql/lib/definitions';
-import { esqlFunctionNames } from '@kbn/esql-ast/src/definitions/generated/function_names';
 import {
   suggest,
   validateQuery,
   getHoverItem,
+  inlineSuggest,
   type ESQLCallbacks,
 } from '@kbn/esql-validation-autocomplete';
 import type { ESQLTelemetryCallbacks } from '@kbn/esql-types';
@@ -72,9 +73,14 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
       { open: '"', close: '"' },
     ],
   },
-  validate: async (model: monaco.editor.ITextModel, code: string, callbacks?: ESQLCallbacks) => {
+  validate: async (
+    model: monaco.editor.ITextModel,
+    code: string,
+    callbacks?: ESQLCallbacks,
+    options?: { invalidateColumnsCache?: boolean }
+  ) => {
     const text = code ?? model.getValue();
-    const { errors, warnings } = await validateQuery(text, undefined, callbacks);
+    const { errors, warnings } = await validateQuery(text, callbacks, options);
     const monacoErrors = wrapAsMonacoMessages(text, errors);
     const monacoWarnings = wrapAsMonacoMessages(text, warnings);
     return { errors: monacoErrors, warnings: monacoWarnings };
@@ -110,6 +116,34 @@ export const ESQLLang: CustomLangModuleType<ESQLDependencies, MonacoMessage> = {
         return getHoverItem(fullText, offset, deps);
       },
     };
+  },
+  getInlineCompletionsProvider: (
+    callbacks?: ESQLCallbacks
+  ): monaco.languages.InlineCompletionsProvider => {
+    const provider = {
+      async provideInlineCompletions(model: monaco.editor.ITextModel, position: monaco.Position) {
+        const fullText = model.getValue();
+        // Get the text before the cursor
+        const textBeforeCursor = model.getValueInRange({
+          startLineNumber: 1,
+          startColumn: 1,
+          endLineNumber: position.lineNumber,
+          endColumn: position.column,
+        });
+
+        const range = new monaco.Range(
+          position.lineNumber,
+          position.column,
+          position.lineNumber,
+          position.column
+        );
+
+        return await inlineSuggest(fullText, textBeforeCursor, range, callbacks);
+      },
+      freeInlineCompletions: () => {},
+    };
+
+    return provider;
   },
   getSuggestionProvider: (deps?: ESQLDependencies): monaco.languages.CompletionItemProvider => {
     return {

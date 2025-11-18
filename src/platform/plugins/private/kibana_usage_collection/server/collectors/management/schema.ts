@@ -507,6 +507,18 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
   },
+  'agentBuilder:dashboardTools': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'agentBuilder:navEnabled': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
+  'dataConnectors:enabled': {
+    type: 'boolean',
+    _meta: { description: 'Non-default value of setting.' },
+  },
   'workflows:ui:enabled': {
     type: 'boolean',
     _meta: { description: 'Non-default value of setting.' },
@@ -680,6 +692,12 @@ export const stackManagementSchema: MakeSchemaFrom<UsageStats> = {
     type: 'boolean',
     _meta: {
       description: 'Enable Group streams in Streams',
+    },
+  },
+  'observability:streamsEnableAttachments': {
+    type: 'boolean',
+    _meta: {
+      description: 'Enable Streams attachments tab.',
     },
   },
   'observability:streamsEnableContentPacks': {

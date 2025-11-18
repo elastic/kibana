@@ -14,7 +14,6 @@ import { NO_PRIVILEGE_FOR_MANAGEMENT_OF_GLOBAL_ARTIFACT_MESSAGE } from '../../..
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { MANAGEMENT_OF_SHARED_PER_POLICY_ARTIFACT_NOT_ALLOWED_MESSAGE } from './translations';
 import { useSpaceId } from '../../../../common/hooks/use_space_id';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { isArtifactGlobal } from '../../../../../common/endpoint/service/artifacts';
 import { useCardArtifact } from './card_artifact_context';
 import type { ActionsContextMenuProps } from '../../actions_context_menu';
@@ -33,9 +32,6 @@ export const CardActionsFlexItem = memo<CardActionsFlexItemProps>(
       useUserPrivileges().endpointPrivileges.canManageGlobalArtifacts;
     const isGlobal = useMemo(() => isArtifactGlobal(item), [item]);
     const ownerSpaceIds = useMemo(() => getArtifactOwnerSpaceIds(item), [item]);
-    const isSpacesEnabled = useIsExperimentalFeatureEnabled(
-      'endpointManagementSpaceAwarenessEnabled'
-    );
     const activeSpaceId = useSpaceId();
 
     interface MenuButtonDisableOptions {
@@ -43,7 +39,7 @@ export const CardActionsFlexItem = memo<CardActionsFlexItemProps>(
       disabledTooltip: ReactNode;
     }
     const { isDisabled, disabledTooltip } = useMemo<MenuButtonDisableOptions>(() => {
-      if (!isSpacesEnabled || canManageGlobalArtifacts) {
+      if (canManageGlobalArtifacts) {
         return { isDisabled: false, disabledTooltip: undefined };
       }
 
@@ -62,7 +58,7 @@ export const CardActionsFlexItem = memo<CardActionsFlexItemProps>(
       }
 
       return { isDisabled: false, disabledTooltip: undefined };
-    }, [activeSpaceId, canManageGlobalArtifacts, isGlobal, isSpacesEnabled, ownerSpaceIds]);
+    }, [activeSpaceId, canManageGlobalArtifacts, isGlobal, ownerSpaceIds]);
 
     return actions && actions.length > 0 ? (
       <EuiFlexItem grow={false}>

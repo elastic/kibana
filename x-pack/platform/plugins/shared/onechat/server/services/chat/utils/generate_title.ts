@@ -6,43 +6,42 @@
  */
 
 import type { Observable } from 'rxjs';
-import { defer, shareReplay, switchMap } from 'rxjs';
+import { defer, shareReplay } from 'rxjs';
 import { z } from '@kbn/zod';
 import type { BaseMessageLike } from '@langchain/core/messages';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
 import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
-import type { Conversation, ConversationRound, RoundInput } from '@kbn/onechat-common';
-import { conversationToLangchainMessages } from '../../agents/modes/utils';
+import type { Conversation, ConversationRound, RawRoundInput } from '@kbn/onechat-common';
+import { createUserMessage } from '@kbn/onechat-genai-utils/langchain';
 
-export const generateTitle$ = ({
-  chatModel,
-  conversation$,
+/**
+ * Generates a title for a conversation
+ */
+export const generateTitle = ({
   nextInput,
+  conversation,
+  chatModel,
 }: {
+  nextInput: RawRoundInput;
+  conversation: Conversation;
   chatModel: InferenceChatModel;
-  conversation$: Observable<Conversation>;
-  nextInput: RoundInput;
 }): Observable<string> => {
-  return conversation$.pipe(
-    switchMap((conversation) => {
-      return defer(async () => {
-        return generateConversationTitle({
-          previousRounds: conversation.rounds,
-          nextInput,
-          chatModel,
-        });
-      }).pipe(shareReplay());
-    })
-  );
+  return defer(async () => {
+    return generateConversationTitle({
+      previousRounds: conversation.rounds,
+      nextInput,
+      chatModel,
+    });
+  }).pipe(shareReplay());
 };
 
-export const generateConversationTitle = async ({
+const generateConversationTitle = async ({
   previousRounds,
   nextInput,
   chatModel,
 }: {
   previousRounds: ConversationRound[];
-  nextInput: RoundInput;
+  nextInput: RawRoundInput;
   chatModel: InferenceChatModel;
 }) => {
   return withActiveInferenceSpan(
@@ -73,7 +72,7 @@ Conversation:
 
 Now, generate a title for the following conversation.`,
         ],
-        ...conversationToLangchainMessages({ previousRounds, nextInput }),
+        createUserMessage(nextInput.message),
       ];
 
       const { title } = await structuredModel.invoke(prompt);

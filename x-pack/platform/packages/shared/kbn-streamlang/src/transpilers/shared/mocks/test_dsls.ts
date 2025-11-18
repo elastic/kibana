@@ -5,19 +5,39 @@
  * 2.0.
  */
 
-import type { StreamlangDSL } from '../../../../types/streamlang';
 import type {
-  RenameProcessor,
-  SetProcessor,
-  GrokProcessor,
+  AppendProcessor,
+  ConvertProcessor,
   DateProcessor,
   DissectProcessor,
+  GrokProcessor,
   ManualIngestPipelineProcessor,
-  AppendProcessor,
+  RenameProcessor,
+  SetProcessor,
+  DropDocumentProcessor,
 } from '../../../../types/processors';
+import type { StreamlangDSL } from '../../../../types/streamlang';
 
 export const comprehensiveTestDSL: StreamlangDSL = {
   steps: [
+    {
+      action: 'drop_document',
+      where: {
+        field: 'https.status_code',
+        eq: 200,
+      },
+    } as DropDocumentProcessor,
+    // Convert a field to a different type
+    {
+      action: 'convert',
+      from: 'http.status_code',
+      type: 'string',
+      to: 'http.status_code_str',
+      where: {
+        field: 'http.error',
+        eq: 404,
+      },
+    } as ConvertProcessor,
     // Rename a field
     {
       action: 'rename',

@@ -71,6 +71,7 @@ export interface ISuggestionItem {
   command?: {
     title: string;
     id: string;
+    arguments?: { [key: string]: string }[];
   };
   /**
    * The range that should be replaced when the suggestion is applied
@@ -142,6 +143,7 @@ export interface ICommandCallbacks {
   hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
   getJoinIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
   canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
+  isServerless?: boolean;
 }
 
 export interface ICommandContext {
@@ -156,6 +158,7 @@ export interface ICommandContext {
   supportsControls?: boolean;
   histogramBarTarget?: number;
   activeProduct?: PricingProduct | undefined;
+  isCursorInSubquery?: boolean;
 }
 /**
  * This is a list of locations within an ES|QL query.

@@ -27,10 +27,8 @@ import { useDateFormat, useTimeZone } from '../../../../common/lib/kibana';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { mockDataFormattedForFieldBrowser } from '../../shared/mocks/mock_data_formatted_for_field_browser';
 import { TestProviders } from '../../../../common/mock';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 jest.mock('../../../../common/lib/kibana');
-jest.mock('../../../../common/hooks/use_experimental_features');
 
 moment.suppressDeprecationWarnings = true;
 moment.tz.setDefault('UTC');
@@ -58,8 +56,6 @@ describe('<AlertHeaderTitle />', () => {
   });
 
   it('should render component', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
-
     const { getByTestId, queryByTestId } = renderHeader(mockContextValue);
 
     expect(getByTestId(HEADER_TEXT_TEST_ID)).toHaveTextContent('rule-name');
@@ -69,7 +65,7 @@ describe('<AlertHeaderTitle />', () => {
     expect(getByTestId(STATUS_TITLE_TEST_ID)).toHaveTextContent('Status');
     expect(getByTestId(RISK_SCORE_TITLE_TEST_ID)).toHaveTextContent('Risk score');
     expect(getByTestId(ASSIGNEES_TITLE_TEST_ID)).toHaveTextContent('Assignees');
-    expect(queryByTestId(NOTES_TITLE_TEST_ID)).not.toBeInTheDocument();
+    expect(getByTestId(NOTES_TITLE_TEST_ID)).toBeInTheDocument();
 
     expect(getByTestId(RISK_SCORE_VALUE_TEST_ID)).toBeInTheDocument();
     expect(getByTestId(STATUS_BUTTON_TEST_ID)).toBeInTheDocument();
@@ -88,12 +84,5 @@ describe('<AlertHeaderTitle />', () => {
     expect(queryByTestId(STATUS_BUTTON_TEST_ID)).not.toBeInTheDocument();
     expect(getByTestId(ASSIGNEES_EMPTY_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(ASSIGNEES_TEST_ID)).not.toBeInTheDocument();
-  });
-
-  it('should render notes section if experimental flag is enabled', () => {
-    (useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
-
-    const { getByTestId } = renderHeader(mockContextValue);
-    expect(getByTestId(NOTES_TITLE_TEST_ID)).toHaveTextContent('Notes');
   });
 });

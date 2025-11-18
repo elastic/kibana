@@ -11,7 +11,7 @@ import type { QueryParams } from '../components/all_inference_endpoints/types';
 import { SortFieldInferenceEndpoint, SortOrder } from '../components/all_inference_endpoints/types';
 import { useTableData } from './use_table_data';
 import { INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES } from '../components/all_inference_endpoints/types';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 import { TRAINED_MODEL_STATS_QUERY_KEY } from '../../common/constants';
 

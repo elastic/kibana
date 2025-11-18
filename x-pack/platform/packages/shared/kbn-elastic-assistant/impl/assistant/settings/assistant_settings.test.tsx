@@ -12,7 +12,7 @@ import { AssistantSettings } from './assistant_settings';
 import React from 'react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
 import { MOCK_QUICK_PROMPTS } from '../../mock/quick_prompt';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { QUICK_PROMPTS_TAB, SYSTEM_PROMPTS_TAB } from './const';
 
 const mockSystemUpdater = {

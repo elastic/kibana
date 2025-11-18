@@ -16,29 +16,27 @@ import type {
   PluginInitializerContext,
 } from '@kbn/core/server';
 
-import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { WorkflowExecutionEngineModel } from '@kbn/workflows/types/latest';
 import type { WorkflowsManagementConfig } from './config';
 
-import { createWorkflowTaskRunner } from './tasks/workflow_task_runner';
-import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
-import type {
-  WorkflowsServerPluginSetupDeps,
-  WorkflowsServerPluginStartDeps,
-  WorkflowsServerPluginSetup,
-  WorkflowsServerPluginStart,
-} from './types';
-import { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
-import { defineRoutes } from './workflows_management/routes';
-import { WorkflowsService } from './workflows_management/workflows_management_service';
-// Import the workflows connector
 import {
   getWorkflowsConnectorAdapter,
   getConnectorType as getWorkflowsConnectorType,
 } from './connectors/workflows';
-import { registerFeatures } from './features';
+import { WorkflowsManagementFeatureConfig } from './features';
+import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
+import type {
+  WorkflowsServerPluginSetup,
+  WorkflowsServerPluginSetupDeps,
+  WorkflowsServerPluginStart,
+  WorkflowsServerPluginStartDeps,
+} from './types';
 import { registerUISettings } from './ui_settings';
+import { defineRoutes } from './workflows_management/routes';
+import { WorkflowsManagementApi } from './workflows_management/workflows_management_api';
+import { WorkflowsService } from './workflows_management/workflows_management_service';
+// Import the workflows connector
 
 export class WorkflowsPlugin
   implements
@@ -53,7 +51,6 @@ export class WorkflowsPlugin
   private readonly config: WorkflowsManagementConfig;
   private workflowsService: WorkflowsService | null = null;
   private workflowTaskScheduler: WorkflowTaskScheduler | null = null;
-  private unsecureActionsClient: IUnsecuredActionsClient | null = null;
   private api: WorkflowsManagementApi | null = null;
   private spaces?: SpacesServiceStart | null = null;
 
@@ -103,7 +100,7 @@ export class WorkflowsPlugin
           };
 
           // Run the workflow, @tb: maybe switch to scheduler?
-          return await this.api.runWorkflow(workflowToRun, spaceId, inputs, request);
+          return this.api.runWorkflow(workflowToRun, spaceId, inputs, request);
         };
       };
 
@@ -116,45 +113,8 @@ export class WorkflowsPlugin
       }
     }
 
-    // Register workflow task definition
-    if (plugins.taskManager) {
-      plugins.taskManager.registerTaskDefinitions({
-        'workflow:scheduled': {
-          title: 'Scheduled Workflow Execution',
-          description: 'Executes workflows on a scheduled basis',
-          timeout: '5m',
-          maxAttempts: 3,
-          createTaskRunner: ({ taskInstance, fakeRequest }) => {
-            // Capture the plugin instance in a closure
-            const plugin = this;
-            // Use a factory pattern to get dependencies when the task runs
-            return {
-              async run() {
-                // Get dependencies when the task actually runs
-                const [, pluginsStart] = await core.getStartServices();
-
-                // Create the actual task runner with dependencies
-                const taskRunner = createWorkflowTaskRunner({
-                  logger: plugin.logger,
-                  workflowsService: plugin.workflowsService!,
-                  workflowsExecutionEngine: pluginsStart.workflowsExecutionEngine,
-                  actionsClient: plugin.unsecureActionsClient!,
-                })({ taskInstance, fakeRequest });
-
-                return taskRunner.run();
-              },
-              async cancel() {
-                // Cancel function for the task
-              },
-            };
-          },
-        },
-      });
-    }
-
-    // Register saved object types
-
-    registerFeatures(plugins);
+    // Register the workflows management feature and its privileges
+    plugins.features?.registerKibanaFeature(WorkflowsManagementFeatureConfig);
 
     this.logger.debug('Workflows Management: Creating router');
     const router = core.http.createRouter();
@@ -182,8 +142,12 @@ export class WorkflowsPlugin
     this.api = new WorkflowsManagementApi(this.workflowsService, getWorkflowExecutionEngine);
     this.spaces = plugins.spaces?.spacesService;
 
+    if (!this.spaces) {
+      throw new Error('Spaces service not initialized');
+    }
+
     // Register server side APIs
-    defineRoutes(router, this.api, this.logger, this.spaces!);
+    defineRoutes(router, this.api, this.logger, this.spaces);
 
     return {
       management: this.api,
@@ -192,8 +156,6 @@ export class WorkflowsPlugin
 
   public start(core: CoreStart, plugins: WorkflowsServerPluginStartDeps) {
     this.logger.info('Workflows Management: Start');
-
-    this.unsecureActionsClient = plugins.actions.getUnsecuredActionsClient();
 
     // Initialize workflow task scheduler with the start contract
     this.workflowTaskScheduler = new WorkflowTaskScheduler(this.logger, plugins.taskManager);

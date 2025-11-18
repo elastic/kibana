@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMutation } from '@tanstack/react-query';
+import { useMutation } from '@kbn/react-query';
 import { useContentClient } from './content_client_context';
 import type { CreateIn, UpdateIn, DeleteIn } from '../../common';
 import { queryKeyBuilder } from './content_client';

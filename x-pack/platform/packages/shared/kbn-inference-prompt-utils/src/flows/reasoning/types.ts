@@ -16,10 +16,13 @@ import type {
   ToolOptionsOfPrompt,
 } from '@kbn/inference-common';
 
+export type ReasoningPower = 'low' | 'medium' | 'high';
+
 export interface ReasoningPromptOptions {
   inferenceClient: BoundInferenceClient;
   maxSteps?: number;
   prevMessages?: undefined;
+  power?: ReasoningPower;
 }
 
 export type ReasoningPromptResponseOf<
@@ -33,7 +36,7 @@ export type ReasoningPromptResponseOf<
     MessageOf<
       ToolOptionsOfPrompt<TPrompt>,
       {
-        [key in keyof TToolCallbacks]: Awaited<ReturnType<TToolCallbacks[key]>>;
+        [key in keyof TToolCallbacks]: Awaited<ReturnType<TToolCallbacks[key]>>['response'];
       }
     >
   >;

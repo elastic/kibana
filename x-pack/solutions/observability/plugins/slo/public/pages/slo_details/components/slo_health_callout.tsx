@@ -21,8 +21,7 @@ import { ContentWithResetCta } from './health_callout/content_with_reset_cta';
 import { ContentWithInspectCta } from './health_callout/content_with_inspect_cta';
 
 export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
-  const { isLoading, isError, data: resultData } = useFetchSloHealth({ list: [slo] });
-  const { data } = resultData ?? {};
+  const { isLoading, isError, data } = useFetchSloHealth({ list: [slo] });
 
   const {
     share: {
@@ -75,10 +74,10 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
     return null;
   }
 
-  const unhealthyRollup = health.rollup === 'unhealthy';
-  const unhealthySummary = health.summary === 'unhealthy';
-  const missingRollup = health.rollup === 'missing';
-  const missingSummary = health.summary === 'missing';
+  const unhealthyRollup = health.rollup.status === 'unhealthy';
+  const unhealthySummary = health.summary.status === 'unhealthy';
+  const missingRollup = health.rollup.status === 'missing';
+  const missingSummary = health.summary.status === 'missing';
 
   const unhealthyRollupContent = `${rollupTransformId} (unhealthy)`;
   const unhealthySummaryContent = `${summaryTransformId} (unhealthy)`;
@@ -110,7 +109,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
             values={{ count, stateText }}
           />
           <ul>
-            {health.rollup === 'unhealthy' && !!rollupUrl && (
+            {health.rollup.status === 'unhealthy' && !!rollupUrl && (
               <li key={`${slo.id}-rollup-unhealthy`}>
                 <ContentWithInspectCta
                   textSize="s"
@@ -119,7 +118,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
                 />
               </li>
             )}
-            {health.summary === 'unhealthy' && !!summaryUrl && (
+            {health.summary.status === 'unhealthy' && !!summaryUrl && (
               <li key={`${slo.id}-summary-unhealthy`}>
                 <ContentWithInspectCta
                   textSize="s"
@@ -128,7 +127,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
                 />
               </li>
             )}
-            {health.rollup === 'missing' && (
+            {health.rollup.status === 'missing' && (
               <li key={`${slo.id}-rollup-missing`}>
                 <ContentWithResetCta
                   textSize="s"
@@ -137,7 +136,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
                 />
               </li>
             )}
-            {health.summary === 'missing' && (
+            {health.summary.status === 'missing' && (
               <li key={`${slo.id}-summary-missing`}>
                 <ContentWithResetCta
                   textSize="s"

@@ -7,22 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useEuiTheme } from '@elastic/eui';
+import { transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useEffect, useMemo } from 'react';
-import { monaco } from '@kbn/monaco';
 import { useSelector } from 'react-redux';
+import { monaco } from '@kbn/monaco';
 import {
+  selectEditorWorkflowLookup,
   selectHighlightedStepId,
   selectStepExecutions,
-  selectWorkflowLookup,
-} from '../../lib/store';
+} from '../../../../entities/workflows/store';
 
 export const useStepDecorationsInExecution = (
   editor: monaco.editor.IStandaloneCodeEditor | null
 ) => {
   const stepExecutions = useSelector(selectStepExecutions);
-  const workflowLookup = useSelector(selectWorkflowLookup);
+  const workflowLookup = useSelector(selectEditorWorkflowLookup);
   const highlightedStepId = useSelector(selectHighlightedStepId);
   const decorationsCollection = useMemo(() => {
     if (!editor) {
@@ -34,44 +34,50 @@ export const useStepDecorationsInExecution = (
   useEffect(() => {
     decorationsCollection?.clear();
 
-    if (!stepExecutions?.length) {
+    if (!stepExecutions?.length || !workflowLookup?.steps) {
       return;
     }
 
     const decorations = stepExecutions.flatMap((stepExecution) => {
-      const stepInfo = workflowLookup?.steps[stepExecution.stepId];
+      const { stepId, status } = stepExecution;
+      const stepInfo = workflowLookup.steps[stepId];
 
       if (!stepInfo) {
         return [];
       }
+
+      const glyphClassNames = ['step-execution-glyph', `step-execution-${status}-glyph`];
+      const bgClassNames = ['step-execution-background', `step-execution-${status}`];
+
+      if (!!highlightedStepId && highlightedStepId !== stepId) {
+        glyphClassNames.push('dimmed');
+        bgClassNames.push('dimmed');
+      }
+
       // Glyph decoration for status icon - position at the dash line
       const glyphDecoration: monaco.editor.IModelDeltaDecoration = {
-        range: new monaco.Range(
-          stepInfo.lineStart,
-          1, // Start at column 1 for consistent glyph positioning
-          stepInfo.lineStart,
-          1 // End at column 1 for single-point positioning
-        ),
-        options: {
-          glyphMarginClassName: `step-execution-${stepExecution.status}-glyph ${
-            !!highlightedStepId && highlightedStepId !== stepExecution.stepId ? 'dimmed' : ''
-          }`,
-        },
+        range: new monaco.Range(stepInfo.lineStart, 1, stepInfo.lineStart, 1),
+        options: { glyphMarginClassName: glyphClassNames.join(' ') },
       };
+
+      // Only apply background decoration if the step is not nested
+      // This prevents overlapped backgrounds (double transparency) when parent and child are both decorated
+      const isNested =
+        stepInfo.parentStepId &&
+        stepExecutions.some((otherStepExecution) => {
+          return otherStepExecution.stepId === stepInfo.parentStepId;
+        });
+      if (isNested) {
+        // For nested steps, only show the glyph decoration
+        return [glyphDecoration];
+      }
+
       // Background decoration for execution status - from dash line to end of step
-      const bgClassName = `step-execution-${stepExecution.status} ${
-        !!highlightedStepId && highlightedStepId !== stepExecution.stepId ? 'dimmed' : ''
-      }`;
       const backgroundDecoration: monaco.editor.IModelDeltaDecoration = {
-        range: new monaco.Range(
-          stepInfo.lineStart, // Start from the dash line
-          1, // Start at column 1
-          stepInfo.lineEnd,
-          0
-        ),
+        range: new monaco.Range(stepInfo.lineStart, 1, stepInfo.lineEnd, 0),
         options: {
-          className: bgClassName,
-          marginClassName: bgClassName,
+          className: bgClassNames.join(' '),
+          marginClassName: bgClassNames.join(' '),
           isWholeLine: true,
         },
       };
@@ -81,77 +87,49 @@ export const useStepDecorationsInExecution = (
     decorationsCollection?.set(decorations);
   }, [stepExecutions, decorationsCollection, workflowLookup, highlightedStepId]);
 
-  const theme = useEuiTheme();
+  const { colors } = useEuiTheme().euiTheme;
   const styles = useMemo(
     () =>
       css({
         '.step-execution-skipped': {
-          backgroundColor: theme.euiTheme.colors.backgroundBaseFormsControlDisabled,
+          backgroundColor: transparentize(colors.backgroundBaseFormsControlDisabled, 0.5),
         },
         '.step-execution-waiting_for_input': {
-          backgroundColor: theme.euiTheme.colors.backgroundLightWarning,
+          backgroundColor: transparentize(colors.backgroundLightWarning, 0.5),
         },
         '.step-execution-running': {
-          backgroundColor: theme.euiTheme.colors.backgroundLightPrimary,
+          backgroundColor: transparentize(colors.backgroundLightPrimary, 0.5),
         },
         '.step-execution-completed': {
-          backgroundColor: theme.euiTheme.colors.backgroundLightSuccess,
+          backgroundColor: transparentize(colors.backgroundLightSuccess, 0.5),
         },
         '.step-execution-failed': {
-          backgroundColor: theme.euiTheme.colors.backgroundLightDanger,
+          backgroundColor: transparentize(colors.backgroundLightDanger, 0.5),
         },
-        '.step-execution-skipped-glyph': {
-          '&:before': {
-            content: '""',
-            display: 'block',
-            width: '12px',
-            height: '12px',
-            backgroundColor: theme.euiTheme.colors.backgroundFilledText,
-            borderRadius: '50%',
-          },
+        '.step-execution-glyph:before': {
+          content: '""',
+          display: 'block',
+          width: '6px',
+          height: '6px',
+          borderRadius: '50%',
         },
-        '.step-execution-waiting_for_input-glyph': {
-          '&:before': {
-            content: '""',
-            display: 'block',
-            width: '12px',
-            height: '12px',
-            backgroundColor: theme.euiTheme.colors.backgroundFilledWarning,
-            borderRadius: '50%',
-          },
+        '.step-execution-skipped-glyph:before': {
+          backgroundColor: colors.backgroundFilledText,
         },
-        '.step-execution-running-glyph': {
-          '&:before': {
-            content: '""',
-            display: 'block',
-            width: '12px',
-            height: '12px',
-            backgroundColor: theme.euiTheme.colors.backgroundFilledPrimary,
-            borderRadius: '50%',
-          },
+        '.step-execution-waiting_for_input-glyph:before': {
+          backgroundColor: colors.backgroundFilledWarning,
         },
-        '.step-execution-completed-glyph': {
-          '&:before': {
-            content: '""',
-            display: 'block',
-            width: '12px',
-            height: '12px',
-            backgroundColor: theme.euiTheme.colors.vis.euiColorVis0,
-            borderRadius: '50%',
-          },
+        '.step-execution-running-glyph:before': {
+          backgroundColor: colors.backgroundFilledPrimary,
         },
-        '.step-execution-failed-glyph': {
-          '&:before': {
-            content: '""',
-            display: 'block',
-            width: '12px',
-            height: '12px',
-            backgroundColor: theme.euiTheme.colors.danger,
-            borderRadius: '50%',
-          },
+        '.step-execution-completed-glyph:before': {
+          backgroundColor: colors.vis.euiColorVis0,
+        },
+        '.step-execution-failed-glyph:before': {
+          backgroundColor: colors.danger,
         },
       }),
-    [theme]
+    [colors]
   );
 
   return { styles };

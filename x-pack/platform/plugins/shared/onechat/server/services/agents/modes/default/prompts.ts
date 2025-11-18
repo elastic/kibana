@@ -14,7 +14,9 @@ import {
 import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 import { visualizationElement } from '@kbn/onechat-common/tools/tool_result';
 import { ChartType } from '@kbn/visualization-utils';
-import { customInstructionsBlock, formatDate } from '../utils/prompt_helpers';
+import { customInstructionsBlock, formatDate } from './prompts/prompt_helpers';
+import type { ResearchAgentAction, AnswerAgentAction } from './actions';
+import { formatResearcherActionHistory, formatAnswerActionHistory } from './prompts/format_actions';
 
 const tools = {
   indexExplorer: sanitizeToolId(platformCoreTools.indexExplorer),
@@ -25,11 +27,13 @@ const tools = {
 export const getActPrompt = ({
   customInstructions,
   capabilities,
-  messages,
+  initialMessages,
+  actions,
 }: {
   customInstructions?: string;
   capabilities: ResolvedAgentCapabilities;
-  messages: BaseMessageLike[];
+  initialMessages: BaseMessageLike[];
+  actions: ResearchAgentAction[];
 }): BaseMessageLike[] => {
   return [
     [
@@ -130,41 +134,39 @@ ${customInstructionsBlock(customInstructions)}
 - [ ] If I'm calling a tool, Did I use the \`_reasoning\` parameter to clearly explain why I'm taking this next step?
 - [ ] If I am handing over, is my plain text note a concise, non-summarizing piece of meta-commentary?`,
     ],
-    ...messages,
+    ...initialMessages,
+    ...formatResearcherActionHistory({ actions }),
   ];
 };
 
 export const getAnswerPrompt = ({
   customInstructions,
-  discussion,
-  handoverNote,
+  initialMessages,
+  actions,
+  answerActions,
   capabilities,
 }: {
   customInstructions?: string;
-  discussion: BaseMessageLike[];
-  handoverNote?: string;
+  initialMessages: BaseMessageLike[];
+  actions: ResearchAgentAction[];
+  answerActions: AnswerAgentAction[];
   capabilities: ResolvedAgentCapabilities;
 }): BaseMessageLike[] => {
   const visEnabled = capabilities.visualizations;
+
   return [
     [
       'system',
       `You are an expert enterprise AI assistant from Elastic, the company behind Elasticsearch.
 
-Your role is to provide a clear, well-reasoned answer to the user's question using the information gathered by prior research steps.
+Your role is to be the **final answering agent** in a multi-agent flow. Your **ONLY** capability is to generate a natural language response to the user.
 
 ## INSTRUCTIONS
 - Carefully read the original discussion and the gathered information.
 - Synthesize an accurate response that directly answers the user's question.
 - Do not hedge. If the information is complete, provide a confident and final answer.
 - If there are still uncertainties or unresolved issues, acknowledge them clearly and state what is known and what is not.
-
-## IMPORTANT CONTEXT FROM THE PREVIOUS STEP
-The previous agent has completed its research and provided the following handover note:
----
-${handoverNote ?? 'No handover note was provided.'}
----
-Use the context above to inform your final answer.
+- You do not have access to any tools. You MUST NOT, under any circumstances, attempt to call or generate syntax for any tool.
 
 ## GUIDELINES
 - Do not mention the research process or that you are an AI or assistant.
@@ -188,31 +190,35 @@ ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 - Current date: ${formatDate()}
 
 ## PRE-RESPONSE COMPLIANCE CHECK
+- [ ] I answered with a text response
+- [ ] I did not call any tool
 - [ ] All claims are grounded in tool output, conversation history or user-provided content.
 - [ ] I asked for missing mandatory parameters only when required.
 - [ ] The answer stays within the user's requested scope.
 - [ ] I answered every part of the user's request (identified sub-questions/requirements). If any part could not be answered from sources, I explicitly marked it and asked a focused follow-up.
 - [ ] No internal tool process or names revealed (unless user asked).`,
     ],
-    ...discussion,
+    ...initialMessages,
+    ...formatResearcherActionHistory({ actions }),
+    ...formatAnswerActionHistory({ actions: answerActions }),
   ];
 };
 
 function renderVisualizationPrompt() {
-  const { tabularData } = ToolResultType;
+  const { tabularData, visualization } = ToolResultType;
   const { tagName, attributes } = visualizationElement;
   const chartTypeNames = Object.values(ChartType)
     .map((chartType) => `\`${chartType}\``)
     .join(', ');
 
   return `### RENDERING VISUALIZATIONS
-      When a tool call returns a result of type "${tabularData}", you may render a visualization in the UI by emitting a custom XML element:
+      When a tool call returns a result of type "${tabularData}" or "${visualization}", you may render a visualization in the UI by emitting a custom XML element:
 
       <${tagName} ${attributes.toolResultId}="TOOL_RESULT_ID_HERE" />
 
       **Rules**
-      * The \`<${tagName}>\` element must only be used to render tool results of type \`${tabularData}\`.
-      * You can specify an optional chart type by adding the \`${attributes.chartType}\` attribute with one of the following values: ${chartTypeNames}.
+      * The \`<${tagName}>\` element must only be used to render tool results of type \`${tabularData}\` or \`${visualization}\`.
+      * You can specify an optional chart type by adding the \`${attributes.chartType}\` attribute with one of the following values: ${chartTypeNames}. Only for "${tabularData}" type.
       * If the user does NOT specify a chart type in their message, you MUST omit the \`chart-type\` attribute. The system will choose an appropriate chart type automatically.
       * You must copy the \`tool_result_id\` from the tool's response into the \`${attributes.toolResultId}\` element attribute verbatim.
       * Do not invent, alter, or guess \`tool_result_id\`. You must use the exact id provided in the tool response.

@@ -49,6 +49,7 @@ import type {
 } from './types';
 import { setupRoutes } from './routes/setup_routes';
 import { cspBenchmarkRule, cspSettings } from './saved_objects';
+import { deleteOldAndLegacyCdrDataViewsForAllSpaces } from './saved_objects/data_views';
 import { initializeCspIndices } from './create_indices/create_indices';
 import {
   deletePreviousTransformsVersions,
@@ -239,8 +240,10 @@ export class CspPlugin
   ): Promise<void> {
     this.logger.debug('initialize');
     const esClient = core.elasticsearch.client.asInternalUser;
+    const soClient = core.savedObjects.createInternalRepository();
     const isIntegrationVersionIncludesTransformAsset =
       isTransformAssetIncluded(packagePolicyVersion);
+
     await initializeCspIndices(
       esClient,
       this.config,
@@ -252,14 +255,26 @@ export class CspPlugin
       isIntegrationVersionIncludesTransformAsset,
       this.logger
     );
+
     await scheduleFindingsStatsTask(taskManager, this.logger);
     await this.initializeIndexAlias(esClient, this.logger);
+
+    // Delete old and legacy CDR data views for all spaces
+    await deleteOldAndLegacyCdrDataViewsForAllSpaces(soClient, this.logger);
+
     this.#isInitialized = true;
   }
 
   // For integration versions earlier than 2.00, we will manually create an index alias for the deprecated latest index 'logs-cloud_security_posture.findings_latest-default'.
   // For integration versions 2.00 and above, the index alias will be automatically created or updated as part of the Transform setup.
   initializeIndexAlias = async (esClient: ElasticsearchClient, logger: Logger): Promise<void> => {
+    const isIndexExists = await esClient.indices.exists({
+      index: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
+    });
+    if (isIndexExists) {
+      return;
+    }
+
     const isAliasExists = await esClient.indices.existsAlias({
       name: CDR_LATEST_NATIVE_MISCONFIGURATIONS_INDEX_ALIAS,
     });

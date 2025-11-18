@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -9,7 +9,8 @@
     "public/**/*",
     "server/**/*",
     "../../../../../typings/**/*",
-    ".storybook/**/*"
+    ".storybook/**/*",
+    "integration_tests/**/*"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -19,6 +20,9 @@
     "@kbn/task-manager-plugin",
     "@kbn/es-query",
     "@kbn/core-elasticsearch-server",
+    "@kbn/cloud-plugin",
+    "@kbn/utility-types",
+    "@kbn/zod",
   ],
   "exclude": [
     "target/**/*"

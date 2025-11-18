@@ -12,3 +12,4 @@ export { findInputsInGraph } from './find_inputs_in_graph/find_inputs_in_graph';
 export { extractSchemaPropertyPaths } from './extract_schema_property_paths/extract_schema_property_paths';
 export { parseJsPropertyAccess } from './parse_js_property_access/parse_js_property_access';
 export { extractPropertyPathsFromKql } from './extract_property_paths_from_kql/extract_property_paths_from_kql';
+export { isPropertyAccess } from './is_property_access/is_property_access';

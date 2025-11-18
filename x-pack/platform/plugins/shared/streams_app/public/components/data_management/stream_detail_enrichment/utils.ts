@@ -13,6 +13,7 @@ import { htmlIdGenerator } from '@elastic/eui';
 import { countBy, isEmpty, mapValues, omit, orderBy } from 'lodash';
 import { DraftGrokExpression } from '@kbn/grok-ui';
 import type {
+  ConvertProcessor,
   GrokProcessor,
   ProcessorType,
   StreamlangProcessorDefinition,
@@ -37,6 +38,8 @@ import type {
   EnrichmentDataSourceWithUIAttributes,
   SetFormState,
   WhereBlockFormState,
+  ConvertFormState,
+  DropFormState,
 } from './types';
 import { configDrivenProcessors } from './steps/blocks/action/config_driven';
 import type {
@@ -49,7 +52,7 @@ import type { ProcessorResources } from './state_management/steps_state_machine'
 /**
  * These are processor types with specialised UI. Other processor types are handled by a generic config-driven UI.
  */
-export const SPECIALISED_TYPES = ['date', 'dissect', 'grok', 'set'];
+export const SPECIALISED_TYPES = ['convert', 'date', 'dissect', 'grok', 'set'];
 
 interface FormStateDependencies {
   grokCollection: StreamEnrichmentContextType['grokCollection'];
@@ -101,6 +104,16 @@ const getDefaultTextField = (sampleDocs: FlattenRecord[], prioritizedFields: str
   return mostCommonField ? mostCommonField[0] : '';
 };
 
+const defaultConvertProcessorFormState = (): ConvertFormState => ({
+  action: 'convert' as const,
+  from: '',
+  to: '',
+  type: 'string',
+  ignore_failure: true,
+  ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
 const defaultDateProcessorFormState = (sampleDocs: FlattenRecord[]): DateFormState => ({
   action: 'date',
   from: getDefaultTextField(sampleDocs, PRIORITIZED_DATE_FIELDS),
@@ -117,6 +130,11 @@ const defaultDissectProcessorFormState = (sampleDocs: FlattenRecord[]): DissectF
   pattern: '',
   ignore_failure: true,
   ignore_missing: true,
+  where: ALWAYS_CONDITION,
+});
+
+const defaultDropProcessorFormState = (): DropFormState => ({
+  action: 'drop_document',
   where: ALWAYS_CONDITION,
 });
 
@@ -162,8 +180,10 @@ const defaultProcessorFormStateByType: Record<
   ProcessorType,
   (sampleDocs: FlattenRecord[], formStateDependencies: FormStateDependencies) => ProcessorFormState
 > = {
+  convert: defaultConvertProcessorFormState,
   date: defaultDateProcessorFormState,
   dissect: defaultDissectProcessorFormState,
+  drop_document: defaultDropProcessorFormState,
   grok: defaultGrokProcessorFormState,
   manual_ingest_pipeline: defaultManualIngestPipelineProcessorFormState,
   set: defaultSetProcessorFormState,
@@ -202,7 +222,9 @@ export const getFormStateFromActionStep = (
     step.action === 'dissect' ||
     step.action === 'manual_ingest_pipeline' ||
     step.action === 'date' ||
-    step.action === 'set'
+    step.action === 'drop_document' ||
+    step.action === 'set' ||
+    step.action === 'convert'
   ) {
     const { customIdentifier, parentId, ...restStep } = step;
     return structuredClone({
@@ -297,7 +319,7 @@ export const convertFormStateToProcessor = (
     }
 
     if (formState.action === 'date') {
-      const { from, formats, ignore_failure, to, output_format } = formState;
+      const { from, formats, ignore_failure, to, output_format, timezone, locale } = formState;
 
       return {
         processorDefinition: {
@@ -308,6 +330,17 @@ export const convertFormStateToProcessor = (
           ignore_failure,
           to: isEmpty(to) ? undefined : to,
           output_format: isEmpty(output_format) ? undefined : output_format,
+          timezone: isEmpty(timezone) ? undefined : timezone,
+          locale: isEmpty(locale) ? undefined : locale,
+        },
+      };
+    }
+
+    if (formState.action === 'drop_document') {
+      return {
+        processorDefinition: {
+          action: 'drop_document',
+          where: formState.where,
         },
       };
     }
@@ -334,6 +367,22 @@ export const convertFormStateToProcessor = (
           override,
           ignore_failure,
         },
+      };
+    }
+
+    if (formState.action === 'convert') {
+      const { from, type, to, ignore_failure, ignore_missing } = formState;
+
+      return {
+        processorDefinition: {
+          action: 'convert',
+          from,
+          type,
+          to: isEmpty(to) ? undefined : to,
+          ignore_failure,
+          ignore_missing,
+          where: 'where' in formState ? formState.where : undefined,
+        } as ConvertProcessor,
       };
     }
 

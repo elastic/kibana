@@ -856,92 +856,145 @@ paths:
       tags:
         - Security AI Assistant API
         - Conversation API
-  /api/security_ai_assistant/knowledge_base/{resource}:
+  /api/security_ai_assistant/knowledge_base:
     get:
       description: Read a single KB
-      operationId: ReadKnowledgeBase
-      parameters:
-        - description: The KnowledgeBase `resource` value.
-          example: kb12345
-          in: path
-          name: resource
-          schema:
-            type: string
+      operationId: GetKnowledgeBase
       responses:
         '200':
           content:
             application/json:
+              examples:
+                KnowledgeBaseReadResponse200Example2:
+                  summary: >-
+                    A response that returns information about the knowledge
+                    base.
+                  value:
+                    defend_insights_exists: true
+                    elser_exists: false
+                    is_setup_available: true
+                    is_setup_in_progress: true
+                    product_documentation_status: installed
+                    security_labs_exists: false
+                    user_data_exists: true
               schema:
-                type: object
-                properties:
-                  defend_insights_exists:
-                    description: >-
-                      Indicates if Defend Insights documentation exists in the
-                      KnowledgeBase.
-                    example: true
-                    type: boolean
-                  elser_exists:
-                    description: Indicates if the ELSER model exists for the KnowledgeBase.
-                    example: true
-                    type: boolean
-                  is_setup_available:
-                    description: >-
-                      Indicates if the setup process is available for the
-                      KnowledgeBase.
-                    example: true
-                    type: boolean
-                  is_setup_in_progress:
-                    description: Indicates if the setup process is currently in progress.
-                    example: false
-                    type: boolean
-                  product_documentation_status:
-                    description: >-
-                      The status of the product documentation in the
-                      KnowledgeBase.
-                    example: complete
-                    type: string
-                  security_labs_exists:
-                    description: >-
-                      Indicates if Security Labs documentation exists in the
-                      KnowledgeBase.
-                    example: true
-                    type: boolean
-                  user_data_exists:
-                    description: Indicates if user data exists in the KnowledgeBase.
-                    example: false
-                    type: boolean
+                $ref: '#/components/schemas/KnowledgeBaseReadResponse200'
           description: Indicates a successful call.
         '400':
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    description: A short description of the error.
-                    example: Bad Request
-                    type: string
-                  message:
-                    description: A detailed error message.
-                    example: Invalid resource ID provided.
-                    type: string
-                  statusCode:
-                    description: The HTTP status code of the error.
-                    example: 400
-                    type: number
+                $ref: '#/components/schemas/KnowledgeBaseResponse400'
           description: Generic Error
       summary: Read a KnowledgeBase
       tags:
         - Security AI Assistant API
         - KnowledgeBase API
     post:
-      description: Create a KnowledgeBase
+      operationId: PostKnowledgeBase
+      parameters:
+        - description: >-
+            ELSER modelId to use when setting up the Knowledge Base. If not
+            provided, a default model will be used.
+          example: elser-model-001
+          in: query
+          name: modelId
+          required: false
+          schema:
+            type: string
+        - description: >-
+            Indicates whether we should or should not install Security Labs docs
+            when setting up the Knowledge Base. Defaults to `false`.
+          example: true
+          in: query
+          name: ignoreSecurityLabs
+          required: false
+          schema:
+            default: false
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                KnowledgeBaseResponse200Example2:
+                  summary: A response that indicates that the request was successful.
+                  value:
+                    success: true
+              schema:
+                $ref: '#/components/schemas/KnowledgeBaseResponse'
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              examples:
+                KnowledgeBaseResponse400Example2:
+                  summary: >-
+                    A response for a request that failed due to an invalid query
+                    parameter value.
+                  value: >
+                    statusCode: 400 error: Bad Request message: "[request
+                    query]: ignoreSecurityLabs: Invalid enum value. Expected
+                    'true' | 'false', received 'yes', ignoreSecurityLabs:
+                    Expected boolean, received string"
+              schema:
+                $ref: '#/components/schemas/KnowledgeBaseResponse400'
+          description: Generic Error
+      summary: Create a KnowledgeBase
+      tags:
+        - Security AI Assistant API
+        - KnowledgeBase API
+  /api/security_ai_assistant/knowledge_base/{resource}:
+    get:
+      description: Read a knowledge base with a specific resource identifier.
+      operationId: ReadKnowledgeBase
+      parameters:
+        - description: The KnowledgeBase `resource` value.
+          example: kb12345
+          in: path
+          name: resource
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                KnowledgeBaseReadResponse200Example1:
+                  summary: >-
+                    A response that returns information about the knowledge
+                    base.
+                  value:
+                    defend_insights_exists: true
+                    elser_exists: false
+                    is_setup_available: true
+                    is_setup_in_progress: true
+                    product_documentation_status: installed
+                    security_labs_exists: false
+                    user_data_exists: true
+              schema:
+                $ref: '#/components/schemas/KnowledgeBaseReadResponse200'
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/KnowledgeBaseResponse400'
+          description: Generic Error
+      summary: Read a KnowledgeBase for a resource
+      tags:
+        - Security AI Assistant API
+        - KnowledgeBase API
+    post:
+      description: Create a knowledge base with a specific resource identifier.
       operationId: CreateKnowledgeBase
       parameters:
         - description: The KnowledgeBase `resource` value.
           example: kb12345
           in: path
           name: resource
+          required: true
           schema:
             type: string
         - description: >-
@@ -967,29 +1020,31 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                KnowledgeBaseResponse200Example1:
+                  summary: A response that indicates that the request was successful.
+                  value:
+                    success: true
               schema:
                 $ref: '#/components/schemas/KnowledgeBaseResponse'
           description: Indicates a successful call.
         '400':
           content:
             application/json:
+              examples:
+                KnowledgeBaseResponse400Example1:
+                  summary: >-
+                    A response for a request that failed due to an invalid query
+                    parameter value.
+                  value: >
+                    statusCode: 400 error: Bad Request message: "[request
+                    query]: ignoreSecurityLabs: Invalid enum value. Expected
+                    'true' | 'false', received 'yes', ignoreSecurityLabs:
+                    Expected boolean, received string"
               schema:
-                type: object
-                properties:
-                  error:
-                    description: A short description of the error.
-                    example: Bad Request
-                    type: string
-                  message:
-                    description: A detailed error message.
-                    example: Invalid resource ID provided.
-                    type: string
-                  statusCode:
-                    description: The HTTP status code of the error.
-                    example: 400
-                    type: number
+                $ref: '#/components/schemas/KnowledgeBaseResponse400'
           description: Generic Error
-      summary: Create a KnowledgeBase
+      summary: Create a KnowledgeBase for a resource
       tags:
         - Security AI Assistant API
         - KnowledgeBase API
@@ -1832,6 +1887,35 @@ components:
       required:
         - id
         - type
+    BaseInterruptResumeValue:
+      description: The basis of an interrupt resume value
+      type: object
+      properties:
+        type:
+          $ref: '#/components/schemas/InterruptType'
+          description: Type of the resume value
+          example: SELECT_OPTION
+      required:
+        - type
+    BaseInterruptValue:
+      description: The basis of an agent interrupt
+      type: object
+      properties:
+        expired:
+          description: Whether the interrupt has expired and can no longer be resumed.
+          example: false
+          type: boolean
+        threadId:
+          description: Thread ID of the graph execution that produced this message.
+          example: <UUID>
+          type: string
+        type:
+          $ref: '#/components/schemas/InterruptType'
+          description: Type of the interrupt
+          example: SELECT_OPTION
+      required:
+        - type
+        - threadId
     BulkCrudActionSummary:
       type: object
       properties:
@@ -2475,6 +2559,65 @@ components:
           - fieldType
           - description
       type: array
+    InputTextInterruptResumeValue:
+      allOf:
+        - $ref: '#/components/schemas/BaseInterruptResumeValue'
+        - type: object
+          properties:
+            type:
+              enum:
+                - INPUT_TEXT
+              example: INPUT_TEXT
+              type: string
+            value:
+              description: Text value used to resume the graph execution with.
+              example: .logs*
+              type: string
+          required:
+            - value
+            - type
+      description: A resume value for input text
+    InputTextInterruptValue:
+      allOf:
+        - $ref: '#/components/schemas/BaseInterruptValue'
+        - type: object
+          properties:
+            description:
+              description: Description of action required
+              example: What is the index you would like to use for the query.
+              type: string
+            placeholder:
+              description: Placeholder text for the input field
+              example: Enter index pattern here...
+              type: string
+            type:
+              enum:
+                - INPUT_TEXT
+              example: INPUT_TEXT
+              type: string
+          required:
+            - type
+      description: Interrupt that requests user to provide text input
+    InterruptResumeValue:
+      description: Union of the interrupt resume values
+      oneOf:
+        - $ref: '#/components/schemas/SelectOptionInterruptResumeValue'
+          additionalProperties: false
+        - $ref: '#/components/schemas/InputTextInterruptResumeValue'
+          additionalProperties: false
+    InterruptType:
+      description: The type of interrupt
+      enum:
+        - SELECT_OPTION
+        - INPUT_TEXT
+      type: string
+    InterruptValue:
+      description: Union of the interrupt values
+      oneOf:
+        - $ref: '#/components/schemas/SelectOptionInterruptValue'
+          additionalProperties: false
+        - $ref: '#/components/schemas/InputTextInterruptValue'
+          additionalProperties: false
     KnowledgeBaseEntryBulkActionSkipReason:
       description: Reason why a Knowledge Base Entry was skipped during the bulk action.
       enum:
@@ -2693,6 +2836,41 @@ components:
         - $ref: '#/components/schemas/IndexEntryCreateFields'
       discriminator:
         propertyName: type
+    KnowledgeBaseReadResponse200:
+      type: object
+      properties:
+        defend_insights_exists:
+          description: >-
+            Indicates if Defend Insights documentation exists in the
+            KnowledgeBase.
+          example: true
+          type: boolean
+        elser_exists:
+          description: Indicates if the ELSER model exists for the KnowledgeBase.
+          example: true
+          type: boolean
+        is_setup_available:
+          description: Indicates if the setup process is available for the KnowledgeBase.
+          example: true
+          type: boolean
+        is_setup_in_progress:
+          description: Indicates if the setup process is currently in progress.
+          example: false
+          type: boolean
+        product_documentation_status:
+          description: The status of the product documentation in the KnowledgeBase.
+          example: complete
+          type: string
+        security_labs_exists:
+          description: >-
+            Indicates if Security Labs documentation exists in the
+            KnowledgeBase.
+          example: true
+          type: boolean
+        user_data_exists:
+          description: Indicates if user data exists in the KnowledgeBase.
+          example: false
+          type: boolean
     KnowledgeBaseResource:
       description: >-
         Knowledge Base resource name for grouping entries, e.g. 'security_labs',
@@ -2711,6 +2889,21 @@ components:
           description: Identify the success of the method execution.
           example: true
           type: boolean
+    KnowledgeBaseResponse400:
+      type: object
+      properties:
+        error:
+          description: A short description of the error.
+          example: Bad Request
+          type: string
+        message:
+          description: A detailed error message.
+          example: Invalid resource ID provided.
+          type: string
+        statusCode:
+          description: The HTTP status code of the error.
+          example: 400
+          type: number
     Message:
       description: AI assistant conversation message.
       type: object
@@ -2764,6 +2957,18 @@ components:
         contentReferences:
           $ref: '#/components/schemas/ContentReferences'
           description: Data referred to by the message content.
+        interruptResumeValue:
+          $ref: '#/components/schemas/InterruptResumeValue'
+          description: >-
+            When the agent is resumed after an interrupt, this field is
+            populated with the details of the resume value.
+        interruptValue:
+          $ref: '#/components/schemas/InterruptValue'
+          description: >-
+            When the agent is interrupted (for example, when user input is
+            required), this field is populated with the details of the
+            interrupt. Messages containing interruptValues in the metadata are
+            excluded from the LLM context.
     MessageRole:
       description: Message role.
       enum:
@@ -3190,6 +3395,79 @@ components:
           required:
             - type
       description: References the security alerts page
+    SelectOptionInterruptOption:
+      description: A request approval option
+      type: object
+      properties:
+        buttonColor:
+          enum:
+            - text
+            - accent
+            - accentSecondary
+            - primary
+            - success
+            - warning
+            - danger
+            - neutral
+            - risk
+          example: danger
+          type: string
+        label:
+          example: Option 1
+          type: string
+        value:
+          example: option_1
+          type: string
+      required:
+        - label
+        - value
+    SelectOptionInterruptResumeValue:
+      allOf:
+        - $ref: '#/components/schemas/BaseInterruptResumeValue'
+        - type: object
+          properties:
+            type:
+              enum:
+                - SELECT_OPTION
+              example: SELECT_OPTION
+              type: string
+            value:
+              description: >-
+                The value of the selected option to resume the graph execution
+                with
+              example: option_1
+              type: string
+          required:
+            - value
+            - type
+      description: A request approval resume schema
+    SelectOptionInterruptValue:
+      allOf:
+        - $ref: '#/components/schemas/BaseInterruptValue'
+        - type: object
+          properties:
+            description:
+              description: Description of action required
+              example: Select one of the options
+              type: string
+            options:
+              description: List of actions to choose from
+              example:
+                - label: Option 1
+                - label: Option 2
+              items:
+                $ref: '#/components/schemas/SelectOptionInterruptOption'
+              type: array
+            type:
+              enum:
+                - SELECT_OPTION
+              example: SELECT_OPTION
+              type: string
+          required:
+            - type
+            - description
+            - options
+      description: Interrupt that requests user to select one of the provided options
     SortOrder:
       description: The order in which results are sorted.
       enum:

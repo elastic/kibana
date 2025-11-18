@@ -28,7 +28,7 @@ import { deleteAllConversations } from './delete_all_conversations';
  * configuration after initial plugin start
  */
 export interface GetAIAssistantConversationsDataClientParams {
-  contentReferencesEnabled?: boolean;
+  assistantInterruptsEnabled?: boolean;
 }
 
 export class AIAssistantConversationsDataClient extends AIAssistantDataClient {

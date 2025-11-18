@@ -1,10 +1,18 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["../../../../../typings/**/*", "common/**/*", "public/**/*", "server/**/*"],
-  "exclude": ["target/**/*", ".storybook/**/*.js"],
+  "include": [
+    "../../../../../typings/**/*",
+    "common/**/*",
+    "public/**/*",
+    "server/**/*"
+  ],
+  "exclude": [
+    "target/**/*",
+    ".storybook/**/*.js"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/logging",
@@ -77,5 +85,14 @@
     "@kbn/spaces-plugin",
     "@kbn/licensing-types",
     "@kbn/licensing-plugin",
+    "@kbn/lens-embeddable-utils",
+    "@kbn/ai-assistant-connector-selector-action",
+    "@kbn/elastic-assistant",
+    "@kbn/react-kibana-mount",
+    "@kbn/react-query",
+    "@kbn/maps-plugin",
+    "@kbn/shared-ux-utility",
+    "@kbn/usage-collection-plugin",
+    "@kbn/core-notifications-browser"
   ]
 }

@@ -19,6 +19,8 @@ import { TaskTypeDictionary } from './task_type_dictionary';
 import { taskManagerMock } from './mocks';
 import { omit } from 'lodash';
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { TaskAlreadyRunningError } from './lib/errors';
+import { taskPollingLifecycleMock } from './polling_lifecycle.mock';
 
 let fakeTimer: sinon.SinonFakeTimers;
 jest.mock('uuid', () => ({
@@ -60,12 +62,14 @@ describe('TaskScheduling', () => {
 
   const mockTaskStore = taskStoreMock.create({});
   const definitions = new TaskTypeDictionary(mockLogger());
+  const taskPollingLifecycle = taskPollingLifecycleMock.create({});
   const taskSchedulingOpts = {
     taskStore: mockTaskStore,
     logger: mockLogger(),
     middleware: createInitialMiddleware(),
     definitions,
     taskManagerId: '123',
+    taskPollingLifecycle,
   };
 
   definitions.registerTaskDefinitions({
@@ -247,6 +251,35 @@ describe('TaskScheduling', () => {
               error: 'error',
               message: 'Failed to update schedule due to version conflict',
               statusCode: 409,
+            },
+          },
+        ],
+      });
+    mockTaskStore.schedule.mockRejectedValueOnce({
+      statusCode: 409,
+    });
+
+    const result = await taskScheduling.ensureScheduled(task);
+
+    expect(bulkUpdateScheduleSpy).toHaveBeenCalledWith(['my-foo-id'], { interval: '1m' });
+    expect(result.id).toEqual('my-foo-id');
+  });
+
+  test('handles NOT_FOUND_STATUS errors when trying to update schedule for tasks that have already been scheduled', async () => {
+    const task = getTask();
+    const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+    const bulkUpdateScheduleSpy = jest
+      .spyOn(taskScheduling, 'bulkUpdateSchedules')
+      .mockResolvedValue({
+        tasks: [],
+        errors: [
+          {
+            id: 'my-foo-id',
+            type: 'task',
+            error: {
+              error: 'Not Found',
+              message: 'Saved object [task/my-foo-id] not found',
+              statusCode: 404,
             },
           },
         ],
@@ -687,6 +720,14 @@ describe('TaskScheduling', () => {
 
   describe('bulkUpdateSchedules', () => {
     const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+    const rruleScheduleExample24h = {
+      rrule: {
+        freq: 3, // Daily
+        interval: 1,
+        tzid: 'UTC',
+      },
+    };
+
     beforeEach(() => {
       mockTaskStore.bulkUpdate.mockImplementation(() =>
         Promise.resolve([{ tag: 'ok', value: taskManagerMock.createTask() }])
@@ -752,7 +793,7 @@ describe('TaskScheduling', () => {
       });
     });
 
-    test('should not update task if new interval is equal to previous', async () => {
+    test('should not update task if new schedule is equal to previous using interval', async () => {
       const task = taskManagerMock.createTask({ id, schedule: { interval: '3h' } });
 
       mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
@@ -765,13 +806,29 @@ describe('TaskScheduling', () => {
       expect(bulkUpdatePayload).toHaveLength(0);
     });
 
+    test('should not update task if new schedule is equal to previous using rrule', async () => {
+      const task = taskManagerMock.createTask({
+        id,
+        schedule: rruleScheduleExample24h,
+      });
+
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkUpdateSchedules([id], rruleScheduleExample24h);
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
+
+      expect(bulkUpdatePayload).toHaveLength(0);
+    });
+
     test('should postpone task run if new interval is greater than previous', async () => {
-      // task set to be run in 2 hrs from now
-      const runInTwoHrs = new Date(Date.now() + moment.duration(2, 'hours').asMilliseconds());
+      // task set to be run in 3hrs from now
+      const runInThreeHrs = new Date(Date.now() + moment.duration(3, 'hours').asMilliseconds());
       const task = taskManagerMock.createTask({
         id,
         schedule: { interval: '3h' },
-        runAt: runInTwoHrs,
+        runAt: runInThreeHrs,
       });
 
       mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
@@ -784,18 +841,60 @@ describe('TaskScheduling', () => {
       expect(bulkUpdatePayload).toHaveLength(1);
       expect(bulkUpdatePayload[0]).toHaveProperty('schedule', { interval: '5h' });
       // if tasks updated with schedule interval of '5h' and previous interval was 3h, task will be scheduled to run in 2 hours later
-      expect(bulkUpdatePayload[0].runAt.getTime() - runInTwoHrs.getTime()).toBe(
+      expect(bulkUpdatePayload[0].runAt.getTime() - runInThreeHrs.getTime()).toBe(
         moment.duration(2, 'hours').asMilliseconds()
+      );
+    });
+
+    test('should postpone task run if new rrule is greater than previous interval', async () => {
+      const task = taskManagerMock.createTask({
+        id,
+        schedule: { interval: '3h' },
+      });
+
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkUpdateSchedules([id], rruleScheduleExample24h);
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
+
+      expect(bulkUpdatePayload).toHaveLength(1);
+      expect(bulkUpdatePayload[0]).toHaveProperty('schedule', rruleScheduleExample24h);
+      expect(bulkUpdatePayload[0].runAt.getTime()).toBe(
+        moment.duration(24, 'hours').asMilliseconds()
+      );
+    });
+
+    test('should postpone task run if new interval is greater than previous rrule', async () => {
+      const task = taskManagerMock.createTask({
+        id,
+        schedule: rruleScheduleExample24h,
+      });
+
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkUpdateSchedules([id], { interval: '25h' });
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
+
+      expect(bulkUpdatePayload).toHaveLength(1);
+      expect(bulkUpdatePayload[0]).toHaveProperty('schedule', { interval: '25h' });
+
+      // last run(moment) + 25h
+      expect(bulkUpdatePayload[0].runAt.getTime()).toBe(
+        moment.duration(25, 'hours').asMilliseconds()
       );
     });
 
     test('should set task run sooner if new interval is lesser than previous', async () => {
       // task set to be run in one 2hrs from now
-      const runInTwoHrs = new Date(Date.now() + moment.duration(2, 'hours').asMilliseconds());
+      const runInThreeHrs = new Date(Date.now() + moment.duration(3, 'hours').asMilliseconds());
       const task = taskManagerMock.createTask({
         id,
         schedule: { interval: '3h' },
-        runAt: runInTwoHrs,
+        runAt: runInThreeHrs,
       });
 
       mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
@@ -804,21 +903,56 @@ describe('TaskScheduling', () => {
       await taskScheduling.bulkUpdateSchedules([id], { interval: '2h' });
 
       const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
-
       expect(bulkUpdatePayload[0]).toHaveProperty('schedule', { interval: '2h' });
       // if tasks updated with schedule interval of '2h' and previous interval was 3h, task will be scheduled to run in 1 hour sooner
-      expect(runInTwoHrs.getTime() - bulkUpdatePayload[0].runAt.getTime()).toBe(
+      expect(runInThreeHrs.getTime() - bulkUpdatePayload[0].runAt.getTime()).toBe(
         moment.duration(1, 'hour').asMilliseconds()
       );
     });
 
+    test('should set task run sooner if new rrule is lesser than previous interval', async () => {
+      const task = taskManagerMock.createTask({
+        id,
+        schedule: { interval: '2d' },
+      });
+
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkUpdateSchedules([id], rruleScheduleExample24h);
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
+      expect(bulkUpdatePayload[0]).toHaveProperty('schedule', rruleScheduleExample24h);
+      expect(bulkUpdatePayload[0].runAt.getTime()).toBe(
+        moment.duration(24, 'hour').asMilliseconds()
+      );
+    });
+
+    test('should set task run sooner if new interval is lesser than previous rrule', async () => {
+      const task = taskManagerMock.createTask({
+        id,
+        schedule: rruleScheduleExample24h,
+      });
+
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkUpdateSchedules([id], { interval: '12h' });
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
+      expect(bulkUpdatePayload[0]).toHaveProperty('schedule', { interval: '12h' });
+      expect(bulkUpdatePayload[0].runAt.getTime()).toBe(
+        moment.duration(12, 'hour').asMilliseconds()
+      );
+    });
+
     test('should set task run to now if time that passed from last run is greater than new interval', async () => {
-      // task set to be run in one 1hr from now. With interval of '2h', it means last run happened 1 hour ago
-      const runInOneHr = new Date(Date.now() + moment.duration(1, 'hour').asMilliseconds());
+      // task scheduled now - 1h. With interval of '2h' the next run is in one hour(hwich is <30m).
+      const minusOneHour = new Date(Date.now() - moment.duration(1, 'hour').asMilliseconds());
       const task = taskManagerMock.createTask({
         id,
         schedule: { interval: '2h' },
-        runAt: runInOneHr,
+        scheduledAt: minusOneHour,
       });
 
       mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
@@ -827,11 +961,33 @@ describe('TaskScheduling', () => {
       await taskScheduling.bulkUpdateSchedules([id], { interval: '30m' });
 
       const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
-
       expect(bulkUpdatePayload[0]).toHaveProperty('schedule', { interval: '30m' });
 
       // if time that passed from last task run is greater than new interval, task should be set to run at now time
       expect(bulkUpdatePayload[0].runAt.getTime()).toBeLessThanOrEqual(Date.now());
+    });
+
+    test('should set task run to now if time that passed from last run is greater than new rrule', async () => {
+      // last run yesterday. With interval of '3d', runAt is in 2 days.
+      const yesterday = new Date(Date.now() - moment.duration(1, 'days').asMilliseconds());
+      const task = taskManagerMock.createTask({
+        id,
+        schedule: { interval: '3d' },
+        scheduledAt: yesterday,
+      });
+
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkUpdateSchedules([id], rruleScheduleExample24h);
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
+      expect(bulkUpdatePayload[0]).toHaveProperty('schedule', rruleScheduleExample24h);
+
+      // if time that passed from last task run is greater than new interval, task should be set to run at now time
+      expect(bulkUpdatePayload[0].runAt.getTime()).toBeLessThanOrEqual(
+        moment.duration(1, 'days').asMilliseconds()
+      );
     });
   });
 
@@ -857,7 +1013,7 @@ describe('TaskScheduling', () => {
         { validate: false }
       );
       expect(mockTaskStore.get).toHaveBeenCalledWith(id);
-      expect(result).toEqual({ id });
+      expect(result).toEqual({ id, forced: false });
     });
 
     test('runs failed tasks too', async () => {
@@ -880,7 +1036,7 @@ describe('TaskScheduling', () => {
         { validate: false }
       );
       expect(mockTaskStore.get).toHaveBeenCalledWith(id);
-      expect(result).toEqual({ id });
+      expect(result).toEqual({ id, forced: false });
     });
 
     test('rejects when the task update fails', async () => {
@@ -909,7 +1065,7 @@ describe('TaskScheduling', () => {
       mockTaskStore.update.mockRejectedValueOnce({ statusCode: 409 });
 
       const result = await taskScheduling.runSoon(id);
-      expect(result).toEqual({ id });
+      expect(result).toEqual({ id, forced: false });
       expect(taskSchedulingOpts.logger.debug).toHaveBeenCalledWith(
         'Failed to update the task (01ddff11-e88a-4d13-bc4e-256164e755e2) for runSoon due to conflict (409)'
       );
@@ -924,15 +1080,17 @@ describe('TaskScheduling', () => {
       );
       mockTaskStore.update.mockRejectedValueOnce(409);
 
-      const result = taskScheduling.runSoon(id);
-      await expect(result).rejects.toEqual(
-        Error(
+      try {
+        await taskScheduling.runSoon(id);
+      } catch (error) {
+        expect(error).toBeInstanceOf(TaskAlreadyRunningError);
+        expect(error.message).toBe(
           'Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" as it is currently running'
-        )
-      );
+        );
+      }
     });
 
-    test('rejects when the task is already running', async () => {
+    test('rejects with TaskAlreadyRunningError when the task status is "running" and force=false', async () => {
       const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
       const taskScheduling = new TaskScheduling(taskSchedulingOpts);
 
@@ -941,12 +1099,59 @@ describe('TaskScheduling', () => {
       );
       mockTaskStore.update.mockRejectedValueOnce(409);
 
-      const result = taskScheduling.runSoon(id);
-      await expect(result).rejects.toEqual(
-        Error(
+      try {
+        await taskScheduling.runSoon(id);
+      } catch (error) {
+        expect(error).toBeInstanceOf(TaskAlreadyRunningError);
+        expect(error.message).toBe(
           'Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" as it is currently running'
-        )
+        );
+      }
+    });
+
+    test('rejects with TaskAlreadyRunningError when the task status is "running" and force=true but the task is current in task pool', async () => {
+      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      mockTaskStore.get.mockResolvedValueOnce(
+        taskManagerMock.createTask({ id, status: TaskStatus.Running })
       );
+      mockTaskStore.update.mockRejectedValueOnce(409);
+      taskPollingLifecycle.getCurrentTasksInPool.mockReturnValueOnce([id]);
+
+      try {
+        await taskScheduling.runSoon(id, true);
+      } catch (error) {
+        expect(error).toBeInstanceOf(TaskAlreadyRunningError);
+        expect(error.message).toBe(
+          'Failed to run task "01ddff11-e88a-4d13-bc4e-256164e755e2" as it is currently running and cannot be forced'
+        );
+      }
+    });
+
+    test('updates task when the task status is "running" and force is true and task is not in task pool', async () => {
+      const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      mockTaskStore.get.mockResolvedValueOnce(
+        taskManagerMock.createTask({ id, status: TaskStatus.Running })
+      );
+      mockTaskStore.update.mockResolvedValueOnce(taskManagerMock.createTask({ id }));
+      taskPollingLifecycle.getCurrentTasksInPool.mockReturnValueOnce(['123']);
+
+      const result = await taskScheduling.runSoon(id, true);
+
+      expect(mockTaskStore.update).toHaveBeenCalledWith(
+        taskManagerMock.createTask({
+          id,
+          status: TaskStatus.Idle,
+          runAt: expect.any(Date),
+          scheduledAt: expect.any(Date),
+        }),
+        { validate: false }
+      );
+      expect(mockTaskStore.get).toHaveBeenCalledWith(id);
+      expect(result).toEqual({ id, forced: true });
     });
 
     test('rejects when the task status is Unrecognized', async () => {

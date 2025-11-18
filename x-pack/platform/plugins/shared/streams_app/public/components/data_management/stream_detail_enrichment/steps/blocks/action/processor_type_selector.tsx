@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import React from 'react';
-import type { EuiSuperSelectProps } from '@elastic/eui';
-import { EuiLink, EuiFormRow, EuiSuperSelect } from '@elastic/eui';
+import React, { useEffect, useMemo } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiLink, EuiFormRow, EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useController, useFormContext, useWatch } from 'react-hook-form';
@@ -21,6 +21,7 @@ import { configDrivenProcessors } from './config_driven';
 import { useGetStreamEnrichmentState } from '../../../state_management/stream_enrichment_state_machine';
 import { selectPreviewRecords } from '../../../state_management/simulation_state_machine/selectors';
 import { useStreamEnrichmentSelector } from '../../../state_management/stream_enrichment_state_machine';
+import { isStepUnderEdit } from '../../../state_management/steps_state_machine';
 
 interface TAvailableProcessor {
   type: ProcessorType;
@@ -30,9 +31,7 @@ interface TAvailableProcessor {
 
 type TAvailableProcessors = Record<ProcessorType, TAvailableProcessor>;
 
-export const ProcessorTypeSelector = ({
-  disabled = false,
-}: Pick<EuiSuperSelectProps, 'disabled'>) => {
+export const ProcessorTypeSelector = ({ disabled = false }: { disabled?: boolean }) => {
   const { core } = useKibana();
   const getEnrichmentState = useGetStreamEnrichmentState();
 
@@ -47,9 +46,32 @@ export const ProcessorTypeSelector = ({
     Streams.WiredStream.GetResponse.is(snapshot.context.definition)
   );
 
+  const isWithinWhereBlock = useStreamEnrichmentSelector((state) => {
+    const stepUnderEdit = state.context.stepRefs.find((stepRef) =>
+      isStepUnderEdit(stepRef.getSnapshot())
+    );
+    return stepUnderEdit ? stepUnderEdit.getSnapshot().context.step.parentId !== null : false;
+  });
+
   const grokCollection = useStreamEnrichmentSelector((state) => state.context.grokCollection);
 
-  const handleChange = (type: ProcessorType) => {
+  // To make it possible to clear the selection to enter a new value,
+  // keep track of local empty state. As soon as field.value is set, switch back to highlighting
+  // the selected option.
+  const [localEmpty, setLocalEmpty] = React.useState(false);
+
+  useEffect(() => {
+    if (field.value) {
+      setLocalEmpty(false);
+    }
+  }, [field.value]);
+
+  const handleChange = (selectedOptions: Array<EuiComboBoxOptionOption<ProcessorType>>) => {
+    if (selectedOptions.length === 0) {
+      setLocalEmpty(true);
+      return;
+    }
+    const type = selectedOptions[0].value!;
     const formState = getDefaultFormStateByType(
       type,
       selectPreviewRecords(getEnrichmentState().context.simulatorRef.getSnapshot().context),
@@ -58,7 +80,16 @@ export const ProcessorTypeSelector = ({
     reset(formState);
   };
 
-  const selectorOptions = React.useMemo(() => getProcessorTypeSelectorOptions(isWired), [isWired]);
+  const groupedOptions = useMemo(
+    () => getProcessorTypeSelectorOptions(isWired, isWithinWhereBlock),
+    [isWired, isWithinWhereBlock]
+  );
+
+  const selectedOptions = useMemo(() => {
+    const allOptions = groupedOptions.flatMap((group) => group.options);
+    const selected = allOptions.find((opt) => opt.value === field.value);
+    return selected ? [selected] : [];
+  }, [field.value, groupedOptions]);
 
   return (
     <EuiFormRow
@@ -67,16 +98,22 @@ export const ProcessorTypeSelector = ({
         'xpack.streams.streamDetailView.managementTab.enrichment.processor.typeSelectorLabel',
         { defaultMessage: 'Processor' }
       )}
-      helpText={getProcessorDescription(core.docLinks, isWired)(processorType)}
+      helpText={getProcessorDescription(core.docLinks, isWired, isWithinWhereBlock)(processorType)}
     >
-      <EuiSuperSelect
+      <EuiComboBox
         data-test-subj="streamsAppProcessorTypeSelector"
-        disabled={disabled}
-        options={selectorOptions}
+        aria-label={i18n.translate(
+          'xpack.streams.streamDetailView.managementTab.enrichment.processor.typeSelectorLabel',
+          { defaultMessage: 'Processor' }
+        )}
+        isDisabled={disabled}
+        options={groupedOptions}
         isInvalid={fieldState.invalid}
-        valueOfSelected={field.value}
+        selectedOptions={localEmpty ? [] : selectedOptions}
         onChange={handleChange}
         fullWidth
+        singleSelection={{ asPlainText: true }}
+        compressed={true}
         placeholder={i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.typeSelectorPlaceholder',
           { defaultMessage: 'Grok, Dissect ...' }
@@ -86,7 +123,10 @@ export const ProcessorTypeSelector = ({
   );
 };
 
-const getAvailableProcessors: (isWired: boolean) => Partial<TAvailableProcessors> = (isWired) => ({
+const getAvailableProcessors: (
+  isWired: boolean,
+  isWithinWhereBlock?: boolean
+) => Partial<TAvailableProcessors> = (isWired, isWithinWhereBlock = false) => ({
   date: {
     type: 'date',
     inputDisplay: 'Date',
@@ -145,6 +185,37 @@ const getAvailableProcessors: (isWired: boolean) => Partial<TAvailableProcessors
       />
     ),
   },
+  convert: {
+    type: 'convert' as const,
+    inputDisplay: i18n.translate(
+      'xpack.streams.streamDetailView.managementTab.enrichment.processor.convertInputDisplay',
+      {
+        defaultMessage: 'Convert',
+      }
+    ),
+    getDocUrl: (docLinks: DocLinksStart) => {
+      return (
+        <FormattedMessage
+          id="xpack.streams.streamDetailView.managementTab.enrichment.processor.setHelpText"
+          defaultMessage="{convertLink}. For example, you can convert a string to an long."
+          values={{
+            convertLink: (
+              <EuiLink
+                data-test-subj="streamsAppAvailableProcessorsConvertLink"
+                external
+                target="_blank"
+                href={docLinks.links.ingest.convert}
+              >
+                {i18n.translate('xpack.streams.availableProcessors.setLinkLabel', {
+                  defaultMessage: 'Converts a field to a different data type',
+                })}
+              </EuiLink>
+            ),
+          }}
+        />
+      );
+    },
+  },
   set: {
     type: 'set' as const,
     inputDisplay: i18n.translate(
@@ -191,15 +262,118 @@ const getAvailableProcessors: (isWired: boolean) => Partial<TAvailableProcessors
           ),
         },
       }),
+  // Remove remove_by_prefix from available processors when inside a where block
+  ...(isWithinWhereBlock
+    ? {
+        remove_by_prefix: undefined,
+      }
+    : {}),
 });
 
+const PROCESSOR_GROUP_MAP: Record<
+  ProcessorType,
+  'removeField' | 'extract' | 'convert' | 'set' | 'other'
+> = {
+  remove: 'removeField',
+  remove_by_prefix: 'removeField',
+  grok: 'extract',
+  dissect: 'extract',
+  convert: 'convert',
+  date: 'convert',
+  append: 'set',
+  set: 'set',
+  rename: 'set',
+  drop_document: 'other',
+  manual_ingest_pipeline: 'other',
+};
+
 const getProcessorDescription =
-  (docLinks: DocLinksStart, isWired: boolean) => (type: ProcessorType) => {
-    return getAvailableProcessors(isWired)[type]?.getDocUrl(docLinks);
+  (docLinks: DocLinksStart, isWired: boolean, isWithinWhereBlock?: boolean) =>
+  (type: ProcessorType) => {
+    return getAvailableProcessors(isWired, isWithinWhereBlock)[type]?.getDocUrl(docLinks);
   };
 
-const getProcessorTypeSelectorOptions = (isWired: boolean) =>
-  Object.values(getAvailableProcessors(isWired)).map(({ type, inputDisplay }) => ({
-    value: type,
-    inputDisplay,
-  }));
+const getProcessorTypeSelectorOptions = (
+  isWired: boolean,
+  isWithinWhereBlock?: boolean
+): Array<{
+  label: string;
+  options: Array<EuiComboBoxOptionOption<ProcessorType>>;
+}> => {
+  const availableProcessors = getAvailableProcessors(isWired, isWithinWhereBlock);
+
+  // Define processor groups
+  const groups = {
+    removeField: [] as Array<EuiComboBoxOptionOption<ProcessorType>>,
+    extract: [] as Array<EuiComboBoxOptionOption<ProcessorType>>,
+    convert: [] as Array<EuiComboBoxOptionOption<ProcessorType>>,
+    set: [] as Array<EuiComboBoxOptionOption<ProcessorType>>,
+    other: [] as Array<EuiComboBoxOptionOption<ProcessorType>>,
+  };
+
+  // Categorize processors into groups using lookup map
+  Object.values(availableProcessors)
+    .filter((processor) => processor !== undefined)
+    .forEach(({ type, inputDisplay }) => {
+      const option = { label: inputDisplay, value: type };
+      const groupKey = PROCESSOR_GROUP_MAP[type] || 'other';
+      groups[groupKey].push(option);
+    });
+
+  const result: Array<{
+    label: string;
+    options: Array<EuiComboBoxOptionOption<ProcessorType>>;
+  }> = [];
+
+  if (groups.removeField.length > 0) {
+    result.push({
+      label: i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.removeFieldGroup',
+        { defaultMessage: 'Remove field' }
+      ),
+      options: groups.removeField,
+    });
+  }
+
+  if (groups.extract.length > 0) {
+    result.push({
+      label: i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.extractGroup',
+        { defaultMessage: 'Extract' }
+      ),
+      options: groups.extract,
+    });
+  }
+
+  if (groups.convert.length > 0) {
+    result.push({
+      label: i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.convertGroup',
+        { defaultMessage: 'Convert' }
+      ),
+      options: groups.convert,
+    });
+  }
+
+  if (groups.set.length > 0) {
+    result.push({
+      label: i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.setGroup',
+        { defaultMessage: 'Set' }
+      ),
+      options: groups.set,
+    });
+  }
+
+  if (groups.other.length > 0) {
+    result.push({
+      label: i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processor.otherGroup',
+        { defaultMessage: 'Other' }
+      ),
+      options: groups.other,
+    });
+  }
+
+  return result;
+};

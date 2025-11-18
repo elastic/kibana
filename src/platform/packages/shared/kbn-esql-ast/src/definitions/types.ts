@@ -38,6 +38,9 @@ export const fieldTypes: readonly string[] = [
   'function_named_parameters',
   'aggregate_metric_double',
   'dense_vector',
+  'histogram',
+  'exponential_histogram',
+  'tdigest',
 ] as const;
 
 export type FieldType = (typeof fieldTypes)[number];
@@ -71,6 +74,9 @@ export const userDefinedTypes = [
   'time_duration',
   'date_period',
   'param', // Defines a named param such as ?value or ??field
+  'histogram',
+  'exponential_histogram',
+  'tdigest',
 ] as const;
 
 /**
@@ -183,6 +189,11 @@ export interface FunctionParameter {
   suggestedValues?: string[];
 
   mapParams?: string;
+
+  /** If true, this parameter supports multiple values (arrays). Default is false.
+   * This indicates that the parameter can accept multiple values, which will be passed as an array.
+   */
+  supportsMultiValues?: boolean;
 }
 
 export interface ElasticsearchCommandDefinition {
@@ -288,6 +299,10 @@ export interface ValidationErrors {
     message: string;
     type: { name: string };
   };
+  unknownSetting: {
+    message: string;
+    type: { name: string };
+  };
   functionNotAllowedHere: {
     message: string;
     type: { name: string; locationName: string };
@@ -387,6 +402,18 @@ export interface ValidationErrors {
     type: {};
   };
   forkTooFewBranches: {
+    message: string;
+    type: {};
+  };
+  forkNotAllowedWithSubqueries: {
+    message: string;
+    type: {};
+  };
+  inlineStatsNotAllowedAfterLimit: {
+    message: string;
+    type: {};
+  };
+  joinOnSingleExpression: {
     message: string;
     type: {};
   };

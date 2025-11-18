@@ -140,8 +140,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: [apiUrl]: expected value of type [string] but got [undefined]',
+              message: `error validating connector type config: Field \"apiUrl\": Required`,
             });
           });
       });
@@ -165,7 +164,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: Error configuring Amazon Bedrock action: Error: error validating url: target url "http://bedrock.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating connector type config: Error configuring Amazon Bedrock action: Error: error validating url: target url "http://bedrock.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -184,8 +183,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type secrets: [accessKey]: expected value of type [string] but got [undefined]',
+              message: `error validating connector type secrets: 2 errors:\n [1]: Field \"accessKey\": Required;\n [2]: Field \"secret\": Required`,
             });
           });
       });
@@ -206,8 +204,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type secrets: [accessKey]: expected value of type [string] but got [undefined]',
+              message: `error validating connector type secrets: Field \"accessKey\": Required`,
             });
           });
       });
@@ -228,8 +225,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type secrets: [secret]: expected value of type [string] but got [undefined]',
+              message: `error validating connector type secrets: Field \"secret\": Required`,
             });
           });
       });
@@ -265,8 +261,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
           expect(body).to.eql({
             status: 'error',
             connector_id: bedrockActionId,
-            message:
-              'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
+            message: `error validating action params: Field \"subAction\": Required`,
             retry: false,
             errorSource: TaskErrorSource.USER,
           });
@@ -628,8 +623,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             status: 'error',
             connector_id: bedrockActionId,
             errorSource: TaskErrorSource.USER,
-            message:
-              'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
+            message: `error validating action params: Field \"subAction\": Required`,
             retry: false,
           });
         });

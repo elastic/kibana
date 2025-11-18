@@ -60,7 +60,7 @@ describe('useUnifiedHistogram', () => {
     });
     expect(hook.result.current.api).toBeDefined();
     expect(hook.result.current.chartProps?.chart?.timeInterval).toBe('42s');
-    expect(hook.result.current.chartProps?.esqlVariables).toEqual([
+    expect(hook.result.current.chartProps?.requestParams.esqlVariables).toEqual([
       {
         key: 'agent_keyword',
         value: 'Mozilla/5.0 (X11; Linux x86_64; rv:6.0a1) Gecko/20110421 Firefox/6.0a1',

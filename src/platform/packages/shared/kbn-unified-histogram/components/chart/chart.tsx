@@ -29,7 +29,7 @@ import type { TimeRange } from '@kbn/es-query';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { ControlPanelsState } from '@kbn/controls-plugin/public';
-import type { ESQLControlState, ESQLControlVariable } from '@kbn/esql-types';
+import type { ESQLControlState } from '@kbn/esql-types';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
 import { Histogram } from './histogram';
@@ -72,6 +72,7 @@ export interface UnifiedHistogramChartProps {
   isPlainRecord?: boolean;
   lensVisService: LensVisService;
   relativeTimeRange?: TimeRange;
+  lastReloadRequestTime?: number;
   request?: UnifiedHistogramRequestContext;
   hits?: UnifiedHistogramHitsContext;
   chart?: UnifiedHistogramChartContext;
@@ -92,7 +93,6 @@ export interface UnifiedHistogramChartProps {
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
   columns?: DatatableColumn[];
-  esqlVariables?: ESQLControlVariable[];
   controlsState?: ControlPanelsState<ESQLControlState>;
 }
 
@@ -105,6 +105,7 @@ export function UnifiedHistogramChart({
   dataView,
   requestParams,
   relativeTimeRange: originalRelativeTimeRange,
+  lastReloadRequestTime,
   request,
   hits,
   chart,
@@ -146,7 +147,8 @@ export function UnifiedHistogramChart({
     [originalInput$]
   );
 
-  const { filters, query, getTimeRange, updateTimeRange, relativeTimeRange } = requestParams;
+  const { filters, query, esqlVariables, getTimeRange, updateTimeRange, relativeTimeRange } =
+    requestParams;
 
   const fetch$ = useFetch({
     input$,
@@ -221,7 +223,9 @@ export function UnifiedHistogramChart({
     getTimeRange,
     fetch$,
     visContext,
+    esqlVariables,
     onLoad,
+    lastReloadRequestTime,
   });
 
   const { chartToolbarCss, histogramCss } = useChartStyles(chartVisible);
@@ -251,8 +255,8 @@ export function UnifiedHistogramChart({
     isPlainRecord,
   });
 
-  const toolbarLeftSide = useMemo(
-    () => [
+  const toolbarToggleActions = useMemo(
+    () =>
       renderCustomChartToggleActions ? (
         renderCustomChartToggleActions()
       ) : (
@@ -277,6 +281,12 @@ export function UnifiedHistogramChart({
           ]}
         />
       ),
+    [chartVisible, toggleHideChart, renderCustomChartToggleActions]
+  );
+
+  const toolbarSelectors = useMemo(
+    () => [
+      ,
       chartVisible && !isPlainRecord && !!onTimeIntervalChange ? (
         <TimeIntervalSelector chart={chart} onTimeIntervalChange={onTimeIntervalChange} />
       ) : null,
@@ -292,9 +302,7 @@ export function UnifiedHistogramChart({
       </div>,
     ],
     [
-      renderCustomChartToggleActions,
       chartVisible,
-      toggleHideChart,
       isPlainRecord,
       onTimeIntervalChange,
       chart,
@@ -371,7 +379,8 @@ export function UnifiedHistogramChart({
         {...a11yCommonProps}
         toolbarCss={chartToolbarCss}
         toolbar={{
-          leftSide: toolbarLeftSide,
+          toggleActions: toolbarToggleActions,
+          leftSide: toolbarSelectors,
           rightSide: chartVisible ? actions : [],
         }}
       >

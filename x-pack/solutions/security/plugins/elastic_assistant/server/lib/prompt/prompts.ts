@@ -23,22 +23,26 @@ export const GEMINI_USER_PROMPT = `Now, always using the tools at your disposal,
 export const ATTACK_DISCOVERY_DEFAULT = `
 As a world-class cyber security analyst, your task is to analyze a set of security events and accurately identify distinct, comprehensive attack chains. Your analysis should reflect the sophistication of modern cyber attacks, which often span multiple hosts and use diverse techniques.
 Key Principles:
-1. Contextual & Host Analysis: Analyze how attacks may span systems while maintaining focus on specific, traceable relationships across events and timeframes.
-2. Independent Evaluation: Do not assume all events belong to a single attack chain. Separate events into distinct chains when evidence indicates they are unrelated.
+1. "Attack Chain" Definition: For this task, we define an "Attack Chain" as 2 or more alerts that demonstrate a progression of a real or simulated (red team) adversary. Attack chains must consist of alerts from more than one rule. A single alert, or multiple alerts of the same rule or behavior, should never generate an attack chain.
+2. False Positives: Most alerts are false positives, even if they look alarming or anomalous at first glance. Exclude alerts or attacks that are likely false positives. For example, legitimate enterprise management tools (SCCM/CCM, Group Policy, etc.) often trigger security alerts during normal operations. Also, Security software (especially DLP), Digital Rights Management packers/protectors, and video game anti-cheats often leverage evasive techniques that may look like malware.
+3. Contextual & Host Analysis: Analyze how attacks may span systems while maintaining focus on specific, traceable relationships across events and timeframes.
+4. Independent Evaluation: Do not assume all events belong to a single attack chain. Separate events into distinct chains when evidence indicates they are unrelated.
 Be mindful that data exfiltration might indicate the culmination of an attack chain, and should typically be linked with the preceding events unless strong evidence points otherwise.
-3. Lateral Movement & Command Structure: For multi-system events, identify potential lateral movement, command-and-control activities, and coordination patterns.
-4. Impact Assessment: Consider high-impact events (e.g., data exfiltration, ransomware, system disruption) as potential stages within the attack chain, but avoid splitting attack chains unless there is clear justification. High-impact events may not mark the end of the attack sequence, so remain open to the possibility of ongoing activities after such events.
+5. Lateral Movement & Command Structure: For multi-system events, identify potential lateral movement, command-and-control activities, and coordination patterns.
+6. Impact Assessment: Consider high-impact events (e.g., data exfiltration, ransomware, system disruption) as potential stages within the attack chain, but avoid splitting attack chains unless there is clear justification. High-impact events may not mark the end of the attack sequence, so remain open to the possibility of ongoing activities after such events.
 Analysis Process:
 1. Detail Review: Examine all timestamps, hostnames, usernames, IPs, filenames, and processes across events.
 2. Timeline Construction: Create a chronological map of events across all systems to identify timing patterns and system interactions.  When correlating alerts, use kibana.alert.original_time when it's available, as this represents the actual time the event was detected. If kibana.alert.original_time is not available, use @timestamp as the fallback. Ensure events that appear to be part of the same attack chain are properly aligned chronologically.
-3. Indicator Correlation: Identify relationships between events using concrete indicators (file hashes, IPs, C2 signals).
+3. Indicator Correlation: Identify relationships between events using concrete indicators (file hashes, IPs, C2 signals, process trees). Do not group alerts solely because they occur on the same host in a short timeframe. They must demonstrate a direct correlation. For example, a malware alert triggers on one process, then a child of this process accesses credentials.
 4. Chain Construction & Validation: Begin by assuming potential connections, then critically evaluate whether events should be separated based on evidence.
 5. TTP Analysis: Identify relevant MITRE ATT&CK tactics for each event, using consistency of TTPs as supporting (not determining) evidence.
 6. Alert Prioritization: Weight your analysis based on alert severity:
    - HIGH severity: Primary indicators of attack chains
    - MEDIUM severity: Supporting evidence
    - LOW severity: Supplementary information unless providing critical links
+
 Output Requirements:
+- Think through the problem step by step. Show your reasoning before the json output section. This is the only output that is allowed outside of the defined json schema.
 - Provide a narrative summary for each identified attack chain
 - Explain connections between events with concrete evidence
 - Use the special {{ field.name fieldValue }} syntax to reference source data fields. IMPORTANT - LIMIT the details markdown to 2750 characters and summary to 200 characters! This is to prevent hitting output context limits.`;
@@ -52,10 +56,13 @@ Review the JSON output from your initial analysis. Your task is to refine the at
    - Explain the specific evidence connecting events (particularly across hosts)
    - Reference relevant MITRE ATT&CK techniques that support your grouping
    - Ensure your narrative follows the chronological progression of the attack
+4. Remove Attack Chains that are likely false positives. Most alerts are false positives, even if they look alarming or anomalous at first glance. Only alert on attacks if you are confident they are a real attack, or demonstrate an attack simulation or red team. For example, legitimate enterprise management tools (SCCM/CCM, Group Policy, etc.) often trigger security alerts during normal operations. Also, Security software (especially DLP), Digital Rights Management packers/protectors, and video game anti-cheats often leverage evasive techniques that may look like malware.
+5. Remove low quality Attack Chains. Attack Chains must demonstrate an attacker progression. Attacks must consist of alerts from more than one rule. A single alert, or multiple alerts of the same rule or behavior, should never generate an attack chain. Include rule names in your reasoning to ensure you follow this requirement.
+
 Output requirements:
+- Think through the problem step by step. Show your reasoning before the JSON output section.
 - Return your refined analysis using the exact same JSON format as your initial output, applying the same field syntax requirements.
 - Conform exactly to the JSON schema defined earlier
-- Do not include explanatory text outside the JSON
 `;
 
 export const ATTACK_DISCOVERY_CONTINUE = `
@@ -180,6 +187,32 @@ export const ALERT_SUMMARY_SYSTEM_PROMPT =
   '\n' +
   'The response should look like this:\n' +
   '{{"summary":"Markdown-formatted summary text.","recommendedActions":"Markdown-formatted action list starting with a ### header."}}';
+
+export const ENTITY_DETAILS_HIGHLIGHTS_PROMPT = `Generate markdown text with most important information for entity so a Security analyst can act. Your response should take all the important elements of the entity into consideration. Limit your response to 500 characters. Only reply with the required sections, and nothing else.
+  ### Format  
+  Return a string with markdown text without any explanations, or variable assignments. Do **not** wrap the output in triple backticks. 
+    The result must be a list of bullet points, nothing more.
+    Generate summaries for the following sections, but omit any section that if the information isn't available in the context:
+      - Risk score: Summarize the entity's risk score and the main factors contributing to it.
+      - Criticality: Note the entity's criticality level and its impact on the risk score.
+      - Vulnerabilities: Summarize any significant Vulnerability and briefly explain why it is significant.
+      - Anomalies: Summarize unusual activities or anomalies detected for the entity and briefly explain why it is significant.  
+    The generated data **MUST** follow this pattern:
+  """- **{title1}**: {description1}
+  - **{title2}**: {description2}
+  ...
+  - **{titleN}**: {descriptionN}
+  
+  **Recommended action**: {description}"""
+  
+    **Strict rules**:
+      _ Only reply with the required sections, and nothing else.
+      - Limit your total response to 500 characters.
+      - Never return an section which there is no data available in the context.
+      - Use inline code (backticks) for technical values like file paths, process names, arguments, etc.
+      - Recommended action title should be bold and text should be inline.    
+      - **Do not** include any extra explanation, reasoning or text.
+    `;
 
 export const RULE_ANALYSIS =
   'Please provide a comprehensive analysis of each selected Elastic Security detection rule, and consider using applicable tools for each part of the below request. Make sure you consider using appropriate tools available to you to fulfill this request. For each rule, include:\n' +

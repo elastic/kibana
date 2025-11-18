@@ -8,4 +8,4 @@
  */
 
 // BOOKMARK - List of Kibana project types - TODO unify with the definitions under @kbn/projects-solutions-groups
-export type ProjectType = 'observability' | 'security' | 'search' | 'workplace_ai';
+export type ProjectType = 'observability' | 'security' | 'search' | 'workplaceai';

@@ -9,7 +9,7 @@ import { waitFor, renderHook } from '@testing-library/react';
 import type { UseSetupKnowledgeBaseParams } from './use_setup_knowledge_base';
 import { useSetupKnowledgeBase } from './use_setup_knowledge_base';
 import { postKnowledgeBase as _postKnowledgeBase } from './api';
-import { useMutation as _useMutation } from '@tanstack/react-query';
+import { useMutation as _useMutation } from '@kbn/react-query';
 import { API_VERSIONS } from '@kbn/elastic-assistant-common';
 
 const postKnowledgeBaseMock = _postKnowledgeBase as jest.Mock;
@@ -24,7 +24,7 @@ jest.mock('./api', () => {
 jest.mock('./use_knowledge_base_status');
 jest.mock('./entries/use_knowledge_base_entries');
 
-jest.mock('@tanstack/react-query', () => ({
+jest.mock('@kbn/react-query', () => ({
   useMutation: jest.fn().mockImplementation(async (queryKey, fn, opts) => {
     try {
       const res = await fn();
