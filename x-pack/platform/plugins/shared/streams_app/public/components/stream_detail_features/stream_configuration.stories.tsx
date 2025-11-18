@@ -26,7 +26,7 @@ export const StreamConfigurationStory: StoryFn<{}> = () => {
         ingest: {
           settings: {},
           lifecycle: { inherit: {} },
-          processing: { steps: [] },
+          processing: { steps: [], updated_at: new Date().toISOString() },
           classic: {},
           failure_store: { inherit: {} },
         },

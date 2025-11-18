@@ -36,7 +36,7 @@ describe('EditLifecycleModal', () => {
         updated_at: new Date().toISOString(),
         ingest: {
           lifecycle: ingestLifecycle,
-          processing: { steps: [] },
+          processing: { steps: [], updated_at: new Date().toISOString() },
           settings: {},
           wired: { fields: {}, routing: [] },
           failure_store: { inherit: {} },

@@ -16,7 +16,12 @@ import type {
 import type { IScopedClusterClient, Logger, KibanaRequest } from '@kbn/core/server';
 import { isNotFoundError } from '@kbn/es-errors';
 import type { RoutingStatus } from '@kbn/streams-schema';
-import { Streams, getAncestors, getParentId } from '@kbn/streams-schema';
+import {
+  Streams,
+  convertUpsertRequestIntoDefinition,
+  getAncestors,
+  getParentId,
+} from '@kbn/streams-schema';
 import type { LockManagerService } from '@kbn/lock-manager';
 import type { Condition } from '@kbn/streamlang';
 import type { AssetClient } from './assets/asset_client';
@@ -27,7 +32,7 @@ import {
 } from './errors/definition_not_found_error';
 import { SecurityError } from './errors/security_error';
 import { StatusError } from './errors/status_error';
-import { LOGS_ROOT_STREAM_NAME, rootStreamDefinition } from './root_stream_definition';
+import { LOGS_ROOT_STREAM_NAME, createRootStreamDefinition } from './root_stream_definition';
 import type { StreamsStorageClient } from './storage/streams_storage_client';
 import { State } from './state_management/state';
 import { checkAccess, checkAccessBulk } from './stream_crud';
@@ -144,7 +149,7 @@ export class StreamsClient {
         [
           {
             type: 'upsert',
-            definition: { ...rootStreamDefinition, updated_at: new Date().toISOString() },
+            definition: createRootStreamDefinition(),
           },
         ],
         {
@@ -201,7 +206,7 @@ export class StreamsClient {
         [
           {
             type: 'delete' as const,
-            name: rootStreamDefinition.name,
+            name: LOGS_ROOT_STREAM_NAME,
           },
         ].concat(
           groupStreams.map((stream) => ({
@@ -260,11 +265,7 @@ export class StreamsClient {
     name: string;
     request: Streams.all.UpsertRequest;
   }): Promise<UpsertStreamResponse> {
-    const stream: Streams.all.Definition = {
-      ...request.stream,
-      name,
-      updated_at: new Date().toISOString(),
-    };
+    const stream = convertUpsertRequestIntoDefinition(name, request);
 
     const result = await State.attemptChanges(
       [
@@ -291,11 +292,7 @@ export class StreamsClient {
     const result = await State.attemptChanges(
       streams.map(({ name, request }) => ({
         type: 'upsert',
-        definition: {
-          ...request.stream,
-          name,
-          updated_at: new Date().toISOString(),
-        },
+        definition: convertUpsertRequestIntoDefinition(name, request),
       })),
       {
         ...this.dependencies,
@@ -361,7 +358,7 @@ export class StreamsClient {
             updated_at: new Date().toISOString(),
             ingest: {
               lifecycle: { inherit: {} },
-              processing: { steps: [] },
+              processing: { steps: [], updated_at: new Date().toISOString() },
               settings: {},
               wired: {
                 fields: {},
@@ -595,7 +592,7 @@ export class StreamsClient {
       updated_at: new Date().toISOString(),
       ingest: {
         lifecycle: { inherit: {} },
-        processing: { steps: [] },
+        processing: { steps: [], updated_at: new Date().toISOString() },
         settings: {},
         classic: {},
         failure_store: { inherit: {} },
@@ -682,7 +679,7 @@ export class StreamsClient {
       updated_at: new Date().toISOString(),
       ingest: {
         lifecycle: { inherit: {} },
-        processing: { steps: [] },
+        processing: { steps: [], updated_at: new Date().toISOString() },
         settings: {},
         classic: {},
         failure_store: { inherit: {} },

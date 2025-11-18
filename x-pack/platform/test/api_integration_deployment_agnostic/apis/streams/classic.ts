@@ -58,7 +58,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ingest: {
             lifecycle: { inherit: {} },
             settings: {},
-            processing: { steps: [] },
+            processing: {
+              steps: [],
+              updated_at: (classicStream as Streams.ClassicStream.Definition).ingest.processing
+                .updated_at,
+            },
             classic: {},
             failure_store: { inherit: {} },
           },
@@ -140,6 +144,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                   where: { always: {} },
                 },
               ],
+              updated_at: stream.ingest.processing.updated_at,
             },
             classic: {},
             failure_store: { inherit: {} },

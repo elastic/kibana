@@ -68,6 +68,7 @@ const migratedProcessing = {
       },
     },
   ],
+  updated_at: new Date(0).toISOString(),
 };
 
 // Do not update these if tests are failing - this is testing whether they get migrated correctly - you should

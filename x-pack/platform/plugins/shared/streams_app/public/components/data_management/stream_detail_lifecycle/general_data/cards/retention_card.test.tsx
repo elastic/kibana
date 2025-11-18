@@ -78,7 +78,7 @@ describe('RetentionCard', () => {
           updated_at: new Date().toISOString(),
           ingest: {
             lifecycle: { inherit: {} }, // child is inheriting -> should show "Inherit from parent"
-            processing: { steps: [] },
+            processing: { steps: [], updated_at: new Date().toISOString() },
             settings: {},
             wired: { fields: {}, routing: [] },
             failure_store: { inherit: {} },
@@ -122,7 +122,7 @@ describe('RetentionCard', () => {
           updated_at: new Date().toISOString(),
           ingest: {
             lifecycle: { ilm: { policy: 'test-policy' } }, // override -> should show "Override parent"
-            processing: { steps: [] },
+            processing: { steps: [], updated_at: new Date().toISOString() },
             settings: {},
             wired: { fields: {}, routing: [] },
             failure_store: { inherit: {} },

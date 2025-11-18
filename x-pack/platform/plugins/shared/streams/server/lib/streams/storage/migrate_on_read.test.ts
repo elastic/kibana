@@ -39,7 +39,7 @@ function createCompleteWiredStreamDefinition(overrides: any = {}) {
     updated_at: new Date().toISOString(),
     ingest: {
       lifecycle: { dsl: {} },
-      processing: { steps: [] },
+      processing: { steps: [], updated_at: new Date().toISOString() },
       settings: {},
       wired: {
         fields: {},
@@ -58,7 +58,7 @@ function createCompleteClassicStreamDefinition(overrides: any = {}) {
     updated_at: new Date().toISOString(),
     ingest: {
       lifecycle: { dsl: {} },
-      processing: { steps: [] },
+      processing: { steps: [], updated_at: new Date().toISOString() },
       settings: {},
       classic: {
         fieldOverrides: [],
@@ -414,6 +414,58 @@ describe('migrateOnRead', () => {
 
         const result = migrateOnRead(definition);
         expect(result.updated_at).toEqual(existingUpdatedAt);
+        expect(mockStreamsAsserts).not.toHaveBeenCalled();
+      });
+    });
+  });
+
+  describe('ingest.processing.updated_at migration', () => {
+    describe('Should add updated_at if missing', () => {
+      it('for wired stream', () => {
+        const definition = createCompleteWiredStreamDefinition() as any;
+        delete definition.ingest?.processing?.updated_at;
+
+        const result = migrateOnRead(definition) as Streams.WiredStream.Definition;
+        expect(result.ingest.processing.updated_at).toEqual(new Date(0).toISOString());
+        expect(mockStreamsAsserts).toHaveBeenCalled();
+      });
+
+      it('for classic stream', () => {
+        const definition = createCompleteClassicStreamDefinition() as any;
+        delete definition.ingest?.processing?.updated_at;
+
+        const result = migrateOnRead(definition) as Streams.ClassicStream.Definition;
+        expect(result.ingest.processing.updated_at).toEqual(new Date(0).toISOString());
+        expect(mockStreamsAsserts).toHaveBeenCalled();
+      });
+    });
+
+    describe('Should not touch updated_at if present', () => {
+      it('for wired stream', () => {
+        const definition = createCompleteWiredStreamDefinition();
+        const existingUpdatedAt = definition.ingest.processing.updated_at;
+
+        const result = migrateOnRead(definition) as Streams.WiredStream.Definition;
+        expect(result.ingest.processing.updated_at).toEqual(existingUpdatedAt);
+        expect(mockStreamsAsserts).not.toHaveBeenCalled();
+      });
+
+      it('for classic stream', () => {
+        const definition = createCompleteClassicStreamDefinition();
+        const existingUpdatedAt = definition.ingest.processing.updated_at;
+
+        const result = migrateOnRead(definition) as Streams.ClassicStream.Definition;
+        expect(result.ingest.processing.updated_at).toEqual(existingUpdatedAt);
+        expect(mockStreamsAsserts).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('Should not modify non-ingest streams', () => {
+      it('for group stream', () => {
+        const definition = createCompleteGroupStreamDefinition();
+
+        const result = migrateOnRead(definition);
+        expect((result as any).ingest).toBeUndefined();
         expect(mockStreamsAsserts).not.toHaveBeenCalled();
       });
     });

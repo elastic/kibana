@@ -80,6 +80,7 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
             lifecycle: { inherit: {} },
             settings: {},
             processing: {
+              updated_at: new Date().toISOString(),
               steps: [
                 // Set up some failed documents
                 {

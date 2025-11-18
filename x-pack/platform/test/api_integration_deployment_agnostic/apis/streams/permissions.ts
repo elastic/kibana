@@ -78,6 +78,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('cannot change lifecycle as an editor', async () => {
+      // TODO: @AlexFernandez update once ingest upsert is fixed
       const response = await editorApiClient
         .fetch('PUT /api/streams/{name}/_ingest 2023-10-31', {
           params: {
@@ -89,7 +90,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                     data_retention: '5d',
                   },
                 },
-                processing: { steps: [] },
+                processing: { steps: [], updated_at: new Date().toISOString() },
                 settings: {},
                 wired: {
                   fields: {},

@@ -14,7 +14,7 @@ describe('generateLayer', () => {
     description: '',
     updated_at: new Date().toISOString(),
     ingest: {
-      processing: { steps: [] },
+      processing: { steps: [], updated_at: new Date().toISOString() },
       wired: {
         routing: [],
         fields: {

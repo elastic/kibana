@@ -611,7 +611,7 @@ export const buildUpsertStreamRequestPayload = (
   steps: StreamlangStepWithUIAttributes[],
   fields?: FieldDefinition
 ): { ingest: Streams.ingest.all.GetResponse['stream']['ingest'] } => {
-  const processing = convertUIStepsToDSL(steps);
+  const processing = { ...convertUIStepsToDSL(steps), updated_at: new Date().toISOString() };
 
   return Streams.WiredStream.GetResponse.is(definition)
     ? {

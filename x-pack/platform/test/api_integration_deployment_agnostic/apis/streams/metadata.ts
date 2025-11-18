@@ -145,5 +145,107 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(updatedParent.stream.updated_at).to.not.equal(oldParentUpdatedAt);
       });
     });
+
+    describe('ingest.processing.updated_at', () => {
+      it('should set an ingest.processing.updated_at timestamp for a new stream', async () => {
+        const body: Streams.WiredStream.UpsertRequest = {
+          ...emptyAssets,
+          stream: {
+            description: 'This is a test stream',
+            ingest: {
+              lifecycle: { inherit: {} },
+              processing: { steps: [] },
+              settings: {},
+              wired: {
+                fields: {},
+                routing: [],
+              },
+            },
+          },
+        };
+        await putStream(apiClient, 'logs.ingest.processing.updated_at', body, 200);
+
+        const response = (await getStream(
+          apiClient,
+          'logs.ingest.processing.updated_at'
+        )) as Streams.WiredStream.GetResponse;
+
+        expect(response.stream.ingest.processing).to.have.property('updated_at');
+      });
+    });
+
+    it('should not update the timestamp for existing streams when processing does not change', async () => {
+      const oldStream = (await getStream(
+        apiClient,
+        'logs.ingest.processing.updated_at'
+      )) as Streams.WiredStream.GetResponse;
+      const oldUpdatedAt = oldStream.stream.ingest.processing.updated_at;
+
+      const body: Streams.WiredStream.UpsertRequest = {
+        ...emptyAssets,
+        stream: {
+          description: 'This is a test stream',
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: { steps: [] },
+            settings: {},
+            wired: {
+              fields: {},
+              routing: [],
+            },
+          },
+        },
+      };
+      await putStream(apiClient, 'logs.ingest.processing.updated_at', body, 200);
+
+      const response = (await getStream(
+        apiClient,
+        'logs.ingest.processing.updated_at'
+      )) as Streams.WiredStream.GetResponse;
+
+      expect(response.stream.ingest.processing).to.have.property('updated_at');
+      expect(response.stream.ingest.processing).to.equal(oldUpdatedAt);
+    });
+
+    it('should update the timestamp for existing streams when processing does change', async () => {
+      const oldStream = (await getStream(
+        apiClient,
+        'logs.ingest.processing.updated_at'
+      )) as Streams.WiredStream.GetResponse;
+      const oldUpdatedAt = oldStream.stream.ingest.processing.updated_at;
+
+      const body: Streams.WiredStream.UpsertRequest = {
+        ...emptyAssets,
+        stream: {
+          description: 'This is a test stream',
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: {
+              steps: [
+                {
+                  action: 'set',
+                  to: 'attributes.test',
+                  value: 'test',
+                },
+              ],
+            },
+            settings: {},
+            wired: {
+              fields: {},
+              routing: [],
+            },
+          },
+        },
+      };
+      await putStream(apiClient, 'logs.ingest.processing.updated_at', body, 200);
+
+      const response = (await getStream(
+        apiClient,
+        'logs.ingest.processing.updated_at'
+      )) as Streams.WiredStream.GetResponse;
+
+      expect(response.stream.ingest.processing).to.have.property('updated_at');
+      expect(response.stream.ingest.processing).to.equal(oldUpdatedAt);
+    });
   });
 }

@@ -57,7 +57,7 @@ And it can render !{tooltip[tooltips like this](Look! I'm a very helpful tooltip
         ingest: {
           settings: {},
           lifecycle: { inherit: {} },
-          processing: { steps: [] },
+          processing: { steps: [], updated_at: new Date().toISOString() },
           classic: {},
           failure_store: { inherit: {} },
         },

@@ -42,7 +42,7 @@ const logsStreamDefinition: Streams.WiredStream.Definition = {
       routing: [],
     },
     lifecycle: { inherit: {} },
-    processing: { steps: [] },
+    processing: { steps: [], updated_at: new Date().toISOString() },
     settings: {},
     failure_store: { inherit: {} },
   },

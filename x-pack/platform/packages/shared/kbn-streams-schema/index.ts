@@ -23,6 +23,8 @@ export {
 export { isRootStreamDefinition } from './src/helpers/is_root';
 export { isOtelStream } from './src/helpers/is_otel_stream';
 export { getIndexPatternsForStream } from './src/helpers/hierarchy_helpers';
+export { convertUpsertRequestIntoDefinition } from './src/helpers/convert_upsert_request_into_definition';
+export { convertGetRequestIntoUpsertRequest } from './src/helpers/convert_get_request_into_upsert_request';
 
 export {
   keepFields,

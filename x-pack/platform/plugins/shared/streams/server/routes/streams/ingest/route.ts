@@ -12,6 +12,7 @@ import { Streams } from '@kbn/streams-schema';
 import { Ingest } from '@kbn/streams-schema/src/models/ingest';
 import { WiredIngest } from '@kbn/streams-schema/src/models/ingest/wired';
 import type { ClassicIngest } from '@kbn/streams-schema/src/models/ingest/classic';
+import _ from 'lodash';
 import type { AttachmentClient } from '../../../lib/streams/attachments/attachment_client';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
@@ -85,7 +86,7 @@ async function updateWiredIngest({
     queries,
     stream: {
       ...stream,
-      ingest,
+      ingest: { ...ingest, processing: _.omit(ingest.processing, 'updated_at') },
     },
     rules,
   };
@@ -128,7 +129,7 @@ async function updateClassicIngest({
     queries,
     stream: {
       ...stream,
-      ingest,
+      ingest: { ...ingest, processing: _.omit(ingest.processing, 'updated_at') },
     },
     rules,
   };
@@ -197,6 +198,7 @@ const upsertIngestRoute = createServerRoute({
     path: z.object({
       name: z.string(),
     }),
+    // TODO: @AlexFernandez Add IngestUpsertRequest schemas
     body: z.object({
       ingest: Ingest.right,
     }),

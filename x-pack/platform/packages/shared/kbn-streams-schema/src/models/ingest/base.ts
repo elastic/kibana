@@ -125,11 +125,11 @@ type WithDefaults = {
 type OmitUpsertProps<
   T extends {
     ingest: Omit<IngestBase, 'processing'> & {
-      processing: Omit<IngestStreamProcessing, 'updated_at'> & { updated_at?: string };
+      processing: Omit<IngestBase['processing'], 'updated_at'> & { updated_at?: string };
     };
   }
 > = Omit<T, 'ingest'> & {
   ingest: Omit<IngestBase, 'processing'> & {
-    processing: Omit<IngestStreamProcessing, 'updated_at'> & { updated_at?: never };
+    processing: Omit<IngestBase['processing'], 'updated_at'> & { updated_at?: never };
   };
 };
