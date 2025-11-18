@@ -116,10 +116,16 @@ export const entityAnalyticsToolInternal = (
           esClient.asCurrentUser
         );
 
-        const exploreDataViewId = `security-solution-${spaceId}`; // TODO: Get the security data view id from the right place
-        // TODO: Check if we only return indices that exist
-        // TODO: Don't return the alert index, we only need security solution events and logs
-        const dataView = await dataViewsService.get(exploreDataViewId);
+        // TODO: Get the security-solution-explore data view.
+        // But how to do it in the server side?
+        const securityDataViewId = `security-solution-${spaceId}`;
+        const dataView = await dataViewsService.get(securityDataViewId);
+        const indexPattern = dataView.getIndexPattern();
+        // remove alert indices from the pattern
+        const indexPatterns = indexPattern
+          .split(',')
+          .filter((pattern) => !pattern.includes('alerts-'))
+          .join(',');
 
         const specificEntityAnalyticsResponse = domain
           ? await MAP_DOMAIN_TO_INFO_BUILDER[domain](entityType as EntityType, dependencies)
@@ -133,10 +139,8 @@ export const entityAnalyticsToolInternal = (
         const generalSecuritySolutionMessage = `
           Always try querying the most appropriate domain index when available. 
           When it isn't enough, you can query security solution events and logs. 
-          For that, you must generate an ES|QL, and you **MUST ALWAYS** use the following from clause (ONLY FOR LOGS AND NOT FOR OTHER INDICES): "FROM ${dataView.getIndexPattern()}"
-          When searching for logs of a ${entityType} you **MUST ALWAYS** use the following where clause "where ${
-          EntityTypeToIdentifierField[entityType]
-        } == {identifier}"`;
+          For that, you must generate an ES|QL, and you **MUST ALWAYS** use the following from clause (ONLY FOR LOGS AND NOT FOR OTHER INDICES): "FROM ${indexPatterns}"
+          When searching for logs of a ${entityType} you **MUST ALWAYS** use the following where clause "where ${EntityTypeToIdentifierField[entityType]} == {identifier}"`;
 
         const results: ToolHandlerResult[] = [];
         if (hasGenerateESQLQuery && specificEntityAnalyticsResponse.index && !informationOnly) {

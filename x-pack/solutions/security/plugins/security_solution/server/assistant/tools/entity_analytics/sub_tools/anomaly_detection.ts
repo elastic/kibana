@@ -117,6 +117,6 @@ export const getAnomalyDetectionSubTool: EntityAnalyticsSubTool = async (
         ### This is a list of recommended jobs that can be used to answer the user prompt for entity type '${entityType}' (You should suggest that the user install these jobs):
         ${JSON.stringify(recommendedJobs, null, 2)}         
 `,
-    index: `.ml-anomalies-*`, // TODO: Use a constant for the index pattern
+    index: `.ml-anomalies-*`,
   };
 };

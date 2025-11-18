@@ -5,14 +5,11 @@
  * 2.0.
  */
 
+import { getEntitiesIndexName } from '../../../../lib/entity_analytics/entity_store/utils';
 import { ENGINE_STATUS } from '../../../../lib/entity_analytics/entity_store/constants';
 import { EngineDescriptorClient } from '../../../../lib/entity_analytics/entity_store/saved_object/engine_descriptor';
 import type { EntityType } from '../../../../../common/search_strategy';
 import type { EntityAnalyticsSubTool } from './types';
-
-// TODO: get this index pattern from a common place
-const getEntityStoreIndexPattern = (entityType: EntityType, spaceId: string) =>
-  `.entities.v1.latest.security_${entityType}_${spaceId}`;
 
 export const getEntityStoreSubTool: EntityAnalyticsSubTool = async (
   entityType: EntityType,
@@ -30,7 +27,7 @@ export const getEntityStoreSubTool: EntityAnalyticsSubTool = async (
       message: `
         This is a set of rules that you must follow strictly:
         * When searching the entity store for '${entityType}' you **MUST ALWAYS** filter by: 'where entity.EngineMetadata.Type == "${entityType}" OR entity.type == "${entityType}"'.`,
-      index: getEntityStoreIndexPattern(entityType, spaceId),
+      index: getEntitiesIndexName(entityType, spaceId),
     };
   } else {
     return {
