@@ -4770,6 +4770,17 @@
           },
           {
             "parentPluginId": "@kbn/workflows",
+            "id": "def-common.WorkflowExecutionDto.isTestRun",
+            "type": "boolean",
+            "tags": [],
+            "label": "isTestRun",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
             "id": "def-common.WorkflowExecutionDto.startedAt",
             "type": "string",
             "tags": [],
@@ -4904,6 +4915,20 @@
             "tags": [],
             "label": "yaml",
             "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.WorkflowExecutionDto.context",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -7406,7 +7431,7 @@
         "label": "WorkflowExecutionListItemDto",
         "description": [],
         "signature": [
-          "{ id: string; spaceId: string; duration: number | null; status: ",
+          "{ id: string; spaceId: string; context?: Record<string, unknown> | undefined; duration: number | null; status: ",
           {
             "pluginId": "@kbn/workflows",
             "scope": "common",
@@ -7414,7 +7439,7 @@
             "section": "def-common.ExecutionStatus",
             "text": "ExecutionStatus"
           },
-          "; startedAt: string; stepId?: string | undefined; workflowId?: string | undefined; finishedAt: string; workflowName?: string | undefined; triggeredBy?: string | undefined; }"
+          "; startedAt: string; isTestRun: boolean; stepId?: string | undefined; workflowId?: string | undefined; finishedAt: string; workflowName?: string | undefined; triggeredBy?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "deprecated": false,

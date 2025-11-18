@@ -178,14 +178,12 @@ describe('WorkflowsService', () => {
 
       mockEsClient.search.mockResolvedValue(mockSearchResponse as any);
 
-      const result = await service.getWorkflows({ limit: 10, page: 1 }, 'default');
+      const result = await service.getWorkflows({ size: 10, page: 1 }, 'default');
 
       expect(result).toEqual({
-        _pagination: {
-          page: 1,
-          limit: 10,
-          total: 1,
-        },
+        page: 1,
+        size: 10,
+        total: 1,
         results: [
           {
             id: 'test-workflow-id',
@@ -238,7 +236,7 @@ describe('WorkflowsService', () => {
 
       mockEsClient.search.mockResolvedValue(mockSearchResponse as any);
 
-      await service.getWorkflows({ limit: 10, page: 1, enabled: [true] }, 'default');
+      await service.getWorkflows({ size: 10, page: 1, enabled: [true] }, 'default');
 
       expect(mockEsClient.search).toHaveBeenCalledWith({
         size: 10,
@@ -275,7 +273,7 @@ describe('WorkflowsService', () => {
 
       mockEsClient.search.mockResolvedValue(mockSearchResponse as any);
 
-      await service.getWorkflows({ limit: 10, page: 1, query: 'test query' }, 'default');
+      await service.getWorkflows({ size: 10, page: 1, query: 'test query' }, 'default');
 
       expect(mockEsClient.search).toHaveBeenCalledWith({
         size: 10,
@@ -411,7 +409,7 @@ describe('WorkflowsService', () => {
           .mockResolvedValueOnce(mockSearchResponse as any)
           .mockResolvedValueOnce(mockExecutionResponse as any);
 
-        const result = await service.getWorkflows({ limit: 10, page: 1 }, 'default');
+        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default');
 
         expect(result.results[0].history).toHaveLength(1);
         expect(result.results[0].history[0]).toEqual({
@@ -484,7 +482,7 @@ describe('WorkflowsService', () => {
           .mockResolvedValueOnce(mockSearchResponse as any)
           .mockResolvedValueOnce(mockEmptyExecutionResponse as any);
 
-        const result = await service.getWorkflows({ limit: 10, page: 1 }, 'default');
+        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default');
 
         expect(result.results[0].history).toEqual([]);
       });
@@ -529,7 +527,7 @@ describe('WorkflowsService', () => {
           .mockResolvedValueOnce(mockSearchResponse as any)
           .mockResolvedValueOnce(mockExecutionResponseWithoutFinishedAt as any);
 
-        const result = await service.getWorkflows({ limit: 10, page: 1 }, 'default');
+        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default');
 
         expect(result.results[0].history[0]).toEqual({
           id: 'execution-1',
@@ -591,7 +589,7 @@ describe('WorkflowsService', () => {
           .mockResolvedValueOnce(mockSearchResponse as any)
           .mockResolvedValueOnce(mockMixedExecutionResponse as any);
 
-        const result = await service.getWorkflows({ limit: 10, page: 1 }, 'default');
+        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default');
 
         expect(result.results).toHaveLength(2);
         expect(result.results[0].history).toHaveLength(1);
@@ -610,7 +608,7 @@ describe('WorkflowsService', () => {
           .mockResolvedValueOnce(mockSearchResponse as any)
           .mockRejectedValueOnce(new Error('Execution search failed'));
 
-        const result = await service.getWorkflows({ limit: 10, page: 1 }, 'default');
+        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default');
 
         expect(result.results[0].history).toEqual([]);
         expect(mockLogger.error).toHaveBeenCalledWith(
@@ -644,7 +642,7 @@ describe('WorkflowsService', () => {
           .mockResolvedValueOnce(mockSearchResponse as any)
           .mockRejectedValueOnce(indexNotFoundError);
 
-        const result = await service.getWorkflows({ limit: 10, page: 1 }, 'default');
+        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default');
 
         expect(result.results[0].history).toEqual([]);
         expect(mockLogger.error).not.toHaveBeenCalled();
@@ -676,7 +674,7 @@ describe('WorkflowsService', () => {
           .mockResolvedValueOnce(mockSearchResponse as any)
           .mockRejectedValueOnce(otherError);
 
-        const result = await service.getWorkflows({ limit: 10, page: 1 }, 'default');
+        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default');
 
         expect(result.results[0].history).toEqual([]);
         expect(mockLogger.error).toHaveBeenCalledWith(
@@ -694,7 +692,7 @@ describe('WorkflowsService', () => {
 
         mockEsClient.search.mockResolvedValueOnce(mockSearchResponse as any);
 
-        const result = await service.getWorkflows({ limit: 10, page: 1 }, 'default');
+        const result = await service.getWorkflows({ size: 10, page: 1 }, 'default');
 
         expect(result.results).toEqual([]);
         expect(mockEsClient.search).toHaveBeenCalledTimes(1); // Only workflows search, no execution search
@@ -1386,7 +1384,9 @@ steps:
           {
             spaceId: 'default',
             id: 'execution-1',
+            stepId: undefined,
             status: 'completed',
+            isTestRun: false,
             startedAt: '2023-01-01T00:00:00Z',
             finishedAt: '2023-01-01T00:05:00Z',
             duration: 300000,
@@ -1394,11 +1394,9 @@ steps:
             triggeredBy: 'manual',
           },
         ],
-        _pagination: {
-          limit: 20,
-          page: 1,
-          total: 1,
-        },
+        size: 100,
+        page: 1,
+        total: 1,
       });
 
       expect(mockEsClient.search).toHaveBeenCalledWith({
@@ -1420,7 +1418,7 @@ steps:
             ]),
           },
         },
-        size: 20,
+        size: 100,
         from: 0,
         sort: [{ createdAt: 'desc' }],
         track_total_hits: true,
@@ -1475,7 +1473,7 @@ steps:
       );
     });
 
-    it('should return workflow executions with execution type filter', async () => {
+    describe('execution type filter', () => {
       const mockExecutionsResponse = {
         hits: {
           hits: [
@@ -1495,32 +1493,112 @@ steps:
           total: { value: 1 },
         },
       };
+      it('should add filter excluding test runs when filter is production', async () => {
+        mockEsClient.search.mockResolvedValue(mockExecutionsResponse as any);
 
-      mockEsClient.search.mockResolvedValue(mockExecutionsResponse as any);
+        await service.getWorkflowExecutions(
+          {
+            workflowId: 'workflow-1',
+            executionTypes: [ExecutionType.PRODUCTION],
+          },
+          'default'
+        );
 
-      await service.getWorkflowExecutions(
-        {
-          workflowId: 'workflow-1',
-          executionTypes: [ExecutionType.PRODUCTION, ExecutionType.TEST],
-        },
-        'default'
-      );
-
-      expect(mockEsClient.search).toHaveBeenCalledWith(
-        expect.objectContaining({
-          query: expect.objectContaining({
-            bool: expect.objectContaining({
-              must: expect.arrayContaining([
-                {
-                  terms: {
-                    executionType: [ExecutionType.PRODUCTION, ExecutionType.TEST],
+        expect(mockEsClient.search).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              bool: expect.objectContaining({
+                must: expect.arrayContaining([
+                  {
+                    bool: {
+                      should: [
+                        { term: { isTestRun: false } },
+                        { bool: { must_not: { exists: { field: 'isTestRun' } } } },
+                      ],
+                      minimum_should_match: 1,
+                    },
                   },
-                },
-              ]),
+                ]),
+              }),
             }),
-          }),
-        })
-      );
+          })
+        );
+      });
+
+      it('should add filter excluding production runs when filter is test', async () => {
+        mockEsClient.search.mockResolvedValue(mockExecutionsResponse as any);
+
+        await service.getWorkflowExecutions(
+          {
+            workflowId: 'workflow-1',
+            executionTypes: [ExecutionType.TEST],
+          },
+          'default'
+        );
+
+        expect(mockEsClient.search).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              bool: expect.objectContaining({
+                must: expect.arrayContaining([
+                  {
+                    term: {
+                      isTestRun: true,
+                    },
+                  },
+                ]),
+              }),
+            }),
+          })
+        );
+      });
+
+      it('should not add test/production run related filters if no execution type is specified', async () => {
+        mockEsClient.search.mockResolvedValue(mockExecutionsResponse as any);
+
+        await service.getWorkflowExecutions(
+          {
+            workflowId: 'workflow-1',
+            executionTypes: [],
+          },
+          'default'
+        );
+
+        expect(mockEsClient.search).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              bool: expect.objectContaining({
+                must: expect.not.arrayContaining([
+                  {
+                    term: {
+                      isTestRun: true,
+                    },
+                  },
+                ]),
+              }),
+            }),
+          })
+        );
+        expect(mockEsClient.search).toHaveBeenCalledWith(
+          expect.objectContaining({
+            query: expect.objectContaining({
+              bool: expect.objectContaining({
+                must: expect.not.arrayContaining([
+                  {
+                    bool: {
+                      should: [
+                        { term: { isTestRun: false } },
+                        { bool: { must_not: { exists: { field: 'isTestRun' } } } },
+                      ],
+                      minimum_should_match: 1,
+                    },
+                  },
+                ]),
+              }),
+            }),
+          })
+        );
+      });
     });
 
     it('should handle empty results', async () => {
@@ -1542,11 +1620,9 @@ steps:
 
       expect(result).toEqual({
         results: [],
-        _pagination: {
-          limit: 20,
-          page: 1,
-          total: 0,
-        },
+        size: 100,
+        page: 1,
+        total: 0,
       });
     });
 
