@@ -31,10 +31,10 @@ const getGlobalRegistry = (): TourQueueRegistry => {
 };
 
 /**
- * Get or create the global tour queue state manager instance.
+ * Get or create the global tour queue instance.
  * This ensures a single state manager is shared across all plugins and bundles.
  */
-export const getTourQueueStateManager = (): TourQueueStateManager => {
+export const getTourQueue = (): TourQueueStateManager => {
   const registry = getGlobalRegistry();
   return (registry.tourQueueStateManager ??= new TourQueueStateManager());
 };

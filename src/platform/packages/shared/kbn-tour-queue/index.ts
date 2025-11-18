@@ -8,7 +8,7 @@
  */
 
 export { useTourQueue } from './hooks/use_tour_queue';
-export { getTourQueueStateManager } from './state/registry';
+export { getTourQueue } from './state/registry';
 export type { TourQueueResult } from './hooks/use_tour_queue';
 
 const TOUR_REGISTRY = {
