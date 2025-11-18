@@ -40,8 +40,7 @@ import { getSharedChartLensStateToAPI, getSharedChartAPIToLensState } from './ut
 import { fromColorByValueAPIToLensState, fromColorByValueLensStateToAPI } from '../coloring';
 import { isEsqlTableTypeDataset } from '../../utils';
 
-const ACCESSOR = 'metric_formula_accessor';
-const LENS_DEFAULT_LAYER_ID = 'layer_0';
+const ACCESSOR = 'legacy_metric_accessor';
 
 function buildVisualizationState(config: LegacyMetricState): LegacyMetricVisualizationState {
   const layer = config;
@@ -70,10 +69,6 @@ function reverseBuildVisualizationState(
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
 ): LegacyMetricState {
-  if (visualization.accessor == null) {
-    throw new Error('Metric accessor is missing in the visualization state');
-  }
-
   const dataset = buildDatasetState(layer, adHocDataViews, references, adhocReferences, layerId);
 
   if (!dataset || dataset.type == null) {
@@ -82,12 +77,16 @@ function reverseBuildVisualizationState(
 
   const props: DeepPartial<DeepMutable<LegacyMetricState>> = {
     ...generateApiLayer(layer),
-    metric: isEsqlTableTypeDataset(dataset)
-      ? getValueApiColumn(visualization.accessor, layer as TextBasedLayer)
-      : (operationFromColumn(
-          visualization.accessor,
-          layer as FormBasedLayer
-        ) as LensApiAllMetricOperations),
+    ...(visualization.accessor
+      ? {
+          metric: isEsqlTableTypeDataset(dataset)
+            ? getValueApiColumn(visualization.accessor, layer as TextBasedLayer)
+            : (operationFromColumn(
+                visualization.accessor,
+                layer as FormBasedLayer
+              ) as LensApiAllMetricOperations),
+        }
+      : {}),
   } as LegacyMetricState;
 
   if (props.metric) {
@@ -148,7 +147,7 @@ export function fromAPItoLensState(config: LegacyMetricState): LensAttributes {
     (v): v is { id: string; type: 'dataView' } => v.type === 'dataView'
   );
   const references = regularDataViews.length
-    ? buildReferences({ [LENS_DEFAULT_LAYER_ID]: regularDataViews[0]?.id })
+    ? buildReferences({ [DEFAULT_LAYER_ID]: regularDataViews[0]?.id })
     : [];
 
   return {
@@ -178,14 +177,16 @@ export function fromLensStateToAPI(
     (state.datasourceStates.indexpattern?.layers as PersistedIndexPatternLayer[]) ??
     [];
 
-  const [layerId, layer] = Object.entries(layers)[0];
+  // Necessary for ESQL panels to find the correct layer, since the old layers are not removed from the state
+  const visLayerId = Object.entries(layers).find(([id]) => id === visualization.layerId);
+  const [layerId, layer] = visLayerId ?? Object.entries(layers)[0];
 
   const visualizationState = {
     ...getSharedChartLensStateToAPI(config),
     ...reverseBuildVisualizationState(
       visualization,
       layer,
-      layerId ?? LENS_DEFAULT_LAYER_ID,
+      layerId ?? DEFAULT_LAYER_ID,
       config.state.adHocDataViews ?? {},
       config.references,
       config.state.internalReferences

@@ -53,12 +53,11 @@ type MetricApiCompareType = Extract<
   { compare: any }
 >['compare'];
 
-const ACCESSOR = 'metric_formula_accessor';
+const ACCESSOR = 'metric_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 const TRENDLINE_LAYER_ID = 'layer_0_trendline';
 export const LENS_METRIC_COMPARE_TO_PALETTE_DEFAULT = 'compare_to';
 const LENS_METRIC_COMPARE_TO_REVERSED = false;
-const LENS_DEFAULT_LAYER_ID = 'layer_0';
 
 function getAccessorName(type: 'metric' | 'max' | 'breakdown' | 'secondary') {
   return `${ACCESSOR}_${type}`;
@@ -196,9 +195,6 @@ function reverseBuildVisualizationState(
   adhocReferences?: SavedObjectReference[]
 ): MetricState {
   const metricAccessor = getMetricAccessor(visualization);
-  if (metricAccessor == null) {
-    throw new Error('Metric accessor is missing in the visualization state');
-  }
 
   const dataset = buildDatasetState(layer, adHocDataViews, references, adhocReferences, layerId);
 
@@ -212,7 +208,7 @@ function reverseBuildVisualizationState(
     const esqlLayer = layer as TextBasedLayer;
     props = {
       ...props,
-      metric: getValueApiColumn(metricAccessor, esqlLayer),
+      ...(metricAccessor ? { metric: getValueApiColumn(metricAccessor, esqlLayer) } : {}),
       ...(visualization.secondaryMetricAccessor
         ? {
             secondary_metric: {
@@ -240,7 +236,9 @@ function reverseBuildVisualizationState(
     } as MetricState;
   } else if (dataset.type === 'dataView' || dataset.type === 'index') {
     const formLayer = layer as FormBasedLayer;
-    const metric = operationFromColumn(metricAccessor, formLayer) as LensApiAllMetricOperations;
+    const metric = metricAccessor
+      ? (operationFromColumn(metricAccessor, formLayer) as LensApiAllMetricOperations)
+      : undefined;
     // eslint-disable-next-line @typescript-eslint/naming-convention
     const secondary_metric = visualization.secondaryMetricAccessor
       ? (operationFromColumn(
@@ -449,7 +447,7 @@ export function fromAPItoLensState(config: MetricState): LensAttributes {
     (v): v is { id: string; type: 'dataView' } => v.type === 'dataView'
   );
   const references = regularDataViews.length
-    ? buildReferences({ [LENS_DEFAULT_LAYER_ID]: regularDataViews[0]?.id })
+    ? buildReferences({ [DEFAULT_LAYER_ID]: regularDataViews[0]?.id })
     : [];
 
   return {
@@ -479,17 +477,21 @@ export function fromLensStateToAPI(
     (state.datasourceStates.indexpattern?.layers as PersistedIndexPatternLayer[]) ??
     [];
 
+  // Necessary for ESQL panels to find the correct layer, since the old layers are not removed from the state
+  const visLayerId = Object.entries(layers).find(([id]) => id === visualization.layerId);
   // Layers can be in any order, so make sure to get the main one
-  const [layerId, layer] = Object.entries(layers).find(
-    ([, l]) => !('linkToLayers' in l) || l.linkToLayers == null
-  )!;
+  const [layerId, layer] =
+    visLayerId ??
+    Object.entries(layers).find(
+      ([, l]) => !('linkToLayers' in l) || (l as { linkToLayers?: unknown }).linkToLayers == null
+    )!;
 
   const visualizationState = {
     ...getSharedChartLensStateToAPI(config),
     ...reverseBuildVisualizationState(
       visualization,
       layer,
-      layerId ?? LENS_DEFAULT_LAYER_ID,
+      layerId ?? DEFAULT_LAYER_ID,
       config.state.adHocDataViews ?? {},
       config.references,
       config.state.internalReferences
