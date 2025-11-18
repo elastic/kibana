@@ -55,8 +55,8 @@ export const resolveResource = async ({
     throw e;
   }
 
-  const resourceCount =
-    resolveRes.indices.length + resolveRes.aliases.length + resolveRes.data_streams.length;
+  // const resourceCount =
+  //   resolveRes.indices.length + resolveRes.aliases.length + resolveRes.data_streams.length;
 
   // if (resourceCount !== 1) {
   //   throw new Error(`Found multiple targets when trying to resolve resource for ${resourceName}`);
@@ -90,13 +90,6 @@ export const resolveResource = async ({
         description: mappings._meta?.description,
       };
     }
-
-    return {
-      name: resourceName,
-      type: EsResourceType.index,
-      fields,
-      description: mappings._meta?.description,
-    };
   }
   // target is a datastream
   if (resolveRes.data_streams.length > 0) {
