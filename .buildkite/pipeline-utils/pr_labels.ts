@@ -36,3 +36,30 @@ export function collectEnvFromLabels(
 
   return envFromlabels;
 }
+
+export enum FIPS_VERSION {
+  TWO = '140-2',
+  THREE = '140-3',
+}
+
+export const FIPS_GH_LABELS = {
+  [FIPS_VERSION.TWO]: 'ci:enable-fips-140-2-agent',
+  [FIPS_VERSION.THREE]: 'ci:enable-fips-140-3-agent',
+};
+
+/**
+ * Checks if the PR has a specific FIPS label or ANY FIPS label when no version is passed.
+ */
+export function hasFIPSLabel(ver?: FIPS_VERSION): boolean {
+  const labels = process.env.GITHUB_PR_LABELS ?? '';
+
+  if (!labels) {
+    return false;
+  }
+
+  if (ver) {
+    return labels.includes(FIPS_GH_LABELS[ver]);
+  }
+
+  return Object.values(FIPS_GH_LABELS).some((label) => labels.includes(label));
+}

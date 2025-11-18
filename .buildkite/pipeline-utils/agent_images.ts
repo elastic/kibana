@@ -10,14 +10,10 @@
 import { dump } from 'js-yaml';
 import type { BuildkiteAgentTargetingRule } from './buildkite';
 import { BuildkiteClient } from './buildkite';
+import { FIPS_VERSION, hasFIPSLabel } from './pr_labels';
 
 const ELASTIC_IMAGES_QA_PROJECT = 'elastic-images-qa';
 const ELASTIC_IMAGES_PROD_PROJECT = 'elastic-images-prod';
-
-enum FIPS_VERSION {
-  TWO = '140-2',
-  THREE = '140-3',
-}
 
 // constrain AgentImageConfig to the type that doesn't have the `queue` property
 const DEFAULT_AGENT_IMAGE_CONFIG: BuildkiteAgentTargetingRule = {
@@ -29,18 +25,11 @@ const DEFAULT_AGENT_IMAGE_CONFIG: BuildkiteAgentTargetingRule = {
 const GITHUB_PR_LABELS = process.env.GITHUB_PR_LABELS ?? '';
 const TEST_ENABLE_FIPS_AGENT = process.env.TEST_ENABLE_FIPS_AGENT?.toLowerCase() === 'true';
 const USE_QA_IMAGE_FOR_PR = process.env.USE_QA_IMAGE_FOR_PR?.match(/(1|true)/i);
-const FIPS_GH_LABELS = {
-  [FIPS_VERSION.TWO]: 'ci:enable-fips-140-2-agent',
-  [FIPS_VERSION.THREE]: 'ci:enable-fips-140-3-agent',
-};
 
 const getFIPSImage = () => {
   let image: string;
 
-  if (
-    process.env.KBN_FIPS_VERSION === FIPS_VERSION.THREE ||
-    GITHUB_PR_LABELS.includes(FIPS_GH_LABELS[FIPS_VERSION.THREE])
-  ) {
+  if (process.env.KBN_FIPS_VERSION === FIPS_VERSION.THREE || hasFIPSLabel(FIPS_VERSION.THREE)) {
     image = 'family/kibana-fips-140-3-ubuntu-2404';
   } else {
     image = 'family/kibana-fips-140-2-ubuntu-2404';
@@ -60,10 +49,7 @@ function getAgentImageConfig({ returnYaml = false } = {}): string | BuildkiteAge
   const bk = new BuildkiteClient();
   let config: BuildkiteAgentTargetingRule;
 
-  if (
-    TEST_ENABLE_FIPS_AGENT ||
-    Object.values(FIPS_GH_LABELS).some((label) => GITHUB_PR_LABELS.includes(label))
-  ) {
+  if (TEST_ENABLE_FIPS_AGENT || hasFIPSLabel()) {
     config = getFIPSImage();
 
     bk.setAnnotation(
