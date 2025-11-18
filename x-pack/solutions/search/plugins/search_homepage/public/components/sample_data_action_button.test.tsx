@@ -37,7 +37,7 @@ describe('Sample data action button', () => {
     jest.clearAllMocks();
   });
 
-  it('renders elements when onechat is enabled', async () => {
+  it('renders elements when agent builder is enabled', async () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         uiSettings: { get: mockUiSettingsGet },

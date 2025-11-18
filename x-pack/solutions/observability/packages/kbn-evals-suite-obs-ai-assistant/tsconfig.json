@@ -28,6 +28,6 @@
     "@kbn/alerts-ui-shared",
     "@kbn/alerting-comparators",
     "@kbn/some-dev-log",
-    "@kbn/onechat-common",
+    "@kbn/agent-builder-common",
   ]
 }

@@ -95,8 +95,8 @@
     "@kbn/cypress-test-helper",
     "@kbn/streams-schema",
     "@kbn/data-quality",
-    "@kbn/onechat-common",
+    "@kbn/agent-builder-common",
     "@kbn/observability-agent-plugin",
-    "@kbn/onechat-plugin",
+    "@kbn/agent-builder-plugin",
   ]
 }

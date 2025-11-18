@@ -1,0 +1,44 @@
+{
+  "type": "plugin",
+  "id": "@kbn/agent-builder-plugin",
+  "owner": "@elastic/workchat-eng",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "agent_builder",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "agent_builder"
+    ],
+    "requiredPlugins": [
+      "actions",
+      "data",
+      "dataViews",
+      "uiActions",
+      "esql",
+      "features",
+      "inference",
+      "kibanaUtils",
+      "lens",
+      "licensing",
+      "management",
+      "share",
+      "spaces",
+      "stackConnectors",
+      "licensing",
+      "triggersActionsUi"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ],
+    "optionalPlugins": [
+      "cloud",
+      "licenseManagement",
+      "workflowsManagement",
+      "usageCollection"
+    ],
+    "extraPublicDirs": []
+  }
+}

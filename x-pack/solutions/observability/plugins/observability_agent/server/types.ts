@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { OnechatPluginSetup, OnechatPluginStart } from '@kbn/onechat-plugin/server/types';
+import type {
+  AgentBuilderPluginSetup,
+  AgentBuilderPluginStart,
+} from '@kbn/agent-builder-plugin/server/types';
 import type {
   ApmDataAccessPluginSetup,
   ApmDataAccessPluginStart,
@@ -25,7 +28,7 @@ export type ObservabilityAgentPluginSetup = Record<string, never>;
 export type ObservabilityAgentPluginStart = Record<string, never>;
 
 export interface ObservabilityAgentPluginSetupDependencies {
-  onechat: OnechatPluginSetup;
+  agentBuilder: AgentBuilderPluginSetup;
   apmDataAccess: ApmDataAccessPluginSetup;
   logsDataAccess: LogsDataAccessPluginSetup;
   metricsDataAccess: MetricsDataPluginSetup;
@@ -33,7 +36,7 @@ export interface ObservabilityAgentPluginSetupDependencies {
 }
 
 export interface ObservabilityAgentPluginStartDependencies {
-  onechat: OnechatPluginStart;
+  agentBuilder: AgentBuilderPluginStart;
   apmDataAccess: ApmDataAccessPluginStart;
   logsDataAccess: LogsDataAccessPluginStart;
   metricsDataAccess: MetricsDataPluginStart;

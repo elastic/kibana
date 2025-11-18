@@ -965,11 +965,11 @@ x-pack/platform/packages/shared/ml/random_sampler_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/response_stream @elastic/ml-ui
 x-pack/platform/packages/shared/ml/runtime_field_utils @elastic/ml-ui
 x-pack/platform/packages/shared/ml/trained_models_utils @elastic/ml-ui
-x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat @elastic/workchat-eng
-x-pack/platform/packages/shared/onechat/onechat-browser @elastic/workchat-eng
-x-pack/platform/packages/shared/onechat/onechat-common @elastic/workchat-eng
-x-pack/platform/packages/shared/onechat/onechat-genai-utils @elastic/workchat-eng
-x-pack/platform/packages/shared/onechat/onechat-server @elastic/workchat-eng
+x-pack/platform/packages/shared/agent-builder/kbn-evals-suite-agent-builder @elastic/workchat-eng
+x-pack/platform/packages/shared/agent-builder/agent-builder-browser @elastic/workchat-eng
+x-pack/platform/packages/shared/agent-builder/agent-builder-common @elastic/workchat-eng
+x-pack/platform/packages/shared/agent-builder/agent-builder-genai-utils @elastic/workchat-eng
+x-pack/platform/packages/shared/agent-builder/agent-builder-server @elastic/workchat-eng
 x-pack/platform/packages/shared/security/api_key_management @elastic/kibana-security
 x-pack/platform/packages/shared/security/form_components @elastic/kibana-security
 x-pack/platform/packages/shared/security/plugin_types_common @elastic/kibana-security
@@ -1054,7 +1054,7 @@ x-pack/platform/plugins/shared/maps @elastic/kibana-presentation
 x-pack/platform/plugins/shared/ml @elastic/ml-ui
 x-pack/platform/plugins/shared/notifications @elastic/appex-sharedux
 x-pack/platform/plugins/shared/observability_ai_assistant @elastic/obs-ai-assistant
-x-pack/platform/plugins/shared/onechat @elastic/workchat-eng
+x-pack/platform/plugins/shared/agent-builder @elastic/workchat-eng
 x-pack/platform/plugins/shared/osquery @elastic/security-defend-workflows
 x-pack/platform/plugins/shared/rule_registry @elastic/response-ops @elastic/obs-ux-management-team
 x-pack/platform/plugins/shared/sample_data_ingest @elastic/search-kibana
@@ -2301,10 +2301,10 @@ x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/se
 # workplaceai
 /x-pack/solutions/workplaceai/test/serverless/api_integration/configs/config.ts @elastic/search-kibana @elastic/appex-qa
 /x-pack/solutions/workplaceai/test/serverless/functional/configs/config.ts @elastic/search-kibana @elastic/appex-qa
-/x-pack/platform/test/onechat_api_integration @elastic/search-kibana @elastic/workchat-eng
-/x-pack/platform/test/onechat_functional @elastic/search-kibana @elastic/workchat-eng
-/x-pack/platform/test/functional/page_objects/onechat_page.ts @elastic/workchat-eng
-/x-pack/platform/test/onechat @elastic/search-kibana @elastic/workchat-eng
+/x-pack/platform/test/agent_builder_api_integration @elastic/search-kibana @elastic/workchat-eng
+/x-pack/platform/test/agent_builder_functional @elastic/search-kibana @elastic/workchat-eng
+/x-pack/platform/test/functional/page_objects/agent_builder_page.ts @elastic/workchat-eng
+/x-pack/platform/test/agent_builder @elastic/search-kibana @elastic/workchat-eng
 
 # Management Experience - Deployment Management
 /src/platform/test/functional/fixtures/kbn_archiver/management.json @elastic/kibana-management @elastic/kibana-data-discovery # Assigned per 2 uses: test/functional/apps/management/_import_objects.ts && test/functional/apps/management/data_views/_scripted_fields_filter.ts

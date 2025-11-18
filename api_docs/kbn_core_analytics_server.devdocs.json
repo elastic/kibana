@@ -808,8 +808,8 @@
                 "path": "x-pack/platform/plugins/private/reporting/server/usage/event_tracker.ts"
               },
               {
-                "plugin": "onechat",
-                "path": "x-pack/platform/plugins/shared/onechat/public/application/hooks/use_report_error.ts"
+                "plugin": "agentBuilder",
+                "path": "x-pack/platform/plugins/shared/agent_builder/public/application/hooks/use_report_error.ts"
               },
               {
                 "plugin": "osquery",

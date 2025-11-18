@@ -6,8 +6,8 @@
  */
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import { platformCoreTools } from '@kbn/onechat-common';
-import type { StaticToolRegistration } from '@kbn/onechat-server';
+import { platformCoreTools } from '@kbn/agent-builder-common';
+import type { StaticToolRegistration } from '@kbn/agent-builder-server';
 import {
   OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
   createGetDataSourcesTool,
@@ -54,6 +54,6 @@ export async function registerTools({
   ];
 
   for (const tool of observabilityTools) {
-    plugins.onechat.tools.register(tool);
+    plugins.agentBuilder.tools.register(tool);
   }
 }

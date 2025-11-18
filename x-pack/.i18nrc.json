@@ -109,7 +109,7 @@
     "xpack.observabilityLogsOverview": [
       "platform/packages/shared/logs-overview/src/components"
     ],
-    "xpack.onechat": ["platform/plugins/shared/onechat", "platform/packages/shared/onechat"],
+    "xpack.agentBuilder": ["platform/plugins/shared/agent_builder", "platform/packages/shared/agent-builder"],
     "xpack.osquery": [
       "platform/plugins/shared/osquery"
     ],

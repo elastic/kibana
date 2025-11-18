@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import type { CoreStart } from '@kbn/core/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import { groupBy, uniq } from 'lodash';
-import type { ModelProvider } from '@kbn/onechat-server';
+import type { ModelProvider } from '@kbn/agent-builder-server';
 import type { ObservabilityAgentPluginStartDependencies } from '../../types';
 import { selectRelevantAlertFields } from './select_relevant_alert_fields';
 import { getHitsTotal } from '../../utils/get_hits_total';

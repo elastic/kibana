@@ -9,7 +9,7 @@
     "browser": false,
     "server": true,
     "requiredPlugins": [
-      "onechat",
+      "agentBuilder",
       "apmDataAccess",
       "logsDataAccess",
       "security",

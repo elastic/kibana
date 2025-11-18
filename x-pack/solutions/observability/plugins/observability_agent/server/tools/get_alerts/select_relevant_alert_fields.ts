@@ -7,12 +7,12 @@
 
 import { chunk, uniq } from 'lodash';
 import type { Logger } from '@kbn/core/server';
-import type { ModelProvider } from '@kbn/onechat-server';
+import type { ModelProvider } from '@kbn/agent-builder-server';
 import { ShortIdTable } from '../../utils/short_id_table';
 
-const SELECT_RELEVANT_FIELD_NAMES_SYSTEM_MESSAGE = `You are a helpful AI assistant for Elastic Observability. 
-Your task is to determine which fields are relevant to the conversation by selecting only the field IDs from the provided list. 
-The list in the user message consists of JSON objects that map a human-readable field "name" to its unique "id". 
+const SELECT_RELEVANT_FIELD_NAMES_SYSTEM_MESSAGE = `You are a helpful AI assistant for Elastic Observability.
+Your task is to determine which fields are relevant to the conversation by selecting only the field IDs from the provided list.
+The list in the user message consists of JSON objects that map a human-readable field "name" to its unique "id".
 You must not output any field names — only the corresponding "id" values. Ensure that your output follows the exact JSON format specified.`;
 
 export async function selectRelevantAlertFields({
