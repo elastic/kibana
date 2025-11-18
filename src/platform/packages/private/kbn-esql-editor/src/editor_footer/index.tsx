@@ -31,7 +31,6 @@ import type { TelemetryQuerySubmittedProps } from '@kbn/esql-types/src/esql_tele
 import { QuerySource } from '@kbn/esql-types/src/esql_telemetry_types';
 import type { DataErrorsControl, ESQLEditorDeps } from '../types';
 import { ErrorsWarningsFooterPopover } from './errors_warnings_popover';
-import { SubmitFeedbackComponent } from './feedback_component';
 import { HistoryAndStarredQueriesTabs, QueryHistoryAction } from './history_starred_queries';
 import { KeyboardShortcuts } from './keyboard_shortcuts';
 import { QueryWrapComponent } from './query_wrap_component';
@@ -244,7 +243,6 @@ export const EditorFooter = memo(function EditorFooter({
             <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
               {!Boolean(editorIsInline) && (
                 <>
-                  <SubmitFeedbackComponent />
                   {!hideQueryHistory && (
                     <QueryHistoryAction
                       toggleHistory={() => setIsHistoryOpen(!isHistoryOpen)}
@@ -306,7 +304,6 @@ export const EditorFooter = memo(function EditorFooter({
             <>
               <EuiFlexItem grow={false}>
                 <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
-                  <SubmitFeedbackComponent isSpaceReduced={true} />
                   {!hideQueryHistory && (
                     <QueryHistoryAction
                       toggleHistory={toggleHistoryComponent}
