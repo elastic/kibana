@@ -103,6 +103,7 @@ const typeGroups: { label: string; types: string[] }[] = [
       'wildcard',
       'match_only_text',
       'search_as_you_type',
+      'semantic_text',
     ],
   },
   {
@@ -164,12 +165,12 @@ const typeGroups: { label: string; types: string[] }[] = [
       defaultMessage: 'Will not work well',
     }),
     types: [
+      'scaled_float',
       'aggregate_metric_double',
       'object',
       'nested',
       'murmur3',
       'token_count',
-      'constant_keyword',
       'join',
     ],
   },

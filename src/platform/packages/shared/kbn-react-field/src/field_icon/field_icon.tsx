@@ -54,6 +54,8 @@ export const typeToEuiIconMap = {
   string: { iconType: 'tokenString' },
   text: { iconType: 'tokenString' },
   keyword: { iconType: 'tokenKeyword' },
+  constant_keyword: { iconType: 'tokenKeyword' },
+  wildcard: { iconType: 'tokenKeyword' },
   gauge: { iconType: 'tokenMetricGauge' },
   counter: { iconType: 'tokenMetricCounter' },
   nested: { iconType: 'tokenNested' },
