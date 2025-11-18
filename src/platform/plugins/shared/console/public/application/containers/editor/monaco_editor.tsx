@@ -49,6 +49,8 @@ const useStyles = () => {
   return {
     editorActions: css`
       ${actions}
+      padding-left: ${euiTheme.size.xs};
+      padding-right: ${euiTheme.size.xs};
 
       // For IE11
       min-width: calc(${euiTheme.size.l} * 2);
