@@ -87,6 +87,8 @@ describe('inlineSuggest', () => {
     });
     (mockCallbacks.getHistoryStarredItems as jest.Mock).mockResolvedValue([
       'FROM logs* | WHERE host.name: "server1"',
+      // break the query suggestion at same command
+      `FROM test_logs | WHERE response: "error"\nAND status_code >= 500`,
     ]);
   });
 
@@ -133,6 +135,21 @@ describe('inlineSuggest', () => {
     const calls = mockSetToCache.mock.calls;
     const templateCacheCall = calls.find((call) => Array.isArray(call[1]));
     expect(templateCacheCall).toBeDefined();
+  });
+
+  it('should suggest correct multiline queries with a break different than a pipe', async () => {
+    const result = await inlineSuggest(
+      'FROM test_logs',
+      'FROM test_logs',
+      mockRange,
+      mockCallbacks
+    );
+    expect(result.items.length).toBeGreaterThan(0);
+    expect(
+      result.items.some((item) =>
+        item.insertText.includes('WHERE response: "error" AND status_code')
+      )
+    ).toBe(true);
   });
 
   it('should remove duplicate suggestions', async () => {

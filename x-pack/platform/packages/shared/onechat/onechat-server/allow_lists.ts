@@ -17,6 +17,7 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   // Observability
   'observability.search_knowledge_base',
   'observability.get_data_sources',
+  'observability.get_alerts',
   // Dashboard
   'platform.dashboard.create_dashboard',
   'platform.dashboard.get_dashboard',
