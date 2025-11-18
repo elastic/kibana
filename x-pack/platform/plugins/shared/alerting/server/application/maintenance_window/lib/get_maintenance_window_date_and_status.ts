@@ -33,7 +33,6 @@ export const getMaintenanceWindowDateAndStatus = ({
   expirationDate: Date;
   enabled: Boolean;
 }): MaintenanceWindowDateAndStatus => {
-  // if enabled = false, the mw should be disabled
   if (!enabled) {
     if (!events.length) {
       return {

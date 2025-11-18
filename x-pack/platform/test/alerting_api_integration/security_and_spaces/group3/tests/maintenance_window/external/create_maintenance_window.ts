@@ -21,7 +21,6 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
     const objectRemover = new ObjectRemover(supertest);
     const createRequestBody = {
       title: 'test-maintenance-window',
-      enabled: false,
       schedule: {
         custom: {
           duration: '1m',
@@ -82,8 +81,8 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body.title).to.eql('test-maintenance-window');
-              expect(response.body.status).to.eql('upcoming');
-              expect(response.body.enabled).to.eql(false);
+              expect(response.body.status).to.eql('running');
+              expect(response.body.enabled).to.eql(true);
               expect(response.body.scope.alerting.query.kql).to.eql("_id: '1234'");
               expect(response.body.created_by).to.eql(scenario.user.username);
               expect(response.body.updated_by).to.eql(scenario.user.username);
@@ -92,6 +91,49 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
               expect(response.body.schedule.custom.recurring.every).to.eql('2d');
               expect(response.body.schedule.custom.recurring.end).to.eql(end.toISOString());
               expect(response.body.schedule.custom.recurring.onWeekDay).to.eql(['MO', 'FR']);
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
+
+        it('should handle create disabled maintenance window request appropriately', async () => {
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/api/maintenance_window`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send({ ...createRequestBody, enabled: false });
+
+          if (response.body.id) {
+            objectRemover.add(
+              space.id,
+              response.body.id,
+              'rules/maintenance_window',
+              'alerting',
+              true
+            );
+          }
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'global_read at space1':
+            case 'space_1_all at space2':
+            case 'space_1_all_with_restricted_fixture at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message:
+                  'API [POST /api/maintenance_window] is unauthorized for user, this action is granted by the Kibana privileges [write-maintenance-window]',
+                statusCode: 403,
+              });
+              break;
+            case 'superuser at space1':
+            case 'space_1_all at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body.title).to.eql('test-maintenance-window');
+              expect(response.body.status).to.eql('disabled');
+              expect(response.body.enabled).to.eql(false);
               break;
             default:
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
