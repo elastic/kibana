@@ -6,14 +6,18 @@
  */
 
 import { expect } from 'expect';
-import { AGENT_POLICY_INDEX } from '@kbn/fleet-plugin/common';
 import type { FtrProviderContextWithServices } from '../ftr_provider_context';
-import { createAgentDoc, cleanupAgentDocs } from '../helpers';
+import {
+  createAgentDoc,
+  cleanupAgentDocs,
+  createPolicyRevisions,
+  getPolicyRevisions,
+  cleanupPolicyRevisions,
+} from '../helpers';
 
 export default function (providerContext: FtrProviderContextWithServices) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
-  const es = getService('es');
   const TASK_INTERVAL = 30000; // as set in the config (30s)
   const MAX_REVISIONS = 5; // as set in the config
   let testPolicyId: string;
@@ -22,79 +26,6 @@ export default function (providerContext: FtrProviderContextWithServices) {
     // Sleep for the duration of the task interval plus a buffer.
     // In case of test flakiness, the sleep duration can be increased.
     await new Promise((resolve) => setTimeout(resolve, TASK_INTERVAL + 5000));
-  }
-
-  async function createPolicyRevision(policyId: string, revisionIdx: number) {
-    const doc = {
-      '@timestamp': new Date().toISOString(),
-      policy_id: policyId,
-      revision_idx: revisionIdx,
-      data: {
-        id: policyId,
-        name: `Test Policy ${policyId}`,
-        namespace: 'default',
-        revision: revisionIdx,
-        agent_features: [],
-        inputs: [],
-      },
-    };
-
-    await es.index({
-      index: AGENT_POLICY_INDEX,
-      id: `${policyId}:${revisionIdx}`,
-      document: doc,
-      refresh: 'wait_for',
-    });
-  }
-
-  async function createMultiplePolicyRevisions(policyId: string, count: number) {
-    const promises = [];
-    for (let i = 1; i <= count; i++) {
-      promises.push(createPolicyRevision(policyId, 1 + i));
-    }
-    await Promise.all(promises);
-  }
-
-  async function getPolicyRevisionCount(policyId: string): Promise<number> {
-    const result = await es.search({
-      index: AGENT_POLICY_INDEX,
-      query: {
-        term: {
-          policy_id: policyId,
-        },
-      },
-      size: 0,
-    });
-    const total = result.hits.total;
-    return typeof total === 'number' ? total : total?.value || 0;
-  }
-
-  async function getPolicyRevisions(policyId: string) {
-    const result = await es.search({
-      index: AGENT_POLICY_INDEX,
-      query: {
-        term: {
-          policy_id: policyId,
-        },
-      },
-      sort: [{ revision_idx: { order: 'asc' } }],
-      size: 1000,
-    });
-    return result.hits.hits.map((hit: any) => ({
-      id: hit._id,
-      revision_idx: hit._source.revision_idx,
-    }));
-  }
-
-  async function cleanupPolicyRevisions() {
-    await es.deleteByQuery({
-      index: AGENT_POLICY_INDEX,
-      ignore_unavailable: true,
-      refresh: true,
-      query: {
-        match_all: {},
-      },
-    });
   }
 
   describe('Fleet Policy Revisions Cleanup Task', () => {
@@ -124,34 +55,34 @@ export default function (providerContext: FtrProviderContextWithServices) {
 
     afterEach(async () => {
       await cleanupAgentDocs(providerContext);
-      await cleanupPolicyRevisions();
+      await cleanupPolicyRevisions(providerContext);
     });
 
     it('should not clean up policies with revisions equal to max_revisions limit', async () => {
-      await createMultiplePolicyRevisions(testPolicyId, MAX_REVISIONS - 1);
+      await createPolicyRevisions(providerContext, testPolicyId, MAX_REVISIONS - 1);
 
-      const initialCount = await getPolicyRevisionCount(testPolicyId);
-      expect(initialCount).toBe(MAX_REVISIONS);
+      const initialRevisions = await getPolicyRevisions(providerContext, testPolicyId);
+      expect(initialRevisions.length).toBe(MAX_REVISIONS);
 
       await waitForTask();
 
-      const finalCount = await getPolicyRevisionCount(testPolicyId);
-      expect(finalCount).toBe(MAX_REVISIONS);
+      const finalRevisions = await getPolicyRevisions(providerContext, testPolicyId);
+      expect(finalRevisions.length).toBe(MAX_REVISIONS);
     });
 
     it('should clean up policies with revisions exceeding max_revisions limit', async () => {
       const totalRevisions = MAX_REVISIONS + 3;
-      await createMultiplePolicyRevisions(testPolicyId, totalRevisions);
+      await createPolicyRevisions(providerContext, testPolicyId, totalRevisions);
 
-      const initialCount = await getPolicyRevisionCount(testPolicyId);
-      expect(initialCount).toBe(totalRevisions + 1);
+      const initialRevisions = await getPolicyRevisions(providerContext, testPolicyId);
+      expect(initialRevisions.length).toBe(totalRevisions + 1);
 
       await waitForTask();
 
-      const finalCount = await getPolicyRevisionCount(testPolicyId);
-      expect(finalCount).toBe(MAX_REVISIONS);
+      const finalRevisions = await getPolicyRevisions(providerContext, testPolicyId);
+      expect(finalRevisions.length).toBe(MAX_REVISIONS);
 
-      const remainingRevisions = await getPolicyRevisions(testPolicyId);
+      const remainingRevisions = await getPolicyRevisions(providerContext, testPolicyId);
       const expectedRevisions = [5, 6, 7, 8, 9]; // Should keep the 5 latest
       const actualRevisions = remainingRevisions.map((r) => r.revision_idx).sort((a, b) => a - b);
       expect(actualRevisions).toEqual(expectedRevisions);
@@ -159,7 +90,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
 
     it('should preserve all revisions above the minimum used revision by an agent', async () => {
       const totalRevisions = MAX_REVISIONS + 6;
-      await createMultiplePolicyRevisions(testPolicyId, totalRevisions);
+      await createPolicyRevisions(providerContext, testPolicyId, totalRevisions);
 
       // Create agents using older revisions that would normally be cleaned up
       await createAgentDoc(providerContext, 'agent1', testPolicyId, '9.3.0', true, {
@@ -169,35 +100,35 @@ export default function (providerContext: FtrProviderContextWithServices) {
         policy_revision_idx: 6,
       });
 
-      const initialCount = await getPolicyRevisionCount(testPolicyId);
-      expect(initialCount).toBe(totalRevisions + 1);
+      const initialRevisions = await getPolicyRevisions(providerContext, testPolicyId);
+      expect(initialRevisions.length).toBe(totalRevisions + 1);
 
       await waitForTask();
 
-      const remainingRevisions = await getPolicyRevisions(testPolicyId);
+      const remainingRevisions = await getPolicyRevisions(providerContext, testPolicyId);
 
-      const expectedRevisions = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]; // Should keep all revisions from 6 and up
+      const expectedRevisions = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]; // Should keep all revisions from 2 and up
       const actualRevisions = remainingRevisions.map((r) => r.revision_idx).sort((a, b) => a - b);
       expect(actualRevisions).toEqual(expectedRevisions);
     });
 
     it('should not make any deletions if minimum used revision minus max_revisions has an offset at or idx 0', async () => {
       const totalRevisions = MAX_REVISIONS + 3;
-      await createMultiplePolicyRevisions(testPolicyId, totalRevisions);
+      await createPolicyRevisions(providerContext, testPolicyId, totalRevisions);
 
       // Create agents using older revisions that would normally be cleaned up
       await createAgentDoc(providerContext, 'agent1', testPolicyId, '9.3.0', true, {
         policy_revision_idx: 2,
       });
 
-      const initialCount = await getPolicyRevisionCount(testPolicyId);
-      expect(initialCount).toBe(totalRevisions + 1);
+      const initialRevisions = await getPolicyRevisions(providerContext, testPolicyId);
+      expect(initialRevisions.length).toBe(totalRevisions + 1);
 
       await waitForTask();
 
-      const remainingRevisions = await getPolicyRevisions(testPolicyId);
+      const remainingRevisions = await getPolicyRevisions(providerContext, testPolicyId);
 
-      expect(remainingRevisions.length).toEqual(initialCount);
+      expect(remainingRevisions.length).toEqual(initialRevisions.length);
     });
 
     it('should handle multiple policies in a single cleanup run', async () => {
@@ -206,9 +137,8 @@ export default function (providerContext: FtrProviderContextWithServices) {
         .post('/api/fleet/agent_policies')
         .set('kbn-xsrf', 'xxxx')
         .send({
-          name: 'Test policy 2 for cleanup',
+          name: 'Test policy 2',
           namespace: 'default',
-          force: true,
         })
         .expect(200);
       const policyId2 = agentPolicyResponse2.item.id;
@@ -216,20 +146,20 @@ export default function (providerContext: FtrProviderContextWithServices) {
       try {
         const policy1Revisions = 8;
         const policy2Revisions = 7;
-        await createMultiplePolicyRevisions(testPolicyId, policy1Revisions);
-        await createMultiplePolicyRevisions(policyId2, policy2Revisions);
+        await createPolicyRevisions(providerContext, testPolicyId, policy1Revisions);
+        await createPolicyRevisions(providerContext, policyId2, policy2Revisions);
 
-        const initialCount1 = await getPolicyRevisionCount(testPolicyId);
-        const initialCount2 = await getPolicyRevisionCount(policyId2);
-        expect(initialCount1).toBe(policy1Revisions + 1);
-        expect(initialCount2).toBe(policy2Revisions + 1);
+        const initialRevisions1 = await getPolicyRevisions(providerContext, testPolicyId);
+        const initialRevisions2 = await getPolicyRevisions(providerContext, policyId2);
+        expect(initialRevisions1.length).toBe(policy1Revisions + 1);
+        expect(initialRevisions2.length).toBe(policy2Revisions + 1);
 
         await waitForTask();
 
-        const finalCount1 = await getPolicyRevisionCount(testPolicyId);
-        const finalCount2 = await getPolicyRevisionCount(policyId2);
-        expect(finalCount1).toBe(MAX_REVISIONS);
-        expect(finalCount2).toBe(MAX_REVISIONS);
+        const finalRevisions1 = await getPolicyRevisions(providerContext, testPolicyId);
+        const finalRevisions2 = await getPolicyRevisions(providerContext, policyId2);
+        expect(finalRevisions1.length).toBe(MAX_REVISIONS);
+        expect(finalRevisions2.length).toBe(MAX_REVISIONS);
       } finally {
         await supertest
           .post('/api/fleet/agent_policies/delete')
