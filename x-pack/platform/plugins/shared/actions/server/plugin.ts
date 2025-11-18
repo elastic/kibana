@@ -125,6 +125,7 @@ export interface PluginSetupContract {
   ): void;
 
   getSchemaForAuthType: AuthTypeRegistry['getSchemaForAuthType'];
+  getAxiosInstanceWithAuth(validatedSecrets: Record<string, unknown>): Promise<AxiosInstance>;
 
   getAxiosInstanceWithAuth(validatedSecrets: Record<string, unknown>): Promise<AxiosInstance>;
 
@@ -388,6 +389,15 @@ export class ActionsPlugin
       actionsConfigUtils,
       usageCounter: this.usageCounter,
     });
+
+    const getAxiosInstanceFn = getAxiosInstanceWithAuth({
+      authTypeRegistry: this.authTypeRegistry!,
+      configurationUtilities: actionsConfigUtils,
+      logger: this.logger,
+    });
+    const getAxiosInstanceWithAuthHelper = async (validatedSecrets: Record<string, unknown>) => {
+      return await getAxiosInstanceFn(validatedSecrets);
+    };
 
     return {
       registerType: <
