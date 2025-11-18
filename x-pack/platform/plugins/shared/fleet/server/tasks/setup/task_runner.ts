@@ -14,6 +14,7 @@ import { appContextService } from '../../services';
 
 import { TASK_TIMEOUT, TASK_TITLE, TASK_TYPE, type SetupTaskParams } from './utils';
 import { runBackportPackagePolicyInputId } from './run_backport_package_policy_input_id';
+import { runMigrateComponentTemplateILMs } from './run_migrate_component_template_ilms';
 
 /**
  * Register Fleet setup operations, migrations, ...
@@ -41,6 +42,11 @@ export function registerSetupTasks(taskManager: TaskManagerSetupContract) {
             try {
               if (taskParams.type === 'backportPackagePolicyInputId') {
                 await runBackportPackagePolicyInputId({
+                  abortController,
+                  logger,
+                });
+              } else if (taskParams.type === 'migrateComponentTemplateILMs') {
+                await runMigrateComponentTemplateILMs({
                   abortController,
                   logger,
                 });

@@ -18,4 +18,13 @@ export async function scheduleSetupTask(taskManagerStart: TaskManagerStartContra
     runAt: new Date(Date.now() + 3 * 1000),
     state: {},
   });
+
+  await taskManagerStart.ensureScheduled({
+    id: `${TASK_TYPE}:migrateComponentTemplateILMs`,
+    scope: ['fleet'],
+    params: { type: 'migrateComponentTemplateILMs' },
+    taskType: TASK_TYPE,
+    runAt: new Date(Date.now() + 6 * 1000),
+    state: {},
+  });
 }

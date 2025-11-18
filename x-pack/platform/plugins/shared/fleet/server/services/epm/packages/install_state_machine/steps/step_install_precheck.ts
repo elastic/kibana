@@ -8,6 +8,7 @@
 import { appContextService } from '../../../..';
 
 import {
+  DATA_STREAM_TYPES_DEPRECATED_ILMS,
   getILMMigrationStatus,
   getILMPolicies,
   getILMPolicy,
@@ -27,10 +28,9 @@ export async function stepInstallPrecheck() {
     const ilmMigrationStatusMap = await getILMMigrationStatus();
     const updatedILMMigrationStatusMap = new Map(ilmMigrationStatusMap);
 
-    const dataStreamTypes = ['logs', 'metrics', 'synthetics'];
-    const ilmPolicies = await getILMPolicies(dataStreamTypes);
+    const ilmPolicies = await getILMPolicies(DATA_STREAM_TYPES_DEPRECATED_ILMS);
 
-    for (const dataStreamType of dataStreamTypes) {
+    for (const dataStreamType of DATA_STREAM_TYPES_DEPRECATED_ILMS) {
       const ilmPolicy = getILMPolicy(dataStreamType, ilmMigrationStatusMap, ilmPolicies);
 
       if (ilmPolicy === `${dataStreamType}@lifecycle`) {
