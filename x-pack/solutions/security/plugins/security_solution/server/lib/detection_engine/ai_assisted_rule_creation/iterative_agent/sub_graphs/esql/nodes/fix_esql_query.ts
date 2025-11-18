@@ -45,7 +45,6 @@ export const fixEsqlQueryNode = async ({
         esql_errors: state.validationErrors.esqlErrors,
         esql_query: state.rule.query,
         index_patterns_context: indexPatternsContext.join(' '),
-        knowledge_base_insights: state.knowledgeBase.insights || 'N/A',
       });
 
       const { content } = await lastValueFrom(

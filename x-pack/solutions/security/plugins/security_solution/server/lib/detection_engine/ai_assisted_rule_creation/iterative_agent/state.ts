@@ -18,7 +18,12 @@ export const RuleCreationAnnotation = Annotation.Root({
   answer: Annotation<string>(),
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   rule: Annotation<Record<string, any>>(),
-  errors: Annotation<string[]>(),
+  errors: Annotation<string[]>({
+    default: () => [],
+    reducer: (current, update) => {
+      return [...current, ...update];
+    },
+  }),
   indices: Annotation<{
     shortlistedIndexPatterns: string[];
     indexPatternAnalysis: Record<

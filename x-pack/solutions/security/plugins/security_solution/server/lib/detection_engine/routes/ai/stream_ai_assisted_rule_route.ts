@@ -104,7 +104,6 @@ export const streamAiAssistedRuleRoute = (router: SecuritySolutionPluginRouter, 
             esClient,
             savedObjectsClient,
             rulesClient,
-            kbDataClient,
           });
           /*
           const mockedStream = `{\"type\":\"node_update\",\"nodeState\":{\"userQuery\":\"get me top 10 network events with response size greater than 100Kb\\n\",\"errors\":[]},\"nodeName\":\"processKnowledgeBase\",\"timestamp\":\"2025-11-05T09:58:46.065Z\"}
