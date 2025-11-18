@@ -138,20 +138,7 @@ export const RunScriptActionResult = memo<
       <RunscriptActionResult
         action={completedActionDetails}
         agentId={command.commandDefinition?.meta?.endpointId}
-        canAccessFileDownloadLink={
-          command.commandDefinition?.meta?.agentType === 'sentinel_one' ||
-          command.commandDefinition?.meta?.agentType === 'microsoft_defender_endpoint'
-        }
-        data-test-subj={
-          command.commandDefinition?.meta?.agentType === 'sentinel_one'
-            ? 'sentinelOneRunscriptResult'
-            : 'console'
-        }
-        hideFile={command.commandDefinition?.meta?.agentType === 'crowdstrike'}
-        shouldShowOutput={
-          command.commandDefinition?.meta?.agentType === 'microsoft_defender_endpoint'
-        }
-        showPasscode={command.commandDefinition?.meta?.agentType === 'sentinel_one'}
+        data-test-subj="runscriptResult"
         textSize="s"
       />
     </ResultComponent>

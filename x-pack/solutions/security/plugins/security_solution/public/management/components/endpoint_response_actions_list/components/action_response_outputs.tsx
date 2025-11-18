@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable complexity */
+
 import React, { memo, useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import {
@@ -123,34 +125,14 @@ export const ActionResponseOutputs = memo<ActionResponseOutputsProps>(
               }
 
               if (isRunScriptAction(action)) {
-                if (action.agentType === 'sentinel_one') {
-                  hostOutput = (
-                    <RunscriptActionResult
-                      action={action}
-                      agentId={agentId}
-                      textSize="xs"
-                      data-test-subj={getTestId('actionsLogTray')}
-                    />
-                  );
-                } else if (
-                  action.agentType === 'microsoft_defender_endpoint' ||
-                  action.agentType === 'crowdstrike'
-                ) {
-                  hostOutput = (
-                    <ExecuteActionHostResponse
-                      action={action}
-                      agentId={agentId}
-                      canAccessFileDownloadLink={
-                        canAccessEndpointActionsLogManagement || canReadActionsLogManagement
-                      }
-                      textSize="xs"
-                      data-test-subj={getTestId('actionsLogTray')}
-                      hideFile={action.agentType === 'crowdstrike'}
-                      hideContext={true}
-                      showPasscode={action.agentType !== 'microsoft_defender_endpoint'}
-                    />
-                  );
-                }
+                hostOutput = (
+                  <RunscriptActionResult
+                    action={action}
+                    agentId={agentId}
+                    data-test-subj={getTestId('actionsLogTray')}
+                    textSize="xs"
+                  />
+                );
               }
 
               if (isMemoryDumpAction(action)) {

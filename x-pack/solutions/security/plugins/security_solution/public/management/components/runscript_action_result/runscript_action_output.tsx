@@ -59,7 +59,7 @@ const RunscriptOutputAccordion = memo<RunscriptActionOutputProps>(
   ({
     content = emptyValue,
     initialIsOpen = false,
-    textSize,
+    textSize = 'xs',
     type,
     'data-test-subj': dataTestSubj,
   }) => {
@@ -98,7 +98,7 @@ RunscriptOutputAccordion.displayName = 'RunscriptOutputAccordion';
 export interface RunscriptOutputProps {
   outputContent: ResponseActionRunScriptOutputContent;
   'data-test-subj'?: string;
-  textSize?: 's' | 'xs';
+  textSize?: Exclude<EuiTextProps['size'], 'm' | 'relative'>;
 }
 
 export const RunscriptOutput = memo<RunscriptOutputProps>(
@@ -125,26 +125,26 @@ export const RunscriptOutput = memo<RunscriptOutputProps>(
       );
     }
 
+    const hasErrorOutput = stderr && stderr.length > 0;
+    const hasStdOutput = stdout && stdout.length > 0;
+
     return (
       <>
         <EuiFlexItem>
-          {stderr.length > 0 && (
-            <>
-              <EuiSpacer size="m" />
-              <RunscriptOutputAccordion
-                content={stderr.length ? stderr : undefined}
-                data-test-subj={`${dataTestSubj}-error`}
-                initialIsOpen
-                textSize={textSize}
-                type="error"
-              />
-            </>
+          {hasErrorOutput && (
+            <RunscriptOutputAccordion
+              content={hasErrorOutput ? stderr : undefined}
+              data-test-subj={`${dataTestSubj}-error`}
+              initialIsOpen
+              textSize={textSize}
+              type="error"
+            />
           )}
-          {stdout.length > 0 && (
+          {hasStdOutput && (
             <>
-              <EuiSpacer size="m" />
+              {hasErrorOutput && <EuiSpacer size="m" />}
               <RunscriptOutputAccordion
-                content={stdout.length ? stdout : undefined}
+                content={hasStdOutput ? stdout : undefined}
                 data-test-subj={`${dataTestSubj}-output`}
                 initialIsOpen
                 textSize={textSize}
