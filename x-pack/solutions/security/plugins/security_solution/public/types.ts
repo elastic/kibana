@@ -31,6 +31,7 @@ import type { CasesPublicStart, CasesPublicSetup } from '@kbn/cases-plugin/publi
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { SessionViewStart } from '@kbn/session-view-plugin/public';
+import type { KubernetesSecurityStart } from '@kbn/kubernetes-security-plugin/public';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/public';
 import type { OsqueryPluginStart } from '@kbn/osquery-plugin/public';
 import type { LicensingPluginStart, LicensingPluginSetup } from '@kbn/licensing-plugin/public';
@@ -69,6 +70,7 @@ import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
 import type { Cases } from './cases';
 import type { Exceptions } from './exceptions';
+import type { Kubernetes } from './kubernetes';
 import type { Onboarding } from './onboarding';
 import type { Overview } from './overview';
 import type { Reports } from './reports';
@@ -129,6 +131,7 @@ export interface StartPlugins {
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
   fleet?: FleetStart;
+  kubernetesSecurity: KubernetesSecurityStart;
   lens: LensPublicStart;
   lists?: ListsPluginStart;
   licensing: LicensingPluginStart;
@@ -240,6 +243,7 @@ export interface SubPlugins {
   dashboards: Dashboards;
   exceptions: Exceptions;
   explore: Explore;
+  kubernetes: Kubernetes;
   management: Management;
   onboarding: Onboarding;
   overview: Overview;
@@ -264,6 +268,7 @@ export interface StartedSubPlugins {
   dashboards: ReturnType<Dashboards['start']>;
   exceptions: ReturnType<Exceptions['start']>;
   explore: ReturnType<Explore['start']>;
+  kubernetes: ReturnType<Kubernetes['start']>;
   management: ReturnType<Management['start']>;
   onboarding: ReturnType<Onboarding['start']>;
   overview: ReturnType<Overview['start']>;

@@ -1312,6 +1312,8 @@
       "@kbn/kibana-usage-collection-plugin/*": ["src/platform/plugins/private/kibana_usage_collection/*"],
       "@kbn/kibana-utils-plugin": ["src/platform/plugins/shared/kibana_utils"],
       "@kbn/kibana-utils-plugin/*": ["src/platform/plugins/shared/kibana_utils/*"],
+      "@kbn/kubernetes-security-plugin": ["x-pack/solutions/security/plugins/kubernetes_security"],
+      "@kbn/kubernetes-security-plugin/*": ["x-pack/solutions/security/plugins/kubernetes_security/*"],
       "@kbn/langchain": ["x-pack/platform/packages/shared/kbn-langchain"],
       "@kbn/langchain/*": ["x-pack/platform/packages/shared/kbn-langchain/*"],
       "@kbn/langgraph-checkpoint-saver": ["x-pack/platform/packages/shared/kbn-langgraph-checkpoint-saver"],

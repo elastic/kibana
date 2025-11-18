@@ -415,3 +415,4 @@ enabled:
   - x-pack/platform/test/saved_object_api_integration/user_profiles/config.ts
     # stateful config files that run deployment-agnostic tests
   - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.stateful.config.ts
+  - x-pack/test/kubernetes_security/basic/config.ts
