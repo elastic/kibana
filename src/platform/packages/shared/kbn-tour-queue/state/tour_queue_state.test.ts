@@ -126,7 +126,7 @@ describe('TourQueueStateManager', () => {
 
   describe('Tour object', () => {
     describe('complete', () => {
-      it('should mark the tour as completed and unregister it', () => {
+      it('should mark the tour as completed', () => {
         const tour = tourQueue.register(TOUR_1);
 
         expect(tourQueue.getState().registeredTourIds).toContain(TOUR_1);
@@ -135,7 +135,6 @@ describe('TourQueueStateManager', () => {
         tour.complete();
 
         expect(tourQueue.getState().completedTourIds.has(TOUR_1)).toBe(true);
-        expect(tourQueue.getState().registeredTourIds).not.toContain(TOUR_1);
       });
 
       it('should notify subscribers when completed', () => {
@@ -166,6 +165,26 @@ describe('TourQueueStateManager', () => {
         tourQueue.subscribe(subscriber);
 
         tour.skip();
+
+        expect(subscriber).toHaveBeenCalledTimes(1);
+      });
+    });
+    describe('unregister', () => {
+      it('should remove tour from registered list', () => {
+        const tour = tourQueue.register(TOUR_1);
+
+        expect(tourQueue.getState().registeredTourIds).toContain(TOUR_1);
+
+        tour.unregister();
+
+        expect(tourQueue.getState().registeredTourIds).not.toContain(TOUR_1);
+      });
+
+      it('should notify subscribers', () => {
+        const tour = tourQueue.register(TOUR_1);
+        tourQueue.subscribe(subscriber);
+
+        tour.unregister();
 
         expect(subscriber).toHaveBeenCalledTimes(1);
       });

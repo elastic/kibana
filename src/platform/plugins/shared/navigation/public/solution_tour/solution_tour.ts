@@ -63,8 +63,9 @@ export class SolutionNavigationTourManager {
         tour.skip();
       }
       await preserveTourCompletion(this.deps.userProfile);
-    } finally {
       tour.complete();
+    } finally {
+      tour.unregister();
     }
   }
 }

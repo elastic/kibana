@@ -36,7 +36,7 @@ export const useTourQueue = (tourId: TourId): TourQueueResult => {
       setIsActive(tourQueue.isActive(tourId));
     });
     return () => {
-      tourRef.current?.complete();
+      tourRef.current?.unregister();
       stopListening();
     };
   }, [tourId, tourQueue]);

@@ -12,6 +12,7 @@ import { getTourPriority, type TourId } from '..';
 export interface Tour {
   skip: () => void;
   complete: () => void;
+  unregister: () => void;
 }
 
 export interface TourQueueState {
@@ -35,6 +36,7 @@ export class TourQueueStateManager {
       return {
         skip: () => {},
         complete: () => {},
+        unregister: () => {},
       };
     }
 
@@ -50,6 +52,9 @@ export class TourQueueStateManager {
       },
       complete: () => {
         this.complete(tourId);
+      },
+      unregister: () => {
+        this.unregister(tourId);
       },
     };
   }
@@ -71,11 +76,15 @@ export class TourQueueStateManager {
     return this.getActive() === tourId;
   }
 
-  complete(tourId: TourId): void {
-    this.completedTourIds.add(tourId);
+  unregister(tourId: TourId): void {
     this.registeredTourIds = this.registeredTourIds.filter(
       (registeredTourId) => registeredTourId !== tourId
     );
+    this.notifySubscribers();
+  }
+
+  complete(tourId: TourId): void {
+    this.completedTourIds.add(tourId);
     this.notifySubscribers();
   }
 
