@@ -23,7 +23,7 @@ import {
   getAgentImageConfig,
   emitPipeline,
   getPipeline,
-  hasFIPSLabel,
+  prHasFIPSLabel,
 } from '#pipeline-utils';
 
 const prConfig = prConfigs.jobs.find((job) => job.pipelineSlug === 'kibana-pull-request');
@@ -67,7 +67,7 @@ const SKIPPABLE_PR_MATCHERS = prConfig.skip_ci_on_only_changed!.map((r) => new R
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/pick_test_groups.yml'));
     }
 
-    if (hasFIPSLabel()) {
+    if (prHasFIPSLabel()) {
       pipeline.push(getPipeline('.buildkite/pipelines/fips/verify_fips_enabled.yml'));
     }
 

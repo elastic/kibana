@@ -50,7 +50,7 @@ export const FIPS_GH_LABELS = {
 /**
  * Checks if the PR has a specific FIPS label or ANY FIPS label when no version is passed.
  */
-export function hasFIPSLabel(ver?: FIPS_VERSION): boolean {
+export function prHasFIPSLabel(ver?: FIPS_VERSION): boolean {
   const labels = process.env.GITHUB_PR_LABELS ?? '';
 
   if (!labels) {

@@ -10,7 +10,7 @@
 import { dump } from 'js-yaml';
 import type { BuildkiteAgentTargetingRule } from './buildkite';
 import { BuildkiteClient } from './buildkite';
-import { FIPS_VERSION, hasFIPSLabel } from './pr_labels';
+import { FIPS_VERSION, prHasFIPSLabel } from './pr_labels';
 
 const ELASTIC_IMAGES_QA_PROJECT = 'elastic-images-qa';
 const ELASTIC_IMAGES_PROD_PROJECT = 'elastic-images-prod';
@@ -29,7 +29,7 @@ const USE_QA_IMAGE_FOR_PR = process.env.USE_QA_IMAGE_FOR_PR?.match(/(1|true)/i);
 const getFIPSImage = () => {
   let image: string;
 
-  if (process.env.KBN_FIPS_VERSION === FIPS_VERSION.THREE || hasFIPSLabel(FIPS_VERSION.THREE)) {
+  if (process.env.KBN_FIPS_VERSION === FIPS_VERSION.THREE || prHasFIPSLabel(FIPS_VERSION.THREE)) {
     image = 'family/kibana-fips-140-3-ubuntu-2404';
   } else {
     image = 'family/kibana-fips-140-2-ubuntu-2404';
@@ -49,7 +49,7 @@ function getAgentImageConfig({ returnYaml = false } = {}): string | BuildkiteAge
   const bk = new BuildkiteClient();
   let config: BuildkiteAgentTargetingRule;
 
-  if (TEST_ENABLE_FIPS_AGENT || hasFIPSLabel()) {
+  if (TEST_ENABLE_FIPS_AGENT || prHasFIPSLabel()) {
     config = getFIPSImage();
 
     bk.setAnnotation(
