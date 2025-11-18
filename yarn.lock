@@ -6503,6 +6503,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/eslint-plugin-perf-suggestions@link:packages/kbn-eslint-plugin-perf-suggestions":
+  version "0.0.0"
+  uid ""
+
 "@kbn/eslint-plugin-telemetry@link:packages/kbn-eslint-plugin-telemetry":
   version "0.0.0"
   uid ""
