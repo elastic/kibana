@@ -300,9 +300,7 @@ export const MonacoEditor = ({
           >
             <EuiButtonIcon
               display="fill"
-              color="primary"
               iconType="play"
-              iconSize="m"
               onClick={sendRequestsCallback}
               data-test-subj="sendRequestButton"
               aria-label={i18n.translate('console.monaco.sendRequestButtonTooltipAriaLabel', {
