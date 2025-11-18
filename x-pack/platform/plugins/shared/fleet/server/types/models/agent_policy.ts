@@ -284,6 +284,19 @@ const BaseSecretsSchema = schema
 
 export const NewAgentPolicySchema = schema.object({
   ...AgentPolicyBaseSchema,
+  supports_agentless: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.boolean({
+        defaultValue: false,
+        meta: {
+          description:
+            'Indicates whether the agent policy supports agentless integrations. Deprecated in favor of agentless policies API.',
+          deprecated: true,
+        },
+      }),
+    ])
+  ),
   force: schema.maybe(schema.boolean()),
 });
 
