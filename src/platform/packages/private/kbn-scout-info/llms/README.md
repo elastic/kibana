@@ -63,6 +63,7 @@ Instructions:
 @src/platform/packages/private/kbn-scout-info/llms/generate-scout-page-objects.md contains instructions on how to perform this task
 @src/platform/packages/private/kbn-scout-info/llms/what-is-scout.md contains a high-level description of the Scout framework
 @src/platform/packages/private/kbn-scout-info/llms/scout-page-objects.md contains a high-level overview of page objects in Scout
+@src/platform/packages/private/kbn-scout-info/llms/scout-browser-auth.md contains information on how browser authentication works in Scout
 ```
 
 **Checkpoint**: the AI will generate or modify Scout page objects. For this step, you may need to manually move these files to the correct directory (either the plugin's page objects folder, or one of the Scout packages), and register them in the `pageObjects` fixture. Refer to the official Scout documentation.
