@@ -35,7 +35,19 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
     await this.advanceRetryAttempt();
   }
 
-  public async catchError(): Promise<void> {
+  public async catchError(failedContext: StepExecutionRuntime): Promise<void> {
+    const shouldRetry = failedContext.contextManager.renderValueAccordingToContext(
+      this.node.configuration.condition || true,
+      {
+        error: failedContext.stepExecution?.error,
+      }
+    );
+
+    if (!shouldRetry) {
+      this.workflowLogger.logDebug(`Condition for retry step not met, propagating error.`);
+      return;
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
     const retryState = this.stepExecutionRuntime.getCurrentStepState()!;
 

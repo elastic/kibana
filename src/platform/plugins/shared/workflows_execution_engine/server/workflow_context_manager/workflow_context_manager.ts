@@ -130,9 +130,9 @@ export class WorkflowContextManager {
    * // => { url: "https://api.example.com", headers: { "X-Request-Id": "exec-123" } }
    * ```
    */
-  public renderValueAccordingToContext<T>(obj: T): T {
+  public renderValueAccordingToContext<T>(obj: T, additionalContext?: Record<string, unknown>): T {
     const context = this.getContext();
-    return this.templateEngine.render(obj, context);
+    return this.templateEngine.render(obj, { ...context, ...additionalContext });
   }
 
   public evaluateExpressionInContext(template: string): unknown {
