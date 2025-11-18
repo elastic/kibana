@@ -23,6 +23,7 @@ import {
 } from '@kbn/securitysolution-exceptions-common/api';
 
 import { EXCEPTIONS_API_ALL } from '@kbn/security-solution-features/constants';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { CREATE_RULE_EXCEPTIONS_URL } from '../../../../../../common/api/detection_engine/rule_exceptions';
 
 import { readRules } from '../../../rule_management/logic/detection_rules_client/read_rules';
@@ -90,6 +91,7 @@ export const createRuleExceptionsRoute = (router: SecuritySolutionPluginRouter) 
             rule,
             listsClient,
             detectionRulesClient,
+            alertingRulesClient: rulesClient,
           });
 
           return response.ok({ body: CreateRuleExceptionListItemsResponse.parse(createdItems) });
@@ -109,11 +111,13 @@ export const createRuleExceptions = async ({
   rule,
   listsClient,
   detectionRulesClient,
+  alertingRulesClient,
 }: {
   items: CreateRuleExceptionListItemProps[];
+  rule: SanitizedRule<RuleParams>;
   listsClient: ExceptionListClient | null;
   detectionRulesClient: IDetectionRulesClient;
-  rule: SanitizedRule<RuleParams>;
+  alertingRulesClient: RulesClient;
 }) => {
   const ruleDefaultLists = rule.params.exceptionsList.filter(
     (list) => list.type === ExceptionListTypeEnum.RULE_DEFAULT
@@ -149,6 +153,7 @@ export const createRuleExceptions = async ({
         listsClient,
         detectionRulesClient,
         removeOldAssociation: true,
+        alertingRulesClient,
       });
 
       return createExceptionListItems({ items, defaultList, listsClient });
@@ -159,6 +164,7 @@ export const createRuleExceptions = async ({
       listsClient,
       detectionRulesClient,
       removeOldAssociation: false,
+      alertingRulesClient,
     });
 
     return createExceptionListItems({ items, defaultList, listsClient });
@@ -249,11 +255,13 @@ export const createAndAssociateDefaultExceptionList = async ({
   listsClient,
   detectionRulesClient,
   removeOldAssociation,
+  alertingRulesClient,
 }: {
   rule: SanitizedRule<RuleParams>;
   listsClient: ExceptionListClient | null;
   detectionRulesClient: IDetectionRulesClient;
   removeOldAssociation: boolean;
+  alertingRulesClient: RulesClient;
 }): Promise<ExceptionList> => {
   const exceptionListToAssociate = await createExceptionList({ rule, listsClient });
 
@@ -269,20 +277,24 @@ export const createAndAssociateDefaultExceptionList = async ({
     ? existingRuleExceptionLists.filter((list) => list.type !== ExceptionListTypeEnum.RULE_DEFAULT)
     : existingRuleExceptionLists;
 
-  await detectionRulesClient.patchRule({
-    rulePatch: {
-      rule_id: rule.params.ruleId,
-      ...rule.params,
-      exceptions_list: [
-        ...ruleExceptionLists,
-        {
-          id: exceptionListToAssociate.id,
-          list_id: exceptionListToAssociate.list_id,
-          type: exceptionListToAssociate.type,
-          namespace_type: exceptionListToAssociate.namespace_type,
-        },
-      ],
-    },
+  // if patchRule fails, delete the exception list created above
+  await alertingRulesClient.bulkEditRuleParamsWithReadAuth({
+    ids: [rule.id],
+    operations: [
+      {
+        field: 'exceptionsList',
+        operation: 'set',
+        value: [
+          ...ruleExceptionLists,
+          {
+            id: exceptionListToAssociate.id,
+            list_id: exceptionListToAssociate.list_id,
+            type: exceptionListToAssociate.type,
+            namespace_type: exceptionListToAssociate.namespace_type,
+          },
+        ],
+      },
+    ],
   });
 
   return exceptionListToAssociate;
