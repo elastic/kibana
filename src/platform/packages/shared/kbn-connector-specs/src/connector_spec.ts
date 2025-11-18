@@ -1,0 +1,275 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
+ */
+
+/**
+ * Stack Connectors 2.0 - Minimal TypeScript Specification
+ *
+ * This is a simplified spec containing only features used by example connectors.
+ * For the comprehensive specification, see connector_rfc.ts
+ *
+ * Key principles:
+ * - Single schema (config + secrets together)
+ * - Secrets marked with meta.sensitive
+ * - Standard auth schemas (reusable)
+ * - Zod for validation and UI derivation
+ */
+
+import { z } from '@kbn/zod';
+import type { Logger } from '@kbn/logging';
+import type { LicenseType } from '@kbn/licensing-types';
+import type { AxiosInstance } from 'axios';
+import { withUIMeta } from './connector_spec_ui';
+
+export { withUIMeta, UISchemas } from './connector_spec_ui';
+
+// ============================================================================
+// INTERNATIONALIZATION
+// ============================================================================
+
+export function createI18nKeys(connectorId: string) {
+  const base = `xpack.stackConnectors${connectorId}`;
+  return {
+    metadata: (key: string) => `${base}.metadata.${key}`,
+    config: (key: string) => `${base}.config.${key}`,
+    secrets: (key: string) => `${base}.secrets.${key}`,
+    actions: (actionName: string, key: string) => `${base}.actions.${actionName}.${key}`,
+    validation: (key: string) => `${base}.validation.${key}`,
+    test: (key: string) => `${base}.test.${key}`,
+  };
+}
+
+// ============================================================================
+// METADATA
+// ============================================================================
+
+export interface ConnectorMetadata {
+  id: string;
+  displayName: string;
+  icon?: string;
+  description: string;
+  docsUrl?: string;
+  minimumLicense: LicenseType;
+  supportedFeatureIds: Array<
+    | 'alerting'
+    | 'cases'
+    | 'uptime'
+    | 'siem'
+    | 'generativeAIForSecurity'
+    | 'generativeAIForObservability'
+    | 'generativeAIForSearchPlayground'
+    | 'endpointSecurity'
+    | 'workflows'
+  >;
+}
+
+// ============================================================================
+// STANDARD AUTH SCHEMAS - PHASE 1
+// ============================================================================
+// Phase 1 supports only: Header, Basic, Bearer
+// OAuth2, SSL/mTLS, AWS SigV4 → Phase 2 (see connector_rfc.ts)
+
+/**
+ * Header-based authentication (generic)
+ * Use for: API keys, custom headers (X-API-Key, etc.)
+ */
+export const HeaderAuthSchema = z.object({
+  method: z.literal('headers'),
+  headers: z.record(z.string(), z.string()).describe('Custom Headers'),
+});
+
+/**
+ * HTTP Basic Authentication
+ * Use for: Username + Password auth (Jira, etc.)
+ */
+export const BasicAuthSchema = z.object({
+  method: z.literal('basic'),
+  credentials: z.object({
+    username: z.string().describe('Username'),
+    password: withUIMeta(z.string(), { sensitive: true }).describe('Password'),
+  }),
+});
+
+/**
+ * Bearer Token Authentication
+ * Use for: OAuth tokens, API tokens sent as "Authorization: Bearer <token>"
+ */
+export const BearerAuthSchema = z.object({
+  method: z.literal('bearer'),
+  token: withUIMeta(z.string(), { sensitive: true }).describe('Bearer Token'),
+});
+
+// ============================================================================
+// PHASE 2 AUTH TYPES (Not supported yet - see connector_rfc.ts)
+// ============================================================================
+// - OAuth2 (clientId, clientSecret, token refresh)
+// - SSL/mTLS (certificate-based authentication)
+// - AWS SigV4 (AWS service authentication)
+// - Custom (connector-specific auth flows)
+
+// ============================================================================
+// POLICIES
+// ============================================================================
+
+export const RETRY_RATE_LIMIT = [429, 503] as const;
+export const RETRY_SERVER_ERRORS = [500, 502, 503, 504] as const;
+export const RETRY_GATEWAY_ERRORS = [502, 503, 504] as const;
+export const RETRY_TIMEOUT_AND_RATE_LIMIT = [408, 429, 503] as const;
+
+export interface RateLimitPolicy {
+  strategy: 'header' | 'status_code' | 'response_body';
+  codes?: number[];
+  remainingHeader?: string;
+  resetHeader?: string;
+  bodyPath?: string;
+}
+
+export interface PaginationPolicy {
+  strategy: 'cursor' | 'offset' | 'link_header' | 'none';
+  parameterLocation?: 'query_params' | 'headers' | 'body';
+  resultPath?: string;
+  cursorParam?: string;
+  cursorPath?: string;
+  offsetParam?: string;
+  limitParam?: string;
+  linkHeaderName?: string;
+  pageSizeParam?: string;
+  defaultPageSize?: number;
+}
+
+export interface RetryPolicy {
+  retryOnStatusCodes?: number[];
+  customRetryCondition?: (error: {
+    status?: number;
+    message?: string;
+    response?: unknown;
+  }) => boolean;
+  maxRetries?: number;
+  backoffStrategy?: 'exponential' | 'linear' | 'fixed';
+  initialDelay?: number;
+}
+
+export interface ErrorPolicy {
+  classifyError?: (error: { status?: number; message?: string }) => 'user' | 'system' | 'unknown';
+  userErrorCodes?: number[];
+  systemErrorCodes?: number[];
+}
+
+export interface StreamingPolicy {
+  enabled: boolean;
+  mechanism?: 'sse' | 'chunked' | 'websocket';
+  parser?: 'ndjson' | 'json' | 'text' | 'custom';
+}
+
+export interface ConnectorPolicies {
+  rateLimit?: RateLimitPolicy;
+  pagination?: PaginationPolicy;
+  retry?: RetryPolicy;
+  error?: ErrorPolicy;
+  streaming?: StreamingPolicy;
+}
+
+// ============================================================================
+// ACTIONS
+// ============================================================================
+
+export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = unknown> {
+  isTool?: boolean;
+  input: z.ZodSchema<TInput>;
+  output?: z.ZodSchema<TOutput>;
+  error?: z.ZodSchema<TError>;
+  handler: (ctx: ActionContext, input: TInput) => Promise<TOutput>;
+  description?: string;
+  actionGroup?: string;
+  supportsStreaming?: boolean;
+}
+
+export interface ActionContext {
+  auth: { method: string; headers: Record<string, string>; [key: string]: unknown };
+  log: Logger;
+  client: AxiosInstance;
+  config?: Record<string, unknown>;
+  connectorUsageCollector?: unknown;
+}
+
+// ============================================================================
+// TRANSFORMATIONS
+// ============================================================================
+
+export interface TemplateRendering {
+  enabled: boolean;
+  format?: 'mustache' | 'handlebars' | 'custom';
+  escaping?: 'html' | 'json' | 'markdown' | 'none';
+}
+
+export interface Transformations {
+  templates?: TemplateRendering;
+  serializeRequest?: (data: unknown) => unknown;
+  deserializeResponse?: (data: unknown) => unknown;
+  interceptors?: {
+    request?: (config: unknown) => unknown | Promise<unknown>;
+    response?: (response: unknown) => unknown | Promise<unknown>;
+  };
+}
+
+// ============================================================================
+// TESTING
+// ============================================================================
+
+export interface ConnectorTest {
+  handler: (ctx: ActionContext) => Promise<{
+    ok: boolean;
+    message?: string;
+    [key: string]: unknown;
+  }>;
+  description?: string;
+}
+
+// ============================================================================
+// MAIN CONNECTOR DEFINITION
+// ============================================================================
+
+export interface ConnectorSpec {
+  metadata: ConnectorMetadata;
+
+  // Single unified schema for all connector fields (config + secrets)
+  // Mark sensitive fields with withUIMeta({ sensitive: true })
+  schema: z.ZodSchema;
+
+  validateUrls?: {
+    fields?: string[];
+  };
+
+  policies?: ConnectorPolicies;
+
+  actions: Record<string, ActionDefinition>;
+
+  test?: ConnectorTest;
+
+  transformations?: Transformations;
+}
+
+// ============================================================================
+// HELPER UTILITIES
+// ============================================================================
+
+export function requiresCredentials(auth: { method: string }): boolean {
+  return auth.method !== 'none' && auth.method !== 'webhook';
+}
+
+export function supportsStreaming(connector: ConnectorSpec): boolean {
+  return connector.policies?.streaming?.enabled ?? false;
+}
+
+export function getActionNames(connector: ConnectorSpec): string[] {
+  return Object.keys(connector.actions);
+}
+
+export function isToolAction(connector: ConnectorSpec, actionName: string): boolean {
+  return connector.actions[actionName]?.isTool ?? false;
+}

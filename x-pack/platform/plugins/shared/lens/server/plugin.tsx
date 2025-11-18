@@ -29,6 +29,7 @@ import type {
 import type { EmbeddableRegistryDefinition, EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
+import { LensConfigBuilder } from '@kbn/lens-embeddable-utils/config_builder';
 import { setupSavedObjects } from './saved_objects';
 import { setupExpressions } from './expressions';
 import { makeLensEmbeddableFactory } from './embeddable/make_lens_embeddable_factory';
@@ -41,6 +42,7 @@ import {
 } from '../common/constants';
 import { LensStorage } from './content_management';
 import { registerLensAPIRoutes } from './api/routes';
+import { fetchLensFeatureFlags } from '../common';
 import { getLensTransforms } from '../common/transforms';
 
 export interface PluginSetupContract {
@@ -114,10 +116,12 @@ export class LensServerPlugin
     plugins.embeddable.registerEmbeddableFactory(
       lensEmbeddableFactory() as unknown as EmbeddableRegistryDefinition
     );
+    const builder = new LensConfigBuilder();
 
     plugins.embeddable.registerTransforms(
       LENS_EMBEDDABLE_TYPE,
       getLensTransforms({
+        builder,
         transformEnhancementsIn: plugins.embeddable.transformEnhancementsIn,
         transformEnhancementsOut: plugins.embeddable.transformEnhancementsOut,
       })
@@ -126,8 +130,19 @@ export class LensServerPlugin
     registerLensAPIRoutes({
       http: core.http,
       contentManagement: plugins.contentManagement,
+      builder,
       logger: this.logger,
     });
+
+    core
+      .getStartServices()
+      .then(async ([{ featureFlags }]) => {
+        const flags = await fetchLensFeatureFlags(featureFlags);
+        builder.setEnabled(flags.apiFormat);
+      })
+      .catch((error) => {
+        this.logger.error(error);
+      });
 
     return {
       lensEmbeddableFactory,

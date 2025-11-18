@@ -20,6 +20,9 @@ const _allowedExperimentalValues = {
   enableAgentPrivilegeLevelChange: false,
   installIntegrationsKnowledge: false,
   fleetPolicyRevisionsCleanupTask: true,
+  agentlessPoliciesAPI: true,
+  useAgentlessAPIInUI: false,
+  disabledAgentlessLegacyAPI: false,
 };
 
 /**

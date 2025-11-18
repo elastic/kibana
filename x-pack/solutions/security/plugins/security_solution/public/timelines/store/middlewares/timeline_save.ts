@@ -5,48 +5,48 @@
  * 2.0.
  */
 
-import { get, has, omit, isObject, toString as fpToString } from 'lodash/fp';
+import { get, has, isObject, omit, toString as fpToString } from 'lodash/fp';
 import { set } from '@kbn/safer-lodash-set/fp';
 import type { Action, Middleware } from 'redux';
 import type { CoreStart } from '@kbn/core/public';
 import type { Filter, MatchAllFilter } from '@kbn/es-query';
 import {
-  isScriptedRangeFilter,
   isExistsFilter,
-  isRangeFilter,
   isMatchAllFilter,
   isPhraseFilter,
-  isQueryStringFilter,
   isPhrasesFilter,
+  isQueryStringFilter,
+  isRangeFilter,
+  isScriptedRangeFilter,
 } from '@kbn/es-query';
 
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { PageScope } from '../../../data_view_manager/constants';
 import { sourcererAdapterSelector } from '../../../data_view_manager/redux/selectors';
 import { sourcererSelectors } from '../../../sourcerer/store';
 import {
-  updateTimeline,
-  startTimelineSaving,
   endTimelineSaving,
-  showCallOutUnauthorizedMsg,
   saveTimeline,
   setChanged,
+  showCallOutUnauthorizedMsg,
+  startTimelineSaving,
+  updateTimeline,
 } from '../actions';
 import { copyTimeline, persistTimeline } from '../../containers/api';
 import type { State } from '../../../common/store/types';
+import type { inputsModel } from '../../../common/store/inputs';
 import { inputsSelectors } from '../../../common/store/inputs';
 import { selectTimelineById } from '../selectors';
 import * as i18n from '../../pages/translations';
-import type { inputsModel } from '../../../common/store/inputs';
-import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import type {
-  TimelineErrorResponse,
   PersistTimelineResponse,
   SavedTimeline,
+  TimelineErrorResponse,
 } from '../../../../common/api/timeline';
+import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/timeline';
 import type { TimelineModel } from '../model';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import { extractTimelineIdsAndVersions, refreshTimelines } from './helpers';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 
 function isSaveTimelineAction(action: Action): action is ReturnType<typeof saveTimeline> {
   return action.type === saveTimeline.type;
@@ -70,21 +70,26 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
     const timelineTimeRange = inputsSelectors.timelineTimeRangeSelector(storeState);
     const selectedDataViewIdSourcerer = sourcererSelectors.sourcererScopeSelectedDataViewId(
       storeState,
-      SourcererScopeName.timeline
+      PageScope.timeline
     );
     const selectedPatternsSourcerer = sourcererSelectors.sourcererScopeSelectedPatterns(
       storeState,
-      SourcererScopeName.timeline
+      PageScope.timeline
     );
 
-    const { dataViewId: experimentalDataViewId } = sourcererAdapterSelector(
-      SourcererScopeName.timeline
-    )(storeState);
+    const { dataViewId: experimentalDataViewId } = sourcererAdapterSelector(PageScope.timeline)(
+      storeState
+    );
 
     const experimentalIsDataViewEnabled =
       storeState.app.enableExperimental.newDataViewPickerEnabled;
 
     let experimentalSelectedPatterns: string[] = [];
+    let dataViewId: string | null = null;
+
+    if (!experimentalIsDataViewEnabled) {
+      dataViewId = selectedDataViewIdSourcerer;
+    }
 
     // NOTE: remove eslint override above after the experimental picker is stabilized
     if (experimentalIsDataViewEnabled && experimentalDataViewId) {
@@ -95,13 +100,8 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
       if (plugins.dataViews.found) {
         const experimentalDataView = await plugins.dataViews.contract.get(experimentalDataViewId);
 
-        if (!experimentalDataView.isPersisted()) {
-          return kibana.notifications.toasts.addError(
-            new Error('Persisting timelines with adhoc data views is not allowed'),
-            {
-              title: 'Error persisting timeline',
-            }
-          );
+        if (experimentalDataView.isPersisted()) {
+          dataViewId = experimentalDataViewId;
         }
 
         experimentalSelectedPatterns = experimentalDataView.getIndexPattern().split(',');
@@ -111,9 +111,6 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
     const indexNames = experimentalIsDataViewEnabled
       ? experimentalSelectedPatterns
       : selectedPatternsSourcerer;
-    const dataViewId = experimentalIsDataViewEnabled
-      ? experimentalDataViewId
-      : selectedDataViewIdSourcerer;
 
     store.dispatch(startTimelineSaving({ id: localTimelineId }));
 
