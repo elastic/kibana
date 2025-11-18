@@ -159,8 +159,8 @@ export async function cleanUpProfilingData({
     es.indices.deleteDataStream({
       name: 'profiling-events*',
     }),
-    collectorId ? deletePackagePolicy(config, collectorId) : Promise.resolve(),
-    symbolizerId ? deletePackagePolicy(config, symbolizerId) : Promise.resolve(),
+    collectorId ? await deletePackagePolicy(config, collectorId) : Promise.resolve(),
+    symbolizerId ? await deletePackagePolicy(config, symbolizerId) : Promise.resolve(),
   ]);
   log('Unloaded Profiling data');
 }
