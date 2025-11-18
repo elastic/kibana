@@ -27,13 +27,13 @@ export type MaintenanceWindowRequestHandlerContext = CustomRequestHandlerContext
 
 export type MaintenanceWindowClientApi = PublicMethodsOf<MaintenanceWindowClient>;
 
-export interface MaintenanceWindowsPluginsSetup {
+export interface MaintenanceWindowsServerSetupDependencies {
   taskManager: TaskManagerSetupContract;
   licensing: LicensingPluginSetup;
   features: FeaturesPluginSetup;
 }
 
-export interface MaintenanceWindowsPluginsStart {
+export interface MaintenanceWindowsServerStartDependencies {
   taskManager: TaskManagerStartContract;
 }
 

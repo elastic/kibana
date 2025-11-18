@@ -14,8 +14,6 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { Subject } from 'rxjs';
-import { ReplaySubject } from 'rxjs';
 import type { MaintenanceWindowsConfig } from './config';
 import { maintenanceWindowFeature } from './maintenance_window_feature';
 import { registerSavedObject } from './saved_objects';
@@ -27,8 +25,8 @@ import type { MaintenanceWindowRequestHandlerContext, MaintenanceWindowClientApi
 import { LicenseState, type ILicenseState } from './lib';
 import { MaintenanceWindowClientFactory } from './maintenance_window_client_factory';
 import type {
-  MaintenanceWindowsPluginsSetup,
-  MaintenanceWindowsPluginsStart,
+  MaintenanceWindowsServerSetupDependencies,
+  MaintenanceWindowsServerStartDependencies,
   MaintenanceWindowsServerStart,
 } from './types';
 import { defineRoutes } from './routes';
@@ -38,29 +36,27 @@ export class MaintenanceWindowsPlugin
     Plugin<
       void,
       MaintenanceWindowsServerStart,
-      MaintenanceWindowsPluginsSetup,
-      MaintenanceWindowsPluginsStart
+      MaintenanceWindowsServerSetupDependencies,
+      MaintenanceWindowsServerStartDependencies
     >
 {
   private readonly logger: Logger;
   private readonly config: MaintenanceWindowsConfig;
   private licenseState: ILicenseState | null = null;
-  private pluginStop$: Subject<void>;
   private readonly maintenanceWindowClientFactory: MaintenanceWindowClientFactory;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
     this.config = this.config = initializerContext.config.get();
-    this.pluginStop$ = new ReplaySubject(1);
     this.maintenanceWindowClientFactory = new MaintenanceWindowClientFactory();
   }
 
   public setup(
-    core: CoreSetup<MaintenanceWindowsPluginsStart, unknown>,
-    plugins: MaintenanceWindowsPluginsSetup
+    core: CoreSetup<MaintenanceWindowsServerStartDependencies, unknown>,
+    plugins: MaintenanceWindowsServerSetupDependencies
   ) {
     this.licenseState = new LicenseState(plugins.licensing.license$);
-    // Note 1 - is it needed?
+
     core.capabilities.registerProvider(() => {
       return {
         management: {
@@ -71,7 +67,9 @@ export class MaintenanceWindowsPlugin
       };
     });
 
-    plugins.features.registerKibanaFeature(maintenanceWindowFeature);
+    if (this.config.enabled) {
+      plugins.features.registerKibanaFeature(maintenanceWindowFeature);
+    }
 
     registerSavedObject(core.savedObjects, this.logger);
 
@@ -98,7 +96,7 @@ export class MaintenanceWindowsPlugin
 
   public start(
     core: CoreStart,
-    plugins: MaintenanceWindowsPluginsStart
+    plugins: MaintenanceWindowsServerStartDependencies
   ): MaintenanceWindowsServerStart {
     const { maintenanceWindowClientFactory } = this;
 
@@ -112,7 +110,7 @@ export class MaintenanceWindowsPlugin
     const getMaintenanceWindowClientWithRequest = (
       request: KibanaRequest
     ): MaintenanceWindowClientApi => {
-      return maintenanceWindowClientFactory!.create(request);
+      return maintenanceWindowClientFactory!.createWithAuthorization(request);
     };
 
     scheduleMaintenanceWindowEventsGenerator(this.logger, plugins.taskManager).catch(() => {});
@@ -123,7 +121,7 @@ export class MaintenanceWindowsPlugin
   }
 
   private createRouteHandlerContext(
-    core: CoreSetup<MaintenanceWindowsPluginsStart, unknown>
+    core: CoreSetup<MaintenanceWindowsServerStartDependencies, unknown>
   ): IContextProvider<MaintenanceWindowRequestHandlerContext, 'maintenanceWindow'> {
     const { maintenanceWindowClientFactory } = this;
     return async function maintenanceWindowsRouteHandlerContext(context, request) {
@@ -139,7 +137,5 @@ export class MaintenanceWindowsPlugin
     if (this.licenseState) {
       this.licenseState.clean();
     }
-    this.pluginStop$.next();
-    this.pluginStop$.complete();
   }
 }

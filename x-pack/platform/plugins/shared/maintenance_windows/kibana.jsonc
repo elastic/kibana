@@ -2,7 +2,9 @@
   "type": "plugin",
   "id": "@kbn/maintenance-windows-plugin",
   "owner": "@elastic/response-ops",
-  "description": "Exposes the Maintenance Windows feature to define time windows to suppress notifications.",
+  "description": "This plugin exposes functionalities to manage maintenance windows.",
+  "group": "platform",
+  "visibility": "shared",
   "plugin": {
     "id": "maintenanceWindows",
     "server": true,

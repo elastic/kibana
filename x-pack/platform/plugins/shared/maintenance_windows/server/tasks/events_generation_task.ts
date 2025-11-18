@@ -26,7 +26,7 @@ import {
   transformMaintenanceWindowAttributesToMaintenanceWindow,
   transformMaintenanceWindowToMaintenanceWindowAttributes,
 } from '../application/transforms';
-import type { MaintenanceWindowsPluginsStart } from '../types';
+import type { MaintenanceWindowsServerStartDependencies } from '../types';
 import { getMaintenanceWindowStatus } from '../application/lib/get_maintenance_window_status';
 import { generateMaintenanceWindowEvents as generateMaintenanceWindowEventsViaRRule } from '../application/lib/generate_maintenance_window_events';
 
@@ -38,7 +38,7 @@ export const SCHEDULE: IntervalSchedule = { interval: '1d' };
 export function initializeMaintenanceWindowEventsGenerator(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
-  coreStartServices: StartServicesAccessor<MaintenanceWindowsPluginsStart, unknown>
+  coreStartServices: StartServicesAccessor<MaintenanceWindowsServerStartDependencies, unknown>
 ) {
   registerMaintenanceWindowEventsGeneratorTask(logger, taskManager, coreStartServices);
 }
@@ -63,7 +63,7 @@ export async function scheduleMaintenanceWindowEventsGenerator(
 function registerMaintenanceWindowEventsGeneratorTask(
   logger: Logger,
   taskManager: TaskManagerSetupContract,
-  coreStartServices: StartServicesAccessor<MaintenanceWindowsPluginsStart, unknown>
+  coreStartServices: StartServicesAccessor<MaintenanceWindowsServerStartDependencies, unknown>
 ) {
   taskManager.registerTaskDefinitions({
     [MAINTENANCE_WINDOW_EVENTS_TASK_TYPE]: {
@@ -76,7 +76,7 @@ function registerMaintenanceWindowEventsGeneratorTask(
 
 export function createEventsGeneratorTaskRunner(
   logger: Logger,
-  coreStartServices: StartServicesAccessor<MaintenanceWindowsPluginsStart, unknown>
+  coreStartServices: StartServicesAccessor<MaintenanceWindowsServerStartDependencies, unknown>
 ) {
   return () => {
     let cancelled = false;

@@ -19,14 +19,14 @@ export const plugin = async (initContext: PluginInitializerContext) => {
 export const config: PluginConfigDescriptor<MaintenanceWindowsConfig> = {
   schema: configSchema,
   exposeToBrowser: {
-    maintenanceWindow: { enabled: true },
+    enabled: true,
   },
 };
 
 export type {
   MaintenanceWindowsServerStart,
-  MaintenanceWindowsPluginsSetup,
-  MaintenanceWindowsPluginsStart,
+  MaintenanceWindowsServerSetupDependencies,
+  MaintenanceWindowsServerStartDependencies,
 } from './types';
 
 export type MaintenanceWindowClient = PublicMethodsOf<MaintenanceWindowClientClass>;

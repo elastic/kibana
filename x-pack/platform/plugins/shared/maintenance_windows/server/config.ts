@@ -9,9 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 
 export const configSchema = schema.object({
-  maintenanceWindow: schema.object({
-    enabled: schema.boolean({ defaultValue: true }),
-  }),
+  enabled: schema.boolean({ defaultValue: true }),
 });
 
 export type MaintenanceWindowsConfig = TypeOf<typeof configSchema>;

@@ -12,9 +12,9 @@ export type {
   MaintenanceWindowSOAttributes,
   MaintenanceWindowCreateBody,
   MaintenanceWindowClientContext,
-  MaintenanceWindowDeepLinkIds,
   ScopedQueryAttributes,
-} from './constants';
+  MaintenanceWindowDeepLinkIds,
+} from './types';
 
 export type { MaintenanceWindow } from '../server/application/types';
 export type { FindMaintenanceWindowsResult } from '../server/application/methods/find/types';
@@ -56,6 +56,3 @@ export const GET_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PA
 export const UPDATE_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}`;
 export const DELETE_MAINTENANCE_WINDOW_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/{id}`;
 export const FIND_MAINTENANCE_WINDOWS_API_PATH = `${BASE_MAINTENANCE_WINDOW_API_PATH}/_find`;
-
-// export const PLUGIN_ID = 'maintenanceWindows';
-// export const PLUGIN_NAME = 'maintenanceWindows';

@@ -37,7 +37,7 @@ export interface RouteOptions {
 export function defineRoutes(opts: RouteOptions) {
   const { router, licenseState, maintenanceWindowsConfig } = opts;
 
-  if (maintenanceWindowsConfig.maintenanceWindow.enabled) {
+  if (maintenanceWindowsConfig.enabled) {
     // Internal APIs
     createMaintenanceWindowRouteInternal(router, licenseState);
     getMaintenanceWindowRouteInternal(router, licenseState);

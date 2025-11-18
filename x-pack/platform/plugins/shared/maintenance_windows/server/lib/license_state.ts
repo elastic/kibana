@@ -11,7 +11,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import { assertNever } from '@kbn/std';
 import type { Observable, Subscription } from 'rxjs';
 import type { ILicense } from '@kbn/licensing-types';
-import { PLUGIN } from '../../common/constants/plugin';
+import { PLUGIN } from '../../common/constants';
 
 export type ILicenseState = PublicMethodsOf<LicenseState>;
 
