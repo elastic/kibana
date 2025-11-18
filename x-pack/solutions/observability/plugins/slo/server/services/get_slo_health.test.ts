@@ -10,18 +10,17 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { getSLOSummaryTransformId, getSLOTransformId } from '../../common/constants';
 import { createSLO } from './fixtures/slo';
-import {
-  aHitFromSummaryIndex,
-  aHitFromTempSummaryIndex,
-  aSummaryDocument,
-} from './fixtures/summary_search_document';
+import { aSummaryDocument } from './fixtures/summary_search_document';
 import { GetSLOHealth } from './get_slo_health';
 
 describe('GetSLOHealth', () => {
   let mockScopedClusterClient: ScopedClusterClientMock;
   let getSLOHealth: GetSLOHealth;
 
-  function mockSLOCompositeAggResponse(slos: { id: any; revision: any; name: any }[]) {
+  function mockSLOCompositeAggResponse(
+    slos: { id: any; revision: any; name: any }[],
+    summaryDocs: Array<{ sloId: string; summaryDoc?: any; hasOnlyTempSummaryDoc?: boolean }> = []
+  ) {
     return mockScopedClusterClient.asCurrentUser.search.mockResolvedValueOnce({
       took: 1,
       timed_out: false,
@@ -41,15 +40,33 @@ describe('GetSLOHealth', () => {
       },
       aggregations: {
         sloIds: {
-          buckets: slos.map((slo) => ({
-            key: {
-              sloId: slo.id,
-              sloInstanceId: '*',
-              sloRevision: slo.revision,
-              sloName: slo.name,
-            },
-            doc_count: 1,
-          })),
+          buckets: slos.map((slo) => {
+            const summaryDocData = summaryDocs.find((doc) => doc.sloId === slo.id);
+            const hasOnlyTempSummaryDoc = summaryDocData?.hasOnlyTempSummaryDoc ?? false;
+            // Always provide a summaryDoc when a bucket exists - use provided one or create a default
+            const summaryDoc = summaryDocData?.summaryDoc ?? aSummaryDocument(slo);
+            return {
+              key: {
+                sloId: slo.id,
+                sloInstanceId: '*',
+                sloRevision: slo.revision,
+                sloName: slo.name,
+              },
+              doc_count: 1,
+              summaryDoc: {
+                hits: {
+                  hits: [
+                    {
+                      _source: summaryDoc,
+                    },
+                  ],
+                },
+              },
+              nonTempSummaryDocs: {
+                doc_count: hasOnlyTempSummaryDoc ? 0 : 1,
+              },
+            };
+          }),
         },
       },
     });
@@ -62,29 +79,18 @@ describe('GetSLOHealth', () => {
 
   it('returns the health and state', async () => {
     const slo = createSLO({ id: '95ffb9af-1384-4d24-8e3f-345a03d7a439' });
-    mockSLOCompositeAggResponse([slo]);
-
-    mockScopedClusterClient.asCurrentUser.search.mockResolvedValueOnce({
-      took: 0,
-      timed_out: false,
-      _shards: {
-        total: 2,
-        successful: 2,
-        skipped: 0,
-        failed: 0,
-      },
-      hits: {
-        total: {
-          value: 1,
-          relation: 'eq',
+    const summaryDoc = aSummaryDocument(slo);
+    mockSLOCompositeAggResponse(
+      [slo],
+      [
+        {
+          sloId: slo.id,
+          summaryDoc,
+          hasOnlyTempSummaryDoc: false,
         },
-        max_score: 1,
-        hits: [
-          aHitFromSummaryIndex(aSummaryDocument(slo)),
-          aHitFromTempSummaryIndex(aSummaryDocument(slo, { isTempDoc: true })), // kept
-        ],
-      },
-    });
+      ]
+    );
+
     mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
       transforms: [],
     } as any);
@@ -107,7 +113,6 @@ describe('GetSLOHealth', () => {
               },
             },
             "sloId": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
-            "sloInstanceId": "*",
             "sloName": "irrelevant",
             "sloRevision": 1,
             "state": "no_data",
@@ -122,24 +127,6 @@ describe('GetSLOHealth', () => {
 
   it('handles nonexistant sloId', async () => {
     mockSLOCompositeAggResponse([]);
-    mockScopedClusterClient.asCurrentUser.search.mockResolvedValueOnce({
-      took: 0,
-      timed_out: false,
-      _shards: {
-        total: 2,
-        successful: 2,
-        skipped: 0,
-        failed: 0,
-      },
-      hits: {
-        total: {
-          value: 1,
-          relation: 'eq',
-        },
-        max_score: 1,
-        hits: [],
-      },
-    });
     mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
       transforms: [],
     } as any);
@@ -154,26 +141,17 @@ describe('GetSLOHealth', () => {
   describe('computes health', () => {
     it('returns healthy when both transforms are healthy', async () => {
       const slo = createSLO({ id: '95ffb9af-1384-4d24-8e3f-345a03d7a439' });
-      mockSLOCompositeAggResponse([slo]);
-
-      mockScopedClusterClient.asCurrentUser.search.mockResolvedValueOnce({
-        took: 0,
-        timed_out: false,
-        _shards: {
-          total: 2,
-          successful: 2,
-          skipped: 0,
-          failed: 0,
-        },
-        hits: {
-          total: {
-            value: 1,
-            relation: 'eq',
+      const summaryDoc = aSummaryDocument(slo);
+      mockSLOCompositeAggResponse(
+        [slo],
+        [
+          {
+            sloId: slo.id,
+            summaryDoc,
+            hasOnlyTempSummaryDoc: false,
           },
-          max_score: 1,
-          hits: [aHitFromSummaryIndex(aSummaryDocument(slo))],
-        },
-      });
+        ]
+      );
 
       // @ts-ignore
       mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
@@ -211,7 +189,6 @@ describe('GetSLOHealth', () => {
                 },
               },
               "sloId": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
-              "sloInstanceId": "*",
               "sloName": "irrelevant",
               "sloRevision": 1,
               "state": "no_data",
@@ -226,26 +203,17 @@ describe('GetSLOHealth', () => {
 
     it('returns unhealthy whenever one of the transform is unhealthy', async () => {
       const slo = createSLO({ id: '95ffb9af-1384-4d24-8e3f-345a03d7a439' });
-      mockSLOCompositeAggResponse([slo]);
-
-      mockScopedClusterClient.asCurrentUser.search.mockResolvedValue({
-        took: 0,
-        timed_out: false,
-        _shards: {
-          total: 2,
-          successful: 2,
-          skipped: 0,
-          failed: 0,
-        },
-        hits: {
-          total: {
-            value: 1,
-            relation: 'eq',
+      const summaryDoc = aSummaryDocument(slo);
+      mockSLOCompositeAggResponse(
+        [slo],
+        [
+          {
+            sloId: slo.id,
+            summaryDoc,
+            hasOnlyTempSummaryDoc: false,
           },
-          max_score: 1,
-          hits: [aHitFromSummaryIndex(aSummaryDocument(slo))],
-        },
-      });
+        ]
+      );
 
       // @ts-ignore
       mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
@@ -283,7 +251,6 @@ describe('GetSLOHealth', () => {
                 },
               },
               "sloId": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
-              "sloInstanceId": "*",
               "sloName": "irrelevant",
               "sloRevision": 1,
               "state": "no_data",
@@ -299,29 +266,23 @@ describe('GetSLOHealth', () => {
     it('reports a healthy SLO as healthy even when another SLO has a missing summary transform', async () => {
       const slo1 = createSLO({ id: 'c06591d1-9bd0-4538-8618-592759f265d1' });
       const slo2 = createSLO({ id: 'c06591d1-9bd0-4538-8618-592759f265d2' });
-      mockSLOCompositeAggResponse([slo1, slo2]);
-
-      mockScopedClusterClient.asCurrentUser.search.mockResolvedValue({
-        took: 0,
-        timed_out: false,
-        _shards: {
-          total: 2,
-          successful: 2,
-          skipped: 0,
-          failed: 0,
-        },
-        hits: {
-          total: {
-            value: 2,
-            relation: 'eq',
+      const summaryDoc1 = aSummaryDocument(slo1);
+      const summaryDoc2 = aSummaryDocument(slo2);
+      mockSLOCompositeAggResponse(
+        [slo1, slo2],
+        [
+          {
+            sloId: slo1.id,
+            summaryDoc: summaryDoc1,
+            hasOnlyTempSummaryDoc: false,
           },
-          max_score: 1,
-          hits: [
-            aHitFromSummaryIndex(aSummaryDocument(slo1)),
-            aHitFromSummaryIndex(aSummaryDocument(slo2)),
-          ],
-        },
-      });
+          {
+            sloId: slo2.id,
+            summaryDoc: summaryDoc2,
+            hasOnlyTempSummaryDoc: false,
+          },
+        ]
+      );
 
       // @ts-ignore
       mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
@@ -361,29 +322,23 @@ describe('GetSLOHealth', () => {
     it('shows only 1 missing summary transform', async () => {
       const slo1 = createSLO({ id: 'c06591d1-9bd0-4538-8618-592759f265d1' });
       const slo2 = createSLO({ id: 'c06591d1-9bd0-4538-8618-592759f265d2' });
-      mockSLOCompositeAggResponse([slo1, slo2]);
-
-      mockScopedClusterClient.asCurrentUser.search.mockResolvedValue({
-        took: 0,
-        timed_out: false,
-        _shards: {
-          total: 2,
-          successful: 2,
-          skipped: 0,
-          failed: 0,
-        },
-        hits: {
-          total: {
-            value: 2,
-            relation: 'eq',
+      const summaryDoc1 = aSummaryDocument(slo1);
+      const summaryDoc2 = aSummaryDocument(slo2);
+      mockSLOCompositeAggResponse(
+        [slo1, slo2],
+        [
+          {
+            sloId: slo1.id,
+            summaryDoc: summaryDoc1,
+            hasOnlyTempSummaryDoc: false,
           },
-          max_score: 1,
-          hits: [
-            aHitFromSummaryIndex(aSummaryDocument(slo1)),
-            aHitFromSummaryIndex(aSummaryDocument(slo2)),
-          ],
-        },
-      });
+          {
+            sloId: slo2.id,
+            summaryDoc: summaryDoc2,
+            hasOnlyTempSummaryDoc: false,
+          },
+        ]
+      );
 
       // @ts-ignore
       mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
@@ -427,33 +382,21 @@ describe('GetSLOHealth', () => {
   describe('computes state', () => {
     it('returns stale when summaryUpdatedAt is 2 days old', async () => {
       const slo = createSLO({ id: '95ffb9af-1384-4d24-8e3f-345a03d7a439' });
-      mockSLOCompositeAggResponse([slo]);
-      mockScopedClusterClient.asCurrentUser.search.mockResolvedValue({
-        took: 0,
-        timed_out: false,
-        _shards: {
-          total: 2,
-          successful: 2,
-          skipped: 0,
-          failed: 0,
-        },
-        hits: {
-          total: {
-            value: 1,
-            relation: 'eq',
-          },
-          max_score: 1,
-          hits: [
-            aHitFromSummaryIndex(
-              aSummaryDocument(slo, {
-                summaryUpdatedAt: new Date(Date.now() - 49 * 60 * 60 * 1000).toISOString(),
-                latestSliTimestamp: new Date(Date.now() - 60 * 60 * 60 * 1000).toISOString(),
-                isTempDoc: false,
-              })
-            ),
-          ],
-        },
+      const summaryDoc = aSummaryDocument(slo, {
+        summaryUpdatedAt: new Date(Date.now() - 49 * 60 * 60 * 1000).toISOString(),
+        latestSliTimestamp: new Date(Date.now() - 60 * 60 * 60 * 1000).toISOString(),
+        isTempDoc: false,
       });
+      mockSLOCompositeAggResponse(
+        [slo],
+        [
+          {
+            sloId: slo.id,
+            summaryDoc,
+            hasOnlyTempSummaryDoc: false,
+          },
+        ]
+      );
 
       // @ts-ignore
       mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
@@ -481,33 +424,21 @@ describe('GetSLOHealth', () => {
     it("returns 'indexing' when diff(summaryUpdatedAt - latestSliTimestamp) >= 10min", async () => {
       const slo = createSLO({ id: '95ffb9af-1384-4d24-8e3f-345a03d7a439' });
       const now = Date.now();
-      mockSLOCompositeAggResponse([slo]);
-      mockScopedClusterClient.asCurrentUser.search.mockResolvedValue({
-        took: 0,
-        timed_out: false,
-        _shards: {
-          total: 2,
-          successful: 2,
-          skipped: 0,
-          failed: 0,
-        },
-        hits: {
-          total: {
-            value: 1,
-            relation: 'eq',
-          },
-          max_score: 1,
-          hits: [
-            aHitFromSummaryIndex(
-              aSummaryDocument(slo, {
-                summaryUpdatedAt: new Date(now).toISOString(),
-                latestSliTimestamp: new Date(now - 10 * 60 * 1000).toISOString(), // 10min
-                isTempDoc: false,
-              })
-            ),
-          ],
-        },
+      const summaryDoc = aSummaryDocument(slo, {
+        summaryUpdatedAt: new Date(now).toISOString(),
+        latestSliTimestamp: new Date(now - 10 * 60 * 1000).toISOString(), // 10min
+        isTempDoc: false,
       });
+      mockSLOCompositeAggResponse(
+        [slo],
+        [
+          {
+            sloId: slo.id,
+            summaryDoc,
+            hasOnlyTempSummaryDoc: false,
+          },
+        ]
+      );
 
       // @ts-ignore
       mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
@@ -535,33 +466,21 @@ describe('GetSLOHealth', () => {
     it("returns 'running' when diff(summaryUpdatedAt - latestSliTimestamp) < 10min", async () => {
       const slo = createSLO({ id: '95ffb9af-1384-4d24-8e3f-345a03d7a439' });
       const now = Date.now();
-      mockSLOCompositeAggResponse([slo]);
-      mockScopedClusterClient.asCurrentUser.search.mockResolvedValue({
-        took: 0,
-        timed_out: false,
-        _shards: {
-          total: 2,
-          successful: 2,
-          skipped: 0,
-          failed: 0,
-        },
-        hits: {
-          total: {
-            value: 1,
-            relation: 'eq',
-          },
-          max_score: 1,
-          hits: [
-            aHitFromSummaryIndex(
-              aSummaryDocument(slo, {
-                summaryUpdatedAt: new Date(now).toISOString(),
-                latestSliTimestamp: new Date(now - 9 * 60 * 1000 + 59 * 1000).toISOString(), // 9min59s
-                isTempDoc: false,
-              })
-            ),
-          ],
-        },
+      const summaryDoc = aSummaryDocument(slo, {
+        summaryUpdatedAt: new Date(now).toISOString(),
+        latestSliTimestamp: new Date(now - 9 * 60 * 1000 + 59 * 1000).toISOString(), // 9min59s
+        isTempDoc: false,
       });
+      mockSLOCompositeAggResponse(
+        [slo],
+        [
+          {
+            sloId: slo.id,
+            summaryDoc,
+            hasOnlyTempSummaryDoc: false,
+          },
+        ]
+      );
 
       // @ts-ignore
       mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
@@ -593,26 +512,12 @@ describe('GetSLOHealth', () => {
     );
 
     beforeEach(() => {
-      mockSLOCompositeAggResponse(slos);
-
-      mockScopedClusterClient.asCurrentUser.search.mockResolvedValue({
-        took: 0,
-        timed_out: false,
-        _shards: {
-          total: 2,
-          successful: 2,
-          skipped: 0,
-          failed: 0,
-        },
-        hits: {
-          total: {
-            value: slos.length,
-            relation: 'eq',
-          },
-          max_score: 1,
-          hits: slos.map((slo) => aHitFromSummaryIndex(aSummaryDocument(slo))),
-        },
-      });
+      const summaryDocs = slos.map((slo) => ({
+        sloId: slo.id,
+        summaryDoc: aSummaryDocument(slo),
+        hasOnlyTempSummaryDoc: false,
+      }));
+      mockSLOCompositeAggResponse(slos, summaryDocs);
 
       mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
         transforms: slos.flatMap((slo) => [
@@ -708,26 +613,12 @@ describe('GetSLOHealth', () => {
     const slos = [slo1, slo2];
 
     beforeEach(() => {
-      mockSLOCompositeAggResponse(slos);
-
-      mockScopedClusterClient.asCurrentUser.search.mockResolvedValue({
-        took: 0,
-        timed_out: false,
-        _shards: {
-          total: 2,
-          successful: 2,
-          skipped: 0,
-          failed: 0,
-        },
-        hits: {
-          total: {
-            value: slos.length,
-            relation: 'eq',
-          },
-          max_score: 1,
-          hits: slos.map((slo) => aHitFromSummaryIndex(aSummaryDocument(slo))),
-        },
-      });
+      const summaryDocs = slos.map((slo) => ({
+        sloId: slo.id,
+        summaryDoc: aSummaryDocument(slo),
+        hasOnlyTempSummaryDoc: false,
+      }));
+      mockSLOCompositeAggResponse(slos, summaryDocs);
 
       mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
         transforms: [
