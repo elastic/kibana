@@ -131,7 +131,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       describe('Endpoint package integration', () => {
-        for (const [privilege, userName] of endpointIntegrationTestUsers) {
+        for (const [privilege, userName] of Object.entries(endpointIntegrationTestUsers)) {
           it(`should return 200 when requesting Endpoint package policies with "${privilege}" READ privilege`, async function () {
             await superTestWithoutAuth
               .get(`/api/fleet/package_policies/${endpointPackagePolicyId}`)
@@ -255,7 +255,7 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       describe('Endpoint package integration', () => {
-        for (const [privilege, userName] of endpointIntegrationTestUsers) {
+        for (const [privilege, userName] of Object.entries(endpointIntegrationTestUsers)) {
           it(`should return 403 when requesting non-endpoint packages with "${privilege}" READ privilege`, async function () {
             await superTestWithoutAuth
               .post(`/api/fleet/package_policies/_bulk_get`)
@@ -507,7 +507,7 @@ export default function (providerContext: FtrProviderContext) {
             .expect(200);
         });
 
-        for (const [privilege, userName] of endpointIntegrationTestUsers) {
+        for (const [privilege, userName] of Object.entries(endpointIntegrationTestUsers)) {
           it(`should return 200 when requesting Endpoint package policies with "${privilege}" READ privilege`, async function () {
             const { body: packagePolicyResponse } = await superTestWithoutAuth
               .get(

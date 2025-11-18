@@ -7,6 +7,7 @@
 
 import type { SecurityService } from '@kbn/ftr-common-functional-services';
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
+import type { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 
 interface TestUsers {
   [key: string]: {
@@ -243,6 +244,16 @@ export const testUsers = {
     username: 'endpoint_integr_read_policy_for_blocklist',
     password: 'changeme',
   },
+  endpoint_integr_read_policy_for_endpoint_exceptions: {
+    permissions: {
+      feature: {
+        [SECURITY_FEATURE_ID]: ['minimal_all', 'endpoint_exceptions_read'],
+      },
+      spaces: ['*'],
+    },
+    username: 'endpoint_integr_read_policy_for_endpoint_exceptions',
+    password: 'changeme',
+  },
 
   // for package_policy update API
   endpoint_integr_write_policy: {
@@ -301,14 +312,25 @@ export const testUsers = {
   },
 } satisfies TestUsers;
 
-export const endpointIntegrationTestUsers: [name: string, keyof typeof testUsers][] = [
-  ['policy management', 'endpoint_integr_read_policy_for_policy_management'],
-  ['trusted applications', 'endpoint_integr_read_policy_for_trusted_apps'],
-  ['trusted devices', 'endpoint_integr_read_policy_for_trusted_devices'],
-  ['event filters', 'endpoint_integr_read_policy_for_event_filters'],
-  ['host isolation exceptions', 'endpoint_integr_read_policy_for_host_isolation_exceptions'],
-  ['blocklist', 'endpoint_integr_read_policy_for_blocklist'],
-];
+/**
+ * Test user group for testing Endpoint artifacts. If a new artifact is added,
+ * this group and the API privileges should be updated to provide package policy
+ * access for policy-assignment features on the new artifact.
+ */
+export const endpointIntegrationTestUsers: Record<
+  'policy_management' | keyof typeof ENDPOINT_ARTIFACT_LISTS,
+  keyof typeof testUsers
+> = {
+  policy_management: 'endpoint_integr_read_policy_for_policy_management',
+
+  // Endpoint artifact lists
+  trustedApps: 'endpoint_integr_read_policy_for_trusted_apps',
+  trustedDevices: 'endpoint_integr_read_policy_for_trusted_devices',
+  eventFilters: 'endpoint_integr_read_policy_for_event_filters',
+  hostIsolationExceptions: 'endpoint_integr_read_policy_for_host_isolation_exceptions',
+  blocklists: 'endpoint_integr_read_policy_for_blocklist',
+  endpointExceptions: 'endpoint_integr_read_policy_for_endpoint_exceptions',
+};
 
 export const setupTestUsers = async (security: SecurityService, spaceAwarenessEnabled = false) => {
   for (const roleName in testUsers) {
