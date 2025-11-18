@@ -180,6 +180,28 @@ export class QueryUtils {
               size: 100,
             },
           },
+          total_tokens: {
+            sum: {
+              script: {
+                source: `
+                  def source = params._source;
+                  def roundsArray = source.conversation_rounds != null ? source.conversation_rounds : source.rounds;
+                  def totalTokens = 0;
+                  if (roundsArray != null) {
+                    for (def round : roundsArray) {
+                      if (round.model_usage != null) {
+                        def inputTokens = round.model_usage.input_tokens != null ? round.model_usage.input_tokens : 0;
+                        def outputTokens = round.model_usage.output_tokens != null ? round.model_usage.output_tokens : 0;
+                        totalTokens += inputTokens + outputTokens;
+                      }
+                    }
+                  }
+                  return totalTokens;
+                `,
+                lang: 'painless',
+              },
+            },
+          },
         },
       });
 
@@ -212,11 +234,18 @@ export class QueryUtils {
       const avgRoundsPerConversation =
         totalConversations > 0 ? totalRounds / totalConversations : 0;
 
+      const totalTokensAgg = response.aggregations?.total_tokens as any;
+      const tokensUsed = totalTokensAgg?.value || 0;
+      const averageTokensPerConversation =
+        totalConversations > 0 ? tokensUsed / totalConversations : 0;
+
       return {
         total: totalConversations,
         total_rounds: totalRounds,
         avg_rounds_per_conversation: Math.round(avgRoundsPerConversation * 100) / 100,
         rounds_distribution: roundsDistribution,
+        tokens_used: Math.round(tokensUsed),
+        average_tokens_per_conversation: Math.round(averageTokensPerConversation * 100) / 100,
       };
     } catch (error) {
       this.logger.warn(`Failed to fetch conversation metrics: ${error.message}`);
@@ -225,6 +254,8 @@ export class QueryUtils {
         total_rounds: 0,
         avg_rounds_per_conversation: 0,
         rounds_distribution: [],
+        tokens_used: 0,
+        average_tokens_per_conversation: 0,
       };
     }
   }

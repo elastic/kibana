@@ -35,6 +35,8 @@ export interface OnechatTelemetry {
       bucket: string;
       count: number;
     }>;
+    tokens_used: number;
+    average_tokens_per_conversation: number;
   };
   query_to_result_time: {
     p50: number;
@@ -152,6 +154,18 @@ export function registerTelemetryCollector(
                   description: 'Number of conversations in this bucket',
                 },
               },
+            },
+          },
+          tokens_used: {
+            type: 'long',
+            _meta: {
+              description: 'Total tokens used across all conversations (input + output)',
+            },
+          },
+          average_tokens_per_conversation: {
+            type: 'float',
+            _meta: {
+              description: 'Average tokens per conversation',
             },
           },
         },
@@ -358,6 +372,8 @@ export function registerTelemetryCollector(
               total_rounds: 0,
               avg_rounds_per_conversation: 0,
               rounds_distribution: [],
+              tokens_used: 0,
+              average_tokens_per_conversation: 0,
             },
             query_to_result_time: {
               p50: 0,
