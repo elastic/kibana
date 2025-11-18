@@ -51,7 +51,6 @@ export const ApiKeyHeaderAuth: AuthTypeSpec<AuthSchemaType> = {
     return schemaToUse;
   },
   configure: (axiosInstance: AxiosInstance, secret: NormalizedAuthSchemaType): AxiosInstance => {
-    console.log(secret);
     // set global defaults
     Object.keys(secret)
       .filter((key) => key !== 'authType')
