@@ -142,7 +142,7 @@ export TEST_GROUP_TYPE_FUNCTIONAL="Functional Tests"
 # tells the gh command what our default repo is
 export GH_REPO=github.com/elastic/kibana
 
-if [[ "${TEST_ENABLE_FIPS_AGENT:-}" == "true" ]] || is_pr_with_label "ci:enable-fips-agent"; then
+if [[ "${TEST_ENABLE_FIPS_AGENT:-}" == "true" ]] || is_pr_with_label "ci:enable-fips-140-2-agent" || is_pr_with_label "ci:enable-fips-140-3-agent"; then
   ES_SECURITY_ENABLED=true
   export ES_SECURITY_ENABLED
   # used by FIPS agents to link FIPS OpenSSL modules
