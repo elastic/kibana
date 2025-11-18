@@ -30,7 +30,7 @@ function shouldRunCorrectnessAnalysis() {
   const evaluatorSelection = parseSelectedEvaluators();
 
   return (
-    !evaluatorSelection ||
+    evaluatorSelection.length === 0 ||
     [
       QUALITATIVE_EVALUATOR_NAME,
       FACTUALITY_EVALUATOR_NAME,

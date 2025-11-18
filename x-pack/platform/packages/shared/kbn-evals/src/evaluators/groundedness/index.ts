@@ -25,7 +25,7 @@ function shouldRunGroundednessAnalysis() {
 
   return (
     // Default to running qualitative analysis if no specific evaluators are selected
-    !evaluatorSelection ||
+    evaluatorSelection.length === 0 ||
     evaluatorSelection.includes(QUALITATIVE_EVALUATOR_NAME) ||
     evaluatorSelection.includes(QUANTITATIVE_EVALUATOR_NAME)
   );
