@@ -303,7 +303,10 @@ describe('WorkflowExecutionRuntimeManager', () => {
     it('should fail workflow execution if workflow error is set', async () => {
       (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
         startedAt: '2025-08-05T00:00:00.000Z',
-        error: 'Second step failed',
+        error: {
+          message: 'Second step failed',
+          type: 'Error',
+        },
       } as Partial<EsWorkflowStepExecution>);
       await underTest.saveState();
 
@@ -329,7 +332,10 @@ describe('WorkflowExecutionRuntimeManager', () => {
     it('should log workflow failure', async () => {
       (workflowExecutionState.getWorkflowExecution as jest.Mock).mockReturnValue({
         startedAt: '2025-08-05T00:00:00.000Z',
-        error: 'Second step failed',
+        error: {
+          message: 'Second step failed',
+          type: 'Error',
+        },
       } as Partial<EsWorkflowStepExecution>);
       await underTest.saveState();
 

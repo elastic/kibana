@@ -188,8 +188,7 @@ export class StepExecutionRuntime {
       error: executionError,
     });
     this.workflowExecutionState.upsertStep(stepExecutionUpdate);
-    // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    this.logStepFail(stepExecutionUpdate.id!, executionError);
+    this.logStepFail(executionError);
   }
 
   public async setWaitStep(): Promise<void> {
@@ -236,34 +235,27 @@ export class StepExecutionRuntime {
         execution_time_ms: step.executionTimeMs,
       },
       ...(step.error && {
-        error: {
-          message: step.error.message,
-          type: step.error.type,
-          // stack_trace: typeof step.error === 'string' ? undefined : (step.error as Error)?.stack,
-        },
+        error: step.error,
       }),
     });
   }
 
-  private logStepFail(stepExecutionId: string, error: ExecutionError): void {
+  private logStepFail(error: ExecutionError): void {
     const stepName = this.node.stepId;
     const stepType = this.node.stepType || 'unknown';
-    const _error = typeof error === 'string' ? Error(error) : error;
 
-    // Include error message in the log message
-    const errorMsg = typeof error === 'string' ? error : error?.message || 'Unknown error';
-    const message = `Step '${stepName}' failed: ${errorMsg}`;
+    const message = `Step '${stepName}' failed: ${error.message}`;
 
-    // this.stepLogger?.logError(message, _error, {
-    //   workflow: { step_id: this.node.stepId, step_execution_id: stepExecutionId },
-    //   event: { action: 'step-fail', category: ['workflow', 'step'] },
-    //   tags: ['workflow', 'step', 'fail'],
-    //   labels: {
-    //     step_type: stepType,
-    //     connector_type: stepType,
-    //     step_name: stepName,
-    //     step_id: this.node.stepId,
-    //   },
-    // });
+    this.stepLogger?.logError(message, error, {
+      workflow: { step_id: this.node.stepId, step_execution_id: this.stepExecutionId },
+      event: { action: 'step-fail', category: ['workflow', 'step'] },
+      tags: ['workflow', 'step', 'fail'],
+      labels: {
+        step_type: stepType,
+        connector_type: stepType,
+        step_name: stepName,
+        step_id: this.node.stepId,
+      },
+    });
   }
 }
