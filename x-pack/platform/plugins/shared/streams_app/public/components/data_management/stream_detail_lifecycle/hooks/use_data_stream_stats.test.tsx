@@ -40,7 +40,9 @@ const mockDefinition = {
   },
   effective_failure_store: {
     lifecycle: {
-      data_retention: '30d',
+      enabled: {
+        data_retention: '30d',
+      },
     },
   },
 } as any;

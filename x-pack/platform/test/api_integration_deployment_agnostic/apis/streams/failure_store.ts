@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import type {
   EffectiveFailureStore,
+  FailureStore,
   WiredIngestStreamEffectiveFailureStore,
 } from '@kbn/streams-schema';
 import { Streams, emptyAssets, isEnabledFailureStore } from '@kbn/streams-schema';
@@ -32,7 +33,41 @@ type DataStreamWithFailureStore = IndicesDataStream & {
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const esClient = getService('es');
+  const config = getService('config');
+  const isServerless = !!config.get('serverless');
   let apiClient: StreamsSupertestRepositoryClient;
+
+  async function updateFailureStore(streamName: string, failureStore: FailureStore) {
+    const definition = await getStream(apiClient, streamName);
+    const parsedDef = Streams.ingest.all.GetResponse.parse(definition);
+
+    if (Streams.WiredStream.GetResponse.is(parsedDef)) {
+      const request: Streams.WiredStream.UpsertRequest = {
+        ...emptyAssets,
+        stream: {
+          description: '',
+          ingest: {
+            ...parsedDef.stream.ingest,
+            failure_store: failureStore,
+          },
+        },
+      };
+      return await putStream(apiClient, streamName, request);
+    } else if (Streams.ClassicStream.GetResponse.is(parsedDef)) {
+      const request: Streams.ClassicStream.UpsertRequest = {
+        ...emptyAssets,
+        stream: {
+          description: '',
+          ingest: {
+            ...parsedDef.stream.ingest,
+            failure_store: failureStore,
+          },
+        },
+      };
+      return await putStream(apiClient, streamName, request);
+    }
+    throw new Error(`Unsupported stream type for ${streamName}`);
+  }
 
   async function expectFailureStore(
     streams: string[],
@@ -55,11 +90,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(dataStream.failure_store?.enabled).to.eql(expectedEnabled);
 
       if (expectedEnabled && 'lifecycle' in expectedFailureStore) {
-        const expectedRetention = expectedFailureStore.lifecycle.data_retention;
-        if (expectedRetention) {
-          const dsFailureStore =
-            dataStream.failure_store as DataStreamWithFailureStore['failure_store'];
-          expect(dsFailureStore?.lifecycle?.data_retention).to.eql(expectedRetention);
+        if ('enabled' in expectedFailureStore.lifecycle) {
+          const expectedRetention = expectedFailureStore.lifecycle.enabled.data_retention;
+          if (expectedRetention) {
+            const dsFailureStore =
+              dataStream.failure_store as DataStreamWithFailureStore['failure_store'];
+            expect(dsFailureStore?.lifecycle?.data_retention).to.eql(expectedRetention);
+          }
         }
       }
     }
@@ -72,6 +109,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     after(async () => {
+      // Reset root stream to a sensible default state before disabling streams
+      // This ensures subsequent test files don't inherit a bad state if they run before cleanup
+      try {
+        await updateFailureStore('logs', {
+          lifecycle: { enabled: { data_retention: '90d' } },
+        });
+      } catch (error) {
+        // Ignore errors during cleanup
+      }
+
       await disableStreams(apiClient);
     });
 
@@ -100,7 +147,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ingest: {
               ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
               failure_store: {
-                lifecycle: { data_retention: '60d' },
+                lifecycle: { enabled: { data_retention: '60d' } },
               },
             },
           },
@@ -108,15 +155,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         expect(response).to.have.property('acknowledged', true);
 
         const updatedRootDefinition = await getStream(apiClient, 'logs');
-        expect(
-          (updatedRootDefinition as Streams.WiredStream.GetResponse).stream.ingest.failure_store
-        ).to.eql({
-          enabled: true,
-          lifecycle: { data_retention: '60d' },
+        const failureStore = (updatedRootDefinition as Streams.WiredStream.GetResponse).stream
+          .ingest.failure_store;
+        expect(failureStore).to.eql({
+          lifecycle: { enabled: { data_retention: '60d' } },
         });
 
         await expectFailureStore(['logs'], {
-          lifecycle: { data_retention: '60d' },
+          lifecycle: { enabled: { data_retention: '60d' } },
           from: 'logs',
         });
       });
@@ -149,7 +195,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ingest: {
               ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
               failure_store: {
-                lifecycle: { data_retention: '45d' },
+                lifecycle: { enabled: { data_retention: '45d' } },
               },
             },
           },
@@ -159,7 +205,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         // Child should inherit parent's failure store configuration
         await expectFailureStore(['logs.inherits-fs'], {
-          lifecycle: { data_retention: '45d' },
+          lifecycle: { enabled: { data_retention: '45d' } },
           from: 'logs',
         });
       });
@@ -185,7 +231,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 ],
               },
               failure_store: {
-                lifecycle: { data_retention: '15d' },
+                lifecycle: { enabled: { data_retention: '15d' } },
               },
             },
           },
@@ -200,7 +246,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ingest: {
               ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
               failure_store: {
-                lifecycle: { data_retention: '90d' },
+                lifecycle: { enabled: { data_retention: '90d' } },
               },
             },
           },
@@ -208,13 +254,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
         // Inheriting streams should get root's config
         await expectFailureStore(['logs.fs-inherits', 'logs.fs-inherits.child'], {
-          lifecycle: { data_retention: '90d' },
+          lifecycle: { enabled: { data_retention: '90d' } },
           from: 'logs',
         });
 
         // Overriding streams should keep their own config
         await expectFailureStore(['logs.fs-overrides', 'logs.fs-overrides.child'], {
-          lifecycle: { data_retention: '15d' },
+          lifecycle: { enabled: { data_retention: '15d' } },
           from: 'logs.fs-overrides',
         });
       });
@@ -227,7 +273,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ingest: {
               ...wiredPutBody.stream.ingest,
               failure_store: {
-                lifecycle: { data_retention: '30d' },
+                lifecycle: { enabled: { data_retention: '30d' } },
               },
             },
           },
@@ -239,7 +285,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ingest: {
               ...wiredPutBody.stream.ingest,
               failure_store: {
-                lifecycle: { data_retention: '60d' },
+                lifecycle: { enabled: { data_retention: '60d' } },
               },
             },
           },
@@ -247,7 +293,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await putStream(apiClient, 'logs.fs-30d.fs-60d.inherits', wiredPutBody);
 
         await expectFailureStore(['logs.fs-30d.fs-60d.inherits'], {
-          lifecycle: { data_retention: '60d' },
+          lifecycle: { enabled: { data_retention: '60d' } },
           from: 'logs.fs-30d.fs-60d',
         });
 
@@ -276,7 +322,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await expectFailureStore(
           ['logs.fs-30d', 'logs.fs-30d.fs-60d', 'logs.fs-30d.fs-60d.inherits'],
           {
-            lifecycle: { data_retention: '30d' },
+            lifecycle: { enabled: { data_retention: '30d' } },
             from: 'logs.fs-30d',
           }
         );
@@ -294,14 +340,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 routing: [],
               },
               failure_store: {
-                lifecycle: { data_retention: '7d' },
+                lifecycle: { enabled: { data_retention: '7d' } },
               },
             },
           },
         });
 
         await expectFailureStore(['logs.fs-enabled-with-lifecycle'], {
-          lifecycle: { data_retention: '7d' },
+          lifecycle: { enabled: { data_retention: '7d' } },
           from: 'logs.fs-enabled-with-lifecycle',
         });
       });
@@ -319,14 +365,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 routing: [],
               },
               failure_store: {
-                lifecycle: { data_retention: '10d' },
+                lifecycle: { enabled: { data_retention: '10d' } },
               },
             },
           },
         });
 
         await expectFailureStore([streamName], {
-          lifecycle: { data_retention: '10d' },
+          lifecycle: { enabled: { data_retention: '10d' } },
           from: streamName,
         });
 
@@ -341,15 +387,96 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
                 routing: [],
               },
               failure_store: {
-                lifecycle: { data_retention: '20d' },
+                lifecycle: { enabled: { data_retention: '20d' } },
               },
             },
           },
         });
 
         await expectFailureStore([streamName], {
-          lifecycle: { data_retention: '20d' },
+          lifecycle: { enabled: { data_retention: '20d' } },
           from: streamName,
+        });
+      });
+
+      it('disables lifecycle on failure store', async () => {
+        const streamName = 'logs.fs-disabled-lifecycle';
+        await putStream(apiClient, streamName, {
+          ...emptyAssets,
+          stream: {
+            description: '',
+            ingest: {
+              ...wiredPutBody.stream.ingest,
+              wired: {
+                fields: {},
+                routing: [],
+              },
+              failure_store: {
+                lifecycle: { disabled: {} },
+              },
+            },
+          },
+        });
+
+        const definition = await getStream(apiClient, streamName);
+        const parsedDefinition = Streams.WiredStream.GetResponse.parse(definition);
+
+        expect(parsedDefinition.effective_failure_store).to.eql({
+          lifecycle: { disabled: {} },
+          from: streamName,
+        });
+
+        // Verify failure store is enabled but lifecycle is disabled
+        const dataStreams = await esClient.indices.getDataStream({ name: [streamName] });
+        expect(dataStreams.data_streams[0].failure_store?.enabled).to.eql(true);
+      });
+
+      it('inherits disabled lifecycle from parent', async () => {
+        const parentStream = 'logs.parent-disabled-lifecycle';
+        const childStream = 'logs.parent-disabled-lifecycle.child';
+
+        // Create parent with disabled lifecycle
+        await putStream(apiClient, parentStream, {
+          ...emptyAssets,
+          stream: {
+            description: '',
+            ingest: {
+              ...wiredPutBody.stream.ingest,
+              wired: {
+                fields: {},
+                routing: [
+                  {
+                    destination: childStream,
+                    where: { never: {} },
+                    status: 'disabled',
+                  },
+                ],
+              },
+              failure_store: {
+                lifecycle: { disabled: {} },
+              },
+            },
+          },
+        });
+
+        // Create child that inherits
+        await putStream(apiClient, childStream, wiredPutBody);
+
+        // Both should have disabled lifecycle
+        const parentDefinition = await getStream(apiClient, parentStream);
+        const childDefinition = await getStream(apiClient, childStream);
+
+        const parsedParent = Streams.WiredStream.GetResponse.parse(parentDefinition);
+        const parsedChild = Streams.WiredStream.GetResponse.parse(childDefinition);
+
+        expect(parsedParent.effective_failure_store).to.eql({
+          lifecycle: { disabled: {} },
+          from: parentStream,
+        });
+
+        expect(parsedChild.effective_failure_store).to.eql({
+          lifecycle: { disabled: {} },
+          from: parentStream,
         });
       });
     });
@@ -370,6 +497,14 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       };
 
       let clean: () => Promise<void>;
+
+      before(async () => {
+        // Reset root stream to a known state before classic streams tests
+        await updateFailureStore('logs', {
+          disabled: {},
+        });
+      });
+
       afterEach(() => clean?.());
 
       const createDataStream = async (
@@ -381,18 +516,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           settings: {
             'index.default_pipeline': 'logs@default-pipeline',
           },
+          data_stream_options: {
+            failure_store: {
+              enabled: failureStoreEnabled,
+            },
+          },
         };
 
-        if (failureStoreEnabled) {
-          template.failure_store = {
+        if (failureStoreEnabled && failureStoreRetention) {
+          template.data_stream_options.failure_store.lifecycle = {
             enabled: true,
+            data_retention: failureStoreRetention,
           };
-          if (failureStoreRetention) {
-            template.failure_store.lifecycle = {
-              enabled: true,
-              data_retention: failureStoreRetention,
-            };
-          }
         }
 
         await esClient.indices.putIndexTemplate({
@@ -409,13 +544,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         };
       };
 
-      it('inherit falls back to template failure store configuration', async () => {
+      it('inherit defaults to disabled for classic streams without index template failure store configuration', async () => {
         const indexName = 'classic-stream-inherit-fs';
-        await createDataStream(indexName, true, '77d');
+        await createDataStream(indexName, false);
 
+        // Classic streams with inherit and no index template failure store configuration default to disabled failure store lifecycle
         await putStream(apiClient, indexName, classicPutBody);
-        await expectFailureStore([indexName], { lifecycle: { data_retention: '77d' } });
+        await expectFailureStore([indexName], {
+          disabled: {},
+        });
 
+        // Can explicitly set failure store configuration
         await putStream(apiClient, indexName, {
           ...emptyAssets,
           stream: {
@@ -423,16 +562,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ingest: {
               ...classicPutBody.stream.ingest,
               failure_store: {
-                lifecycle: { data_retention: '5d' },
+                lifecycle: { enabled: { data_retention: '5d' } },
               },
             },
           },
         });
-        await expectFailureStore([indexName], { lifecycle: { data_retention: '5d' } });
+        await expectFailureStore([indexName], { lifecycle: { enabled: { data_retention: '5d' } } });
 
-        // Inherit sets the failure store back to the template configuration
+        // Inherit resets to default disabled state
         await putStream(apiClient, indexName, classicPutBody);
-        await expectFailureStore([indexName], { lifecycle: { data_retention: '77d' } });
+        await expectFailureStore([indexName], {
+          disabled: {},
+        });
       });
 
       it('overrides failure store configuration', async () => {
@@ -446,13 +587,15 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ingest: {
               ...classicPutBody.stream.ingest,
               failure_store: {
-                lifecycle: { data_retention: '10d' },
+                lifecycle: { enabled: { data_retention: '10d' } },
               },
             },
           },
         });
 
-        await expectFailureStore([indexName], { lifecycle: { data_retention: '10d' } });
+        await expectFailureStore([indexName], {
+          lifecycle: { enabled: { data_retention: '10d' } },
+        });
       });
 
       it('disables failure store on classic stream', async () => {
@@ -484,13 +627,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ingest: {
               ...classicPutBody.stream.ingest,
               failure_store: {
-                lifecycle: { data_retention: '7d' },
+                lifecycle: { enabled: { data_retention: '7d' } },
               },
             },
           },
         });
 
-        await expectFailureStore([indexName], { lifecycle: { data_retention: '7d' } });
+        await expectFailureStore([indexName], { lifecycle: { enabled: { data_retention: '7d' } } });
 
         await putStream(apiClient, indexName, {
           ...emptyAssets,
@@ -499,37 +642,58 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ingest: {
               ...classicPutBody.stream.ingest,
               failure_store: {
-                lifecycle: { data_retention: '30d' },
+                lifecycle: { enabled: { data_retention: '30d' } },
               },
             },
           },
         });
 
-        await expectFailureStore([indexName], { lifecycle: { data_retention: '30d' } });
+        await expectFailureStore([indexName], {
+          lifecycle: { enabled: { data_retention: '30d' } },
+        });
+      });
+
+      it('disables lifecycle on classic stream failure store only for not serverless', async () => {
+        const indexName = 'classic-stream-disabled-lifecycle';
+        await createDataStream(indexName, true, '30d');
+
+        await putStream(apiClient, indexName, {
+          ...emptyAssets,
+          stream: {
+            description: '',
+            ingest: {
+              ...classicPutBody.stream.ingest,
+              failure_store: {
+                lifecycle: { disabled: {} },
+              },
+            },
+          },
+        });
+
+        const definition = await getStream(apiClient, indexName);
+        const parsedDefinition = Streams.ClassicStream.GetResponse.parse(definition);
+
+        if (isServerless) {
+          expect(parsedDefinition.effective_failure_store).to.eql({
+            lifecycle: { enabled: {} },
+          });
+        } else {
+          expect(parsedDefinition.effective_failure_store).to.eql({
+            lifecycle: { disabled: {} },
+          });
+        }
+
+        // Verify failure store is enabled but lifecycle is disabled if not serverless
+        const dataStreams = await esClient.indices.getDataStream({ name: [indexName] });
+        if (isServerless) {
+          expect(dataStreams.data_streams[0].failure_store?.enabled).to.eql(true);
+        } else {
+          expect(dataStreams.data_streams[0].failure_store?.enabled).to.eql(false);
+        }
       });
     });
 
     describe('Root stream failure store', () => {
-      it('does not allow inherit failure store on root', async () => {
-        const rootDefinition = await getStream(apiClient, 'logs');
-
-        await putStream(
-          apiClient,
-          'logs',
-          {
-            ...emptyAssets,
-            stream: {
-              description: '',
-              ingest: {
-                ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
-                failure_store: { inherit: {} },
-              },
-            },
-          },
-          400
-        );
-      });
-
       it('allows updating root stream failure store', async () => {
         const rootDefinition = await getStream(apiClient, 'logs');
 
@@ -540,19 +704,52 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ingest: {
               ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
               failure_store: {
-                lifecycle: { data_retention: '120d' },
+                lifecycle: { enabled: { data_retention: '120d' } },
               },
             },
           },
         });
 
         const updatedDefinition = await getStream(apiClient, 'logs');
-        expect(
-          (updatedDefinition as Streams.WiredStream.GetResponse).stream.ingest.failure_store
-        ).to.eql({
-          enabled: true,
-          lifecycle: { data_retention: '120d' },
+        const failureStore = (updatedDefinition as Streams.WiredStream.GetResponse).stream.ingest
+          .failure_store;
+        expect(failureStore).to.eql({
+          lifecycle: { enabled: { data_retention: '120d' } },
         });
+      });
+
+      it('allows disabling lifecycle on root stream failure store', async () => {
+        const rootDefinition = await getStream(apiClient, 'logs');
+
+        await putStream(apiClient, 'logs', {
+          ...emptyAssets,
+          stream: {
+            description: '',
+            ingest: {
+              ...(rootDefinition as Streams.WiredStream.GetResponse).stream.ingest,
+              failure_store: {
+                lifecycle: { disabled: {} },
+              },
+            },
+          },
+        });
+
+        const updatedDefinition = await getStream(apiClient, 'logs');
+        const parsedDefinition = Streams.WiredStream.GetResponse.parse(updatedDefinition);
+
+        const failureStore = parsedDefinition.stream.ingest.failure_store;
+        expect(failureStore).to.eql({
+          lifecycle: { disabled: {} },
+        });
+
+        expect(parsedDefinition.effective_failure_store).to.eql({
+          lifecycle: { disabled: {} },
+          from: 'logs',
+        });
+
+        // Verify failure store is enabled but lifecycle is disabled
+        const dataStreams = await esClient.indices.getDataStream({ name: ['logs'] });
+        expect(dataStreams.data_streams[0].failure_store?.enabled).to.eql(true);
       });
     });
   });

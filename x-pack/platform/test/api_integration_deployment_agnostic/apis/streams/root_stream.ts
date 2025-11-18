@@ -58,7 +58,7 @@ const rootStreamDefinition: Streams.WiredStream.Definition = {
         },
       },
     },
-    failure_store: { inherit: {} },
+    failure_store: { lifecycle: { enabled: { data_retention: '30d' } } },
   },
 };
 

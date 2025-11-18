@@ -23,7 +23,8 @@ import type {
   FailureStoreEnabled,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import {
-  isEnabledFailureStore,
+  isDisabledLifecycleFailureStore,
+  isEnabledLifecycleFailureStore,
   isInheritFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { retryTransientEsErrors } from '../helpers/retry';
@@ -289,11 +290,13 @@ export async function updateDataStreamsFailureStore({
   logger,
   name,
   failureStore,
+  isServerless,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
   name: string;
   failureStore: FailureStore;
+  isServerless: boolean;
 }) {
   try {
     let failureStoreConfig: IndicesDataStreamFailureStore;
@@ -304,19 +307,31 @@ export async function updateDataStreamsFailureStore({
         () => esClient.indices.simulateIndexTemplate({ name }),
         { logger }
       );
-
       // If not template, disable the failure store. Empty object would cause Elasticsearch error.
       // @ts-expect-error index simulate response is not well typed
       failureStoreConfig = response.template?.data_stream_options?.failure_store ?? {
         enabled: false,
       };
-    } else if (isEnabledFailureStore(failureStore)) {
-      // Handle { lifecycle: { data_retention?: string } }
-      const dataRetention = (failureStore as FailureStoreEnabled).lifecycle.data_retention;
+    } else if (isEnabledLifecycleFailureStore(failureStore)) {
+      // Handle { lifecycle: { enabled: { data_retention?: string } } }
+      const dataRetention = (failureStore as FailureStoreEnabled).lifecycle.enabled?.data_retention;
       failureStoreConfig = {
         enabled: true,
         ...(dataRetention ? { lifecycle: { data_retention: dataRetention, enabled: true } } : {}),
       };
+    } else if (isDisabledLifecycleFailureStore(failureStore)) {
+      // Handle { lifecycle: { disabled: {} } }
+      if (!isServerless) {
+        // lifecycle cannot be disabled for serverless
+        failureStoreConfig = {
+          enabled: true,
+          lifecycle: { enabled: false },
+        };
+      } else {
+        failureStoreConfig = {
+          enabled: true,
+        };
+      }
     } else {
       // Handle { disabled: {} }
       failureStoreConfig = {

@@ -8,6 +8,7 @@
 import type { IndicesDataStream } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
+import { isSchema } from '../../../shared/type_guards';
 
 export interface FailureStoreStatsResponse {
   size?: number;
@@ -24,12 +25,23 @@ export interface FailureStoreDisabled {
 }
 
 export interface FailureStoreEnabled {
-  lifecycle: { data_retention?: string };
+  lifecycle: { enabled: { data_retention?: string } };
 }
 
-export type EffectiveFailureStore = FailureStoreDisabled | FailureStoreEnabled;
+export interface FailureStoreDisabledLifecycle {
+  lifecycle: { disabled: {} };
+}
 
-export type FailureStore = FailureStoreInherit | FailureStoreEnabled | FailureStoreDisabled;
+export type EffectiveFailureStore =
+  | FailureStoreDisabled
+  | FailureStoreEnabled
+  | FailureStoreDisabledLifecycle;
+
+export type FailureStore =
+  | FailureStoreInherit
+  | FailureStoreEnabled
+  | FailureStoreDisabled
+  | FailureStoreDisabledLifecycle;
 
 export type WiredIngestStreamEffectiveFailureStore = EffectiveFailureStore & { from: string };
 
@@ -37,19 +49,24 @@ const inheritFailureStoreSchema = z.object({ inherit: z.strictObject({}) });
 const disabledFailureStoreSchema = z.object({ disabled: z.strictObject({}) });
 export const enabledFailureStoreSchema = z.object({
   lifecycle: z.object({
-    data_retention: NonEmptyString.optional(),
+    enabled: z.object({ data_retention: NonEmptyString.optional() }),
   }),
+});
+const disabledLifecycleFailureStoreSchema = z.object({
+  lifecycle: z.object({ disabled: z.strictObject({}) }),
 });
 
 export const effectiveFailureStoreSchema: z.Schema<EffectiveFailureStore> = z.union([
   enabledFailureStoreSchema,
   disabledFailureStoreSchema,
+  disabledLifecycleFailureStoreSchema,
 ]);
 
 export const failureStoreSchema: z.Schema<FailureStore> = z.union([
   inheritFailureStoreSchema,
   enabledFailureStoreSchema,
   disabledFailureStoreSchema,
+  disabledLifecycleFailureStoreSchema,
 ]);
 
 export const failureStoreStatsSchema: z.Schema<FailureStoreStatsResponse> = z.object({
@@ -60,16 +77,35 @@ export const failureStoreStatsSchema: z.Schema<FailureStoreStatsResponse> = z.ob
 
 export const wiredIngestStreamEffectiveFailureStoreSchema: z.Schema<WiredIngestStreamEffectiveFailureStore> =
   z
-    .union([enabledFailureStoreSchema, disabledFailureStoreSchema])
+    .union([
+      enabledFailureStoreSchema,
+      disabledFailureStoreSchema,
+      disabledLifecycleFailureStoreSchema,
+    ])
     .and(z.object({ from: NonEmptyString }));
 
-export const isEnabledFailureStore = (input: EffectiveFailureStore | FailureStore): boolean => {
-  if (!input) return false;
-  return 'lifecycle' in input;
+export const isEnabledLifecycleFailureStore = (
+  input: EffectiveFailureStore | FailureStore
+): boolean => {
+  return isSchema(enabledFailureStoreSchema, input);
 };
 
+export const isDisabledLifecycleFailureStore = (
+  input: EffectiveFailureStore | FailureStore
+): boolean => {
+  return isSchema(disabledLifecycleFailureStoreSchema, input);
+};
+
+export function isEnabledFailureStore(
+  input: EffectiveFailureStore | FailureStore
+): input is
+  | z.input<typeof enabledFailureStoreSchema>
+  | z.input<typeof disabledLifecycleFailureStoreSchema> {
+  return isEnabledLifecycleFailureStore(input) || isDisabledLifecycleFailureStore(input);
+}
+
 export function isInheritFailureStore(input: FailureStore): input is { inherit: {} } {
-  return !input || 'inherit' in input;
+  return isSchema(inheritFailureStoreSchema, input);
 }
 
 export type DataStreamWithFailureStore = IndicesDataStream & {

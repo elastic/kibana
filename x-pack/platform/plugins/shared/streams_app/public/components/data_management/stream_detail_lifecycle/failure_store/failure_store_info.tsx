@@ -15,6 +15,7 @@ import { IngestionCard } from './cards/ingestion_card';
 import { FailureStoreIngestionRate } from './ingestion_rate';
 import type { StreamAggregations } from '../hooks/use_ingestion_rate';
 import type { EnhancedFailureStoreStats } from '../hooks/use_data_stream_stats';
+import type { useFailureStoreConfig } from '../hooks/use_failure_store_config';
 
 export const FailureStoreInfo = ({
   openModal,
@@ -24,7 +25,7 @@ export const FailureStoreInfo = ({
   stats,
   timeState,
   aggregations,
-  defaultRetentionPeriod,
+  failureStoreConfig,
 }: {
   openModal: (show: boolean) => void;
   definition: Streams.ingest.all.GetResponse;
@@ -33,7 +34,7 @@ export const FailureStoreInfo = ({
   stats?: EnhancedFailureStoreStats;
   timeState: TimeState;
   aggregations?: StreamAggregations;
-  defaultRetentionPeriod?: string;
+  failureStoreConfig: ReturnType<typeof useFailureStoreConfig>;
 }) => {
   return (
     <>
@@ -57,8 +58,7 @@ export const FailureStoreInfo = ({
             openModal={openModal}
             canManageFailureStore={definition.privileges?.manage_failure_store}
             streamName={definition.stream.name}
-            definition={definition}
-            defaultRetentionPeriod={defaultRetentionPeriod}
+            failureStoreConfig={failureStoreConfig}
           />
         </EuiFlexItem>
         <EuiFlexItem>

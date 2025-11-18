@@ -107,7 +107,7 @@ describe('updateDataStreamsFailureStore', () => {
 
   it('enables failure store with lifecycle data retention', async () => {
     const failureStore: FailureStore = {
-      lifecycle: { data_retention: '30d' },
+      lifecycle: { enabled: { data_retention: '30d' } },
     };
 
     await updateDataStreamsFailureStore({
@@ -115,6 +115,7 @@ describe('updateDataStreamsFailureStore', () => {
       logger: mockLogger,
       name: 'test-stream',
       failureStore,
+      isServerless: false,
     });
 
     expect(mockEsClient.indices.putDataStreamOptions).toHaveBeenCalledWith(
@@ -131,7 +132,7 @@ describe('updateDataStreamsFailureStore', () => {
 
   it('enables failure store without lifecycle data retention', async () => {
     const failureStore: FailureStore = {
-      lifecycle: {},
+      lifecycle: { enabled: {} },
     };
 
     await updateDataStreamsFailureStore({
@@ -139,6 +140,56 @@ describe('updateDataStreamsFailureStore', () => {
       logger: mockLogger,
       name: 'test-stream',
       failureStore,
+      isServerless: false,
+    });
+
+    expect(mockEsClient.indices.putDataStreamOptions).toHaveBeenCalledWith(
+      {
+        name: 'test-stream',
+        failure_store: {
+          enabled: true,
+        },
+      },
+      { meta: true }
+    );
+  });
+
+  it('enables failure store with disabled lifecycle (non-serverless)', async () => {
+    const failureStore: FailureStore = {
+      lifecycle: { disabled: {} },
+    };
+
+    await updateDataStreamsFailureStore({
+      esClient: mockEsClient,
+      logger: mockLogger,
+      name: 'test-stream',
+      failureStore,
+      isServerless: false,
+    });
+
+    expect(mockEsClient.indices.putDataStreamOptions).toHaveBeenCalledWith(
+      {
+        name: 'test-stream',
+        failure_store: {
+          enabled: true,
+          lifecycle: { enabled: false },
+        },
+      },
+      { meta: true }
+    );
+  });
+
+  it('enables failure store with disabled lifecycle (serverless)', async () => {
+    const failureStore: FailureStore = {
+      lifecycle: { disabled: {} },
+    };
+
+    await updateDataStreamsFailureStore({
+      esClient: mockEsClient,
+      logger: mockLogger,
+      name: 'test-stream',
+      failureStore,
+      isServerless: true,
     });
 
     expect(mockEsClient.indices.putDataStreamOptions).toHaveBeenCalledWith(
@@ -162,6 +213,7 @@ describe('updateDataStreamsFailureStore', () => {
       logger: mockLogger,
       name: 'test-stream',
       failureStore,
+      isServerless: false,
     });
 
     expect(mockEsClient.indices.putDataStreamOptions).toHaveBeenCalledWith(
@@ -185,6 +237,7 @@ describe('updateDataStreamsFailureStore', () => {
       logger: mockLogger,
       name: 'test-stream',
       failureStore,
+      isServerless: false,
     });
 
     expect(mockEsClient.indices.simulateIndexTemplate).toHaveBeenCalledWith({
@@ -217,6 +270,7 @@ describe('updateDataStreamsFailureStore', () => {
       logger: mockLogger,
       name: 'test-stream',
       failureStore,
+      isServerless: false,
     });
 
     expect(mockEsClient.indices.simulateIndexTemplate).toHaveBeenCalledWith({
@@ -236,7 +290,7 @@ describe('updateDataStreamsFailureStore', () => {
 
   it('logs and throws error when putDataStreamOptions fails', async () => {
     const failureStore: FailureStore = {
-      lifecycle: { data_retention: '30d' },
+      lifecycle: { enabled: { data_retention: '30d' } },
     };
 
     const error = new Error('Elasticsearch error');
@@ -248,6 +302,7 @@ describe('updateDataStreamsFailureStore', () => {
         logger: mockLogger,
         name: 'test-stream',
         failureStore,
+        isServerless: false,
       })
     ).rejects.toThrow('Elasticsearch error');
 
@@ -266,6 +321,7 @@ describe('updateDataStreamsFailureStore', () => {
         logger: mockLogger,
         name: 'test-stream',
         failureStore: { inherit: {} },
+        isServerless: false,
       })
     ).rejects.toThrow('Template simulation error');
 

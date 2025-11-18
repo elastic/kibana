@@ -108,7 +108,7 @@ describe('ClassicStream', () => {
         },
         data_stream_exists: true,
         effective_failure_store: {
-          lifecycle: {},
+          lifecycle: { enabled: {} },
         },
         ...emptyAssets,
       },

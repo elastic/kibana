@@ -6,43 +6,40 @@
  */
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
-import { isRoot } from '@kbn/streams-schema';
-import type { FailureStoreEnabled } from '@kbn/streams-schema/src/models/ingest/failure_store';
-import {
-  isEnabledFailureStore,
-  isInheritFailureStore,
-} from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { useFailureStoreRedirectLink } from '../../hooks/use_failure_store_redirect_link';
 import { BaseMetricCard } from '../../common/base_metric_card';
 import { getTimeSizeAndUnitLabel } from '../../helpers/format_size_units';
+import type { useFailureStoreConfig } from '../../hooks/use_failure_store_config';
 
 export const RetentionCard = ({
   openModal,
   canManageFailureStore,
   streamName,
-  definition,
-  defaultRetentionPeriod,
+  failureStoreConfig,
 }: {
   openModal: (show: boolean) => void;
   canManageFailureStore: boolean;
   streamName: string;
-  definition: Streams.ingest.all.GetResponse;
-  defaultRetentionPeriod?: string;
+  failureStoreConfig: ReturnType<typeof useFailureStoreConfig>;
 }) => {
   const { href } = useFailureStoreRedirectLink({ streamName });
-  const { effective_failure_store: failureStore } = definition;
-  const failureStoreEnabled = isEnabledFailureStore(failureStore);
-  const customRetentionPeriod =
-    failureStoreEnabled && (failureStore as FailureStoreEnabled).lifecycle.data_retention;
+  const {
+    failureStoreEnabled,
+    customRetentionPeriod,
+    defaultRetentionPeriod,
+    inheritOptions,
+    isDisabledLifecycle,
+  } = failureStoreConfig;
+
   if (!failureStoreEnabled) {
     return null;
   }
 
-  const isRootStream = isRoot(definition.stream.name);
-  const isWiredStream = Streams.WiredStream.GetResponse.is(definition);
-  const isClassicStream = Streams.ClassicStream.GetResponse.is(definition);
-  const isInheritingFailureStore = isInheritFailureStore(definition.stream.ingest.failure_store);
+  const {
+    isWired: isWiredStream,
+    isCurrentlyInherited: isInheritingFailureStore,
+    canShowInherit,
+  } = inheritOptions;
   const title = i18n.translate(
     'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.title',
     {
@@ -56,7 +53,7 @@ export const RetentionCard = ({
         return i18n.translate('xpack.streams.streamDetailFailureStore.inheritingFromParent', {
           defaultMessage: 'Inherit from parent',
         });
-      } else if (!isRootStream) {
+      } else if (canShowInherit) {
         return i18n.translate('xpack.streams.streamDetailFailureStore.overrideParent', {
           defaultMessage: 'Override parent',
         });
@@ -64,7 +61,7 @@ export const RetentionCard = ({
       return null;
     }
 
-    if (isClassicStream) {
+    if (!isWiredStream) {
       return isInheritingFailureStore
         ? i18n.translate('xpack.streams.streamDetailFailureStore.inheritingFromIndexTemplate', {
             defaultMessage: 'Inherit from index template',
@@ -79,7 +76,14 @@ export const RetentionCard = ({
 
   const retentionOrigin = getRetentionOrigin();
 
-  const retentionTypeApplied = customRetentionPeriod
+  const retentionTypeApplied = isDisabledLifecycle
+    ? i18n.translate(
+        'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.infinite',
+        {
+          defaultMessage: 'Infinite retention',
+        }
+      )
+    : customRetentionPeriod
     ? i18n.translate(
         'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.custom',
         {
@@ -93,7 +97,9 @@ export const RetentionCard = ({
         }
       );
 
-  const failureRetentionPeriod = customRetentionPeriod
+  const failureRetentionPeriod = isDisabledLifecycle
+    ? '∞'
+    : customRetentionPeriod
     ? getTimeSizeAndUnitLabel(customRetentionPeriod)
     : getTimeSizeAndUnitLabel(defaultRetentionPeriod);
 

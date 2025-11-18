@@ -17,7 +17,7 @@ export const rootStreamDefinition: Streams.WiredStream.Definition = {
   ingest: {
     lifecycle: { dsl: {} },
     failure_store: {
-      lifecycle: { data_retention: '30d' }, // default 30d retention for failure store
+      lifecycle: { enabled: { data_retention: '30d' } }, // default 30d retention for failure store
     },
     settings: {},
     processing: { steps: [] },

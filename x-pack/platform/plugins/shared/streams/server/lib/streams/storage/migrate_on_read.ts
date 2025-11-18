@@ -131,6 +131,12 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
     hasBeenMigrated = true;
   }
 
+  // Add failure_store to ingest streams if missing
+  if (isObject(migratedDefinition.ingest) && !('failure_store' in migratedDefinition.ingest)) {
+    set(migratedDefinition, 'ingest.failure_store', { inherit: {} });
+    hasBeenMigrated = true;
+  }
+
   if (hasBeenMigrated) {
     Streams.all.Definition.asserts(migratedDefinition as unknown as BaseStream.Definition);
   }

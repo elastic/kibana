@@ -35,6 +35,7 @@ const request: Streams.WiredStream.UpsertRequest = {
           },
         },
       },
+      failure_store: { inherit: {} },
     },
   },
   ...emptyAssets,

@@ -407,6 +407,7 @@ export class ExecutionPlan {
           logger: this.dependencies.logger,
           name: action.request.name,
           failureStore: action.request.failure_store,
+          isServerless: this.dependencies.isServerless,
         })
       )
     );

@@ -5,18 +5,10 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import { Streams, isRoot } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { withSuspense } from '@kbn/shared-ux-utility';
-import type {
-  FailureStore,
-  FailureStoreEnabled,
-} from '@kbn/streams-schema/src/models/ingest/failure_store';
-import {
-  isEnabledFailureStore,
-  isInheritFailureStore,
-} from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { NoFailureStorePanel } from './no_failure_store_panel';
 import { FailureStoreInfo } from './failure_store_info';
 import { useUpdateFailureStore } from '../../../../hooks/use_update_failure_store';
@@ -24,8 +16,11 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { NoPermissionBanner } from './no_permission_banner';
 import { useTimefilter } from '../../../../hooks/use_timefilter';
 import type { useDataStreamStats } from '../hooks/use_data_stream_stats';
-import { useFailureStoreDefaultRetention } from '../hooks/use_failure_store_default_retention';
 import { getFormattedError } from '../../../../util/errors';
+import {
+  transformFailureStoreConfig,
+  useFailureStoreConfig,
+} from '../hooks/use_failure_store_config';
 
 // Lazy load the FailureStoreModal to reduce bundle size
 const LazyFailureStoreModal = React.lazy(async () => ({
@@ -57,8 +52,11 @@ export const StreamDetailFailureStore = ({
       read_failure_store: readFailureStorePrivilege,
       manage_failure_store: manageFailureStorePrivilege,
     },
-    effective_failure_store: failureStore,
   } = definition;
+
+  const failureStoreConfig = useFailureStoreConfig(definition);
+  const { failureStoreEnabled, defaultRetentionPeriod, customRetentionPeriod, inheritOptions } =
+    failureStoreConfig;
 
   const closeModal = () => {
     setIsFailureStoreModalOpen(false);
@@ -68,30 +66,10 @@ export const StreamDetailFailureStore = ({
     failureStoreEnabled?: boolean;
     customRetentionPeriod?: string;
     inherit?: boolean;
+    lifecycleEnabled?: boolean;
   }) => {
     try {
-      if (update.inherit) {
-        await updateFailureStore(definition.stream.name, {
-          inherit: {},
-        });
-      } else {
-        const failureStoreEnabled = update.failureStoreEnabled ?? false;
-
-        // Determine the failure store configuration
-        let failureStoreConfig: FailureStore;
-
-        if (update.inherit) {
-          failureStoreConfig = { inherit: {} };
-        } else if (!failureStoreEnabled) {
-          failureStoreConfig = { disabled: {} };
-        } else {
-          failureStoreConfig = {
-            lifecycle: { data_retention: update.customRetentionPeriod ?? undefined },
-          };
-        }
-
-        await updateFailureStore(definition.stream.name, failureStoreConfig);
-      }
+      await updateFailureStore(definition.stream.name, transformFailureStoreConfig(update));
 
       refreshDefinition();
 
@@ -113,26 +91,6 @@ export const StreamDetailFailureStore = ({
     }
   };
 
-  // Determine stream type and inheritance options
-  const isWired = Streams.WiredStream.GetResponse.is(definition);
-  const isClassicStream = Streams.ClassicStream.GetResponse.is(definition);
-  const isRootStream = isRoot(definition.stream.name);
-
-  // Check if current failure store is inherited
-  const isCurrentlyInherited = isInheritFailureStore(definition.stream.ingest.failure_store);
-
-  const canShowInherit = (isWired && !isRootStream) || isClassicStream;
-
-  const inheritOptions = {
-    canShowInherit,
-    isWired,
-    isCurrentlyInherited,
-  };
-
-  const failureStoreEnabled = isEnabledFailureStore(failureStore);
-
-  const defaultRetentionPeriod = useFailureStoreDefaultRetention(definition.stream.name);
-
   return (
     <EuiFlexItem grow={false}>
       <EuiFlexGroup direction="column" gutterSize="m">
@@ -145,9 +103,7 @@ export const StreamDetailFailureStore = ({
                 failureStoreProps={{
                   failureStoreEnabled,
                   defaultRetentionPeriod,
-                  customRetentionPeriod: failureStoreEnabled
-                    ? (failureStore as FailureStoreEnabled).lifecycle.data_retention
-                    : undefined,
+                  customRetentionPeriod,
                 }}
                 inheritOptions={inheritOptions}
                 showIlmDescription={isServerless}
@@ -162,7 +118,7 @@ export const StreamDetailFailureStore = ({
                 stats={data.stats?.fs.stats}
                 timeState={timeState}
                 aggregations={data?.stats?.fs.aggregations}
-                defaultRetentionPeriod={defaultRetentionPeriod}
+                failureStoreConfig={failureStoreConfig}
               />
             ) : (
               <NoFailureStorePanel openModal={setIsFailureStoreModalOpen} definition={definition} />

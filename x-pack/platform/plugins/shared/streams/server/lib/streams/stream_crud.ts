@@ -310,14 +310,23 @@ export async function getDefaultRetentionValue({
 export function getFailureStore({
   dataStream,
 }: {
-  dataStream: DataStreamWithFailureStore;
+  dataStream: DataStreamWithFailureStore | null;
 }): EffectiveFailureStore {
-  if (dataStream.failure_store?.enabled) {
-    const dataRetention = dataStream.failure_store?.lifecycle?.data_retention;
+  if (!dataStream) {
+    return { disabled: {} };
+  }
 
-    // data_retention is optional - failure store can be enabled without custom retention
+  if (dataStream.failure_store?.enabled) {
+    const lifecycle = dataStream.failure_store?.lifecycle;
+
+    if (lifecycle?.enabled) {
+      return {
+        lifecycle: { enabled: { data_retention: lifecycle.data_retention } },
+      };
+    }
+
     return {
-      lifecycle: dataRetention ? { data_retention: dataRetention } : {},
+      lifecycle: { disabled: {} },
     };
   }
 

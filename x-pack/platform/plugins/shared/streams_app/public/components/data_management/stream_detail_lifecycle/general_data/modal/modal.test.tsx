@@ -58,7 +58,7 @@ describe('EditLifecycleModal', () => {
         view_index_metadata: true,
       },
       effective_failure_store: {
-        lifecycle: {},
+        lifecycle: { enabled: {} },
         from: streamName,
       },
     };
