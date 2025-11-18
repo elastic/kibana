@@ -21,6 +21,7 @@ import {
 } from '@kbn/es-query';
 
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { PageScope } from '../../../data_view_manager/constants';
 import { sourcererAdapterSelector } from '../../../data_view_manager/redux/selectors';
 import { sourcererSelectors } from '../../../sourcerer/store';
 import {
@@ -46,7 +47,6 @@ import { TimelineStatusEnum, TimelineTypeEnum } from '../../../../common/api/tim
 import type { TimelineModel } from '../model';
 import type { ColumnHeaderOptions } from '../../../../common/types/timeline';
 import { extractTimelineIdsAndVersions, refreshTimelines } from './helpers';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 
 function isSaveTimelineAction(action: Action): action is ReturnType<typeof saveTimeline> {
   return action.type === saveTimeline.type;
@@ -70,16 +70,16 @@ export const saveTimelineMiddleware: (kibana: CoreStart) => Middleware<{}, State
     const timelineTimeRange = inputsSelectors.timelineTimeRangeSelector(storeState);
     const selectedDataViewIdSourcerer = sourcererSelectors.sourcererScopeSelectedDataViewId(
       storeState,
-      SourcererScopeName.timeline
+      PageScope.timeline
     );
     const selectedPatternsSourcerer = sourcererSelectors.sourcererScopeSelectedPatterns(
       storeState,
-      SourcererScopeName.timeline
+      PageScope.timeline
     );
 
-    const { dataViewId: experimentalDataViewId } = sourcererAdapterSelector(
-      SourcererScopeName.timeline
-    )(storeState);
+    const { dataViewId: experimentalDataViewId } = sourcererAdapterSelector(PageScope.timeline)(
+      storeState
+    );
 
     const experimentalIsDataViewEnabled =
       storeState.app.enableExperimental.newDataViewPickerEnabled;
