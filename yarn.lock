@@ -4539,7 +4539,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/agent-builder-plugin@link:x-pack/platform/plugins/shared/agent-builder":
+"@kbn/agent-builder-plugin@link:x-pack/platform/plugins/shared/agent_builder":
   version "0.0.0"
   uid ""
 
