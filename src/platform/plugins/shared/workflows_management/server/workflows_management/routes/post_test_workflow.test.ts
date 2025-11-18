@@ -54,6 +54,7 @@ describe('POST /api/workflows/test', () => {
       const mockContext = {};
       const mockRequest = {
         body: {
+          workflowId: 'workflow-123',
           workflowYaml:
             'name: Test Workflow\nenabled: true\nsteps:\n  - id: step1\n    name: First Step\n    type: action\n    action: test-action',
           inputs: {
@@ -68,12 +69,13 @@ describe('POST /api/workflows/test', () => {
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      expect(workflowsApi.testWorkflow).toHaveBeenCalledWith(
-        mockRequest.body.workflowYaml,
-        mockRequest.body.inputs,
-        'default',
-        mockRequest
-      );
+      expect(workflowsApi.testWorkflow).toHaveBeenCalledWith({
+        workflowId: mockRequest.body.workflowId,
+        workflowYaml: mockRequest.body.workflowYaml,
+        inputs: mockRequest.body.inputs,
+        spaceId: 'default',
+        request: mockRequest,
+      });
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: {
           workflowExecutionId: mockExecutionId,
@@ -127,12 +129,13 @@ describe('POST /api/workflows/test', () => {
 
       await routeHandler(mockContext, mockRequest, mockResponse);
 
-      expect(workflowsApi.testWorkflow).toHaveBeenCalledWith(
-        mockRequest.body.workflowYaml,
-        mockRequest.body.inputs,
-        'custom-space',
-        mockRequest
-      );
+      expect(workflowsApi.testWorkflow).toHaveBeenCalledWith({
+        workflowId: undefined,
+        workflowYaml: mockRequest.body.workflowYaml,
+        inputs: mockRequest.body.inputs,
+        spaceId: 'custom-space',
+        request: mockRequest,
+      });
       expect(mockResponse.ok).toHaveBeenCalledWith({
         body: {
           workflowExecutionId: mockExecutionId,

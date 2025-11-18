@@ -116,10 +116,10 @@ UI metadata extension system that enables:
 - Pre-configured schema helpers (`UISchemas.secret()`, `UISchemas.textarea()`, etc.)
 
 #### `specs/`
-Directory containing actual connector implementations:
-- `virustotal.ts` - Threat intelligence connector
-- `shodan.ts` - Asset discovery connector
-- `abuseipdb.ts`, `alienvault_otx.ts`, `greynoise.ts`, `urlvoid.ts` - Security connectors
+Directory containing actual connector implementations
+
+#### `icons/`
+Directory containing custom icon components
 
 ### Design Principles
 
@@ -139,8 +139,8 @@ A `SingleFileConnectorDefinition` consists of:
 metadata: {
   id: '.connector_id',              // Unique connector identifier
   displayName: 'Connector Name',     // User-facing name
-  icon?: string,                     // Base64-encoded icon (SVG or PNG)
   description: 'Description',        // Connector description
+  icon?: string,                     // EUI icon name (e.g., 'addDataApp', 'globe') - only for built-in EUI icons
   docsUrl?: string,                  // Link to documentation
   minimumLicense: 'basic' | 'gold' | 'platinum' | 'enterprise',
   supportedFeatureIds: ['workflows', 'alerting', 'cases', ...],
@@ -278,23 +278,6 @@ field: withUIMeta(z.string(), {
 }).describe('Field Label')
 ```
 
-## Examples
-
-### VirusTotal Connector
-
-See `src/specs/virustotal.ts` for a complete example with:
-- Header-based authentication
-- Multiple tool actions (scanFileHash, scanUrl, submitFile, getIpReport)
-- Base64-encoded icon
-- Connection testing
-
-### Shodan Connector
-
-See `src/specs/shodan.ts` for an example with:
-- API key authentication
-- Search and lookup actions
-- Pagination support
-
 ## Advanced Features
 
 ### Dynamic Options
@@ -358,17 +341,104 @@ policies: {
 
 ## Icons
 
-Icons can be set using base64 encoding. Both SVG and PNG formats are supported:
+Icons can be provided in two ways: **built-in EUI icons** (for simple cases) or **lazy-loaded React components** (for custom icons).
+
+### Method 1: Built-in EUI Icons
+
+For connectors that don't need custom branding, you can use any built-in EUI icon by setting the icon name in metadata:
 
 ```typescript
 metadata: {
-  icon: `data:image/png;base64,${getIconPngBase64()}`,
-  // or
-  icon: `data:image/svg+xml;base64,${getIconSvgBase64()}`,
+  id: '.my_connector',
+  displayName: 'My Connector',
+  icon: 'addDataApp',  // Any EUI icon name (e.g., 'globe', 'link', 'cloud', etc.)
 }
 ```
 
-See `src/specs/virustotal.ts` for a complete example.
+**Pros**: Simple, no additional files needed, no bundle size impact  
+**Cons**: Limited to EUI's built-in icon set
+
+**Note**: The `icon` field in metadata should **only** be used for EUI icon names. For custom icons, use the lazy-loaded approach below.
+
+### Method 2: Lazy-Loaded Custom Icons (For Custom Branding)
+
+For custom icons (logos, branded images, etc.), use lazy-loaded React components. This approach keeps custom icon assets out of the main bundle and loads them on-demand. To use lazy icons:
+
+1. **Create an icon component** in `src/icons/{connector_id}/`:
+
+**Option A: Using EuiIcon with an image file**
+
+```typescript
+// src/icons/my_connector/index.tsx
+import React from 'react';
+import { EuiIcon } from '@elastic/eui';
+import type { ConnectorIconProps } from '../../types';
+import myIcon from './my_connector.png'; // or .jpg, .svg
+
+export default (props: ConnectorIconProps) => {
+  return <EuiIcon type={myIcon} {...props} />;
+};
+```
+
+**Option B: Using a custom SVG component**
+
+```typescript
+// src/icons/my_connector.tsx
+import React from 'react';
+import type { ConnectorIconProps } from '../types';
+
+export default (props: ConnectorIconProps) => {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" fill="#00A6C1" {...props}>
+      <path d="M88.5,20.3c0-3.5-3.8-6.7-7.8-6.7H46V30h42.5L88.5,20.3z" />
+    </svg>
+  );
+};
+```
+
+2. **Register the icon** in `src/connector_icons_map.ts`:
+
+```typescript
+// src/connector_icons_map.ts
+import { lazy } from 'react';
+import type { ConnectorIconProps } from './types';
+
+export const ConnectorIconsMap: Map<
+  string,
+  React.LazyExoticComponent<React.ComponentType<ConnectorIconProps>>
+> = new Map([
+  // ... existing icons ...
+  [
+    '.my_connector',
+    lazy(() => import(/* webpackChunkName: "connectorIconMyConnector" */ './icons/my_connector')),
+  ],
+]);
+```
+
+3. **Omit the icon from metadata** (or leave it undefined):
+
+```typescript
+// src/specs/my_connector.ts
+export const MyConnector: SingleFileConnectorDefinition = {
+  metadata: {
+    id: '.my_connector',  // Must match the key in ConnectorIconsMap
+    displayName: 'My Connector',
+    // icon is optional - will be resolved from ConnectorIconsMap
+  },
+  // ... rest of the definition
+};
+```
+
+**Pros**: Better performance, code splitting, icons loaded on-demand, supports custom branding  
+**Cons**: Requires additional files and registration
+
+### Icon Resolution Priority
+
+The system resolves icons in the following order:
+
+1. If `metadata.icon` is set (EUI icon name), it's used directly
+2. If `metadata.icon` is not set, the system looks up the connector ID in `ConnectorIconsMap`
+3. If no icon is found, defaults to the `'globe'` icon
 
 ## TypeScript Support
 
@@ -376,7 +446,7 @@ The package provides full TypeScript support:
 
 ```typescript
 import type { 
-  SingleFileConnectorDefinition,
+  ConnectorSpec,
   ActionDefinition,
   ConnectorMetadata,
 } from '@kbn/connector-specs';
@@ -384,7 +454,6 @@ import type {
 
 ## Related Documentation
 
-- [Examples README](./src/examples/README.md) - Detailed examples from real connectors
 - [Connector Spec](./src/connector_spec.ts) - Full API reference
 - [UI Metadata System](./src/connector_spec_ui.ts) - UI derivation documentation
 
@@ -394,9 +463,28 @@ When adding a new connector:
 
 1. Create the spec file in `src/specs/`
 2. Export it from `src/all_specs.ts`
-3. Follow the existing patterns for consistency
-4. Include proper TypeScript types
-5. Add appropriate UI metadata for better UX
+3. (Optional) Add an icon:
+   - For simple cases: Use a built-in EUI icon by setting `metadata.icon` to an EUI icon name (e.g., `'globe'`, `'addDataApp'`)
+   - For custom branding: Create a lazy icon component in `src/icons/{connector_id}/` and register it in `src/connector_icons_map.ts`
+4. Follow the existing patterns for consistency
+5. Include proper TypeScript types
+6. Add appropriate UI metadata for better UX
+
+### Adding a Lazy Icon
+
+When creating a new connector with a lazy icon:
+
+1. Create the icon component file(s):
+   - For simple SVGs: `src/icons/{connector_id}.tsx`
+   - For icons with assets: `src/icons/{connector_id}/index.tsx` and asset files
+2. Register in `src/connector_icons_map.ts`:
+   ```typescript
+   [
+     '.your_connector_id',
+     lazy(() => import(/* webpackChunkName: "connectorIconYourConnector" */ './icons/your_icon_component')),
+   ],
+   ```
+3. Ensure `metadata.id` in your spec matches the key in the map (including the leading dot)
 
 ## License
 
