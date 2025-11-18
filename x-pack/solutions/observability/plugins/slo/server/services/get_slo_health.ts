@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  TransformGetTransformStatsTransformStats,
-  AggregationsAggregate,
-  FieldValue,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { FetchSLOHealthParams, FetchSLOHealthResponse } from '@kbn/slo-schema';
 import { fetchSLOHealthResponseSchema } from '@kbn/slo-schema';
@@ -21,6 +17,7 @@ import {
   getSLOTransformId,
 } from '../../common/constants';
 import type { HealthStatus, State } from '../domain/models/health';
+import type { SLORepository } from './slo_repository';
 import type { EsSummaryDocument } from './summary_transform_generator/helpers/create_temp_summary';
 
 const LAG_THRESHOLD_MINUTES = 10;
@@ -45,7 +42,10 @@ function getAfterKey(
 }
 
 export class GetSLOHealth {
-  constructor(private scopedClusterClient: IScopedClusterClient) {}
+  constructor(
+    private scopedClusterClient: IScopedClusterClient,
+    private repository: SLORepository
+  ) {}
 
   public async execute(params: FetchSLOHealthParams): Promise<FetchSLOHealthResponse> {
     let afterKey: AggregationsAggregate | undefined;
@@ -151,20 +151,16 @@ export class GetSLOHealth {
       })
     );
 
+    /*
+     * Map results based on SLO ids since transforms represent all instances
+     * Since "state" is not being used in Kibana, we can group by SLO id and return only one result per SLO
+     * If needed in the future, we can return all instances by removing this mapping
+     * and adding sloInstanceId to the response schema
+     */
     const mappedResults = Array.from(
       new Map(results.map((item) => [`${item.sloId}-${item.sloRevision}`, item])).values()
     );
-
-    const uniqueResults = params.statusFilter
-      ? mappedResults.filter((item) => item.health.overall === params.statusFilter)
-      : mappedResults;
-
-    return fetchSLOHealthResponseSchema.encode({
-      data: uniqueResults.slice(page * perPage, (page + 1) * perPage),
-      page,
-      perPage,
-      total: uniqueResults.length,
-    });
+    return fetchSLOHealthResponseSchema.encode(mappedResults);
   }
 
   private async getTransformStatsForSLO(item: {
