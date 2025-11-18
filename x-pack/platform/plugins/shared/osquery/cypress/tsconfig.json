@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "include": [
     "**/*",
     "./cypress.config.ts",
@@ -19,18 +19,12 @@
   },
   "kbn_references": [
     "@kbn/cypress-config",
-    // cypress projects that are nested inside of other ts project use code
-    // from the parent ts project in ways that can't be automatically deteceted
-    // at this time so we have to force the inclusion of this reference
-    {
-      "path": "../tsconfig.json",
-      "force": true
-    },
     "@kbn/fleet-plugin",
     "@kbn/cases-plugin",
     "@kbn/cypress-test-helper",
     "@kbn/security-plugin",
     "@kbn/test",
     "@kbn/tooling-log",
+    "@kbn/osquery-plugin",
   ]
 }

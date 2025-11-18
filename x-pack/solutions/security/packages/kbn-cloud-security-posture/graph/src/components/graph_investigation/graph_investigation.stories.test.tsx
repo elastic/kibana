@@ -220,7 +220,7 @@ describe('GraphInvestigation Component', () => {
       expect(showDetailsItem).toHaveTextContent('Show alert details');
     });
 
-    xit('should not show `Show event details` list item when label node misses documentsData', async () => {
+    it('should not show `Show event details` list item when label node misses documentsData', async () => {
       const { container, queryByTestId } = renderStory();
 
       await expandNode(
@@ -242,7 +242,7 @@ describe('GraphInvestigation Component', () => {
       expect(showDetailsItem).not.toHaveAttribute('disabled');
     });
 
-    xit('show the option `Show entity details` as disabled when entity node has no documentsData', async () => {
+    it('show the option `Show entity details` as disabled when entity node has no documentsData', async () => {
       const { container, getByTestId, queryByTestId } = renderStory();
 
       await expandNode(container, 'admin@example.com');
