@@ -74812,6 +74812,10 @@ components:
           description: |
             If true, an alert occurs if a group that previously reported metrics does not report them again over the expected time period. This check is not recommended for dynamically scaling infrastructures that might rapidly start and stop nodes automatically.
     params_property_slo_burn_rate:
+      title: SLO burn rate
+      description: |
+        The parameters for the SLO burn rate rule. These parameters are appropriate when `rule_type_id` is `slo.rules.burnRate`.
+      type: object
       properties:
         sloId:
           description: The SLO identifier used by the rule
