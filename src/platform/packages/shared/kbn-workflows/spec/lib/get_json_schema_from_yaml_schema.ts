@@ -186,6 +186,13 @@ function fixBrokenSchemaReferencesAndEnforceStrictValidation(schema: any): any {
     '"type": "object", "properties": {}, "additionalProperties": false, "description": "Schema intersection (simplified due to broken reference)"'
   );
 
+  // Pattern 8: Fix broken references to items that don't exist
+  // Example: #/definitions/WorkflowSchema/properties/settings/properties/on-failure/properties/fallback/items
+  fixedSchemaString = fixedSchemaString.replace(
+    /"\$ref":"#\/definitions\/WorkflowSchema\/properties\/settings\/properties\/on-failure\/properties\/fallback\/items"/g,
+    '"type": "array", "items": {"type": "object", "additionalProperties": false}, "description": "Fallback steps array"'
+  );
+
   // Enforce strict validation: ensure all objects have additionalProperties: false
   // This fixes the main issue where Kibana connectors were too permissive
   try {

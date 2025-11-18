@@ -147,8 +147,8 @@ function improveTypeFieldDescriptions(schema: any, connectorsData?: any): any {
 
 /**
  * Ensure the inputs schema is in object format (not array format)
- * This fixes any cases where array schemas might have been reintroduced
  * This is a safety net that runs after all other post-processing
+ * to ensure array schemas (legacy format) are filtered out
  */
 function ensureInputsSchemaIsObjectFormat(schema: any): void {
   if (!schema?.definitions?.WorkflowSchema?.properties?.inputs) {
@@ -157,31 +157,7 @@ function ensureInputsSchemaIsObjectFormat(schema: any): void {
 
   const inputsSchema = schema.definitions.WorkflowSchema.properties.inputs;
 
-  // Helper to recursively remove array types from schema
-  const removeArrayTypes = (obj: any): void => {
-    if (!obj || typeof obj !== 'object') {
-      return;
-    }
-
-    // If this is an array schema, convert it to object
-    if (obj.type === 'array' && obj !== inputsSchema) {
-      // Don't modify the inputsSchema itself if it's an array (shouldn't happen)
-      // But if properties.properties is an array, fix it
-      obj.type = 'object';
-      if (!obj.additionalProperties) {
-        obj.additionalProperties = true;
-      }
-    }
-
-    // Recursively process all properties
-    if (Array.isArray(obj)) {
-      obj.forEach(removeArrayTypes);
-    } else {
-      Object.values(obj).forEach(removeArrayTypes);
-    }
-  };
-
-  // If inputs has anyOf, filter out array schemas
+  // If inputs has anyOf, filter out array schemas (legacy format)
   if (inputsSchema.anyOf && Array.isArray(inputsSchema.anyOf)) {
     inputsSchema.anyOf = inputsSchema.anyOf.filter((subSchema: any) => {
       // Keep null/undefined (for optional)
