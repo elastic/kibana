@@ -20,7 +20,7 @@ export const getSchemaForAuthType = (
   authType: NormalizedAuthType,
   { defaults }: AuthTypeOverride
 ) => {
-  const schemaToUse = z.object({
+  let schemaToUse = z.object({
     ...authType.schema.shape,
   });
   if (defaults) {
@@ -30,6 +30,10 @@ export const getSchemaForAuthType = (
         schemaToUse.shape[key] = schemaToUse.shape[key].default(defaultValue);
       }
     });
+  }
+
+  if (authType.normalizeSchema) {
+    schemaToUse = authType.normalizeSchema(defaults);
   }
 
   // add the authType discriminator key

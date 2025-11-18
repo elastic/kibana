@@ -11,7 +11,7 @@ import type { FtrProviderContext } from '../../../../common/ftr_provider_context
 export default function createSingleFileConnectorTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
 
-  describe('testtest create single file connector', () => {
+  describe('create single file connector', () => {
     it('should include single file connector in action type registry', async () => {
       const response = await supertest
         .get('/api/actions/connector_types')
@@ -54,8 +54,7 @@ export default function createSingleFileConnectorTest({ getService }: FtrProvide
           },
           secrets: {
             authType: 'api_key_header',
-            headerField: 'Key',
-            apiKey: 'abcdefg12345',
+            Key: 'abcdefg12345',
           },
         })
         .expect(200);

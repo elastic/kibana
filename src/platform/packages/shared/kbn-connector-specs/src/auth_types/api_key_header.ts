@@ -9,11 +9,17 @@
 
 import { z } from '@kbn/zod/v4';
 import type { AxiosInstance } from 'axios';
+import { isString } from 'lodash';
 import type { AuthTypeSpec } from '../connector_spec';
 
+const HEADER_FIELD_DEFAULT = 'Api-Key';
 const authSchema = z.object({
-  headerField: z.string().meta({ sensitive: true }).describe('API Key header field'),
-  apiKey: z.string().meta({ sensitive: true }).describe('API Key value'),
+  headerField: z
+    .string()
+    .meta({ sensitive: true })
+    .describe('API Key header field')
+    .default(HEADER_FIELD_DEFAULT),
+  apiKey: z.string().meta({ sensitive: true }).describe('API Key'),
 });
 
 type AuthSchemaType = z.infer<typeof authSchema>;
@@ -25,6 +31,24 @@ type AuthSchemaType = z.infer<typeof authSchema>;
 export const ApiKeyHeaderAuth: AuthTypeSpec<AuthSchemaType> = {
   id: 'api_key_header',
   schema: authSchema,
+  normalizeSchema: (defaults?: Record<string, unknown>) => {
+    const schemaToUse = z.object({
+      ...authSchema.shape,
+    });
+
+    if (defaults) {
+      // get the default values for the headerField
+      const headerField: string =
+        defaults.headerField && isString(defaults.headerField)
+          ? defaults.headerField
+          : HEADER_FIELD_DEFAULT;
+      return z.object({
+        [headerField]: schemaToUse.shape.apiKey,
+      });
+    }
+
+    return schemaToUse;
+  },
   configure: (axiosInstance: AxiosInstance, secret: AuthSchemaType): AxiosInstance => {
     // set global defaults
     axiosInstance.defaults.headers.common[secret.headerField] = secret.apiKey;

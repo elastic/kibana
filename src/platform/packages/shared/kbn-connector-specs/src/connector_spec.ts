@@ -79,6 +79,7 @@ export interface ConnectorMetadata {
 export interface AuthTypeSpec<T extends Record<string, unknown>> {
   id: string;
   schema: z.ZodObject<Record<string, z.ZodType>>;
+  normalizeSchema?: (defaults?: Record<string, unknown>) => z.ZodObject<Record<string, z.ZodType>>;
   configure: (axiosInstance: AxiosInstance, secret: T) => AxiosInstance;
 }
 
