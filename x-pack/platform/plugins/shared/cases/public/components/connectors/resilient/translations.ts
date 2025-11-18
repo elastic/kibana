@@ -52,10 +52,3 @@ export const ADDITIONAL_FIELDS_HELP_TEXT = i18n.translate(
     defaultMessage: 'Add additional IBM Resilient fields.',
   }
 );
-
-export const REMOVE_FIELD_BUTTON_LABEL = i18n.translate(
-  'xpack.cases.connectors.resilient.removeFieldButtonLabel',
-  {
-    defaultMessage: 'Remove field',
-  }
-);

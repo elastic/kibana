@@ -11,9 +11,6 @@ import {
   type EuiComboBoxOptionOption,
   EuiFormRow,
   type EuiComboBoxProps,
-  type EuiFormRowProps,
-  EuiLink,
-  EuiText,
 } from '@elastic/eui';
 import {
   type FieldHook,
@@ -29,48 +26,28 @@ import {
   SelectField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { ResilientFieldMetadata } from './types';
-import { REMOVE_FIELD_BUTTON_LABEL } from './translations';
 
 interface AdditionalFieldProps {
   path: string;
   label: string;
-  labelAppend: EuiFormRowProps['labelAppend'];
   field: ResilientFieldMetadata;
   'data-test-subj': string;
 }
 
-const RemoveField = React.memo<{
-  field: ResilientFieldMetadata;
-  onRemoveField: (fieldName: string) => void;
-}>(({ field, onRemoveField }) => {
-  const onClick = useCallback(() => {
-    onRemoveField(field.name);
-  }, [onRemoveField, field.name]);
-  return (
-    <EuiText size="xs">
-      <EuiLink onClick={onClick} aria-label={REMOVE_FIELD_BUTTON_LABEL}>
-        {REMOVE_FIELD_BUTTON_LABEL}
-      </EuiLink>
-    </EuiText>
-  );
-});
-RemoveField.displayName = 'RemoveField';
-
 const AdditionalGenericField = React.memo<
   AdditionalFieldProps & { Component: UseFieldProps<unknown>['component'] }
->(({ path, label, labelAppend, 'data-test-subj': dataTestSubj, Component }) => {
+>(({ path, label, 'data-test-subj': dataTestSubj, Component }) => {
   const fieldProps = useMemo(() => {
     return {
       config: { defaultValue: '', label },
       componentProps: {
-        labelAppend,
         euiFieldProps: {
           display: 'center',
           'data-test-subj': dataTestSubj,
         },
       },
     };
-  }, [label, labelAppend, dataTestSubj]);
+  }, [label, dataTestSubj]);
   return (
     <UseField<string>
       path={path}
@@ -83,20 +60,19 @@ const AdditionalGenericField = React.memo<
 AdditionalGenericField.displayName = 'AdditionalGenericField';
 
 const AdditionalDateField = React.memo<AdditionalFieldProps & { showTimeSelect: boolean }>(
-  ({ path, label, labelAppend, 'data-test-subj': dataTestSubj, showTimeSelect }) => {
+  ({ path, label, 'data-test-subj': dataTestSubj, showTimeSelect }) => {
     const fieldProps = useMemo(() => {
       return {
         config: { label },
         defaultValue: moment(),
         componentProps: {
-          labelAppend,
           euiFieldProps: {
             'data-test-subj': dataTestSubj,
             showTimeSelect,
           },
         },
       };
-    }, [label, labelAppend, dataTestSubj, showTimeSelect]);
+    }, [label, dataTestSubj, showTimeSelect]);
     return (
       <UseField<Moment>
         path={path}
@@ -111,12 +87,11 @@ const AdditionalDateField = React.memo<AdditionalFieldProps & { showTimeSelect: 
 AdditionalDateField.displayName = 'AdditionalDateField';
 
 const AdditionalSelectField = React.memo<AdditionalFieldProps>(
-  ({ path, label, labelAppend, 'data-test-subj': dataTestSubj, field }) => {
+  ({ path, label, 'data-test-subj': dataTestSubj, field }) => {
     const fieldProps = useMemo(() => {
       return {
         config: { label },
         componentProps: {
-          labelAppend,
           euiFieldProps: {
             'data-test-subj': dataTestSubj,
             hasNoInitialSelection: true,
@@ -131,7 +106,7 @@ const AdditionalSelectField = React.memo<AdditionalFieldProps>(
           },
         },
       };
-    }, [label, labelAppend, dataTestSubj, field]);
+    }, [label, dataTestSubj, field]);
     return (
       <UseField<number>
         path={path}
@@ -146,7 +121,6 @@ AdditionalSelectField.displayName = 'AdditionalSelectField';
 
 interface InnerFieldProps {
   label: string;
-  labelAppend: EuiFormRowProps['labelAppend'];
   outerField: ResilientFieldMetadata;
   options: EuiComboBoxProps<string>['options'];
   'data-test-subj': string;
@@ -155,7 +129,7 @@ const AdditionalMultiSelectInnerField = React.memo<
   InnerFieldProps & {
     field: FieldHook<number[], number[]>;
   }
->(({ field, label, labelAppend, outerField, options, 'data-test-subj': dataTestSubj }) => {
+>(({ field, label, outerField, options, 'data-test-subj': dataTestSubj }) => {
   const onChangeComboBox = useCallback(
     (changedOptions: Array<EuiComboBoxOptionOption<string>>) => {
       field.setValue(changedOptions.map((option) => parseInt(option.value as string, 10)));
@@ -173,7 +147,7 @@ const AdditionalMultiSelectInnerField = React.memo<
 
   const isInvalid = false;
   return (
-    <EuiFormRow label={label} labelAppend={labelAppend} isInvalid={isInvalid}>
+    <EuiFormRow label={label} isInvalid={isInvalid}>
       <EuiComboBox
         isInvalid={isInvalid}
         data-test-subj={dataTestSubj}
@@ -190,11 +164,10 @@ const AdditionalMultiSelectInnerField = React.memo<
 AdditionalMultiSelectInnerField.displayName = 'AdditionalMultiSelectInnerField';
 
 const AdditionalMultiSelectField = React.memo<AdditionalFieldProps>(
-  ({ path, label, labelAppend, 'data-test-subj': dataTestSubj, field }) => {
+  ({ path, label, 'data-test-subj': dataTestSubj, field }) => {
     const fieldProps = useMemo(() => {
       const componentProps: InnerFieldProps = {
         label,
-        labelAppend,
         outerField: field,
         options: field.values
           ? field.values.map((val) => ({
@@ -208,7 +181,7 @@ const AdditionalMultiSelectField = React.memo<AdditionalFieldProps>(
         config: { defaultValue: [] },
         componentProps,
       };
-    }, [label, labelAppend, dataTestSubj, field]);
+    }, [label, dataTestSubj, field]);
     return (
       <UseField<number[]>
         path={path}
@@ -223,19 +196,17 @@ AdditionalMultiSelectField.displayName = 'AdditionalMultiSelectField';
 
 export const AdditionalFormField = React.memo<{
   field: ResilientFieldMetadata;
-  onRemoveField: (fieldName: string) => void;
-}>(({ field, onRemoveField }) => {
+}>(({ field }) => {
   const path = field.name;
   const dataTestSubj = `resilientAdditionalField-${field.name}`;
   const props: AdditionalFieldProps = useMemo(() => {
     return {
       path,
       label: field.text,
-      labelAppend: <RemoveField onRemoveField={onRemoveField} field={field} />,
       field,
       'data-test-subj': dataTestSubj,
     };
-  }, [path, field, dataTestSubj, onRemoveField]);
+  }, [path, field, dataTestSubj]);
   switch (field.input_type) {
     case 'text':
       return <AdditionalGenericField {...props} Component={TextField} />;

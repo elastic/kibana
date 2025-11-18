@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useCallback, useEffect, useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { isObject } from 'lodash';
 import {
   EuiComboBox,
@@ -53,12 +53,6 @@ export const AdditionalFormFields = React.memo<{
       }));
     }
   );
-
-  const onRemoveField = useCallback((fieldName: string) => {
-    setAdditionalFields((fields) => {
-      return fields.filter((field) => field.value !== fieldName);
-    });
-  }, []);
 
   const defaultAdditionalFields = useMemo(() => {
     return additionalFieldsFormField.value ? JSON.parse(additionalFieldsFormField.value) : {};
@@ -126,7 +120,7 @@ export const AdditionalFormFields = React.memo<{
           }
           return (
             <EuiFlexItem key={fieldMetaData.name}>
-              <AdditionalFormField field={fieldMetaData} onRemoveField={onRemoveField} />
+              <AdditionalFormField field={fieldMetaData} />
             </EuiFlexItem>
           );
         })}
