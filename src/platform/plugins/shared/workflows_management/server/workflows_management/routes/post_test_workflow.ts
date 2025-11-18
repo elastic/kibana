@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
+import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { WORKFLOW_ROUTE_OPTIONS } from './route_constants';
 import { handleRouteError } from './route_error_handlers';
 import { WORKFLOW_EXECUTE_SECURITY } from './route_security';
@@ -22,10 +23,18 @@ export function registerPostTestWorkflowRoute({ router, api, logger, spaces }: R
       options: WORKFLOW_ROUTE_OPTIONS,
       security: WORKFLOW_EXECUTE_SECURITY,
       validate: {
-        body: schema.object({
-          inputs: schema.recordOf(schema.string(), schema.any()),
-          workflowYaml: schema.string(),
-        }),
+        body: buildRouteValidationWithZod(
+          z
+            .object({
+              workflowId: z.string().optional(),
+              workflowYaml: z.string().optional(),
+              inputs: z.record(z.string(), z.any()),
+            })
+            .refine((data) => data.workflowId || data.workflowYaml, {
+              message: "Either 'workflowId' or 'workflowYaml' or both must be provided",
+              path: ['workflowId', 'workflowYaml'],
+            })
+        ),
       },
     },
     async (context, request, response) => {
@@ -34,7 +43,7 @@ export function registerPostTestWorkflowRoute({ router, api, logger, spaces }: R
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
         let processedInputs = request.body.inputs;
-        const parsedYaml = parseYamlToJSONWithoutValidation(request.body.workflowYaml);
+        const parsedYaml = parseYamlToJSONWithoutValidation(request.body.workflowYaml || '');
         const hasAlertTrigger =
           parsedYaml.success &&
           Array.isArray(parsedYaml.json.triggers) &&
@@ -63,12 +72,13 @@ export function registerPostTestWorkflowRoute({ router, api, logger, spaces }: R
           }
         }
 
-        const workflowExecutionId = await api.testWorkflow(
-          request.body.workflowYaml,
-          processedInputs,
+        const workflowExecutionId = await api.testWorkflow({
+          workflowId: request.body.workflowId,
+          workflowYaml: request.body.workflowYaml,
+          inputs: processedInputs,
           spaceId,
-          request
-        );
+          request,
+        });
 
         return response.ok({
           body: {
