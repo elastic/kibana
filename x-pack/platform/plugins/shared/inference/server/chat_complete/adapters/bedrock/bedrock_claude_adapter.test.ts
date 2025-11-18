@@ -343,9 +343,9 @@ Human:`,
 
       const { messages } = getCallParams();
       expect(messages).toEqual([
-        { role: 'user', content: [{ text: 'question', type: "text" }] },
-        { role: 'assistant', content: [{ text: 'answer', type: "text" }] },
-        { role: 'user', content: [{ text: 'another question', type: "text" }] },
+        { role: 'user', content: [{ text: 'question', type: 'text' }] },
+        { role: 'assistant', content: [{ text: 'answer', type: 'text' }] },
+        { role: 'user', content: [{ text: 'another question', type: 'text' }] },
         {
           role: 'assistant',
           content: [
