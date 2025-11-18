@@ -7031,7 +7031,7 @@
         "signature": [
           "{ resource?: string | undefined; }"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7044,7 +7044,7 @@
         "label": "CreateKnowledgeBaseRequestParamsInput",
         "description": [],
         "signature": [
-          "{ resource?: string | undefined; }"
+          "{ resource: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
         "deprecated": false,
@@ -9610,6 +9610,21 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.GetKnowledgeBaseResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "GetKnowledgeBaseResponse",
+        "description": [],
+        "signature": [
+          "{ elser_exists?: boolean | undefined; is_setup_available?: boolean | undefined; is_setup_in_progress?: boolean | undefined; security_labs_exists?: boolean | undefined; defend_insights_exists?: boolean | undefined; user_data_exists?: boolean | undefined; product_documentation_status?: string | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.HrefContentReference",
         "type": "Type",
         "tags": [],
@@ -10127,6 +10142,21 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.KnowledgeBaseReadResponse200",
+        "type": "Type",
+        "tags": [],
+        "label": "KnowledgeBaseReadResponse200",
+        "description": [],
+        "signature": [
+          "{ elser_exists?: boolean | undefined; is_setup_available?: boolean | undefined; is_setup_in_progress?: boolean | undefined; security_labs_exists?: boolean | undefined; defend_insights_exists?: boolean | undefined; user_data_exists?: boolean | undefined; product_documentation_status?: string | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.KnowledgeBaseResource",
         "type": "Type",
         "tags": [],
@@ -10168,6 +10198,21 @@
         ],
         "signature": [
           "{ success?: boolean | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.KnowledgeBaseResponse400",
+        "type": "Type",
+        "tags": [],
+        "label": "KnowledgeBaseResponse400",
+        "description": [],
+        "signature": [
+          "{ error?: string | undefined; message?: string | undefined; statusCode?: number | undefined; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
         "deprecated": false,
@@ -11618,6 +11663,51 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.PostKnowledgeBaseRequestQuery",
+        "type": "Type",
+        "tags": [],
+        "label": "PostKnowledgeBaseRequestQuery",
+        "description": [],
+        "signature": [
+          "{ modelId?: string | undefined; ignoreSecurityLabs?: any; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.PostKnowledgeBaseRequestQueryInput",
+        "type": "Type",
+        "tags": [],
+        "label": "PostKnowledgeBaseRequestQueryInput",
+        "description": [],
+        "signature": [
+          "{ modelId?: string | undefined; ignoreSecurityLabs?: any; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.PostKnowledgeBaseResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "PostKnowledgeBaseResponse",
+        "description": [],
+        "signature": [
+          "{ success?: boolean | undefined; }"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.ProductDocumentationContentReference",
         "type": "Type",
         "tags": [],
@@ -12077,7 +12167,7 @@
         "signature": [
           "{ resource?: string | undefined; }"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -12090,7 +12180,7 @@
         "label": "ReadKnowledgeBaseRequestParamsInput",
         "description": [],
         "signature": [
-          "{ resource?: string | undefined; }"
+          "{ resource: string; }"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
         "deprecated": false,
@@ -33593,7 +33683,7 @@
         "description": [],
         "signature": [
           "ZodObject",
-          "<{ resource: ",
+          "<{} & { resource: ",
           "ZodOptional",
           "<",
           "ZodString",
@@ -33601,7 +33691,7 @@
           "ZodTypeAny",
           ", { resource?: string | undefined; }, { resource?: string | undefined; }>"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -41452,6 +41542,52 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.GetKnowledgeBaseResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "GetKnowledgeBaseResponse",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ elser_exists: ",
+          "ZodOptional",
+          "<",
+          "ZodBoolean",
+          ">; is_setup_available: ",
+          "ZodOptional",
+          "<",
+          "ZodBoolean",
+          ">; is_setup_in_progress: ",
+          "ZodOptional",
+          "<",
+          "ZodBoolean",
+          ">; security_labs_exists: ",
+          "ZodOptional",
+          "<",
+          "ZodBoolean",
+          ">; defend_insights_exists: ",
+          "ZodOptional",
+          "<",
+          "ZodBoolean",
+          ">; user_data_exists: ",
+          "ZodOptional",
+          "<",
+          "ZodBoolean",
+          ">; product_documentation_status: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { elser_exists?: boolean | undefined; is_setup_available?: boolean | undefined; is_setup_in_progress?: boolean | undefined; security_labs_exists?: boolean | undefined; defend_insights_exists?: boolean | undefined; user_data_exists?: boolean | undefined; product_documentation_status?: string | undefined; }, { elser_exists?: boolean | undefined; is_setup_available?: boolean | undefined; is_setup_in_progress?: boolean | undefined; security_labs_exists?: boolean | undefined; defend_insights_exists?: boolean | undefined; user_data_exists?: boolean | undefined; product_documentation_status?: string | undefined; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.HrefContentReference",
         "type": "Object",
         "tags": [],
@@ -43569,6 +43705,52 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.KnowledgeBaseReadResponse200",
+        "type": "Object",
+        "tags": [],
+        "label": "KnowledgeBaseReadResponse200",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ elser_exists: ",
+          "ZodOptional",
+          "<",
+          "ZodBoolean",
+          ">; is_setup_available: ",
+          "ZodOptional",
+          "<",
+          "ZodBoolean",
+          ">; is_setup_in_progress: ",
+          "ZodOptional",
+          "<",
+          "ZodBoolean",
+          ">; security_labs_exists: ",
+          "ZodOptional",
+          "<",
+          "ZodBoolean",
+          ">; defend_insights_exists: ",
+          "ZodOptional",
+          "<",
+          "ZodBoolean",
+          ">; user_data_exists: ",
+          "ZodOptional",
+          "<",
+          "ZodBoolean",
+          ">; product_documentation_status: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { elser_exists?: boolean | undefined; is_setup_available?: boolean | undefined; is_setup_in_progress?: boolean | undefined; security_labs_exists?: boolean | undefined; defend_insights_exists?: boolean | undefined; user_data_exists?: boolean | undefined; product_documentation_status?: string | undefined; }, { elser_exists?: boolean | undefined; is_setup_available?: boolean | undefined; is_setup_in_progress?: boolean | undefined; security_labs_exists?: boolean | undefined; defend_insights_exists?: boolean | undefined; user_data_exists?: boolean | undefined; product_documentation_status?: string | undefined; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.KnowledgeBaseResource",
         "type": "Object",
         "tags": [],
@@ -43614,6 +43796,36 @@
           ">; }, \"strip\", ",
           "ZodTypeAny",
           ", { success?: boolean | undefined; }, { success?: boolean | undefined; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.KnowledgeBaseResponse400",
+        "type": "Object",
+        "tags": [],
+        "label": "KnowledgeBaseResponse400",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ statusCode: ",
+          "ZodOptional",
+          "<",
+          "ZodNumber",
+          ">; error: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; message: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { error?: string | undefined; message?: string | undefined; statusCode?: number | undefined; }, { error?: string | undefined; message?: string | undefined; statusCode?: number | undefined; }>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
         "deprecated": false,
@@ -53263,6 +53475,54 @@
       },
       {
         "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.PostKnowledgeBaseRequestQuery",
+        "type": "Object",
+        "tags": [],
+        "label": "PostKnowledgeBaseRequestQuery",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ modelId: ",
+          "ZodOptional",
+          "<",
+          "ZodString",
+          ">; ignoreSecurityLabs: ",
+          "ZodDefault",
+          "<",
+          "ZodOptional",
+          "<KbnZodBooleanFromString>>; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { modelId?: string | undefined; ignoreSecurityLabs?: any; }, { modelId?: string | undefined; ignoreSecurityLabs?: any; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
+        "id": "def-common.PostKnowledgeBaseResponse",
+        "type": "Object",
+        "tags": [],
+        "label": "PostKnowledgeBaseResponse",
+        "description": [],
+        "signature": [
+          "ZodObject",
+          "<{ success: ",
+          "ZodOptional",
+          "<",
+          "ZodBoolean",
+          ">; }, \"strip\", ",
+          "ZodTypeAny",
+          ", { success?: boolean | undefined; }, { success?: boolean | undefined; }>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/elastic-assistant-common",
         "id": "def-common.ProductDocumentationContentReference",
         "type": "Object",
         "tags": [],
@@ -55366,7 +55626,7 @@
         "description": [],
         "signature": [
           "ZodObject",
-          "<{ resource: ",
+          "<{} & { resource: ",
           "ZodOptional",
           "<",
           "ZodString",
@@ -55374,7 +55634,7 @@
           "ZodTypeAny",
           ", { resource?: string | undefined; }, { resource?: string | undefined; }>"
         ],
-        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/knowledge_base/crud_kb_route.gen.ts",
+        "path": "x-pack/platform/packages/shared/kbn-elastic-assistant-common/impl/schemas/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
