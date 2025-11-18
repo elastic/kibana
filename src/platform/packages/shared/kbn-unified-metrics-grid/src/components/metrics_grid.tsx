@@ -11,7 +11,11 @@ import React, { useCallback, useMemo, useState, useRef } from 'react';
 import type { EuiFlexGridProps } from '@elastic/eui';
 import { EuiFlexGrid, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import type {
+  MetricField,
+  Dimension,
+  DimensionFilters,
+} from '@kbn/metrics-experience-plugin/common/types';
 import type { ChartSectionProps, UnifiedHistogramInputMessage } from '@kbn/unified-histogram/types';
 import type { Observable } from 'rxjs';
 import { css } from '@emotion/react';
@@ -28,8 +32,8 @@ export type MetricsGridProps = Pick<
   ChartSectionProps,
   'searchSessionId' | 'services' | 'onBrushEnd' | 'onFilter' | 'abortController' | 'requestParams'
 > & {
-  filters?: Array<{ field: string; value: string }>;
-  dimensions: string[];
+  filters?: DimensionFilters;
+  dimensions: Dimension[];
   searchTerm?: string;
   columns: NonNullable<EuiFlexGridProps['columns']>;
   discoverFetch$: Observable<UnifiedHistogramInputMessage>;
@@ -51,7 +55,7 @@ export const MetricsGrid = ({
   requestParams,
   discoverFetch$,
   searchTerm,
-  filters = [],
+  filters = {},
 }: MetricsGridProps) => {
   const gridRef = useRef<HTMLDivElement>(null);
   const chartRefs = useRef<Map<string, HTMLDivElement>>(new Map());
@@ -200,8 +204,8 @@ interface ChartItemProps
   metric: MetricField;
   index: number;
   size: ChartSize;
-  dimensions: string[];
-  filters: Array<{ field: string; value: string }>;
+  dimensions: Dimension[];
+  filters: DimensionFilters;
   discoverFetch$: Observable<UnifiedHistogramInputMessage>;
   rowIndex: number;
   colIndex: number;

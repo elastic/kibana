@@ -66,6 +66,7 @@ describe('TelemetryService', () => {
       expect(telemetry).toHaveProperty('reportAnomalyDetectionDateFieldChange');
       expect(telemetry).toHaveProperty('reportAnomalyDetectionPartitionFieldChange');
       expect(telemetry).toHaveProperty('reportAnomalyDetectionFilterFieldChange');
+      expect(telemetry).toHaveProperty('reportMetricsExplorerCalloutViewInDiscoverClicked');
     });
   });
 
@@ -481,6 +482,26 @@ describe('TelemetryService', () => {
           interaction,
           schema_selected: schemaSelected,
           schemas_available: schemasAvailable,
+        }
+      );
+    });
+  });
+  describe('#reportMetricsExplorerCalloutViewInDiscoverClicked', () => {
+    it('should report metrics explorer callout view in discover clicked with properties', async () => {
+      const setupParams = getSetupParams();
+      service.setup(setupParams);
+      const telemetry = service.start();
+      const view = 'metrics_explorer';
+
+      telemetry.reportMetricsExplorerCalloutViewInDiscoverClicked({
+        view,
+      });
+
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledTimes(1);
+      expect(setupParams.analytics.reportEvent).toHaveBeenCalledWith(
+        'Metrics Explorer Callout View In Discover Clicked',
+        {
+          view,
         }
       );
     });
