@@ -116,8 +116,7 @@ describe('getAxiosInstance', () => {
     });
     const result = await getAxios({
       authType: 'api_key_header',
-      headerField: 'X-Custom-Auth',
-      apiKey: 'i-am-a-custom-auth-string',
+      'X-Custom-Auth': 'i-am-a-custom-auth-string',
     });
 
     expect(result).not.toBeUndefined();

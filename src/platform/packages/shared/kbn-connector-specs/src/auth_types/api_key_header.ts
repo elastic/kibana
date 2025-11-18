@@ -23,6 +23,7 @@ const authSchema = z.object({
 });
 
 type AuthSchemaType = z.infer<typeof authSchema>;
+type NormalizedAuthSchemaType = Record<string, string>;
 
 /**
  * Header-based authentication (generic)
@@ -49,9 +50,14 @@ export const ApiKeyHeaderAuth: AuthTypeSpec<AuthSchemaType> = {
 
     return schemaToUse;
   },
-  configure: (axiosInstance: AxiosInstance, secret: AuthSchemaType): AxiosInstance => {
+  configure: (axiosInstance: AxiosInstance, secret: NormalizedAuthSchemaType): AxiosInstance => {
+    console.log(secret);
     // set global defaults
-    axiosInstance.defaults.headers.common[secret.headerField] = secret.apiKey;
+    Object.keys(secret)
+      .filter((key) => key !== 'authType')
+      .forEach((key) => {
+        axiosInstance.defaults.headers.common[key] = secret[key];
+      });
 
     return axiosInstance;
   },
