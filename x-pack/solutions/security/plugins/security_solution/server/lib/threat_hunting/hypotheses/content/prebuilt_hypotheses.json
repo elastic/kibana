@@ -1,0 +1,1088 @@
+[
+    {
+        "hypothesis_id": "hypothesis-001",
+        "title": "Windows Persistence via Scheduled Tasks",
+        "summary": "Investigate suspicious scheduled task creation that may indicate persistence mechanisms. Adversaries often use scheduled tasks to maintain access to compromised systems, executing malicious payloads at specified intervals or system events.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0003",
+                "name": "Persistence",
+                "reference": "https://attack.mitre.org/tactics/TA0003"
+            },
+            "technique": {
+                "id": "T1053",
+                "name": "Scheduled Task/Job",
+                "reference": "https://attack.mitre.org/techniques/T1053",
+                "subtechnique": {
+                    "id": "T1053.005",
+                    "name": "Scheduled Task",
+                    "reference": "https://attack.mitre.org/techniques/T1053/005"
+                }
+            }
+        },
+        "tags": [
+            "windows",
+            "persistence",
+            "scheduled-tasks",
+            "t1053"
+        ],
+        "required_data_sources": [
+            "windows",
+            "event_logs"
+        ],
+        "model": {
+            "name": "manual"
+        },
+        "query_generation_prompt": "Generate an ES|QL or KQL query to investigate suspicious scheduled task creation on Windows systems. The query should:\n- Search Windows event logs for scheduled task creation events (Event ID 4698 or Task Scheduler events)\n- Look for tasks created by non-administrative users or unusual user contexts\n- Filter for tasks with suspicious command lines, unusual execution times, or paths in temp directories\n- Include fields like user.name, process.command_line, file.path, and @timestamp\n- Consider joining with process execution events to identify the parent process that created the task",
+        "searchable_text": "Windows Persistence via Scheduled Tasks Investigate suspicious scheduled task creation that may indicate persistence mechanisms. Adversaries often use scheduled tasks to maintain access to compromised systems, executing malicious payloads at specified intervals or system events. windows persistence scheduled-tasks t1053"
+    },
+    {
+        "hypothesis_id": "hypothesis-002",
+        "title": "Linux Process Injection via Shared Libraries",
+        "summary": "Hunt for process injection techniques on Linux systems where adversaries inject malicious code into running processes. This technique allows attackers to evade detection by running code within legitimate processes and can be used for privilege escalation or maintaining persistence.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0004",
+                "name": "Privilege Escalation",
+                "reference": "https://attack.mitre.org/tactics/TA0004"
+            },
+            "technique": {
+                "id": "T1055",
+                "name": "Process Injection",
+                "reference": "https://attack.mitre.org/techniques/T1055",
+                "subtechnique": {
+                    "id": "T1055.001",
+                    "name": "Dynamic-link Library Injection",
+                    "reference": "https://attack.mitre.org/techniques/T1055/001"
+                }
+            }
+        },
+        "tags": [
+            "linux",
+            "process-injection",
+            "privilege-escalation",
+            "t1055"
+        ],
+        "required_data_sources": [
+            "linux",
+            "process_events"
+        ],
+        "model": {
+            "name": "manual"
+        }
+    },
+    {
+        "hypothesis_id": "hypothesis-003",
+        "title": "Lateral Movement via Remote Desktop Protocol",
+        "summary": "Identify suspicious RDP connections that may indicate lateral movement attempts. Adversaries use RDP to move between systems in a network, often after initial compromise, to access additional resources and maintain their presence.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0008",
+                "name": "Lateral Movement",
+                "reference": "https://attack.mitre.org/tactics/TA0008"
+            },
+            "technique": {
+                "id": "T1021",
+                "name": "Remote Services",
+                "reference": "https://attack.mitre.org/techniques/T1021",
+                "subtechnique": {
+                    "id": "T1021.001",
+                    "name": "Remote Desktop Protocol",
+                    "reference": "https://attack.mitre.org/techniques/T1021/001"
+                }
+            }
+        },
+        "tags": [
+            "lateral-movement",
+            "rdp",
+            "network",
+            "t1021"
+        ],
+        "required_data_sources": [
+            "network",
+            "windows"
+        ],
+        "model": {
+            "name": "manual"
+        }
+    },
+    {
+        "hypothesis_id": "hypothesis-004",
+        "title": "Cloud Credential Compromise via Access Keys",
+        "summary": "Investigate potential cloud credential theft or misuse, focusing on access key usage patterns. Compromised cloud credentials can lead to unauthorized access to cloud resources, data exfiltration, and further infrastructure compromise.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0006",
+                "name": "Credential Access",
+                "reference": "https://attack.mitre.org/tactics/TA0006"
+            },
+            "technique": {
+                "id": "T1552",
+                "name": "Unsecured Credentials",
+                "reference": "https://attack.mitre.org/techniques/T1552",
+                "subtechnique": {
+                    "id": "T1552.001",
+                    "name": "Credentials In Files",
+                    "reference": "https://attack.mitre.org/techniques/T1552/001"
+                }
+            }
+        },
+        "tags": [
+            "cloud",
+            "credentials",
+            "aws",
+            "azure",
+            "gcp",
+            "t1552"
+        ],
+        "required_data_sources": [
+            "cloud",
+            "aws",
+            "azure",
+            "gcp"
+        ],
+        "model": {
+            "name": "manual"
+        }
+    },
+    {
+        "hypothesis_id": "hypothesis-005",
+        "title": "Fileless Malware Execution via PowerShell",
+        "summary": "Detect fileless malware execution techniques using PowerShell and other scripting engines. Fileless malware operates entirely in memory, making it difficult to detect with traditional file-based security tools and often leveraging legitimate system tools.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0002",
+                "name": "Execution",
+                "reference": "https://attack.mitre.org/tactics/TA0002"
+            },
+            "technique": {
+                "id": "T1059",
+                "name": "Command and Scripting Interpreter",
+                "reference": "https://attack.mitre.org/techniques/T1059",
+                "subtechnique": {
+                    "id": "T1059.001",
+                    "name": "PowerShell",
+                    "reference": "https://attack.mitre.org/techniques/T1059/001"
+                }
+            }
+        },
+        "tags": [
+            "fileless",
+            "powershell",
+            "execution",
+            "windows",
+            "t1059"
+        ],
+        "required_data_sources": [
+            "windows",
+            "process_events",
+            "powershell"
+        ],
+        "model": {
+            "name": "manual"
+        }
+    },
+    {
+        "hypothesis_id": "hypothesis-006",
+        "title": "Anomalous Risk Score Spikes for Critical Assets",
+        "summary": "Investigate entities with sudden or significant risk score increases, particularly for assets marked as critical. Rapid risk score changes may indicate active compromise, privilege escalation, or suspicious behavior patterns that warrant immediate investigation.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0004",
+                "name": "Privilege Escalation",
+                "reference": "https://attack.mitre.org/tactics/TA0004"
+            },
+            "technique": {
+                "id": "T1078",
+                "name": "Valid Accounts",
+                "reference": "https://attack.mitre.org/techniques/T1078"
+            }
+        },
+        "tags": [
+            "risk-score",
+            "entity-analytics",
+            "anomaly",
+            "critical-assets"
+        ],
+        "required_data_sources": [
+            "risk_score",
+            "entity_analytics"
+        ],
+        "model": {
+            "name": "manual"
+        }
+    },
+    {
+        "hypothesis_id": "hypothesis-007",
+        "title": "Privileged User Unusual Activity Patterns",
+        "summary": "Hunt for anomalous behavior patterns from privileged user accounts, including unusual access times, geographic locations, or resource access patterns. Privileged account compromise can lead to significant security breaches and data exfiltration.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0006",
+                "name": "Credential Access",
+                "reference": "https://attack.mitre.org/tactics/TA0006"
+            },
+            "technique": {
+                "id": "T1078",
+                "name": "Valid Accounts",
+                "reference": "https://attack.mitre.org/techniques/T1078",
+                "subtechnique": {
+                    "id": "T1078.002",
+                    "name": "Domain Accounts",
+                    "reference": "https://attack.mitre.org/techniques/T1078/002"
+                }
+            }
+        },
+        "tags": [
+            "privileged-users",
+            "user-monitoring",
+            "anomaly",
+            "t1078"
+        ],
+        "required_data_sources": [
+            "entity_analytics",
+            "privilege_monitoring",
+            "authentication_logs"
+        ],
+        "model": {
+            "name": "manual"
+        }
+    },
+    {
+        "hypothesis_id": "hypothesis-008",
+        "title": "High-Risk Entities with No Recent Alerts",
+        "summary": "Identify entities with elevated risk scores that have not generated corresponding security alerts. This may indicate sophisticated attacks evading detection rules, or emerging threats that existing detections have not yet covered.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0005",
+                "name": "Defense Evasion",
+                "reference": "https://attack.mitre.org/tactics/TA0005"
+            },
+            "technique": {
+                "id": "T1562",
+                "name": "Impair Defenses",
+                "reference": "https://attack.mitre.org/techniques/T1562"
+            }
+        },
+        "tags": [
+            "risk-score",
+            "entity-analytics",
+            "defense-evasion",
+            "t1562"
+        ],
+        "required_data_sources": [
+            "risk_score",
+            "entity_analytics",
+            "alerts"
+        ],
+        "model": {
+            "name": "manual"
+        }
+    },
+    {
+        "hypothesis_id": "hypothesis-009",
+        "title": "Privilege Escalation via Service Account Abuse",
+        "summary": "Investigate service accounts exhibiting behavior patterns inconsistent with their intended purpose, such as interactive logons, unusual network connections, or access to resources outside their normal scope. Service account compromise is a common vector for privilege escalation.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0004",
+                "name": "Privilege Escalation",
+                "reference": "https://attack.mitre.org/tactics/TA0004"
+            },
+            "technique": {
+                "id": "T1078",
+                "name": "Valid Accounts",
+                "reference": "https://attack.mitre.org/techniques/T1078",
+                "subtechnique": {
+                    "id": "T1078.003",
+                    "name": "Local Accounts",
+                    "reference": "https://attack.mitre.org/techniques/T1078/003"
+                }
+            }
+        },
+        "tags": [
+            "privilege-escalation",
+            "service-accounts",
+            "privilege-monitoring",
+            "t1078"
+        ],
+        "required_data_sources": [
+            "privilege_monitoring",
+            "authentication_logs",
+            "entity_analytics"
+        ],
+        "model": {
+            "name": "manual"
+        }
+    },
+    {
+        "hypothesis_id": "hypothesis-010",
+        "title": "Rapid Risk Score Accumulation Across Multiple Entities",
+        "summary": "Detect coordinated attacks where multiple entities show simultaneous or rapid risk score increases. This pattern may indicate lateral movement, credential stuffing, or a widespread attack campaign affecting multiple systems or users.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0008",
+                "name": "Lateral Movement",
+                "reference": "https://attack.mitre.org/tactics/TA0008"
+            },
+            "technique": {
+                "id": "T1021",
+                "name": "Remote Services",
+                "reference": "https://attack.mitre.org/techniques/T1021"
+            }
+        },
+        "tags": [
+            "risk-score",
+            "entity-analytics",
+            "lateral-movement",
+            "coordinated-attack"
+        ],
+        "required_data_sources": [
+            "risk_score",
+            "entity_analytics"
+        ],
+        "model": {
+            "name": "manual"
+        }
+    },
+    {
+        "hypothesis_id": "hypothesis-011",
+        "title": "Users with Highest Risk Scores",
+        "summary": "Identify users with the highest current risk scores in your environment. High-risk users may indicate compromised accounts, insider threats, or accounts exhibiting suspicious behavior patterns that require immediate investigation.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0001",
+                "name": "Initial Access",
+                "reference": "https://attack.mitre.org/tactics/TA0001"
+            },
+            "technique": {
+                "id": "T1078",
+                "name": "Valid Accounts",
+                "reference": "https://attack.mitre.org/techniques/T1078"
+            }
+        },
+        "tags": [
+            "risk-score",
+            "entity-analytics",
+            "users",
+            "prioritization"
+        ],
+        "required_data_sources": [
+            "risk_score",
+            "entity_analytics"
+        ],
+        "model": {
+            "name": "manual"
+        },
+        "query_generation_prompt": "Generate an ES|QL query to identify users with the highest risk scores in the environment. The query should:\n- Use risk_score and entity_analytics data sources\n- Return users sorted by risk score in descending order\n- Include relevant fields like user.name, risk score value, and timestamp\n- Filter for users with risk scores above a meaningful threshold (e.g., 75)\n- Consider including additional context like number of alerts, last activity time, and asset criticality if available",
+        "searchable_text": "Users with Highest Risk Scores Identify users with the highest current risk scores in your environment. High-risk users may indicate compromised accounts, insider threats, or accounts exhibiting suspicious behavior patterns that require immediate investigation. risk-score entity-analytics users prioritization"
+    },
+    {
+        "hypothesis_id": "hypothesis-012",
+        "title": "Entities with Anomalous Behavior in Last 24 Hours",
+        "summary": "Detect entities (users, hosts, or services) exhibiting anomalous behavior patterns within the last 24 hours. Anomalies may include unusual access patterns, command execution, network connections, or data access that deviates from normal baseline behavior.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0007",
+                "name": "Discovery",
+                "reference": "https://attack.mitre.org/tactics/TA0007"
+            },
+            "technique": {
+                "id": "T1083",
+                "name": "File and Directory Discovery",
+                "reference": "https://attack.mitre.org/techniques/T1083"
+            }
+        },
+        "tags": [
+            "anomaly",
+            "entity-analytics",
+            "behavioral-analysis",
+            "24h"
+        ],
+        "required_data_sources": [
+            "entity_analytics",
+            "behavioral_data"
+        ],
+        "model": {
+            "name": "manual"
+        },
+        "searchable_text": "Entities with Anomalous Behavior in Last 24 Hours Detect entities (users, hosts, or services) exhibiting anomalous behavior patterns within the last 24 hours. Anomalies may include unusual access patterns, command execution, network connections, or data access that deviates from normal baseline behavior. anomaly entity-analytics behavioral-analysis 24h"
+    },
+    {
+        "hypothesis_id": "hypothesis-013",
+        "title": "Service Accounts with Unusual Access Patterns",
+        "summary": "Investigate service accounts displaying access patterns inconsistent with their intended purpose. Unusual patterns may include interactive logons, access outside normal business hours, connections from unexpected locations, or access to resources outside their typical scope.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0004",
+                "name": "Privilege Escalation",
+                "reference": "https://attack.mitre.org/tactics/TA0004"
+            },
+            "technique": {
+                "id": "T1078",
+                "name": "Valid Accounts",
+                "reference": "https://attack.mitre.org/techniques/T1078",
+                "subtechnique": {
+                    "id": "T1078.003",
+                    "name": "Local Accounts",
+                    "reference": "https://attack.mitre.org/techniques/T1078/003"
+                }
+            }
+        },
+        "tags": [
+            "service-accounts",
+            "privilege-monitoring",
+            "anomaly",
+            "access-patterns"
+        ],
+        "required_data_sources": [
+            "privilege_monitoring",
+            "authentication_logs",
+            "entity_analytics"
+        ],
+        "model": {
+            "name": "manual"
+        },
+        "query_generation_prompt": "Generate an ES|QL query to identify service accounts with unusual access patterns. The query should:\n- Use authentication logs and entity analytics data sources\n- Identify service accounts (typically accounts with 'svc', 'service', or specific naming patterns)\n- Look for interactive logon events (logon type 2) which are unusual for service accounts\n- Detect access outside normal business hours or from unexpected geographic locations\n- Compare current access patterns against historical baselines\n- Include fields like user.name, event.action, source.geo.location, and @timestamp\n- Flag service accounts accessing resources outside their typical scope or department",
+        "searchable_text": "Service Accounts with Unusual Access Patterns Investigate service accounts displaying access patterns inconsistent with their intended purpose. Unusual patterns may include interactive logons, access outside normal business hours, connections from unexpected locations, or access to resources outside their typical scope. service-accounts privilege-monitoring anomaly access-patterns"
+    },
+    {
+        "hypothesis_id": "hypothesis-014",
+        "title": "Biggest Risk Score Jumps in Last Day",
+        "summary": "Identify users or entities that have experienced the most significant risk score increases within the last 24 hours. Rapid risk score jumps may indicate active compromise, privilege escalation, or sudden changes in behavior that warrant immediate investigation.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0004",
+                "name": "Privilege Escalation",
+                "reference": "https://attack.mitre.org/tactics/TA0004"
+            },
+            "technique": {
+                "id": "T1078",
+                "name": "Valid Accounts",
+                "reference": "https://attack.mitre.org/techniques/T1078"
+            }
+        },
+        "tags": [
+            "risk-score",
+            "entity-analytics",
+            "anomaly",
+            "24h",
+            "prioritization"
+        ],
+        "required_data_sources": [
+            "risk_score",
+            "entity_analytics"
+        ],
+        "model": {
+            "name": "manual"
+        }
+    },
+    {
+        "hypothesis_id": "hypothesis-015",
+        "title": "Riskiest High-Impact Hosts in Environment",
+        "summary": "Identify hosts with both high risk scores and high business impact. These critical assets with elevated risk represent the highest priority for investigation, as compromise could significantly impact business operations or sensitive data.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0043",
+                "name": "Reconnaissance",
+                "reference": "https://attack.mitre.org/tactics/TA0043"
+            },
+            "technique": {
+                "id": "T1590",
+                "name": "Gather Victim Network Information",
+                "reference": "https://attack.mitre.org/techniques/T1590"
+            }
+        },
+        "tags": [
+            "risk-score",
+            "entity-analytics",
+            "hosts",
+            "critical-assets",
+            "prioritization"
+        ],
+        "required_data_sources": [
+            "risk_score",
+            "entity_analytics",
+            "asset_criticality"
+        ],
+        "model": {
+            "name": "manual"
+        },
+        "query_generation_prompt": "Generate an ES|QL query to detect users accessing sensitive data outside normal working hours. The query should:\n- Use data access logs and entity analytics data sources\n- Filter for access events occurring outside typical business hours (e.g., 6 PM - 6 AM, weekends)\n- Identify access to sensitive data classifications or high-value resources\n- Include fields like user.name, file.path, data.classification, @timestamp, and event.action\n- Consider timezone awareness and normalize timestamps appropriately\n- Join with user profile data to identify users who typically work during business hours\n- Flag unusual patterns like first-time access to sensitive resources or access from unusual locations",
+        "searchable_text": "Users Accessing Sensitive Data Outside Working Hours Detect users accessing sensitive or critical data outside normal business hours. Unusual access times may indicate account compromise, insider threats, or unauthorized access attempts, especially when combined with other suspicious behaviors. data-access sensitive-data anomaly working-hours insider-threat"
+    },
+    {
+        "hypothesis_id": "hypothesis-016",
+        "title": "Users Accessing Sensitive Data Outside Working Hours",
+        "summary": "Detect users accessing sensitive or critical data outside normal business hours. Unusual access times may indicate account compromise, insider threats, or unauthorized access attempts, especially when combined with other suspicious behaviors.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0009",
+                "name": "Collection",
+                "reference": "https://attack.mitre.org/tactics/TA0009"
+            },
+            "technique": {
+                "id": "T1005",
+                "name": "Data from Local System",
+                "reference": "https://attack.mitre.org/techniques/T1005"
+            }
+        },
+        "tags": [
+            "data-access",
+            "sensitive-data",
+            "anomaly",
+            "working-hours",
+            "insider-threat"
+        ],
+        "required_data_sources": [
+            "data_access_logs",
+            "entity_analytics"
+        ],
+        "model": {
+            "name": "manual"
+        }
+    },
+    {
+        "hypothesis_id": "hypothesis-017",
+        "title": "Users Accessing Systems They Never Accessed Before",
+        "summary": "Identify users accessing systems or resources they have never previously accessed. First-time access patterns may indicate account takeover, privilege escalation, lateral movement, or reconnaissance activities by compromised accounts.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0008",
+                "name": "Lateral Movement",
+                "reference": "https://attack.mitre.org/tactics/TA0008"
+            },
+            "technique": {
+                "id": "T1021",
+                "name": "Remote Services",
+                "reference": "https://attack.mitre.org/techniques/T1021"
+            }
+        },
+        "tags": [
+            "lateral-movement",
+            "access-patterns",
+            "anomaly",
+            "first-access"
+        ],
+        "required_data_sources": [
+            "authentication_logs",
+            "entity_analytics",
+            "access_logs"
+        ],
+        "model": {
+            "name": "manual"
+        }
+    },
+    {
+        "hypothesis_id": "hypothesis-018",
+        "title": "Privileged Accounts with Unusual Command Patterns",
+        "summary": "Investigate privileged accounts executing commands or scripts that deviate from their normal operational patterns. Unusual command execution may indicate account compromise, privilege abuse, or malicious activity by authorized users.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0002",
+                "name": "Execution",
+                "reference": "https://attack.mitre.org/tactics/TA0002"
+            },
+            "technique": {
+                "id": "T1059",
+                "name": "Command and Scripting Interpreter",
+                "reference": "https://attack.mitre.org/techniques/T1059"
+            }
+        },
+        "tags": [
+            "privileged-users",
+            "command-execution",
+            "anomaly",
+            "privilege-monitoring"
+        ],
+        "required_data_sources": [
+            "privilege_monitoring",
+            "process_events",
+            "command_logs"
+        ],
+        "model": {
+            "name": "manual"
+        }
+    },
+    {
+        "hypothesis_id": "hypothesis-019",
+        "title": "Users Logged In from Multiple Locations",
+        "summary": "Detect users authenticating from multiple geographic locations within a short time period, which is physically impossible and may indicate account sharing, credential theft, or compromised accounts being used from different attacker locations.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0006",
+                "name": "Credential Access",
+                "reference": "https://attack.mitre.org/tactics/TA0006"
+            },
+            "technique": {
+                "id": "T1078",
+                "name": "Valid Accounts",
+                "reference": "https://attack.mitre.org/techniques/T1078"
+            }
+        },
+        "tags": [
+            "authentication",
+            "geolocation",
+            "anomaly",
+            "credential-theft"
+        ],
+        "required_data_sources": [
+            "authentication_logs",
+            "entity_analytics"
+        ],
+        "model": {
+            "name": "manual"
+        }
+    },
+    {
+        "hypothesis_id": "hypothesis-020",
+        "title": "Connections Suggesting Lateral Movement",
+        "summary": "Identify network connections and authentication patterns that suggest lateral movement attempts. Look for sequences of connections between systems, especially from compromised hosts to previously uncompromised systems, indicating an attacker expanding their foothold.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0008",
+                "name": "Lateral Movement",
+                "reference": "https://attack.mitre.org/tactics/TA0008"
+            },
+            "technique": {
+                "id": "T1021",
+                "name": "Remote Services",
+                "reference": "https://attack.mitre.org/techniques/T1021"
+            }
+        },
+        "tags": [
+            "lateral-movement",
+            "network",
+            "connections",
+            "t1021"
+        ],
+        "required_data_sources": [
+            "network",
+            "authentication_logs"
+        ],
+        "model": {
+            "name": "manual"
+        }
+    },
+    {
+        "hypothesis_id": "hypothesis-021",
+        "title": "Accounts Accessing Multiple Critical Systems in Sequence",
+        "summary": "Detect accounts accessing multiple critical systems in rapid succession, which may indicate lateral movement, reconnaissance, or an attacker systematically exploring and compromising critical infrastructure. This pattern suggests targeted attacks on high-value assets.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0008",
+                "name": "Lateral Movement",
+                "reference": "https://attack.mitre.org/tactics/TA0008"
+            },
+            "technique": {
+                "id": "T1021",
+                "name": "Remote Services",
+                "reference": "https://attack.mitre.org/techniques/T1021"
+            }
+        },
+        "tags": [
+            "lateral-movement",
+            "critical-systems",
+            "access-patterns",
+            "t1021"
+        ],
+        "required_data_sources": [
+            "authentication_logs",
+            "access_logs",
+            "entity_analytics"
+        ],
+        "model": {
+            "name": "manual"
+        }
+    },
+    {
+        "hypothesis_id": "hypothesis-022",
+        "title": "Patterns Suggesting Credential Hopping",
+        "summary": "Identify authentication patterns that suggest credential hopping, where an attacker uses compromised credentials to access one system, then uses those credentials or newly obtained credentials to access additional systems. Look for rapid authentication sequences across multiple systems.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0006",
+                "name": "Credential Access",
+                "reference": "https://attack.mitre.org/tactics/TA0006"
+            },
+            "technique": {
+                "id": "T1550",
+                "name": "Use Alternate Authentication Material",
+                "reference": "https://attack.mitre.org/techniques/T1550"
+            }
+        },
+        "tags": [
+            "credential-hopping",
+            "authentication",
+            "lateral-movement",
+            "t1550"
+        ],
+        "required_data_sources": [
+            "authentication_logs",
+            "entity_analytics"
+        ],
+        "model": {
+            "name": "manual"
+        }
+    },
+    {
+        "hypothesis_id": "hypothesis-023",
+        "title": "Users Downloading Unusually Large Data",
+        "summary": "Detect users downloading unusually large volumes of data, which may indicate data exfiltration attempts. Large data transfers, especially from sensitive systems or outside normal patterns, could signal insider threats or compromised accounts attempting to steal information.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0010",
+                "name": "Exfiltration",
+                "reference": "https://attack.mitre.org/tactics/TA0010"
+            },
+            "technique": {
+                "id": "T1041",
+                "name": "Exfiltration Over C2 Channel",
+                "reference": "https://attack.mitre.org/techniques/T1041"
+            }
+        },
+        "tags": [
+            "data-exfiltration",
+            "data-transfer",
+            "anomaly",
+            "t1041"
+        ],
+        "required_data_sources": [
+            "network",
+            "data_access_logs"
+        ],
+        "model": {
+            "name": "manual"
+        }
+    },
+    {
+        "hypothesis_id": "hypothesis-024",
+        "title": "Accounts Accessing Data Outside Their Department",
+        "summary": "Identify accounts accessing data or systems outside their normal department or organizational unit. Unusual cross-departmental access may indicate privilege abuse, account compromise, or unauthorized access attempts, especially when combined with other suspicious activities.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0007",
+                "name": "Discovery",
+                "reference": "https://attack.mitre.org/tactics/TA0007"
+            },
+            "technique": {
+                "id": "T1083",
+                "name": "File and Directory Discovery",
+                "reference": "https://attack.mitre.org/techniques/T1083"
+            }
+        },
+        "tags": [
+            "data-access",
+            "access-patterns",
+            "anomaly",
+            "insider-threat"
+        ],
+        "required_data_sources": [
+            "data_access_logs",
+            "entity_analytics"
+        ],
+        "model": {
+            "name": "manual"
+        }
+    },
+    {
+        "hypothesis_id": "hypothesis-025",
+        "title": "Users Uploading Data to External Domains",
+        "summary": "Detect users uploading data to external domains or cloud services outside the organization's approved infrastructure. External data uploads may indicate data exfiltration attempts, unauthorized cloud storage usage, or potential data leakage to external parties.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0010",
+                "name": "Exfiltration",
+                "reference": "https://attack.mitre.org/tactics/TA0010"
+            },
+            "technique": {
+                "id": "T1567",
+                "name": "Exfiltration Over Web Service",
+                "reference": "https://attack.mitre.org/techniques/T1567"
+            }
+        },
+        "tags": [
+            "data-exfiltration",
+            "external-domains",
+            "cloud",
+            "t1567"
+        ],
+        "required_data_sources": [
+            "network",
+            "data_access_logs"
+        ],
+        "model": {
+            "name": "manual"
+        }
+    },
+    {
+        "hypothesis_id": "hypothesis-026",
+        "title": "Emails with Large Attachments",
+        "summary": "Identify emails sent with unusually large attachments, which may be used for data exfiltration. Large email attachments, especially when sent to external recipients or outside normal communication patterns, could indicate attempts to exfiltrate sensitive information via email channels.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0010",
+                "name": "Exfiltration",
+                "reference": "https://attack.mitre.org/tactics/TA0010"
+            },
+            "technique": {
+                "id": "T1048",
+                "name": "Exfiltration Over Alternative Protocol",
+                "reference": "https://attack.mitre.org/techniques/T1048"
+            }
+        },
+        "tags": [
+            "data-exfiltration",
+            "email",
+            "attachments",
+            "t1048"
+        ],
+        "required_data_sources": [
+            "email_logs",
+            "network"
+        ],
+        "model": {
+            "name": "manual"
+        }
+    },
+    {
+        "hypothesis_id": "hypothesis-027",
+        "title": "Users Gaining New System Privileges",
+        "summary": "Investigate users who have recently gained new system privileges or administrative access. Unexpected privilege escalation may indicate account compromise, insider threats, or unauthorized privilege grants that could be exploited for malicious purposes.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0004",
+                "name": "Privilege Escalation",
+                "reference": "https://attack.mitre.org/tactics/TA0004"
+            },
+            "technique": {
+                "id": "T1078",
+                "name": "Valid Accounts",
+                "reference": "https://attack.mitre.org/techniques/T1078"
+            }
+        },
+        "tags": [
+            "privilege-escalation",
+            "privilege-monitoring",
+            "access-control",
+            "t1078"
+        ],
+        "required_data_sources": [
+            "privilege_monitoring",
+            "authentication_logs"
+        ],
+        "model": {
+            "name": "manual"
+        }
+    },
+    {
+        "hypothesis_id": "hypothesis-028",
+        "title": "Accounts Performing Unusual Administrative Actions",
+        "summary": "Detect accounts performing administrative actions that deviate from their normal operational patterns. Unusual administrative activities may include creating new accounts, modifying security settings, changing system configurations, or other privileged operations outside expected behavior.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0003",
+                "name": "Persistence",
+                "reference": "https://attack.mitre.org/tactics/TA0003"
+            },
+            "technique": {
+                "id": "T1136",
+                "name": "Create Account",
+                "reference": "https://attack.mitre.org/techniques/T1136"
+            }
+        },
+        "tags": [
+            "administrative-actions",
+            "privilege-monitoring",
+            "anomaly",
+            "t1136"
+        ],
+        "required_data_sources": [
+            "privilege_monitoring",
+            "audit_logs"
+        ],
+        "model": {
+            "name": "manual"
+        }
+    },
+    {
+        "hypothesis_id": "hypothesis-029",
+        "title": "Users Attempting to Modify Access Rights",
+        "summary": "Identify users attempting to modify access rights, permissions, or security policies. Unauthorized or unusual modifications to access controls may indicate privilege abuse, account compromise, or attempts to maintain persistence or expand access within the environment.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0003",
+                "name": "Persistence",
+                "reference": "https://attack.mitre.org/tactics/TA0003"
+            },
+            "technique": {
+                "id": "T1136",
+                "name": "Create Account",
+                "reference": "https://attack.mitre.org/techniques/T1136"
+            }
+        },
+        "tags": [
+            "access-control",
+            "privilege-monitoring",
+            "permissions",
+            "t1136"
+        ],
+        "required_data_sources": [
+            "privilege_monitoring",
+            "audit_logs"
+        ],
+        "model": {
+            "name": "manual"
+        }
+    },
+    {
+        "hypothesis_id": "hypothesis-030",
+        "title": "Unusual Access Attempts to Privileged Accounts",
+        "summary": "Detect unusual or suspicious access attempts targeting privileged accounts, including failed authentication attempts, access from unexpected locations, or attempts outside normal patterns. These may indicate brute force attacks, credential stuffing, or reconnaissance activities targeting high-value accounts.",
+        "managed": true,
+        "source_type": "pre_built",
+        "version": "1.0.0",
+        "threat": {
+            "framework": "MITRE ATT&CK",
+            "tactic": {
+                "id": "TA0006",
+                "name": "Credential Access",
+                "reference": "https://attack.mitre.org/tactics/TA0006"
+            },
+            "technique": {
+                "id": "T1110",
+                "name": "Brute Force",
+                "reference": "https://attack.mitre.org/techniques/T1110"
+            }
+        },
+        "tags": [
+            "privileged-accounts",
+            "authentication",
+            "brute-force",
+            "t1110"
+        ],
+        "required_data_sources": [
+            "authentication_logs",
+            "privilege_monitoring"
+        ],
+        "model": {
+            "name": "manual"
+        }
+    }
+]
