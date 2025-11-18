@@ -39,12 +39,6 @@ export class DashboardAgentPlugin
 
     // Register dashboard-specific tools during start lifecycle when dashboard plugin is available
     void coreSetup.getStartServices().then(([coreStart, startDeps]) => {
-      // @TODO: Check using uiSettings if dashboard tools enable
-      // const uiSettingsClient = coreStart.uiSettings.asScopedToClient(soClient);
-      // const createVisualizationsEnabled = await uiSettingsClient.get<boolean>(
-      //   AGENT_BUILDER_DASHBOARD_TOOLS_SETTING_ID
-      // ); // @TODO: remove
-
       // @TODO: remove
       console.log(`--@@coreStart.share`, coreStart.share);
       console.log(`--@@coreStart.uiSettings`, coreStart.uiSettings);
@@ -64,6 +58,7 @@ export class DashboardAgentPlugin
       );
     });
 
+    // TODO: It shouldn't be registered if the UI Setting is disabled
     registerDashboardAgent(setupDeps.onechat);
 
     return {};

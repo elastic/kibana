@@ -15,6 +15,7 @@ import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { getToolResultId } from '@kbn/onechat-server';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import { dashboardTools } from '../../../common';
+import { checkDashboardToolsAvailability } from '../utils';
 
 // Type for the response from dashboardClient.get()
 interface GetItemResponse<T = unknown, M = void> {
@@ -34,6 +35,10 @@ export const getDashboardTool = (
   return {
     id: dashboardTools.getDashboard,
     type: ToolType.builtin,
+    availability: {
+      cacheMode: 'space',
+      handler: checkDashboardToolsAvailability,
+    },
     description: `Retrieve a dashboard by its ID.
 
 This tool will:

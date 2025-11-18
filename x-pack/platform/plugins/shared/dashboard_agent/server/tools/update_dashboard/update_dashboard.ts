@@ -15,6 +15,7 @@ import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { getToolResultId } from '@kbn/onechat-server';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import { dashboardTools } from '../../../common';
+import { checkDashboardToolsAvailability } from '../utils';
 
 // Type for the response from dashboardClient.update()
 interface UpdateItemResponse<T = unknown, M = void> {
@@ -40,6 +41,10 @@ export const updateDashboardTool = (
   return {
     id: dashboardTools.updateDashboard,
     type: ToolType.builtin,
+    availability: {
+      cacheMode: 'space',
+      handler: checkDashboardToolsAvailability,
+    },
     description: `Update an existing dashboard with new title, description, or panels.
 
 This tool will:
