@@ -5,7 +5,11 @@ SETLOCAL ENABLEDELAYEDEXPANSION
 set SCRIPT_DIR=%~dp0
 for %%I in ("%SCRIPT_DIR%..") do set DIR=%%~dpfI
 
-set NODE=%DIR%\node\default\node.exe
+If Defined KBN_NODE_HOME (
+  set "NODE=%KBN_NODE_HOME%\bin\node.exe"
+) Else (
+  set "NODE=%DIR%\node\default\node.exe"
+)
 set NODE_ENV=production
 
 If Not Exist "%NODE%" (
