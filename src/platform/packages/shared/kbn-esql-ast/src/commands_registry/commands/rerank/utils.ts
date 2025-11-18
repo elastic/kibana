@@ -11,6 +11,7 @@ import type {
   ESQLMap,
   ESQLSingleAstItem,
   ESQLAstAllCommands,
+  ESQLCommandOption,
 } from '../../../types';
 import { isAssignment, isFunctionExpression } from '../../../ast/is';
 import { within } from '../../../ast/location';
@@ -35,6 +36,7 @@ export enum CaretPosition {
   ON_WITHIN_FIELD_LIST, // After "ON": suggest field names
   ON_KEEP_SUGGESTIONS_AFTER_TRAILING_SPACE, // Special case: After a complete field with space, suggest next actions or assignment
   ON_EXPRESSION, // After "ON": handle all field list expressions like EVAL
+  AFTER_WITH_KEYWORD, // After "WITH " but before opening brace: suggest opening braces with params
   WITHIN_MAP_EXPRESSION, // After "WITH": suggest a json of params
   AFTER_COMMAND, // Command is complete, suggest pipe
 }
@@ -50,9 +52,15 @@ export function getPosition(
   const rerankCommand = command as ESQLAstRerankCommand;
   const innerText = query.substring(rerankCommand.location.min);
   const onMap = rerankCommand.args[1];
-  const withMap = rerankCommand.args[2] as ESQLMap | undefined;
+  const withArg = rerankCommand.args[2];
 
-  if (withMap) {
+  if (withArg && 'type' in withArg && withArg.type === 'option') {
+    const withMap = (withArg as ESQLCommandOption).args[0] as ESQLMap | undefined;
+
+    if (!withMap || (withMap.incomplete && !withMap.text)) {
+      return { position: CaretPosition.AFTER_WITH_KEYWORD };
+    }
+
     if (withMap.text && withMap.incomplete) {
       return { position: CaretPosition.WITHIN_MAP_EXPRESSION };
     }

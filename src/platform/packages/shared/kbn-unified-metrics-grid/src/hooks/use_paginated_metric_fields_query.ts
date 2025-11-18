@@ -11,6 +11,7 @@ import type { QueryFunctionContext } from '@kbn/react-query';
 import { useInfiniteQuery } from '@kbn/react-query';
 import { useEffect, useMemo } from 'react';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import { PAGE_SIZE } from '../common/constants';
 
 export function filterFieldsWithData(fields: MetricField[]) {
   return fields.filter((field) => !field.noData);
@@ -19,6 +20,7 @@ export function filterFieldsWithData(fields: MetricField[]) {
 interface PaginatedResponse {
   fields: MetricField[];
   page: number;
+  total: number;
 }
 
 export const usePaginatedMetricFieldsQuery = <TQueryKey extends readonly unknown[]>({
@@ -40,7 +42,8 @@ export const usePaginatedMetricFieldsQuery = <TQueryKey extends readonly unknown
       keepPreviousData: true,
       getNextPageParam: (lastPage) => {
         if (!lastPage) return;
-        if (lastPage.fields.length === 0) return;
+        if (lastPage.fields.length === 0 || lastPage.page >= Math.ceil(lastPage.total / PAGE_SIZE))
+          return;
         return lastPage.page + 1;
       },
       staleTime: 10 * 60 * 1000, // 10 minutes - fields don't change often
