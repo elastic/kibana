@@ -22,7 +22,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { JsonArray, JsonObject } from '@kbn/utility-types';
 import { FieldName } from './field_name';
-import { formatValue, formatValueAsElement } from './format_value';
+import { formatValueAsElement } from './format_value';
 import { inferFieldType } from './infer_field_type';
 import { TableFieldValue } from './table_field_value';
 import { appendKeyPath, flattenKeyPaths } from '../../lib/flatten_key_paths';
@@ -68,7 +68,7 @@ export const JSONDataTable = React.memo<JSONDataTableProps>(
         const textValue =
           fieldType === 'date'
             ? getFormattedDateTime(new Date(value as string)) ?? ''
-            : formatValue(value);
+            : String(value);
         const displayValue = fieldType === 'date' ? textValue : formatValueAsElement(value);
 
         return {

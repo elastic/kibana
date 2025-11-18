@@ -10,23 +10,6 @@
 import React from 'react';
 
 /**
- * Formats a value as plain text without HTML tags.
- * Arrays are formatted as [item1, item2, item3]
- */
-export function formatValue(value: unknown): string {
-  if (value === null || value === undefined) {
-    return '-';
-  }
-  if (Array.isArray(value)) {
-    return `[${value.map(formatValue).join(', ')}]`;
-  }
-  if (typeof value === 'object') {
-    return JSON.stringify(value);
-  }
-  return String(value);
-}
-
-/**
  * Formats a value as a React element with proper highlighting for arrays.
  * This safely renders arrays with highlighted brackets and commas.
  */
