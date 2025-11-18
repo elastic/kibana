@@ -395,6 +395,18 @@
                   }
                 }
               }
+            },
+            "tokens_used": {
+              "type": "long",
+              "_meta": {
+                "description": "Total tokens used across all conversations (input + output)"
+              }
+            },
+            "average_tokens_per_conversation": {
+              "type": "float",
+              "_meta": {
+                "description": "Average tokens per conversation"
+              }
             }
           }
         },
