@@ -16,7 +16,7 @@ import { getDatasetQualityTableColumns } from '../components/dataset_quality/tab
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 import { useKibanaContextForPlugin } from '../utils';
 import { filterInactiveDatasets, isActiveDataset } from '../utils/filter_inactive_datasets';
-import { SortDirection } from '../../common/types';
+import type { SortDirection } from '../../common/types';
 import { useDatasetQualityState } from './use_dataset_quality_state';
 
 export type DatasetTableSortField = keyof DataStreamStat;
@@ -208,6 +208,31 @@ export const useDatasetQualityTable = () => {
     );
   }, [rowsPerPage, page, renderedItems.length, datasets.length]);
 
+  const updateFailureStore = useCallback(
+    ({
+      failureStoreEnabled,
+      customRetentionPeriod,
+      dataStreamName,
+    }: {
+      failureStoreEnabled: boolean;
+      customRetentionPeriod?: string;
+      dataStreamName: string;
+    }) => {
+      const dataStream = datasets.find((ds) => ds.rawName === dataStreamName);
+      if (!dataStream) return;
+
+      service.send({
+        type: 'UPDATE_FAILURE_STORE',
+        dataStream: {
+          ...dataStream,
+          hasFailureStore: failureStoreEnabled,
+          customRetentionPeriod,
+        },
+      });
+    },
+    [service, datasets]
+  );
+
   return {
     sort: { sort },
     onTableChange,
@@ -223,5 +248,6 @@ export const useDatasetQualityTable = () => {
     canUserMonitorAnyDataStream,
     toggleInactiveDatasets,
     toggleFullDatasetNames,
+    updateFailureStore,
   };
 };

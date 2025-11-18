@@ -9,7 +9,7 @@ import type { StateGraphArgs } from '@langchain/langgraph';
 import { END, START, StateGraph } from '@langchain/langgraph';
 import type { ApiAnalysisState } from '../../types';
 
-import { ApiAnalysisGraphParams, ApiAnalysisBaseNodeParams } from './types';
+import type { ApiAnalysisGraphParams, ApiAnalysisBaseNodeParams } from './types';
 import { handleGetSuggestedPaths } from './paths';
 
 const graphState: StateGraphArgs<ApiAnalysisState>['channels'] = {

@@ -6,7 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect, MutableRefObject } from 'react';
+import type { MutableRefObject } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   EuiFlyoutHeader,
   EuiFlyoutFooter,

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { sloData } from './fixtures/create_slo';
 
 const OVERVIEW_MODE_SELECTOR = 'sloOverviewModeSelector';

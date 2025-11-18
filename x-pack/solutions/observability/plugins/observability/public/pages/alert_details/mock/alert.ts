@@ -32,7 +32,7 @@ import {
   TIMESTAMP,
   VERSION,
 } from '@kbn/rule-data-utils';
-import { AlertData } from '../../../hooks/use_fetch_alert_detail';
+import type { AlertData } from '../../../hooks/use_fetch_alert_detail';
 import type { TopAlert } from '../../../typings/alerts';
 
 export const tags: string[] = ['tag1', 'tag2', 'tag3'];

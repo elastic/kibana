@@ -45,7 +45,7 @@ const spawnChild = async () => {
   const child = spawn('node', [
     'scripts/functional_tests',
     '--config',
-    'x-pack/test/security_solution_cypress/cli_config.ts',
+    'x-pack/solutions/security/test/security_solution_cypress/cli_config.ts',
   ]);
   for await (const chunk of child.stdout) {
     console.log(chunk.toString());

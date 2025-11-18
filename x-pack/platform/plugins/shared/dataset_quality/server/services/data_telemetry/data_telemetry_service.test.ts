@@ -6,14 +6,14 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { FetchResult } from '@kbn/task-manager-plugin/server/task_store';
 import type { TelemetryPluginStart } from '@kbn/telemetry-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { createUsageCollectionSetupMock } from '@kbn/usage-collection-plugin/server/mocks';
 
-import { DataTelemetryEvent, DataTelemetryObject } from './types';
+import type { DataTelemetryEvent, DataTelemetryObject } from './types';
 import { MAX_STREAMS_TO_REPORT } from './constants';
 import { DataTelemetryService } from './data_telemetry_service';
 
@@ -294,6 +294,47 @@ describe('DataTelemetryService', () => {
     );
 
     it(
+      'should handle license errors gracefully and log as debug',
+      async () => {
+        jest.spyOn(service as any, 'shouldCollectTelemetry').mockResolvedValue(true);
+
+        // Mock a license error from Elasticsearch
+        const licenseError = {
+          message: 'security_exception: current license is non-compliant for [security]',
+          meta: {
+            body: {
+              error: {
+                type: 'security_exception',
+                reason: 'current license is non-compliant for [security]',
+              },
+            },
+          },
+        };
+
+        (mockEsClient.indices.getDataStream as jest.Mock).mockRejectedValue(licenseError);
+
+        const taskResult = await runTask();
+
+        // Task should complete successfully with null data
+        expect(taskResult?.state.data).toBeNull();
+
+        // Error should be logged as debug, not error
+        expect(mockLogger.debug).toHaveBeenCalledWith(
+          expect.stringContaining('Skipping telemetry collection due to license restriction')
+        );
+        // The error logger should not have been called for the license error itself
+        // (there may be other unrelated errors from test setup, so we check the calls)
+        const errorCalls = (mockLogger.error as jest.Mock).mock.calls;
+        const licenseErrorLogged = errorCalls.some(
+          (call: any[]) =>
+            call[0]?.message?.includes('license') || String(call[0]).includes('license')
+        );
+        expect(licenseErrorLogged).toBe(false);
+      },
+      TEST_TIMEOUT
+    );
+
+    it(
       'should not include stats of excluded indices',
       async () => {
         jest.spyOn(service as any, 'shouldCollectTelemetry').mockResolvedValue(true);
@@ -470,7 +511,10 @@ function setupMocks() {
   const runTask = () => {
     const taskDefinitions = taskManagerSetup.registerTaskDefinitions.mock.calls[0][0];
     const taskType = Object.keys(taskDefinitions)[0];
-    const taskRunner = taskDefinitions[taskType].createTaskRunner({ taskInstance: {} as any });
+    const taskRunner = taskDefinitions[taskType].createTaskRunner({
+      taskInstance: {} as any,
+      abortController: new AbortController(),
+    });
 
     return taskRunner.run();
   };

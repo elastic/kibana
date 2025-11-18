@@ -6,10 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from './api_helper';
-import { cleanFleetIndices, createFleetAgent } from './helpers';
+import { cleanFleetIndices, createFleetAgent, createTestSpace } from './helpers';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -33,7 +33,7 @@ export default function (providerContext: FtrProviderContext) {
         await cleanFleetIndices(esClient);
         await apiClient.postEnableSpaceAwareness();
         await apiClient.setup();
-        await spaces.createTestSpace(TEST_SPACE_1);
+        await createTestSpace(providerContext, TEST_SPACE_1);
       });
 
       after(async () => {
@@ -68,7 +68,7 @@ export default function (providerContext: FtrProviderContext) {
         await apiClient.setup();
         const testSpaceFleetServerPolicy = await apiClient.createFleetServerPolicy(TEST_SPACE_1);
         await createFleetAgent(esClient, testSpaceFleetServerPolicy.item.id, TEST_SPACE_1);
-        await spaces.createTestSpace(TEST_SPACE_1);
+        await createTestSpace(providerContext, TEST_SPACE_1);
       });
 
       after(async () => {
@@ -103,7 +103,7 @@ export default function (providerContext: FtrProviderContext) {
         await apiClient.setup();
         const defaultFleetServerPolicy = await apiClient.createFleetServerPolicy();
         await createFleetAgent(esClient, defaultFleetServerPolicy.item.id);
-        await spaces.createTestSpace(TEST_SPACE_1);
+        await createTestSpace(providerContext, TEST_SPACE_1);
       });
 
       after(async () => {

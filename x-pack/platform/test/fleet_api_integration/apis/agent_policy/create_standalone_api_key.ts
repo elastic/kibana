@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 import { SpaceTestApiClient } from '../space_awareness/api_helper';
 import { expectToRejectWithError } from '../space_awareness/helpers';
@@ -39,7 +39,7 @@ export default function (providerContext: FtrProviderContext) {
         });
         await expectToRejectWithError(
           () => apiClient.postStandaloneApiKey('tata'),
-          /403 Forbidden Missing permissions to create standalone API key/
+          /403 "Forbidden" Missing permissions to create standalone API key/
         );
       });
     });

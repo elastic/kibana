@@ -352,6 +352,26 @@
             "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "discoverShared",
+            "id": "def-public.ObservabilityStreamsFeatureRenderDeps.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "src/platform/plugins/shared/discover_shared/public/services/discover_features/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -469,19 +489,25 @@
             "pluginId": "discoverShared",
             "scope": "public",
             "docId": "kibDiscoverSharedPluginApi",
-            "section": "def-public.ObservabilityLogsAIAssistantFeature",
-            "text": "ObservabilityLogsAIAssistantFeature"
+            "section": "def-public.ObservabilityStreamsFeature",
+            "text": "ObservabilityStreamsFeature"
           },
           " | ",
           {
             "pluginId": "discoverShared",
             "scope": "public",
             "docId": "kibDiscoverSharedPluginApi",
-            "section": "def-public.ObservabilityStreamsFeature",
-            "text": "ObservabilityStreamsFeature"
+            "section": "def-public.ObservabilityLogsAIAssistantFeature",
+            "text": "ObservabilityLogsAIAssistantFeature"
           },
           " | ",
           "ObservabilityCreateSLOFeature",
+          " | ",
+          "ObservabilityLogEventsFeature",
+          " | ",
+          "ObservabilityTracesSpanLinksFeature",
+          " | ",
+          "ObservabilityTracesFetchErrorsFeature",
           " | ",
           "SecuritySolutionFeature"
         ],

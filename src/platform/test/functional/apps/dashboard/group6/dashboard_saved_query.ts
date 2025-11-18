@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
@@ -35,8 +35,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/189023
-    describe.skip('saved query management component functionality', function () {
+    describe('saved query management component functionality', function () {
       before(async () => {
         await dashboard.gotoDashboardLandingPage();
         await dashboard.clickNewDashboard();
@@ -79,7 +78,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(timePickerValues.end).to.not.eql(timePicker.defaultEndTime);
       });
 
-      it('preserves the currently loaded query when the page is reloaded', async () => {
+      // Regression: https://github.com/elastic/kibana/issues/242039
+      it.skip('preserves the currently loaded query when the page is reloaded', async () => {
         await browser.refresh();
         const timePickerValues = await timePicker.getTimeConfigAsAbsoluteTimes();
         expect(timePickerValues.start).to.not.eql(timePicker.defaultStartTime);

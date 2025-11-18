@@ -12,18 +12,21 @@ import { assetCriticalityServiceMock } from '../asset_criticality/asset_critical
 import { calculateAndPersistRiskScores } from './calculate_and_persist_risk_scores';
 import { calculateRiskScores } from './calculate_risk_scores';
 import { calculateRiskScoresMock } from './calculate_risk_scores.mock';
+import { calculateScoresWithESQL } from './calculate_esql_risk_scores';
+import { calculateScoresWithESQLMock } from './calculate_esql_risk_scores.mock';
 import { riskScoreDataClientMock } from './risk_score_data_client.mock';
 import type { RiskScoreDataClient } from './risk_score_data_client';
 import type { ExperimentalFeatures } from '../../../../common';
 import { EntityType } from '../../../../common/search_strategy';
 
 jest.mock('./calculate_risk_scores');
-const mockExperimentalFeatures = {} as ExperimentalFeatures;
+jest.mock('./calculate_esql_risk_scores');
 
 const calculateAndPersistRecentHostRiskScores = (
   esClient: ElasticsearchClient,
   logger: Logger,
-  riskScoreDataClient: RiskScoreDataClient
+  riskScoreDataClient: RiskScoreDataClient,
+  esql: boolean = false
 ) => {
   return calculateAndPersistRiskScores({
     afterKeys: {},
@@ -37,7 +40,9 @@ const calculateAndPersistRecentHostRiskScores = (
     riskScoreDataClient,
     assetCriticalityService: assetCriticalityServiceMock.create(),
     runtimeMappings: {},
-    experimentalFeatures: mockExperimentalFeatures,
+    experimentalFeatures: {
+      disableESQLRiskScoring: !esql,
+    } as ExperimentalFeatures,
   });
 };
 
@@ -46,45 +51,100 @@ describe('calculateAndPersistRiskScores', () => {
   let logger: Logger;
   let riskScoreDataClient: RiskScoreDataClient;
 
-  beforeEach(() => {
-    esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
-    logger = loggingSystemMock.createLogger();
-    riskScoreDataClient = riskScoreDataClientMock.create();
+  describe('scripted metric', () => {
+    const calculate = () =>
+      calculateAndPersistRecentHostRiskScores(esClient, logger, riskScoreDataClient, false);
+
+    beforeEach(() => {
+      esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+      logger = loggingSystemMock.createLogger();
+      riskScoreDataClient = riskScoreDataClientMock.create();
+    });
+
+    describe('with no risk scores to persist', () => {
+      beforeEach(() => {
+        (calculateRiskScores as jest.Mock).mockResolvedValueOnce(
+          calculateRiskScoresMock.buildResponse({ scores: { host: [] } })
+        );
+      });
+
+      it('does not upgrade configurations', async () => {
+        await calculate();
+
+        expect(riskScoreDataClient.upgradeIfNeeded).not.toHaveBeenCalled();
+      });
+
+      it('returns an appropriate response', async () => {
+        const results = await calculate();
+
+        const entities = {
+          host: [],
+          user: [],
+          service: [],
+          generic: [],
+        };
+        expect(results).toEqual({ after_keys: {}, errors: [], scores_written: 0, entities });
+      });
+    });
+    describe('with risk scores to persist', () => {
+      beforeEach(() => {
+        (calculateRiskScores as jest.Mock).mockResolvedValueOnce(
+          calculateRiskScoresMock.buildResponseWithOneScore()
+        );
+      });
+      it('upgrades configurations when persisting risk scores', async () => {
+        await calculate();
+
+        expect(riskScoreDataClient.upgradeIfNeeded).toHaveBeenCalled();
+      });
+    });
   });
 
-  describe('with no risk scores to persist', () => {
+  describe('ESQL', () => {
+    const calculate = () =>
+      calculateAndPersistRecentHostRiskScores(esClient, logger, riskScoreDataClient, true);
     beforeEach(() => {
-      (calculateRiskScores as jest.Mock).mockResolvedValueOnce(
-        calculateRiskScoresMock.buildResponse({ scores: { host: [] } })
-      );
+      esClient = elasticsearchServiceMock.createScopedClusterClient().asCurrentUser;
+      logger = loggingSystemMock.createLogger();
+      riskScoreDataClient = riskScoreDataClientMock.create();
     });
 
-    it('does not upgrade configurations', async () => {
-      await calculateAndPersistRecentHostRiskScores(esClient, logger, riskScoreDataClient);
+    describe('with no risk scores to persist', () => {
+      beforeEach(() => {
+        (calculateScoresWithESQL as jest.Mock).mockResolvedValueOnce(
+          calculateScoresWithESQLMock.buildResponse({ scores: { host: [] } })
+        );
+      });
 
-      expect(riskScoreDataClient.upgradeIfNeeded).not.toHaveBeenCalled();
+      it('does not upgrade configurations', async () => {
+        await calculate();
+
+        expect(riskScoreDataClient.upgradeIfNeeded).not.toHaveBeenCalled();
+      });
+
+      it('returns an appropriate response', async () => {
+        const results = await calculate();
+
+        const entities = {
+          host: [],
+          user: [],
+          service: [],
+          generic: [],
+        };
+        expect(results).toEqual({ after_keys: {}, errors: [], scores_written: 0, entities });
+      });
     });
+    describe('with risk scores to persist', () => {
+      beforeEach(() => {
+        (calculateScoresWithESQL as jest.Mock).mockResolvedValueOnce(
+          calculateScoresWithESQLMock.buildResponseWithOneScore()
+        );
+      });
+      it('upgrades configurations when persisting risk scores', async () => {
+        await calculate();
 
-    it('returns an appropriate response', async () => {
-      const results = await calculateAndPersistRecentHostRiskScores(
-        esClient,
-        logger,
-        riskScoreDataClient
-      );
-
-      expect(results).toEqual({ after_keys: {}, errors: [], scores_written: 0 });
-    });
-  });
-  describe('with risk scores to persist', () => {
-    beforeEach(() => {
-      (calculateRiskScores as jest.Mock).mockResolvedValueOnce(
-        calculateRiskScoresMock.buildResponseWithOneScore()
-      );
-    });
-    it('upgrades configurations when persisting risk scores', async () => {
-      await calculateAndPersistRecentHostRiskScores(esClient, logger, riskScoreDataClient);
-
-      expect(riskScoreDataClient.upgradeIfNeeded).toHaveBeenCalled();
+        expect(riskScoreDataClient.upgradeIfNeeded).toHaveBeenCalled();
+      });
     });
   });
 });

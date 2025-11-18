@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common, discover, timePicker, unifiedFieldList, header } = getPageObjects([
@@ -85,6 +85,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should not show Field Statistics tab', async () => {
+      await testSubjects.existOrFail('dscViewModeToggle');
+    });
+
+    it('should hide view mode toggle in fullscreen mode', async () => {
+      await testSubjects.existOrFail('dscViewModeToggle');
+
+      await testSubjects.click('dataGridFullScreenButton');
+      await testSubjects.missingOrFail('dscViewModeToggle');
+
+      await testSubjects.click('dataGridFullScreenButton');
       await testSubjects.existOrFail('dscViewModeToggle');
     });
 

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -41,6 +41,9 @@
     "@kbn/utility-types",
     "@kbn/core-plugins-contracts-server",
     "@kbn/projects-solutions-groups",
+    "@kbn/core-di",
+    "@kbn/core-di-internal",
+    "@kbn/core-di-server",
   ],
   "exclude": [
     "target/**/*",

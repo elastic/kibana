@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useEffect } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -23,7 +24,7 @@ import {
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
-import { DocLinksStart } from '@kbn/core/public';
+import type { DocLinksStart } from '@kbn/core/public';
 import type { SystemIndicesMigrationFeature } from '../../../../../common/types';
 import type { OverviewStepProps } from '../../types';
 import { useMigrateSystemIndices } from './use_migrate_system_indices';
@@ -160,6 +161,7 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
   if (migrationStatus.error) {
     return (
       <EuiCallOut
+        announceOnMount={false}
         title={i18nTexts.loadingError}
         color="danger"
         iconType="warning"
@@ -203,6 +205,7 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
       {startMigrationStatus.statusType === 'error' && (
         <>
           <EuiCallOut
+            announceOnMount
             size="s"
             color="danger"
             iconType="warning"
@@ -218,6 +221,7 @@ const MigrateSystemIndicesStep: FunctionComponent<Props> = ({ setIsComplete }) =
       {migrationStatus.data?.migration_status === 'ERROR' && (
         <>
           <EuiCallOut
+            announceOnMount={false}
             size="s"
             color="danger"
             iconType="warning"

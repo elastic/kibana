@@ -10,7 +10,7 @@ import { EuiButton, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { CreateIndexButton } from '../../sections/home/index_list/create_index/create_index_button';
-import { ExtensionsService } from '../../../services/extensions_service';
+import type { ExtensionsService } from '../../../services/extensions_service';
 
 export const NoMatch = ({
   loadIndices,
@@ -65,7 +65,13 @@ export const NoMatch = ({
 
   if (extensionsService.emptyListContent) {
     return extensionsService.emptyListContent.renderContent({
-      createIndexButton: <CreateIndexButton loadIndices={loadIndices} share={share} />,
+      createIndexButton: (
+        <CreateIndexButton
+          loadIndices={loadIndices}
+          share={share}
+          dataTestSubj="createIndexButtonEmptyList"
+        />
+      ),
     });
   }
 

@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { BaseAggParams } from '../types';
+import type { BaseAggParams } from '../types';
 import { aggCountFnName } from './count_fn';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';

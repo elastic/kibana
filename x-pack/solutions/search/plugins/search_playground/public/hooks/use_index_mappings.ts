@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
 import { useFormContext } from 'react-hook-form';
 
 import { SearchPlaygroundQueryKeys } from '../../common';
-import { APIRoutes, PlaygroundForm, PlaygroundFormFields } from '../types';
+import type { PlaygroundForm } from '../types';
+import { APIRoutes, PlaygroundFormFields } from '../types';
 import { useKibana } from './use_kibana';
 
 export interface FetchIndexMappingsArgs {

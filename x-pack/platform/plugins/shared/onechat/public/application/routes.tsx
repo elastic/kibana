@@ -5,13 +5,15 @@
  * 2.0.
  */
 
-import { Routes, Route } from '@kbn/shared-ux-router';
+import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
-import { OnechatToolsPage } from './pages/tools';
-import { OnechatConversationsPage } from './pages/conversations';
-import { OnechatAgentsPage } from './pages/agents';
 import { OnechatAgentsCreate } from './pages/agent_create';
 import { OnechatAgentsEdit } from './pages/agent_edit';
+import { OnechatAgentsPage } from './pages/agents';
+import { OnechatConversationsPage } from './pages/conversations';
+import { OnechatToolCreatePage } from './pages/tool_create';
+import { OnechatToolDetailsPage } from './pages/tool_details';
+import { OnechatToolsPage } from './pages/tools';
 
 export const OnechatRoutes: React.FC<{}> = () => {
   return (
@@ -32,12 +34,16 @@ export const OnechatRoutes: React.FC<{}> = () => {
         <OnechatAgentsPage />
       </Route>
 
-      <Route path="/tools">
-        <OnechatToolsPage />
+      <Route path="/tools/new">
+        <OnechatToolCreatePage />
       </Route>
 
-      <Route path="/agents">
-        <OnechatAgentsPage />
+      <Route path="/tools/:toolId">
+        <OnechatToolDetailsPage />
+      </Route>
+
+      <Route path="/tools">
+        <OnechatToolsPage />
       </Route>
 
       {/* Default to conversations page */}

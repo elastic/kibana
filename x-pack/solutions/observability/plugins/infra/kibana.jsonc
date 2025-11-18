@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/infra-plugin",
-  "owner": ["@elastic/obs-ux-logs-team", "@elastic/obs-ux-infra_services-team"],
+  "owner": ["@elastic/obs-onboarding-team", "@elastic/obs-ux-infra_services-team"],
   "group": "observability",
   "visibility": "private",
   "description": "This plugin visualizes data from Filebeat and Metricbeat, and integrates with other Observability solutions",
@@ -14,6 +14,7 @@
       "aiops",
       "alerting",
       "charts",
+      "contentManagement",
       "data",
       "dataViews",
       "dataViewEditor",
@@ -28,6 +29,7 @@
       "observability",
       "observabilityShared",
       "ruleRegistry",
+      "savedSearch",
       "security",
       "share",
       "triggersActionsUi",
@@ -52,7 +54,6 @@
       "serverless"
     ],
     "requiredBundles": [
-      "unifiedSearch",
       "observability",
       "licenseManagement",
       "kibanaUtils",

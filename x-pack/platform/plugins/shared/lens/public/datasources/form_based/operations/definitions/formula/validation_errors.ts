@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { REASON_IDS } from '@kbn/data-plugin/common';
+import type { REASON_IDS } from '@kbn/data-plugin/common';
 
 export interface MissingFieldError {
   id: 'missingField';

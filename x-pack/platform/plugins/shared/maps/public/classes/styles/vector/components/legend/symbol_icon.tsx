@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { Component, CSSProperties } from 'react';
-import { CommonProps } from '@elastic/eui';
+import type { CSSProperties } from 'react';
+import React, { Component } from 'react';
+import type { CommonProps } from '@elastic/eui';
 import { styleSvg, buildSrcUrl } from '../../symbol_utils';
 
 interface Props extends CommonProps {

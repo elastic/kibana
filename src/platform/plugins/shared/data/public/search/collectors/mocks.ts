@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SearchUsageCollector } from './types';
+import type { SearchUsageCollector } from './types';
 
 export function createSearchUsageCollectorMock(): jest.Mocked<SearchUsageCollector> {
   return {

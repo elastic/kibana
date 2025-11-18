@@ -29,7 +29,6 @@ export const onboarding = {
           t.literal(INSTRUCTION_VARIANT.JAVA),
           t.literal(INSTRUCTION_VARIANT.DOTNET),
           t.literal(INSTRUCTION_VARIANT.PHP),
-          t.literal(INSTRUCTION_VARIANT.OPEN_TELEMETRY),
         ]),
       }),
     }),

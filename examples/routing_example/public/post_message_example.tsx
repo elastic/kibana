@@ -19,7 +19,7 @@ import {
   EuiTextArea,
 } from '@elastic/eui';
 import { type IHttpFetchError, isHttpFetchError } from '@kbn/core-http-browser';
-import { Services } from './services';
+import type { Services } from './services';
 
 interface Props {
   postMessage: Services['postMessage'];
@@ -83,7 +83,7 @@ export function PostMessageRouteExample({ postMessage, addSuccessToast }: Props)
         </EuiFormRow>
 
         {error !== undefined ? (
-          <EuiCallOut color="danger" iconType="warning">
+          <EuiCallOut announceOnMount color="danger" iconType="warning">
             {error.message}
           </EuiCallOut>
         ) : null}

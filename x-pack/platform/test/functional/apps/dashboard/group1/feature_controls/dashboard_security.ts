@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -34,7 +34,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const from = 'Sep 20, 2015 @ 00:00:00.000';
   const to = 'Sep 21, 2015 @ 00:00:00.000';
 
-  // more tests are in x-pack/test/functional/apps/saved_query_management/feature_controls/security.ts
+  // more tests are in x-pack/platform/test/functional/apps/saved_query_management/feature_controls/security.ts
 
   describe('dashboard feature controls security', () => {
     before(async () => {
@@ -130,12 +130,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`does not allow a visualization to be edited`, async () => {
-        await dashboard.gotoDashboardEditMode('A Dashboard');
+        await dashboard.loadDashboardInEditMode('A Dashboard');
         await panelActions.expectMissingEditPanelAction();
       });
 
       it(`does not allow a map to be edited`, async () => {
-        await dashboard.gotoDashboardEditMode('dashboard with map');
+        await dashboard.loadDashboardInEditMode('dashboard with map');
         await panelActions.expectMissingEditPanelAction();
       });
     });
@@ -180,13 +180,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       it(`allows a visualization to be edited`, async () => {
         await dashboard.navigateToApp();
-        await dashboard.gotoDashboardEditMode('A Dashboard');
+        await dashboard.loadDashboardInEditMode('A Dashboard');
         await panelActions.expectExistsEditPanelAction();
       });
 
       it(`allows a map to be edited`, async () => {
         await dashboard.navigateToApp();
-        await dashboard.gotoDashboardEditMode('dashboard with map');
+        await dashboard.loadDashboardInEditMode('dashboard with map');
         await panelActions.expectExistsEditPanelAction();
       });
 

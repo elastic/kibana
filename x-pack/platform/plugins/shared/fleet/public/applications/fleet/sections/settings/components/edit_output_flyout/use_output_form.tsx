@@ -142,6 +142,7 @@ export interface OutputFormInputsType {
   kafkaSslKeyInput: ReturnType<typeof useInput>;
   kafkaSslKeySecretInput: ReturnType<typeof useSecretInput>;
   kafkaSslCertificateAuthoritiesInput: ReturnType<typeof useComboInput>;
+  writeToStreams: ReturnType<typeof useSwitchInput>;
 }
 
 function extractKafkaOutputSecrets(
@@ -193,7 +194,7 @@ export function extractDefaultDynamicKafkaTopics(
   ];
 }
 
-export function useOutputForm(onSucess: () => void, output?: Output, defaultOuput?: Output) {
+export function useOutputForm(onSucess: () => void, output?: Output, defaultOutput?: Output) {
   const fleetStatus = useFleetStatus();
   const authz = useAuthz();
 
@@ -254,7 +255,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
   const isServerless = cloud?.isServerlessEnabled;
   // Set the hosts to default for new ES output in serverless.
   const elasticsearchUrlDefaultValue =
-    isServerless && !output?.hosts ? defaultOuput?.hosts || [] : output?.hosts || [];
+    isServerless && !output?.hosts ? defaultOutput?.hosts || [] : output?.hosts || [];
   const elasticsearchUrlDisabled = isServerless || isDisabled('hosts');
   const elasticsearchUrlInput = useComboInput(
     'esHostsComboxBox',
@@ -574,6 +575,12 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
 
   const kafkaKeyInput = useInput(kafkaOutput?.key, undefined, isDisabled('key'));
 
+  // Write to streams input - defaults to false
+  const writeToStreams = useSwitchInput(
+    (output as any)?.write_to_logs_streams ?? false,
+    false // Not disabled for now
+  );
+
   const isLogstash = typeInput.value === outputType.Logstash;
   const isKafka = typeInput.value === outputType.Kafka;
   const isRemoteElasticsearch = typeInput.value === outputType.RemoteElasticsearch;
@@ -639,6 +646,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     kafkaTopicsInput,
     kafkaStaticTopicInput,
     kafkaDynamicTopicInput,
+    writeToStreams,
   };
 
   const hasChanged = Object.values(inputs).some((input) => input.hasChanged);
@@ -1001,6 +1009,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
               kibana_url: kibanaURLInput.value || null,
               sync_uninstalled_integrations: syncUninstalledIntegrationsInput.value,
               proxy_id: proxyIdValue,
+              write_to_logs_streams: writeToStreams.value,
               ...shipperParams,
               ssl: {
                 certificate: sslCertificateInput.value,
@@ -1022,6 +1031,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
               config_yaml: additionalYamlConfigInput.value,
               ca_trusted_fingerprint: caTrustedFingerprintInput.value,
               proxy_id: proxyIdValue,
+              write_to_logs_streams: writeToStreams.value,
               ...shipperParams,
               ssl: {
                 certificate: sslCertificateInput.value,
@@ -1136,6 +1146,7 @@ export function useOutputForm(onSucess: () => void, output?: Output, defaultOupu
     syncUninstalledIntegrationsInput.value,
     kibanaURLInput.value,
     caTrustedFingerprintInput.value,
+    writeToStreams.value,
     confirm,
     notifications.toasts,
   ]);

@@ -140,6 +140,14 @@ Or you can pass only `--kibana` and the CLI will infer the Elasticsearch URL fro
 node scripts/synthtrace simple_trace.ts --target=https://<username>:<password>@your-cloud-cluster.kb.us-west2.gcp.elastic-cloud.com/
 ```
 
+#### Using CLI with an API key
+
+You can use a Kibana API key for authentication by passing the `--apiKey` option. When the `--apiKey` is provided, it will be used for authentication with both Elasticsearch and Kibana, taking precedence over other types of authentication.
+
+```sh
+node scripts/synthtrace simple_trace.ts --target=https://my-deployment.es.us-central1.gcp.elastic.cloud --apiKey="your-api-key"
+```
+
 ### Understanding Scenario Files
 
 Scenario files accept 3 arguments, 2 of them optional and 1 mandatory
@@ -158,6 +166,7 @@ The following options are supported:
 |---------------------|----------|:--------|--------------------------------------------------------------------------------------------|
 | `--target`          | [string] |         | Elasticsearch target                                                                       |
 | `--kibana`          | [string] |         | Kibana target, used to bootstrap datastreams/mappings/templates/settings                   |
+| `--apiKey`          | [string] |         | API key for Kibana                                                                         |
 | `--versionOverride` | [string] |         | String to be used for `observer.version`. Defauls to the version of the installed package. |
 
 Note:

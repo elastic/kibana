@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
+import { EuiIcon, EuiText, EuiToolTip, EuiIconTip } from '@elastic/eui';
 
 import React from 'react';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
@@ -72,9 +72,12 @@ export const DocumentStat = ({ config, showIcon, totalCount }: Props) => {
 
   const icon = showIcon ? (
     type === SUPPORTED_FIELD_TYPES.TEXT ? (
-      <EuiToolTip content={tooltipContent}>
-        <EuiIcon type="partial" size={'m'} className={'columnHeader__icon'} />
-      </EuiToolTip>
+      <EuiIconTip
+        content={tooltipContent}
+        type="partial"
+        anchorClassName="columnHeader__icon"
+        size="m"
+      />
     ) : (
       <EuiIcon type="document" size={'m'} className={'columnHeader__icon'} />
     )

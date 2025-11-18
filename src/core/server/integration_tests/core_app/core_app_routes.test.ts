@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Root } from '@kbn/core-root-server-internal';
+import type { Root } from '@kbn/core-root-server-internal';
 import { createRoot, request } from '@kbn/core-test-helpers-kbn-server';
 
 describe('Core app routes', () => {

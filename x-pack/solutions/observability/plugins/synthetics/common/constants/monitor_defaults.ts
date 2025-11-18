@@ -5,27 +5,29 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import {
-  CodeEditorMode,
+import type {
   BrowserAdvancedFields,
   BrowserSimpleFields,
   CommonFields,
-  MonitorTypeEnum,
-  FormMonitorType,
   HTTPAdvancedFields,
-  HTTPMethod,
   HTTPSimpleFields,
   ICMPSimpleFields,
-  Mode,
   MonitorDefaults,
-  ResponseBodyIndexPolicy,
-  ScheduleUnit,
-  ScreenshotOption,
-  SourceType,
   TCPAdvancedFields,
   TCPSimpleFields,
   ThrottlingConfig,
   TLSFields,
+} from '../runtime_types/monitor_management';
+import {
+  CodeEditorMode,
+  MonitorTypeEnum,
+  FormMonitorType,
+  HTTPMethod,
+  Mode,
+  ResponseBodyIndexPolicy,
+  ScheduleUnit,
+  ScreenshotOption,
+  SourceType,
   TLSVersion,
   VerificationMode,
 } from '../runtime_types/monitor_management';

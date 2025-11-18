@@ -22,9 +22,10 @@ export const buildThreatEnrichment = ({
   reassignThreatPitId,
   threatIndexFields,
   allowedFieldsForTermsQuery,
+  threatMapping,
 }: BuildThreatEnrichmentOptions): SignalsEnrichment => {
   return async (signals) => {
-    const { signalIdToMatchedQueriesMap, threatList } = await getSignalIdToMatchedQueriesMap({
+    const signalIdToMatchedQueriesMap = await getSignalIdToMatchedQueriesMap({
       services,
       sharedParams,
       signals,
@@ -39,7 +40,7 @@ export const buildThreatEnrichment = ({
     const enrichment = threatEnrichmentFactory({
       signalIdToMatchedQueriesMap,
       threatIndicatorPath,
-      matchedThreats: threatList,
+      threatMappings: threatMapping,
     });
 
     return enrichment(signals);

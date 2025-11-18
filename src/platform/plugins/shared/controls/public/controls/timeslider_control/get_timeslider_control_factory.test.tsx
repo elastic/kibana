@@ -12,7 +12,7 @@ import { BehaviorSubject } from 'rxjs';
 
 import { EuiThemeProvider } from '@elastic/eui';
 import dateMath from '@kbn/datemath';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import { fireEvent, render as rtlRender } from '@testing-library/react';
 
 import { dataService } from '../../services/kibana_services';

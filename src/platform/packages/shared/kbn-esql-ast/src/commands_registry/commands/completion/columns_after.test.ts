@@ -7,52 +7,45 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { synth } from '../../../..';
-import type { ESQLFieldWithMetadata, ESQLUserDefinedColumn } from '../../types';
+import type { ESQLColumnData } from '../../types';
 import { columnsAfter } from './columns_after';
 
 describe('COMPLETION', () => {
-  const context = {
-    userDefinedColumns: new Map<string, ESQLUserDefinedColumn[]>([]),
-    fields: new Map<string, ESQLFieldWithMetadata>([
-      ['field1', { name: 'field1', type: 'keyword' }],
-      ['count', { name: 'count', type: 'double' }],
-    ]),
-  };
   it('adds "completion" field, when targetField is not specified', () => {
-    const previousCommandFields = [
-      { name: 'field1', type: 'keyword' },
-      { name: 'count', type: 'double' },
-    ] as ESQLFieldWithMetadata[];
+    const previousCommandColumns: ESQLColumnData[] = [
+      { name: 'field1', type: 'keyword', userDefined: false },
+      { name: 'count', type: 'double', userDefined: false },
+    ];
 
     const result = columnsAfter(
-      synth.cmd`COMPLETION "prompt" WITH inferenceId`,
-      previousCommandFields,
-      context
+      synth.cmd`COMPLETION "prompt" WITH {"inference_id": "my-inference-id"}`,
+      previousCommandColumns,
+      ''
     );
 
     expect(result).toEqual([
-      { name: 'field1', type: 'keyword' },
-      { name: 'count', type: 'double' },
-      { name: 'completion', type: 'keyword' },
+      { name: 'field1', type: 'keyword', userDefined: false },
+      { name: 'count', type: 'double', userDefined: false },
+      { name: 'completion', type: 'keyword', userDefined: false },
     ]);
   });
 
   it('adds the given targetField as field, when targetField is specified', () => {
-    const previousCommandFields = [
-      { name: 'field1', type: 'keyword' },
-      { name: 'count', type: 'double' },
-    ] as ESQLFieldWithMetadata[];
+    const previousCommandColumns: ESQLColumnData[] = [
+      { name: 'field1', type: 'keyword', userDefined: false },
+      { name: 'count', type: 'double', userDefined: false },
+    ];
 
     const result = columnsAfter(
-      synth.cmd`COMPLETION customField = "prompt" WITH inferenceId`,
-      previousCommandFields,
-      context
+      synth.cmd`COMPLETION customField = "prompt" WITH {"inference_id": "my-inference-id"}`,
+      previousCommandColumns,
+      ''
     );
 
     expect(result).toEqual([
-      { name: 'field1', type: 'keyword' },
-      { name: 'count', type: 'double' },
-      { name: 'customField', type: 'keyword' },
+      { name: 'field1', type: 'keyword', userDefined: false },
+      { name: 'count', type: 'double', userDefined: false },
+      { name: 'customField', type: 'keyword', userDefined: true, location: { min: 0, max: 0 } },
     ]);
   });
 });

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { RUNTIME_FIELD_TYPES } from './constants';
-import { OpenRuntimeFieldEditorProps } from './load_editor';
+import type { RUNTIME_FIELD_TYPES } from './constants';
+import type { OpenRuntimeFieldEditorProps } from './load_editor';
 
 export interface LoadEditorResponse {
   openEditor(props: OpenRuntimeFieldEditorProps): () => void;

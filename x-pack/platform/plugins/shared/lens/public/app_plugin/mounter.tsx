@@ -6,11 +6,11 @@
  */
 
 import React, { useCallback, useEffect, useState, useMemo } from 'react';
-import { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 import { HashRouter, Routes, Route } from '@kbn/shared-ux-router';
-import { History } from 'history';
+import type { History } from 'history';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import { Provider } from 'react-redux';
@@ -19,8 +19,8 @@ import {
   Storage,
   withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
-import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import { ACTION_VISUALIZE_LENS_FIELD, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import { ACTION_VISUALIZE_LENS_FIELD } from '@kbn/ui-actions-plugin/public';
 import { ACTION_CONVERT_TO_LENS } from '@kbn/visualizations-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
@@ -28,30 +28,29 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import { withSuspense } from '@kbn/shared-ux-utility';
 
+import type {
+  LensSerializedState,
+  MainHistoryLocationState,
+  LensAppLocator,
+  VisualizeEditorContext,
+  LensAppServices,
+  EditorFrameStart,
+  LensTopNavMenuEntryGenerator,
+  LensAttributesService,
+} from '@kbn/lens-common';
+import { LENS_SHARE_STATE_ACTION } from '@kbn/lens-common';
+import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
 import { App } from './app';
-import { EditorFrameStart, LensTopNavMenuEntryGenerator, VisualizeEditorContext } from '../types';
 import { addHelpMenuToAppChrome } from '../help_menu_util';
-import { LensPluginStartDependencies } from '../plugin';
-import { extract } from '../../common/embeddable_factory';
+import type { LensPluginStartDependencies } from '../plugin';
 import { LENS_EMBEDDABLE_TYPE, LENS_EDIT_BY_VALUE, APP_ID } from '../../common/constants';
-import { LensAttributesService } from '../lens_attribute_service';
-import { LensAppServices, RedirectToOriginProps, HistoryLocationState } from './types';
-import {
-  makeConfigureStore,
-  navigateAway,
-  LensRootStore,
-  loadInitial,
-  setState,
-} from '../state_management';
+import type { RedirectToOriginProps, HistoryLocationState } from './types';
+import type { LensRootStore } from '../state_management';
+import { makeConfigureStore, navigateAway, loadInitial, setState } from '../state_management';
 import { getPreloadedState } from '../state_management/lens_slice';
 import { getLensInspectorService } from '../lens_inspector_service';
-import {
-  LensAppLocator,
-  LENS_SHARE_STATE_ACTION,
-  MainHistoryLocationState,
-} from '../../common/locator/locator';
 import { LensDocumentService } from '../persistence';
-import { LensSerializedState } from '../react_embeddable/types';
+import { EditorFrameServiceProvider } from '../editor_frame_service/editor_frame_service_context';
 
 function getInitialContext(history: AppMountParameters['history']) {
   const historyLocationState = history.location.state as
@@ -118,7 +117,7 @@ export async function getLensServices(
     attributeService,
     eventAnnotationService,
     uiActions: startDependencies.uiActions,
-    lensDocumentService: new LensDocumentService(startDependencies.contentManagement),
+    lensDocumentService: new LensDocumentService(coreStart.http),
     presentationUtil: startDependencies.presentationUtil,
     dataViewEditor: startDependencies.dataViewEditor,
     dataViewFieldEditor: startDependencies.dataViewFieldEditor,
@@ -219,19 +218,22 @@ export async function mountApp(
     }
     if (stateTransfer && props?.state) {
       const { state: rawState, isCopied } = props;
-      const { references } = extract(rawState as unknown as EmbeddableStateWithType);
-      stateTransfer.navigateToWithEmbeddablePackage<LensSerializedState>(mergedOriginatingApp, {
-        path: embeddableEditorIncomingState?.originatingPath,
-        state: {
-          embeddableId: isCopied ? undefined : embeddableId,
-          type: LENS_EMBEDDABLE_TYPE,
-          serializedState: {
-            references,
-            rawState,
-          },
-          searchSessionId: data.search.session.getSessionId(),
-        },
-      });
+      stateTransfer.navigateToWithEmbeddablePackages<LensSerializedAPIConfig>(
+        mergedOriginatingApp,
+        {
+          path: embeddableEditorIncomingState?.originatingPath,
+          state: [
+            {
+              embeddableId: isCopied ? undefined : embeddableId,
+              type: LENS_EMBEDDABLE_TYPE,
+              serializedState: {
+                rawState,
+              },
+              searchSessionId: data.search.session.getSessionId(),
+            },
+          ],
+        }
+      );
     } else {
       coreStart.application.navigateToApp(mergedOriginatingApp, {
         path: embeddableEditorIncomingState?.originatingPath,
@@ -359,23 +361,26 @@ export async function mountApp(
 
       return (
         <Provider store={lensStore}>
-          <App
-            incomingState={embeddableEditorIncomingState}
-            editorFrame={instance}
-            initialInput={initialInput}
-            redirectTo={redirectCallback}
-            redirectToOrigin={redirectToOrigin}
-            onAppLeave={params.onAppLeave}
-            setHeaderActionMenu={params.setHeaderActionMenu}
-            history={props.history}
+          <EditorFrameServiceProvider
             datasourceMap={datasourceMap}
             visualizationMap={visualizationMap}
-            initialContext={initialContext}
-            contextOriginatingApp={originatingApp}
-            topNavMenuEntryGenerators={topNavMenuEntryGenerators}
-            theme$={core.theme.theme$}
-            coreStart={coreStart}
-          />
+          >
+            <App
+              incomingState={embeddableEditorIncomingState}
+              editorFrame={instance}
+              initialInput={initialInput}
+              redirectTo={redirectCallback}
+              redirectToOrigin={redirectToOrigin}
+              onAppLeave={params.onAppLeave}
+              setHeaderActionMenu={params.setHeaderActionMenu}
+              history={props.history}
+              initialContext={initialContext}
+              contextOriginatingApp={originatingApp}
+              topNavMenuEntryGenerators={topNavMenuEntryGenerators}
+              theme$={core.theme.theme$}
+              coreStart={coreStart}
+            />
+          </EditorFrameServiceProvider>
         </Provider>
       );
     }

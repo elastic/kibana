@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import {
-  AssistantMessage,
-  MessageRole,
-  ToolMessage,
-  generateFakeToolCallId,
-} from '@kbn/inference-common';
+import type { AssistantMessage, ToolMessage } from '@kbn/inference-common';
+import { MessageRole, generateFakeToolCallId } from '@kbn/inference-common';
 
 const COMPLETE_INSTRUCTIONS = `Enter into your Definitive Output mode.`;
 

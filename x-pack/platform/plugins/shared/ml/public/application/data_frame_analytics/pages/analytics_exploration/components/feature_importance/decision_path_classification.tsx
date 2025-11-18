@@ -116,6 +116,12 @@ export const ClassificationDecisionPath: FC<ClassificationDecisionPathProps> = (
           options={options}
           valueOfSelected={currentClass}
           onChange={setCurrentClass}
+          aria-label={i18n.translate(
+            'xpack.ml.dataframe.analytics.explorationResults.classificationDecisionPathClassNameTitle',
+            {
+              defaultMessage: 'Class name',
+            }
+          )}
         />
       )}
       <DecisionPathChart

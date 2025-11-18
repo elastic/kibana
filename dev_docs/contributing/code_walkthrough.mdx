@@ -99,7 +99,7 @@ Maintained by Ops and Core, this contains global typings for dependencies that d
 
 ## [x-pack](https://github.com/elastic/kibana/tree/main/x-pack)
 
-Contains all code and infrasturcture that powers our gold+ (non-basic) features that are provided under a more restrictive license. The code is organized in the following subfolders:
+Contains all code and infrastructure that powers our gold+ (non-basic) features that are provided under a more restrictive license. The code is organized in the following subfolders:
 
 ## [x-pack/platform](https://github.com/elastic/kibana/tree/main/x-pack/platform)
 
@@ -108,7 +108,7 @@ Contains all of the gold+ (non-basic) modules that are common to all Kibana solu
 ## [x-pack/solutions](https://github.com/elastic/kibana/tree/main/x-pack/solutions)
 
 [//]: # (BOOKMARK - List of Kibana solutions)
-Contains all of the code that is specific to each Kibana solution. At the moment, we have a folder for [observability](https://github.com/elastic/kibana/tree/main/x-pack/solutions/observability), another for [security](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security), another for [search](https://github.com/elastic/kibana/tree/main/x-pack/solutions/search) and another for [chat](https://github.com/elastic/kibana/tree/main/x-pack/solutions/chat) (serverless only).
+Contains all of the code that is specific to each Kibana solution. At the moment, we have a folder for [observability](https://github.com/elastic/kibana/tree/main/x-pack/solutions/observability), another for [security](https://github.com/elastic/kibana/tree/main/x-pack/solutions/security), another for [search](https://github.com/elastic/kibana/tree/main/x-pack/solutions/search) and another for [workplaceai](https://github.com/elastic/kibana/tree/main/x-pack/solutions/workplaceai) (serverless only).
 
 These folders contain the modules that belong to each solution, and these modules are also categorised as plugins or packages.
 Unlike the `src/platform` and the `x-pack/platform` code, the solution-specific modules are `private` by definition, aka they cannot be accessed from platform nor from other solutions.
@@ -133,6 +133,6 @@ Contains code for all the plugins that power our gold+ features.
 
 Maintained by the Ops team, this folder contains some scripts for running x-pack utilities, like the functional test runner that runs with a license higher than Basic.
 
-### [x-pack/test](https://github.com/elastic/kibana/tree/main/x-pack/test)
+### [x-pack/platform/test](https://github.com/elastic/kibana/tree/main/x-pack/platform/test)
 
 Functional tests for our gold+ features.

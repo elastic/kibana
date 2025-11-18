@@ -6,10 +6,13 @@
  */
 
 import _ from 'lodash';
-import React, { ChangeEvent, Component } from 'react';
-import { EuiComboBox, EuiComboBoxOptionOption, EuiFieldText } from '@elastic/eui';
+import type { ChangeEvent } from 'react';
+import React, { Component } from 'react';
+import { i18n } from '@kbn/i18n';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFieldText } from '@elastic/eui';
 import { SINGLE_SELECTION_AS_TEXT_PROPS } from '../../../../../common/constants';
-import { IField } from '../../../fields/field';
+import type { IField } from '../../../fields/field';
 
 interface Props {
   dataTestSubj: string;
@@ -142,6 +145,9 @@ export class StopInput extends Component<Props, State> {
         onFocus={this._onFocus}
         data-test-subj={this.props.dataTestSubj}
         compressed
+        aria-label={i18n.translate('xpack.maps.stopInput.valueComboBoxAriaLabel', {
+          defaultMessage: 'Stop value',
+        })}
       />
     );
   }

@@ -8,13 +8,13 @@
  */
 
 import React, { PureComponent } from 'react';
-import { OverlayModalStart } from '@kbn/core/public';
-import { FieldDescription } from '@kbn/field-utils';
+import type { OverlayModalStart } from '@kbn/core/public';
+import { FieldDescription, FieldIcon, getFieldIconType } from '@kbn/field-utils';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiIcon,
   EuiInMemoryTable,
   EuiIconTip,
-  EuiBasicTableColumn,
   EuiBadge,
   EuiToolTip,
   EuiModalHeader,
@@ -26,6 +26,7 @@ import {
   EuiBasicTable,
   EuiCode,
   EuiSpacer,
+  EuiFlexGroup,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -36,9 +37,9 @@ import {
   type EuiTablePersistInjectedProps,
 } from '@kbn/shared-ux-table-persist';
 
-import { DataView } from '@kbn/data-views-plugin/public';
-import { StartServices } from '../../../../../types';
-import { IndexedFieldItem } from '../../types';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import type { StartServices } from '../../../../../types';
+import type { IndexedFieldItem } from '../../types';
 
 export const showDelete = (field: IndexedFieldItem) =>
   // runtime fields that aren't composite subfields
@@ -235,10 +236,10 @@ const getItems = (conflictDescriptions: IndexedFieldItem['conflictDescriptions']
 
 export const renderFieldName = (field: IndexedFieldItem, timeFieldName?: string) => (
   <span data-test-subj={`field-name-${field.name}`}>
-    {field.name}
-    {field.info && field.info.length ? (
-      <span>
-        &nbsp;
+    <EuiFlexGroup gutterSize="s" alignItems="center">
+      <FieldIcon type={getFieldIconType(field, (f) => f?.kbnType)} scripted={field?.scripted} />
+      {field.name}
+      {field.info && field.info.length ? (
         <EuiIconTip
           type="question"
           color="primary"
@@ -247,33 +248,27 @@ export const renderFieldName = (field: IndexedFieldItem, timeFieldName?: string)
             <div key={i}>{info}</div>
           ))}
         />
-      </span>
-    ) : null}
-    {timeFieldName === field.name ? (
-      <span>
-        &nbsp;
+      ) : null}
+      {timeFieldName === field.name ? (
         <EuiIconTip
           type="clock"
           color="primary"
           aria-label={primaryTimeAriaLabel}
           content={primaryTimeTooltip}
         />
-      </span>
-    ) : null}
-    {!field.isMapped && field.hasRuntime ? (
-      <span>
-        &nbsp;
+      ) : null}
+      {!field.isMapped && field.hasRuntime ? (
         <EuiIconTip
           type="indexRuntime"
           title={runtimeIconTipTitle(field)}
           content={runtimeIconTipText}
         />
-      </span>
-    ) : null}
+      ) : null}
+    </EuiFlexGroup>
     {field.customLabel && field.customLabel !== field.name ? (
       <div>
         <EuiToolTip content={labelDescription}>
-          <EuiBadge iconType="flag" iconSide="left">
+          <EuiBadge iconType="flag" iconSide="left" tabIndex={0}>
             {field.customLabel}
           </EuiBadge>
         </EuiToolTip>

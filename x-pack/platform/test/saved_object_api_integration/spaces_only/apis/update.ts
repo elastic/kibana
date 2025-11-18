@@ -7,7 +7,7 @@
 
 import { SPACES } from '../../common/lib/spaces';
 import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 import { updateTestSuiteFactory, TEST_CASES as CASES } from '../../common/suites/update';
 
 const {

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -35,8 +35,8 @@
     "@kbn/visualizations-plugin",
     "@kbn/presentation-containers",
     "@kbn/presentation-publishing",
+    "@kbn/presentation-publishing-schemas",
     "@kbn/react-kibana-context-render",
-    "@kbn/presentation-panel-plugin",
     "@kbn/share-plugin",
     "@kbn/es-query",
     "@kbn/presentation-util"

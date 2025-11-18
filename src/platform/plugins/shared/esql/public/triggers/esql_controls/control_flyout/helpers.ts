@@ -6,8 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { monaco } from '@kbn/monaco';
-import { ESQLVariableType, ESQLControlVariable, VariableNamePrefix } from '@kbn/esql-types';
+import type { monaco } from '@kbn/monaco';
+import type { ESQLControlVariable } from '@kbn/esql-types';
+import { ESQLVariableType, VariableNamePrefix } from '@kbn/esql-types';
 import { TIME_SPAN_UNITS } from '@kbn/esql-ast';
 import { css } from '@emotion/react';
 
@@ -93,6 +94,8 @@ export const getVariableSuggestion = (variableType: ESQLVariableType) => {
       return 'function';
     case ESQLVariableType.TIME_LITERAL:
       return 'interval';
+    case ESQLVariableType.MULTI_VALUES:
+      return 'values';
     default:
       return 'variable';
   }
@@ -158,7 +161,8 @@ export const getVariableTypeFromQuery = (str: string, variableType: ESQLVariable
   if (
     leadingQuestionMarksCount === 1 &&
     variableType !== ESQLVariableType.TIME_LITERAL &&
-    variableType !== ESQLVariableType.VALUES
+    variableType !== ESQLVariableType.VALUES &&
+    variableType !== ESQLVariableType.MULTI_VALUES
   ) {
     return ESQLVariableType.VALUES;
   }
@@ -173,6 +177,7 @@ export const getVariableNamePrefix = (type: ESQLVariableType) => {
       return VariableNamePrefix.IDENTIFIER;
     case ESQLVariableType.VALUES:
     case ESQLVariableType.TIME_LITERAL:
+    case ESQLVariableType.MULTI_VALUES:
     default:
       return VariableNamePrefix.VALUE;
   }

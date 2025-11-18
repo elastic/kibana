@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { services as platformServices } from '@kbn/test-suites-xpack-platform/functional/services';
 import { QueryBarProvider } from './query_bar_provider';
 
 export const services = {
+  ...platformServices,
   queryBarProvider: QueryBarProvider,
 };

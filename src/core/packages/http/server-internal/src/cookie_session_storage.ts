@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Request, Server, ServerStateCookieOptions } from '@hapi/hapi';
+import type { Request, Server } from '@hapi/hapi';
 import hapiAuthCookie from '@hapi/cookie';
 
 import type { Logger } from '@kbn/logging';
@@ -126,22 +126,8 @@ export async function createCookieSessionStorageFactory<T extends object>(
       clearInvalid: false,
       isHttpOnly: true,
       isSameSite: cookieOptions.sameSite ?? false,
-      contextualize: (
-        definition: Omit<ServerStateCookieOptions, 'isSameSite'> & { isSameSite: string }
-      ) => {
-        /**
-         * This is a temporary solution to support the Partitioned attribute.
-         * Statehood performs validation for the params, but only before the contextualize function call.
-         * Since value for the isSameSite is used directly when making segment,
-         * we can leverage that to append the Partitioned attribute to the cookie.
-         *
-         * Once statehood is updated to support the Partitioned attribute, we can remove this.
-         * Issue: https://github.com/elastic/kibana/issues/188720
-         */
-        if (definition.isSameSite === 'None' && definition.isSecure && !disableEmbedding) {
-          definition.isSameSite = 'None;Partitioned';
-        }
-      },
+      isPartitioned:
+        cookieOptions.sameSite === 'None' && cookieOptions.isSecure && !disableEmbedding,
     },
     validate: async (req: Request, session: T | T[]) => {
       const result = cookieOptions.validate(session);

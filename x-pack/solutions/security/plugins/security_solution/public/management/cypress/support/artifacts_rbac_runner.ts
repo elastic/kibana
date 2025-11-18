@@ -18,6 +18,7 @@ import { performUserActions } from '../tasks/perform_user_actions';
 import { indexEndpointHosts } from '../tasks/index_endpoint_hosts';
 import type { ReturnTypeFromChainable } from '../types';
 import { SIEM_VERSIONS } from '../common/constants';
+import type { SiemVersion } from '../common/constants';
 import { SECURITY_FEATURE_ID } from '../../../../common';
 
 /**
@@ -36,7 +37,12 @@ export const getArtifactMockedDataTests = (testData: ArtifactsFixtureType) => ()
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
 
   const isServerless = Cypress.env('IS_SERVERLESS');
-  const siemVersionsToTest = isServerless ? [SECURITY_FEATURE_ID] : SIEM_VERSIONS;
+  const firstSiemVersion = testData.firstSiemVersion ?? 'siem';
+  const siemVersionsToTest = isServerless
+    ? [SECURITY_FEATURE_ID]
+    : SIEM_VERSIONS.filter(
+        (version) => getVersionNumber(version) >= getVersionNumber(firstSiemVersion)
+      );
 
   let loginWithoutAccess: () => void;
   let loginWithReadAccess: () => void;
@@ -70,14 +76,20 @@ export const getArtifactMockedDataTests = (testData: ArtifactsFixtureType) => ()
               login(ROLE.endpoint_policy_manager);
             } else {
               login.withCustomKibanaPrivileges({
-                [siemVersion]: ['read', `${privilegePrefix}all`],
+                [siemVersion]: [
+                  'read',
+                  `${privilegePrefix}all`,
+                  'global_artifact_management_all', // todo: remove when Endpoint exceptions per-policy assignment is implemented
+                ],
               });
             }
           };
 
           loginWithReadAccess = () => {
             expect(isServerless, 'Testing read access is implemented only on ESS').to.equal(false);
-            login.withCustomKibanaPrivileges({ [siemVersion]: ['read', `${privilegePrefix}read`] });
+            login.withCustomKibanaPrivileges({
+              [siemVersion]: ['read', `${privilegePrefix}read`],
+            });
           };
 
           loginWithoutAccess = () => {
@@ -210,3 +222,6 @@ export const getArtifactMockedDataTests = (testData: ArtifactsFixtureType) => ()
     });
   }
 };
+
+const getVersionNumber = (version: SiemVersion): number =>
+  Number(version.replace(/siemV?/, '') || 1);

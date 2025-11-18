@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { useInfiniteQuery } from '@kbn/react-query';
 import { useCallback, useMemo } from 'react';
+import type { FindAnonymizationFieldsResponse } from '@kbn/elastic-assistant-common';
 import {
   ELASTIC_AI_ASSISTANT_ANONYMIZATION_FIELDS_URL_FIND,
   API_VERSIONS,
-  FindAnonymizationFieldsResponse,
 } from '@kbn/elastic-assistant-common';
 import { useAssistantContext } from '../../../assistant_context';
 

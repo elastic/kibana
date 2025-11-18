@@ -15,7 +15,7 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import { GroupPanelRenderer, GroupStatsItem, RawBucket } from '@kbn/grouping/src';
+import type { GroupPanelRenderer, GroupStatsItem, RawBucket } from '@kbn/grouping/src';
 import { i18n } from '@kbn/i18n';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';
 import { getGroupPanelTitle } from '@kbn/cloud-security-posture';
@@ -182,6 +182,7 @@ const FindingsCountComponent = ({ bucket }: { bucket: RawBucket<FindingsGrouping
         `}
         color="hollow"
         data-test-subj={FINDINGS_GROUPING_COUNTER}
+        tabIndex={0}
       >
         {getAbbreviatedNumber(bucket.doc_count)}
       </EuiBadge>

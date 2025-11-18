@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { SOContentStorage } from '@kbn/content-management-utils';
 import { cmServicesDefinition } from './cm_services';
 import type { GraphCrudTypes } from '../../common/content_management';

@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 import { first, last } from 'lodash';
-import { InfraTimerangeInput } from '@kbn/infra-plugin/common/http_api/snapshot_api';
-import { InventoryTsvbType } from '@kbn/metrics-data-access-plugin/common';
-import { NodeDetailsMetricDataResponse } from '@kbn/infra-plugin/common/http_api/node_details_api';
+import type { InfraTimerangeInput } from '@kbn/infra-plugin/common/http_api/snapshot_api';
+import type { InventoryTsvbType } from '@kbn/metrics-data-access-plugin/common';
+import type { NodeDetailsMetricDataResponse } from '@kbn/infra-plugin/common/http_api/node_details_api';
 import type { SupertestWithRoleScopeType } from '../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
@@ -131,6 +131,43 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const podOverviewMetric = resp.metrics.find((metric) => metric.id === 'podOverview');
 
         expect(podOverviewMetric?.series.length).to.be.greaterThan(1);
+      });
+    });
+
+    it('should use fallback when cpu.usage.limit.pct is missing', async () => {
+      // This pod has no kubernetes.pod.cpu.usage.limit.pct field
+      // So the CPU aggregation should fall back to kubernetes.pod.cpu.usage.node.pct
+      const data = fetchNodeDetails({
+        sourceId: 'default',
+        metrics: ['podCpuUsage'],
+        timerange: {
+          to: max,
+          from: min,
+          interval: '>=1m',
+        },
+        nodeId: 'fallback-test-pod-12345-67890-abcdef',
+        nodeType: 'pod',
+      });
+      return data.then((resp) => {
+        if (!resp) {
+          return;
+        }
+
+        expect(resp.metrics.length).to.equal(1);
+        const metric = first(resp.metrics) as any;
+        expect(metric).to.have.property('id', 'podCpuUsage');
+        expect(metric).to.have.property('series');
+        const series = first(metric.series) as any;
+        expect(series).to.have.property('id', 'cpu');
+        expect(series).to.have.property('data');
+
+        // Verify we got data - the fallback to node.pct should have worked
+        expect(series.data.length).to.be.greaterThan(0);
+
+        // The CPU values should be around 0.75 (from node.pct, not limit.pct)
+        const datapoint = last(series.data) as any;
+        expect(datapoint).to.have.property('value');
+        expect(datapoint.value).to.be.within(0.6, 0.9);
       });
     });
   });

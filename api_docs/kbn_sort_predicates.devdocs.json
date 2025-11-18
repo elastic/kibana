@@ -98,7 +98,20 @@
       }
     ],
     "interfaces": [],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/sort-predicates",
+        "id": "def-common.NonStringSortableFieldType",
+        "type": "Enum",
+        "tags": [],
+        "label": "NonStringSortableFieldType",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-sort-predicates/src/sorting.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [],
     "objects": []
   }

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -51,13 +51,18 @@
     "@kbn/server-route-repository-utils",
     "@kbn/inference-plugin",
     "@kbn/ai-assistant-icon",
-    "@kbn/core-http-browser",
     "@kbn/sse-utils",
     "@kbn/core-security-server",
     "@kbn/ml-trained-models-utils",
     "@kbn/lock-manager",
     "@kbn/i18n-react",
-    "@kbn/inference-tracing"
+    "@kbn/inference-tracing",
+    "@kbn/licensing-types",
+    "@kbn/llm-tasks-plugin",
+    "@kbn/product-doc-base-plugin",
+    "@kbn/inference-endpoint-plugin",
+    "@kbn/spaces-utils",
+    "@kbn/usage-collection-plugin"
   ],
   "exclude": ["target/**/*"]
 }

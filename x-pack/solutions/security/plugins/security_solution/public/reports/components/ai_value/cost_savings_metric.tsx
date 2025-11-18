@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { getExcludeAlertsFilters } from './utils';
+import { PageScope } from '../../../data_view_manager/constants';
 import * as i18n from './translations';
-import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import {
+  type GetLensAttributes,
+  VisualizationContextMenuActions,
+} from '../../../common/components/visualization_actions/types';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 import { getCostSavingsMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/cost_savings_metric';
+import { useMetricAnimation } from '../../hooks/use_metric_animation';
+import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_default';
 
 interface Props {
   from: string;
   to: string;
-  attackAlertIds: string[];
   minutesPerAlert: number;
   analystHourlyRate: number;
 }
@@ -32,7 +35,6 @@ const ID = 'CostSavingsMetricQuery';
  */
 
 const CostSavingsMetricComponent: React.FC<Props> = ({
-  attackAlertIds,
   minutesPerAlert,
   analystHourlyRate,
   from,
@@ -41,13 +43,25 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
   const {
     euiTheme: { colors },
   } = useEuiTheme();
-  const extraVisualizationOptions = useMemo(
-    () => ({
-      filters: getExcludeAlertsFilters(attackAlertIds),
-    }),
-    [attackAlertIds]
-  );
+
+  // Apply animation to the metric value
+  useMetricAnimation({
+    animationDurationMs: 1500,
+    selector: '.echMetricText__value',
+  });
+  const signalIndexName = useSignalIndexWithDefault();
   const timerange = useMemo(() => ({ from, to }), [from, to]);
+  const getLensAttributes = useCallback<GetLensAttributes>(
+    (args) =>
+      getCostSavingsMetricLensAttributes({
+        ...args,
+        backgroundColor: colors.backgroundBaseSuccess,
+        minutesPerAlert,
+        analystHourlyRate,
+        signalIndexName,
+      }),
+    [analystHourlyRate, colors.backgroundBaseSuccess, minutesPerAlert, signalIndexName]
+  );
 
   return (
     <div
@@ -60,10 +74,12 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
           fill: ${colors.success};
         }
         .echMetricText {
-          padding: 8px 20px 60px;
+          padding: 8px 16px 60px;
         }
         p.echMetricText__value {
           color: ${colors.success};
+          font-size: 48px !important;
+          padding: 10px 0;
         }
         .euiPanel,
         .embPanel__hoverActions > span {
@@ -76,14 +92,11 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
     >
       <VisualizationEmbeddable
         data-test-subj="cost-savings-metric"
-        extraOptions={extraVisualizationOptions}
-        getLensAttributes={(args) =>
-          getCostSavingsMetricLensAttributes({ ...args, minutesPerAlert, analystHourlyRate })
-        }
+        getLensAttributes={getLensAttributes}
         timerange={timerange}
         id={`${ID}-metric`}
         inspectTitle={i18n.COST_SAVINGS_TREND}
-        scopeId={SourcererScopeName.detections}
+        scopeId={PageScope.alerts}
         withActions={[
           VisualizationContextMenuActions.addToExistingCase,
           VisualizationContextMenuActions.addToNewCase,

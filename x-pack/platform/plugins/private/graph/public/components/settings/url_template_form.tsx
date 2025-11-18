@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiFormRow,
   EuiFieldText,
@@ -16,12 +17,11 @@ import {
   EuiButtonEmpty,
   EuiLink,
   EuiAccordion,
-  UseEuiTheme,
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { UrlTemplate } from '../../types';
+import type { UrlTemplate } from '../../types';
 import { outlinkEncoders } from '../../helpers/outlink_encoders';
 import { urlTemplateIconChoices } from '../../helpers/style_choices';
 import { isUrlTemplateValid, isKibanaUrl, replaceKibanaUrlParam } from '../../helpers/url_template';

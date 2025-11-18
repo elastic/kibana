@@ -8,25 +8,29 @@
  */
 
 import React from 'react';
+import type { HorizontalAlignment, EuiTableDataType } from '@elastic/eui';
 import {
   EuiInMemoryTable,
-  HorizontalAlignment,
   EuiText,
   EuiLink,
-  EuiTableDataType,
+  EuiBadge,
+  EuiBadgeGroup,
+  EuiFlexGroup,
 } from '@elastic/eui';
-import { CoreStart } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
 import { get } from 'lodash';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
+import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 
-import {
+import type {
   SavedObjectRelation,
   SavedObjectManagementTypeInfo,
   SavedObjectsManagementPluginStart,
 } from '@kbn/saved-objects-management-plugin/public';
 
-import { EuiToolTip, EuiIcon, SearchFilterConfig } from '@elastic/eui';
+import type { SearchFilterConfig } from '@elastic/eui';
+import { EuiIconTip } from '@elastic/eui';
 import { IPM_APP_ID } from '../../../plugin';
 import {
   typeFieldName,
@@ -34,6 +38,7 @@ import {
   titleFieldName,
   titleFieldDescription,
   filterTitle,
+  managedBadge,
 } from './i18n';
 
 const canGoInApp = (
@@ -55,6 +60,7 @@ export const RelationshipsTable = ({
   getSavedObjectLabel,
   relationships,
   allowedTypes,
+  savedObjectsTagging,
 }: {
   basePath: CoreStart['http']['basePath'];
   capabilities: CoreStart['application']['capabilities'];
@@ -64,6 +70,7 @@ export const RelationshipsTable = ({
   getSavedObjectLabel: SavedObjectsManagementPluginStart['getSavedObjectLabel'];
   relationships: SavedObjectRelation[];
   allowedTypes: SavedObjectManagementTypeInfo[];
+  savedObjectsTagging?: SavedObjectsTaggingApi;
 }) => {
   const columns = [
     {
@@ -76,14 +83,16 @@ export const RelationshipsTable = ({
       render: (type: string, object: SavedObjectRelation) => {
         const typeLabel = getSavedObjectLabel(type, allowedTypes);
         return (
-          <EuiToolTip position="top" content={typeLabel}>
-            <EuiIcon
-              aria-label={typeLabel}
-              type={object.meta.icon || 'apps'}
-              size="s"
-              data-test-subj="relationshipsObjectType"
-            />
-          </EuiToolTip>
+          <EuiIconTip
+            content={typeLabel}
+            position="top"
+            aria-label={typeLabel}
+            type={object.meta.icon || 'apps'}
+            size="s"
+            iconProps={{
+              'data-test-subj': 'relationshipsObjectType',
+            }}
+          />
         );
       },
     },
@@ -98,14 +107,38 @@ export const RelationshipsTable = ({
         const showUrl = canGoInApp(object, capabilities);
         const titleDisplayed = title || getDefaultTitle(object);
 
-        return showUrl ? (
-          <EuiLink href={basePath.prepend(path)} data-test-subj="relationshipsTitle">
-            {titleDisplayed}
-          </EuiLink>
-        ) : (
-          <EuiText size="s" data-test-subj="relationshipsTitle">
-            {titleDisplayed}
-          </EuiText>
+        const TagListComponent = savedObjectsTagging?.ui.components.TagList;
+
+        const isManaged = object.managed === true;
+        const hasTags = object.references?.some((ref) => ref.type === 'tag') === true;
+
+        const showTags = !!TagListComponent && hasTags;
+        const showBadges = isManaged || showTags;
+
+        return (
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            {showUrl ? (
+              <EuiLink href={basePath.prepend(path)} data-test-subj="relationshipsTitle">
+                {titleDisplayed}
+              </EuiLink>
+            ) : (
+              <EuiText size="s" data-test-subj="relationshipsTitle">
+                {titleDisplayed}
+              </EuiText>
+            )}
+            {showBadges && (
+              <EuiBadgeGroup>
+                {isManaged && (
+                  <EuiBadge color="hollow" data-test-subj="managedBadge">
+                    {managedBadge}
+                  </EuiBadge>
+                )}
+                {showTags && (
+                  <TagListComponent object={object} data-test-subj="relationshipsTags" />
+                )}
+              </EuiBadgeGroup>
+            )}
+          </EuiFlexGroup>
         );
       },
     },

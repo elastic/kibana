@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import type { ModelOptionsData } from './get_model_options_for_inference_endpoints';
 import {
   e5SmallDescription,
   e5SmallTitle,
   elserDescription,
   elserTitle,
   getModelOptionsForInferenceEndpoints,
-  ModelOptionsData,
 } from './get_model_options_for_inference_endpoints';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 import {

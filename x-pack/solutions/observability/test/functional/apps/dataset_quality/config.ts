@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext, GenericFtrProviderContext } from '@kbn/test';
-import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrConfigProviderContext, GenericFtrProviderContext } from '@kbn/test';
+import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
-import { FtrProviderContext as InheritedFtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext as InheritedFtrProviderContext } from '../../ftr_provider_context';
 
 export type InheritedServices = InheritedFtrProviderContext extends GenericFtrProviderContext<
   infer TServices,

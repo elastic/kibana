@@ -14,12 +14,6 @@ export const UP = i18n.translate('xpack.securitySolution.reports.aiValue.up', {
 export const DOWN = i18n.translate('xpack.securitySolution.reports.aiValue.down', {
   defaultMessage: 'down',
 });
-export const COST_SAVINGS_TITLE = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.costSavingsTitle',
-  {
-    defaultMessage: 'Cost savings',
-  }
-);
 
 export const COST_SAVINGS_TREND = i18n.translate(
   'xpack.securitySolution.reports.aiValue.costSavingsTrend',
@@ -28,10 +22,10 @@ export const COST_SAVINGS_TREND = i18n.translate(
   }
 );
 
-export const COST_SAVINGS_SOC = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.costSavingsSoc',
+export const INSIGHTS_ERROR = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.insightsError',
   {
-    defaultMessage: 'Cumulative savings from AI-driven SOC operations',
+    defaultMessage: 'Failed to fetch insight data due to an error:',
   }
 );
 
@@ -63,12 +57,6 @@ export const TIME_RANGE = (timeRange: string) =>
     values: { timeRange },
   });
 
-export const METRICS_OVER_TIME = (timeRange: string) =>
-  i18n.translate('xpack.securitySolution.reports.aiValue.metricsOverTime', {
-    defaultMessage: 'Value report metrics shown below reflect the last {timeRange} days',
-    values: { timeRange },
-  });
-
 export const ATTACK_DISCOVERY_COUNT = i18n.translate(
   'xpack.securitySolution.reports.aiValue.attackDiscoveryCount',
   {
@@ -97,24 +85,9 @@ export const NON_SUSPICIOUS_ALERTS = i18n.translate(
     defaultMessage: 'Non-suspicious alerts',
   }
 );
-
-export const TOTAL_ALERTS_PROCESSED = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.totalAlertsProcessed',
-  {
-    defaultMessage: 'Total alerts processed',
-  }
-);
-
 export const ESCALATED = i18n.translate('xpack.securitySolution.reports.aiValue.escalated', {
   defaultMessage: 'Escalated',
 });
-
-export const NON_SUSPICIOUS = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.nonSuspicious',
-  {
-    defaultMessage: 'non-suspicious',
-  }
-);
 
 export const ESCALATED_ALERTS = i18n.translate(
   'xpack.securitySolution.reports.aiValue.escalatedAlerts',
@@ -141,112 +114,19 @@ export const TIME_SAVED_DESC = i18n.translate(
   }
 );
 
+export const COST_SAVED_DESC = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.timeSavedTitle',
+  {
+    defaultMessage: 'Cost saved in dollars',
+  }
+);
+
 export const ALERT_PROCESSING_TITLE = i18n.translate(
   'xpack.securitySolution.reports.aiValue.alertProcessingTitle',
   {
     defaultMessage: 'Alert processing analytics',
   }
 );
-
-export const ALERT_PROCESSING_DESC = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.alertProcessingDesc',
-  {
-    defaultMessage: 'AI alert handling breakdown',
-  }
-);
-
-export const EXECUTIVE_GREETING = (username: string) =>
-  i18n.translate('xpack.securitySolution.reports.aiValue.executiveGreeting', {
-    defaultMessage: `Hi {username} - here is your executive summary`,
-    values: { username },
-  });
-export const EXECUTIVE_MESSAGE_START = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.executiveMessageStart',
-  {
-    defaultMessage: 'The Elastic AI SOC Engine continues to deliver measurable impact, driving ',
-  }
-);
-
-export const EXECUTIVE_COST_SAVINGS_LABEL = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.executiveCostSavingsLabel',
-  {
-    defaultMessage: 'in cost savings',
-  }
-);
-
-export const EXECUTIVE_AND = i18n.translate('xpack.securitySolution.reports.aiValue.executiveAnd', {
-  defaultMessage: 'and reclaiming',
-});
-
-export const EXECUTIVE_AND_A = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.executiveAndA',
-  {
-    defaultMessage: 'and a',
-  }
-);
-
-export const EXECUTIVE_HOURS_SAVED_LABEL = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.executiveHoursSavedLabel',
-  {
-    defaultMessage: 'analyst hours',
-  }
-);
-
-export const EXECUTIVE_MESSAGE_END = (timeRange: string) =>
-  i18n.translate('xpack.securitySolution.reports.aiValue.executiveMessageEnd', {
-    defaultMessage: '{timeRange} — significantly increasing threat detection coverage.',
-    values: { timeRange },
-  });
-
-export const EXECUTIVE_FILTERING = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.executiveFiltering',
-  {
-    defaultMessage:
-      'These results are based on AI-powered alert filtering that prevents analysts from spending time on non-suspicious alerts.',
-  }
-);
-
-export const EXECUTIVE_CALC = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.executiveCalc',
-  {
-    defaultMessage:
-      'Here’s how it works: alerts identified as part of attack discoveries are classified as ',
-  }
-);
-
-export const EXECUTIVE_CALC2 = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.executiveCalc2',
-  {
-    defaultMessage:
-      'By automatically filtering out non-suspicious alerts, the AI SOC reduces triage workload at scale. Cost savings are calculated by multiplying the number of non-suspicious alerts by an average review time of',
-  }
-);
-
-export const EXECUTIVE_SUSPICIOUS = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.executiveCalcEscalated',
-  {
-    defaultMessage: '(i.e., suspicious), while all others are considered',
-  }
-);
-
-export const EXECUTIVE_CONVERT = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.executiveConvert',
-  {
-    defaultMessage: 'converting that time to hours, and applying a',
-  }
-);
-
-export const MINUTES_PER_ALERT = (minutes: string) =>
-  i18n.translate('xpack.securitySolution.reports.aiValue.executiveMinutes', {
-    defaultMessage: '{minutes} minutes per alert',
-    values: { minutes },
-  });
-
-export const ANALYST_RATE = (rate: string) =>
-  i18n.translate('xpack.securitySolution.reports.aiValue.executiveRate', {
-    defaultMessage: '{rate}/hour analyst rate',
-    values: { rate },
-  });
 
 export const EXECUTIVE_MESSAGE_NO_ATTACKS = i18n.translate(
   'xpack.securitySolution.reports.aiValue.executiveMessageNoAttacks',
@@ -256,62 +136,134 @@ export const EXECUTIVE_MESSAGE_NO_ATTACKS = i18n.translate(
   }
 );
 
-export const EXECUTIVE_MESSAGE_SECOND = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.executiveMessageSecond',
+export const THREATS_DETECTED = i18n.translate(
+  'xpack.securitySolution.aiValue.threatsDetectedTitle',
+  {
+    defaultMessage: 'Real threats detected',
+  }
+);
+
+export const KEY_INSIGHT = i18n.translate('xpack.securitySolution.aiValue.keyInsight', {
+  defaultMessage: 'Key Insight',
+});
+
+export const MINIMIZE_ALERT_FATIGUE = i18n.translate(
+  'xpack.securitySolution.aiValue.minimizeFatigue',
   {
     defaultMessage:
-      'The result: leaner SOC operations, increased threat coverage, and more time for analysts to focus on what matters most — investigating real threats.',
+      'Elastic’s Attack Discovery is effectively minimizing alert fatigue by filtering out the vast majority of noise, only escalating credible threats, and maintaining a very low false positive rate. This allows security teams to spend their time on true investigations instead of sifting through irrelevant alerts',
   }
 );
 
-export const EXECUTIVE_COST_SAVINGS_DESC = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.executiveCostSavingsDesc',
-  {
-    defaultMessage: 'cost savings from automated alert processing',
-  }
-);
-
-export const EXECUTIVE_ALERT_FILTERING_DESC = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.executiveAlertFilteringDesc',
-  {
-    defaultMessage: 'alert filtering rate, reducing analyst fatigue and noise',
-  }
-);
-
-export const EXECUTIVE_HOURS_SAVED_DESC = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.executiveHoursSavedDesc',
-  {
-    defaultMessage: 'analyst hours saved',
-  }
-);
-
-export const EXECUTIVE_INCREASE = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.executiveIncrease',
-  {
-    defaultMessage: 'increase',
-  }
-);
-
-export const EXECUTIVE_DECREASE = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.executiveDecrease',
-  {
-    defaultMessage: 'decrease',
-  }
-);
-
-export const EXECUTIVE_THREATS_DETECTED_DESC = (isIncrease: boolean) =>
-  i18n.translate('xpack.securitySolution.reports.aiValue.executiveThreatsDetectedDesc', {
-    defaultMessage: '{creaseType} in real threats detected, improving detection coverage',
-    values: { creaseType: isIncrease ? EXECUTIVE_INCREASE : EXECUTIVE_DECREASE },
+export const FILTERED_ALERTS_1 = ({ percentage, count }: { percentage: string; count: string }) =>
+  i18n.translate('xpack.securitySolution.reports.aiValue.filteredAlerts1', {
+    defaultMessage: 'High automation efficiency: {percentage} of alerts ({count})',
+    values: { percentage, count },
   });
 
-export const EXECUTIVE_THREATS_DETECTED_DESC_NO_COMPARE = i18n.translate(
-  'xpack.securitySolution.reports.aiValue.executiveThreatsDetectedDescNoCompare',
+export const FILTERED_ALERTS_2 = i18n.translate('xpack.securitySolution.aiValue.filteredAlerts2', {
+  defaultMessage:
+    ' were automatically filtered out by AI, meaning analysts didn’t have to review them manually. This drastically cuts down noise and routine triage work',
+});
+
+export const ESCALATED_ALERTS_1 = ({ percentage, count }: { percentage: string; count: string }) =>
+  i18n.translate('xpack.securitySolution.reports.aiValue.escalatedAlerts1', {
+    defaultMessage: 'Focused escalations: Only {percentage} of alerts ({count})',
+    values: { percentage, count },
+  });
+
+export const ESCALATED_ALERTS_2 = i18n.translate(
+  'xpack.securitySolution.aiValue.escalatedAlerts2',
   {
-    defaultMessage: 'real threats detected, improving detection coverage',
+    defaultMessage:
+      ' were escalated for analyst review — highlighting that Elastic’s Attack Discovery surfaces only the alerts that matter and are more likely tied to actual threats',
   }
 );
-
 export const AI_FILTERED = i18n.translate('xpack.securitySolution.reports.aiValue.aiFiltered', {
   defaultMessage: 'AI filtered',
 });
+
+export const COST_CALCULATIONS = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.costCalculations',
+  {
+    defaultMessage: 'Cost calculations',
+  }
+);
+
+export const COST_CALCULATION = ({
+  minutesPerAlert,
+  analystHourlyRate,
+}: {
+  minutesPerAlert: number;
+  analystHourlyRate: number;
+}) =>
+  i18n.translate('xpack.securitySolution.reports.aiValue.costCalculation', {
+    defaultMessage:
+      'Value is calculated by multiplying the total number of alerts by {minutesPerAlert} minutes each and then multiplying the result by a ${analystHourlyRate} per hour analyst rate.',
+    values: { minutesPerAlert, analystHourlyRate },
+  });
+
+export const CHANGE_RATE = i18n.translate('xpack.securitySolution.reports.aiValue.changeRate', {
+  defaultMessage: 'Change rate in advanced settings',
+});
+
+export const EDIT_TITLE = i18n.translate('xpack.securitySolution.reports.aiValue.editTitle', {
+  defaultMessage: 'Edit title inline',
+});
+
+export const LEGAL_DISCLAIMER = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.legalDisclaimer',
+  {
+    defaultMessage:
+      'The savings, figures, and estimates presented herein are for illustrative and informational purposes only. Individual results may vary significantly. This information is not, and should not be taken as, legal or financial advice to any person or company. Before making any decisions, consult with a qualified advisor. Elastic accepts no liability or responsibility whatsoever for any losses or liabilities allegedly arising from the use of this information.',
+  }
+);
+
+export const EXECUTIVE_SUMMARY_SUBTITLE = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.executiveSummarySubtitle',
+  {
+    defaultMessage: 'Elastic AI SOC Engine continues to deliver measurable ROI: ',
+  }
+);
+
+export const EXECUTIVE_SAVINGS_SUMMARY = ({
+  costSavings,
+  hoursSaved,
+}: {
+  costSavings: string;
+  hoursSaved: string;
+}) =>
+  i18n.translate('xpack.securitySolution.reports.aiValue.executiveSavingsSummary', {
+    defaultMessage: '{costSavings} cost savings and {hoursSaved} analyst hours saved',
+    values: {
+      costSavings,
+      hoursSaved,
+    },
+  });
+
+export const EXECUTIVE_SUMMARY_MAIN_TEXT = ({
+  timeRange,
+  minutesPerAlert,
+  analystRate,
+}: {
+  timeRange: string;
+  minutesPerAlert: number;
+  analystRate: number;
+}) =>
+  i18n.translate('xpack.securitySolution.reports.aiValue.executiveSummaryMainText', {
+    defaultMessage:
+      ' over the last {timeRange} days — significantly increasing threat detection coverage. These results are based on automating alert triage, using an average review time of {minutesPerAlert} minutes per alert and a ${analystRate}/hour analyst rate.',
+    values: {
+      timeRange,
+      minutesPerAlert,
+      analystRate,
+    },
+  });
+
+export const EXECUTIVE_SUMMARY_SECONDARY_TEXT = i18n.translate(
+  'xpack.securitySolution.reports.aiValue.executiveSummarySecondaryText',
+  {
+    defaultMessage:
+      'By reducing the manual burden of high-volume alert review, the AI SOC enhances efficiency, lowers operational costs, and enables teams to focus on higher-value security work. At the same time, it increases threat detection coverage — helping organizations respond faster, with fewer resources.',
+  }
+);

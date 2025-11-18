@@ -18,10 +18,15 @@ import type {
   GetStoppedPartitionResult,
   GetDatafeedResultsChartDataResult,
   GetAnomaliesTableDataResult,
+  ViewByResponse,
 } from '../../../../common/types/results';
 import type { JobId } from '../../../../common/types/anomaly_detection_jobs';
 import type { PartitionFieldsConfig } from '../../../../common/types/storage';
-import type { ExplorerChartsData } from '../../../../common/types/results';
+import type {
+  ExplorerChartsData,
+  GetTopInfluencersRequest,
+  InfluencersByFieldResponse,
+} from '../../../../common/types/results';
 
 import { useMlKibana } from '../../contexts/kibana';
 import type { HttpService } from '../http_service';
@@ -235,6 +240,56 @@ export const resultsApiProvider = (httpService: HttpService) => ({
     });
     return httpService.http$<{ success: boolean; records: MlAnomalyRecordDoc[] }>({
       path: `${ML_INTERNAL_BASE_PATH}/results/anomaly_records`,
+      method: 'POST',
+      body,
+      version: '1',
+    });
+  },
+
+  getTopInfluencers(payload: GetTopInfluencersRequest) {
+    const body = JSON.stringify(payload);
+    return httpService.http<InfluencersByFieldResponse>({
+      path: `${ML_INTERNAL_BASE_PATH}/results/top_influencers`,
+      method: 'POST',
+      body,
+      version: '1',
+    });
+  },
+
+  getScoresByBucket(payload: {
+    jobIds: string[];
+    earliestMs: number;
+    latestMs: number;
+    intervalMs: number;
+    perPage?: number;
+    fromPage?: number;
+    swimLaneSeverity?: Array<{ min: number; max?: number }>;
+  }) {
+    const body = JSON.stringify(payload);
+    return httpService.http<ViewByResponse>({
+      path: `${ML_INTERNAL_BASE_PATH}/results/view_by/scores_by_bucket`,
+      method: 'POST',
+      body,
+      version: '1',
+    });
+  },
+
+  getInfluencerValueMaxScoreByTime(payload: {
+    jobIds: string[];
+    influencerFieldName: string;
+    influencerFieldValues?: string[];
+    earliestMs: number;
+    latestMs: number;
+    intervalMs: number;
+    maxResults?: number;
+    perPage?: number;
+    fromPage?: number;
+    influencersFilterQuery?: unknown;
+    swimLaneSeverity?: Array<{ min: number; max?: number }>;
+  }) {
+    const body = JSON.stringify(payload);
+    return httpService.http<ViewByResponse>({
+      path: `${ML_INTERNAL_BASE_PATH}/results/view_by/influencer_values_by_time`,
       method: 'POST',
       body,
       version: '1',

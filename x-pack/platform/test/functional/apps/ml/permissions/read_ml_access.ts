@@ -6,7 +6,7 @@
  */
 
 import { USER } from '../../../services/ml/security_common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -398,10 +398,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await ml.testExecution.logTestStep(
               'should display components of the file details page'
             );
-            await ml.dataVisualizerFileBased.assertFileTitle(expectedUploadFileTitle);
-            await ml.dataVisualizerFileBased.assertFileContentPanelExists();
-            await ml.dataVisualizerFileBased.assertSummaryPanelExists();
-            await ml.dataVisualizerFileBased.assertFileStatsPanelExists();
+            await ml.dataVisualizerFileBased.assertFileTitle(expectedUploadFileTitle, 0);
+            await ml.dataVisualizerFileBased.assertFilePreviewPanelExists(0);
+            await ml.dataVisualizerFileBased.setIndexName('test');
             await ml.dataVisualizerFileBased.assertImportButtonEnabled(false);
           });
           it('should display elements on Settings home page correctly', async () => {

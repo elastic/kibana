@@ -6,12 +6,12 @@
  */
 
 import { INDEX_PLACEHOLDER } from '../constants';
-import {
+import type {
   IngestDataCodeDefinition,
   SearchCodeDefinition,
   SearchCodeSnippetFunction,
 } from '../types';
-import { CreateIndexLanguageExamples } from './types';
+import type { CreateIndexLanguageExamples } from './types';
 
 export const ConsoleCreateIndexExamples: CreateIndexLanguageExamples = {
   default: {

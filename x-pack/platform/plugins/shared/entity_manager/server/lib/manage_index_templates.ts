@@ -5,17 +5,21 @@
  * 2.0.
  */
 
-import { EntityDefinition } from '@kbn/entities-schema';
-import {
+import type { EntityDefinition } from '@kbn/entities-schema';
+import type {
   ClusterPutComponentTemplateRequest,
   IndicesPutIndexTemplateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { entitiesLatestBaseComponentTemplateConfig } from '../templates/components/base_latest';
+import { entitiesHistoryBaseComponentTemplateConfig } from '../templates/components/base_history';
 import { entitiesEntityComponentTemplateConfig } from '../templates/components/entity';
 import { entitiesEventComponentTemplateConfig } from '../templates/components/event';
 import { retryTransientEsErrors } from './entities/helpers/retry';
 import { generateEntitiesLatestIndexTemplateConfig } from './entities/templates/entities_latest_template';
+import { generateEntitiesHistoryIndexTemplateConfig } from './entities/templates/entities_history_template';
+import { generateEntitiesResetIndexTemplateConfig } from './entities/templates/entities_reset_template';
+import { generateEntitiesUpdatesIndexTemplateConfig } from './entities/templates/entities_updates_template';
 
 interface TemplateManagementOptions {
   esClient: ElasticsearchClient;
@@ -32,25 +36,32 @@ interface ComponentManagementOptions {
 export const installEntityManagerTemplates = async ({
   esClient,
   logger,
+  isServerless,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
+  isServerless: boolean;
 }) => {
   await Promise.all([
     upsertComponent({
       esClient,
       logger,
-      component: entitiesLatestBaseComponentTemplateConfig,
+      component: removeIlmInServerless(entitiesLatestBaseComponentTemplateConfig, isServerless),
     }),
     upsertComponent({
       esClient,
       logger,
-      component: entitiesEventComponentTemplateConfig,
+      component: removeIlmInServerless(entitiesHistoryBaseComponentTemplateConfig, isServerless),
     }),
     upsertComponent({
       esClient,
       logger,
-      component: entitiesEntityComponentTemplateConfig,
+      component: removeIlmInServerless(entitiesEventComponentTemplateConfig, isServerless),
+    }),
+    upsertComponent({
+      esClient,
+      logger,
+      component: removeIlmInServerless(entitiesEntityComponentTemplateConfig, isServerless),
     }),
   ]);
 };
@@ -73,15 +84,29 @@ export async function upsertTemplate({ esClient, template, logger }: TemplateMan
     throw error;
   }
 }
-
 export async function createAndInstallTemplates(
   esClient: ElasticsearchClient,
   definition: EntityDefinition,
   logger: Logger
 ): Promise<Array<{ type: 'template'; id: string }>> {
-  const template = generateEntitiesLatestIndexTemplateConfig(definition);
-  await upsertTemplate({ esClient, template, logger });
-  return [{ type: 'template', id: template.name }];
+  const latestTemplate = generateEntitiesLatestIndexTemplateConfig(definition);
+  const historyTemplate = generateEntitiesHistoryIndexTemplateConfig(definition);
+  const resetTemplate = generateEntitiesResetIndexTemplateConfig(definition);
+  const updatesTemplate = generateEntitiesUpdatesIndexTemplateConfig(definition);
+
+  await Promise.all([
+    upsertTemplate({ esClient, template: latestTemplate, logger }),
+    upsertTemplate({ esClient, template: historyTemplate, logger }),
+    upsertTemplate({ esClient, template: resetTemplate, logger }),
+    upsertTemplate({ esClient, template: updatesTemplate, logger }),
+  ]);
+
+  return [
+    { type: 'template', id: latestTemplate.name },
+    { type: 'template', id: historyTemplate.name },
+    { type: 'template', id: resetTemplate.name },
+    { type: 'template', id: updatesTemplate.name },
+  ];
 }
 
 export async function deleteTemplate({ esClient, name, logger }: DeleteTemplateOptions) {
@@ -128,4 +153,17 @@ export async function upsertComponent({ esClient, component, logger }: Component
     logger.error(`Error updating entity manager component template: ${error.message}`);
     throw error;
   }
+}
+
+export function removeIlmInServerless(
+  component: ClusterPutComponentTemplateRequest,
+  isServerless: boolean
+): ClusterPutComponentTemplateRequest {
+  if (isServerless) {
+    component.template.lifecycle = undefined;
+    if (component.template.settings?.index !== undefined) {
+      component.template.settings.index.lifecycle = undefined;
+    }
+  }
+  return component;
 }

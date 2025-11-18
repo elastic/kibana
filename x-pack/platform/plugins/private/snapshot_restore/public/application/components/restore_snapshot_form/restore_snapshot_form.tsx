@@ -16,8 +16,9 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { FEATURE_STATES_NONE_OPTION } from '../../../../common/constants';
-import { SnapshotDetails, RestoreSettings } from '../../../../common/types';
-import { RestoreValidation, validateRestore } from '../../services/validation';
+import type { SnapshotDetails, RestoreSettings } from '../../../../common/types';
+import type { RestoreValidation } from '../../services/validation';
+import { validateRestore } from '../../services/validation';
 import {
   RestoreSnapshotStepLogistics,
   RestoreSnapshotStepSettings,

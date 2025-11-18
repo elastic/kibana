@@ -6,11 +6,9 @@
  */
 
 import { parseEsqlQuery } from '@kbn/securitysolution-utils';
-import {
-  RuleMigrationTranslationResultEnum,
-  type RuleMigrationTranslationResult,
-  type UpdateRuleMigrationRule,
-} from '../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { MigrationTranslationResult } from '../../../../../../common/siem_migrations/model/common.gen';
+import { MigrationTranslationResultEnum } from '../../../../../../common/siem_migrations/model/common.gen';
+import { type UpdateRuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { InternalUpdateRuleMigrationRule } from '../../types';
 
 export const isValidEsqlQuery = (esqlQuery: string) => {
@@ -31,13 +29,13 @@ export const isValidEsqlQuery = (esqlQuery: string) => {
 
 export const convertEsqlQueryToTranslationResult = (
   esqlQuery: string
-): RuleMigrationTranslationResult | undefined => {
+): MigrationTranslationResult | undefined => {
   if (esqlQuery === '') {
-    return RuleMigrationTranslationResultEnum.untranslatable;
+    return MigrationTranslationResultEnum.untranslatable;
   }
   return isValidEsqlQuery(esqlQuery)
-    ? RuleMigrationTranslationResultEnum.full
-    : RuleMigrationTranslationResultEnum.partial;
+    ? MigrationTranslationResultEnum.full
+    : MigrationTranslationResultEnum.partial;
 };
 
 export const transformToInternalUpdateRuleMigrationData = (

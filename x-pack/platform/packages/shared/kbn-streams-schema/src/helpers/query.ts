@@ -5,46 +5,56 @@
  * 2.0.
  */
 
+import { conditionToESQL } from '@kbn/streamlang';
 import { BasicPrettyPrinter, Builder } from '@kbn/esql-ast';
-import { StreamQuery } from '../queries';
+import type { StreamQuery } from '../queries';
 
 export const buildEsqlQuery = (
   indices: string[],
   query: StreamQuery,
   includeMetadata: boolean = false
 ): string => {
-  const esqlQuery = Builder.expression.query([
-    Builder.command({
-      name: 'from',
-      args: [
-        Builder.expression.source.node({
-          index: indices.join(','),
-          sourceType: 'index',
-        }),
-        ...(includeMetadata
-          ? [
-              Builder.option({
-                name: 'metadata',
-                args: [
-                  Builder.expression.column({
-                    args: [Builder.identifier({ name: '_id' })],
-                  }),
-                  Builder.expression.column({
-                    args: [Builder.identifier('_source')],
-                  }),
-                ],
-              }),
-            ]
-          : []),
-      ],
-    }),
-    Builder.command({
-      name: 'where',
-      args: [
-        Builder.expression.func.call('kql', [Builder.expression.literal.string(query.kql.query)]),
-      ],
-    }),
+  const fromCommand = Builder.command({
+    name: 'from',
+    args: [
+      Builder.expression.source.index(indices.join(',')),
+      ...(includeMetadata
+        ? [
+            Builder.option({
+              name: 'METADATA',
+              args: [
+                Builder.expression.column({
+                  args: [Builder.identifier({ name: '_id' })],
+                }),
+                Builder.expression.column({
+                  args: [Builder.identifier('_source')],
+                }),
+              ],
+            }),
+          ]
+        : []),
+    ],
+  });
+
+  const kqlQuery = Builder.expression.func.call('KQL', [
+    Builder.expression.literal.string(query.kql.query),
   ]);
 
-  return BasicPrettyPrinter.expression(esqlQuery);
+  const whereCondition = query.feature
+    ? Builder.expression.func.binary('and', [
+        kqlQuery,
+        Builder.expression.literal.string(conditionToESQL(query.feature.filter), {
+          unquoted: true,
+        }),
+      ])
+    : kqlQuery;
+
+  const whereCommand = Builder.command({
+    name: 'where',
+    args: [whereCondition],
+  });
+
+  const esqlQuery = Builder.expression.query([fromCommand, whereCommand]);
+
+  return BasicPrettyPrinter.print(esqlQuery);
 };

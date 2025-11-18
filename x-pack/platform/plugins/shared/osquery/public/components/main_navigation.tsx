@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
+import { i18n } from '@kbn/i18n';
 import { navCss } from './layouts/default';
 import { useRouterNavigate } from '../common/lib/kibana';
 import { ManageIntegrationLink } from './manage_integration_link';
@@ -22,6 +23,9 @@ enum Section {
 export const MainNavigation = () => {
   const location = useLocation();
   const section = useMemo(() => location.pathname.split('/')[1] ?? 'overview', [location.pathname]);
+  const feedbackButtonLabel = i18n.translate('xpack.osquery.appNavigation.giveFeedbackButton', {
+    defaultMessage: 'Give feedback',
+  });
 
   return (
     <div css={navCss}>
@@ -58,14 +62,14 @@ export const MainNavigation = () => {
           <EuiFlexGroup gutterSize="s" direction="row">
             <EuiFlexItem>
               <EuiButtonEmpty
-                iconType="popout"
                 href="https://ela.st/osquery-feedback"
                 target="_blank"
+                aria-label={feedbackButtonLabel}
+                iconType="popout"
+                iconSide="right"
+                color="primary"
               >
-                <FormattedMessage
-                  id="xpack.osquery.appNavigation.sendFeedbackButton"
-                  defaultMessage="Send feedback"
-                />
+                {feedbackButtonLabel}
               </EuiButtonEmpty>
             </EuiFlexItem>
             <ManageIntegrationLink />

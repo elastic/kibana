@@ -11,11 +11,7 @@ import { init as initMemoryCharts } from './memory';
 import { init as initNetworkCharts } from './network';
 import { logs } from './logs';
 import { charts as kubernetesNodeCharts } from '../../../kubernetes/node/metrics';
-import {
-  DataSchemaFormat,
-  type ChartsConfigMap,
-  type FormulasCatalog,
-} from '../../../shared/metrics/types';
+import { type ChartsConfigMap, type FormulasCatalog } from '../../../shared/metrics/types';
 import type { HostFormulas } from '../formulas';
 
 export const initCharts = (formulas: FormulasCatalog<HostFormulas>) => {
@@ -25,9 +21,7 @@ export const initCharts = (formulas: FormulasCatalog<HostFormulas>) => {
     memory: initMemoryCharts(formulas),
     network: initNetworkCharts(formulas),
     logs,
-    ...(formulas.schema === DataSchemaFormat.ECS
-      ? { kubernetesNode: kubernetesNodeCharts.node }
-      : {}),
+    ...(formulas.schema === 'ecs' ? { kubernetesNode: kubernetesNodeCharts.node } : {}),
   } satisfies ChartsConfigMap;
 };
 export type HostCharts = ReturnType<typeof initCharts>;

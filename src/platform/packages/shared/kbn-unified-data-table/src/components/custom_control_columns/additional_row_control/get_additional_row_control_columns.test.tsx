@@ -14,7 +14,7 @@ import React from 'react';
 import { UnifiedDataTableContext } from '../../../table_context';
 import { dataTableContextComplexMock } from '../../../../__mocks__/table_context';
 import { userEvent } from '@testing-library/user-event';
-import { RowControlColumn } from '@kbn/discover-utils';
+import type { RowControlColumn } from '@kbn/discover-utils';
 
 const setup = (rowControlColumns: RowControlColumn[]) => {
   const columns = getAdditionalRowControlColumns(rowControlColumns);

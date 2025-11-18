@@ -24,7 +24,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import { InferencePipeline, TrainedModelState } from '../../../../../../common/types/pipelines';
+import type { InferencePipeline } from '../../../../../../common/types/pipelines';
+import { TrainedModelState } from '../../../../../../common/types/pipelines';
 import { CANCEL_BUTTON_LABEL, DELETE_BUTTON_LABEL } from '../../../../shared/constants';
 import { HttpLogic } from '../../../../shared/http';
 import { ML_MANAGE_TRAINED_MODELS_PATH } from '../../../routes';

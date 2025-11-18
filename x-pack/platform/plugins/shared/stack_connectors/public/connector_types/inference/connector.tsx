@@ -11,7 +11,7 @@ import { InferenceServiceFormFields } from '@kbn/inference-endpoint-ui-common';
 import { type ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { useConnectorContext } from '@kbn/triggers-actions-ui-plugin/public';
-import { SolutionView } from '@kbn/spaces-plugin/common';
+import type { SolutionView } from '@kbn/spaces-plugin/common';
 
 const solutionMap = {
   observability: 'oblt',
@@ -60,10 +60,16 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
 
   return (
     <InferenceServiceFormFields
+      config={{
+        isEdit,
+        enforceAdaptiveAllocations: isServerless,
+        currentSolution,
+        allowContextWindowLength: true,
+        enableCustomHeaders: true,
+        allowTemperature: true,
+        reenterSecretsOnEdit: true,
+      }}
       http={http}
-      isEdit={isEdit}
-      enforceAdaptiveAllocations={isServerless}
-      currentSolution={currentSolution}
       toasts={toasts}
     />
   );

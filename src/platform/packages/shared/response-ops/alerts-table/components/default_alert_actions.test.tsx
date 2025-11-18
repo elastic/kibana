@@ -10,7 +10,7 @@
 import React from 'react';
 import { DefaultAlertActions } from './default_alert_actions';
 import { render, screen } from '@testing-library/react';
-import { AdditionalContext, AlertActionsProps, RenderContext } from '../types';
+import type { AdditionalContext, AlertActionsProps, RenderContext } from '../types';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 import { createPartialObjectMock } from '../utils/test';
@@ -63,7 +63,7 @@ const context = createPartialObjectMock<RenderContext<AdditionalContext>>({
 
 const TestComponent = (_props: AlertActionsProps) => (
   <AlertsTableContextProvider value={context}>
-    <DefaultAlertActions {..._props} />
+    <DefaultAlertActions<AdditionalContext> {..._props} />
   </AlertsTableContextProvider>
 );
 

@@ -19,29 +19,32 @@ import { ProtectionUpdatesLayout } from '../protection_updates/protection_update
 import { PolicySettingsLayout } from '../policy_settings_layout';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import {
-  getPolicyDetailPath,
-  getPolicyEventFiltersPath,
-  getPolicyHostIsolationExceptionsPath,
-  getPolicyTrustedAppsPath,
+  getBlocklistsListPath,
   getEventFiltersListPath,
   getHostIsolationExceptionsListPath,
-  getTrustedAppsListPath,
-  getPolicyDetailsArtifactsListPath,
-  getBlocklistsListPath,
   getPolicyBlocklistsPath,
+  getPolicyDetailPath,
+  getPolicyDetailsArtifactsListPath,
+  getPolicyEventFiltersPath,
+  getPolicyHostIsolationExceptionsPath,
   getPolicyProtectionUpdatesPath,
+  getPolicyTrustedAppsPath,
+  getPolicyTrustedDevicesPath,
+  getTrustedAppsListPath,
+  getTrustedDevicesListPath,
 } from '../../../../common/routing';
 import { useHttp, useToasts } from '../../../../../common/lib/kibana';
 import { ManagementPageLoader } from '../../../../components/management_page_loader';
 import {
+  isOnBlocklistsView,
   isOnHostIsolationExceptionsView,
   isOnPolicyEventFiltersView,
   isOnPolicyFormView,
   isOnPolicyTrustedAppsView,
-  isOnBlocklistsView,
+  isOnPolicyTrustedDevicesView,
+  isOnProtectionUpdatesView,
   policyDetails,
   policyIdFromParams,
-  isOnProtectionUpdatesView,
 } from '../../store/policy_details/selectors';
 import { PolicyArtifactsLayout } from '../artifacts/layout/policy_artifacts_layout';
 import { usePolicyDetailsSelector } from '../policy_hooks';
@@ -57,8 +60,11 @@ import { SEARCHABLE_FIELDS as TRUSTED_APPS_SEARCHABLE_FIELDS } from '../../../tr
 import { SEARCHABLE_FIELDS as EVENT_FILTERS_SEARCHABLE_FIELDS } from '../../../event_filters/constants';
 import { SEARCHABLE_FIELDS as HOST_ISOLATION_EXCEPTIONS_SEARCHABLE_FIELDS } from '../../../host_isolation_exceptions/constants';
 import { SEARCHABLE_FIELDS as BLOCKLISTS_SEARCHABLE_FIELDS } from '../../../blocklist/constants';
+import { SEARCHABLE_FIELDS as TRUSTED_DEVICES_SEARCHABLE_FIELDS } from '../../../trusted_devices/constants';
 import type { PolicyDetailsRouteState } from '../../../../../../common/endpoint/types';
 import { useHostIsolationExceptionsAccess } from '../../../../hooks/artifacts/use_host_isolation_exceptions_access';
+import { TrustedDevicesApiClient } from '../../../trusted_devices/service/api_client';
+import { POLICY_ARTIFACT_TRUSTED_DEVICES_LABELS } from './trusted_devices_translations';
 
 enum PolicyTabKeys {
   SETTINGS = 'settings',
@@ -67,6 +73,7 @@ enum PolicyTabKeys {
   HOST_ISOLATION_EXCEPTIONS = 'hostIsolationExceptions',
   BLOCKLISTS = 'blocklists',
   PROTECTION_UPDATES = 'protectionUpdates',
+  TRUSTED_DEVICES = 'trustedDevices',
 }
 
 interface PolicyTab {
@@ -82,6 +89,7 @@ export const PolicyTabs = React.memo(() => {
 
   const isInSettingsTab = usePolicyDetailsSelector(isOnPolicyFormView);
   const isInTrustedAppsTab = usePolicyDetailsSelector(isOnPolicyTrustedAppsView);
+  const isInTrustedDevicesTab = usePolicyDetailsSelector(isOnPolicyTrustedDevicesView);
   const isInEventFiltersTab = usePolicyDetailsSelector(isOnPolicyEventFiltersView);
   const isInHostIsolationExceptionsTab = usePolicyDetailsSelector(isOnHostIsolationExceptionsView);
   const isInBlocklistsTab = usePolicyDetailsSelector(isOnBlocklistsView);
@@ -124,15 +132,17 @@ export const PolicyTabs = React.memo(() => {
     canWriteHostIsolationExceptions,
     canReadBlocklist,
     canWriteBlocklist,
+    canReadTrustedDevices,
+    canWriteTrustedDevices,
     loading: isPrivilegesLoading,
   } = useUserPrivileges().endpointPrivileges;
   const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
 
-  const isProtectionUpdatesFeatureEnabled = useIsExperimentalFeatureEnabled(
-    'protectionUpdatesEnabled'
-  );
+  const isTrustedDevicesFeatureEnabled = useIsExperimentalFeatureEnabled('trustedDevices');
+
   const isEnterprise = useLicense().isEnterprise();
-  const isProtectionUpdatesEnabled = isEnterprise && isProtectionUpdatesFeatureEnabled;
+  const isTrustedDevicesEnabled =
+    isEnterprise && isTrustedDevicesFeatureEnabled && canReadTrustedDevices;
 
   const getHostIsolationExceptionsApiClientInstance = useCallback(
     () => HostIsolationExceptionsApiClient.getInstance(http),
@@ -161,7 +171,8 @@ export const PolicyTabs = React.memo(() => {
       (isInTrustedAppsTab && !canReadTrustedApplications) ||
       (isInEventFiltersTab && !canReadEventFilters) ||
       redirectHostIsolationException ||
-      (isInBlocklistsTab && !canReadBlocklist)
+      (isInBlocklistsTab && !canReadBlocklist) ||
+      (isInTrustedDevicesTab && !canReadTrustedDevices)
     ) {
       history.replace(getPolicyDetailPath(policyId));
       toasts.addDanger(
@@ -176,6 +187,7 @@ export const PolicyTabs = React.memo(() => {
     canReadEventFilters,
     canReadHostIsolationExceptions,
     canReadTrustedApplications,
+    canReadTrustedDevices,
     hasAccessToHostIsolationExceptions,
     history,
     isHostIsolationExceptionsAccessLoading,
@@ -184,6 +196,7 @@ export const PolicyTabs = React.memo(() => {
     isInHostIsolationExceptionsTab,
     isInProtectionUpdatesTab,
     isInTrustedAppsTab,
+    isInTrustedDevicesTab,
     isPrivilegesLoading,
     policyId,
     toasts,
@@ -191,6 +204,11 @@ export const PolicyTabs = React.memo(() => {
 
   const getTrustedAppsApiClientInstance = useCallback(
     () => TrustedAppsApiClient.getInstance(http),
+    [http]
+  );
+
+  const getTrustedDevicesApiClientInstance = useCallback(
+    () => TrustedDevicesApiClient.getInstance(http),
     [http]
   );
 
@@ -211,6 +229,17 @@ export const PolicyTabs = React.memo(() => {
         <FormattedMessage
           id="xpack.securitySolution.endpoint.policy.trustedApps.list.about"
           defaultMessage="There {count, plural, one {is} other {are}} {count} trusted {count, plural, =1 {application} other {applications}} associated with this policy. Click here to {link}"
+          values={{ count, link }}
+        />
+      ),
+    };
+
+    const trustedDevicesLabels = {
+      ...POLICY_ARTIFACT_TRUSTED_DEVICES_LABELS,
+      layoutAboutMessage: (count: number, link: React.ReactElement): React.ReactNode => (
+        <FormattedMessage
+          id="xpack.securitySolution.endpoint.policy.trustedDevices.list.about"
+          defaultMessage="There {count, plural, one {is} other {are}} {count} trusted {count, plural, =1 {device} other {devices}} associated with this policy. Click here to {link}"
           values={{ count, link }}
         />
       ),
@@ -293,6 +322,32 @@ export const PolicyTabs = React.memo(() => {
             'data-test-subj': 'policyTrustedAppsTab',
           }
         : undefined,
+      [PolicyTabKeys.TRUSTED_DEVICES]: isTrustedDevicesEnabled
+        ? {
+            id: PolicyTabKeys.TRUSTED_DEVICES,
+            name: i18n.translate(
+              'xpack.securitySolution.endpoint.policy.details.tabs.trustedDevices',
+              {
+                defaultMessage: 'Trusted devices',
+              }
+            ),
+            content: (
+              <>
+                <EuiSpacer />
+                <PolicyArtifactsLayout
+                  policyItem={policyItem}
+                  labels={trustedDevicesLabels}
+                  getExceptionsListApiClient={getTrustedDevicesApiClientInstance}
+                  searchableFields={TRUSTED_DEVICES_SEARCHABLE_FIELDS}
+                  getArtifactPath={getTrustedDevicesListPath}
+                  getPolicyArtifactsPath={getPolicyTrustedDevicesPath}
+                  canWriteArtifact={canWriteTrustedDevices}
+                />
+              </>
+            ),
+            'data-test-subj': 'policyTrustedDevicesTab',
+          }
+        : undefined,
       [PolicyTabKeys.EVENT_FILTERS]: canReadEventFilters
         ? {
             id: PolicyTabKeys.EVENT_FILTERS,
@@ -370,7 +425,7 @@ export const PolicyTabs = React.memo(() => {
           }
         : undefined,
 
-      [PolicyTabKeys.PROTECTION_UPDATES]: isProtectionUpdatesEnabled
+      [PolicyTabKeys.PROTECTION_UPDATES]: isEnterprise
         ? {
             id: PolicyTabKeys.PROTECTION_UPDATES,
             name: i18n.translate(
@@ -398,6 +453,9 @@ export const PolicyTabs = React.memo(() => {
     canReadTrustedApplications,
     getTrustedAppsApiClientInstance,
     canWriteTrustedApplications,
+    isTrustedDevicesEnabled,
+    getTrustedDevicesApiClientInstance,
+    canWriteTrustedDevices,
     canReadEventFilters,
     getEventFiltersApiClientInstance,
     canWriteEventFilters,
@@ -407,7 +465,7 @@ export const PolicyTabs = React.memo(() => {
     canReadBlocklist,
     getBlocklistsApiClientInstance,
     canWriteBlocklist,
-    isProtectionUpdatesEnabled,
+    isEnterprise,
   ]);
 
   // convert tabs object into an array EuiTabbedContent can understand
@@ -424,6 +482,8 @@ export const PolicyTabs = React.memo(() => {
       selectedTab = tabs[PolicyTabKeys.SETTINGS];
     } else if (isInTrustedAppsTab) {
       selectedTab = tabs[PolicyTabKeys.TRUSTED_APPS];
+    } else if (isInTrustedDevicesTab) {
+      selectedTab = tabs[PolicyTabKeys.TRUSTED_DEVICES];
     } else if (isInEventFiltersTab) {
       selectedTab = tabs[PolicyTabKeys.EVENT_FILTERS];
     } else if (isInHostIsolationExceptionsTab) {
@@ -439,6 +499,7 @@ export const PolicyTabs = React.memo(() => {
     tabs,
     isInSettingsTab,
     isInTrustedAppsTab,
+    isInTrustedDevicesTab,
     isInEventFiltersTab,
     isInHostIsolationExceptionsTab,
     isInBlocklistsTab,
@@ -461,6 +522,9 @@ export const PolicyTabs = React.memo(() => {
           break;
         case PolicyTabKeys.TRUSTED_APPS:
           path = getPolicyTrustedAppsPath(policyId);
+          break;
+        case PolicyTabKeys.TRUSTED_DEVICES:
+          path = getPolicyTrustedDevicesPath(policyId);
           break;
         case PolicyTabKeys.EVENT_FILTERS:
           path = getPolicyEventFiltersPath(policyId);

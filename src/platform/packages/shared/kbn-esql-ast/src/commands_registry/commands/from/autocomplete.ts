@@ -6,8 +6,9 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLCommand } from '../../../types';
-import { pipeCompleteItem, commaCompleteItem } from '../../complete_items';
+import { SOURCES_TYPES } from '@kbn/esql-types';
+import type { ESQLAstAllCommands } from '../../../types';
+import { pipeCompleteItem, commaCompleteItem, subqueryCompleteItem } from '../../complete_items';
 import {
   getSourcesFromCommands,
   getSourceSuggestions,
@@ -16,74 +17,166 @@ import {
 import { metadataSuggestion, getMetadataSuggestions } from '../../options/metadata';
 import { getRecommendedQueriesSuggestions } from '../../options/recommended_queries';
 import { withinQuotes } from '../../../definitions/utils/autocomplete/helpers';
-import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
+import type { ICommandCallbacks } from '../../types';
+import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { getOverlapRange, isRestartingExpression } from '../../../definitions/utils/shared';
+import { isSubQuery, isSource } from '../../../ast/is';
+
+const SOURCE_TYPE_INDEX = 'index';
+const METADATA_KEYWORD = 'METADATA';
+const EMPTY_EXTENSIONS = { recommendedFields: [], recommendedQueries: [] };
+const PIPE_SORT_TEXT = '0';
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition?: number
 ): Promise<ISuggestionItem[]> {
   const innerText = query.substring(0, cursorPosition);
+
   if (withinQuotes(innerText) || !callbacks?.getByType) {
     return [];
   }
 
-  const suggestions: ISuggestionItem[] = [];
+  return handleFromAutocomplete(query, command, callbacks, context, cursorPosition);
+}
 
-  const indexes = getSourcesFromCommands([command], 'index');
+/**
+ * Routes to appropriate suggestion scenario based on cursor position and indexes.
+ */
+async function handleFromAutocomplete(
+  query: string,
+  command: ESQLAstAllCommands,
+  callbacks?: ICommandCallbacks,
+  context?: ICommandContext,
+  cursorPosition?: number
+): Promise<ISuggestionItem[]> {
+  const cursorPos = cursorPosition ?? query.length;
+  const innerText = query.substring(0, cursorPos);
 
-  const metadataSuggestions = getMetadataSuggestions(command, innerText);
+  // Cursor before FROM keyword
+  if (command.location.min > cursorPos) {
+    return getSourceSuggestions(context?.sources ?? [], [], innerText);
+  }
+
+  // Extract text relative to command start (critical for subqueries)
+  // Use commandText for pattern matching (e.g., /METADATA\s+$/, /\s$/) because these
+  // checks need to operate on the current command only, not the entire query
+  const commandText = query.substring(command.location.min, cursorPos);
+
+  // METADATA suggestions - uses commandText for regex pattern matching
+  const metadataSuggestions = await getMetadataSuggestions(command, commandText);
   if (metadataSuggestions) {
     return metadataSuggestions;
   }
 
-  const metadataOverlap = getOverlapRange(innerText, 'METADATA');
+  const indexes = getSourcesFromCommands([command], SOURCE_TYPE_INDEX);
 
-  // FROM /
-  if (indexes.length === 0) {
-    suggestions.push(
-      ...getSourceSuggestions(
-        context?.sources ?? [],
-        indexes.map(({ name }) => name)
-      )
-    );
-  }
-  // FROM something /
-  else if (indexes.length > 0 && /\s$/.test(innerText) && !isRestartingExpression(innerText)) {
-    suggestions.push(metadataSuggestion);
-    suggestions.push(commaCompleteItem);
-    suggestions.push(pipeCompleteItem);
-    suggestions.push(
-      ...(await getRecommendedQueriesSuggestions(
-        context?.editorExtensions ?? { recommendedFields: [], recommendedQueries: [] },
-        callbacks?.getByType
-      ))
-    );
-  }
-  // FROM something MET/
-  else if (indexes.length > 0 && /^FROM\s+\S+\s+/i.test(innerText) && metadataOverlap) {
-    suggestions.push(metadataSuggestion);
-  }
-  // FROM someth/
-  // FROM something/
-  // FROM something, /
-  else if (indexes.length) {
-    const sources = context?.sources ?? [];
+  // Check if there are any sources (including subqueries)
+  const hasAnySources = command.args.some(
+    (arg) => !Array.isArray(arg) && (isSource(arg) || isSubQuery(arg))
+  );
 
-    const recommendedQuerySuggestions = await getRecommendedQueriesSuggestions(
-      context?.editorExtensions ?? { recommendedFields: [], recommendedQueries: [] },
-      callbacks?.getByType
-    );
-    const additionalSuggestions = await additionalSourcesSuggestions(
-      innerText,
-      sources,
-      indexes.map(({ name }) => name),
-      recommendedQuerySuggestions
-    );
-    suggestions.push(...additionalSuggestions);
+  // Case 1: FROM | (no sources yet)
+  if (!hasAnySources) {
+    // Use innerText for absolute positions in rangeToReplace
+    return suggestInitialSources(context, innerText);
+  }
+
+  // Case 2: FROM index | (after space, suggest next actions)
+  if (/\s$/.test(commandText) && !isRestartingExpression(commandText)) {
+    return suggestNextActions(context, callbacks);
+  }
+
+  // Case 3: FROM in|, FROM index, | (typing or adding more indexes)
+  // Use innerText for absolute positions in rangeToReplace
+  return suggestAdditionalSources(innerText, context, callbacks, indexes);
+}
+
+/**
+ * Case 1: No indexes yet - suggest available sources and subquery.
+ */
+function suggestInitialSources(
+  context: ICommandContext | undefined,
+  innerText: string
+): ISuggestionItem[] {
+  let sources = context?.sources ?? [];
+
+  if (context?.isCursorInSubquery) {
+    sources = sources.filter((source) => source.type !== SOURCES_TYPES.TIMESERIES);
+  }
+
+  const suggestions = getSourceSuggestions(sources, [], innerText);
+
+  // Only suggest subqueries when not already inside a subquery
+  if (!context?.isCursorInSubquery) {
+    suggestions.push(subqueryCompleteItem);
+  }
+
+  return suggestions;
+}
+
+/**
+ * Case 2: After space - suggest pipe, comma, metadata, and recommended queries.
+ */
+async function suggestNextActions(
+  context: ICommandContext | undefined,
+  callbacks: ICommandCallbacks | undefined
+): Promise<ISuggestionItem[]> {
+  const suggestions: ISuggestionItem[] = [
+    { ...pipeCompleteItem, sortText: PIPE_SORT_TEXT },
+    commaCompleteItem,
+    metadataSuggestion,
+  ];
+
+  const recommendedQueries = await getRecommendedQueriesSuggestions(
+    context?.editorExtensions ?? EMPTY_EXTENSIONS,
+    callbacks?.getByType
+  );
+
+  return [...suggestions, ...recommendedQueries];
+}
+
+/**
+ * Case 3: Typing or adding more indexes - suggest additional sources with metadata check.
+ */
+async function suggestAdditionalSources(
+  innerText: string,
+  context: ICommandContext | undefined,
+  callbacks: ICommandCallbacks | undefined,
+  indexes: ReturnType<typeof getSourcesFromCommands>
+): Promise<ISuggestionItem[]> {
+  const lastIndex = indexes[indexes.length - 1];
+  const isTypingIndexName = lastIndex?.name && innerText.endsWith(lastIndex.name);
+
+  // Check for METADATA overlap (only when not typing index name)
+  if (!isTypingIndexName && getOverlapRange(innerText, METADATA_KEYWORD)) {
+    return [metadataSuggestion];
+  }
+
+  let sources = context?.sources ?? [];
+
+  if (context?.isCursorInSubquery) {
+    sources = sources.filter((source) => source.type !== SOURCES_TYPES.TIMESERIES);
+  }
+
+  const recommendedQueries = await getRecommendedQueriesSuggestions(
+    context?.editorExtensions ?? EMPTY_EXTENSIONS,
+    callbacks?.getByType
+  );
+
+  const suggestions = await additionalSourcesSuggestions(
+    innerText,
+    sources,
+    indexes.map(({ name }) => name),
+    recommendedQueries
+  );
+
+  // Add subquery suggestion when restarting after comma (only if not already in subquery)
+  if (isRestartingExpression(innerText) && !context?.isCursorInSubquery) {
+    suggestions.push(subqueryCompleteItem);
   }
 
   return suggestions;

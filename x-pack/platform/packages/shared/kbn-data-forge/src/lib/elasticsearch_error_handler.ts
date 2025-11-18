@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { Client } from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import { startsWith } from 'lodash';
-import { ToolingLog } from '@kbn/tooling-log';
-import { ElasticSearchService } from '../types';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { ElasticSearchService } from '../types';
 
 const ERROR_MESSAGES = [
   'getaddrinfo ENOTFOUND',

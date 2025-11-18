@@ -31,7 +31,6 @@ import { LegendControls } from './waffle/legend_controls';
 
 interface Props {
   currentView?: InventoryView | null;
-  reload: () => void;
   interval: string;
   nodes: SnapshotNode[];
   loading: boolean;
@@ -43,7 +42,7 @@ interface LegendControlOptions {
   legend: WaffleLegendOptions;
 }
 
-export const Layout = React.memo(({ reload, interval, nodes, loading }: Props) => {
+export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
   const [showLoading, setShowLoading] = useState(true);
   const {
     metric,
@@ -95,7 +94,12 @@ export const Layout = React.memo(({ reload, interval, nodes, loading }: Props) =
 
   const onDrilldown = useCallback(
     (expression: string) => {
-      applyFilterQuery(expression);
+      applyFilterQuery({
+        query: {
+          language: 'kuery',
+          query: expression,
+        },
+      });
     },
     [applyFilterQuery]
   );
@@ -166,7 +170,6 @@ export const Layout = React.memo(({ reload, interval, nodes, loading }: Props) =
                   nodeType={nodeType}
                   loading={loading}
                   showLoading={showLoading}
-                  reload={reload}
                   onDrilldown={onDrilldown}
                   currentTime={currentTime}
                   view={view}

@@ -7,7 +7,7 @@
 
 import { EuiConfirmModal, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SLODefinitionResponse } from '@kbn/slo-schema';
+import type { SLODefinitionResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { useBulkDeleteSlo } from '../../../pages/slo_management/hooks/use_bulk_delete_slo';
 

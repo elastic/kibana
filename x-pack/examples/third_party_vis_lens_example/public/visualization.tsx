@@ -7,9 +7,9 @@
 
 import React from 'react';
 import { EuiFormRow, EuiColorPicker } from '@elastic/eui';
-import { Ast } from '@kbn/interpreter';
-import { ThemeServiceStart } from '@kbn/core/public';
-import { Visualization, OperationMetadata } from '@kbn/lens-plugin/public';
+import type { Ast } from '@kbn/interpreter';
+import type { ThemeServiceStart } from '@kbn/core/public';
+import type { Visualization, OperationMetadata } from '@kbn/lens-plugin/public';
 import { layerTypes } from '@kbn/lens-plugin/public';
 import type { RotatingNumberState } from '../common/types';
 import { DEFAULT_COLOR } from '../common/constants';

@@ -17,7 +17,7 @@ import {
   createTestServers,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { Root } from '@kbn/core-root-server-internal';
+import type { Root } from '@kbn/core-root-server-internal';
 
 const logFilePath = Path.join(__dirname, 'wait_for_migration_completion.log');
 
@@ -127,6 +127,7 @@ function createRoot() {
     {
       migrations: {
         skip: false,
+        useCumulativeLogger: false,
       },
       node: {
         roles: ['background_tasks'],

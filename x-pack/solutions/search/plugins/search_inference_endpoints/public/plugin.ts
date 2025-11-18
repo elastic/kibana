@@ -7,20 +7,18 @@
 
 import { BehaviorSubject, type Subscription } from 'rxjs';
 
-import {
+import type {
   AppMountParameters,
-  AppStatus,
   AppUpdater,
   CoreSetup,
   CoreStart,
-  DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common/constants';
+import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import { PLUGIN_ID, PLUGIN_TITLE } from '../common/constants';
 import { docLinks } from '../common/doc_links';
-import {
+import type {
   AppPluginSetupDependencies,
   AppPluginStartDependencies,
   SearchInferenceEndpointsConfigType,
@@ -54,14 +52,12 @@ export class SearchInferenceEndpointsPlugin
         {
           id: 'inferenceEndpoints',
           path: `/${INFERENCE_ENDPOINTS_PATH}`,
-          title: i18n.translate('xpack.searchInferenceEndpoints.InferenceEndpointsLinkLabel', {
-            defaultMessage: 'Inference Endpoints',
-          }),
+          title: PLUGIN_TITLE,
           visibleIn: ['globalSearch'],
         },
       ],
       status: AppStatus.inaccessible,
-      title: PLUGIN_NAME,
+      title: PLUGIN_TITLE,
       updater$: this.appUpdater$,
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
@@ -75,7 +71,7 @@ export class SearchInferenceEndpointsPlugin
 
         return renderApp(coreStart, startDeps, element);
       },
-      order: 5,
+      order: 6,
       visibleIn: ['sideNav'],
     });
 

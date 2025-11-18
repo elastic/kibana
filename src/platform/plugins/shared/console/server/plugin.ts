@@ -7,17 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { SemVer } from 'semver';
 
 import { ProxyConfigCollection } from './lib';
 import { SpecDefinitionsService, EsLegacyConfigService } from './services';
-import { ConsoleConfig, ConsoleConfig7x } from './config';
+import type { ConsoleConfig, ConsoleConfig7x } from './config';
 
 import { registerRoutes } from './routes';
 
-import { ESConfigForProxy, ConsoleSetup, ConsoleStart } from './types';
+import type { ESConfigForProxy, ConsoleSetup, ConsoleStart } from './types';
 import { handleEsError } from './shared_imports';
 
 interface PluginsSetup {
@@ -88,6 +88,10 @@ export class ConsoleServerPlugin implements Plugin<ConsoleSetup, ConsoleStart> {
       autocompleteDefinitions: { endpointsAvailability: endpointsAvailability },
     } = this.ctx.config.get<ConsoleConfig>();
     this.specDefinitionsService.start({ endpointsAvailability });
+
+    return {
+      getSpecJson: () => this.specDefinitionsService.asJson(),
+    };
   }
 
   stop() {

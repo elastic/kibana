@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { Fields } from '../../../../../common/search_strategy';
+import type { Fields } from '../../../../../common/search_strategy';
 import { getNestedParentPath } from './get_nested_parent_path';
 
 describe('getNestedParentPath', () => {

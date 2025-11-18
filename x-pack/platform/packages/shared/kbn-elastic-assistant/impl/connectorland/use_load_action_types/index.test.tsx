@@ -6,10 +6,11 @@
  */
 
 import { waitFor, renderHook } from '@testing-library/react';
-import { useLoadActionTypes, Props } from '.';
+import type { Props } from '.';
+import { useLoadActionTypes } from '.';
 import { mockActionTypes } from '../../mock/connectors';
 
-jest.mock('@tanstack/react-query', () => ({
+jest.mock('@kbn/react-query', () => ({
   useQuery: jest.fn().mockImplementation(async (queryKey, fn, opts) => {
     try {
       const res = await fn();

@@ -5,19 +5,21 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
-import { getExcludeAlertsFilters } from './utils';
-import { VisualizationContextMenuActions } from '../../../common/components/visualization_actions/types';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
+import { PageScope } from '../../../data_view_manager/constants';
+import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_default';
+import {
+  type GetLensAttributes,
+  VisualizationContextMenuActions,
+} from '../../../common/components/visualization_actions/types';
 import { getTimeSavedMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/time_saved_metric';
 import * as i18n from './translations';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
 
 interface Props {
-  attackAlertIds: string[];
   from: string;
   to: string;
   minutesPerAlert: number;
@@ -28,24 +30,17 @@ const ID = 'TimeSavedMetricQuery';
  * Renders a Lens embeddable metric visualization showing the estimated time saved
  * based on the number of AI filtered alerts and minutes saved per alert for a given time range.
  */
-const TimeSavedMetricComponent: React.FC<Props> = ({
-  attackAlertIds,
-  from,
-  to,
-  minutesPerAlert,
-}) => {
+const TimeSavedMetricComponent: React.FC<Props> = ({ from, to, minutesPerAlert }) => {
   const {
     euiTheme: { colors },
   } = useEuiTheme();
-  const extraVisualizationOptions = useMemo(
-    () => ({
-      filters: getExcludeAlertsFilters(attackAlertIds),
-    }),
-    [attackAlertIds]
-  );
-
   const timerange = useMemo(() => ({ from, to }), [from, to]);
+  const signalIndexName = useSignalIndexWithDefault();
 
+  const getLensAttributes = useCallback<GetLensAttributes>(
+    (args) => getTimeSavedMetricLensAttributes({ ...args, minutesPerAlert, signalIndexName }),
+    [minutesPerAlert, signalIndexName]
+  );
   return (
     <div
       data-test-subj="time-saved-metric-container"
@@ -58,18 +53,36 @@ const TimeSavedMetricComponent: React.FC<Props> = ({
           fill: ${colors.vis.euiColorVis2};
         }
         .echMetricText {
-          padding: 8px 20px 60px;
+          padding: 8px 16px 60px;
+        }
+        .echMetricText {
+          display: grid !important;
+          grid-template-columns: auto auto 1fr !important;
+          gap: 8px !important;
+          align-items: center !important;
+        }
+        .echMetricText__titlesBlock--left {
+          grid-column: 1 !important;
+        }
+        .echMetricText__icon--right {
+          grid-column: 2 !important;
+        }
+        .euiPanel,
+        .embPanel,
+        .echMetric,
+        .echChartBackground,
+        .embPanel__hoverActions > span {
+          background-color: rgb(0, 0, 0, 0) !important;
         }
       `}
     >
       <VisualizationEmbeddable
         data-test-subj="time-saved-metric"
-        extraOptions={extraVisualizationOptions}
-        getLensAttributes={(args) => getTimeSavedMetricLensAttributes({ ...args, minutesPerAlert })}
+        getLensAttributes={getLensAttributes}
         timerange={timerange}
         id={`${ID}-metric`}
         inspectTitle={i18n.TIME_SAVED}
-        scopeId={SourcererScopeName.detections}
+        scopeId={PageScope.alerts}
         withActions={[
           VisualizationContextMenuActions.addToExistingCase,
           VisualizationContextMenuActions.addToNewCase,

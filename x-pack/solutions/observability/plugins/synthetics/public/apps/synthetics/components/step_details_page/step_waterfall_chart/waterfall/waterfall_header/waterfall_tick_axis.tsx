@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { BarStyleAccessor, DomainRange, TickFormatter } from '@elastic/charts';
+import type { BarStyleAccessor, DomainRange, TickFormatter } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon, useEuiTheme } from '@elastic/eui';
 
 import { MAIN_GROW_SIZE, SIDEBAR_GROW_SIZE } from '../constants';

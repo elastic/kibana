@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   EmbeddableStateWithType,
   EmbeddablePersistableStateService,
 } from '@kbn/embeddable-plugin/server';
-import { SavedObjectReference } from '@kbn/core/types';
+import type { SavedObjectReference } from '@kbn/core/types';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import { DefaultDataControlState } from '../../common';
+import type { DefaultDataControlState } from '../../common';
 
 const dataViewReferenceName = 'optionsListDataView';
 

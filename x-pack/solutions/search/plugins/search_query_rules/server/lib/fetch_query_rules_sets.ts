@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { QueryRulesListRulesetsQueryRulesetListItem } from '@elastic/elasticsearch/lib/api/types';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { Page, Paginate, pageToPagination } from '../../common/pagination';
+import type { QueryRulesListRulesetsQueryRulesetListItem } from '@elastic/elasticsearch/lib/api/types';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { Page, Paginate } from '../../common/pagination';
+import { pageToPagination } from '../../common/pagination';
 
 export const fetchQueryRulesSets = async (
   client: ElasticsearchClient,

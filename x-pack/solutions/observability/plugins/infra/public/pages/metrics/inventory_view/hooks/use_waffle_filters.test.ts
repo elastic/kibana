@@ -12,10 +12,21 @@ import { useWaffleFilters } from './use_waffle_filters';
 import { TIMESTAMP_FIELD } from '../../../../../common/constants';
 import type { ResolvedDataView } from '../../../../utils/data_view';
 import { useUrlState } from '@kbn/observability-shared-plugin/public';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
+import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { useAlertPrefillContext } from '../../../../alerting/use_alert_prefill';
 
 jest.mock('@kbn/observability-shared-plugin/public');
+jest.mock('../../../../hooks/use_kibana');
+jest.mock('../../../../alerting/use_alert_prefill');
 
 const mockUseUrlState = useUrlState as jest.MockedFunction<typeof useUrlState>;
+const mockUseKibanaContextForPlugin = useKibanaContextForPlugin as jest.MockedFunction<
+  typeof useKibanaContextForPlugin
+>;
+const mockUseAlertPrefillContext = useAlertPrefillContext as jest.MockedFunction<
+  typeof useAlertPrefillContext
+>;
 
 // Mock useUrlState hook
 jest.mock('react-router-dom', () => ({
@@ -53,24 +64,43 @@ jest.mock('./use_inventory_views', () => ({
   }),
 }));
 
-let PREFILL: Record<string, any> = {};
-jest.mock('../../../../alerting/use_alert_prefill', () => ({
-  useAlertPrefillContext: () => ({
-    inventoryPrefill: {
-      setKuery(kuery: string) {
-        PREFILL = { kuery };
-      },
-    },
-  }),
-}));
-
 const renderUseWaffleFiltersHook = () => renderHook(() => useWaffleFilters());
+const setPrefillState = jest.fn();
+
+const DEFAULT_STATE: WaffleFiltersState = {
+  language: 'kuery',
+  query: '',
+};
+
+const dataPluginStartMock = dataPluginMock.createStartContract();
 
 describe('useWaffleFilters', () => {
+  const mockGetQuery = jest.fn().mockReturnValue(DEFAULT_STATE);
   beforeEach(() => {
-    PREFILL = {};
+    mockUseUrlState.mockReturnValue([DEFAULT_STATE, jest.fn()]);
+
+    mockUseKibanaContextForPlugin.mockReturnValue({
+      services: {
+        data: {
+          ...dataPluginStartMock,
+          query: {
+            ...dataPluginStartMock.query,
+            queryString: {
+              ...dataPluginStartMock.query.queryString,
+              getQuery: mockGetQuery,
+            },
+          },
+        },
+      },
+    } as unknown as ReturnType<typeof useKibanaContextForPlugin>);
+    mockUseAlertPrefillContext.mockReturnValue({
+      inventoryPrefill: {
+        setPrefillState,
+      },
+    } as unknown as ReturnType<typeof useAlertPrefillContext>);
+
     mockUseUrlState.mockReturnValue([
-      { kind: 'kuery', expression: '' } as WaffleFiltersState,
+      { language: 'kuery', query: '' } as WaffleFiltersState,
       jest.fn(),
     ]);
   });
@@ -79,15 +109,20 @@ describe('useWaffleFilters', () => {
     const { result, rerender } = renderUseWaffleFiltersHook();
 
     const newQuery = {
-      expression: 'foo: *',
-      kind: 'kuery',
+      query: 'foo',
+      language: 'kuery',
     } as WaffleFiltersState;
 
     act(() => {
+      mockGetQuery.mockReturnValue(newQuery);
       mockUseUrlState.mockReturnValue([newQuery, jest.fn()]);
-      result.current.applyFilterQuery(newQuery.expression);
+      result.current.applyFilterQuery({
+        query: newQuery,
+      });
     });
+
     rerender();
-    expect(PREFILL).toEqual({ kuery: newQuery.expression });
+
+    expect(setPrefillState).toHaveBeenCalledWith({ kuery: newQuery.query });
   });
 });

@@ -7,9 +7,10 @@
 
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { SerializedEnrichPolicy } from '@kbn/index-management-shared-types';
-import { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
-import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesStatsResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type { ReindexService } from '@kbn/reindex-service-plugin/public';
 import {
   API_BASE_PATH,
   INTERNAL_API_BASE_PATH,
@@ -35,7 +36,7 @@ import {
   UIM_TEMPLATE_CLONE,
   UIM_TEMPLATE_SIMULATE,
 } from '../../../common/constants';
-import {
+import type {
   TemplateDeserialized,
   TemplateListItem,
   DataStream,
@@ -44,19 +45,24 @@ import {
 } from '../../../common';
 import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
-import { UiMetricService } from './ui_metric';
+import type { UiMetricService } from './ui_metric';
 import type { FieldFromIndicesRequest } from '../../../common';
-import { Fields } from '../components/mappings_editor/types';
+import type { Fields } from '../components/mappings_editor/types';
 
 interface ReloadIndicesOptions {
   asSystemRequest?: boolean;
 }
 
-// Temporary hack to provide the uiMetricService instance to this file.
+// Temporary hack to provide the uiMetricService and reindexService instance to this file.
 // TODO: Refactor and export an ApiService instance through the app dependencies context
 let uiMetricService: UiMetricService;
 export const setUiMetricService = (_uiMetricService: UiMetricService) => {
   uiMetricService = _uiMetricService;
+};
+
+let reindexService: ReindexService;
+export const setReindexService = (_reindexService: ReindexService) => {
+  reindexService = _reindexService;
 };
 // End hack
 
@@ -115,9 +121,14 @@ export async function updateDSFailureStore(
   dataStreams: string[],
   data: {
     dsFailureStore: boolean;
+    customRetentionPeriod?: string;
   }
 ) {
-  const body = { dsFailureStore: data.dsFailureStore, dataStreams };
+  const body = {
+    dsFailureStore: data.dsFailureStore,
+    dataStreams,
+    customRetentionPeriod: data.customRetentionPeriod,
+  };
 
   return sendRequest({
     path: `${API_BASE_PATH}/data_streams/configure_failure_store`,
@@ -482,3 +493,21 @@ export function useLoadInferenceEndpoints() {
     method: 'get',
   });
 }
+
+export const startReindex = (sourceIndexName: string, lookupIndexName: string) => {
+  return reindexService.startReindex({
+    indexName: sourceIndexName,
+    newIndexName: lookupIndexName,
+    settings: {
+      mode: 'lookup',
+    },
+  });
+};
+
+export const cancelReindex = (sourceIndexName: string) => {
+  return reindexService.cancelReindex(sourceIndexName);
+};
+
+export const getReindexStatus = (sourceIndexName: string) => {
+  return reindexService.getReindexStatus(sourceIndexName);
+};

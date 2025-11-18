@@ -8,7 +8,7 @@
  */
 
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import { ExpressionFunctionIpRange, IpRange } from './ip_range';
+import type { ExpressionFunctionIpRange, IpRange } from './ip_range';
 
 export const ipRangeToAst = (ipRange: IpRange) => {
   return buildExpression([

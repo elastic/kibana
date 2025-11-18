@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { findIndexPatternById, getFieldByName } from '../data_views';
-import { ConfigSchema } from '../config';
+import type { ConfigSchema } from '../config';
 
 export async function termsEnumSuggestions(
   config: ConfigSchema,

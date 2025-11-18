@@ -13,6 +13,11 @@ import type {
   IRouter,
 } from '@kbn/core/server';
 
+const expectedHeaders = {
+  secret: 'secretValue',
+  config: 'configValue',
+};
+
 export function initPlugin(router: IRouter, path: string) {
   router.post(
     {
@@ -33,6 +38,21 @@ export function initPlugin(router: IRouter, path: string) {
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {
+      // only validate headers if they are defined:
+      const headers = req.headers;
+
+      if (headers.secret || headers.config) {
+        const match = Object.entries(expectedHeaders).every(
+          ([key, expectedValue]) => headers[key] === expectedValue
+        );
+
+        if (!match) {
+          return jsonResponse(res, 400, {
+            error: 'Headers do not match',
+          });
+        }
+      }
+
       return jsonResponse(res, 200, {
         id: '123',
         key: 'CK-1',

@@ -12,7 +12,7 @@ import {
   SUMMARY_FILTER,
   getRangeFilter,
 } from '../constants/client_defaults';
-import { CertResult, GetCertsParams, Ping } from '../runtime_types';
+import type { CertResult, GetCertsParams, Ping } from '../runtime_types';
 import { createEsQuery } from '../utils/es_search';
 
 import type { CertificatesResults } from '../../server/legacy_uptime/lib/requests/get_certs';
@@ -114,7 +114,7 @@ export const getCertsRequestBody = ({
                   ? [
                       {
                         range: {
-                          'tls.certificate_not_valid_before': {
+                          'tls.server.x509.not_before': {
                             lte: absoluteDate(notValidBefore),
                           },
                         },
@@ -125,7 +125,7 @@ export const getCertsRequestBody = ({
                   ? [
                       {
                         range: {
-                          'tls.certificate_not_valid_after': {
+                          'tls.server.x509.not_after': {
                             lte: absoluteDate(notValidAfter),
                           },
                         },

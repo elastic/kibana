@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-export { type RelevantPanel, relevantPanelSchema } from './schema/relevant_panel/v1';
 export {
   type LinkedDashboard,
   type SuggestedDashboard,

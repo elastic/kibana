@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
+import type { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
 import { getSecurityLabsDocsCount, loadSecurityLabs } from './security_labs_loader';
 import { loggerMock } from '@kbn/logging-mocks';
-import { Document } from 'langchain/document';
+import type { Document } from 'langchain/document';
 
 const mockKbDataClient = {
   addKnowledgeBaseDocuments: jest.fn().mockResolvedValue([{ foo: 'bar' }]),

@@ -26,7 +26,6 @@ import type {
   EnterpriseSearchContentApp,
   EnterpriseSearchApplicationsApp,
   EnterpriseSearchAnalyticsApp,
-  ServerlessSearchApp,
   DeepLinkId as SearchLink,
 } from '@kbn/deeplinks-search';
 import type {
@@ -36,7 +35,10 @@ import type {
 import type { AppId as SecurityApp, DeepLinkId as SecurityLink } from '@kbn/deeplinks-security';
 import type { AppId as FleetApp, DeepLinkId as FleetLink } from '@kbn/deeplinks-fleet';
 import type { AppId as SharedApp, DeepLinkId as SharedLink } from '@kbn/deeplinks-shared';
-import type { WorkchatApp, DeepLinkId as ChatLink } from '@kbn/deeplinks-chat';
+import type { WorkplaceAIApp, DeepLinkId as WorkplaceAILink } from '@kbn/deeplinks-workplace-ai';
+import type { DeepLinkId as AgentBuilderLink } from '@kbn/deeplinks-agent-builder';
+import type { DeepLinkId as DataConnectorsLink } from '@kbn/deeplinks-data-connectors';
+import type { AppId as WorkflowsApp, DeepLinkId as WorkflowsLink } from '@kbn/deeplinks-workflows';
 import type { KibanaProject } from '@kbn/projects-solutions-groups';
 
 import type { ChromeNavLink } from './nav_links';
@@ -54,12 +56,12 @@ export type AppId =
   | EnterpriseSearchContentApp
   | EnterpriseSearchApplicationsApp
   | EnterpriseSearchAnalyticsApp
-  | ServerlessSearchApp
   | ObservabilityApp
   | SecurityApp
   | FleetApp
   | SharedApp
-  | WorkchatApp;
+  | WorkplaceAIApp
+  | WorkflowsApp;
 
 /** @public */
 export type AppDeepLinkId =
@@ -72,7 +74,10 @@ export type AppDeepLinkId =
   | SecurityLink
   | FleetLink
   | SharedLink
-  | ChatLink;
+  | WorkplaceAILink
+  | AgentBuilderLink
+  | DataConnectorsLink
+  | WorkflowsLink;
 
 /** @public */
 export type CloudLinkId =
@@ -104,7 +109,9 @@ export type CloudLinks = {
 
 export type SideNavNodeStatus = 'hidden' | 'visible';
 
-export type RenderAs = 'block' | 'accordion' | 'panelOpener' | 'item';
+export type SideNavVersion = 'v1' | 'v2';
+
+export type RenderAs = 'block' | 'accordion' | 'panelOpener' | 'item' | 'home';
 
 export type EuiThemeSize = Exclude<
   (typeof EuiThemeSizes)[number],
@@ -129,6 +136,11 @@ interface NodeDefinitionBase {
    * Optional icon for the navigation node. Note: not all navigation depth will render the icon
    */
   icon?: IconType;
+
+  /**
+   * Icon that will be rendered only in new sidenav
+   */
+  iconV2?: IconType;
   /**
    * href for absolute links only. Internal links should use "link".
    */
@@ -147,6 +159,11 @@ interface NodeDefinitionBase {
    * @default 'visible'
    */
   sideNavStatus?: SideNavNodeStatus;
+  /**
+   * Optional version to specify which side navigation version this node is intended for.
+   * This allows for version-specific rendering behavior.
+   */
+  sideNavVersion?: SideNavVersion;
   /**
    * Optional function to get the active state. This function is called whenever the location changes.
    */
@@ -212,6 +229,10 @@ interface NodeDefinitionBase {
     /** Text shown on tooltip attached to the badge. */
     tooltip?: string;
   };
+  /**
+   * Sidenav v2 for now supports only 2 types of badges:
+   */
+  badgeTypeV2?: 'beta' | 'techPreview';
 }
 
 /** @public */
@@ -242,11 +263,6 @@ export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
    */
   isExternalLink?: boolean;
 }
-
-export type PanelSelectedNode = Pick<
-  ChromeProjectNavigationNode,
-  'id' | 'children' | 'path' | 'sideNavStatus' | 'deepLink' | 'title'
->;
 
 /** @public */
 export interface ChromeSetProjectBreadcrumbsParams {

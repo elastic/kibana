@@ -90,6 +90,25 @@ export type IsExternalRuleCustomized = z.infer<typeof IsExternalRuleCustomized>;
 export const IsExternalRuleCustomized = z.boolean();
 
 /**
+ * Determines whether an external/prebuilt rule has its original, unmodified version present when the calculation of its customization status is performed (`rule_source.is_customized` and `rule_source.customized_fields`).
+ */
+export type ExternalRuleHasBaseVersion = z.infer<typeof ExternalRuleHasBaseVersion>;
+export const ExternalRuleHasBaseVersion = z.boolean();
+
+/**
+ * An array of customized field names — that is, fields that the user has modified from their base value. Defaults to an empty array.
+ */
+export type ExternalRuleCustomizedFields = z.infer<typeof ExternalRuleCustomizedFields>;
+export const ExternalRuleCustomizedFields = z.array(
+  z.object({
+    /**
+     * Name of a user-modified field in the rule object.
+     */
+    field_name: z.string(),
+  })
+);
+
+/**
  * Type of rule source for internally sourced rules, i.e. created within the Kibana apps.
  */
 export type InternalRuleSource = z.infer<typeof InternalRuleSource>;
@@ -104,6 +123,8 @@ export type ExternalRuleSource = z.infer<typeof ExternalRuleSource>;
 export const ExternalRuleSource = z.object({
   type: z.literal('external'),
   is_customized: IsExternalRuleCustomized,
+  has_base_version: ExternalRuleHasBaseVersion,
+  customized_fields: ExternalRuleCustomizedFields,
 });
 
 /**
@@ -576,7 +597,6 @@ export const RuleActionFrequency = z.object({
 - `query` (object, optional): Object containing a query filter which gets applied to an action and determines whether the action should run.
     - `kql` (string, required): A KQL string.
     - `filters` (array of objects, required): Array of filter objects, as defined in the `kbn-es-query` package.
-      
 
   */
 export type RuleActionAlertsFilter = z.infer<typeof RuleActionAlertsFilter>;
@@ -669,6 +689,7 @@ export const ExceptionListType = z.enum([
   'rule_default',
   'endpoint',
   'endpoint_trusted_apps',
+  'endpoint_trusted_devices',
   'endpoint_events',
   'endpoint_host_isolation_exceptions',
   'endpoint_blocklists',

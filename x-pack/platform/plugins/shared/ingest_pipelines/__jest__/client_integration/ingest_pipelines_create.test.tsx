@@ -10,7 +10,7 @@ import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment, pageHelpers } from './helpers';
 import { API_BASE_PATH } from '../../common/constants';
-import { PipelinesCreateTestBed } from './helpers/pipelines_create.helpers';
+import type { PipelinesCreateTestBed } from './helpers/pipelines_create.helpers';
 
 import { nestedProcessorsErrorFixture } from './fixtures';
 

@@ -44,8 +44,9 @@ export const combineFilterWithAuthorizationFilter = (
 };
 
 export const ensureFieldIsSafeForQuery = (field: string, value: string): boolean => {
-  const invalid = value.match(/([>=<\*:()]+|\s+)/g);
-  if (invalid) {
+  const matches = value.match(/([>=<\*:()]+|\s+)/g);
+  if (matches) {
+    const invalid = Array.from(matches);
     const whitespace = remove(invalid, (chars) => chars.trim().length === 0);
     const errors = [];
     if (whitespace.length) {

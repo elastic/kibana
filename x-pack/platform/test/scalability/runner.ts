@@ -10,11 +10,11 @@ import { withProcRunner } from '@kbn/dev-proc-runner';
 import { kibanaPackageJson } from '@kbn/repo-info';
 import path from 'path';
 import fs from 'fs';
-import { ToolingLog } from '@kbn/tooling-log';
-import { FtrProviderContext } from './ftr_provider_context';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { FtrProviderContext } from './ftr_provider_context';
 import { EventsShipper } from './events_shipper';
 import { getCapacityMetrics } from './report_parser';
-import { ScalabilityJourney, MetricEvent } from './types';
+import type { ScalabilityJourney, MetricEvent } from './types';
 
 const telemetryChannel = 'scalability-metrics';
 

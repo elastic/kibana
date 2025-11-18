@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { ApiConfig, Message, Replacements } from '@kbn/elastic-assistant-common';
-import { EuiCommentProps } from '@elastic/eui';
-import { UserAvatar } from '.';
+import type {
+  ApiConfig,
+  InterruptResumeValue,
+  Message,
+  Replacements,
+  User,
+} from '@kbn/elastic-assistant-common';
+import type { EuiCommentProps } from '@elastic/eui';
 
 export interface MessagePresentation {
   delay?: number;
@@ -29,16 +34,14 @@ export interface ClientMessage extends Omit<Message, 'content' | 'reader'> {
 export interface Conversation {
   '@timestamp'?: string;
   apiConfig?: ApiConfig;
-  user?: {
-    id?: string;
-    name?: string;
-  };
+  createdBy: User;
+  users: User[];
   category: string;
   id: string;
   title: string;
   messages: ClientMessage[];
   updatedAt?: string;
-  createdAt?: string;
+  createdAt: string;
   replacements: Replacements;
   excludeFromLastConversationStorage?: boolean;
 }
@@ -84,12 +87,17 @@ export interface AssistantAvailability {
 export type GetAssistantMessages = (commentArgs: {
   abortStream: () => void;
   currentConversation?: Conversation;
+  isConversationOwner: boolean;
   isFetchingResponse: boolean;
   refetchCurrentConversation: ({ isStreamRefetch }: { isStreamRefetch?: boolean }) => void;
   regenerateMessage: (conversationId: string) => void;
   showAnonymizedValues: boolean;
-  currentUserAvatar?: UserAvatar;
   setIsStreaming: (isStreaming: boolean) => void;
   systemPromptContent?: string;
   contentReferencesVisible: boolean;
 }) => EuiCommentProps[];
+
+export type ResumeGraphFunction = (
+  threadId: string,
+  resumeValue: InterruptResumeValue
+) => Promise<void>;

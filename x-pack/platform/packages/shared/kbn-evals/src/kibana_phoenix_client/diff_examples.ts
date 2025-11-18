@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
+import type { Example } from '@arizeai/phoenix-client/dist/esm/types/datasets';
 import objectHash from 'object-hash';
-import { ExampleWithId } from '../types';
+import { isEmpty, omitBy } from 'lodash';
+import type { ExampleWithId } from '../types';
 
 function normaliseExample(example: Example | ExampleWithId) {
   return {
     input: example.input,
     output: example.output,
-    metadata: example.metadata,
+    // Phoenix sets some defaults in stored examples (like `annotations`),
+    // so we emit them here
+    metadata: omitBy(example.metadata, isEmpty),
   };
 }
 

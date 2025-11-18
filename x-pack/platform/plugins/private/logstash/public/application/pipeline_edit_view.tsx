@@ -7,12 +7,12 @@
 
 import React, { useState, useLayoutEffect, useCallback } from 'react';
 import usePromise from 'react-use/lib/usePromise';
-import { History } from 'history';
+import type { History } from 'history';
 
 import { i18n } from '@kbn/i18n';
-import { ToastsStart } from '@kbn/core/public';
+import type { ToastsStart } from '@kbn/core/public';
 
-import { ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { PipelineEditor } from './components/pipeline_editor';
 import { Pipeline } from '../models/pipeline';
 import * as Breadcrumbs from './breadcrumbs';

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent, useState } from 'react';
+import type { FunctionComponent } from 'react';
+import React, { useState } from 'react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import {
@@ -26,7 +27,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import { Index } from '../../../../../../../common';
+import type { Index } from '../../../../../../../common';
 import { OverviewCard } from './overview_card';
 
 const MAX_VISIBLE_ALIASES = 3;

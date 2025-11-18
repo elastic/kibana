@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { map, takeUntil, firstValueFrom, Observable, Subject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { map, takeUntil, firstValueFrom, Subject } from 'rxjs';
 
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
@@ -26,8 +27,9 @@ import type {
 import { ClusterClient, AgentManager } from '@kbn/core-elasticsearch-client-server-internal';
 
 import { registerAnalyticsContextProvider } from './register_analytics_context_provider';
-import { ElasticsearchConfig, ElasticsearchConfigType } from './elasticsearch_config';
-import {
+import type { ElasticsearchConfigType } from './elasticsearch_config';
+import { ElasticsearchConfig } from './elasticsearch_config';
+import type {
   InternalElasticsearchServicePreboot,
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
@@ -62,6 +64,8 @@ export class ElasticsearchService
   private clusterInfo$?: Observable<ClusterInfo>;
   private unauthorizedErrorHandler?: UnauthorizedErrorHandler;
   private agentManager?: AgentManager;
+  // @ts-expect-error - CPS is not yet implemented
+  private cpsEnabled = false;
 
   constructor(private readonly coreContext: CoreContext) {
     this.kibanaVersion = coreContext.env.packageInfo.version;
@@ -103,6 +107,7 @@ export class ElasticsearchService
       ignoreVersionMismatch: config.ignoreVersionMismatch,
       healthCheckInterval: config.healthCheckDelay.asMilliseconds(),
       healthCheckStartupInterval: config.healthCheckStartupDelay.asMilliseconds(),
+      healthCheckRetry: config.healthCheckRetry,
       log: this.log,
       internalClient: this.client.asInternalUser,
     }).pipe(takeUntil(this.stop$));
@@ -136,6 +141,10 @@ export class ElasticsearchService
         getAgentsStats: agentManager.getAgentsStats.bind(agentManager),
       },
       publicBaseUrl: config.publicBaseUrl,
+      setCpsFeatureFlag: (enabled) => {
+        this.cpsEnabled = enabled;
+        this.log.info(`CPS feature flag set to ${enabled}`);
+      },
     };
   }
 
@@ -189,7 +198,10 @@ export class ElasticsearchService
     }
 
     return {
-      client: this.client!,
+      client: {
+        asInternalUser: this.client!.asInternalUser,
+        asScoped: this.client!.asScoped.bind(this.client!),
+      },
       createClient: (type, clientConfig) => this.createClusterClient(type, config, clientConfig),
       getCapabilities: () => capabilities,
       metrics: {

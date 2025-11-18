@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { visualize, lens, common } = getPageObjects(['visualize', 'lens', 'common']);
@@ -173,7 +173,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.closePalettePanel();
       await lens.closeDimensionEditor();
 
-      await lens.toggleToolbarPopover('lnsHeatmapHorizontalAxisButton');
+      await lens.openStyleSettingsFlyout();
       await testSubjects.click('axis_orientation_vertical');
 
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');
@@ -185,7 +185,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it.skip('should display axis values when setting axis title mode to Auto', async () => {
       await lens.closeDimensionEditor();
 
-      await lens.toggleToolbarPopover('lnsLeftAxisButton');
+      await lens.openStyleSettingsFlyout();
       await testSubjects.selectValue('lnsLeftAxisTitle-select', 'Auto');
 
       const debugState = await lens.getCurrentChartDebugState('heatmapChart');

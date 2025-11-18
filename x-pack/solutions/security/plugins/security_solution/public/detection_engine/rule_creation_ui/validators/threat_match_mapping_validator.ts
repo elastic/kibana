@@ -11,12 +11,12 @@ import {
   singleEntryThreat,
 } from '../../../common/components/threat_match/helpers';
 import type { FormData, ValidationFunc } from '../../../shared_imports';
-import type { ThreatMapEntries } from '../../../common/components/threat_match/types';
+import type { ThreatMapping } from '../../../../common/api/detection_engine/model/rule_schema';
 
 export function threatMatchMappingValidatorFactory(): ValidationFunc<
   FormData,
   string,
-  ThreatMapEntries[]
+  ThreatMapping
 > {
   return (...args) => {
     const [{ path, value }] = args;

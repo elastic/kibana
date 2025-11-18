@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicatorType } from '@kbn/slo-schema';
+import type { IndicatorType } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import deepmerge from 'deepmerge';
 import { useEffect, useState } from 'react';
@@ -22,7 +22,7 @@ import {
   SLO_EDIT_FORM_DEFAULT_VALUES_SYNTHETICS_AVAILABILITY,
   TIMESLICE_METRIC_DEFAULT_VALUES,
 } from '../constants';
-import { CreateSLOForm } from '../types';
+import type { CreateSLOForm } from '../types';
 
 /**
  * This hook handles the unregistration of inputs when selecting another SLI indicator.

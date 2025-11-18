@@ -98,8 +98,10 @@ components:
         - execute
         - upload
         - scan
+        - runscript
+        - cancel
       minLength: 1
-      description: The command to be executed (cannot be an empty string)
+      description: The command for the response action
 
     Commands:
       type: array
@@ -176,15 +178,6 @@ components:
         minLength: 1
       minItems: 1
 
-    CaseIds:
-      type: array
-      description: Case IDs to be updated (cannot contain empty strings)
-      example: [ "case-id-1", "case-id-2" ]
-      items:
-        type: string
-        minLength: 1
-      minItems: 1
-
     Comment:
       type: string
       description: Optional comment
@@ -211,9 +204,21 @@ components:
         endpoint_ids:
           $ref: '#/components/schemas/EndpointIds'
         alert_ids:
-          $ref: '../../../model/alert.schema.yaml#/components/schemas/AlertIds'
+          type: array
+          description: If this action is associated with any alerts, they can be specified here. The action will be logged in any cases associated with the specified alerts.
+          example: [ "alert-id-1", "alert-id-2" ]
+          minItems: 1
+          items:
+            type: string
+            minLength: 1
         case_ids:
-          $ref: '#/components/schemas/CaseIds'
+          type: array
+          description: The IDs of cases where the action taken will be logged.
+          example: [ "case-id-1", "case-id-2" ]
+          minItems: 1
+          items:
+            type: string
+            minLength: 1
         comment:
           $ref: '#/components/schemas/Comment'
         parameters:
@@ -236,6 +241,128 @@ components:
       properties:
         note:
           type: string
+
+    ResponseActionDetails:
+       type: object
+       required:
+         - command
+       properties:
+         id:
+           type: string
+           format: uuid
+           description: The response action ID
+         command:
+           $ref: '#/components/schemas/Command'
+         agentType:
+           $ref: '#/components/schemas/AgentTypes'
+         isExpired:
+           type: boolean
+           description: Whether the response action is expired
+         isComplete:
+           type: boolean
+           description: Whether the response action is complete
+         wasSuccessful:
+           type: boolean
+           description: Whether the response action was successful
+         status:
+           type: string
+           description: The response action status
+         startedAt:
+           type: string
+           format: date-time
+           description: The response action start time
+         completedAt:
+           type: string
+           format: date-time
+           description: The response action completion time
+         createdBy:
+           type: string
+           description: The user who created the response action
+         agents:
+           type: array
+           description: The agent IDs for the hosts that the response action was sent to
+           items:
+             type: string
+             format: uuid
+         parameters:
+           type: object
+           description: The parameters of the response action. Content different depending on the response action command
+         hosts:
+           type: object
+           description: An object containing the host names associated with the agent IDs the response action was sent to
+           additionalProperties:
+             type: object
+             format: uuid
+             properties:
+               name:
+                 type: string
+                 description: The host name
+         agentState:
+           type: object
+           description: The state of the response action for each agent ID that it was sent to
+           additionalProperties:
+             type: object
+             format: uuid
+             properties:
+               isCompleted:
+                 type: boolean
+                 description: Whether the response action is completed for the agent ID
+               wasSuccessful:
+                 type: boolean
+                 description: Whether the response action was successful for the agent ID
+               completedAt:
+                 type: string
+                 description: The date and time the response action was completed for the agent ID
+         outputs:
+           type: object
+           description: |
+             The outputs of the response action for each agent ID that it was sent to. Content different depending on the
+             response action command and will only be present for agents that have responded to the response action
+           additionalProperties:
+             type: object
+             title: Agent ID
+             description: The agent id
+             format: uuid
+             required: [ type, content ]
+             properties:
+               type:
+                 type: string
+                 enum: [ json, text ]
+               content:
+                 description: The response action output content for the agent ID. Exact format depends on the response action command.
+                 oneOf:
+                   - type: object
+                   - type: string
+
+
+
+    ResponseActionCreateSuccessResponse:
+      type: object
+      properties:
+        data:
+          $ref: '#/components/schemas/ResponseActionDetails'
+      example:
+        data:
+          id: "233db9ea-6733-4849-9226-5a7039c7161d"
+          command: "__command__name__here__"
+          agentType: "__agent__type__here_"
+          isExpired: false
+          isCompleted: false
+          wasSuccessful: false
+          status: "pending"
+          startedAt: "2022-07-29T19:08:49.126Z"
+          createdBy: "elastic"
+          agents:
+            - "ed518850-681a-4d60-bb98-e22640cae2a8"
+          hosts:
+            ed518850-681a-4d60-bb98-e22640cae2a8:
+              name: "gke-node-1235412"
+          agentState:
+            ed518850-681a-4d60-bb98-e22640cae2a8:
+              isCompleted: false
+              wasSuccessful: false
+          parameters: {}
+          outputs: {}
 
     SuccessResponse:
       type: object

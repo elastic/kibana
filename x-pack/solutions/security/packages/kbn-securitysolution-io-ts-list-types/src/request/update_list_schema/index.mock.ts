@@ -7,7 +7,7 @@
 
 import { DESCRIPTION, LIST_ID, META, NAME, _VERSION } from '../../constants/index.mock';
 
-import { UpdateListSchema } from '.';
+import type { UpdateListSchema } from '.';
 
 export const getUpdateListSchemaMock = (): UpdateListSchema => ({
   _version: _VERSION,

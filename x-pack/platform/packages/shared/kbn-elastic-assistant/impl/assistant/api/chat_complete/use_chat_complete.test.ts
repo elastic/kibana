@@ -8,7 +8,8 @@
 import { renderHook, act, waitFor } from '@testing-library/react';
 import { useChatComplete } from './use_chat_complete';
 import { useAssistantContext, useLoadConnectors } from '../../../..';
-import { postChatComplete, ChatCompleteResponse } from './post_chat_complete';
+import type { ChatCompleteResponse } from './post_chat_complete';
+import { postChatComplete } from './post_chat_complete';
 
 jest.mock('../../../..', () => ({
   useAssistantContext: jest.fn(),

@@ -23,14 +23,27 @@ export async function getEsqlDataView(
 ) {
   const indexPatternFromQuery = getIndexPatternFromESQLQuery(query.esql);
   const newTimeField = getTimeFieldFromESQLQuery(query.esql);
+  const onlyTimeFieldChanged =
+    indexPatternFromQuery === currentDataView?.getIndexPattern() &&
+    newTimeField !== currentDataView?.timeFieldName;
+
   if (
     currentDataView?.isPersisted() ||
     indexPatternFromQuery !== currentDataView?.getIndexPattern() ||
     // here the pattern hasn't changed but the time field has
-    (newTimeField !== currentDataView?.timeFieldName &&
-      indexPatternFromQuery === currentDataView?.getIndexPattern())
+    onlyTimeFieldChanged
   ) {
-    return await getESQLAdHocDataview(query.esql, services.dataViews);
+    return await getESQLAdHocDataview({
+      dataViewsService: services.dataViews,
+      query: query.esql,
+      options: {
+        // make sure that data view service cache is not used when creating the ES|QL data view,
+        // otherwise a single mutated data view instance would be used across tabs (inside currentDataView$) which would be incorrect
+        // https://github.com/elastic/kibana/issues/234719
+        createNewInstanceEvenIfCachedOneAvailable: !currentDataView || onlyTimeFieldChanged,
+      },
+      http: services.http,
+    });
   }
   return currentDataView;
 }

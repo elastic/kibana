@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExpressionValueRender, ExpressionFunctionDefinition } from '../../../types';
+import type { ExpressionValueRender, ExpressionFunctionDefinition } from '../../../types';
 import { help as strings, errors } from '../../../i18n/functions/dict/repeat_image';
 
 interface Arguments {

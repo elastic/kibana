@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
@@ -63,7 +63,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       it('should only render management entries controllable via Kibana privileges', async () => {
         await PageObjects.common.navigateToApp('management');
         const sections = await managementMenu.getSections();
-        expect(sections).to.have.length(4);
+        expect(sections).to.have.length(5);
 
         // Order of the sections in Stack Management might change in the future
         // so we need to find the sections by their id
@@ -85,7 +85,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'dataViews',
           'filesManagement',
           'objects',
-          'aiAssistantManagementSelection',
           'tags',
           'spaces',
           'settings',

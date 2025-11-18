@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Result } from '@elastic/elasticsearch/lib/api/types';
+import type { Result } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
-import { ConnectorStatus } from '../types/connectors';
+import type { ConnectorStatus } from '../types/connectors';
 
 export const updateConnectorStatus = async (
   client: ElasticsearchClient,

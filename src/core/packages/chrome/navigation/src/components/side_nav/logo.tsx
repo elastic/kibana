@@ -8,69 +8,96 @@
  */
 
 import React from 'react';
-import { EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
+import type { HTMLAttributes } from 'react';
+import { EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-export interface SideNavLogoProps {
+import { i18n } from '@kbn/i18n';
+
+import type { SideNavLogo } from '../../../types';
+import { MenuItem } from '../menu_item';
+import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
+import { useTooltip } from '../../hooks/use_tooltip';
+
+export interface LogoProps extends Omit<HTMLAttributes<HTMLAnchorElement>, 'onClick'>, SideNavLogo {
+  id: string;
   isCollapsed: boolean;
-  label: string;
-  logoType: string;
+  isCurrent?: boolean;
+  isHighlighted: boolean;
+  onClick?: () => void;
 }
 
-/**
- * It's not clickable or focusable.
- * It's used to communicate what solution the user is currently in.
- */
-export const SideNavLogo = ({ isCollapsed, label, logoType }: SideNavLogoProps): JSX.Element => {
+export const Logo = ({
+  isCollapsed,
+  isCurrent,
+  isHighlighted,
+  label,
+  ...props
+}: LogoProps): JSX.Element => {
   const { euiTheme } = useEuiTheme();
+  const { tooltipRef, handleMouseOut } = useTooltip();
 
-  return (
-    <div
-      css={css`
-        align-items: center;
-        border-bottom: 1px solid ${euiTheme.colors.borderBaseSubdued};
-        display: flex;
-        flex-direction: column;
-        // 3px is from Figma; there is no token
-        gap: 3px;
-        justify-content: center;
-        padding: ${euiTheme.size.s} ${euiTheme.size.s}
-          ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
-      `}
-    >
-      <div
-        css={css`
-          align-items: center;
-          display: flex;
-          height: ${euiTheme.size.xl};
-          justify-content: center;
-          width: ${euiTheme.size.xl};
-        `}
+  /**
+   * **Icon size**
+   *
+   * In Figma, the logo icon is 20x20.
+   * `EuiIcon` supports `l` which is 24x24 and `m` which is 16x16.
+   *
+   * **Padding**
+   *
+   * 7px aligns better with other elements in the layout.
+   * We cannot use `euiTheme.size.s` because it's 8px.
+   */
+  const wrapperStyles = css`
+    border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+    padding-top: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
+    padding-bottom: ${isCollapsed ? '7px' : euiTheme.size.m};
+
+    .euiText {
+      font-weight: ${euiTheme.font.weight.bold};
+    }
+
+    svg {
+      height: 20px;
+      width: 20px;
+    }
+  `;
+
+  const logoWrapperTestSubj = `${NAVIGATION_SELECTOR_PREFIX}-logoWrapper`;
+  const logoTestSubj = `${NAVIGATION_SELECTOR_PREFIX}-logo`;
+
+  const menuItem = (
+    <div data-test-subj={logoWrapperTestSubj} css={wrapperStyles}>
+      <MenuItem
+        aria-label={i18n.translate('core.ui.chrome.sideNavigation.logoAriaLabel', {
+          defaultMessage: '{label} homepage',
+          values: { label },
+        })}
+        data-test-subj={logoTestSubj}
+        isHighlighted={isHighlighted}
+        isCurrent={isCurrent}
+        isLabelVisible={!isCollapsed}
+        isTruncated={false}
+        {...props}
       >
-        {/**
-         * In Figma, the icon is 20x20
-         * `EuiIcon` supports `l` which is 24x24
-         * and `m` which is 16x16;
-         * Hence style override
-         */}
-        <EuiIcon
-          css={css`
-            height: 20px;
-            width: 20px;
-          `}
-          type={logoType}
-        />
-      </div>
-      {!isCollapsed && (
-        <EuiText
-          css={css`
-            font-weight: ${euiTheme.font.weight.medium};
-            font-size: 11px;
-          `}
-          size="xs"
-        >
-          {label}
-        </EuiText>
-      )}
+        {label}
+      </MenuItem>
     </div>
   );
+
+  if (isCollapsed) {
+    return (
+      <EuiToolTip
+        ref={tooltipRef}
+        content={label}
+        disableScreenReaderOutput
+        onMouseOut={handleMouseOut}
+        position="right"
+        repositionOnScroll
+      >
+        {menuItem}
+      </EuiToolTip>
+    );
+  }
+
+  return menuItem;
 };

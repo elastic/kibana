@@ -8,6 +8,7 @@
 import { compact, mapValues, omit, uniq } from 'lodash';
 import datemath from '@elastic/datemath';
 import { rangeQuery } from '@kbn/observability-plugin/server';
+import { GET_APM_DATASET_INFO_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server';
 import { getTypedSearch } from '../utils/create_typed_es_client';
 import type { FunctionRegistrationParameters } from '.';
 
@@ -18,7 +19,7 @@ export function registerGetApmDatasetInfoFunction({
 }: FunctionRegistrationParameters) {
   registerFunction(
     {
-      name: 'get_apm_dataset_info',
+      name: GET_APM_DATASET_INFO_FUNCTION_NAME,
       description: `Use this function to get information about APM data.`,
       parameters: {
         type: 'object',

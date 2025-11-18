@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import {
+import type {
   ChatCompleteResponse,
   ChatCompletionEvent,
   PromptAPI,
   PromptOptions,
-  ToolOptionsOfPrompt,
 } from '@kbn/inference-common';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import { defer, from, lastValueFrom, throwError } from 'rxjs';
 import type { HttpHandler } from '@kbn/core/public';
-import { PromptRequestBody } from '../http_apis';
+import type { PromptRequestBody } from '../http_apis';
 import { retryWithExponentialBackoff } from '../utils/retry_with_exponential_backoff';
 import { getRetryFilter } from '../utils/error_retry_filter';
 import { combineSignal } from '../utils/combine_signal';
@@ -28,9 +27,7 @@ interface PublicInferenceClientCreateOptions {
 export function createPromptRestApi(options: PublicInferenceClientCreateOptions): PromptAPI;
 
 export function createPromptRestApi({ fetch, signal }: PublicInferenceClientCreateOptions) {
-  return <TPromptOptions extends PromptOptions>(
-    options: PromptOptions<TPromptOptions['prompt']>
-  ) => {
+  return (options: PromptOptions) => {
     const {
       abortSignal,
       maxRetries,
@@ -44,6 +41,7 @@ export function createPromptRestApi({ fetch, signal }: PublicInferenceClientCrea
       connectorId,
       functionCalling,
       prevMessages,
+      toolChoice,
     } = options;
 
     const body: PromptRequestBody = {
@@ -57,6 +55,7 @@ export function createPromptRestApi({ fetch, signal }: PublicInferenceClientCrea
       input,
       prevMessages,
       metadata,
+      toolChoice,
     };
 
     const validationResult = inputSchema.safeParse(input);
@@ -85,12 +84,7 @@ export function createPromptRestApi({ fetch, signal }: PublicInferenceClientCrea
             signal: combineSignal(signal, abortSignal),
           }).then((response) => ({ response: response.response! }))
         );
-      }).pipe(
-        httpResponseIntoObservable<
-          ChatCompletionEvent<ToolOptionsOfPrompt<TPromptOptions['prompt']>>
-        >(),
-        retry()
-      );
+      }).pipe(httpResponseIntoObservable<ChatCompletionEvent>(), retry());
     }
 
     if (!validationResult.success) {
@@ -100,14 +94,11 @@ export function createPromptRestApi({ fetch, signal }: PublicInferenceClientCrea
     return lastValueFrom(
       defer(() => {
         return from(
-          fetch<ChatCompleteResponse<ToolOptionsOfPrompt<TPromptOptions['prompt']>>>(
-            `/internal/inference/prompt`,
-            {
-              method: 'POST',
-              body: JSON.stringify(body),
-              signal: combineSignal(signal, abortSignal),
-            }
-          )
+          fetch<ChatCompleteResponse>(`/internal/inference/prompt`, {
+            method: 'POST',
+            body: JSON.stringify(body),
+            signal: combineSignal(signal, abortSignal),
+          })
         );
       }).pipe(retry())
     );

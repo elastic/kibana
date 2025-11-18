@@ -12,7 +12,7 @@ import { EuiPage, EuiPageBody, EuiPanel, EuiSpacer, EuiFlexGroup, EuiFlexItem } 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { KibanaTemplate } from './kibana_template';
 import { GlobalStateContext } from '../../contexts/global_state_context';
-import { ComponentProps } from '../../route_init';
+import type { ComponentProps } from '../../route_init';
 import { MonitoringTimeseriesContainer } from '../../../components/chart';
 import { ClusterStatus } from '../../../components/kibana/cluster_status';
 import { useBreadcrumbContainerContext } from '../../hooks/use_breadcrumbs';

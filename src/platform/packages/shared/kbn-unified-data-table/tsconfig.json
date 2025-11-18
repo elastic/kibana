@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -30,7 +30,6 @@
     "@kbn/data-plugin",
     "@kbn/core",
     "@kbn/ui-actions-plugin",
-    "@kbn/charts-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/monaco",
     "@kbn/code-editor",
@@ -46,5 +45,6 @@
     "@kbn/data-view-utils",
     "@kbn/restorable-state",
     "@kbn/react-hooks",
+    "@kbn/css-utils",
   ]
 }

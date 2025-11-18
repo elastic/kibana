@@ -5,28 +5,33 @@
  * 2.0.
  */
 
-import {
-  FlattenRecord,
-  flattenRecord,
-  namedFieldDefinitionConfigSchema,
-  processorWithIdDefinitionSchema,
-} from '@kbn/streams-schema';
+import type { FlattenRecord } from '@kbn/streams-schema';
+import { flattenRecord, namedFieldDefinitionConfigSchema } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import { streamlangDSLSchema } from '@kbn/streamlang';
+import { from, map } from 'rxjs';
+import type { ServerSentEventBase } from '@kbn/sse-utils';
+import type { Observable } from 'rxjs';
 import { STREAMS_API_PRIVILEGES, STREAMS_TIERED_ML_FEATURE } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../../create_server_route';
-import { ProcessingSimulationParams, simulateProcessing } from './simulation_handler';
-import { handleProcessingSuggestion } from './suggestions_handler';
+import type { ProcessingSimulationParams } from './simulation_handler';
+import { simulateProcessing } from './simulation_handler';
 import {
   handleProcessingDateSuggestions,
   processingDateSuggestionsSchema,
-} from './suggestions/date_suggestions_handler';
+} from './date_suggestions_handler';
+import {
+  handleProcessingGrokSuggestions,
+  processingGrokSuggestionsSchema,
+} from './grok_suggestions_handler';
+import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
 
 const paramsSchema = z.object({
   path: z.object({ name: z.string() }),
   body: z.object({
-    processing: z.array(processorWithIdDefinitionSchema),
+    processing: streamlangDSLSchema,
     documents: z.array(flattenRecord),
     detected_fields: z.array(namedFieldDefinitionConfigSchema).optional(),
   }),
@@ -44,14 +49,16 @@ export const simulateProcessorRoute = createServerRoute({
   },
   params: paramsSchema,
   handler: async ({ params, request, getScopedClients }) => {
-    const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
+    const { scopedClusterClient, streamsClient, fieldsMetadataClient } = await getScopedClients({
+      request,
+    });
 
     const { read } = await checkAccess({ name: params.path.name, scopedClusterClient });
     if (!read) {
       throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
     }
 
-    return simulateProcessing({ params, scopedClusterClient, streamsClient });
+    return simulateProcessing({ params, scopedClusterClient, streamsClient, fieldsMetadataClient });
   },
 });
 
@@ -61,19 +68,15 @@ export interface ProcessingSuggestionBody {
   samples: FlattenRecord[];
 }
 
-const processingSuggestionSchema = z.object({
-  field: z.string(),
-  connectorId: z.string(),
-  samples: z.array(flattenRecord),
-});
+type GrokSuggestionResponse = Observable<
+  ServerSentEventBase<
+    'grok_suggestion',
+    { grokProcessor: Awaited<ReturnType<typeof handleProcessingGrokSuggestions>> }
+  >
+>;
 
-const suggestionsParamsSchema = z.object({
-  path: z.object({ name: z.string() }),
-  body: processingSuggestionSchema,
-});
-
-export const processingSuggestionRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/processing/_suggestions',
+export const processingGrokSuggestionRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{name}/processing/_suggestions/grok',
   options: {
     access: 'internal',
   },
@@ -82,22 +85,39 @@ export const processingSuggestionRoute = createServerRoute({
       requiredPrivileges: [STREAMS_API_PRIVILEGES.read],
     },
   },
-  params: suggestionsParamsSchema,
-  handler: async ({ params, request, getScopedClients, server }) => {
+  params: processingGrokSuggestionsSchema,
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    server,
+  }): Promise<GrokSuggestionResponse> => {
     const isAvailableForTier = server.core.pricing.isFeatureAvailable(STREAMS_TIERED_ML_FEATURE.id);
     if (!isAvailableForTier) {
-      throw new SecurityError(`Cannot access API on the current pricing tier`);
+      throw new SecurityError('Cannot access API on the current pricing tier');
     }
 
-    const { inferenceClient, scopedClusterClient, streamsClient } = await getScopedClients({
-      request,
-    });
-    return handleProcessingSuggestion(
-      params.path.name,
-      params.body,
-      inferenceClient,
-      scopedClusterClient,
-      streamsClient
+    const { inferenceClient, scopedClusterClient, streamsClient, fieldsMetadataClient } =
+      await getScopedClients({
+        request,
+      });
+
+    // Turn our promise into an Observable ServerSideEvent. The only reason we're streaming the
+    // response here is to avoid timeout issues prevalent with long-running requests to LLMs.
+    return from(
+      handleProcessingGrokSuggestions({
+        params,
+        inferenceClient,
+        streamsClient,
+        scopedClusterClient,
+        fieldsMetadataClient,
+        signal: getRequestAbortSignal(request),
+      })
+    ).pipe(
+      map((grokProcessor) => ({
+        grokProcessor,
+        type: 'grok_suggestion' as const,
+      }))
     );
   },
 });
@@ -116,7 +136,7 @@ export const processingDateSuggestionsRoute = createServerRoute({
   handler: async ({ params, request, getScopedClients, server }) => {
     const isAvailableForTier = server.core.pricing.isFeatureAvailable(STREAMS_TIERED_ML_FEATURE.id);
     if (!isAvailableForTier) {
-      throw new SecurityError(`Cannot access API on the current pricing tier`);
+      throw new SecurityError('Cannot access API on the current pricing tier');
     }
 
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
@@ -137,6 +157,6 @@ export const processingDateSuggestionsRoute = createServerRoute({
 
 export const internalProcessingRoutes = {
   ...simulateProcessorRoute,
-  ...processingSuggestionRoute,
+  ...processingGrokSuggestionRoute,
   ...processingDateSuggestionsRoute,
 };

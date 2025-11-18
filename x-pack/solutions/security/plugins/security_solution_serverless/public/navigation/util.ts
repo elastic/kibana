@@ -24,21 +24,21 @@ export const getProjectFeaturesUrl = (cloud: CloudStart): string | undefined => 
 };
 
 export const getCloudUrl: GetCloudUrl = (cloudUrlKey, cloud) => {
+  const cloudUrls = cloud.getUrls();
+
   switch (cloudUrlKey) {
-    case 'billing':
-      return cloud.billingUrl;
     case 'deployment':
-      return cloud.deploymentUrl;
+      return cloudUrls.deploymentUrl;
     case 'organization':
-      return cloud.organizationUrl;
+      return cloudUrls.organizationUrl;
     case 'performance':
-      return cloud.performanceUrl;
+      return cloudUrls.performanceUrl;
     case 'profile':
-      return cloud.profileUrl;
+      return cloudUrls.profileUrl;
     case 'usersAndRoles':
-      return cloud.usersAndRolesUrl;
+      return cloudUrls.usersAndRolesUrl;
     case 'projects':
-      return cloud.projectsUrl;
+      return cloudUrls.projectsUrl;
     default:
       return undefined;
   }

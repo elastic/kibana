@@ -6,21 +6,14 @@
  */
 
 import { z } from '@kbn/zod';
-import { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
+import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
 import { internal } from '@hapi/boom';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
-import { Asset, DashboardAsset } from '../../../common/assets';
 import { createServerRoute } from '../create_server_route';
-import { ASSET_ID, ASSET_TYPE } from '../../lib/streams/assets/fields';
-
-export interface SanitizedDashboardAsset {
-  id: string;
-  title: string;
-  tags: string[];
-}
+import type { Attachment } from '../../lib/streams/attachments/types';
 
 export interface ListDashboardsResponse {
-  dashboards: SanitizedDashboardAsset[];
+  dashboards: Attachment[];
 }
 
 export interface LinkDashboardResponse {
@@ -32,22 +25,14 @@ export interface UnlinkDashboardResponse {
 }
 
 export interface SuggestDashboardResponse {
-  suggestions: SanitizedDashboardAsset[];
+  suggestions: Attachment[];
 }
 
-export type BulkUpdateAssetsResponse =
+export type BulkUpdateAttachmentsResponse =
   | {
       acknowledged: boolean;
     }
   | { errors: ErrorCause[] };
-
-function sanitizeDashboardAsset(asset: DashboardAsset): SanitizedDashboardAsset {
-  return {
-    id: asset[ASSET_ID],
-    title: asset.title,
-    tags: asset.tags,
-  };
-}
 
 const listDashboardsRoute = createServerRoute({
   endpoint: 'GET /api/streams/{name}/dashboards 2023-10-31',
@@ -71,21 +56,21 @@ const listDashboardsRoute = createServerRoute({
     },
   },
   async handler({ params, request, getScopedClients }): Promise<ListDashboardsResponse> {
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+    const { attachmentClient, streamsClient } = await getScopedClients({ request });
     await streamsClient.ensureStream(params.path.name);
 
     const {
       path: { name: streamName },
     } = params;
 
-    function isDashboard(asset: Asset): asset is DashboardAsset {
-      return asset[ASSET_TYPE] === 'dashboard';
+    function isDashboard(attachment: Attachment) {
+      return attachment.type === 'dashboard';
     }
 
     return {
-      dashboards: (await assetClient.getAssets(streamName))
-        .filter(isDashboard)
-        .map(sanitizeDashboardAsset),
+      dashboards: (await attachmentClient.getAttachments(streamName, 'dashboard')).filter(
+        isDashboard
+      ),
     };
   },
 });
@@ -113,16 +98,16 @@ const linkDashboardRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<LinkDashboardResponse> => {
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+    const { attachmentClient, streamsClient } = await getScopedClients({ request });
     const {
       path: { dashboardId, name: streamName },
     } = params;
 
     await streamsClient.ensureStream(streamName);
 
-    await assetClient.linkAsset(streamName, {
-      [ASSET_TYPE]: 'dashboard',
-      [ASSET_ID]: dashboardId,
+    await attachmentClient.linkAttachment(streamName, {
+      type: 'dashboard',
+      id: dashboardId,
     });
 
     return {
@@ -154,7 +139,7 @@ const unlinkDashboardRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<UnlinkDashboardResponse> => {
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+    const { attachmentClient, streamsClient } = await getScopedClients({ request });
 
     await streamsClient.ensureStream(params.path.name);
 
@@ -162,9 +147,9 @@ const unlinkDashboardRoute = createServerRoute({
       path: { dashboardId, name: streamName },
     } = params;
 
-    await assetClient.unlinkAsset(streamName, {
-      [ASSET_ID]: dashboardId,
-      [ASSET_TYPE]: 'dashboard',
+    await attachmentClient.unlinkAttachment(streamName, {
+      type: 'dashboard',
+      id: dashboardId,
     });
 
     return {
@@ -195,7 +180,7 @@ const suggestDashboardsRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<SuggestDashboardResponse> => {
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+    const { attachmentClient, streamsClient } = await getScopedClients({ request });
 
     await streamsClient.ensureStream(params.path.name);
 
@@ -205,14 +190,12 @@ const suggestDashboardsRoute = createServerRoute({
     } = params;
 
     const suggestions = (
-      await assetClient.getSuggestions({
-        assetTypes: ['dashboard'],
+      await attachmentClient.getSuggestions({
+        attachmentTypes: ['dashboard'],
         query,
         tags,
       })
-    ).assets.map((asset) => {
-      return sanitizeDashboardAsset(asset as DashboardAsset);
-    });
+    ).attachments;
 
     return {
       suggestions,
@@ -262,8 +245,8 @@ const bulkDashboardsRoute = createServerRoute({
     request,
     getScopedClients,
     logger,
-  }): Promise<BulkUpdateAssetsResponse> => {
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+  }): Promise<BulkUpdateAttachmentsResponse> => {
+    const { attachmentClient, streamsClient } = await getScopedClients({ request });
 
     const {
       path: { name: streamName },
@@ -272,24 +255,24 @@ const bulkDashboardsRoute = createServerRoute({
 
     await streamsClient.ensureStream(streamName);
 
-    const result = await assetClient.bulk(
+    const result = await attachmentClient.bulk(
       streamName,
       operations.map((operation) => {
         if ('index' in operation) {
           return {
             index: {
-              asset: {
-                [ASSET_TYPE]: 'dashboard',
-                [ASSET_ID]: operation.index.id,
+              attachment: {
+                type: 'dashboard',
+                id: operation.index.id,
               },
             },
           };
         }
         return {
           delete: {
-            asset: {
-              [ASSET_TYPE]: 'dashboard',
-              [ASSET_ID]: operation.delete.id,
+            attachment: {
+              type: 'dashboard',
+              id: operation.delete.id,
             },
           },
         };

@@ -28,9 +28,9 @@ import {
   createXsrfPostAuthHandler,
 } from './lifecycle_handlers';
 
-import { HttpConfig } from './http_config';
+import type { HttpConfig } from './http_config';
 import { loggerMock } from '@kbn/logging-mocks';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
 
 type ToolkitMock = jest.Mocked<OnPreResponseToolkit & OnPostAuthToolkit & OnPreRoutingToolkit>;

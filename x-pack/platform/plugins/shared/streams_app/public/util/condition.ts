@@ -5,24 +5,28 @@
  * 2.0.
  */
 
+import type {
+  AlwaysCondition,
+  Condition,
+  FilterCondition,
+  OperatorKeys,
+  ShorthandBinaryFilterCondition,
+} from '@kbn/streamlang';
 import {
+  ALWAYS_CONDITION,
+  getFilterOperator,
+  getFilterValue,
   isAlwaysCondition,
-  type AlwaysCondition,
-  type BinaryFilterCondition,
-  type Condition,
-  NeverCondition,
-} from '@kbn/streams-schema';
-import { cloneDeep, isEqual } from 'lodash';
+  isCondition,
+  isFilterConditionObject,
+} from '@kbn/streamlang';
 
-export const EMPTY_EQUALS_CONDITION: BinaryFilterCondition = Object.freeze({
+import { cloneDeep, isEqual, isPlainObject } from 'lodash';
+
+export const EMPTY_EQUALS_CONDITION: ShorthandBinaryFilterCondition = Object.freeze({
   field: '',
-  operator: 'eq',
-  value: '',
+  eq: '',
 });
-
-export const ALWAYS_CONDITION: AlwaysCondition = Object.freeze({ always: {} });
-
-export const NEVER_CONDITION: NeverCondition = Object.freeze({ never: {} });
 
 export function alwaysToEmptyEquals<T extends Condition>(condition: T): Exclude<T, AlwaysCondition>;
 
@@ -39,3 +43,83 @@ export function emptyEqualsToAlways(condition: Condition) {
   }
   return condition;
 }
+
+const UI_SUPPORTED_OPERATORS_AND_VALUE_TYPES: Record<Exclude<OperatorKeys, 'range'>, string[]> = {
+  // Allow both string and boolean for eq/neq so that boolean shorthand (e.g. "equals true") can rendered in UI
+  eq: ['string', 'boolean'],
+  neq: ['string', 'boolean'],
+
+  gt: ['string'],
+  gte: ['string'],
+  lt: ['string'],
+  lte: ['string'],
+  contains: ['string'],
+  startsWith: ['string'],
+  endsWith: ['string'],
+  exists: ['boolean'],
+};
+
+function isOperatorUiSupported(
+  operator: OperatorKeys
+): operator is keyof typeof UI_SUPPORTED_OPERATORS_AND_VALUE_TYPES {
+  return operator in UI_SUPPORTED_OPERATORS_AND_VALUE_TYPES;
+}
+
+export const isConditionEditableInUi = (
+  condition: Condition
+): condition is FilterCondition | AlwaysCondition => {
+  if (isPlainObject(condition) && isFilterConditionObject(condition)) {
+    const operator = getFilterOperator(condition as FilterCondition);
+    const value = getFilterValue(condition as FilterCondition);
+
+    // Check if the operator itself is supported by the UI
+    if (!operator || !isOperatorUiSupported(operator)) {
+      return false;
+    }
+
+    // Check if the value's data type is supported for that specific operator
+    const allowedTypes = UI_SUPPORTED_OPERATORS_AND_VALUE_TYPES[operator];
+    if (!allowedTypes) {
+      return false;
+    }
+
+    return allowedTypes.includes(typeof value);
+  }
+
+  // If it's not a simple filter, the only other UI-representable state is
+  // an 'always' condition, which is representable in UI (empty condition)
+  return isAlwaysCondition(condition);
+};
+
+// Determines whether a filter condition can be represented using the boolean shorthand
+// e.g. { field: 'foo', eq: true } can be represented by "equals true" operator in the UI
+export function isShorthandBooleanFilterCondition(
+  condition: FilterCondition
+): condition is ShorthandBinaryFilterCondition {
+  return (
+    (isPlainObject(condition) &&
+      isFilterConditionObject(condition) &&
+      'eq' in condition &&
+      typeof condition.eq === 'boolean') ||
+    ('neq' in condition && typeof condition.neq === 'boolean')
+  );
+}
+
+// Determines whether a value input should be displayed for a condition.
+// Shorthand binary operators e.g. "equals true" do not need a value field.
+export function conditionNeedsValueField(condition: FilterCondition): boolean {
+  return !isShorthandBooleanFilterCondition(condition);
+}
+
+/**
+ * Get the field name from a filter condition.
+ * @param condition condition to extract field name from
+ * @returns field name or undefined if not a filter condition
+ */
+export const getFilterConditionField = (condition: Condition) => {
+  return isCondition(condition) && alwaysToEmptyEquals(condition)
+    ? isPlainObject(condition) && isFilterConditionObject(condition)
+      ? condition.field
+      : undefined
+    : undefined;
+};

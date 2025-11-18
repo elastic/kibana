@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ComponentProps, lazy, Suspense } from 'react';
+import type { ComponentProps } from 'react';
+import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { ObservabilityAlertsTable as ObservabilityAlertsTableType } from './alerts_table';
 

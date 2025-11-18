@@ -11,14 +11,13 @@ import { get } from 'lodash';
 import { defer } from 'rxjs';
 import { switchMap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
-import { KibanaRequest, StartServicesAccessor } from '@kbn/core/server';
-import {
+import type { KibanaRequest, StartServicesAccessor } from '@kbn/core/server';
+import type {
   EsaggsExpressionFunctionDefinition,
   EsaggsStartDependencies,
-  getEsaggsMeta,
-  handleEsaggsRequest,
 } from '../../../common/search/expressions';
-import { DataPluginStartDependencies, DataPluginStart } from '../../plugin';
+import { getEsaggsMeta, handleEsaggsRequest } from '../../../common/search/expressions';
+import type { DataPluginStartDependencies, DataPluginStart } from '../../plugin';
 
 /**
  * Returns the expression function definition. Any stateful dependencies are accessed
@@ -52,9 +51,9 @@ export function getFunctionDefinition({
           );
         }
 
-        const { aggs, indexPatterns, searchSource } = await getStartDependencies(kibanaRequest);
+        const { aggs, dataViews, searchSource } = await getStartDependencies(kibanaRequest);
 
-        const indexPattern = await indexPatterns.create(args.index.value, true);
+        const indexPattern = await dataViews.create(args.index.value, true);
         const aggConfigs = aggs.createAggConfigs(
           indexPattern,
           args.aggs?.map((agg) => agg.value) ?? [],
@@ -111,7 +110,7 @@ export function getEsaggs({
 
       return {
         aggs: await search.aggs.asScopedToClient(savedObjectsClient, esClient.asCurrentUser),
-        indexPatterns: await indexPatterns.dataViewsServiceFactory(
+        dataViews: await indexPatterns.dataViewsServiceFactory(
           savedObjectsClient,
           esClient.asCurrentUser
         ),

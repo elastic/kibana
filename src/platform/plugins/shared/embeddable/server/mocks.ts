@@ -8,7 +8,7 @@
  */
 
 import { createEmbeddablePersistableStateServiceMock } from '../common/mocks';
-import { EmbeddableSetup, EmbeddableStart } from './plugin';
+import type { EmbeddableSetup, EmbeddableStart } from './plugin';
 
 export const createEmbeddableSetupMock = (): jest.Mocked<EmbeddableSetup> => ({
   ...createEmbeddablePersistableStateServiceMock(),
@@ -16,9 +16,12 @@ export const createEmbeddableSetupMock = (): jest.Mocked<EmbeddableSetup> => ({
   registerTransforms: jest.fn(),
   getAllMigrations: jest.fn().mockReturnValue({}),
   registerEnhancement: jest.fn(),
+  transformEnhancementsIn: jest.fn(),
+  transformEnhancementsOut: jest.fn(),
 });
 
 export const createEmbeddableStartMock = (): jest.Mocked<EmbeddableStart> => ({
   ...createEmbeddablePersistableStateServiceMock(),
+  getEmbeddableSchemas: jest.fn(),
   getTransforms: jest.fn(),
 });

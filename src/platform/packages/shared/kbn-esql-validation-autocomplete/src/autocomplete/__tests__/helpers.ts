@@ -7,16 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { camelCase } from 'lodash';
-import {
-  TRIGGER_SUGGESTION_COMMAND,
-  fieldTypes,
+import type {
   FieldType,
   FunctionParameterType,
   FunctionReturnType,
-  FunctionDefinitionTypes,
+  FunctionDefinition,
 } from '@kbn/esql-ast';
+import { withAutoSuggest, fieldTypes, FunctionDefinitionTypes } from '@kbn/esql-ast';
 import { getSafeInsertText } from '@kbn/esql-ast/src/definitions/utils';
-import {
+import type {
   Location,
   ESQLFieldWithMetadata,
   ISuggestionItem,
@@ -25,9 +24,17 @@ import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/
 import { timeSeriesAggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/time_series_agg_functions';
 import { groupingFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/grouping_functions';
 import { scalarFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/scalar_functions';
-import { operatorsDefinitions } from '@kbn/esql-ast/src/definitions/all_operators';
-import { ESQLLicenseType } from '@kbn/esql-types';
-import { PricingProduct } from '@kbn/core-pricing-common/src/types';
+import {
+  operatorsDefinitions,
+  logicalOperators,
+  arithmeticOperators,
+  comparisonFunctions,
+  patternMatchOperators,
+  inOperators,
+  nullCheckOperators,
+} from '@kbn/esql-ast/src/definitions/all_operators';
+import type { LicenseType } from '@kbn/licensing-types';
+import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import { NOT_SUGGESTED_TYPES } from '../../shared/resources_helpers';
 import { getLocationFromCommandOrOptionName } from '../../shared/types';
 import * as autocomplete from '../autocomplete';
@@ -52,15 +59,27 @@ export const fields: TestField[] = [
   ...fieldTypes.map((type) => ({
     name: `${camelCase(type)}Field`,
     type,
+    userDefined: false as const,
+    // suggestedAs is optional and omitted here
   })),
-  { name: 'any#Char$Field', type: 'double', suggestedAs: '`any#Char$Field`' },
-  { name: 'kubernetes.something.something', type: 'double' },
+  {
+    name: 'any#Char$Field',
+    type: 'double',
+    suggestedAs: '`any#Char$Field`',
+    userDefined: false as const,
+  },
+  {
+    name: 'kubernetes.something.something',
+    type: 'double',
+    suggestedAs: undefined,
+    userDefined: false as const,
+  },
 ];
 
 export const lookupIndexFields: TestField[] = [
-  { name: 'booleanField', type: 'boolean' },
-  { name: 'dateField', type: 'date' },
-  { name: 'joinIndexOnlyField', type: 'text' },
+  { name: 'booleanField', type: 'boolean', userDefined: false },
+  { name: 'dateField', type: 'date', userDefined: false },
+  { name: 'joinIndexOnlyField', type: 'text', userDefined: false },
 ];
 
 export const indexes = (
@@ -124,6 +143,7 @@ export function getFunctionSignaturesByReturnType(
     grouping,
     scalar,
     operators,
+    excludeOperatorGroups,
     timeseriesAgg,
     // skipAssign here is used to communicate to not propose an assignment if it's not possible
     // within the current context (the actual logic has it, but here we want a shortcut)
@@ -133,14 +153,19 @@ export function getFunctionSignaturesByReturnType(
     grouping?: boolean;
     scalar?: boolean;
     operators?: boolean;
+    /** Exclude specific operator groups (e.g., ['in', 'nullCheck']) */
+    excludeOperatorGroups?: Array<
+      'logical' | 'comparison' | 'arithmetic' | 'pattern' | 'in' | 'nullCheck'
+    >;
     timeseriesAgg?: boolean;
     skipAssign?: boolean;
   } = {},
   paramsTypes?: Readonly<FunctionParameterType[]>,
   ignored?: string[],
   option?: string,
-  hasMinimumLicenseRequired = (license?: ESQLLicenseType | undefined): boolean =>
-    license === 'platinum'
+  hasMinimumLicenseRequired = (license?: LicenseType | undefined): boolean =>
+    license === 'platinum',
+  activeProduct?: PricingProduct
 ): PartialSuggestionWithText[] {
   const expectedReturnType = Array.isArray(_expectedReturnType)
     ? _expectedReturnType
@@ -161,7 +186,43 @@ export function getFunctionSignaturesByReturnType(
     list.push(...timeSeriesAggFunctionDefinitions);
   }
   if (operators) {
-    list.push(...operatorsDefinitions.filter(({ name }) => (skipAssign ? name !== '=' : true)));
+    // Build set of operator names to exclude based on excludeOperatorGroups
+    const excludedOperatorNames = new Set<string>();
+
+    if (excludeOperatorGroups) {
+      const operatorGroupMap: Record<string, FunctionDefinition[]> = {
+        logical: logicalOperators,
+        comparison: comparisonFunctions,
+        arithmetic: arithmeticOperators,
+        pattern: patternMatchOperators,
+        in: inOperators,
+        nullCheck: nullCheckOperators,
+      };
+
+      for (const groupName of excludeOperatorGroups) {
+        const group = operatorGroupMap[groupName];
+
+        if (group) {
+          for (const op of group) {
+            excludedOperatorNames.add(op.name);
+          }
+        }
+      }
+    }
+
+    list.push(
+      ...operatorsDefinitions.filter(({ name }) => {
+        if (skipAssign && (name === '=' || name === ':')) {
+          return false;
+        }
+
+        if (excludedOperatorNames.has(name)) {
+          return false;
+        }
+
+        return true;
+      })
+    );
   }
 
   const deduped = Array.from(new Set(list));
@@ -169,53 +230,64 @@ export function getFunctionSignaturesByReturnType(
   const locations = Array.isArray(location) ? location : [location];
 
   return deduped
-    .filter(({ signatures, ignoreAsSuggestion, locationsAvailable }) => {
-      const hasRestrictedSignature = signatures.some((signature) => signature.license);
-      if (hasRestrictedSignature) {
-        const availableSignatures = signatures.filter((signature) => {
-          if (!signature.license) return true;
-          return hasMinimumLicenseRequired(
-            signature.license.toLocaleLowerCase() as ESQLLicenseType
-          );
-        });
+    .filter(
+      ({ signatures, ignoreAsSuggestion, locationsAvailable, observabilityTier, license }) => {
+        const hasRestrictedSignature = signatures.some((signature) => signature.license);
+        if (hasRestrictedSignature) {
+          const availableSignatures = signatures.filter((signature) => {
+            if (!signature.license) return true;
+            return hasMinimumLicenseRequired(signature.license.toLocaleLowerCase() as LicenseType);
+          });
 
-        if (availableSignatures.length === 0) {
+          if (availableSignatures.length === 0) {
+            return false;
+          }
+        }
+
+        const hasObservabilityAccess = !(
+          observabilityTier &&
+          activeProduct &&
+          activeProduct.type === 'observability' &&
+          activeProduct.tier !== observabilityTier.toLowerCase()
+        );
+
+        if (!hasObservabilityAccess) {
           return false;
         }
-      }
 
-      if (ignoreAsSuggestion) {
-        return false;
-      }
-      if (
-        !(option ? [...locations, getLocationFromCommandOrOptionName(option)] : locations).some(
-          (loc) => locationsAvailable.includes(loc)
-        )
-      ) {
-        return false;
-      }
-      const filteredByReturnType = signatures.filter(
-        ({ returnType }) =>
-          expectedReturnType.includes('any') || expectedReturnType.includes(returnType as string)
-      );
-      if (!filteredByReturnType.length && !expectedReturnType.includes('any')) {
-        return false;
-      }
-      if (paramsTypes?.length) {
-        return filteredByReturnType.some(
-          ({ params }) =>
-            !params.length ||
-            (paramsTypes.length <= params.length &&
-              paramsTypes.every(
-                (expectedType, i) =>
-                  expectedType === 'any' ||
-                  params[i].type === 'any' ||
-                  expectedType === params[i].type
-              ))
+        if (ignoreAsSuggestion) {
+          return false;
+        }
+        if (
+          !(option ? [...locations, getLocationFromCommandOrOptionName(option)] : locations).some(
+            (loc) => locationsAvailable.includes(loc)
+          )
+        ) {
+          return false;
+        }
+        const filteredByReturnType = signatures.filter(
+          ({ returnType }) =>
+            expectedReturnType.includes('any') || expectedReturnType.includes(returnType as string)
         );
+        if (!filteredByReturnType.length && !expectedReturnType.includes('any')) {
+          return false;
+        }
+        if (paramsTypes?.length) {
+          return filteredByReturnType.some(
+            ({ params }) =>
+              !params.length ||
+              (paramsTypes.length <= params.length &&
+                paramsTypes.every(
+                  (expectedType, i) =>
+                    expectedType === 'any' ||
+                    params[i].type === 'any' ||
+                    expectedType === params[i].type
+                ))
+          );
+        }
+        return true;
       }
-      return true;
-    })
+    )
     .filter(({ name }) => {
       if (ignored?.length) {
         return !ignored?.includes(name);
@@ -234,6 +306,15 @@ export function getFunctionSignaturesByReturnType(
           label: name.toUpperCase(),
         };
       }
+
+      const hasNoArguments = signatures.every((sig) => sig.params.length === 0);
+      if (hasNoArguments) {
+        return {
+          text: `${name.toUpperCase()}()`,
+          label: name.toUpperCase(),
+        };
+      }
+
       return {
         text: customParametersSnippet
           ? `${name.toUpperCase()}(${customParametersSnippet})`
@@ -276,7 +357,7 @@ export function createCustomCallbackMocks(
     enrichFields: string[];
   }>,
   customLicenseType = 'platinum',
-  customActiveProduct: PricingProduct = { type: 'observability', tier: 'complete' }
+  customActiveProduct?: PricingProduct
 ): ESQLCallbacks {
   const finalColumnsSinceLastCommand =
     customColumnsSinceLastCommand ||
@@ -297,7 +378,8 @@ export function createCustomCallbackMocks(
     getJoinIndices: jest.fn(async () => ({ indices: joinIndices })),
     getTimeseriesIndices: jest.fn(async () => ({ indices: timeseriesIndices })),
     getEditorExtensions: jest.fn(async (queryString: string) => {
-      if (queryString.includes('logs*')) {
+      // from * is called in the empty state
+      if (queryString.includes('logs*') || queryString === 'from *') {
         return {
           recommendedQueries: editorExtensions.recommendedQueries,
           recommendedFields: editorExtensions.recommendedFields,
@@ -387,8 +469,7 @@ export const attachTriggerCommand = (
   s: string | PartialSuggestionWithText
 ): PartialSuggestionWithText =>
   typeof s === 'string'
-    ? {
+    ? withAutoSuggest({
         text: s,
-        command: TRIGGER_SUGGESTION_COMMAND,
-      }
-    : { ...s, command: TRIGGER_SUGGESTION_COMMAND };
+      } as ISuggestionItem)
+    : withAutoSuggest(s as ISuggestionItem);

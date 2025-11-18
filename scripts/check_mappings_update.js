@@ -7,5 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('../src/setup_node_env');
-require('@kbn/check-mappings-update-cli');
+require('@kbn/setup-node-env');
+require('@kbn/check-saved-objects-cli').runCheckMappingsUpdateCli();

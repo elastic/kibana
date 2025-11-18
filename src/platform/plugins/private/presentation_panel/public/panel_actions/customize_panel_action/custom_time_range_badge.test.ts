@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter, TimeRange, type AggregateQuery, type Query } from '@kbn/es-query';
+import type { Filter, TimeRange } from '@kbn/es-query';
+import { type AggregateQuery, type Query } from '@kbn/es-query';
 
-import { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
 import { BehaviorSubject, take } from 'rxjs';
 import { CustomTimeRangeBadge } from './custom_time_range_badge';
 

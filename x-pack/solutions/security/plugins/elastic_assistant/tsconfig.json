@@ -1,6 +1,6 @@
 {
   "esModuleInterop": true,
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -89,7 +89,16 @@
     "@kbn/inference-langchain",
     "@kbn/security-solution-features",
     "@kbn/core-http-server-mocks",
-    "@kbn/inference-common"
+    "@kbn/inference-common",
+    "@kbn/licensing-types",
+    "@kbn/user-profile-components",
+    "@kbn/core-user-profile-common",
+    "@kbn/core-analytics-server-mocks",
+    "@kbn/core-security-server",
+    "@kbn/index-adapter",
+    "@kbn/langgraph-checkpoint-saver",
+    "@kbn/lists-plugin",
+    "@kbn/react-query"
   ],
   "exclude": [
     "target/**/*",

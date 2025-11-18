@@ -28,7 +28,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
-import { css } from '@emotion/react';
 import { FieldStatsPopover } from './context_popover/field_stats_popover';
 import { asPreciseDecimal } from '../../../../common/utils/formatters';
 import type { LatencyCorrelation } from '../../../../common/correlations/latency_correlations/types';
@@ -52,6 +51,7 @@ import { getTransactionDistributionChartData } from './get_transaction_distribut
 import { ChartTitleToolTip } from './chart_title_tool_tip';
 import { getLatencyCorrelationImpactLabel } from './utils/get_failed_transactions_correlation_impact_label';
 import { MIN_TAB_TITLE_HEIGHT } from '../../shared/charts/duration_distribution_chart_with_scrubber';
+import { OpenInDiscoverButton } from '../../shared/links/discover_links/open_in_discover_button';
 
 export function FallbackCorrelationBadge() {
   return (
@@ -299,13 +299,7 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
 
   return (
     <div data-test-subj="apmLatencyCorrelationsTabContent">
-      <EuiFlexGroup
-        css={css`
-          min-height: ${MIN_TAB_TITLE_HEIGHT};
-        `}
-        alignItems="center"
-        gutterSize="s"
-      >
+      <EuiFlexGroup style={{ minHeight: MIN_TAB_TITLE_HEIGHT }} alignItems="center" gutterSize="s">
         <EuiFlexItem grow={false}>
           <EuiTitle size="xs">
             <h5 data-test-subj="apmCorrelationsLatencyCorrelationsChartTitle">
@@ -325,6 +319,10 @@ export function LatencyCorrelations({ onFilter }: { onFilter: () => void }) {
             eventType={ProcessorEvent.transaction}
             totalDocCount={response.totalDocCount}
           />
+        </EuiFlexItem>
+
+        <EuiFlexItem grow={false}>
+          <OpenInDiscoverButton dataTestSubj="apmLatencyCorrelationsOpenInDiscoverButton" />
         </EuiFlexItem>
 
         <EuiFlexItem grow={false}>

@@ -10,7 +10,8 @@
 import moment from 'moment-timezone';
 import { wrapArray } from './util';
 import { ApplicationUsageTracker } from './application_usage_tracker';
-import { Metric, METRIC_TYPE } from './metrics';
+import type { Metric } from './metrics';
+import { METRIC_TYPE } from './metrics';
 const REPORT_VERSION = 3;
 
 import type { UiCounterMetric, UiCounterMetricType } from './metrics/ui_counter';

@@ -6,40 +6,40 @@ The Kibana Alerting plugin provides a common place to set up rules. You can:
 - List the types of registered rules
 - Perform CRUD actions on rules
 
-----
+---
 
 Table of Contents
 
 - [Kibana Alerting](#kibana-alerting)
-	- [Terminology](#terminology)
-	- [Usage](#usage)
-	- [Alerting API Keys](#alerting-api-keys)
-	- [Rule Types](#rule-types)
-		- [Methods](#methods)
-		- [Executor](#executor)
-		- [Alerts as Data](#alerts-as-data)
-		- [Action Variables](#action-variables)
-		- [useSavedObjectReferences Hooks](#usesavedobjectreferences-hooks)
-	- [Recovered Alerts](#recovered-alerts)
-	- [Licensing](#licensing)
-	- [Documentation](#documentation)
-	- [Tests](#tests)
-		- [Example](#example)
-	- [Role Based Access-Control](#role-based-access-control)
-		- [Subfeature privileges](#subfeature-privileges)
-		- [`read` privileges vs. `all` privileges](#read-privileges-vs-all-privileges)
-	- [Alert Navigation](#alert-navigation)
-		- [registerNavigation](#registernavigation)
-		- [registerDefaultNavigation](#registerdefaultnavigation)
-		- [Balancing both APIs side by side](#balancing-both-apis-side-by-side)
-	- [Internal HTTP APIs](#internal-http-apis)
-		- [`GET /internal/alerting/rule/{id}/state`: Get rule state](#get-internalalertingruleidstate-get-rule-state)
-		- [`GET /internal/alerting/rule/{id}/_alert_summary`: Get rule alert summary](#get-internalalertingruleid_alert_summary-get-rule-alert-summary)
-		- [`POST /api/alerting/rule/{id}/_update_api_key`: Update rule API key](#post-apialertingruleid_update_api_key-update-rule-api-key)
-	- [Alert Factory](#alert-factory)
-		- [When should I use `setContext`?](#when-should-i-use-setcontext)
-	- [Templating Actions](#templating-actions)
-		- [Examples](#examples)
+  - [Terminology](#terminology)
+  - [Usage](#usage)
+  - [Alerting API Keys](#alerting-api-keys)
+  - [Rule Types](#rule-types)
+    - [Methods](#methods)
+    - [Executor](#executor)
+    - [Alerts as Data](#alerts-as-data)
+    - [Action Variables](#action-variables)
+    - [useSavedObjectReferences Hooks](#usesavedobjectreferences-hooks)
+  - [Recovered Alerts](#recovered-alerts)
+  - [Licensing](#licensing)
+  - [Documentation](#documentation)
+  - [Tests](#tests)
+    - [Example](#example)
+  - [Role Based Access-Control](#role-based-access-control)
+    - [Subfeature privileges](#subfeature-privileges)
+    - [`read` privileges vs. `all` privileges](#read-privileges-vs-all-privileges)
+  - [Alert Navigation](#alert-navigation)
+    - [registerNavigation](#registernavigation)
+    - [registerDefaultNavigation](#registerdefaultnavigation)
+    - [Balancing both APIs side by side](#balancing-both-apis-side-by-side)
+  - [Internal HTTP APIs](#internal-http-apis)
+    - [`GET /internal/alerting/rule/{id}/state`: Get rule state](#get-internalalertingruleidstate-get-rule-state)
+    - [`GET /internal/alerting/rule/{id}/_alert_summary`: Get rule alert summary](#get-internalalertingruleid_alert_summary-get-rule-alert-summary)
+    - [`POST /api/alerting/rule/{id}/_update_api_key`: Update rule API key](#post-apialertingruleid_update_api_key-update-rule-api-key)
+  - [Alert Factory](#alert-factory)
+    - [When should I use `setContext`?](#when-should-i-use-setcontext)
+  - [Templating Actions](#templating-actions)
+    - [Examples](#examples)
 
 ## Terminology
 
@@ -51,7 +51,7 @@ Table of Contents
 
 **Alert**: The alert(s) created from a rule execution.
 
-A Kibana rule checks the condition defined by its rule type and executes one or more actions when that condition is met.  Rules work by going through the followings steps:
+A Kibana rule checks the condition defined by its rule type and executes one or more actions when that condition is met. Rules work by going through the followings steps:
 
 1. Run a periodic check to detect a condition (the check is provided by a rule type).
 2. Convert that condition into one or more stateful alerts.
@@ -70,7 +70,7 @@ When we create a rule, we generate a new API key.
 
 When we update, enable, or disable a rule, we must invalidate the old API key and create a new one.
 
-To manage the invalidation process for API keys, we use the saved object type `api_key_pending_invalidation`.  This saved object stores all API keys that were marked for invalidation anytime rules were updated, enabled or disabled.
+To manage the invalidation process for API keys, we use the saved object type `api_key_pending_invalidation`. This saved object stores all API keys that were marked for invalidation anytime rules were updated, enabled or disabled.
 
 For security plugin invalidation, we schedule a task to check if the `api_key_pending_invalidation` saved object contains new API keys that were marked for invalidation earlier than the configured delay. The default schedule for running this task is every 5 minutes.
 
@@ -86,6 +86,7 @@ To change the default delay for the API key invalidation, use the kibana.yml con
 
 The following table describes the properties of the `options` object.
 
+<<<<<<< HEAD
 |Property|Description|Type|
 |---|---|---|
 |id|Unique identifier for the rule type. By convention, IDs starting with `.` are reserved for built-in rule types. We recommend using a convention like `<plugin_id>.mySpecialRule` for your rule types to avoid conflicting with another plugin.|string|
@@ -108,7 +109,32 @@ The following table describes the properties of the `options` object.
 |alerts|(Optional) Specify options for writing alerts as data documents for this rule type. This feature is currently under development so this field is optional but we will eventually make this a requirement of all rule types. For full details, see the alerts as data section below.|IRuleTypeAlerts|
 |autoRecoverAlerts|(Optional) Whether the framework should determine if alerts have recovered between rule runs. If not specified, the default value of `true` is used. |boolean|
 |getViewInAppRelativeUrl|(Optional) When developing a rule type, you can choose to implement this hook for generating a link back to the Kibana application that can be used in alert actions. If not specified, a generic link back to the Rule Management app is generated.|Function|
-|internallyManaged|(Optional) Indicates that the rule type is managed internally by a Kibana plugin. Internally managed rule types cannot be created through the APIs. Alerts of internally managed rule types are not returned by the APIs and thus not shown in the alerts table.|boolean|
+|internallyManaged|(Optional) Indicates that the rule type is managed internally by a Kibana plugin. Internally managed rule types cannot be created or updated through the APIs. API keys of internal rule types can be updated. Alerts of internally managed rule types are not returned by the APIs and thus not shown in the alerts table.|boolean|
+=======
+| Property                                   | Description                                                                                                                                                                                                                                                                                                                                                                   | Type                                                                                                |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------- |
+| id                                         | Unique identifier for the rule type. By convention, IDs starting with `.` are reserved for built-in rule types. We recommend using a convention like `<plugin_id>.mySpecialRule` for your rule types to avoid conflicting with another plugin.                                                                                                                                | string                                                                                              |
+| name                                       | A user-friendly name for the rule type. These will be displayed in dropdowns when choosing rule types.                                                                                                                                                                                                                                                                        | string                                                                                              |
+| actionGroups                               | An explicit list of groups the rule type may schedule actions for, each specifying the ActionGroup's unique ID and human readable name. Each rule type's `actions` validation will use this list to ensure configured groups are valid. We highly encourage using `kbn-i18n` to translate the names of actionGroup when registering the rule type.                            | Array<{id:string, name:string}>                                                                     |
+| defaultActionGroupId                       | ID value for the default action group for the rule type.                                                                                                                                                                                                                                                                                                                      | string                                                                                              |
+| recoveryActionGroup                        | (Optional) The action group to use when an alert goes from an active state to an inactive one. This action group should not be specified under the `actionGroups` property. If no recoveryActionGroup is specified, the default `recovered` action group will be used.                                                                                                        | {id:string, name:string}                                                                            |
+| actionVariables                            | (Optional) An explicit list of action variables that the rule type makes available via context and state in action parameter templates, and a short human readable description for each. The Alerting UI will use this to display prompts for the users for these variables, in action parameter editors. We highly encourage using `kbn-i18n` to translate the descriptions. | { context: Array<{name:string, description:string}, state: Array<{name:string, description:string}> |
+| validate.params                            | When developing a rule type, you can choose to accept a series of parameters. You may also choose to have the parameters validated before they are passed to the `executor` function or created as a saved object. In order to do this, provide a `@kbn/config-schema` schema that we will use to validate the `params` attribute.                                            | @kbn/config-schema                                                                                  |
+| executor                                   | This is where the code for the rule type lives. This is a function to be called when executing a rule on an interval basis. For full details, see the executor section below.                                                                                                                                                                                                 | Function                                                                                            |
+| producer                                   | The id of the application producing this rule type.                                                                                                                                                                                                                                                                                                                           | string                                                                                              |
+| minimumLicenseRequired                     | The value of a minimum license. Most of the rules are licensed as "basic".                                                                                                                                                                                                                                                                                                    | string                                                                                              |
+| ruleTaskTimeout                            | (Optional) The length of time a rule can run before being cancelled due to timeout. If not specified, the default value of "5m" is used. Requests made to Elasticsearch will also receive the same timeout configuration, up to 5m.                                                                                                                                           | string                                                                                              |
+| cancelAlertsOnRuleTimeout                  | (Optional) Whether to skip writing alerts and scheduling actions if a rule execution is cancelled due to timeout. If not specified, the default value of "true" is used.                                                                                                                                                                                                      | boolean                                                                                             |
+| useSavedObjectReferences.extractReferences | (Optional) When developing a rule type, you can choose to implement hooks for extracting saved object references from rule parameters. This hook will be invoked when a rule is created or updated. Implementing this hook is optional, but if an extract hook is implemented, an inject hook must also be implemented.                                                       | Function                                                                                            |
+| useSavedObjectReferences.injectReferences  | (Optional) When developing a rule type, you can choose to implement hooks for injecting saved object references into rule parameters. This hook will be invoked when a rule is retrieved (get or find). Implementing this hook is optional, but if an inject hook is implemented, an extract hook must also be implemented.                                                   | Function                                                                                            |
+| isExportable                               | Whether the rule type is exportable from the Saved Objects Management UI.                                                                                                                                                                                                                                                                                                     | boolean                                                                                             |
+| defaultScheduleInterval                    | (Optional) The default interval that will show up in the UI when creating a rule of this rule type.                                                                                                                                                                                                                                                                           | boolean                                                                                             |
+| doesSetRecoveryContext                     | (Optional) Whether the rule type will set context variables for recovered alerts. Defaults to `false`. If this is set to true, context variables are made available for the recovery action group and executors will be provided with the ability to set recovery context.                                                                                                    | boolean                                                                                             |
+| alerts                                     | (Optional) Specify options for writing alerts as data documents for this rule type. This feature is currently under development so this field is optional but we will eventually make this a requirement of all rule types. For full details, see the alerts as data section below.                                                                                           | IRuleTypeAlerts                                                                                     |
+| autoRecoverAlerts                          | (Optional) Whether the framework should determine if alerts have recovered between rule runs. If not specified, the default value of `true` is used.                                                                                                                                                                                                                          | boolean                                                                                             |
+| getViewInAppRelativeUrl                    | (Optional) When developing a rule type, you can choose to implement this hook for generating a link back to the Kibana application that can be used in alert actions. If not specified, a generic link back to the Rule Management app is generated.                                                                                                                          | Function                                                                                            |
+| internallyManaged                          | (Optional) Indicates that the rule type is managed internally by a Kibana plugin. Internally managed rule types cannot be created through the APIs. Alerts of internally managed rule types are not returned by the APIs and thus not shown in the alerts table.                                                                                                              | boolean                                                                                             |
+>>>>>>> main
 
 ### Executor
 
@@ -116,58 +142,59 @@ This is the primary function for a rule type. Whenever the rule needs to execute
 
 **executor(options)**
 
-|Property|Description|
-|---|---|
-|services.scopedClusterClient|This is an instance of the Elasticsearch client. Use this to do Elasticsearch queries in the context of the user who created the alert when security is enabled.|
-|services.savedObjectsClient|This is an instance of the saved objects client. This provides the ability to perform CRUD operations on any saved object that lives in the same space as the rule.<br><br>The scope of the saved objects client is tied to the user who created the rule (only when security is enabled).|
-|services.alertFactory|This [alert factory](#alert-factory) creates alerts and must be used in order to schedule action execution. The id you give to the alert factory create function() is a unique identifier for the alert.|
-|services.log(tags, [data], [timestamp])|Use this to create server logs. (This is the same function as server.log)|
-|services.shouldWriteAlerts()|This returns a boolean indicating whether the executor should write out alerts as data. This is determined by whether rule execution has been cancelled due to timeout AND whether both the Kibana `cancelAlertsOnRuleTimeout` flag and the rule type `cancelAlertsOnRuleTimeout` are set to `true`.|
-|services.shouldStopExecution()|This returns a boolean indicating whether rule execution has been cancelled due to timeout.|
-|startedAt|The date and time the rule type started execution.|
-|previousStartedAt|The previous date and time the rule type started a successful execution.|
-|params|Parameters for the execution. This is where the parameters you require will be passed in. (e.g. threshold). Use rule type validation to ensure values are set before execution.|
-|state|State returned from the previous execution. This is the rule level state. What the executor returns will be serialized and provided here at the next execution.|
-|spaceId|The id of the space of this rule.|
-|namespace|The namespace of the space of this rule. This is the same as `spaceId`, unless `spaceId === "default"`, in which case the namespace = `undefined`.|
-|rule.id|The id of this rule.|
-|rule.name|The name of this rule.|
-|rule.tags|The tags associated with this rule.|
-|rule.consumer|The consumer of this rule type.|
-|rule.producer|The producer of this rule type.|
-|rule.ruleTypeId|The ID of the rule type for this rule.|
-|rule.ruleTypeName|The user-friendly name of the rule type for this rule.|
-|rule.enabled|Whether this rule is currently enabled.|
-|rule.schedule|The configured schedule interval of this rule.|
-|rule.actions|The configured actions for this rule.|
-|rule.createdBy|The user ID of the user that created this rule.|
-|rule.updatedBy|The user ID of the user that last updated this rule.|
-|rule.createdAt|The date and time this rule was created.|
-|rule.updatedAt|The date and this this rule was last updated.|
-|rule.throttle|The configured throttle interval for this rule.|
-|rule.notifyWhen|The configured notification type for this rule.|
+| Property                                | Description                                                                                                                                                                                                                                                                                          |
+| --------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| services.scopedClusterClient            | This is an instance of the Elasticsearch client. Use this to do Elasticsearch queries in the context of the user who created the alert when security is enabled.                                                                                                                                     |
+| services.getAsyncClient                 | This function returns an async search client. `search` method of this client submits your query to elasticsearch and then polls for the response. Use this when you have a long-running query.                                                                                                       |
+| services.savedObjectsClient             | This is an instance of the saved objects client. This provides the ability to perform CRUD operations on any saved object that lives in the same space as the rule.<br><br>The scope of the saved objects client is tied to the user who created the rule (only when security is enabled).           |
+| services.alertFactory                   | This [alert factory](#alert-factory) creates alerts and must be used in order to schedule action execution. The id you give to the alert factory create function() is a unique identifier for the alert.                                                                                             |
+| services.log(tags, [data], [timestamp]) | Use this to create server logs. (This is the same function as server.log)                                                                                                                                                                                                                            |
+| services.shouldWriteAlerts()            | This returns a boolean indicating whether the executor should write out alerts as data. This is determined by whether rule execution has been cancelled due to timeout AND whether both the Kibana `cancelAlertsOnRuleTimeout` flag and the rule type `cancelAlertsOnRuleTimeout` are set to `true`. |
+| services.shouldStopExecution()          | This returns a boolean indicating whether rule execution has been cancelled due to timeout.                                                                                                                                                                                                          |
+| startedAt                               | The date and time the rule type started execution.                                                                                                                                                                                                                                                   |
+| previousStartedAt                       | The previous date and time the rule type started a successful execution.                                                                                                                                                                                                                             |
+| params                                  | Parameters for the execution. This is where the parameters you require will be passed in. (e.g. threshold). Use rule type validation to ensure values are set before execution.                                                                                                                      |
+| state                                   | State returned from the previous execution. This is the rule level state. What the executor returns will be serialized and provided here at the next execution.                                                                                                                                      |
+| spaceId                                 | The id of the space of this rule.                                                                                                                                                                                                                                                                    |
+| namespace                               | The namespace of the space of this rule. This is the same as `spaceId`, unless `spaceId === "default"`, in which case the namespace = `undefined`.                                                                                                                                                   |
+| rule.id                                 | The id of this rule.                                                                                                                                                                                                                                                                                 |
+| rule.name                               | The name of this rule.                                                                                                                                                                                                                                                                               |
+| rule.tags                               | The tags associated with this rule.                                                                                                                                                                                                                                                                  |
+| rule.consumer                           | The consumer of this rule type.                                                                                                                                                                                                                                                                      |
+| rule.producer                           | The producer of this rule type.                                                                                                                                                                                                                                                                      |
+| rule.ruleTypeId                         | The ID of the rule type for this rule.                                                                                                                                                                                                                                                               |
+| rule.ruleTypeName                       | The user-friendly name of the rule type for this rule.                                                                                                                                                                                                                                               |
+| rule.enabled                            | Whether this rule is currently enabled.                                                                                                                                                                                                                                                              |
+| rule.schedule                           | The configured schedule interval of this rule.                                                                                                                                                                                                                                                       |
+| rule.actions                            | The configured actions for this rule.                                                                                                                                                                                                                                                                |
+| rule.createdBy                          | The user ID of the user that created this rule.                                                                                                                                                                                                                                                      |
+| rule.updatedBy                          | The user ID of the user that last updated this rule.                                                                                                                                                                                                                                                 |
+| rule.createdAt                          | The date and time this rule was created.                                                                                                                                                                                                                                                             |
+| rule.updatedAt                          | The date and this this rule was last updated.                                                                                                                                                                                                                                                        |
+| rule.throttle                           | The configured throttle interval for this rule.                                                                                                                                                                                                                                                      |
+| rule.notifyWhen                         | The configured notification type for this rule.                                                                                                                                                                                                                                                      |
 
 ### Alerts as Data
 
 The `alerts` property on a rule type should contain the information needed for the framework to install the Elasticsearch assets required to support writing alert documents.
 
-|Property|Description|Type|
-|---|---|---|
-|context|The namespace to use for this rule type. Multiple rule types can specify the same value for their alert context.|string|
-|mappings|Specify custom mappings for this rule type. These mappings will be translated into a component template.|ComponentTemplateSpec|
-|useEcs|(Optional) Whether to include the ECS component template for this rule type's alerts. If not specified, this value defaults to `false`.|boolean|
-|useLegacyAlerts|(Optional) Whether to include the legacy alert component template for this rule type's alerts. This should only be used by rule types that previously registered with the rule registry. If not specified, this value defaults to `false`.|boolean|
-|isSpaceAware|(Optional) Whether this rule type's alerts should be space-aware. If set to `true`, space specific alerts indices will be created during rule execution. If not specified, this value defaults to `false`.|boolean|
-|secondaryAlias|(Optional) Secondary alias to include. This option is included to support the signals alias for detection rules.|string|
+| Property        | Description                                                                                                                                                                                                                                | Type                  |
+| --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------- |
+| context         | The namespace to use for this rule type. Multiple rule types can specify the same value for their alert context.                                                                                                                           | string                |
+| mappings        | Specify custom mappings for this rule type. These mappings will be translated into a component template.                                                                                                                                   | ComponentTemplateSpec |
+| useEcs          | (Optional) Whether to include the ECS component template for this rule type's alerts. If not specified, this value defaults to `false`.                                                                                                    | boolean               |
+| useLegacyAlerts | (Optional) Whether to include the legacy alert component template for this rule type's alerts. This should only be used by rule types that previously registered with the rule registry. If not specified, this value defaults to `false`. | boolean               |
+| isSpaceAware    | (Optional) Whether this rule type's alerts should be space-aware. If set to `true`, space specific alerts indices will be created during rule execution. If not specified, this value defaults to `false`.                                 | boolean               |
+| secondaryAlias  | (Optional) Secondary alias to include. This option is included to support the signals alias for detection rules.                                                                                                                           | string                |
 
 Regardless of whether any rule type specifies an `alerts` definition, the alerting framework will install the following common Elasticsearch assets on plugin setup:
 
-|Type|Name|Descripton|
-|---|---|---|
-|ILM Policy|`.alerts-ilm-policy`|Roll over after 30 days or if index exceeds 50 gigabytes|
-|Component Template|`.alerts-framework-mappings`|Includes mappings for all framework alerting fields|
-|Component Template|`.alerts-legacy-alert-mappings`|Includes mappings for all legacy alert fields. Use these mappings along with the framework mappings to match the rule registry technical mappings.|
-|Component Template|`.alerts-ecs-mappings`|Includes mappings for all ECS fields, excluding those of type `constant_keyword`|
+| Type               | Name                            | Descripton                                                                                                                                         |
+| ------------------ | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ILM Policy         | `.alerts-ilm-policy`            | Roll over after 30 days or if index exceeds 50 gigabytes                                                                                           |
+| Component Template | `.alerts-framework-mappings`    | Includes mappings for all framework alerting fields                                                                                                |
+| Component Template | `.alerts-legacy-alert-mappings` | Includes mappings for all legacy alert fields. Use these mappings along with the framework mappings to match the rule registry technical mappings. |
+| Component Template | `.alerts-ecs-mappings`          | Includes mappings for all ECS fields, excluding those of type `constant_keyword`                                                                   |
 
 When a rule type specifies an `alerts` definition, the alerting framework will install Elasticsearch assets for the rule type on plugin setup. The following example definition
 
@@ -188,26 +215,24 @@ When a rule type specifies an `alerts` definition, the alerting framework will i
 
 will result in the following assets being installed:
 
-|Type|Name|Descripton|
-|---|---|---|
-|Component Template|`.alerts-mySpecialRule-mappings`|Includes mappings for fields in the specified fieldMap|
-|Index Template|`.alerts-mySpecialRule.alerts-default-index-template`|Includes references to the framework component template, the `.alerts-mySpecialRule-mappings` component template and the ECS component templates because `useEcs: true`|
-|Alias|`.alerts-mySpecialRule.alerts-default`||
-|Index|`.internal.alerts-mySpecialRule.alerts-default-000001`|Concrete write index for the `.alerts-mySpecialRule.alerts-default` alias|
+| Type               | Name                                                   | Descripton                                                                                                                                                              |
+| ------------------ | ------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Component Template | `.alerts-mySpecialRule-mappings`                       | Includes mappings for fields in the specified fieldMap                                                                                                                  |
+| Index Template     | `.alerts-mySpecialRule.alerts-default-index-template`  | Includes references to the framework component template, the `.alerts-mySpecialRule-mappings` component template and the ECS component templates because `useEcs: true` |
+| Alias              | `.alerts-mySpecialRule.alerts-default`                 |                                                                                                                                                                         |
+| Index              | `.internal.alerts-mySpecialRule.alerts-default-000001` | Concrete write index for the `.alerts-mySpecialRule.alerts-default` alias                                                                                               |
 
 It is important to note that while multiple rule types can specify the same `context` in order to consolidate their alerts into a single index, the `alerts` definition must be the same across all these rule types. If, for example, RuleTypeA registers alert context `ourRules` with `useEcs: true` and RuleTypeB registers alert context `ourRules` with `useEcs: false`, an error will be thrown during registration.
 
 ### Action Variables
 
-The `actionVariables` property should contain the **flattened** names of the state and context variables available when an executor calls `alertInstance.scheduleActions(actionGroup, context)`.  These names are meant to be used in prompters in the Alerting UI, are used as text values for display, and can be inserted into to an action parameter text entry field via a UI gesture (e.g., clicking a menu item from a menu built with these names).  They should be flattened, so if a state or context variable is an object with properties, these should be listed with the "parent" property/properties in the name, separated by a `.` (period).
+The `actionVariables` property should contain the **flattened** names of the state and context variables available when an executor calls `alertInstance.scheduleActions(actionGroup, context)`. These names are meant to be used in prompters in the Alerting UI, are used as text values for display, and can be inserted into to an action parameter text entry field via a UI gesture (e.g., clicking a menu item from a menu built with these names). They should be flattened, so if a state or context variable is an object with properties, these should be listed with the "parent" property/properties in the name, separated by a `.` (period).
 
 For example, if the `context` has one variable `foo` which is an object that has one property `bar`, and there are no `state` variables, the `actionVariables` value would be in the following shape:
 
 ```js
 {
-	context: [
-		{ name: 'foo.bar', description: 'the ultra-exciting bar property' },
-	]
+  context: [{ name: 'foo.bar', description: 'the ultra-exciting bar property' }];
 }
 ```
 
@@ -219,13 +244,12 @@ This is an optional pair of functions that can be implemented by a rule type. Bo
 
 This function should take the rule type params as input and extract out any saved object IDs stored within the params. For each saved object ID, a new saved object reference should be created and a saved object reference should replace the saved object ID in the rule params. This function should return the modified rule type params (with saved object reference name, not IDs) and an array of saved object references.
 
-
 **useSavedObjectReferences.injectReferences**
-
 
 This function should take the rule type params (with saved object references) and the saved object references array as input and inject the saved object ID in place of any saved object references in the rule type params. Note that any error thrown within this function will be propagated.
 
 ## Recovered Alerts
+
 The Alerting framework automatically determines which alerts are recovered by comparing the active alerts from the previous rule execution to the active alerts in the current rule execution. Alerts that were active previously but not active currently are considered `recovered`. If any actions were specified on the Recovery action group for the rule, they will be scheduled at the end of the execution cycle.
 
 Because this determination occurs after rule type executors have completed execution, the framework provides a mechanism for rule type executors to set contextual information for recovered alerts that can be templated and used inside recovery actions. In order to use this mechanism, the rule type must set the `doesSetRecoveryContext` flag to `true` during rule type registration.
@@ -253,6 +277,7 @@ for (const alert of getRecoveredAlerts()) {
 	})
 }
 ```
+
 ## Licensing
 
 Currently most rule types are free features. But some rule types are subscription features, such as the tracking containment rule.
@@ -449,6 +474,64 @@ const myRuleType: RuleType<
 server.newPlatform.setup.plugins.alerting.registerType(myRuleType);
 ```
 
+### Async Search Example
+
+```typescript
+
+...
+
+const myRuleType: RuleType<
+	MyRuleTypeParams,
+	MyRuleTypeExtractedParams,
+	MyRuleTypeState,
+	MyRuleTypeAlertState,
+	MyRuleTypeAlertContext,
+	MyRuleTypeActionGroups
+> = {
+	id: 'my-rule-type',
+	name: 'My rule type',
+	validate: {},
+	actionGroups: [],
+	defaultActionGroupId: 'default',
+	actionVariables: {},
+	minimumLicenseRequired: 'basic',
+	isExportable: true,
+	async executor({
+		alertId,
+		startedAt,
+		previousStartedAt,
+		services,
+		params,
+		state,
+		rule,
+	}: RuleExecutorOptions<
+		MyRuleTypeParams,
+		MyRuleTypeExtractedParams,
+		MyRuleTypeState,
+		MyRuleTypeAlertState,
+		MyRuleTypeAlertContext,
+		MyRuleTypeActionGroups
+	>) {
+
+		// Query Elasticsearch using a cancellable async search
+		// Below client runs an async ES|QL query,
+		// you can use EQL `EQL_SEARCH_STRATEGY` and Enhanced Es Search `ENHANCED_ES_SEARCH_STRATEGY` as well
+ 		const asyncSearchClient = getAsyncSearchClient<ESQLSearchParams>(ESQL_ASYNC_SEARCH_STRATEGY);
+		const asyncResponse = await asyncSearchClient.search({
+			request: { params: { query: <- your ES|QL query ->, filter: <- your search filter ->} },
+		});
+
+		// Report your alerts here
+
+		return {
+			lastChecked: new Date(),
+		};
+	},
+	producer: 'alerting',
+	ruleTaskTimeout: '10m',
+};
+```
+
 ## Role Based Access-Control
 
 Once you have registered your RuleType, you need to grant your users privileges to use it.
@@ -461,67 +544,67 @@ You can control all of these abilities by assigning privileges to the Alerting F
 
 ```typescript
 features.registerKibanaFeature({
-	id: 'my-application-id',
-	name: 'My Application',
-	app: [],
-	alerting: [
-		'my-application-id.my-rule-type',
-		'my-application-id.my-restricted-rule-type',
-		'.index-threshold',
-		'xpack.uptime.alerts.actionGroups.tls'
-	],
-	privileges: {
-		all: {
-			alerting: {
-				rule: {
-					all: [
-						// grant `all` over our own types
-						'my-application-id.my-rule-type',
-						'my-application-id.my-restricted-rule-type',
-						// grant `all` over the built-in IndexThreshold
-						'.index-threshold',
-						// grant `all` over Uptime's TLS rule type
-						'xpack.uptime.alerts.actionGroups.tls'
-					],
-				},
-				alert: {
-					all: [
-						// grant `all` over our own types
-						'my-application-id.my-rule-type',
-						'my-application-id.my-restricted-rule-type',
-						// grant `all` over the built-in IndexThreshold
-						'.index-threshold',
-						// grant `all` over Uptime's TLS rule type
-						'xpack.uptime.alerts.actionGroups.tls'
-					],
-				}
-			},
-		},
-		read: {
-			alerting: {
-				rule: {
-					read: [
-						// grant `read` over our own type
-						'my-application-id.my-alert-type',
-						// grant `read` over the built-in IndexThreshold
-						'.index-threshold',
-						// grant `read` over Uptime's TLS RuleType
-						'xpack.uptime.alerts.actionGroups.tls'
-					],
-				},
-				alert: {
-					read: [
-						// grant `read` over our own type
-						'my-application-id.my-alert-type',
-						// grant `read` over the built-in IndexThreshold
-						'.index-threshold',
-						// grant `read` over Uptime's TLS RuleType
-						'xpack.uptime.alerts.actionGroups.tls'
-					],
-				},
-			},
-		},
-	},
+  id: 'my-application-id',
+  name: 'My Application',
+  app: [],
+  alerting: [
+    'my-application-id.my-rule-type',
+    'my-application-id.my-restricted-rule-type',
+    '.index-threshold',
+    'xpack.uptime.alerts.actionGroups.tls',
+  ],
+  privileges: {
+    all: {
+      alerting: {
+        rule: {
+          all: [
+            // grant `all` over our own types
+            'my-application-id.my-rule-type',
+            'my-application-id.my-restricted-rule-type',
+            // grant `all` over the built-in IndexThreshold
+            '.index-threshold',
+            // grant `all` over Uptime's TLS rule type
+            'xpack.uptime.alerts.actionGroups.tls',
+          ],
+        },
+        alert: {
+          all: [
+            // grant `all` over our own types
+            'my-application-id.my-rule-type',
+            'my-application-id.my-restricted-rule-type',
+            // grant `all` over the built-in IndexThreshold
+            '.index-threshold',
+            // grant `all` over Uptime's TLS rule type
+            'xpack.uptime.alerts.actionGroups.tls',
+          ],
+        },
+      },
+    },
+    read: {
+      alerting: {
+        rule: {
+          read: [
+            // grant `read` over our own type
+            'my-application-id.my-alert-type',
+            // grant `read` over the built-in IndexThreshold
+            '.index-threshold',
+            // grant `read` over Uptime's TLS RuleType
+            'xpack.uptime.alerts.actionGroups.tls',
+          ],
+        },
+        alert: {
+          read: [
+            // grant `read` over our own type
+            'my-application-id.my-alert-type',
+            // grant `read` over the built-in IndexThreshold
+            '.index-threshold',
+            // grant `read` over Uptime's TLS RuleType
+            'xpack.uptime.alerts.actionGroups.tls',
+          ],
+        },
+      },
+    },
+  },
 });
 ```
 
@@ -538,10 +621,7 @@ features.registerKibanaFeature({
   id: 'my-application-id',
   name: 'My Application',
   app: [],
-  alerting: [
-    'my-application-id.my-rule-type',
-    'my-application-id.my-restricted-rule-type'
-  ],
+  alerting: ['my-application-id.my-rule-type', 'my-application-id.my-restricted-rule-type'],
   privileges: {
     all: {
       app: ['my-application-id', 'kibana'],
@@ -556,20 +636,12 @@ features.registerKibanaFeature({
       app: ['lens', 'kibana'],
       alerting: {
         rule: {
-          all: [
-            'my-application-id.my-rule-type'
-          ],
-          read: [
-            'my-application-id.my-restricted-rule-type'
-          ],
+          all: ['my-application-id.my-rule-type'],
+          read: ['my-application-id.my-restricted-rule-type'],
         },
         alert: {
-          all: [
-            'my-application-id.my-rule-type'
-          ],
-          read: [
-            'my-application-id.my-restricted-rule-type'
-          ],
+          all: ['my-application-id.my-rule-type'],
+          read: ['my-application-id.my-restricted-rule-type'],
         },
       },
       savedObject: {
@@ -597,10 +669,7 @@ features.registerKibanaFeature({
   id: 'my-application-id',
   name: 'My Application',
   app: [],
-  alerting: [
-    'my-application-id.my-rule-type',
-    'my-application-id.my-other-rule-type'
-  ],
+  alerting: ['my-application-id.my-rule-type', 'my-application-id.my-other-rule-type'],
   privileges: {
     all: {
       app: ['my-application-id', 'kibana'],
@@ -610,17 +679,11 @@ features.registerKibanaFeature({
       },
       alerting: {
         rule: {
-          all: [
-            'my-application-id.my-rule-type',
-            'my-application-id.my-other-rule-type'
-          ]
+          all: ['my-application-id.my-rule-type', 'my-application-id.my-other-rule-type'],
         },
         alert: {
-          read: [
-            'my-application-id.my-rule-type',
-            'my-application-id.my-other-rule-type'
-          ]
-        }
+          read: ['my-application-id.my-rule-type', 'my-application-id.my-other-rule-type'],
+        },
       },
       ui: [],
       api: [],
@@ -629,17 +692,11 @@ features.registerKibanaFeature({
       app: ['lens', 'kibana'],
       alerting: {
         rule: {
-          read: [
-            'my-application-id.my-rule-type',
-            'my-application-id.my-other-rule-type'
-          ]
+          read: ['my-application-id.my-rule-type', 'my-application-id.my-other-rule-type'],
         },
         alert: {
-          read: [
-            'my-application-id.my-rule-type',
-            'my-application-id.my-other-rule-type'
-          ]
-        }
+          read: ['my-application-id.my-rule-type', 'my-application-id.my-other-rule-type'],
+        },
       },
       savedObject: {
         all: [],
@@ -662,10 +719,7 @@ features.registerKibanaFeature({
               includeIn: 'all',
               alerting: {
                 alert: {
-                  all: [
-                    'my-application-id.my-rule-type',
-                    'my-application-id.my-other-rule-type'
-                  ],
+                  all: ['my-application-id.my-rule-type', 'my-application-id.my-other-rule-type'],
                 },
               },
               savedObject: {
@@ -673,12 +727,12 @@ features.registerKibanaFeature({
                 read: [],
               },
               ui: [],
-            }
-          ]
-        }
-      ]
-    }
-  ]
+            },
+          ],
+        },
+      ],
+    },
+  ],
 });
 ```
 
@@ -692,6 +746,7 @@ This subfeature privilege definition allows for the following granularity:
 - `read` privileges to rules for a rule type and subprivilege escalation to grant `all` privileges to alerts for a rule type.
 
 ### `read` privileges vs. `all` privileges
+
 When a user is granted the `read` role in the Alerting Framework, they will be able to execute the following api calls:
 
 - `get`
@@ -729,28 +784,26 @@ When registering a rule type, you'll likely want to provide a way of viewing rul
 
 In order for the Alerting Framework to know that your plugin has its own internal view for displaying a rule, you must register a navigation handler within the framework.
 
-A navigation handler is nothing more than a function that receives a rule and its corresponding RuleType, and is expected to then return the path *within your plugin* which knows how to display this rule.
+A navigation handler is nothing more than a function that receives a rule and its corresponding RuleType, and is expected to then return the path _within your plugin_ which knows how to display this rule.
 
 The signature of such a handler is:
 
 ```typescript
-type AlertNavigationHandler = (
-  rule: SanitizedRule,
-  ruleType: RuleType
-) => string;
+type AlertNavigationHandler = (rule: SanitizedRule, ruleType: RuleType) => string;
 ```
 
 There are two ways to register this handler.
-By specifying _alerting_ as a dependency of your *public* (client side) plugin, you'll gain access to two apis: _alerting.registerNavigation_ and _alerting.registerDefaultNavigation_.
+By specifying _alerting_ as a dependency of your _public_ (client side) plugin, you'll gain access to two apis: _alerting.registerNavigation_ and _alerting.registerDefaultNavigation_.
 
 ### registerNavigation
+
 The _registerNavigation_ api allows you to register a handler for a specific alert type within your solution:
 
 ```typescript
 alerting.registerNavigation(
-	'my-application-id',
-	'my-application-id.my-rule-type',
-	(rule: SanitizedRule) => `/my-unique-rule/${rule.id}`
+  'my-application-id',
+  'my-application-id.my-rule-type',
+  (rule: SanitizedRule) => `/my-unique-rule/${rule.id}`
 );
 ```
 
@@ -761,6 +814,7 @@ The navigation is handled using the `navigateToUrl` API, meaning that the path w
 You can look at the `alerting-example` plugin to see an example of using this API, which is enabled using the `--run-examples` flag when you run `yarn start`.
 
 ### registerDefaultNavigation
+
 The _registerDefaultNavigation_ API allows you to register a handler for any rule type within your solution:
 
 ```
@@ -773,6 +827,7 @@ alerting.registerDefaultNavigation(
 This tells the Alerting Framework that any rule whose `consumer` value is your application can be navigated to in your application using the path `/my-other-rules/${the id of the rule}`.
 
 ### Balancing both APIs side by side
+
 As we mentioned, using `registerDefaultNavigation` will tell the Alerting Framework that your application can handle any type of rule we throw at it, as long as your application created it, using the handler you provided.
 
 The only case in which this handler will not be used to evaluate the navigation for a rule (assuming your application is the `consumer`) is if you have also used the `registerNavigation` API, alongside your `registerDefaultNavigation` usage, to handle that rule's specific RuleType.
@@ -788,9 +843,9 @@ In addition to the public APIs, we provide the following internal APIs. Internal
 
 Params:
 
-|Property|Description|Type|
-|---|---|---|
-|id|The id of the rule whose state you're trying to get.|string|
+| Property | Description                                          | Type   |
+| -------- | ---------------------------------------------------- | ------ |
+| id       | The id of the rule whose state you're trying to get. | string |
 
 ### `GET /internal/alerting/rule/{id}/_alert_summary`: Get rule alert summary
 
@@ -799,21 +854,21 @@ the event log.
 
 Params:
 
-|Property|Description|Type|
-|---|---|---|
-|id|The id of the rule whose alert summary you're trying to get.|string|
+| Property | Description                                                  | Type   |
+| -------- | ------------------------------------------------------------ | ------ |
+| id       | The id of the rule whose alert summary you're trying to get. | string |
 
 Query:
 
-|Property|Description|Type|
-|---|---|---|
-|dateStart|The date to start looking for alert events in the event log. Either an ISO date string, or a duration string indicating time since now.|string|
+| Property  | Description                                                                                                                             | Type   |
+| --------- | --------------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| dateStart | The date to start looking for alert events in the event log. Either an ISO date string, or a duration string indicating time since now. | string |
 
 ### `POST /api/alerting/rule/{id}/_update_api_key`: Update rule API key
 
-|Property|Description|Type|
-|---|---|---|
-|id|The id of the rule you're trying to update the API key for. System will use user in request context to generate an API key for.|string|
+| Property | Description                                                                                                                     | Type   |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------- | ------ |
+| id       | The id of the rule you're trying to update the API key for. System will use user in request context to generate an API key for. | string |
 
 ## Alert Factory
 
@@ -825,15 +880,16 @@ Note that the `id` only needs to be unique **within the scope of a specific rule
 
 This factory returns an instance of `Alert`. The `Alert` class has the following methods. Note that we have removed the methods that you shouldn't touch.
 
-|Method|Description|
-|---|---|
-|getUuid()|Get the UUID of the alert.|
-|getState()|Get the current state of the alert.|
-|scheduleActions(actionGroup, context)|Call this to schedule the execution of actions. The actionGroup is a string `id` that relates to the group of alert `actions` to execute and the context will be used for templating purposes. `scheduleActions` should only be called once per alert.|
-|replaceState(state)|Used to replace the current state of the alert. This doesn't work like React, the entire state must be provided. Use this feature as you see fit. The state that is set will persist between rule executions whenever you re-create an alert with the same id. The alert state will be erased when `scheduleActions`isn't called during an execution.|
-|setContext(context)|Call this to set the context for this alert that is used for templating purposes.
+| Method                                | Description                                                                                                                                                                                                                                                                                                                                           |
+| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| getUuid()                             | Get the UUID of the alert.                                                                                                                                                                                                                                                                                                                            |
+| getState()                            | Get the current state of the alert.                                                                                                                                                                                                                                                                                                                   |
+| scheduleActions(actionGroup, context) | Call this to schedule the execution of actions. The actionGroup is a string `id` that relates to the group of alert `actions` to execute and the context will be used for templating purposes. `scheduleActions` should only be called once per alert.                                                                                                |
+| replaceState(state)                   | Used to replace the current state of the alert. This doesn't work like React, the entire state must be provided. Use this feature as you see fit. The state that is set will persist between rule executions whenever you re-create an alert with the same id. The alert state will be erased when `scheduleActions`isn't called during an execution. |
+| setContext(context)                   | Call this to set the context for this alert that is used for templating purposes.                                                                                                                                                                                                                                                                     |
 
 ### When should I use `setContext`?
+
 `setContext` is intended to be used for setting context for recovered alerts. While rule type executors make the determination as to which alerts are active for an execution, the Alerting Framework automatically determines which alerts are recovered for an execution. `setContext` empowers rule type executors to provide additional contextual information for these recovered alerts that will be templated into actions.
 
 ## Templating Actions

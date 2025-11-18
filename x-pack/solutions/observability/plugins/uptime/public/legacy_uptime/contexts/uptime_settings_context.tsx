@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useMemo, PropsWithChildren } from 'react';
-import { UptimeAppProps } from '../app/uptime_app';
+import type { PropsWithChildren } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
+import type { UptimeAppProps } from '../app/uptime_app';
 import { CLIENT_DEFAULTS, CONTEXT_DEFAULTS } from '../../../common/constants';
-import { CommonlyUsedRange } from '../components/common/uptime_date_picker';
+import type { CommonlyUsedRange } from '../components/common/uptime_date_picker';
 import { useGetUrlParams } from '../hooks';
 
 export interface UptimeSettingsContextValues {

@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FieldType, InferenceProvider } from '../types/types';
+import type { InferenceProvider } from '../types/types';
+import { FieldType } from '../types/types';
 
 export const mockProviders: InferenceProvider[] = [
   {

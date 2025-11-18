@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   DataViewsContract,
   DataView,
   DataViewField,
   DataViewListItem,
-  DataViewType,
 } from '@kbn/data-views-plugin/public';
+import { DataViewType } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { ROLLUP_DEPRECATION_BADGE_LABEL } from '@kbn/rollup';
 
@@ -24,6 +24,13 @@ const defaultIndexPatternListName = i18n.translate(
   }
 );
 
+const managedDataViewTagName = i18n.translate(
+  'indexPatternManagement.editIndexPattern.list.managedDataViewTagName',
+  {
+    defaultMessage: 'Managed',
+  }
+);
+
 export const isRollup = (indexPatternType: string = '') => {
   return indexPatternType === DataViewType.ROLLUP;
 };
@@ -31,7 +38,7 @@ export const isRollup = (indexPatternType: string = '') => {
 export async function getIndexPatterns(defaultIndex: string, dataViewsService: DataViewsContract) {
   const existingIndexPatterns = await dataViewsService.getIdsWithTitle(true);
   const indexPatternsListItems = existingIndexPatterns.map((idxPattern) => {
-    const { id, title, namespaces, name } = idxPattern;
+    const { id, title, namespaces, name, managed } = idxPattern;
     const isDefault = defaultIndex === id;
     const tags = getTags(idxPattern, isDefault, dataViewsService.getRollupsEnabled());
     const displayName = name ? name : title;
@@ -48,6 +55,7 @@ export async function getIndexPatterns(defaultIndex: string, dataViewsService: D
       // or on bottom of the table
       sort: `${isDefault ? '0' : '1'}${displayName}`,
       getName: () => displayName,
+      managed,
     };
   });
 
@@ -70,6 +78,13 @@ export const getTags = (
   rollupsEnabled: boolean
 ) => {
   const tags = [];
+  if (indexPattern.managed) {
+    tags.push({
+      key: 'managed',
+      name: managedDataViewTagName,
+      'data-test-subj': 'managed-tag',
+    });
+  }
   if (isDefault) {
     tags.push({
       key: DataViewType.DEFAULT,

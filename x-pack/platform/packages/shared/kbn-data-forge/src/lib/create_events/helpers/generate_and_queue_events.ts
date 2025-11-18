@@ -6,8 +6,8 @@
  */
 
 import moment from 'moment';
-import { QueueObject } from 'async';
-import { Config, Doc, ParsedSchedule } from '../../../types';
+import type { QueueObject } from 'async';
+import type { Config, Doc, ParsedSchedule } from '../../../types';
 import { generateEvents } from '../../../data_sources';
 
 export function generateAndQueueEvents(

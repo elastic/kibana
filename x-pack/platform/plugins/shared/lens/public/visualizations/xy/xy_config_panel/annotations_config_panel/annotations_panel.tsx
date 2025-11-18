@@ -10,19 +10,24 @@ import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import { AnnotationEditorControls } from '@kbn/event-annotation-components';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import moment from 'moment';
 import { search } from '@kbn/data-plugin/public';
+import type {
+  LensAppServices,
+  FramePublicAPI,
+  VisualizationDimensionEditorProps,
+  XYState,
+  XYAnnotationLayerConfig,
+  XYDataLayerConfig,
+} from '@kbn/lens-common';
 import { LENS_APP_NAME } from '../../../../../common/constants';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../../utils';
-import { LensAppServices } from '../../../../app_plugin/types';
-import { updateLayer } from '..';
-import type { FramePublicAPI, VisualizationDimensionEditorProps } from '../../../../types';
-import type { State, XYState, XYAnnotationLayerConfig, XYDataLayerConfig } from '../../types';
+import { updateLayer } from '../../toolbar';
 import { isDataLayer } from '../../visualization_helpers';
 
 export const AnnotationsPanel = (
-  props: VisualizationDimensionEditorProps<State> & {
+  props: VisualizationDimensionEditorProps<XYState> & {
     datatableUtilities: DatatableUtilitiesService;
     dataViewsService: DataViewsPublicPluginStart;
   }

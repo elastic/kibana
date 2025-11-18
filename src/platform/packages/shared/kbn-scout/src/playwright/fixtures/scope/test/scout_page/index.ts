@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Page } from '@playwright/test';
-import { PathOptions } from '../../../../../common/services/kibana_url';
+import type { Page } from '@playwright/test';
+import type { PathOptions } from '../../../../../common/services/kibana_url';
 
 /**
  * Extends the Playwright 'Page' interface with methods specific to Kibana.
@@ -31,6 +31,24 @@ export type ScoutPage = Page & {
    * @returns A Promise resolving when the indicator is hidden.
    */
   waitForLoadingIndicatorHidden: () => ReturnType<Page['waitForSelector']>;
+  /**
+   * Presses a key until the element with the css selector is in focus. If multiple elements match it will
+   * press the key until the first occurrence of the element is focused.
+   * @param selector - The css selector for the element.
+   * @param key The key to press for keyboard navigation. Corresponds with the playwright keyboard api https://playwright.dev/docs/api/class-keyboard.
+   * @param maxElementsToTraverse The maximum number of times the key will be pressed before throwing an error. Defaults to 1000.
+   * @returns A Promise that resolves once the the element with the css selector is focused, or an error occurs.
+   */
+  keyTo: (selector: string, key: string, maxElementsToTraverse?: number) => Promise<void>;
+  /**
+   * Types text into an input field character by character with a specified delay between each character.
+   * @param selector - The css selector for the input element.
+   * @param text - The text to type into the input field.
+   * @param options - Optional configuration object.
+   * @param options.delay - The delay in milliseconds between typing each character (default: 25ms).
+   * @returns A Promise that resolves once the text has been typed.
+   */
+  typeWithDelay: (selector: string, text: string, options?: { delay: number }) => Promise<void>;
   /**
    * Simplified API to interact with elements using Kibana's 'data-test-subj' attribute.
    */
@@ -101,5 +119,5 @@ export type ScoutPage = Page & {
   };
 };
 
-export { scoutPageFixture } from './single_thread';
 export { scoutPageParallelFixture } from './parallel';
+export { scoutPageFixture } from './single_thread';

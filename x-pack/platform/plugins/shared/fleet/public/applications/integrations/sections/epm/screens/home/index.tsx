@@ -11,7 +11,11 @@ import { EuiLoadingSpinner } from '@elastic/eui';
 
 import { installationStatuses } from '../../../../../../../common/constants';
 
-import { INTEGRATIONS_ROUTING_PATHS, INTEGRATIONS_SEARCH_QUERYPARAM } from '../../../../constants';
+import {
+  INTEGRATIONS_ROUTING_PATHS,
+  INTEGRATIONS_SEARCH_QUERYPARAM,
+  INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM,
+} from '../../../../constants';
 import { DefaultLayout } from '../../../../layouts';
 import { ExperimentalFeaturesService, isPackageUpdatable } from '../../../../services';
 import { InstalledIntegrationsPage } from '../installed_integrations';
@@ -40,7 +44,13 @@ export const getParams = (params: CategoryParams, search: string) => {
   const selectedCategory: ExtendedIntegrationCategory = category || '';
   const queryParams = new URLSearchParams(search);
   const searchParam = queryParams.get(INTEGRATIONS_SEARCH_QUERYPARAM) || '';
-  return { selectedCategory, searchParam, selectedSubcategory: subcategory };
+  const onlyAgentlessParam = queryParams.get(INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM) === 'true';
+  return {
+    selectedCategory,
+    searchParam,
+    selectedSubcategory: subcategory,
+    onlyAgentless: onlyAgentlessParam,
+  };
 };
 
 export const categoryExists = (category: string, categories: CategoryFacet[]) => {
@@ -113,7 +123,9 @@ export const EPMHomePage: React.FC = () => {
       <Route path={INTEGRATIONS_ROUTING_PATHS.integrations_installed}>
         <DefaultLayout section="manage" notificationsBySection={notificationsBySection}>
           {installedIntegrationsTabularUI ? (
-            <InstalledIntegrationsPage />
+            <InstalledIntegrationsPage
+              prereleaseIntegrationsEnabled={prereleaseIntegrationsEnabled}
+            />
           ) : (
             <InstalledPackages installedPackages={installedPackages} isLoading={isLoading} />
           )}

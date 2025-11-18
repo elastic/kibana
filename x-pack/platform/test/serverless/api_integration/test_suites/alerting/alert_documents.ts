@@ -41,10 +41,11 @@ import {
   ALERT_RULE_EXECUTION_TIMESTAMP,
   ALERT_PREVIOUS_ACTION_GROUP,
   ALERT_PENDING_RECOVERED_COUNT,
+  ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { ObjectRemover } from './object_remover';
-import { RoleCredentials } from '../../../shared/services';
+import type { RoleCredentials } from '../../../shared/services';
 
 const OPEN_OR_ACTIVE = new Set(['open', 'active']);
 
@@ -131,6 +132,8 @@ export default function ({ getService }: FtrProviderContext) {
       expect(typeof hits1[VERSION]).to.be('string');
       expect(typeof hits1[ALERT_CONSECUTIVE_MATCHES]).to.be('number');
       expect(hits1[ALERT_RULE_EXECUTION_TIMESTAMP]).to.eql(hits1['@timestamp']);
+      expect(new Date(hits1[ALERT_STATE_NAMESPACE].dateEnd)).to.be.a(Date);
+      expect(new Date(hits1[ALERT_STATE_NAMESPACE].dateStart)).to.be.a(Date);
 
       // remove fields we aren't going to compare directly
       const fields = [
@@ -151,6 +154,7 @@ export default function ({ getService }: FtrProviderContext) {
         'kibana.alert.consecutive_matches',
         'kibana.alert.severity_improving',
         'kibana.alert.previous_action_group',
+        'kibana.alert.state',
       ];
 
       for (const field of fields) {
@@ -267,6 +271,8 @@ export default function ({ getService }: FtrProviderContext) {
       expect(hits2[ALERT_CONSECUTIVE_MATCHES]).to.be.greaterThan(hits1[ALERT_CONSECUTIVE_MATCHES]);
       expect(hits2[ALERT_PREVIOUS_ACTION_GROUP]).to.be('query matched');
       expect(hits2[ALERT_SEVERITY_IMPROVING]).to.be(undefined);
+      expect(new Date(hits1[ALERT_STATE_NAMESPACE].dateEnd)).to.be.a(Date);
+      expect(new Date(hits1[ALERT_STATE_NAMESPACE].dateStart)).to.be.a(Date);
 
       // remove fields we know will be different
       const fields = [
@@ -281,6 +287,7 @@ export default function ({ getService }: FtrProviderContext) {
         'kibana.alert.severity_improving',
         'kibana.alert.previous_action_group',
         'kibana.alert.url',
+        'kibana.alert.state',
       ];
 
       for (const field of fields) {

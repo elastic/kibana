@@ -9,6 +9,7 @@ import type { Gap } from '../../../../lib/rule_gaps/gap';
 import { scheduleBackfill } from '../../../backfill/methods/schedule';
 import { rulesClientContextMock } from '../../../../rules_client/rules_client.mock';
 import { processGapsBatch } from './process_gaps_batch';
+import { backfillInitiator } from '../../../../../common/constants';
 
 jest.mock('../../../backfill/methods/schedule', () => {
   return {
@@ -50,11 +51,16 @@ describe('processGapsBatch', () => {
     jest.resetAllMocks();
   });
 
-  const callProcessGapsBatch = async (batch = testBatch, dateRange = backfillingDateRange) => {
+  const callProcessGapsBatch = async (
+    batch = testBatch,
+    dateRange = backfillingDateRange,
+    maxGapsCountToProcess: number | undefined = undefined
+  ) => {
     result = await processGapsBatch(context, {
       rule,
       range: dateRange,
       gapsBatch: batch,
+      maxGapsCountToProcess,
     });
   };
 
@@ -71,6 +77,7 @@ describe('processGapsBatch', () => {
         [
           {
             ruleId: rule.id,
+            initiator: backfillInitiator.USER,
             ranges: testBatch.flatMap(getGapScheduleRange),
           },
         ],
@@ -78,8 +85,10 @@ describe('processGapsBatch', () => {
       );
     });
 
-    it('should return true if it schedules a backfill', () => {
-      expect(result).toBe(true);
+    it('should return the right count of processed gaps', () => {
+      expect(result).toEqual({
+        processedGapsCount: testBatch.length,
+      });
     });
   });
 
@@ -116,8 +125,10 @@ describe('processGapsBatch', () => {
       expect(scheduleBackfillMock).not.toHaveBeenCalled();
     });
 
-    it('should return false', () => {
-      expect(result).toBe(false);
+    it('should return the right count of processed gaps', () => {
+      expect(result).toEqual({
+        processedGapsCount: 0,
+      });
     });
   });
 
@@ -146,11 +157,18 @@ describe('processGapsBatch', () => {
         [
           {
             ruleId: rule.id,
+            initiator: backfillInitiator.USER,
             ranges: clampedGapsBatch.flatMap(getGapScheduleRange),
           },
         ],
         gapsBatchOutsideOfRange
       );
+    });
+
+    it('should return the right count of processed gaps', () => {
+      expect(result).toEqual({
+        processedGapsCount: 2,
+      });
     });
   });
 
@@ -161,8 +179,53 @@ describe('processGapsBatch', () => {
       await callProcessGapsBatch(gapsWithEmptyUnfilledIntervals);
     });
 
-    it('should only schedule for gaps within the range', () => {
+    it('should not schedule any backfills', () => {
       expect(scheduleBackfillMock).not.toHaveBeenCalled();
+    });
+
+    it('should return the right count of processed gaps', () => {
+      expect(result).toEqual({
+        processedGapsCount: 0,
+      });
+    });
+  });
+
+  describe('when the caller defines a limit of how many gaps should be processed', () => {
+    const backfillingRange = {
+      start: '2025-05-10T09:15:09.457Z',
+      end: '2025-05-15T09:15:09.457Z',
+    };
+    const gapsBatch = [
+      createGap([range(backfillingRange.start, '2025-05-11T09:15:09.457Z')]),
+      createGap([range('2025-05-11T09:15:10.457Z', '2025-05-12T09:15:09.457Z')]),
+      createGap([range('2025-05-13T09:15:09.457Z', backfillingRange.end)]),
+    ];
+
+    beforeEach(async () => {
+      scheduleBackfillMock.mockResolvedValue([{ some: 'successful result' }]);
+      await callProcessGapsBatch(gapsBatch, backfillingRange, 2);
+    });
+
+    it('should only schedule for gaps within the count limt', () => {
+      const processedGaps = gapsBatch.slice(0, 2);
+      expect(scheduleBackfillMock).toHaveBeenCalledTimes(1);
+      expect(scheduleBackfillMock).toHaveBeenCalledWith(
+        context,
+        [
+          {
+            ruleId: rule.id,
+            initiator: backfillInitiator.USER,
+            ranges: processedGaps.flatMap(getGapScheduleRange),
+          },
+        ],
+        processedGaps
+      );
+    });
+
+    it('should return the right count of processed gaps', () => {
+      expect(result).toEqual({
+        processedGapsCount: 2,
+      });
     });
   });
 });

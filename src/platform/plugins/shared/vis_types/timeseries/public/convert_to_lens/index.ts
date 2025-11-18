@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Vis } from '@kbn/visualizations-plugin/public';
-import { TimeRange } from '@kbn/data-plugin/common';
+import type { Vis } from '@kbn/visualizations-plugin/public';
+import type { TimeRange } from '@kbn/data-plugin/common';
 import type { Panel } from '../../common/types';
 import { PANEL_TYPES } from '../../common/enums';
-import { ConvertTsvbToLensVisualization } from './types';
+import type { ConvertTsvbToLensVisualization } from './types';
 
 const getConvertFnByType = (type: PANEL_TYPES) => {
   const convertionFns: { [key in PANEL_TYPES]?: () => Promise<ConvertTsvbToLensVisualization> } = {

@@ -27,6 +27,7 @@ export interface DocLinks {
   readonly settings: string;
   readonly elasticStackGetStarted: string;
   readonly apiReference: string;
+  readonly serverlessReleaseNotes: string;
   readonly upgrade: {
     readonly upgradingStackOnPrem: string;
     readonly upgradingStackOnCloud: string;
@@ -51,6 +52,7 @@ export interface DocLinks {
   };
   readonly cloud: {
     readonly beatsAndLogstashConfiguration: string;
+    readonly elasticsearchBillingManagingCosts: string;
     readonly indexManagement: string;
   };
   readonly console: {
@@ -85,6 +87,10 @@ export interface DocLinks {
     readonly notebooksExamples: string;
     readonly customerEngineerRequestForm: string;
     readonly elasticCommunity: string;
+  };
+  readonly searchGettingStarted: {
+    readonly visitSearchLabs: string;
+    readonly notebooksExamples: string;
   };
   readonly metricbeat: {
     readonly base: string;
@@ -142,6 +148,7 @@ export interface DocLinks {
     readonly deployTrainedModels: string;
     readonly documentLevelSecurity: string;
     readonly e5Model: string;
+    readonly elasticInferenceService: string;
     readonly elser: string;
     readonly engines: string;
     readonly indexApi: string;
@@ -295,12 +302,17 @@ export interface DocLinks {
   readonly server: {
     readonly protocol: string;
     readonly publicBaseUrl: string;
+    readonly troubleshootServerNotReady: string;
   };
   readonly logging: {
     readonly enableDeprecationHttpDebugLogs: string;
   };
   readonly securitySolution: {
-    readonly aiAssistant: string;
+    readonly aiAssistant: {
+      home: string;
+      knowledgeBaseHome: string;
+      knowledgeBaseIndexEntries: string;
+    };
     readonly cloudSecurityPosture: string;
     readonly installElasticDefend: string;
     readonly artifactControl: string;
@@ -308,6 +320,7 @@ export interface DocLinks {
     readonly bidirectionalIntegrations: string;
     readonly thirdPartyLlmProviders: string;
     readonly trustedApps: string;
+    readonly trustedDevices: string;
     readonly elasticAiFeatures: string;
     readonly eventFilters: string;
     readonly eventMerging: string;
@@ -356,6 +369,7 @@ export interface DocLinks {
     readonly queryDsl: string;
     readonly queryESQL: string;
     readonly queryESQLExamples: string;
+    readonly queryESQLMultiValueControls: string;
   };
   readonly date: {
     readonly dateMath: string;
@@ -377,6 +391,9 @@ export interface DocLinks {
     createRoleMappingTemplates: string;
     createRollupJobsRequest: string;
     createApiKey: string;
+    createApiKeyMetadata: string;
+    createApiKeyRoleDescriptors: string;
+    createCrossClusterApiKey: string;
     createPipeline: string;
     createTransformRequest: string;
     cronExpressions: string;
@@ -412,6 +429,7 @@ export interface DocLinks {
     uptimeDurationAnomaly: string;
     monitorLogs: string;
     logsStreams: string;
+    wiredStreams: string;
     analyzeMetrics: string;
     monitorUptimeSynthetics: string;
     userExperience: string;
@@ -425,6 +443,7 @@ export interface DocLinks {
     aiAssistant: string;
     elasticManagedLlm: string;
     elasticManagedLlmUsageCost: string;
+    elasticServerlessSearchManagedLlmUsageCost: string;
   }>;
   readonly alerting: Readonly<{
     authorization: string;
@@ -488,6 +507,7 @@ export interface DocLinks {
   readonly spaces: Readonly<{
     kibanaLegacyUrlAliases: string;
     kibanaDisableLegacyUrlAliasesApi: string;
+    kibanaManageSpaces: string;
   }>;
   readonly watcher: Record<string, string>;
   readonly ccs: Record<string, string>;
@@ -549,6 +569,9 @@ export interface DocLinks {
     httpMonitoring: string;
     agentLevelLogging: string;
     remoteESOoutputTroubleshooting: string;
+    agentReleaseProcess: string;
+    fipsIngest: string;
+    edotCollector: string;
   }>;
   readonly integrationDeveloper: {
     upload: string;
@@ -670,6 +693,19 @@ export interface DocLinks {
   };
   readonly datasetQuality: {
     readonly failureStore: string;
+  };
+  readonly agentBuilder: {
+    readonly agentBuilder: string;
+    readonly getStarted: string;
+    readonly models: string;
+    readonly chat: string;
+    readonly agentBuilderAgents: string;
+    readonly tools: string;
+    readonly programmaticAccess: string;
+    readonly kibanaApi: string;
+    readonly mcpServer: string;
+    readonly a2aServer: string;
+    readonly limitationsKnownIssues: string;
   };
 }
 

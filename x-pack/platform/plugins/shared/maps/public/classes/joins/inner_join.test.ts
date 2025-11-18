@@ -6,10 +6,7 @@
  */
 
 import type { Feature } from 'geojson';
-import type {
-  ESTermSourceDescriptor,
-  JoinSourceDescriptor,
-} from '../../../common/descriptor_types';
+import type { ESTermSourceDescriptor } from '../../../common/descriptor_types';
 import type { IVectorSource } from '../sources/vector_source';
 import type { IField } from '../fields/field';
 import { createJoinSource, InnerJoin } from './inner_join';
@@ -53,8 +50,8 @@ describe('createJoinSource', () => {
   test('Should return undefined with unmatched source type', () => {
     expect(
       createJoinSource({
-        type: SOURCE_TYPES.WMS,
-      } as unknown as Partial<JoinSourceDescriptor>)
+        type: 'unknown_join_source_type',
+      })
     ).toBe(undefined);
   });
 

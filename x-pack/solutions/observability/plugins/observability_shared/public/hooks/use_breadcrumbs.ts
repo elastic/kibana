@@ -6,10 +6,11 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ApplicationStart, ChromeBreadcrumb, ChromeStart } from '@kbn/core/public';
-import { MouseEvent, useEffect, useMemo } from 'react';
+import type { ApplicationStart, ChromeBreadcrumb, ChromeStart } from '@kbn/core/public';
+import type { MouseEvent } from 'react';
+import { useEffect, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
+import type { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
 import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import useObservable from 'react-use/lib/useObservable';
 import { useQueryParams } from './use_query_params';

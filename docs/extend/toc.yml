@@ -39,7 +39,6 @@ toc:
       - file: development-tests.md
       - file: interpreting-ci-failures.md
       - file: ci-metrics.md
-      - file: development-documentation.md
       - file: development-pull-request.md
       - file: kibana-issue-reporting.md
       - file: pr-review.md

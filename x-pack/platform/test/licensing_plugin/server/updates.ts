@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../services';
+import type { FtrProviderContext } from '../services';
 import { createScenario } from '../scenario';
 import '@kbn/core-provider-plugin/types';
 

@@ -9,8 +9,9 @@
 
 import React from 'react';
 
-import { NoDataCard, NoDataCardProps } from '@kbn/shared-ux-card-no-data';
-import { ActionCardProps } from '@kbn/shared-ux-page-no-data-types';
+import type { NoDataCardProps } from '@kbn/shared-ux-card-no-data';
+import { NoDataCard } from '@kbn/shared-ux-card-no-data';
+import type { ActionCardProps } from '@kbn/shared-ux-page-no-data-types';
 
 export type NoDataPageActions = NoDataCardProps;
 

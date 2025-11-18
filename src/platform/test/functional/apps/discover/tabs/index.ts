@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -26,30 +26,50 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await esArchiver.loadIfNeeded(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
+      await esArchiver.loadIfNeeded(
+        'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield'
+      );
+      await esArchiver.load(
+        'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights'
+      );
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+      );
       await kibanaServer.uiSettings.replace({ defaultIndex: 'logstash-*' });
       await timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
 
     beforeEach(async () => {
-      await common.navigateToApp('home');
-      await browser.setLocalStorageItem('discoverExperimental:tabs', 'true');
       await common.navigateToApp('discover');
       await discover.waitUntilTabIsLoaded();
     });
 
     after(async () => {
-      await browser.setLocalStorageItem('discoverExperimental:tabs', 'false');
       await kibanaServer.importExport.unload(
         'src/platform/test/functional/fixtures/kbn_archiver/discover'
       );
       await esArchiver.unload(
         'src/platform/test/functional/fixtures/es_archiver/logstash_functional'
       );
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/index_pattern_without_timefield'
+      );
+      await esArchiver.unload(
+        'src/platform/test/functional/fixtures/es_archiver/kibana_sample_data_flights'
+      );
+      await kibanaServer.importExport.unload(
+        'src/platform/test/functional/fixtures/kbn_archiver/kibana_sample_data_flights_index_pattern'
+      );
       await kibanaServer.uiSettings.unset('defaultIndex');
       await kibanaServer.savedObjects.cleanStandardList();
     });
 
     loadTestFile(require.resolve('./_duplication'));
+    loadTestFile(require.resolve('./_on_tab_change'));
+    loadTestFile(require.resolve('./_new_tab'));
+    loadTestFile(require.resolve('./_no_data'));
     loadTestFile(require.resolve('./_restorable_state'));
+    loadTestFile(require.resolve('./_controls'));
+    loadTestFile(require.resolve('./_save_and_load'));
   });
 }

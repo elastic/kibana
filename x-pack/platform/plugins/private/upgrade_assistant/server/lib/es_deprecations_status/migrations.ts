@@ -11,7 +11,8 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { omit } from 'lodash';
-import type { CorrectiveAction, EnrichedDeprecationInfo } from '../../../common/types';
+import { esIndicesStateCheck } from '@kbn/upgrade-assistant-pkg-server';
+import type { EnrichedDeprecationInfo } from '../../../common/types';
 import {
   convertFeaturesToIndicesArray,
   getESSystemIndicesMigrationStatus,
@@ -21,7 +22,6 @@ import {
   getCorrectiveAction,
   isFrozenDeprecation,
 } from './get_corrective_actions';
-import { esIndicesStateCheck } from '../es_indices_state_check';
 
 /**
  * Remove once the these keys are added to the `MigrationDeprecationsResponse` type
@@ -191,32 +191,6 @@ const enrichIndexSettingsDeprecations = async (
   });
 };
 
-const excludeDeprecation = (
-  deprecation: BaseDeprecation,
-  correctiveAction?: CorrectiveAction
-): boolean => {
-  if (deprecation.type === 'index_settings' && correctiveAction?.type === 'reindex') {
-    return true;
-  } else if (
-    deprecation.type === 'data_streams' &&
-    correctiveAction?.type === 'dataStream' &&
-    correctiveAction.metadata.reindexRequired
-  ) {
-    return true;
-  } else if (
-    deprecation.level === 'critical' &&
-    deprecation.type === 'index_settings' &&
-    deprecation.isFrozenIndex &&
-    correctiveAction?.type === 'reindex'
-  ) {
-    // in this scenario we will already have a "frozen index" deprecation for the same index
-    // we will filter this 'reindex' deprecation out, and let the 'unfreeze' one pass through
-    return true;
-  }
-
-  return false;
-};
-
 export const getEnrichedDeprecations = async (
   esClient: ElasticsearchClient
 ): Promise<EnrichedDeprecationInfo[]> => {
@@ -245,11 +219,6 @@ export const getEnrichedDeprecations = async (
   // enrich deprecations with the corrective actions, remove metadata
   return filteredDeprecations.flatMap((deprecation) => {
     const correctiveAction = getCorrectiveAction(deprecation);
-
-    // Prevent some deprecations from showing up in the UI
-    if (excludeDeprecation(deprecation, correctiveAction)) {
-      return []; // equivalent of filtering out, thanks to the flatMap
-    }
 
     return {
       ...omit(deprecation, 'metadata', 'isFrozenIndex', 'isClosedIndex', 'isInDataStream'),

@@ -6,11 +6,13 @@
  */
 
 import { map, mergeMap } from 'rxjs';
-import { ISearchStrategy, PluginStart, shimHitsTotal } from '@kbn/data-plugin/server';
-import { EqlSearchStrategyResponse, EQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
-import { TimelineEqlRequestOptions } from '../../../../common/api/search_strategy';
-import { EqlSearchResponse } from '../../../../common/search_strategy';
-import { TimelineEqlResponse } from '../../../../common/search_strategy/timeline/events/eql';
+import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
+import { shimHitsTotal } from '@kbn/data-plugin/server';
+import type { EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
+import { EQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
+import type { TimelineEqlRequestOptions } from '../../../../common/api/search_strategy';
+import type { EqlSearchResponse } from '../../../../common/search_strategy';
+import type { TimelineEqlResponse } from '../../../../common/search_strategy/timeline/events/eql';
 import { buildEqlDsl, parseEqlResponse } from './helpers';
 import { parseOptions } from './parse_options';
 

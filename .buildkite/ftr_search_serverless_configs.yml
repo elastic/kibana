@@ -4,13 +4,14 @@ disabled:
 
 defaultQueue: 'n2-4-spot'
 enabled:
-  - x-pack/test_serverless/api_integration/test_suites/search/config.ts
-  - x-pack/test_serverless/api_integration/test_suites/search/config.feature_flags.ts
+  - x-pack/solutions/search/test/serverless/api_integration/configs/config.ts
+  - x-pack/solutions/search/test/serverless/api_integration/configs/config.feature_flags.ts
+  - x-pack/solutions/search/test/serverless/functional/configs/config.ts
+  - x-pack/solutions/search/test/serverless/functional/configs/config.search_features.ts
+  - x-pack/solutions/search/test/serverless/functional/configs/config.feature_flags.ts
+  - x-pack/solutions/search/test/serverless/functional/configs/config.screenshots.ts
   - x-pack/platform/test/serverless/api_integration/configs/search/config.group1.ts
-  - x-pack/test_serverless/functional/test_suites/search/config.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.examples.ts
-  - x-pack/test_serverless/functional/test_suites/search/config.feature_flags.ts
-  - x-pack/test_serverless/functional/test_suites/search/config.screenshots.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.saved_objects_management.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.context_awareness.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.config_compat_mode.ts
@@ -26,3 +27,4 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/search/config.group10.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group11.ts
   - x-pack/platform/test/serverless/functional/configs/search/config.group12.ts
+  - x-pack/platform/test/onechat_api_integration/configs/config.serverless.ts

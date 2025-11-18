@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Page, test as base } from '@playwright/test';
-import { PathOptions } from '../../../../../common/services/kibana_url';
-import { ScoutPage } from '.';
-import { KibanaUrl, ScoutLogger } from '../../worker';
-import { ScoutSpaceParallelFixture } from '../../worker/scout_space';
+import type { Page } from '@playwright/test';
+import { test as base } from '@playwright/test';
+import type { ScoutPage } from '.';
+import type { PathOptions } from '../../../../../common/services/kibana_url';
+import type { KibanaUrl, ScoutLogger } from '../../worker';
+import type { ScoutSpaceParallelFixture } from '../../worker/scout_space';
 import { extendPlaywrightPage } from './single_thread';
 
 export const scoutPageParallelFixture = base.extend<

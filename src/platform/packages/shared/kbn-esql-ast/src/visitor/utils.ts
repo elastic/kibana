@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLAstExpression, ESQLAstItem, ESQLProperNode, ESQLSingleAstItem } from '../types';
+import type { ESQLAstExpression, ESQLAstItem, ESQLProperNode, ESQLSingleAstItem } from '../types';
 
 /**
  * Normalizes AST "item" list to only contain *single* items.
@@ -59,6 +59,7 @@ export function* children(node: ESQLProperNode): Iterable<ESQLAstExpression> {
   switch (node.type) {
     case 'function':
     case 'command':
+    case 'header-command':
     case 'order':
     case 'option': {
       yield* singleItems(node.args);
@@ -83,6 +84,10 @@ export function* children(node: ESQLProperNode): Iterable<ESQLAstExpression> {
       } else {
         yield node.value;
       }
+      break;
+    }
+    case 'parens': {
+      yield node.child;
       break;
     }
   }

@@ -9,7 +9,7 @@ import {
   getExternalServiceSimulatorPath,
   ExternalServiceSimulator,
 } from '../../../../alerting_api_integration/common/lib/actions_simulations_utils';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const actions = getService('actions');

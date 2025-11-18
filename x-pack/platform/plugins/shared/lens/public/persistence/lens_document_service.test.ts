@@ -5,30 +5,40 @@
  * 2.0.
  */
 
-import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import { coreMock } from '@kbn/core/public/mocks';
+
+import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
+import { LensClient } from './lens_client';
 import { LensDocumentService } from './lens_document_service';
+import type { LensDocument } from '@kbn/lens-common';
+
+jest.mock('./lens_client', () => {
+  const mockClient = {
+    create: jest.fn(),
+    get: jest.fn(),
+    update: jest.fn(),
+    search: jest.fn(),
+  };
+  return {
+    LensClient: jest.fn(() => mockClient),
+  };
+});
+
+const startMock = coreMock.createStart();
 
 describe('LensStore', () => {
-  function testStore(testId?: string) {
-    const client = {
-      create: jest.fn(() => Promise.resolve({ item: { id: testId || 'testid' } })),
-      update: jest.fn(() => Promise.resolve({ item: { id: testId || 'testid' } })),
-      get: jest.fn(),
-    };
-
+  function testStore() {
+    const httpMock = startMock.http;
     return {
-      client,
-      service: new LensDocumentService({
-        client,
-        registry: jest.fn(),
-      } as unknown as ContentManagementPublicStart),
+      client: new LensClient(httpMock), // mock client
+      service: new LensDocumentService(httpMock),
     };
   }
 
   describe('save', () => {
-    test('creates and returns a visualization document', async () => {
-      const { client, service } = testStore('FOO');
-      const doc = await service.save({
+    test('creates and returns a Lens document', async () => {
+      const { client, service } = testStore();
+      const docToSave: LensDocument = {
         title: 'Hello',
         description: 'My doc',
         visualizationType: 'bar',
@@ -41,50 +51,32 @@ describe('LensStore', () => {
           query: { query: '', language: 'lucene' },
           filters: [],
         },
-      });
+        version: LENS_ITEM_LATEST_VERSION,
+      };
 
-      expect(doc).toEqual({
-        savedObjectId: 'FOO',
-        title: 'Hello',
-        description: 'My doc',
-        visualizationType: 'bar',
-        references: [],
-        state: {
-          datasourceStates: {
-            indexpattern: { type: 'index_pattern', indexPattern: '.kibana_test' },
-          },
-          visualization: { x: 'foo', y: 'baz' },
-          query: { query: '', language: 'lucene' },
-          filters: [],
+      jest.mocked(client.create).mockImplementation(async (item, references) => ({
+        item: {
+          id: 'new-id',
+          ...item,
+          references,
+          extraProp: 'test',
+          visualizationType: item.visualizationType ?? 'lnsXY',
         },
-      });
+        meta: { type: 'lens' },
+      }));
+      const doc = await service.save(docToSave);
+
+      expect(doc).toEqual({ savedObjectId: 'new-id' });
 
       expect(client.create).toHaveBeenCalledTimes(1);
-      expect(client.create).toHaveBeenCalledWith({
-        contentTypeId: 'lens',
-        data: {
-          title: 'Hello',
-          description: 'My doc',
-          visualizationType: 'bar',
-          state: {
-            datasourceStates: {
-              indexpattern: { type: 'index_pattern', indexPattern: '.kibana_test' },
-            },
-            visualization: { x: 'foo', y: 'baz' },
-            query: { query: '', language: 'lucene' },
-            filters: [],
-          },
-        },
-        options: {
-          references: [],
-        },
-      });
+      const { references, ...attributes } = docToSave;
+      expect(client.create).toHaveBeenCalledWith(attributes, references);
     });
 
-    test('updates and returns a visualization document', async () => {
-      const { client, service } = testStore('Gandalf');
-      const doc = await service.save({
-        savedObjectId: 'Gandalf',
+    test('updates and returns a Lens document', async () => {
+      const { client, service } = testStore();
+      const docToUpdate: LensDocument = {
+        savedObjectId: 'update-id',
         title: 'Even the very wise cannot see all ends.',
         visualizationType: 'line',
         references: [],
@@ -94,62 +86,36 @@ describe('LensStore', () => {
           query: { query: '', language: 'lucene' },
           filters: [],
         },
-      });
+        version: LENS_ITEM_LATEST_VERSION,
+      };
 
-      expect(doc).toEqual({
-        savedObjectId: 'Gandalf',
-        title: 'Even the very wise cannot see all ends.',
-        visualizationType: 'line',
-        references: [],
-        state: {
-          datasourceStates: { indexpattern: { type: 'index_pattern', indexPattern: 'lotr' } },
-          visualization: { gear: ['staff', 'pointy hat'] },
-          query: { query: '', language: 'lucene' },
-          filters: [],
+      jest.mocked(client.update).mockImplementation(async (id, item, references) => ({
+        item: {
+          id,
+          ...item,
+          references,
+          extraProp: 'test',
+          visualizationType: item.visualizationType ?? 'lnsXY',
         },
-      });
+        meta: { type: 'lens' },
+      }));
+
+      const doc = await service.save(docToUpdate);
+      // should replace doc with response properties
+      expect(doc).toEqual({ savedObjectId: 'update-id' });
 
       expect(client.update).toHaveBeenCalledTimes(1);
-      expect(client.update.mock.calls).toEqual([
-        [
-          {
-            contentTypeId: 'lens',
-            id: 'Gandalf',
-            data: {
-              title: 'Even the very wise cannot see all ends.',
-              visualizationType: 'line',
-              state: {
-                datasourceStates: { indexpattern: { type: 'index_pattern', indexPattern: 'lotr' } },
-                visualization: { gear: ['staff', 'pointy hat'] },
-                query: { query: '', language: 'lucene' },
-                filters: [],
-              },
-            },
-            options: { references: [] },
-          },
-        ],
-      ]);
+      const { savedObjectId, references, ...attributes } = docToUpdate;
+      expect(client.update).toHaveBeenCalledWith(savedObjectId, attributes, references);
     });
   });
 
   describe('load', () => {
     test('throws if an error is returned', async () => {
       const { client, service } = testStore();
-      client.get = jest.fn(async () => ({
-        meta: { outcome: 'exactMatch' },
-        item: {
-          id: 'Paul',
-          type: 'lens',
-          attributes: {
-            title: 'Hope clouds observation.',
-            visualizationType: 'dune',
-            state: '{ "datasource": { "giantWorms": true } }',
-          },
-          error: new Error('shoot dang!'),
-        },
-      }));
+      jest.mocked(client.get).mockRejectedValue(new Error('shoot dang!'));
 
-      await expect(service.load('Paul')).rejects.toThrow('shoot dang!');
+      await expect(service.load('123')).rejects.toThrow('shoot dang!');
     });
   });
 });

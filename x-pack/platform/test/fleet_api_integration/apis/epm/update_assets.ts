@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { FLEET_INSTALL_FORMAT_VERSION } from '@kbn/fleet-plugin/server/constants';
 
 import { sortBy } from 'lodash';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
@@ -346,8 +346,8 @@ export default function (providerContext: FtrProviderContext) {
         installed_kibana: sortBy(
           [
             {
-              id: 'sample_alert_rule',
-              type: 'alert',
+              id: 'sample_alerting_rule_template',
+              type: 'alerting_rule_template',
             },
             {
               id: 'sample_dashboard',
@@ -561,11 +561,6 @@ export default function (providerContext: FtrProviderContext) {
             type: 'epm-packages-assets',
           },
           {
-            id: '81cb1738-dcfc-5d22-8367-d13f4b5908a5',
-            path: 'all_assets-0.2.0/kibana/alert/sample_alert_rule.json',
-            type: 'epm-packages-assets',
-          },
-          {
             id: '848d7b69-26d1-52c1-8afc-65e627b34812',
             path: 'all_assets-0.2.0/kibana/security_ai_prompt/sample_security_ai_prompts.json',
             type: 'epm-packages-assets',
@@ -583,6 +578,11 @@ export default function (providerContext: FtrProviderContext) {
           {
             id: 'bf3b0b65-9fdc-53c6-a9ca-e76140e56490',
             path: 'all_assets-0.2.0/kibana/dashboard/sample_dashboard.json',
+            type: 'epm-packages-assets',
+          },
+          {
+            id: 'c5eaf69c-2dab-5678-a6e5-e586db4f3728',
+            path: 'all_assets-0.2.0/kibana/alerting_rule_template/sample_alerting_rule_template.json',
             type: 'epm-packages-assets',
           },
           {
@@ -629,9 +629,22 @@ export default function (providerContext: FtrProviderContext) {
         install_source: 'registry',
         install_format_schema_version: FLEET_INSTALL_FORMAT_VERSION,
         latest_install_failed_attempts: [],
+        rolled_back: false,
         verification_status: 'unknown',
         verification_key_id: null,
         previous_version: '0.1.0',
+      });
+    });
+
+    it('should have updated the ilm migration status', async function () {
+      const settingsSO = await kibanaServer.savedObjects.get({
+        type: 'ingest_manager_settings',
+        id: 'fleet-default-settings',
+      });
+      expect(settingsSO.attributes.ilm_migration_status).eql({
+        logs: 'success',
+        metrics: 'success',
+        synthetics: 'success',
       });
     });
   });

@@ -5,30 +5,28 @@
  * 2.0.
  */
 
-import { AlertsClientError, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
+import type { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import moment from 'moment';
-import {
-  KibanaRequest,
-  SavedObjectsClientContract,
-  DEFAULT_APP_CATEGORIES,
-} from '@kbn/core/server';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_REASON,
 } from '@kbn/rule-data-utils';
-import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
+import type { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
 import { getSeverityType } from '@kbn/ml-anomaly-utils';
 import { uptimeDurationAnomalyRuleParamsSchema } from '@kbn/response-ops-rule-params/uptime_duration_anomaly';
+import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
 import {
   alertsLocatorID,
-  AlertsLocatorParams,
   getAlertUrl,
   observabilityFeatureId,
   observabilityPaths,
 } from '@kbn/observability-plugin/common';
-import { LocatorPublic } from '@kbn/share-plugin/common';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { asyncForEach } from '@kbn/std';
 import { UptimeEsClient } from '../lib';
 import {
@@ -40,9 +38,9 @@ import {
 } from './common';
 import { CLIENT_ALERT_TYPES, DURATION_ANOMALY } from '../../../../common/constants/uptime_alerts';
 import { commonStateTranslations, durationAnomalyTranslations } from './translations';
-import { UptimeCorePluginsSetup } from '../adapters/framework';
-import { UptimeAlertTypeFactory } from './types';
-import { Ping } from '../../../../common/runtime_types/ping';
+import type { UptimeCorePluginsSetup } from '../adapters/framework';
+import type { UptimeAlertTypeFactory } from './types';
+import type { Ping } from '../../../../common/runtime_types/ping';
 import { getMLJobId } from '../../../../common/lib';
 
 import { DurationAnomalyTranslations as CommonDurationAnomalyTranslations } from '../../../../common/rules/legacy_uptime/translations';

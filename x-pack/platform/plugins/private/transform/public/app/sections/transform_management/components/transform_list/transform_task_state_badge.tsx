@@ -34,7 +34,7 @@ export const TransformTaskStateBadge: FC<TransformTaskStateBadgeProps> = ({ stat
   if (state === TRANSFORM_STATE.FAILED && reason !== undefined) {
     return (
       <EuiToolTip content={reason}>
-        <EuiBadge className="transform__TaskStateBadge" color={color}>
+        <EuiBadge tabIndex={0} className="transform__TaskStateBadge" color={color}>
           {state}
         </EuiBadge>
       </EuiToolTip>

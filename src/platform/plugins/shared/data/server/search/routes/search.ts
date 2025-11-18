@@ -10,9 +10,9 @@
 import { first } from 'rxjs';
 import { schema } from '@kbn/config-schema';
 import { reportServerError } from '@kbn/kibana-utils-plugin/server';
-import { IncomingMessage } from 'http';
+import type { IncomingMessage } from 'http';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import type { ExecutionContextSetup } from '@kbn/core-execution-context-server';
 import apm from 'elastic-apm-node';
 import { reportSearchError } from '../report_search_error';
@@ -54,6 +54,7 @@ export function registerSearchRoute(
                 isRestore: schema.maybe(schema.boolean()),
                 retrieveResults: schema.maybe(schema.boolean()),
                 stream: schema.maybe(schema.boolean()),
+                requestHash: schema.maybe(schema.string()),
               },
               { unknowns: 'allow' }
             ),
@@ -68,6 +69,7 @@ export function registerSearchRoute(
           isRestore,
           retrieveResults,
           stream,
+          requestHash,
           ...searchRequest
         } = request.body;
         const { strategy, id } = request.params;
@@ -101,6 +103,7 @@ export function registerSearchRoute(
                   isRestore,
                   retrieveResults,
                   stream,
+                  requestHash,
                 }
               )
               .pipe(first())

@@ -9,15 +9,13 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import React, { useState } from 'react';
+import React from 'react';
 import { Conversation } from './conversation';
-import { ConversationHeader } from './conversation_header';
-import { ConversationSidebar } from './conversation_sidebar/conversation_sidebar';
-import { useConversationList } from '../../hooks/use_conversation_list';
-import { MessagesProvider } from '../../context/messages_context';
+import { ConversationHeader } from './conversation_header/conversation_header';
+import { RoutedConversationsProvider } from '../../context/conversation/routed_conversations_provider';
+import { SendMessageProvider } from '../../context/send_message/send_message_context';
 
 export const OnechatConversationsView: React.FC<{}> = () => {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
 
   const mainStyles = css`
@@ -26,18 +24,10 @@ export const OnechatConversationsView: React.FC<{}> = () => {
   const backgroundStyles = css`
     background-color: ${euiTheme.colors.backgroundBasePlain};
   `;
-  const sidebarStyles = css`
-    ${backgroundStyles}
-    padding: ${euiTheme.size.base};
-    max-block-size: calc(var(--kbn-application--content-height));
-  `;
   const headerHeight = `calc(${euiTheme.size.xl} * 2)`;
   const headerStyles = css`
     ${backgroundStyles}
-    display: flex;
-    flex-direction: column;
     justify-content: center;
-    border: none;
     block-size: ${headerHeight};
   `;
   const contentStyles = css`
@@ -45,6 +35,10 @@ export const OnechatConversationsView: React.FC<{}> = () => {
     width: 100%;
     height: 100%;
     max-block-size: calc(var(--kbn-application--content-height) - ${headerHeight});
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0 ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.base};
   `;
 
   const labels = {
@@ -56,52 +50,41 @@ export const OnechatConversationsView: React.FC<{}> = () => {
     }),
   };
 
-  // Prefetch conversations before sidebar is opened
-  const { conversations, isLoading } = useConversationList();
-
   return (
-    <MessagesProvider>
-      <KibanaPageTemplate
-        offset={0}
-        restrictWidth={false}
-        data-test-subj="onechatPageConversations"
-        grow={false}
-        panelled={false}
-        mainProps={{
-          css: mainStyles,
-        }}
-        responsive={[]}
-      >
-        {isSidebarOpen && (
-          <KibanaPageTemplate.Sidebar data-test-subj="onechatSidebar" css={sidebarStyles}>
-            <ConversationSidebar conversations={conversations} isLoading={isLoading} />
-          </KibanaPageTemplate.Sidebar>
-        )}
-
-        <KibanaPageTemplate.Header
-          css={headerStyles}
-          bottomBorder={false}
-          aria-label={labels.header}
-          paddingSize="m"
-        >
-          <ConversationHeader
-            isSidebarOpen={isSidebarOpen}
-            onToggleSidebar={() => {
-              setIsSidebarOpen((open) => !open);
-            }}
-          />
-        </KibanaPageTemplate.Header>
-        <KibanaPageTemplate.Section
-          paddingSize="none"
-          grow
-          contentProps={{
-            css: contentStyles,
+    <RoutedConversationsProvider>
+      <SendMessageProvider>
+        <KibanaPageTemplate
+          offset={0}
+          restrictWidth={false}
+          data-test-subj="onechatPageConversations"
+          grow={false}
+          panelled={false}
+          mainProps={{
+            css: mainStyles,
           }}
-          aria-label={labels.content}
+          responsive={[]}
         >
-          <Conversation />
-        </KibanaPageTemplate.Section>
-      </KibanaPageTemplate>
-    </MessagesProvider>
+          <KibanaPageTemplate.Header
+            css={headerStyles}
+            bottomBorder={false}
+            aria-label={labels.header}
+            paddingSize="m"
+            responsive={false}
+          >
+            <ConversationHeader />
+          </KibanaPageTemplate.Header>
+          <KibanaPageTemplate.Section
+            paddingSize="none"
+            grow
+            contentProps={{
+              css: contentStyles,
+            }}
+            aria-label={labels.content}
+          >
+            <Conversation />
+          </KibanaPageTemplate.Section>
+        </KibanaPageTemplate>
+      </SendMessageProvider>
+    </RoutedConversationsProvider>
   );
 };

@@ -348,6 +348,9 @@ export const getMockRuleSearchResponse = (
               ? {
                   type: 'external',
                   isCustomized,
+                  customizedFields: isCustomized
+                    ? [{ fieldName: 'tags' }, { fieldName: 'name' }, { fieldName: 'description' }]
+                    : [],
                 }
               : { type: 'internal' },
           },
@@ -395,4 +398,137 @@ export const getMockRuleSearchResponse = (
       },
     ],
     // NOTE: We have to cast as "unknown" and then back to "RuleSearchResult" because "RuleSearchResult" isn't an exact type. See notes in the JSDocs fo that type.
+  } as unknown as SavedObjectsFindResponse<RuleSearchResult, never>);
+
+export const getMockThreatMatchRuleSO = ({
+  isElastic = false,
+  isCustomized = false,
+  hasNegateThreatMapping = false,
+}: {
+  isElastic?: boolean;
+  isCustomized?: boolean;
+  hasNegateThreatMapping?: boolean;
+} = {}): RuleSearchResult =>
+  ({
+    type: 'alert',
+    id: '6eecd8c2-8bfb-11eb-afbe-1b7a66309c6b',
+    namespaces: ['default'],
+    attributes: {
+      name: 'mock IM rule 1',
+      tags: ['mock'],
+      alertTypeId: 'siem.indicatorRule',
+      consumer: 'siem',
+      params: {
+        author: [],
+        description: 'mock',
+        falsePositives: [],
+        from: 'now-5001h',
+        ruleId: 'a6261241-b236-4f5b-ac09-deab86330b3a',
+        immutable: isElastic,
+        ruleSource: isCustomized
+          ? {
+              type: 'external',
+              isCustomized,
+              customizedFields: isCustomized
+                ? [{ fieldName: 'tags' }, { fieldName: 'name' }, { fieldName: 'description' }]
+                : [],
+            }
+          : { type: 'internal' },
+        license: '',
+        outputIndex: '',
+        meta: {
+          kibana_siem_app_url: 'http://localhost:5620/app/security',
+        },
+        maxSignals: 100,
+        riskScore: 21,
+        riskScoreMapping: [],
+        severity: 'low',
+        severityMapping: [],
+        threat: [],
+        to: 'now',
+        references: [],
+        version: 1,
+        exceptionsList: [],
+        relatedIntegrations: [],
+        requiredFields: [],
+        setup: '',
+        type: 'threat_match',
+        language: 'kuery',
+        index: ['my-index'],
+        query: '*',
+        filters: [],
+        threatFilters: [],
+        threatQuery: '*',
+        threatMapping: [
+          {
+            entries: [
+              {
+                field: 'host.name',
+                type: 'mapping',
+                value: 'threat.indicator.host.name',
+                negate: false,
+              },
+              {
+                field: 'user.name',
+                type: 'mapping',
+                value: 'threat.indicator.user.name',
+                negate: hasNegateThreatMapping,
+              },
+            ],
+          },
+        ],
+        threatLanguage: 'kuery',
+        threatIndex: ['threat-index'],
+        threatIndicatorPath: 'threat.indicator',
+      },
+      schedule: {
+        interval: '5m',
+      },
+      actions: [],
+      throttle: null,
+      notifyWhen: 'onActiveAlert',
+      apiKeyOwner: null,
+      apiKey: '',
+      legacyId: null,
+      createdBy: 'user',
+      updatedBy: 'user',
+      createdAt: '2021-03-23T17:15:59.634Z',
+      updatedAt: '2021-03-23T17:15:59.634Z',
+      muteAll: true,
+      mutedInstanceIds: [],
+      monitoring: {
+        execution: {
+          history: [],
+          calculated_metrics: {
+            success_ratio: 1,
+            p99: 7981,
+            p50: 1653,
+            p95: 6523.699999999996,
+          },
+        },
+      },
+      meta: {
+        versionApiKeyLastmodified: '8.2.0',
+      },
+      scheduledTaskId: '6eecd8c2-8bfb-11eb-afbe-1b7a66309c6d',
+    },
+    references: [],
+    migrationVersion: {
+      alert: '8.0.0',
+    },
+    coreMigrationVersion: '8.2.0',
+    updated_at: '2021-03-23T17:15:59.634Z',
+    version: 'Wzk4NTQwLDNd',
+    score: 0,
+    sort: ['1644865254209', '19548'],
+  } as unknown as RuleSearchResult);
+
+export const getMockThreatMatchRuleSearchResponse = (
+  rulesSO: RuleSearchResult[]
+): SavedObjectsFindResponse<RuleSearchResult, never> =>
+  ({
+    page: 1,
+    per_page: 1_000,
+    total: 1,
+    saved_objects: rulesSO,
   } as unknown as SavedObjectsFindResponse<RuleSearchResult, never>);

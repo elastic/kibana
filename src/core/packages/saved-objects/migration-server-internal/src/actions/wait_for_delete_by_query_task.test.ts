@@ -10,7 +10,8 @@
 import * as Either from 'fp-ts/Either';
 import * as TaskEither from 'fp-ts/TaskEither';
 import * as Option from 'fp-ts/Option';
-import { errors as EsErrors, TransportResult } from '@elastic/elasticsearch';
+import type { TransportResult } from '@elastic/elasticsearch';
+import { errors as EsErrors } from '@elastic/elasticsearch';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { waitForDeleteByQueryTask } from './wait_for_delete_by_query_task';
 import { waitForTask } from './wait_for_task';

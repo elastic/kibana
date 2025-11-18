@@ -6,86 +6,45 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
 import { FormInfoField } from '@kbn/search-shared-ui';
-import { ConnectToElasticsearchSidePanel } from './connect_to_elasticsearch_side_panel';
-import { AISearchCapabilities } from './ai_search_capabilities/ai_search_capabilities';
 import { useElasticsearchUrl } from '../hooks/use_elasticsearch_url';
 import { ApiKeyForm } from './api_key_form';
+import { ELASTICSEARCH_ENDPOINT_LABEL } from './shared/i18n';
 
 export const ConnectToElasticsearch = () => {
   const elasticsearchUrl = useElasticsearchUrl();
 
   return (
-    <EuiFlexGroup gutterSize="xl" wrap>
-      <EuiFlexItem grow={3}>
-        <EuiFlexGroup direction="column" gutterSize="l">
+    <EuiFlexGroup direction="column" gutterSize="xs">
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexItem>
+            <EuiTitle size="xxs">
+              <h3>{ELASTICSEARCH_ENDPOINT_LABEL}</h3>
+            </EuiTitle>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiFlexGroup alignItems="flexStart" gutterSize="m" wrap>
           <EuiFlexItem grow={false}>
-            <EuiFlexGroup direction="column" gutterSize="s">
+            <EuiFlexGroup direction="column" gutterSize="xs">
               <EuiFlexItem>
-                <EuiTitle size="m">
-                  <h2>
-                    {i18n.translate('xpack.searchHomepage.connectToElasticsearch.title', {
-                      defaultMessage: 'Connect to Elasticsearch',
-                    })}
-                  </h2>
-                </EuiTitle>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiText grow={false} color="subdued">
-                  <p>
-                    {i18n.translate('xpack.searchHomepage.connectToElasticsearch.description', {
-                      defaultMessage:
-                        'Set up your connection to Elasticsearch to start searching and analyzing your data.',
-                    })}
-                  </p>
-                </EuiText>
+                <FormInfoField
+                  value={elasticsearchUrl}
+                  copyValue={elasticsearchUrl}
+                  dataTestSubj="endpointValueField"
+                  copyValueDataTestSubj="copyEndpointButton"
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
-            <EuiFlexGroup alignItems="flexStart" gutterSize="l">
-              <EuiFlexItem grow={false}>
-                <EuiFlexGroup direction="column" gutterSize="s">
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle size="xxs">
-                      <span>
-                        {i18n.translate(
-                          'xpack.searchHomepage.connectToElasticsearch.elasticSearchEndpointLabel',
-                          {
-                            defaultMessage: 'Elasticsearch endpoint',
-                          }
-                        )}
-                      </span>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <FormInfoField
-                      value={elasticsearchUrl}
-                      copyValue={elasticsearchUrl}
-                      dataTestSubj="endpointValueField"
-                      copyValueDataTestSubj="copyEndpointButton"
-                    />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <ApiKeyForm />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiHorizontalRule />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <AISearchCapabilities />
+            <ApiKeyForm />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiFlexItem>
-      <EuiFlexItem grow={1}>
-        <ConnectToElasticsearchSidePanel />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

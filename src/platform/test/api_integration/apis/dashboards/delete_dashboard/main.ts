@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 import { PUBLIC_API_PATH } from '@kbn/dashboard-plugin/server';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -19,13 +19,14 @@ export default function ({ getService }: FtrProviderContext) {
         .delete(`${PUBLIC_API_PATH}/non-existent-dashboard`)
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+        .set('elastic-api-version', '1')
         .send();
 
       expect(response.status).to.be(404);
       expect(response.body).to.eql({
         statusCode: 404,
         error: 'Not Found',
-        message: 'A dashboard with saved object ID non-existent-dashboard was not found.',
+        message: 'A dashboard with ID non-existent-dashboard was not found.',
       });
     });
 
@@ -34,6 +35,7 @@ export default function ({ getService }: FtrProviderContext) {
         .delete(`${PUBLIC_API_PATH}/be3733a0-9efe-11e7-acb3-3dab96693fab`)
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+        .set('elastic-api-version', '1')
         .send();
 
       expect(response.status).to.be(200);

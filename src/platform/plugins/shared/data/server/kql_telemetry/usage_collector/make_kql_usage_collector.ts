@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { fetchProvider, Usage } from './fetch';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type { Usage } from './fetch';
+import { fetchProvider } from './fetch';
 
 export function makeKQLUsageCollector(
   usageCollection: UsageCollectionSetup,

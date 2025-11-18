@@ -1,0 +1,498 @@
+{
+  "id": "@kbn/grok-heuristics",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/grok-heuristics",
+        "id": "def-common.extractGrokPatternDangerouslySlow",
+        "type": "Function",
+        "tags": [],
+        "label": "extractGrokPatternDangerouslySlow",
+        "description": [
+          "\nWARNING: DO NOT RUN THIS FUNCTION ON THE MAIN THREAD\n\nExtracts structured fields (nodes) from an array of log messages by analyzing\npatterns, delimiters, and column structures.\n\nThis function performs multiple passes to identify consistent tokenization patterns\nand normalize the data into a structured format. It is computationally intensive\nand should not be run on the main thread.\n\nSteps:\n1. Masks specific patterns (e.g. quoted strings, parentheses) in the messages.\n2. Detects the most likely delimiter (e.g. whitespace, `|`, `;`).\n3. Splits messages into columns using the detected delimiter and tokenizes them.\n4. Identifies consistent split characters for further tokenization.\n5. Refines tokenization using consistent split characters.\n6. Normalizes columns into a unified structure across all messages.\n7. Identifies useful columns and collapses others into a single GREEDYDATA column.\n8. Flattens the structured columns into a list of tokens with delimiters inlined."
+        ],
+        "signature": [
+          "(messages: string[]) => ",
+          "GrokPatternNode",
+          "[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/tokenization/extract_grok_pattern.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-heuristics",
+            "id": "def-common.extractGrokPatternDangerouslySlow.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "messages",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/tokenization/extract_grok_pattern.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-heuristics",
+        "id": "def-common.getGrokPattern",
+        "type": "Function",
+        "tags": [],
+        "label": "getGrokPattern",
+        "description": [],
+        "signature": [
+          "(nodes: ",
+          "GrokPatternNode",
+          "[]) => string"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/get_grok_pattern.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-heuristics",
+            "id": "def-common.getGrokPattern.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "nodes",
+            "description": [],
+            "signature": [
+              "GrokPatternNode",
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/get_grok_pattern.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-heuristics",
+        "id": "def-common.getGrokProcessor",
+        "type": "Function",
+        "tags": [],
+        "label": "getGrokProcessor",
+        "description": [
+          "\nGenerates a GROK processor definition by combining extracted tokens and\nthe result of an LLM review. It constructs a root GROK pattern and\noptionally defines custom pattern definitions for fields with multiple\ncolumns, ensuring patterns are validated and adjusted based on example\nvalues."
+        ],
+        "signature": [
+          "(nodes: ",
+          "GrokPatternNode",
+          "[], reviewResult: ",
+          "NormalizedReviewResult",
+          ") => ",
+          {
+            "pluginId": "@kbn/grok-heuristics",
+            "scope": "common",
+            "docId": "kibKbnGrokHeuristicsPluginApi",
+            "section": "def-common.GrokProcessorResult",
+            "text": "GrokProcessorResult"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/get_grok_processor.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-heuristics",
+            "id": "def-common.getGrokProcessor.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "nodes",
+            "description": [],
+            "signature": [
+              "GrokPatternNode",
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/get_grok_processor.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/grok-heuristics",
+            "id": "def-common.getGrokProcessor.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "reviewResult",
+            "description": [],
+            "signature": [
+              "NormalizedReviewResult"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/get_grok_processor.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-heuristics",
+        "id": "def-common.getReviewFields",
+        "type": "Function",
+        "tags": [],
+        "label": "getReviewFields",
+        "description": [
+          "\nGenerates an object of fields with their corresponding GROK component and example values."
+        ],
+        "signature": [
+          "(nodes: ",
+          "GrokPatternNode",
+          "[], numExamples: number) => ",
+          "ReviewFields"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/get_review_fields.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-heuristics",
+            "id": "def-common.getReviewFields.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "nodes",
+            "description": [],
+            "signature": [
+              "GrokPatternNode",
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/get_review_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/grok-heuristics",
+            "id": "def-common.getReviewFields.$2",
+            "type": "number",
+            "tags": [],
+            "label": "numExamples",
+            "description": [],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/get_review_fields.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-heuristics",
+        "id": "def-common.groupMessagesByPattern",
+        "type": "Function",
+        "tags": [],
+        "label": "groupMessagesByPattern",
+        "description": [],
+        "signature": [
+          "(messages: string[], params: { patternThreshold?: number | undefined; minProbability?: number | undefined; limit?: number | undefined; } | undefined) => { truncatedPattern: string; probability: number; messages: string[]; }[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/group_messages.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-heuristics",
+            "id": "def-common.groupMessagesByPattern.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "messages",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/group_messages.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/grok-heuristics",
+            "id": "def-common.groupMessagesByPattern.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/group_messages.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/grok-heuristics",
+                "id": "def-common.groupMessagesByPattern.$2.patternThreshold",
+                "type": "number",
+                "tags": [],
+                "label": "patternThreshold",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/group_messages.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/grok-heuristics",
+                "id": "def-common.groupMessagesByPattern.$2.minProbability",
+                "type": "number",
+                "tags": [],
+                "label": "minProbability",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/group_messages.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/grok-heuristics",
+                "id": "def-common.groupMessagesByPattern.$2.limit",
+                "type": "number",
+                "tags": [],
+                "label": "limit",
+                "description": [],
+                "signature": [
+                  "number | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/group_messages.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-heuristics",
+        "id": "def-common.mergeGrokProcessors",
+        "type": "Function",
+        "tags": [],
+        "label": "mergeGrokProcessors",
+        "description": [
+          "\nMerges multiple GrokProcessorResult objects into a single result.\n- Combines patterns and ensures unique pattern definitions by renaming duplicates.\n- Merges descriptions from all processors into a single string.\n"
+        ],
+        "signature": [
+          "(grokProcessors: ",
+          {
+            "pluginId": "@kbn/grok-heuristics",
+            "scope": "common",
+            "docId": "kibKbnGrokHeuristicsPluginApi",
+            "section": "def-common.GrokProcessorResult",
+            "text": "GrokProcessorResult"
+          },
+          "[]) => ",
+          {
+            "pluginId": "@kbn/grok-heuristics",
+            "scope": "common",
+            "docId": "kibKbnGrokHeuristicsPluginApi",
+            "section": "def-common.GrokProcessorResult",
+            "text": "GrokProcessorResult"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/merge_grok_processors.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-heuristics",
+            "id": "def-common.mergeGrokProcessors.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "grokProcessors",
+            "description": [
+              "- Array of GrokProcessorResult objects to merge."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/grok-heuristics",
+                "scope": "common",
+                "docId": "kibKbnGrokHeuristicsPluginApi",
+                "section": "def-common.GrokProcessorResult",
+                "text": "GrokProcessorResult"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/merge_grok_processors.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "A single GrokProcessorResult with merged patterns, definitions, and descriptions."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/grok-heuristics",
+        "id": "def-common.unwrapPatternDefinitions",
+        "type": "Function",
+        "tags": [],
+        "label": "unwrapPatternDefinitions",
+        "description": [
+          "\nUnwraps pattern definitions by recursively inlining them\ninto the provided patterns. This ensures that all patterns are fully\nexpanded, resolving any references to other patterns defined in the\n`pattern_definitions` object. Prevents infinite recursion in case of\ncyclic definitions.\n"
+        ],
+        "signature": [
+          "(grokProcessor: Pick<",
+          {
+            "pluginId": "@kbn/streamlang",
+            "scope": "common",
+            "docId": "kibKbnStreamlangPluginApi",
+            "section": "def-common.GrokProcessor",
+            "text": "GrokProcessor"
+          },
+          ", \"patterns\" | \"pattern_definitions\">) => string[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-streamlang/types/utils/grok_pattern_definitions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-heuristics",
+            "id": "def-common.unwrapPatternDefinitions.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "grokProcessor",
+            "description": [
+              "- An object containing GROK patterns and their definitions."
+            ],
+            "signature": [
+              "Pick<",
+              {
+                "pluginId": "@kbn/streamlang",
+                "scope": "common",
+                "docId": "kibKbnStreamlangPluginApi",
+                "section": "def-common.GrokProcessor",
+                "text": "GrokProcessor"
+              },
+              ", \"patterns\" | \"pattern_definitions\">"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-streamlang/types/utils/grok_pattern_definitions.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "An array of fully expanded patterns."
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/grok-heuristics",
+        "id": "def-common.GrokProcessorResult",
+        "type": "Interface",
+        "tags": [],
+        "label": "GrokProcessorResult",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/get_grok_processor.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/grok-heuristics",
+            "id": "def-common.GrokProcessorResult.description",
+            "type": "string",
+            "tags": [],
+            "label": "description",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/get_grok_processor.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/grok-heuristics",
+            "id": "def-common.GrokProcessorResult.patterns",
+            "type": "Array",
+            "tags": [],
+            "label": "patterns",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/get_grok_processor.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/grok-heuristics",
+            "id": "def-common.GrokProcessorResult.pattern_definitions",
+            "type": "Object",
+            "tags": [],
+            "label": "pattern_definitions",
+            "description": [],
+            "signature": [
+              "Record<string, string> | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/get_grok_processor.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/grok-heuristics",
+        "id": "def-common.ReviewFieldsPrompt",
+        "type": "Object",
+        "tags": [],
+        "label": "ReviewFieldsPrompt",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.Prompt",
+            "text": "Prompt"
+          },
+          "<{ sample_messages: string[]; review_fields: string; }, [{ template: { mustache: { template: string; }; }; toolChoice: { function: \"validate_response_schema\"; }; tools: { validate_response_schema: { readonly description: \"Validate the response schema to ensure the output adheres to the defined structure.\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly log_source: { readonly type: \"string\"; }; readonly fields: { readonly type: \"array\"; readonly items: { readonly type: \"object\"; readonly properties: { readonly ecs_field: { readonly type: \"string\"; }; readonly columns: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; readonly grok_components: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; }; readonly required: readonly [\"ecs_field\", \"columns\", \"grok_components\"]; }; }; }; readonly required: readonly [\"log_source\", \"fields\"]; }; }; }; }]>"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-grok-heuristics/src/review/review_fields_prompt.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  }
+}

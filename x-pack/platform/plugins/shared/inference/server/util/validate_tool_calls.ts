@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import Ajv from 'ajv';
-import {
-  ToolCallsOf,
-  ToolChoiceType,
-  ToolOptions,
-  UnvalidatedToolCall,
-} from '@kbn/inference-common';
+import addFormats from 'ajv-formats';
+import type { ToolCall, ToolOptions, UnvalidatedToolCall } from '@kbn/inference-common';
+import { ToolChoiceType } from '@kbn/inference-common';
+import type { ToolCallOfToolOptions } from '@kbn/inference-common';
 import {
   createToolNotFoundError,
   createToolValidationError,
@@ -20,8 +19,15 @@ export function validateToolCalls<TToolOptions extends ToolOptions>({
   toolCalls,
   toolChoice,
   tools,
-}: TToolOptions & { toolCalls: UnvalidatedToolCall[] }): ToolCallsOf<TToolOptions>['toolCalls'] {
+}: TToolOptions & { toolCalls: UnvalidatedToolCall[] }): ToolCallOfToolOptions<TToolOptions>[];
+
+export function validateToolCalls({
+  toolCalls,
+  toolChoice,
+  tools,
+}: ToolOptions & { toolCalls: UnvalidatedToolCall[] }): ToolCall[] {
   const validator = new Ajv();
+  addFormats(validator, { mode: 'fast' });
 
   if (toolCalls.length && toolChoice === ToolChoiceType.none) {
     throw createToolValidationError(
@@ -36,12 +42,15 @@ export function validateToolCalls<TToolOptions extends ToolOptions>({
     const tool = tools?.[toolCall.function.name];
 
     if (!tool) {
-      throw createToolNotFoundError(toolCall.function.name);
+      throw createToolNotFoundError({
+        name: toolCall.function.name,
+        args: toolCall.function.arguments,
+      });
     }
 
     const toolSchema = tool.schema ?? { type: 'object', properties: {} };
 
-    let serializedArguments: ToolCallsOf<TToolOptions>['toolCalls'][0]['function']['arguments'];
+    let serializedArguments: Record<string, unknown>;
 
     try {
       serializedArguments = JSON.parse(toolCall.function.arguments);

@@ -11,7 +11,6 @@ import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { APP_ID, FEATURE_ID, FEATURE_ID_V3 } from '../../common/constants';
 import { createUICapabilities, getApiTags } from '../../common';
 import { CASES_DELETE_SUB_PRIVILEGE_ID, CASES_SETTINGS_SUB_PRIVILEGE_ID } from './constants';
@@ -44,7 +43,6 @@ export const getV1 = (): KibanaFeatureConfig => {
       defaultMessage: 'Cases (Deprecated)',
     }),
     category: DEFAULT_APP_CATEGORIES.management,
-    scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
     app: [],
     order: FEATURE_ORDER,
     management: {

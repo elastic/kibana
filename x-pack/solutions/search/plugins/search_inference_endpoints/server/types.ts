@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import type { FeaturesPluginSetup, FeaturesPluginStart } from '@kbn/features-plugin/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchInferenceEndpointsPluginSetup {}

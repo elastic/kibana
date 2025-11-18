@@ -6,9 +6,10 @@
  */
 
 import type SuperTest from 'supertest';
-import { parse as parseCookie, Cookie } from 'tough-cookie';
+import type { Cookie } from 'tough-cookie';
+import { parse as parseCookie } from 'tough-cookie';
 import { superUser } from '../authentication/users';
-import { User } from '../authentication/types';
+import type { User } from '../authentication/types';
 
 export const loginUsers = async ({
   supertest,

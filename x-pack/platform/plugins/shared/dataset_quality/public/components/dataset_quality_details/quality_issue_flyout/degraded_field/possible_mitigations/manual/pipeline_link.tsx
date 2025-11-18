@@ -17,7 +17,6 @@ import {
   EuiLink,
   EuiPanel,
   EuiSpacer,
-  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import {
@@ -27,12 +26,6 @@ import {
 } from '../../../../../../../common/translations';
 import { useKibanaContextForPlugin } from '../../../../../../utils';
 import { useDatasetQualityDetailsState } from '../../../../../../hooks';
-
-const AccordionTitle = () => (
-  <EuiTitle size="xxs">
-    <h6>{otherMitigationsCustomIngestPipeline}</h6>
-  </EuiTitle>
-);
 
 export function CreateEditPipelineLink({
   areIntegrationAssetsAvailable,
@@ -72,10 +65,11 @@ export function CreateEditPipelineLink({
     <EuiPanel hasBorder grow={false}>
       <EuiAccordion
         id={accordionId}
-        buttonContent={<AccordionTitle />}
+        buttonContent={<EuiLink>{otherMitigationsCustomIngestPipeline}</EuiLink>}
         paddingSize="none"
-        initialIsOpen={true}
+        initialIsOpen={false}
         data-test-subj="datasetQualityManualMitigationsPipelineAccordion"
+        arrowProps={{ color: 'primary' }}
       >
         <EuiHorizontalRule margin="s" />
         <FormattedMessage
@@ -98,6 +92,7 @@ export function CreateEditPipelineLink({
               iconType="copy"
               data-test-subj="datasetQualityManualMitigationsPipelineNameCopyButton"
               onClick={onClickHandler}
+              aria-label={manualMitigationCustomPipelineCopyPipelineNameAriaText}
             />
           }
           readOnly={true}

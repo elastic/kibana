@@ -7,28 +7,35 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import {
-  type ESQLAstCommand,
+  BasicPrettyPrinter,
   esqlCommandRegistry,
-  type FieldType,
+  isSource,
+  mutate,
+  synth,
+  type ESQLAstCommand,
   type FunctionDefinition,
 } from '@kbn/esql-ast';
 import type {
+  ESQLColumnData,
   ESQLFieldWithMetadata,
-  ESQLUserDefinedColumn,
+  ESQLPolicy,
 } from '@kbn/esql-ast/src/commands_registry/types';
-import { ESQLParamLiteral } from '@kbn/esql-ast/src/types';
-import { uniqBy } from 'lodash';
+import type { ESQLAstQueryExpression, ESQLParamLiteral } from '@kbn/esql-ast/src/types';
 
+import type { IAdditionalFields } from '@kbn/esql-ast/src/commands_registry/registry';
 import { enrichFieldsWithECSInfo } from '../autocomplete/utils/ecs_metadata_helper';
 import type { ESQLCallbacks } from './types';
-import { collectUserDefinedColumns } from './user_defined_columns';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
   return v != null;
 }
 
-export function isSourceCommand({ label }: { label: string }) {
+export function isSourceCommandSuggestion({ label }: { label: string }) {
   return ['FROM', 'ROW', 'SHOW', 'TS'].includes(label);
+}
+
+export function isHeaderCommandSuggestion({ label }: { label: string }) {
+  return label === 'SET';
 }
 
 export function createMapFromList<T extends { name: string }>(arr: T[]): Map<string, T> {
@@ -77,28 +84,6 @@ export function getParamAtPosition(
   return params.length > position ? params[position] : minParams ? params[params.length - 1] : null;
 }
 
-// --- Fields helpers ---
-
-export function transformMapToESQLFields(
-  inputMap: Map<string, ESQLUserDefinedColumn[]>
-): ESQLFieldWithMetadata[] {
-  const esqlFields: ESQLFieldWithMetadata[] = [];
-
-  for (const [, userDefinedColumns] of inputMap) {
-    for (const userDefinedColumn of userDefinedColumns) {
-      // Only include userDefinedColumns that have a known type
-      if (userDefinedColumn.type) {
-        esqlFields.push({
-          name: userDefinedColumn.name,
-          type: userDefinedColumn.type as FieldType,
-        });
-      }
-    }
-  }
-
-  return esqlFields;
-}
-
 async function getEcsMetadata(resourceRetriever?: ESQLCallbacks) {
   if (!resourceRetriever?.getFieldsMetadata) {
     return undefined;
@@ -125,30 +110,66 @@ export async function getFieldsFromES(query: string, resourceRetriever?: ESQLCal
  * @param previousPipeFields, the fields from the previous pipe
  * @returns a list of fields that are available for the current pipe
  */
-export async function getCurrentQueryAvailableFields(
-  query: string,
+export async function getCurrentQueryAvailableColumns(
   commands: ESQLAstCommand[],
-  previousPipeFields: ESQLFieldWithMetadata[]
+  previousPipeFields: ESQLColumnData[],
+  fetchFields: (query: string) => Promise<ESQLFieldWithMetadata[]>,
+  getPolicies: () => Promise<Map<string, ESQLPolicy>>,
+  originalQueryText: string
 ) {
-  const cacheCopy = new Map<string, ESQLFieldWithMetadata>();
-  previousPipeFields.forEach((field) => cacheCopy.set(field.name, field));
   const lastCommand = commands[commands.length - 1];
-  const commandDefinition = esqlCommandRegistry.getCommandByName(lastCommand.name);
+  const commandDef = esqlCommandRegistry.getCommandByName(lastCommand.name);
 
-  // If the command has a columnsAfter function, use it to get the fields
-  if (commandDefinition?.methods.columnsAfter) {
-    const userDefinedColumns = collectUserDefinedColumns([lastCommand], cacheCopy, query);
+  const getJoinFields = (command: ESQLAstCommand): Promise<ESQLFieldWithMetadata[]> => {
+    const joinSummary = mutate.commands.join.summarize({
+      type: 'query',
+      commands: [command],
+    } as ESQLAstQueryExpression);
+    const joinIndices = joinSummary.map(({ target: { index } }) => index);
+    if (joinIndices.length > 0) {
+      const joinFieldQuery = synth.cmd`FROM ${joinIndices}`.toString();
+      return fetchFields(joinFieldQuery);
+    }
+    return Promise.resolve([]);
+  };
 
-    return commandDefinition.methods.columnsAfter(lastCommand, previousPipeFields, {
-      userDefinedColumns,
-    });
-  } else {
-    // If the command doesn't have a columnsAfter function, use the default behavior
-    const userDefinedColumns = collectUserDefinedColumns(commands, cacheCopy, query);
-    const arrayOfUserDefinedColumns: ESQLFieldWithMetadata[] = transformMapToESQLFields(
-      userDefinedColumns ?? new Map<string, ESQLUserDefinedColumn[]>()
+  const getEnrichFields = async (command: ESQLAstCommand): Promise<ESQLFieldWithMetadata[]> => {
+    if (!isSource(command.args[0])) {
+      return [];
+    }
+
+    const policyName = command.args[0].name;
+
+    const policies = await getPolicies();
+    const policy = policies.get(policyName);
+
+    if (policy) {
+      const fieldsQuery = `FROM ${policy.sourceIndices.join(
+        ', '
+      )} | KEEP ${policy.enrichFields.join(', ')}`;
+      return fetchFields(fieldsQuery);
+    }
+
+    return [];
+  };
+
+  const getFromFields = (command: ESQLAstCommand): Promise<ESQLFieldWithMetadata[]> => {
+    return fetchFields(BasicPrettyPrinter.command(command));
+  };
+
+  const additionalFields: IAdditionalFields = {
+    fromJoin: getJoinFields,
+    fromEnrich: getEnrichFields,
+    fromFrom: getFromFields,
+  };
+
+  if (commandDef?.methods.columnsAfter) {
+    return commandDef.methods.columnsAfter(
+      lastCommand,
+      previousPipeFields,
+      originalQueryText,
+      additionalFields
     );
-    const allFields = uniqBy([...(previousPipeFields ?? []), ...arrayOfUserDefinedColumns], 'name');
-    return allFields;
   }
+  return previousPipeFields;
 }

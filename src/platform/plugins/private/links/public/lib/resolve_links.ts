@@ -8,7 +8,7 @@
  */
 
 import { memoize } from 'lodash';
-import { ResolvedLink } from '../types';
+import type { ResolvedLink } from '../types';
 import { DASHBOARD_LINK_TYPE, EXTERNAL_LINK_TYPE } from '../../common/content_management';
 import type { Link } from '../../server';
 import { validateUrl } from '../components/external_link/external_link_tools';
@@ -71,9 +71,7 @@ export async function resolveLinkInfo(
   if (link.type === DASHBOARD_LINK_TYPE) {
     if (!link.destination) return { title: '' };
     try {
-      const {
-        attributes: { title, description },
-      } = await fetchDashboard(link.destination);
+      const { title, description } = await fetchDashboard(link.destination);
       return { label: link.label, title, description };
     } catch (error) {
       return {

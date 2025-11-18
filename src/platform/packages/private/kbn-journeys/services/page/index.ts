@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
-import { Page } from 'playwright';
-import { Retry } from '..';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { Page } from 'playwright';
+import type { Retry } from '..';
 import { KibanaPage } from './kibana_page';
 import { ProjectPage } from './project_page';
 

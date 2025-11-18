@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { connect } from 'react-redux';
 import { type UseEuiTheme, useEuiShadow, euiFontSize } from '@elastic/eui';
 import { css } from '@emotion/react';
-import {
+import type {
   ControlType,
   TermIntersect,
   UrlTemplate,
@@ -26,7 +26,8 @@ import { SelectedNodeEditor } from './selected_node_editor';
 import { MergeCandidates } from './merge_candidates';
 import { DrillDowns } from './drill_downs';
 import { DrillDownIconLinks } from './drill_down_icon_links';
-import { GraphState, liveResponseFieldsSelector, templatesSelector } from '../../state_management';
+import type { GraphState } from '../../state_management';
+import { liveResponseFieldsSelector, templatesSelector } from '../../state_management';
 import { SelectedNodeItem } from './selected_node_item';
 import { gphSidebarHeaderStyles } from '../../styles';
 

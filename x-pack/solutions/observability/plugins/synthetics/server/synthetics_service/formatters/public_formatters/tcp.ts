@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { ConfigKey, TCPFields } from '../../../../common/runtime_types';
-import { Formatter, commonFormatters } from './common';
+import type { TCPFields } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
+import type { Formatter } from './common';
+import { commonFormatters } from './common';
 import { tlsFormatters } from './tls';
 
 export type TCPFormatMap = Record<keyof TCPFields, Formatter>;

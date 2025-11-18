@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -58,7 +58,8 @@
     "@kbn/ebt-tools",
     "@kbn/core-security-server",
     "@kbn/charts-theme",
-    "@kbn/shared-ux-error-boundary"
+    "@kbn/shared-ux-error-boundary",
+    "@kbn/licensing-types"
     // add references to other TypeScript projects the plugin depends on
 
     // requiredPlugins from ./kibana.json

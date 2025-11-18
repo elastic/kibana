@@ -9,11 +9,9 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
-import {
-  PublishesUnifiedSearch,
-  useStateFromPublishingSubject,
-} from '@kbn/presentation-publishing';
+import type { DefaultEmbeddableApi, EmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { EuiCodeBlock, EuiPanel, EuiTitle } from '@elastic/eui';
 import { FILTER_DEBUGGER_EMBEDDABLE_ID } from './constants';
 

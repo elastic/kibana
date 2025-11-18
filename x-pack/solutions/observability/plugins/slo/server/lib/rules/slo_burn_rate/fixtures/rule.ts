@@ -12,8 +12,8 @@ import {
   LOW_PRIORITY_ACTION,
   MEDIUM_PRIORITY_ACTION,
 } from '../../../../../common/constants';
-import { SLODefinition } from '../../../../domain/models';
-import { BurnRateRuleParams } from '../types';
+import type { SLODefinition } from '../../../../domain/models';
+import type { BurnRateRuleParams } from '../types';
 
 export function createBurnRateRule(
   slo: SLODefinition,

@@ -19,9 +19,13 @@
         "label": "describeDataset",
         "description": [],
         "signature": [
-          "({\n  esClient,\n  start,\n  end,\n  index,\n  kql,\n}: { esClient: ",
+          "({\n  esClient,\n  start,\n  end,\n  index,\n  kql,\n  filter,\n}: { esClient: ",
           "ElasticsearchClient",
-          "; start: number; end: number; index: string | string[]; kql?: string | undefined; }) => Promise<",
+          "; start: number; end: number; index: string | string[]; kql?: string | undefined; filter?: ",
+          "QueryDslQueryContainer",
+          " | ",
+          "QueryDslQueryContainer",
+          "[] | undefined; }) => Promise<",
           {
             "pluginId": "@kbn/ai-tools",
             "scope": "server",
@@ -40,7 +44,7 @@
             "id": "def-server.describeDataset.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  esClient,\n  start,\n  end,\n  index,\n  kql,\n}",
+            "label": "{\n  esClient,\n  start,\n  end,\n  index,\n  kql,\n  filter,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/index.ts",
             "deprecated": false,
@@ -162,7 +166,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "SearchResponse",
-                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
@@ -945,6 +949,8 @@
                   "; sql: ",
                   "default",
                   "; ssl: ",
+                  "default",
+                  "; streams: ",
                   "default",
                   "; synonyms: ",
                   "default",
@@ -1093,6 +1099,23 @@
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-tools",
+                "id": "def-server.describeDataset.$1.filter",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "filter",
+                "description": [],
+                "signature": [
+                  "QueryDslQueryContainer",
+                  " | ",
+                  "QueryDslQueryContainer",
+                  "[] | undefined"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/index.ts",
+                "deprecated": false,
+                "trackAdoption": false
               }
             ]
           }
@@ -1126,7 +1149,7 @@
             "section": "def-common.Logger",
             "text": "Logger"
           },
-          "; start?: number | undefined; end?: number | undefined; signal: AbortSignal; prompt: string; tools?: TTools | undefined; } & (TTools extends Record<string, ",
+          "; start?: number | undefined; end?: number | undefined; signal: AbortSignal; prompt: string; } & (TTools extends Record<string, ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -1134,7 +1157,9 @@
             "section": "def-common.ToolDefinition",
             "text": "ToolDefinition"
           },
-          "> ? { toolCallbacks: ToolCallbacksOfTools<TTools>; } : {})) => Promise<",
+          "<",
+          "ToolSchemaTypeObject",
+          " | undefined>> ? { toolCallbacks: ToolCallbacksOfTools<TTools>; } : {})) => Promise<",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -1142,23 +1167,9 @@
             "section": "def-common.ChatCompleteResponse",
             "text": "ChatCompleteResponse"
           },
-          "<Omit<",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.PromptOptions",
-            "text": "PromptOptions"
-          },
           "<",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.Prompt",
-            "text": "Prompt"
-          },
-          "<{ prompt: string; esql_system_prompt: string; }, [{ system: { mustache: { template: string; }; }; template: { mustache: { template: string; }; }; temperature: number; tools: { readonly get_documentation: { readonly description: \"Get documentation about specific ES|QL commands or functions\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly commands: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; readonly functions: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; }; readonly required: readonly [\"commands\", \"functions\"]; }; }; readonly validate_queries: { readonly description: \"Validate one or more ES|QL queries for syntax errors and/or mapping issues\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly queries: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; }; readonly required: readonly [\"queries\"]; }; }; readonly run_queries: { readonly description: \"Run one or more validated ES|QL queries and retrieve the results\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly queries: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; }; readonly required: readonly [\"queries\"]; }; }; readonly list_datasets: { readonly description: \"List datasets (index, data stream, aliases) based on a name or pattern, similar to _resolve/_index\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly name: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; }; readonly required: readonly [\"name\"]; }; }; readonly describe_dataset: { readonly description: \"Get dataset description via sampling of documents\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly index: { readonly type: \"string\"; readonly description: \"Index, data stream or index pattern you want to analyze\"; }; readonly kql: { readonly type: \"string\"; readonly description: \"KQL for filtering the data\"; }; }; readonly required: readonly [\"index\"]; }; }; }; }]>> & { tools: TTools; stream: false; }, \"tools\" | \"toolChoice\"> & MergeToolOptions<Pick<{ system: { mustache: { template: string; }; }; template: { mustache: { template: string; }; }; temperature: number; tools: { readonly get_documentation: { readonly description: \"Get documentation about specific ES|QL commands or functions\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly commands: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; readonly functions: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; }; readonly required: readonly [\"commands\", \"functions\"]; }; }; readonly validate_queries: { readonly description: \"Validate one or more ES|QL queries for syntax errors and/or mapping issues\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly queries: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; }; readonly required: readonly [\"queries\"]; }; }; readonly run_queries: { readonly description: \"Run one or more validated ES|QL queries and retrieve the results\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly queries: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; }; readonly required: readonly [\"queries\"]; }; }; readonly list_datasets: { readonly description: \"List datasets (index, data stream, aliases) based on a name or pattern, similar to _resolve/_index\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly name: { readonly type: \"array\"; readonly items: { readonly type: \"string\"; }; }; }; readonly required: readonly [\"name\"]; }; }; readonly describe_dataset: { readonly description: \"Get dataset description via sampling of documents\"; readonly schema: { readonly type: \"object\"; readonly properties: { readonly index: { readonly type: \"string\"; readonly description: \"Index, data stream or index pattern you want to analyze\"; }; readonly kql: { readonly type: \"string\"; readonly description: \"KQL for filtering the data\"; }; }; readonly required: readonly [\"index\"]; }; }; }; }, \"tools\" | \"toolChoice\">, ",
+          "ChatCompleteOptionsOfPromptOptions",
+          "<",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -1206,7 +1217,7 @@
                 "section": "def-common.Logger",
                 "text": "Logger"
               },
-              "; start?: number | undefined; end?: number | undefined; signal: AbortSignal; prompt: string; tools?: TTools | undefined; } & (TTools extends Record<string, ",
+              "; start?: number | undefined; end?: number | undefined; signal: AbortSignal; prompt: string; } & (TTools extends Record<string, ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -1214,7 +1225,9 @@
                 "section": "def-common.ToolDefinition",
                 "text": "ToolDefinition"
               },
-              "> ? { toolCallbacks: ToolCallbacksOfTools<TTools>; } : {})"
+              "<",
+              "ToolSchemaTypeObject",
+              " | undefined>> ? { toolCallbacks: ToolCallbacksOfTools<TTools>; } : {})"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/esql/index.ts",
             "deprecated": false,
@@ -1233,7 +1246,7 @@
         "label": "executeAsEsqlAgent",
         "description": [],
         "signature": [
-          "({\n  inferenceClient,\n  esClient,\n  start,\n  end,\n  signal,\n  prompt,\n  tools,\n  toolCallbacks,\n}: { inferenceClient: ",
+          "({\n  inferenceClient,\n  esClient,\n  start,\n  end,\n  signal,\n  prompt,\n  toolCallbacks,\n}: { inferenceClient: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -1243,15 +1256,15 @@
           },
           "; esClient: ",
           "ElasticsearchClient",
-          "; start?: number | undefined; end?: number | undefined; signal: AbortSignal; prompt: string; tools?: Record<string, ",
+          "; start?: number | undefined; end?: number | undefined; signal: AbortSignal; prompt: string; toolCallbacks?: { [x: string]: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
             "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolDefinition",
-            "text": "ToolDefinition"
+            "section": "def-common.ToolCallback",
+            "text": "ToolCallback"
           },
-          "> | undefined; toolCallbacks?: { [x: string]: (toolCall: ",
+          "<",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -1259,7 +1272,15 @@
             "section": "def-common.ToolCall",
             "text": "ToolCall"
           },
-          "<string, {}>) => Promise<unknown>; } | undefined; }) => Promise<",
+          "<string, {}>, ",
+          {
+            "pluginId": "@kbn/inference-common",
+            "scope": "common",
+            "docId": "kibKbnInferenceCommonPluginApi",
+            "section": "def-common.ToolCallbackResult",
+            "text": "ToolCallbackResult"
+          },
+          ">; } | undefined; }) => Promise<",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -1292,14 +1313,8 @@
             "text": "PromptVersion"
           },
           "<",
-          {
-            "pluginId": "@kbn/inference-common",
-            "scope": "common",
-            "docId": "kibKbnInferenceCommonPluginApi",
-            "section": "def-common.ToolOptions",
-            "text": "ToolOptions"
-          },
-          "<string>>[]>>>>"
+          "ToolDefinitions",
+          " | undefined>[]>>>>"
         ],
         "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/esql/index.ts",
         "deprecated": false,
@@ -1310,7 +1325,7 @@
             "id": "def-server.executeAsEsqlAgent.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  inferenceClient,\n  esClient,\n  start,\n  end,\n  signal,\n  prompt,\n  tools,\n  toolCallbacks,\n}",
+            "label": "{\n  inferenceClient,\n  esClient,\n  start,\n  end,\n  signal,\n  prompt,\n  toolCallbacks,\n}",
             "description": [],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/esql/index.ts",
             "deprecated": false,
@@ -1452,7 +1467,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "SearchResponse",
-                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
@@ -2235,6 +2250,8 @@
                   "; sql: ",
                   "default",
                   "; ssl: ",
+                  "default",
+                  "; streams: ",
                   "default",
                   "; synonyms: ",
                   "default",
@@ -2389,35 +2406,21 @@
               },
               {
                 "parentPluginId": "@kbn/ai-tools",
-                "id": "def-server.executeAsEsqlAgent.$1.tools",
-                "type": "Object",
-                "tags": [],
-                "label": "tools",
-                "description": [],
-                "signature": [
-                  "Record<string, ",
-                  {
-                    "pluginId": "@kbn/inference-common",
-                    "scope": "common",
-                    "docId": "kibKbnInferenceCommonPluginApi",
-                    "section": "def-common.ToolDefinition",
-                    "text": "ToolDefinition"
-                  },
-                  "> | undefined"
-                ],
-                "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/esql/index.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              },
-              {
-                "parentPluginId": "@kbn/ai-tools",
                 "id": "def-server.executeAsEsqlAgent.$1.toolCallbacks",
                 "type": "Object",
                 "tags": [],
                 "label": "toolCallbacks",
                 "description": [],
                 "signature": [
-                  "{ [x: string]: (toolCall: ",
+                  "{ [x: string]: ",
+                  {
+                    "pluginId": "@kbn/inference-common",
+                    "scope": "common",
+                    "docId": "kibKbnInferenceCommonPluginApi",
+                    "section": "def-common.ToolCallback",
+                    "text": "ToolCallback"
+                  },
+                  "<",
                   {
                     "pluginId": "@kbn/inference-common",
                     "scope": "common",
@@ -2425,13 +2428,90 @@
                     "section": "def-common.ToolCall",
                     "text": "ToolCall"
                   },
-                  "<string, {}>) => Promise<unknown>; } | undefined"
+                  "<string, {}>, ",
+                  {
+                    "pluginId": "@kbn/inference-common",
+                    "scope": "common",
+                    "docId": "kibKbnInferenceCommonPluginApi",
+                    "section": "def-common.ToolCallbackResult",
+                    "text": "ToolCallbackResult"
+                  },
+                  ">; } | undefined"
                 ],
                 "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/esql/index.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
             ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-tools",
+        "id": "def-server.formatDocumentAnalysis",
+        "type": "Function",
+        "tags": [],
+        "label": "formatDocumentAnalysis",
+        "description": [],
+        "signature": [
+          "(analysis: ",
+          {
+            "pluginId": "@kbn/ai-tools",
+            "scope": "server",
+            "docId": "kibKbnAiToolsPluginApi",
+            "section": "def-server.DocumentAnalysis",
+            "text": "DocumentAnalysis"
+          },
+          ", options: FormatDocumentAnalysisOptions | undefined) => ",
+          {
+            "pluginId": "@kbn/ai-tools",
+            "scope": "server",
+            "docId": "kibKbnAiToolsPluginApi",
+            "section": "def-server.FormattedDocumentAnalysis",
+            "text": "FormattedDocumentAnalysis"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/format_document_analysis.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-tools",
+            "id": "def-server.formatDocumentAnalysis.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "analysis",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/ai-tools",
+                "scope": "server",
+                "docId": "kibKbnAiToolsPluginApi",
+                "section": "def-server.DocumentAnalysis",
+                "text": "DocumentAnalysis"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/format_document_analysis.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ai-tools",
+            "id": "def-server.formatDocumentAnalysis.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "FormatDocumentAnalysisOptions | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/format_document_analysis.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
         "returnComment": [],
@@ -2509,6 +2589,88 @@
       },
       {
         "parentPluginId": "@kbn/ai-tools",
+        "id": "def-server.mergeSampleDocumentsWithFieldCaps",
+        "type": "Function",
+        "tags": [],
+        "label": "mergeSampleDocumentsWithFieldCaps",
+        "description": [],
+        "signature": [
+          "({\n  total,\n  hits,\n  fieldCaps,\n}: { total: number; hits: ",
+          "SearchHit",
+          "<unknown>[]; fieldCaps: ",
+          "FieldCapsResponse",
+          "; }) => ",
+          {
+            "pluginId": "@kbn/ai-tools",
+            "scope": "server",
+            "docId": "kibKbnAiToolsPluginApi",
+            "section": "def-server.DocumentAnalysis",
+            "text": "DocumentAnalysis"
+          }
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/merge_sample_documents_with_field_caps.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ai-tools",
+            "id": "def-server.mergeSampleDocumentsWithFieldCaps.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  total,\n  hits,\n  fieldCaps,\n}",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/merge_sample_documents_with_field_caps.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/ai-tools",
+                "id": "def-server.mergeSampleDocumentsWithFieldCaps.$1.total",
+                "type": "number",
+                "tags": [],
+                "label": "total",
+                "description": [],
+                "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/merge_sample_documents_with_field_caps.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-tools",
+                "id": "def-server.mergeSampleDocumentsWithFieldCaps.$1.hits",
+                "type": "Array",
+                "tags": [],
+                "label": "hits",
+                "description": [],
+                "signature": [
+                  "SearchHit",
+                  "<unknown>[]"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/merge_sample_documents_with_field_caps.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/ai-tools",
+                "id": "def-server.mergeSampleDocumentsWithFieldCaps.$1.fieldCaps",
+                "type": "Object",
+                "tags": [],
+                "label": "fieldCaps",
+                "description": [],
+                "signature": [
+                  "FieldCapsResponse"
+                ],
+                "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/merge_sample_documents_with_field_caps.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ai-tools",
         "id": "def-server.pValueToLabel",
         "type": "Function",
         "tags": [],
@@ -2535,87 +2697,6 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/ai-tools",
-        "id": "def-server.sortAndTruncateAnalyzedFields",
-        "type": "Function",
-        "tags": [],
-        "label": "sortAndTruncateAnalyzedFields",
-        "description": [],
-        "signature": [
-          "(analysis: ",
-          {
-            "pluginId": "@kbn/ai-tools",
-            "scope": "server",
-            "docId": "kibKbnAiToolsPluginApi",
-            "section": "def-server.DocumentAnalysis",
-            "text": "DocumentAnalysis"
-          },
-          ", options: { dropEmpty?: boolean | undefined; }) => ",
-          {
-            "pluginId": "@kbn/ai-tools",
-            "scope": "server",
-            "docId": "kibKbnAiToolsPluginApi",
-            "section": "def-server.TruncatedDocumentAnalysis",
-            "text": "TruncatedDocumentAnalysis"
-          }
-        ],
-        "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/sort_and_truncate_analyzed_fields.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/ai-tools",
-            "id": "def-server.sortAndTruncateAnalyzedFields.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "analysis",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/ai-tools",
-                "scope": "server",
-                "docId": "kibKbnAiToolsPluginApi",
-                "section": "def-server.DocumentAnalysis",
-                "text": "DocumentAnalysis"
-              }
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/sort_and_truncate_analyzed_fields.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/ai-tools",
-            "id": "def-server.sortAndTruncateAnalyzedFields.$2",
-            "type": "Object",
-            "tags": [],
-            "label": "options",
-            "description": [],
-            "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/sort_and_truncate_analyzed_fields.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/ai-tools",
-                "id": "def-server.sortAndTruncateAnalyzedFields.$2.dropEmpty",
-                "type": "CompoundType",
-                "tags": [],
-                "label": "dropEmpty",
-                "description": [],
-                "signature": [
-                  "boolean | undefined"
-                ],
-                "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/sort_and_truncate_analyzed_fields.ts",
-                "deprecated": false,
-                "trackAdoption": false
-              }
-            ]
           }
         ],
         "returnComment": [],
@@ -2664,7 +2745,8 @@
             "label": "fields",
             "description": [],
             "signature": [
-              "{ name: string; types: string[]; cardinality: number | null; values: (string | number | boolean)[]; empty: boolean; }[]"
+              "DocumentAnalysisField",
+              "[]"
             ],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/document_analysis.ts",
             "deprecated": false,
@@ -2675,10 +2757,10 @@
       },
       {
         "parentPluginId": "@kbn/ai-tools",
-        "id": "def-server.TruncatedDocumentAnalysis",
+        "id": "def-server.FormattedDocumentAnalysis",
         "type": "Interface",
         "tags": [],
-        "label": "TruncatedDocumentAnalysis",
+        "label": "FormattedDocumentAnalysis",
         "description": [],
         "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/document_analysis.ts",
         "deprecated": false,
@@ -2686,21 +2768,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/ai-tools",
-            "id": "def-server.TruncatedDocumentAnalysis.fields",
-            "type": "Array",
-            "tags": [],
-            "label": "fields",
-            "description": [],
-            "signature": [
-              "string[]"
-            ],
-            "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/document_analysis.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ai-tools",
-            "id": "def-server.TruncatedDocumentAnalysis.total",
+            "id": "def-server.FormattedDocumentAnalysis.total",
             "type": "number",
             "tags": [],
             "label": "total",
@@ -2711,11 +2779,25 @@
           },
           {
             "parentPluginId": "@kbn/ai-tools",
-            "id": "def-server.TruncatedDocumentAnalysis.sampled",
+            "id": "def-server.FormattedDocumentAnalysis.sampled",
             "type": "number",
             "tags": [],
             "label": "sampled",
             "description": [],
+            "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/document_analysis.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ai-tools",
+            "id": "def-server.FormattedDocumentAnalysis.fields",
+            "type": "Object",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              "{ [x: string]: string[]; }"
+            ],
             "path": "x-pack/platform/packages/shared/kbn-ai-tools/src/tools/describe_dataset/document_analysis.ts",
             "deprecated": false,
             "trackAdoption": false

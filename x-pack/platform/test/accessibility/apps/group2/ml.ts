@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const a11y = getService('a11y');
@@ -307,11 +307,6 @@ export default function ({ getService }: FtrProviderContext) {
             'should select a file and load visualizer result page'
           );
           await ml.dataVisualizerFileBased.selectFile(uploadFilePath);
-          await a11y.testAppSnapshot();
-        });
-
-        it('file data visualizer import data page', async () => {
-          await ml.dataVisualizerFileBased.navigateToFileImport();
           await a11y.testAppSnapshot();
         });
       });

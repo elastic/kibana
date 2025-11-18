@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { LegacyRequest } from '../../../../types';
+import type { LegacyRequest } from '../../../../types';
 
 export async function getLivesNodes(req: LegacyRequest) {
   const params = {

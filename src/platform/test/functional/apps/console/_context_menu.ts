@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -107,7 +107,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await testSubjects.exists('changeLanguageButton')).to.be(false);
       });
 
-      it.skip('allows to change default language', async () => {
+      it('allows to change default language', async () => {
         await PageObjects.console.clickContextMenu();
 
         // By default should be copy as cURL
@@ -119,6 +119,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.console.changeDefaultLanguage('python');
         // Wait until async operation is done
         await PageObjects.common.sleep(2000);
+        // Select requests to display context menu button
+        await PageObjects.console.selectAllRequests();
         // Open the context menu once again
         await PageObjects.console.clickContextMenu();
 
@@ -182,28 +184,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await retry.try(async () => {
         const request = await PageObjects.console.getEditorText();
         expect(request).to.be.eql('GET _search\n{\n  "query": {\n    "match_all": {}\n  }\n}');
-      });
-    });
-
-    // not implemented for monaco yet https://github.com/elastic/kibana/issues/185891
-    it.skip('should collapse the request when auto indent button is clicked again', async () => {
-      await PageObjects.console.clearEditorText();
-      await PageObjects.console.enterText('GET _search\n{"query": {"match_all": {}}}');
-      await PageObjects.console.clickContextMenu();
-      await PageObjects.console.clickAutoIndentButton();
-      // Retry until the request is auto indented
-      await retry.try(async () => {
-        const request = await PageObjects.console.getEditorText();
-        expect(request).to.be.eql('GET _search\n{\n  "query": {\n    "match_all": {}\n  }\n}');
-      });
-
-      await PageObjects.console.clickContextMenu();
-      // Click the auto-indent button again to condense request
-      await PageObjects.console.clickAutoIndentButton();
-      // Retry until the request is condensed
-      await retry.try(async () => {
-        const request = await PageObjects.console.getEditorText();
-        expect(request).to.be.eql('GET _search\n{"query":{"match_all":{}}}');
       });
     });
   });

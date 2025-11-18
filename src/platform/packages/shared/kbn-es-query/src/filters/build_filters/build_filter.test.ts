@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { buildFilter, FilterStateStore, FILTERS } from '.';
-import { DataViewBase } from '../../..';
+import { FilterStateStore } from '@kbn/es-query-constants';
+import { buildFilter, FILTERS } from '.';
+import type { DataViewBase } from '../../..';
 import { fields as stubFields } from '../stubs';
 
 describe('buildFilter', () => {

@@ -33,8 +33,10 @@ import {
   UIM_TEMPLATE_DETAIL_PANEL_ALIASES_TAB,
   UIM_TEMPLATE_DETAIL_PANEL_PREVIEW_TAB,
 } from '../../../../../../common/constants';
-import { SectionLoading, UseRequestResponse } from '../../../../../shared_imports';
-import { TemplateDeleteModal, SectionError, Error } from '../../../../components';
+import type { UseRequestResponse } from '../../../../../shared_imports';
+import { SectionLoading } from '../../../../../shared_imports';
+import type { Error } from '../../../../components';
+import { TemplateDeleteModal, SectionError } from '../../../../components';
 import { useLoadIndexTemplate } from '../../../../services/api';
 import { useServices } from '../../../../app_context';
 import { TabAliases, TabMappings, TabSettings } from '../../../../components/shared';
@@ -152,12 +154,9 @@ export const TemplateDetailsContent = ({
     if (error) {
       return (
         <SectionError
-          title={
-            <FormattedMessage
-              id="xpack.idxMgmt.templateDetails.loadingIndexTemplateErrorMessage"
-              defaultMessage="Error loading template"
-            />
-          }
+          title={i18n.translate('xpack.idxMgmt.templateDetails.loadingIndexTemplateErrorMessage', {
+            defaultMessage: 'Error loading template',
+          })}
           error={error as Error}
           data-test-subj="sectionError"
         />
@@ -180,6 +179,7 @@ export const TemplateDetailsContent = ({
       const managedTemplateCallout = isCloudManaged && (
         <>
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.idxMgmt.templateDetails.cloudManagedTemplateInfoTitle"

@@ -29,7 +29,7 @@ describe('Find user prompts route', () => {
     server = serverMock.create();
     ({ clients, context } = requestContextMock.createTools());
     const mockUser1 = {
-      username: 'my_username',
+      username: 'elastic',
       authentication_realm: {
         type: 'my_realm_type',
         name: 'my_realm_name',

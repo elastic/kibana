@@ -61,6 +61,14 @@ paths:
             minimum: 0
             default: 20
             example: 20
+        - name: 'is_owner'
+          in: query
+          description: Whether to return conversations that the current user owns. If true, only conversations owned by the user are returned.
+          required: false
+          schema:
+            type: boolean
+            default: false
+            example: true
 
       responses:
         200:

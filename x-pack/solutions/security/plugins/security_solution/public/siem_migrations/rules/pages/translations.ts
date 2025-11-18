@@ -11,21 +11,6 @@ export const PAGE_TITLE = i18n.translate('xpack.securitySolution.siemMigrations.
   defaultMessage: 'Translated rules',
 });
 
-export const BETA_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.pageTitle.betaBadge',
-  {
-    defaultMessage: 'Technical preview',
-  }
-);
-
-export const BETA_TOOLTIP = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.pageTitle.betaTooltip',
-  {
-    defaultMessage:
-      'This functionality is in technical preview and is subject to change. Please use Automatic Migration with caution in production environments.',
-  }
-);
-
 export const TRANSLATED_RULES_EMPTY_PAGE_MESSAGE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.emptyPageMessage',
   {

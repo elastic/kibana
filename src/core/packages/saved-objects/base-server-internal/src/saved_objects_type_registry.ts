@@ -43,7 +43,10 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
       );
     }
     validateType(type);
-    this.types.set(type.name, deepFreeze(type) as SavedObjectsType);
+    if (process.env.NODE_ENV !== 'production') {
+      deepFreeze(type);
+    }
+    this.types.set(type.name, type);
   }
 
   /** {@inheritDoc ISavedObjectTypeRegistry.getLegacyTypes} */

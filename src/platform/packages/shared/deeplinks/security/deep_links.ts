@@ -10,10 +10,16 @@
 export enum SecurityPageName {
   administration = 'administration',
   alerts = 'alerts',
+  attacks = 'attacks',
   aiValue = 'ai_value',
   assetInventory = 'asset_inventory',
   attackDiscovery = 'attack_discovery',
   blocklist = 'blocklist',
+
+  // TODO: https://github.com/elastic/kibana/issues/242434
+  // Investigate possibility of using `detections` instead
+  alertDetections = 'alert_detections',
+
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
    * All Cases page names must match `CasesDeepLinkId` in x-pack/platform/plugins/shared/cases/public/common/navigation/deep_links.ts
@@ -35,6 +41,7 @@ export enum SecurityPageName {
   detections = 'detections',
   detectionAndResponse = 'detection_response',
   endpoints = 'endpoints',
+  endpointExceptions = 'endpoint_exceptions',
   eventFilters = 'event_filters',
   exceptions = 'exceptions',
   exploreLanding = 'explore',
@@ -64,7 +71,10 @@ export enum SecurityPageName {
   rulesCreate = 'rules-create',
   rulesLanding = 'rules-landing',
   rulesManagement = 'rules-management',
+  siemReadiness = 'siem_readiness',
+  siemMigrationsLanding = 'siem_migrations',
   siemMigrationsRules = 'siem_migrations-rules',
+  siemMigrationsDashboards = 'siem_migrations-dashboards',
   /*
    * Warning: Computed values are not permitted in an enum with string valued members
    * All threat intelligence page names must match `TIPageId` in x-pack/solutions/security/plugins/threat_intelligence/public/common/navigation/types.ts
@@ -73,6 +83,7 @@ export enum SecurityPageName {
   timelines = 'timelines',
   timelinesTemplates = 'timelines-templates',
   trustedApps = 'trusted_apps',
+  trustedDevices = 'trusted_devices',
   users = 'users',
   usersAll = 'users-all',
   usersAnomalies = 'users-anomalies',

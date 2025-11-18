@@ -7,8 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { PropsWithChildren } from 'react';
-import { Observable } from 'rxjs';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
+import type { Observable } from 'rxjs';
 import type { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiFlexGroup } from '@elastic/eui';

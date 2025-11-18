@@ -16,7 +16,7 @@ import {
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { ControlType, TermIntersect, Workspace } from '../../types';
+import type { ControlType, TermIntersect, Workspace } from '../../types';
 import { VennDiagram } from '../venn_diagram';
 import { gphSidebarHeaderStyles, gphSidebarPanelStyles } from '../../styles';
 
@@ -141,17 +141,17 @@ export const MergeCandidates = ({
             <VennDiagram leftValue={mc.v1} rightValue={mc.v2} overlap={mc.overlap} />
 
             <EuiToolTip content={leftTermCountMsg}>
-              <small className="gphLinkSummary__term--1" css={styles.term1}>
+              <small tabIndex={0} className="gphLinkSummary__term--1" css={styles.term1}>
                 {mc.v1}
               </small>
             </EuiToolTip>
             <EuiToolTip content={bothTermsCountMsg}>
-              <small className="gphLinkSummary__term--1-2" css={styles.term1_2}>
+              <small tabIndex={0} className="gphLinkSummary__term--1-2" css={styles.term1_2}>
                 &nbsp;({mc.overlap})&nbsp;
               </small>
             </EuiToolTip>
             <EuiToolTip content={rightTermCountMsg}>
-              <small className="gphLinkSummary__term--2" css={styles.term2}>
+              <small tabIndex={0} className="gphLinkSummary__term--2" css={styles.term2}>
                 {mc.v2}
               </small>
             </EuiToolTip>

@@ -8,8 +8,8 @@
  */
 
 import expect from '@kbn/expect';
-import { ServiceStatusLevels } from '@kbn/core/server';
-import { PluginFunctionalProviderContext } from '../../services';
+import type { ServiceStatusLevels } from '@kbn/core/server';
+import type { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const supertest = getService('supertest');

@@ -13,6 +13,7 @@ export interface RenovatePackageRule {
   matchDepNames?: string[];
   matchPackagePatterns?: string[];
   matchDepPatterns?: string[];
+  matchManagers?: string[];
   excludePackageNames?: string[];
   excludePackagePatterns?: string[];
   enabled?: boolean;
@@ -22,15 +23,22 @@ export interface RenovatePackageRule {
 export function ruleFilter(rule: RenovatePackageRule) {
   // Explicit list of rules that are allowed to be disabled.
   const allowedDisabledRules = [
-    'bazel', // Per operations team. This is slated for removal, and does not make sense to track.
     'typescript', // These updates are always handled manually
-    'webpack', // While we are in the middle of a webpack upgrade. TODO: Remove this once we are done.
+    'puppeteer', // These updates are always handled manually
+    'undici', // These updates are always handled manually, and only with Node.js upgrades
   ];
+  // Rules that use custom managers are not supported by this tool, and are ignored.
+  const rulesWithCustomManagers = ['chainguard', 'chainguard-fips'];
+
   return (
     // Only include rules that are enabled or explicitly allowed to be disabled
     (allowedDisabledRules.includes(rule.groupName) || rule.enabled !== false) &&
     // Only include rules that have a team reviewer
-    rule.reviewers?.some((reviewer) => reviewer.startsWith('team:'))
+    rule.reviewers?.some((reviewer) => reviewer.startsWith('team:')) &&
+    // Only include rules that use the default manager, or specify npm
+    (!rule.matchManagers || !rule.matchManagers.length || rule.matchManagers.includes('npm')) &&
+    // Exclude rules that use custom managers
+    !rulesWithCustomManagers.includes(rule.groupName)
   );
 }
 
@@ -41,7 +49,6 @@ export function packageFilter(pkg: string) {
     !pkg.startsWith('@kbn/') &&
     // The EUI team owns the EUI packages, and are not covered by renovate
     pkg !== '@elastic/eui' &&
-    pkg !== '@elastic/eui-amsterdam' &&
     pkg !== '@elastic/eui-theme-borealis' &&
     // Operations owns node, and is not covered by renovate
     pkg !== '@types/node'

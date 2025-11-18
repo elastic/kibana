@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { dataViewsService } from '@kbn/data-views-plugin/server/mocks';
-import { GetPreviewDataParams } from '@kbn/slo-schema';
+import type { GetPreviewDataParams } from '@kbn/slo-schema';
 import { GetPreviewData } from './get_preview_data';
 import { oneMinute } from './fixtures/duration';
 

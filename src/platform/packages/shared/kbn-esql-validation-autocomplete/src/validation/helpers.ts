@@ -7,80 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLAstQueryExpression } from '@kbn/esql-ast';
 import {
-  type ESQLAst,
-  type ESQLAstQueryExpression,
-  type ESQLColumn,
-  type ESQLSource,
   type ESQLCommand,
   type FunctionDefinition,
   Walker,
+  Builder,
+  isSubQuery,
 } from '@kbn/esql-ast';
-import { mutate, synth } from '@kbn/esql-ast';
-import { ESQLPolicy } from '@kbn/esql-ast/src/commands_registry/types';
-
-export function buildQueryForFieldsFromSource(queryString: string, ast: ESQLAst) {
-  const firstCommand = ast[0];
-  if (!firstCommand) return '';
-
-  const sources: ESQLSource[] = [];
-  const metadataFields: ESQLColumn[] = [];
-
-  if (firstCommand.name === 'ts') {
-    const timeseries = firstCommand as ESQLCommand<'ts'>;
-    const tsSources = timeseries.args as ESQLSource[];
-
-    sources.push(...tsSources);
-  } else if (firstCommand.name === 'from') {
-    const fromSources = mutate.commands.from.sources.list(firstCommand as any);
-    const fromMetadataColumns = [...mutate.commands.from.metadata.list(firstCommand as any)].map(
-      ([column]) => column
-    );
-
-    sources.push(...fromSources);
-    if (fromMetadataColumns.length) metadataFields.push(...fromMetadataColumns);
-  }
-
-  const joinSummary = mutate.commands.join.summarize({
-    type: 'query',
-    commands: ast,
-  } as ESQLAstQueryExpression);
-  const joinIndices = joinSummary.map(({ target: { index } }) => index);
-
-  if (joinIndices.length > 0) {
-    sources.push(...joinIndices);
-  }
-
-  if (sources.length === 0) {
-    return queryString.substring(0, firstCommand.location.max + 1);
-  }
-
-  const from =
-    metadataFields.length > 0
-      ? synth.cmd`FROM ${sources} METADATA ${metadataFields}`
-      : synth.cmd`FROM ${sources}`;
-
-  return from.toString();
-}
-
-export function buildQueryForFieldsInPolicies(policies: ESQLPolicy[]) {
-  return `from ${policies
-    .flatMap(({ sourceIndices }) => sourceIndices)
-    .join(', ')} | keep ${policies.flatMap(({ enrichFields }) => enrichFields).join(', ')}`;
-}
-
-export function buildQueryForFieldsForStringSources(queryString: string, ast: ESQLAst) {
-  // filter out the query until the last GROK or DISSECT command
-  const lastCommandIndex =
-    ast.length - [...ast].reverse().findIndex(({ name }) => ['grok', 'dissect'].includes(name));
-  // we're sure it's not -1 because we check the commands chain before calling this function
-  const nextCommandIndex = Math.min(lastCommandIndex + 1, ast.length - 1);
-  const customQuery = queryString.substring(0, ast[nextCommandIndex].location.min).trimEnd();
-  if (customQuery[customQuery.length - 1] === '|') {
-    return customQuery.substring(0, customQuery.length - 1);
-  }
-  return customQuery;
-}
+import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
+import { expandEvals } from '../shared/expand_evals';
 
 /**
  * Returns the maximum and minimum number of parameters allowed by a function
@@ -107,5 +43,96 @@ export function getMaxMinNumberOfParams(definition: FunctionDefinition) {
  * This function traverses the provided ESQL commands and collects all commands with the name 'enrich'.
  * @returns {ESQLCommand[]} - An array of ESQLCommand objects that represent the 'enrich' commands found in the input.
  */
-export const getEnrichCommands = (commands: ESQLCommand[]): ESQLCommand[] =>
+export const getEnrichCommands = (commands: ESQLAstAllCommands[]): ESQLCommand[] =>
   Walker.matchAll(commands, { type: 'command', name: 'enrich' }) as ESQLCommand[];
+
+/**
+ * Returns a list of subqueries to validate
+ * @param rootCommands
+ */
+export function getSubqueriesToValidate(rootCommands: ESQLCommand[]) {
+  const subsequences = [];
+  const expandedCommands = expandEvals(rootCommands);
+  for (let i = 0; i < expandedCommands.length; i++) {
+    const command = expandedCommands[i];
+
+    // every command within FORK's branches is its own subquery to be validated
+    if (command.name.toLowerCase() === 'fork') {
+      const branchSubqueries = getForkBranchSubqueries(command as ESQLCommand<'fork'>);
+      for (const subquery of branchSubqueries) {
+        subsequences.push([...expandedCommands.slice(0, i), ...subquery]);
+      }
+    }
+
+    // every command within FROM's subqueries is its own subquery to be validated
+    if (command.name.toLowerCase() === 'from') {
+      const fromSubqueries = getFromSubqueries(command as ESQLCommand<'from'>);
+
+      for (const subquery of fromSubqueries) {
+        subsequences.push(subquery);
+      }
+    }
+
+    subsequences.push(expandedCommands.slice(0, i + 1));
+  }
+
+  return subsequences.map((subsequence) => Builder.expression.query(subsequence));
+}
+
+/**
+ * Expands a FORK command into flat subqueries for each command in each branch.
+ *
+ * E.g. FORK (EVAL 1 | LIMIT 10) (RENAME foo AS bar | DROP lolz)
+ *
+ * becomes [`EVAL 1`, `EVAL 1 | LIMIT 10`, `RENAME foo AS bar`, `RENAME foo AS bar | DROP lolz`]
+ *
+ * @param command a FORK command
+ * @returns an array of expanded subqueries
+ */
+function getForkBranchSubqueries(command: ESQLCommand<'fork'>): ESQLCommand[][] {
+  const expanded: ESQLCommand[][] = [];
+  const branches = command.args as ESQLAstQueryExpression[];
+  for (let j = 0; j < branches.length; j++) {
+    for (let k = 0; k < branches[j].commands.length; k++) {
+      const partialQuery = branches[j].commands.slice(0, k + 1);
+      expanded.push(partialQuery);
+    }
+  }
+  return expanded;
+}
+
+/**
+ * Expands a FROM command into flat subqueries for each command in each subquery.
+ *
+ * E.g. FROM index1, (FROM index2 | WHERE x > 10), (FROM index3, (FROM index4) | KEEP a)
+ *
+ * becomes [
+ *   [FROM index2],
+ *   [FROM index2 | WHERE x > 10],
+ *   [FROM index4],
+ *   [FROM index3, (FROM index4)],
+ *   [FROM index3, (FROM index4) | KEEP a]
+ * ]
+ *
+ * @param command a FROM command
+ * @returns an array of expanded subqueries
+ */
+function getFromSubqueries(command: ESQLCommand<'from'>): ESQLCommand[][] {
+  return command.args.filter(isSubQuery).flatMap((arg) => {
+    const subquery = arg.child;
+
+    return subquery.commands.flatMap((currentCommand, k) => {
+      const results: ESQLCommand[][] = [];
+
+      // If this command is a FROM with nested subqueries, expand recursively first
+      if (currentCommand.name.toLowerCase() === 'from') {
+        results.push(...getFromSubqueries(currentCommand as ESQLCommand<'from'>));
+      }
+
+      // Always add the partial query (includes current command and all previous ones)
+      results.push(subquery.commands.slice(0, k + 1));
+
+      return results;
+    });
+  });
+}

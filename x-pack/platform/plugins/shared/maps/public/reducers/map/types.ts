@@ -9,9 +9,9 @@
 
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Query } from '@kbn/data-plugin/common';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import type { TimeRange } from '@kbn/es-query';
-import {
+import type {
   DrawState,
   EditState,
   Goto,
@@ -64,4 +64,5 @@ export type MapState = {
   waitingForMapReadyLayerList: LayerDescriptor[];
   settings: MapSettings;
   __rollbackSettings: MapSettings | null;
+  __pauseSyncData: boolean;
 };

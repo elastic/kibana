@@ -11,13 +11,15 @@ import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { act, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { LogsOverview, LogsOverviewApi, LogsOverviewProps } from './logs_overview';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { LogsOverviewApi, LogsOverviewProps } from './logs_overview';
+import { LogsOverview } from './logs_overview';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { setUnifiedDocViewerServices } from '../../plugin';
 import { mockUnifiedDocViewerServices } from '../../__mocks__';
 import { merge } from 'lodash';
 import { DATA_QUALITY_DETAILS_LOCATOR_ID } from '@kbn/deeplinks-observability';
+import type { TraceIndexes } from '@kbn/discover-utils/src';
 
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
@@ -141,20 +143,35 @@ setUnifiedDocViewerServices(
   merge(mockUnifiedDocViewerServices, getCustomUnifedDocViewerServices())
 );
 
+const indexes: TraceIndexes = {
+  apm: {
+    errors: 'apm-error-index',
+    traces: 'apm-trace-index',
+  },
+  logs: 'logs-index',
+};
+
 const renderLogsOverview = (
   props: Partial<LogsOverviewProps> = {},
   ref?: (api: LogsOverviewApi) => void
 ) => {
   const { rerender: baseRerender, ...tools } = render(
     <EuiProvider highContrastMode={false}>
-      <LogsOverview ref={ref} dataView={dataView} hit={fullHit} {...props} />
+      <LogsOverview ref={ref} dataView={dataView} hit={fullHit} indexes={indexes} {...props} />
     </EuiProvider>
   );
 
   const rerender = (rerenderProps: Partial<LogsOverviewProps>) =>
     baseRerender(
       <EuiProvider highContrastMode={false}>
-        <LogsOverview ref={ref} dataView={dataView} hit={fullHit} {...props} {...rerenderProps} />
+        <LogsOverview
+          ref={ref}
+          dataView={dataView}
+          hit={fullHit}
+          indexes={indexes}
+          {...props}
+          {...rerenderProps}
+        />
       </EuiProvider>
     );
 
@@ -162,8 +179,12 @@ const renderLogsOverview = (
 };
 
 describe('LogsOverview', () => {
-  beforeEach(() => renderLogsOverview());
-
+  beforeEach(
+    async () =>
+      await act(async () => {
+        renderLogsOverview();
+      })
+  );
   describe('Header section', () => {
     it('should display a timestamp badge', async () => {
       expect(screen.queryByTestId('unifiedDocViewLogsOverviewTimestamp')).toBeInTheDocument();
@@ -180,35 +201,32 @@ describe('LogsOverview', () => {
 
   describe('Highlights section', () => {
     it('should load the service container with all fields', async () => {
-      expect(
-        screen.queryByTestId('unifiedDocViewLogsOverviewHighlightSectionServiceInfra')
-      ).toBeInTheDocument();
-      expect(screen.queryByTestId('unifiedDocViewLogsOverviewService')).toBeInTheDocument();
-      expect(screen.queryByTestId('unifiedDocViewLogsOverviewTrace')).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedDocViewLogsOverviewServiceName')).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedDocViewLogsOverviewTraceID')).toBeInTheDocument();
       expect(screen.queryByTestId('unifiedDocViewLogsOverviewHostName')).toBeInTheDocument();
-      expect(screen.queryByTestId('unifiedDocViewLogsOverviewClusterName')).toBeInTheDocument();
-      expect(screen.queryByTestId('unifiedDocViewLogsOverviewResourceId')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('unifiedDocViewLogsOverviewOrchestratorClusterName')
+      ).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('unifiedDocViewLogsOverviewOrchestratorResourceID')
+      ).toBeInTheDocument();
     });
 
     it('should load the cloud container with all fields', async () => {
-      expect(
-        screen.queryByTestId('unifiedDocViewLogsOverviewHighlightSectionCloud')
-      ).toBeInTheDocument();
       expect(screen.queryByTestId('unifiedDocViewLogsOverviewCloudProvider')).toBeInTheDocument();
       expect(screen.queryByTestId('unifiedDocViewLogsOverviewCloudRegion')).toBeInTheDocument();
-      expect(screen.queryByTestId('unifiedDocViewLogsOverviewCloudAz')).toBeInTheDocument();
-      expect(screen.queryByTestId('unifiedDocViewLogsOverviewCloudProjectId')).toBeInTheDocument();
-      expect(screen.queryByTestId('unifiedDocViewLogsOverviewCloudInstanceId')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('unifiedDocViewLogsOverviewCloudAvailabilityZone')
+      ).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedDocViewLogsOverviewCloudProjectID')).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedDocViewLogsOverviewCloudInstanceID')).toBeInTheDocument();
     });
 
     it('should load the other container with all fields', async () => {
-      expect(
-        screen.queryByTestId('unifiedDocViewLogsOverviewHighlightSectionOther')
-      ).toBeInTheDocument();
       expect(screen.queryByTestId('unifiedDocViewLogsOverviewLogPathFile')).toBeInTheDocument();
       expect(screen.queryByTestId('unifiedDocViewLogsOverviewNamespace')).toBeInTheDocument();
       expect(screen.queryByTestId('unifiedDocViewLogsOverviewDataset')).toBeInTheDocument();
-      expect(screen.queryByTestId('unifiedDocViewLogsOverviewLogShipper')).toBeInTheDocument();
+      expect(screen.queryByTestId('unifiedDocViewLogsOverviewShipper')).toBeInTheDocument();
     });
   });
 

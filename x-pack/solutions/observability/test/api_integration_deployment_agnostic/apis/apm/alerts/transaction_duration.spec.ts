@@ -14,10 +14,10 @@ import { omit } from 'lodash';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import type { RoleCredentials } from '../../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { ApmAlertFields } from './helpers/alerting_helper';
 import {
   fetchServiceInventoryAlertCounts,
   fetchServiceTabAlertCount,
-  ApmAlertFields,
   getIndexAction,
   APM_ACTION_VARIABLE_INDEX,
   APM_ALERTS_INDEX,
@@ -34,18 +34,25 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     windowSize: 5,
     windowUnit: 'm',
     transactionType: 'request',
-    serviceName: 'opbeans-java',
     environment: 'production',
     aggregationType: AggregationType.Avg,
     groupBy: ['service.name', 'service.environment', 'transaction.type', 'transaction.name'],
   };
 
-  describe('transaction duration alert', () => {
+  describe('transaction duration alert', function () {
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
     let roleAuthc: RoleCredentials;
 
     before(async () => {
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+
+      // Clean up any existing alerts and rules from previous test runs
+      await alertingApi.cleanUpAlerts({
+        roleAuthc,
+        consumer: 'apm',
+        alertIndexName: APM_ALERTS_INDEX,
+        connectorIndexName: APM_ACTION_VARIABLE_INDEX,
+      });
 
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
@@ -100,11 +107,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           name: 'Apm transaction duration without kql filter',
           consumer: 'apm',
           schedule: {
-            interval: '1m',
+            interval: '1h',
           },
           tags: ['apm'],
           params: {
             ...ruleParams,
+            serviceName: 'opbeans-java',
           },
           actions: [indexAction],
           roleAuthc,
@@ -231,12 +239,19 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let alerts: ApmAlertFields[];
 
       before(async () => {
+        await alertingApi.cleanUpAlerts({
+          roleAuthc,
+          consumer: 'apm',
+          alertIndexName: APM_ALERTS_INDEX,
+          connectorIndexName: APM_ACTION_VARIABLE_INDEX,
+        });
+
         const createdRule = await alertingApi.createRule({
           ruleTypeId: ApmRuleType.TransactionDuration,
           name: 'Apm transaction duration with kql filter',
           consumer: 'apm',
           schedule: {
-            interval: '1m',
+            interval: '1h',
           },
           tags: ['apm'],
           params: {
@@ -248,6 +263,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
               },
             },
             ...ruleParams,
+            serviceName: 'opbeans-node',
           },
           actions: [],
           roleAuthc,

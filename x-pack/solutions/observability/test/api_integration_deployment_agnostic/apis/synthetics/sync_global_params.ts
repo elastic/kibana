@@ -5,20 +5,19 @@
  * 2.0.
  */
 
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
-import {
-  ConfigKey,
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type {
   HTTPFields,
-  LocationStatus,
   PrivateLocation,
   ServiceLocation,
   SyntheticsParams,
 } from '@kbn/synthetics-plugin/common/runtime_types';
+import { ConfigKey, LocationStatus } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
-import { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import expect from '@kbn/expect';
 import { syntheticsParamType } from '@kbn/synthetics-plugin/common/types/saved_objects';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helpers/get_fixture_json';
 import { PrivateLocationTestService } from '../../services/synthetics_private_location';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
@@ -38,6 +37,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   describe.skip('SyncGlobalParams', function () {
     this.tags('skipCloud');
     const supertestAPI = getService('supertestWithoutAuth');
+    // TODO: Replace with roleScopedSupertest for deployment-agnostic compatibility
+    // eslint-disable-next-line @kbn/eslint/deployment_agnostic_test_context
     const supertestWithAuth = getService('supertest');
     const kServer = getService('kibanaServer');
     const samlAuth = getService('samlAuth');

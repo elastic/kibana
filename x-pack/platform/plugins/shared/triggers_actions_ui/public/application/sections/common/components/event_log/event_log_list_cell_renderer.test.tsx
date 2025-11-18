@@ -7,8 +7,7 @@
 
 import React from 'react';
 import moment from 'moment';
-import { EuiIcon, EuiLink } from '@elastic/eui';
-import { shallow, mount } from 'enzyme';
+import { render, screen } from '@testing-library/react';
 import { EventLogListCellRenderer, DEFAULT_DATE_FORMAT } from './event_log_list_cell_renderer';
 import { EventLogListStatus } from './event_log_list_status';
 import { RuleDurationFormat } from '../../../rules_list/components/rule_duration_format';
@@ -18,14 +17,15 @@ jest.mock('react-router-dom', () => ({
     location: {
       pathname: '/logs',
     },
+    push: jest.fn(),
   }),
 }));
 
 jest.mock('../../../../../common/lib/kibana', () => ({
   useSpacesData: () => ({
     spacesMap: new Map([
-      ['space1', { id: 'space1' }],
-      ['space2', { id: 'space2' }],
+      ['space1', { id: 'space1', name: 'Space 1' }],
+      ['space2', { id: 'space2', name: 'Space 2' }],
     ]),
     activeSpaceId: 'space1',
   }),
@@ -40,89 +40,101 @@ jest.mock('../../../../../common/lib/kibana', () => ({
   }),
 }));
 
-describe('rule_event_log_list_cell_renderer', () => {
-  const savedLocation = window.location;
+jest.mock('../../../rules_list/components/rule_duration_format', () => ({
+  RuleDurationFormat: jest.fn(({ duration }) => (
+    <span data-test-subj="rule-duration">{duration}</span>
+  )),
+}));
+
+jest.mock('./event_log_list_status', () => ({
+  EventLogListStatus: jest.fn((props) => (
+    <span data-test-subj="event-log-status">{props.status}</span>
+  )),
+}));
+
+describe('EventLogListCellRenderer', () => {
+  let originalLocation: Location;
+
   beforeAll(() => {
-    // @ts-ignore Mocking window.location
+    originalLocation = window.location;
+    // @ts-ignore
     delete window.location;
     // @ts-ignore
-    window.location = Object.assign(
-      new URL('https://localhost/app/management/insightsAndAlerting/triggersActions/logs'),
-      {
-        ancestorOrigins: '',
-        assign: jest.fn(),
-        reload: jest.fn(),
-        replace: jest.fn(),
-      }
-    );
+    window.location = {
+      ...originalLocation,
+      ancestorOrigins: {} as DOMStringList,
+      assign: jest.fn(),
+      reload: jest.fn(),
+      replace: jest.fn(),
+      href: 'https://localhost/app/management/insightsAndAlerting/triggersActions/logs',
+    };
   });
+
   afterAll(() => {
-    window.location = savedLocation;
+    window.location = originalLocation;
+  });
+
+  beforeEach(() => {
+    jest.clearAllMocks();
   });
 
   it('renders primitive values correctly', () => {
-    const wrapper = mount(<EventLogListCellRenderer columnId="message" value="test" />);
-
-    expect(wrapper.text()).toEqual('test');
+    render(<EventLogListCellRenderer columnId="message" value="test" />);
+    expect(screen.getByText('test')).toBeInTheDocument();
   });
 
   it('renders undefined correctly', () => {
-    const wrapper = shallow(<EventLogListCellRenderer columnId="message" />);
-
-    expect(wrapper.text()).toBeFalsy();
+    const { container } = render(<EventLogListCellRenderer columnId="message" />);
+    expect(container).toBeEmptyDOMElement();
   });
 
   it('renders date duration correctly', () => {
-    const wrapper = shallow(
-      <EventLogListCellRenderer columnId="execution_duration" value="100000" />
-    );
-
-    expect(wrapper.find(RuleDurationFormat).exists()).toBeTruthy();
-    expect(wrapper.find(RuleDurationFormat).props().duration).toEqual(100000);
+    render(<EventLogListCellRenderer columnId="execution_duration" value="100000" />);
+    expect(RuleDurationFormat).toHaveBeenCalledWith({ duration: 100000 }, {});
+    expect(screen.getByTestId('rule-duration')).toHaveTextContent('100000');
   });
 
   it('renders alert count correctly', () => {
-    const wrapper = shallow(
-      <EventLogListCellRenderer columnId="num_new_alerts" value="3" version="8.3.0" />
-    );
-
-    expect(wrapper.text()).toEqual('3');
+    render(<EventLogListCellRenderer columnId="num_new_alerts" value="3" version="8.3.0" />);
+    expect(screen.getByText('3')).toBeInTheDocument();
   });
 
   it('renders timestamps correctly', () => {
     const time = '2022-03-20T07:40:44-07:00';
-    const wrapper = shallow(<EventLogListCellRenderer columnId="timestamp" value={time} />);
-
-    expect(wrapper.text()).toEqual(moment(time).format(DEFAULT_DATE_FORMAT));
+    render(<EventLogListCellRenderer columnId="timestamp" value={time} />);
+    expect(screen.getByText(moment(time).format(DEFAULT_DATE_FORMAT))).toBeInTheDocument();
   });
 
   it('renders alert status correctly', () => {
-    const wrapper = shallow(<EventLogListCellRenderer columnId="status" value="success" />);
-
-    expect(wrapper.find(EventLogListStatus).exists()).toBeTruthy();
-    expect(wrapper.find(EventLogListStatus).props().status).toEqual('success');
+    render(<EventLogListCellRenderer columnId="status" value="success" />);
+    expect(EventLogListStatus).toHaveBeenCalledWith(
+      { status: 'success', useExecutionStatus: true },
+      {}
+    );
+    expect(screen.getByTestId('event-log-status')).toHaveTextContent('success');
   });
 
-  it('unaccounted status will still render, but with the unknown color', () => {
-    const wrapper = mount(<EventLogListCellRenderer columnId="status" value="newOutcome" />);
-
-    expect(wrapper.find(EventLogListStatus).exists()).toBeTruthy();
-    expect(wrapper.find(EventLogListStatus).text()).toEqual('newOutcome');
-    expect(wrapper.find(EuiIcon).props().color).toEqual('gray');
+  it('unaccounted status will still render', () => {
+    render(<EventLogListCellRenderer columnId="status" value="newOutcome" />);
+    expect(EventLogListStatus).toHaveBeenCalledWith(
+      { status: 'newOutcome', useExecutionStatus: true },
+      {}
+    );
+    expect(screen.getByTestId('event-log-status')).toHaveTextContent('newOutcome');
   });
 
   it('renders maintenance window correctly', () => {
-    const wrapper = shallow(
+    render(
       <EventLogListCellRenderer
         columnId="maintenance_window_ids"
         value={['test-id-1', 'test-id-2']}
       />
     );
-    expect(wrapper.text()).toEqual('test-id-1, test-id-2');
+    expect(screen.getByText('test-id-1, test-id-2')).toBeInTheDocument();
   });
 
-  it('links to rules on the correct space', () => {
-    const wrapper1 = shallow(
+  it('links to rules on the active space', () => {
+    render(
       <EventLogListCellRenderer
         columnId="rule_name"
         value="Rule"
@@ -130,9 +142,12 @@ describe('rule_event_log_list_cell_renderer', () => {
         spaceIds={['space1']}
       />
     );
-    // @ts-ignore data-href is not a native EuiLink prop
-    expect(wrapper1.find(EuiLink).props()['data-href']).toEqual('/rule/1');
-    const wrapper2 = shallow(
+    const linkButton = screen.getByRole('button', { name: 'Rule' });
+    expect(linkButton).toHaveAttribute('data-href', '/rule/1');
+  });
+
+  it('links to rules on a different space', () => {
+    render(
       <EventLogListCellRenderer
         columnId="rule_name"
         value="Rule"
@@ -140,11 +155,7 @@ describe('rule_event_log_list_cell_renderer', () => {
         spaceIds={['space2']}
       />
     );
-    // @ts-ignore data-href is not a native EuiLink prop
-    expect(wrapper2.find(EuiLink).props()['data-href']).toEqual(
-      '/basePath/s/space2/app/management/insightsAndAlerting/triggersActions/rule/1'
-    );
-
-    window.location = savedLocation;
+    const linkButton = screen.getByRole('button', { name: 'Rule' });
+    expect(linkButton).toHaveAttribute('data-href', '/basePath/s/space2/');
   });
 });

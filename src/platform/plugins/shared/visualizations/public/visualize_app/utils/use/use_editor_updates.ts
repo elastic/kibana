@@ -9,9 +9,9 @@
 
 import { useEffect, useState } from 'react';
 import { isEqual } from 'lodash';
-import { EventEmitter } from 'events';
-import { Query } from '@kbn/es-query';
-import {
+import type { EventEmitter } from 'events';
+import type { Query } from '@kbn/es-query';
+import type {
   VisualizeServices,
   VisualizeAppState,
   VisualizeAppStateContainer,

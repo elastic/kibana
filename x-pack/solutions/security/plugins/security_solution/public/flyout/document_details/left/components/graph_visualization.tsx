@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useCallback } from 'react';
+import React, { memo, useCallback, useEffect } from 'react';
 import { css } from '@emotion/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
@@ -13,13 +13,23 @@ import dateMath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import {
+  type EntityOrEventItem,
   getNodeDocumentMode,
-  hasNodeDocumentsData,
+  getSingleDocumentData,
+  GraphGroupedNodePreviewPanelKey,
+  GROUP_PREVIEW_BANNER,
+  groupedItemClick$,
+  NETWORK_PREVIEW_BANNER,
   type NodeViewModel,
 } from '@kbn/cloud-security-posture-graph';
+import { type NodeDocumentDataModel } from '@kbn/cloud-security-posture-common/types/graph/v1';
+import {
+  DOCUMENT_TYPE_ALERT,
+  DOCUMENT_TYPE_ENTITY,
+} from '@kbn/cloud-security-posture-common/schema/graph/v1';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { useDataView } from '../../../../data_view_manager/hooks/use_data_view';
 import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { GRAPH_VISUALIZATION_TEST_ID } from './test_ids';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
@@ -27,8 +37,14 @@ import { useInvestigateInTimeline } from '../../../../common/hooks/timeline/use_
 import { normalizeTimeRange } from '../../../../common/utils/normalize_time_range';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { DocumentDetailsPreviewPanelKey } from '../../shared/constants/panel_keys';
-import { ALERT_PREVIEW_BANNER, EVENT_PREVIEW_BANNER } from '../../preview/constants';
-import { useKibana } from '../../../../common/lib/kibana';
+import {
+  ALERT_PREVIEW_BANNER,
+  EVENT_PREVIEW_BANNER,
+  GENERIC_ENTITY_PREVIEW_BANNER,
+} from '../../preview/constants';
+import { useToasts } from '../../../../common/lib/kibana';
+import { GenericEntityPanelKey } from '../../../entity_details/shared/constants';
+import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 
 const GraphInvestigationLazy = React.lazy(() =>
   import('@kbn/cloud-security-posture-graph').then((module) => ({
@@ -38,21 +54,22 @@ const GraphInvestigationLazy = React.lazy(() =>
 
 export const GRAPH_ID = 'graph-visualization' as const;
 
+const MAX_DOCUMENTS_TO_LOAD = 50;
+
 /**
  * Graph visualization view displayed in the document details expandable flyout left section under the Visualize tab
  */
 export const GraphVisualization: React.FC = memo(() => {
-  const {
-    services: { notifications },
-  } = useKibana();
+  const toasts = useToasts();
   const oldDataView = useGetScopedSourcererDataView({
-    sourcererScope: SourcererScopeName.default,
+    sourcererScope: PageScope.default,
   });
 
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.default);
+  const { dataView: experimentalDataView } = useDataView(PageScope.default);
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
   const dataView = newDataViewPickerEnabled ? experimentalDataView : oldDataView;
+  const dataViewIndexPattern = dataView ? dataView.getIndexPattern() : undefined;
 
   const { getFieldsData, dataAsNestedObject, dataFormattedForFieldBrowser, scopeId } =
     useDocumentDetailsContext();
@@ -67,29 +84,107 @@ export const GraphVisualization: React.FC = memo(() => {
   });
 
   const { openPreviewPanel } = useExpandableFlyoutApi();
+
+  const onOpenNetworkPreview = useCallback(
+    (ip: string, previewScopeId: string) => {
+      openPreviewPanel({
+        id: 'network-preview',
+        params: {
+          ip,
+          scopeId: previewScopeId,
+          flowTarget: FlowTargetSourceDest.source,
+          banner: NETWORK_PREVIEW_BANNER,
+          isPreviewMode: true,
+        },
+      });
+    },
+    [openPreviewPanel]
+  );
+
   const onOpenEventPreview = useCallback(
     (node: NodeViewModel) => {
-      if (
-        hasNodeDocumentsData(node) &&
-        node.documentsData[0].index &&
-        (getNodeDocumentMode(node) === 'single-event' ||
-          getNodeDocumentMode(node) === 'single-alert')
-      ) {
+      const singleDocumentData = getSingleDocumentData(node);
+      const docMode = getNodeDocumentMode(node);
+      const documentsData = (node.documentsData ?? []) as NodeDocumentDataModel[];
+
+      const showEntityPreview = (item: { id: string; entity?: unknown }) => {
+        openPreviewPanel({
+          id: GenericEntityPanelKey,
+          params: {
+            entityId: item.id,
+            scopeId,
+            isPreviewMode: true,
+            banner: GENERIC_ENTITY_PREVIEW_BANNER,
+            isEngineMetadataExist: !!item.entity,
+          },
+        });
+      };
+
+      const showEventOrAlertPreview = (
+        item: { id: string },
+        banner: {
+          title: string;
+          backgroundColor: string;
+          textColor: string;
+        },
+        index?: string
+      ) => {
         openPreviewPanel({
           id: DocumentDetailsPreviewPanelKey,
           params: {
-            id: node.documentsData[0].id,
-            indexName: node.documentsData[0].index,
+            id: item.id,
+            indexName: index,
             scopeId,
-            banner:
-              getNodeDocumentMode(node) === 'single-alert'
-                ? ALERT_PREVIEW_BANNER
-                : EVENT_PREVIEW_BANNER,
+            banner,
             isPreviewMode: true,
           },
         });
+      };
+      if ((docMode === 'single-event' || docMode === 'single-alert') && singleDocumentData) {
+        showEventOrAlertPreview(
+          singleDocumentData,
+          docMode === 'single-alert' ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
+          singleDocumentData.index
+        );
+      } else if (docMode === 'single-entity' && singleDocumentData) {
+        showEntityPreview(singleDocumentData);
+      } else if (docMode === 'grouped-entities' && documentsData.length > 0) {
+        openPreviewPanel({
+          id: GraphGroupedNodePreviewPanelKey,
+          params: {
+            id: node.id,
+            scopeId,
+            isPreviewMode: true,
+            banner: GROUP_PREVIEW_BANNER,
+            docMode,
+            entityItems: (node.documentsData as NodeDocumentDataModel[])
+              .slice(0, MAX_DOCUMENTS_TO_LOAD)
+              .map((doc) => ({
+                itemType: DOCUMENT_TYPE_ENTITY,
+                id: doc.id,
+                type: doc.entity?.type,
+                subType: doc.entity?.sub_type,
+                icon: node.icon,
+              })),
+          },
+        });
+      } else if (docMode === 'grouped-events' && documentsData.length > 0) {
+        openPreviewPanel({
+          id: GraphGroupedNodePreviewPanelKey,
+          params: {
+            id: node.id,
+            scopeId,
+            isPreviewMode: true,
+            banner: GROUP_PREVIEW_BANNER,
+            docMode,
+            dataViewId: dataViewIndexPattern,
+            documentIds: (node.documentsData as NodeDocumentDataModel[])
+              .slice(0, MAX_DOCUMENTS_TO_LOAD)
+              .map((doc) => doc.event?.id),
+          },
+        });
       } else {
-        notifications?.toasts.addDanger({
+        toasts.addDanger({
           title: i18n.translate(
             'xpack.securitySolution.flyout.document_details.left.components.graphVisualization.errorOpenNodePreview',
             {
@@ -99,8 +194,39 @@ export const GraphVisualization: React.FC = memo(() => {
         });
       }
     },
-    [notifications?.toasts, openPreviewPanel, scopeId]
+    [toasts, openPreviewPanel, scopeId, dataViewIndexPattern]
   );
+
+  // Subscribe to grouped item click events emitted by graph package
+  useEffect(() => {
+    const sub = groupedItemClick$.subscribe((item: EntityOrEventItem) => {
+      if (item.itemType === DOCUMENT_TYPE_ENTITY) {
+        openPreviewPanel({
+          id: GenericEntityPanelKey,
+          params: {
+            entityId: item.id,
+            scopeId,
+            isPreviewMode: true,
+            banner: GENERIC_ENTITY_PREVIEW_BANNER,
+          },
+        });
+      } else {
+        // event or alert
+        openPreviewPanel({
+          id: DocumentDetailsPreviewPanelKey,
+          params: {
+            id: item.docId,
+            indexName: item.index,
+            scopeId,
+            banner:
+              item.itemType === DOCUMENT_TYPE_ALERT ? ALERT_PREVIEW_BANNER : EVENT_PREVIEW_BANNER,
+            isPreviewMode: true,
+          },
+        });
+      }
+    });
+    return () => sub.unsubscribe();
+  }, [openPreviewPanel, scopeId]);
 
   const originEventIds = eventIds.map((id) => ({ id, isAlert }));
   const { investigateInTimeline } = useInvestigateInTimeline();
@@ -110,7 +236,20 @@ export const GraphVisualization: React.FC = memo(() => {
       const to = dateMath.parse(timeRange.to);
 
       if (!from || !to) {
-        // TODO: show error message
+        toasts.addDanger({
+          title: i18n.translate(
+            'xpack.securitySolution.flyout.document_details.left.components.graphVisualization.errorInvalidTimeRange',
+            {
+              defaultMessage: 'Invalid time range',
+            }
+          ),
+          text: i18n.translate(
+            'xpack.securitySolution.flyout.document_details.left.components.graphVisualization.errorInvalidTimeRangeDescription',
+            {
+              defaultMessage: 'Please select a valid time range.',
+            }
+          ),
+        });
         return;
       }
 
@@ -131,7 +270,7 @@ export const GraphVisualization: React.FC = memo(() => {
         },
       });
     },
-    [investigateInTimeline]
+    [investigateInTimeline, toasts]
   );
 
   return (
@@ -158,6 +297,7 @@ export const GraphVisualization: React.FC = memo(() => {
             showToggleSearch={true}
             onInvestigateInTimeline={openTimelineCallback}
             onOpenEventPreview={onOpenEventPreview}
+            onOpenNetworkPreview={onOpenNetworkPreview}
           />
         </React.Suspense>
       )}

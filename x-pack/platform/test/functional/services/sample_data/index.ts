@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { SampleDataTestResourcesServiceProvider } from './test_resources';
 
 export function SampleDataServiceProvider(context: FtrProviderContext) {

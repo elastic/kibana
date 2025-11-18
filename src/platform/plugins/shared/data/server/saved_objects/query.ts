@@ -8,7 +8,7 @@
  */
 
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import { savedQueryMigrations } from './migrations/query';
 import {
   SCHEMA_QUERY_V8_8_0,

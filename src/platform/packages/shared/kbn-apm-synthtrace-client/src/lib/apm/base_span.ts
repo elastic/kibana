@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Span } from './span';
-import { Transaction } from './transaction';
+import type { Span } from './span';
+import type { Transaction } from './transaction';
 import { generateLongId } from '../utils/generate_id';
-import { ApmFields } from './apm_fields';
+import type { ApmFields } from './apm_fields';
 import { AbstractSpan } from './abstract_span';
 
 export class BaseSpan extends AbstractSpan<ApmFields, BaseSpan> {

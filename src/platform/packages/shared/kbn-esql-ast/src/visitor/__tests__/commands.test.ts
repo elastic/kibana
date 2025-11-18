@@ -143,18 +143,55 @@ test('can visit CHANGE_POINT command', () => {
 
 test('can visit RERANK command', () => {
   const { ast } = EsqlQuery.fromSrc(`
-    FROM k8s
-      | RERANK "test" ON field WITH id
+    FROM movies
+      | RERANK "star wars" ON title=X(title, 2), description=X(description, 1.5) WITH {"inferenceId":"rerankerInferenceId", "scoreColumn":"rerank_score"}
       | LIMIT 123
   `);
+
   const visitor = new Visitor()
-    .on('visitExpression', (ctx) => {
+    .on('visitLiteralExpression', (ctx) => {
+      if (ctx.node.literalType === 'keyword') {
+        return ctx.node.value;
+      }
+      return null;
+    })
+    .on('visitMapExpression', (ctx) => {
+      return [...ctx.visitEntries(null)].flat();
+    })
+    .on('visitMapEntryExpression', (ctx) => {
+      return [ctx.visitKey(null), ctx.visitValue(null)];
+    })
+    .on('visitFunctionCallExpression', (ctx) => {
+      if (ctx.node.subtype === 'binary-expression' && ctx.node.name === '=') {
+        const results = ['FIELD_ASSIGNMENT'];
+        results.push(...[...ctx.visitArguments(null)].flat());
+        return results;
+      }
+
+      if (ctx.node.name === 'x') {
+        return 'X';
+      }
+
+      return null;
+    })
+    .on('visitExpression', () => {
+      return null;
+    })
+    .on('visitCommandOption', (ctx) => {
+      if (ctx.node.name === 'on') {
+        return [...ctx.visitArguments()].flat();
+      }
+
+      if (ctx.node.name === 'with') {
+        return [...ctx.visitArguments()].flat();
+      }
+
       return null;
     })
     .on('visitRerankCommand', (ctx) => {
-      return 'RERANK';
+      return [...ctx.visitOptions()].flat();
     })
-    .on('visitCommand', (ctx) => {
+    .on('visitCommand', () => {
       return null;
     })
     .on('visitQuery', (ctx) => {
@@ -162,7 +199,13 @@ test('can visit RERANK command', () => {
     });
   const list = visitor.visitQuery(ast).flat().filter(Boolean);
 
-  expect(list).toEqual(['RERANK']);
+  expect(list.filter((item) => item === 'FIELD_ASSIGNMENT')).toHaveLength(2);
+  expect(list.filter((item) => item === 'X')).toHaveLength(2);
+
+  expect(list).toContain('"inferenceId"');
+  expect(list).toContain('"rerankerInferenceId"');
+  expect(list).toContain('"scoreColumn"');
+  expect(list).toContain('"rerank_score"');
 });
 
 test('can visit COMPLETION command', () => {
@@ -186,4 +229,40 @@ test('can visit COMPLETION command', () => {
   const list = visitor.visitQuery(ast).flat().filter(Boolean);
 
   expect(list).toEqual(['COMPLETION']);
+});
+
+test('can visit FROM command with complex subqueries', () => {
+  const { ast } = EsqlQuery.fromSrc(`
+    FROM index1,
+         (FROM index2
+          | WHERE a > 10
+          | EVAL b = a * 2
+          | STATS cnt = COUNT(*) BY c
+          | SORT cnt desc
+          | LIMIT 10),
+         index3,
+         (FROM index4 | STATS count(*))
+    | WHERE d > 10
+    | STATS max = max(*) BY e
+    | SORT max desc
+  `);
+  const visitor = new Visitor()
+    .on('visitParensExpression', () => {
+      return 'SUBQUERY';
+    })
+    .on('visitExpression', () => {
+      return null;
+    })
+    .on('visitFromCommand', (ctx) => {
+      return [...ctx.visitArguments()];
+    })
+    .on('visitCommand', (ctx) => {
+      return null;
+    })
+    .on('visitQuery', (ctx) => {
+      return [...ctx.visitCommands()].flat();
+    });
+  const list = visitor.visitQuery(ast).flat().filter(Boolean);
+
+  expect(list).toEqual(['SUBQUERY', 'SUBQUERY']);
 });

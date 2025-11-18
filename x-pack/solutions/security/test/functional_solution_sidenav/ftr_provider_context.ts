@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GenericFtrProviderContext } from '@kbn/test';
+import type { GenericFtrProviderContext } from '@kbn/test';
 import { pageObjects } from '@kbn/test-suites-xpack-platform/functional/page_objects';
 import { services } from '@kbn/test-suites-xpack-platform/functional/services';
 

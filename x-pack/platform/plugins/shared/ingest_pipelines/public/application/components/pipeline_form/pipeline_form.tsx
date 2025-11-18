@@ -11,18 +11,19 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
-import { Pipeline, Processor } from '../../../../common/types';
-import { useForm, Form, FormConfig, useFormIsModified } from '../../../shared_imports';
+import type { Pipeline, Processor } from '../../../../common/types';
+import type { FormConfig } from '../../../shared_imports';
+import { useForm, Form, useFormIsModified } from '../../../shared_imports';
 
 import { useKibana } from '../../../shared_imports';
-import { OnUpdateHandlerArg, OnUpdateHandler } from '../pipeline_editor';
+import type { OnUpdateHandlerArg, OnUpdateHandler } from '../pipeline_editor';
 
 import { deepEqualIgnoreUndefined } from './utils';
 import { PipelineRequestFlyout } from './pipeline_request_flyout';
 import { PipelineFormFields } from './pipeline_form_fields';
 import { PipelineFormError } from './pipeline_form_error';
 import { pipelineFormSchema } from './schema';
-import { PipelineForm as IPipelineForm } from './types';
+import type { PipelineForm as IPipelineForm } from './types';
 
 export interface PipelineFormProps {
   onSave: (pipeline: Pipeline) => void;

@@ -91,6 +91,7 @@ describe('CrowdstrikeActionsClient class', () => {
     'getFile',
     'execute',
     'upload',
+    'cancel',
   ] as Array<keyof ResponseActionsClient>)(
     'should throw an un-supported error for %s',
     async (methodName) => {
@@ -749,9 +750,6 @@ describe('CrowdstrikeActionsClient class', () => {
 
   describe('and space awareness is enabled', () => {
     beforeEach(() => {
-      // @ts-expect-error write to readonly property
-      classConstructorOptions.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-        true;
       getActionDetailsByIdMock.mockResolvedValue({});
     });
 
@@ -782,7 +780,7 @@ describe('CrowdstrikeActionsClient class', () => {
       );
     });
 
-    it('should search for Crwodstrike agent ID using index names', async () => {
+    it('should search for CrowdStrike agent ID using index names', async () => {
       await expect(
         crowdstrikeActionsClient.isolate(createCrowdstrikeIsolationOptions())
       ).resolves.toBeTruthy();
@@ -794,8 +792,8 @@ describe('CrowdstrikeActionsClient class', () => {
           inner_hits: {
             name: 'most_recent',
             size: 1,
-            _source: ['agent', 'device.id', 'event.created'],
-            sort: [{ 'event.created': 'desc' }],
+            _source: ['agent', 'device.id', '@timestamp'],
+            sort: [{ '@timestamp': 'desc' }],
           },
         },
         ignore_unavailable: true,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
+import type {
   APM_APP_ID,
   LOGS_APP_ID,
   METRICS_APP_ID,

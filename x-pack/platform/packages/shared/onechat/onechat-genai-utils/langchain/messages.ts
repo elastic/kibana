@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import {
-  BaseMessage,
-  ToolMessage,
-  MessageContentComplex,
-  isAIMessage,
-} from '@langchain/core/messages';
+import { v4 } from 'uuid';
+import type { BaseMessage, MessageContentComplex } from '@langchain/core/messages';
+import { ToolMessage, AIMessage, HumanMessage } from '@langchain/core/messages';
+import { isAIMessage } from '@langchain/core/messages';
 import type { RunToolReturn } from '@kbn/onechat-server';
-import { isArray, isEmpty } from 'lodash';
+import { createErrorResult } from '@kbn/onechat-server';
+import { isArray } from 'lodash';
 
 /**
  * Extract the text content from a langchain message or chunk.
@@ -64,16 +63,65 @@ export const extractToolCalls = (message: BaseMessage): ToolCall[] => {
  * it was executed from a onechat agent.
  */
 export const extractToolReturn = (message: ToolMessage): RunToolReturn => {
-  if (!message.artifact) {
-    throw new Error('No artifact attached to tool message');
-  }
-  if (!isArray(message.artifact.results) || isEmpty(message.artifact.results)) {
-    throw new Error(
-      `Artifact is not a structured tool artifact. Received artifact=${JSON.stringify(
-        message.artifact
-      )}`
-    );
-  }
+  if (message.artifact) {
+    if (!isArray(message.artifact.results)) {
+      throw new Error(
+        `Artifact is not a structured tool artifact. Received artifact=${JSON.stringify(
+          message.artifact
+        )}`
+      );
+    }
 
-  return message.artifact as RunToolReturn;
+    return message.artifact as RunToolReturn;
+  } else {
+    // langchain tool validation error (such as schema errors) are out of our control and don't emit artifacts...
+    const content = extractTextContent(message);
+    if (content.startsWith('Error:')) {
+      return {
+        results: [createErrorResult(content)],
+      };
+    } else {
+      throw new Error(`No artifact attached to tool message: ${JSON.stringify(message)}`);
+    }
+  }
+};
+
+export const generateFakeToolCallId = () => {
+  return v4().substr(0, 6);
+};
+
+export const createUserMessage = (content: string): HumanMessage => {
+  return new HumanMessage({ content });
+};
+
+export const createAIMessage = (content: string): AIMessage => {
+  return new AIMessage({ content });
+};
+
+export const createToolResultMessage = ({
+  content,
+  toolCallId,
+}: {
+  content: unknown;
+  toolCallId: string;
+}): ToolMessage => {
+  return new ToolMessage({
+    content: typeof content === 'string' ? content : JSON.stringify(content),
+    tool_call_id: toolCallId,
+  });
+};
+
+export const createToolCallMessage = (
+  toolCallOrCalls: ToolCall | ToolCall[],
+  message?: string
+): AIMessage => {
+  const toolCalls = isArray(toolCallOrCalls) ? toolCallOrCalls : [toolCallOrCalls];
+  return new AIMessage({
+    content: message ?? '',
+    tool_calls: toolCalls.map((toolCall) => ({
+      id: toolCall.toolCallId,
+      name: toolCall.toolName,
+      args: toolCall.args,
+    })),
+  });
 };

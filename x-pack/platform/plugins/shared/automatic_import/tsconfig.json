@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -44,6 +44,9 @@
     "@kbn/utils",
     "@kbn/zod",
     "@kbn/tooling-log",
-    "@kbn/ai-assistant-icon"
+    "@kbn/ai-assistant-icon",
+    "@kbn/licensing-types",
+    "@kbn/inference-plugin",
+    "@kbn/inference-langchain"
   ]
 }

@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import SemVer from 'semver/classes/semver';
 import { i18n } from '@kbn/i18n';
-import { Plugin, CoreSetup, PluginInitializerContext } from '@kbn/core/public';
+import type { Plugin, CoreSetup, PluginInitializerContext } from '@kbn/core/public';
 
-import { apiService } from './application/lib/api';
-import { breadcrumbService } from './application/lib/breadcrumbs';
-import { uiMetricService } from './application/lib/ui_metric';
-import { SetupDependencies, StartDependencies, AppDependencies, ClientConfigType } from './types';
+import type {
+  SetupDependencies,
+  StartDependencies,
+  AppDependencies,
+  ClientConfigType,
+} from './types';
 
 export class UpgradeAssistantUIPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>
@@ -30,14 +31,15 @@ export class UpgradeAssistantUIPlugin
 
     if (isUpgradeAssistantUiEnabled) {
       const appRegistrar = management.sections.section.stack;
-      const kibanaVersion = new SemVer(this.ctx.env.packageInfo.version);
+      const kibanaVersion = this.ctx.env.packageInfo.version.split('.');
+      const kibanaVersionMajor = Number(kibanaVersion[0]);
 
       const kibanaVersionInfo = {
-        currentMajor: kibanaVersion.major,
-        prevMajor: kibanaVersion.major - 1,
-        nextMajor: kibanaVersion.major + 1,
-        currentMinor: kibanaVersion.minor,
-        currentPatch: kibanaVersion.patch,
+        currentMajor: kibanaVersionMajor,
+        prevMajor: kibanaVersionMajor - 1,
+        nextMajor: kibanaVersionMajor + 1,
+        currentMinor: Number(kibanaVersion[1]),
+        currentPatch: Number(kibanaVersion[2]),
       };
 
       const pluginName = i18n.translate('xpack.upgradeAssistant.appTitle', {
@@ -45,7 +47,9 @@ export class UpgradeAssistantUIPlugin
       });
 
       if (usageCollection) {
-        uiMetricService.setup(usageCollection);
+        import('./application/lib/ui_metric').then(({ uiMetricService }) => {
+          uiMetricService.setup(usageCollection);
+        });
       }
 
       appRegistrar.registerApp({
@@ -53,7 +57,7 @@ export class UpgradeAssistantUIPlugin
         title: pluginName,
         order: 1,
         async mount(params) {
-          const [coreStart, { data }] = await coreSetup.getStartServices();
+          const [coreStart, { data, reindexService }] = await coreSetup.getStartServices();
 
           const {
             chrome: { docTitle },
@@ -67,13 +71,12 @@ export class UpgradeAssistantUIPlugin
             plugins: {
               cloud,
               share,
+              reindexService,
             },
             services: {
               core: coreStart,
               data,
               history: params.history,
-              api: apiService,
-              breadcrumbs: breadcrumbService,
             },
           };
 

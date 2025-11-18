@@ -9,7 +9,7 @@
 
 import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
 import { TriggerContract } from './trigger_contract';
-import { UiActionsService } from '../service';
+import type { UiActionsService } from '../service';
 
 /**
  * Internal representation of a trigger kept for consumption only internally

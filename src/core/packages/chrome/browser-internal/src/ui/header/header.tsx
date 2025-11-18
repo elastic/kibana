@@ -33,10 +33,8 @@ import type {
   ChromeGlobalHelpExtensionMenuLink,
   ChromeUserBanner,
 } from '@kbn/core-chrome-browser';
-import { CustomBranding } from '@kbn/core-custom-branding-common';
+import type { CustomBranding } from '@kbn/core-custom-branding-common';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { css } from '@emotion/react';
 import { CollapsibleNav } from './collapsible_nav';
 import { HeaderBadge } from './header_badge';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
@@ -47,7 +45,7 @@ import { HeaderActionMenu, useHeaderActionMenuMounter } from './header_action_me
 import { BreadcrumbsWithExtensionsWrapper } from './breadcrumbs_with_extensions';
 import { HeaderTopBanner } from './header_top_banner';
 import { HeaderMenuButton } from './header_menu_button';
-import { ScreenReaderRouteAnnouncements, SkipToMainContent } from './screen_reader_a11y';
+import { HeaderPageAnnouncer } from './header_page_announcer';
 
 export interface HeaderProps {
   kibanaVersion: string;
@@ -103,13 +101,6 @@ export function Header({
 
   return (
     <>
-      <ScreenReaderRouteAnnouncements
-        breadcrumbs$={observables.breadcrumbs$}
-        customBranding$={customBranding$}
-        appId$={application.currentAppId$}
-      />
-      <SkipToMainContent />
-
       {observables.headerBanner$ && <HeaderTopBanner headerBanner$={observables.headerBanner$} />}
       <header className={className} data-test-subj="headerGlobalNav">
         <div id="globalHeaderBars" className="header__bars">
@@ -120,6 +111,10 @@ export function Header({
             sections={[
               {
                 items: [
+                  <HeaderPageAnnouncer
+                    breadcrumbs$={observables.breadcrumbs$}
+                    customBranding$={customBranding$}
+                  />,
                   <HeaderLogo
                     href={homeHref}
                     forceNavigation$={observables.forceAppSwitcherNavigation$}
@@ -202,18 +197,12 @@ export function Header({
 
               <HeaderNavControls side="left" navControls$={observables.navControlsLeft$} />
             </EuiHeaderSection>
-            <RedirectAppLinks
-              coreStart={{ application }}
-              css={css`
-                min-width: 0; // enable text truncation for long breadcrumb titles
-              `}
+
+            <BreadcrumbsWithExtensionsWrapper
+              breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
             >
-              <BreadcrumbsWithExtensionsWrapper
-                breadcrumbsAppendExtensions$={breadcrumbsAppendExtensions$}
-              >
-                {Breadcrumbs}
-              </BreadcrumbsWithExtensionsWrapper>
-            </RedirectAppLinks>
+              {Breadcrumbs}
+            </BreadcrumbsWithExtensionsWrapper>
 
             <HeaderBadge badge$={observables.badge$} />
 

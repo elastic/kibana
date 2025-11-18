@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { Either } from 'fp-ts/Either';
+import type { Either } from 'fp-ts/Either';
 import { namespaceType } from '../default_namespace';
 
 export const namespaceTypeArray = t.array(namespaceType);

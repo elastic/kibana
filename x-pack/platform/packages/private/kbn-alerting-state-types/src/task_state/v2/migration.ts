@@ -7,7 +7,7 @@
 
 import { type TypeOf } from '@kbn/config-schema';
 import { isStringArray } from '../lib';
-import { versionSchema } from './schema';
+import type { versionSchema } from './schema';
 
 type VersionSchema = TypeOf<typeof versionSchema>;
 

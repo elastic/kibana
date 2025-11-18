@@ -8,13 +8,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { GetPanelPlacementSettings } from './types';
+import type { GetPanelSettings } from './types';
 
-const registry = new Map<string, GetPanelPlacementSettings<object>>();
+const registry = new Map<string, GetPanelSettings<object>>();
 
-export const registerDashboardPanelPlacementSetting = <SerializedState extends object = object>(
+export const registerDashboardPanelSettings = <SerializedState extends object = object>(
   embeddableType: string,
-  getPanelPlacementSettings: GetPanelPlacementSettings<SerializedState>
+  getPanelSettings: GetPanelSettings<SerializedState>
 ) => {
   if (registry.has(embeddableType)) {
     throw new Error(
@@ -24,7 +24,7 @@ export const registerDashboardPanelPlacementSetting = <SerializedState extends o
       })
     );
   }
-  registry.set(embeddableType, getPanelPlacementSettings as GetPanelPlacementSettings<object>);
+  registry.set(embeddableType, getPanelSettings as GetPanelSettings<object>);
 };
 
 /**

@@ -8,11 +8,11 @@
  */
 
 import chalk from 'chalk';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 import { isErrorLogged, markErrorLogged } from './errors';
 import { Build } from './build';
-import { Config } from './config';
+import type { Config } from './config';
 
 interface Options {
   config: Config;

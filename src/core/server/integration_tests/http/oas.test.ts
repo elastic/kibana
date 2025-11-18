@@ -10,18 +10,21 @@
 import supertest from 'supertest';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
 import { contextServiceMock } from '@kbn/core-http-context-server-mocks';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 import { createConfigService } from '@kbn/core-http-server-mocks';
 import type {
   InternalContextPreboot,
   InternalContextSetup,
 } from '@kbn/core-http-context-server-internal';
-import { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
-import { IRouter } from '@kbn/core-http-server';
+import type { DocLinksServicePreboot } from '@kbn/core-doc-links-server';
+import type { InternalExecutionContextSetup } from '@kbn/core-execution-context-server-internal';
+import type { IRouter } from '@kbn/core-http-server';
 import { schema } from '@kbn/config-schema';
 import { createInternalHttpService } from '../utilities';
 
 let prebootDeps: {
   context: jest.Mocked<InternalContextPreboot>;
+  docLinks: jest.Mocked<DocLinksServicePreboot>;
 };
 let setupDeps: {
   context: jest.Mocked<InternalContextSetup>;
@@ -30,6 +33,7 @@ let setupDeps: {
 beforeEach(async () => {
   prebootDeps = {
     context: contextServiceMock.createPrebootContract(),
+    docLinks: docLinksServiceMock.createSetupContract(),
   };
   const contextSetup = contextServiceMock.createSetupContract();
   setupDeps = {

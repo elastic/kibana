@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState, FC } from 'react';
+import type { FC } from 'react';
+import React, { useEffect, useState } from 'react';
 
 import {
   EuiBadge,

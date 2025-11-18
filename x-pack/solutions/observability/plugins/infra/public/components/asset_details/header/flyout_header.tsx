@@ -20,11 +20,13 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common/inventory_models/types';
-import { PageTitleWithPopover } from './page_title_with_popover';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { HostHeaderTitle } from './host_header_title';
 
 type Props = Pick<EuiPageHeaderProps, 'tabs' | 'title' | 'rightSideItems'> & {
   entityType: InventoryItemType;
   loading: boolean;
+  schema?: DataSchemaFormat | null;
 };
 
 export const FlyoutHeader = ({
@@ -33,6 +35,7 @@ export const FlyoutHeader = ({
   rightSideItems = [],
   entityType,
   loading,
+  schema,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
 
@@ -55,7 +58,9 @@ export const FlyoutHeader = ({
             {loading ? (
               <EuiLoadingSpinner size="m" />
             ) : (
-              <h4>{entityType === 'host' ? <PageTitleWithPopover name={title ?? ''} /> : title}</h4>
+              <h4>
+                {entityType === 'host' ? <HostHeaderTitle title={title} schema={schema} /> : title}
+              </h4>
             )}
           </EuiTitle>
         </EuiFlexItem>

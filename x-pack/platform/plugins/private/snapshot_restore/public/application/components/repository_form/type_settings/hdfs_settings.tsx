@@ -19,8 +19,8 @@ import {
 } from '@elastic/eui';
 
 import { CodeEditor } from '@kbn/code-editor';
-import { HDFSRepository, Repository, SourceRepository } from '../../../../../common/types';
-import { RepositorySettingsValidation } from '../../../services/validation';
+import type { HDFSRepository, Repository, SourceRepository } from '../../../../../common/types';
+import type { RepositorySettingsValidation } from '../../../services/validation';
 import { ChunkSizeField, MaxSnapshotsField, MaxRestoreField } from './common';
 
 interface Props {

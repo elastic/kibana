@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Ref, FC } from 'react';
 import React, {
-  useState,
   useCallback,
   useRef,
   useMemo,
@@ -16,42 +16,40 @@ import React, {
   useEffect,
   useImperativeHandle,
   forwardRef,
-  Ref,
   memo,
-  FC,
 } from 'react';
-import { isEmpty } from 'lodash';
-import {
+import type {
   EuiDataGridColumn,
-  EuiProgress,
   EuiDataGridSorting,
   EuiDataGridControlColumn,
   EuiDataGridRefProps,
 } from '@elastic/eui';
+import { EuiProgress } from '@elastic/eui';
 import {
   ALERT_CASE_IDS,
   ALERT_MAINTENANCE_WINDOW_IDS,
   ALERT_RULE_UUID,
-  ALERT_UUID,
 } from '@kbn/rule-data-utils';
-import type { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';
-import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
-import { QueryClientProvider, useQueryClient } from '@tanstack/react-query';
+import { QueryClientProvider, useQueryClient } from '@kbn/react-query';
 import { useSearchAlertsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_search_alerts_query';
 import { DEFAULT_ALERTS_PAGE_SIZE } from '@kbn/alerts-ui-shared/src/common/constants';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
-import deepEqual from 'fast-deep-equal';
-import { Alert } from '@kbn/alerting-types';
+import type { Alert, BrowserFields } from '@kbn/alerting-types';
 import { useGetMutedAlertsQuery } from '@kbn/response-ops-alerts-apis/hooks/use_get_muted_alerts_query';
 import { queryKeys as alertsQueryKeys } from '@kbn/response-ops-alerts-apis/query_keys';
+import deepEqual from 'fast-deep-equal';
+import { useFetchAlertsFieldsQuery } from '@kbn/alerts-ui-shared/src/common/hooks/use_fetch_alerts_fields_query';
+import { applySetStateAction } from '../utils/apply_set_state_action';
+import { useAlertsTableQueryParams } from '../hooks/use_alerts_table_query_params';
+import { applyColumnsConfiguration } from '../utils/columns_configuration';
+import { useAlertsTableConfiguration } from '../hooks/use_alerts_table_configuration';
 import { ErrorFallback } from './error_fallback';
 import { defaultAlertsTableColumns } from '../configuration';
-import { Storage } from '../utils/storage';
 import { queryKeys } from '../constants';
 import { AlertsDataGrid } from './alerts_data_grid';
 import { EmptyState } from './empty_state';
-import { RenderContext, RowSelectionState } from '../types';
-import {
+import type { AlertsTableSortCombinations, RenderContext, RowSelectionState } from '../types';
+import type {
   AdditionalContext,
   AlertsDataGridProps,
   AlertsTableImperativeApi,
@@ -65,14 +63,9 @@ import { useBulkGetCasesQuery } from '../hooks/use_bulk_get_cases';
 import { useBulkGetMaintenanceWindowsQuery } from '../hooks/use_bulk_get_maintenance_windows';
 import { AlertsTableContextProvider } from '../contexts/alerts_table_context';
 import { ErrorBoundary } from './error_boundary';
-import { usePagination } from '../hooks/use_pagination';
 import { typedForwardRef } from '../utils/react';
-
-export interface AlertsTablePersistedConfiguration {
-  columns: EuiDataGridColumn[];
-  visibleColumns?: string[];
-  sort: SortCombinations[];
-}
+import { useControllableState } from '../hooks/use_controllable_state';
+import { LocalStorageWrapper } from '../utils/local_storage_wrapper';
 
 type AlertWithCaseIds = Alert & Required<Pick<Alert, typeof ALERT_CASE_IDS>>;
 type AlertWithMaintenanceWindowIds = Alert &
@@ -112,6 +105,25 @@ const isCasesColumnEnabled = (columns: EuiDataGridColumn[]): boolean =>
 const isMaintenanceWindowColumnEnabled = (columns: EuiDataGridColumn[]): boolean =>
   columns.some(({ id }) => id === ALERT_MAINTENANCE_WINDOW_IDS);
 
+/**
+ * If an alert is expanded, returns the page where the alert is located if different
+ * from the current page index
+ */
+const getExpandedAlertPage = (
+  expandedAlertIndex: number | null,
+  pageSize: number,
+  pageIndex: number
+) => {
+  if (expandedAlertIndex !== null) {
+    const expandedAlertPage = Math.floor(expandedAlertIndex / pageSize);
+    if (expandedAlertPage >= 0 && expandedAlertPage !== pageIndex) {
+      return expandedAlertPage;
+    }
+  }
+};
+
+const getLocalStorageWrapper = () => new LocalStorageWrapper(window.localStorage);
+
 const emptyRowSelection = new Map<number, RowSelectionState>();
 
 const initialBulkActionsState = {
@@ -127,7 +139,7 @@ const initialBulkActionsState = {
  *
  * It manages the paginated and cached fetching of alerts based on the
  * provided `ruleTypeIds` and `consumers` (the final query can be refined
- * through the `query` and `initialSort` props). The `id` prop is required in order
+ * through the `query` and `sort` props). The `id` prop is required in order
  * to persist the table state in `localStorage`
  *
  * @example
@@ -137,7 +149,7 @@ const initialBulkActionsState = {
  *   ruleTypeIds={ruleTypeIds}
  *   consumers={consumers}
  *   query={esQuery}
- *   initialSort={defaultAlertsTableSort}
+ *   sort={defaultAlertsTableSort}
  *   renderCellValue={CellValue}
  *   renderActionsCell={ActionsCell}
  *   services={{ ... }}
@@ -160,8 +172,7 @@ export const AlertsTable = memo(
 (AlertsTable as FC).displayName = 'AlertsTable';
 
 const DEFAULT_LEADING_CONTROL_COLUMNS: EuiDataGridControlColumn[] = [];
-const DEFAULT_SORT: SortCombinations[] = [];
-const DEFAULT_COLUMNS: EuiDataGridColumn[] = [];
+const DEFAULT_SORT: AlertsTableSortCombinations[] = [];
 
 const AlertsTableContent = typedForwardRef(
   <AC extends AdditionalContext>(
@@ -172,14 +183,21 @@ const AlertsTableContent = typedForwardRef(
       query,
       minScore,
       trackScores = false,
-      initialSort = DEFAULT_SORT,
-      initialPageSize = DEFAULT_ALERTS_PAGE_SIZE,
+      sort: sortProp = DEFAULT_SORT,
+      onSortChange,
+      pageIndex: pageIndexProp,
+      onPageIndexChange,
+      pageSize: pageSizeProp,
+      onPageSizeChange,
+      columns: columnsProp,
+      onColumnsChange,
+      visibleColumns: visibleColumnsProp,
+      onVisibleColumnsChange,
       leadingControlColumns = DEFAULT_LEADING_CONTROL_COLUMNS,
       trailingControlColumns,
       rowHeightsOptions,
-      columns: initialColumns = defaultAlertsTableColumns,
       gridStyle,
-      browserFields: propBrowserFields,
+      browserFields: alertsFieldsProp,
       onUpdate,
       onLoaded,
       runtimeMappings,
@@ -193,14 +211,12 @@ const AlertsTableContent = typedForwardRef(
       renderCellValue,
       renderCellPopover,
       renderActionsCell,
-      renderFlyoutHeader,
-      renderFlyoutBody,
-      renderFlyoutFooter,
-      flyoutOwnsFocus = false,
-      flyoutPagination = true,
+      expandedAlertIndex: expandedAlertIndexProp,
+      onExpandedAlertIndexChange,
+      renderExpandedAlertView,
       renderAdditionalToolbarControls: AdditionalToolbarControlsComponent,
       lastReloadRequestTime,
-      configurationStorage = new Storage(window.localStorage),
+      configurationStorage: configurationStorageProp,
       services,
       ...publicDataGridProps
     }: AlertsTableProps<AC>,
@@ -212,105 +228,148 @@ const AlertsTableContent = typedForwardRef(
     const { casesConfiguration, showInspectButton } = publicDataGridProps;
     const { data, cases: casesService, http, notifications, application, licensing } = services;
     const queryClient = useQueryClient({ context: AlertsQueryContext });
-    const storageRef = useRef(configurationStorage);
     const dataGridRef = useRef<EuiDataGridRefProps>(null);
-    const localStorageAlertsTableConfig = storageRef.current.get(
-      id
-    ) as Partial<AlertsTablePersistedConfiguration>;
-
-    const columnsLocal = useMemo(
-      () =>
-        !isEmpty(localStorageAlertsTableConfig?.columns)
-          ? localStorageAlertsTableConfig!.columns!
-          : !isEmpty(initialColumns)
-          ? initialColumns!
-          : [],
-      [initialColumns, localStorageAlertsTableConfig]
+    const configurationStorage = useMemo(
+      () => configurationStorageProp ?? getLocalStorageWrapper(),
+      [configurationStorageProp]
     );
 
-    const getStorageConfig = useCallback(
-      () => ({
-        columns: columnsLocal,
-        sort: !isEmpty(localStorageAlertsTableConfig?.sort)
-          ? localStorageAlertsTableConfig!.sort!
-          : initialSort ?? [],
-        visibleColumns: !isEmpty(localStorageAlertsTableConfig?.visibleColumns)
-          ? localStorageAlertsTableConfig!.visibleColumns!
-          : columnsLocal.map((c) => c.id),
-      }),
-      [columnsLocal, localStorageAlertsTableConfig, initialSort]
-    );
-    const storageAlertsTable = useRef<AlertsTablePersistedConfiguration>(getStorageConfig());
-
-    storageAlertsTable.current = getStorageConfig();
-
-    const [sort, setSort] = useState<SortCombinations[]>(storageAlertsTable.current.sort);
-
-    const onPageChange = useCallback((pagination: RuleRegistrySearchRequestPagination) => {
-      setQueryParams((prevQueryParams) => ({
-        ...prevQueryParams,
-        pageSize: pagination.pageSize,
-        pageIndex: pagination.pageIndex,
-      }));
-    }, []);
-
-    const {
-      columns,
-      browserFields,
-      isBrowserFieldDataLoading,
-      onToggleColumn,
-      onResetColumns,
-      visibleColumns,
-      onChangeVisibleColumns,
-      onColumnResize,
-      fields,
-    } = useColumns({
-      ruleTypeIds,
-      storageAlertsTable,
-      storage: storageRef,
+    const [configuration, setConfiguration] = useAlertsTableConfiguration({
       id,
-      defaultColumns: initialColumns ?? DEFAULT_COLUMNS,
-      alertsFields: propBrowserFields,
-      http,
+      configurationStorage,
+      notifications,
     });
 
-    const [queryParams, setQueryParams] = useState({
+    // Keeping a stable reference to the default columns to support the reset functionality and
+    // to apply default properties to the configured columns
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const defaultColumns = useMemo(() => columnsProp ?? defaultAlertsTableColumns, []);
+    const [columns, setColumns] = useControllableState({
+      value: columnsProp,
+      onChange: onColumnsChange,
+      defaultValue: applyColumnsConfiguration({
+        defaultColumns,
+        configuredColumns: configuration?.columns,
+      }),
+    });
+    const updateColumns = useCallback<typeof setColumns>(
+      (setStateAction) => {
+        const newColumns = applySetStateAction(setStateAction, columns);
+        setColumns(newColumns);
+        setConfiguration({ columns: newColumns });
+      },
+      [columns, setColumns, setConfiguration]
+    );
+    // Like `defaultColumns`, purposefully keeping the initial value only
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const defaultVisibleColumns = useMemo(() => visibleColumnsProp ?? columns.map((c) => c.id), []);
+    const [visibleColumns, setVisibleColumns] = useControllableState({
+      value: visibleColumnsProp,
+      onChange: onVisibleColumnsChange,
+      defaultValue: configuration?.visibleColumns ?? defaultVisibleColumns,
+    });
+    const updateVisibleColumns = useCallback<typeof setVisibleColumns>(
+      (setStateAction) => {
+        const newVisibleColumns = applySetStateAction(setStateAction, visibleColumns);
+        setVisibleColumns(newVisibleColumns);
+        setConfiguration({ visibleColumns: newVisibleColumns });
+      },
+      [setConfiguration, setVisibleColumns, visibleColumns]
+    );
+    // Purposefully keeping the initial value only for reset
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    const defaultSort = useMemo(() => sortProp ?? DEFAULT_SORT, []);
+    const [sort, setSort] = useControllableState({
+      value: sortProp,
+      onChange: onSortChange,
+      defaultValue: configuration?.sort ?? defaultSort,
+    });
+    const updateSort = useCallback<typeof setSort>(
+      (setStateAction) => {
+        const newSort = applySetStateAction(setStateAction, sort);
+        setSort(newSort);
+        setConfiguration({ sort: newSort });
+      },
+      [setConfiguration, setSort, sort]
+    );
+    const [expandedAlertIndex, setExpandedAlertIndex] = useControllableState({
+      value: expandedAlertIndexProp,
+      onChange: onExpandedAlertIndexChange,
+      defaultValue: expandedAlertIndexProp ?? null,
+    });
+    const [pageSize, setPageSize] = useControllableState({
+      value: pageSizeProp,
+      onChange: onPageSizeChange,
+      defaultValue: pageSizeProp ?? DEFAULT_ALERTS_PAGE_SIZE,
+    });
+    const defaultPageIndex = pageIndexProp ?? 0;
+    const [pageIndex, setPageIndex] = useControllableState({
+      value: pageIndexProp,
+      onChange: onPageIndexChange,
+      defaultValue:
+        // If an alert is expanded, make sure to show its page on first load
+        getExpandedAlertPage(expandedAlertIndex, pageSize, defaultPageIndex) ?? defaultPageIndex,
+    });
+    const updateExpandedAlertIndex = useCallback<typeof setExpandedAlertIndex>(
+      (setStateAction) => {
+        const newExpandedAlertIndex = applySetStateAction(setStateAction, expandedAlertIndex);
+        // If the new expanded alert is outside the current page, update the page index
+        const expandedAlertPage = getExpandedAlertPage(newExpandedAlertIndex, pageSize, pageIndex);
+        if (expandedAlertPage != null) {
+          setPageIndex(expandedAlertPage);
+        }
+        setExpandedAlertIndex(newExpandedAlertIndex);
+      },
+      [expandedAlertIndex, setExpandedAlertIndex, pageSize, pageIndex, setPageIndex]
+    );
+
+    const fieldsQuery = useFetchAlertsFieldsQuery(
+      { http, ruleTypeIds },
+      { enabled: !alertsFieldsProp, context: AlertsQueryContext }
+    );
+    const selectedAlertsFields = useMemo<BrowserFields>(
+      () => alertsFieldsProp ?? fieldsQuery.data?.browserFields ?? {},
+      [alertsFieldsProp, fieldsQuery.data?.browserFields]
+    );
+
+    const { columnsWithFieldsData, onToggleColumn, onColumnResize, onResetColumns, fields } =
+      useColumns({
+        columns,
+        updateColumns,
+        defaultColumns,
+        visibleColumns,
+        updateVisibleColumns,
+        defaultVisibleColumns,
+        alertsFields: selectedAlertsFields,
+      });
+
+    const [bulkActionsState, dispatchBulkAction] = useReducer(
+      bulkActionsReducer,
+      initialBulkActionsState
+    );
+
+    const bulkActionsStore = useMemo(
+      () =>
+        [bulkActionsState, dispatchBulkAction] as [
+          typeof bulkActionsState,
+          typeof dispatchBulkAction
+        ],
+      [bulkActionsState, dispatchBulkAction]
+    );
+
+    const queryParams = useAlertsTableQueryParams({
       ruleTypeIds,
       consumers,
       fields,
       query,
       sort,
       runtimeMappings,
-      pageIndex: 0,
-      pageSize: initialPageSize,
+      pageIndex,
+      pageSize,
       minScore,
       trackScores,
+      dispatchBulkAction,
     });
-
-    useEffect(() => {
-      setQueryParams(({ pageIndex: oldPageIndex, pageSize: oldPageSize, ...prevQueryParams }) => ({
-        ruleTypeIds,
-        consumers,
-        fields,
-        query,
-        sort,
-        runtimeMappings,
-        minScore,
-        trackScores,
-        // Go back to the first page if the query changes
-        pageIndex: !deepEqual(prevQueryParams, {
-          ruleTypeIds,
-          consumers,
-          fields,
-          query,
-          sort,
-          runtimeMappings,
-        })
-          ? 0
-          : oldPageIndex,
-        pageSize: oldPageSize,
-      }));
-    }, [ruleTypeIds, fields, query, runtimeMappings, sort, consumers, minScore, trackScores]);
 
     const {
       data: alertsData,
@@ -321,12 +380,14 @@ const AlertsTableContent = typedForwardRef(
       data,
       ...queryParams,
     });
+
     const {
       alerts = [],
       oldAlertsData = [],
       ecsAlertsData = [],
       total: alertsCount = -1,
       querySnapshot: alertsQuerySnapshot,
+      error: alertsError,
     } = alertsData ?? {};
 
     useEffect(() => {
@@ -334,6 +395,16 @@ const AlertsTableContent = typedForwardRef(
         onLoaded({ alerts, columns, totalAlertsCount: alertsCount });
       }
     }, [alerts, columns, isLoadingAlerts, isSuccess, onLoaded, alertsCount]);
+
+    const fieldWithSortingError = useMemo(
+      () =>
+        alertsError?.message?.toLowerCase()?.includes('sort')
+          ? queryParams.sort.find((sortField) =>
+              alertsError?.message?.includes(Object.keys(sortField)[0])
+            )
+          : undefined,
+      [alertsError?.message, queryParams.sort]
+    );
 
     const ruleIds = useMemo(() => getRuleIdsFromAlerts(alerts), [alerts]);
     const mutedAlertsQuery = useGetMutedAlertsQuery({
@@ -360,43 +431,39 @@ const AlertsTableContent = typedForwardRef(
     );
 
     const refresh = useCallback(() => {
-      if (queryParams.pageIndex !== 0) {
-        // Refetch from the first page
-        setQueryParams((prevQueryParams) => ({ ...prevQueryParams, pageIndex: 0 }));
+      if (pageIndex !== 0) {
+        // Refetch from the first page when refreshing
+        setPageIndex(0);
       } else {
         refetchAlerts();
       }
       queryClient.invalidateQueries(queryKeys.casesBulkGet(caseIds));
       queryClient.invalidateQueries(alertsQueryKeys.getMutedAlerts(ruleIds));
       queryClient.invalidateQueries(queryKeys.maintenanceWindowsBulkGet(maintenanceWindowIds));
-    }, [caseIds, maintenanceWindowIds, queryClient, queryParams.pageIndex, refetchAlerts, ruleIds]);
+    }, [
+      pageIndex,
+      queryClient,
+      caseIds,
+      ruleIds,
+      maintenanceWindowIds,
+      setPageIndex,
+      refetchAlerts,
+    ]);
 
     useEffect(() => {
       if (lastReloadRequestTime) {
         refresh();
       }
-    }, [lastReloadRequestTime, refresh]);
+      // Purposefully not including `refresh` to avoid refreshing when it changes
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [lastReloadRequestTime]);
 
     useImperativeHandle(ref, () => ({
       refresh,
       toggleColumn: onToggleColumn,
     }));
 
-    const [bulkActionsState, dispatchBulkAction] = useReducer(
-      bulkActionsReducer,
-      initialBulkActionsState
-    );
-
-    const bulkActionsStore = useMemo(
-      () =>
-        [bulkActionsState, dispatchBulkAction] as [
-          typeof bulkActionsState,
-          typeof dispatchBulkAction
-        ],
-      [bulkActionsState, dispatchBulkAction]
-    );
-
-    const onSortChange = useCallback(
+    const onDataGridSortChange = useCallback(
       (_sort: EuiDataGridSorting['columns']) => {
         const newSort = _sort
           .map((sortItem) => {
@@ -411,15 +478,22 @@ const AlertsTableContent = typedForwardRef(
             return visibleColumns.includes(sortKey);
           });
 
-        storageAlertsTable.current = {
-          ...storageAlertsTable.current,
-          sort: newSort,
-        };
-        storageRef.current.set(id, storageAlertsTable.current);
-        setSort(newSort);
+        updateSort(newSort);
       },
-      [id, visibleColumns]
+      [updateSort, visibleColumns]
     );
+
+    const handleReset = useCallback(() => {
+      // allow to reset to previous sort state in case of sorting error
+      if (fieldWithSortingError) {
+        const newSort = sort.filter((sortField) => !deepEqual(sortField, fieldWithSortingError));
+        updateSort(newSort);
+      } else {
+        // allow to reset to default state in case of any other error
+        updateSort(defaultSort);
+        onResetColumns();
+      }
+    }, [fieldWithSortingError, sort, updateSort, defaultSort, onResetColumns]);
 
     const CasesContext = useMemo(() => {
       return casesService?.ui.getCasesContext();
@@ -427,34 +501,11 @@ const AlertsTableContent = typedForwardRef(
 
     const isCasesContextAvailable = casesService && CasesContext;
 
-    const {
-      pagination,
-      onChangePageSize,
-      onChangePageIndex,
-      onPaginateFlyout,
-      flyoutAlertIndex,
-      setFlyoutAlertIndex,
-    } = usePagination({
-      bulkActionsStore,
-      onPageChange,
-      pageIndex: queryParams.pageIndex,
-      pageSize: queryParams.pageSize,
-    });
-
-    // TODO when every solution is using this table, we will be able to simplify it by just passing the alert index
-    const openAlertInFlyout = useCallback(
-      (alertId: string) => {
-        const idx = alerts.findIndex((a) => (a as any)[ALERT_UUID].includes(alertId));
-        setFlyoutAlertIndex(idx);
-      },
-      [alerts, setFlyoutAlertIndex]
-    );
-
     const renderContext = useMemo(
       () =>
         ({
           ...additionalContext,
-          columns,
+          columns: columnsWithFieldsData,
           tableId: id,
           dataGridRef,
           refresh,
@@ -462,39 +513,41 @@ const AlertsTableContent = typedForwardRef(
             isLoadingAlerts ||
             casesQuery.isFetching ||
             maintenanceWindowsQuery.isFetching ||
-            mutedAlertsQuery.isFetching,
+            mutedAlertsQuery.isFetching ||
+            fieldsQuery.isFetching,
           isLoadingAlerts,
           alerts,
           alertsCount,
+
           // TODO deprecate
           ecsAlertsData,
           oldAlertsData,
-          browserFields,
+
+          browserFields: selectedAlertsFields,
           isLoadingCases: casesQuery.isFetching,
           cases: casesQuery.data,
           isLoadingMaintenanceWindows: maintenanceWindowsQuery.isFetching,
           maintenanceWindows: maintenanceWindowsQuery.data,
           isLoadingMutedAlerts: mutedAlertsQuery.isFetching,
           mutedAlerts: mutedAlertsQuery.data,
-          pageIndex: pagination.pageIndex,
-          pageSize: pagination.pageSize,
+          pageIndex,
+          onPageIndexChange: setPageIndex,
+          pageSize,
+          onPageSizeChange: setPageSize,
           showAlertStatusWithFlapping,
-          openAlertInFlyout,
           bulkActionsStore,
           renderCellValue,
           renderCellPopover,
           renderActionsCell,
-          renderFlyoutHeader,
-          renderFlyoutBody,
-          renderFlyoutFooter,
-          flyoutOwnsFocus,
-          flyoutPagination,
           openLinksInNewTab,
           services: memoizedServices,
+          expandedAlertIndex,
+          onExpandedAlertIndexChange: updateExpandedAlertIndex,
+          renderExpandedAlertView,
         } as RenderContext<AC>),
       [
         additionalContext,
-        columns,
+        columnsWithFieldsData,
         id,
         refresh,
         isLoadingAlerts,
@@ -504,26 +557,26 @@ const AlertsTableContent = typedForwardRef(
         maintenanceWindowsQuery.data,
         mutedAlertsQuery.isFetching,
         mutedAlertsQuery.data,
+        fieldsQuery.isFetching,
         alerts,
         alertsCount,
         ecsAlertsData,
         oldAlertsData,
-        browserFields,
-        pagination.pageIndex,
-        pagination.pageSize,
+        selectedAlertsFields,
+        pageIndex,
+        setPageIndex,
+        pageSize,
+        setPageSize,
         showAlertStatusWithFlapping,
-        openAlertInFlyout,
         bulkActionsStore,
         renderCellValue,
         renderCellPopover,
         renderActionsCell,
-        renderFlyoutHeader,
-        renderFlyoutBody,
-        renderFlyoutFooter,
-        flyoutOwnsFocus,
-        flyoutPagination,
         openLinksInNewTab,
         memoizedServices,
+        expandedAlertIndex,
+        updateExpandedAlertIndex,
+        renderExpandedAlertView,
       ]
     );
 
@@ -545,14 +598,16 @@ const AlertsTableContent = typedForwardRef(
       () => ({
         ...publicDataGridProps,
         renderContext,
+        columnVisibility: {
+          visibleColumns,
+          setVisibleColumns: updateVisibleColumns,
+        },
         additionalToolbarControls,
         leadingControlColumns,
         trailingControlColumns,
-        visibleColumns,
         'data-test-subj': 'internalAlertsState',
         onToggleColumn,
         onResetColumns,
-        onChangeVisibleColumns,
         onColumnResize,
         query,
         rowHeightsOptions,
@@ -562,24 +617,19 @@ const AlertsTableContent = typedForwardRef(
         dynamicRowHeight,
         ruleTypeIds,
         alertsQuerySnapshot,
-        onChangePageIndex,
-        onChangePageSize,
-        onPaginateFlyout,
-        flyoutAlertIndex,
-        setFlyoutAlertIndex,
         sort,
-        onSortChange,
+        onSortChange: onDataGridSortChange,
       }),
       [
         publicDataGridProps,
         renderContext,
+        visibleColumns,
+        updateVisibleColumns,
         additionalToolbarControls,
         leadingControlColumns,
         trailingControlColumns,
-        visibleColumns,
         onToggleColumn,
         onResetColumns,
-        onChangeVisibleColumns,
         onColumnResize,
         query,
         rowHeightsOptions,
@@ -589,13 +639,8 @@ const AlertsTableContent = typedForwardRef(
         dynamicRowHeight,
         ruleTypeIds,
         alertsQuerySnapshot,
-        onChangePageIndex,
-        onChangePageSize,
-        onPaginateFlyout,
-        flyoutAlertIndex,
-        setFlyoutAlertIndex,
         sort,
-        onSortChange,
+        onDataGridSortChange,
       ]
     );
 
@@ -611,10 +656,13 @@ const AlertsTableContent = typedForwardRef(
               messageBody={emptyState?.messageBody}
               height={emptyState?.height}
               variant={emptyState?.variant}
+              error={alertsError}
+              fieldWithSortingError={fieldWithSortingError}
+              onReset={handleReset}
             />
           </InspectButtonContainer>
         )}
-        {(isLoadingAlerts || isBrowserFieldDataLoading) && (
+        {(isLoadingAlerts || fieldsQuery.isLoading) && (
           <EuiProgress size="xs" color="accent" data-test-subj="internalAlertsPageLoading" />
         )}
         {alertsCount > 0 &&
@@ -622,7 +670,13 @@ const AlertsTableContent = typedForwardRef(
             <CasesContext
               owner={casesConfiguration?.owner ?? []}
               permissions={casesPermissions}
-              features={{ alerts: { sync: casesConfiguration?.syncAlerts ?? false } }}
+              features={{
+                alerts: { sync: casesConfiguration?.syncAlerts ?? false },
+                observables: {
+                  enabled: true,
+                  autoExtract: casesConfiguration?.extractObservables ?? false,
+                },
+              }}
             >
               <AlertsDataGrid {...dataGridProps} />
             </CasesContext>

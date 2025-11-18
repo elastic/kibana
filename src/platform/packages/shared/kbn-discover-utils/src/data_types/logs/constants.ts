@@ -8,7 +8,7 @@
  */
 
 import { fieldConstants } from '../..';
-import { SmartFieldGridColumnOptions } from './types';
+import type { SmartFieldGridColumnOptions } from './types';
 
 export * from '../../field_constants';
 
@@ -94,6 +94,7 @@ export const RESOURCE_FIELDS = [
   fieldConstants.ORCHESTRATOR_CLUSTER_ID_FIELD,
   fieldConstants.CONTAINER_ID_FIELD,
   fieldConstants.AGENT_NAME_FIELD,
+  fieldConstants.OTEL_RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE,
 ] as const;
 export const TRACE_FIELDS = [
   fieldConstants.SERVICE_NAME_FIELD,

@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Vis } from '@kbn/visualizations-plugin/public';
-import { InputControlVisParams } from './types';
+import type { Vis } from '@kbn/visualizations-plugin/public';
+import type { InputControlVisParams } from './types';
 import { toExpressionAst } from './to_ast';
 
 describe('input_control_vis toExpressionAst', () => {

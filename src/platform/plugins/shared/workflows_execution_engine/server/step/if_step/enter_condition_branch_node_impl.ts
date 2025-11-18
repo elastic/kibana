@@ -7,13 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { StepImplementation } from '../step_base';
-import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { EnterConditionBranchNode } from '@kbn/workflows/graph';
+import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { NodeImplementation } from '../node_implementation';
 
-export class EnterConditionBranchNodeImpl implements StepImplementation {
-  constructor(private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager) {}
+export class EnterConditionBranchNodeImpl implements NodeImplementation {
+  constructor(
+    private node: EnterConditionBranchNode,
+    private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
+  ) {}
 
   public async run(): Promise<void> {
-    this.wfExecutionRuntimeManager.goToNextStep();
+    if (this.node.type === 'enter-then-branch') {
+      this.wfExecutionRuntimeManager.enterScope('true');
+    } else {
+      this.wfExecutionRuntimeManager.enterScope('false');
+    }
+    this.wfExecutionRuntimeManager.navigateToNextNode();
   }
 }

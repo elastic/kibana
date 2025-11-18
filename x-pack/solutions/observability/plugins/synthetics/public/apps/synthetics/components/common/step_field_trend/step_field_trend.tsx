@@ -9,12 +9,13 @@ import React from 'react';
 import { EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { AllSeries, createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
+import type { AllSeries } from '@kbn/exploratory-view-plugin/public';
+import { createExploratoryViewUrl } from '@kbn/exploratory-view-plugin/public';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
-import { JourneyStep } from '../../../../../../common/runtime_types';
+import type { JourneyStep } from '../../../../../../common/runtime_types';
 
 export const getLast48Intervals = (activeStep: JourneyStep) => {
   const timestamp = activeStep['@timestamp'];

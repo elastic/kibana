@@ -6,9 +6,11 @@
  */
 
 import { EuiPage, EuiPageBody, EuiPageTemplate, EuiTab, EuiTabs, EuiSpacer } from '@elastic/eui';
-import React, { useContext, useState, useEffect, useCallback, FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useContext, useState, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
+import { AutoOpsPromotionCallout } from '@kbn/autoops-promotion-callout';
 import { useTitle } from '../hooks/use_title';
 import { MonitoringToolbar } from '../../components/shared/toolbar';
 import { useMonitoringTimeContainerContext } from '../hooks/use_monitoring_time';
@@ -25,6 +27,7 @@ import { useRequestErrorHandler } from '../hooks/use_request_error_handler';
 import { SetupModeToggleButton } from '../../components/setup_mode/toggle_button';
 import { HeaderActionMenuContext } from '../contexts/header_action_menu_context';
 import { HeaderMenuPortal } from '../../components/header_menu';
+import { Legacy } from '../../legacy_shims';
 
 export interface TabMenuItem {
   id: string;
@@ -40,6 +43,7 @@ export interface PageTemplateProps {
   tabs?: TabMenuItem[];
   getPageData?: () => Promise<void>;
   product?: string;
+  showAutoOpsPromotion?: boolean;
 }
 
 export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
@@ -48,6 +52,7 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
   tabs,
   getPageData,
   product,
+  showAutoOpsPromotion,
   children,
 }) => {
   useTitle('', title);
@@ -109,6 +114,8 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
   };
 
   const { supported, enabled } = getSetupModeState();
+  const shouldShowAutoOpsPromotion =
+    showAutoOpsPromotion && !Legacy.shims.isCloud && Legacy.shims.hasEnterpriseLicense;
 
   return (
     <EuiPageTemplate
@@ -127,6 +134,8 @@ export const PageTemplate: FC<PropsWithChildren<PageTemplateProps>> = ({
           </HeaderMenuPortal>
         )}
         <MonitoringToolbar pageTitle={pageTitle} onRefresh={onRefresh} />
+        <EuiSpacer size="m" />
+        {shouldShowAutoOpsPromotion && <AutoOpsPromotionCallout />}
         <EuiSpacer size="m" />
         {tabs && (
           <EuiTabs size="l">

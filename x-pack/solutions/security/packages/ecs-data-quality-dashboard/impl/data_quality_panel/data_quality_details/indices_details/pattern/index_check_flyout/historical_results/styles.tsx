@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export const textCss = ({ euiTheme }: UseEuiTheme) =>

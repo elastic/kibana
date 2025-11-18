@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Duration } from 'moment';
-import { CoreSetup, IRouter, Logger } from '@kbn/core/server';
+import type { Duration } from 'moment';
+import type { CoreSetup, IRouter, Logger } from '@kbn/core/server';
 import { registerDeleteUnusedUrlsRoute } from './register_delete_unused_urls_route';
 
 export const registerUrlServiceRoutes = ({

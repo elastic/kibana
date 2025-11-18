@@ -43,10 +43,23 @@ export class CharacterNotAllowedInField extends KbnError {
  */
 export class SavedObjectNotFound extends KbnError {
   public savedObjectType: string;
+  public savedObjectTypeDisplayName: string;
   public savedObjectId?: string;
-  constructor(type: string, id?: string, link?: string, customMessage?: string) {
+  constructor({
+    type,
+    typeDisplayName = type,
+    id,
+    link,
+    customMessage,
+  }: {
+    type: string;
+    typeDisplayName?: string;
+    id?: string;
+    link?: string;
+    customMessage?: string;
+  }) {
     const idMsg = id ? ` (id: ${id})` : '';
-    let message = `Could not locate that ${type}${idMsg}`;
+    let message = `Could not locate that ${typeDisplayName}${idMsg}`;
 
     if (link) {
       message += `, [click here to re-create it](${link})`;
@@ -55,6 +68,7 @@ export class SavedObjectNotFound extends KbnError {
     super(customMessage || message);
 
     this.savedObjectType = type;
+    this.savedObjectTypeDisplayName = typeDisplayName;
     this.savedObjectId = id;
   }
 }

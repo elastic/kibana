@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ViewMode } from '@kbn/presentation-publishing';
-import { DashboardCreationOptions } from '../../../dashboard_api/types';
+import type { ViewMode } from '@kbn/presentation-publishing';
+import type { DashboardCreationOptions } from '../../../dashboard_api/types';
 import { extractControlGroupState } from './extract_control_group_state';
-import { extractSettings } from './extract_dashboard_settings';
+import { extractOptions } from './extract_options';
 import { extractPanelsState } from './extract_panels_state';
 import { extractSearchState } from './extract_search_state';
 
@@ -24,16 +24,30 @@ export function extractDashboardState(
     const controlGroupState = extractControlGroupState(stateAsObject);
     if (controlGroupState) dashboardState.controlGroupInput = controlGroupState;
 
+    if (typeof stateAsObject.description === 'string') {
+      dashboardState.description = stateAsObject.description;
+    }
+
+    if (Array.isArray(stateAsObject.tags)) {
+      dashboardState.tags = stateAsObject.tags;
+    }
+
+    if (typeof stateAsObject.title === 'string') {
+      dashboardState.title = stateAsObject.title;
+    }
+
     if (Array.isArray(stateAsObject.references))
       dashboardState.references = stateAsObject.references;
 
     if (typeof stateAsObject.viewMode === 'string')
       dashboardState.viewMode = stateAsObject.viewMode as ViewMode;
 
+    const options = extractOptions(stateAsObject);
+
     dashboardState = {
       ...dashboardState,
       ...extractSearchState(stateAsObject),
-      ...extractSettings(stateAsObject),
+      ...(Object.keys(options).length && { options }),
     };
 
     const { panels, savedObjectReferences } = extractPanelsState(stateAsObject);

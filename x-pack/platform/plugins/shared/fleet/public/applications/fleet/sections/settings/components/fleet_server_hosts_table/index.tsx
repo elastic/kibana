@@ -126,6 +126,12 @@ export const FleetServerHostsTable: React.FunctionComponent<FleetServerHostsTabl
                         defaultMessage: 'Delete',
                       }
                     )}
+                    aria-label={i18n.translate(
+                      'xpack.fleet.settings.fleetServerHostsTable.deleteButtonAriaLabel',
+                      {
+                        defaultMessage: 'Delete host',
+                      }
+                    )}
                     data-test-subj="fleetServerHostsTable.delete.btn"
                   />
                 )}
@@ -141,6 +147,12 @@ export const FleetServerHostsTable: React.FunctionComponent<FleetServerHostsTabl
                     'xpack.fleet.settings.fleetServerHostsTable.editButtonTitle',
                     {
                       defaultMessage: 'Edit',
+                    }
+                  )}
+                  aria-label={i18n.translate(
+                    'xpack.fleet.settings.fleetServerHostsTable.editButtonAriaLabel',
+                    {
+                      defaultMessage: 'Edit host',
                     }
                   )}
                   data-test-subj="fleetServerHostsTable.edit.btn"

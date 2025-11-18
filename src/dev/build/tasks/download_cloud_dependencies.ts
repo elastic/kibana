@@ -11,7 +11,8 @@ import Path from 'path';
 import del from 'del';
 import Axios from 'axios';
 import Fsp from 'fs/promises';
-import { Task, downloadToDisk, downloadToString } from '../lib';
+import type { Task } from '../lib';
+import { downloadToDisk, downloadToString } from '../lib';
 
 export const DownloadCloudDependencies: Task = {
   description: 'Downloading cloud dependencies',

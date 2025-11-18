@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiCallOut, EuiDataGridCustomToolbarProps } from '@elastic/eui';
+import type { EuiDataGridCustomToolbarProps } from '@elastic/eui';
+import { EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 import { internalRenderCustomToolbar } from '../custom_toolbar/render_custom_toolbar';
 
 export interface ComparisonToolbarProps {
@@ -31,6 +33,7 @@ export const renderComparisonToolbar = ({
       bottomSection:
         totalFields > comparisonFields.length ? (
           <EuiCallOut
+            announceOnMount={false}
             size="s"
             iconType="info"
             title={i18n.translate('unifiedDataTable.comparisonMaxFieldsCallout', {

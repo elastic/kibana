@@ -9,7 +9,7 @@
 
 import * as React from 'react';
 import { EuiDataGrid, EuiPanel, EuiSpacer } from '@elastic/eui';
-import { createParser } from '@kbn/esql-ast';
+import { Parser } from '@kbn/esql-ast';
 import { useEsqlInspector } from '../../../../context';
 import { useBehaviorSubject } from '../../../../../../hooks/use_behavior_subject';
 
@@ -32,7 +32,7 @@ const columns = [
   },
 ];
 
-const symbolicNames = createParser('').lexer.symbolicNames;
+const symbolicNames = Parser.create('').lexer.symbolicNames;
 
 export const PreviewTokens: React.FC = (props) => {
   const state = useEsqlInspector();

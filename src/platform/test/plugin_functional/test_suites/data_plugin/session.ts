@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { PluginFunctionalProviderContext } from '../../services';
+import type { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const { common, header, dashboard, discover, unifiedFieldList } = getPageObjects([
@@ -94,7 +94,6 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
         );
         await common.navigateToApp('dashboard');
         await dashboard.loadSavedDashboard('dashboard with filter');
-        await header.waitUntilLoadingHasFinished();
       });
 
       afterEach(async () => {

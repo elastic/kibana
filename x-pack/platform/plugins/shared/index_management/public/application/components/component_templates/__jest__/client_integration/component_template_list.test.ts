@@ -8,10 +8,10 @@
 import { act } from 'react-dom/test-utils';
 
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
-import { ComponentTemplateListItem } from '../../shared_imports';
+import type { ComponentTemplateListItem } from '../../shared_imports';
 
 import { setupEnvironment, pageHelpers } from './helpers';
-import { ComponentTemplateListTestBed } from './helpers/component_template_list.helpers';
+import type { ComponentTemplateListTestBed } from './helpers/component_template_list.helpers';
 import { API_BASE_PATH } from './helpers/constants';
 
 const { setup } = pageHelpers.componentTemplateList;

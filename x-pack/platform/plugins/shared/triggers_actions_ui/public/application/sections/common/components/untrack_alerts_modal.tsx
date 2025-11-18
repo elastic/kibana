@@ -7,7 +7,8 @@
 
 import React, { useState, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiConfirmModal, EuiSwitch, EuiSwitchEvent, useGeneratedHtmlId } from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import { EuiConfirmModal, EuiSwitch, useGeneratedHtmlId } from '@elastic/eui';
 
 const UNTRACK_ORPHANED_ALERTS_TITLE = i18n.translate(
   'xpack.triggersActionsUI.sections.untrackAlertsModal.title',

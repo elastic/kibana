@@ -8,7 +8,7 @@
 import { useRouteMatch } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
-import {
+import type {
   ScreenshotImageBlob,
   ScreenshotRefImageData,
 } from '../../../../../../../common/runtime_types';

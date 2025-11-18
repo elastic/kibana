@@ -10,7 +10,8 @@
 import moment from 'moment';
 import type { Writable } from 'stream';
 import type { Filter } from '@kbn/es-query';
-import { errors as esErrors, estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
+import { errors as esErrors } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import type { ISearchClient } from '@kbn/search-types';
 import type { DataView, ISearchStartSearchSource } from '@kbn/data-plugin/common';
@@ -21,11 +22,10 @@ import type {
   FieldFormatConfig,
   IFieldFormatsRegistry,
 } from '@kbn/field-formats-plugin/common';
+import type { CancellationToken, ReportingError } from '@kbn/reporting-common';
 import {
   AuthenticationExpiredError,
   byteSizeValueToNumber,
-  CancellationToken,
-  ReportingError,
   ReportingSavedObjectNotFoundError,
 } from '@kbn/reporting-common';
 import type { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';
@@ -300,6 +300,7 @@ export class CsvGenerator {
     const indexPatternTitle = index.getIndexPattern();
     const builder = new MaxSizeStringBuilder(this.stream, byteSizeValueToNumber(maxSizeBytes), bom);
     const warnings: string[] = [];
+    let userError: boolean | undefined;
     let first = true;
     let currentRecord = -1;
     let totalRecords: number | undefined;
@@ -465,6 +466,7 @@ export class CsvGenerator {
         warnings.push(
           i18nTexts.csvRowCountError({ expected: totalRecords, received: this.csvRowCount })
         );
+        userError = true;
       } else {
         warnings.push(i18nTexts.csvRowCountIndeterminable({ received: this.csvRowCount }));
       }
@@ -496,6 +498,7 @@ export class CsvGenerator {
         csv: { rows: this.csvRowCount },
       },
       warnings,
+      user_error: userError,
       error_code: reportingError?.code,
     };
   }

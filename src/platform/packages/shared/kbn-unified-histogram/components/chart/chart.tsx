@@ -7,11 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, ReactElement, useCallback, useEffect, useMemo, useState } from 'react';
+import type { ReactElement } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Subject } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import { EuiFlexGroup, EuiFlexItem, EuiProgress, EuiDelayRender, EuiSpacer } from '@elastic/eui';
+import { EuiProgress, EuiDelayRender, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   EmbeddableComponentProps,
@@ -25,25 +26,26 @@ import type {
 } from '@kbn/expressions-plugin/common';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
-import { PublishingSubject } from '@kbn/presentation-publishing';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 import type { RequestStatus } from '@kbn/inspector-plugin/public';
-import { IKibanaSearchResponse } from '@kbn/search-types';
+import type { ControlPanelsState } from '@kbn/controls-plugin/public';
+import type { ESQLControlState } from '@kbn/esql-types';
+import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { estypes } from '@elastic/elasticsearch';
 import { Histogram } from './histogram';
-import {
-  UnifiedHistogramSuggestionContext,
+import type {
   UnifiedHistogramBreakdownContext,
+  UnifiedHistogramBucketInterval,
   UnifiedHistogramChartContext,
   UnifiedHistogramChartLoadEvent,
-  UnifiedHistogramFetchStatus,
   UnifiedHistogramHitsContext,
   UnifiedHistogramInput$,
   UnifiedHistogramInputMessage,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
-  UnifiedHistogramBucketInterval,
+  UnifiedHistogramSuggestionContext,
 } from '../../types';
-import { UnifiedHistogramSuggestionType } from '../../types';
+import { UnifiedHistogramFetchStatus, UnifiedHistogramSuggestionType } from '../../types';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
 import { TimeIntervalSelector } from './time_interval_selector';
 import { useTotalHits } from './hooks/use_total_hits';
@@ -52,12 +54,13 @@ import { useChartActions } from './hooks/use_chart_actions';
 import { ChartConfigPanel } from './chart_config_panel';
 import { useFetch } from './hooks/use_fetch';
 import { useEditVisualization } from './hooks/use_edit_visualization';
-import { LensVisService } from '../../services/lens_vis_service';
+import type { LensVisService } from '../../services/lens_vis_service';
 import type { UseRequestParamsResult } from '../../hooks/use_request_params';
 import { removeTablesFromLensAttributes } from '../../utils/lens_vis_from_table';
 import { useLensProps } from './hooks/use_lens_props';
 import { useStableCallback } from '../../hooks/use_stable_callback';
 import { buildBucketInterval } from './utils/build_bucket_interval';
+import { ChartSectionTemplate } from './chart_section_template';
 
 export interface UnifiedHistogramChartProps {
   abortController?: AbortController;
@@ -69,6 +72,7 @@ export interface UnifiedHistogramChartProps {
   isPlainRecord?: boolean;
   lensVisService: LensVisService;
   relativeTimeRange?: TimeRange;
+  lastReloadRequestTime?: number;
   request?: UnifiedHistogramRequestContext;
   hits?: UnifiedHistogramHitsContext;
   chart?: UnifiedHistogramChartContext;
@@ -89,6 +93,7 @@ export interface UnifiedHistogramChartProps {
   onBrushEnd?: LensEmbeddableInput['onBrushEnd'];
   withDefaultActions?: EmbeddableComponentProps['withDefaultActions'];
   columns?: DatatableColumn[];
+  controlsState?: ControlPanelsState<ESQLControlState>;
 }
 
 const RequestStatusError: typeof RequestStatus.ERROR = 2;
@@ -100,6 +105,7 @@ export function UnifiedHistogramChart({
   dataView,
   requestParams,
   relativeTimeRange: originalRelativeTimeRange,
+  lastReloadRequestTime,
   request,
   hits,
   chart,
@@ -117,6 +123,7 @@ export function UnifiedHistogramChart({
   onTotalHitsChange,
   onChartLoad,
   columns,
+  controlsState,
   ...histogramProps
 }: UnifiedHistogramChartProps) {
   const lensVisServiceCurrentSuggestionContext = useObservable(
@@ -140,7 +147,8 @@ export function UnifiedHistogramChart({
     [originalInput$]
   );
 
-  const { filters, query, getTimeRange, updateTimeRange, relativeTimeRange } = requestParams;
+  const { filters, query, esqlVariables, getTimeRange, updateTimeRange, relativeTimeRange } =
+    requestParams;
 
   const fetch$ = useFetch({
     input$,
@@ -159,6 +167,7 @@ export function UnifiedHistogramChart({
     fetch$,
     onTotalHitsChange,
     isPlainRecord,
+    abortController: histogramProps.abortController,
   });
 
   const [bucketInterval, setBucketInterval] = useState<UnifiedHistogramBucketInterval>();
@@ -214,7 +223,9 @@ export function UnifiedHistogramChart({
     getTimeRange,
     fetch$,
     visContext,
+    esqlVariables,
     onLoad,
+    lastReloadRequestTime,
   });
 
   const { chartToolbarCss, histogramCss } = useChartStyles(chartVisible);
@@ -243,6 +254,64 @@ export function UnifiedHistogramChart({
     lensAttributes: visContext?.attributes,
     isPlainRecord,
   });
+
+  const toolbarToggleActions = useMemo(
+    () =>
+      renderCustomChartToggleActions ? (
+        renderCustomChartToggleActions()
+      ) : (
+        <IconButtonGroup
+          legend={i18n.translate('unifiedHistogram.hideChartButtongroupLegend', {
+            defaultMessage: 'Chart visibility',
+          })}
+          buttonSize="s"
+          buttons={[
+            {
+              label: chartVisible
+                ? i18n.translate('unifiedHistogram.hideChartButton', {
+                    defaultMessage: 'Hide chart',
+                  })
+                : i18n.translate('unifiedHistogram.showChartButton', {
+                    defaultMessage: 'Show chart',
+                  }),
+              iconType: chartVisible ? 'transitionTopOut' : 'transitionTopIn',
+              'data-test-subj': 'unifiedHistogramToggleChartButton',
+              onClick: toggleHideChart,
+            },
+          ]}
+        />
+      ),
+    [chartVisible, toggleHideChart, renderCustomChartToggleActions]
+  );
+
+  const toolbarSelectors = useMemo(
+    () => [
+      ,
+      chartVisible && !isPlainRecord && !!onTimeIntervalChange ? (
+        <TimeIntervalSelector chart={chart} onTimeIntervalChange={onTimeIntervalChange} />
+      ) : null,
+      <div>
+        {chartVisible && breakdown && (
+          <BreakdownFieldSelector
+            dataView={dataView}
+            breakdown={breakdown}
+            onBreakdownFieldChange={onBreakdownFieldChange}
+            esqlColumns={isPlainRecord ? columns : undefined}
+          />
+        )}
+      </div>,
+    ],
+    [
+      chartVisible,
+      isPlainRecord,
+      onTimeIntervalChange,
+      chart,
+      breakdown,
+      dataView,
+      onBreakdownFieldChange,
+      columns,
+    ]
+  );
 
   const a11yCommonProps = {
     id: 'unifiedHistogramCollapsablePanel',
@@ -305,127 +374,63 @@ export function UnifiedHistogramChart({
   }
 
   return (
-    <EuiFlexGroup
-      {...a11yCommonProps}
-      className="unifiedHistogram__chart"
-      direction="column"
-      alignItems="stretch"
-      gutterSize="none"
-      responsive={false}
-    >
-      <EuiFlexItem grow={false} css={chartToolbarCss}>
-        <EuiFlexGroup
-          direction="row"
-          gutterSize="s"
-          responsive={false}
-          alignItems="center"
-          justifyContent="spaceBetween"
-        >
-          <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
-            <EuiFlexGroup direction="row" gutterSize="s" responsive={false} alignItems="center">
-              <EuiFlexItem grow={false}>
-                {renderCustomChartToggleActions ? (
-                  renderCustomChartToggleActions()
-                ) : (
-                  <IconButtonGroup
-                    legend={i18n.translate('unifiedHistogram.hideChartButtongroupLegend', {
-                      defaultMessage: 'Chart visibility',
-                    })}
-                    buttonSize="s"
-                    buttons={[
-                      {
-                        label: chartVisible
-                          ? i18n.translate('unifiedHistogram.hideChartButton', {
-                              defaultMessage: 'Hide chart',
-                            })
-                          : i18n.translate('unifiedHistogram.showChartButton', {
-                              defaultMessage: 'Show chart',
-                            }),
-                        iconType: chartVisible ? 'transitionTopOut' : 'transitionTopIn',
-                        'data-test-subj': 'unifiedHistogramToggleChartButton',
-                        onClick: toggleHideChart,
-                      },
-                    ]}
-                  />
-                )}
-              </EuiFlexItem>
-              {chartVisible && !isPlainRecord && !!onTimeIntervalChange && (
-                <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
-                  <TimeIntervalSelector chart={chart} onTimeIntervalChange={onTimeIntervalChange} />
-                </EuiFlexItem>
+    <>
+      <ChartSectionTemplate
+        {...a11yCommonProps}
+        toolbarCss={chartToolbarCss}
+        toolbar={{
+          toggleActions: toolbarToggleActions,
+          leftSide: toolbarSelectors,
+          rightSide: chartVisible ? actions : [],
+        }}
+      >
+        {chartVisible && (
+          <>
+            <section
+              ref={(element) => (chartRef.current.element = element)}
+              tabIndex={-1}
+              aria-label={i18n.translate('unifiedHistogram.histogramOfFoundDocumentsAriaLabel', {
+                defaultMessage: 'Histogram of found documents',
+              })}
+              css={histogramCss}
+              data-test-subj="unifiedHistogramRendered"
+            >
+              {isChartLoading && (
+                /*
+                 There are 2 different loaders which can appear above the chart. One is from the embeddable and one is from the UnifiedHistogram.
+                 The idea is to show UnifiedHistogram loader until we get a new query params which would trigger the embeddable loader.
+                 Updates to the time range can come earlier than the query updates which we delay on purpose for text based mode,
+                 this is why it might get both loaders. We should find a way to resolve that better.
+               */
+                <EuiDelayRender delay={500} data-test-subj="unifiedHistogramProgressBar">
+                  <EuiProgress size="xs" color="accent" position="absolute" />
+                </EuiDelayRender>
               )}
-              <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
-                <div>
-                  {chartVisible && breakdown && (
-                    <BreakdownFieldSelector
-                      dataView={dataView}
-                      breakdown={breakdown}
-                      onBreakdownFieldChange={onBreakdownFieldChange}
-                      esqlColumns={isPlainRecord ? columns : undefined}
-                    />
-                  )}
-                </div>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-          {chartVisible && actions.length > 0 && (
-            <EuiFlexItem grow={false}>
-              <IconButtonGroup
-                legend={i18n.translate('unifiedHistogram.chartActionsGroupLegend', {
-                  defaultMessage: 'Chart actions',
-                })}
-                buttonSize="s"
-                buttons={actions}
-              />
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
-      </EuiFlexItem>
-      {chartVisible && (
-        <EuiFlexItem>
-          <section
-            ref={(element) => (chartRef.current.element = element)}
-            tabIndex={-1}
-            aria-label={i18n.translate('unifiedHistogram.histogramOfFoundDocumentsAriaLabel', {
-              defaultMessage: 'Histogram of found documents',
-            })}
-            css={histogramCss}
-            data-test-subj="unifiedHistogramRendered"
-          >
-            {isChartLoading && (
-              /*
-                There are 2 different loaders which can appear above the chart. One is from the embeddable and one is from the UnifiedHistogram.
-                The idea is to show UnifiedHistogram loader until we get a new query params which would trigger the embeddable loader.
-                Updates to the time range can come earlier than the query updates which we delay on purpose for text based mode,
-                this is why it might get both loaders. We should find a way to resolve that better.
-              */
-              <EuiDelayRender delay={500} data-test-subj="unifiedHistogramProgressBar">
-                <EuiProgress size="xs" color="accent" position="absolute" />
-              </EuiDelayRender>
-            )}
-            {lensPropsContext && (
-              <HistogramMemoized
-                services={services}
-                dataView={dataView}
-                chart={chart}
-                bucketInterval={bucketInterval}
-                getTimeRange={getTimeRange}
-                visContext={visContext}
-                isPlainRecord={isPlainRecord}
-                {...histogramProps}
-                {...lensPropsContext}
-              />
-            )}
-          </section>
-          <EuiSpacer size="s" />
-        </EuiFlexItem>
-      )}
+              {lensPropsContext && (
+                <HistogramMemoized
+                  services={services}
+                  dataView={dataView}
+                  chart={chart}
+                  bucketInterval={bucketInterval}
+                  getTimeRange={getTimeRange}
+                  visContext={visContext}
+                  isPlainRecord={isPlainRecord}
+                  {...histogramProps}
+                  {...lensPropsContext}
+                />
+              )}
+            </section>
+            <EuiSpacer size="s" />
+          </>
+        )}
+      </ChartSectionTemplate>
       {canSaveVisualization && isSaveModalVisible && visContext.attributes && (
         <LensSaveModalComponent
           initialInput={removeTablesFromLensAttributes(visContext.attributes)}
           onSave={() => {}}
           onClose={() => setIsSaveModalVisible(false)}
           isSaveable={false}
+          controlsState={controlsState}
         />
       )}
       {isFlyoutVisible && !!visContext && !!lensVisServiceCurrentSuggestionContext && (
@@ -442,7 +447,7 @@ export function UnifiedHistogramChart({
           onSuggestionContextEdit={onSuggestionContextEdit}
         />
       )}
-    </EuiFlexGroup>
+    </>
   );
 }
 

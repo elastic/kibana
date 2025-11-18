@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
+import type { IlmExplainLifecycleLifecycleExplain } from '@elastic/elasticsearch/lib/api/types';
 
 import { getIlmPhase } from '../../../../utils/get_ilm_phase';
 import { getDocsCount, getSizeInBytes } from '../../../../utils/stats';
-import { MeteringStatsIndex } from '../../../../types';
+import type { MeteringStatsIndex } from '../../../../types';
 
 export const getPatternDocsCount = ({
   indexNames,

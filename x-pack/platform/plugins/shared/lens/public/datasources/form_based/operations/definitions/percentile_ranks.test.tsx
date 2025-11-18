@@ -6,20 +6,22 @@
  */
 
 import React from 'react';
-import { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
+import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMockedIndexPattern } from '../../mocks';
 import { percentileRanksOperation } from '.';
-import { FormBasedLayer } from '../../types';
-import type { PercentileRanksIndexPatternColumn } from './percentile_ranks';
-import { TermsIndexPatternColumn } from './terms';
-import { IndexPattern } from '../../../../types';
+import type {
+  FormBasedLayer,
+  IndexPattern,
+  PercentileRanksIndexPatternColumn,
+  TermsIndexPatternColumn,
+} from '@kbn/lens-common';
 
 const uiSettingsMock = {} as IUiSettingsClient;
 

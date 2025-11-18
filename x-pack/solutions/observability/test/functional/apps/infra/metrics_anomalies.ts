@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { HOSTS_VIEW_PATH, ML_JOB_IDS } from './constants';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {

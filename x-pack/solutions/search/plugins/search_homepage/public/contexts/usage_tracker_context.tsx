@@ -12,7 +12,7 @@ import type {
 } from '@kbn/usage-collection-plugin/public';
 
 import { createUsageTracker, createEmptyUsageTracker } from '../usage_tracker';
-import { AppUsageTracker } from '../types';
+import type { AppUsageTracker } from '../types';
 
 const UsageTrackerContext = createContext<AppUsageTracker>(createEmptyUsageTracker());
 

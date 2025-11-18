@@ -1,0 +1,61 @@
+format_version: 3.2.0
+name: knowledge_base_test
+title: Knowledge Base Test Package
+description: >
+  This package is a test package for validating knowledge base functionality.
+  It contains sample knowledge base documentation files for testing purposes.
+version: 1.0.0
+type: integration
+source:
+  license: 'Apache-2.0'
+conditions:
+  kibana:
+    version: '^8.16.0'
+  elastic:
+    subscription: 'basic'
+categories:
+  - custom
+icons:
+  - src: '/img/logo.svg'
+    title: 'Knowledge Base Test Logo'
+    size: '16x16'
+    type: 'image/svg+xml'
+owner:
+  github: elastic/fleet
+  type: elastic
+policy_templates:
+  - name: knowledge_base_test
+    title: Knowledge Base Test
+    description: Test policy template
+    inputs:
+      - type: logfile
+        title: Log Files
+        description: Collect log files
+        vars:
+          - name: paths
+            type: text
+            title: Paths
+            multi: true
+            required: true
+            show_user: true
+            default:
+              - /var/log/*.log
+data_streams:
+  - name: logs
+    title: Log messages
+    description: Collect log messages
+    type: logs
+    dataset: knowledge_base_test.logs
+    streams:
+      - input: logfile
+        title: Knowledge Base Test logs
+        description: Knowledge Base Test log messages
+        vars:
+          - name: paths
+            type: text
+            title: Paths
+            multi: true
+            required: true
+            show_user: true
+            default:
+              - /var/log/knowledge_base_test/*.log

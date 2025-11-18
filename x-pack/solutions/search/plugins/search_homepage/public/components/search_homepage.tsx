@@ -8,10 +8,10 @@
 import React, { useEffect, useMemo } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../hooks/use_kibana';
-import { useSearchHomePageRedirect } from '../hooks/use_search_home_page_redirect';
 import { SearchHomepageBody } from './search_homepage_body';
-import { SearchHomepageHeader } from './search_homepage_header';
+import { SearchHomepageHeader } from './header';
 
 export const SearchHomepagePage = () => {
   const {
@@ -19,10 +19,13 @@ export const SearchHomepagePage = () => {
   } = useKibana();
   useEffect(() => {
     if (searchNavigation) {
-      searchNavigation.breadcrumbs.setSearchBreadCrumbs([]);
+      searchNavigation.breadcrumbs.setSearchBreadCrumbs([
+        {
+          text: i18n.translate('xpack.searchHomepage.breadcrumbs.home', { defaultMessage: 'Home' }),
+        },
+      ]);
     }
   }, [searchNavigation]);
-  useSearchHomePageRedirect();
 
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),

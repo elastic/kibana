@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('disables the a11y overlay via settings', async () => {
       await PageObjects.console.openConfig();
-      await PageObjects.console.toggleA11yOverlaySetting();
+      await PageObjects.console.toggleA11yOverlaySetting(false);
       await PageObjects.console.openConsole();
 
       await retry.try(async () => {

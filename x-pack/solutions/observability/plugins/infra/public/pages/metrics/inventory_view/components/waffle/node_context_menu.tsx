@@ -39,6 +39,7 @@ import type {
   InfraWaffleMapOptions,
 } from '../../../../../common/inventory/types';
 import { getUptimeUrl } from '../../lib/get_uptime_url';
+import { useWaffleOptionsContext } from '../../hooks/use_waffle_options';
 
 interface Props {
   options: InfraWaffleMapOptions;
@@ -52,6 +53,7 @@ export const NodeContextMenu = withEuiTheme(
   ({ options, currentTime, node, nodeType }: PropsWithTheme) => {
     const { getAssetDetailUrl } = useAssetDetailsRedirect();
     const [flyoutVisible, setFlyoutVisible] = useState(false);
+    const { preferredSchema } = useWaffleOptionsContext();
     const inventoryModel = findInventoryModel(nodeType);
     const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
     const { services } = useKibanaContextForPlugin();
@@ -230,6 +232,7 @@ export const NodeContextMenu = withEuiTheme(
             nodeType={nodeType}
             setVisible={setFlyoutVisible}
             visible={flyoutVisible}
+            schema={preferredSchema}
           />
         )}
       </>

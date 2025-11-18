@@ -6,7 +6,7 @@
  */
 
 import React, { useContext, createContext, useState } from 'react';
-import { Operation, Shard } from '../../types';
+import type { Operation, Shard } from '../../types';
 
 const HighlightContext = createContext<{
   selectedRow: string;

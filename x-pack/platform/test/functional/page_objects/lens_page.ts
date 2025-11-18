@@ -5,12 +5,13 @@
  * 2.0.
  */
 
+import chroma from 'chroma-js';
 import expect from '@kbn/expect';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import type { FittingFunction, XYCurveType } from '@kbn/lens-plugin/public';
-import { DebugState } from '@elastic/charts';
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { DebugState } from '@elastic/charts';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { FtrProviderContext } from '../ftr_provider_context';
 import { logWrapper } from './log_wrapper';
 
 declare global {
@@ -22,6 +23,8 @@ declare global {
     ELASTIC_LENS_CSV_CONTENT?: Record<string, { content: string; type: string }>;
   }
 }
+
+const ECH_BADGE_SELECTOR = '.echBadge__content';
 
 export function LensPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -776,7 +779,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       });
 
       await testSubjects.click('confirmSaveSavedObjectButton');
-      await retry.waitForWithTimeout('Save modal to disappear', 1000, () =>
+      await retry.waitForWithTimeout('Save modal to disappear', 5000, () =>
         testSubjects
           .missingOrFail('confirmSaveSavedObjectButton')
           .then(() => true)
@@ -843,27 +846,48 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       await colorPickerInput.type(color);
       await common.sleep(1000); // give time for debounced components to rerender
     },
-    hasVisualOptionsButton() {
-      return testSubjects.exists('lnsVisualOptionsButton');
+    async hasStyleToolbarButton() {
+      return find.existsByCssSelector('button[data-test-subj="style"][title="Style"]');
     },
-    async openVisualOptions() {
-      if (await testSubjects.exists('lnsVisualOptionsPopover_title', { timeout: 50 })) {
-        return;
+    async hasLegendToolbarButton() {
+      return find.existsByCssSelector('button[data-test-subj="legend"][title="Legend"]');
+    },
+    async openStyleSettingsFlyout() {
+      // Close dimension editor flyout
+      if (await this.isDimensionEditorOpen()) {
+        await this.closeDimensionEditor();
       }
+
+      await find.clickByCssSelector('button[data-test-subj="style"][title="Style"]');
       await retry.try(async () => {
-        await testSubjects.click('lnsVisualOptionsButton');
-        await testSubjects.exists('lnsVisualOptionsPopover_title');
+        const styleTitle = await find.byCssSelector('#lnsDimensionContainerTitle');
+        const titleText = await styleTitle.getVisibleText();
+        if (titleText !== 'Style') {
+          throw new Error(`Expected flyout title to be "Style", but got "${titleText}"`);
+        }
       });
     },
-    async openTextOptions() {
-      if (await testSubjects.exists('lnsTextOptionsPopover_title', { timeout: 50 })) {
-        return;
+
+    async openLegendSettingsFlyout() {
+      // Close dimension editor flyout
+      if (await this.isDimensionEditorOpen()) {
+        await this.closeDimensionEditor();
       }
+
+      if (await this.hasLegendToolbarButton()) {
+        const button = await find.byCssSelector('button[data-test-subj="legend"][title="Legend"]');
+        await button.click();
+      }
+    },
+    async closeFlyoutWithBackButton() {
       await retry.try(async () => {
-        await testSubjects.click('lnsTextOptionsButton');
-        await testSubjects.exists('lnsTextOptionsPopover_title');
+        if (await testSubjects.exists('lns-indexPattern-dimensionContainerBack')) {
+          await testSubjects.click('lns-indexPattern-dimensionContainerBack');
+          await testSubjects.missingOrFail('lns-indexPattern-dimensionContainerBack');
+        }
       });
     },
+
     async retrySetValue(
       input: string,
       value: string,
@@ -940,13 +964,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async openChartSwitchPopover(layerIndex = 0) {
-      if (await testSubjects.exists('lnsChartSwitchList', { timeout: 50 })) {
+      if (await testSubjects.exists('lnsChartSwitchList', { timeout: 200 })) {
         return;
       }
       await retry.try(async () => {
         const allChartSwitches = await testSubjects.findAll('lnsChartSwitchPopover');
         await allChartSwitches[layerIndex].click();
-        await testSubjects.existOrFail('lnsChartSwitchList');
+        await testSubjects.existOrFail('lnsChartSwitchList', { timeout: 5000 });
       });
     },
 
@@ -968,30 +992,33 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async getDonutHoleSize() {
-      await this.openVisualOptions();
+      await this.openStyleSettingsFlyout();
+
       const comboboxOptions = await comboBox.getComboBoxSelectedOptions('lnsEmptySizeRatioOption');
       return comboboxOptions[0];
     },
 
     async setDonutHoleSize(value: string) {
-      await retry.waitFor('visual options toolbar is open', async () => {
-        await this.openVisualOptions();
-        return await testSubjects.exists('lnsEmptySizeRatioOption');
-      });
+      await this.openStyleSettingsFlyout();
       await comboBox.set('lnsEmptySizeRatioOption', value);
+      await this.closeFlyoutWithBackButton();
     },
 
     async setGaugeShape(value: string) {
-      await retry.waitFor('visual options toolbar is open', async () => {
-        await this.openVisualOptions();
-        return await testSubjects.exists('lnsToolbarGaugeAngleType');
-      });
+      await this.openStyleSettingsFlyout();
       await comboBox.set('lnsToolbarGaugeAngleType > comboBoxInput', value);
+      await this.closeFlyoutWithBackButton();
+    },
+
+    async setGaugeOrientation(value: 'horizontal' | 'vertical') {
+      await this.openStyleSettingsFlyout();
+      await testSubjects.click(`lns_gaugeOrientation_${value}Bullet`);
+      await this.closeFlyoutWithBackButton();
     },
 
     async getSelectedBarOrientationSetting() {
       await retry.waitFor('visual options are displayed', async () => {
-        await this.openVisualOptions();
+        await this.openStyleSettingsFlyout();
         return await testSubjects.exists('lns_barOrientation');
       });
       const orientationButtons = await find.allByCssSelector(
@@ -1469,10 +1496,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
           await this.getMetricElementIfExists('.echMetricText__subtitle', tile)
         )?.getAttribute('innerText'),
         extraText: await (
-          await this.getMetricElementIfExists('.echMetricText__extra', tile)
+          await this.getMetricElementIfExists('.echMetricText__extraBlock', tile)
         )?.getAttribute('innerText'),
         value: await (
-          await this.getMetricElementIfExists('.echMetricText__value', tile)
+          await this.getMetricElementIfExists('.echMetricText__valueBlock', tile)
         )?.getAttribute('innerText'),
         color: await (
           await this.getMetricElementIfExists('.echMetric', tile)
@@ -2119,6 +2146,37 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       return find.existsByCssSelector(
         `[data-test-subj="lnsDataTable"][class*="cellPadding-${size}-fontSize-${size}"]`
       );
+    },
+
+    async getSecondaryMetricLabel(tile?: WebElementWrapper) {
+      const ECH_SECONDARY_METRIC_LABEL_SELECTOR = '.echSecondaryMetric__label';
+      const label = tile
+        ? await this.getMetricElementIfExists(ECH_SECONDARY_METRIC_LABEL_SELECTOR, tile)
+        : await find.byCssSelector(ECH_SECONDARY_METRIC_LABEL_SELECTOR);
+      return label ? label.getAttribute('innerText') : undefined;
+    },
+
+    async hasSecondaryMetricBadge(tile?: WebElementWrapper) {
+      return tile
+        ? Boolean(this.getMetricElementIfExists(ECH_BADGE_SELECTOR, tile))
+        : find.existsByCssSelector(ECH_BADGE_SELECTOR);
+    },
+
+    async getSecondaryMetricBadge(tile?: WebElementWrapper) {
+      return tile
+        ? this.getMetricElementIfExists(ECH_BADGE_SELECTOR, tile)
+        : find.byCssSelector(ECH_BADGE_SELECTOR);
+    },
+
+    async getSecondaryMetricBadgeText(tile?: WebElementWrapper) {
+      const badge = await this.getSecondaryMetricBadge(tile);
+      return badge ? await badge.getVisibleText() : undefined;
+    },
+
+    async getSecondaryMetricBadgeColor(tile?: WebElementWrapper) {
+      const badge = await this.getSecondaryMetricBadge(tile);
+      const color = badge ? await badge.getComputedStyle('background-color') : undefined;
+      return color ? chroma(color).hex().toUpperCase() : undefined;
     },
   });
 }

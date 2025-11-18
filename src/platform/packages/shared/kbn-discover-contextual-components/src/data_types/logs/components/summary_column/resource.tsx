@@ -8,7 +8,8 @@
  */
 
 import React from 'react';
-import { CommonProps, EuiBadge, EuiFlexGroup } from '@elastic/eui';
+import type { CommonProps } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup } from '@elastic/eui';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { ResourceFieldDescriptor } from './utils';
 
@@ -37,6 +38,7 @@ export const Resource = ({ fields, limited = false, onFilter, ...props }: Resour
           value={value}
           icon={Icon}
           onFilter={onFilter}
+          truncateTitle={true}
         />
       ))}
       {extraFieldsCount > 0 && (

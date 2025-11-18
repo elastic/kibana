@@ -39,6 +39,11 @@ export interface BuildkiteMetadata {
     label?: string;
   };
   command?: string;
+  triggered_from_build: {
+    id?: string;
+    number?: string;
+    pipeline_slug?: string;
+  };
 }
 
 /**
@@ -77,6 +82,11 @@ export const buildkite: BuildkiteMetadata =
           label: process.env.BUILDKITE_LABEL,
         },
         command: process.env.BUILDKITE_COMMAND,
+        triggered_from_build: {
+          id: process.env.BUILDKITE_TRIGGERED_FROM_BUILD_ID,
+          number: process.env.BUILDKITE_TRIGGERED_FROM_BUILD_NUMBER,
+          pipeline_slug: process.env.BUILDKITE_TRIGGERED_FROM_BUILD_PIPELINE_SLUG,
+        },
       }
     : {
         build: {},
@@ -84,4 +94,5 @@ export const buildkite: BuildkiteMetadata =
         agent: {},
         group: {},
         step: {},
+        triggered_from_build: {},
       };

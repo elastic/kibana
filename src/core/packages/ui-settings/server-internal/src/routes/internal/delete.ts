@@ -10,11 +10,11 @@
 import { schema } from '@kbn/config-schema';
 
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-server';
-import { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import type { InternalUiSettingsRouter } from '../../internal_types';
 import { CannotOverrideError } from '../../ui_settings_errors';
-import { InternalUiSettingsRequestHandlerContext } from '../../internal_types';
+import type { InternalUiSettingsRequestHandlerContext } from '../../internal_types';
 
 const validate = {
   params: schema.object({
@@ -59,8 +59,7 @@ export function registerInternalDeleteRoute(router: InternalUiSettingsRouter) {
       options: { access: 'internal' },
       security: {
         authz: {
-          enabled: false,
-          reason: 'This route delegates authorization to the UI Settings Client',
+          requiredPrivileges: ['manage_advanced_settings'],
         },
       },
     },
@@ -76,8 +75,7 @@ export function registerInternalDeleteRoute(router: InternalUiSettingsRouter) {
       options: { access: 'internal' },
       security: {
         authz: {
-          enabled: false,
-          reason: 'This route delegates authorization to the UI Settings Client',
+          requiredPrivileges: ['manage_advanced_settings'],
         },
       },
     },

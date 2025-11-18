@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import type React from 'react';
 
 /**
  * Dimensions for each layout section in the Chrome UI.
  *
  * This interface defines the pixel sizes for key layout areas such as banner, footer, header,
- * navigation, and sidebar, including their respective panel widths.
+ * navigation, and sidebar
  */
 export interface LayoutDimensions {
   bannerHeight: number;
@@ -21,7 +21,6 @@ export interface LayoutDimensions {
   headerHeight: number;
   navigationWidth: number;
   sidebarWidth: number;
-  sidebarPanelWidth: number;
   applicationTopBarHeight: number;
   applicationBottomBarHeight: number;
 }
@@ -33,7 +32,6 @@ export interface LayoutState extends LayoutDimensions {
   hasBanner: boolean;
   hasFooter: boolean;
   hasSidebar: boolean;
-  hasSidebarPanel: boolean;
   hasHeader: boolean;
   hasNavigation: boolean;
   hasApplicationTopBar: boolean;
@@ -58,7 +56,6 @@ export interface ChromeLayoutSlots {
   navigation?: Slot | null;
   banner?: Slot | null;
   footer?: Slot | null;
-  sidebarPanel?: Slot | null;
   sidebar?: Slot | null;
   applicationTopBar?: Slot | null;
   applicationBottomBar?: Slot | null;

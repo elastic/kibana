@@ -9,36 +9,24 @@
 
 import expect from '@kbn/expect';
 import { PUBLIC_API_PATH } from '@kbn/dashboard-plugin/server';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   describe('validation', () => {
-    it('returns error when attributes object is not provided', async () => {
-      const response = await supertest
-        .post(PUBLIC_API_PATH)
-        .set('kbn-xsrf', 'true')
-        .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
-        .send({});
-      expect(response.status).to.be(400);
-      expect(response.body.statusCode).to.be(400);
-      expect(response.body.message).to.be(
-        '[request body.attributes.title]: expected value of type [string] but got [undefined]'
-      );
-    });
-
     it('returns error when title is not provided', async () => {
       const response = await supertest
         .post(PUBLIC_API_PATH)
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+        .set('elastic-api-version', '1')
         .send({
-          attributes: {},
+          data: {},
         });
       expect(response.status).to.be(400);
       expect(response.body.statusCode).to.be(400);
       expect(response.body.message).to.be(
-        '[request body.attributes.title]: expected value of type [string] but got [undefined]'
+        '[request body.data.title]: expected value of type [string] but got [undefined]'
       );
     });
 
@@ -47,8 +35,9 @@ export default function ({ getService }: FtrProviderContext) {
         .post(PUBLIC_API_PATH)
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
+        .set('elastic-api-version', '1')
         .send({
-          attributes: {
+          data: {
             title: 'foo',
             panels: {},
           },
@@ -56,7 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.status).to.be(400);
       expect(response.body.statusCode).to.be(400);
       expect(response.body.message).to.be(
-        '[request body.attributes.panels]: expected value of type [array] but got [Object]'
+        '[request body.data.panels]: expected value of type [array] but got [Object]'
       );
     });
   });

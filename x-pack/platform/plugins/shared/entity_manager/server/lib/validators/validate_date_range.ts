@@ -6,7 +6,7 @@
  */
 
 import datemath from '@kbn/datemath';
-import { Moment } from 'moment';
+import type { Moment } from 'moment';
 import { AssetsValidationError } from './validation_error';
 
 export function validateStringDateRange(from: string, to?: string) {

@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import {
   streamsAIGrokSuggestionAcceptedEventType,
   streamsAIGrokSuggestionLatencyEventType,
-  streamsAssetClickEventType,
-  streamsAssetCountEventType,
+  streamsAttachmentClickEventType,
+  streamsAttachmentCountEventType,
+  streamsChildStreamCreatedEventType,
+  streamsProcessingSavedEventType,
+  streamsRetentionChangedEventType,
+  streamsSchemaUpdatedEventType,
+  streamsSignificantEventsCreatedEventType,
+  streamsSignificantEventsSuggestionsGeneratedEventType,
+  wiredStreamsStatusChangedEventType,
 } from './events';
 import { StreamsTelemetryClient } from './client';
 
@@ -21,10 +28,17 @@ export class StreamsTelemetryService {
 
   public setup(analytics: AnalyticsServiceSetup) {
     this.analytics = analytics;
-    this.analytics.registerEventType(streamsAssetCountEventType);
-    this.analytics.registerEventType(streamsAssetClickEventType);
+    this.analytics.registerEventType(streamsAttachmentCountEventType);
+    this.analytics.registerEventType(streamsAttachmentClickEventType);
     this.analytics.registerEventType(streamsAIGrokSuggestionLatencyEventType);
     this.analytics.registerEventType(streamsAIGrokSuggestionAcceptedEventType);
+    this.analytics.registerEventType(streamsProcessingSavedEventType);
+    this.analytics.registerEventType(streamsRetentionChangedEventType);
+    this.analytics.registerEventType(streamsChildStreamCreatedEventType);
+    this.analytics.registerEventType(streamsSchemaUpdatedEventType);
+    this.analytics.registerEventType(streamsSignificantEventsSuggestionsGeneratedEventType);
+    this.analytics.registerEventType(streamsSignificantEventsCreatedEventType);
+    this.analytics.registerEventType(wiredStreamsStatusChangedEventType);
   }
 
   public getClient() {

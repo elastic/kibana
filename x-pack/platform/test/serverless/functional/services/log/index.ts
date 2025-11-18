@@ -6,7 +6,7 @@
  */
 
 import { createLogger, LogLevel, SynthtraceClientsManager } from '@kbn/apm-synthtrace';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export function LogsSynthtraceProvider(context: FtrProviderContext) {
   const clientManager = new SynthtraceClientsManager({

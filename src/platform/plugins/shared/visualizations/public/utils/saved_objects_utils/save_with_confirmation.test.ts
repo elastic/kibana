@@ -9,11 +9,11 @@
 
 import { coreMock } from '@kbn/core/public/mocks';
 import { saveWithConfirmation } from './save_with_confirmation';
-import { VisSavedObject } from '../../types';
+import type { VisSavedObject } from '../../types';
 import * as deps from './confirm_modal_promise';
 import { OVERWRITE_REJECTED } from './constants';
-import { VisualizationSavedObjectAttributes } from '../../../common';
-import { CreateOptions } from '../../../common/content_management';
+import type { VisualizationSavedObjectAttributes } from '../../../common';
+import type { CreateOptions } from '../../../common/content_management';
 
 const coreStart = coreMock.createStart();
 const mockFindContent = jest.fn(() => ({

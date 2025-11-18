@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ILLEGAL_CHARACTERS_KEY, CONTAINS_SPACES_KEY } from './constants';
+import type { ILLEGAL_CHARACTERS_KEY, CONTAINS_SPACES_KEY } from './constants';
 
 export interface ValidationErrors {
   [ILLEGAL_CHARACTERS_KEY]?: string[];

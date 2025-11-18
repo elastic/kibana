@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiFlyoutResizable, EuiFlyoutResizableProps, EuiLoadingElastic } from '@elastic/eui';
+import type { EuiFlyoutResizableProps } from '@elastic/eui';
+import { EuiFlyoutResizable, EuiLoadingElastic } from '@elastic/eui';
 import React, { Suspense, lazy, useCallback } from 'react';
 import { css } from '@emotion/react';
 import type { RuleFormProps } from '../src/rule_form';
@@ -68,7 +69,7 @@ const RuleFormFlyoutRenderer = <MetaData extends RuleTypeMetaData>({
           </RuleFormErrorPromptWrapper>
         }
       >
-        <RuleForm {...ruleFormProps} isFlyout />
+        <RuleForm {...ruleFormProps} isFlyout focusTrapProps={focusTrapProps} />
       </Suspense>
     </EuiFlyoutResizable>
   );

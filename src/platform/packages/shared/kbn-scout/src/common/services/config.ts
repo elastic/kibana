@@ -9,7 +9,7 @@
 
 import path from 'path';
 import fs from 'fs';
-import { ScoutLogger, ScoutTestConfig } from '../../types';
+import type { ScoutLogger, ScoutTestConfig } from '../../types';
 
 export function createScoutConfig(
   configDir: string,

@@ -11,7 +11,7 @@ import type {
   MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import type { EntityDefinition } from '@kbn/entities-schema';
+import type { EntityDefinition, EntityStoreCapability } from '@kbn/entities-schema';
 import type { EntityType } from '../../../../../common/api/entity_analytics';
 
 export type EntityDefinitionMetadataElement = NonNullable<EntityDefinition['metadata']>[number];
@@ -95,11 +95,14 @@ export interface EntityEngineInstallationDescriptor {
    * This is mainly used for the Asset Inventory use case.
    */
   dynamic: boolean;
+
+  capabilities?: EntityStoreCapability[];
 }
 
 export type FieldDescription = EntityDefinitionMetadataElement & {
   mapping: MappingProperty;
   retention: FieldRetentionOp;
+  allowAPIUpdate?: boolean;
 };
 
 export type FieldRetentionOp =

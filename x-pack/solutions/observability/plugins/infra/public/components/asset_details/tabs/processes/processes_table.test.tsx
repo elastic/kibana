@@ -61,7 +61,7 @@ const processListData = [
   },
 ];
 
-const renderProcessesTable = ({
+const renderEcsProcessesTable = ({
   isLoading = false,
   processList,
   error = undefined,
@@ -83,13 +83,37 @@ const renderProcessesTable = ({
         error={error}
         clearSearchBar={() => {}}
         setSortBy={(s: SortBy) => {}}
+        schema="ecs"
       />
     </IntlProvider>
   );
-
+const renderSemConvProcessesTable = ({
+  processList,
+}: {
+  isLoading?: boolean;
+  processList: ProcessListAPIResponse['processList'];
+  error?: string;
+}) =>
+  render(
+    <IntlProvider locale="en">
+      <ProcessesTable
+        currentTime={1739180032015}
+        isLoading={false}
+        processList={processList}
+        sortBy={{
+          name: 'cpu',
+          isAscending: false,
+        }}
+        error={undefined}
+        clearSearchBar={() => {}}
+        setSortBy={(s: SortBy) => {}}
+        schema="semconv"
+      />
+    </IntlProvider>
+  );
 describe('Processes Table', () => {
   it('should return process table with 5 processes', () => {
-    const result = renderProcessesTable({ processList: processListData });
+    const result = renderEcsProcessesTable({ processList: processListData });
     expect(result.queryByTestId('infraAssetDetailsProcessesTable')).toBeInTheDocument();
 
     // Header
@@ -127,12 +151,12 @@ describe('Processes Table', () => {
   });
 
   it('should return loading text if loading and no items', () => {
-    const result = renderProcessesTable({ isLoading: true, processList: [] });
+    const result = renderEcsProcessesTable({ isLoading: true, processList: [] });
     expect(result.getByText('Loading...')).toBeInTheDocument();
   });
 
   it('should return error if error is defined', () => {
-    const result = renderProcessesTable({
+    const result = renderEcsProcessesTable({
       error: 'Test Error Message',
       processList: processListData,
     });
@@ -141,7 +165,7 @@ describe('Processes Table', () => {
   });
 
   it('should return empty state if no process are found', () => {
-    const result = renderProcessesTable({
+    const result = renderEcsProcessesTable({
       processList: [],
     });
     expect(result.getByText('No processes found')).toBeInTheDocument();
@@ -150,8 +174,21 @@ describe('Processes Table', () => {
   });
 
   it('should match a snapshot with a single process with long command found', () => {
-    const result = renderProcessesTable({ processList: [processListData[4]] });
+    const result = renderEcsProcessesTable({ processList: [processListData[4]] });
     expect(result.queryByTestId('infraAssetDetailsProcessesTable')).toBeInTheDocument();
     expect(result).toMatchSnapshot();
+  });
+  // SEMCONV
+  it('should not display state if schema is semconv', () => {
+    const result = renderSemConvProcessesTable({ processList: processListData });
+    expect(result.queryByTestId('state-header')).not.toBeInTheDocument();
+  });
+
+  it('should show the OTel docs link in the empty state if schema is semconv', () => {
+    const result = renderSemConvProcessesTable({ processList: [] });
+    expect(result.queryByTestId('infraProcessesTableOtelDocsLink')).toBeInTheDocument();
+    expect(
+      result.queryByTestId('infraProcessesTableTopNByCpuOrMemoryLink')
+    ).not.toBeInTheDocument();
   });
 });

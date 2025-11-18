@@ -24,9 +24,7 @@ This is the configuration used by CI. It uses the FTR to spawn both a Kibana ins
 
 ### Test Execution: Examples
 
-#### FTR + Headless (Chrome)
-
-Since this is how tests are run on CI, this will likely be the configuration you want to reproduce failures locally, etc.
+Initialization:
 
 ```shell
 # bootstrap kibana from the project root
@@ -34,25 +32,24 @@ yarn kbn bootstrap
 
 # build the plugins/assets that cypress will execute against
 node scripts/build_kibana_platform_plugins
-
-# launch the cypress test runner
-cd x-pack/platform/plugins/shared/osquery
-yarn cypress:run-as-ci
 ```
-#### FTR + Interactive
 
-This is the preferred mode for developing new tests.
-
+You can either run all the tests:
 ```shell
-# bootstrap kibana from the project root
-yarn kbn bootstrap
+# ess
+yarn --cwd x-pack/platform/plugins/shared/osquery cypress:run
 
-# build the plugins/assets that cypress will execute against
-node scripts/build_kibana_platform_plugins
+# serverless
+yarn --cwd x-pack/platform/plugins/shared/osquery cypress:serverless:run
+```
 
-# launch the cypress test runner
-cd x-pack/platform/plugins/shared/osquery
-yarn cypress:open-as-ci
+Or open the Cypress test runner to run tests in an interactive way.
+```shell
+# ess
+yarn --cwd x-pack/platform/plugins/shared/osquery cypress:open
+
+# serverless
+yarn --cwd x-pack/platform/plugins/shared/osquery cypress:serverless:open
 ```
 
 Note that you can select the browser you want to use on the top right side of the interactive runner.

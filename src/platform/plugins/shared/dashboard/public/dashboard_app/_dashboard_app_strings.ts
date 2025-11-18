@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
 
 export const getDashboardPageTitle = () =>
   i18n.translate('dashboard.dashboardPageTitle', {
@@ -71,7 +71,7 @@ export const unsavedChangesBadgeStrings = {
 
 export const getCreateVisualizationButtonTitle = () =>
   i18n.translate('dashboard.solutionToolbar.addPanelButtonLabel', {
-    defaultMessage: 'Create visualization',
+    defaultMessage: 'Visualization',
   });
 
 export const getQuickCreateButtonGroupLegend = () =>
@@ -192,7 +192,7 @@ export const topNavStrings = {
   },
   editModeInteractiveSave: {
     label: i18n.translate('dashboard.topNave.editModeInteractiveSaveButtonAriaLabel', {
-      defaultMessage: 'save as',
+      defaultMessage: 'Save as',
     }),
     description: i18n.translate('dashboard.topNave.editModeInteractiveSaveConfigDescription', {
       defaultMessage: 'Save as a new dashboard',
@@ -208,7 +208,7 @@ export const topNavStrings = {
   },
   switchToViewMode: {
     label: i18n.translate('dashboard.topNave.cancelButtonAriaLabel', {
-      defaultMessage: 'Switch to view mode',
+      defaultMessage: 'Exit edit',
     }),
     description: i18n.translate('dashboard.topNave.viewConfigDescription', {
       defaultMessage: 'Switch to view-only mode',
@@ -246,6 +246,30 @@ export const topNavStrings = {
       defaultMessage: 'Create a copy of your dashboard',
     }),
   },
+  add: {
+    label: i18n.translate('dashboard.topNave.addButtonAriaLabel', {
+      defaultMessage: 'add',
+    }),
+    description: i18n.translate('dashboard.topNave.addConfigDescription', {
+      defaultMessage: 'Add content to your dashboard',
+    }),
+  },
+  backgroundSearch: {
+    label: i18n.translate('dashboard.topNave.backgroundSearchButtonAriaLabel', {
+      defaultMessage: 'Background searches',
+    }),
+    description: i18n.translate('dashboard.topNave.backgroundSearchConfigDescription', {
+      defaultMessage: 'Open background searches',
+    }),
+  },
+  saveMenu: {
+    label: i18n.translate('dashboard.topNave.saveMenuButtonAriaLabel', {
+      defaultMessage: 'Save options',
+    }),
+    description: i18n.translate('dashboard.topNave.saveMenuDescription', {
+      defaultMessage: 'Additional save options',
+    }),
+  },
 };
 
 export const getControlButtonTitle = () =>
@@ -255,12 +279,12 @@ export const getControlButtonTitle = () =>
 
 export const getAddControlButtonTitle = () =>
   i18n.translate('dashboard.editingToolbar.addControlButtonTitle', {
-    defaultMessage: 'Add control',
+    defaultMessage: 'Control',
   });
 
 export const getAddESQLControlButtonTitle = () =>
   i18n.translate('dashboard.editingToolbar.addESQLControlButtonTitle', {
-    defaultMessage: 'Add ES|QL control',
+    defaultMessage: 'Variable control',
   });
 
 export const getEditControlGroupButtonTitle = () =>
@@ -275,5 +299,5 @@ export const getOnlyOneTimeSliderControlMsg = () =>
 
 export const getAddTimeSliderControlButtonTitle = () =>
   i18n.translate('dashboard.editingToolbar.addTimeSliderControlButtonTitle', {
-    defaultMessage: 'Add time slider control',
+    defaultMessage: 'Time slider control',
   });

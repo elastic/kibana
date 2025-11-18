@@ -7,6 +7,7 @@
 
 import sinon from 'sinon';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
+import type { SavedObject } from '@kbn/core/server';
 import type {
   RuleExecutorOptions,
   RuleTypeParams,
@@ -21,6 +22,7 @@ import {
   RuleExecutionStatusWarningReasons,
   DEFAULT_FLAPPING_SETTINGS,
   DEFAULT_QUERY_DELAY_SETTINGS,
+  type RawRule,
 } from '../types';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import {
@@ -245,6 +247,12 @@ describe('Task Runner', () => {
 
     actionsClient.bulkEnqueueExecution.mockResolvedValue({ errors: false, items: [] });
 
+    alertsClient.updatePersistedAlerts.mockResolvedValue({
+      failures: [],
+      updated: 0,
+      total: 1,
+    });
+
     ruleResultService.getLastRunResults.mockImplementation(() => ({
       errors: [],
       warnings: [],
@@ -342,6 +350,84 @@ describe('Task Runner', () => {
     expect(
       jest.requireMock('../lib/wrap_scoped_cluster_client').createWrappedScopedClusterClientFactory
     ).toHaveBeenCalled();
+  });
+
+  test('should update the persisted alerts', async () => {
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionTypeEnabled.mockReturnValue(true);
+    taskRunnerFactoryInitializerParams.actionsPlugin.isActionExecutable.mockReturnValue(true);
+    ruleType.executor.mockImplementation(async () => {
+      return { state: {} };
+    });
+    alertsClient.getProcessedAlerts.mockReturnValue({});
+    alertsClient.getSummarizedAlerts.mockResolvedValue({
+      new: {
+        count: 1,
+        data: [mockAAD],
+      },
+      ongoing: { count: 0, data: [] },
+      recovered: { count: 0, data: [] },
+    });
+    alertsClient.getAlertsToUpdateWithMaintenanceWindows.mockReturnValue([
+      mockAAD['kibana.alert.uuid'],
+    ]);
+    alertsClient.getAlertsToUpdateWithLastScheduledActions.mockReturnValue({
+      [mockAAD['kibana.alert.uuid']]: {
+        group: 'default',
+        date: new Date().toISOString(),
+      },
+    });
+    alertsClient.getRawAlertInstancesForState.mockReturnValue({
+      rawActiveAlerts: {
+        [mockAAD['kibana.alert.uuid']]: {
+          meta: {
+            uuid: mockAAD['kibana.alert.uuid'],
+            lastScheduledActions: {
+              group: 'default',
+              date: new Date().toISOString(),
+            },
+          },
+          state: {},
+        },
+      },
+      rawRecoveredAlerts: {},
+    });
+
+    alertsService.createAlertsClient.mockImplementation(() => alertsClient);
+
+    const taskRunner = new TaskRunner({
+      ruleType,
+      internalSavedObjectsRepository,
+      taskInstance: mockedTaskInstance,
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+
+    mockGetRuleFromRaw.mockReturnValue({
+      ...(mockedRuleTypeSavedObject as Rule),
+      actions: [
+        {
+          group: 'default',
+          id: '1',
+          actionTypeId: 'slack',
+          frequency: {
+            notifyWhen: 'onThrottleInterval',
+            summary: true,
+            throttle: '1h',
+          },
+          params: {
+            foo: true,
+          },
+          uuid: '111-111',
+        },
+      ],
+    });
+
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+    await taskRunner.run();
+
+    expect(alertsClient.updatePersistedAlerts).toHaveBeenCalledTimes(1);
+    expect(alertsClient.getAlertsToUpdateWithMaintenanceWindows).toHaveBeenCalledTimes(1);
+    expect(alertsClient.getAlertsToUpdateWithLastScheduledActions).toHaveBeenCalledTimes(1);
   });
 
   test('throws error when schedule.interval is not provided', async () => {
@@ -1657,7 +1743,6 @@ describe('Task Runner', () => {
       ongoing: { count: 0, data: [] },
       recovered: { count: 0, data: [] },
     });
-    alertsClient.getTrackedExecutions.mockResolvedValue([]);
 
     alertsClient.getRawAlertInstancesForState.mockResolvedValueOnce({ state: {}, meta: {} });
     alertsService.createAlertsClient.mockImplementation(() => alertsClient);
@@ -3136,16 +3221,9 @@ describe('Task Runner', () => {
       triggeredActions: 0,
       generatedActions: 1,
       status: 'ok',
-      logAlert: 1,
+      logAlert: 0,
     });
-    expect(alertingEventLogger.logAlert).toHaveBeenNthCalledWith(
-      1,
-      generateAlertOpts({
-        action: EVENT_LOG_ACTIONS.activeInstance,
-        group: 'default',
-        state: { bar: false, start: DATE_1969, duration: MOCK_DURATION },
-      })
-    );
+    expect(alertingEventLogger.logAlert).not.toHaveBeenCalled();
 
     expect(mockUsageCounter.incrementCounter).not.toHaveBeenCalled();
   });
@@ -3352,49 +3430,6 @@ describe('Task Runner', () => {
     );
   });
 
-  test('should remove the oldest execution id and return the tracked executions', async () => {
-    alertsClient.getTrackedExecutions.mockReturnValue(['1111', '2222', '3333', '4444', '5555']);
-    alertsClient.getProcessedAlerts.mockReturnValue({});
-    alertsClient.getSummarizedAlerts.mockResolvedValue({
-      new: {
-        count: 1,
-        data: [mockAAD],
-      },
-      ongoing: { count: 0, data: [] },
-      recovered: { count: 0, data: [] },
-    });
-
-    alertsClient.getRawAlertInstancesForState.mockResolvedValueOnce({ state: {}, meta: {} });
-    alertsService.createAlertsClient.mockImplementation(() => alertsClient);
-
-    rulesSettingsService.getSettings.mockResolvedValue({
-      flappingSettings: { ...DEFAULT_FLAPPING_SETTINGS, lookBackWindow: 5 },
-      queryDelaySettings: DEFAULT_QUERY_DELAY_SETTINGS,
-    });
-
-    alertsService.createAlertsClient.mockImplementation(() => alertsClient);
-
-    const taskRunner = new TaskRunner({
-      ruleType,
-      taskInstance: mockedTaskInstance,
-      context: taskRunnerFactoryInitializerParams,
-      inMemoryMetrics,
-      internalSavedObjectsRepository,
-    });
-    expect(AlertingEventLogger).toHaveBeenCalledTimes(1);
-
-    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObject as Rule);
-    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
-    const runnerResult = await taskRunner.run();
-    expect(runnerResult.state.trackedExecutions).toEqual([
-      '2222',
-      '3333',
-      '4444',
-      '5555',
-      '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
-    ]);
-  });
-
   test('should not run the rule and return DeleteRuleTaskRunResult when the task is outdated', async () => {
     const taskRunner = new TaskRunner({
       ruleType,
@@ -3423,6 +3458,37 @@ describe('Task Runner', () => {
       shouldDeleteTask: true,
       state: {},
     });
+  });
+
+  test('should return shouldDisableTask when task is enabled but rule is not', async () => {
+    const taskRunner = new TaskRunner({
+      ruleType,
+      internalSavedObjectsRepository,
+      taskInstance: { ...mockedTaskInstance },
+      context: taskRunnerFactoryInitializerParams,
+      inMemoryMetrics,
+    });
+    expect(AlertingEventLogger).toHaveBeenCalled();
+    const mockedRuleTypeSavedObjectDisabled = {
+      ...(mockedRuleTypeSavedObject as Rule),
+      enabled: false,
+    };
+    const mockedRawRuleSODisabled: SavedObject<RawRule> = {
+      ...mockedRawRuleSO,
+    };
+    mockedRawRuleSODisabled.attributes.enabled = false;
+
+    mockGetRuleFromRaw.mockReturnValue(mockedRuleTypeSavedObjectDisabled);
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValue(mockedRawRuleSO);
+
+    const result = await taskRunner.run();
+
+    expect(ruleType.executor).not.toHaveBeenCalled();
+
+    expect(result.shouldDisableTask).toEqual(true);
+    expect(result.taskRunError?.message).toBe(
+      'Rule failed to execute because rule ran after it was disabled.'
+    );
   });
 
   function testAlertingEventLogCalls({
@@ -3524,6 +3590,7 @@ describe('Task Runner', () => {
             rule_type_run_duration_ms: 0,
             total_run_duration_ms: 0,
             trigger_actions_duration_ms: 0,
+            update_alerts_duration_ms: 0,
           },
         });
       }
@@ -3560,6 +3627,7 @@ describe('Task Runner', () => {
           rule_type_run_duration_ms: 0,
           total_run_duration_ms: 0,
           trigger_actions_duration_ms: 0,
+          update_alerts_duration_ms: 0,
         },
       });
     } else if (status === 'skip') {
@@ -3593,6 +3661,7 @@ describe('Task Runner', () => {
           rule_type_run_duration_ms: 0,
           total_run_duration_ms: 0,
           trigger_actions_duration_ms: 0,
+          update_alerts_duration_ms: 0,
         },
       });
     }

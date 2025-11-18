@@ -7,8 +7,8 @@
 
 import { refinePotentialMatches } from './refine_potential_matches';
 import { findPotentialMatches } from './find_potential_matches';
-import { ChunkFetcher, ChunkResult } from './monitor_summary_iterator';
-import { QueryContext } from './query_context';
+import type { ChunkFetcher, ChunkResult } from './monitor_summary_iterator';
+import type { QueryContext } from './query_context';
 
 /**
  * Fetches a single 'chunk' of data with a single query, then uses a secondary query to filter out erroneous matches.

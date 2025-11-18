@@ -29,6 +29,7 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { useApi, useExceptionLists } from '@kbn/securitysolution-list-hooks';
 import { EmptyViewerState, ViewerStatus } from '@kbn/securitysolution-exception-list-components';
 
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
 import { useKibana } from '../../../common/lib/kibana';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
@@ -48,7 +49,7 @@ import { patchRule } from '../../../detection_engine/rule_management/api/api';
 import { getSearchFilters } from '../../../detection_engine/rule_management_ui/components/rules_table/helpers';
 import { useUserData } from '../../../detections/components/user_info';
 import { useListsConfig } from '../../../detections/containers/detection_engine/lists/use_lists_config';
-import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
+import { MissingPrivilegesCallOut } from '../../../common/components/missing_privileges';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../../../common/endpoint/service/artifacts/constants';
 
 import { AddExceptionFlyout } from '../../../detection_engine/rule_exceptions/components/add_exception_flyout';
@@ -91,6 +92,7 @@ export const SharedLists = React.memo(() => {
   const loading = userInfoLoading || listsConfigLoading;
 
   const canAccessEndpointExceptions = useEndpointExceptionsCapability('showEndpointExceptions');
+  const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
   const {
     services: {
       http,
@@ -133,7 +135,9 @@ export const SharedLists = React.memo(() => {
     http,
     namespaceTypes: ['single', 'agnostic'],
     notifications,
-    hideLists: ALL_ENDPOINT_ARTIFACT_LIST_IDS,
+    hideLists: ALL_ENDPOINT_ARTIFACT_LIST_IDS.filter(
+      (listId) => listId !== ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+    ),
   });
   const [loadingTableInfo, exceptionListsWithRuleRefs, exceptionsListsRef] = useAllExceptionLists({
     exceptionLists: exceptions ?? [],
@@ -493,9 +497,11 @@ export const SharedLists = React.memo(() => {
           <EuiPopover
             data-test-subj="manageExceptionListCreateButton"
             button={
-              <EuiButton iconType={'arrowDown'} onClick={onCreateButtonClick}>
-                {i18n.CREATE_BUTTON}
-              </EuiButton>
+              !isReadOnly && (
+                <EuiButton iconType={'arrowDown'} onClick={onCreateButtonClick}>
+                  {i18n.CREATE_BUTTON}
+                </EuiButton>
+              )
             }
             isOpen={isCreatePopoverOpen}
             closePopover={onCloseCreatePopover}
@@ -525,13 +531,15 @@ export const SharedLists = React.memo(() => {
               ]}
             />
           </EuiPopover>,
-          <EuiButton
-            data-test-subj="importSharedExceptionList"
-            iconType={'importAction'}
-            onClick={() => setDisplayImportListFlyout(true)}
-          >
-            {i18n.IMPORT_EXCEPTION_LIST_BUTTON}
-          </EuiButton>,
+          (!isReadOnly || canWriteEndpointExceptions) && (
+            <EuiButton
+              data-test-subj="importSharedExceptionList"
+              iconType={'importAction'}
+              onClick={() => setDisplayImportListFlyout(true)}
+            >
+              {i18n.IMPORT_EXCEPTION_LIST_BUTTON}
+            </EuiButton>
+          ),
         ]}
       />
 
@@ -597,7 +605,11 @@ export const SharedLists = React.memo(() => {
                   <EuiFlexItem key={excList.list_id}>
                     <ExceptionsListCard
                       data-test-subj="exceptionsListCard"
-                      readOnly={isReadOnly}
+                      readOnly={
+                        excList.list_id === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+                          ? !canWriteEndpointExceptions
+                          : isReadOnly
+                      }
                       exceptionsList={excList}
                       handleDelete={handleDelete}
                       handleExport={handleExport}

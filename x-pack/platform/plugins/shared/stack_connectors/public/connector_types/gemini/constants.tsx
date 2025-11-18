@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   GEMINI_REGION_DOC_LINK,
   GEMINI_PROJECT_ID_DOC_LINK,
@@ -20,6 +20,7 @@ import {
   DEFAULT_GCP_REGION,
 } from '../../../common/gemini/constants';
 import * as i18n from './translations';
+import { contextWindowLengthField, temperatureField } from '../../common/genai_connectors';
 
 const generationConfig = {
   temperature: 0,
@@ -117,6 +118,8 @@ export const geminiConfig: ConfigFieldSchema[] = [
     ),
     defaultValue: DEFAULT_GEMINI_MODEL,
   },
+  contextWindowLengthField,
+  temperatureField,
 ];
 
 export const geminiSecrets: SecretsFieldSchema[] = [

@@ -9,7 +9,7 @@ import { createContext } from 'react';
 import type { AppMountParameters } from '@kbn/core/public';
 import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
-import { ExperimentalFeatures } from '../../common/config';
+import type { ExperimentalFeatures } from '../../common/config';
 import type { SLORepositoryClient } from '../types';
 
 export interface PluginContextValue {

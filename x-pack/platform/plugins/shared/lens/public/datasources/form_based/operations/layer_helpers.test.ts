@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { OperationMetadata } from '../../../types';
 import {
   copyColumn,
   insertNewColumn,
@@ -19,27 +18,30 @@ import {
   isReferenced,
   getReferenceRoot,
 } from './layer_helpers';
-import { operationDefinitionMap, OperationType } from '.';
-import { TermsIndexPatternColumn } from './definitions/terms';
-import { DateHistogramIndexPatternColumn } from './definitions/date_histogram';
-import { AvgIndexPatternColumn } from './definitions/metrics';
-import type { FormBasedLayer, FormBasedPrivateState } from '../types';
-import { documentField } from '../document_field';
-import { getFieldByNameFactory } from '../pure_helpers';
-import { generateId } from '../../../id_generator';
-import { createMockedFullReference, createMockedManagedReference } from './mocks';
-import {
+import type {
+  AvgIndexPatternColumn,
   CounterRateIndexPatternColumn,
+  DateHistogramIndexPatternColumn,
   FiltersIndexPatternColumn,
   FormulaIndexPatternColumn,
   GenericIndexPatternColumn,
   MathIndexPatternColumn,
   MaxIndexPatternColumn,
   MovingAverageIndexPatternColumn,
-  OperationDefinition,
-} from './definitions';
-import { TinymathAST } from '@kbn/tinymath';
-import { IndexPattern } from '../../../types';
+  OperationType,
+  TermsIndexPatternColumn,
+  FormBasedLayer,
+  OperationMetadata,
+  FormBasedPrivateState,
+  IndexPattern,
+} from '@kbn/lens-common';
+import { operationDefinitionMap } from '.';
+import { documentField } from '../document_field';
+import { getFieldByNameFactory } from '../pure_helpers';
+import { generateId } from '../../../id_generator';
+import { createMockedFullReference, createMockedManagedReference } from './mocks';
+import type { OperationDefinition } from './definitions';
+import type { TinymathAST } from '@kbn/tinymath';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createCoreStartMock } from '@kbn/core-lifecycle-browser-mocks/src/core_start.mock';
 

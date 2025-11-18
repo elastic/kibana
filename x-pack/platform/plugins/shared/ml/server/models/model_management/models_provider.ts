@@ -35,6 +35,7 @@ import {
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { ElasticCuratedModelName } from '@kbn/ml-trained-models-utils';
 import { isDefined } from '@kbn/ml-is-defined';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../../common/constants/trained_models';
 import type { MlFeatures } from '../../../common/constants/app';
 import type {
@@ -548,7 +549,24 @@ export class ModelsProvider {
     let indicesSettings;
 
     try {
-      indicesSettings = await this._client.asInternalUser.indices.getSettings();
+      indicesSettings = await this._client.asInternalUser.indices.getSettings({
+        expand_wildcards: ['open', 'closed'],
+        filter_path: '**.index.default_pipeline',
+        master_timeout: '30s',
+      });
+    } catch (e) {
+      // Possible that the user doesn't have permissions to view
+      if (e.meta?.statusCode !== 403) {
+        mlLog.error(e);
+      }
+      indicesSettings = {};
+    }
+
+    if (isPopulatedObject(indicesSettings) === false) {
+      return pipelineIdsToDestinationIndices;
+    }
+
+    try {
       const hasPrivilegesResponse = await this._client.asCurrentUser.security.hasPrivileges({
         index: [
           {

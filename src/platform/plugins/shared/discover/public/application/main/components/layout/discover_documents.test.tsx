@@ -62,6 +62,7 @@ async function mountComponent(
           to: '2020-05-14T11:20:13.590',
         },
         searchSessionId: 'test',
+        isSearchSessionRestored: false,
       },
     })
   );
@@ -137,7 +138,7 @@ describe('Discover documents layout', () => {
       container
     );
 
-    expect(container.appState.getState().grid?.columns?.someField.width).toEqual(206);
+    expect(container.appState.get().grid?.columns?.someField.width).toEqual(206);
   });
 
   test('should render customisations', async () => {

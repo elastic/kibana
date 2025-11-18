@@ -5,14 +5,18 @@
  * 2.0.
  */
 
-import { DragContextState, DropType } from '@kbn/dom-drag-drop';
-import {
-  isOperation,
+import type { DragContextState, DropType } from '@kbn/dom-drag-drop';
+import type {
+  GenericIndexPatternColumn,
+  FormBasedPrivateState,
+  OperationMetadata,
+  DraggedField,
   DragDropOperation,
   IndexPattern,
   IndexPatternMap,
   IndexPatternField,
-} from '../../../../types';
+} from '@kbn/lens-common';
+import { isOperation } from '../../../../types_guards';
 import {
   getCurrentFieldsForOperation,
   getOperationDisplay,
@@ -20,10 +24,8 @@ import {
 } from '../../operations';
 import { isDraggedDataViewField, isOperationFromTheSameGroup } from '../../../../utils';
 import { hasField } from '../../pure_utils';
-import { OperationMetadata, DraggedField } from '../../../../types';
 import { getOperationTypesForField } from '../../operations';
-import { GenericIndexPatternColumn } from '../../form_based';
-import { FormBasedPrivateState, DataViewDragDropOperation } from '../../types';
+import type { DataViewDragDropOperation } from '../../types';
 
 interface GetDropPropsArgs {
   state: FormBasedPrivateState;

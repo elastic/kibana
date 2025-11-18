@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { FormattedDate, FormattedTime, FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiSkeletonText, EuiButton } from '@elastic/eui';
@@ -63,6 +64,7 @@ export const DeprecationsCountCallout: FunctionComponent<Props> = ({ checkpoint 
   if (error) {
     return (
       <EuiCallOut
+        announceOnMount
         title={i18nTexts.loadingError}
         color="danger"
         iconType="warning"

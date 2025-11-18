@@ -14,8 +14,8 @@
       "data",
       "datasetQuality",
       "dataViews",
-      "discover",
       "discoverShared",
+      "console",
       "fieldFormats",
       "fieldsMetadata",
       "licensing",
@@ -26,10 +26,17 @@
       "share",
       "streams",
       "unifiedSearch",
-      "unifiedDocViewer"
+      "unifiedDocViewer",
+      "dashboard",
     ],
-    "optionalPlugins": ["observabilityAIAssistant"],
-    "requiredBundles": ["kibanaReact", "kibanaUtils", "observabilityAIAssistant"],
+    "optionalPlugins": ["cloud", "spaces"],
+    "requiredBundles": [
+      "discover",
+      "kibanaReact",
+      "kibanaUtils",
+      "observabilityAIAssistant",
+      "esUiShared"
+    ],
     "extraPublicDirs": ["common"]
   }
 }

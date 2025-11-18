@@ -9,7 +9,7 @@ import type { AggregationOptionsByType } from '@kbn/es-types';
 
 import Boom from '@hapi/boom';
 import { afterKeyObjectRT } from '../../../../common/http_api';
-import { TIMESTAMP_FIELD } from '../../../../common/constants';
+import { TIMESTAMP } from '../../../../common/constants';
 import type { MetricsAPIRequest } from '../../../../common/http_api/metrics_api';
 import { calculateDateHistogramOffset } from './calculate_date_histogram_offset';
 import { createMetricsAggregations } from './create_metrics_aggregations';
@@ -37,7 +37,7 @@ const createMetricHistogramAggs = (options: MetricsAPIRequest): HistogramAggrega
   return {
     histogram: {
       date_histogram: {
-        field: TIMESTAMP_FIELD,
+        field: TIMESTAMP,
         fixed_interval: intervalString,
         offset: options.alignDataToEnd ? calculateDateHistogramOffset(options.timerange) : '0s',
         extended_bounds: {

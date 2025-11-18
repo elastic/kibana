@@ -11,7 +11,7 @@
 import { test } from '../../../fixtures';
 
 test.describe(
-  'Stream data routing - error handling and recovery',
+  'Stream data routing - reordering routing rules',
   { tag: ['@ess', '@svlOblt'] },
   () => {
     test.beforeAll(async ({ apiServices }) => {
@@ -27,8 +27,7 @@ test.describe(
       for (const streamName of streamNames) {
         await apiServices.streams.forkStream('logs', streamName, {
           field: 'service.name',
-          value: streamName.split('.')[1],
-          operator: 'eq',
+          eq: streamName.split('.')[1],
         });
       }
 
@@ -47,7 +46,7 @@ test.describe(
       await pageObjects.streams.dragRoutingRule('logs.first', 2);
 
       await pageObjects.streams.saveRuleOrder();
-      await pageObjects.streams.expectToastVisible();
+      await pageObjects.toasts.waitFor();
 
       await pageObjects.streams.expectRoutingOrder(['logs.second', 'logs.third', 'logs.first']);
     });
@@ -57,7 +56,7 @@ test.describe(
 
       await pageObjects.streams.dragRoutingRule('logs.first', 2);
 
-      await pageObjects.streams.cancelRuleOrder();
+      await pageObjects.streams.cancelChanges();
 
       await pageObjects.streams.expectRoutingOrder(['logs.first', 'logs.second', 'logs.third']);
     });
@@ -65,12 +64,15 @@ test.describe(
     test('should handle multiple reorder operations', async ({ pageObjects }) => {
       // Perform drag operations
       await pageObjects.streams.dragRoutingRule('logs.first', 2);
+      await pageObjects.streams.checkDraggingOver();
+
       // Perform another reorder while in reordering state
       await pageObjects.streams.dragRoutingRule('logs.third', -1);
+      await pageObjects.streams.checkDraggingOver();
 
       // Save all changes
       await pageObjects.streams.saveRuleOrder();
-      await pageObjects.streams.expectToastVisible();
+      await pageObjects.toasts.waitFor();
 
       await pageObjects.streams.expectRoutingOrder(['logs.third', 'logs.second', 'logs.first']);
     });

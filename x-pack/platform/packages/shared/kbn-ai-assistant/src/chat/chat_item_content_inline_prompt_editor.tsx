@@ -9,12 +9,12 @@ import React from 'react';
 import { noop } from 'lodash';
 import { css } from '@emotion/css';
 import { EuiPanel } from '@elastic/eui';
-import { Message } from '@kbn/observability-ai-assistant-plugin/common';
-import {
+import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
+import type {
   ChatActionClickHandler,
-  MessageText,
   TelemetryEventTypeWithPayload,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import { MessageText } from '@kbn/observability-ai-assistant-plugin/public';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
 
 interface Props {

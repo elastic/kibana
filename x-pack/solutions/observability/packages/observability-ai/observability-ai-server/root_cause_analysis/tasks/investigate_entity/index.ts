@@ -6,12 +6,12 @@
  */
 
 import { getEntityKuery } from '@kbn/observability-utils-common/entities/get_entity_kuery';
-import { sortAndTruncateAnalyzedFields, describeDataset } from '@kbn/ai-tools';
+import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import { getDataStreamsForEntity } from '@kbn/observability-utils-server/entities/get_data_streams_for_entity';
 import { getAlertsForEntity } from '@kbn/observability-utils-server/entities/signals/get_alerts_for_entity';
 import { getSlosForEntity } from '@kbn/observability-utils-server/entities/signals/get_slos_for_entity';
-import { TracedElasticsearchClient } from '@kbn/traced-es-client';
-import { RootCauseAnalysisContext } from '../../types';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
+import type { RootCauseAnalysisContext } from '../../types';
 import { stringifySummaries } from '../../util/stringify_summaries';
 import { analyzeLogPatterns } from '../analyze_log_patterns';
 import { describeEntity } from '../describe_entity';
@@ -19,7 +19,7 @@ import { describeLogPatterns } from '../describe_log_patterns';
 import { findRelatedEntities } from '../find_related_entities';
 import { extractRelatedEntities } from '../find_related_entities/extract_related_entities';
 import { writeEntityInvestigationReport } from '../write_entity_investigation_report';
-import { EntityInvestigation } from './types';
+import type { EntityInvestigation } from './types';
 import { getKnowledgeBaseEntries } from '../get_knowledge_base_entries';
 
 export type { EntityInvestigation };
@@ -85,7 +85,7 @@ export async function investigateEntity(
     dataStreams,
   });
 
-  const truncatedAnalysis = sortAndTruncateAnalyzedFields(fullAnalysis);
+  const truncatedAnalysis = formatDocumentAnalysis(fullAnalysis);
 
   const kbEntries = await kbPromise;
 

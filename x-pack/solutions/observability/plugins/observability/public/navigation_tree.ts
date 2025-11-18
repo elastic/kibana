@@ -4,11 +4,29 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { i18n } from '@kbn/i18n';
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
+import { i18n } from '@kbn/i18n';
 import type { AddSolutionNavigationArg } from '@kbn/navigation-plugin/public';
+import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
+import { lazy } from 'react';
 import { map, of } from 'rxjs';
 import type { ObservabilityPublicPluginsStart } from './plugin';
+const LazyIconBriefcase = lazy(() =>
+  import('@kbn/observability-nav-icons').then(({ iconBriefcase }) => ({ default: iconBriefcase }))
+);
+const LazyIconMl = lazy(() =>
+  import('@kbn/observability-nav-icons').then(({ iconProductMl }) => ({ default: iconProductMl }))
+);
+const LazyIconProductStreamsWired = lazy(() =>
+  import('@kbn/observability-nav-icons').then(({ iconProductStreamsWired }) => ({
+    default: iconProductStreamsWired,
+  }))
+);
+const LazyIconProductCloudInfra = lazy(() =>
+  import('@kbn/observability-nav-icons').then(({ iconProductCloudInfra }) => ({
+    default: iconProductCloudInfra,
+  }))
+);
 
 const title = i18n.translate(
   'xpack.observability.obltNav.headerSolutionSwitcher.obltSolutionTitle',
@@ -32,6 +50,14 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
         children: [
           {
             link: 'observability-overview',
+            title,
+            icon,
+            renderAs: 'home',
+            sideNavVersion: 'v2',
+          },
+          {
+            link: 'observability-overview',
+            sideNavVersion: 'v1',
           },
           {
             title: i18n.translate('xpack.observability.obltNav.discover', {
@@ -46,7 +72,20 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             },
           },
           {
+            link: 'workflows',
+            withBadge: true,
+            badgeTypeV2: 'techPreview' as const,
+            badgeOptions: {
+              icon: 'beaker',
+              tooltip: i18n.translate('xpack.observability.nav.workflowsBadgeTooltip', {
+                defaultMessage:
+                  'This functionality is experimental and not supported. It may change or be removed at any time.',
+              }),
+            },
+          },
+          {
             link: 'observability-overview:alerts',
+            iconV2: 'warning',
           },
           {
             link: 'observability-overview:cases',
@@ -59,28 +98,17 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 link: 'observability-overview:cases_create',
               },
             ],
+            iconV2: LazyIconBriefcase,
           },
           {
             link: 'slo',
-          },
-          {
-            link: 'observabilityAIAssistant',
-            title: i18n.translate('xpack.observability.obltNav.aiMl.aiAssistant', {
-              defaultMessage: 'AI Assistant',
-            }),
+            iconV2: 'visGauge',
           },
           ...(streamsAvailable
             ? [
                 {
                   link: 'streams' as const,
-                  withBadge: true,
-                  badgeOptions: {
-                    icon: 'beaker',
-                    tooltip: i18n.translate('xpack.observability.obltNav.streamsBadgeTooltip', {
-                      defaultMessage:
-                        'This functionality is experimental and not supported. It may change or be removed at any time.',
-                    }),
-                  },
+                  iconV2: LazyIconProductStreamsWired,
                 },
               ]
             : []),
@@ -90,10 +118,11 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               defaultMessage: 'Applications',
             }),
             renderAs: 'panelOpener',
+            spaceBefore: null,
+            iconV2: 'spaces',
             children: [
               {
                 id: 'apm',
-                link: 'apm:services',
                 children: [
                   {
                     link: 'apm:service-map',
@@ -191,6 +220,8 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               defaultMessage: 'Infrastructure',
             }),
             renderAs: 'panelOpener',
+            spaceBefore: null,
+            iconV2: LazyIconProductCloudInfra,
             children: [
               {
                 children: [
@@ -243,13 +274,24 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             ],
           },
           {
+            id: 'aiAssistantContainer',
+            title: i18n.translate('xpack.observability.obltNav.aiAssistant', {
+              defaultMessage: 'AI Assistant',
+            }),
+            iconV2: 'sparkles',
+            link: 'observabilityAIAssistant',
+          },
+          {
             id: 'machine_learning-landing',
-            renderAs: 'panelOpener',
             title: i18n.translate('xpack.observability.obltNav.machineLearning', {
               defaultMessage: 'Machine Learning',
             }),
+            spaceBefore: null,
+            renderAs: 'panelOpener',
+            iconV2: LazyIconMl,
             children: [
               {
+                title: '',
                 children: [
                   {
                     link: 'ml:overview',
@@ -298,30 +340,12 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 children: [
                   {
                     link: 'ml:logRateAnalysis',
-                    title: i18n.translate(
-                      'xpack.observability.obltNav.ml.aiops_labs.log_rate_analysis',
-                      {
-                        defaultMessage: 'Log rate analysis',
-                      }
-                    ),
                   },
                   {
                     link: 'ml:logPatternAnalysis',
-                    title: i18n.translate(
-                      'xpack.observability.obltNav.ml.aiops_labs.log_pattern_analysis',
-                      {
-                        defaultMessage: 'Log pattern analysis',
-                      }
-                    ),
                   },
                   {
                     link: 'ml:changePointDetections',
-                    title: i18n.translate(
-                      'xpack.observability.obltNav.ml.aiops_labs.change_point_detection',
-                      {
-                        defaultMessage: 'Change point detection',
-                      }
-                    ),
                   },
                 ],
               },
@@ -332,7 +356,9 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
             title: i18n.translate('xpack.observability.obltNav.otherTools', {
               defaultMessage: 'Other tools',
             }),
+            spaceBefore: null,
             renderAs: 'panelOpener',
+            iconV2: 'wrench',
             children: [
               {
                 link: 'logs:anomalies',
@@ -347,7 +373,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                 }),
               },
               { link: 'maps' },
-              { link: 'canvas' },
               { link: 'graph' },
               {
                 link: 'visualize',
@@ -370,7 +395,7 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               defaultMessage: 'Add data',
             }),
             link: 'observabilityOnboarding',
-            icon: 'launch',
+            iconV2: 'plusInCircle',
           },
           {
             id: 'devTools',
@@ -378,118 +403,220 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
               defaultMessage: 'Developer tools',
             }),
             link: 'dev_tools',
+            iconV2: 'code',
             icon: 'editorCodeBlock',
           },
           {
-            id: 'project_settings_project_nav',
-            title: i18n.translate('xpack.observability.obltNav.management', {
-              defaultMessage: 'Management',
+            id: DATA_MANAGEMENT_NAV_ID,
+            title: i18n.translate('xpack.observability.obltNav.dataManagement', {
+              defaultMessage: 'Data management',
+              description:
+                'The heading of a section in a navigation tree dedicated to data collection',
             }),
-            icon: 'gear',
-            breadcrumbStatus: 'hidden',
-            renderAs: 'accordion',
+            renderAs: 'panelOpener',
             spaceBefore: null,
+            iconV2: 'database',
             children: [
               {
-                id: 'stack_management', // This id can't be changed as we use it to open the panel programmatically
-                title: i18n.translate('xpack.observability.obltNav.stackManagement', {
-                  defaultMessage: 'Stack Management',
+                id: 'ingest_and_integrations',
+                title: i18n.translate('xpack.observability.obltNav.ingestAndIntegrations', {
+                  defaultMessage: 'Ingest and integrations',
+                  description:
+                    'The heading of a section in a navigation tree dedicated to data collection',
                 }),
                 renderAs: 'panelOpener',
                 spaceBefore: null,
                 children: [
                   {
-                    title: 'Ingest',
-                    children: [
-                      { link: 'management:ingest_pipelines' },
-                      { link: 'management:pipelines' },
-                    ],
+                    link: 'integrations',
                   },
                   {
-                    title: 'Data',
-                    children: [
-                      { link: 'management:index_management' },
-                      { link: 'management:data_quality' },
-                      { link: 'management:index_lifecycle_management' },
-                      { link: 'management:snapshot_restore' },
-                      { link: 'management:rollup_jobs' },
-                      { link: 'management:transform' },
-                      { link: 'management:cross_cluster_replication' },
-                      { link: 'management:remote_clusters' },
-                      { link: 'management:migrate_data' },
-                      { link: 'management:content_connectors' },
-                    ],
+                    link: 'fleet',
                   },
                   {
-                    title: 'Alerts and Insights',
-                    children: [
-                      { link: 'management:triggersActions' },
-                      { link: 'management:cases' },
-                      { link: 'management:triggersActionsConnectors' },
-                      { link: 'management:reporting' },
-                      { link: 'management:jobsListLink' },
-                      { link: 'management:watcher' },
-                      { link: 'management:maintenanceWindows' },
-                    ],
+                    link: 'management:ingest_pipelines',
                   },
                   {
-                    title: 'Machine Learning',
-                    children: [
-                      { link: 'management:overview' },
-                      { link: 'management:anomaly_detection' },
-                      { link: 'management:analytics' },
-                      { link: 'management:trained_models' },
-                      { link: 'management:supplied_configurations' },
-                    ],
+                    link: 'management:pipelines',
                   },
                   {
-                    title: 'Security',
-                    children: [
-                      { link: 'management:users' },
-                      { link: 'management:roles' },
-                      { link: 'management:api_keys' },
-                      { link: 'management:role_mappings' },
-                    ],
-                  },
-                  {
-                    title: 'Kibana',
-                    children: [
-                      { link: 'management:dataViews' },
-                      { link: 'management:filesManagement' },
-                      { link: 'management:objects' },
-                      { link: 'management:tags' },
-                      { link: 'management:search_sessions' },
-                      { link: 'management:aiAssistantManagementSelection' },
-                      { link: 'management:spaces' },
-                      { link: 'management:settings' },
-                    ],
-                  },
-                  {
-                    title: 'Stack',
-                    children: [
-                      { link: 'management:license_management' },
-                      { link: 'management:upgrade_assistant' },
-                    ],
+                    link: 'management:content_connectors',
                   },
                 ],
               },
               {
-                id: 'monitoring',
-                link: 'monitoring',
+                id: 'indicesAndDataStreams',
+                title: i18n.translate('xpack.observability.obltNav.indicesAndDataStreams', {
+                  defaultMessage: 'Indices and data streams',
+                  description:
+                    'Heading in a nav tree dedicated to UIs for leveraging various Elasticsearch features for data management',
+                }),
+                renderAs: 'panelOpener',
+                children: [
+                  {
+                    link: 'management:index_management',
+                  },
+                  {
+                    link: 'management:index_lifecycle_management',
+                  },
+                  {
+                    link: 'management:snapshot_restore',
+                  },
+                  {
+                    link: 'management:transform',
+                  },
+                  {
+                    link: 'management:rollup_jobs',
+                  },
+                  {
+                    link: 'management:data_quality',
+                  },
+                ],
+              },
+            ],
+          },
+          {
+            id: STACK_MANAGEMENT_NAV_ID,
+            title: i18n.translate('xpack.observability.obltNav.management', {
+              defaultMessage: 'Stack Management',
+            }),
+            icon: 'gear',
+            breadcrumbStatus: 'hidden',
+            renderAs: 'panelOpener',
+            spaceBefore: null,
+            children: [
+              {
+                id: 'stack_management_home',
+                title: '',
+                renderAs: 'panelOpener',
+                children: [
+                  {
+                    // We include this link here to ensure that the settings icon does not land on Stack Monitoring by default
+                    // https://github.com/elastic/kibana/issues/241518
+                    // And that the sidenav panel opens when user lands to legacy management landing page
+                    // https://github.com/elastic/kibana/issues/240275
+                    link: 'management',
+                    title: i18n.translate('xpack.observability.obltNav.management_home', {
+                      defaultMessage: 'Home',
+                    }),
+                    breadcrumbStatus: 'hidden',
+                  },
+                  { link: 'monitoring' },
+                ],
               },
               {
-                link: 'integrations',
+                id: 'alerts_and_insights',
+                title: i18n.translate('xpack.observability.obltNav.alertsAndInsights', {
+                  defaultMessage: 'Alerts and Insights',
+                }),
+                renderAs: 'panelOpener',
+                spaceBefore: null,
+                children: [
+                  {
+                    link: 'management:triggersActions',
+                  },
+                  {
+                    link: 'management:triggersActionsConnectors',
+                  },
+                  {
+                    link: 'management:reporting',
+                  },
+                  {
+                    link: 'management:watcher',
+                  },
+                  {
+                    link: 'management:maintenanceWindows',
+                  },
+                ],
               },
               {
-                link: 'fleet',
+                id: 'management_ml',
+                title: i18n.translate('xpack.observability.obltNav.machineLearning', {
+                  defaultMessage: 'Machine Learning',
+                }),
+                children: [
+                  { link: 'management:overview' },
+                  { link: 'management:anomaly_detection' },
+                  { link: 'management:analytics' },
+                  { link: 'management:trained_models' },
+                  { link: 'management:supplied_configurations' },
+                ],
               },
               {
-                id: 'cloudLinkUserAndRoles',
-                cloudLink: 'userAndRoles',
+                id: 'management_ai',
+                title: i18n.translate('xpack.observability.obltNav.ai', {
+                  defaultMessage: 'AI',
+                }),
+                children: [
+                  { link: 'management:genAiSettings' },
+                  { link: 'management:aiAssistantManagementSelection' },
+                ],
               },
               {
-                id: 'cloudLinkBilling',
-                cloudLink: 'billingAndSub',
+                id: 'security',
+                title: i18n.translate('xpack.observability.obltNav.security', {
+                  defaultMessage: 'Security',
+                }),
+                renderAs: 'panelOpener',
+                children: [
+                  {
+                    link: 'management:users',
+                  },
+                  {
+                    link: 'management:roles',
+                  },
+                  {
+                    link: 'management:api_keys',
+                  },
+                  {
+                    link: 'management:role_mappings',
+                  },
+                ],
+              },
+              {
+                id: 'data',
+                title: i18n.translate('xpack.observability.obltNav.data', {
+                  defaultMessage: 'Data',
+                }),
+                renderAs: 'panelOpener',
+                children: [
+                  {
+                    link: 'management:cross_cluster_replication',
+                  },
+                  {
+                    link: 'management:remote_clusters',
+                  },
+                ],
+              },
+              {
+                id: 'kibana',
+                title: i18n.translate('xpack.observability.obltNav.kibana', {
+                  defaultMessage: 'Kibana',
+                }),
+                renderAs: 'panelOpener',
+                children: [
+                  {
+                    link: 'management:filesManagement',
+                  },
+                  {
+                    link: 'management:objects',
+                  },
+                  {
+                    link: 'management:tags',
+                  },
+                  {
+                    link: 'management:spaces',
+                  },
+                  {
+                    link: 'management:settings',
+                  },
+                  {
+                    link: 'management:dataViews',
+                  },
+                  {
+                    link: 'management:search_sessions',
+                  },
+                ],
               },
             ],
           },
@@ -508,8 +635,8 @@ export const createDefinition = (
   title,
   icon: 'logoObservability',
   homePage: 'observabilityOnboarding',
-  navigationTree$: (pluginsStart.streams?.status$ || of({ status: 'disabled' as const })).pipe(
-    map(({ status }) => createNavTree({ streamsAvailable: status === 'enabled' }))
-  ),
+  navigationTree$: (
+    pluginsStart.streams?.navigationStatus$ || of({ status: 'disabled' as const })
+  ).pipe(map(({ status }) => createNavTree({ streamsAvailable: status === 'enabled' }))),
   dataTestSubj: 'observabilitySideNav',
 });

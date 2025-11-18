@@ -543,7 +543,7 @@
             "label": "click",
             "description": [],
             "signature": [
-              "(selector: string, timeout?: number, topOffset?: number | undefined) => Promise<void>"
+              "(selector: string, timeout?: number, topOffsetOrOptions?: number | { topOffset?: number | undefined; bottomOffset?: number | undefined; } | undefined, preclickDelay?: number) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
             "deprecated": false,
@@ -582,17 +582,32 @@
               {
                 "parentPluginId": "@kbn/ftr-common-functional-ui-services",
                 "id": "def-common.TestSubjects.click.$3",
-                "type": "number",
+                "type": "CompoundType",
                 "tags": [],
-                "label": "topOffset",
+                "label": "topOffsetOrOptions",
                 "description": [],
                 "signature": [
-                  "number | undefined"
+                  "number | { topOffset?: number | undefined; bottomOffset?: number | undefined; } | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "@kbn/ftr-common-functional-ui-services",
+                "id": "def-common.TestSubjects.click.$4",
+                "type": "number",
+                "tags": [],
+                "label": "preclickDelay",
+                "description": [],
+                "signature": [
+                  "number"
+                ],
+                "path": "src/platform/packages/shared/kbn-ftr-common-functional-ui-services/services/test_subjects.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
               }
             ],
             "returnComment": []
@@ -2435,7 +2450,7 @@
               "\nClicks on this element.\nhttps://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebElement.html#click\n"
             ],
             "signature": [
-              "(topOffset?: number | undefined) => Promise<void>"
+              "(topOffsetOrOptions?: number | { topOffset?: number | undefined; bottomOffset?: number | undefined; } | undefined) => Promise<void>"
             ],
             "path": "src/platform/packages/shared/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
             "deprecated": false,
@@ -2444,12 +2459,12 @@
               {
                 "parentPluginId": "@kbn/ftr-common-functional-ui-services",
                 "id": "def-common.WebElementWrapper.click.$1",
-                "type": "number",
+                "type": "CompoundType",
                 "tags": [],
-                "label": "topOffset",
+                "label": "topOffsetOrOptions",
                 "description": [],
                 "signature": [
-                  "number | undefined"
+                  "number | { topOffset?: number | undefined; bottomOffset?: number | undefined; } | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-ftr-common-functional-ui-services/services/web_element_wrapper/web_element_wrapper.ts",
                 "deprecated": false,
@@ -12119,9 +12134,9 @@
             "section": "def-common.FtrProviderContext",
             "text": "FtrProviderContext"
           },
-          ") => ",
+          ") => Promise<",
           "default",
-          "; kibanaServer: ({ getService }: ",
+          ">; kibanaServer: ({ getService }: ",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
             "scope": "common",
@@ -12209,9 +12224,9 @@
             "section": "def-common.FtrProviderContext",
             "text": "FtrProviderContext"
           },
-          ") => ",
+          ") => Promise<",
           "default",
-          "; kibanaServer: ({ getService }: ",
+          ">; kibanaServer: ({ getService }: ",
           {
             "pluginId": "@kbn/ftr-common-functional-services",
             "scope": "common",
@@ -12686,9 +12701,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -12776,9 +12791,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -12924,9 +12939,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -13014,9 +13029,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -13152,9 +13167,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -13242,9 +13257,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -13399,9 +13414,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",
@@ -13489,9 +13504,9 @@
                     "section": "def-common.FtrProviderContext",
                     "text": "FtrProviderContext"
                   },
-                  ") => ",
+                  ") => Promise<",
                   "default",
-                  "; kibanaServer: ({ getService }: ",
+                  ">; kibanaServer: ({ getService }: ",
                   {
                     "pluginId": "@kbn/ftr-common-functional-services",
                     "scope": "common",

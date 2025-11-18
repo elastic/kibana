@@ -8,9 +8,9 @@
 import type { SecurityRoleDescriptor } from '@elastic/elasticsearch/lib/api/types';
 
 import type { agentPolicyStatuses } from '../../constants';
-import type { BaseSSLSecrets, MonitoringType, PolicySecretReference, ValueOf } from '..';
+import type { BaseSSLSecrets, MonitoringType, SecretReference, ValueOf } from '..';
 
-import type { PackagePolicy, PackagePolicyPackage } from './package_policy';
+import type { PackagePolicy } from './package_policy';
 import type { Output } from './output';
 
 export type AgentPolicyStatus = typeof agentPolicyStatuses;
@@ -92,7 +92,6 @@ export interface GlobalDataTag {
   value: string | number;
 }
 
-// SO definition for this type is declared in server/types/interfaces
 export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   id: string;
   space_ids?: string[] | undefined;
@@ -104,6 +103,7 @@ export interface AgentPolicy extends Omit<NewAgentPolicy, 'id'> {
   revision: number;
   agents?: number;
   unprivileged_agents?: number;
+  fips_agents?: number;
   is_protected: boolean;
   version?: string;
 }
@@ -126,13 +126,20 @@ export interface FullAgentPolicyInput {
   use_output: string;
   package_policy_id: string;
   meta?: {
-    package?: Pick<PackagePolicyPackage, 'name' | 'version'>;
+    package?: FullAgentPolicyMetaPackage;
     [key: string]: unknown;
   };
   streams?: FullAgentPolicyInputStream[];
   processors?: FullAgentPolicyAddFields[];
   ssl?: BaseSSLConfig;
   [key: string]: any;
+}
+
+export interface FullAgentPolicyMetaPackage {
+  name: string;
+  version: string;
+  policy_template?: string;
+  release?: string;
 }
 
 export type TemplateAgentPolicyInput = Pick<FullAgentPolicyInput, 'id' | 'type' | 'streams'>;
@@ -186,6 +193,8 @@ export interface FullAgentPolicyDownload {
   sourceURI: string;
   ssl?: BaseSSLConfig;
   secrets?: BaseSSLSecrets;
+  proxy_url?: string;
+  proxy_headers?: any;
 }
 
 export interface FullAgentPolicy {
@@ -226,7 +235,7 @@ export interface FullAgentPolicy {
       go_max_procs?: number;
     };
   };
-  secret_references?: PolicySecretReference[];
+  secret_references?: SecretReference[];
   signed?: {
     data: string;
     signature: string;

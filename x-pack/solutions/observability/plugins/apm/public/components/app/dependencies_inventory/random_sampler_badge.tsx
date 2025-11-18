@@ -18,7 +18,7 @@ export function RandomSamplerBadge() {
             'This view is using random sampler aggregations due to the amount of data found in the selected time range. Sampling has been configured to balance accuracy and speed. Reduce the time range to see un-sampled data.',
         })}
       >
-        <EuiBadge iconType="info" color="hollow">
+        <EuiBadge iconType="info" color="hollow" tabIndex={0}>
           {i18n.translate('xpack.apm.dependencies.randomSampler.badge', {
             defaultMessage: `Based on sampled spans`,
           })}

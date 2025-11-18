@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { TimeBuckets } from '@kbn/data-plugin/common';
-import { TimeRange } from '@kbn/es-query';
+import type { TimeBuckets } from '@kbn/data-plugin/common';
+import type { TimeRange } from '@kbn/es-query';
 import { getAbsoluteTime } from '../../../utils/date';
 import { getBucketSize } from '../../../utils/get_bucket_size';
 import { DEFAULT_INTERVAL } from '../../../constants';

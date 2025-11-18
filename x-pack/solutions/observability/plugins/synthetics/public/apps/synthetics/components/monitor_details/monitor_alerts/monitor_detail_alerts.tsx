@@ -10,7 +10,7 @@ import { AlertConsumers, SYNTHETICS_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
 import { useParams } from 'react-router-dom';
 import { ObservabilityAlertsTable, AlertActions } from '@kbn/observability-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 import { useRefreshedRangeFromUrl } from '../../../hooks';
 import { SyntheticsDatePicker } from '../../common/date_picker/synthetics_date_picker';
 import { useSelectedLocation } from '../hooks/use_selected_location';
@@ -61,7 +61,7 @@ export function MonitorDetailsAlerts() {
                 ],
               },
             }}
-            initialPageSize={100}
+            pageSize={100}
             data-test-subj="monitorAlertsTable"
             renderActionsCell={AlertActions}
             showInspectButton

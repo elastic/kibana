@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
+import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
 import { render } from '@testing-library/react';
 import React from 'react';
 import { getCustomCellPopoverRenderer } from './get_render_cell_popover';

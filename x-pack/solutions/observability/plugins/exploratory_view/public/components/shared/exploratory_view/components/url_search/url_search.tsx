@@ -8,8 +8,9 @@
 import React, { useEffect, useState } from 'react';
 import { isEqual, map } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { SelectableUrlList, UrlOption } from './selectable_url_list';
-import { SeriesConfig, SeriesUrl, UrlFilter } from '../../types';
+import type { UrlOption } from './selectable_url_list';
+import { SelectableUrlList } from './selectable_url_list';
+import type { SeriesConfig, SeriesUrl, UrlFilter } from '../../types';
 import { useUrlSearch } from './use_url_search';
 import { useSeriesFilters } from '../../hooks/use_series_filters';
 import { TRANSACTION_URL } from '../../configurations/constants/elasticsearch_fieldnames';

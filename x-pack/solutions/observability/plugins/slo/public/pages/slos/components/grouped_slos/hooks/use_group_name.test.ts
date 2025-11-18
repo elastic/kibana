@@ -6,7 +6,7 @@
  */
 
 import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../../../../common/constants';
-import { GroupSummary } from '@kbn/slo-schema';
+import type { GroupSummary } from '@kbn/slo-schema';
 import { useGroupName } from './use_group_name';
 
 describe('useGroupName', () => {

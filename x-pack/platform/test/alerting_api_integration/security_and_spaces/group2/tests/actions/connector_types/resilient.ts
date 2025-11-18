@@ -92,6 +92,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             apiUrl: resilientSimulatorURL,
             orgId: mockResilient.config.orgId,
           },
+          is_connector_type_deprecated: false,
         });
 
         const { body: fetchedAction } = await supertest
@@ -110,6 +111,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             apiUrl: resilientSimulatorURL,
             orgId: mockResilient.config.orgId,
           },
+          is_connector_type_deprecated: false,
         });
       });
 
@@ -127,8 +129,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: [apiUrl]: expected value of type [string] but got [undefined]',
+              message: `error validating connector type config: Field \"apiUrl\": Required`,
             });
           });
       });
@@ -147,8 +148,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: [orgId]: expected value of type [string] but got [undefined]',
+              message: `error validating connector type config: Field \"orgId\": Required`,
             });
           });
       });
@@ -172,7 +172,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: error validating url: target url "http://resilient.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating connector type config: error validating url: target url "http://resilient.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -194,8 +194,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type secrets: [apiKeyId]: expected value of type [string] but got [undefined]',
+              message: `error validating connector type secrets: 2 errors:\n [1]: Field \"apiKeyId\": Required;\n [2]: Field \"apiKeySecret\": Required`,
             });
           });
       });
@@ -273,8 +272,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
-                service_message:
-                  'Request validation failed (Error: [incident.name]: expected value of type [string] but got [undefined])',
+                service_message: `Request validation failed (Field \"incident\": Required)`,
                 errorSource: TaskErrorSource.USER,
               });
             });
@@ -302,8 +300,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message:
-                  'Request validation failed (Error: [incident.name]: expected value of type [string] but got [undefined])',
+                service_message: `Request validation failed (Field \"incident.name\": Required)`,
               });
             });
         });
@@ -331,8 +328,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message:
-                  'Request validation failed (Error: [comments]: types that failed validation:\n- [comments.0.0.commentId]: expected value of type [string] but got [undefined]\n- [comments.1]: expected value to equal [null])',
+                service_message: `Request validation failed (Field \"comments.0.commentId\": Required)`,
               });
             });
         });
@@ -360,8 +356,7 @@ export default function resilientTest({ getService }: FtrProviderContext) {
                 retry: true,
                 message: 'an error occurred while running the action',
                 errorSource: TaskErrorSource.USER,
-                service_message:
-                  'Request validation failed (Error: [comments]: types that failed validation:\n- [comments.0.0.comment]: expected value of type [string] but got [undefined]\n- [comments.1]: expected value to equal [null])',
+                service_message: `Request validation failed (Field \"comments.0.comment\": Required)`,
               });
             });
         });

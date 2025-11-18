@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { getStaticDataViewId } from '@kbn/apm-data-view';
 import { LAYER_WIZARD_CATEGORY, WIZARD_ID } from '../../../../../../common/constants';
-import { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
+import type { LayerWizard, RenderWizardArguments } from '../../layer_wizard_registry';
 import { ObservabilityLayerTemplate } from './observability_layer_template';
 import { getIndexPatternService, getSpaceId } from '../../../../../kibana_services';
 

@@ -39,6 +39,7 @@ export function Sort({ type, onChange }: Props) {
       aria-label={i18n.translate('xpack.apm.serviceGroups.list.sort.ariaLabel', {
         defaultMessage: 'Sort service groups by',
       })}
+      compressed
       options={options}
       value={type}
       onChange={(e) => onChange(e.target.value as ServiceGroupsSortType)}

@@ -53,4 +53,32 @@ export class ServiceMapPage {
     await this.serviceMap.waitFor({ state: 'visible' });
     return expect(this.serviceMap.getByLabel('Loading')).toBeHidden();
   }
+
+  /**
+   * Clicks zoom buttons by waiting for them to be enabled and handling tooltip interference
+   * @param direction - 'in' for zoom in, 'out' for zoom out
+   */
+  async clickZoom(direction: 'in' | 'out') {
+    const button = direction === 'in' ? this.zoomInBtn : this.zoomOutBtn;
+
+    // Wait for the button to be visible
+    await button.waitFor({ state: 'visible' });
+    // Wait a bit for any tooltips to settle
+    await this.page.waitForTimeout(500);
+    // Try to click with force if normal click fails due to tooltip interference
+    try {
+      await button.click({ timeout: 5000 });
+    } catch {
+      // If normal click fails, try with force to bypass tooltip interference
+      await button.click({ force: true, timeout: 5000 });
+    }
+  }
+
+  async clickZoomIn() {
+    await this.clickZoom('in');
+  }
+
+  async clickZoomOut() {
+    await this.clickZoom('out');
+  }
 }

@@ -12,7 +12,8 @@ import {
   updateDataTableColumnWidth,
 } from './helpers';
 import { mockGlobalState } from '../../mock/global_state';
-import { SortColumnTable, TableId } from '../../common/types';
+import type { SortColumnTable } from '../../common/types';
+import { TableId } from '../../common/types';
 import type { DataTableModelSettings } from './model';
 import type { TableById } from './types';
 

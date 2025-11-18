@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ConversationResponse } from '@kbn/elastic-assistant-common';
-import { EsConversationSchema } from './types';
+import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ConversationResponse } from '@kbn/elastic-assistant-common';
+import type { EsConversationSchema } from './types';
 import { transformESSearchToConversations } from './transforms';
 
 export interface GetConversationParams {
@@ -61,7 +61,31 @@ export const getConversation = async ({
                 ],
               },
             },
-            ...filterByUser,
+          ],
+          filter: [
+            {
+              bool: {
+                should: [
+                  ...filterByUser,
+                  // global users
+                  {
+                    bool: {
+                      must_not: [
+                        {
+                          nested: {
+                            path: 'users',
+                            query: {
+                              match_all: {},
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
           ],
         },
       },

@@ -95,6 +95,7 @@ export const FLEET_ROUTING_PATHS = {
 };
 
 export const INTEGRATIONS_SEARCH_QUERYPARAM = 'q';
+export const INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM = 'onlyAgentless';
 export const INTEGRATIONS_ROUTING_PATHS = {
   integrations: '/:tabId',
   integrations_all: '/browse/:category?/:subcategory?',
@@ -126,19 +127,31 @@ export const pagePathGetters: {
     searchTerm,
     category,
     subCategory,
+    onlyAgentless,
   }: {
     searchTerm?: string;
     category?: string;
     subCategory?: string;
+    onlyAgentless?: boolean;
   }) => {
     const categoryPath =
       category && subCategory
-        ? `/${category}/${subCategory} `
+        ? `/${category}/${subCategory}`
         : category && !subCategory
         ? `/${category}`
         : ``;
-    const queryParams = searchTerm ? `?${INTEGRATIONS_SEARCH_QUERYPARAM}=${searchTerm}` : ``;
-    return [INTEGRATIONS_BASE_PATH, `/browse${categoryPath}${queryParams}`];
+    const queryParams = new URLSearchParams();
+    if (searchTerm) {
+      queryParams.set(INTEGRATIONS_SEARCH_QUERYPARAM, searchTerm);
+    }
+    if (onlyAgentless) {
+      queryParams.set(INTEGRATIONS_ONLY_AGENTLESS_QUERYPARAM, 'true');
+    }
+    const queryString = queryParams.toString();
+    return [
+      INTEGRATIONS_BASE_PATH,
+      `/browse${categoryPath}${queryString ? `?${queryString}` : ''}`,
+    ];
   },
   integrations_installed: ({ query, category }: { query?: string; category?: string }) => {
     const categoryPath = category ? `/${category}` : ``;
@@ -212,10 +225,17 @@ export const pagePathGetters: {
     FLEET_BASE_PATH,
     `/policies/${policyId}${tabId ? `/${tabId}` : ''}`,
   ],
-  add_integration_to_policy: ({ pkgkey, integration, agentPolicyId, useMultiPageLayout }) => {
+  add_integration_to_policy: ({
+    pkgkey,
+    integration,
+    agentPolicyId,
+    useMultiPageLayout,
+    prerelease,
+  }) => {
     const qs = stringify({
       ...(agentPolicyId ? { policyId: agentPolicyId } : {}),
       ...(useMultiPageLayout ? { useMultiPageLayout: null } : {}),
+      ...(prerelease ? { prerelease } : {}),
     });
     return [
       FLEET_BASE_PATH,

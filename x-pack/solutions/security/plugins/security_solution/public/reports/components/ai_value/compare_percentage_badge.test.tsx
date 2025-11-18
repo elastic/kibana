@@ -15,7 +15,6 @@ describe('ComparePercentageBadge', () => {
       <ComparePercentageBadge currentCount={10} previousCount={0} stat="Alerts" statType="count" />
     );
     expect(screen.queryByTestId('comparePercentageBadge')).toBeInTheDocument();
-    // Should not render badge
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
 
@@ -24,7 +23,6 @@ describe('ComparePercentageBadge', () => {
       <ComparePercentageBadge currentCount={0} previousCount={10} stat="Alerts" statType="count" />
     );
     expect(screen.queryByTestId('comparePercentageBadge')).toBeInTheDocument();
-    // Should not render badge
     expect(screen.queryByRole('status')).not.toBeInTheDocument();
   });
 

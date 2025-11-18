@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
-import { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import {
   readLog,
   clearLog,
@@ -18,7 +18,7 @@ import {
   defaultKibanaIndex,
   startElasticsearch,
   getAggregatedTypesCount,
-} from '../kibana_migrator_test_kit';
+} from '@kbn/migrator-test-kit';
 
 import {
   createBaseline,
@@ -27,7 +27,7 @@ import {
   getReindexingMigratorTestKit,
   getUpToDateBaselineTypes,
   getCompatibleBaselineTypes,
-} from '../kibana_migrator_test_kit.fixtures';
+} from '@kbn/migrator-test-kit/fixtures';
 
 describe('when upgrading to a new stack version', () => {
   let esServer: TestElasticsearchUtils['es'];

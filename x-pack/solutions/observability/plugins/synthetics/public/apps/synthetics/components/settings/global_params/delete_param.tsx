@@ -16,7 +16,7 @@ import {
   selectGlobalParamState,
 } from '../../../state/global_params';
 import { NO_LABEL, YES_LABEL } from '../../monitors_page/management/monitor_list_table/labels';
-import { ListParamItem } from './params_list';
+import type { ListParamItem } from './params_list';
 
 export const DeleteParam = ({
   items,

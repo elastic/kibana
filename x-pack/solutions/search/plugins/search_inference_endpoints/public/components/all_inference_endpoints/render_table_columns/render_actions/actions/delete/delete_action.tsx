@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { useDeleteEndpoint } from '../../../../../../hooks/use_delete_endpoint';
 import { ConfirmDeleteEndpointModal } from './confirm_delete_endpoint';
 

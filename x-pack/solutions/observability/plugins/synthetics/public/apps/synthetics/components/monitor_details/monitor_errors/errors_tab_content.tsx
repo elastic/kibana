@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FailedTestsByStep } from './failed_tests_by_step';
-import { PingState } from '../../../../../../common/runtime_types';
+import type { PingState } from '../../../../../../common/runtime_types';
 import { PanelWithTitle } from '../../common/components/panel_with_title';
 import { MonitorErrorsCount } from '../monitor_summary/monitor_errors_count';
 import { FailedTestsCount } from './failed_tests_count';

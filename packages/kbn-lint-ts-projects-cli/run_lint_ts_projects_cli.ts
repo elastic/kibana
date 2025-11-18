@@ -11,13 +11,14 @@ import Path from 'path';
 
 import { run } from '@kbn/dev-cli-runner';
 import { createFailError } from '@kbn/dev-cli-errors';
-import { RepoPath } from '@kbn/repo-path';
+import type { RepoPath } from '@kbn/repo-path';
 import { getRepoFiles } from '@kbn/get-repo-files';
-import { SomeDevLog } from '@kbn/some-dev-log';
+import type { SomeDevLog } from '@kbn/some-dev-log';
 import { PackageFileMap, TsProjectFileMap } from '@kbn/repo-file-maps';
 import { getPackages } from '@kbn/repo-packages';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { TS_PROJECTS, TsProject } from '@kbn/ts-projects';
+import type { TsProject } from '@kbn/ts-projects';
+import { TS_PROJECTS } from '@kbn/ts-projects';
 import { runLintRules, TsProjectLintTarget } from '@kbn/repo-linter';
 
 import { RULES } from './rules';

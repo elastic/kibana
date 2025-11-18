@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
+import type { EuiTextColorProps } from '@elastic/eui';
 import {
   EuiTextColor,
-  EuiTextColorProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiToolTip,
+  EuiIconTip,
 } from '@elastic/eui';
 
 export interface TextWithIconProps {
@@ -38,9 +40,7 @@ export const TextWithIcon: FC<PropsWithChildren<TextWithIconProps>> = ({
       {!!icon && (
         <EuiFlexItem grow={false}>
           {!!iconTooltip ? (
-            <EuiToolTip content={iconTooltip}>
-              <EuiIcon color={iconColor} type={icon} />
-            </EuiToolTip>
+            <EuiIconTip content={iconTooltip} type={icon} color={iconColor} />
           ) : (
             <EuiIcon color={iconColor} type={icon} />
           )}

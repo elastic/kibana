@@ -10,11 +10,8 @@ import { render, fireEvent } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import { TestProvider } from '../../../test/test_provider';
-import {
-  FieldsSelectorTable,
-  FieldsSelectorTableProps,
-  filterFieldsBySearch,
-} from './fields_selector_table';
+import type { FieldsSelectorTableProps } from './fields_selector_table';
+import { FieldsSelectorTable, filterFieldsBySearch } from './fields_selector_table';
 
 const VIEW_MENU_ALL_TEXT = 'View: all';
 const VIEW_MENU_SELECTED_TEXT = 'View: selected';

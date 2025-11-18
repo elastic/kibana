@@ -15,16 +15,16 @@ import {
   isRangeAnnotationConfig,
 } from '@kbn/event-annotation-common';
 import type { AccessorConfig } from '@kbn/visualization-ui-components';
-import type { FramePublicAPI } from '../../types';
+import type { FramePublicAPI } from '@kbn/lens-common';
 import { getColumnToLabelMap } from './state_helpers';
-import { FormatFactory } from '../../../common/types';
+import type { FormatFactory } from '../../../common/types';
 import { isDataLayer, isReferenceLayer, isAnnotationsLayer } from './visualization_helpers';
 import { getAnnotationsAccessorColorConfig } from './annotations/helpers';
 import {
   getReferenceLineAccessorColorConfig,
   getSingleColorConfig,
 } from './reference_line_helpers';
-import { XYDataLayerConfig, XYLayerConfig } from './types';
+import type { XYDataLayerConfig, XYLayerConfig } from './types';
 
 const isPrimitive = (value: unknown): boolean => value != null && typeof value !== 'object';
 

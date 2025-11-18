@@ -77,7 +77,7 @@ describe('OpenAI action params validation', () => {
         subAction,
         subActionParams,
       };
-      expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+      expect(await actionTypeModel.validateParams(actionParams, null)).toEqual({
         errors: { body: [], input: [], subAction: [], inputType: [], query: [] },
       });
     }
@@ -89,9 +89,9 @@ describe('OpenAI action params validation', () => {
       subActionParams: { body: 'message {test}' },
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
-        body: ['Messages is required.'],
+        body: ['The request body is not in a valid JSON format.'],
         inputType: [],
         query: [],
         subAction: [],
@@ -105,7 +105,7 @@ describe('OpenAI action params validation', () => {
       subActionParams: { input: 'message test' },
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         body: [],
         input: [],
@@ -122,7 +122,7 @@ describe('OpenAI action params validation', () => {
       subActionParams: { input: 'message test' },
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         body: [],
         input: [],
@@ -139,7 +139,7 @@ describe('OpenAI action params validation', () => {
       subActionParams: {},
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         body: [],
         input: ['Input is required.', 'Input does not have a valid Array format.'],
@@ -156,7 +156,7 @@ describe('OpenAI action params validation', () => {
       subActionParams: { input: 'message test' },
     };
 
-    expect(await actionTypeModel.validateParams(actionParams)).toEqual({
+    expect(await actionTypeModel.validateParams(actionParams, null)).toEqual({
       errors: {
         body: [],
         input: [],

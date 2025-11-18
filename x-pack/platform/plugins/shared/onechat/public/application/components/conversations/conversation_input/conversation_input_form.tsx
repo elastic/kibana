@@ -8,42 +8,47 @@
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-import { useMessages } from '../../../context/messages_context';
+import React, { useState } from 'react';
+import { useSendMessage } from '../../../context/send_message/send_message_context';
 import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
-import { ConversationContent } from '../conversation_grid';
-import { ConversationInputActions } from './conversation_input_actions';
 import { ConversationInputTextArea } from './conversation_input_text_area';
+import { useAgentId } from '../../../hooks/use_conversation';
+import { useOnechatAgents } from '../../../hooks/agents/use_agents';
+import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
+import { ConversationInputActions } from './conversation_input_actions';
+
+const MIN_HEIGHT = 150;
 
 interface ConversationInputFormProps {
-  onSubmit: () => void;
+  onSubmit?: () => void;
 }
-
-const fullHeightStyles = css`
-  height: 100%;
-`;
 
 export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ onSubmit }) => {
   const isSendingMessage = useIsSendingMessage();
-  const { input, setInput, sendMessage } = useMessages();
+  const [input, setInput] = useState('');
+  const { sendMessage, pendingMessage } = useSendMessage();
   const { euiTheme } = useEuiTheme();
-  const disabled = !input.trim() || isSendingMessage;
+  const { isFetched } = useOnechatAgents();
+  const agentId = useAgentId();
+
+  const validateAgentId = useValidateAgentId();
+  const isAgentIdValid = validateAgentId(agentId);
+
+  const shouldDisableTextArea = !isAgentIdValid && isFetched && !!agentId;
+  const isSubmitDisabled = !input.trim() || isSendingMessage || !isAgentIdValid;
 
   const handleSubmit = () => {
-    if (disabled) {
+    if (isSubmitDisabled) {
       return;
     }
     sendMessage({ message: input });
     setInput('');
-    onSubmit();
+    onSubmit?.();
   };
 
-  const contentStyles = css`
-    ${fullHeightStyles}
-    align-items: stretch;
-  `;
   const formContainerStyles = css`
-    ${fullHeightStyles}
+    width: 100%;
+    min-height: ${MIN_HEIGHT}px;
     padding: ${euiTheme.size.base};
     box-shadow: none;
     border: ${euiTheme.border.thin};
@@ -54,26 +59,43 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
     }
   `;
 
+  const formContainerDisabledStyles = css`
+    background-color: ${euiTheme.colors.backgroundBaseDisabled};
+  `;
+
   return (
-    <ConversationContent css={contentStyles}>
-      <EuiFlexGroup
-        css={formContainerStyles}
-        direction="column"
-        gutterSize="s"
-        responsive={false}
-        alignItems="stretch"
-        justifyContent="center"
-        aria-label={i18n.translate('xpack.onechat.conversationInputForm', {
-          defaultMessage: 'Message input form',
-        })}
-      >
-        <ConversationInputTextArea
-          message={input}
-          setMessage={setInput}
-          handleSubmit={handleSubmit}
+    <EuiFlexGroup
+      css={[formContainerStyles, shouldDisableTextArea && formContainerDisabledStyles]}
+      direction="column"
+      gutterSize="s"
+      responsive={false}
+      alignItems="stretch"
+      justifyContent="center"
+      data-test-subj="agentBuilderConversationInputForm"
+      aria-label={i18n.translate('xpack.onechat.conversationInputForm', {
+        defaultMessage: 'Message input form',
+      })}
+      aria-disabled={shouldDisableTextArea}
+    >
+      <ConversationInputTextArea
+        input={input}
+        setInput={setInput}
+        onSubmit={handleSubmit}
+        disabled={shouldDisableTextArea}
+        agentId={agentId}
+      />
+      {!shouldDisableTextArea && (
+        <ConversationInputActions
+          onSubmit={handleSubmit}
+          isSubmitDisabled={isSubmitDisabled}
+          resetToPendingMessage={() => {
+            if (pendingMessage) {
+              setInput(pendingMessage);
+            }
+          }}
+          agentId={agentId}
         />
-        <ConversationInputActions handleSubmit={handleSubmit} submitDisabled={disabled} />
-      </EuiFlexGroup>
-    </ConversationContent>
+      )}
+    </EuiFlexGroup>
   );
 };

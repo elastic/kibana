@@ -287,6 +287,7 @@ describe('Ad Hoc Task Runner', () => {
         duration: '1h',
         enabled: true,
         end: '2024-03-01T05:00:00.000Z',
+        initiator: 'user',
         rule: {
           name: 'test',
           tags: [],
@@ -1407,7 +1408,7 @@ describe('Ad Hoc Task Runner', () => {
         backfillRunAt: schedule1.runAt,
         backfillInterval: schedule1.interval,
       });
-      expect(logger.debug).toHaveBeenCalledTimes(4);
+      expect(logger.debug).toHaveBeenCalledTimes(6);
       expect(logger.debug).nthCalledWith(
         1,
         `Executing ad hoc run for rule test:rule-id for runAt ${schedule1.runAt}`
@@ -1423,6 +1424,14 @@ describe('Ad Hoc Task Runner', () => {
       expect(logger.debug).nthCalledWith(
         4,
         `skipping persisting alerts for rule test:rule-id: 'test': rule execution has been cancelled.`
+      );
+      expect(logger.debug).nthCalledWith(
+        5,
+        `no scheduling of actions for rule test:rule-id: 'test': rule execution has been cancelled.`
+      );
+      expect(logger.debug).nthCalledWith(
+        6,
+        `skipping updating alerts for rule test:rule-id: 'test': rule execution has been cancelled.`
       );
       expect(logger.error).not.toHaveBeenCalled();
     });
@@ -1489,7 +1498,7 @@ describe('Ad Hoc Task Runner', () => {
         backfillRunAt: schedule2.runAt,
         backfillInterval: schedule2.interval,
       });
-      expect(logger.debug).toHaveBeenCalledTimes(4);
+      expect(logger.debug).toHaveBeenCalledTimes(6);
       expect(logger.debug).nthCalledWith(
         1,
         `Executing ad hoc run for rule test:rule-id for runAt ${schedule2.runAt}`
@@ -1505,6 +1514,14 @@ describe('Ad Hoc Task Runner', () => {
       expect(logger.debug).nthCalledWith(
         4,
         `skipping persisting alerts for rule test:rule-id: 'test': rule execution has been cancelled.`
+      );
+      expect(logger.debug).nthCalledWith(
+        5,
+        `no scheduling of actions for rule test:rule-id: 'test': rule execution has been cancelled.`
+      );
+      expect(logger.debug).nthCalledWith(
+        6,
+        `skipping updating alerts for rule test:rule-id: 'test': rule execution has been cancelled.`
       );
       expect(logger.error).not.toHaveBeenCalled();
     });
@@ -1701,6 +1718,7 @@ describe('Ad Hoc Task Runner', () => {
           rule_type_run_duration_ms: 0,
           total_run_duration_ms: expect.any(Number),
           trigger_actions_duration_ms: 0,
+          update_alerts_duration_ms: 0,
         },
       });
     } else if (status === 'warning') {
@@ -1736,6 +1754,7 @@ describe('Ad Hoc Task Runner', () => {
           rule_type_run_duration_ms: 0,
           total_run_duration_ms: 0,
           trigger_actions_duration_ms: 0,
+          update_alerts_duration_ms: 0,
         },
       });
     } else if (status === 'skip') {
@@ -1772,6 +1791,7 @@ describe('Ad Hoc Task Runner', () => {
           rule_type_run_duration_ms: 0,
           total_run_duration_ms: expect.any(Number),
           trigger_actions_duration_ms: 0,
+          update_alerts_duration_ms: 0,
         },
       });
     }

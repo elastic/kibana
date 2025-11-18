@@ -16,11 +16,11 @@ import type {
   ChatCompleteMetadata,
   AnonymizationRule,
 } from '@kbn/inference-common';
-import { KibanaRequest } from '@kbn/core/server';
-import { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server';
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { KibanaRequest } from '@kbn/core/server';
+import type { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import type { InferenceExecutor } from './utils';
-import { RegexWorkerService } from './anonymization/regex_worker_service';
+import type { RegexWorkerService } from './anonymization/regex_worker_service';
 
 /**
  * Adapter in charge of communicating with a specific inference connector

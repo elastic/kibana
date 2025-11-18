@@ -9,10 +9,10 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { $Keys } from 'utility-types';
+import type { $Keys } from 'utility-types';
 import { flatten } from 'lodash';
 
-import { KqlQuerySuggestionProvider } from './types';
+import type { KqlQuerySuggestionProvider } from './types';
 import { QuerySuggestionTypes } from '../query_suggestion_provider';
 
 const equalsText = (

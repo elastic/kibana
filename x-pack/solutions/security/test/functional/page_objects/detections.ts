@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
+import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '@kbn/test-suites-xpack-platform/functional/ftr_provider_context';
 
 const ALERT_TABLE_ROW_CSS_SELECTOR = '[data-test-subj="alertsTableIsLoaded"] .euiDataGridRow';

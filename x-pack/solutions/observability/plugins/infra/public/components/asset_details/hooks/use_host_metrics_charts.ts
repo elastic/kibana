@@ -6,19 +6,24 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DataSchemaFormat, findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import type { DataSchemaFormat } from '@kbn/metrics-data-access-plugin/common';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import useAsync from 'react-use/lib/useAsync';
 import type { HostMetricTypes } from '../charts/types';
+import {
+  AVG_OR_AVERAGE_AS_FIRST_FUNCTION_PATTERN,
+  MAX_AS_FIRST_FUNCTION_PATTERN,
+} from '../constants';
 import { useChartSeriesColor } from './use_chart_series_color';
 
 export const useHostCharts = ({
   metric,
-  dataViewId,
+  indexPattern,
   overview,
   schema,
 }: {
   metric: HostMetricTypes;
-  dataViewId?: string;
+  indexPattern?: string;
   overview?: boolean;
   schema?: DataSchemaFormat | null;
 }) => {
@@ -26,37 +31,33 @@ export const useHostCharts = ({
     const hostCharts = await getHostsCharts({
       metric,
       overview,
-      schema: schema ?? DataSchemaFormat.ECS,
+      schema: schema ?? 'ecs',
     });
 
     return hostCharts.map((chart) => ({
       ...chart,
-      ...(dataViewId && {
+      ...(indexPattern && {
         dataset: {
-          index: dataViewId,
+          index: indexPattern,
         },
       }),
     }));
-  }, [dataViewId, metric, overview, schema]);
+  }, [indexPattern, metric, overview, schema]);
 
   return { charts, error };
 };
 
 export const useKubernetesCharts = ({
-  dataViewId,
+  indexPattern,
   overview,
-  schema,
 }: {
-  dataViewId?: string;
+  indexPattern?: string;
   overview?: boolean;
-  schema?: DataSchemaFormat | null;
 }) => {
   const model = findInventoryModel('host');
 
   const { value: charts = [], error } = useAsync(async () => {
-    const { kubernetesNode } = await model.metrics.getCharts({
-      schema: schema ?? DataSchemaFormat.ECS,
-    });
+    const { kubernetesNode } = await model.metrics.getCharts();
 
     if (!kubernetesNode) {
       return [];
@@ -74,32 +75,44 @@ export const useKubernetesCharts = ({
     return items.map((chart) => {
       return {
         ...chart,
-        ...(dataViewId && {
+        ...(indexPattern && {
           dataset: {
-            index: dataViewId,
+            index: indexPattern,
           },
         }),
       };
     });
-  }, [model.metrics, schema, overview, dataViewId]);
+  }, [model.metrics, overview, indexPattern]);
 
   return { charts, error };
 };
 
-const getSubtitleFromFormula = (value: string) =>
-  value.startsWith('max')
-    ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.max', { defaultMessage: 'Max' })
-    : i18n.translate('xpack.infra.assetDetails.kpi.subtitle.average', {
-        defaultMessage: 'Average',
-      });
+export const getSubtitleFromFormula = (value: string) => {
+  // Check if 'avg' or 'average' is the first word/function in the formula
+  if (AVG_OR_AVERAGE_AS_FIRST_FUNCTION_PATTERN.test(value)) {
+    return i18n.translate('xpack.infra.assetDetails.kpi.subtitle.average', {
+      defaultMessage: 'Average',
+    });
+  }
+
+  // Check if 'max' is the first word/function in the formula
+  if (MAX_AS_FIRST_FUNCTION_PATTERN.test(value)) {
+    return i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.max', {
+      defaultMessage: 'Max',
+    });
+  }
+
+  // remove the fallback subtitle to avoid confusion
+  return '';
+};
 
 export const useHostKpiCharts = ({
-  dataViewId,
+  indexPattern,
   seriesColor,
   getSubtitle,
   schema,
 }: {
-  dataViewId?: string;
+  indexPattern?: string;
   seriesColor?: string;
   getSubtitle?: (formulaValue: string) => string;
   schema?: DataSchemaFormat | null;
@@ -109,7 +122,7 @@ export const useHostKpiCharts = ({
   const { value: charts = [] } = useAsync(async () => {
     const model = findInventoryModel('host');
     const { cpu, memory, disk } = await model.metrics.getCharts({
-      schema: schema ?? DataSchemaFormat.ECS,
+      schema: schema ?? 'ecs',
     });
 
     return [
@@ -122,13 +135,13 @@ export const useHostKpiCharts = ({
       seriesColor,
       decimals: 1,
       subtitle: getSubtitle ? getSubtitle(chart.value) : getSubtitleFromFormula(chart.value),
-      ...(dataViewId && {
+      ...(indexPattern && {
         dataset: {
-          index: dataViewId,
+          index: indexPattern,
         },
       }),
     }));
-  }, [dataViewId, seriesColor, getSubtitle, schema]);
+  }, [indexPattern, seriesColor, getSubtitle, schema]);
 
   return charts;
 };
@@ -145,7 +158,7 @@ const getHostsCharts = async ({
   const model = findInventoryModel('host');
 
   const { cpu, memory, network, disk, logs } = await model.metrics.getCharts({
-    schema: schema ?? DataSchemaFormat.ECS,
+    schema: schema ?? 'ecs',
   });
 
   switch (metric) {

@@ -8,23 +8,25 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { ManagementSetup } from '@kbn/management-plugin/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
+import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
+import type {
+  SavedObjectsManagementActionServiceStart,
+  SavedObjectsManagementColumnServiceStart,
+} from './services';
 import {
   SavedObjectsManagementActionService,
-  SavedObjectsManagementActionServiceStart,
   SavedObjectsManagementColumnService,
-  SavedObjectsManagementColumnServiceStart,
 } from './services';
 
 import type { v1 } from '../common';
 
-import { SavedObjectManagementTypeInfo } from './types';
+import type { SavedObjectManagementTypeInfo } from './types';
 import {
   getAllowedTypes,
   getDefaultTitle,
@@ -43,7 +45,8 @@ export interface SavedObjectsManagementPluginStart {
   getRelationships: (
     type: string,
     id: string,
-    savedObjectTypes: string[]
+    savedObjectTypes: string[],
+    size?: number
   ) => Promise<v1.RelationshipsResponseHTTP>;
   getSavedObjectLabel: typeof getSavedObjectLabel;
   getDefaultTitle: typeof getDefaultTitle;
@@ -131,8 +134,8 @@ export class SavedObjectsManagementPlugin
 
     return {
       getAllowedTypes: () => getAllowedTypes(_core.http),
-      getRelationships: (type: string, id: string, savedObjectTypes: string[]) =>
-        getRelationships(_core.http, type, id, savedObjectTypes),
+      getRelationships: (type: string, id: string, savedObjectTypes: string[], size?: number) =>
+        getRelationships(_core.http, type, id, savedObjectTypes, size),
       getSavedObjectLabel,
       getDefaultTitle,
       parseQuery,

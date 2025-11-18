@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { Adapters } from '@kbn/inspector-plugin/common/adapters';
+import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { createEsError } from '@kbn/search-errors';

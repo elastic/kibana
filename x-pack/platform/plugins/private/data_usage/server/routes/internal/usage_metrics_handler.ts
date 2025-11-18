@@ -6,15 +6,12 @@
  */
 
 import { chunk } from 'lodash/fp';
-import { RequestHandler } from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 import { momentDateParser } from '../../../common/utils';
-import type {
-  MetricTypes,
-  UsageMetricsAutoOpsResponseSchemaBody,
-  UsageMetricsRequestBody,
-  UsageMetricsResponseSchemaBody,
-} from '../../../common/rest_types';
-import { DataUsageContext, DataUsageRequestHandlerContext } from '../../types';
+import type { MetricTypes } from '../../../common/rest_types';
+import type { UsageMetricsAutoOpsResponseSchemaBody } from '../../services/autoops_api';
+import type { UsageMetricsRequestBody, UsageMetricsResponseSchemaBody } from './usage_metrics';
+import type { DataUsageContext, DataUsageRequestHandlerContext } from '../../types';
 
 import { errorHandler } from '../error_handler';
 import { CustomHttpRequestError } from '../../utils';
@@ -80,7 +77,7 @@ export const getUsageMetricsHandler = (
         return errorHandler(
           logger,
           response,
-          new CustomHttpRequestError('Failed to retrieve data streams', 400)
+          new CustomHttpRequestError('Failed to retrieve data streams', 400, error)
         );
       }
 

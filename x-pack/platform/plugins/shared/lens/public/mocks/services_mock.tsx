@@ -16,7 +16,7 @@ import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
-import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 
 import { createEmbeddableStateTransferMock } from '@kbn/embeddable-plugin/public/mocks';
@@ -27,12 +27,12 @@ import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 
-import { LensAppServices } from '../app_plugin/types';
+import type { LensDocument, LensAppServices, LensAttributesService } from '@kbn/lens-common';
 import { mockDataPlugin } from './data_plugin_mock';
 import { getLensInspectorService } from '../lens_inspector_service';
-import { LensDocument, LensDocumentService } from '../persistence';
-import { LensAttributesService } from '../lens_attribute_service';
+import type { LensDocumentService } from '../persistence';
 import { mockDatasourceStates } from './store_mocks';
+import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
 
 const startMock = coreMock.createStart();
 
@@ -47,6 +47,7 @@ export const defaultDoc: LensDocument = {
     visualization: {},
   },
   references: [{ type: 'index-pattern', id: '1', name: 'index-pattern-0' }],
+  version: LENS_ITEM_LATEST_VERSION,
 };
 
 export const exactMatchDoc = {
@@ -63,17 +64,6 @@ export function makeAttributeService(doc: LensDocument): jest.Mocked<LensAttribu
     loadFromLibrary: jest.fn().mockResolvedValue(exactMatchDoc),
     saveToLibrary: jest.fn().mockResolvedValue(doc.savedObjectId),
     checkForDuplicateTitle: jest.fn().mockResolvedValue(false),
-    injectReferences: jest.fn((_runtimeState, references) => ({
-      ..._runtimeState,
-      attributes: {
-        ..._runtimeState.attributes,
-        references: references?.length ? references : _runtimeState.attributes.references,
-      },
-    })),
-    extractReferences: jest.fn((_runtimeState) => ({
-      rawState: _runtimeState,
-      references: _runtimeState.attributes.references || [],
-    })),
   };
 
   return attributeServiceMock;

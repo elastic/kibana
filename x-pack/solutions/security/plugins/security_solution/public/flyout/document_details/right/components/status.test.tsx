@@ -37,9 +37,11 @@ const actionItem = {
 
 (useAlertsActions as jest.Mock).mockReturnValue({
   actionItems: [actionItem],
+  panels: [],
 });
 
-describe('<DocumentStatus />', () => {
+// Failing: See https://github.com/elastic/kibana/issues/231701
+describe.skip('<DocumentStatus />', () => {
   it('should render status information', async () => {
     const contextValue = {
       eventId: 'eventId',

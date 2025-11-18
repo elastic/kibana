@@ -101,6 +101,7 @@ exports[`ScopeExpression renders when enabled set to false 1`] = `
     >
       <button
         class="euiExpression emotion-euiExpression-isClickable-success"
+        data-test-subj="mlScopeExpressionFilterSelector"
       >
         <span
           class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
@@ -173,6 +174,7 @@ exports[`ScopeExpression renders when filter ID and type supplied 1`] = `
     >
       <button
         class="euiExpression emotion-euiExpression-isClickable-success"
+        data-test-subj="mlScopeExpressionFilterSelector"
       >
         <span
           class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
@@ -245,6 +247,7 @@ exports[`ScopeExpression renders when no filter ID or type supplied 1`] = `
     >
       <button
         class="euiExpression emotion-euiExpression-isClickable-success"
+        data-test-subj="mlScopeExpressionFilterSelector"
       >
         <span
           class="euiExpression__description emotion-euiExpression__description-success-isUppercase"

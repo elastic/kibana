@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Builder } from '../builder';
-import { Walker, WalkerAstNode } from '../walker/walker';
-import { SynthNode } from './synth_node';
 import { holeToFragment } from './holes';
 import type { ESQLProperNode } from '../types';
 import type {
@@ -19,18 +16,6 @@ import type {
   SynthTemplateHole,
 } from './types';
 import type { ParseOptions } from '../parser';
-
-export const makeSynthNode = (ast: WalkerAstNode) => {
-  // Add SynthNode prototype to the AST node.
-  Object.setPrototypeOf(ast, new SynthNode());
-
-  // Remove parser generated fields.
-  Walker.walk(ast, {
-    visitAny: (node) => {
-      Object.assign(node, Builder.parserFields({}));
-    },
-  });
-};
 
 export const createTag = <N extends ESQLProperNode>(
   generator: SynthGenerator<N>
@@ -49,6 +34,7 @@ export const createTag = <N extends ESQLProperNode>(
           src += fragment;
         }
       }
+
       return generator(src, opts);
     };
   }) as SynthTaggedTemplateWithOpts<N>;

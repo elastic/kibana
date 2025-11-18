@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const { lens, timePicker, dashboard } = getPageObjects(['lens', 'timePicker', 'dashboard']);
@@ -21,7 +21,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   describe('Time Series', function describeIndexTests() {
     const fixture =
-      'x-pack/test_serverless/functional/fixtures/kbn_archiver/lens/open_in_lens/tsvb/timeseries.json';
+      'x-pack/platform/test/serverless/fixtures/kbn_archives/lens/open_in_lens/tsvb/timeseries.json';
 
     before(async () => {
       await kibanaServer.importExport.load(fixture);
@@ -33,7 +33,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       await dashboard.navigateToApp(); // required for svl until dashboard PO navigation is fixed
-      await dashboard.gotoDashboardEditMode('Convert to Lens - TSVB - Timeseries');
+      await dashboard.loadDashboardInEditMode('Convert to Lens - TSVB - Timeseries');
       await timePicker.setDefaultAbsoluteRange();
     });
 

@@ -8,11 +8,12 @@
  */
 
 import { Builder } from '../../../builder';
-import { ESQLAstQueryExpression, ESQLCommand, ESQLSource } from '../../../types';
+import type { ESQLAstQueryExpression, ESQLCommand, ESQLSource } from '../../../types';
 import { Visitor } from '../../../visitor';
 import * as generic from '../../generic';
 import * as util from '../../util';
 import type { Predicate } from '../../types';
+import { isSubQuery } from '../../../ast/is';
 
 export const list = (
   ast: ESQLAstQueryExpression | ESQLCommand<'from'>
@@ -22,6 +23,8 @@ export const list = (
       for (const argument of ctx.arguments()) {
         if (argument.type === 'source') {
           yield argument;
+        } else if (isSubQuery(argument)) {
+          yield* list(argument.child);
         }
       }
     })

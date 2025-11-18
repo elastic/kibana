@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export type { ILicense, LicenseType, LicenseCheckState } from '@kbn/licensing-plugin/common/types';
+export type { ILicense, LicenseType, LicenseCheckState } from '@kbn/licensing-types';
 
 export type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 

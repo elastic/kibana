@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -11,7 +11,9 @@
     "public/**/*",
     "types/**/*"
   ],
-  "exclude": ["target/**/*"],
+  "exclude": [
+    "target/**/*"
+  ],
   "kbn_references": [
     "@kbn/config-schema",
     "@kbn/core-pricing-common",
@@ -45,7 +47,6 @@
     "@kbn/traced-es-client",
     "@kbn/zod-helpers",
     "@kbn/inference-common",
-    "@kbn/core-elasticsearch-client-server-internal",
     "@kbn/std",
     "@kbn/core-http-server",
     "@kbn/core-saved-objects-api-server",
@@ -53,7 +54,22 @@
     "@kbn/inference-plugin",
     "@kbn/security-plugin",
     "@kbn/task-manager-plugin",
+    "@kbn/ai-tools",
+    "@kbn/logging-mocks",
+    "@kbn/grok-heuristics",
+    "@kbn/streamlang",
+    "@kbn/licensing-types",
+    "@kbn/core-elasticsearch-server-utils",
+    "@kbn/safer-lodash-set",
     "@kbn/sse-utils",
-    "@kbn/ai-tools"
+    "@kbn/global-search-plugin",
+    "@kbn/fields-metadata-plugin",
+    "@kbn/otel-semantic-conventions",
+    "@kbn/streams-ai",
+    "@kbn/spaces-plugin",
+    "@kbn/usage-collection-plugin",
+    "@kbn/utility-types",
+    "@kbn/console-plugin",
+    "@kbn/actions-plugin",
   ]
 }

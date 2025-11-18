@@ -9,7 +9,8 @@ import { parse } from 'query-string';
 import type { FunctionComponent } from 'react';
 import React, { useEffect, useState } from 'react';
 
-import { EuiCallOut, EuiCodeBlock, UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiCallOut, EuiCodeBlock } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
@@ -18,8 +19,8 @@ import {
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
   REPORTING_REDIRECT_ALLOWED_LOCATOR_TYPES,
 } from '@kbn/reporting-common';
-import { LocatorParams, BaseParamsV2 } from '@kbn/reporting-common/types';
-import { ReportingAPIClient } from '@kbn/reporting-public';
+import type { LocatorParams, BaseParamsV2 } from '@kbn/reporting-common/types';
+import type { ReportingAPIClient } from '@kbn/reporting-public';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 
 import type { SharePluginSetup } from '../shared_imports';
@@ -101,7 +102,7 @@ export const RedirectApp: FunctionComponent<Props> = ({ apiClient, screenshotMod
       }
     >
       {error ? (
-        <EuiCallOut title={i18nTexts.errorTitle} color="danger">
+        <EuiCallOut announceOnMount title={i18nTexts.errorTitle} color="danger">
           <p>{error.message}</p>
           {error.stack && <EuiCodeBlock>{error.stack}</EuiCodeBlock>}
         </EuiCallOut>

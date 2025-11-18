@@ -10,7 +10,8 @@ import type { Filter } from '@kbn/es-query';
 import type { Query, TimeRange } from '@kbn/es-query';
 import type { ExpressionValueSearchContext } from '@kbn/data-plugin/common/search/expressions/kibana_context_type';
 import type { ExpressionFunctionDefinition, Render } from '@kbn/expressions-plugin/public';
-import { TILE_MAP_RENDER, TILE_MAP_VIS_TYPE, TileMapVisConfig } from './types';
+import type { TileMapVisConfig } from './types';
+import { TILE_MAP_RENDER, TILE_MAP_VIS_TYPE } from './types';
 
 interface Arguments {
   visConfig: string;

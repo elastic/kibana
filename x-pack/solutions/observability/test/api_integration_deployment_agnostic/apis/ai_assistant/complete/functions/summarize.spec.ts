@@ -7,7 +7,8 @@
 
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import expect from '@kbn/expect';
-import { LlmProxy, createLlmProxy } from '../../utils/create_llm_proxy';
+import type { LlmProxy } from '../../utils/create_llm_proxy';
+import { createLlmProxy } from '../../utils/create_llm_proxy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import { invokeChatCompleteWithFunctionRequest } from '../../utils/conversation';
 import {

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -34,20 +34,19 @@
     "@kbn/cloud-plugin",
     "@kbn/cloud-security-posture-plugin",
     "@kbn/security-solution-features",
-    "@kbn/cases-plugin",
     "@kbn/fleet-plugin",
     "@kbn/serverless-security-settings",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-logging-server-mocks",
-    "@kbn/stack-connectors-plugin",
     "@kbn/actions-plugin",
     "@kbn/discover-plugin",
     "@kbn/logging",
     "@kbn/automatic-import-plugin",
     "@kbn/cloud-security-posture-common",
     "@kbn/dev-utils",
-    "@kbn/inference-common",
     "@kbn/ai-assistant-icon",
     "@kbn/core-application-browser",
+    "@kbn/deeplinks-management",
+    "@kbn/connector-schemas",
   ]
 }

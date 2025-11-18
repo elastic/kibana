@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -18,10 +18,15 @@
     "@kbn/onechat-common",
     "@kbn/onechat-server",
     "@kbn/core-elasticsearch-server",
-    "@kbn/inference-common",
     "@kbn/inference-plugin",
     "@kbn/zod",
     "@kbn/logging",
     "@kbn/logging-mocks",
+    "@kbn/core",
+    "@kbn/inference-tracing",
+    "@kbn/es-errors",
+    "@kbn/i18n",
+    "@kbn/std",
+    "@kbn/esql-ast",
   ]
 }

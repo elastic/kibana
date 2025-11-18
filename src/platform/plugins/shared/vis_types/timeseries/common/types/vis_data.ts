@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PANEL_TYPES } from '../enums';
+import type { PANEL_TYPES } from '../enums';
 import type { TimeseriesUIRestrictions } from '../ui_restrictions';
 
 export type TimeseriesVisData = SeriesData | TableData;

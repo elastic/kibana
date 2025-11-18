@@ -9,9 +9,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { EuiFieldText } from '@elastic/eui';
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   PhraseValueInput,
@@ -20,7 +20,7 @@ import {
   isRangeParams,
 } from '../../filter_bar/filter_editor';
 import type { Operator } from '../../filter_bar/filter_editor';
-import { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
+import type { SuggestionsAbstraction } from '../../typeahead/suggestions_component';
 import { OPERATORS } from '../../filter_bar/filter_editor/lib/filter_operators';
 import { formatDateChange } from '../../filter_bar/filter_editor/range_value_input';
 

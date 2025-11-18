@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import {
+import type {
   CreateExceptionListSchemaDecoded,
   ExceptionListSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
+import {
   createExceptionListSchema,
   exceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';

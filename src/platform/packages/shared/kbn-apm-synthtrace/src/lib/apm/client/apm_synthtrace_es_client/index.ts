@@ -7,21 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Client, estypes } from '@elastic/elasticsearch';
-import { ApmFields, ApmOtelFields, ApmSynthtracePipelines } from '@kbn/apm-synthtrace-client';
-import { ValuesType } from 'utility-types';
-import { Readable } from 'stream';
-import { PipelineOptions } from '../../../../cli/utils/clients_manager';
-import {
-  SynthtraceEsClientBase,
-  SynthtraceEsClient,
-  SynthtraceEsClientOptions,
-} from '../../../shared/base_client';
-import { Logger } from '../../../utils/create_logger';
+import type { Client, estypes } from '@elastic/elasticsearch';
+import type { ApmFields, ApmOtelFields, ApmSynthtracePipelines } from '@kbn/apm-synthtrace-client';
+import type { ValuesType } from 'utility-types';
+import type { Readable } from 'stream';
+import type { PipelineOptions } from '../../../../cli/utils/clients_manager';
+import type { SynthtraceEsClient, SynthtraceEsClientOptions } from '../../../shared/base_client';
+import { SynthtraceEsClientBase } from '../../../shared/base_client';
+import type { Logger } from '../../../utils/create_logger';
 import { apmPipeline } from './apm_pipeline';
 import { apmToOtelPipeline } from './otel/apm_to_otel_pipeline';
 import { otelToApmPipeline } from './otel/otel_to_apm_pipeline';
-import { PackageManagement } from '../../../shared/types';
+import type { PackageManagement } from '../../../shared/types';
 
 export enum ComponentTemplateName {
   LogsApp = 'logs-apm.app@custom',

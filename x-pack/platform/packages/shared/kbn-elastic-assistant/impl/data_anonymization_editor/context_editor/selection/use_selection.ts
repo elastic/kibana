@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { FindAnonymizationFieldsClientResponse } from './types';
+import type { FindAnonymizationFieldsClientResponse } from './types';
 
 const EMPTY_CONVERSATIONS_ARRAY: string[] = [];
 

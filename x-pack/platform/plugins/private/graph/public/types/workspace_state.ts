@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { JsonObject } from '@kbn/utility-types';
-import d3 from 'd3';
-import { TargetOptions } from '../components/control_panel';
-import { GenericIcon } from '../helpers/style_choices';
-import { WorkspaceField, AdvancedSettings } from './app_state';
+import type { JsonObject } from '@kbn/utility-types';
+import type d3 from 'd3';
+import type { TargetOptions } from '../components/control_panel';
+import type { GenericIcon } from '../helpers/style_choices';
+import type { WorkspaceField, AdvancedSettings } from './app_state';
 
 export interface WorkspaceNode {
   id: string;

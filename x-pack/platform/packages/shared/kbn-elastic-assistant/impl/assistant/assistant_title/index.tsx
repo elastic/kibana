@@ -9,7 +9,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiInlineEditTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
-import { DataStreamApis } from '../use_data_stream_apis';
+import type { DataStreamApis } from '../use_data_stream_apis';
 import type { Conversation } from '../../..';
 import { useConversation } from '../use_conversation';
 import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';

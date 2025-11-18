@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { AnyAction } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
+import type { AnyAction } from 'redux';
+import type { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import { TooltipState } from '../../../../common/descriptor_types';
+import type { TooltipState } from '../../../../common/descriptor_types';
 import { TooltipControl } from './tooltip_control';
 import {
   closeOnClickTooltip,
@@ -26,7 +26,7 @@ import {
 } from '../../../selectors/map_selectors';
 import { getDrawMode } from '../../../selectors/ui_selectors';
 import { DRAW_MODE } from '../../../../common/constants';
-import { MapStoreState } from '../../../reducers/store';
+import type { MapStoreState } from '../../../reducers/store';
 
 function mapStateToProps(state: MapStoreState) {
   return {

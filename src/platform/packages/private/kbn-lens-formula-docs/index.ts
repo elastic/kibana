@@ -58,7 +58,7 @@ import { percentile } from './src/operations/percentile';
 import { stdDeviation } from './src/operations/std_deviation';
 import { sum } from './src/operations/sum';
 import { timeRange } from './src/operations/time_range';
-import { OperationDocumentationType } from './src/operations/types';
+import type { OperationDocumentationType } from './src/operations/types';
 
 export const documentationMap: Record<string, OperationDocumentationType> = [
   average,

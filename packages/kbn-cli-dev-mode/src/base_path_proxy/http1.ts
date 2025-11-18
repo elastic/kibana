@@ -8,16 +8,17 @@
  */
 
 import Url from 'url';
-import { Agent as HttpsAgent, ServerOptions as TlsOptions } from 'https';
+import type { ServerOptions as TlsOptions } from 'https';
+import { Agent as HttpsAgent } from 'https';
 import apm from 'elastic-apm-node';
-import { Server, Request } from '@hapi/hapi';
+import type { Server, Request } from '@hapi/hapi';
 import HapiProxy from '@hapi/h2o2';
 import { take } from 'rxjs';
 import { ByteSizeValue } from '@kbn/config-schema';
 import { createServer, getServerOptions } from '@kbn/server-http-tools';
 
-import { DevConfig, HttpConfig } from '../config';
-import { Log } from '../log';
+import type { DevConfig, HttpConfig } from '../config';
+import type { Log } from '../log';
 import { getRandomBasePath } from './utils';
 import type { BasePathProxyServer, BasePathProxyServerOptions } from './types';
 

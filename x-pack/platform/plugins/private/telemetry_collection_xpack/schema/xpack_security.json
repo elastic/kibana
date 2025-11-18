@@ -1,5 +1,196 @@
 {
   "properties": {
+    "asset_inventory": {
+      "properties": {
+        "entities": {
+          "properties": {
+            "doc_count": {
+              "type": "long"
+            },
+            "last_doc_timestamp": {
+              "type": "date"
+            }
+          }
+        },
+        "entities_type_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "entity_type": {
+                "type": "keyword"
+              },
+              "doc_count": {
+                "type": "long"
+              },
+              "last_doc_timestamp": {
+                "type": "date"
+              }
+            }
+          }
+        },
+        "entity_store_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "entity_store": {
+                "type": "keyword"
+              },
+              "doc_count": {
+                "type": "long"
+              },
+              "last_doc_timestamp": {
+                "type": "date"
+              }
+            }
+          }
+        },
+        "entity_source_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "entity_source": {
+                "type": "keyword"
+              },
+              "doc_count": {
+                "type": "long"
+              },
+              "last_doc_timestamp": {
+                "type": "date"
+              }
+            }
+          }
+        },
+        "asset_criticality_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "criticality": {
+                "type": "keyword"
+              },
+              "doc_count": {
+                "type": "long"
+              },
+              "last_doc_timestamp": {
+                "type": "date"
+              }
+            }
+          }
+        },
+        "asset_inventory_cloud_connector_usage_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "id": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Cloud connector ID"
+                }
+              },
+              "created_at": {
+                "type": "date",
+                "_meta": {
+                  "description": "Cloud connector created at timestamp"
+                }
+              },
+              "updated_at": {
+                "type": "date",
+                "_meta": {
+                  "description": "Cloud connector updated at timestamp"
+                }
+              },
+              "hasCredentials": {
+                "type": "boolean",
+                "_meta": {
+                  "description": "Whether the cloud connector has valid credentials"
+                }
+              },
+              "cloud_provider": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Cloud provider (aws, azure, gcp)"
+                }
+              },
+              "packagePolicyIds": {
+                "type": "array",
+                "items": {
+                  "type": "keyword",
+                  "_meta": {
+                    "description": "Package policy ID using this cloud connector"
+                  }
+                }
+              },
+              "packagePolicyCount": {
+                "type": "long",
+                "_meta": {
+                  "description": "Number of package policies using this cloud connector"
+                }
+              }
+            }
+          }
+        },
+        "asset_inventory_installation_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "package_policy_id": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Package policy ID"
+                }
+              },
+              "package_name": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Package name"
+                }
+              },
+              "package_version": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Package version"
+                }
+              },
+              "created_at": {
+                "type": "date",
+                "_meta": {
+                  "description": "Package policy created at timestamp"
+                }
+              },
+              "agent_policy_id": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Agent policy ID"
+                }
+              },
+              "agent_count": {
+                "type": "long",
+                "_meta": {
+                  "description": "Number of agents associated with the agent policy"
+                }
+              },
+              "is_agentless": {
+                "type": "boolean",
+                "_meta": {
+                  "description": "Whether the deployment is agentless"
+                }
+              },
+              "supports_cloud_connector": {
+                "type": "boolean",
+                "_meta": {
+                  "description": "Whether the package policy supports cloud connector"
+                }
+              },
+              "cloud_connector_id": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Cloud connector ID associated with the package policy"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "cloud_security_posture": {
       "properties": {
         "indices": {
@@ -278,6 +469,18 @@
               },
               "setup_access_option": {
                 "type": "keyword"
+              },
+              "supports_cloud_connector": {
+                "type": "boolean",
+                "_meta": {
+                  "description": "Whether the package policy supports cloud connector"
+                }
+              },
+              "cloud_connector_id": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Cloud connector ID"
+                }
               }
             }
           }
@@ -419,6 +622,58 @@
               },
               "version": {
                 "type": "keyword"
+              }
+            }
+          }
+        },
+        "cspm_cloud_connector_usage_stats": {
+          "type": "array",
+          "items": {
+            "properties": {
+              "id": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Cloud connector ID"
+                }
+              },
+              "created_at": {
+                "type": "date",
+                "_meta": {
+                  "description": "Cloud connector created at"
+                }
+              },
+              "updated_at": {
+                "type": "date",
+                "_meta": {
+                  "description": "Cloud connector updated at"
+                }
+              },
+              "hasCredentials": {
+                "type": "boolean",
+                "_meta": {
+                  "description": "Whether the cloud connector has valid credentials"
+                }
+              },
+              "cloud_provider": {
+                "type": "keyword",
+                "_meta": {
+                  "description": "Cloud connector cloud provider"
+                }
+              },
+              "packagePolicyIds": {
+                "type": "array",
+                "items": {
+                  "type": "keyword",
+                  "_meta": {
+                    "description": "Package policy ID"
+                  }
+                }
+              },
+              "packagePolicyCount": {
+                "type": "long",
+                "_meta": {
+                  "description": "Number of package policies using the cloud connector"
+                }
               }
             }
           }
@@ -1871,6 +2126,12 @@
                           "_meta": {
                             "description": "Number of threat match rules with exceptions"
                           }
+                        },
+                        "has_does_not_match_condition": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of threat match rules with does_not_match condition in threat mappings"
+                          }
                         }
                       }
                     },
@@ -2028,6 +2289,12 @@
                           "type": "long",
                           "_meta": {
                             "description": "Number of custom threat match rules with exceptions"
+                          }
+                        },
+                        "has_does_not_match_condition": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of threat match rules with does_not_match condition in threat mappings"
                           }
                         }
                       }
@@ -3432,6 +3699,12 @@
                         "type": "boolean",
                         "_meta": {
                           "description": "True if this rule has exceptions"
+                        }
+                      },
+                      "has_does_not_match_condition": {
+                        "type": "boolean",
+                        "_meta": {
+                          "description": "True if Threat match rule has does_not_match condition in threat mappings"
                         }
                       }
                     }
@@ -7239,6 +7512,130 @@
                       "type": "long",
                       "_meta": {
                         "description": "The number of disabled upgradeable elastic rules"
+                      }
+                    }
+                  }
+                },
+                "elastic_detection_rule_customization_status": {
+                  "properties": {
+                    "alert_suppression": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of prebuilt rules with customized alert_suppression field"
+                      }
+                    },
+                    "anomaly_threshold": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of prebuilt rules with customized anomaly_threshold field"
+                      }
+                    },
+                    "data_view_id": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of prebuilt rules with customized data_view_id field"
+                      }
+                    },
+                    "description": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of prebuilt rules with customized description field"
+                      }
+                    },
+                    "filters": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of prebuilt rules with customized filters field"
+                      }
+                    },
+                    "from": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of prebuilt rules with customized from field"
+                      }
+                    },
+                    "index": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of prebuilt rules with customized index field"
+                      }
+                    },
+                    "interval": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of prebuilt rules with customized interval field"
+                      }
+                    },
+                    "investigation_fields": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of prebuilt rules with customized investigation_fields field"
+                      }
+                    },
+                    "name": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of prebuilt rules with customized name field"
+                      }
+                    },
+                    "new_terms_fields": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of prebuilt rules with customized new_terms_fields field"
+                      }
+                    },
+                    "note": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of prebuilt rules with customized note field"
+                      }
+                    },
+                    "query": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of prebuilt rules with customized query field"
+                      }
+                    },
+                    "risk_score": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of prebuilt rules with customized risk_score field"
+                      }
+                    },
+                    "severity": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of prebuilt rules with customized severity field"
+                      }
+                    },
+                    "setup": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of prebuilt rules with customized setup field"
+                      }
+                    },
+                    "tags": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of prebuilt rules with customized tags field"
+                      }
+                    },
+                    "threat_query": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of prebuilt rules with customized threat_query field"
+                      }
+                    },
+                    "threshold": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of prebuilt rules with customized threshold field"
+                      }
+                    },
+                    "timeline_id": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "The number of prebuilt rules with customized timeline_id field"
                       }
                     }
                   }

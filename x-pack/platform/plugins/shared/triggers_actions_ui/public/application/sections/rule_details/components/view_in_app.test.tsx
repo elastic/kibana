@@ -7,68 +7,71 @@
 
 import * as React from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { ReactWrapper } from 'enzyme';
-import { act } from 'react-dom/test-utils';
-import { mountWithIntl } from '@kbn/test-jest-helpers';
-
-import { Rule } from '../../../../types';
+import { render, screen, waitFor } from '@testing-library/react';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import userEvent from '@testing-library/user-event';
+import type { Rule } from '../../../../types';
 import { ViewInApp } from './view_in_app';
-import { useKibana } from '../../../../common/lib/kibana';
-jest.mock('../../../../common/lib/kibana');
+import { createStartServicesMock } from '../../../../common/lib/kibana/kibana_react.mock';
 
+const mockGetNavigation = jest.fn();
+const mockNavigateToUrl = jest.fn();
+
+const mockStartServices = createStartServicesMock();
+mockStartServices.alerting!.getNavigation = mockGetNavigation;
+mockStartServices.application.navigateToUrl = mockNavigateToUrl;
+mockStartServices.http.basePath.prepend = jest.fn((p: string) => p);
+
+jest.mock('../../../../common/lib/kibana', () => ({
+  __esModule: true,
+  useKibana: jest.fn(() => ({
+    services: mockStartServices,
+  })),
+}));
 jest.mock('../../../lib/capabilities', () => ({
   hasSaveRulesCapability: jest.fn(() => true),
 }));
 
-describe('view in app', () => {
-  describe('link to the app that created the rule', () => {
-    it('is disabled when there is no navigation', async () => {
-      const rule = mockRule();
-      const { alerting } = useKibana().services;
-      let component: ReactWrapper;
-      await act(async () => {
-        // use mount as we need useEffect to run
-        component = mountWithIntl(<ViewInApp rule={rule} />);
+const renderWithIntl = (ui: React.ReactElement) => {
+  return render(
+    <IntlProvider locale="en" messages={{}}>
+      {ui}
+    </IntlProvider>
+  );
+};
 
-        await waitForUseEffect();
+describe('view in app, link to the app that created the rule', () => {
+  it('is disabled when there is no navigation', async () => {
+    const rule = mockRule();
+    mockGetNavigation.mockResolvedValueOnce(undefined);
 
-        expect(component!.find('button').prop('disabled')).toBe(true);
-        expect(component!.text()).toBe('View in app');
+    renderWithIntl(<ViewInApp rule={rule} />);
+    const button = await screen.findByRole('button', { name: /view in app/i });
 
-        expect(alerting!.getNavigation).toBeCalledWith(rule.id);
-      });
+    expect(button).toBeDisabled();
+    expect(button).toHaveTextContent('View in app');
+
+    await waitFor(() => expect(mockGetNavigation).toBeCalledWith(rule.id));
+  });
+
+  it('enabled when there is navigation', async () => {
+    const user = userEvent.setup();
+
+    const rule = mockRule({ id: 'rule-with-nav', consumer: 'siem' });
+
+    mockGetNavigation.mockResolvedValueOnce('/rule');
+
+    renderWithIntl(<ViewInApp rule={rule} />);
+    const button = screen.getByRole('button', { name: /view in app/i });
+
+    await waitFor(() => {
+      expect(button).not.toBeDisabled();
     });
 
-    it('enabled when there is navigation', async () => {
-      const rule = mockRule({ id: 'rule-with-nav', consumer: 'siem' });
-      const {
-        application: { navigateToApp },
-      } = useKibana().services;
-
-      let component: ReactWrapper;
-      act(async () => {
-        // use mount as we need useEffect to run
-        component = mountWithIntl(<ViewInApp rule={rule} />);
-
-        await waitForUseEffect();
-
-        expect(component!.find('button').prop('disabled')).toBe(undefined);
-
-        component!.find('button').prop('onClick')!({
-          currentTarget: {},
-        } as React.MouseEvent<{}, MouseEvent>);
-
-        expect(navigateToApp).toBeCalledWith('siem', '/rule');
-      });
-    });
+    await user.click(button);
+    expect(mockNavigateToUrl).toBeCalledWith('/rule');
   });
 });
-
-function waitForUseEffect() {
-  return new Promise((resolve) => {
-    setTimeout(resolve, 0);
-  });
-}
 
 function mockRule(overloads: Partial<Rule> = {}): Rule {
   return {

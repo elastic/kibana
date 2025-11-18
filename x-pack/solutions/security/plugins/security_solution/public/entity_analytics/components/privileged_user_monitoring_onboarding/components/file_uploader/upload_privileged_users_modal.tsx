@@ -12,6 +12,7 @@ import {
   EuiModalHeaderTitle,
   EuiModalBody,
   EuiText,
+  EuiSpacer,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -48,7 +49,7 @@ export const UploadPrivilegedUsersModal: React.FC<ImportPrivilegedUsersModalProp
             />
           </p>
         </EuiText>
-
+        <EuiSpacer size="m" />
         <PrivilegedUsersFileUploader onFileUploaded={onImport} onClose={onClose} />
       </EuiModalBody>
     </EuiModal>

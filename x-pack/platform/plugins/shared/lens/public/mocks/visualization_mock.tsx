@@ -8,7 +8,7 @@ import React from 'react';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { toExpression } from '@kbn/interpreter';
 import { faker } from '@faker-js/faker';
-import { Visualization, VisualizationMap } from '../types';
+import type { Visualization, VisualizationMap } from '@kbn/lens-common';
 
 export function createMockVisualization(
   id = 'testVis',
@@ -64,6 +64,7 @@ export function createMockVisualization(
     setDimension: jest.fn(),
     removeDimension: jest.fn(),
     DimensionEditorComponent: jest.fn(() => <div data-test-subj="lnsVisDimensionEditor" />),
+    isSubtypeSupported: jest.fn(() => true),
   };
 }
 

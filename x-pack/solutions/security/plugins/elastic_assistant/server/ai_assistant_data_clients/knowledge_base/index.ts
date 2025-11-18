@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   MlTrainedModelDeploymentNodesStats,
   MlTrainedModelStats,
   SearchTotalHits,
@@ -13,8 +13,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import { Document } from 'langchain/document';
-import {
-  DocumentEntryType,
+import type {
   DocumentEntry,
   IndexEntry,
   KnowledgeBaseEntryCreateProps,
@@ -23,10 +22,11 @@ import {
   ContentReferencesStore,
   KnowledgeBaseEntryUpdateProps,
 } from '@kbn/elastic-assistant-common';
+import { DocumentEntryType } from '@kbn/elastic-assistant-common';
 import pRetry from 'p-retry';
-import { StructuredTool } from '@langchain/core/tools';
+import type { StructuredTool } from '@langchain/core/tools';
 import { v4 as uuidv4 } from 'uuid';
-import {
+import type {
   AnalyticsServiceSetup,
   AuditLogger,
   ElasticsearchClient,
@@ -35,26 +35,31 @@ import {
 } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
 import { map } from 'lodash';
-import { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
+import type { InstallationStatus } from '@kbn/product-doc-base-plugin/common/install_status';
 import type { TrainedModelsProvider } from '@kbn/ml-plugin/server/shared_services/providers';
 import { getMlNodeCount } from '@kbn/ml-plugin/server/lib/node_utils';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
-import { GetElser } from '../../types';
+import type { AIAssistantDataClientParams } from '..';
+import { AIAssistantDataClient } from '..';
+import type { GetElser } from '../../types';
 import {
   createKnowledgeBaseEntry,
   getUpdateScript,
   transformToCreateSchema,
   transformToUpdateSchema,
 } from './create_knowledge_base_entry';
-import {
+import type {
   EsDocumentEntry,
   EsIndexEntry,
   EsKnowledgeBaseEntrySchema,
   UpdateKnowledgeBaseEntrySchema,
 } from './types';
 import { transformESSearchToKnowledgeBaseEntry, transformESToKnowledgeBase } from './transforms';
-import { SECURITY_LABS_RESOURCE, USER_RESOURCE } from '../../routes/knowledge_base/constants';
+import {
+  SECURITY_LABS_RESOURCE,
+  USER_RESOURCE,
+  DEFEND_INSIGHTS_RESOURCES,
+} from '../../routes/knowledge_base/constants';
 import {
   getKBVectorSearchQuery,
   getStructuredToolForIndexEntry,
@@ -69,8 +74,12 @@ import {
   loadSecurityLabs,
   getSecurityLabsDocsCount,
 } from '../../lib/langchain/content_loaders/security_labs_loader';
+import {
+  getDefendInsightsDocsCount,
+  loadDefendInsights,
+} from '../../lib/langchain/content_loaders/defend_insights_loader';
 import { ASSISTANT_ELSER_INFERENCE_ID } from './field_maps_configuration';
-import { BulkOperationError } from '../../lib/data_stream/documents_data_writer';
+import type { BulkOperationError } from '../../lib/data_stream/documents_data_writer';
 import { AUDIT_OUTCOME, KnowledgeBaseAuditAction, knowledgeBaseAuditEvent } from './audit_events';
 import { findDocuments } from '../find';
 
@@ -293,6 +302,8 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
         }
       }
 
+      const docLoaderPromises: Array<Promise<boolean>> = [];
+
       if (!ignoreSecurityLabs) {
         this.options.logger.debug(`Checking if Knowledge Base docs have been loaded...`);
 
@@ -318,12 +329,50 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
 
           this.options.logger.debug(`Loading Security Labs KB docs...`);
 
-          void loadSecurityLabs(this, this.options.logger)?.then(() => {
-            this.options.setIsKBSetupInProgress(this.spaceId, false);
-          });
+          docLoaderPromises.push(loadSecurityLabs(this, this.options.logger));
         } else {
           this.options.logger.debug(`Security Labs Knowledge Base docs already loaded!`);
         }
+      }
+
+      // Load Defend Insights docs if not already loaded
+      this.options.logger.debug(`Checking if Defend Insights docs have been loaded...`);
+      const defendInsightsDocsLoaded = await this.isDefendInsightsDocsLoaded();
+      if (!defendInsightsDocsLoaded) {
+        // Delete any existing Defend Insights content
+        const defendInsightsDocs = await (
+          await this.options.elasticsearchClientPromise
+        ).deleteByQuery({
+          index: this.indexTemplateAndPattern.alias,
+          query: {
+            bool: {
+              must: [
+                {
+                  bool: {
+                    must: [{ prefix: { kb_resource: DEFEND_INSIGHTS_RESOURCES } }],
+                  },
+                },
+              ],
+            },
+          },
+        });
+
+        if (defendInsightsDocs?.total) {
+          this.options.logger.info(
+            `Removed ${defendInsightsDocs?.total} Defend Insights knowledge base docs from knowledge base data stream: ${this.indexTemplateAndPattern.alias}.`
+          );
+        }
+
+        this.options.logger.debug(`Loading Defend Insights KB docs...`);
+        docLoaderPromises.push(loadDefendInsights(this, this.options.logger));
+      } else {
+        this.options.logger.debug(`Defend Insights Knowledge Base docs already loaded!`);
+      }
+
+      if (docLoaderPromises.length > 0) {
+        void Promise.all(docLoaderPromises).then(() => {
+          this.options.setIsKBSetupInProgress(this.spaceId, false);
+        });
       }
 
       // If loading security labs, we need to wait for the docs to be loaded
@@ -471,6 +520,42 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   };
 
   /**
+   * Returns loaded Defend Insights KB docs count
+   */
+  public getLoadedDefendInsightsDocsCount = async (): Promise<number> => {
+    const user = this.options.currentUser;
+    if (user == null) {
+      throw new Error(
+        'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
+      );
+    }
+
+    const esClient = await this.options.elasticsearchClientPromise;
+
+    try {
+      const response = await esClient.count({
+        index: this.indexTemplateAndPattern.alias,
+        query: {
+          bool: {
+            must: [
+              {
+                bool: {
+                  must: [{ prefix: { kb_resource: DEFEND_INSIGHTS_RESOURCES } }],
+                },
+              },
+            ],
+          },
+        },
+      });
+
+      return response.count ?? 0;
+    } catch (e) {
+      this.options.logger.info(`Error checking if Defend Insights docs are loaded: ${e.message}`);
+      return 0;
+    }
+  };
+
+  /**
    * Returns if allSecurity Labs KB docs have been loaded
    */
   public isSecurityLabsDocsLoaded = async (): Promise<boolean> => {
@@ -493,6 +578,33 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
       return existingDocs === expectedDocsCount;
     } catch (e) {
       this.options.logger.info(`Error checking if Security Labs docs are loaded: ${e.message}`);
+      return false;
+    }
+  };
+
+  /**
+   * Returns if all Defend Insights KB docs have been loaded
+   */
+  public isDefendInsightsDocsLoaded = async (): Promise<boolean> => {
+    const user = this.options.currentUser;
+    if (user == null) {
+      throw new Error(
+        'Authenticated user not found! Ensure kbDataClient was initialized from a request.'
+      );
+    }
+
+    try {
+      const expectedDocsCount = await getDefendInsightsDocsCount({ logger: this.options.logger });
+      const existingDocs = await this.getLoadedDefendInsightsDocsCount();
+
+      if (existingDocs !== expectedDocsCount) {
+        this.options.logger.debug(
+          `Defend insights docs are not loaded, existing docs: ${existingDocs}, expected docs: ${expectedDocsCount}`
+        );
+      }
+      return existingDocs === expectedDocsCount;
+    } catch (e) {
+      this.options.logger.info(`Error checking if Defend insights docs are loaded: ${e.message}`);
       return false;
     }
   };

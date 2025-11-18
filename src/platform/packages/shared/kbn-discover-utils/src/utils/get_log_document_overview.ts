@@ -9,7 +9,8 @@
 
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { DataTableRecord, LogDocumentOverview, fieldConstants, formatFieldValue } from '../..';
+import type { DataTableRecord, LogDocumentOverview } from '../..';
+import { fieldConstants, formatFieldValue } from '../..';
 
 export function getLogDocumentOverview(
   doc: DataTableRecord,
@@ -39,6 +40,8 @@ export function getLogDocumentOverview(
   // Service
   const serviceName = formatField(fieldConstants.SERVICE_NAME_FIELD);
   const traceId = formatField(fieldConstants.TRACE_ID_FIELD);
+  const transactionId = formatField(fieldConstants.TRANSACTION_ID_FIELD);
+  const spanId = formatField(fieldConstants.SPAN_ID_FIELD);
 
   // Infrastructure
   const hostname = formatField(fieldConstants.HOST_NAME_FIELD);
@@ -58,14 +61,30 @@ export function getLogDocumentOverview(
   const dataset = formatField(fieldConstants.DATASTREAM_DATASET_FIELD);
   const agentName = formatField(fieldConstants.AGENT_NAME_FIELD);
 
+  // apm  log fields
+  const errorLogLevel = formatField(fieldConstants.ERROR_LOG_LEVEL_FIELD);
+  const errorExceptionMessage = formatField(fieldConstants.ERROR_EXCEPTION_MESSAGE);
+  const processorEvent = formatField(fieldConstants.PROCESSOR_EVENT_FIELD);
+
+  // otel log fields
+  const eventName = formatField(fieldConstants.OTEL_EVENT_NAME_FIELD);
+
+  // exception message
+  const exceptionMessage = formatField(fieldConstants.EXCEPTION_MESSAGE_FIELD);
+  const otelExpectionMessage = formatField(fieldConstants.OTEL_ATTRIBUTES_EXCEPTION_MESSAGE);
+  const otelExpectionStackTrace = formatField(fieldConstants.OTEL_ATTRIBUTES_EXCEPTION_STACKTRACE);
+
   return {
     [fieldConstants.LOG_LEVEL_FIELD]: level,
+    [fieldConstants.ERROR_LOG_LEVEL_FIELD]: errorLogLevel,
     [fieldConstants.TIMESTAMP_FIELD]: timestamp,
     [fieldConstants.MESSAGE_FIELD]: message,
     [fieldConstants.ERROR_MESSAGE_FIELD]: errorMessage,
     [fieldConstants.EVENT_ORIGINAL_FIELD]: eventOriginal,
     [fieldConstants.SERVICE_NAME_FIELD]: serviceName,
     [fieldConstants.TRACE_ID_FIELD]: traceId,
+    [fieldConstants.TRANSACTION_ID_FIELD]: transactionId,
+    [fieldConstants.SPAN_ID_FIELD]: spanId,
     [fieldConstants.HOST_NAME_FIELD]: hostname,
     [fieldConstants.ORCHESTRATOR_CLUSTER_NAME_FIELD]: orchestratorClusterName,
     [fieldConstants.ORCHESTRATOR_RESOURCE_ID_FIELD]: orchestratorResourceId,
@@ -78,5 +97,11 @@ export function getLogDocumentOverview(
     [fieldConstants.DATASTREAM_NAMESPACE_FIELD]: namespace,
     [fieldConstants.DATASTREAM_DATASET_FIELD]: dataset,
     [fieldConstants.AGENT_NAME_FIELD]: agentName,
+    [fieldConstants.EXCEPTION_MESSAGE_FIELD]: exceptionMessage,
+    [fieldConstants.OTEL_ATTRIBUTES_EXCEPTION_MESSAGE]: otelExpectionMessage,
+    [fieldConstants.OTEL_ATTRIBUTES_EXCEPTION_STACKTRACE]: otelExpectionStackTrace,
+    [fieldConstants.PROCESSOR_EVENT_FIELD]: processorEvent,
+    [fieldConstants.OTEL_EVENT_NAME_FIELD]: eventName,
+    [fieldConstants.ERROR_EXCEPTION_MESSAGE]: errorExceptionMessage,
   };
 }

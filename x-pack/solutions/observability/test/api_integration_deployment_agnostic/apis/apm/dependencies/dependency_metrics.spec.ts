@@ -7,10 +7,10 @@
 import expect from '@kbn/expect';
 import { sum } from 'lodash';
 import { isFiniteNumber } from '@kbn/apm-plugin/common/utils/is_finite_number';
-import { Coordinate } from '@kbn/apm-plugin/typings/timeseries';
+import type { Coordinate } from '@kbn/apm-plugin/typings/timeseries';
 import { ENVIRONMENT_ALL } from '@kbn/apm-plugin/common/environment_filter_values';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { SupertestReturnType } from '../../../services/apm_api';
+import type { SupertestReturnType } from '../../../services/apm_api';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { roundNumber } from '../utils/common';
 import { generateOperationData, generateOperationDataConfig } from './generate_operation_data';

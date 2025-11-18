@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import type { PickFieldsConfig, DatafeedConfig, Detector } from './types';
 
 export default function ({ getService }: FtrProviderContext) {

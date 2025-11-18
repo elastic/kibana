@@ -9,14 +9,14 @@ import { get, keyBy, map, groupBy } from 'lodash';
 import type { PaletteRegistry, PaletteOutput } from '@kbn/coloring';
 import { getLegendConfig } from '../../common/lib/get_legend_config';
 import { getFunctionHelp } from '../../i18n';
-import {
-  Legend,
+import type {
   PointSeries,
   Render,
   SeriesStyle,
   Style,
   ExpressionFunctionDefinition,
 } from '../../types';
+import { Legend } from '../../types';
 
 interface PieSeriesOptions {
   show: boolean;

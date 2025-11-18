@@ -11,6 +11,8 @@ import { REPO_ROOT } from '@kbn/repo-info';
 
 const ES_RESOURCES_DIR = resolve(__dirname, 'es_serverless_resources');
 
+// TODO: Add support for serverless projects with different tiers
+// ref https://github.com/elastic/kibana/pull/229919
 export const ES_RESOURCES = Object.freeze({
   roles: join(ES_RESOURCES_DIR, 'roles.yml'),
   users: join(ES_RESOURCES_DIR, 'users'),

@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { fireEvent, render, screen } from '@testing-library/react';
-import { EuiTourStepProps } from '@elastic/eui';
+import type { EuiTourStepProps } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { KnowledgeBaseTour } from '.';
 import { TestProviders } from '../../mock/test_providers/test_providers';
@@ -116,7 +116,7 @@ describe('Attack discovery tour', () => {
     );
     fireEvent.click(getByTestId('tryKb'));
     expect(navigateToApp).toHaveBeenCalledWith('management', {
-      path: `kibana/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
+      path: `ai/securityAiAssistantManagement?tab=${KNOWLEDGE_BASE_TAB}`,
     });
   });
 

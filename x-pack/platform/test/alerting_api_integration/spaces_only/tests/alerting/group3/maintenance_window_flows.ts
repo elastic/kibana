@@ -16,9 +16,9 @@ import {
   finishMaintenanceWindow,
   getRuleEvents,
   expectNoActionsFired,
-  runSoon,
   expectActionsFired,
 } from './test_helpers';
+import { runSoon } from '../../helpers';
 
 export default function maintenanceWindowFlowsTests({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');

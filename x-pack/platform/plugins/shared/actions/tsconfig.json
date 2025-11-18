@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -51,6 +51,10 @@
     "@kbn/core-http-server-utils",
     "@kbn/es-errors",
     "@kbn/kibana-utils-plugin",
+    "@kbn/licensing-types",
+    "@kbn/lazy-object",
+    "@kbn/zod",
+    "@kbn/connector-schemas",
   ],
   "exclude": [
     "target/**/*",

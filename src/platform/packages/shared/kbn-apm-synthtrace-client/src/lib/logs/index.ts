@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { Fields } from '../entity';
+import type { Fields } from '../entity';
 import { Serializable } from '../serializable';
 
 export const LONG_FIELD_NAME =
@@ -29,6 +29,7 @@ export type LogDocument = Fields &
     'log.file.path'?: string;
     'service.name'?: string;
     'service.environment'?: string;
+    'service.version'?: string;
     'data_stream.namespace': string;
     'data_stream.type': string;
     'data_stream.dataset': string;
@@ -63,6 +64,12 @@ export type LogDocument = Fields &
     'error.log'?: unknown;
     'log.custom': Record<string, unknown>;
     'host.geo.location': number[];
+    'host.geo.city_name'?: string;
+    'host.geo.country_name'?: string;
+    'host.geo.country_iso_code'?: string;
+    'host.geo.continent_name'?: string;
+    'host.geo.region_name'?: string;
+    'host.geo.timezone'?: string;
     'host.ip': string;
     'network.bytes': number;
     'tls.established': boolean;
@@ -72,6 +79,10 @@ export type LogDocument = Fields &
     'event.category'?: string;
     'event.type'?: string;
     'event.outcome'?: string;
+    'event.action'?: string;
+    'event.sequence'?: number;
+    'source.ip'?: string;
+    'rule.name'?: string;
     labels?: Record<string, string>;
     test_field: string | string[];
     date: Date;
@@ -90,9 +101,45 @@ export type LogDocument = Fields &
     'kubernetes.namespace'?: string;
     'kubernetes.pod.name'?: string;
     'kubernetes.container.name'?: string;
+    'kubernetes.deployment.name'?: string;
+    'kubernetes.replicaset.name'?: string;
+    'kubernetes.statefulset.name'?: string;
+    'kubernetes.daemonset.name'?: string;
     'orchestrator.resource.name'?: string;
     tags?: string | string[];
+    'user.name'?: string;
     'user_agent.name'?: string;
+    'orchestrator.type'?: string;
+    'orchestrator.resource.type'?: string;
+    'container.image.name'?: string;
+    'container.image.tag'?: string;
+    'container.runtime'?: string;
+    'host.os.platform'?: string;
+    'host.os.name'?: string;
+    'host.os.version'?: string;
+    'host.architecture'?: string;
+    'cloud.instance.name'?: string;
+    'kubernetes.container.image'?: string;
+    'kubernetes.container.image_id'?: string;
+    'kubernetes.node.name'?: string;
+    'kubernetes.node.uid'?: string;
+    'kubernetes.labels.app'?: string;
+    'kubernetes.labels.version'?: string;
+    'kubernetes.labels.tier'?: string;
+    'kubernetes.annotations.deployment'?: string;
+    'process.pid'?: number;
+    'deployment.name'?: string;
+    'network.protocol'?: string;
+    'network.transport'?: string;
+    'network.type'?: string;
+    'tls.version'?: string;
+    'tls.cipher'?: string;
+    'tls.server.subject'?: string;
+    'tls.client.subject'?: string;
+    'session.id'?: string;
+    'span.id'?: string;
+    'error.type'?: string;
+    'error.code'?: string;
   }>;
 
 class Log extends Serializable<LogDocument> {

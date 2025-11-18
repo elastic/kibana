@@ -6,52 +6,38 @@
  */
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { Logger } from '@kbn/core/server';
-import {
+import type {
   AttackDiscoveryScheduleAction,
-  AttackDiscoveryScheduleActionGroup,
+  AttackDiscoveryScheduleGeneralAction,
+  AttackDiscoveryScheduleSystemAction,
 } from '@kbn/elastic-assistant-common';
 
-type AlertingAction = Omit<AttackDiscoveryScheduleAction, 'group'> & {
-  group: AttackDiscoveryScheduleActionGroup;
-};
-
-type AlertingSystemAction = Omit<
-  AttackDiscoveryScheduleAction,
-  'group' | 'frequency' | 'alertsFilter' | 'useAlertDataForTemplate'
->;
-
-const isAlertingActions = (action: AttackDiscoveryScheduleAction): action is AlertingAction => {
-  return action.group != null;
+const isSystemAction = (
+  action: AttackDiscoveryScheduleAction,
+  actionsClient: ActionsClient
+): action is AttackDiscoveryScheduleSystemAction => {
+  return actionsClient.isSystemAction(action.id);
 };
 
 export const convertScheduleActionsToAlertingActions = ({
   actionsClient,
-  logger,
   scheduleActions,
 }: {
   actionsClient: ActionsClient;
-  logger: Logger;
   scheduleActions: AttackDiscoveryScheduleAction[] | undefined;
 }) => {
   return (scheduleActions ?? []).reduce(
     (acc, value) => {
-      if (actionsClient.isSystemAction(value.id)) {
+      if (isSystemAction(value, actionsClient)) {
         acc.systemActions.push(value);
       } else {
-        if (isAlertingActions(value)) {
-          acc.actions.push(value);
-        } else {
-          logger.error(
-            `Missing group for non-system action ${value.id} of type ${value.actionTypeId}`
-          );
-        }
+        acc.actions.push(value);
       }
       return acc;
     },
     { actions: [], systemActions: [] } as {
-      actions: AlertingAction[];
-      systemActions: AlertingSystemAction[];
+      actions: AttackDiscoveryScheduleGeneralAction[];
+      systemActions: AttackDiscoveryScheduleSystemAction[];
     }
   );
 };

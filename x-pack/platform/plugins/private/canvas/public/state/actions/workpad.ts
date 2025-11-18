@@ -11,7 +11,7 @@ import { createThunk } from '../../lib/create_thunk';
 import { getWorkpadColors } from '../selectors/workpad';
 // @ts-expect-error
 import { fetchAllRenderables } from './elements';
-import { CanvasWorkpad, CanvasVariable } from '../../../types';
+import type { CanvasWorkpad, CanvasVariable } from '../../../types';
 
 export const sizeWorkpad = createAction<{ height: number; width: number }>('sizeWorkpad');
 export const setName = createAction<string>('setName');

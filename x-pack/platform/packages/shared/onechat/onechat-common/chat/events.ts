@@ -6,18 +6,22 @@
  */
 
 import type { OnechatEvent } from '../base/events';
-import { ToolResult } from '../tools/tool_result';
+import type { ToolResult } from '../tools/tool_result';
 import type { ConversationRound } from './conversation';
 
 export enum ChatEventType {
   toolCall = 'tool_call',
+  browserToolCall = 'browser_tool_call',
+  toolProgress = 'tool_progress',
   toolResult = 'tool_result',
   reasoning = 'reasoning',
   messageChunk = 'message_chunk',
   messageComplete = 'message_complete',
+  thinkingComplete = 'thinking_complete',
   roundComplete = 'round_complete',
   conversationCreated = 'conversation_created',
   conversationUpdated = 'conversation_updated',
+  conversationIdSet = 'conversation_id_set',
 }
 
 export type ChatEventBase<
@@ -39,6 +43,38 @@ export const isToolCallEvent = (event: OnechatEvent<string, any>): event is Tool
   return event.type === ChatEventType.toolCall;
 };
 
+export interface BrowserToolCallEventData {
+  tool_call_id: string;
+  tool_id: string;
+  params: Record<string, unknown>;
+}
+
+export type BrowserToolCallEvent = ChatEventBase<
+  ChatEventType.browserToolCall,
+  BrowserToolCallEventData
+>;
+
+export const isBrowserToolCallEvent = (
+  event: OnechatEvent<string, any>
+): event is BrowserToolCallEvent => {
+  return event.type === ChatEventType.browserToolCall;
+};
+
+// Tool progress
+
+export interface ToolProgressEventData {
+  tool_call_id: string;
+  message: string;
+}
+
+export type ToolProgressEvent = ChatEventBase<ChatEventType.toolProgress, ToolProgressEventData>;
+
+export const isToolProgressEvent = (
+  event: OnechatEvent<string, any>
+): event is ToolProgressEvent => {
+  return event.type === ChatEventType.toolProgress;
+};
+
 // Tool result
 
 export interface ToolResultEventData {
@@ -56,7 +92,10 @@ export const isToolResultEvent = (event: OnechatEvent<string, any>): event is To
 // reasoning
 
 export interface ReasoningEventData {
+  /** plain text reasoning content */
   reasoning: string;
+  /** if true, will not be persisted or displaying in the thinking panel, only displayed as "current thinking" **/
+  transient?: boolean;
 }
 
 export type ReasoningEvent = ChatEventBase<ChatEventType.reasoning, ReasoningEventData>;
@@ -100,6 +139,24 @@ export const isMessageCompleteEvent = (
   event: OnechatEvent<string, any>
 ): event is MessageCompleteEvent => {
   return event.type === ChatEventType.messageComplete;
+};
+
+// Thinking complete
+
+export interface ThinkingCompleteEventData {
+  /** time elapsed from round start to first token arrival, in ms */
+  time_to_first_token: number;
+}
+
+export type ThinkingCompleteEvent = ChatEventBase<
+  ChatEventType.thinkingComplete,
+  ThinkingCompleteEventData
+>;
+
+export const isThinkingCompleteEvent = (
+  event: OnechatEvent<string, any>
+): event is ThinkingCompleteEvent => {
+  return event.type === ChatEventType.thinkingComplete;
 };
 
 // Round complete
@@ -153,18 +210,42 @@ export const isConversationUpdatedEvent = (
   return event.type === ChatEventType.conversationUpdated;
 };
 
+// conversation id set
+
+export interface ConversationIdSetEventData {
+  conversation_id: string;
+}
+
+export type ConversationIdSetEvent = ChatEventBase<
+  ChatEventType.conversationIdSet,
+  ConversationIdSetEventData
+>;
+
+export const isConversationIdSetEvent = (
+  event: OnechatEvent<string, any>
+): event is ConversationIdSetEvent => {
+  return event.type === ChatEventType.conversationIdSet;
+};
+
 /**
  * All types of events that can be emitted from an agent execution.
  */
 export type ChatAgentEvent =
   | ToolCallEvent
+  | BrowserToolCallEvent
+  | ToolProgressEvent
   | ToolResultEvent
   | ReasoningEvent
   | MessageChunkEvent
   | MessageCompleteEvent
+  | ThinkingCompleteEvent
   | RoundCompleteEvent;
 
 /**
  * All types of events that can be emitted from the chat API.
  */
-export type ChatEvent = ChatAgentEvent | ConversationCreatedEvent | ConversationUpdatedEvent;
+export type ChatEvent =
+  | ChatAgentEvent
+  | ConversationCreatedEvent
+  | ConversationUpdatedEvent
+  | ConversationIdSetEvent;

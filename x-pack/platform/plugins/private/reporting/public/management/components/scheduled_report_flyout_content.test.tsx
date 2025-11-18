@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import React, { PropsWithChildren } from 'react';
+import type { PropsWithChildren } from 'react';
+import React from 'react';
 import moment from 'moment';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { type ReportingAPIClient, useKibana } from '@kbn/reporting-public';
 import { coreMock } from '@kbn/core/public/mocks';
-import { ReportTypeData, ScheduledReport } from '../../types';
+import type { ReportTypeData, ScheduledReport } from '../../types';
 import { getReportingHealth } from '../apis/get_reporting_health';
 import { testQueryClient } from '../test_utils/test_query_client';
-import { QueryClientProvider } from '@tanstack/react-query';
+import { QueryClientProvider } from '@kbn/react-query';
 import { ScheduledReportFlyoutContent } from './scheduled_report_flyout_content';
 import { scheduleReport } from '../apis/schedule_report';
-import { ScheduledReportApiJSON } from '../../../server/types';
+import type { ScheduledReportApiJSON } from '../../../server/types';
 import * as useDefaultTimezoneModule from '../hooks/use_default_timezone';
 
 // Mock Kibana hooks and context

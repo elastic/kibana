@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Trigger } from '.';
+import type { Trigger } from '.';
 
 export const VISUALIZE_GEO_FIELD_TRIGGER = 'VISUALIZE_GEO_FIELD_TRIGGER';
 export const visualizeGeoFieldTrigger: Trigger = {

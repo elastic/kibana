@@ -25,6 +25,8 @@ describe('when in the Administration tab', () => {
     endpointPageHttpMock(mockedContext.coreStart.http);
     render = () => mockedContext.render(<ManagementContainer />);
     mockedContext.history.push('/administration/endpoints');
+
+    mockedContext.setExperimentalFlag({ endpointExceptionsMovedUnderManagement: true });
   });
 
   afterEach(() => {
@@ -46,6 +48,15 @@ describe('when in the Administration tab', () => {
       });
 
       mockedContext.history.push('/administration/policy');
+      expect(await render().findByTestId('noPrivilegesPage')).toBeTruthy();
+    });
+
+    it('should display `no permission` if no `canReadEndpointExceptions`', async () => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: { loading: false, canReadEndpointExceptions: false },
+      });
+
+      mockedContext.history.push('/administration/endpoint_exceptions');
       expect(await render().findByTestId('noPrivilegesPage')).toBeTruthy();
     });
 
@@ -113,6 +124,15 @@ describe('when in the Administration tab', () => {
       expect(await render().findByTestId('policyListPage')).toBeTruthy();
     });
 
+    it('should display endpoint exceptions list page when `canReadEndpointExceptions` is TRUE', async () => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: { loading: false, canReadEndpointExceptions: true },
+      });
+
+      mockedContext.history.push('/administration/endpoint_exceptions');
+      expect(await render().findByTestId('endpointExceptionsListPage-container')).toBeTruthy();
+    });
+
     it('should display trusted apps list page when `canReadTrustedApplications` is TRUE', async () => {
       useUserPrivilegesMock.mockReturnValue({
         endpointPrivileges: { loading: false, canReadTrustedApplications: true },
@@ -147,6 +167,30 @@ describe('when in the Administration tab', () => {
 
       mockedContext.history.push('/administration/response_actions_history');
       expect(await render().findByTestId('responseActionsPage')).toBeTruthy();
+    });
+  });
+
+  describe('when `endpointExceptionsMovedUnderManagement` feature flag is disabled', () => {
+    beforeEach(() => {
+      mockedContext.setExperimentalFlag({ endpointExceptionsMovedUnderManagement: false });
+    });
+
+    it('should display `notFoundPage` for the endpoint exceptions page with read privilege', async () => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: { loading: false, canReadEndpointExceptions: true },
+      });
+
+      mockedContext.history.push('/administration/endpoint_exceptions');
+      expect(await render().findByTestId('notFoundPage')).toBeTruthy();
+    });
+
+    it('should display `notFoundPage` for the endpoint exceptions page without read privilege', async () => {
+      useUserPrivilegesMock.mockReturnValue({
+        endpointPrivileges: { loading: false, canReadEndpointExceptions: false },
+      });
+
+      mockedContext.history.push('/administration/endpoint_exceptions');
+      expect(await render().findByTestId('notFoundPage')).toBeTruthy();
     });
   });
 });

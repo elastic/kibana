@@ -6,15 +6,16 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLSignatureLicenseType } from '@kbn/esql-types';
+import type { LicenseType } from '@kbn/licensing-types';
+import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { ESQLNumericLiteralType } from '../types';
-import { Location } from '../commands_registry/types';
+import type { Location } from '../commands_registry/types';
 
 /**
  * All supported field types in ES|QL. This is all the types
  * that can come back in the table from a query.
  */
-export const fieldTypes = [
+export const fieldTypes: readonly string[] = [
   'boolean',
   'date',
   'double',
@@ -35,9 +36,15 @@ export const fieldTypes = [
   'unsupported',
   'date_nanos',
   'function_named_parameters',
+  'aggregate_metric_double',
+  'dense_vector',
+  'histogram',
+  'exponential_histogram',
+  'tdigest',
 ] as const;
 
 export type FieldType = (typeof fieldTypes)[number];
+
 /**
  * All supported field types in ES|QL. This is all the types
  * that can come back in the table from a query.
@@ -67,6 +74,9 @@ export const userDefinedTypes = [
   'time_duration',
   'date_period',
   'param', // Defines a named param such as ?value or ??field
+  'histogram',
+  'exponential_histogram',
+  'tdigest',
 ] as const;
 
 /**
@@ -79,13 +89,16 @@ export const userDefinedTypes = [
  * the capabilities of the client-side engines grow.
  * https://github.com/elastic/elasticsearch/blob/main/x-pack/plugin/esql-core/src/main/java/org/elasticsearch/xpack/esql/core/type/DataType.java
  */
-export const dataTypes = [
+export const dataTypes: readonly string[] = [
   ...fieldTypes,
   'null',
   'time_duration',
   'date_period',
-  'param', // Defines a named param such as ?value or ??field
-] as const;
+  'param', // Defines a named param such as ?value or ??field,
+  'geohash',
+  'geohex',
+  'geotile',
+];
 
 export type SupportedDataType = (typeof dataTypes)[number];
 
@@ -95,7 +108,7 @@ export type SupportedDataType = (typeof dataTypes)[number];
  *
  * The fate of these is uncertain. They may be removed in the future.
  */
-const arrayTypes = [
+const arrayTypes: readonly string[] = [
   'double[]',
   'unsigned_long[]',
   'long[]',
@@ -116,9 +129,13 @@ const arrayTypes = [
   'geo_shape[]',
   'version[]',
   'date_nanos[]',
-] as const;
+];
 
 export type ArrayType = (typeof arrayTypes)[number];
+
+export function isArrayType(type: string): type is ArrayType {
+  return arrayTypes.includes(type);
+}
 
 export enum FunctionDefinitionTypes {
   AGG = 'agg',
@@ -128,6 +145,9 @@ export enum FunctionDefinitionTypes {
   TIME_SERIES_AGG = 'time_series_agg',
 }
 
+export const grokSupportedDataTypes = ['int', 'long', 'double', 'float', 'boolean'] as const;
+export type GrokDataType = (typeof grokSupportedDataTypes)[number];
+
 export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFunction';
 
 /**
@@ -135,14 +155,16 @@ export type ReasonTypes = 'missingCommand' | 'unsupportedFunction' | 'unknownFun
  */
 export type FunctionParameterType = Exclude<SupportedDataType, 'unsupported'> | ArrayType | 'any';
 
+export const isFieldType = (str: string | undefined): str is FieldType =>
+  str !== undefined && fieldTypes.includes(str);
+
 export const isParameterType = (str: string | undefined): str is FunctionParameterType =>
-  typeof str !== undefined &&
+  str !== undefined &&
   str !== 'unsupported' &&
-  ([...dataTypes, ...arrayTypes, 'any'] as string[]).includes(str as string);
+  (str === 'any' || dataTypes.includes(str) || arrayTypes.includes(str));
 
 export const isReturnType = (str: string | FunctionParameterType): str is FunctionReturnType =>
-  str !== 'unsupported' &&
-  (dataTypes.includes(str as SupportedDataType) || str === 'unknown' || str === 'any');
+  str !== 'unsupported' && (str === 'unknown' || str === 'any' || dataTypes.includes(str));
 
 export interface FunctionParameter {
   name: string;
@@ -162,36 +184,32 @@ export interface FunctionParameter {
   fieldsOnly?: boolean;
 
   /**
-   * if provided this means that the value must be one
-   * of the options in the array iff the value is a literal.
-   *
-   * String values are case insensitive.
-   *
-   * If the value is not a literal, this field is ignored because
-   * we can't check the return value of a function to see if it
-   * matches one of the options prior to runtime.
+   * A list of suggested values for this parameter.
    */
-  acceptedValues?: string[];
+  suggestedValues?: string[];
 
-  /**
-   * Must only be included _in addition to_ acceptedValues.
-   *
-   * If provided this is the list of suggested values that
-   * will show up in the autocomplete. If omitted, the acceptedValues
-   * will be used as suggestions.
-   *
-   * This is useful for functions that accept
-   * values that we don't want to show as suggestions.
-   */
-  literalSuggestions?: string[];
   mapParams?: string;
+
+  /** If true, this parameter supports multiple values (arrays). Default is false.
+   * This indicates that the parameter can accept multiple values, which will be passed as an array.
+   */
+  supportsMultiValues?: boolean;
 }
 
 export interface ElasticsearchCommandDefinition {
   type: string;
   name: string;
-  license?: ESQLSignatureLicenseType;
+  license?: LicenseType;
   observability_tier?: string;
+}
+
+export interface ElasticsearchSettingsDefinition {
+  name: string;
+  type: string;
+  serverlessOnly: boolean;
+  preview: boolean;
+  snapshotOnly: boolean;
+  description: string;
 }
 
 /**
@@ -205,7 +223,7 @@ export interface Signature {
   params: FunctionParameter[];
   minParams?: number;
   returnType: FunctionReturnType;
-  license?: ESQLSignatureLicenseType;
+  license?: LicenseType;
 }
 
 export interface FunctionDefinition {
@@ -220,13 +238,15 @@ export interface FunctionDefinition {
   examples?: string[];
   operator?: string;
   customParametersSnippet?: string;
-  license?: ESQLSignatureLicenseType;
+  license?: LicenseType;
+  observabilityTier?: Uppercase<Extract<PricingProduct, { type: 'observability' }>['tier']>;
 }
 
 export interface FunctionFilterPredicates {
   location: Location;
   returnTypes?: string[];
   ignored?: string[];
+  allowed?: string[];
 }
 
 export interface Literals {
@@ -235,39 +255,36 @@ export interface Literals {
 }
 
 export interface ValidationErrors {
-  wrongArgumentType: {
-    message: string;
-    type: {
-      name: string;
-      argType: string;
-      value: string | number | Date;
-      givenType: string;
-    };
-  };
-  wrongArgumentNumber: {
+  wrongNumberArgsExact: {
     message: string;
     type: {
       fn: string;
-      numArgs: number;
-      passedArgs: number;
+      expected: number;
+      actual: number;
     };
   };
-  wrongArgumentNumberTooMany: {
+  wrongNumberArgsVariadic: {
     message: string;
     type: {
       fn: string;
-      numArgs: number;
-      passedArgs: number;
-      extraArgs: number;
+      validArgCounts: number[];
+      actual: number;
     };
   };
-  wrongArgumentNumberTooFew: {
+  wrongNumberArgsAtLeast: {
     message: string;
     type: {
       fn: string;
-      numArgs: number;
-      passedArgs: number;
-      missingArgs: number;
+      minArgs: number;
+      actual: number;
+    };
+  };
+  noMatchingCallSignature: {
+    message: string;
+    type: {
+      functionName: string;
+      argTypes: string;
+      validSignatures: string[];
     };
   };
   unknownColumn: {
@@ -282,21 +299,13 @@ export interface ValidationErrors {
     message: string;
     type: { name: string };
   };
-  noNestedArgumentSupport: {
+  unknownSetting: {
     message: string;
-    type: { name: string; argType: string };
+    type: { name: string };
   };
-  unsupportedFunctionForCommand: {
+  functionNotAllowedHere: {
     message: string;
-    type: { name: string; command: string };
-  };
-  unsupportedFunctionForCommandOption: {
-    message: string;
-    type: { name: string; command: string; option: string };
-  };
-  unsupportedLiteralOption: {
-    message: string;
-    type: { name: string; value: string; supportedOptions: string };
+    type: { name: string; locationName: string };
   };
   unsupportedColumnTypeForCommand: {
     message: string;
@@ -314,13 +323,13 @@ export interface ValidationErrors {
     message: string;
     type: { value: string };
   };
-  unsupportedTypeForCommand: {
-    message: string;
-    type: { command: string; value: string; type: string };
-  };
   unknownPolicy: {
     message: string;
     type: { name: string };
+  };
+  nestedAggFunction: {
+    message: string;
+    type: { parentName: string; name: string };
   };
   unknownAggregateFunction: {
     message: string;
@@ -334,14 +343,6 @@ export interface ValidationErrors {
     message: string;
     type: { command: string; value: string; expected: string };
   };
-  fnUnsupportedAfterCommand: {
-    message: string;
-    type: { function: string; command: string };
-  };
-  expectedConstant: {
-    message: string;
-    type: { fn: string; given: string };
-  };
   metadataBracketsDeprecation: {
     message: string;
     type: {};
@@ -353,30 +354,6 @@ export interface ValidationErrors {
   wrongDissectOptionArgumentType: {
     message: string;
     type: { value: string | number };
-  };
-  noAggFunction: {
-    message: string;
-    type: {
-      commandName: string;
-      expression: string;
-    };
-  };
-  expressionNotAggClosed: {
-    message: string;
-    type: {
-      commandName: string;
-      expression: string;
-    };
-  };
-  aggInAggFunction: {
-    message: string;
-    type: {
-      nestedAgg: string;
-    };
-  };
-  onlyWhereCommandSupported: {
-    message: string;
-    type: { fn: string };
   };
   invalidJoinIndex: {
     message: string;
@@ -401,6 +378,45 @@ export interface ValidationErrors {
       requiredLicense: string;
     };
   };
+  changePointWrongFieldType: {
+    message: string;
+    type: {
+      columnName: string;
+      givenType: string;
+    };
+  };
+  dropTimestampWarning: {
+    message: string;
+    type: {};
+  };
+  inferenceIdRequired: {
+    message: string;
+    type: {};
+  };
+  unsupportedQueryType: {
+    message: string;
+    type: {};
+  };
+  forkTooManyBranches: {
+    message: string;
+    type: {};
+  };
+  forkTooFewBranches: {
+    message: string;
+    type: {};
+  };
+  forkNotAllowedWithSubqueries: {
+    message: string;
+    type: {};
+  };
+  inlineStatsNotAllowedAfterLimit: {
+    message: string;
+    type: {};
+  };
+  joinOnSingleExpression: {
+    message: string;
+    type: {};
+  };
 }
 
 export type ErrorTypes = keyof ValidationErrors;
@@ -419,17 +435,23 @@ export const ESQL_NUMERIC_DECIMAL_TYPES = [
   'counter_double',
 ] as const;
 
-export const ESQL_NUMBER_TYPES = [
+export const ESQL_NUMBER_TYPES: readonly SupportedDataType[] = [
   'integer',
   'counter_integer',
   ...ESQL_NUMERIC_DECIMAL_TYPES,
-] as const;
+];
+
+export const ESQL_ARITHMETIC_TYPES: readonly string[] = [
+  ...ESQL_NUMBER_TYPES,
+  'aggregate_metric_double',
+];
 
 export function isNumericType(type: unknown): type is ESQLNumericLiteralType {
-  return (
-    typeof type === 'string' &&
-    [...ESQL_NUMBER_TYPES, 'decimal'].includes(type as (typeof ESQL_NUMBER_TYPES)[number])
-  );
+  return typeof type === 'string' && (type === 'decimal' || ESQL_NUMBER_TYPES.includes(type));
+}
+
+export function supportsArithmeticOperations(type: string): boolean {
+  return ESQL_ARITHMETIC_TYPES.includes(type);
 }
 
 export const ESQL_STRING_TYPES = ['keyword', 'text'] as const;

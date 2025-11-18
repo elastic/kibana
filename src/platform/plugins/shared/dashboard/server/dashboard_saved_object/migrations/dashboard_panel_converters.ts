@@ -9,8 +9,8 @@
 
 import { omit } from 'lodash';
 
-import { SavedDashboardPanel } from '../schema/v2';
-import { DashboardPanelMap810, DashboardPanelState810 } from './types';
+import type { SavedDashboardPanel } from '../schema/v2';
+import type { DashboardPanelMap810, DashboardPanelState810 } from './types';
 
 export function convertSavedDashboardPanelToPanelState<PanelState extends object>(
   savedDashboardPanel: SavedDashboardPanel

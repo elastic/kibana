@@ -6,18 +6,23 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import type { RunnableConfig } from '@langchain/core/runnables';
+import type { Runnable, RunnableConfig } from '@langchain/core/runnables';
+import type { InferenceChatModelCallOptions } from '@kbn/inference-langchain';
+import type { AIMessageChunk } from '@langchain/core/messages';
+import type { BaseLanguageModelInput } from '@langchain/core/language_models/base';
 import type { RuleMigrationsRetriever } from '../retrievers';
-import type { EsqlKnowledgeBase } from '../util/esql_knowledge_base';
-import type { SiemMigrationTelemetryClient } from '../rule_migrations_telemetry_client';
-import type { ChatModel } from '../util/actions_client_chat';
+import type { EsqlKnowledgeBase } from '../../../common/task/util/esql_knowledge_base';
+import type { ChatModel } from '../../../common/task/util/actions_client_chat';
 import type { migrateRuleConfigSchema, migrateRuleState } from './state';
+import type { RuleMigrationTelemetryClient } from '../rule_migrations_telemetry_client';
+import type { RulesMigrationTools } from './tools';
 
 export type MigrateRuleState = typeof migrateRuleState.State;
-export type MigrateRuleGraphConfig = RunnableConfig<(typeof migrateRuleConfigSchema)['State']>;
+export type MigrateRuleConfigSchema = (typeof migrateRuleConfigSchema)['State'];
+export type MigrateRuleConfig = RunnableConfig<MigrateRuleConfigSchema>;
 export type GraphNode = (
   state: MigrateRuleState,
-  config: MigrateRuleGraphConfig
+  config: MigrateRuleConfig
 ) => Promise<Partial<MigrateRuleState>>;
 
 export interface RuleMigrationAgentRunOptions {
@@ -26,8 +31,12 @@ export interface RuleMigrationAgentRunOptions {
 
 export interface MigrateRuleGraphParams {
   esqlKnowledgeBase: EsqlKnowledgeBase;
-  model: ChatModel;
+  model:
+    | ChatModel
+    // when model is passed with tools, its type changes to Runnable
+    | Runnable<BaseLanguageModelInput, AIMessageChunk, InferenceChatModelCallOptions>;
   ruleMigrationsRetriever: RuleMigrationsRetriever;
   logger: Logger;
-  telemetryClient: SiemMigrationTelemetryClient;
+  telemetryClient: RuleMigrationTelemetryClient;
+  tools: RulesMigrationTools;
 }

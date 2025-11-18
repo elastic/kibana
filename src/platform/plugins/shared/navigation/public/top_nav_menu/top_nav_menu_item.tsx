@@ -10,19 +10,21 @@
 import { upperFirst, isFunction, omit } from 'lodash';
 
 import { css } from '@emotion/react';
-import React, { MouseEvent } from 'react';
+import type { MouseEvent } from 'react';
+import React from 'react';
 
+import type { EuiButtonColor, EuiButtonProps } from '@elastic/eui';
 import {
   EuiToolTip,
   EuiButton,
   EuiHeaderLink,
   EuiBetaBadge,
-  EuiButtonColor,
   EuiButtonIcon,
   useEuiTheme,
 } from '@elastic/eui';
 import { getRouterLinkProps } from '@kbn/router-utils';
-import { TopNavMenuData } from './top_nav_menu_data';
+import { SplitButton } from '@kbn/split-button';
+import type { TopNavMenuData } from './top_nav_menu_data';
 
 export interface TopNavMenuItemProps extends TopNavMenuData {
   closePopover: () => void;
@@ -78,11 +80,20 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
     }
   }
 
+  function handleSecondaryButtonClick(event: MouseEvent<HTMLButtonElement | HTMLAnchorElement>) {
+    if (props.splitButtonProps?.isSecondaryButtonDisabled) return;
+
+    props.splitButtonProps?.run?.(event.currentTarget);
+    if (props.isMobileMenu) {
+      props.closePopover();
+    }
+  }
+
   const routerLinkProps = props.href
     ? getRouterLinkProps({ href: props.href, onClick: handleClick })
     : { onClick: handleClick };
 
-  const commonButtonProps = {
+  const commonButtonProps: EuiButtonProps & { id?: string } = {
     id: props.htmlId,
     isDisabled: isDisabled(),
     isLoading: props.isLoading,
@@ -101,44 +112,53 @@ export function TopNavMenuItem(props: TopNavMenuItemProps) {
       ? { onClick: undefined, href: props.href, target: props.target }
       : {};
 
-  const btn =
-    props.iconOnly && props.iconType && !props.isMobileMenu ? (
-      // icon only buttons are not supported by EuiHeaderLink
-      React.createElement(
-        props.disableButton ? React.Fragment : EuiToolTip,
-        // @ts-expect-error - EuiToolTip does not accept `key` prop, we pass to react Fragment
-        {
-          ...(props.disableButton
-            ? { key: props.label || props.id! }
-            : {
-                content: upperFirst(props.label || props.id!),
-                position: 'bottom',
-                delay: 'long',
-              }),
-        },
-        <EuiButtonIcon
-          size="s"
-          {...omit(commonButtonProps, 'iconSide')}
-          iconType={props.iconType}
-          display={props.emphasize && (props.fill ?? true) ? 'fill' : undefined}
-          aria-label={upperFirst(props.label || props.id!)}
-        />
-      )
-    ) : props.emphasize ? (
-      // fill is not compatible with EuiHeaderLink
-      <EuiButton
+  const btn = props.splitButtonProps ? (
+    <SplitButton
+      {...commonButtonProps}
+      fill={props.emphasize}
+      {...props.splitButtonProps}
+      onSecondaryButtonClick={handleSecondaryButtonClick}
+      size="s"
+    >
+      <ButtonContainer />
+    </SplitButton>
+  ) : props.iconOnly && props.iconType && !props.isMobileMenu ? (
+    // icon only buttons are not supported by EuiHeaderLink
+    React.createElement(
+      props.disableButton ? React.Fragment : EuiToolTip,
+      // @ts-expect-error - EuiToolTip does not accept `key` prop, we pass to react Fragment
+      {
+        ...(props.disableButton
+          ? { key: props.label || props.id! }
+          : {
+              content: upperFirst(props.label || props.id!),
+              position: 'bottom',
+              delay: 'long',
+            }),
+      },
+      <EuiButtonIcon
         size="s"
-        fullWidth={props.isMobileMenu}
-        {...commonButtonProps}
-        fill={props.fill ?? true}
-      >
-        <ButtonContainer />
-      </EuiButton>
-    ) : (
-      <EuiHeaderLink size="s" {...commonButtonProps} {...overrideProps}>
-        <ButtonContainer />
-      </EuiHeaderLink>
-    );
+        {...omit(commonButtonProps, 'iconSide')}
+        iconType={props.iconType}
+        display={props.emphasize && (props.fill ?? true) ? 'fill' : undefined}
+        aria-label={upperFirst(props.label || props.id!)}
+      />
+    )
+  ) : props.emphasize ? (
+    // fill is not compatible with EuiHeaderLink
+    <EuiButton
+      size="s"
+      fullWidth={props.isMobileMenu}
+      {...commonButtonProps}
+      fill={props.fill ?? true}
+    >
+      <ButtonContainer />
+    </EuiButton>
+  ) : (
+    <EuiHeaderLink size="s" {...commonButtonProps} {...overrideProps}>
+      <ButtonContainer />
+    </EuiHeaderLink>
+  );
 
   const tooltip = getTooltip();
   if (tooltip) {

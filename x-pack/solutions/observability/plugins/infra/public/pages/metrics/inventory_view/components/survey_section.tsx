@@ -7,20 +7,21 @@
 
 import React from 'react';
 import { FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
+import { useLocation } from 'react-router-dom';
 import { useKibanaEnvironmentContext } from '../../../../hooks/use_kibana';
 
-import { useWaffleOptionsContext } from '../hooks/use_waffle_options';
 import { SurveyKubernetes } from './survey_kubernetes';
 
-const INVENTORY_FEEDBACK_LINK = 'https://ela.st/survey-infra-inventory?usp=pp_url';
+const INVENTORY_FEEDBACK_LINK = 'https://ela.st/survey-infra-inventory';
 
 export const SurveySection = () => {
-  const { nodeType } = useWaffleOptionsContext();
+  const { search } = useLocation();
+
   const { kibanaVersion, isCloudEnv, isServerlessEnv } = useKibanaEnvironmentContext();
 
   return (
     <>
-      {nodeType === 'pod' ? (
+      {search.includes('nodeType:pod') ? (
         <SurveyKubernetes />
       ) : (
         <FeatureFeedbackButton
@@ -29,6 +30,7 @@ export const SurveySection = () => {
           kibanaVersion={kibanaVersion}
           isCloudEnv={isCloudEnv}
           isServerlessEnv={isServerlessEnv}
+          sanitizedPath={document.location.pathname}
         />
       )}
     </>

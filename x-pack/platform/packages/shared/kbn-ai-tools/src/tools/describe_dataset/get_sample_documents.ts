@@ -5,9 +5,14 @@
  * 2.0.
  */
 
-import { QueryDslFieldAndFormat, SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslFieldAndFormat,
+  QueryDslQueryContainer,
+  SearchHit,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { kqlQuery, dateRangeQuery } from '@kbn/es-query';
+import { castArray } from 'lodash';
 
 export function getSampleDocuments({
   esClient,
@@ -15,6 +20,7 @@ export function getSampleDocuments({
   start,
   end,
   kql,
+  filter,
   size = 1000,
   fields = [
     {
@@ -31,6 +37,7 @@ export function getSampleDocuments({
   end: number;
   kql?: string;
   size?: number;
+  filter?: QueryDslQueryContainer | QueryDslQueryContainer[];
   fields?: Array<QueryDslFieldAndFormat | string>;
   _source?: boolean;
   timeout?: string;
@@ -43,7 +50,7 @@ export function getSampleDocuments({
       timeout,
       query: {
         bool: {
-          must: [...kqlQuery(kql), ...dateRangeQuery(start, end)],
+          must: [...kqlQuery(kql), ...dateRangeQuery(start, end), ...castArray(filter ?? [])],
           should: [
             {
               function_score: {

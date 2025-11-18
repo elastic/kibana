@@ -8,10 +8,10 @@
  */
 
 import { DataGridDensity, type DataGridCellValueElementProps } from '@kbn/unified-data-table';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiButtonIcon, EuiCodeBlock, EuiFlexGroup, EuiText, EuiTitle } from '@elastic/eui';
 import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
-import { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
+import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
@@ -128,6 +128,15 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
   const { row, dataView, fieldFormats, onFilter, closePopover, share, core, isTracesSummary } =
     props;
 
+  const filterAndClosePopover: AllSummaryColumnProps['onFilter'] = useMemo(() => {
+    if (!onFilter) return undefined;
+
+    return (...params) => {
+      onFilter(...params);
+      closePopover();
+    };
+  }, [onFilter, closePopover]);
+
   const isTraceDoc = isTracesSummary && isTraceDocument(row);
 
   const resourceFields = createResourceFields(
@@ -180,7 +189,7 @@ export const SummaryCellPopover = (props: AllSummaryColumnProps) => {
           <EuiTitle size="xxs">
             <span>{isTraceDoc ? traceLabel : resourceLabel}</span>
           </EuiTitle>
-          <Resource fields={resourceFields} onFilter={onFilter} />
+          <Resource fields={resourceFields} onFilter={filterAndClosePopover} />
         </EuiFlexGroup>
       )}
       <EuiFlexGroup direction="column" gutterSize="s">

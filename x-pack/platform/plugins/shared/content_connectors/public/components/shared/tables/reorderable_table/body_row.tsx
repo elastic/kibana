@@ -7,38 +7,67 @@
 
 import React from 'react';
 
-import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText, EuiToken } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiToken,
+  useEuiTheme,
+} from '@elastic/eui';
 
 import { Cell } from './cell';
 import { DRAGGABLE_UX_STYLE } from './constants';
-import { Column } from './types';
+import type { Column } from './types';
+import * as Styles from './styles';
 
 export interface BodyRowProps<Item> {
-  columns: Array<Column<Item>>;
-  item: Item;
   additionalProps?: object;
+  ariaRowindex?: number;
+  columns: Array<Column<Item>>;
+  errors?: string[];
+  item: Item;
   // Cell to put in first column before other columns
   leftAction?: React.ReactNode;
-  errors?: string[];
   rowIdentifier?: string;
 }
 
 export const BodyRow = <Item extends object>({
-  columns,
-  item,
   additionalProps,
-  leftAction,
+  ariaRowindex,
+  columns,
   errors = [],
+  item,
+  leftAction,
   rowIdentifier,
 }: BodyRowProps<Item>) => {
+  const { euiTheme } = useEuiTheme();
+  // Calculate column index offset based on presence of leftAction and rowIdentifier
+  const columnIndexOffset = (leftAction ? 1 : 0) + (rowIdentifier ? 1 : 0);
+
   return (
     <div className="reorderableTableRow">
-      <EuiFlexGroup data-test-subj="row" alignItems="center" {...(additionalProps || {})}>
-        <EuiFlexItem>
+      <EuiFlexGroup
+        data-test-subj="row"
+        alignItems="center"
+        role="row"
+        aria-rowindex={ariaRowindex}
+        {...(additionalProps || {})}
+      >
+        <EuiFlexItem css={Styles.bodyRowItemStyles(euiTheme)}>
           <EuiFlexGroup alignItems="center">
-            {leftAction && <Cell {...DRAGGABLE_UX_STYLE}>{leftAction}</Cell>}
+            {leftAction && (
+              <Cell {...DRAGGABLE_UX_STYLE} role="cell" ariaColindex={1}>
+                {leftAction}
+              </Cell>
+            )}
             {rowIdentifier && (
-              <Cell {...DRAGGABLE_UX_STYLE} flexBasis="24px">
+              <Cell
+                {...DRAGGABLE_UX_STYLE}
+                flexBasis="24px"
+                role="cell"
+                ariaColindex={leftAction ? 2 : 1}
+              >
                 <EuiToken
                   size="m"
                   iconType={() => (
@@ -55,6 +84,8 @@ export const BodyRow = <Item extends object>({
                 alignItems={column.alignItems}
                 flexBasis={column.flexBasis}
                 flexGrow={column.flexGrow}
+                role="cell"
+                ariaColindex={columnIndex + columnIndexOffset + 1}
               >
                 {column.render(item)}
               </Cell>
@@ -67,6 +98,7 @@ export const BodyRow = <Item extends object>({
           {errors.map((errorMessage, errorMessageIndex) => (
             <EuiFlexItem key={errorMessageIndex}>
               <EuiCallOut
+                announceOnMount={false}
                 role="alert"
                 aria-live="polite"
                 iconType="warning"

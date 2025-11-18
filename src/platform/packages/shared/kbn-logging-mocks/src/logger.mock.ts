@@ -8,11 +8,12 @@
  */
 
 import type { Logger, LogMeta, LogMessageSource } from '@kbn/logging';
+import { lazyObject } from '@kbn/lazy-object';
 
 export type MockedLogger = jest.Mocked<Logger> & { context: string[] };
 
 const createLoggerMock = (context: string[] = []) => {
-  const mockLog: MockedLogger = {
+  const mockLog: MockedLogger = lazyObject({
     context,
     debug: jest.fn(),
     error: jest.fn(),
@@ -22,14 +23,13 @@ const createLoggerMock = (context: string[] = []) => {
     trace: jest.fn(),
     warn: jest.fn(),
     get: jest.fn(),
-    isLevelEnabled: jest.fn(),
-  };
+    isLevelEnabled: jest.fn().mockReturnValue(true),
+  });
+
   mockLog.get.mockImplementation((...ctx) => ({
     ...mockLog,
     context: Array.isArray(context) ? context.concat(ctx) : [context, ...ctx].filter(Boolean),
   }));
-
-  mockLog.isLevelEnabled.mockReturnValue(true);
 
   return mockLog;
 };
@@ -69,7 +69,7 @@ const convertMessageSourceOrError = (
 };
 
 const collectLoggerMock = (logger: MockedLogger) => {
-  return {
+  return lazyObject({
     debug: logger.debug.mock.calls.map(convertMessageSource),
     error: logger.error.mock.calls.map(convertMessageSourceOrError),
     fatal: logger.fatal.mock.calls.map(convertMessageSourceOrError),
@@ -77,7 +77,7 @@ const collectLoggerMock = (logger: MockedLogger) => {
     log: logger.log.mock.calls,
     trace: logger.trace.mock.calls.map(convertMessageSource),
     warn: logger.warn.mock.calls.map(convertMessageSourceOrError),
-  };
+  });
 };
 
 export const loggerMock = {

@@ -18,9 +18,9 @@ import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { useKibana } from '../../../../common/lib/kibana';
 import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
 import { SpyRoute } from '../../../../common/utils/route/spy_routes';
-import { MissingPrivilegesCallOut } from '../../../../detections/components/callouts/missing_privileges_callout';
+import { MissingPrivilegesCallOut } from '../../../../common/components/missing_privileges';
 import { MlJobCompatibilityCallout } from '../../components/ml_job_compatibility_callout';
-import { NeedAdminForUpdateRulesCallOut } from '../../../../detections/components/callouts/need_admin_for_update_callout';
+import { NeedAdminForUpdateRulesCallOut } from '../../../rule_management/components/callouts/need_admin_for_update_rules_callout';
 import { AddElasticRulesButton } from '../../components/pre_packaged_rules/add_elastic_rules_button';
 import { ValueListsFlyout } from '../../components/value_lists_management_flyout';
 import { useUserData } from '../../../../detections/components/user_info';
@@ -33,6 +33,11 @@ import { HeaderPage } from '../../../../common/components/header_page';
 import { RuleUpdateCallouts } from '../../components/rule_update_callouts/rule_update_callouts';
 import { BlogPostPrebuiltRuleCustomizationCallout } from '../../components/blog_post_prebuilt_rule_customization_callout';
 import { RuleImportModal } from '../../components/rule_import_modal/rule_import_modal';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import {
+  CREATE_NEW_RULE_TOUR_ANCHOR,
+  RuleFeatureTour,
+} from '../../components/rules_table/feature_tour/rules_feature_tour';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -57,6 +62,10 @@ const RulesPageComponent: React.FC = () => {
     needsIndex: needsListsIndex,
   } = useListsConfig();
   const loading = userInfoLoading || listsConfigLoading;
+
+  const isDoesNotMatchForIndicatorMatchRuleEnabled = useIsExperimentalFeatureEnabled(
+    'doesNotMatchForIndicatorMatchRuleEnabled'
+  );
 
   if (
     redirectToDetections(
@@ -128,7 +137,7 @@ const RulesPageComponent: React.FC = () => {
                   {i18n.IMPORT_RULE}
                 </EuiButtonEmpty>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
+              <EuiFlexItem grow={false} id={CREATE_NEW_RULE_TOUR_ANCHOR}>
                 <SecuritySolutionLinkButton
                   data-test-subj="create-new-rule"
                   fill
@@ -139,6 +148,7 @@ const RulesPageComponent: React.FC = () => {
                   {i18n.ADD_NEW_RULE}
                 </SecuritySolutionLinkButton>
               </EuiFlexItem>
+              {isDoesNotMatchForIndicatorMatchRuleEnabled && <RuleFeatureTour />}
             </EuiFlexGroup>
           </HeaderPage>
           <RuleUpdateCallouts shouldShowUpdateRulesCallout={true} />

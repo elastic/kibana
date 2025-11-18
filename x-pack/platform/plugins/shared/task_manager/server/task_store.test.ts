@@ -6,7 +6,6 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { Client } from '@elastic/elasticsearch';
 import type { estypes } from '@elastic/elasticsearch';
 import _ from 'lodash';
 import { first } from 'rxjs';
@@ -24,14 +23,14 @@ import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks
 import type { SearchOpts, AggregationOpts } from './task_store';
 import { TaskStore, taskInstanceToAttributes } from './task_store';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import type { SavedObjectAttributes } from '@kbn/core/server';
+import type { SavedObjectAttributes, IBasePath } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';
 import { AdHocTaskCounter } from './lib/adhoc_task_counter';
 import { asErr, asOk } from './lib/result_type';
 import type { UpdateByQueryResponse } from '@elastic/elasticsearch/lib/api/types';
-import { MsearchError } from './lib/msearch_error';
+import { MsearchError } from './lib/errors';
 import { getApiKeyAndUserScope } from './lib/api_key_utils';
 import type {
   EncryptedSavedObjectsClient,
@@ -65,6 +64,8 @@ const adHocTaskCounter = new AdHocTaskCounter();
 const randomId = () => `id-${_.random(1, 20)}`;
 
 const coreStart = coreMock.createStart();
+
+const basePathMock = { get: () => '/', serverBasePath: '/' } as unknown as IBasePath;
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -137,6 +138,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -265,6 +267,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => false,
+        basePath: basePathMock,
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -372,7 +375,12 @@ describe('TaskStore', () => {
         }
       );
 
-      expect(getApiKeyAndUserScope).toHaveBeenCalledWith([task], request, coreStart.security);
+      expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
+        [task],
+        request,
+        coreStart.security,
+        basePathMock
+      );
 
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
 
@@ -413,6 +421,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: false,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
 
       const task = {
@@ -516,14 +525,9 @@ describe('TaskStore', () => {
   describe('fetch', () => {
     let store: TaskStore;
     let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
-    let childEsClient: ReturnType<
-      typeof elasticsearchServiceMock.createClusterClient
-    >['asInternalUser'];
 
     beforeAll(() => {
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      childEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      esClient.child.mockReturnValue(childEsClient as unknown as Client);
       store = new TaskStore({
         logger: mockLogger(),
         index: 'tasky',
@@ -540,6 +544,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
 
@@ -548,17 +553,17 @@ describe('TaskStore', () => {
       hits: Array<estypes.SearchHit<unknown>> = [],
       limitResponse: boolean = false
     ) {
-      childEsClient.search.mockResponse({
+      esClient.search.mockResponse({
         hits: { hits, total: hits.length },
       } as estypes.SearchResponse);
 
       const result = await store.fetch(opts, limitResponse);
 
-      expect(childEsClient.search).toHaveBeenCalledTimes(1);
+      expect(esClient.search).toHaveBeenCalledTimes(1);
 
       return {
         result,
-        args: childEsClient.search.mock.calls[0][0],
+        args: esClient.search.mock.calls[0][0],
       };
     }
 
@@ -589,7 +594,7 @@ describe('TaskStore', () => {
 
     test('pushes error from call cluster to errors$', async () => {
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
-      childEsClient.search.mockRejectedValue(new Error('Failure'));
+      esClient.search.mockRejectedValue(new Error('Failure'));
       await expect(store.fetch()).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
@@ -608,9 +613,6 @@ describe('TaskStore', () => {
   describe('msearch', () => {
     let store: TaskStore;
     let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
-    let childEsClient: ReturnType<
-      typeof elasticsearchServiceMock.createClusterClient
-    >['asInternalUser'];
 
     const mockTask = {
       taskType: 'taskWithApiKey',
@@ -652,8 +654,6 @@ describe('TaskStore', () => {
       }));
 
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      childEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      esClient.child.mockReturnValue(childEsClient as unknown as Client);
       store = new TaskStore({
         logger: mockLogger(),
         index: 'tasky',
@@ -671,6 +671,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
 
       esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
@@ -697,7 +698,7 @@ describe('TaskStore', () => {
       optsArray: SearchOpts[],
       hitsArray: Array<estypes.SearchHitsMetadata<unknown>> = []
     ) {
-      childEsClient.msearch.mockResponse({
+      esClient.msearch.mockResponse({
         took: 0,
         responses: hitsArray.map((hits) => ({
           hits,
@@ -714,11 +715,11 @@ describe('TaskStore', () => {
 
       const result = await store.msearch(optsArray);
 
-      expect(childEsClient.msearch).toHaveBeenCalledTimes(1);
+      expect(esClient.msearch).toHaveBeenCalledTimes(1);
 
       return {
         result,
-        args: childEsClient.msearch.mock.calls[0][0],
+        args: esClient.msearch.mock.calls[0][0],
       };
     }
 
@@ -806,7 +807,7 @@ describe('TaskStore', () => {
 
     test('pushes error from call cluster to errors$', async () => {
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
-      childEsClient.msearch.mockResponse({
+      esClient.msearch.mockResponse({
         took: 0,
         responses: [
           {
@@ -857,6 +858,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
 
@@ -984,6 +986,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
 
@@ -1165,6 +1168,21 @@ describe('TaskStore', () => {
   describe('bulkUpdate', () => {
     let store: TaskStore;
     const logger = mockLogger();
+    const bulkUpdateTask = {
+      runAt: mockedDate,
+      scheduledAt: mockedDate,
+      startedAt: null,
+      retryAt: null,
+      id: 'task:324242',
+      params: { hello: 'world' },
+      state: { foo: 'bar' },
+      taskType: 'report',
+      attempts: 3,
+      status: 'idle' as TaskStatus,
+      version: '123',
+      ownerId: null,
+      traceparent: '',
+    };
 
     beforeAll(() => {
       store = new TaskStore({
@@ -1183,33 +1201,18 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
 
     test(`doesn't validate whenever validate:false is passed-in`, async () => {
-      const task = {
-        runAt: mockedDate,
-        scheduledAt: mockedDate,
-        startedAt: null,
-        retryAt: null,
-        id: 'task:324242',
-        params: { hello: 'world' },
-        state: { foo: 'bar' },
-        taskType: 'report',
-        attempts: 3,
-        status: 'idle' as TaskStatus,
-        version: '123',
-        ownerId: null,
-        traceparent: '',
-      };
-
       savedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: [
           {
             id: '324242',
             type: 'task',
             attributes: {
-              ...task,
+              ...bulkUpdateTask,
               state: '{"foo":"bar"}',
               params: '{"hello":"world"}',
             },
@@ -1219,19 +1222,20 @@ describe('TaskStore', () => {
         ],
       });
 
-      await store.bulkUpdate([task], { validate: false });
+      await store.bulkUpdate([bulkUpdateTask], { validate: false });
 
-      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(task, {
+      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(bulkUpdateTask, {
         validate: false,
       });
 
       expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
         [
           {
-            id: task.id,
+            id: bulkUpdateTask.id,
+            mergeAttributes: true,
             type: 'task',
-            version: task.version,
-            attributes: taskInstanceToAttributes(task, task.id),
+            version: bulkUpdateTask.version,
+            attributes: taskInstanceToAttributes(bulkUpdateTask, bulkUpdateTask.id),
           },
         ],
         { refresh: false }
@@ -1239,29 +1243,13 @@ describe('TaskStore', () => {
     });
 
     test(`validates whenever validate:true is passed-in`, async () => {
-      const task = {
-        runAt: mockedDate,
-        scheduledAt: mockedDate,
-        startedAt: null,
-        retryAt: null,
-        id: 'task:324242',
-        params: { hello: 'world' },
-        state: { foo: 'bar' },
-        taskType: 'report',
-        attempts: 3,
-        status: 'idle' as TaskStatus,
-        version: '123',
-        ownerId: null,
-        traceparent: '',
-      };
-
       savedObjectsClient.bulkUpdate.mockResolvedValue({
         saved_objects: [
           {
             id: '324242',
             type: 'task',
             attributes: {
-              ...task,
+              ...bulkUpdateTask,
               state: '{"foo":"bar"}',
               params: '{"hello":"world"}',
             },
@@ -1271,19 +1259,20 @@ describe('TaskStore', () => {
         ],
       });
 
-      await store.bulkUpdate([task], { validate: true });
+      await store.bulkUpdate([bulkUpdateTask], { validate: true });
 
-      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(task, {
+      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(bulkUpdateTask, {
         validate: true,
       });
 
       expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
         [
           {
-            id: task.id,
+            id: bulkUpdateTask.id,
+            mergeAttributes: true,
             type: 'task',
-            version: task.version,
-            attributes: taskInstanceToAttributes(task, task.id),
+            version: bulkUpdateTask.version,
+            attributes: taskInstanceToAttributes(bulkUpdateTask, bulkUpdateTask.id),
           },
         ],
         { refresh: false }
@@ -1291,26 +1280,10 @@ describe('TaskStore', () => {
     });
 
     test('pushes error from saved objects client to errors$', async () => {
-      const task = {
-        runAt: mockedDate,
-        scheduledAt: mockedDate,
-        startedAt: null,
-        retryAt: null,
-        id: 'task:324242',
-        params: { hello: 'world' },
-        state: { foo: 'bar' },
-        taskType: 'report',
-        attempts: 3,
-        status: 'idle' as TaskStatus,
-        version: '123',
-        ownerId: null,
-        traceparent: '',
-      };
-
       const firstErrorPromise = store.errors$.pipe(first()).toPromise();
       savedObjectsClient.bulkUpdate.mockRejectedValue(new Error('Failure'));
       await expect(
-        store.bulkUpdate([task], { validate: true })
+        store.bulkUpdate([bulkUpdateTask], { validate: true })
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Failure"`);
       expect(await firstErrorPromise).toMatchInlineSnapshot(`[Error: Failure]`);
     });
@@ -1378,9 +1351,47 @@ describe('TaskStore', () => {
         [
           {
             id: task1.id,
+            mergeAttributes: true,
             type: 'task',
             version: task1.version,
             attributes: taskInstanceToAttributes(task1, task1.id),
+          },
+        ],
+        { refresh: false }
+      );
+    });
+
+    test('forwards mergeAttributes as expected when defined', async () => {
+      savedObjectsClient.bulkUpdate.mockResolvedValue({
+        saved_objects: [
+          {
+            id: '324242',
+            type: 'task',
+            attributes: {
+              ...bulkUpdateTask,
+              state: '{"foo":"bar"}',
+              params: '{"hello":"world"}',
+            },
+            references: [],
+            version: '123',
+          },
+        ],
+      });
+
+      await store.bulkUpdate([bulkUpdateTask], { validate: false, mergeAttributes: false });
+
+      expect(mockGetValidatedTaskInstanceForUpdating).toHaveBeenCalledWith(bulkUpdateTask, {
+        validate: false,
+      });
+
+      expect(savedObjectsClient.bulkUpdate).toHaveBeenCalledWith(
+        [
+          {
+            id: bulkUpdateTask.id,
+            mergeAttributes: false,
+            type: 'task',
+            version: bulkUpdateTask.version,
+            attributes: taskInstanceToAttributes(bulkUpdateTask, bulkUpdateTask.id),
           },
         ],
         { refresh: false }
@@ -1411,6 +1422,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
 
@@ -1962,6 +1974,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
 
       esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
@@ -2083,6 +2096,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
 
       esoClient.createPointInTimeFinderDecryptedAsInternalUser = jest.fn().mockResolvedValue({
@@ -2154,6 +2168,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
 
@@ -2220,6 +2235,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
 
@@ -2321,6 +2337,7 @@ describe('TaskStore', () => {
             savedObjectsService: coreStart.savedObjects,
             security: coreStart.security,
             getIsSecurityEnabled: () => true,
+            basePath: basePathMock,
           });
 
           expect(await store.getLifecycle(task.id)).toEqual(status);
@@ -2349,6 +2366,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
 
       expect(await store.getLifecycle(randomId())).toEqual(TaskLifecycleResult.NotFound);
@@ -2375,6 +2393,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
 
       return expect(store.getLifecycle(randomId())).rejects.toThrow('Bad Request');
@@ -2403,6 +2422,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -2475,7 +2495,10 @@ describe('TaskStore', () => {
             },
           },
         ],
-        { refresh: false }
+        {
+          overwrite: true,
+          refresh: false,
+        }
       );
 
       expect(result).toEqual([
@@ -2608,7 +2631,8 @@ describe('TaskStore', () => {
       expect(getApiKeyAndUserScope).toHaveBeenCalledWith(
         [task1, task2],
         request,
-        coreStart.security
+        coreStart.security,
+        basePathMock
       );
 
       expect(savedObjectsClient.create).not.toHaveBeenCalled();
@@ -2671,6 +2695,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: false,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
 
       const task1 = {
@@ -2705,6 +2730,7 @@ describe('TaskStore', () => {
         security: coreStart.security,
         canEncryptSavedObjects: true,
         getIsSecurityEnabled: () => false,
+        basePath: basePathMock,
       });
 
       store.registerEncryptedSavedObjectsClient(esoClient);
@@ -2924,7 +2950,10 @@ describe('TaskStore', () => {
             },
           },
         ],
-        { refresh: false }
+        {
+          overwrite: true,
+          refresh: false,
+        }
       );
     });
   });
@@ -2959,6 +2988,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
 
       savedObjectsClient.create.mockImplementation(async (type: string, attributes: unknown) => ({
@@ -3010,6 +3040,7 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
 
       savedObjectsClient.create.mockImplementation(async (type: string, attributes: unknown) => ({
@@ -3038,14 +3069,9 @@ describe('TaskStore', () => {
   describe('updateByQuery', () => {
     let store: TaskStore;
     let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
-    let childEsClient: ReturnType<
-      typeof elasticsearchServiceMock.createClusterClient
-    >['asInternalUser'];
 
     beforeAll(() => {
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      childEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      esClient.child.mockReturnValue(childEsClient as unknown as Client);
       store = new TaskStore({
         logger: mockLogger(),
         index: 'tasky',
@@ -3062,15 +3088,17 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
-    test('should pass requestTimeout', async () => {
-      childEsClient.updateByQuery.mockResponse({
+    test('should pass requestTimeout and retryOnTimeout', async () => {
+      esClient.updateByQuery.mockResponse({
         hits: { hits: [], total: 0, updated: 100, version_conflicts: 0 },
       } as UpdateByQueryResponse);
       await store.updateByQuery({ script: { source: '' } }, { max_docs: 10 });
-      expect(childEsClient.updateByQuery).toHaveBeenCalledWith(expect.any(Object), {
+      expect(esClient.updateByQuery).toHaveBeenCalledWith(expect.any(Object), {
         requestTimeout: 1000,
+        retryOnTimeout: false,
       });
     });
   });
@@ -3078,14 +3106,9 @@ describe('TaskStore', () => {
   describe('bulkGetVersions', () => {
     let store: TaskStore;
     let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
-    let childEsClient: ReturnType<
-      typeof elasticsearchServiceMock.createClusterClient
-    >['asInternalUser'];
 
     beforeAll(() => {
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      childEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      esClient.child.mockReturnValue(childEsClient as unknown as Client);
       store = new TaskStore({
         logger: mockLogger(),
         index: 'tasky',
@@ -3102,11 +3125,12 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
 
     test('should return the version of the tasks when found', async () => {
-      childEsClient.mget.mockResponse({
+      esClient.mget.mockResponse({
         docs: [
           {
             _index: 'ignored-1',
@@ -3145,7 +3169,7 @@ describe('TaskStore', () => {
     });
 
     test('should handle errors and missing tasks', async () => {
-      childEsClient.mget.mockResponse({
+      esClient.mget.mockResponse({
         docs: [
           {
             _index: 'ignored-1',
@@ -3199,14 +3223,9 @@ describe('TaskStore', () => {
   describe('getDocVersions', () => {
     let store: TaskStore;
     let esClient: ReturnType<typeof elasticsearchServiceMock.createClusterClient>['asInternalUser'];
-    let childEsClient: ReturnType<
-      typeof elasticsearchServiceMock.createClusterClient
-    >['asInternalUser'];
 
     beforeAll(() => {
       esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      childEsClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
-      esClient.child.mockReturnValue(childEsClient as unknown as Client);
       store = new TaskStore({
         logger: mockLogger(),
         index: 'tasky',
@@ -3223,11 +3242,12 @@ describe('TaskStore', () => {
         savedObjectsService: coreStart.savedObjects,
         security: coreStart.security,
         getIsSecurityEnabled: () => true,
+        basePath: basePathMock,
       });
     });
 
     test('should return the version as expected, with errors included', async () => {
-      childEsClient.mget.mockResponse({
+      esClient.mget.mockResponse({
         docs: [
           {
             _index: 'ignored-1',

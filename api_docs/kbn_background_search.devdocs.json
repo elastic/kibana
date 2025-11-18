@@ -1,0 +1,65 @@
+{
+  "id": "@kbn/background-search",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/background-search",
+        "id": "def-public.BackgroundSearchRestoredCallout",
+        "type": "Function",
+        "tags": [],
+        "label": "BackgroundSearchRestoredCallout",
+        "description": [
+          "\nDisplays a sticky callout when a search session was restored (cached background search).\n\nThe callout becomes visible when the session transitions to Restored and remains visible\nfor the Restored / BackgroundLoading states until a non-background state appears.\n"
+        ],
+        "signature": [
+          "(props: BackgroundSearchRestoredCalloutProps) => React.JSX.Element | null"
+        ],
+        "path": "src/platform/packages/shared/kbn-background-search/src/components/background_search_restored_callout.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/background-search",
+            "id": "def-public.BackgroundSearchRestoredCallout.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [
+              "Component props."
+            ],
+            "signature": [
+              "BackgroundSearchRestoredCalloutProps"
+            ],
+            "path": "src/platform/packages/shared/kbn-background-search/src/components/background_search_restored_callout.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

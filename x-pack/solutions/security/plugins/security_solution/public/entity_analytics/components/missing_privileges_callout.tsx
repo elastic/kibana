@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { LineClamp } from '../../common/components/line_clamp';
 import type { EntityAnalyticsPrivileges } from '../../../common/api/entity_analytics';
 import { getAllMissingPrivileges } from '../../../common/entity_analytics/privileges';
-import { CommaSeparatedValues } from '../../detections/components/callouts/missing_privileges_callout/comma_separated_values';
+import { CommaSeparatedValues } from '../../common/components/missing_privileges';
 
 interface MissingPrivilegesCalloutProps {
   privileges: EntityAnalyticsPrivileges;

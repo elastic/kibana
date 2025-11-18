@@ -18,4 +18,4 @@ export type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/publ
 
 export type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 
-export type { LicenseCheck } from '@kbn/licensing-plugin/public';
+export type { LicenseCheck } from '@kbn/licensing-types';

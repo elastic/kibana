@@ -24,20 +24,8 @@ Object {
       "rename": Object {
         "field": "foo",
         "if": "
-  def relevant_fields = [:];
-  
-relevant_fields['attributes.status'] = ctx['attributes'];
-if (relevant_fields['attributes.status'] != null) {
-  if (relevant_fields['attributes.status'] instanceof Map) {
-    relevant_fields['attributes.status'] = relevant_fields['attributes.status']['status'];
-  } else {
-    relevant_fields['attributes.status'] = null;
-  }
-}
-
-  
   try {
-  if ((relevant_fields['attributes.status'] !== null && ((relevant_fields['attributes.status'] instanceof Number && relevant_fields['attributes.status'].toString() == \\"active\\") || relevant_fields['attributes.status'] == \\"active\\"))) {
+  if (($('attributes.status', null) !== null && (($('attributes.status', null) instanceof Number && $('attributes.status', null).toString() == \\"active\\") || $('attributes.status', null) == \\"active\\"))) {
     return true;
   }
   return false;
@@ -86,20 +74,8 @@ Object {
       "set": Object {
         "field": "attributes.not_flag",
         "if": "
-  def relevant_fields = [:];
-  
-relevant_fields['attributes.status'] = ctx['attributes'];
-if (relevant_fields['attributes.status'] != null) {
-  if (relevant_fields['attributes.status'] instanceof Map) {
-    relevant_fields['attributes.status'] = relevant_fields['attributes.status']['status'];
-  } else {
-    relevant_fields['attributes.status'] = null;
-  }
-}
-
-  
   try {
-  if (!((relevant_fields['attributes.status'] !== null && ((relevant_fields['attributes.status'] instanceof Number && relevant_fields['attributes.status'].toString() == \\"active\\") || relevant_fields['attributes.status'] == \\"active\\")))) {
+  if (!(($('attributes.status', null) !== null && (($('attributes.status', null) instanceof Number && $('attributes.status', null).toString() == \\"active\\") || $('attributes.status', null) == \\"active\\")))) {
     return true;
   }
   return false;
@@ -114,29 +90,8 @@ if (relevant_fields['attributes.status'] != null) {
       "set": Object {
         "field": "attributes.not_nested",
         "if": "
-  def relevant_fields = [:];
-  
-relevant_fields['attributes.a'] = ctx['attributes'];
-if (relevant_fields['attributes.a'] != null) {
-  if (relevant_fields['attributes.a'] instanceof Map) {
-    relevant_fields['attributes.a'] = relevant_fields['attributes.a']['a'];
-  } else {
-    relevant_fields['attributes.a'] = null;
-  }
-}
-
-relevant_fields['attributes.b'] = ctx['attributes'];
-if (relevant_fields['attributes.b'] != null) {
-  if (relevant_fields['attributes.b'] instanceof Map) {
-    relevant_fields['attributes.b'] = relevant_fields['attributes.b']['b'];
-  } else {
-    relevant_fields['attributes.b'] = null;
-  }
-}
-
-  
   try {
-  if (!(((relevant_fields['attributes.a'] !== null && ((relevant_fields['attributes.a'] instanceof Number && relevant_fields['attributes.a'].toString() == \\"1\\") || relevant_fields['attributes.a'] == \\"1\\")) || (relevant_fields['attributes.b'] !== null && ((relevant_fields['attributes.b'] instanceof Number && relevant_fields['attributes.b'].toString() == \\"2\\") || relevant_fields['attributes.b'] == \\"2\\"))))) {
+  if (!((($('attributes.a', null) !== null && (($('attributes.a', null) instanceof Number && $('attributes.a', null).toString() == \\"1\\") || $('attributes.a', null) == 1)) || ($('attributes.b', null) !== null && (($('attributes.b', null) instanceof Number && $('attributes.b', null).toString() == \\"2\\") || $('attributes.b', null) == 2))))) {
     return true;
   }
   return false;
@@ -151,9 +106,129 @@ if (relevant_fields['attributes.b'] != null) {
 }
 `;
 
+exports[`transpile (Streamlang DSL to ingest pipeline) should handle type coercions 1`] = `
+Object {
+  "processors": Array [
+    Object {
+      "set": Object {
+        "field": "attributes.boolean_true_test",
+        "if": "
+  try {
+  if (($('attributes.is_active', null) !== null && (($('attributes.is_active', null) instanceof Number && $('attributes.is_active', null).toString() == \\"true\\") || $('attributes.is_active', null) == true)) && ($('attributes.is_active_str', null) !== null && (($('attributes.is_active_str', null) instanceof Number && $('attributes.is_active_str', null).toString() == \\"true\\") || $('attributes.is_active_str', null) == \\"true\\")) && ($('attributes.is_inactive', null) !== null && (($('attributes.is_inactive', null) instanceof Number && $('attributes.is_inactive', null).toString() != \\"true\\") || $('attributes.is_inactive', null) != true)) && ($('attributes.is_inactive_str', null) !== null && (($('attributes.is_inactive_str', null) instanceof Number && $('attributes.is_inactive_str', null).toString() != \\"true\\") || $('attributes.is_inactive_str', null) != \\"true\\"))) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+",
+        "value": "matched_true_test",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "attributes.boolean_false_test",
+        "if": "
+  try {
+  if (($('attributes.is_disabled', null) !== null && (($('attributes.is_disabled', null) instanceof Number && $('attributes.is_disabled', null).toString() == \\"false\\") || $('attributes.is_disabled', null) == false)) && ($('attributes.is_disabled_str', null) !== null && (($('attributes.is_disabled_str', null) instanceof Number && $('attributes.is_disabled_str', null).toString() == \\"false\\") || $('attributes.is_disabled_str', null) == \\"false\\")) && ($('attributes.is_enabled', null) !== null && (($('attributes.is_enabled', null) instanceof Number && $('attributes.is_enabled', null).toString() != \\"false\\") || $('attributes.is_enabled', null) != false)) && ($('attributes.is_enabled_str', null) !== null && (($('attributes.is_enabled_str', null) instanceof Number && $('attributes.is_enabled_str', null).toString() != \\"false\\") || $('attributes.is_enabled_str', null) != \\"false\\"))) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+",
+        "value": "matched_false_test",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "attributes.numeric_450_test",
+        "if": "
+  try {
+  if (($('attributes.status_code', null) !== null && (($('attributes.status_code', null) instanceof Number && $('attributes.status_code', null).toString() == \\"450\\") || $('attributes.status_code', null) == 450)) && ($('attributes.status_code_str', null) !== null && (($('attributes.status_code_str', null) instanceof Number && $('attributes.status_code_str', null).toString() == \\"450\\") || $('attributes.status_code_str', null) == \\"450\\")) && ($('attributes.other_code', null) !== null && (($('attributes.other_code', null) instanceof Number && $('attributes.other_code', null).toString() != \\"450\\") || $('attributes.other_code', null) != 450)) && ($('attributes.other_code_str', null) !== null && (($('attributes.other_code_str', null) instanceof Number && $('attributes.other_code_str', null).toString() != \\"450\\") || $('attributes.other_code_str', null) != \\"450\\"))) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+",
+        "value": "matched_450_test",
+      },
+    },
+    Object {
+      "set": Object {
+        "field": "attributes.mixed_coercion_test",
+        "if": "
+  try {
+  if (($('attributes.response_time', null) !== null && (($('attributes.response_time', null) instanceof String && Float.parseFloat($('attributes.response_time', null)) > 100) || $('attributes.response_time', null) > 100)) && ($('attributes.response_time_str', null) !== null && (($('attributes.response_time_str', null) instanceof String && Float.parseFloat($('attributes.response_time_str', null)) > 100) || $('attributes.response_time_str', null) > 100)) && ($('attributes.port', null) !== null && (($('attributes.port', null) instanceof Number && $('attributes.port', null) >= 8000 && $('attributes.port', null) <= 9000) || ($('attributes.port', null) instanceof String && Float.parseFloat($('attributes.port', null)) >= 8000 && Float.parseFloat($('attributes.port', null)) <= 9000))) && ($('attributes.is_enabled', null) !== null && (($('attributes.is_enabled', null) instanceof Number && $('attributes.is_enabled', null).toString() == \\"true\\") || $('attributes.is_enabled', null) == true)) && ($('attributes.count_str', null) !== null && (($('attributes.count_str', null) instanceof Number && $('attributes.count_str', null).toString() == \\"42\\") || $('attributes.count_str', null) == \\"42\\"))) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+",
+        "value": "matched_mixed_coercion",
+      },
+    },
+  ],
+}
+`;
+
 exports[`transpile (Streamlang DSL to ingest pipeline) should transpile a variety of processor steps and where blocks 1`] = `
 Object {
   "processors": Array [
+    Object {
+      "drop": Object {
+        "if": "
+  try {
+  if (($('https.status_code', null) !== null && (($('https.status_code', null) instanceof Number && $('https.status_code', null).toString() == \\"200\\") || $('https.status_code', null) == 200))) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+",
+      },
+    },
+    Object {
+      "convert": Object {
+        "field": "http.status_code",
+        "if": "
+  try {
+  if (($('http.error', null) !== null && (($('http.error', null) instanceof Number && $('http.error', null).toString() == \\"404\\") || $('http.error', null) == 404))) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+",
+        "target_field": "http.status_code_str",
+        "type": "string",
+      },
+    },
+    Object {
+      "gsub": Object {
+        "field": "message",
+        "if": "
+  try {
+  if (($('log_level', null) !== null && (($('log_level', null) instanceof Number && $('log_level', null).toString() == \\"ERROR\\") || $('log_level', null) == \\"ERROR\\"))) {
+    return true;
+  }
+  return false;
+} catch (Exception e) {
+  return false;
+}
+",
+        "pattern": "error",
+        "replacement": "warning",
+        "target_field": "clean_message",
+      },
+    },
     Object {
       "rename": Object {
         "field": "attributes.old_name",
@@ -168,6 +243,7 @@ Object {
     },
     Object {
       "grok": Object {
+        "ecs_compatibility": "v1",
         "field": "body.message",
         "patterns": Array [
           "%{IP:attributes.client_ip} - %{WORD:attributes.method}",
@@ -192,23 +268,19 @@ Object {
       },
     },
     Object {
+      "append": Object {
+        "field": "attributes.tags",
+        "value": Array [
+          "new_tag",
+        ],
+      },
+    },
+    Object {
       "set": Object {
         "field": "attributes.flag",
         "if": "
-  def relevant_fields = [:];
-  
-relevant_fields['attributes.status'] = ctx['attributes'];
-if (relevant_fields['attributes.status'] != null) {
-  if (relevant_fields['attributes.status'] instanceof Map) {
-    relevant_fields['attributes.status'] = relevant_fields['attributes.status']['status'];
-  } else {
-    relevant_fields['attributes.status'] = null;
-  }
-}
-
-  
   try {
-  if ((relevant_fields['attributes.status'] !== null && ((relevant_fields['attributes.status'] instanceof Number && relevant_fields['attributes.status'].toString() == \\"active\\") || relevant_fields['attributes.status'] == \\"active\\"))) {
+  if (($('attributes.status', null) !== null && (($('attributes.status', null) instanceof Number && $('attributes.status', null).toString() == \\"active\\") || $('attributes.status', null) == \\"active\\"))) {
     return true;
   }
   return false;
@@ -223,20 +295,8 @@ if (relevant_fields['attributes.status'] != null) {
       "set": Object {
         "field": "attributes.prod_flag",
         "if": "
-  def relevant_fields = [:];
-  
-relevant_fields['attributes.env'] = ctx['attributes'];
-if (relevant_fields['attributes.env'] != null) {
-  if (relevant_fields['attributes.env'] instanceof Map) {
-    relevant_fields['attributes.env'] = relevant_fields['attributes.env']['env'];
-  } else {
-    relevant_fields['attributes.env'] = null;
-  }
-}
-
-  
   try {
-  if ((relevant_fields['attributes.env'] !== null && ((relevant_fields['attributes.env'] instanceof Number && relevant_fields['attributes.env'].toString() == \\"prod\\") || relevant_fields['attributes.env'] == \\"prod\\"))) {
+  if (($('attributes.env', null) !== null && (($('attributes.env', null) instanceof Number && $('attributes.env', null).toString() == \\"prod\\") || $('attributes.env', null) == \\"prod\\"))) {
     return true;
   }
   return false;
@@ -251,29 +311,8 @@ if (relevant_fields['attributes.env'] != null) {
       "set": Object {
         "field": "attributes.prod_flag",
         "if": "
-  def relevant_fields = [:];
-  
-relevant_fields['attributes.a'] = ctx['attributes'];
-if (relevant_fields['attributes.a'] != null) {
-  if (relevant_fields['attributes.a'] instanceof Map) {
-    relevant_fields['attributes.a'] = relevant_fields['attributes.a']['a'];
-  } else {
-    relevant_fields['attributes.a'] = null;
-  }
-}
-
-relevant_fields['attributes.b'] = ctx['attributes'];
-if (relevant_fields['attributes.b'] != null) {
-  if (relevant_fields['attributes.b'] instanceof Map) {
-    relevant_fields['attributes.b'] = relevant_fields['attributes.b']['b'];
-  } else {
-    relevant_fields['attributes.b'] = null;
-  }
-}
-
-  
   try {
-  if ((relevant_fields['attributes.a'] !== null && ((relevant_fields['attributes.a'] instanceof Number && relevant_fields['attributes.a'].toString() == \\"1\\") || relevant_fields['attributes.a'] == \\"1\\")) || (relevant_fields['attributes.b'] !== null && ((relevant_fields['attributes.b'] instanceof Number && relevant_fields['attributes.b'].toString() == \\"2\\") || relevant_fields['attributes.b'] == \\"2\\"))) {
+  if (($('attributes.a', null) !== null && (($('attributes.a', null) instanceof Number && $('attributes.a', null).toString() == \\"1\\") || $('attributes.a', null) == 1)) || ($('attributes.b', null) !== null && (($('attributes.b', null) instanceof Number && $('attributes.b', null).toString() == \\"2\\") || $('attributes.b', null) == 2))) {
     return true;
   }
   return false;
@@ -288,38 +327,8 @@ if (relevant_fields['attributes.b'] != null) {
       "set": Object {
         "field": "attributes.department_flag",
         "if": "
-  def relevant_fields = [:];
-  
-relevant_fields['attributes.a'] = ctx['attributes'];
-if (relevant_fields['attributes.a'] != null) {
-  if (relevant_fields['attributes.a'] instanceof Map) {
-    relevant_fields['attributes.a'] = relevant_fields['attributes.a']['a'];
-  } else {
-    relevant_fields['attributes.a'] = null;
-  }
-}
-
-relevant_fields['attributes.b'] = ctx['attributes'];
-if (relevant_fields['attributes.b'] != null) {
-  if (relevant_fields['attributes.b'] instanceof Map) {
-    relevant_fields['attributes.b'] = relevant_fields['attributes.b']['b'];
-  } else {
-    relevant_fields['attributes.b'] = null;
-  }
-}
-
-relevant_fields['attributes.department'] = ctx['attributes'];
-if (relevant_fields['attributes.department'] != null) {
-  if (relevant_fields['attributes.department'] instanceof Map) {
-    relevant_fields['attributes.department'] = relevant_fields['attributes.department']['department'];
-  } else {
-    relevant_fields['attributes.department'] = null;
-  }
-}
-
-  
   try {
-  if (((relevant_fields['attributes.a'] !== null && ((relevant_fields['attributes.a'] instanceof Number && relevant_fields['attributes.a'].toString() == \\"1\\") || relevant_fields['attributes.a'] == \\"1\\")) || (relevant_fields['attributes.b'] !== null && ((relevant_fields['attributes.b'] instanceof Number && relevant_fields['attributes.b'].toString() == \\"2\\") || relevant_fields['attributes.b'] == \\"2\\"))) && (relevant_fields['attributes.department'] !== null && ((relevant_fields['attributes.department'] instanceof Number && relevant_fields['attributes.department'].toString() == \\"legal\\") || relevant_fields['attributes.department'] == \\"legal\\"))) {
+  if ((($('attributes.a', null) !== null && (($('attributes.a', null) instanceof Number && $('attributes.a', null).toString() == \\"1\\") || $('attributes.a', null) == 1)) || ($('attributes.b', null) !== null && (($('attributes.b', null) instanceof Number && $('attributes.b', null).toString() == \\"2\\") || $('attributes.b', null) == 2))) && ($('attributes.department', null) !== null && (($('attributes.department', null) instanceof Number && $('attributes.department', null).toString() == \\"legal\\") || $('attributes.department', null) == \\"legal\\"))) {
     return true;
   }
   return false;
@@ -334,29 +343,8 @@ if (relevant_fields['attributes.department'] != null) {
       "set": Object {
         "field": "attributes.test",
         "if": "
-  def relevant_fields = [:];
-  
-relevant_fields['attributes.status'] = ctx['attributes'];
-if (relevant_fields['attributes.status'] != null) {
-  if (relevant_fields['attributes.status'] instanceof Map) {
-    relevant_fields['attributes.status'] = relevant_fields['attributes.status']['status'];
-  } else {
-    relevant_fields['attributes.status'] = null;
-  }
-}
-
-relevant_fields['attributes.read_only'] = ctx['attributes'];
-if (relevant_fields['attributes.read_only'] != null) {
-  if (relevant_fields['attributes.read_only'] instanceof Map) {
-    relevant_fields['attributes.read_only'] = relevant_fields['attributes.read_only']['read_only'];
-  } else {
-    relevant_fields['attributes.read_only'] = null;
-  }
-}
-
-  
   try {
-  if ((relevant_fields['attributes.status'] !== null && ((relevant_fields['attributes.status'] instanceof Number && relevant_fields['attributes.status'].toString() == \\"active\\") || relevant_fields['attributes.status'] == \\"active\\")) || ((relevant_fields['attributes.status'] !== null && ((relevant_fields['attributes.status'] instanceof Number && relevant_fields['attributes.status'].toString() == \\"inactive\\") || relevant_fields['attributes.status'] == \\"inactive\\")) && (relevant_fields['attributes.read_only'] !== null && ((relevant_fields['attributes.read_only'] instanceof Number && relevant_fields['attributes.read_only'].toString() == \\"false\\") || relevant_fields['attributes.read_only'] == \\"false\\")))) {
+  if (($('attributes.status', null) !== null && (($('attributes.status', null) instanceof Number && $('attributes.status', null).toString() == \\"active\\") || $('attributes.status', null) == \\"active\\")) || (($('attributes.status', null) !== null && (($('attributes.status', null) instanceof Number && $('attributes.status', null).toString() == \\"inactive\\") || $('attributes.status', null) == \\"inactive\\")) && ($('attributes.read_only', null) !== null && (($('attributes.read_only', null) instanceof Number && $('attributes.read_only', null).toString() == \\"false\\") || $('attributes.read_only', null) == false)))) {
     return true;
   }
   return false;

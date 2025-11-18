@@ -12,7 +12,7 @@ import type {
   PerformanceMetrics as ScreenshotMetrics,
 } from '@kbn/screenshotting-plugin/common';
 import type { ConcreteTaskInstance, RruleSchedule } from '@kbn/task-manager-plugin/server';
-import { JOB_STATUS } from './constants';
+import type { JOB_STATUS } from './constants';
 import type { LocatorParams } from './url';
 
 export type * from './url';
@@ -33,6 +33,7 @@ export interface TaskRunResult {
   max_size_reached?: boolean;
   warnings?: string[];
   metrics?: TaskRunMetrics;
+  user_error?: boolean;
   /**
    * When running a report task we may finish with warnings that were triggered
    * by an error. We can pass the error code via the task run result to the

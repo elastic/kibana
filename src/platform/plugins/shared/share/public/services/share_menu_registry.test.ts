@@ -8,7 +8,7 @@
  */
 
 import { ShareRegistry } from './share_menu_registry';
-import { ShareContext, ShareIntegration, ShareRegistryApiStart } from '../types';
+import type { ShareContext, ShareRegistryApiStart, RegisterShareIntegrationArgs } from '../types';
 import { url } from '../mocks';
 
 describe('ShareActionsRegistry', () => {
@@ -28,13 +28,13 @@ describe('ShareActionsRegistry', () => {
 
       shareRegistrySetup.registerShareIntegration({
         id: 'csvReports',
-        config: () => ({}),
+        getShareIntegrationConfig: () => Promise.resolve({}),
       });
 
       expect(() =>
         shareRegistrySetup.registerShareIntegration({
           id: 'csvReports',
-          config: () => ({}),
+          getShareIntegrationConfig: () => Promise.resolve({}),
         })
       ).toThrowErrorMatchingInlineSnapshot(
         `"Share action with type [integration] for app [*] has already been registered."`
@@ -53,7 +53,7 @@ describe('ShareActionsRegistry', () => {
         // register a global integration without a prerequisite
         registerShareIntegration({
           id: 'csvReports',
-          config: () => ({}),
+          getShareIntegrationConfig: () => Promise.resolve({}),
         });
 
         // we expect to have 2 default share actions (link and embed) + 1 registered integration
@@ -71,7 +71,7 @@ describe('ShareActionsRegistry', () => {
         // register a global integration with a prerequisiteCheck
         registerShareIntegration({
           id: 'csvReports',
-          config: () => ({}),
+          getShareIntegrationConfig: () => Promise.resolve({}),
           prerequisiteCheck: prerequisiteCheckFn,
         });
 
@@ -97,7 +97,7 @@ describe('ShareActionsRegistry', () => {
         // register a global integration with a prerequisiteCheck
         registerShareIntegration({
           id: 'csvReports',
-          config: () => ({}),
+          getShareIntegrationConfig: () => Promise.resolve({}),
           prerequisiteCheck: prerequisiteCheckFn,
         });
 
@@ -122,7 +122,7 @@ describe('ShareActionsRegistry', () => {
         registerShareIntegration({
           id: 'csvReports',
           groupId: 'export',
-          config: () => ({}),
+          getShareIntegrationConfig: () => Promise.resolve({}),
         });
 
         // we only expect to have the global integration we registered with the groupId 'export'
@@ -139,7 +139,7 @@ describe('ShareActionsRegistry', () => {
         registerShareIntegration('scoped', {
           id: 'csvReports',
           groupId: 'export',
-          config: () => ({}),
+          getShareIntegrationConfig: () => Promise.resolve({}),
         });
 
         expect(availableIntegrations('scoped', 'export')).toHaveLength(1);
@@ -148,31 +148,33 @@ describe('ShareActionsRegistry', () => {
     });
 
     describe('resolveShareItemsForShareContext', () => {
-      test('it returns the default share actions for any requested app scope without performing any prior registrations', () => {
+      test('it returns the default share actions for any requested app scope without performing any prior registrations', async () => {
         const { resolveShareItemsForShareContext } = new ShareRegistry().start(startDeps);
 
         const context = {
           objectType: 'someRandomObjectType',
         } as ShareContext;
 
-        expect(resolveShareItemsForShareContext({ ...context, isServerless: false })).toEqual([
-          expect.objectContaining({
-            shareType: 'link',
-          }),
-          expect.objectContaining({
-            shareType: 'embed',
-          }),
-        ]);
+        expect(await resolveShareItemsForShareContext({ ...context, isServerless: false })).toEqual(
+          [
+            expect.objectContaining({
+              shareType: 'link',
+            }),
+            expect.objectContaining({
+              shareType: 'embed',
+            }),
+          ]
+        );
       });
 
-      test('it excludes the default embed share actions for any requested app scope in serverless', () => {
+      test('it excludes the default embed share actions for any requested app scope in serverless', async () => {
         const { resolveShareItemsForShareContext } = new ShareRegistry().start(startDeps);
 
         const context = {
           objectType: 'someRandomObjectType',
         } as ShareContext;
 
-        expect(resolveShareItemsForShareContext({ ...context, isServerless: true })).toEqual(
+        expect(await resolveShareItemsForShareContext({ ...context, isServerless: true })).toEqual(
           expect.not.arrayContaining([
             expect.objectContaining({
               shareType: 'embed',
@@ -181,29 +183,26 @@ describe('ShareActionsRegistry', () => {
         );
       });
 
-      test('returns a flat list of actions returned by all providers', () => {
+      test('returns a flat list of actions returned by all providers', async () => {
         const service = new ShareRegistry();
         const { registerShareIntegration: registerFunction } = service.setup();
 
-        const shareAction1ConfigFactory = jest.fn(() => ({}));
-        const shareAction1: ShareIntegration = {
+        const shareAction1ConfigFactory = jest.fn(() => Promise.resolve({}));
+        const shareAction1: RegisterShareIntegrationArgs = {
           id: 'shareAction1',
-          shareType: 'integration',
-          config: shareAction1ConfigFactory,
+          getShareIntegrationConfig: shareAction1ConfigFactory,
         };
 
-        const shareAction2ConfigFactory = jest.fn(() => ({}));
-        const shareAction2: ShareIntegration = {
+        const shareAction2ConfigFactory = jest.fn(() => Promise.resolve({}));
+        const shareAction2: RegisterShareIntegrationArgs = {
           id: 'shareAction2',
-          shareType: 'integration',
-          config: shareAction2ConfigFactory,
+          getShareIntegrationConfig: shareAction2ConfigFactory,
         };
 
-        const shareAction3ConfigFactory = jest.fn(() => ({}));
-        const shareAction3: ShareIntegration = {
+        const shareAction3ConfigFactory = jest.fn(() => Promise.resolve({}));
+        const shareAction3: RegisterShareIntegrationArgs = {
           id: 'shareAction3',
-          shareType: 'integration',
-          config: shareAction3ConfigFactory,
+          getShareIntegrationConfig: shareAction3ConfigFactory,
         };
 
         registerFunction(shareAction1);
@@ -215,7 +214,7 @@ describe('ShareActionsRegistry', () => {
 
         const { resolveShareItemsForShareContext } = service.start(startDeps);
 
-        expect(resolveShareItemsForShareContext({ ...context, isServerless })).toEqual([
+        expect(await resolveShareItemsForShareContext({ ...context, isServerless })).toEqual([
           expect.objectContaining({
             shareType: 'link',
             config: expect.any(Object),
@@ -255,32 +254,29 @@ describe('ShareActionsRegistry', () => {
         );
       });
 
-      test('it returns a flat list of actions registered to the requested scope', () => {
+      test('it returns a flat list of actions registered to the requested scope', async () => {
         const service = new ShareRegistry();
         const { registerShareIntegration: registerFunction } = service.setup();
         const context = { objectType: 'randomObjectType' } as ShareContext;
 
         const isServerless = false;
 
-        const shareAction1ConfigFactory = jest.fn(() => ({}));
-        const shareAction1: ShareIntegration = {
+        const shareAction1ConfigFactory = jest.fn(() => Promise.resolve({}));
+        const shareAction1: RegisterShareIntegrationArgs = {
           id: 'shareAction1',
-          shareType: 'integration',
-          config: shareAction1ConfigFactory,
+          getShareIntegrationConfig: shareAction1ConfigFactory,
         };
 
-        const shareAction2ConfigFactory = jest.fn(() => ({}));
-        const shareAction2: ShareIntegration = {
+        const shareAction2ConfigFactory = jest.fn(() => Promise.resolve({}));
+        const shareAction2: RegisterShareIntegrationArgs = {
           id: 'shareAction2',
-          shareType: 'integration',
-          config: shareAction2ConfigFactory,
+          getShareIntegrationConfig: shareAction2ConfigFactory,
         };
 
-        const shareAction3ConfigFactory = jest.fn(() => ({}));
-        const shareAction3: ShareIntegration = {
+        const shareAction3ConfigFactory = jest.fn(() => Promise.resolve({}));
+        const shareAction3: RegisterShareIntegrationArgs = {
           id: 'shareAction3',
-          shareType: 'integration',
-          config: shareAction3ConfigFactory,
+          getShareIntegrationConfig: shareAction3ConfigFactory,
         };
 
         registerFunction(context.objectType, shareAction1);
@@ -289,7 +285,7 @@ describe('ShareActionsRegistry', () => {
 
         const { resolveShareItemsForShareContext } = service.start(startDeps);
 
-        expect(resolveShareItemsForShareContext({ ...context, isServerless })).toEqual([
+        expect(await resolveShareItemsForShareContext({ ...context, isServerless })).toEqual([
           expect.objectContaining({
             shareType: 'link',
             config: expect.any(Object),

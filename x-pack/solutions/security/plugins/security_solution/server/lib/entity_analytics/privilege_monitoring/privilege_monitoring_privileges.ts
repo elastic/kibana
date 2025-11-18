@@ -7,7 +7,7 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { getPrivilegeUserMonitoringRequiredEsIndexPrivileges } from '../../../../common/entity_analytics/privilege_monitoring/utils';
+import { getPrivilegeUserMonitoringRequiredEsIndexPrivileges } from '../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import { checkAndFormatPrivileges } from '../utils/check_and_format_privileges';
 
 export const getReadPrivilegeUserMonitoringPrivileges = async (

@@ -10,9 +10,9 @@ import { act } from 'react-dom/test-utils';
 import { INVALID_NAME_CHARS } from '../../public/application/services/validation/validate_repository';
 import { API_BASE_PATH } from '../../common';
 import { getRepository } from '../../test/fixtures';
-import { RepositoryType } from '../../common/types';
+import type { RepositoryType } from '../../common/types';
 import { setupEnvironment, pageHelpers } from './helpers';
-import { RepositoryAddTestBed } from './helpers/repository_add.helpers';
+import type { RepositoryAddTestBed } from './helpers/repository_add.helpers';
 
 const { setup } = pageHelpers.repositoryAdd;
 const repositoryTypes = ['fs', 'url', 'source', 'azure', 'gcs', 's3', 'hdfs'];

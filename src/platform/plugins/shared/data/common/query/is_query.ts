@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Query } from './types';
+import type { Query } from './types';
 
 export const isQuery = (x: unknown): x is Query =>
   !!x &&

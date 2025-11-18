@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataTableRecord } from '../../types';
+import type { DataTableRecord } from '../../types';
 
 export interface TraceFields {
   'service.name'?: string;
@@ -54,5 +54,13 @@ export interface TraceDocument extends DataTableRecord {
     'transaction.duration.us'?: string;
     'span.name'?: string;
     'span.duration.us'?: string;
+  };
+}
+
+export interface TraceIndexes {
+  logs?: string;
+  apm: {
+    errors?: string;
+    traces?: string;
   };
 }

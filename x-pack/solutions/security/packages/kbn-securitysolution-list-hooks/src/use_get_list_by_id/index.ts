@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
-import { getListById, ApiParams } from '@kbn/securitysolution-list-api';
+import { useQuery } from '@kbn/react-query';
+import type { ApiParams } from '@kbn/securitysolution-list-api';
+import { getListById } from '@kbn/securitysolution-list-api';
 import { withOptionalSignal } from '@kbn/securitysolution-hook-utils';
 
 const getListByIdWithOptionalSignal = withOptionalSignal(getListById);

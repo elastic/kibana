@@ -683,6 +683,11 @@ Object {
       "required": true,
       "type": "keyword",
     },
+    "kibana.alert.attack_ids": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.case_ids": Object {
       "array": true,
       "required": false,
@@ -712,6 +717,11 @@ Object {
       "array": true,
       "required": false,
       "type": "boolean",
+    },
+    "kibana.alert.index_pattern": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
     },
     "kibana.alert.instance.id": Object {
       "array": false,
@@ -821,6 +831,20 @@ Object {
       "required": true,
       "type": "keyword",
     },
+    "kibana.alert.scheduled_action.date": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.scheduled_action.group": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.scheduled_action.throttling": Object {
+      "required": false,
+      "type": "unmapped",
+    },
     "kibana.alert.severity_improving": Object {
       "array": false,
       "required": false,
@@ -830,6 +854,11 @@ Object {
       "array": false,
       "required": false,
       "type": "date",
+    },
+    "kibana.alert.state": Object {
+      "array": false,
+      "required": false,
+      "type": "unmapped",
     },
     "kibana.alert.status": Object {
       "array": false,
@@ -1348,6 +1377,11 @@ Object {
       "required": true,
       "type": "keyword",
     },
+    "kibana.alert.attack_ids": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.building_block_type": Object {
       "array": false,
       "required": false,
@@ -1399,6 +1433,11 @@ Object {
       "type": "integer",
     },
     "kibana.alert.host.criticality_level": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.index_pattern": Object {
       "array": false,
       "required": false,
       "type": "keyword",
@@ -1852,6 +1891,20 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.scheduled_action.date": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.scheduled_action.group": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.scheduled_action.throttling": Object {
+      "required": false,
+      "type": "unmapped",
+    },
     "kibana.alert.severity": Object {
       "array": false,
       "required": false,
@@ -1866,6 +1919,11 @@ Object {
       "array": false,
       "required": false,
       "type": "date",
+    },
+    "kibana.alert.state": Object {
+      "array": false,
+      "required": false,
+      "type": "unmapped",
     },
     "kibana.alert.status": Object {
       "array": false,
@@ -2501,6 +2559,11 @@ Object {
       "required": true,
       "type": "keyword",
     },
+    "kibana.alert.attack_ids": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.building_block_type": Object {
       "array": false,
       "required": false,
@@ -2552,6 +2615,11 @@ Object {
       "type": "integer",
     },
     "kibana.alert.host.criticality_level": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.index_pattern": Object {
       "array": false,
       "required": false,
       "type": "keyword",
@@ -3005,6 +3073,20 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.scheduled_action.date": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.scheduled_action.group": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.scheduled_action.throttling": Object {
+      "required": false,
+      "type": "unmapped",
+    },
     "kibana.alert.severity": Object {
       "array": false,
       "required": false,
@@ -3019,6 +3101,11 @@ Object {
       "array": false,
       "required": false,
       "type": "date",
+    },
+    "kibana.alert.state": Object {
+      "array": false,
+      "required": false,
+      "type": "unmapped",
     },
     "kibana.alert.status": Object {
       "array": false,
@@ -3654,6 +3741,11 @@ Object {
       "required": true,
       "type": "keyword",
     },
+    "kibana.alert.attack_ids": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.building_block_type": Object {
       "array": false,
       "required": false,
@@ -3705,6 +3797,11 @@ Object {
       "type": "integer",
     },
     "kibana.alert.host.criticality_level": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.index_pattern": Object {
       "array": false,
       "required": false,
       "type": "keyword",
@@ -4158,6 +4255,20 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.scheduled_action.date": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.scheduled_action.group": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.scheduled_action.throttling": Object {
+      "required": false,
+      "type": "unmapped",
+    },
     "kibana.alert.severity": Object {
       "array": false,
       "required": false,
@@ -4172,6 +4283,11 @@ Object {
       "array": false,
       "required": false,
       "type": "date",
+    },
+    "kibana.alert.state": Object {
+      "array": false,
+      "required": false,
+      "type": "unmapped",
     },
     "kibana.alert.status": Object {
       "array": false,
@@ -4807,6 +4923,11 @@ Object {
       "required": true,
       "type": "keyword",
     },
+    "kibana.alert.attack_ids": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.building_block_type": Object {
       "array": false,
       "required": false,
@@ -4858,6 +4979,11 @@ Object {
       "type": "integer",
     },
     "kibana.alert.host.criticality_level": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.index_pattern": Object {
       "array": false,
       "required": false,
       "type": "keyword",
@@ -5311,6 +5437,20 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.scheduled_action.date": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.scheduled_action.group": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.scheduled_action.throttling": Object {
+      "required": false,
+      "type": "unmapped",
+    },
     "kibana.alert.severity": Object {
       "array": false,
       "required": false,
@@ -5325,6 +5465,11 @@ Object {
       "array": false,
       "required": false,
       "type": "date",
+    },
+    "kibana.alert.state": Object {
+      "array": false,
+      "required": false,
+      "type": "unmapped",
     },
     "kibana.alert.status": Object {
       "array": false,
@@ -5960,6 +6105,11 @@ Object {
       "required": true,
       "type": "keyword",
     },
+    "kibana.alert.attack_ids": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.building_block_type": Object {
       "array": false,
       "required": false,
@@ -6011,6 +6161,11 @@ Object {
       "type": "integer",
     },
     "kibana.alert.host.criticality_level": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.index_pattern": Object {
       "array": false,
       "required": false,
       "type": "keyword",
@@ -6464,6 +6619,20 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.scheduled_action.date": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.scheduled_action.group": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.scheduled_action.throttling": Object {
+      "required": false,
+      "type": "unmapped",
+    },
     "kibana.alert.severity": Object {
       "array": false,
       "required": false,
@@ -6478,6 +6647,11 @@ Object {
       "array": false,
       "required": false,
       "type": "date",
+    },
+    "kibana.alert.state": Object {
+      "array": false,
+      "required": false,
+      "type": "unmapped",
     },
     "kibana.alert.status": Object {
       "array": false,
@@ -7119,6 +7293,11 @@ Object {
       "required": true,
       "type": "keyword",
     },
+    "kibana.alert.attack_ids": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.building_block_type": Object {
       "array": false,
       "required": false,
@@ -7170,6 +7349,11 @@ Object {
       "type": "integer",
     },
     "kibana.alert.host.criticality_level": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.index_pattern": Object {
       "array": false,
       "required": false,
       "type": "keyword",
@@ -7623,6 +7807,20 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.scheduled_action.date": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.scheduled_action.group": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.scheduled_action.throttling": Object {
+      "required": false,
+      "type": "unmapped",
+    },
     "kibana.alert.severity": Object {
       "array": false,
       "required": false,
@@ -7637,6 +7835,11 @@ Object {
       "array": false,
       "required": false,
       "type": "date",
+    },
+    "kibana.alert.state": Object {
+      "array": false,
+      "required": false,
+      "type": "unmapped",
     },
     "kibana.alert.status": Object {
       "array": false,
@@ -8272,6 +8475,11 @@ Object {
       "required": true,
       "type": "keyword",
     },
+    "kibana.alert.attack_ids": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.building_block_type": Object {
       "array": false,
       "required": false,
@@ -8323,6 +8531,11 @@ Object {
       "type": "integer",
     },
     "kibana.alert.host.criticality_level": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.index_pattern": Object {
       "array": false,
       "required": false,
       "type": "keyword",
@@ -8776,6 +8989,20 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.scheduled_action.date": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.scheduled_action.group": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.scheduled_action.throttling": Object {
+      "required": false,
+      "type": "unmapped",
+    },
     "kibana.alert.severity": Object {
       "array": false,
       "required": false,
@@ -8790,6 +9017,11 @@ Object {
       "array": false,
       "required": false,
       "type": "date",
+    },
+    "kibana.alert.state": Object {
+      "array": false,
+      "required": false,
+      "type": "unmapped",
     },
     "kibana.alert.status": Object {
       "array": false,
@@ -9425,6 +9657,11 @@ Object {
       "required": true,
       "type": "keyword",
     },
+    "kibana.alert.attack_ids": Object {
+      "array": true,
+      "required": false,
+      "type": "keyword",
+    },
     "kibana.alert.building_block_type": Object {
       "array": false,
       "required": false,
@@ -9476,6 +9713,11 @@ Object {
       "type": "integer",
     },
     "kibana.alert.host.criticality_level": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.index_pattern": Object {
       "array": false,
       "required": false,
       "type": "keyword",
@@ -9929,6 +10171,20 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "kibana.alert.scheduled_action.date": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.scheduled_action.group": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.scheduled_action.throttling": Object {
+      "required": false,
+      "type": "unmapped",
+    },
     "kibana.alert.severity": Object {
       "array": false,
       "required": false,
@@ -9943,6 +10199,11 @@ Object {
       "array": false,
       "required": false,
       "type": "date",
+    },
+    "kibana.alert.state": Object {
+      "array": false,
+      "required": false,
+      "type": "unmapped",
     },
     "kibana.alert.status": Object {
       "array": false,
@@ -10563,6 +10824,11 @@ Object {
       "required": false,
       "type": "object",
     },
+    "slo.dataViewId": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
     "slo.id": Object {
       "array": false,
       "required": false,
@@ -10643,6 +10909,11 @@ Object {
       "array": true,
       "required": false,
       "type": "boolean",
+    },
+    "kibana.alert.index_pattern": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
     },
     "kibana.alert.instance.id": Object {
       "array": false,
@@ -10747,6 +11018,20 @@ Object {
       "required": true,
       "type": "keyword",
     },
+    "kibana.alert.scheduled_action.date": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.scheduled_action.group": Object {
+      "array": false,
+      "required": false,
+      "type": "keyword",
+    },
+    "kibana.alert.scheduled_action.throttling": Object {
+      "required": false,
+      "type": "unmapped",
+    },
     "kibana.alert.severity_improving": Object {
       "array": false,
       "required": false,
@@ -10756,6 +11041,11 @@ Object {
       "array": false,
       "required": false,
       "type": "date",
+    },
+    "kibana.alert.state": Object {
+      "array": false,
+      "required": false,
+      "type": "unmapped",
     },
     "kibana.alert.status": Object {
       "array": false,
@@ -11066,6 +11356,18 @@ Object {
 
 exports[`Alert as data fields checks detect AAD fields changes for: xpack.synthetics.alerts.monitorStatus 1`] = `
 Object {
+  "dynamicTemplates": Array [
+    Object {
+      "strings_as_keywords": Object {
+        "mapping": Object {
+          "ignore_above": 1024,
+          "type": "keyword",
+        },
+        "match_mapping_type": "string",
+        "path_match": "kibana.alert.grouping.*",
+      },
+    },
+  ],
   "fieldMap": Object {
     "agent.name": Object {
       "required": false,
@@ -11216,6 +11518,18 @@ Object {
 
 exports[`Alert as data fields checks detect AAD fields changes for: xpack.synthetics.alerts.tls 1`] = `
 Object {
+  "dynamicTemplates": Array [
+    Object {
+      "strings_as_keywords": Object {
+        "mapping": Object {
+          "ignore_above": 1024,
+          "type": "keyword",
+        },
+        "match_mapping_type": "string",
+        "path_match": "kibana.alert.grouping.*",
+      },
+    },
+  ],
   "fieldMap": Object {
     "agent.name": Object {
       "required": false,
@@ -11366,6 +11680,18 @@ Object {
 
 exports[`Alert as data fields checks detect AAD fields changes for: xpack.uptime.alerts.durationAnomaly 1`] = `
 Object {
+  "dynamicTemplates": Array [
+    Object {
+      "strings_as_keywords": Object {
+        "mapping": Object {
+          "ignore_above": 1024,
+          "type": "keyword",
+        },
+        "match_mapping_type": "string",
+        "path_match": "kibana.alert.grouping.*",
+      },
+    },
+  ],
   "fieldMap": Object {
     "agent.name": Object {
       "required": false,
@@ -11516,6 +11842,18 @@ Object {
 
 exports[`Alert as data fields checks detect AAD fields changes for: xpack.uptime.alerts.monitorStatus 1`] = `
 Object {
+  "dynamicTemplates": Array [
+    Object {
+      "strings_as_keywords": Object {
+        "mapping": Object {
+          "ignore_above": 1024,
+          "type": "keyword",
+        },
+        "match_mapping_type": "string",
+        "path_match": "kibana.alert.grouping.*",
+      },
+    },
+  ],
   "fieldMap": Object {
     "agent.name": Object {
       "required": false,
@@ -11672,6 +12010,18 @@ Object {
 
 exports[`Alert as data fields checks detect AAD fields changes for: xpack.uptime.alerts.tlsCertificate 1`] = `
 Object {
+  "dynamicTemplates": Array [
+    Object {
+      "strings_as_keywords": Object {
+        "mapping": Object {
+          "ignore_above": 1024,
+          "type": "keyword",
+        },
+        "match_mapping_type": "string",
+        "path_match": "kibana.alert.grouping.*",
+      },
+    },
+  ],
   "fieldMap": Object {
     "agent.name": Object {
       "required": false,

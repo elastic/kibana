@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -12,7 +12,10 @@
     ".storybook/**/*",
     "test/scout/**/*"
   ],
-  "exclude": ["target/**/*", ".storybook/**/*.js"],
+  "exclude": [
+    "target/**/*",
+    ".storybook/**/*.js"
+  ],
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-plugin",
@@ -27,8 +30,6 @@
     "@kbn/es-query",
     "@kbn/zod",
     "@kbn/share-plugin",
-    "@kbn/react-kibana-context-render",
-    "@kbn/shared-ux-link-redirect-app",
     "@kbn/typed-react-router-config",
     "@kbn/i18n",
     "@kbn/code-editor",
@@ -40,15 +41,14 @@
     "@kbn/shared-ux-utility",
     "@kbn/unsaved-changes-prompt",
     "@kbn/grok-ui",
+    "@kbn/grok-heuristics",
     "@kbn/streams-plugin",
     "@kbn/search-types",
     "@kbn/xstate-utils",
     "@kbn/datemath",
     "@kbn/index-lifecycle-management-common-shared",
     "@kbn/charts-theme",
-    "@kbn/field-types",
     "@kbn/index-management-shared-types",
-    "@kbn/traced-es-client",
     "@kbn/discover-plugin",
     "@kbn/content-packs-schema",
     "@kbn/dashboard-plugin",
@@ -76,6 +76,21 @@
     "@kbn/monaco",
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/utility-types",
-    "@kbn/apm-synthtrace-client"
+    "@kbn/apm-synthtrace-client",
+    "@kbn/streamlang",
+    "@kbn/failure-store-modal",
+    "@kbn/data-quality",
+    "@kbn/core-notifications-browser",
+    "@kbn/io-ts-utils",
+    "@kbn/otel-semantic-conventions",
+    "@kbn/storage-adapter",
+    "@kbn/cloud-plugin",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/deeplinks-security",
+    "@kbn/spaces-plugin",
+    "@kbn/unified-data-table",
+    "@kbn/console-plugin",
+    "@kbn/es-types",
+    "@kbn/esql-utils",
   ]
 }

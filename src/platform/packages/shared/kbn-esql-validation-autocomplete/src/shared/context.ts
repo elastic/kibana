@@ -7,33 +7,59 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ESQLCommandOption } from '@kbn/esql-ast';
 import {
-  ESQLCommandOption,
   Walker,
   isIdentifier,
   isOptionNode,
   isSource,
   isColumn,
   isList,
-  type ESQLAst,
   type ESQLAstItem,
-  type ESQLCommand,
   type ESQLFunction,
   type ESQLSingleAstItem,
+  within,
+  isSubQuery,
 } from '@kbn/esql-ast';
 import { EDITOR_MARKER } from '@kbn/esql-ast/src/definitions/constants';
 import { pipePrecedesCurrentWord } from '@kbn/esql-ast/src/definitions/utils';
-import { within } from '@kbn/esql-ast/src/definitions/utils/autocomplete/helpers';
-import { ESQLAstExpression } from '@kbn/esql-ast/src/types';
+import type {
+  ESQLAstExpression,
+  ESQLAstAllCommands,
+  ESQLAstQueryExpression,
+  ESQLAstHeaderCommand,
+} from '@kbn/esql-ast/src/types';
 
-function findCommand(ast: ESQLAst, offset: number) {
-  const commandIndex = ast.findIndex(
+function findCommand(ast: ESQLAstQueryExpression, offset: number) {
+  const queryCommands = ast.commands;
+  const commandIndex = queryCommands.findIndex(
     ({ location }) => location.min <= offset && location.max >= offset
   );
 
-  const command = ast[commandIndex] || ast[ast.length - 1];
+  const command = queryCommands[commandIndex] || queryCommands[queryCommands.length - 1];
+
+  if (!command) {
+    return findHeaderCommand(ast, offset);
+  }
 
   return command;
+}
+
+function findHeaderCommand(
+  ast: ESQLAstQueryExpression,
+  offset: number
+): ESQLAstHeaderCommand | undefined {
+  if (!ast.header || ast.header.length === 0) {
+    return;
+  }
+
+  const commandIndex = ast.header.findIndex(
+    ({ location }) => location.min <= offset && location.max >= offset
+  );
+
+  const targetHeader = ast.header[commandIndex] || ast.header[ast.header.length - 1];
+
+  return targetHeader.incomplete ? targetHeader : undefined;
 }
 
 function findOption(nodes: ESQLAstItem[], offset: number): ESQLCommandOption | undefined {
@@ -81,13 +107,18 @@ function mapToNonMarkerNode(arg: ESQLAstItem): ESQLAstItem {
   return Array.isArray(arg) ? arg.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode) : arg;
 }
 
-export function removeMarkerArgFromArgsList<T extends ESQLSingleAstItem | ESQLCommand>(
+export function removeMarkerArgFromArgsList<T extends ESQLSingleAstItem | ESQLAstAllCommands>(
   node: T | undefined
 ) {
   if (!node) {
     return;
   }
-  if (node.type === 'command' || node.type === 'option' || node.type === 'function') {
+  if (
+    node.type === 'command' ||
+    node.type === 'header-command' ||
+    node.type === 'option' ||
+    node.type === 'function'
+  ) {
     return {
       ...node,
       args: node.args.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode),
@@ -108,7 +139,7 @@ const removeMarkerNode = (node: ESQLAstExpression) => {
   });
 };
 
-function findAstPosition(ast: ESQLAst, offset: number) {
+function findAstPosition(ast: ESQLAstQueryExpression, offset: number) {
   const command = findCommand(ast, offset);
   if (!command) {
     return { command: undefined, node: undefined };
@@ -152,6 +183,7 @@ function findAstPosition(ast: ESQLAst, offset: number) {
     node: removeMarkerArgFromArgsList(cleanMarkerNode(node)),
   };
 }
+
 /**
  * Given a ES|QL query string, its AST and the cursor position,
  * it returns the type of context for the position ("list", "function", "option", "setting", "expression", "newCommand")
@@ -163,12 +195,39 @@ function findAstPosition(ast: ESQLAst, offset: number) {
  * * "expression": the cursor is inside a command expression (i.e. `command ... <here>` or `command a = ... <here>`)
  * * "newCommand": the cursor is at the beginning of a new command (i.e. `command1 | command2 | <here>`)
  */
-export function getAstContext(queryString: string, ast: ESQLAst, offset: number) {
+export function getAstContext(
+  queryString: string,
+  queryAst: ESQLAstQueryExpression,
+  offset: number
+) {
+  // Find the innermost subquery containing the cursor position
+  // Example: FROM a, (FROM b, (FROM c | WHERE |))
+  //                                         ↑ cursor
+  // Returns: ESQLAstQueryExpression for "FROM c | WHERE"
+  let innermostSubquery: ESQLAstQueryExpression | null = null;
+  let queryContainsSubqueries = false;
+
+  // Check if query contains subqueries while walking the AST
+  const allCommands = Walker.commands(queryAst);
+  const fromCommands = allCommands.filter(({ name }) => name.toLowerCase() === 'from');
+  queryContainsSubqueries = fromCommands.some((cmd) => cmd.args.some((arg) => isSubQuery(arg)));
+
+  Walker.walk(queryAst, {
+    visitParens: (node) => {
+      if (isSubQuery(node) && within(offset, node)) {
+        innermostSubquery = node.child;
+      }
+    },
+  });
+
+  const astForContext = innermostSubquery ?? queryAst;
+  const isCursorInSubquery = innermostSubquery !== null;
+
   let inComment = false;
 
-  Walker.visitComments(ast, (node) => {
+  Walker.visitComments(queryAst, (node) => {
     // if the cursor (offset) is within the range of a comment node
-    if (within(offset, node.location)) {
+    if (within(offset, node)) {
       inComment = true;
       // or if the cursor (offset) is right after a single-line comment (which means there was no newline)
     } else if (
@@ -183,10 +242,13 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
   if (inComment) {
     return {
       type: 'comment' as const,
+      isCursorInSubquery,
+      queryContainsSubqueries,
+      astForContext,
     };
   }
 
-  const { command, option, node, containingFunction } = findAstPosition(ast, offset);
+  const { command, option, node, containingFunction } = findAstPosition(astForContext, offset);
   if (
     !command ||
     (queryString.length <= offset &&
@@ -194,7 +256,16 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
       command.location.max < queryString.length)
   ) {
     //   // ... | <here>
-    return { type: 'newCommand' as const, command: undefined, node, option, containingFunction };
+    return {
+      type: 'newCommand' as const,
+      command: undefined,
+      node,
+      option,
+      containingFunction,
+      isCursorInSubquery,
+      queryContainsSubqueries,
+      astForContext,
+    };
   }
 
   // command a ... <here> OR command a = ... <here>
@@ -204,5 +275,8 @@ export function getAstContext(queryString: string, ast: ESQLAst, offset: number)
     containingFunction,
     option,
     node,
+    isCursorInSubquery,
+    queryContainsSubqueries,
+    astForContext,
   };
 }

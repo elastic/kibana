@@ -11,9 +11,9 @@ import React, { useState, useEffect } from 'react';
 import { EuiTabbedContent, EuiCallOut } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { InspectorViewProps } from '@kbn/inspector-plugin/public';
+import type { InspectorViewProps } from '@kbn/inspector-plugin/public';
 import { css } from '@emotion/react';
-import { VegaInspectorAdapters } from './vega_inspector';
+import type { VegaInspectorAdapters } from './vega_inspector';
 import { DataViewer, SignalViewer, SpecViewer } from './components';
 
 export type VegaDataInspectorProps = InspectorViewProps<VegaInspectorAdapters>;
@@ -63,6 +63,7 @@ const VegaDataInspector = ({ adapters }: VegaDataInspectorProps) => {
   if (error) {
     return (
       <EuiCallOut
+        announceOnMount
         title={i18n.translate('visTypeVega.inspector.errorHeading', {
           defaultMessage: `Vega didn't render successfully`,
         })}

@@ -29,6 +29,7 @@ import { TemplateSelector } from './templates';
 import { getInitialCaseValue } from './utils';
 import { CaseFormFields } from '../case_form_fields';
 import { builderMap as customFieldsBuilderMap } from '../custom_fields/builder';
+import { ObservablesToggle } from '../case_form_fields/observables_toggle';
 
 export interface CreateCaseFormFieldsProps {
   configuration: CasesConfigurationUI;
@@ -66,7 +67,13 @@ const DEFAULT_EMPTY_TEMPLATE_KEY = 'defaultEmptyTemplateKey';
 export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.memo(
   ({ configuration, connectors, isLoading, withSteps, draftStorageKey }) => {
     const { reset, updateFieldValues, isSubmitting, setFieldValue } = useFormContext();
-    const { isSyncAlertsEnabled } = useCasesFeatures();
+    const {
+      isSyncAlertsEnabled,
+      isExtractObservablesEnabled,
+      observablesAuthorized,
+      connectorsAuthorized,
+    } = useCasesFeatures();
+    const canExtractObservables = observablesAuthorized && isExtractObservablesEnabled;
     const configurationOwner = configuration.owner;
 
     /**
@@ -136,13 +143,18 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
       }),
       [configuration.customFields, draftStorageKey, isSubmitting]
     );
-
+    const showThirdStep = isSyncAlertsEnabled || canExtractObservables;
     const thirdStep = useMemo(
       () => ({
         title: i18n.STEP_THREE_TITLE,
-        children: <SyncAlertsToggle isLoading={isSubmitting} />,
+        children: (
+          <>
+            {isSyncAlertsEnabled && <SyncAlertsToggle isLoading={isSubmitting} />}
+            {canExtractObservables && <ObservablesToggle isLoading={isSubmitting} />}
+          </>
+        ),
       }),
-      [isSubmitting]
+      [isSubmitting, isSyncAlertsEnabled, canExtractObservables]
     );
 
     const fourthStep = useMemo(
@@ -161,8 +173,13 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
     );
 
     const allSteps = useMemo(
-      () => [firstStep, secondStep, ...(isSyncAlertsEnabled ? [thirdStep] : []), fourthStep],
-      [firstStep, secondStep, isSyncAlertsEnabled, thirdStep, fourthStep]
+      () => [
+        firstStep,
+        secondStep,
+        ...(showThirdStep ? [thirdStep] : []),
+        ...(connectorsAuthorized ? [fourthStep] : []),
+      ],
+      [firstStep, secondStep, showThirdStep, thirdStep, connectorsAuthorized, fourthStep]
     );
 
     return (
@@ -205,7 +222,7 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
                 </EuiFlexItem>
                 <EuiFlexItem>{secondStep.children}</EuiFlexItem>
               </EuiFlexGroup>
-              {isSyncAlertsEnabled && (
+              {showThirdStep && (
                 <EuiFlexGroup direction="column">
                   <EuiFlexItem>
                     <EuiTitle size="s">
@@ -215,14 +232,16 @@ export const CreateCaseFormFields: React.FC<CreateCaseFormFieldsProps> = React.m
                   <EuiFlexItem>{thirdStep.children}</EuiFlexItem>
                 </EuiFlexGroup>
               )}
-              <EuiFlexGroup direction="column">
-                <EuiFlexItem>
-                  <EuiTitle size="s">
-                    <h2>{i18n.STEP_FOUR_TITLE}</h2>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem>{fourthStep.children}</EuiFlexItem>
-              </EuiFlexGroup>
+              {connectorsAuthorized && (
+                <EuiFlexGroup direction="column">
+                  <EuiFlexItem>
+                    <EuiTitle size="s">
+                      <h2>{i18n.STEP_FOUR_TITLE}</h2>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  <EuiFlexItem>{fourthStep.children}</EuiFlexItem>
+                </EuiFlexGroup>
+              )}
             </EuiFlexGroup>
           </>
         )}

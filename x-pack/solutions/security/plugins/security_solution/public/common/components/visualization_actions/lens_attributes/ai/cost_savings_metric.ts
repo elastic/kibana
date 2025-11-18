@@ -6,6 +6,7 @@
  */
 
 import type { EuiThemeComputed } from '@elastic/eui';
+import { getAlertIndexFilter } from './helpers';
 import type { ExtraOptions, LensAttributes } from '../../types';
 
 export type MyGetLensAttributes = (params: {
@@ -13,14 +14,18 @@ export type MyGetLensAttributes = (params: {
   euiTheme: EuiThemeComputed;
   extraOptions?: ExtraOptions;
   esql?: string;
+  backgroundColor: string;
   minutesPerAlert: number;
   analystHourlyRate: number;
+  signalIndexName: string;
 }) => LensAttributes;
 
 export const getCostSavingsMetricLensAttributes: MyGetLensAttributes = ({
   analystHourlyRate,
+  backgroundColor,
   extraOptions,
   minutesPerAlert,
+  signalIndexName,
 }) => {
   return {
     description: '',
@@ -39,7 +44,7 @@ export const getCostSavingsMetricLensAttributes: MyGetLensAttributes = ({
                   label: 'Cost Savings',
                   operationType: 'formula',
                   params: {
-                    format: { id: 'custom', params: { decimals: 0, pattern: '$0,0.[000]' } },
+                    format: { id: 'custom', params: { decimals: 0, pattern: '$0,0' } },
                     formula: `count() * ((${minutesPerAlert}/60)*${analystHourlyRate})`,
                     isFormulaBroken: false,
                   },
@@ -67,17 +72,17 @@ export const getCostSavingsMetricLensAttributes: MyGetLensAttributes = ({
                         {
                           args: [
                             {
-                              args: [8, 60],
+                              args: [minutesPerAlert, 60],
                               location: { max: 16, min: 12 },
                               name: 'divide',
-                              text: '8/60',
+                              text: `${minutesPerAlert}/60`,
                               type: 'function',
                             },
-                            75,
+                            analystHourlyRate,
                           ],
                           location: { max: 20, min: 11 },
                           name: 'multiply',
-                          text: '(8/60)*75',
+                          text: `(${minutesPerAlert}/60)*${analystHourlyRate}`,
                           type: 'function',
                         },
                       ],
@@ -95,11 +100,11 @@ export const getCostSavingsMetricLensAttributes: MyGetLensAttributes = ({
           },
         },
       },
-      filters: extraOptions?.filters ?? [],
+      filters: [getAlertIndexFilter(signalIndexName), ...(extraOptions?.filters ?? [])],
       internalReferences: [],
       query: { language: 'kuery', query: '' },
       visualization: {
-        color: 'e8f9f3',
+        color: backgroundColor,
         icon: 'launch',
         iconAlign: 'right',
         valuesTextAlign: 'left',
@@ -118,8 +123,5 @@ export const getCostSavingsMetricLensAttributes: MyGetLensAttributes = ({
         type: 'index-pattern',
       },
     ],
-    type: 'lens',
-    updated_at: '2025-07-21T15:51:38.660Z',
-    version: 'WzI0LDFd',
   } as LensAttributes;
 };

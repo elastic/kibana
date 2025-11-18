@@ -8,7 +8,7 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiPageTemplate } from '@elastic/eui';
-import { LicenseManagementLocator } from '@kbn/license-management-plugin/public/locator';
+import type { LicenseManagementLocator } from '@kbn/license-management-plugin/public/locator';
 
 export const LicensePrompt = ({
   message,

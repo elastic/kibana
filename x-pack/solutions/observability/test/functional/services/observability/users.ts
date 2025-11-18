@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Role } from '@kbn/security-plugin/common';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { Role } from '@kbn/security-plugin/common';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 type CreateRolePayload = Pick<Role, 'metadata' | 'elasticsearch' | 'kibana'>;
 

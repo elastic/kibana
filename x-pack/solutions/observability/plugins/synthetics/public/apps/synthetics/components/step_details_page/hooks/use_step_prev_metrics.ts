@@ -16,7 +16,7 @@ import {
   STEP_DURATION_LABEL,
   TRANSFER_SIZE,
 } from './use_step_metrics';
-import { JourneyStep } from '../../../../../../common/runtime_types';
+import type { JourneyStep } from '../../../../../../common/runtime_types';
 import { median } from './use_network_timings_prev';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../../../common/constants';
 import { useReduxEsSearch } from '../../../hooks/use_redux_es_search';

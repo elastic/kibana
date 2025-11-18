@@ -13,7 +13,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { render, waitFor } from '@testing-library/react';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 
-import { DashboardListingPage, DashboardListingPageProps } from './dashboard_listing_page';
+import type { DashboardListingPageProps } from './dashboard_listing_page';
+import { DashboardListingPage } from './dashboard_listing_page';
 
 // Mock child components. The Dashboard listing page mostly passes down props to shared UX components which are tested in their own packages.
 import { DashboardListing } from '../../dashboard_listing/dashboard_listing';
@@ -26,11 +27,8 @@ jest.mock('../../dashboard_listing/dashboard_listing', () => {
 
 import { DashboardAppNoDataPage } from '../no_data/dashboard_app_no_data';
 import { dataService } from '../../services/kibana_services';
-import { getDashboardContentManagementService } from '../../services/dashboard_content_management_service';
 
-const dashboardContentManagementService = getDashboardContentManagementService();
 const mockIsDashboardAppInNoDataState = jest.fn().mockResolvedValue(false);
-
 jest.mock('../no_data/dashboard_app_no_data', () => {
   const originalModule = jest.requireActual('../no_data/dashboard_app_no_data');
   return {
@@ -40,6 +38,13 @@ jest.mock('../no_data/dashboard_app_no_data', () => {
     DashboardAppNoDataPage: jest.fn().mockReturnValue(null),
   };
 });
+
+const mockFindByTitle = jest.fn();
+jest.mock('../../dashboard_client', () => ({
+  findService: {
+    findByTitle: () => mockFindByTitle(),
+  },
+}));
 
 const renderDashboardListingPage = (props: Partial<DashboardListingPageProps> = {}) =>
   render(
@@ -76,10 +81,7 @@ test('initialFilter is passed through if title is not provided', async () => {
 });
 
 test('When given a title that matches multiple dashboards, filter on the title', async () => {
-  (dashboardContentManagementService.findDashboards.findByTitle as jest.Mock).mockResolvedValue(
-    undefined
-  );
-
+  mockFindByTitle.mockResolvedValue(undefined);
   const redirectTo = jest.fn();
 
   renderDashboardListingPage({ title: 'search by title', redirectTo });
@@ -94,7 +96,7 @@ test('When given a title that matches multiple dashboards, filter on the title',
 });
 
 test('When given a title that matches one dashboard, redirect to dashboard', async () => {
-  (dashboardContentManagementService.findDashboards.findByTitle as jest.Mock).mockResolvedValue({
+  mockFindByTitle.mockResolvedValue({
     id: 'you_found_me',
   });
   const redirectTo = jest.fn();

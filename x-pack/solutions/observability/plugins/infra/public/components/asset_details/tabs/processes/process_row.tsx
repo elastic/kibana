@@ -32,6 +32,7 @@ interface Props {
   cells: React.ReactNode[];
   item: Process;
   supportAIAssistant?: boolean;
+  visibleColumnsCount: number;
 }
 export const ContextualInsightProcessRow = ({ command }: { command: string }) => {
   const { observabilityAIAssistant } = useKibanaContextForPlugin().services;
@@ -103,8 +104,14 @@ export const ContextualInsightProcessRow = ({ command }: { command: string }) =>
   );
 };
 
-export const ProcessRow = ({ cells, item, supportAIAssistant = false }: Props) => {
+export const ProcessRow = ({
+  cells,
+  item,
+  supportAIAssistant = false,
+  visibleColumnsCount,
+}: Props) => {
   const [isExpanded, toggle] = useToggle(false);
+  const colSpan = visibleColumnsCount + 1;
 
   return (
     <>
@@ -124,9 +131,9 @@ export const ProcessRow = ({ cells, item, supportAIAssistant = false }: Props) =
       </EuiTableRow>
       <EuiTableRow isExpandable isExpandedRow={isExpanded}>
         {isExpanded && (
-          <ExpandedRowCell>
+          <ExpandedRowCell colSpan={colSpan} textOnly={false}>
             <EuiSpacer size="s" />
-            <ExpandedRowDescriptionList>
+            <ExpandedRowDescriptionList compressed>
               <EuiFlexGroup gutterSize="s">
                 <EuiFlexItem>
                   <div>
@@ -139,7 +146,9 @@ export const ProcessRow = ({ cells, item, supportAIAssistant = false }: Props) =
                       )}
                     </EuiDescriptionListTitle>
                     <EuiDescriptionListDescription>
-                      <ExpandedCommandLine>{item.command}</ExpandedCommandLine>
+                      <ExpandedCommandLine transparentBackground>
+                        {item.command}
+                      </ExpandedCommandLine>
                     </EuiDescriptionListDescription>
                   </div>
                 </EuiFlexItem>
@@ -164,7 +173,7 @@ export const ProcessRow = ({ cells, item, supportAIAssistant = false }: Props) =
                     )}
                   </EuiDescriptionListTitle>
                   <EuiDescriptionListDescription>
-                    <CodeListItem>{item.pid}</CodeListItem>
+                    <CodeListItem transparentBackground>{item.pid}</CodeListItem>
                   </EuiDescriptionListDescription>
                 </EuiFlexItem>
                 <EuiFlexItem>
@@ -177,7 +186,7 @@ export const ProcessRow = ({ cells, item, supportAIAssistant = false }: Props) =
                     )}
                   </EuiDescriptionListTitle>
                   <EuiDescriptionListDescription>
-                    <CodeListItem>{item.user}</CodeListItem>
+                    <CodeListItem transparentBackground>{item.user}</CodeListItem>
                   </EuiDescriptionListDescription>
                 </EuiFlexItem>
                 <ProcessRowCharts
@@ -206,8 +215,6 @@ const ExpandedRowDescriptionList = styled(EuiDescriptionList)`
   width: 100%;
 `;
 
-ExpandedRowDescriptionList.defaultProps = { compressed: true };
-
 const CodeListItem = styled(EuiCode)`
   padding: 0 !important;
   & code.euiCodeBlock__code {
@@ -216,19 +223,13 @@ const CodeListItem = styled(EuiCode)`
   }
 `;
 
-CodeListItem.defaultProps = { transparentBackground: true };
-
 const ExpandedCommandLine = styled(EuiCode)`
   padding: 0 !important;
   margin-bottom: ${(props) => props.theme.euiTheme.size.s};
 `;
-
-ExpandedCommandLine.defaultProps = { transparentBackground: true };
 
 const ExpandedRowCell = styled(EuiTableRowCell)`
   padding-top: ${(props) => props.theme.euiTheme.size.m} !important;
   padding-bottom: ${(props) => props.theme.euiTheme.size.m} !important;
   background-color: ${(props) => props.theme.euiTheme.colors.lightestShade};
 `;
-
-ExpandedRowCell.defaultProps = { textOnly: false, colSpan: 6 };

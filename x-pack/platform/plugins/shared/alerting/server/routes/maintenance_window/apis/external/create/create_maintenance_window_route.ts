@@ -18,6 +18,7 @@ import type {
 } from '../../../../../../common/routes/maintenance_window/external/apis/create';
 import { createMaintenanceWindowRequestBodySchemaV1 } from '../../../../../../common/routes/maintenance_window/external/apis/create';
 import { maintenanceWindowResponseSchemaV1 } from '../../../../../../common/routes/maintenance_window/external/response';
+import { getDurationInMilliseconds } from '../../../../../../common/routes/schedule';
 import { transformInternalMaintenanceWindowToExternalV1 } from '../common/transforms';
 import { transformCreateBodyV1 } from './transform_create_body';
 
@@ -65,6 +66,7 @@ export const createMaintenanceWindowRoute = (
         licenseState.ensureLicenseForMaintenanceWindow();
 
         const body: CreateMaintenanceWindowRequestBodyV1 = req.body;
+        const customSchedule = body.schedule.custom;
 
         const maintenanceWindowClient = (await context.alerting).getMaintenanceWindowClient();
 
@@ -74,9 +76,24 @@ export const createMaintenanceWindowRoute = (
 
         const response: CreateMaintenanceWindowResponseV1 =
           transformInternalMaintenanceWindowToExternalV1(maintenanceWindow);
+        // Return request duration in response when both are same otherwise throw an error
+        const requestDurationInMilliseconds = getDurationInMilliseconds(customSchedule.duration);
+
+        const responseDurationInMilliseconds = getDurationInMilliseconds(
+          response.schedule.custom.duration
+        );
+
+        if (requestDurationInMilliseconds !== responseDurationInMilliseconds) {
+          throw new Error('Request duration does not match response duration.');
+        }
 
         return res.ok({
-          body: response,
+          body: {
+            ...response,
+            schedule: {
+              custom: { ...response.schedule.custom, duration: customSchedule.duration },
+            },
+          },
         });
       })
     )

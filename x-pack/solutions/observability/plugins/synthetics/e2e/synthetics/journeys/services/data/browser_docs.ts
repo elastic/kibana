@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DocOverrides } from '@kbn/observability-synthetics-test-data/src/make_summaries';
+import type { DocOverrides } from '@kbn/observability-synthetics-test-data/src/make_summaries';
 
 export const getGeoData = (locationName?: string, locationId?: string) => ({
   observer: {

@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import {
+import type {
   ApplicationStart,
   ChromeStart,
   DocLinksStart,
+  FeatureFlagsStart,
   HttpStart,
   PluginInitializer,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { SharePluginStart } from '@kbn/share-plugin/public';
-import {
-  ObservabilityOnboardingPlugin,
+import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { ObservabilityPublicStart } from '@kbn/observability-plugin/public';
+import type {
   ObservabilityOnboardingPluginSetup,
   ObservabilityOnboardingPluginStart,
 } from './plugin';
+import { ObservabilityOnboardingPlugin } from './plugin';
 
 export interface ConfigSchema {
   ui: {
@@ -45,6 +47,8 @@ export interface ObservabilityOnboardingAppServices {
   config: ConfigSchema;
   docLinks: DocLinksStart;
   chrome: ChromeStart;
+  featureFlags: FeatureFlagsStart;
+  observability: ObservabilityPublicStart;
 }
 
 export const plugin: PluginInitializer<

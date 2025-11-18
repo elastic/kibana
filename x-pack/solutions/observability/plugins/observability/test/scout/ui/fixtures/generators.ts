@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { SynthtraceFixture } from '@kbn/scout-oblt';
+import type { SynthtraceFixture } from '@kbn/scout-oblt';
 import { apm, log, timerange } from '@kbn/apm-synthtrace-client';
 
 const TEST_START_TIME = '2024-01-01T00:00:00.000Z';

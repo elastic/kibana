@@ -9,8 +9,8 @@
 
 import type { KibanaRequest } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from '../..';
-import { UiSetting } from '../../expression_types/specs/ui_setting';
+import type { ExpressionFunctionDefinition } from '../..';
+import type { UiSetting } from '../../expression_types/specs/ui_setting';
 
 /**
  * Note: The UiSettings client interface is different between the browser and server.

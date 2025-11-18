@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
+import type { AppContextTestRender } from '../../test';
+import { createAppRootMockRenderer } from '../../test';
 import { sessionViewBasicProcessMock } from '../../../common/mocks/constants/session_view_process.mock';
 import { DetailPanelProcessTab } from '.';
 import { AUDITBEAT_INDEX } from '../../methods';

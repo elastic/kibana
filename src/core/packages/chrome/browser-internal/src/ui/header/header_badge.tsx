@@ -8,7 +8,7 @@
  */
 
 import React, { Component } from 'react';
-import * as Rx from 'rxjs';
+import type * as Rx from 'rxjs';
 import { EuiBetaBadge } from '@elastic/eui';
 import type { ChromeBadge } from '@kbn/core-chrome-browser';
 

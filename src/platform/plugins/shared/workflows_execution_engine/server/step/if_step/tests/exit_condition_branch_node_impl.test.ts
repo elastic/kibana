@@ -7,32 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExitConditionBranchNode, ExitIfNode } from '@kbn/workflows';
-import { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { ExitConditionBranchNode, ExitIfNode, WorkflowGraph } from '@kbn/workflows/graph';
+import type { WorkflowExecutionRuntimeManager } from '../../../workflow_context_manager/workflow_execution_runtime_manager';
 import { ExitConditionBranchNodeImpl } from '../exit_condition_branch_node_impl';
 
 describe('ExitConditionBranchNodeImpl', () => {
-  let step: ExitConditionBranchNode;
+  let node: ExitConditionBranchNode;
   let wfExecutionRuntimeManagerMock: WorkflowExecutionRuntimeManager;
+  let workflowGraphMock: WorkflowGraph;
   let impl: ExitConditionBranchNodeImpl;
-  let goToStep: jest.Mock<any, any, any>;
-  let getNodeSuccessors: jest.Mock<any, any, any>;
 
   beforeEach(() => {
-    goToStep = jest.fn();
-    getNodeSuccessors = jest.fn();
-    step = {
+    node = {
       id: 'testStep',
-      type: 'exit-condition-branch',
+      type: 'exit-then-branch',
+      stepId: 'testStep',
+      stepType: 'if',
       startNodeId: 'startBranchNode',
     };
-    wfExecutionRuntimeManagerMock = {
-      goToStep,
-      getNodeSuccessors,
-    } as any;
-    impl = new ExitConditionBranchNodeImpl(step, wfExecutionRuntimeManagerMock);
+    wfExecutionRuntimeManagerMock = {} as unknown as WorkflowExecutionRuntimeManager;
+    wfExecutionRuntimeManagerMock.navigateToNode = jest.fn();
+    wfExecutionRuntimeManagerMock.exitScope = jest.fn();
 
-    getNodeSuccessors.mockReturnValue([
+    workflowGraphMock = {} as unknown as WorkflowGraph;
+    impl = new ExitConditionBranchNodeImpl(node, workflowGraphMock, wfExecutionRuntimeManagerMock);
+
+    workflowGraphMock.getDirectSuccessors = jest.fn().mockReturnValue([
       {
         id: 'exitIfNode',
         type: 'exit-if',
@@ -41,33 +41,35 @@ describe('ExitConditionBranchNodeImpl', () => {
   });
 
   it('should raise an error if there are multiple successors', async () => {
-    getNodeSuccessors.mockReturnValue([
+    workflowGraphMock.getDirectSuccessors = jest.fn().mockReturnValue([
       { id: 'exitIfNode1', type: 'exit-if' },
       { id: 'exitIfNode2', type: 'exit-if' },
     ]);
 
     await expect(impl.run()).rejects.toThrow(
-      `ExitConditionBranchNode with id ${step.id} must have exactly one successor, but found 2.`
+      `ExitConditionBranchNode with id ${node.id} must have exactly one successor, but found 2.`
     );
   });
 
   it('should raise an error if no successors', async () => {
-    getNodeSuccessors.mockReturnValue([]);
+    workflowGraphMock.getDirectSuccessors = jest.fn().mockReturnValue([]);
 
     await expect(impl.run()).rejects.toThrow(
-      `ExitConditionBranchNode with id ${step.id} must have exactly one successor, but found 0.`
+      `ExitConditionBranchNode with id ${node.id} must have exactly one successor, but found 0.`
     );
   });
 
   it('should raise an error if successor is not exit-if', async () => {
-    getNodeSuccessors.mockReturnValue([{ id: 'someOtherNode', type: 'some-other-type' }]);
+    workflowGraphMock.getDirectSuccessors = jest
+      .fn()
+      .mockReturnValue([{ id: 'someOtherNode', type: 'some-other-type' }]);
     await expect(impl.run()).rejects.toThrow(
-      `ExitConditionBranchNode with id ${step.id} must have an exit-if successor, but found some-other-type with id someOtherNode.`
+      `ExitConditionBranchNode with id ${node.id} must have an exit-if successor, but found some-other-type with id someOtherNode.`
     );
   });
 
   it('should go to the exitIfNode after running', async () => {
     await impl.run();
-    expect(wfExecutionRuntimeManagerMock.goToStep).toHaveBeenCalledWith('exitIfNode');
+    expect(wfExecutionRuntimeManagerMock.navigateToNode).toHaveBeenCalledWith('exitIfNode');
   });
 });

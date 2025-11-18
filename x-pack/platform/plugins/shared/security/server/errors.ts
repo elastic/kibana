@@ -7,6 +7,7 @@
 
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
+import { inspect } from 'util';
 
 import type { CustomHttpResponseOptions, ResponseError } from '@kbn/core/server';
 
@@ -54,5 +55,47 @@ export function getDetailedErrorMessage(error: any): string {
     return JSON.stringify(error.output.payload);
   }
 
-  return error.message;
+  if (!error.cause) {
+    return error.message;
+  }
+
+  // Usually it's enough to get the first level cause message.
+  return `${error.message} (cause: ${
+    typeof error.cause === 'string'
+      ? error.cause
+      : error.cause instanceof Error
+      ? error.cause.message
+      : inspect(error.cause)
+  })`;
+}
+
+export function isExpiredOrInvalidRefreshTokenError(error: errors.ResponseError): boolean {
+  return (
+    error.body?.error_description?.includes('token has already been refreshed') ||
+    error.body?.error_description?.includes('could not refresh the requested token')
+  );
+}
+
+export function isCredentialMismatchError(error: errors.ResponseError): boolean {
+  return error.body?.error_description?.includes('tokens must be refreshed by the creating client');
+}
+
+export class InvalidGrantError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'InvalidGrantError';
+    Object.setPrototypeOf(this, InvalidGrantError.prototype);
+  }
+
+  public static expiredOrInvalidRefreshToken() {
+    return new InvalidGrantError(
+      'Your session has expired because your refresh token is no longer valid. Please log in again.'
+    );
+  }
+
+  public static credentialMismatch() {
+    return new InvalidGrantError(
+      'Your session could not be refreshed due to a system misconfiguration. Please contact your administrator for assistance.'
+    );
+  }
 }

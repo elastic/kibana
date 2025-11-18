@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 import moment from 'moment';
 import { EuiDescriptionList, EuiSkeletonText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -31,7 +32,7 @@ export const MonitorDetailsLastRun: React.FC = () => {
               content={moment(latestPing?.['@timestamp']).format('LLL')}
               position="bottom"
             >
-              <>{description}</>
+              <span tabIndex={0}>{description}</span>
             </EuiToolTip>
           ),
         },

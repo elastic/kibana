@@ -8,8 +8,8 @@
 import { join } from 'path';
 import expect from '@kbn/expect';
 import type { Response } from 'supertest';
-import { SavedObject } from '@kbn/core/types';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { SavedObject } from '@kbn/core/types';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 interface MinimalSO {
   id: string;

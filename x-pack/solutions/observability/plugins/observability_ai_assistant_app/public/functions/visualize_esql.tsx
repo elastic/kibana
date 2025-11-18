@@ -47,9 +47,9 @@ import {
   type VisualizeQueryResponse,
 } from '../../common/functions/visualize_esql';
 
-import { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
+import type { ObservabilityAIAssistantAppPluginStartDependencies } from '../types';
 
-const VISUALIZE_QUERY_NAME = 'visualize_query';
+const VISUALIZE_QUERY_FUNCTION_NAME = 'visualize_query';
 
 interface VisualizeESQLProps {
   /** Lens start contract, get the ES|QL charts suggestions api */
@@ -112,7 +112,11 @@ export function VisualizeESQL({
   }, [lens]);
 
   const dataViewAsync = useAsync(() => {
-    return getESQLAdHocDataview(query, dataViews);
+    return getESQLAdHocDataview({
+      dataViewsService: dataViews,
+      query,
+      options: { skipFetchFields: true },
+    });
   }, [query, dataViews]);
 
   const chatFlyoutSecondSlotHandler = useContext(ObservabilityAIAssistantMultipaneFlyoutContext);
@@ -394,7 +398,7 @@ export function registerVisualizeQueryRenderFunction({
   pluginsStart: ObservabilityAIAssistantAppPluginStartDependencies;
 }) {
   registerRenderFunction(
-    VISUALIZE_QUERY_NAME,
+    VISUALIZE_QUERY_FUNCTION_NAME,
     ({
       arguments: { query, userOverrides, intention },
       response,

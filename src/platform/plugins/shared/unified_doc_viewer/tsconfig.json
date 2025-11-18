@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -34,7 +34,6 @@
     "@kbn/code-editor",
     "@kbn/code-editor-mock",
     "@kbn/custom-icons",
-    "@kbn/react-field",
     "@kbn/discover-shared-plugin",
     "@kbn/fields-metadata-plugin",
     "@kbn/core-notifications-browser",
@@ -54,7 +53,9 @@
     "@kbn/object-utils",
     "@kbn/es-query",
     "@kbn/css-utils",
-    "@kbn/storybook"
+    "@kbn/storybook",
+    "@kbn/esql-composer",
+    "@kbn/deeplinks-analytics"
   ],
   "exclude": ["target/**/*"]
 }

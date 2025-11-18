@@ -6,14 +6,14 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import {
+import type {
   PromptCreateProps,
   PromptResponse,
   PromptType,
   PromptUpdateProps,
 } from '@kbn/elastic-assistant-common/impl/schemas';
-import { AuthenticatedUser } from '@kbn/core-security-common';
-import { CreatePromptSchema, EsPromptsSchema, UpdatePromptSchema } from './types';
+import type { AuthenticatedUser } from '@kbn/core-security-common';
+import type { CreatePromptSchema, EsPromptsSchema, UpdatePromptSchema } from './types';
 
 export const transformESToPrompts = (response: EsPromptsSchema[]): PromptResponse[] => {
   return response.map((promptSchema) => {

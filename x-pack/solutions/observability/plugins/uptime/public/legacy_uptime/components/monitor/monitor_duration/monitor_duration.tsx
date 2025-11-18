@@ -8,9 +8,9 @@
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle, EuiSpacer } from '@elastic/eui';
-import { LocationDurationLine } from '../../../../../common/types';
+import type { LocationDurationLine } from '../../../../../common/types';
 import { MLIntegrationComponent } from '../ml/ml_integeration';
-import { AnomalyRecords } from '../../../state/actions';
+import type { AnomalyRecords } from '../../../state/actions';
 import { DurationChartComponent } from '../../common/charts';
 
 interface DurationChartProps {

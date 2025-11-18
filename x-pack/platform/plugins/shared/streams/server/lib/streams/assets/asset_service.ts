@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
+import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
-import { StreamsPluginStartDependencies } from '../../../types';
-import { AssetClient, StoredAssetLink } from './asset_client';
-import { AssetStorageSettings, assetStorageSettings } from './storage_settings';
+import type { StreamsPluginStartDependencies } from '../../../types';
+import type { StoredAssetLink } from './asset_client';
+import { AssetClient } from './asset_client';
+import type { AssetStorageSettings } from './storage_settings';
+import { assetStorageSettings } from './storage_settings';
 
 export class AssetService {
   constructor(
@@ -18,7 +20,7 @@ export class AssetService {
   ) {}
 
   async getClientWithRequest({ request }: { request: KibanaRequest }): Promise<AssetClient> {
-    const [coreStart, pluginsStart] = await this.coreSetup.getStartServices();
+    const [coreStart] = await this.coreSetup.getStartServices();
 
     const adapter = new StorageIndexAdapter<AssetStorageSettings, StoredAssetLink>(
       coreStart.elasticsearch.client.asInternalUser,
@@ -29,7 +31,6 @@ export class AssetService {
     return new AssetClient({
       storageClient: adapter.getClient(),
       soClient: coreStart.savedObjects.getScopedClient(request),
-      rulesClient: await pluginsStart.alerting.getRulesClientWithRequest(request),
     });
   }
 }

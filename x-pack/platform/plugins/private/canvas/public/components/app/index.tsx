@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { AppUpdater, ScopedHistory } from '@kbn/core/public';
+import type { AppUpdater, ScopedHistory } from '@kbn/core/public';
 import PropTypes from 'prop-types';
-import React, { FC, useEffect } from 'react';
-import { BehaviorSubject } from 'rxjs';
+import type { FC } from 'react';
+import React, { useEffect } from 'react';
+import type { BehaviorSubject } from 'rxjs';
 // @ts-expect-error
 import { shortcutManager } from '../../lib/shortcut_manager';
 import { CanvasRouter } from '../../routes';

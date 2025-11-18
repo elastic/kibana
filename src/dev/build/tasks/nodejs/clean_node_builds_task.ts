@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { deleteAll, Task } from '../../lib';
+import type { Task } from '../../lib';
+import { deleteAll } from '../../lib';
 
 export const CleanNodeBuilds: Task = {
   description: 'Cleaning npm from node',

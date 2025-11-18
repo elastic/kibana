@@ -6,17 +6,19 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { SampleDocument } from '@kbn/streams-schema';
-import { ErrorActorEvent, fromObservable } from 'xstate5';
+import type { SampleDocument } from '@kbn/streams-schema';
+import type { ErrorActorEvent } from 'xstate5';
+import { fromObservable } from 'xstate5';
 import type { errors as esErrors } from '@elastic/elasticsearch';
-import { Filter, Query, TimeRange, buildEsQuery } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { buildEsQuery } from '@kbn/es-query';
 import { Observable, filter, map, of } from 'rxjs';
 import { isRunningResponse } from '@kbn/data-plugin/common';
-import { IEsSearchResponse } from '@kbn/search-types';
+import type { IEsSearchResponse } from '@kbn/search-types';
 import { pick } from 'lodash';
 import { getFormattedError } from '../../../../../util/errors';
-import { DataSourceMachineDeps } from './types';
-import { EnrichmentDataSourceWithUIAttributes } from '../../types';
+import type { DataSourceMachineDeps } from './types';
+import type { EnrichmentDataSourceWithUIAttributes } from '../../types';
 
 export interface SamplesFetchInput {
   dataSource: EnrichmentDataSourceWithUIAttributes;
@@ -51,7 +53,7 @@ export function createDataCollectorActor({ data }: Pick<DataSourceMachineDeps, '
  * Returns the appropriate data collector function based on the data source type
  */
 function getDataCollectorForDataSource(dataSource: EnrichmentDataSourceWithUIAttributes) {
-  if (dataSource.type === 'random-samples') {
+  if (dataSource.type === 'latest-samples') {
     return (args: CollectorParams) => collectKqlData(args);
   }
   if (dataSource.type === 'kql-samples') {
@@ -134,7 +136,10 @@ function buildSamplesSearchParams({
 /**
  * Adds time range to the query definition if provided
  */
-function addTimeRangeToQuery(queryDefinition: any, timeRange?: TimeRange): void {
+function addTimeRangeToQuery(
+  queryDefinition: ReturnType<typeof buildEsQuery>,
+  timeRange?: TimeRange
+): void {
   if (timeRange) {
     queryDefinition.bool.must.unshift({
       range: {
@@ -150,7 +155,7 @@ function addTimeRangeToQuery(queryDefinition: any, timeRange?: TimeRange): void 
 /**
  * Creates a notifier for data collection failures
  */
-export function createDataCollectionFailureNofitier({
+export function createDataCollectionFailureNotifier({
   toasts,
 }: {
   toasts: DataSourceMachineDeps['toasts'];

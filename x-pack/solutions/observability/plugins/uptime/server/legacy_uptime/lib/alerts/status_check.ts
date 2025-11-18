@@ -5,30 +5,30 @@
  * 2.0.
  */
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { AlertsClientError, GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
+import type { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { min } from 'lodash';
 import moment from 'moment';
 
 import datemath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
-import { JsonObject } from '@kbn/utility-types';
+import type { JsonObject } from '@kbn/utility-types';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
-import { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
+import type { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { uptimeMonitorStatusRuleParamsSchema } from '@kbn/response-ops-rule-params/uptime_monitor_status';
+import type { AlertsLocatorParams, TimeUnitChar } from '@kbn/observability-plugin/common';
 import {
   alertsLocatorID,
-  AlertsLocatorParams,
   formatDurationFromTimeUnitChar,
   getAlertUrl,
   observabilityFeatureId,
   observabilityPaths,
-  TimeUnitChar,
 } from '@kbn/observability-plugin/common';
-import { LocatorPublic } from '@kbn/share-plugin/common';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { asyncForEach } from '@kbn/std';
-import { MonitorSummary, UptimeAlertTypeFactory } from './types';
-import {
+import type { MonitorSummary, UptimeAlertTypeFactory } from './types';
+import type {
   StatusCheckFilters,
   Ping,
   GetMonitorAvailabilityParams,
@@ -46,15 +46,17 @@ import {
   statusCheckTranslations,
 } from './translations';
 import { stringifyKueries, combineFiltersAndUserSearch } from '../../../../common/lib';
-import { GetMonitorAvailabilityResult } from '../requests/get_monitor_availability';
-import {
+import type { GetMonitorAvailabilityResult } from '../requests/get_monitor_availability';
+import type {
   GetMonitorStatusResult,
   GetMonitorDownStatusMessageParams,
-  getMonitorDownStatusMessageParams,
 } from '../requests/get_monitor_status';
+import { getMonitorDownStatusMessageParams } from '../requests/get_monitor_status';
 import { UNNAMED_LOCATION } from '../../../../common/constants';
-import { getUptimeIndexPattern, IndexPatternTitleAndFields } from '../requests/get_index_pattern';
-import { UMServerLibs, UptimeEsClient } from '../lib';
+import type { IndexPatternTitleAndFields } from '../requests/get_index_pattern';
+import { getUptimeIndexPattern } from '../requests/get_index_pattern';
+import type { UMServerLibs } from '../lib';
+import { UptimeEsClient } from '../lib';
 import {
   ACTION_VARIABLES,
   ALERT_DETAILS_URL,

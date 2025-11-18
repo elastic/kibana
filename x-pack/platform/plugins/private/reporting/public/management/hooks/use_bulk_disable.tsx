@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { useMutation, useQueryClient } from '@kbn/react-query';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/reporting-public';
 import { bulkDisableScheduledReports } from '../apis/bulk_disable_scheduled_reports';

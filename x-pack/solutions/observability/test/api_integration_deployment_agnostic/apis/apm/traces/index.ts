@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
   describe('Traces', () => {
@@ -16,5 +16,6 @@ export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext)
     loadTestFile(require.resolve('./trace_by_id.spec.ts'));
     loadTestFile(require.resolve('./transaction_details.spec.ts'));
     loadTestFile(require.resolve('./focused_trace.spec.ts'));
+    loadTestFile(require.resolve('./unified_trace_errors.spec.ts'));
   });
 }

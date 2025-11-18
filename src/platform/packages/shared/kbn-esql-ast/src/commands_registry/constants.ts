@@ -7,9 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const TRIGGER_SUGGESTION_COMMAND = {
-  title: 'Trigger Suggestion Dialog',
-  id: 'editor.action.triggerSuggest',
-};
-
 export const ESQL_VARIABLES_PREFIX = '?';

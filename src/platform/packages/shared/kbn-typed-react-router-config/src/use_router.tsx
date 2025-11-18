@@ -8,7 +8,7 @@
  */
 
 import React, { createContext, useContext } from 'react';
-import { RouteMap, Router } from './types';
+import type { RouteMap, Router } from './types';
 
 const RouterContext = createContext<Router<any> | undefined>(undefined);
 

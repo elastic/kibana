@@ -15,26 +15,31 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
-import { PackageInfo } from '@kbn/fleet-plugin/common';
+import type { PackageInfo } from '@kbn/fleet-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { fieldIsInvalid, findVariableDef } from '../utils';
-import { CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS } from './gcp_test_subjects';
-import { gcpField } from './gcp_utils';
+import { GCP_INPUT_FIELDS_TEST_SUBJECTS } from '@kbn/cloud-security-posture-common';
+import { fieldIsInvalid, findVariableDef, gcpField } from '../utils';
 import { GCP_CREDENTIALS_TYPE } from '../constants';
-import { GcpFields, GcpInputFields } from '../types';
+import type { GcpFields, GcpInputFields } from '../types';
 
 const credentialOptionsList = [
   {
-    text: i18n.translate('securitySolutionPackages.gcpIntegration.credentialsFileOption', {
-      defaultMessage: 'Credentials File',
-    }),
+    text: i18n.translate(
+      'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.credentialsFileOption',
+      {
+        defaultMessage: 'Credentials File',
+      }
+    ),
     value: GCP_CREDENTIALS_TYPE.CREDENTIALS_FILE,
     'data-test-subj': 'credentials_file_option_test_id',
   },
   {
-    text: i18n.translate('securitySolutionPackages.gcpIntegration.credentialsJsonOption', {
-      defaultMessage: 'Credentials JSON',
-    }),
+    text: i18n.translate(
+      'securitySolutionPackages.cloudSecurityPosture.cloudSetup.gcp.credentialsJsonOption',
+      {
+        defaultMessage: 'Credentials JSON',
+      }
+    ),
     value: GCP_CREDENTIALS_TYPE.CREDENTIALS_JSON,
     'data-test-subj': 'credentials_json_option_test_id',
   },
@@ -74,7 +79,7 @@ export const GcpInputVarFields = ({
     hasInvalidRequiredVars
   );
   const credentialFilesError = i18n.translate(
-    'securitySolutionPackages.cspmIntegration.integration.fieldRequired',
+    'securitySolutionPackages.cloudSecurityPosture.cloudSetup.fieldRequired.',
     {
       defaultMessage: '{field} is required',
       values: {
@@ -92,7 +97,7 @@ export const GcpInputVarFields = ({
     hasInvalidRequiredVars
   );
   const credentialJSONError = i18n.translate(
-    'securitySolutionPackages.cspmIntegration.integration.fieldRequired',
+    'securitySolutionPackages.cloudSecurityPosture.cloudSetup.fieldRequired.',
     {
       defaultMessage: '{field} is required',
       values: {
@@ -116,7 +121,7 @@ export const GcpInputVarFields = ({
           <EuiFormRow fullWidth label={gcpField.fields['gcp.organization_id'].label}>
             <EuiFieldText
               disabled={disabled}
-              data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID}
+              data-test-subj={GCP_INPUT_FIELDS_TEST_SUBJECTS.ORGANIZATION_ID}
               id={organizationIdFields.id}
               fullWidth
               value={organizationIdFields.value || ''}
@@ -128,7 +133,7 @@ export const GcpInputVarFields = ({
           <EuiFormRow fullWidth label={gcpField.fields['gcp.project_id'].label}>
             <EuiFieldText
               disabled={disabled}
-              data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID}
+              data-test-subj={GCP_INPUT_FIELDS_TEST_SUBJECTS.PROJECT_ID}
               id={projectIdFields.id}
               fullWidth
               value={projectIdFields.value || ''}
@@ -139,7 +144,7 @@ export const GcpInputVarFields = ({
         {credentialsTypeFields && credentialFilesFields && credentialJSONFields && (
           <EuiFormRow fullWidth label={gcpField.fields['gcp.credentials.type'].label}>
             <EuiSelect
-              data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE}
+              data-test-subj={GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_TYPE}
               fullWidth
               options={credentialOptionsList}
               value={credentialsTypeFields?.value || credentialOptionsList[0].value}
@@ -157,7 +162,7 @@ export const GcpInputVarFields = ({
             error={credentialFilesFieldsInvalid ? credentialFilesError : undefined}
           >
             <EuiFieldText
-              data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE}
+              data-test-subj={GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_FILE}
               id={credentialFilesFields.id}
               fullWidth
               value={credentialFilesFields.value || ''}
@@ -187,11 +192,11 @@ export const GcpInputVarFields = ({
                 label={gcpField.fields['gcp.credentials.json'].label}
                 isInvalid={credentialJSONFieldsInvalid}
                 error={credentialJSONFieldsInvalid ? credentialJSONError : undefined}
-                data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON_SECRET_PANEL}
+                data-test-subj={GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON_SECRET_PANEL}
               >
                 <Suspense fallback={<EuiLoadingSpinner size="l" />}>
                   <LazyPackagePolicyInputVarField
-                    data-test-subj={CIS_GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON}
+                    data-test-subj={GCP_INPUT_FIELDS_TEST_SUBJECTS.CREDENTIALS_JSON}
                     varDef={{
                       ...credentialsJsonFieldDef,
                       required: true,

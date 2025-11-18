@@ -8,26 +8,21 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MigrationReadyPanel } from './migration_ready_panel';
-import { useGetMissingResources } from '../../service/hooks/use_get_missing_resources';
-import { useStartMigration } from '../../service/hooks/use_start_migration';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
-import type { RuleMigrationResourceBase } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { TestProviders } from '../../../../common/mock';
 import type { RuleMigrationStats } from '../../types';
+import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
+import { useGetMissingResources } from '../../../common/hooks/use_get_missing_resources';
+import { useStartMigration } from '../../logic/use_start_migration';
+import { MigrationDataInputContextProvider } from '../../../common/components';
 
 jest.mock('../../../../common/lib/kibana/use_kibana');
 
-jest.mock('../data_input_flyout/context', () => ({
-  useRuleMigrationDataInputContext: () => ({
-    openFlyout: jest.fn(),
-  }),
-}));
-
-jest.mock('../../service/hooks/use_start_migration');
+jest.mock('../../logic/use_start_migration');
 const useStartMigrationMock = useStartMigration as jest.Mock;
 const mockStartMigration = jest.fn();
 
-const mockMigrationStateWithError = {
+const mockMigrationStateWithError: RuleMigrationStats = {
   status: SiemMigrationTaskStatus.READY,
   last_execution: {
     error:
@@ -35,16 +30,16 @@ const mockMigrationStateWithError = {
   },
   id: 'c44d2c7d-0de1-4231-8b82-0dcfd67a9fe3',
   name: 'Migration 1',
-  rules: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
+  items: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
   created_at: '2025-05-27T12:12:17.563Z',
   last_updated_at: '2025-05-27T12:12:17.563Z',
 };
 
-const mockMigrationStatsStopped = {
+const mockMigrationStatsStopped: RuleMigrationStats = {
   status: SiemMigrationTaskStatus.STOPPED,
   id: 'c44d2c7d-0de1-4231-8b82-0dcfd67a9fe3',
   name: 'Migration 1',
-  rules: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
+  items: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
   created_at: '2025-05-27T12:12:17.563Z',
   last_updated_at: '2025-05-27T12:12:17.563Z',
 };
@@ -53,26 +48,32 @@ const mockMigrationStatsReady: RuleMigrationStats = {
   status: SiemMigrationTaskStatus.READY,
   id: 'c44d2c7d-0de1-4231-8b82-0dcfd67a9fe3',
   name: 'Migration 1',
-  rules: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
+  items: { total: 6, pending: 6, processing: 0, completed: 0, failed: 0 },
   created_at: '2025-05-27T12:12:17.563Z',
   last_updated_at: '2025-05-27T12:12:17.563Z',
 };
 
-const missingMacro: RuleMigrationResourceBase = {
+const missingMacro: SiemMigrationResourceBase = {
   type: 'macro',
   name: 'macro1',
 };
-const missingLookup: RuleMigrationResourceBase = {
+const missingLookup: SiemMigrationResourceBase = {
   type: 'lookup',
   name: 'lookup1',
 };
 
-jest.mock('../../service/hooks/use_get_missing_resources');
+jest.mock('../../../common/hooks/use_get_missing_resources');
 const useGetMissingResourcesMock = useGetMissingResources as jest.Mock;
 
 const renderReadyPanel = (migrationStats: RuleMigrationStats) => {
   return render(<MigrationReadyPanel migrationStats={migrationStats} />, {
-    wrapper: TestProviders,
+    wrapper: ({ children }) => (
+      <TestProviders>
+        <MigrationDataInputContextProvider openFlyout={jest.fn()} closeFlyout={jest.fn()}>
+          {children}
+        </MigrationDataInputContextProvider>
+      </TestProviders>
+    ),
   });
 };
 
@@ -110,7 +111,13 @@ describe('MigrationReadyPanel', () => {
         isLoading: true,
       });
       render(<MigrationReadyPanel migrationStats={mockMigrationStatsReady} />, {
-        wrapper: TestProviders,
+        wrapper: ({ children }) => (
+          <TestProviders>
+            <MigrationDataInputContextProvider openFlyout={jest.fn()} closeFlyout={jest.fn()}>
+              {children}
+            </MigrationDataInputContextProvider>
+          </TestProviders>
+        ),
       });
       expect(screen.getByTestId('startMigrationButton')).toBeVisible();
       expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Starting');
@@ -135,14 +142,14 @@ describe('MigrationReadyPanel', () => {
   });
 
   describe('Stopped Migration', () => {
-    it('should render aborted migration message', () => {
+    it('should render stopped migration message', () => {
       renderReadyPanel(mockMigrationStatsStopped);
       expect(screen.getByTestId('ruleMigrationDescription')).toHaveTextContent(
         'Migration of 6 rules was stopped, you can resume it any time.'
       );
     });
 
-    it('should render correct start migration button for aborted migration', () => {
+    it('should render correct start migration button for stopped migration', () => {
       renderReadyPanel(mockMigrationStatsStopped);
       expect(screen.getByTestId('startMigrationButton')).toHaveTextContent('Resume');
     });
@@ -152,7 +159,7 @@ describe('MigrationReadyPanel', () => {
     const missingResources = [missingMacro, missingLookup];
 
     beforeEach(() => {
-      useGetMissingResourcesMock.mockImplementation((setterFn: Function) => {
+      useGetMissingResourcesMock.mockImplementation((type, setterFn: Function) => {
         return {
           getMissingResources: jest.fn().mockImplementation(() => {
             setterFn(missingResources);

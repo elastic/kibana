@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext, getKibanaCliLoggers } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
+import { getKibanaCliLoggers } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -40,10 +41,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--elasticsearch.ssl.certificateAuthorities=${CA_CERT_PATH}`,
 
         // add feature flags here
-        `--xpack.fleet.enableExperimental=${JSON.stringify([
-          'agentTamperProtectionEnabled',
-          'subfeaturePrivileges',
-        ])}`,
+        // `--xpack.fleet.experimentalFeatures=${JSON.stringify({})}`,
 
         `--logging.loggers=${JSON.stringify([
           ...getKibanaCliLoggers(xpackFunctionalTestsConfig.get('kbnTestServer.serverArgs')),

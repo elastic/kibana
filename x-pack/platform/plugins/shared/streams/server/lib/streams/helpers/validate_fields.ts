@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import {
-  FieldDefinition,
-  Streams,
-  isRoot,
-  keepFields,
-  namespacePrefixes,
-} from '@kbn/streams-schema';
+import type { FieldDefinition, Streams } from '@kbn/streams-schema';
+import { isRoot, keepFields, namespacePrefixes } from '@kbn/streams-schema';
 import { MalformedFieldsError } from '../errors/malformed_fields_error';
 import { baseMappings } from '../component_templates/logs_layer';
 
@@ -73,6 +68,18 @@ export function validateSystemFields(definition: Streams.WiredStream.Definition)
   }
   // child streams are not supposed to have system fields
   if (Object.values(definition.ingest.wired.fields).some((field) => field.type === 'system')) {
+    throw new MalformedFieldsError(
+      `Stream ${definition.name} is not allowed to have system fields`
+    );
+  }
+}
+
+export function validateClassicFields(definition: Streams.ClassicStream.Definition) {
+  if (
+    Object.values(definition.ingest.classic.field_overrides || {}).some(
+      (field) => field.type === 'system'
+    )
+  ) {
     throw new MalformedFieldsError(
       `Stream ${definition.name} is not allowed to have system fields`
     );

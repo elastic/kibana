@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { DataStreamsResponseSchema, DataStreamsRequestSchema } from '../../../common/rest_types';
+import { schema, type TypeOf } from '@kbn/config-schema';
 import { DATA_USAGE_DATA_STREAMS_API_ROUTE } from '../../../common';
-import { DataUsageContext, DataUsageRouter } from '../../types';
+import type { DataUsageContext, DataUsageRouter } from '../../types';
 import { getDataStreamsHandler } from './data_streams_handler';
 
 export const registerDataStreamsRoute = (
@@ -38,3 +38,23 @@ export const registerDataStreamsRoute = (
       getDataStreamsHandler(dataUsageContext)
     );
 };
+
+export const DataStreamsRequestSchema = {
+  query: schema.object({
+    includeZeroStorage: schema.boolean({ defaultValue: false }),
+  }),
+};
+
+export type DataStreamsRequestQuery = TypeOf<typeof DataStreamsRequestSchema.query>;
+
+export const DataStreamsResponseSchema = {
+  body: () =>
+    schema.arrayOf(
+      schema.object({
+        name: schema.string(),
+        storageSizeBytes: schema.number(),
+      })
+    ),
+};
+
+export type DataStreamsResponseBodySchemaBody = TypeOf<typeof DataStreamsResponseSchema.body>;

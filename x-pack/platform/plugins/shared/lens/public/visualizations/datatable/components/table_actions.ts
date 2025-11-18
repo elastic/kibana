@@ -15,11 +15,11 @@ import type {
   DatatableColumn,
   DatatableColumnMeta,
 } from '@kbn/expressions-plugin/common';
-import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
+import type { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { getSortingCriteria } from '@kbn/sort-predicates';
 import { i18n } from '@kbn/i18n';
 import { getOriginalId } from '@kbn/transpose-utils';
-import type { LensResizeAction, LensSortAction, LensToggleAction } from './types';
+import type { LensResizeAction, LensSortAction, LensToggleAction } from '@kbn/lens-common';
 import type { DatatableColumnConfig, LensGridDirection } from '../../../../common/expressions';
 import type { FormatFactory } from '../../../../common/types';
 import { buildColumnsMetaLookup } from './helpers';

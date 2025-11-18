@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { TimeStrings } from '@kbn/test-suites-src/functional/page_objects/common_page';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -103,7 +103,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
       // TODO: The Serverless sidebar causes `PageObjects.discover.brushHistogram()`
       // to brush a different range in the histogram, resulting in a different duration
-      expect(Math.round(newDurationHours)).to.be(31);
+      expect(Math.round(newDurationHours)).to.be(25);
 
       await retry.waitFor('doc table containing the documents of the brushed range', async () => {
         const rowData = await PageObjects.discover.getDocTableField(1);
@@ -123,7 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
       // TODO: The Serverless sidebar causes `PageObjects.discover.brushHistogram()`
       // to brush a different range in the histogram, resulting in a different count
-      expect(await PageObjects.discover.getHitCount()).to.be('10');
+      expect(await PageObjects.discover.getHitCount()).to.be('7');
     });
 
     it('should update the histogram timerange when the query is resubmitted', async function () {

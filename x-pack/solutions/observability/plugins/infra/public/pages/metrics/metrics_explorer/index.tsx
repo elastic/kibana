@@ -7,12 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState, useRef } from 'react';
-import { useTrackPageview, FeatureFeedbackButton } from '@kbn/observability-shared-plugin/public';
+import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
 import { OnboardingFlow } from '../../../components/shared/templates/no_data_config';
 import { InfraPageTemplate } from '../../../components/shared/templates/infra_page_template';
 import { WithMetricsExplorerOptionsUrlState } from '../../../containers/metrics_explorer/with_metrics_explorer_options_url_state';
-import { useKibanaEnvironmentContext } from '../../../hooks/use_kibana';
 import { useMetricsExplorerViews } from '../../../hooks/use_metrics_explorer_views';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { NoData } from '../../../components/empty_states';
@@ -22,8 +21,7 @@ import { useMetricsExplorerState } from './hooks/use_metric_explorer_state';
 import { metricsExplorerTitle } from '../../../translations';
 import { SavedViews } from './components/saved_views';
 import { MetricsExplorerOptionsContainer } from './hooks/use_metrics_explorer_options';
-
-const METRICS_EXPLORER_FEEDBACK_URL = 'https://ela.st/survey-infra-metricsexplorer?usp=pp_url';
+import { MetricsInDiscoverCallout } from './components/metrics_in_discover_callout';
 
 export const MetricsExplorerPage = () => {
   useTrackPageview({ app: 'infra_metrics', path: 'metrics_explorer' });
@@ -64,7 +62,6 @@ const MetricsExplorerContent = () => {
   } = useMetricsExplorerState({ enabled });
   const { currentView } = useMetricsExplorerViews();
 
-  const { kibanaVersion, isCloudEnv, isServerlessEnv } = useKibanaEnvironmentContext();
   const prevDataRef = useRef(data);
   const { onPageReady } = usePerformanceContext();
 
@@ -109,23 +106,19 @@ const MetricsExplorerContent = () => {
     }
   }, [isLoading, data, timeRange.from, timeRange.to, onPageReady]);
 
+  const onFilter = (query: string) => {
+    handleFilterQuerySubmit({ query: { query, language: 'kuery' } });
+  };
+
   return (
     <InfraPageTemplate
       onboardingFlow={OnboardingFlow.Infra}
       pageHeader={{
         pageTitle: metricsExplorerTitle,
-        rightSideItems: [
-          <SavedViews viewState={viewState} />,
-          <FeatureFeedbackButton
-            formUrl={METRICS_EXPLORER_FEEDBACK_URL}
-            data-test-subj="infraMetricsExplorerFeedbackLink"
-            kibanaVersion={kibanaVersion}
-            isCloudEnv={isCloudEnv}
-            isServerlessEnv={isServerlessEnv}
-          />,
-        ],
+        rightSideItems: [<SavedViews viewState={viewState} />],
       }}
     >
+      <MetricsInDiscoverCallout timeRange={timeRange} />
       <MetricsExplorerToolbar
         timeRange={timeRange}
         options={options}
@@ -156,7 +149,7 @@ const MetricsExplorerContent = () => {
           options={options}
           chartOptions={chartOptions}
           onLoadMore={handleLoadMore}
-          onFilter={handleFilterQuerySubmit}
+          onFilter={onFilter}
           onRefetch={refresh}
           onTimeChange={handleTimeChange}
         />

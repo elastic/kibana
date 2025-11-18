@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { AGG_TYPE, FIELD_ORIGIN } from '../../../../common/constants';
-import { IESAggSource } from '../../sources/es_agg_source';
+import type { AGG_TYPE } from '../../../../common/constants';
+import { FIELD_ORIGIN } from '../../../../common/constants';
+import type { IESAggSource } from '../../sources/es_agg_source';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { PercentileAggField } from './percentile_agg_field';
-import { ESDocField } from '../es_doc_field';
+import type { ESDocField } from '../es_doc_field';
 
 const mockFields = [
   {

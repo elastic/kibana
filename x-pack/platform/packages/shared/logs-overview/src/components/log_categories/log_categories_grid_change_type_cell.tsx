@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiDataGridColumn } from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
+import { EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { LogCategory } from '../../types';
+import type { LogCategory } from '../../types';
 
 export const logCategoriesGridChangeTypeColumn = {
   id: 'change_type' as const,

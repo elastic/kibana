@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { aiAssistantCapabilities } from '@kbn/observability-ai-assistant-plugin/public';
+
 export function RedirectToHomeIfUnauthorized({
   coreStart,
   children,
@@ -19,10 +21,7 @@ export function RedirectToHomeIfUnauthorized({
     application: { capabilities, navigateToApp },
   } = coreStart;
 
-  const allowed =
-    (capabilities?.management.kibana.observabilityAiAssistantManagement &&
-      capabilities?.observabilityAIAssistant?.[aiAssistantCapabilities.show]) ??
-    false;
+  const allowed = capabilities?.observabilityAIAssistant?.[aiAssistantCapabilities.show] ?? false;
 
   if (!allowed) {
     navigateToApp('home');

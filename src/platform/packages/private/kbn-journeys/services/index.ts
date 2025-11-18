@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { commonFunctionalServices, RetryService } from '@kbn/ftr-common-functional-services';
-import { EsArchiverProvider } from '@kbn/ftr-common-functional-services/services/es_archiver';
-import { KibanaServerProvider } from '@kbn/ftr-common-functional-services/services/kibana_server';
-import { ProvidedType } from '@kbn/test';
+import type { RetryService } from '@kbn/ftr-common-functional-services';
+import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
+import type { EsArchiverProvider } from '@kbn/ftr-common-functional-services/services/es_archiver';
+import type { KibanaServerProvider } from '@kbn/ftr-common-functional-services/services/kibana_server';
+import type { ProvidedType } from '@kbn/test';
 import { EsProvider } from './es';
 import { AuthService } from './auth';
 

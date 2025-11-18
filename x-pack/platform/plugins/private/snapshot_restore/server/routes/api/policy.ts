@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 
-import { SlmPolicyEs, PolicyIndicesResponse } from '../../../common/types';
+import type { SlmPolicyEs, PolicyIndicesResponse } from '../../../common/types';
 import { deserializePolicy, serializePolicy } from '../../../common/lib';
 import { getManagedPolicyNames } from '../../lib';
-import { RouteDependencies, ResolveIndexResponseFromES } from '../../types';
+import type { RouteDependencies, ResolveIndexResponseFromES } from '../../types';
 import { addBasePath } from '../helpers';
 import { nameParameterSchema, policySchema } from './validate_schemas';
 

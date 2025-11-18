@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AcknowledgeSchema } from '.';
+import type { AcknowledgeSchema } from '.';
 
 export const getAcknowledgeSchemaResponseMock = (): AcknowledgeSchema => ({
   acknowledged: true,

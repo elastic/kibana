@@ -96,9 +96,17 @@ describe('MaintenanceWindowClient - find', () => {
       per_page: 5,
     } as unknown as SavedObjectsFindResponse);
 
-    const result = await findMaintenanceWindows(mockContext, { status: ['running'] });
+    const result = await findMaintenanceWindows(mockContext, {
+      status: ['running'],
+      searchFields: ['title'],
+      search: 'some title',
+    });
 
-    expect(spy).toHaveBeenCalledWith({ status: ['running'] });
+    expect(spy).toHaveBeenCalledWith({
+      status: ['running'],
+      search: 'some title',
+      searchFields: ['title'],
+    });
     expect(savedObjectsClient.find).toHaveBeenLastCalledWith({
       filter: {
         arguments: [
@@ -116,6 +124,8 @@ describe('MaintenanceWindowClient - find', () => {
         function: 'is',
         type: 'function',
       },
+      search: 'some title',
+      searchFields: ['title'],
       sortField: 'updatedAt',
       sortOrder: 'desc',
       type: MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,

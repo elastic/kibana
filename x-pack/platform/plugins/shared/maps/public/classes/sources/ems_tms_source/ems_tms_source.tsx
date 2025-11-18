@@ -8,14 +8,15 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { DEFAULT_EMS_ROADMAP_ID } from '@kbn/maps-ems-plugin/common';
-import { EmsSpriteSheet } from '@elastic/ems-client';
-import { AbstractSource, SourceEditorArgs } from '../source';
-import { ITMSSource } from '../tms_source';
+import type { EmsSpriteSheet } from '@elastic/ems-client';
+import type { SourceEditorArgs } from '../source';
+import { AbstractSource } from '../source';
+import type { ITMSSource } from '../tms_source';
 import { getEmsTmsServices } from '../../../util';
 import { UpdateSourceEditor } from './update_source_editor';
 import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { SOURCE_TYPES } from '../../../../common/constants';
-import { EMSTMSSourceDescriptor } from '../../../../common/descriptor_types';
+import type { EMSTMSSourceDescriptor } from '../../../../common/descriptor_types';
 import { getEmsTileLayerId, getIsDarkMode, getEMSSettings } from '../../../kibana_services';
 import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_message';
 import { LICENSED_FEATURES } from '../../../licensed_features';
@@ -45,8 +46,13 @@ export function getSourceTitle() {
   }
 }
 
+type NormalizedEMSTMSSourceDescriptor = EMSTMSSourceDescriptor &
+  Required<Pick<EMSTMSSourceDescriptor, 'isAutoSelect' | 'lightModeDefault'>>;
+
 export class EMSTMSSource extends AbstractSource implements ITMSSource {
-  static createDescriptor(descriptor: Partial<EMSTMSSourceDescriptor>): EMSTMSSourceDescriptor {
+  static createDescriptor(
+    descriptor: Partial<EMSTMSSourceDescriptor>
+  ): NormalizedEMSTMSSourceDescriptor {
     return {
       type: SOURCE_TYPES.EMS_TMS,
       id: descriptor.id,
@@ -60,7 +66,7 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
     };
   }
 
-  readonly _descriptor: EMSTMSSourceDescriptor;
+  readonly _descriptor: NormalizedEMSTMSSourceDescriptor;
 
   constructor(descriptor: Partial<EMSTMSSourceDescriptor>) {
     const emsTmsDescriptor = EMSTMSSource.createDescriptor(descriptor);

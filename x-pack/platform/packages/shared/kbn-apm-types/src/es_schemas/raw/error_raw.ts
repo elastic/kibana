@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { APMBaseDoc } from './apm_base_doc';
-import {
+import type { APMBaseDoc } from './apm_base_doc';
+import type {
   Container,
   Host,
   Http,
@@ -19,7 +19,7 @@ import {
   Url,
   User,
 } from './fields';
-import { Server } from './fields/server';
+import type { Server } from './fields/server';
 
 export interface Processor {
   name: 'error';

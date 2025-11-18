@@ -18,7 +18,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { MONITOR_UPDATE_CHANNEL } from './constants';
 
 import { TelemetryEventsSender } from './sender';
-import { LicenseGetResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { LicenseGetResponse } from '@elastic/elasticsearch/lib/api/types';
 import { Observable } from 'rxjs';
 
 jest.mock('axios', () => {

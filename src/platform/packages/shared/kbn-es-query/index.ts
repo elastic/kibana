@@ -47,6 +47,8 @@ export type {
 
 export type { DslQuery, KueryNode, KueryParseOptions, KueryQueryOptions } from './src/kuery';
 
+export type { ProjectRouting } from './src/project_routing';
+
 export {
   buildEsQuery,
   buildQueryFromFilters,
@@ -61,12 +63,13 @@ export {
   getLanguageDisplayName,
 } from './src/es_query';
 
-export { kqlQuery, dateRangeQuery, termQuery } from './src/es_query/helpers';
+export { kqlQuery, dateRangeQuery, termQuery, termsQuery } from './src/es_query/helpers';
+
+export { FilterStateStore } from '@kbn/es-query-constants';
 
 export {
   COMPARE_ALL_OPTIONS,
   FILTERS,
-  FilterStateStore,
   buildCustomFilter,
   buildEmptyFilter,
   buildExistsFilter,
@@ -116,6 +119,8 @@ export {
   BooleanRelation,
 } from './src/filters';
 
+export { indexPatternToCcs } from './src/indices';
+
 export {
   KQLSyntaxError,
   fromKueryExpression,
@@ -127,6 +132,8 @@ export {
   escapeQuotes,
   getKqlFieldNames,
   getKqlFieldNamesFromExpression,
+  getIsKqlFreeText,
+  getIsKqlFreeTextExpression,
 } from './src/kuery';
 
 export {

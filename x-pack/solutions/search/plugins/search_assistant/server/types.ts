@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ObservabilityAIAssistantServerStart } from '@kbn/observability-ai-assistant-plugin/server';
-import { ServerlessPluginStart } from '@kbn/serverless/server';
+import type { ObservabilityAIAssistantServerStart } from '@kbn/observability-ai-assistant-plugin/server';
+import type { ServerlessPluginStart } from '@kbn/serverless/server';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface SearchAssistantPluginSetup {}

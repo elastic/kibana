@@ -7,21 +7,11 @@
 
 import { z } from '@kbn/zod';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
-import { DashboardAsset } from '../../../../common/assets';
 import { createServerRoute } from '../../create_server_route';
-import { SanitizedDashboardAsset } from '../../dashboards/route';
-import { ASSET_ID } from '../../../lib/streams/assets/fields';
+import type { Attachment } from '../../../lib/streams/attachments/types';
 
 export interface SuggestDashboardResponse {
-  suggestions: SanitizedDashboardAsset[];
-}
-
-function sanitizeDashboardAsset(asset: DashboardAsset): SanitizedDashboardAsset {
-  return {
-    id: asset[ASSET_ID],
-    title: asset.title,
-    tags: asset.tags,
-  };
+  suggestions: Attachment[];
 }
 
 const suggestDashboardsRoute = createServerRoute({
@@ -46,7 +36,7 @@ const suggestDashboardsRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<SuggestDashboardResponse> => {
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+    const { streamsClient, attachmentClient } = await getScopedClients({ request });
 
     await streamsClient.ensureStream(params.path.name);
 
@@ -56,14 +46,12 @@ const suggestDashboardsRoute = createServerRoute({
     } = params;
 
     const suggestions = (
-      await assetClient.getSuggestions({
-        assetTypes: ['dashboard'],
+      await attachmentClient.getSuggestions({
+        attachmentTypes: ['dashboard'],
         query,
         tags,
       })
-    ).assets.map((asset) => {
-      return sanitizeDashboardAsset(asset as DashboardAsset);
-    });
+    ).attachments;
 
     return {
       suggestions,

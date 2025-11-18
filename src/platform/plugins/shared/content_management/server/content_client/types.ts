@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ContentCrud } from '../core/crud';
+import type { ContentCrud } from '../core/crud';
 
 type CrudGetParameters<T = unknown> = Parameters<ContentCrud<T>['get']>;
 export type GetParameters<T = unknown> = [CrudGetParameters<T>[1], CrudGetParameters<T>[2]?];

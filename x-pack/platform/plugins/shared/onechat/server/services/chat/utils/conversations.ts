@@ -6,7 +6,8 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { of, defer, shareReplay, forkJoin, switchMap, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of, forkJoin, switchMap } from 'rxjs';
 import { type Conversation, type RoundCompleteEvent } from '@kbn/onechat-common';
 import type { ConversationClient } from '../../conversation';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
@@ -17,11 +18,13 @@ import { createConversationUpdatedEvent, createConversationCreatedEvent } from '
 export const createConversation$ = ({
   agentId,
   conversationClient,
+  conversationId,
   title$,
   roundCompletedEvents$,
 }: {
   agentId: string;
   conversationClient: ConversationClient;
+  conversationId?: string;
   title$: Observable<string>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
 }) => {
@@ -31,6 +34,7 @@ export const createConversation$ = ({
   }).pipe(
     switchMap(({ title, roundCompletedEvent }) => {
       return conversationClient.create({
+        id: conversationId,
         title,
         agent_id: agentId,
         rounds: [roundCompletedEvent.data.round],
@@ -47,21 +51,20 @@ export const createConversation$ = ({
  */
 export const updateConversation$ = ({
   conversationClient,
-  conversation$,
+  conversation,
   title$,
   roundCompletedEvents$,
 }: {
+  conversation: Conversation;
   title$: Observable<string>;
-  conversation$: Observable<Conversation>;
   roundCompletedEvents$: Observable<RoundCompleteEvent>;
   conversationClient: ConversationClient;
 }) => {
   return forkJoin({
-    conversation: conversation$,
     title: title$,
     roundCompletedEvent: roundCompletedEvents$,
   }).pipe(
-    switchMap(({ conversation, title, roundCompletedEvent }) => {
+    switchMap(({ title, roundCompletedEvent }) => {
       return conversationClient.update({
         id: conversation.id,
         title,
@@ -74,27 +77,78 @@ export const updateConversation$ = ({
   );
 };
 
-export const getConversation$ = ({
+/**
+ * Check if a conversation exists
+ */
+export const conversationExists = async ({
+  conversationId,
+  conversationClient,
+}: {
+  conversationId: string;
+  conversationClient: ConversationClient;
+}): Promise<boolean> => {
+  return conversationClient.exists(conversationId);
+};
+
+export type ConversationOperation = 'CREATE' | 'UPDATE';
+
+export type ConversationWithOperation = Conversation & { operation: ConversationOperation };
+
+/**
+ * Get a conversation by ID, or create a placeholder for new conversations
+ * Also determines the operation type (CREATE or UPDATE) based on the same logic
+ */
+export const getConversation = async ({
   agentId,
   conversationId,
+  autoCreateConversationWithId = false,
   conversationClient,
 }: {
   agentId: string;
   conversationId: string | undefined;
+  autoCreateConversationWithId?: boolean;
   conversationClient: ConversationClient;
-}): Observable<Conversation> => {
-  return defer(() => {
-    if (conversationId) {
-      return conversationClient.get(conversationId);
-    } else {
-      return of(placeholderConversation({ agentId }));
-    }
-  }).pipe(shareReplay());
+}): Promise<ConversationWithOperation> => {
+  // Case 1: No conversation ID - create new with placeholder
+  if (!conversationId) {
+    return {
+      ...placeholderConversation({ agentId }),
+      operation: 'CREATE',
+    };
+  }
+
+  // Case 2: Conversation ID specified and autoCreate is false - update existing
+  if (!autoCreateConversationWithId) {
+    return {
+      ...(await conversationClient.get(conversationId)),
+      operation: 'UPDATE',
+    };
+  }
+
+  // Case 3: Conversation ID specified and autoCreate is true - check if exists
+  const exists = await conversationExists({ conversationId, conversationClient });
+  if (exists) {
+    return {
+      ...(await conversationClient.get(conversationId)),
+      operation: 'UPDATE',
+    };
+  } else {
+    return {
+      ...placeholderConversation({ conversationId, agentId }),
+      operation: 'CREATE',
+    };
+  }
 };
 
-const placeholderConversation = ({ agentId }: { agentId: string }): Conversation => {
+export const placeholderConversation = ({
+  agentId,
+  conversationId,
+}: {
+  agentId: string;
+  conversationId?: string;
+}): Conversation => {
   return {
-    id: uuidv4(),
+    id: conversationId ?? uuidv4(),
     title: 'New conversation',
     agent_id: agentId,
     rounds: [],

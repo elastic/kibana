@@ -18,7 +18,7 @@ import { MAX_OPTIONS_LIST_REQUEST_SIZE, MIN_OPTIONS_LIST_REQUEST_SIZE } from '..
 import { OptionsListControlContext } from '../options_list_context_provider';
 import type { OptionsListComponentApi } from '../types';
 import { OptionsListPopoverSuggestions } from './options_list_popover_suggestions';
-import { OptionsListDisplaySettings } from '../../../../../common/options_list';
+import type { OptionsListDisplaySettings } from '../../../../../common/options_list';
 
 const render = (ui: React.ReactElement) => {
   return rtlRender(ui, { wrapper: EuiThemeProvider });

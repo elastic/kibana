@@ -6,9 +6,10 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { HttpSetup } from '@kbn/core/public';
-import { Actions, createApiLogic } from '../api_logic/create_api_logic';
-import { DeleteConnectorResponse } from '../../../common/types/connectors';
+import type { HttpSetup } from '@kbn/core/public';
+import type { Actions } from '../api_logic/create_api_logic';
+import { createApiLogic } from '../api_logic/create_api_logic';
+import type { DeleteConnectorResponse } from '../../../common/types/connectors';
 
 export interface DeleteConnectorApiLogicArgs {
   connectorId: string;

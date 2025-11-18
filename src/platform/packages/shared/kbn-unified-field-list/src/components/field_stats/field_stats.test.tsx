@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { ReactWrapper } from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { EuiLoadingSpinner, EuiProgress } from '@elastic/eui';
 import { coreMock } from '@kbn/core/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
@@ -20,7 +20,8 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { loadFieldStats } from '../../services/field_stats';
-import FieldStats, { FieldStatsWithKbnQuery } from './field_stats';
+import type { FieldStatsWithKbnQuery } from './field_stats';
+import FieldStats from './field_stats';
 
 jest.mock('../../services/field_stats', () => ({
   loadFieldStats: jest.fn().mockResolvedValue({}),

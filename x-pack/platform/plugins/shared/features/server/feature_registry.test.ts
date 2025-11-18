@@ -6,7 +6,7 @@
  */
 
 import { FeatureRegistry } from './feature_registry';
-import {
+import type {
   ElasticsearchFeatureConfig,
   FeatureKibanaPrivilegesReference,
   KibanaFeatureConfig,
@@ -202,25 +202,6 @@ describe('FeatureRegistry', () => {
           `"[category.label]: expected value of type [string] but got [undefined]"`
         );
       });
-    });
-
-    it('requires only a valid scope registered', () => {
-      const feature: KibanaFeatureConfig = {
-        id: 'test-feature',
-        name: 'Test Feature',
-        app: [],
-        category: { id: 'foo', label: 'foo' },
-        privileges: null,
-        // @ts-expect-error
-        scope: ['foo', 'bar'],
-      };
-
-      const featureRegistry = new FeatureRegistry();
-      expect(() =>
-        featureRegistry.registerKibanaFeature(feature)
-      ).toThrowErrorMatchingInlineSnapshot(
-        `"Feature test-feature has unknown scope entries: foo, bar"`
-      );
     });
 
     it(`requires a value for privileges`, () => {
@@ -2028,6 +2009,114 @@ describe('FeatureRegistry', () => {
       ).toThrowErrorMatchingInlineSnapshot(
         `"[reserved.privileges.0.id]: Does not satisfy regexp /^(?!reserved_)[a-zA-Z0-9_-]+$/"`
       );
+    });
+
+    it('allows reserved features to be hidden', () => {
+      const feature: KibanaFeatureConfig = {
+        id: 'test-feature',
+        name: 'Test Feature',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        privileges: null,
+        hidden: true,
+        reserved: {
+          description: 'my reserved privileges',
+          privileges: [
+            {
+              id: 'a_reserved_1',
+              privilege: {
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                ui: [],
+                app: [],
+              },
+            },
+          ],
+        },
+      };
+
+      const featureRegistry = new FeatureRegistry();
+      expect(() => featureRegistry.registerKibanaFeature(feature)).not.toThrowError();
+    });
+
+    it('does not allow features with both regular and reserved privileges to be hidden', () => {
+      const feature: KibanaFeatureConfig = {
+        id: 'test-feature',
+        name: 'Test Feature',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        privileges: {
+          all: {
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+          read: {
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+        hidden: true,
+        reserved: {
+          description: 'my reserved privileges',
+          privileges: [
+            {
+              id: 'a_reserved_1',
+              privilege: {
+                savedObject: {
+                  all: [],
+                  read: [],
+                },
+                ui: [],
+                app: [],
+              },
+            },
+          ],
+        },
+      };
+
+      const featureRegistry = new FeatureRegistry();
+      expect(() =>
+        featureRegistry.registerKibanaFeature(feature)
+      ).toThrowErrorMatchingInlineSnapshot(`"Feature test-feature cannot be hidden."`);
+    });
+
+    it('does not allow features with regular privileges to be hidden', () => {
+      const feature: KibanaFeatureConfig = {
+        id: 'test-feature',
+        name: 'Test Feature',
+        app: [],
+        category: { id: 'foo', label: 'foo' },
+        privileges: {
+          all: {
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+          read: {
+            savedObject: {
+              all: [],
+              read: [],
+            },
+            ui: [],
+          },
+        },
+        hidden: true,
+      };
+
+      const featureRegistry = new FeatureRegistry();
+      expect(() =>
+        featureRegistry.registerKibanaFeature(feature)
+      ).toThrowErrorMatchingInlineSnapshot(`"Feature test-feature cannot be hidden."`);
     });
 
     it('allows independent sub-feature privileges to register a minimumLicense', () => {

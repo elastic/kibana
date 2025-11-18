@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+import type { EuiFieldSearchProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiFieldSearch,
-  EuiFieldSearchProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPageHeader,
+  EuiScreenReaderOnly,
   EuiSpacer,
   EuiText,
   EuiTextColor,
@@ -27,10 +28,8 @@ import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../../../common/constants';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
 import { CloudPosturePage } from '../../components/cloud_posture_page';
 import { BenchmarksTable } from './benchmarks_table';
-import {
-  useCspBenchmarkIntegrationsV2,
-  UseCspBenchmarkIntegrationsProps,
-} from './use_csp_benchmark_integrations';
+import type { UseCspBenchmarkIntegrationsProps } from './use_csp_benchmark_integrations';
+import { useCspBenchmarkIntegrationsV2 } from './use_csp_benchmark_integrations';
 import { getBenchmarkCisName } from '../../../common/utils/helpers';
 import * as TEST_SUBJ from './test_subjects';
 import {
@@ -115,6 +114,35 @@ const TotalIntegrationsCount = ({
   </EuiText>
 );
 
+const SearchAnnouncement = ({
+  resultCount,
+  searchValue,
+}: {
+  resultCount: number;
+  searchValue: string;
+}) => {
+  const liveRegionRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (liveRegionRef.current) {
+      liveRegionRef.current.textContent = searchValue
+        ? i18n.translate('xpack.csp.benchmarks.searchResultAnnouncementWithQuery', {
+            defaultMessage: '{resultCount} benchmark table results found for "{searchValue}"',
+            values: { resultCount, searchValue },
+          })
+        : i18n.translate('xpack.csp.benchmarks.searchResultAnnouncementWithoutQuery', {
+            defaultMessage: '{resultCount} total benchmarks',
+            values: { resultCount },
+          });
+    }
+  }, [resultCount, searchValue]);
+
+  return (
+    <EuiScreenReaderOnly>
+      <div aria-live="polite" aria-atomic="true" ref={liveRegionRef} role="status" />
+    </EuiScreenReaderOnly>
+  );
+};
 const BenchmarkSearchField = ({
   onSearch,
   isLoading,
@@ -201,6 +229,7 @@ export const Benchmarks = () => {
             totalCount={totalItemCount}
           />
           <EuiSpacer size="s" />
+          <SearchAnnouncement resultCount={benchmarkResult.length} searchValue={query.name} />
           <BenchmarksTable
             benchmarks={benchmarkResult}
             data-test-subj={TEST_SUBJ.BENCHMARKS_TABLE_DATA_TEST_SUBJ}

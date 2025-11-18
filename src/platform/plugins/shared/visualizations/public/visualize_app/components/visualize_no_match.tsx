@@ -14,8 +14,8 @@ import { EuiCallOut, EuiLink } from '@elastic/eui';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { VisualizeServices } from '../types';
-import { VisualizeConstants } from '../../../common/constants';
+import { VisualizeConstants } from '@kbn/visualizations-common';
+import type { VisualizeServices } from '../types';
 
 let bannerId: string;
 
@@ -37,7 +37,7 @@ export const VisualizeNoMatch = () => {
       bannerId = services.overlays.banners.replace(
         bannerId,
         toMountPoint(
-          <EuiCallOut color="warning" iconType="info" title={bannerMessage}>
+          <EuiCallOut announceOnMount color="warning" iconType="info" title={bannerMessage}>
             <p>
               <FormattedMessage
                 id="visualizations.noMatchRoute.bannerText"

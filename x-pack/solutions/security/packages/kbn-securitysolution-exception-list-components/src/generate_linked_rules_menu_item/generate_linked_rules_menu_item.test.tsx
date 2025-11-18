@@ -7,7 +7,7 @@
 
 import { render } from '@testing-library/react';
 import { EuiThemeProvider } from '@elastic/eui';
-import { ReactElement, ElementType } from 'react';
+import type { ReactElement, ElementType } from 'react';
 import { generateLinkedRulesMenuItems } from '.';
 import { rules } from '../mocks/rule_references.mock';
 import {

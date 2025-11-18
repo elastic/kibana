@@ -43,6 +43,7 @@ import {
   stepInstallTransforms,
   stepDeletePreviousPipelines,
   stepSaveArchiveEntries,
+  stepSaveKnowledgeBase,
   stepResolveKibanaPromise,
   stepSaveSystemObject,
   updateLatestExecutedState,
@@ -54,10 +55,13 @@ import {
   cleanupIndexTemplatePipelinesStep,
   cleanupTransformsStep,
   cleanupArchiveEntriesStep,
+  cleanupKnowledgeBaseStep,
   stepInstallKibanaAssetsWithStreaming,
+  stepInstallPrecheck,
 } from './steps';
 import type { StateMachineDefinition, StateMachineStates } from './state_machine';
 import { handleState } from './state_machine';
+import { stepCreateAlertingRules } from './steps/step_create_alerting_rules';
 
 export interface InstallContext extends StateContext<StateNames> {
   savedObjectsClient: SavedObjectsClientContract;
@@ -88,8 +92,13 @@ export interface InstallContext extends StateContext<StateNames> {
  */
 const regularStatesDefinition: StateMachineStates<StateNames> = {
   create_restart_installation: {
-    nextState: INSTALL_STATES.INSTALL_KIBANA_ASSETS,
+    nextState: INSTALL_STATES.INSTALL_PRECHECK,
     onTransition: stepCreateRestartInstallation,
+    onPostTransition: updateLatestExecutedState,
+  },
+  install_precheck: {
+    onTransition: stepInstallPrecheck,
+    nextState: INSTALL_STATES.INSTALL_KIBANA_ASSETS,
     onPostTransition: updateLatestExecutedState,
   },
   install_kibana_assets: {
@@ -140,11 +149,23 @@ const regularStatesDefinition: StateMachineStates<StateNames> = {
   save_archive_entries_from_assets_map: {
     onPreTransition: cleanupArchiveEntriesStep,
     onTransition: stepSaveArchiveEntries,
+    nextState: INSTALL_STATES.SAVE_KNOWLEDGE_BASE,
+    onPostTransition: updateLatestExecutedState,
+  },
+  save_knowledge_base: {
+    onPreTransition: cleanupKnowledgeBaseStep,
+    onTransition: stepSaveKnowledgeBase,
     nextState: INSTALL_STATES.RESOLVE_KIBANA_PROMISE,
     onPostTransition: updateLatestExecutedState,
+    isAsync: true, // Knowledge base indexing runs in background
   },
   resolve_kibana_promise: {
     onTransition: stepResolveKibanaPromise,
+    nextState: INSTALL_STATES.CREATE_ALERTING_RULES,
+    onPostTransition: updateLatestExecutedState,
+  },
+  create_alerting_rules: {
+    onTransition: stepCreateAlertingRules,
     nextState: INSTALL_STATES.UPDATE_SO,
     onPostTransition: updateLatestExecutedState,
   },
@@ -169,6 +190,12 @@ const streamingStatesDefinition: StateMachineStates<string> = {
   save_archive_entries_from_assets_map: {
     onPreTransition: cleanupArchiveEntriesStep,
     onTransition: stepSaveArchiveEntries,
+    nextState: INSTALL_STATES.SAVE_KNOWLEDGE_BASE,
+    onPostTransition: updateLatestExecutedState,
+  },
+  save_knowledge_base: {
+    onPreTransition: cleanupKnowledgeBaseStep,
+    onTransition: stepSaveKnowledgeBase,
     nextState: INSTALL_STATES.UPDATE_SO,
     onPostTransition: updateLatestExecutedState,
   },

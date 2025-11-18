@@ -6,25 +6,32 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import {
+import type {
   EuiDataGridColumnSortingConfig,
+  EuiDataGridCellProps,
+  EuiDataGridControlColumn,
+  EuiDataGridToolBarVisibilityOptions,
+} from '@elastic/eui';
+import {
   EuiSearchBar,
   EuiScreenReaderOnly,
   EuiDataGrid,
-  EuiDataGridCellProps,
-  EuiDataGridControlColumn,
   EuiIconTip,
   EuiFlexGroup,
+  EuiCheckbox,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
+import type { Streams } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
-import { TABLE_COLUMNS, EMPTY_CONTENT, TableColumnName } from './constants';
+import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
+import type { TableColumnName } from './constants';
+import { TABLE_COLUMNS, EMPTY_CONTENT } from './constants';
 import { FieldActionsCell } from './field_actions';
 import { FieldParent } from './field_parent';
 import { FieldStatusBadge } from './field_status';
-import { TControls } from './hooks/use_controls';
-import { SchemaField } from './types';
+import { FieldResultBadge } from './field_result';
+import type { TControls } from './hooks/use_controls';
+import type { SchemaField, SchemaEditorField } from './types';
 import { FieldType } from './field_type';
 
 export function FieldsTable({
@@ -35,6 +42,8 @@ export function FieldsTable({
   stream,
   withTableActions,
   withToolbar,
+  selectedFields,
+  onFieldSelection,
 }: {
   isLoading: boolean;
   controls: TControls;
@@ -42,7 +51,9 @@ export function FieldsTable({
   fields: SchemaField[];
   stream: Streams.ingest.all.Definition;
   withTableActions: boolean;
-  withToolbar: boolean;
+  withToolbar: boolean | EuiDataGridToolBarVisibilityOptions;
+  selectedFields: string[];
+  onFieldSelection: (names: string[], checked: boolean) => void;
 }) {
   // Column visibility
   const [visibleColumns, setVisibleColumns] = useState<string[]>(defaultColumns);
@@ -53,6 +64,19 @@ export function FieldsTable({
     () => filterFieldsByControls(fields, controls),
     [fields, controls]
   );
+
+  const leadingColumns = useMemo(() => {
+    if (!withTableActions) return undefined;
+
+    return [
+      createFieldSelectionCellRenderer(
+        filteredFields,
+        selectedFields,
+        onFieldSelection,
+        stream.name
+      ),
+    ];
+  }, [withTableActions, filteredFields, selectedFields, onFieldSelection, stream.name]);
 
   const trailingColumns = useMemo(() => {
     if (!withTableActions) return undefined;
@@ -89,11 +113,12 @@ export function FieldsTable({
       toolbarVisibility={withToolbar}
       rowCount={filteredFields.length}
       renderCellValue={RenderCellValue}
+      leadingControlColumns={leadingColumns}
       trailingControlColumns={trailingColumns}
       gridStyle={{
-        border: 'none',
-        rowHover: 'none',
-        header: 'underline',
+        border: 'all',
+        rowHover: 'highlight',
+        header: 'shade',
       }}
       inMemory={{ level: 'sorting' }}
     />
@@ -111,23 +136,34 @@ const createCellRenderer =
     const { parent, status } = field;
 
     if (columnId === 'type') {
+      // Prioritize showing esType if available and different from our supported type
+      if (field.esType && (!field.type || field.type === 'system')) {
+        return (
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+            {field.esType}
+            <EuiIconTip
+              content={i18n.translate(
+                'xpack.streams.streamDetailSchemaEditorFieldsTableTypeEsTypeTooltip',
+                {
+                  defaultMessage:
+                    'This field is not managed by Streams, but is defined in Elasticsearch. It can also be controlled via the underlying index template and component templates available in the "Advanced" tab.',
+                }
+              )}
+              position="right"
+            />
+          </EuiFlexGroup>
+        );
+      }
+
       if (!field.type) {
-        if (field.status === 'unmapped' && field.esType) {
-          return (
-            <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
-              {field.esType}
-              <EuiIconTip
-                content={i18n.translate(
-                  'xpack.streams.streamDetailSchemaEditorFieldsTableTypeEsTypeTooltip',
-                  {
-                    defaultMessage:
-                      'This field is not managed by Streams, but is defined in Elasticsearch. It can be controlled via the underlying index template and component templates available in the "Advanced" tab.',
-                  }
-                )}
-                position="right"
-              />
-            </EuiFlexGroup>
-          );
+        // For fields with undefined type (unmanaged fields), show "dynamic" only for classic streams
+        if (field.status === 'unmapped') {
+          const streamType = getStreamTypeFromDefinition(stream);
+          if (streamType === 'classic') {
+            return <>{'<dynamic>'}</>;
+          }
+
+          return EMPTY_CONTENT;
         }
         return EMPTY_CONTENT;
       }
@@ -139,7 +175,23 @@ const createCellRenderer =
     }
 
     if (columnId === 'status') {
-      return <FieldStatusBadge status={status} />;
+      const editorField = field as SchemaEditorField;
+      const streamType = getStreamTypeFromDefinition(stream);
+      return (
+        <FieldStatusBadge
+          status={status}
+          uncommitted={editorField.uncommitted}
+          streamType={streamType}
+        />
+      );
+    }
+
+    if (columnId === 'result') {
+      const editorField = field as SchemaEditorField;
+      if (editorField.result) {
+        return <FieldResultBadge result={editorField.result} />;
+      }
+      return EMPTY_CONTENT;
     }
 
     return <>{field[columnId as keyof SchemaField] || EMPTY_CONTENT}</>;
@@ -166,6 +218,52 @@ const createFieldActionsCellRenderer = (fields: SchemaField[]): EuiDataGridContr
   },
 });
 
+const createFieldSelectionCellRenderer = (
+  fields: SchemaField[],
+  selectedFields: string[],
+  onChange: (names: string[], checked: boolean) => void,
+  streamName: string
+): EuiDataGridControlColumn => ({
+  id: 'field-selection',
+  width: 40,
+  headerCellRender: () => {
+    const selectableFields = fields.filter((field) => isSelectableField(streamName, field));
+    if (selectableFields.length === 0) {
+      return;
+    }
+
+    return (
+      <EuiCheckbox
+        id="selectAllFields"
+        onChange={(e) => {
+          onChange(
+            selectableFields.map((field) => field.name),
+            e.target.checked
+          );
+        }}
+        checked={selectableFields.every((field) => selectedFields.includes(field.name))}
+        indeterminate={
+          selectedFields.length > 0 &&
+          !selectableFields.every((field) => selectedFields.includes(field.name))
+        }
+      />
+    );
+  },
+  rowCellRender: ({ rowIndex }) => {
+    const field = fields[rowIndex];
+
+    if (!isSelectableField(streamName, field)) return null;
+
+    return (
+      <EuiCheckbox
+        id={field.name}
+        onChange={(e) => onChange([field.name], e.target.checked)}
+        checked={selectedFields.includes(field.name)}
+      />
+    );
+  },
+});
+
 const filterFieldsByControls = (fields: SchemaField[], controls: TControls) => {
   if (!controls.query && isEmpty(controls.type) && isEmpty(controls.status)) {
     return fields;
@@ -183,4 +281,13 @@ const filterFieldsByControls = (fields: SchemaField[], controls: TControls) => {
   });
 
   return filteredByGroupsFields;
+};
+
+export const isSelectableField = (streamName: string, field: SchemaField) => {
+  return (
+    field.status !== 'inherited' &&
+    field.parent === streamName &&
+    !field.alias_for &&
+    field.type !== 'system'
+  );
 };

@@ -16,7 +16,7 @@ import {
 } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { Streams } from '@kbn/streams-schema';
+import { Streams, isRoot } from '@kbn/streams-schema';
 import { useStreamsAppRouter } from '../../../../hooks/use_streams_app_router';
 import { FieldParent } from '../field_parent';
 import { FieldStatusBadge } from '../field_status';
@@ -24,7 +24,7 @@ import { FieldFormFormat, typeSupportsFormat } from './field_form_format';
 import { FieldFormType } from './field_form_type';
 import { ChildrenAffectedCallout } from './children_affected_callout';
 import { EMPTY_CONTENT } from '../constants';
-import { SchemaField } from '../types';
+import type { SchemaField } from '../types';
 
 const title = i18n.translate('xpack.streams.streamDetailSchemaEditorFieldSummaryTitle', {
   defaultMessage: 'Field summary',
@@ -93,7 +93,7 @@ export const FieldSummary = (props: FieldSummaryProps) => {
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
-          ) : field.status === 'inherited' ? (
+          ) : field.status === 'inherited' && !isRoot(field.parent) ? (
             <EuiFlexItem grow={2}>
               <EuiFlexGroup justifyContent="flexEnd">
                 <EuiFlexItem grow={false}>
@@ -105,7 +105,7 @@ export const FieldSummary = (props: FieldSummaryProps) => {
                     href={router.link('/{key}/management/{tab}', {
                       path: {
                         key: field.parent,
-                        tab: 'schemaEditor',
+                        tab: 'schema',
                       },
                     })}
                     target="_blank"
@@ -176,7 +176,10 @@ export const FieldSummary = (props: FieldSummaryProps) => {
               </EuiFlexItem>
               <EuiFlexItem grow={2}>
                 {isEditing ? (
-                  <FieldFormFormat field={field} onChange={(format) => onChange({ format })} />
+                  <FieldFormFormat
+                    value={field.format}
+                    onChange={(format) => onChange({ format })}
+                  />
                 ) : (
                   `${field.format ?? EMPTY_CONTENT}`
                 )}

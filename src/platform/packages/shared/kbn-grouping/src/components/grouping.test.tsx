@@ -10,16 +10,17 @@
 import { fireEvent, render, within, screen } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { Grouping, GroupingProps } from './grouping';
+import type { GroupingProps } from './grouping';
+import { Grouping } from './grouping';
 import { createGroupFilter, getNullGroupFilter } from '../containers/query/helpers';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { getTelemetryEvent } from '../telemetry/const';
 
 import { mockGroupingProps, host1Name, host2Name } from './grouping.mock';
-import { SetRequired } from 'type-fest';
+import type { SetRequired } from 'type-fest';
 
 const renderChildComponent = jest.fn();
-const takeActionItems = jest.fn();
+const takeActionItems = jest.fn(mockGroupingProps.takeActionItems);
 const mockTracker = jest.fn();
 
 const testProps: SetRequired<GroupingProps<{}>, 'data'> = {
@@ -130,7 +131,7 @@ describe('Grouping', () => {
   });
 
   it('Renders a null group and passes the correct filter to take actions and child component', () => {
-    takeActionItems.mockReturnValue([<span />]);
+    takeActionItems.mockReturnValue({ items: [{ key: '1', name: '1' }], panels: [] });
     render(
       <I18nProvider>
         <Grouping {...testProps} />

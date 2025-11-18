@@ -8,12 +8,16 @@
  */
 
 import _, { merge } from 'lodash';
-import globby from 'globby';
+import { globSync } from 'fs';
 import { basename, join } from 'path';
 import normalizePath from 'normalize-path';
 import { readFileSync } from 'fs';
 
-import { EndpointDefinition, EndpointDescription, EndpointsAvailability } from '../../common/types';
+import type {
+  EndpointDefinition,
+  EndpointDescription,
+  EndpointsAvailability,
+} from '../../common/types';
 import {
   AUTOCOMPLETE_DEFINITIONS_FOLDER,
   GENERATED_SUBFOLDER,
@@ -104,15 +108,15 @@ export class SpecDefinitionsService {
 
   private loadJSONDefinitionsFiles() {
     // we need to normalize paths otherwise they don't work on windows, see https://github.com/elastic/kibana/issues/151032
-    const generatedFiles = globby.sync(
+    const generatedFiles = globSync(
       normalizePath(join(AUTOCOMPLETE_DEFINITIONS_FOLDER, GENERATED_SUBFOLDER, '*.json'))
-    );
-    const overrideFiles = globby.sync(
+    ).map((p) => normalizePath(p));
+    const overrideFiles = globSync(
       normalizePath(join(AUTOCOMPLETE_DEFINITIONS_FOLDER, OVERRIDES_SUBFOLDER, '*.json'))
-    );
-    const manualFiles = globby.sync(
+    ).map((p) => normalizePath(p));
+    const manualFiles = globSync(
       normalizePath(join(AUTOCOMPLETE_DEFINITIONS_FOLDER, MANUAL_SUBFOLDER, '*.json'))
-    );
+    ).map((p) => normalizePath(p));
 
     // definitions files contain only 1 definition per endpoint name { "endpointName": { endpointDescription }}
     // all endpoints need to be merged into 1 object with endpoint names as keys and endpoint definitions as values

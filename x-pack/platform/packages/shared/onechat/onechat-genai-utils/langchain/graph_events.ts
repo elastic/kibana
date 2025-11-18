@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
-import {
-  ChatEventType,
+import type { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
+import type {
   MessageChunkEvent,
   MessageCompleteEvent,
   ReasoningEvent,
+  ThinkingCompleteEvent,
   ToolCallEvent,
+  BrowserToolCallEvent,
   ToolResultEvent,
 } from '@kbn/onechat-common';
-import { ToolResult } from '@kbn/onechat-common/tools/tool_result';
+import { ChatEventType } from '@kbn/onechat-common';
+import type { ToolResult } from '@kbn/onechat-common/tools/tool_result';
 
 export const isStreamEvent = (input: any): input is LangchainStreamEvent => {
   return 'event' in input && 'name' in input;
@@ -47,6 +49,21 @@ export const createToolCallEvent = (data: {
 }): ToolCallEvent => {
   return {
     type: ChatEventType.toolCall,
+    data: {
+      tool_call_id: data.toolCallId,
+      tool_id: data.toolId,
+      params: data.params,
+    },
+  };
+};
+
+export const createBrowserToolCallEvent = (data: {
+  toolCallId: string;
+  toolId: string;
+  params: Record<string, unknown>;
+}): BrowserToolCallEvent => {
+  return {
+    type: ChatEventType.browserToolCall,
     data: {
       tool_call_id: data.toolCallId,
       tool_id: data.toolId,
@@ -96,11 +113,24 @@ export const createMessageEvent = (
   };
 };
 
-export const createReasoningEvent = (reasoning: string): ReasoningEvent => {
+export const createReasoningEvent = (
+  reasoning: string,
+  { transient }: { transient?: boolean } = {}
+): ReasoningEvent => {
   return {
     type: ChatEventType.reasoning,
     data: {
       reasoning,
+      transient,
+    },
+  };
+};
+
+export const createThinkingCompleteEvent = (timeToFirstToken: number): ThinkingCompleteEvent => {
+  return {
+    type: ChatEventType.thinkingComplete,
+    data: {
+      time_to_first_token: timeToFirstToken,
     },
   };
 };

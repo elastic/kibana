@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -12,9 +12,7 @@
     "@kbn/esql-editor",
     "@kbn/kibana-react-plugin",
     "@kbn/core",
-    "@kbn/expressions-plugin",
     "@kbn/data-views-plugin",
-    "@kbn/index-management-shared-types",
     "@kbn/i18n",
     "@kbn/config-schema",
     "@kbn/esql-utils",
@@ -23,7 +21,6 @@
     "@kbn/es-query",
     "@kbn/fields-metadata-plugin",
     "@kbn/usage-collection-plugin",
-    "@kbn/content-management-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/monaco",
     "@kbn/search-types",
@@ -35,7 +32,13 @@
     "@kbn/licensing-plugin",
     "@kbn/projects-solutions-groups",
     "@kbn/esql-ast",
-    "@kbn/presentation-util"
+    "@kbn/presentation-util",
+    "@kbn/content-management-plugin",
+    "@kbn/index-editor",
+    "@kbn/share-plugin",
+    "@kbn/field-formats-plugin",
+    "@kbn/file-upload-plugin",
+    "@kbn/discover-utils",
   ],
   "exclude": [
     "target/**/*",

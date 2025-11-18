@@ -8,5 +8,11 @@
 export const SLO_ID_FIELD = 'slo.id';
 export const SLO_REVISION_FIELD = 'slo.revision';
 export const SLO_INSTANCE_ID_FIELD = 'slo.instanceId';
+export const SLO_DATA_VIEW_ID_FIELD = 'slo.dataViewId';
 
-export const SLO_BURN_RATE_AAD_FIELDS = [SLO_ID_FIELD, SLO_REVISION_FIELD, SLO_INSTANCE_ID_FIELD];
+export const SLO_BURN_RATE_AAD_FIELDS = [
+  SLO_ID_FIELD,
+  SLO_REVISION_FIELD,
+  SLO_INSTANCE_ID_FIELD,
+  SLO_DATA_VIEW_ID_FIELD,
+];

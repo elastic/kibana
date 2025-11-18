@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   IlmExplainLifecycleLifecycleExplainManaged,
   IlmExplainLifecycleLifecycleExplainUnmanaged,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -31,6 +31,7 @@ const hot: IlmExplainLifecycleLifecycleExplainManaged = {
     version: 1,
     modified_date_in_millis: 1675536751205,
   },
+  skip: false,
 };
 
 const warm = {

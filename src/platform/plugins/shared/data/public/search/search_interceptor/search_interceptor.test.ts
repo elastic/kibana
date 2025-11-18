@@ -8,17 +8,15 @@
  */
 
 import type { MockedKeys } from '@kbn/utility-types-jest';
-import { CoreSetup, CoreStart, HttpFetchOptions, HttpHandler } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, HttpFetchOptions, HttpHandler } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import {
-  IEsSearchRequest,
-  IKibanaSearchRequest,
-  type IKibanaSearchResponse,
-} from '@kbn/search-types';
+import type { IEsSearchRequest, IKibanaSearchRequest } from '@kbn/search-types';
+import { type IKibanaSearchResponse } from '@kbn/search-types';
 import { SearchInterceptor } from './search_interceptor';
 import { AbortError } from '@kbn/kibana-utils-plugin/public';
 import { EsError, type IEsError } from '@kbn/search-errors';
-import { ISessionService, SearchSessionState } from '..';
+import type { ISessionService } from '..';
+import { SearchSessionState } from '..';
 
 import * as searchPhaseException from '../../../common/search/test_data/search_phase_execution_exception.json';
 import * as resourceNotFoundException from '../../../common/search/test_data/resource_not_found_exception.json';
@@ -29,12 +27,16 @@ import type { SearchServiceStartDependencies } from '../search_service';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
 
+import { SearchSessionIncompleteWarning } from './search_session_incomplete_warning';
+import { getMockSearchConfig } from '../../../config.mock';
+
 jest.mock('./create_request_hash', () => {
   const originalModule = jest.requireActual('./create_request_hash');
   return {
     ...originalModule,
     createRequestHash: jest.fn().mockImplementation((input) => {
-      return Promise.resolve(JSON.stringify(input));
+      const { preference, ...params } = input;
+      return JSON.stringify(params);
     }),
   };
 });
@@ -42,9 +44,7 @@ jest.mock('./create_request_hash', () => {
 jest.mock('./search_session_incomplete_warning', () => ({
   SearchSessionIncompleteWarning: jest.fn(),
 }));
-
-import { SearchSessionIncompleteWarning } from './search_session_incomplete_warning';
-import { getMockSearchConfig } from '../../../config.mock';
+const SearchSessionIncompleteWarningMock = jest.mocked(SearchSessionIncompleteWarning);
 
 let searchInterceptor: SearchInterceptor;
 
@@ -149,6 +149,7 @@ describe('SearchInterceptor', () => {
     error.mockClear();
     complete.mockClear();
     jest.clearAllTimers();
+    jest.clearAllMocks();
 
     const inspectorServiceMock = {
       open: () => {},
@@ -319,7 +320,14 @@ describe('SearchInterceptor', () => {
 
       mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
 
-      const response = searchInterceptor.search({}, { pollInterval: 0 });
+      const response = searchInterceptor.search(
+        {
+          params: {
+            body: { query: { match_all: {} } },
+          },
+        },
+        { pollInterval: 0 }
+      );
       response.subscribe({ next, error, complete });
 
       await timeTravel(10);
@@ -387,6 +395,18 @@ describe('SearchInterceptor', () => {
       `);
       expect(complete).toHaveBeenCalled();
       expect(error).not.toHaveBeenCalled();
+
+      // check that the request body wasn't included on the 2nd request
+      expect(mockCoreSetup.http.post).toHaveBeenCalledTimes(2);
+      const firstRequest = (
+        mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
+      )[1];
+      expect(JSON.parse(firstRequest?.body as string).params.body).toBeDefined();
+
+      const secondRequest = (
+        mockCoreSetup.http.post.mock.calls[1] as unknown as [string, HttpFetchOptions]
+      )[1];
+      expect(JSON.parse(secondRequest?.body as string).params.body).not.toBeDefined();
     });
 
     test('should abort on user abort', async () => {
@@ -735,6 +755,71 @@ describe('SearchInterceptor', () => {
       expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
     });
 
+    describe('when the search is already backgrounded', () => {
+      test('should NOT DELETE a running SAVED async search on async timeout', async () => {
+        sessionService.isCurrentSession.mockReturnValue(true);
+        sessionService.isSaving.mockReturnValue(true);
+
+        mockCoreSetup.http.post.mockResolvedValue(
+          getMockSearchResponse({
+            isPartial: true,
+            isRunning: true,
+            rawResponse: {},
+            id: '1',
+          })
+        );
+
+        const response = searchInterceptor.search({}, { pollInterval: 0 });
+        response.subscribe({ next, error });
+
+        await timeTravel(10);
+
+        expect(next).toHaveBeenCalled();
+        expect(error).not.toHaveBeenCalled();
+        expect(mockCoreSetup.http.post).toHaveBeenCalled();
+        expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
+
+        // Long enough to reach the timeout
+        await timeTravel(2000);
+
+        expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('when the search gets backgrounded during execution', () => {
+      test('should NOT DELETE a running SAVED async search on async timeout', async () => {
+        sessionService.isCurrentSession.mockReturnValue(true);
+        sessionService.isSaving.mockReturnValue(false);
+
+        mockCoreSetup.http.post.mockResolvedValue(
+          getMockSearchResponse({
+            isPartial: true,
+            isRunning: true,
+            rawResponse: {},
+            id: '1',
+          })
+        );
+
+        const response = searchInterceptor.search({}, { pollInterval: 0 });
+        response.subscribe({ next, error });
+
+        // We emit a new state to clear the timeout
+        sessionState$.next(SearchSessionState.BackgroundLoading);
+
+        await timeTravel(10);
+
+        expect(next).toHaveBeenCalled();
+        expect(error).not.toHaveBeenCalled();
+        expect(mockCoreSetup.http.post).toHaveBeenCalled();
+        expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
+
+        // Long enough to reach the timeout
+        await timeTravel(2000);
+
+        expect(mockCoreSetup.http.delete).not.toHaveBeenCalled();
+      });
+    });
+
     describe('Search session', () => {
       const setup = (
         opts: {
@@ -852,7 +937,7 @@ describe('SearchInterceptor', () => {
 
         await timeTravel(10);
 
-        expect(SearchSessionIncompleteWarning).toBeCalledTimes(0);
+        expect(SearchSessionIncompleteWarningMock).toBeCalledTimes(0);
       });
 
       test('should not show warning if a search outside of session is running', async () => {
@@ -887,57 +972,125 @@ describe('SearchInterceptor', () => {
 
         await timeTravel(10);
 
-        expect(SearchSessionIncompleteWarning).toBeCalledTimes(0);
+        expect(SearchSessionIncompleteWarningMock).toBeCalledTimes(0);
       });
 
-      test('should show warning once if a search is not available during restore', async () => {
-        setup({
-          isRestore: true,
-          isStored: true,
-          sessionId: '123',
-        });
+      describe('when background search is disabled', () => {
+        test('should show warning once if a search is not available during restore', async () => {
+          mockCoreStart.featureFlags.getBooleanValue.mockReturnValue(false);
 
-        const responses = [
-          {
-            time: 10,
-            value: getMockSearchResponse({
-              isPartial: false,
-              isRunning: false,
-              isRestored: false,
-              id: '1',
-              rawResponse: {
-                took: 1,
-              },
+          setup({
+            isRestore: true,
+            isStored: true,
+            sessionId: '123',
+          });
+
+          const responses = [
+            {
+              time: 10,
+              value: getMockSearchResponse({
+                isPartial: false,
+                isRunning: false,
+                isRestored: false,
+                id: '1',
+                rawResponse: {
+                  took: 1,
+                },
+              }),
+            },
+          ];
+          mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
+
+          searchInterceptor
+            .search(
+              {},
+              {
+                sessionId: '123',
+              }
+            )
+            .subscribe({ next, error, complete });
+
+          await timeTravel(10);
+
+          expect(SearchSessionIncompleteWarningMock).toHaveBeenCalledTimes(1);
+          expect(mockCoreSetup.notifications.toasts.addWarning).toHaveBeenCalledWith(
+            expect.objectContaining({
+              title: 'Your background search is still running',
             }),
-          },
-        ];
-        mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
+            expect.anything()
+          );
 
-        searchInterceptor
-          .search(
-            {},
+          searchInterceptor
+            .search(
+              {},
+              {
+                sessionId: '123',
+              }
+            )
+            .subscribe({ next, error, complete });
+
+          await timeTravel(10);
+
+          expect(SearchSessionIncompleteWarningMock).toHaveBeenCalledTimes(1);
+        });
+      });
+
+      describe('when background search is enabled', () => {
+        test('should show warning once if a search is not available during restore', async () => {
+          setup({
+            isRestore: true,
+            isStored: true,
+            sessionId: '123',
+          });
+
+          const responses = [
             {
-              sessionId: '123',
-            }
-          )
-          .subscribe({ next, error, complete });
+              time: 10,
+              value: getMockSearchResponse({
+                isPartial: false,
+                isRunning: false,
+                isRestored: false,
+                id: '1',
+                rawResponse: {
+                  took: 1,
+                },
+              }),
+            },
+          ];
+          mockCoreSetup.http.post.mockImplementation(getHttpMock(responses));
 
-        await timeTravel(10);
+          searchInterceptor
+            .search(
+              {},
+              {
+                sessionId: '123',
+              }
+            )
+            .subscribe({ next, error, complete });
 
-        expect(SearchSessionIncompleteWarning).toBeCalledTimes(1);
+          await timeTravel(10);
 
-        searchInterceptor
-          .search(
-            {},
-            {
-              sessionId: '123',
-            }
-          )
-          .subscribe({ next, error, complete });
+          expect(SearchSessionIncompleteWarningMock).toHaveBeenCalledTimes(1);
+          expect(mockCoreSetup.notifications.toasts.addWarning).toHaveBeenCalledWith(
+            expect.objectContaining({
+              title: 'Your background search is still running',
+            }),
+            expect.anything()
+          );
 
-        await timeTravel(10);
+          searchInterceptor
+            .search(
+              {},
+              {
+                sessionId: '123',
+              }
+            )
+            .subscribe({ next, error, complete });
 
-        expect(SearchSessionIncompleteWarning).toBeCalledTimes(1);
+          await timeTravel(10);
+
+          expect(SearchSessionIncompleteWarningMock).toHaveBeenCalledTimes(1);
+        });
       });
     });
 

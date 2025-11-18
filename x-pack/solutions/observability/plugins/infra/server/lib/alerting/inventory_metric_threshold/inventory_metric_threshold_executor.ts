@@ -13,6 +13,7 @@ import {
   ALERT_EVALUATION_VALUES,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_GROUPING,
+  ALERT_INDEX_PATTERN,
 } from '@kbn/rule-data-utils';
 import { first, get } from 'lodash';
 import type {
@@ -105,7 +106,7 @@ export const createInventoryMetricThresholdExecutor =
 
     const startTime = Date.now();
 
-    const { criteria, filterQuery, sourceId = 'default', nodeType, alertOnNoData } = params;
+    const { criteria, filterQuery, sourceId = 'default', nodeType, alertOnNoData, schema } = params;
 
     if (criteria.length === 0) throw new Error('Cannot execute an alert with 0 conditions');
 
@@ -157,6 +158,7 @@ export const createInventoryMetricThresholdExecutor =
               timestamp: indexedStartedAt,
               assetDetailsLocator,
               inventoryLocator,
+              schema,
             }),
           },
         });
@@ -196,6 +198,7 @@ export const createInventoryMetricThresholdExecutor =
           logQueryFields,
           nodeType,
           source,
+          schema,
         })
       )
     );
@@ -310,15 +313,21 @@ export const createInventoryMetricThresholdExecutor =
             hostName: additionalContext?.host?.name,
             assetDetailsLocator,
             inventoryLocator,
+            schema,
           }),
           ...additionalContext,
         };
+
+        const {
+          configuration: { metricAlias },
+        } = source;
 
         const payload = {
           [ALERT_REASON]: reason,
           [ALERT_EVALUATION_VALUES]: evaluationValues,
           [ALERT_EVALUATION_THRESHOLD]: thresholds,
           [ALERT_GROUPING]: grouping,
+          [ALERT_INDEX_PATTERN]: metricAlias,
           ...flattenAdditionalContext(additionalContext),
         };
 
@@ -356,6 +365,7 @@ export const createInventoryMetricThresholdExecutor =
           hostName: additionalContext?.host?.name,
           assetDetailsLocator,
           inventoryLocator,
+          schema,
         }),
         reason: alertHits?.[ALERT_REASON],
         originalAlertState: translateActionGroupToAlertState(originalActionGroup),

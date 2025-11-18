@@ -10,6 +10,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import type {
   IndicesGetDataStreamResponse,
   IndicesDataStreamIndex,
+  IndicesDataStream,
 } from '@elastic/elasticsearch/lib/api/types';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { ReplaySubject, Subject, of } from 'rxjs';
@@ -81,10 +82,7 @@ interface EsError extends Error {
 const GetAliasResponse = {
   '.internal.alerts-test.alerts-default-000001': {
     aliases: {
-      alias_1: {
-        is_hidden: true,
-      },
-      alias_2: {
+      '.alerts-test.alerts-default': {
         is_hidden: true,
       },
     },
@@ -104,7 +102,7 @@ const GetDataStreamResponse: IndicesGetDataStreamResponse = {
       next_generation_managed_by: 'Index Lifecycle Management',
       prefer_ilm: false,
       rollover_on_write: false,
-    },
+    } as Partial<IndicesDataStream> as IndicesDataStream,
   ],
 };
 
@@ -539,15 +537,9 @@ describe('Alerts Service', () => {
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
             getIndexTemplatePutBody({ useDataStream: useDataStreamForAlerts })
           );
-          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
-          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
-          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
+          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(1);
 
           if (useDataStreamForAlerts) {
             expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
@@ -556,20 +548,13 @@ describe('Alerts Service', () => {
               name: '.alerts-test.alerts-default',
             });
           } else {
-            expect(clusterClient.indices.create).toHaveBeenCalledWith({
-              index: '.internal.alerts-test.alerts-default-000001',
-              aliases: {
-                '.alerts-test.alerts-default': {
-                  is_write_index: true,
-                },
-              },
-            });
+            expect(clusterClient.indices.create).not.toHaveBeenCalled();
             expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({
               index: [
                 '.internal.alerts-test.alerts-default-*',
                 `.reindexed-v8-internal.alerts-test.alerts-default-*`,
               ],
-              name: '.alerts-test.alerts-*',
+              name: '.alerts-test.alerts-default',
             });
           }
         });
@@ -603,15 +588,9 @@ describe('Alerts Service', () => {
               useDataStream: useDataStreamForAlerts,
             })
           );
-          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
-          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
-          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
+          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(1);
 
           if (useDataStreamForAlerts) {
             expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
@@ -620,20 +599,13 @@ describe('Alerts Service', () => {
               name: '.alerts-test.alerts-default',
             });
           } else {
-            expect(clusterClient.indices.create).toHaveBeenCalledWith({
-              index: '.internal.alerts-test.alerts-default-000001',
-              aliases: {
-                '.alerts-test.alerts-default': {
-                  is_write_index: true,
-                },
-              },
-            });
+            expect(clusterClient.indices.create).not.toHaveBeenCalled();
             expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({
               index: [
                 '.internal.alerts-test.alerts-default-*',
                 `.reindexed-v8-internal.alerts-test.alerts-default-*`,
               ],
-              name: '.alerts-test.alerts-*',
+              name: '.alerts-test.alerts-default',
             });
           }
         });
@@ -664,15 +636,9 @@ describe('Alerts Service', () => {
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(
             getIndexTemplatePutBody({ useEcs: true, useDataStream: useDataStreamForAlerts })
           );
-          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
-          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
-          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
+          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(1);
           if (useDataStreamForAlerts) {
             expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
             expect(clusterClient.indices.getDataStream).toHaveBeenNthCalledWith(1, {
@@ -680,20 +646,13 @@ describe('Alerts Service', () => {
               name: '.alerts-test.alerts-default',
             });
           } else {
-            expect(clusterClient.indices.create).toHaveBeenCalledWith({
-              index: '.internal.alerts-test.alerts-default-000001',
-              aliases: {
-                '.alerts-test.alerts-default': {
-                  is_write_index: true,
-                },
-              },
-            });
+            expect(clusterClient.indices.create).not.toHaveBeenCalled();
             expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({
               index: [
                 '.internal.alerts-test.alerts-default-*',
                 `.reindexed-v8-internal.alerts-test.alerts-default-*`,
               ],
-              name: '.alerts-test.alerts-*',
+              name: '.alerts-test.alerts-default',
             });
           }
         });
@@ -753,35 +712,23 @@ describe('Alerts Service', () => {
               name: '.alerts-test.alerts-default',
             });
           } else {
-            expect(clusterClient.indices.create).toHaveBeenNthCalledWith(1, {
-              index: '.internal.alerts-test.alerts-default-000001',
-              aliases: {
-                '.alerts-test.alerts-default': {
-                  is_write_index: true,
-                },
-              },
-            });
+            expect(clusterClient.indices.create).not.toHaveBeenCalled();
             expect(clusterClient.indices.getAlias).toHaveBeenNthCalledWith(1, {
               index: [
                 '.internal.alerts-test.alerts-default-*',
                 `.reindexed-v8-internal.alerts-test.alerts-default-*`,
               ],
-              name: '.alerts-test.alerts-*',
+              name: '.alerts-test.alerts-default',
             });
           }
-          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
-          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
-          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
+          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(1);
 
           clusterClient.indices.getDataStream.mockImplementationOnce(async () => ({
             data_streams: [],
           }));
+          clusterClient.indices.getAlias.mockImplementationOnce(async () => ({}));
 
           await retryUntil(
             'context in namespace initialized',
@@ -800,15 +747,9 @@ describe('Alerts Service', () => {
               useDataStream: useDataStreamForAlerts,
             })
           );
-          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 4
-          );
-          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 4
-          );
-          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 4
-          );
+          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(1);
           if (useDataStreamForAlerts) {
             expect(clusterClient.indices.createDataStream).toHaveBeenNthCalledWith(1, {
               name: '.alerts-test.alerts-another-namespace',
@@ -818,11 +759,12 @@ describe('Alerts Service', () => {
               name: '.alerts-test.alerts-another-namespace',
             });
           } else {
-            expect(clusterClient.indices.create).toHaveBeenNthCalledWith(2, {
+            expect(clusterClient.indices.create).toHaveBeenNthCalledWith(1, {
               index: '.internal.alerts-test.alerts-another-namespace-000001',
               aliases: {
                 '.alerts-test.alerts-another-namespace': {
                   is_write_index: true,
+                  is_hidden: true,
                 },
               },
             });
@@ -831,7 +773,7 @@ describe('Alerts Service', () => {
                 '.internal.alerts-test.alerts-another-namespace-*',
                 '.reindexed-v8-internal.alerts-test.alerts-another-namespace-*',
               ],
-              name: '.alerts-test.alerts-*',
+              name: '.alerts-test.alerts-another-namespace',
             });
           }
         });
@@ -868,19 +810,12 @@ describe('Alerts Service', () => {
               '.internal.alerts-test.alerts-default-*',
               '.reindexed-v8-internal.alerts-test.alerts-default-*',
             ],
-            name: '.alerts-test.alerts-*',
+            name: '.alerts-test.alerts-default',
           });
-          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(2);
-          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(2);
-          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(2);
-          expect(clusterClient.indices.create).toHaveBeenCalledWith({
-            index: '.internal.alerts-test.alerts-default-000001',
-            aliases: {
-              '.alerts-test.alerts-default': {
-                is_write_index: true,
-              },
-            },
-          });
+          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.create).not.toHaveBeenCalled();
         });
 
         test('should not install component template for context if fieldMap is empty', async () => {
@@ -953,38 +888,25 @@ describe('Alerts Service', () => {
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledWith(template);
 
           if (useDataStreamForAlerts) {
-            expect(clusterClient.indices.createDataStream).not.toHaveBeenCalledWith({});
+            expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
             expect(clusterClient.indices.getDataStream).toHaveBeenCalledWith({
               expand_wildcards: 'all',
               name: '.alerts-empty.alerts-default',
             });
           } else {
-            expect(clusterClient.indices.create).toHaveBeenCalledWith({
-              index: '.internal.alerts-empty.alerts-default-000001',
-              aliases: {
-                '.alerts-empty.alerts-default': {
-                  is_write_index: true,
-                },
-              },
-            });
+            expect(clusterClient.indices.create).not.toHaveBeenCalled();
             expect(clusterClient.indices.getAlias).toHaveBeenCalledWith({
               index: [
                 '.internal.alerts-empty.alerts-default-*',
                 '.reindexed-v8-internal.alerts-empty.alerts-default-*',
               ],
-              name: '.alerts-empty.alerts-*',
+              name: '.alerts-empty.alerts-default',
             });
           }
 
-          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
-          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
-          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 1 : 2
-          );
+          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalledTimes(1);
+          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(1);
         });
 
         test('should skip initialization if context already exists', async () => {
@@ -1061,7 +983,7 @@ describe('Alerts Service', () => {
             expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
             expect(clusterClient.indices.getDataStream).toHaveBeenCalled();
           } else {
-            expect(clusterClient.indices.create).toHaveBeenCalled();
+            expect(clusterClient.indices.create).not.toHaveBeenCalled();
             expect(clusterClient.indices.getAlias).toHaveBeenCalled();
           }
         });
@@ -1198,8 +1120,8 @@ describe('Alerts Service', () => {
           }
         });
 
-        test('should log error and set initialized to false if updating index settings for existing indices throws error', async () => {
-          clusterClient.indices.putSettings.mockRejectedValueOnce(new Error('fail'));
+        test('should log error but set initialized to true if updating index settings for existing indices throws error', async () => {
+          clusterClient.indices.putSettings.mockRejectedValue(new Error('fail'));
 
           alertsService.register(TestRegistrationContext);
           await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
@@ -1209,12 +1131,10 @@ describe('Alerts Service', () => {
               TestRegistrationContext.context,
               DEFAULT_NAMESPACE_STRING
             )
-          ).toEqual({ error: 'Failure during installation. fail', result: false });
+          ).toEqual({ result: true });
 
           expect(logger.error).toHaveBeenCalledWith(
-            useDataStreamForAlerts
-              ? `Failed to PUT index.mapping.total_fields.limit settings for .alerts-test.alerts-default: fail`
-              : `Failed to PUT index.mapping.total_fields.limit settings for alias_1: fail`
+            `Failed to PUT index.mapping.total_fields.limit settings for .alerts-test.alerts-default: fail`
           );
 
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
@@ -1224,7 +1144,7 @@ describe('Alerts Service', () => {
           expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putSettings).toHaveBeenCalled();
-          expect(clusterClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putMapping).not.toHaveBeenCalled();
 
           if (useDataStreamForAlerts) {
@@ -1248,7 +1168,7 @@ describe('Alerts Service', () => {
           expect(logger.error).toHaveBeenCalledWith(
             useDataStreamForAlerts
               ? `Ignored PUT mappings for .alerts-test.alerts-default; error generating simulated mappings: fail`
-              : `Ignored PUT mappings for alias_1; error generating simulated mappings: fail`
+              : `Ignored PUT mappings for .internal.alerts-test.alerts-default-000001; error generating simulated mappings: fail`
           );
 
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
@@ -1257,22 +1177,22 @@ describe('Alerts Service', () => {
           expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
           expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
-          expect(clusterClient.indices.putSettings).toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
           expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalled();
 
           if (useDataStreamForAlerts) {
             expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
             expect(clusterClient.indices.getDataStream).toHaveBeenCalled();
           } else {
-            expect(clusterClient.indices.create).toHaveBeenCalled();
+            expect(clusterClient.indices.create).not.toHaveBeenCalled();
             expect(clusterClient.indices.getAlias).toHaveBeenCalled();
 
             // this is called to update backing indices, so not used with data streams
-            expect(clusterClient.indices.putMapping).toHaveBeenCalled();
+            expect(clusterClient.indices.putMapping).not.toHaveBeenCalled();
           }
         });
 
-        test('should log error and set initialized to false if updating index mappings for existing indices throws error', async () => {
+        test('should log error but set initialized to true if updating index mappings for existing indices throws error', async () => {
           clusterClient.indices.putMapping.mockRejectedValueOnce(new Error('fail'));
 
           alertsService.register(TestRegistrationContext);
@@ -1282,15 +1202,11 @@ describe('Alerts Service', () => {
               TestRegistrationContext.context,
               DEFAULT_NAMESPACE_STRING
             )
-          ).toEqual({ error: 'Failure during installation. fail', result: false });
+          ).toEqual({ result: true });
 
-          if (useDataStreamForAlerts) {
-            expect(logger.error).toHaveBeenCalledWith(
-              `Failed to PUT mapping for .alerts-test.alerts-default: fail`
-            );
-          } else {
-            expect(logger.error).toHaveBeenCalledWith(`Failed to PUT mapping for alias_1: fail`);
-          }
+          expect(logger.error).toHaveBeenCalledWith(
+            `Failed to PUT mapping for .alerts-test.alerts-default: fail`
+          );
 
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
             useDataStreamForAlerts ? 0 : 1
@@ -1311,7 +1227,46 @@ describe('Alerts Service', () => {
           }
         });
 
-        test('does not updating settings or mappings if no existing concrete indices', async () => {
+        test('should log error and set initialized to false if updating index mappings and rolling over both fail', async () => {
+          clusterClient.indices.putMapping.mockRejectedValue(new Error('fail'));
+          clusterClient.indices.rollover.mockRejectedValue(new Error('rollover failure'));
+
+          alertsService.register(TestRegistrationContext);
+          await retryUntil('error logger called', async () => logger.error.mock.calls.length > 0);
+          expect(
+            await alertsService.getContextInitializationPromise(
+              TestRegistrationContext.context,
+              DEFAULT_NAMESPACE_STRING
+            )
+          ).toEqual({ error: 'Failure during installation. rollover failure', result: false });
+
+          expect(logger.error).toHaveBeenCalledWith(
+            `Failed to PUT mapping for .alerts-test.alerts-default: fail`
+          );
+          expect(logger.error).toHaveBeenCalledWith(
+            'Error initializing context test - Failure during installation. rollover failure'
+          );
+
+          expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
+            useDataStreamForAlerts ? 0 : 1
+          );
+          expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
+          expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).toHaveBeenCalled();
+          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalled();
+          expect(clusterClient.indices.putMapping).toHaveBeenCalled();
+
+          if (useDataStreamForAlerts) {
+            expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
+            expect(clusterClient.indices.getDataStream).toHaveBeenCalled();
+          } else {
+            expect(clusterClient.indices.create).not.toHaveBeenCalled();
+            expect(clusterClient.indices.getAlias).toHaveBeenCalled();
+          }
+        });
+
+        test('does not update settings or mappings if no existing concrete indices', async () => {
           clusterClient.indices.getAlias.mockImplementationOnce(async () => ({}));
           clusterClient.indices.getDataStream.mockImplementationOnce(async () => ({
             data_streams: [],
@@ -1371,7 +1326,7 @@ describe('Alerts Service', () => {
           ).toEqual({ result: true });
 
           expect(logger.debug).toHaveBeenCalledWith(
-            `Indices matching pattern .internal.alerts-test.alerts-default-* exist but none are set as the write index for alias .alerts-test.alerts-default`
+            `Indices for alias .alerts-test.alerts-default exist but none are set as the write index`
           );
 
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalled();
@@ -1431,6 +1386,8 @@ describe('Alerts Service', () => {
           // not applicable for data streams
           if (useDataStreamForAlerts) return;
 
+          clusterClient.indices.getAlias.mockImplementationOnce(async () => ({}));
+
           clusterClient.indices.create.mockRejectedValueOnce(new Error('fail'));
           clusterClient.indices.createDataStream.mockRejectedValueOnce(new Error('fail'));
 
@@ -1450,9 +1407,9 @@ describe('Alerts Service', () => {
           expect(clusterClient.cluster.putComponentTemplate).toHaveBeenCalledTimes(4);
           expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
-          expect(clusterClient.indices.putSettings).toHaveBeenCalled();
-          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalled();
-          expect(clusterClient.indices.putMapping).toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
+          expect(clusterClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
+          expect(clusterClient.indices.putMapping).not.toHaveBeenCalled();
 
           if (useDataStreamForAlerts) {
             expect(clusterClient.indices.createDataStream).toHaveBeenCalled();
@@ -1466,6 +1423,8 @@ describe('Alerts Service', () => {
         test('should not throw error if create concrete index throws resource_already_exists_exception error and write index already exists', async () => {
           // not applicable for data streams
           if (useDataStreamForAlerts) return;
+
+          clusterClient.indices.getAlias.mockImplementationOnce(async () => ({}));
 
           const error = new Error(`fail`) as EsError;
           error.meta = {
@@ -1495,9 +1454,9 @@ describe('Alerts Service', () => {
           expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.getAlias).toHaveBeenCalled();
-          expect(clusterClient.indices.putSettings).toHaveBeenCalled();
-          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalled();
-          expect(clusterClient.indices.putMapping).toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
+          expect(clusterClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
+          expect(clusterClient.indices.putMapping).not.toHaveBeenCalled();
           expect(clusterClient.indices.get).toHaveBeenCalled();
           expect(clusterClient.indices.create).toHaveBeenCalled();
         });
@@ -1505,6 +1464,8 @@ describe('Alerts Service', () => {
         test('should log error and set initialized to false if create concrete index throws resource_already_exists_exception error and write index does not already exists', async () => {
           // not applicable for data streams
           if (useDataStreamForAlerts) return;
+
+          clusterClient.indices.getAlias.mockImplementationOnce(async () => ({}));
 
           const error = new Error(`fail`) as EsError;
           error.meta = {
@@ -1541,9 +1502,9 @@ describe('Alerts Service', () => {
           expect(clusterClient.indices.simulateTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalled();
           expect(clusterClient.indices.getAlias).toHaveBeenCalled();
-          expect(clusterClient.indices.putSettings).toHaveBeenCalled();
-          expect(clusterClient.indices.simulateIndexTemplate).toHaveBeenCalled();
-          expect(clusterClient.indices.putMapping).toHaveBeenCalled();
+          expect(clusterClient.indices.putSettings).not.toHaveBeenCalled();
+          expect(clusterClient.indices.simulateIndexTemplate).not.toHaveBeenCalled();
+          expect(clusterClient.indices.putMapping).not.toHaveBeenCalled();
           expect(clusterClient.indices.get).toHaveBeenCalled();
           expect(clusterClient.indices.create).toHaveBeenCalled();
         });
@@ -1730,7 +1691,7 @@ describe('Alerts Service', () => {
             expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
             expect(clusterClient.indices.getDataStream).toHaveBeenCalled();
           } else {
-            expect(clusterClient.indices.create).toHaveBeenCalled();
+            expect(clusterClient.indices.create).not.toHaveBeenCalled();
             expect(clusterClient.indices.getAlias).toHaveBeenCalled();
           }
 
@@ -1864,7 +1825,7 @@ describe('Alerts Service', () => {
             expect(clusterClient.indices.createDataStream).not.toHaveBeenCalled();
             expect(clusterClient.indices.getDataStream).toHaveBeenCalled();
           } else {
-            expect(clusterClient.indices.create).toHaveBeenCalled();
+            expect(clusterClient.indices.create).not.toHaveBeenCalled();
             expect(clusterClient.indices.getAlias).toHaveBeenCalled();
           }
           expect(AlertsClient).toHaveBeenCalledWith({
@@ -2491,11 +2452,7 @@ describe('Alerts Service', () => {
             async () => (await getContextInitialized(alertsService)) === true
           );
 
-          if (useDataStreamForAlerts) {
-            expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(3);
-          } else {
-            expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(4);
-          }
+          expect(clusterClient.indices.putSettings).toHaveBeenCalledTimes(3);
         });
 
         test('should retry updating index mappings for existing indices for transient ES errors', async () => {
@@ -2524,15 +2481,14 @@ describe('Alerts Service', () => {
             async () => (await getContextInitialized(alertsService)) === true
           );
 
-          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(
-            useDataStreamForAlerts ? 3 : 4
-          );
+          expect(clusterClient.indices.putMapping).toHaveBeenCalledTimes(3);
         });
 
         test('should retry creating concrete index for transient ES errors', async () => {
           clusterClient.indices.getDataStream.mockImplementationOnce(async () => ({
             data_streams: [],
           }));
+          clusterClient.indices.getAlias.mockImplementationOnce(async () => ({}));
           clusterClient.indices.createDataStream
             .mockRejectedValueOnce(new EsErrors.ConnectionError('foo'))
             .mockRejectedValueOnce(new EsErrors.TimeoutError('timeout'))

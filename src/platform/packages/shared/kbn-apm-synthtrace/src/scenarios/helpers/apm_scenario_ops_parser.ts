@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApmSynthtracePipelineSchema, ApmSynthtracePipelines } from '@kbn/apm-synthtrace-client';
+import type { ApmSynthtracePipelines } from '@kbn/apm-synthtrace-client';
+import { ApmSynthtracePipelineSchema } from '@kbn/apm-synthtrace-client';
 
 const validPipelines: ApmSynthtracePipelines[] = [
   ApmSynthtracePipelineSchema.ApmToOtel,

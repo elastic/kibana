@@ -8,14 +8,16 @@
  */
 
 import { Position } from '@elastic/charts';
-import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
-import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/visualizations-plugin/common/constants';
+import { validateAccessor } from '@kbn/chart-expressions-common';
+import { prepareLogTable } from '@kbn/visualizations-common';
+import { DEFAULT_LEGEND_SIZE, LegendSize } from '@kbn/chart-expressions-common';
 import {
   LegendDisplay,
   type PartitionChartProps,
   type PartitionVisParams,
 } from '../types/expression_renderers';
-import { ChartTypes, WaffleVisExpressionFunctionDefinition } from '../types';
+import type { WaffleVisExpressionFunctionDefinition } from '../types';
+import { ChartTypes } from '../types';
 import {
   PARTITION_LABELS_FUNCTION,
   PARTITION_LABELS_VALUE,

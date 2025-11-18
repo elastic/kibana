@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useDispatch } from 'react-redux';
 import type { Filter, Query } from '@kbn/es-query';
-import type { DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import {
   type GroupOption,
   type GroupStatsItem,
@@ -56,10 +56,12 @@ export interface AlertsTableComponentProps {
      */
     renderer: GetGroupStats<AlertsGroupingAggregation>;
   };
+  // TODO remove when we remove the newDataViewPickerEnabled feature flag
   /**
    * DataViewSpec object to use internally to fetch the data
    */
   dataViewSpec: DataViewSpec;
+  // TODO this should probably not be optional anymore once we remove the newDataViewPickerEnabled feature flag
   /**
    * DataView object to use internally to fetch the data.
    */
@@ -186,6 +188,11 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
     [newDataViewPickerEnabled, props.dataView?.fields, props.dataViewSpec.fields]
   );
 
+  const multiValueFieldsToFlatten = useMemo(
+    () => fields.filter((field) => field.aggregatable).map((field) => field.name),
+    [fields]
+  );
+
   const runtimeMappings = useMemo(
     () =>
       newDataViewPickerEnabled
@@ -220,6 +227,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
       getGroupStats: groupStatsRenderer,
       onGroupToggle,
       unit: defaultUnit,
+      multiValueFields: multiValueFieldsToFlatten,
     },
     defaultGroupingOptions: groupingOptions,
     fields,
@@ -238,12 +246,11 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
       dispatch(
         updateGroups({
           activeGroups: selectedGroups,
-          options: groupingOptions,
           tableId: props.tableId,
         })
       );
     }
-  }, [groupingOptions, dispatch, props.tableId, selectedGroups]);
+  }, [dispatch, props.tableId, selectedGroups]);
 
   useEffect(() => {
     if (groupInRedux != null && !isNoneGroup(groupInRedux.activeGroups)) {
@@ -362,6 +369,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
           setPageIndex={(newIndex: number) => setPageVar(newIndex, level, 'index')}
           setPageSize={(newSize: number) => setPageVar(newSize, level, 'size')}
           signalIndexName={dataViewTitle}
+          multiValueFieldsToFlatten={multiValueFieldsToFlatten}
         />
       );
     },
@@ -375,6 +383,7 @@ const GroupedAlertsTableComponent: React.FC<AlertsTableComponentProps> = (props)
       runtimeMappings,
       selectedGroups,
       setPageVar,
+      multiValueFieldsToFlatten,
     ]
   );
 

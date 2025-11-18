@@ -10,8 +10,8 @@ import { random } from 'lodash';
 import expect from '@kbn/expect';
 import type { estypes } from '@elastic/elasticsearch';
 import { taskMappings as TaskManagerMapping } from '@kbn/task-manager-plugin/server/saved_objects/mappings';
-import { ConcreteTaskInstance, BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { ConcreteTaskInstance, BulkUpdateTaskResult } from '@kbn/task-manager-plugin/server';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const { properties: taskManagerIndexMapping } = TaskManagerMapping;
 
@@ -433,7 +433,7 @@ export default function ({ getService }: FtrProviderContext) {
         id: originalTask.id,
       });
 
-      expect(runSoonResult).to.eql({ id: originalTask.id });
+      expect(runSoonResult).to.eql({ id: originalTask.id, forced: false });
 
       await retry.try(async () => {
         expect(
@@ -600,7 +600,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       await provideParamsToTasksWaitingForParams(longRunningTask.id);
 
-      expect(await successfulRunSoonResult).to.eql({ id: longRunningTask.id });
+      expect(await successfulRunSoonResult).to.eql({ id: longRunningTask.id, forced: false });
     });
 
     it('should disable and reenable task and run it when runSoon = true', async () => {

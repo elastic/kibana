@@ -20,11 +20,11 @@ describe('useSavedDataViews', () => {
     jest.clearAllMocks();
   });
 
-  it('should filter out the default data view and transform the remaining ones', () => {
+  it('should not transform saved data views', () => {
     // Mock data to be returned by the selector
     const mockDataViews = [
       {
-        id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, // This should be filtered out
+        id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, // This should not be filtered out
         title: 'Default View',
         name: 'default_view',
       },
@@ -32,6 +32,7 @@ describe('useSavedDataViews', () => {
         id: DEFAULT_ALERT_DATA_VIEW_ID, // This should be filtered out
         title: 'Default Alert View',
         name: 'default_alert_view',
+        managed: true,
       },
       {
         id: 'custom-view-1',
@@ -48,22 +49,26 @@ describe('useSavedDataViews', () => {
     // Mock the useSelector to return our test data
     (useSelector as jest.Mock).mockReturnValue({
       dataViews: mockDataViews,
-      defaultDataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-      alertDataViewId: DEFAULT_ALERT_DATA_VIEW_ID,
     });
 
     // Render the hook
     const { result } = renderHook(() => useSavedDataViews());
 
-    // Expect the default view to be filtered out
-    expect(result.current).toHaveLength(2);
-    expect(
-      result.current.find((item) => item.id === DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID)
-    ).toBeUndefined();
-    expect(result.current.find((item) => item.id === DEFAULT_ALERT_DATA_VIEW_ID)).toBeUndefined();
+    expect(result.current).toHaveLength(4);
 
     // Expect the custom views to be correctly transformed
     expect(result.current).toEqual([
+      {
+        id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, // This should not be filtered out
+        title: 'Default View',
+        name: 'default_view',
+      },
+      {
+        id: DEFAULT_ALERT_DATA_VIEW_ID,
+        title: 'Default Alert View',
+        name: 'default_alert_view',
+        managed: true,
+      },
       {
         id: 'custom-view-1',
         title: 'Custom View 1',
@@ -81,7 +86,6 @@ describe('useSavedDataViews', () => {
     // Mock the useSelector to return an empty array
     (useSelector as jest.Mock).mockReturnValue({
       dataViews: [],
-      defaultDataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
     });
 
     // Render the hook
@@ -109,8 +113,6 @@ describe('useSavedDataViews', () => {
     // Mock the useSelector
     (useSelector as jest.Mock).mockReturnValue({
       dataViews: mockDataViews,
-      defaultDataViewId: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-      alertDataViewId: DEFAULT_ALERT_DATA_VIEW_ID,
     });
 
     // Render the hook

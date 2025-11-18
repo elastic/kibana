@@ -37,7 +37,6 @@ import { AlertContextMenu } from '../../../detections/components/alerts_table/ti
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import * as i18n from './translations';
 import { DEFAULT_ACTION_BUTTON_WIDTH, isAlert } from './helpers';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { useNavigateToAnalyzer } from '../../../flyout/document_details/shared/hooks/use_navigate_to_analyzer';
 import { useNavigateToSessionView } from '../../../flyout/document_details/shared/hooks/use_navigate_to_session_view';
 
@@ -46,25 +45,43 @@ const ActionsContainer = styled.div`
   display: flex;
 `;
 
-const emptyNotes: string[] = [];
+type ActionsComponentProps = Pick<
+  ActionProps,
+  | 'ariaRowindex'
+  | 'columnValues'
+  | 'disableExpandAction'
+  | 'disablePinAction'
+  | 'disableTimelineAction'
+  | 'ecsData'
+  | 'eventId'
+  | 'eventIdToNoteIds'
+  | 'isEventViewer'
+  | 'isEventPinned'
+  | 'onEventDetailsPanelOpened'
+  | 'onRuleChange'
+  | 'refetch'
+  | 'showNotes'
+  | 'timelineId'
+  | 'toggleShowNotes'
+>;
 
-const ActionsComponent: React.FC<ActionProps> = ({
+const ActionsComponent: React.FC<ActionsComponentProps> = ({
   ariaRowindex,
   columnValues,
   disableExpandAction = false,
+  disablePinAction = true,
+  disableTimelineAction = false,
   ecsData,
   eventId,
   eventIdToNoteIds,
-  isEventPinned = false,
   isEventViewer = false,
+  isEventPinned = false,
   onEventDetailsPanelOpened,
   onRuleChange,
+  refetch,
   showNotes,
   timelineId,
-  refetch,
   toggleShowNotes,
-  disablePinAction = true,
-  disableTimelineAction = false,
 }) => {
   const dispatch = useDispatch();
 
@@ -96,13 +113,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
     [eventIdToNoteIds, eventId, isEventPinned, onPinEvent, onUnPinEvent]
   );
   const eventType = getEventType(ecsData);
-
-  const isContextMenuDisabled = useMemo(() => {
-    return (
-      eventType !== 'signal' &&
-      !(ecsData.event?.kind?.includes('event') && ecsData.agent?.type?.includes('endpoint'))
-    );
-  }, [ecsData, eventType]);
 
   const { navigateToAnalyzer } = useNavigateToAnalyzer({
     isFlyoutOpen: false,
@@ -157,9 +167,6 @@ const ActionsComponent: React.FC<ActionProps> = ({
     onEventDetailsPanelOpened();
   }, [onEventDetailsPanelOpened]);
 
-  const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
-    'securitySolutionNotesDisabled'
-  );
   const selectNotesByDocumentId = useMemo(() => makeSelectNotesByDocumentId(), []);
   /* only applicable for new event based notes */
   const documentBasedNotes = useSelector((state: State) => selectNotesByDocumentId(state, eventId));
@@ -172,32 +179,19 @@ const ActionsComponent: React.FC<ActionProps> = ({
   );
 
   /* note ids associated with the document AND attached to the current timeline, used for pinning */
-  const timelineNoteIds = useMemo(() => {
-    if (!securitySolutionNotesDisabled) {
+  const timelineNoteIds = useMemo(
+    () =>
       // if timeline is unsaved, there is no notes associated to timeline yet
-      return savedObjectId ? documentBasedNotesInTimeline.map((note) => note.noteId) : [];
-    }
-    return eventIdToNoteIds?.[eventId] ?? emptyNotes;
-  }, [
-    eventIdToNoteIds,
-    eventId,
-    documentBasedNotesInTimeline,
-    savedObjectId,
-    securitySolutionNotesDisabled,
-  ]);
-
-  /* note count of the document */
-  const notesCount = useMemo(
-    () => (securitySolutionNotesDisabled ? timelineNoteIds.length : documentBasedNotes.length),
-    [documentBasedNotes, timelineNoteIds, securitySolutionNotesDisabled]
+      savedObjectId ? documentBasedNotesInTimeline.map((note) => note.noteId) : [],
+    [documentBasedNotesInTimeline, savedObjectId]
   );
 
   // we hide the analyzer icon if the data is not available for the resolver
-  // or if we are on the cases alerts table and the the visualization in flyout advanced setting is disabled
+  // or if we are on the cases alerts table and the visualization in flyout advanced setting is disabled
   const showAnalyzerIcon = useIsInvestigateInResolverActionEnabled(ecsData);
 
   // we hide the session view icon if the session view is not available
-  // or if we are on the cases alerts table and the the visualization in flyout advanced setting is disabled
+  // or if we are on the cases alerts table and the visualization in flyout advanced setting is disabled
   // or if the user is not on an enterprise license or on the kubernetes page
   const isEnterprisePlus = useLicense().isEnterprise();
   const showSessionViewIcon = useMemo(
@@ -239,7 +233,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
             ariaLabel={i18n.ADD_NOTES_FOR_ROW({ ariaRowindex, columnValues })}
             key="add-event-note"
             timelineType={timelineType}
-            notesCount={notesCount}
+            notesCount={documentBasedNotes.length}
             eventId={eventId}
             toggleShowNotes={toggleShowNotes}
           />
@@ -263,7 +257,7 @@ const ActionsComponent: React.FC<ActionProps> = ({
           key="alert-context-menu"
           ecsRowData={ecsData}
           scopeId={timelineId}
-          disabled={isContextMenuDisabled}
+          disabled={false}
           onRuleChange={onRuleChange}
           refetch={refetch}
         />

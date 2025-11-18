@@ -8,7 +8,8 @@
  */
 
 import { parse } from '../../parser';
-import { WrappingPrettyPrinter, WrappingPrettyPrinterOptions } from '../wrapping_pretty_printer';
+import type { WrappingPrettyPrinterOptions } from '../wrapping_pretty_printer';
+import { WrappingPrettyPrinter } from '../wrapping_pretty_printer';
 
 const reprint = (src: string, opts?: WrappingPrettyPrinterOptions) => {
   const { root } = parse(src, { withFormatting: true });
@@ -109,13 +110,13 @@ FROM index
    * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
    * get back to it after 9.1 release.
    */
-  describe.skip('RERANK', () => {
+  describe('RERANK', () => {
     test('comments around all elements', () => {
       assertReprint(
         `FROM a
   | /*0*/ RERANK /*1*/ "query" /*2*/
         ON /*3*/ field /*4*/
-        WITH /*5*/ id /*6*/`
+        WITH /*5*/ {"id": "value"} /*6*/`
       );
     });
   });
@@ -587,6 +588,20 @@ FROM index
           // d.1
           /* d.2 */ d /* d.3 */`);
     });
+
+    test('supports binary expressions', () => {
+      assertReprint(
+        `FROM employees
+  | LEFT JOIN
+      asdf
+        ON
+          // hello world
+          /*1*/ aaaaaaaaaaaaaaaaaaaaaaaaa /*2*/ >
+              /*3*/ bbbbbbbbbbbbbbbbbbbbb /*4*/ AND
+            /*5*/ ccccccccccccccccccc /*6*/ ==
+              /*7*/ dddddddddddddddddddddddddddddddddddddddd /*8*/`
+      );
+    });
   });
 
   describe('function call expressions', () => {
@@ -603,6 +618,18 @@ FROM index
         const text = reprint(query).text;
 
         expect(text).toBe(`ROW 1 * /* 1 */ /* 2 */ 2 /* 3 */ /* 4 */`);
+      });
+
+      test('right from function call', () => {
+        const query = `FROM logs-*-* | WHERE QSTR("term") /* Search all fields using QSTR – e.g. WHERE QSTR("""debug""") */ | LIMIT 10`;
+        const text = reprint(query).text;
+
+        expect(text).toBe(
+          `FROM logs-*-*
+  | WHERE
+      QSTR("term") /* Search all fields using QSTR – e.g. WHERE QSTR("""debug""") */
+  | LIMIT 10`
+        );
       });
 
       test('first operand with top comment', () => {
@@ -790,6 +817,157 @@ ROW
   )`;
         assertReprint(src);
       });
+    });
+  });
+
+  describe('header commands', () => {
+    describe('top comments', () => {
+      test('single line comment before SET', () => {
+        const src = `// Header comment
+SET timeout = "30s";
+FROM index`;
+        assertReprint(src);
+      });
+
+      test('multi-line comment before SET', () => {
+        const src = `/* Header comment
+   with multiple lines */
+SET timeout = "30s";
+FROM index`;
+        assertReprint(src);
+      });
+
+      test('multiple comments before SET', () => {
+        const src = `// First comment
+/* Second comment */
+// Third comment
+SET timeout = "30s";
+FROM index`;
+        assertReprint(src);
+      });
+
+      test('comments before multiple SET commands', () => {
+        const src = `// First SET
+SET timeout = "30s";
+// Second SET
+SET max_results = 100;
+FROM index`;
+        assertReprint(src);
+      });
+    });
+
+    describe('left comments', () => {
+      test('comment to the left of SET keyword', () => {
+        const src = `/* left */ SET timeout = "30s";
+FROM index`;
+        assertReprint(src);
+      });
+
+      test('multiple left comments', () => {
+        const src = `/* a */ /* b */ SET timeout = "30s";
+FROM index`;
+        assertReprint(src);
+      });
+    });
+
+    describe('right comments', () => {
+      test('comment at the end of SET line', () => {
+        const src = `SET timeout = "30s"; // Important timeout
+FROM index`;
+        assertReprint(src);
+      });
+
+      test('multi-line comment after SET semicolon', () => {
+        const src = `SET timeout = "30s"; /* Important */
+FROM index`;
+        assertReprint(src);
+      });
+    });
+
+    describe('comments in SET arguments', () => {
+      test('comment before identifier', () => {
+        const src = `SET /* key */ timeout = "30s";
+FROM index`;
+        assertReprint(src);
+      });
+
+      test('comment after identifier', () => {
+        const src = `SET timeout /* key */ = "30s";
+FROM index`;
+        assertReprint(src);
+      });
+
+      test('comment before value', () => {
+        const src = `SET timeout = /* value */ "30s";
+FROM index`;
+        assertReprint(src);
+      });
+
+      test('comment after value', () => {
+        const src = `SET timeout = "30s" /* value */;
+FROM index`;
+        assertReprint(src);
+      });
+
+      test('can skip header', () => {
+        const text = reprint(
+          `SET timeout = "30s" /* value */;
+FROM index`,
+          { skipHeader: true }
+        ).text;
+
+        expect(text).toBe(`FROM index`);
+      });
+
+      test('comments around assignment operator', () => {
+        const src = `SET timeout /* before */ = /* after */ "30s";
+FROM index`;
+        assertReprint(src);
+      });
+
+      test('multiple comments in SET arguments', () => {
+        const src = `SET /* a */ timeout /* b */ = /* c */ "30s" /* d */;
+FROM index`;
+        assertReprint(src);
+      });
+    });
+  });
+
+  describe('subqueries (parens)', () => {
+    test('can print comments in complex subqueries', () => {
+      // This single test covers comment preservation in wrapped output
+      const query = [
+        'FROM index1,',
+        '/* before subquery */ (/* inside start */ FROM index2 /* after source */ |',
+        'WHERE a > 10 /* after where */ |',
+        'EVAL b = a * 2 |',
+        'STATS cnt = COUNT(*) BY c |',
+        'SORT cnt DESC |',
+        'LIMIT 10) /* after first subquery */,',
+        'index3,',
+        '(FROM index4 | STATS COUNT(*)) /* after second */ |',
+        'WHERE d > 10 |',
+        'STATS max = MAX(*) BY e |',
+        'SORT max DESC',
+      ].join(' ');
+
+      const expected = `FROM
+  index1,
+  /* before subquery */ (/* inside start */ FROM index2 /* after source */
+    | WHERE a > 10 /* after where */
+    | EVAL b = a * 2
+    | STATS cnt = COUNT(*)
+          BY c
+    | SORT cnt DESC
+    | LIMIT 10) /* after first subquery */,
+  index3,
+  (FROM index4 | STATS COUNT(*)) /* after second */
+  | WHERE d > 10
+  | STATS max = MAX(*)
+        BY e
+  | SORT max DESC`;
+
+      assertReprint(query, expected);
     });
   });
 });

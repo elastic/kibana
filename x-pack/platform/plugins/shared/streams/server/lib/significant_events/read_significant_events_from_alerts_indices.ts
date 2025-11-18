@@ -6,15 +6,15 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import {
+import type {
   AggregationsMultiBucketAggregateBase,
   AggregationsTermsAggregateBase,
 } from '@elastic/elasticsearch/lib/api/types';
-import { IScopedClusterClient } from '@kbn/core/server';
-import { ChangePointType } from '@kbn/es-types/src';
-import { SignificantEventsGetResponse } from '@kbn/streams-schema';
+import type { IScopedClusterClient } from '@kbn/core/server';
+import type { ChangePointType } from '@kbn/es-types/src';
+import type { SignificantEventsGetResponse } from '@kbn/streams-schema';
 import { get, isArray, isEmpty, keyBy } from 'lodash';
-import { AssetClient } from '../streams/assets/asset_client';
+import type { AssetClient } from '../streams/assets/asset_client';
 import { getRuleIdFromQueryLink } from '../streams/assets/query/helpers/query';
 import { SecurityError } from '../streams/errors/security_error';
 
@@ -119,6 +119,7 @@ export async function readSignificantEventsFromAlertsIndices(
       id: queryLink.query.id,
       title: queryLink.query.title,
       kql: queryLink.query.kql,
+      feature: queryLink.query.feature,
       occurrences: [],
       change_points: {
         type: {
@@ -138,6 +139,7 @@ export async function readSignificantEventsFromAlertsIndices(
       id: queryLink.query.id,
       title: queryLink.query.title,
       kql: queryLink.query.kql,
+      feature: queryLink.query.feature,
       occurrences: isArray(occurrences)
         ? occurrences.map((occurrence) => ({
             date: occurrence.key_as_string,
@@ -155,6 +157,7 @@ export async function readSignificantEventsFromAlertsIndices(
       id: queryLink.query.id,
       title: queryLink.query.title,
       kql: queryLink.query.kql,
+      feature: queryLink.query.feature,
       occurrences: [],
       change_points: {
         type: {

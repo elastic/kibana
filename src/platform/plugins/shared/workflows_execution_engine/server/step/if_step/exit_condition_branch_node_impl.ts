@@ -7,18 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExitConditionBranchNode } from '@kbn/workflows';
-import { StepImplementation } from '../step_base';
-import { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { ExitConditionBranchNode, WorkflowGraph } from '@kbn/workflows/graph';
+import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { NodeImplementation } from '../node_implementation';
 
-export class ExitConditionBranchNodeImpl implements StepImplementation {
+export class ExitConditionBranchNodeImpl implements NodeImplementation {
   constructor(
     private step: ExitConditionBranchNode,
+    private workflowGraph: WorkflowGraph,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager
   ) {}
 
   public async run(): Promise<void> {
-    const successors = this.wfExecutionRuntimeManager.getNodeSuccessors(this.step.id);
+    const successors = this.workflowGraph.getDirectSuccessors(this.step.id);
 
     if (successors.length !== 1) {
       throw new Error(
@@ -34,6 +35,6 @@ export class ExitConditionBranchNodeImpl implements StepImplementation {
 
     // After the branch finishes, we go to the end of If condition
     const exitIfNode = successors[0];
-    this.wfExecutionRuntimeManager.goToStep(exitIfNode.id);
+    this.wfExecutionRuntimeManager.navigateToNode(exitIfNode.id);
   }
 }

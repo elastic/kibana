@@ -10,7 +10,7 @@
 import Path from 'path';
 import Fs from 'fs';
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 
 export async function initLogsDir(log: ToolingLog, logsDir: string) {
   log.info(`Kibana/ES logs will be written to ${Path.relative(process.cwd(), logsDir)}/`);

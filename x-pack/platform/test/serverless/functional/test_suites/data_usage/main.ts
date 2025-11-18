@@ -5,10 +5,10 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import http from 'http';
-import { InterceptResponseFactory } from '@kbn/ftr-common-functional-ui-services';
+import type http from 'http';
+import type { InterceptResponseFactory } from '@kbn/ftr-common-functional-ui-services';
 import { setupMockServer } from '../../../api_integration/test_suites/data_usage/mock_api';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects([

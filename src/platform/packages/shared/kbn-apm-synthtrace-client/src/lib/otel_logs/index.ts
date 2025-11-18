@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { Fields } from '../entity';
+import type { Fields } from '../entity';
 import { Serializable } from '../serializable';
 
 export const LONG_FIELD_NAME =
@@ -16,8 +16,10 @@ export type OtelLogDocument = Fields &
   Partial<{
     _index?: string;
     trace_id?: string;
+    span_id?: string;
     attributes?: Record<string, unknown>;
     severity_text?: string;
+    severity_number?: number;
     resource?: {
       attributes?: Record<string, unknown>;
     };
@@ -25,6 +27,8 @@ export type OtelLogDocument = Fields &
       text?: string;
       structured?: Record<string, unknown>;
     };
+    flags?: number;
+    observed_timestamp?: number;
   }>;
 
 class OtelLog extends Serializable<OtelLogDocument> {

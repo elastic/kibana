@@ -8,14 +8,12 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import useAsync from 'react-use/lib/useAsync';
-import { Query, TimeRange } from '@kbn/es-query';
+import type { Query, TimeRange } from '@kbn/es-query';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamEnrichmentSelector } from '../state_management/stream_enrichment_state_machine';
-import {
-  DataSourceActorRef,
-  useDataSourceSelector,
-} from '../state_management/data_source_state_machine';
-import { KqlSamplesDataSourceWithUIAttributes } from '../types';
+import type { DataSourceActorRef } from '../state_management/data_source_state_machine';
+import { useDataSourceSelector } from '../state_management/data_source_state_machine';
+import type { KqlSamplesDataSourceWithUIAttributes } from '../types';
 import { UncontrolledStreamsAppSearchBar } from '../../../streams_app_search_bar/uncontrolled_streams_app_bar';
 import { DataSourceCard } from './data_source_card';
 import { NameField } from './name_field';
@@ -34,8 +32,9 @@ export const KqlSamplesDataSourceCard = ({ dataSourceRef }: KqlSamplesDataSource
     (snapshot) => snapshot.context.dataSource as KqlSamplesDataSourceWithUIAttributes
   );
 
-  const isDisabled = useDataSourceSelector(dataSourceRef, (snapshot) =>
-    snapshot.matches('disabled')
+  const isDisabled = useDataSourceSelector(
+    dataSourceRef,
+    (snapshot) => !snapshot.can({ type: 'dataSource.change', dataSource })
   );
 
   const { value: streamDataView } = useAsync(() =>
@@ -74,6 +73,7 @@ export const KqlSamplesDataSourceCard = ({ dataSourceRef }: KqlSamplesDataSource
         onChange={(event) => handleChange({ name: event.target.value })}
         value={dataSource.name}
         disabled={isDisabled}
+        data-test-subj="streamsAppKqlSamplesDataSourceNameField"
       />
       <EuiSpacer />
       {streamDataView && (

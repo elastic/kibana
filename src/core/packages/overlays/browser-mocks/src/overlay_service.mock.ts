@@ -14,23 +14,23 @@ import type { OverlayStart } from '@kbn/core-overlays-browser';
 import { overlayBannersServiceMock } from './banners_service.mock';
 import { overlayFlyoutServiceMock } from './flyout_service.mock';
 import { overlayModalServiceMock } from './modal_service.mock';
+import { lazyObject } from '@kbn/lazy-object';
 
 const createStartContractMock = () => {
   const overlayStart = overlayModalServiceMock.createStartContract();
-  const startContract: DeeplyMockedKeys<OverlayStart> = {
+  const startContract: DeeplyMockedKeys<OverlayStart> = lazyObject({
     openFlyout: overlayFlyoutServiceMock.createStartContract().open,
     openModal: overlayStart.open,
     openConfirm: overlayStart.openConfirm,
     banners: overlayBannersServiceMock.createStartContract(),
-  };
+  });
   return startContract;
 };
 
 const createMock = () => {
-  const mocked: jest.Mocked<PublicMethodsOf<OverlayService>> = {
-    start: jest.fn(),
-  };
-  mocked.start.mockReturnValue(createStartContractMock());
+  const mocked: jest.Mocked<PublicMethodsOf<OverlayService>> = lazyObject({
+    start: jest.fn().mockReturnValue(createStartContractMock()),
+  });
   return mocked;
 };
 

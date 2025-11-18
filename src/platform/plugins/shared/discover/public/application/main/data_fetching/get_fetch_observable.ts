@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { merge } from 'rxjs';
-import { debounceTime, filter, tap } from 'rxjs';
+import { type Subject, debounceTime, filter, tap, defer, merge } from 'rxjs';
 
 import type {
   AutoRefreshDoneFn,
@@ -28,6 +27,7 @@ export function getFetch$({
   main$,
   refetch$,
   searchSessionManager,
+  lastReloadRequestTime$,
 }: {
   setAutoRefreshDone: (val: AutoRefreshDoneFn | undefined) => void;
   data: DataPublicPluginStart;
@@ -35,6 +35,7 @@ export function getFetch$({
   refetch$: DataRefetch$;
   searchSessionManager: DiscoverSearchSessionManager;
   searchSource: ISearchSource;
+  lastReloadRequestTime$: Subject<number | undefined>;
 }) {
   const { timefilter } = data.query.timefilter;
   return merge(
@@ -55,6 +56,19 @@ export function getFetch$({
         );
       })
     ),
-    searchSessionManager.newSearchSessionIdFromURL$.pipe(filter((sessionId) => !!sessionId))
-  ).pipe(debounceTime(100));
+    defer(() => {
+      // We defer creating the search session ID observable until it's subscribed to
+      // in order to ensure we get a new instance when switching between tabs.
+      // Otherwise, search session IDs from previous tabs could trigger extra fetches
+      // when initializing a new tab with a different search session ID.
+      return searchSessionManager
+        .getNewSearchSessionIdFromURL$()
+        .pipe(filter((sessionId) => !!sessionId));
+    })
+  ).pipe(
+    debounceTime(100),
+    tap(() => {
+      lastReloadRequestTime$.next(Date.now());
+    })
+  );
 }

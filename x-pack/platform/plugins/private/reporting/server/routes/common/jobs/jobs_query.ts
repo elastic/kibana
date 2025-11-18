@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { TransportResult, errors, estypes } from '@elastic/elasticsearch';
+import type { TransportResult, estypes } from '@elastic/elasticsearch';
+import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { JOB_STATUS } from '@kbn/reporting-common';
@@ -92,6 +93,7 @@ export function jobsQueryFactory(
                     bool: {
                       should: [
                         { term: { space_id: spaceId } },
+                        { term: { 'space_id.keyword': spaceId } },
                         // also show all reports created before space_id was added
                         { bool: { must_not: { exists: { field: 'space_id' } } } },
                       ],

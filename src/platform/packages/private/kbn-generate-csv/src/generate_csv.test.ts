@@ -11,7 +11,8 @@ import { identity, range } from 'lodash';
 import * as Rx from 'rxjs';
 import type { Writable } from 'stream';
 
-import { errors as esErrors, estypes } from '@elastic/elasticsearch';
+import type { estypes } from '@elastic/elasticsearch';
+import { errors as esErrors } from '@elastic/elasticsearch';
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
 import {
@@ -23,13 +24,13 @@ import {
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 import { stubLogstashFieldSpecMap } from '@kbn/data-views-plugin/common/field.stub';
 import type { ISearchClient, IKibanaSearchResponse } from '@kbn/search-types';
-import { ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import type { ISearchStartSearchSource } from '@kbn/data-plugin/common';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
-import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { CancellationToken } from '@kbn/reporting-common';
-import { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
+import type { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 import {
   UI_SETTINGS_CSV_QUOTE_VALUES,
@@ -493,6 +494,7 @@ describe('CsvGenerator', () => {
               "rows": 0,
             },
           },
+          "user_error": undefined,
           "warnings": Array [
             "Unable to close the Point-In-Time used for search. Check the Kibana server logs.",
           ],
@@ -1450,6 +1452,84 @@ describe('CsvGenerator', () => {
     );
   });
 
+  it('will return warning and user_error if search results does not match expected total', async () => {
+    const mockJobUsingPitPaging = createMockJob({
+      columns: ['date', 'ip', 'message'],
+      pagingStrategy: 'pit',
+    });
+    mockDataClient.search = jest
+      .fn()
+      .mockImplementationOnce(() =>
+        Rx.of({
+          rawResponse: getMockRawResponse(
+            range(0, (HITS_TOTAL - 20) / 10).map(
+              () =>
+                ({
+                  fields: {
+                    date: ['2020-12-31T00:14:28.000Z'],
+                    ip: ['110.135.176.89'],
+                    message: ['hit from the initial search'],
+                  },
+                } as unknown as estypes.SearchHit)
+            ),
+            HITS_TOTAL
+          ),
+        })
+      )
+      .mockImplementation(() =>
+        Rx.of({
+          rawResponse: getMockRawResponse(
+            range(0, HITS_TOTAL / 10).map(
+              () =>
+                ({
+                  fields: {
+                    date: ['2020-12-31T00:14:28.000Z'],
+                    ip: ['110.135.176.89'],
+                    message: ['hit from a subsequent scroll'],
+                  },
+                } as unknown as estypes.SearchHit)
+            )
+          ),
+        })
+      );
+
+    const generateCsv = new CsvGenerator(
+      mockJobUsingPitPaging,
+      mockConfig,
+      mockTaskInstanceFields,
+      {
+        es: mockEsClient,
+        data: mockDataClient,
+        uiSettings: uiSettingsClient,
+      },
+      {
+        searchSourceStart: mockSearchSourceService,
+        fieldFormatsRegistry: mockFieldFormatsRegistry,
+      },
+      new CancellationToken(),
+      mockLogger,
+      stream
+    );
+    const csvResult = await generateCsv.generateData();
+    expect(csvResult).toMatchInlineSnapshot(`
+      Object {
+        "content_type": "text/csv",
+        "csv_contains_formulas": false,
+        "error_code": undefined,
+        "max_size_reached": false,
+        "metrics": Object {
+          "csv": Object {
+            "rows": 108,
+          },
+        },
+        "user_error": true,
+        "warnings": Array [
+          "Encountered an error with the number of CSV rows generated from the search: expected 100, received 108.",
+        ],
+      }
+    `);
+  });
+
   it('will return partial data if the scroll or search fails', async () => {
     mockDataClient.search = jest.fn().mockImplementation(() => {
       throw new esErrors.ResponseError({
@@ -1487,6 +1567,7 @@ describe('CsvGenerator', () => {
             "rows": 0,
           },
         },
+        "user_error": undefined,
         "warnings": Array [
           "Received a 500 response from Elasticsearch: my error",
           "Encountered an error with the number of CSV rows generated from the search: expected rows were indeterminable, received 0.",
@@ -1539,6 +1620,7 @@ describe('CsvGenerator', () => {
             "rows": 0,
           },
         },
+        "user_error": undefined,
         "warnings": Array [
           "Encountered an unknown error: An unknown error",
           "Encountered an error with the number of CSV rows generated from the search: expected rows were indeterminable, received 0.",

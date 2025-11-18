@@ -26,6 +26,26 @@
         "children": [
           {
             "parentPluginId": "fileUpload",
+            "id": "def-public.MessageImporter._reader",
+            "type": "Object",
+            "tags": [],
+            "label": "_reader",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/file-upload-common",
+                "scope": "common",
+                "docId": "kibKbnFileUploadCommonPluginApi",
+                "section": "def-common.MessageReader",
+                "text": "MessageReader"
+              }
+            ],
+            "path": "x-pack/platform/plugins/private/file_upload/public/importer/message_importer.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fileUpload",
             "id": "def-public.MessageImporter.Unnamed",
             "type": "Function",
             "tags": [],
@@ -46,78 +66,18 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "ImportFactoryOptions"
+                  {
+                    "pluginId": "@kbn/file-upload-common",
+                    "scope": "common",
+                    "docId": "kibKbnFileUploadCommonPluginApi",
+                    "section": "def-common.ImportFactoryOptions",
+                    "text": "ImportFactoryOptions"
+                  }
                 ],
                 "path": "x-pack/platform/plugins/private/file_upload/public/importer/message_importer.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-public.MessageImporter._createDocs",
-            "type": "Function",
-            "tags": [],
-            "label": "_createDocs",
-            "description": [],
-            "signature": [
-              "(text: string, isLastPart: boolean, lineLimit?: number | undefined) => ",
-              "CreateDocsResponse",
-              "<",
-              "ImportDocMessage",
-              ">"
-            ],
-            "path": "x-pack/platform/plugins/private/file_upload/public/importer/message_importer.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "fileUpload",
-                "id": "def-public.MessageImporter._createDocs.$1",
-                "type": "string",
-                "tags": [],
-                "label": "text",
-                "description": [],
-                "signature": [
-                  "string"
-                ],
-                "path": "x-pack/platform/plugins/private/file_upload/public/importer/message_importer.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "fileUpload",
-                "id": "def-public.MessageImporter._createDocs.$2",
-                "type": "boolean",
-                "tags": [],
-                "label": "isLastPart",
-                "description": [],
-                "signature": [
-                  "boolean"
-                ],
-                "path": "x-pack/platform/plugins/private/file_upload/public/importer/message_importer.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "fileUpload",
-                "id": "def-public.MessageImporter._createDocs.$3",
-                "type": "number",
-                "tags": [],
-                "label": "lineLimit",
-                "description": [],
-                "signature": [
-                  "number | undefined"
-                ],
-                "path": "x-pack/platform/plugins/private/file_upload/public/importer/message_importer.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
               }
             ],
             "returnComment": []
@@ -458,14 +418,20 @@
               "MappingTypeMapping",
               ", pipeline: (",
               {
-                "pluginId": "fileUpload",
+                "pluginId": "@kbn/file-upload-common",
                 "scope": "common",
-                "docId": "kibFileUploadPluginApi",
+                "docId": "kibKbnFileUploadCommonPluginApi",
                 "section": "def-common.IngestPipeline",
                 "text": "IngestPipeline"
               },
-              " | undefined)[], existingIndex?: boolean | undefined) => Promise<",
-              "InitializeImportResponse",
+              " | undefined)[], existingIndex?: boolean | undefined, signal?: AbortSignal | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/file-upload-common",
+                "scope": "common",
+                "docId": "kibKbnFileUploadCommonPluginApi",
+                "section": "def-common.InitializeImportResponse",
+                "text": "InitializeImportResponse"
+              },
               ">"
             ],
             "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
@@ -527,9 +493,9 @@
                 "signature": [
                   "(",
                   {
-                    "pluginId": "fileUpload",
+                    "pluginId": "@kbn/file-upload-common",
                     "scope": "common",
-                    "docId": "kibFileUploadPluginApi",
+                    "docId": "kibKbnFileUploadCommonPluginApi",
                     "section": "def-common.IngestPipeline",
                     "text": "IngestPipeline"
                   },
@@ -554,6 +520,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
+              },
+              {
+                "parentPluginId": "fileUpload",
+                "id": "def-public.IImporter.initializeImport.$6",
+                "type": "Object",
+                "tags": [],
+                "label": "signal",
+                "description": [],
+                "signature": [
+                  "AbortSignal | undefined"
+                ],
+                "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -570,13 +551,13 @@
               "MappingTypeMapping",
               ", pipelines: ",
               {
-                "pluginId": "fileUpload",
+                "pluginId": "@kbn/file-upload-common",
                 "scope": "common",
-                "docId": "kibFileUploadPluginApi",
+                "docId": "kibKbnFileUploadCommonPluginApi",
                 "section": "def-common.IngestPipeline",
                 "text": "IngestPipeline"
               },
-              "[]) => void"
+              "[], signal?: AbortSignal | undefined) => void"
             ],
             "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
             "deprecated": false,
@@ -621,9 +602,9 @@
                 "description": [],
                 "signature": [
                   {
-                    "pluginId": "fileUpload",
+                    "pluginId": "@kbn/file-upload-common",
                     "scope": "common",
-                    "docId": "kibFileUploadPluginApi",
+                    "docId": "kibKbnFileUploadCommonPluginApi",
                     "section": "def-common.IngestPipeline",
                     "text": "IngestPipeline"
                   },
@@ -633,6 +614,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "fileUpload",
+                "id": "def-public.IImporter.initializeWithoutCreate.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "signal",
+                "description": [],
+                "signature": [
+                  "AbortSignal | undefined"
+                ],
+                "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -645,8 +641,14 @@
             "label": "import",
             "description": [],
             "signature": [
-              "(index: string, ingestPipelineId: string | undefined, setImportProgress: (progress: number) => void) => Promise<",
-              "ImportResults",
+              "(index: string, ingestPipelineId: string | undefined, setImportProgress: (progress: number) => void, signal?: AbortSignal | undefined) => Promise<",
+              {
+                "pluginId": "@kbn/file-upload-common",
+                "scope": "common",
+                "docId": "kibKbnFileUploadCommonPluginApi",
+                "section": "def-common.ImportResults",
+                "text": "ImportResults"
+              },
               ">"
             ],
             "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
@@ -697,6 +699,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "fileUpload",
+                "id": "def-public.IImporter.import.$4",
+                "type": "Object",
+                "tags": [],
+                "label": "signal",
+                "description": [],
+                "signature": [
+                  "AbortSignal | undefined"
+                ],
+                "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -773,14 +790,30 @@
             "label": "deletePipelines",
             "description": [],
             "signature": [
-              "() => Promise<",
+              "(signal?: AbortSignal | undefined) => Promise<",
               "AcknowledgedResponseBase",
               "[]>"
             ],
             "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "fileUpload",
+                "id": "def-public.IImporter.deletePipelines.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "signal",
+                "description": [],
+                "signature": [
+                  "AbortSignal | undefined"
+                ],
+                "path": "x-pack/platform/plugins/private/file_upload/public/importer/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
             "returnComment": []
           }
         ],
@@ -936,781 +969,7 @@
   "common": {
     "classes": [],
     "functions": [],
-    "interfaces": [
-      {
-        "parentPluginId": "fileUpload",
-        "id": "def-common.AnalysisResult",
-        "type": "Interface",
-        "tags": [],
-        "label": "AnalysisResult",
-        "description": [],
-        "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.AnalysisResult.results",
-            "type": "Object",
-            "tags": [],
-            "label": "results",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "fileUpload",
-                "scope": "common",
-                "docId": "kibFileUploadPluginApi",
-                "section": "def-common.FindFileStructureResponse",
-                "text": "FindFileStructureResponse"
-              }
-            ],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.AnalysisResult.overrides",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "overrides",
-            "description": [],
-            "signature": [
-              "FormattedOverrides",
-              " | undefined"
-            ],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fileUpload",
-        "id": "def-common.FindFileStructureErrorResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "FindFileStructureErrorResponse",
-        "description": [],
-        "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.FindFileStructureErrorResponse.body",
-            "type": "Object",
-            "tags": [],
-            "label": "body",
-            "description": [],
-            "signature": [
-              "{ statusCode: number; error: string; message: string; attributes?: ErrorAttribute | undefined; }"
-            ],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.FindFileStructureErrorResponse.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fileUpload",
-        "id": "def-common.FindFileStructureResponse",
-        "type": "Interface",
-        "tags": [],
-        "label": "FindFileStructureResponse",
-        "description": [],
-        "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.FindFileStructureResponse.charset",
-            "type": "string",
-            "tags": [],
-            "label": "charset",
-            "description": [],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.FindFileStructureResponse.has_header_row",
-            "type": "boolean",
-            "tags": [],
-            "label": "has_header_row",
-            "description": [],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.FindFileStructureResponse.has_byte_order_marker",
-            "type": "boolean",
-            "tags": [],
-            "label": "has_byte_order_marker",
-            "description": [],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.FindFileStructureResponse.format",
-            "type": "string",
-            "tags": [],
-            "label": "format",
-            "description": [],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.FindFileStructureResponse.document_type",
-            "type": "string",
-            "tags": [],
-            "label": "document_type",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.FindFileStructureResponse.field_stats",
-            "type": "Object",
-            "tags": [],
-            "label": "field_stats",
-            "description": [],
-            "signature": [
-              "{ [fieldName: string]: { count: number; cardinality: number; top_hits: { count: number; value: any; }[]; mean_value?: number | undefined; median_value?: number | undefined; max_value?: number | undefined; min_value?: number | undefined; earliest?: string | undefined; latest?: string | undefined; }; }"
-            ],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.FindFileStructureResponse.sample_start",
-            "type": "string",
-            "tags": [],
-            "label": "sample_start",
-            "description": [],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.FindFileStructureResponse.num_messages_analyzed",
-            "type": "number",
-            "tags": [],
-            "label": "num_messages_analyzed",
-            "description": [],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.FindFileStructureResponse.mappings",
-            "type": "Object",
-            "tags": [],
-            "label": "mappings",
-            "description": [],
-            "signature": [
-              "{ properties: { [fieldName: string]: { type: ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".STRING | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".TEXT | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".MATCH_ONLY_TEXT | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".KEYWORD | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".VERSION | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".BOOLEAN | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".OBJECT | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".DATE | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".DATE_NANOS | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".DATE_RANGE | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".GEO_POINT | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".GEO_SHAPE | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".FLOAT | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".HALF_FLOAT | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".SCALED_FLOAT | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".DOUBLE | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".INTEGER | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".LONG | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".SHORT | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".UNSIGNED_LONG | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".AGGREGATE_METRIC_DOUBLE | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".FLOAT_RANGE | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".DOUBLE_RANGE | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".INTEGER_RANGE | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".LONG_RANGE | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".NESTED | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".BYTE | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".IP | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".IP_RANGE | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".ATTACHMENT | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".TOKEN_COUNT | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".MURMUR3 | ",
-              {
-                "pluginId": "@kbn/field-types",
-                "scope": "common",
-                "docId": "kibKbnFieldTypesPluginApi",
-                "section": "def-common.ES_FIELD_TYPES",
-                "text": "ES_FIELD_TYPES"
-              },
-              ".HISTOGRAM; format?: string | undefined; }; }; }"
-            ],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.FindFileStructureResponse.ingest_pipeline",
-            "type": "Object",
-            "tags": [],
-            "label": "ingest_pipeline",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "fileUpload",
-                "scope": "common",
-                "docId": "kibFileUploadPluginApi",
-                "section": "def-common.IngestPipeline",
-                "text": "IngestPipeline"
-              }
-            ],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.FindFileStructureResponse.quote",
-            "type": "string",
-            "tags": [],
-            "label": "quote",
-            "description": [],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.FindFileStructureResponse.delimiter",
-            "type": "string",
-            "tags": [],
-            "label": "delimiter",
-            "description": [],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.FindFileStructureResponse.need_client_timezone",
-            "type": "boolean",
-            "tags": [],
-            "label": "need_client_timezone",
-            "description": [],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.FindFileStructureResponse.num_lines_analyzed",
-            "type": "number",
-            "tags": [],
-            "label": "num_lines_analyzed",
-            "description": [],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.FindFileStructureResponse.column_names",
-            "type": "Array",
-            "tags": [],
-            "label": "column_names",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.FindFileStructureResponse.explanation",
-            "type": "Array",
-            "tags": [],
-            "label": "explanation",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.FindFileStructureResponse.grok_pattern",
-            "type": "string",
-            "tags": [],
-            "label": "grok_pattern",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.FindFileStructureResponse.multiline_start_pattern",
-            "type": "string",
-            "tags": [],
-            "label": "multiline_start_pattern",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.FindFileStructureResponse.exclude_lines_pattern",
-            "type": "string",
-            "tags": [],
-            "label": "exclude_lines_pattern",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.FindFileStructureResponse.java_timestamp_formats",
-            "type": "Array",
-            "tags": [],
-            "label": "java_timestamp_formats",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.FindFileStructureResponse.joda_timestamp_formats",
-            "type": "Array",
-            "tags": [],
-            "label": "joda_timestamp_formats",
-            "description": [],
-            "signature": [
-              "string[] | undefined"
-            ],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.FindFileStructureResponse.timestamp_field",
-            "type": "string",
-            "tags": [],
-            "label": "timestamp_field",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.FindFileStructureResponse.should_trim_fields",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "should_trim_fields",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.FindFileStructureResponse.ecs_compatibility",
-            "type": "string",
-            "tags": [],
-            "label": "ecs_compatibility",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fileUpload",
-        "id": "def-common.IngestPipeline",
-        "type": "Interface",
-        "tags": [],
-        "label": "IngestPipeline",
-        "description": [],
-        "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.IngestPipeline.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.IngestPipeline.processors",
-            "type": "Array",
-            "tags": [],
-            "label": "processors",
-            "description": [],
-            "signature": [
-              "any[]"
-            ],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.IngestPipeline.isManaged",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "isManaged",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.IngestPipeline.name",
-            "type": "string",
-            "tags": [],
-            "label": "name",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "fileUpload",
-        "id": "def-common.InputOverrides",
-        "type": "Interface",
-        "tags": [],
-        "label": "InputOverrides",
-        "description": [],
-        "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "fileUpload",
-            "id": "def-common.InputOverrides.Unnamed",
-            "type": "IndexSignature",
-            "tags": [],
-            "label": "[key: string]: string | undefined",
-            "description": [],
-            "signature": [
-              "[key: string]:  string | undefined"
-            ],
-            "path": "x-pack/platform/plugins/private/file_upload/common/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

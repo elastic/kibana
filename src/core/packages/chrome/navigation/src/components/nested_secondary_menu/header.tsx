@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
+import type { FC } from 'react';
 import { EuiButtonIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
-import React, { FC } from 'react';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 
-import { useNestedMenu } from './use_nested_menu';
 import { useMenuHeaderStyle } from '../../hooks/use_menu_header_style';
+import { useNestedMenu } from './use_nested_menu';
 
 export interface HeaderProps {
   title?: string;
@@ -34,8 +36,14 @@ export const Header: FC<HeaderProps> = ({ title }) => {
 
   return (
     <div css={titleStyle}>
-      {/* TODO: translate */}
-      <EuiButtonIcon aria-label="Go back" color="text" iconType="arrowLeft" onClick={goBack} />
+      <EuiButtonIcon
+        aria-label={i18n.translate('core.ui.chrome.sideNavigation.goBackButtonIconAriaLabel', {
+          defaultMessage: 'Go back',
+        })}
+        color="text"
+        iconType="arrowLeft"
+        onClick={goBack}
+      />
       {title && (
         <EuiTitle size="xs">
           <h4>{title}</h4>

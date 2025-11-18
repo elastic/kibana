@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { PropsWithChildren } from 'react';
 import React from 'react';
 import styled from '@emotion/styled';
 import {
+  type EuiThemeComputed,
   type EuiIconProps,
   type EuiTextProps,
   type CommonProps,
@@ -16,11 +18,20 @@ import {
   EuiText,
   useEuiBackgroundColor,
   useEuiTheme,
+  transparentize,
 } from '@elastic/eui';
 import { rgba } from 'polished';
+import { css } from '@emotion/react';
 import { getSpanIcon } from './get_span_icon';
-import type { NodeExpandButtonProps } from './node_expand_button';
 import type { EntityNodeViewModel, LabelNodeViewModel } from '..';
+import { GRAPH_ENTITY_NODE_BUTTON_ID } from '../test_ids';
+
+/**
+ * The total height of an entity node including the shape and details below, in pixels.
+ * Required to calculate total node's height in layout_graph.ts
+ * Must be a multiple of `GRID_SIZE * 2`.
+ */
+export const ENTITY_NODE_TOTAL_HEIGHT = 200;
 
 /**
  * The width of a node in the graph, in pixels.
@@ -38,7 +49,13 @@ export const NODE_HEIGHT = 100;
  * The width of a node label in the graph, in pixels.
  * Must be a multiple of `GRID_SIZE * 2`.
  */
-export const NODE_LABEL_WIDTH = 140;
+export const NODE_LABEL_WIDTH = 200;
+
+/**
+ * The total height of a label node including the shape and details below, in pixels.
+ * Required in layout_graph.ts
+ */
+export const NODE_LABEL_TOTAL_HEIGHT = 72;
 
 /**
  * The height of a node label in the graph, in pixels.
@@ -46,9 +63,17 @@ export const NODE_LABEL_WIDTH = 140;
  */
 export const NODE_LABEL_HEIGHT = 20;
 
+/**
+ * The height of the details below a label node shape, in pixels.
+ * Required in layout_graph.ts
+ */
+export const NODE_LABEL_DETAILS = NODE_LABEL_TOTAL_HEIGHT - NODE_LABEL_HEIGHT;
+
 export const LABEL_BORDER_WIDTH = 1;
 export const ACTUAL_LABEL_HEIGHT = 24 + LABEL_BORDER_WIDTH * 2;
-export const LABEL_PADDING_X = 15;
+export const LABEL_PADDING_X = 8;
+
+const LABEL_BORDER_RADIUS = 8;
 
 type NodeColor = EntityNodeViewModel['color'] | LabelNodeViewModel['color'];
 
@@ -62,35 +87,54 @@ export const LabelNodeContainer = styled.div`
 `;
 
 interface LabelShapeProps extends EuiTextProps {
-  color: LabelNodeViewModel['color'];
+  backgroundColor?: string;
+  borderColor?: string;
+  shadow?: string;
 }
 
-export const LabelShape = styled(EuiText)<LabelShapeProps>`
-  background: ${(props) => useNodeFillColor(props.color)};
+export const LabelShape = styled(EuiText, {
+  shouldForwardProp(propName) {
+    return !['backgroundColor', 'borderColor', 'isConnectable', 'shadow'].includes(propName);
+  },
+})<LabelShapeProps>`
+  background-color: ${(props) => props.backgroundColor};
+  border: ${(props) => `${LABEL_BORDER_WIDTH}px solid ${props.borderColor}`};
   max-width: ${NODE_LABEL_WIDTH - LABEL_PADDING_X * 2 - LABEL_BORDER_WIDTH * 2}px;
   max-height: ${NODE_LABEL_HEIGHT - LABEL_BORDER_WIDTH * 2}px;
-  border: ${(props) => {
-    const { euiTheme } = useEuiTheme();
-    return `solid ${
-      euiTheme.colors[props.color as keyof typeof euiTheme.colors]
-    } ${LABEL_BORDER_WIDTH}px`;
-  }};
-
-  font-weight: ${(_props) => {
-    const { euiTheme } = useEuiTheme();
-    return `${euiTheme.font.weight.semiBold}`;
-  }};
-  font-size: ${(_props) => {
-    const { euiTheme } = useEuiTheme();
-    return `${euiTheme.font.scale.xs * 10.5}px`;
-  }};
 
   line-height: 1.5;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
 
   padding: 6px ${LABEL_PADDING_X}px;
-  border-radius: 16px;
+  border-radius: ${LABEL_BORDER_RADIUS}px;
   min-height: 100%;
   min-width: 100%;
+
+  ${({ shadow }) => `
+    /* Apply shadow when node is selected */
+    .react-flow__node.selected & {
+      ${shadow};
+    }
+
+    /* Apply shadow when node is pressed but still not selected */
+    .react-flow__node:active:not(.selected) & {
+      ${shadow};
+    }
+
+    /* After dragging node, it'll remain selected so shadow is visible until clicked outside */
+  `};
+`;
+
+export const LabelStackedShape = styled.div<{ borderColor: string }>`
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  transform: scale(0.9) translateY(calc(-100% + 3px));
+  z-index: -1;
+  border: ${(props) => `${LABEL_BORDER_WIDTH}px solid ${props.borderColor}`};
+  border-radius: ${LABEL_BORDER_RADIUS}px;
 `;
 
 export const LabelShapeOnHover = styled.div`
@@ -108,10 +152,10 @@ export const LabelShapeOnHover = styled.div`
       0.5
     )} 1px`;
   }};
-  border-radius: 20px;
+  border-radius: ${LABEL_BORDER_RADIUS}px;
   background: transparent;
-  width: 108%;
-  height: 134%;
+  width: calc(100% + 12px);
+  height: calc(100% + 12px);
 
   ${LabelNodeContainer}:hover & {
     opacity: 1; /* Show on hover */
@@ -122,50 +166,112 @@ export const LabelShapeOnHover = styled.div`
   }
 `;
 
+export const NodeContainer = styled.div`
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: ${NODE_WIDTH}px;
+`;
+
+/**
+ * Gets the background, border and text colors for the label based on document analysis
+ */
+export const getLabelColors = (
+  color: LabelNodeViewModel['color'],
+  euiTheme: EuiThemeComputed
+): { backgroundColor: string; borderColor: string; textColor: string } => {
+  if (color === 'danger') {
+    return {
+      backgroundColor: euiTheme.colors.danger,
+      borderColor: euiTheme.colors.danger,
+      textColor: euiTheme.colors.textInverse,
+    };
+  }
+
+  return {
+    backgroundColor: euiTheme.colors.backgroundBasePrimary,
+    borderColor: euiTheme.colors.borderStrongPrimary,
+    textColor: euiTheme.colors.textPrimary,
+  };
+};
+
 export const NodeShapeContainer = styled.div`
   position: relative;
   width: ${NODE_WIDTH}px;
   height: ${NODE_HEIGHT}px;
 `;
 
-export const NodeShapeSvg = styled.svg`
+export const NodeShapeSvg = styled.svg<{ shadow?: string; yPosDelta?: number }>`
   position: absolute;
   top: 50%;
   left: 50%;
-  transform: translate(-50%, -50%);
   z-index: 1;
+
+  ${({ yPosDelta }) => {
+    const delta = typeof yPosDelta === 'number' ? yPosDelta : 0;
+    return `transform: translate(-50%, calc(-50% + ${delta}px));`;
+  }}
+
+  ${({ shadow }) => `
+    /* Apply shadow when node is selected */
+    .react-flow__node.selected & {
+      ${shadow};
+    }
+
+    /* Apply shadow when node is pressed but still not selected */
+    .react-flow__node:active:not(.selected) & {
+      ${shadow};
+    }
+
+    /* After dragging node, it'll remain selected so shadow is visible until clicked outside */
+  `};
 `;
 
-export interface NodeButtonProps extends CommonProps {
+interface ButtonContainerProps extends CommonProps {
   width?: number;
   height?: number;
-  onClick?: (e: React.MouseEvent<HTMLElement>) => void;
+}
+
+export interface NodeButtonProps extends ButtonContainerProps {
+  onClick?: React.MouseEventHandler<HTMLButtonElement>;
 }
 
 export const NodeButton = ({ onClick, width, height, ...props }: NodeButtonProps) => (
   <StyledNodeContainer width={width} height={height} {...props}>
-    <StyledNodeButton width={width} height={height} onClick={onClick} />
+    <StyledNodeButton
+      width={width}
+      height={height}
+      onClick={onClick}
+      data-test-subj={GRAPH_ENTITY_NODE_BUTTON_ID}
+    />
   </StyledNodeContainer>
 );
 
-const StyledNodeContainer = styled.div<NodeButtonProps>`
+const StyledNodeContainer = styled.div<ButtonContainerProps>`
   position: absolute;
   width: ${(props) => props.width ?? NODE_WIDTH}px;
   height: ${(props) => props.height ?? NODE_HEIGHT}px;
   z-index: 1;
 `;
 
-const StyledNodeButton = styled.div<NodeButtonProps>`
+const StyledNodeButton = styled.button<NodeButtonProps>`
+  appearance: none;
   width: ${(props) => props.width ?? NODE_WIDTH}px;
   height: ${(props) => props.height ?? NODE_HEIGHT}px;
 `;
 
-export const StyledNodeExpandButton = styled.div<NodeExpandButtonProps>`
+interface NodeExpandButtonContainerProps extends CommonProps {
+  x?: string;
+  y?: string;
+}
+
+export const NodeExpandButtonContainer = styled.div<NodeExpandButtonContainerProps>`
+  appearance: none;
   opacity: 0; /* Hidden by default */
   transition: opacity 0.2s ease; /* Smooth transition */
-  ${(props: NodeExpandButtonProps) =>
-    (Boolean(props.x) || Boolean(props.y)) &&
-    `transform: translate(${props.x ?? '0'}, ${props.y ?? '0'});`}
+  ${({ x, y }: NodeExpandButtonContainerProps) =>
+    (x || y) && `transform: translate(${x ?? '0'}, ${y ?? '0'});`}
   position: absolute;
   z-index: 1;
 
@@ -194,7 +300,8 @@ export const NodeShapeOnHoverSvg = styled(NodeShapeSvg)`
     opacity: 1; /* Show on hover */
   }
 
-  ${NodeShapeContainer}:has(${StyledNodeExpandButton}.toggled) &, ${LabelNodeContainer}:has(${StyledNodeExpandButton}.toggled) & {
+  ${NodeShapeContainer}:has(${NodeExpandButtonContainer}.toggled) &,
+  ${LabelNodeContainer}:has(${NodeExpandButtonContainer}.toggled) & {
     opacity: 1; /* Show on hover */
   }
 
@@ -224,20 +331,25 @@ export const NodeIcon = ({ icon, color, x, y }: NodeIconProps) => {
 
 export const ExpandButtonSize = 18;
 
-export const RoundEuiButtonIcon = styled(EuiButtonIcon)`
+export const RoundEuiButtonIcon = styled(EuiButtonIcon, {
+  shouldForwardProp: (propName) => propName !== 'backgroundColor',
+})<{ backgroundColor: string }>`
   border-radius: 50%;
-  background-color: ${(_props) => useEuiBackgroundColor('plain')};
+  background-color: ${(props) => props.backgroundColor};
   width: ${ExpandButtonSize}px;
   height: ${ExpandButtonSize}px;
 
   > svg {
-    transform: translate(0.75px, 0.75px);
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
   }
 
   :hover,
   :focus,
   :active {
-    background-color: ${(_props) => useEuiBackgroundColor('plain')};
+    background-color: ${(props) => props.backgroundColor};
   }
 `;
 
@@ -251,7 +363,7 @@ export const useNodeFillColor = (color: NodeColor | undefined) => {
   return useEuiBackgroundColor(fillColor);
 };
 
-export const GroupStyleOverride = (size: {
+export const getStackNodeStyle = (size: {
   width: number;
   height: number;
 }): React.CSSProperties => ({
@@ -262,3 +374,76 @@ export const GroupStyleOverride = (size: {
   width: size.width,
   height: size.height,
 });
+
+interface RoundedBadgeProps extends PropsWithChildren {
+  bgColor?: string;
+  'data-test-subj'?: string;
+}
+
+const ThemedRoundedBadge = styled.div<{
+  euiTheme: EuiThemeComputed;
+  bgColor?: string;
+}>`
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+
+  height: 20px;
+  min-width: 20px;
+  padding: ${({ euiTheme }) => `${euiTheme.size.xxs} ${euiTheme.size.xs}`};
+  gap: ${({ euiTheme }) => euiTheme.size.xxs};
+
+  background-color: ${({ euiTheme, bgColor }) => bgColor || euiTheme.colors.backgroundBasePlain};
+  border: ${({ euiTheme }) =>
+    `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`};
+  border-radius: ${({ euiTheme }) => euiTheme.border.radius.small};
+
+  font-weight: ${({ euiTheme }) => euiTheme.font.weight.bold};
+`;
+
+export const RoundedBadge = ({
+  bgColor,
+  'data-test-subj': dataTestSubj,
+  children,
+}: RoundedBadgeProps) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <ThemedRoundedBadge euiTheme={euiTheme} bgColor={bgColor} data-test-subj={dataTestSubj}>
+      {children}
+    </ThemedRoundedBadge>
+  );
+};
+
+export const ToolTipButton = (props: PropsWithChildren) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <button
+      {...props}
+      css={css`
+        appearance: none; /* Reset native button styles provided by browsers */
+
+        &:focus {
+          /* Tooltip injects its own outline that uses "currentColor" so we style it setting "color" */
+          color: ${euiTheme.colors.primary};
+        }
+      `}
+      type="button"
+    />
+  );
+};
+
+export const middleEntityNodeShapeStyle = (strokeColor: string) => {
+  return {
+    transform: 'scale(0.9) translateY(7px)',
+    transformOrigin: 'center',
+    stroke: transparentize(strokeColor, 0.5),
+  };
+};
+
+export const bottomEntityNodeShapeStyle = (strokeColor: string) => {
+  return {
+    transform: 'scale(0.8) translateY(16px)',
+    transformOrigin: 'center',
+    stroke: transparentize(strokeColor, 0.3),
+  };
+};

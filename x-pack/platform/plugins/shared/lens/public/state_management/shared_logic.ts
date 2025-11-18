@@ -6,14 +6,21 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import { DataViewSpec, DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
-import { AggregateQuery, Query, Filter } from '@kbn/es-query';
-import { FilterManager } from '@kbn/data-plugin/public';
-import { Datatable } from '@kbn/expressions-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
+import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
+import type { FilterManager } from '@kbn/data-plugin/public';
+import type { Datatable } from '@kbn/expressions-plugin/common';
+import type {
+  VisualizationState,
+  DatasourceStates,
+  DatasourceMap,
+  VisualizationMap,
+  Datasource,
+  LensDocument,
+} from '@kbn/lens-common';
 import { DOC_TYPE, INDEX_PATTERN_TYPE } from '../../common/constants';
-import { VisualizationState, DatasourceStates } from '.';
-import { LensDocument } from '../persistence';
-import { DatasourceMap, VisualizationMap, Datasource } from '../types';
+import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
 
 // This piece of logic is shared between the main editor code base and the inline editor one within the embeddable
 export function mergeToNewDoc(
@@ -33,7 +40,7 @@ export function mergeToNewDoc(
     visualizationMap: VisualizationMap;
     extractFilterReferences: FilterManager['extract'];
   }
-) {
+): LensDocument | undefined {
   const activeVisualization =
     visualization.state && visualization.activeId ? visualizationMap[visualization.activeId] : null;
   const activeDatasource =
@@ -124,7 +131,8 @@ export function mergeToNewDoc(
       internalReferences,
       adHocDataViews: persistableAdHocDataViews,
     },
-  };
+    version: LENS_ITEM_LATEST_VERSION,
+  } satisfies LensDocument;
 }
 
 export function getActiveDataFromDatatable(

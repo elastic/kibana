@@ -317,11 +317,11 @@ describe('Per-Alert Action Scheduler', () => {
       expect(logger.debug).toHaveBeenCalledTimes(2);
       expect(logger.debug).toHaveBeenNthCalledWith(
         1,
-        `no scheduling of summary actions \"action-1\" for rule \"rule-id-1\": has active maintenance windows mw-1.`
+        `no scheduling of actions \"action-1\" for alert \"1\" from rule \"rule-id-1\": has active maintenance windows mw-1.`
       );
       expect(logger.debug).toHaveBeenNthCalledWith(
         2,
-        `no scheduling of summary actions \"action-2\" for rule \"rule-id-1\": has active maintenance windows mw-1.`
+        `no scheduling of actions \"action-2\" for alert \"1\" from rule \"rule-id-1\": has active maintenance windows mw-1.`
       );
 
       expect(ruleRunMetricsStore.getNumberOfGeneratedActions()).toEqual(2);
@@ -1199,6 +1199,58 @@ describe('Per-Alert Action Scheduler', () => {
         actions: { '222-222': { date: '1970-01-01T00:00:00.000Z' } },
       });
       expect(alert.hasScheduledActions()).toBe(false);
+    });
+
+    test('should clear lastScheduledActions', async () => {
+      const alert = new Alert<AlertInstanceState, AlertInstanceContext, 'default'>('1', {
+        state: { test: true },
+        meta: {},
+      });
+
+      const spy = jest.spyOn(alert, 'clearThrottlingLastScheduledActions');
+
+      alert.scheduleActions('default');
+
+      const onThrottleIntervalAction1: SanitizedRuleAction = {
+        id: 'action-4',
+        group: 'default',
+        actionTypeId: 'test',
+        frequency: { summary: false, notifyWhen: 'onThrottleInterval', throttle: '1h' },
+        params: {
+          foo: true,
+          contextVal: 'My {{context.value}} goes here',
+          stateVal: 'My {{state.value}} goes here',
+          alertVal:
+            'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
+        },
+        uuid: '111-111',
+      };
+      const onThrottleIntervalAction2: SanitizedRuleAction = {
+        id: 'action-4',
+        group: 'default',
+        actionTypeId: 'test',
+        frequency: { summary: false, notifyWhen: 'onThrottleInterval', throttle: '1h' },
+        params: {
+          foo: true,
+          contextVal: 'My {{context.value}} goes here',
+          stateVal: 'My {{state.value}} goes here',
+          alertVal:
+            'My {{rule.id}} {{rule.name}} {{rule.spaceId}} {{rule.tags}} {{alert.id}} goes here',
+        },
+        uuid: '222-222',
+      };
+
+      const scheduler = new PerAlertActionScheduler({
+        ...getSchedulerContext(),
+        rule: { ...rule, actions: [onThrottleIntervalAction1, onThrottleIntervalAction2] },
+      });
+
+      await scheduler.getActionsToSchedule({
+        activeAlerts: { '1': alert },
+      });
+      expect(spy).toHaveBeenCalledTimes(2); // 2 actions
+      expect(spy).nthCalledWith(1, ['111-111', '222-222']);
+      expect(spy).nthCalledWith(2, ['111-111', '222-222']);
     });
   });
 });

@@ -26,56 +26,36 @@ import {
 } from '@elastic/charts';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { i18n } from '@kbn/i18n';
-import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
-import { useKibana } from '../../hooks/use_kibana';
+import useAsync from 'react-use/lib/useAsync';
 import { esqlResultToTimeseries } from '../../util/esql_result_to_timeseries';
-import { useTimefilter } from '../../hooks/use_timefilter';
+import type { useTimefilter } from '../../hooks/use_timefilter';
 import { TooltipOrPopoverIcon } from '../tooltip_popover_icon/tooltip_popover_icon';
 import { getFormattedError } from '../../util/errors';
+import type { StreamDocCountsFetch } from '../../hooks/use_streams_doc_counts_fetch';
 
 export function DocumentsColumn({
   indexPattern,
+  histogramQueryFetch,
+  timeState,
   numDataPoints,
 }: {
   indexPattern: string;
+  histogramQueryFetch: StreamDocCountsFetch;
+  timeState: ReturnType<typeof useTimefilter>['timeState'];
   numDataPoints: number;
 }) {
-  const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
   const chartBaseTheme = useElasticChartsTheme();
   const { euiTheme } = useEuiTheme();
 
-  const { timeState } = useTimefilter();
-
-  const minInterval = Math.floor((timeState.end - timeState.start) / numDataPoints);
-
-  const histogramQueryFetch = useStreamsAppFetch(
-    async ({ signal, timeState: { start, end } }) => {
-      return streamsRepositoryClient.fetch('POST /internal/streams/esql', {
-        params: {
-          body: {
-            operationName: 'get_doc_count_for_stream',
-            query: `FROM ${indexPattern} | STATS doc_count = COUNT(*) BY @timestamp = BUCKET(@timestamp, ${minInterval} ms)`,
-            start,
-            end,
-          },
-        },
-        signal,
-      });
-    },
-    [streamsRepositoryClient, indexPattern, minInterval],
-    {
-      withTimeRange: true,
-      disableToastOnError: true,
-    }
-  );
+  const histogramQueryResult = useAsync(() => histogramQueryFetch.docCount, [histogramQueryFetch]);
 
   const allTimeseries = React.useMemo(
     () =>
       esqlResultToTimeseries({
-        result: histogramQueryFetch,
+        result: histogramQueryResult,
         metricNames: ['doc_count'],
       }),
-    [histogramQueryFetch]
+    [histogramQueryResult]
   );
 
   const docCount = React.useMemo(
@@ -90,20 +70,31 @@ export function DocumentsColumn({
   const hasData = docCount > 0;
 
   const xFormatter = niceTimeFormatter([timeState.start, timeState.end]);
+  const minInterval = Math.floor((timeState.end - timeState.start) / numDataPoints);
 
-  const noDocCountData = histogramQueryFetch.error ? '' : <EuiI18nNumber value={docCount} />;
+  const noDocCountData = histogramQueryResult.error ? '' : '-';
 
-  const noHistogramData = histogramQueryFetch.error ? (
+  const noHistogramData = histogramQueryResult.error ? (
     <TooltipOrPopoverIcon
       dataTestSubj="streamsDocCount-error"
       icon="warning"
-      title={getFormattedError(histogramQueryFetch.error).message}
+      title={getFormattedError(histogramQueryResult.error).message}
       mode="popover"
       iconColor="danger"
     />
   ) : (
     <EuiIcon type="visLine" size="m" />
   );
+
+  const cellAriaLabel = hasData
+    ? i18n.translate('xpack.streams.documentsColumn.cellDocCountLabel', {
+        defaultMessage: '{docCount} documents in {indexPattern}',
+        values: { docCount, indexPattern },
+      })
+    : i18n.translate('xpack.streams.documentsColumn.cellNoDataLabel', {
+        defaultMessage: 'No documents found in {indexPattern}',
+        values: { indexPattern },
+      });
 
   return (
     <EuiFlexGroup
@@ -113,21 +104,27 @@ export function DocumentsColumn({
         height: ${euiTheme.size.xl};
         white-space: nowrap;
       `}
+      role="group"
+      aria-label={cellAriaLabel}
     >
-      {histogramQueryFetch.loading ? (
+      {histogramQueryResult.loading ? (
         <LoadingPlaceholder />
       ) : (
         <>
           <EuiFlexItem
             grow={2}
+            aria-hidden="true"
             className={css`
               text-align: right;
+              font-family: 'Roboto mono', sans-serif;
             `}
+            data-test-subj={`streamsDocCount-${indexPattern}`}
           >
             {hasData ? <EuiI18nNumber value={docCount} /> : noDocCountData}
           </EuiFlexItem>
           <EuiFlexItem
             grow={3}
+            aria-hidden="true"
             className={css`
               border-bottom: ${hasData ? '1px solid' : 'none'} ${euiTheme.colors.lightShade};
               display: flex;

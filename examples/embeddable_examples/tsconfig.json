@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -43,6 +43,6 @@
     "@kbn/object-versioning",
     "@kbn/logging",
     "@kbn/core-saved-objects-api-server",
-    "@kbn/config-schema"
+    "@kbn/config-schema",
   ]
 }

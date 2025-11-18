@@ -3,6 +3,8 @@
   "id": "@kbn/embeddable-examples-plugin",
   "owner": "@elastic/kibana-presentation",
   "description": "Example app that shows how to register custom embeddables",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "embeddableExamples",
     "server": true,
@@ -17,7 +19,7 @@
       "charts",
       "fieldFormats",
       "developerExamples",
-      "dataViewFieldEditor"
+      "dataViewFieldEditor",
     ],
     "requiredBundles": ["dashboard", "presentationUtil", "kibanaUtils", "kibanaReact"]
   }

@@ -1,0 +1,29 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node",
+      "@kbn/ambient-common-types"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/ai-tools",
+    "@kbn/std",
+    "@kbn/core",
+    "@kbn/streamlang",
+    "@kbn/streams-schema",
+    "@kbn/inference-common",
+    "@kbn/zod",
+    "@kbn/inference-prompt-utils",
+    "@kbn/es-query",
+    "@kbn/zod-helpers",
+  ]
+}

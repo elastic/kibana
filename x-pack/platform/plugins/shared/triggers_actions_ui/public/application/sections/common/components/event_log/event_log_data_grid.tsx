@@ -8,33 +8,33 @@
 import React, { useMemo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiDataGrid,
+import type {
   EuiDataGridStyle,
   Pagination,
   EuiDataGridCellValueElementProps,
   EuiDataGridSorting,
   EuiDataGridColumn,
+  EuiDataGridCellPopoverElementProps,
+} from '@elastic/eui';
+import {
+  EuiDataGrid,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiBadge,
-  EuiDataGridCellPopoverElementProps,
   useEuiTheme,
   EuiToolTip,
   EuiIconTip,
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import {
-  IExecutionLog,
-  executionLogSortableColumns,
-  ExecutionLogSortFields,
-} from '@kbn/alerting-plugin/common';
-import { IExecutionLog as IConnectorsExecutionLog } from '@kbn/actions-plugin/common';
+import type { IExecutionLog, ExecutionLogSortFields } from '@kbn/alerting-plugin/common';
+import { executionLogSortableColumns } from '@kbn/alerting-plugin/common';
+import type { IExecutionLog as IConnectorsExecutionLog } from '@kbn/actions-plugin/common';
 import { get } from 'lodash';
 import { getIsExperimentalFeatureEnabled } from '../../../../../common/get_experimental_features';
-import { EventLogListCellRenderer, ColumnId, EventLogPaginationStatus } from '.';
+import type { ColumnId } from '.';
+import { EventLogListCellRenderer, EventLogPaginationStatus } from '.';
 import { RuleActionErrorBadge } from '../../../rule_details/components/rule_action_error_badge';
 
 export const getIsColumnSortable = (columnId: string) => {

@@ -21,18 +21,18 @@ import {
   EuiEmptyPrompt,
   EuiText,
 } from '@elastic/eui';
-import {
+import type {
   RuleActionAlertsFilterProperty,
   RuleActionFrequency,
   RuleActionParam,
   RuleSystemAction,
 } from '@kbn/alerting-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
+import type { ActionGroupWithMessageVariables } from '@kbn/triggers-actions-ui-types';
 import { checkActionFormActionTypeEnabled } from '@kbn/alerts-ui-shared/src/check_action_type_enabled';
 import { TECH_PREVIEW_DESCRIPTION, TECH_PREVIEW_LABEL } from '../translations';
 import { loadActionTypes, loadAllActions as loadConnectors } from '../../lib/action_connector_api';
-import {
+import type {
   ActionTypeModel,
   ActionTypeIndex,
   ActionConnector,
@@ -57,7 +57,7 @@ export interface ActionAccordionFormProps {
   defaultActionGroupId: string;
   actionGroups?: ActionGroupWithMessageVariables[];
   defaultActionMessage?: string;
-  setActionIdByIndex: (id: string, index: number) => void;
+  setActionIdByIndex: (id: string, index: number, connector?: ActionConnector) => void;
   setActionGroupIdByIndex?: (group: string, index: number) => void;
   setActionUseAlertDataForTemplate?: (enabled: boolean, index: number) => void;
   setActions: (actions: RuleUiAction[]) => void;
@@ -275,7 +275,7 @@ export const ActionForm = ({
       if (actionTypeConnectors.length > 0) {
         // If a connector was successfully found, update the actionTypeId
         actions.push({ ...actionToPush, actionTypeId: actionTypeConnectors[0].actionTypeId });
-        setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
+        setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1, actionTypeConnectors[0]);
       } else {
         // if no connectors exists or all connectors is already assigned an action under current alert
         // set actionType as id to be able to create new connector within the alert form
@@ -285,7 +285,7 @@ export const ActionForm = ({
       }
     } else {
       actions.push(actionToPush);
-      setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1);
+      setActionIdByIndex(actionTypeConnectors[0].id, actions.length - 1, actionTypeConnectors[0]);
     }
   }
 
@@ -296,7 +296,9 @@ export const ActionForm = ({
     const preconfiguredConnectors = connectors.filter((connector) => connector.isPreconfigured);
     actionTypeNodes = actionTypeRegistry
       .list()
-      .filter((item) => actionTypesIndex[item.id] && !item.hideInUi)
+      .filter(
+        (item) => actionTypesIndex[item.id] && !item.getHideInUi?.(Object.values(actionTypesIndex))
+      )
       .filter((item) => !!item.actionParamsFields)
       .sort((a, b) =>
         actionTypeCompare(actionTypesIndex[a.id], actionTypesIndex[b.id], preconfiguredConnectors)
@@ -433,8 +435,8 @@ export const ActionForm = ({
                   setAddModalVisibility(true);
                 }}
                 onSelectConnector={(connectorId: string) => {
-                  setActionIdByIndex(connectorId, index);
                   const newConnector = connectors.find((connector) => connector.id === connectorId);
+                  setActionIdByIndex(connectorId, index, newConnector);
                   if (newConnector && newConnector.actionTypeId) {
                     const actionTypeRegistered = actionTypeRegistry.get(newConnector.actionTypeId);
                     if (actionTypeRegistered.convertParamsBetweenGroups) {
@@ -509,8 +511,8 @@ export const ActionForm = ({
                 setAddModalVisibility(true);
               }}
               onConnectorSelected={(id: string) => {
-                setActionIdByIndex(id, index);
                 const newConnector = connectors.find((connector) => connector.id === id);
+                setActionIdByIndex(id, index, newConnector);
                 if (
                   newConnector &&
                   actionConnector &&
@@ -635,7 +637,9 @@ export const ActionForm = ({
             });
             connectors.push(savedAction);
             const indicesToUpdate = activeActionItem.indices || [];
-            indicesToUpdate.forEach((index: number) => setActionIdByIndex(savedAction.id, index));
+            indicesToUpdate.forEach((index: number) =>
+              setActionIdByIndex(savedAction.id, index, savedAction)
+            );
           }}
           actionTypeRegistry={actionTypeRegistry}
         />

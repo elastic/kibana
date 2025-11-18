@@ -6,9 +6,9 @@
  */
 
 import numeral from '@elastic/numeral';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import { IBasePath } from '@kbn/core-http-browser';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { IBasePath } from '@kbn/core-http-browser';
+import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { useKibana } from '../../../hooks/use_kibana';
 import { paths } from '../../../../common/locators/paths';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';

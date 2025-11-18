@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExtensionsService } from '../../../services';
+import type { ExtensionsService } from '../../../services';
 
 export declare function setExtensionsService(extensionsService: ExtensionsService): any;
 

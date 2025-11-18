@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EnhancedStore } from '@reduxjs/toolkit';
+import type { EnhancedStore } from '@reduxjs/toolkit';
 import type { Query } from '@kbn/es-query';
+import type { LensRootStore } from '.';
 import {
   switchDatasource,
   switchAndCleanDatasource,
@@ -16,23 +17,23 @@ import {
   updateVisualizationState,
   removeOrClearLayer,
   addLayer,
-  LensRootStore,
   selectTriggerApplyChanges,
   selectChangesApplied,
   removeDimension,
 } from '.';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { makeLensStore, defaultState, mockStoreDeps } from '../mocks';
-import {
+import type {
   Datasource,
   DatasourceMap,
   Visualization,
   VisualizationDimensionGroupConfig,
   VisualizationMap,
-} from '../types';
+  DataViewsState,
+  LensAppState,
+} from '@kbn/lens-common';
+import { LENS_LAYER_TYPES } from '@kbn/lens-common';
 import { applyChanges, disableAutoApply, enableAutoApply, setChangesApplied } from './lens_slice';
-import { DataViewsState, LensAppState } from './types';
-import { layerTypes } from '../../common/layer_types';
 
 describe('lensSlice', () => {
   let store: EnhancedStore<{ lens: LensAppState }>;
@@ -308,7 +309,7 @@ describe('lensSlice', () => {
           getLayerIds: (layerIds: unknown) => layerIds as string[],
           getLayersToLinkTo: (state, newLayerId) => ['linked-layer-id'],
           appendLayer: (layerIds: unknown, layerId: string) => [...(layerIds as string[]), layerId],
-          getSupportedLayers: jest.fn(() => [{ type: layerTypes.DATA, label: 'Data Layer' }]),
+          getSupportedLayers: jest.fn(() => [{ type: LENS_LAYER_TYPES.DATA, label: 'Data Layer' }]),
         } as Partial<Visualization>,
       };
 
@@ -385,7 +386,7 @@ describe('lensSlice', () => {
         customStore.dispatch(
           addLayer({
             layerId: 'foo',
-            layerType: layerTypes.DATA,
+            layerType: LENS_LAYER_TYPES.DATA,
             extraArg: undefined,
           })
         );

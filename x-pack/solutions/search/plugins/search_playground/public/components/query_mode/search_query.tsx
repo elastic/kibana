@@ -10,7 +10,8 @@ import React from 'react';
 import { EuiFieldText } from '@elastic/eui';
 import { Controller, useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import { PlaygroundForm, PlaygroundFormFields } from '../../types';
+import type { PlaygroundForm } from '../../types';
+import { PlaygroundFormFields } from '../../types';
 
 export const SearchQuery = ({ isLoading }: { isLoading: boolean }) => {
   const { control } = useFormContext();

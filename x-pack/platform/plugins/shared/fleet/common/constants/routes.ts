@@ -14,6 +14,7 @@ export const EPM_API_ROOT = `${API_ROOT}/epm`;
 export const DATA_STREAM_API_ROOT = `${API_ROOT}/data_streams`;
 export const PACKAGE_POLICY_API_ROOT = `${API_ROOT}/package_policies`;
 export const AGENT_POLICY_API_ROOT = `${API_ROOT}/agent_policies`;
+export const CLOUD_CONNECTOR_API_ROOT = `${API_ROOT}/cloud_connectors`;
 export const K8S_API_ROOT = `${API_ROOT}/kubernetes`;
 export const DOWNLOAD_SOURCE_API_ROOT = `${API_ROOT}/agent_download_sources`;
 
@@ -31,6 +32,8 @@ export const EPM_API_ROUTES = {
   BULK_UPGRADE_INFO_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_upgrade/{taskId}`,
   BULK_UNINSTALL_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_uninstall`,
   BULK_UNINSTALL_INFO_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_uninstall/{taskId}`,
+  BULK_ROLLBACK_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_rollback`,
+  BULK_ROLLBACK_INFO_PATTERN: `${EPM_PACKAGES_MANY}/_bulk_rollback/{taskId}`,
   LIST_PATTERN: EPM_PACKAGES_MANY,
   INSTALLED_LIST_PATTERN: EPM_PACKAGES_INSTALLED,
   LIMITED_LIST_PATTERN: `${EPM_PACKAGES_MANY}/limited`,
@@ -44,7 +47,9 @@ export const EPM_API_ROUTES = {
   DELETE_PATTERN: EPM_PACKAGES_ONE_WITH_OPTIONAL_VERSION,
   INSTALL_KIBANA_ASSETS_PATTERN: `${EPM_PACKAGES_ONE}/kibana_assets`,
   DELETE_KIBANA_ASSETS_PATTERN: `${EPM_PACKAGES_ONE}/kibana_assets`,
+  INSTALL_RULE_ASSETS_PATTERN: `${EPM_PACKAGES_ONE}/rule_assets`,
   FILEPATH_PATTERN: `${EPM_PACKAGES_ONE}/{filePath*}`,
+  KNOWLEDGE_BASE_PATTERN: `${INTERNAL_ROOT}/epm/packages/{pkgName}/knowledge_base`,
   CATEGORIES_PATTERN: `${EPM_API_ROOT}/categories`,
   VERIFICATION_KEY_ID: `${EPM_API_ROOT}/verification_key_id`,
   STATS_PATTERN: `${EPM_PACKAGES_MANY}/{pkgName}/stats`,
@@ -89,6 +94,15 @@ export const AGENT_POLICY_API_ROUTES = {
   INFO_OUTPUTS_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/outputs`,
   AUTO_UPGRADE_AGENTS_STATUS_PATTERN: `${AGENT_POLICY_API_ROOT}/{agentPolicyId}/auto_upgrade_agents_status`,
   CREATE_WITH_PACKAGE_POLICIES: `${INTERNAL_ROOT}/agent_and_package_policies`,
+};
+
+// Cloud Connector API routes
+export const CLOUD_CONNECTOR_API_ROUTES = {
+  LIST_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}`,
+  INFO_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}/{cloudConnectorId}`,
+  CREATE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}`,
+  UPDATE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}/{cloudConnectorId}`,
+  DELETE_PATTERN: `${CLOUD_CONNECTOR_API_ROOT}/{cloudConnectorId}`,
 };
 
 // Kubernetes Manifest API routes
@@ -173,6 +187,13 @@ export const AGENT_API_ROUTES = {
   LIST_UPLOADS_PATTERN: `${API_ROOT}/agents/{agentId}/uploads`,
   GET_UPLOAD_FILE_PATTERN: `${API_ROOT}/agents/files/{fileId}/{fileName}`,
   DELETE_UPLOAD_FILE_PATTERN: `${API_ROOT}/agents/files/{fileId}`,
+  PRIVILEGE_LEVEL_CHANGE_PATTERN: `${API_ROOT}/agents/{agentId}/privilege_level_change`,
+  BULK_PRIVILEGE_LEVEL_CHANGE_PATTERN: `${API_ROOT}/agents/bulk_privilege_level_change`,
+};
+
+export const AGENTLESS_POLICIES_ROUTES = {
+  CREATE_PATTERN: `${API_ROOT}/agentless_policies`,
+  DELETE_PATTERN: `${API_ROOT}/agentless_policies/{policyId}`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {

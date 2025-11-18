@@ -47,7 +47,7 @@ import {
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import { LicenseService } from '../../common/license';
 import { Subject } from 'rxjs';
-import type { ILicense } from '@kbn/licensing-plugin/common/types';
+import type { ILicense } from '@kbn/licensing-types';
 import { EndpointDocGenerator } from '../../common/endpoint/generate_data';
 import type { PolicyConfig, PolicyData } from '../../common/endpoint/types';
 import { AntivirusRegistrationModes, ProtectionModes } from '../../common/endpoint/types';
@@ -1285,6 +1285,31 @@ describe('Fleet integrations', () => {
       });
     });
 
+    it('should throw an error if the policy is invalid', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      licenseEmitter.next(Enterprise);
+
+      const callback = getPackagePolicyUpdateCallback(
+        endpointAppContextServiceMock,
+        cloudService,
+        productFeaturesService,
+        experimentalFeatures
+      );
+      const policyConfig = generator.generatePolicyPackagePolicy();
+
+      // @ts-expect-error TS2790: The operand of a delete operator must be optional
+      delete policyConfig.inputs[0]!.config!.policy;
+      // @ts-expect-error TS2790: The operand of a delete operator must be optional
+      delete policyConfig.inputs[0]!.config!.artifact_manifest;
+
+      await expect(() =>
+        callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+      ).rejects.toThrow(
+        "Invalid Elastic Defend security policy. 'inputs[0].config.policy.value' and 'inputs[0].config.artifact_manifest.value' are required."
+      );
+    });
+
     it('should correctly set meta.billable', async () => {
       const isBillablePolicySpy = jest.spyOn(PolicyConfigHelpers, 'isBillablePolicy');
 
@@ -1324,6 +1349,99 @@ describe('Fleet integrations', () => {
       expect(updatedPolicyConfig.inputs[0]!.config!.policy.value.meta.billable).toEqual(true);
 
       isBillablePolicySpy.mockRestore();
+    });
+
+    describe('device control notification validation', () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      beforeEach(() => {
+        licenseEmitter.next(Enterprise);
+      });
+
+      it.each<['windows' | 'mac', 'audit' | 'read_only', string]>([
+        ['windows', 'audit', 'Windows'],
+        ['mac', 'read_only', 'Mac'],
+      ])(
+        'should throw error when %s notifications are enabled and access level is %s',
+        async (os, accessLevel, osLabel) => {
+          const callback = getPackagePolicyUpdateCallback(
+            endpointAppContextServiceMock,
+            cloudService,
+            productFeaturesService,
+            experimentalFeatures
+          );
+          const policyConfig = generator.generatePolicyPackagePolicy();
+          policyConfig.inputs[0]!.config!.policy.value[os].device_control = {
+            enabled: true,
+            usb_storage: accessLevel,
+          };
+          policyConfig.inputs[0]!.config!.policy.value[os].popup.device_control = {
+            enabled: true,
+            message: 'Test message',
+          };
+
+          await expect(() =>
+            callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+          ).rejects.toThrow(
+            new RegExp(
+              `Device Control user notifications are only supported when USB storage access level is set to deny_all\\. Current ${osLabel} access level is "${accessLevel}"\\.`
+            )
+          );
+        }
+      );
+
+      it('should NOT throw when notifications are enabled and access level is deny_all', async () => {
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value.windows.device_control = {
+          enabled: true,
+          usb_storage: 'deny_all',
+        };
+        policyConfig.inputs[0]!.config!.policy.value.windows.popup.device_control = {
+          enabled: true,
+          message: 'Test message',
+        };
+        policyConfig.inputs[0]!.config!.policy.value.mac.device_control = {
+          enabled: true,
+          usb_storage: 'deny_all',
+        };
+        policyConfig.inputs[0]!.config!.policy.value.mac.popup.device_control = {
+          enabled: true,
+          message: 'Test message',
+        };
+
+        await expect(
+          callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+        ).resolves.not.toThrow();
+      });
+
+      it('should NOT throw when notifications are disabled regardless of access level', async () => {
+        const callback = getPackagePolicyUpdateCallback(
+          endpointAppContextServiceMock,
+          cloudService,
+          productFeaturesService,
+          experimentalFeatures
+        );
+        const policyConfig = generator.generatePolicyPackagePolicy();
+        policyConfig.inputs[0]!.config!.policy.value.windows.device_control = {
+          enabled: true,
+          usb_storage: 'audit',
+        };
+        policyConfig.inputs[0]!.config!.policy.value.windows.popup.device_control = {
+          enabled: false,
+          message: 'Test message',
+        };
+
+        await expect(
+          callback(policyConfig, soClient, esClient, requestContextMock.convertContext(ctx), req)
+        ).resolves.not.toThrow();
+      });
     });
   });
 
@@ -1412,8 +1530,9 @@ describe('Fleet integrations', () => {
 
     describe('and with space awareness feature enabled', () => {
       beforeEach(() => {
-        // @ts-expect-error
-        endpointServicesMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
+        (
+          endpointServicesMock.getInternalFleetServices().isEndpointPackageInstalled as jest.Mock
+        ).mockResolvedValue(true);
 
         const packagePolicyGenerator = new FleetPackagePolicyGenerator('seed');
         const packageNames = Object.values(RESPONSE_ACTIONS_SUPPORTED_INTEGRATION_TYPES).flat();
@@ -1432,14 +1551,6 @@ describe('Fleet integrations', () => {
               success: true,
             };
           });
-      });
-
-      it('should not update response actions if spaces feature is disabled', async () => {
-        // @ts-expect-error
-        endpointServicesMock.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = false;
-        await invokeDeleteCallback();
-
-        expect(endpointServicesMock.getInternalEsClient().updateByQuery).not.toHaveBeenCalled();
       });
 
       it('should check only policies whose package.name matches a package that supports response actions', async () => {

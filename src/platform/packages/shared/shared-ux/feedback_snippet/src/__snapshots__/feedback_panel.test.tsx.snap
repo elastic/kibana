@@ -1,0 +1,191 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`FeedbackPanel renders with the expected inner components based on the feedback view: negative 1`] = `
+<div
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-m-m-plain-hasShadow-FeedbackPanel"
+  data-test-subj="feedbackSnippetPanel"
+>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiText emotion-euiText-s-euiTextAlign-left"
+      >
+        Sorry to hear! Please, tell us a little more:
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <button
+        aria-label="Close feedback panel"
+        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
+        data-test-subj="feedbackSnippetTestIdPanelDismiss"
+        id="feedbackSnippetTestIdPanelDismiss"
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="cross"
+        />
+      </button>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+  />
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-center-stretch-row"
+  >
+    <button
+      aria-label="Take quick survey"
+      class="euiButton emotion-euiButtonDisplay-s-fullWidth-defaultMinWidth-fill-primary"
+      data-test-subj="feedbackSnippetTestIdPanelSurveyLink"
+      id="feedbackSnippetTestIdPanelSurveyLink"
+      type="button"
+    >
+      <span
+        class="emotion-euiButtonDisplayContent"
+      >
+        Take quick survey
+        <span
+          color="inherit"
+          data-euiicon-type="popout"
+        />
+      </span>
+    </button>
+  </div>
+</div>
+`;
+
+exports[`FeedbackPanel renders with the expected inner components based on the feedback view: positive 1`] = `
+<div
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-m-m-plain-hasShadow-FeedbackPanel"
+  data-test-subj="feedbackSnippetPanel"
+>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-center-stretch-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiText emotion-euiText-s-euiTextAlign-center"
+      >
+        Thanks for the feedback!
+        <br />
+        Glad you enjoy it!
+      </div>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+  />
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-center-stretch-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <span
+        color="success"
+        data-euiicon-type="thumbUp"
+        data-test-subj="feedbackSnippetPanelPositiveIcon"
+      >
+        Thumb up
+      </span>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`FeedbackPanel renders with the expected inner components based on the feedback view: prompt 1`] = `
+<div
+  class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-m-m-plain-hasShadow-FeedbackPanel"
+  data-test-subj="feedbackSnippetPanel"
+>
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-spaceBetween-stretch-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <div
+        class="euiText emotion-euiText-s-euiTextAlign-left"
+      >
+        Was this page helpful?
+      </div>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <button
+        aria-label="Close feedback panel"
+        class="euiButtonIcon emotion-euiButtonIcon-xs-empty-text"
+        data-test-subj="feedbackSnippetTestIdPanelDismiss"
+        id="feedbackSnippetTestIdPanelDismiss"
+        type="button"
+      >
+        <span
+          aria-hidden="true"
+          class="euiButtonIcon__icon"
+          color="inherit"
+          data-euiicon-type="cross"
+        />
+      </button>
+    </div>
+  </div>
+  <div
+    class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+  />
+  <div
+    class="euiFlexGroup emotion-euiFlexGroup-responsive-s-center-stretch-row"
+  >
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <button
+        class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-danger"
+        data-test-subj="feedbackSnippetTestIdPanelThumbDown"
+        id="feedbackSnippetTestIdPanelThumbDown"
+        type="button"
+      >
+        <span
+          class="emotion-euiButtonDisplayContent"
+        >
+          <span
+            data-euiicon-type="thumbDown"
+          >
+            Thumb down
+          </span>
+        </span>
+      </button>
+    </div>
+    <div
+      class="euiFlexItem emotion-euiFlexItem-growZero"
+    >
+      <button
+        class="euiButton emotion-euiButtonDisplay-s-defaultMinWidth-base-success"
+        data-test-subj="feedbackSnippetTestIdPanelThumbUp"
+        id="feedbackSnippetTestIdPanelThumbUp"
+        type="button"
+      >
+        <span
+          class="emotion-euiButtonDisplayContent"
+        >
+          <span
+            data-euiicon-type="thumbUp"
+          >
+            Thumb up
+          </span>
+        </span>
+      </button>
+    </div>
+  </div>
+</div>
+`;

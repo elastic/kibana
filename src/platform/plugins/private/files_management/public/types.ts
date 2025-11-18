@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FilesClient, FilesSetup, FilesStart } from '@kbn/files-plugin/public';
-import { ManagementSetup } from '@kbn/management-plugin/public';
+import type { FilesClient, FilesSetup, FilesStart } from '@kbn/files-plugin/public';
+import type { ManagementSetup } from '@kbn/management-plugin/public';
 
 export interface AppContext {
   filesClient: FilesClient;

@@ -17,11 +17,11 @@ import {
   EuiSpacer,
   EuiRadioGroup,
 } from '@elastic/eui';
-import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { getFields } from '@kbn/triggers-actions-ui-plugin/public';
 import { ESQLLangEditor } from '@kbn/esql/public';
-import { fetchFieldsFromESQL } from '@kbn/esql-editor';
-import { getESQLAdHocDataview } from '@kbn/esql-utils';
-import type { AggregateQuery } from '@kbn/es-query';
+import { getESQLAdHocDataview, getESQLResults } from '@kbn/esql-utils';
+import { type AggregateQuery } from '@kbn/es-query';
 import { parseDuration } from '@kbn/alerting-plugin/common';
 import {
   firstFieldOption,
@@ -30,16 +30,43 @@ import {
   isPerRowAggregation,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
-import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType } from '../types';
+import { EsqlQuery } from '@kbn/esql-ast';
+import useDebounce from 'react-use/lib/useDebounce';
+import type { EsQueryRuleParams, EsQueryRuleMetaData } from '../types';
+import { SearchType } from '../types';
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { useTriggerUiActionServices } from '../util';
 import { hasExpressionValidationErrors } from '../validation';
 import { TestQueryRow } from '../test_query_row';
-import {
-  transformDatatableToEsqlTable,
-  getEsqlQueryHits,
-  ALERT_ID_SUGGESTED_MAX,
-} from '../../../../common';
+import { transformToEsqlTable, getEsqlQueryHits, ALERT_ID_SUGGESTED_MAX } from '../../../../common';
+
+export const getTimeFilter = (timeField: string, window: string) => {
+  const timeWindow = parseDuration(window);
+  const now = Date.now();
+  const dateEnd = new Date(now).toISOString();
+  const dateStart = new Date(now - timeWindow).toISOString();
+  return {
+    timeRange: {
+      from: dateStart,
+      to: dateEnd,
+    },
+    timeFilter: {
+      bool: {
+        filter: [
+          {
+            range: {
+              [timeField]: {
+                lte: dateEnd,
+                gt: dateStart,
+                format: 'strict_date_optional_time',
+              },
+            },
+          },
+        ],
+      },
+    },
+  };
+};
 
 const ALL_DOCUMENTS = 'all';
 const alertingOptions = [
@@ -74,11 +101,20 @@ const getWarning = (duplicateAlertIds?: Set<string>, longAlertIds?: Set<string>)
   }
 };
 
+const keepRecommendedWarning = i18n.translate(
+  'xpack.stackAlerts.esQuery.ui.keepRecommendedWarning',
+  {
+    defaultMessage:
+      'KEEP processing command is recommended for ES|QL queries to limit the number of columns returned.',
+  }
+);
+
 export const EsqlQueryExpression: React.FC<
   RuleTypeParamsExpressionProps<EsQueryRuleParams<SearchType.esqlQuery>, EsQueryRuleMetaData>
-> = ({ ruleParams, setRuleParams, setRuleProperty, errors }) => {
-  const { expressions, http, isServerless, dataViews } = useTriggerUiActionServices();
+> = ({ ruleParams, metadata, setRuleParams, setRuleProperty, errors, data }) => {
+  const { http, isServerless, dataViews } = useTriggerUiActionServices();
   const { esqlQuery, timeWindowSize, timeWindowUnit, timeField, groupBy } = ruleParams;
+  const isEdit = !!metadata?.isEdit;
 
   const [currentRuleParams, setCurrentRuleParams] = useState<
     EsQueryRuleParams<SearchType.esqlQuery>
@@ -96,7 +132,7 @@ export const EsqlQueryExpression: React.FC<
     groupBy: groupBy ?? DEFAULT_VALUES.GROUP_BY,
     termSize: DEFAULT_VALUES.TERM_SIZE,
     searchType: SearchType.esqlQuery,
-    // The sourceFields param is ignored for the ES|QL type
+    // The sourceFields param is ignored
     sourceFields: [],
   });
   const [query, setQuery] = useState<AggregateQuery>(esqlQuery ?? { esql: '' });
@@ -104,6 +140,29 @@ export const EsqlQueryExpression: React.FC<
   const [detectedTimestamp, setDetectedTimestamp] = useState<string | undefined>(undefined);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [radioIdSelected, setRadioIdSelected] = useState(groupBy ?? ALL_DOCUMENTS);
+  const [keepWarning, setKeepWarning] = useState<string | undefined>(undefined);
+  const [touched, setTouched] = useState<boolean>(false);
+
+  useDebounce(
+    () => {
+      if (isEdit) {
+        return;
+      }
+      const {
+        ast: { commands },
+        tokens,
+      } = EsqlQuery.fromSrc(query.esql);
+
+      if (!commands.some((command) => command.name === 'keep')) {
+        const lastLine = tokens[tokens.length - 1];
+        setKeepWarning(`"Line ${lastLine?.line || 1}:0: ${keepRecommendedWarning}"`);
+      } else {
+        setKeepWarning(undefined);
+      }
+    },
+    500,
+    [isEdit, query]
+  );
 
   const setParam = useCallback(
     (paramField: string, paramValue: unknown) => {
@@ -153,25 +212,21 @@ export const EsqlQueryExpression: React.FC<
       return emptyResult;
     }
     setIsLoading(true);
-    const timeWindow = parseDuration(window);
-    const now = Date.now();
-    const table = await fetchFieldsFromESQL(
-      esqlQuery,
-      expressions,
-      {
-        from: new Date(now - timeWindow).toISOString(),
-        to: new Date(now).toISOString(),
-      },
-      undefined,
-      // create a data view with the timefield to pass into the query
-      timeField
-    );
-    if (table) {
-      const esqlTable = transformDatatableToEsqlTable(table);
-      const { results, duplicateAlertIds, longAlertIds, rows, cols } = getEsqlQueryHits(
+    const { timeFilter, timeRange } = getTimeFilter(timeField, window);
+    const table = await getESQLResults({
+      esqlQuery: esqlQuery.esql,
+      search: data.search.search,
+      dropNullColumns: true,
+      timeRange,
+      filter: timeFilter,
+    });
+    if (table.response) {
+      const esqlTable = transformToEsqlTable(table.response);
+      const { results, duplicateAlertIds, longAlertIds, rows, cols } = await getEsqlQueryHits(
         esqlTable,
         esqlQuery.esql,
-        isGroupAgg
+        isGroupAgg,
+        true
       );
       const warning = getWarning(duplicateAlertIds, longAlertIds);
 
@@ -199,7 +254,7 @@ export const EsqlQueryExpression: React.FC<
     timeWindowUnit,
     currentRuleParams,
     esqlQuery,
-    expressions,
+    data.search.search,
     timeField,
     isServerless,
     groupBy,
@@ -209,7 +264,11 @@ export const EsqlQueryExpression: React.FC<
     async (q: AggregateQuery) => {
       const fetchTimeFieldsData = async (queryObj: AggregateQuery) => {
         try {
-          const esqlDataView = await getESQLAdHocDataview(queryObj.esql, dataViews);
+          const esqlDataView = await getESQLAdHocDataview({
+            dataViewsService: dataViews,
+            query: queryObj.esql,
+            http,
+          });
           const indexPattern: string = esqlDataView.getIndexPattern();
           const currentEsFields = await getFields(http, [indexPattern]);
           const newTimeFieldOptions = getTimeFieldOptions(currentEsFields);
@@ -239,10 +298,12 @@ export const EsqlQueryExpression: React.FC<
         <ESQLLangEditor
           query={query}
           onTextLangQueryChange={(q: AggregateQuery) => {
+            setTouched(true);
             setQuery(q);
             setParam('esqlQuery', q);
             refreshTimeFields(q);
           }}
+          warning={touched && keepWarning ? keepWarning : undefined}
           onTextLangQuerySubmit={async () => {}}
           detectedTimestamp={detectedTimestamp}
           hideRunQueryText
@@ -251,6 +312,7 @@ export const EsqlQueryExpression: React.FC<
           editorIsInline
           expandToFitQueryOnMount
           hasOutline
+          mergeExternalMessages
         />
       </EuiFormRow>
       <EuiSpacer />
@@ -308,6 +370,7 @@ export const EsqlQueryExpression: React.FC<
             setRadioIdSelected(optionId);
             setParam('groupBy', optionId);
           }}
+          name="alertGroup"
         />
       </EuiFormRow>
       <EuiSpacer />

@@ -6,17 +6,27 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
+import { ControlTriggerSource, ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
-import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
-import type { ESQLAstItem, ESQLLiteral } from '../../types';
-import { FunctionParameterType } from '../types';
-import { ISuggestionItem } from '../../commands_registry/types';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../commands_registry/constants';
-import { getControlSuggestion } from './autocomplete/helpers';
+import { withAutoSuggest } from './autocomplete/helpers';
+import type { ISuggestionItem } from '../../commands_registry/types';
 import { timeUnitsToSuggest } from '../constants';
-import { isLiteral } from '../../ast/is';
+import { getControlSuggestion } from './autocomplete/helpers';
+import type { FunctionParameterType, SupportedDataType } from '../types';
+import { commaCompleteItem } from '../../commands_registry/complete_items';
 
 export const TIME_SYSTEM_PARAMS = ['?_tstart', '?_tend'];
+
+// Targeted: define option interfaces for constants/date literals
+export interface BuildConstantsOptions {
+  advanceCursorAndOpenSuggestions?: boolean;
+  addComma?: boolean;
+}
+
+export interface DateLiteralsOptions {
+  advanceCursorAndOpenSuggestions?: boolean;
+  addComma?: boolean;
+}
 
 export const buildConstantsDefinitions = (
   userConstants: string[],
@@ -25,36 +35,42 @@ export const buildConstantsDefinitions = (
   /**
    * Whether or not to advance the cursor and open the suggestions dialog after inserting the constant.
    */
-  options?: { advanceCursorAndOpenSuggestions?: boolean; addComma?: boolean }
+  options?: BuildConstantsOptions,
+  documentationValue?: string
 ): ISuggestionItem[] =>
-  userConstants.map((label) => ({
-    label,
-    text:
-      label +
-      (options?.addComma ? ',' : '') +
-      (options?.advanceCursorAndOpenSuggestions ? ' ' : ''),
-    kind: 'Constant',
-    detail:
-      detail ??
-      i18n.translate('kbn-esql-ast.esql.autocomplete.constantDefinition', {
-        defaultMessage: `Constant`,
-      }),
-    sortText: sortText ?? 'A',
-    command: options?.advanceCursorAndOpenSuggestions ? TRIGGER_SUGGESTION_COMMAND : undefined,
-  }));
+  userConstants.map((label) => {
+    const suggestion: ISuggestionItem = {
+      label,
+      text:
+        label +
+        (options?.addComma ? ',' : '') +
+        (options?.advanceCursorAndOpenSuggestions ? ' ' : ''),
+      kind: 'Constant',
+      detail:
+        detail ??
+        i18n.translate('kbn-esql-ast.esql.autocomplete.constantDefinition', {
+          defaultMessage: `Constant`,
+        }),
+      ...(documentationValue ? { documentation: { value: documentationValue } } : {}),
+      sortText: sortText ?? 'A',
+    };
 
-export function getDateLiterals(options?: {
-  advanceCursorAndOpenSuggestions?: boolean;
-  addComma?: boolean;
-}) {
+    return options?.advanceCursorAndOpenSuggestions ? withAutoSuggest(suggestion) : suggestion;
+  });
+
+export function getDateLiterals(options?: DateLiteralsOptions) {
   return [
     ...buildConstantsDefinitions(
       TIME_SYSTEM_PARAMS,
       i18n.translate('kbn-esql-ast.esql.autocomplete.namedParamDefinition', {
-        defaultMessage: 'Named parameter',
+        defaultMessage: 'Bind to time filter',
       }),
       '1A',
-      options
+      options,
+      // appears when the user opens the second level popover
+      i18n.translate('kbn-esql-ast.esql.autocomplete.timeNamedParamDoc', {
+        defaultMessage: `Use the \`?_tstart\` and \`?_tend\` parameters to bind a custom timestamp field to Kibana's time filter.`,
+      })
     ),
     {
       label: i18n.translate('kbn-esql-ast.esql.autocomplete.chooseFromTimePickerLabel', {
@@ -85,20 +101,38 @@ export function getUnitDuration(unit: number = 1) {
 }
 
 /**
- * Given information about the current command and the parameter type, suggest
+ * Returns time unit literals (e.g., "1 day", "1 hour") and optionally appends a trailing comma item.
+ * Generic literal builder (no policy), controlled via options.
+ */
+export function getTimeUnitLiterals(
+  addComma: boolean,
+  advanceCursorAndOpenSuggestions: boolean
+): ISuggestionItem[] {
+  const items: ISuggestionItem[] = [
+    ...buildConstantsDefinitions(
+      timeUnitsToSuggest.map(({ name }) => name),
+      undefined,
+      undefined,
+      {
+        addComma,
+        advanceCursorAndOpenSuggestions,
+      }
+    ),
+  ];
+
+  if (addComma || advanceCursorAndOpenSuggestions) {
+    items.push(commaCompleteItem);
+  }
+
+  return items;
+}
+
+/**
+ * Given information about the current parameter type, suggest
  * some literals that may make sense.
- *
- * TODO — this currently tries to cover both command-specific suggestions and type
- * suggestions. We could consider separating the two... or just using parameter types
- * and forgetting about command-specific suggestions altogether.
- *
- * Another thought... should literal suggestions be defined in the definitions file?
- * That approach might allow for greater specificity in the suggestions and remove some
- * "magical" logic. Maybe this is really the same thing as the literalOptions parameter
- * definition property...
  */
 export function getCompatibleLiterals(
-  types: string[],
+  types: (FunctionParameterType | SupportedDataType | 'unknown')[],
   options?: {
     advanceCursorAndOpenSuggestions?: boolean;
     addComma?: boolean;
@@ -118,6 +152,7 @@ export function getCompatibleLiterals(
       timeLiteralSuggestions.push(
         ...getControlSuggestion(
           ESQLVariableType.TIME_LITERAL,
+          ControlTriggerSource.SMART_SUGGESTION,
           userDefinedColumns.map((v) => `?${v.key}`)
         )
       );
@@ -125,81 +160,15 @@ export function getCompatibleLiterals(
     // filter plural for now and suggest only unit + singular
     suggestions.push(...timeLiteralSuggestions); // i.e. 1 year
   }
-  // this is a special type built from the suggestion system, not inherited from the AST
-  if (types.includes('time_literal_unit')) {
+
+  if (types.includes('date')) {
     suggestions.push(
-      ...buildConstantsDefinitions(
-        timeUnitsToSuggest.map(({ name }) => name),
-        undefined,
-        undefined,
-        options
-      )
-    ); // i.e. year, month, ...
+      ...getDateLiterals({
+        addComma: options?.addComma,
+        advanceCursorAndOpenSuggestions: options?.advanceCursorAndOpenSuggestions,
+      })
+    );
   }
+
   return suggestions;
-}
-
-/**
- * Checks if both types are string types.
- *
- * Functions in ES|QL accept `text` and `keyword` types interchangeably.
- * @param type1
- * @param type2
- * @returns
- */
-function bothStringTypes(type1: string, type2: string): boolean {
-  return (type1 === 'text' || type1 === 'keyword') && (type2 === 'text' || type2 === 'keyword');
-}
-
-export function doesLiteralMatchParameterType(argType: FunctionParameterType, item: ESQLLiteral) {
-  if (item.literalType === argType) {
-    return true;
-  }
-
-  if (bothStringTypes(argType, item.literalType)) {
-    // all functions accept keyword literals for text parameters
-    return true;
-  }
-
-  if (item.literalType === 'null') {
-    // all parameters accept null, but this is not yet reflected
-    // in our function definitions so we let it through here
-    return true;
-  }
-
-  // some parameters accept string literals because of ES auto-casting
-  if (
-    item.literalType === 'keyword' &&
-    (argType === 'date' ||
-      argType === 'date_period' ||
-      argType === 'version' ||
-      argType === 'ip' ||
-      argType === 'boolean')
-  ) {
-    return true;
-  }
-
-  return false;
-}
-
-function isValidDateString(dateString: unknown): boolean {
-  if (typeof dateString !== 'string') return false;
-  const timestamp = Date.parse(dateString.replace(/\"/g, ''));
-  return !isNaN(timestamp);
-}
-
-/**
- * Returns true is node is a valid literal that represents a date
- * either a system time parameter or a date string generated by date picker
- * @param dateString
- * @returns
- */
-export function isLiteralDateItem(nodeArg: ESQLAstItem): boolean {
-  return (
-    isLiteral(nodeArg) &&
-    // If text is ?start or ?end, it's a system time parameter
-    (TIME_SYSTEM_PARAMS.includes(nodeArg.text) ||
-      // Or if it's a string generated by date picker
-      isValidDateString(nodeArg.value))
-  );
 }

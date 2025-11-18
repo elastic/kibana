@@ -1,0 +1,19 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { memo } from 'react';
+
+import { useGetPackageStats } from '../../../../../hooks';
+
+/**
+ * Displays a count of Package Policies that are using the given integration
+ */
+export const IntegrationPolicyCount = memo<{ packageName: string }>(({ packageName }) => {
+  const { data } = useGetPackageStats(packageName);
+
+  return <>{data?.response.package_policy_count ?? 0}</>;
+});

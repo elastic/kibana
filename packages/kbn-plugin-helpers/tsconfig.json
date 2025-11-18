@@ -1,5 +1,5 @@
 {
-  "extends": "../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -20,7 +20,6 @@
     "@kbn/jest-serializers",
     "@kbn/repo-packages",
     "@kbn/stdio-dev-helpers",
-    "@kbn/bazel-runner",
   ],
   "exclude": [
     "target/**/*",

@@ -7,10 +7,11 @@
 
 import Boom from '@hapi/boom';
 import { map } from 'rxjs';
-import { Observable, Subscription } from 'rxjs';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { ILicense } from '@kbn/licensing-plugin/common/types';
-import { checkLicense, GraphLicenseInformation } from '../../common/check_license';
+import type { Observable, Subscription } from 'rxjs';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { ILicense } from '@kbn/licensing-types';
+import type { GraphLicenseInformation } from '../../common/check_license';
+import { checkLicense } from '../../common/check_license';
 
 export class LicenseState {
   private licenseInformation: GraphLicenseInformation = checkLicense(undefined);

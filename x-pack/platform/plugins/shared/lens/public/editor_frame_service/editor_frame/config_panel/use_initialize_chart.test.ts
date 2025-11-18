@@ -9,7 +9,7 @@ import {
   createInitializeChartFunction,
   type InitializeChartLogicArgs,
 } from './use_initialize_chart';
-import { TypedLensSerializedState } from '../../../react_embeddable/types';
+import type { TypedLensSerializedState } from '@kbn/lens-common';
 
 describe('createInitializeChartFunction', () => {
   let mockSetErrors: jest.Mock;

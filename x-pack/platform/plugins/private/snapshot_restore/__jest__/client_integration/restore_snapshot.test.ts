@@ -8,7 +8,7 @@ import { act } from 'react-dom/test-utils';
 
 import { API_BASE_PATH } from '../../common';
 import { pageHelpers, setupEnvironment } from './helpers';
-import { RestoreSnapshotTestBed } from './helpers/restore_snapshot.helpers';
+import type { RestoreSnapshotTestBed } from './helpers/restore_snapshot.helpers';
 import { REPOSITORY_NAME, SNAPSHOT_NAME } from './helpers/constant';
 import { FEATURE_STATES_NONE_OPTION } from '../../common/constants';
 import * as fixtures from '../../test/fixtures';

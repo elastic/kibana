@@ -7,16 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState, ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React, { useMemo, useState } from 'react';
 import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
+import type { Criteria } from '@elastic/eui';
 import {
   Comparators,
   EuiBasicTable,
   type EuiBasicTableColumn,
   EuiButtonIcon,
   EuiText,
-  Criteria,
 } from '@elastic/eui';
 import { ClusterView } from './cluster_view';
 import { ClusterHealth } from '../clusters_health';

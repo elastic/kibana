@@ -8,10 +8,12 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { EuiFormRow, EuiHorizontalRule, EuiRange, EuiRangeProps, useEuiTheme } from '@elastic/eui';
+import type { EuiRangeProps } from '@elastic/eui';
+import { EuiFormRow, EuiHorizontalRule, EuiRange, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
-import { RowHeightSettings, RowHeightSettingsProps } from './row_height_settings';
+import type { RowHeightSettingsProps } from './row_height_settings';
+import { RowHeightSettings } from './row_height_settings';
 
 export const DEFAULT_MAX_ALLOWED_SAMPLE_SIZE = 1000;
 export const MIN_ALLOWED_SAMPLE_SIZE = 1;

@@ -30,6 +30,7 @@ export const FileActionsPopoverButton: React.FC<{ caseId: string; theFile: FileJ
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { owner, permissions } = useCasesContext();
   const { client: filesClient } = useFilesContext();
+  const buttonRef = React.useRef<HTMLAnchorElement>(null);
 
   const { showSuccessToast } = useCasesToast();
   const { isLoading, mutate: deleteFileAttachment } = useDeleteFileAttachment();
@@ -162,6 +163,7 @@ export const FileActionsPopoverButton: React.FC<{ caseId: string; theFile: FileJ
             color="text"
             key={`cases-files-actions-popover-button-${theFile.id}`}
             data-test-subj={`cases-files-actions-popover-button-${theFile.id}`}
+            buttonRef={buttonRef}
           />
         }
         isOpen={isPopoverOpen}
@@ -181,6 +183,7 @@ export const FileActionsPopoverButton: React.FC<{ caseId: string; theFile: FileJ
           confirmButtonText={i18n.DELETE}
           onCancel={onCancel}
           onConfirm={onConfirm}
+          focusButtonRef={buttonRef}
         />
       )}
     </>

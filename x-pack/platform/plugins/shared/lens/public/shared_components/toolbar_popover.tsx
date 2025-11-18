@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import React, { PropsWithChildren, useState } from 'react';
-import { EuiFlexItem, EuiPopover, EuiPopoverProps, EuiPopoverTitle, IconType } from '@elastic/eui';
-import { ToolbarButton, ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
+import type { PropsWithChildren } from 'react';
+import React, { useState } from 'react';
+import type { EuiPopoverProps, IconType } from '@elastic/eui';
+import { EuiPopover, EuiPopoverTitle } from '@elastic/eui';
+import type { ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
+import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { EuiIconLegend } from '@kbn/chart-icons';
 
 const typeToIconMap: { [type: string]: string | IconType } = {
@@ -40,7 +43,7 @@ export type ToolbarPopoverProps = Partial<EuiPopoverProps> & {
   handleClose?: () => void;
 };
 
-const defaultPanelStyles = { width: '410px' };
+const defaultPanelStyles = { width: '420px' };
 
 export const ToolbarPopover: React.FC<PropsWithChildren<ToolbarPopoverProps>> = ({
   children,
@@ -58,39 +61,38 @@ export const ToolbarPopover: React.FC<PropsWithChildren<ToolbarPopoverProps>> = 
   const iconType: string | IconType = typeof type === 'string' ? typeToIconMap[type] : type;
 
   return (
-    <EuiFlexItem grow={false}>
-      <EuiPopover
-        panelStyle={panelStyle}
-        ownFocus
-        aria-label={title}
-        button={
-          <ToolbarButton
-            as={'iconButton'}
-            iconType={iconType}
-            onClick={() => {
-              setIsOpen(!isOpen);
-            }}
-            label={title}
-            aria-label={title}
-            isDisabled={isDisabled}
-            groupPosition={groupPosition}
-            data-test-subj={buttonDataTestSubj}
-          />
-        }
-        isOpen={isOpen}
-        closePopover={() => {
-          setIsOpen(false);
-          handleClose?.();
-        }}
-        anchorPosition="downRight"
-        panelPaddingSize="s"
-        {...euiPopoverProps}
-      >
-        <EuiPopoverTitle data-test-subj={`${euiPopoverProps['data-test-subj']}_title`}>
-          {title}
-        </EuiPopoverTitle>
-        {children}
-      </EuiPopover>
-    </EuiFlexItem>
+    <EuiPopover
+      panelStyle={panelStyle}
+      ownFocus
+      aria-label={title}
+      button={
+        <ToolbarButton
+          as={'iconButton'}
+          iconType={iconType}
+          onClick={() => {
+            setIsOpen(!isOpen);
+          }}
+          label={title}
+          aria-label={title}
+          isDisabled={isDisabled}
+          groupPosition={groupPosition}
+          data-test-subj={buttonDataTestSubj}
+          size="s"
+        />
+      }
+      isOpen={isOpen}
+      closePopover={() => {
+        setIsOpen(false);
+        handleClose?.();
+      }}
+      anchorPosition="downRight"
+      panelPaddingSize="m"
+      {...euiPopoverProps}
+    >
+      <EuiPopoverTitle data-test-subj={`${euiPopoverProps['data-test-subj']}_title`}>
+        {title}
+      </EuiPopoverTitle>
+      {children}
+    </EuiPopover>
   );
 };

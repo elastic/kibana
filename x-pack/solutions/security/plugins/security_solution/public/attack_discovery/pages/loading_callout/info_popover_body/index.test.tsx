@@ -5,62 +5,71 @@
  * 2.0.
  */
 
-import type { GenerationInterval } from '@kbn/elastic-assistant-common';
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { InfoPopoverBody } from '.';
 import { TestProviders } from '../../../../common/mock';
 import { AVERAGE_TIME } from '../countdown/translations';
-import { useKibanaFeatureFlags } from '../../use_kibana_feature_flags';
 
-jest.mock('../../use_kibana_feature_flags');
+const averageSuccessfulDurationNanoseconds = 191_000_000_000; // 191 seconds
 
 describe('InfoPopoverBody', () => {
-  const connectorIntervals: GenerationInterval[] = [
-    {
-      date: '2024-05-16T14:13:09.838Z',
-      durationMs: 173648,
-    },
-    {
-      date: '2024-05-16T13:59:49.620Z',
-      durationMs: 146605,
-    },
-    {
-      date: '2024-05-16T13:47:00.629Z',
-      durationMs: 255163,
-    },
-  ];
-
   beforeEach(() => {
     jest.clearAllMocks();
-
-    (useKibanaFeatureFlags as jest.Mock).mockReturnValue({
-      attackDiscoveryAlertsEnabled: false,
-    });
   });
 
   it('renders the expected average time', () => {
     render(
       <TestProviders>
-        <InfoPopoverBody connectorIntervals={connectorIntervals} />
+        <InfoPopoverBody
+          averageSuccessfulDurationNanoseconds={averageSuccessfulDurationNanoseconds}
+        />
       </TestProviders>
     );
 
-    const averageTimeBadge = screen.getByTestId('averageTimeBadge');
-
-    expect(averageTimeBadge).toHaveTextContent('191s');
+    expect(screen.getByTestId('averageTimeBadge')).toHaveTextContent('191s');
   });
 
   it('renders the expected explanation', () => {
     render(
       <TestProviders>
-        <InfoPopoverBody connectorIntervals={connectorIntervals} />
+        <InfoPopoverBody
+          averageSuccessfulDurationNanoseconds={averageSuccessfulDurationNanoseconds}
+        />
       </TestProviders>
     );
 
-    const averageTimeIsCalculated = screen.getAllByTestId('averageTimeIsCalculated');
+    expect(screen.getAllByTestId('averageTimeIsCalculated')[0]).toHaveTextContent(AVERAGE_TIME);
+  });
 
-    expect(averageTimeIsCalculated[0]).toHaveTextContent(AVERAGE_TIME);
+  it('rounds up to the next second', () => {
+    render(
+      <TestProviders>
+        <InfoPopoverBody averageSuccessfulDurationNanoseconds={8_500_000_000} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('averageTimeBadge')).toHaveTextContent('9s');
+  });
+
+  it('renders 0s when nanoseconds is undefined', () => {
+    render(
+      <TestProviders>
+        <InfoPopoverBody averageSuccessfulDurationNanoseconds={undefined} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('averageTimeBadge')).toHaveTextContent('0s');
+  });
+
+  it('renders the LastTimesPopover with successfulGenerations', () => {
+    render(
+      <TestProviders>
+        <InfoPopoverBody successfulGenerations={5} />
+      </TestProviders>
+    );
+
+    expect(screen.getByTestId('lastTimesPopover')).toBeInTheDocument();
   });
 });

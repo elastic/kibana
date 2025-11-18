@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 const RULE_ALERT_INDEX_PATTERN = '.alerts-stack.alerts-*';
 
@@ -239,9 +239,10 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         const consumerOptions = await consumerOptionsList.findAllByClassName(
           'euiComboBoxOption__content'
         );
-        expect(consumerOptions.length).eql(2);
-        expect(await consumerOptions[0].getVisibleText()).eql('Metrics');
-        expect(await consumerOptions[1].getVisibleText()).eql('Logs');
+        expect(consumerOptions.length).eql(3);
+        expect(await consumerOptions[0].getVisibleText()).eql('All');
+        expect(await consumerOptions[1].getVisibleText()).eql('Metrics');
+        expect(await consumerOptions[2].getVisibleText()).eql('Logs');
       });
     });
 
@@ -302,7 +303,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
 
       it('shows the rules table ', async () => {
-        await testSubjects.existOrFail('rulesList');
+        await testSubjects.existOrFail('rulesListSection');
         await testSubjects.waitForDeleted('centerJustifiedSpinner');
         const tableRows = await find.allByCssSelector('.euiTableRow');
         const rows = await getRulesList(tableRows);

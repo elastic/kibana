@@ -19,6 +19,7 @@ import {
   EventFilterValidator,
   HostIsolationExceptionsValidator,
   TrustedAppValidator,
+  TrustedDeviceValidator,
 } from '../validators';
 import {
   hasArtifactOwnerSpaceId,
@@ -61,6 +62,17 @@ export const getExceptionsPreUpdateItemHandler = (
       trustedAppValidator.notifyFeatureUsage(
         data as ExceptionItemLikeOptions,
         'TRUSTED_APP_BY_POLICY'
+      );
+    }
+
+    // Validate Trusted Devices
+    if (TrustedDeviceValidator.isTrustedDevice({ listId })) {
+      isEndpointArtifact = true;
+      const trustedDeviceValidator = new TrustedDeviceValidator(endpointAppContextService, request);
+      validatedItem = await trustedDeviceValidator.validatePreUpdateItem(data, currentSavedItem);
+      trustedDeviceValidator.notifyFeatureUsage(
+        data as ExceptionItemLikeOptions,
+        'TRUSTED_DEVICE_BY_POLICY'
       );
     }
 
@@ -132,10 +144,7 @@ export const getExceptionsPreUpdateItemHandler = (
       );
     }
 
-    if (
-      isEndpointArtifact &&
-      endpointAppContextService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled
-    ) {
+    if (isEndpointArtifact) {
       if (!hasArtifactOwnerSpaceId(validatedItem)) {
         if (!request) {
           throw new EndpointArtifactExceptionValidationError(`Missing HTTP Request object`);

@@ -12,10 +12,16 @@ import type {
   ObltApiServicesFixture,
   ObltTestFixtures,
   ObltWorkerFixtures,
+  ScoutPage,
 } from '@kbn/scout-oblt';
-import { getOnboardingApiHelper, OnboardingApiService } from './apis/onboarding';
+import type { OnboardingApiService } from './apis/onboarding';
+import { getOnboardingApiHelper } from './apis/onboarding';
+import type { OnboardingPageObjects } from './page_objects';
+import { extendPageObjects } from './page_objects';
 
-export type ExtendedScoutTestFixtures = ObltTestFixtures;
+export interface ExtendedScoutTestFixtures extends ObltTestFixtures {
+  pageObjects: OnboardingPageObjects;
+}
 
 export interface ExtendedApiServicesFixture extends ObltApiServicesFixture {
   onboarding: OnboardingApiService;
@@ -28,15 +34,14 @@ export const test = base.extend<ExtendedScoutTestFixtures, ExtendedScoutWorkerFi
   pageObjects: async (
     {
       pageObjects,
+      page,
     }: {
-      pageObjects: ExtendedScoutTestFixtures['pageObjects'];
+      pageObjects: OnboardingPageObjects;
+      page: ScoutPage;
     },
-    use: (pageObjects: ExtendedScoutTestFixtures['pageObjects']) => Promise<void>
+    use: (pageObjects: OnboardingPageObjects) => Promise<void>
   ) => {
-    const extendedPageObjects = {
-      ...pageObjects,
-    };
-
+    const extendedPageObjects = extendPageObjects(pageObjects, page);
     await use(extendedPageObjects);
   },
   apiServices: [

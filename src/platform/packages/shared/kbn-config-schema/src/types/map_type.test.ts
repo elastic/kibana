@@ -362,3 +362,28 @@ describe('nested unknowns', () => {
     expect(type.validate(value, void 0, void 0, {})).toStrictEqual(expected);
   });
 });
+
+test('handles references', () => {
+  const type = schema.mapOf(
+    schema.string(),
+    schema.conditional(
+      schema.contextRef('scenario'),
+      'context',
+      schema.object({
+        value: schema.string({ defaultValue: schema.contextRef('context_value') }),
+        sibling: schema.string({ defaultValue: 'sibling#1' }),
+      }),
+      schema.object({
+        value: schema.string({ defaultValue: schema.siblingRef('sibling') }),
+        sibling: schema.string({ defaultValue: 'sibling#1' }),
+      })
+    )
+  );
+
+  expect(
+    type.validate(new Map([['key', {}]]), { scenario: 'context', context_value: 'context#1' })
+  ).toEqual(new Map([['key', { value: 'context#1', sibling: 'sibling#1' }]]));
+  expect(
+    type.validate(new Map([['key', {}]]), { scenario: 'sibling', context_value: 'context#1' })
+  ).toEqual(new Map([['key', { value: 'sibling#1', sibling: 'sibling#1' }]]));
+});

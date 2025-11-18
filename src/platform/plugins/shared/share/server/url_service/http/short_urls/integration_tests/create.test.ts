@@ -8,7 +8,8 @@
  */
 
 import supertest from 'supertest';
-import { setupServer, SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
+import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { registerCreateRoute } from '../register_create_route';
 import { MockUrlService } from '../../../../../common/mocks';
 import { httpServiceMock } from '@kbn/core/server/mocks';

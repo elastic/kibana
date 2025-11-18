@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { IO_EVENTS_ROUTE, CURRENT_API_VERSION } from '@kbn/session-view-plugin/common/constants';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 const MOCK_INDEX = 'logs-endpoint.events.process*';
 const MOCK_SESSION_START_TIME = '2022-05-08T13:44:00.13Z';
@@ -26,6 +26,27 @@ export default function ioEventsTests({ getService }: FtrProviderContext) {
       .get(IO_EVENTS_ROUTE)
       .set('kbn-xsrf', 'foo')
       .set('Elastic-Api-Version', CURRENT_API_VERSION);
+  }
+
+  // Helper function to verify process args are normalized to arrays
+  function verifyProcessArgsAreArrays(events: any[]) {
+    events
+      .filter((event) => event._source?.event?.kind === 'event' && event._source?.process)
+      .forEach((event) => {
+        const process = event._source.process;
+
+        // Verify main process args is always an array
+        expect(Array.isArray(process.args)).to.be(true);
+        expect(process.args.length).to.be.greaterThan(0);
+
+        // Verify nested process fields have args as arrays
+        const nestedFields = ['parent', 'session_leader', 'entry_leader', 'group_leader'];
+        nestedFields.forEach((field) => {
+          const nestedProcess = process[field];
+          expect(Array.isArray(nestedProcess.args)).to.be(true);
+          expect(nestedProcess.args.length).to.be.greaterThan(0);
+        });
+      });
   }
 
   describe(`Session view - ${IO_EVENTS_ROUTE} - with a basic license`, () => {
@@ -95,6 +116,39 @@ export default function ioEventsTests({ getService }: FtrProviderContext) {
 
       // since our cursor is last event the result set size should only be 1
       expect(response.body.events.length).to.be(1);
+    });
+
+    it(`${IO_EVENTS_ROUTE} returns a page of IO events with normalized args`, async () => {
+      // Pick event where process args and nested args is "string-io-parent-args"
+      const response = await getTestRoute().query({
+        index: MOCK_INDEX,
+        sessionEntityId: MOCK_SESSION_ENTITY_ID,
+        sessionStartTime: '2022-05-08T00:00:00.570Z',
+        pageSize: MOCK_PAGE_SIZE,
+      });
+      expect(response.status).to.be(200);
+      expect(response.body.total).to.be(9);
+      expect(response.body.events.length).to.be(MOCK_PAGE_SIZE);
+
+      // ensure sorting timestamp ascending
+      let lastSort = 0;
+      response.body.events.forEach((hit: any) => {
+        if (hit.sort < lastSort) {
+          throw new Error('events were not sorted by timestamp ascending');
+        }
+
+        lastSort = hit.sort;
+      });
+
+      // Verify that process args fields are normalized to arrays
+      verifyProcessArgsAreArrays(response.body.events);
+      expect(
+        response.body.events.some(
+          (ev: any) =>
+            ev._source.process.args.includes('single-arg') &&
+            ev._source.process.parent.args.includes('single-arg')
+        )
+      ).to.be(true);
     });
   });
 }

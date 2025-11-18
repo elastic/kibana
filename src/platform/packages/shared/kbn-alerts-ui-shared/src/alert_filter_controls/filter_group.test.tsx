@@ -8,12 +8,16 @@
  */
 
 import { FilterGroup } from './filter_group';
-import { FC } from 'react';
+import type { FC } from 'react';
 import React from 'react';
 import { act, render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { ControlGroupRendererApi, ControlGroupRuntimeState } from '@kbn/controls-plugin/public';
+import type {
+  ControlGroupRendererApi,
+  ControlGroupRuntimeState,
+} from '@kbn/controls-plugin/public';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
-import { ControlGroupOutput, initialInputData, sampleOutputData } from './mocks/data';
+import type { ControlGroupOutput } from './mocks/data';
+import { initialInputData, sampleOutputData } from './mocks/data';
 import {
   COMMON_OPTIONS_LIST_CONTROL_INPUTS,
   DEFAULT_CONTROLS,
@@ -467,7 +471,7 @@ describe(' Filter Group Component ', () => {
       fireEvent.click(screen.getByTestId(TEST_IDS.CONTEXT_MENU.RESET));
 
       // blanks the input
-      await waitFor(() => expect(controlGroupMock.updateInput.mock.calls.length).toBe(5));
+      await waitFor(() => expect(controlGroupMock.updateInput.mock.calls.length).toBe(1));
     });
 
     it('should restore controls saved in local storage', async () => {

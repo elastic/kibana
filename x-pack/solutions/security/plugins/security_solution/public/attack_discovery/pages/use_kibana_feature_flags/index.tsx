@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG } from '@kbn/elastic-assistant-common';
+import { ATTACK_DISCOVERY_PUBLIC_API_ENABLED_FEATURE_FLAG } from '@kbn/elastic-assistant-common';
 import { useMemo } from 'react';
 import { useKibana } from '../../../common/lib/kibana';
 
 interface UseKibanaFeatureFlags {
-  attackDiscoveryAlertsEnabled: boolean;
+  attackDiscoveryPublicApiEnabled: boolean;
 }
 
 export const useKibanaFeatureFlags = (): UseKibanaFeatureFlags => {
@@ -18,12 +18,12 @@ export const useKibanaFeatureFlags = (): UseKibanaFeatureFlags => {
     services: { featureFlags },
   } = useKibana();
 
-  const attackDiscoveryAlertsEnabled = useMemo(
-    () => featureFlags.getBooleanValue(ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG, true),
+  const attackDiscoveryPublicApiEnabled = useMemo(
+    () => featureFlags.getBooleanValue(ATTACK_DISCOVERY_PUBLIC_API_ENABLED_FEATURE_FLAG, true),
     [featureFlags]
   );
 
   return {
-    attackDiscoveryAlertsEnabled,
+    attackDiscoveryPublicApiEnabled,
   };
 };

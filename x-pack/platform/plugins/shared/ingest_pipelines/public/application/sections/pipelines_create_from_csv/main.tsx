@@ -7,12 +7,13 @@
 
 import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 import fileSaver from 'file-saver';
 
-import { FieldCopyAction, Processor } from '../../../../common/types';
+import type { Processor } from '../../../../common/types';
+import { FieldCopyAction } from '../../../../common/types';
 import { useKibana } from '../../../shared_imports';
 import { PipelinesCsvUploader } from './pipelines_csv_uploader';
 import { PipelinesPreview } from './pipelines_preview';

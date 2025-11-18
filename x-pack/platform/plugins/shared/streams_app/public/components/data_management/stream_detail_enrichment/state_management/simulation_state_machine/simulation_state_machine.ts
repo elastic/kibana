@@ -4,14 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom, assign, setup } from 'xstate5';
+import type { ActorRefFrom, MachineImplementationsFrom, SnapshotFrom } from 'xstate5';
+import { assign, setup } from 'xstate5';
 import { getPlaceholderFor } from '@kbn/xstate-utils';
-import { FlattenRecord } from '@kbn/streams-schema';
+import type { FlattenRecord } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
 import { flattenObjectNestedLast } from '@kbn/object-utils';
-import { ProcessorDefinitionWithUIAttributes } from '../../types';
-import { isValidProcessor } from '../../utils';
-import {
+import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
+import { getValidSteps } from '../../utils';
+import type {
   SimulationInput,
   SimulationContext,
   SimulationEvent,
@@ -19,24 +20,26 @@ import {
   SimulationMachineDeps,
   SampleDocumentWithUIAttributes,
 } from './types';
-import { PreviewDocsFilterOption } from './simulation_documents_search';
+import type { PreviewDocsFilterOption } from './simulation_documents_search';
 import {
   createSimulationRunnerActor,
-  createSimulationRunFailureNofitier,
+  createSimulationRunFailureNotifier,
 } from './simulation_runner_actor';
 import { getSchemaFieldsFromSimulation, mapField, unmapField } from './utils';
-import { MappedSchemaField } from '../../../schema_editor/types';
+import type { MappedSchemaField } from '../../../schema_editor/types';
 
 export type SimulationActorRef = ActorRefFrom<typeof simulationMachine>;
 export type SimulationActorSnapshot = SnapshotFrom<typeof simulationMachine>;
-export interface ProcessorEventParams {
-  processors: ProcessorDefinitionWithUIAttributes[];
+export interface StepsEventParams {
+  steps: StreamlangStepWithUIAttributes[];
 }
 
 const hasSamples = (samples: SampleDocumentWithUIAttributes[]) => !isEmpty(samples);
 
-const hasAnyValidProcessors = (processors: ProcessorDefinitionWithUIAttributes[]) =>
-  processors.some(isValidProcessor);
+const hasAnyValidSteps = (steps: StreamlangStepWithUIAttributes[]) => {
+  const validSteps = getValidSteps(steps);
+  return validSteps.length > 0;
+};
 
 export const simulationMachine = setup({
   types: {
@@ -48,12 +51,12 @@ export const simulationMachine = setup({
     runSimulation: getPlaceholderFor(createSimulationRunnerActor),
   },
   actions: {
-    notifySimulationRunFailure: getPlaceholderFor(createSimulationRunFailureNofitier),
+    notifySimulationRunFailure: getPlaceholderFor(createSimulationRunFailureNotifier),
     storePreviewDocsFilter: assign((_, params: { filter: PreviewDocsFilterOption }) => ({
       previewDocsFilter: params.filter,
     })),
-    storeProcessors: assign((_, params: ProcessorEventParams) => ({
-      processors: params.processors,
+    storeSteps: assign((_, params: StepsEventParams) => ({
+      steps: params.steps,
     })),
     storeSamples: assign((_, params: { samples: SampleDocumentWithUIAttributes[] }) => ({
       samples: params.samples,
@@ -81,21 +84,27 @@ export const simulationMachine = setup({
         previewColumnsSorting: params.sorting,
       })
     ),
-    deriveDetectedSchemaFields: assign(({ context }) => ({
-      detectedSchemaFields: context.simulation
-        ? getSchemaFieldsFromSimulation(
-            context.simulation.detected_fields,
-            context.detectedSchemaFields,
-            context.streamName
-          )
-        : context.detectedSchemaFields,
-    })),
-    mapField: assign(({ context }, params: { field: MappedSchemaField }) => ({
-      detectedSchemaFields: mapField(context.detectedSchemaFields, params.field),
-    })),
-    unmapField: assign(({ context }, params: { fieldName: string }) => ({
-      detectedSchemaFields: unmapField(context.detectedSchemaFields, params.fieldName),
-    })),
+    deriveDetectedSchemaFields: assign(({ context }) => {
+      const result = getSchemaFieldsFromSimulation(context);
+      return {
+        detectedSchemaFields: result.detectedSchemaFields,
+        detectedSchemaFieldsCache: result.detectedSchemaFieldsCache,
+      };
+    }),
+    mapField: assign(({ context }, params: { field: MappedSchemaField }) => {
+      const result = mapField(context, params.field);
+      return {
+        detectedSchemaFields: result.detectedSchemaFields,
+        detectedSchemaFieldsCache: result.detectedSchemaFieldsCache,
+      };
+    }),
+    unmapField: assign(({ context }, params: { fieldName: string }) => {
+      const result = unmapField(context, params.fieldName);
+      return {
+        detectedSchemaFields: result.detectedSchemaFields,
+        detectedSchemaFieldsCache: result.detectedSchemaFieldsCache,
+      };
+    }),
     resetSimulationOutcome: assign({
       detectedSchemaFields: [],
       explicitlyEnabledPreviewColumns: [],
@@ -104,33 +113,33 @@ export const simulationMachine = setup({
       simulation: undefined,
       previewDocsFilter: 'outcome_filter_all',
     }),
-    resetProcessors: assign({ processors: [] }),
+    resetSteps: assign({ steps: [] }),
     resetSamples: assign({ samples: [] }),
   },
   delays: {
     processorChangeDebounceTime: 300,
   },
   guards: {
-    canSimulate: ({ context }) =>
-      hasSamples(context.samples) && hasAnyValidProcessors(context.processors),
-    hasProcessors: (_, params: ProcessorEventParams) => !isEmpty(params.processors),
+    canSimulate: ({ context }) => hasAnyValidSteps(context.steps),
+    hasSteps: (_, params: StepsEventParams) => !isEmpty(params.steps),
     '!hasSamples': (_, params: { samples: SampleDocumentWithUIAttributes[] }) =>
       !hasSamples(params.samples),
   },
 }).createMachine({
-  /** @xstate-layout N4IgpgJg5mDOIC5SwJYFsCuAbAhgFxQHsA7AYlU1wJIDoBjACx2JgAUAnMANxTAHcAIoTqwAYiix4w7ANoAGALqJQAB0KpqxZSAAeiAGwBmOTQDsAJnP65AFnMAOAIw2598wBoQAT0SOArFY09vqmjmGGNvZy+vY2AL5xnhTY+ERkyVRpNJywYHjySkggahpp2noIALSWNEYAnHX2fnX6djHRNp4+CI76zjRycobNFo729sOmCUnoKZrks5m0nHRgKFxgAPqwOGgqWHAF2iUomuWI1ea1hg1NLW1RrV2+poamNC6N5n5+hs4u8USIAyqRIC0ooOI2TAq3WWx2ewOsBkjkKqnUpzKRQqfhs7zq5j+hn0dUihkM5kczwQrT8NEsch++gC9xsfmmwMWkPBcyyKzWG22u32h3MaOKGLO2IuNXqjWarSsj063l8wRMTmsv1iAICHJB8xU7GEcFghHYsBoACojkUTlLQBVLtdbgqHh1qc5KQM6q9hrZzHi7PquYbjatYGb2PRmKssLb0aUSOcqrKbvL7kqPaqen5HO8frY-NFHHI6sNDCGIWGTZHzfQmCwwAmJUmtNKqnZHEFTAFHFZGhEbL7qTZ+pZ9MzYsFxvpzFXeWCjbWozQIGADlIW-asY6LjcbDRjKXeuY6qWKXVqbT6eZGYr7HVi8GgQa0qRlxHV+vN83UcdJV3XQZSuOU7kVdonhzRwn3eAd-EMR9zFMYJ9AXJYoRQCADh5DCaAAM14LAIEtNAcBUbdAOTDtBwGQkbGJQkjG+a8JmuRlA0aYcbnsdDIRoLCcLfWhCI3EiaAwYgyIoxQALbFNaLkejGOJCk-GpFCTFcYl7FCfsfgaPjNDXMAACNCEkugUBYABhRsYFgUgdFgPB8DAGgcHwqR2AACk-U1zTs5gYAEMyLOIVYABV0DAABKXD+PXczLOsqAgqbZFZLtKj2z3BBFOUudVJY6CbneG5GV6Nw3jeKZX1DLIcEjaQCBYAAlMAAEcMBQTg0DAYg8Ecyj5I7UsGnpCJkMiX0YLnT1-HeGJTBsGwjCGH5AyMxrmvYVqoA67rerAfrBuG-9stGvKwjCGgfjW4YGKUlDDGvN52NxRDkIJX1tuWSTiFSgBlBqwQgEh3OsrhCAAa3c4TiDagHpAAQToPBzRGzFqLy4d7BoMYVvLZDhhHHN7jMJw7y9AldLqP6oXYAHgdBshpGNaN9nwfDzTQGgEaR4hiFR9HMayxNsdy4CEDxgndO4kmRmpXTuwpR4KUGUlCQSIFiEIdd4CKBG5MllNKjWuoez7AcJlWsnunzcqLFGKx82sAkGYE7CwBNh1paMfG5DGVxTDqaIzz+akrEPXTkOD30-GZJ9PaS8KrNs+y4F9oCKiKmgw4JSdVv8RxhmpAI6WZIY7HJL6+k9prcj21LDp6vqBqG7Ocel893jkImmn7sc8XscviXz5xGVMUwy0QtlPaZoWWerICd27iown0AZcRJBik7ZUecyQj4z2YomZ7LHW4iAA */
+  /** @xstate-layout N4IgpgJg5mDOIC5SwJYFsCuAbAhgFxQHsA7AYlU1wJIDoBjACx2JgAUAnMANxTAHcAIoTqwAYiix4w7ANoAGALqJQAB0KpqxZSAAeiAGwBmAJw1DAJgAs544cOWAHPoeGAjABoQAT0SvzAX39PCmx8IjIQqnCaTlgwPHklJBA1DXDtPQQAVgB2Tx8EV30cyxobfXNDEstLVztDQOD0UM1yZqjaTjowFC4wAH1YKRVYRO1UlE0MxFz8xGtXGgcsh2M5OVtXV0sjHMaQSLCSNsoj4hiwbt6B2Bw0FSw4MeSJqeTM2e9fStLcnP1XE4snZbA59odWhDol0en1BncHk9XElVOpJul3jM8l9soCzH5XHJlkS5NVwe0zicWtDLrCbgjHqNzCiUmi3qAPtiCtssqVLFVDMsbOZ9FkReTTq0VJwePwAMKELAYNDEWA0DAqCD4MAAUR0DxQdEmWC8OuIOAARo8IAqlSrRopxmyMRysXNCnUHDQ-DUtqT9DsVhLqcdpdxeHxbcrVerNdq9QajXgTQIULcrZAo-bnqi0iRptkub4csYcjQcnJzOYciZrHJXMYssGOmQw7LI4ro2rCOwINIc6y81pMYX3YTajRin45PZjI2qmCggcKVKZRGszG4ngAMo9ggsAevF26N04uq5GjGBy1HK31y5KyWZuUoZgFT0JgsMCH535kefApqz5ORciyLJCQqVwSybJcoWOV93z7R4pB-IcCwA4sy0bEUcgcKC5Esetn0hYYaCQ+Jv2RJ00P-ItCjAuQljWUkZxAup9GI6IUAgR4qRbGgADNeCwCA1TQHAVFQ9E-1dQp1kYqtRRrMDCKJMc7CyJYslLLJ9AIgFLBgppJS4niwD4s5BOE0T1WIcTJMdF5f2HWTCXWMoRVyQwVPWBwx35cx8XKQwKkMUkGlgldoj7C1CAwYgjRYOVPxgWBSB0IZtRoHABKkdgAAppWEOBYB7ZLmBgAQwFi+LugAFXQMAAEoLM0MjqrihKUCSlKnkc3NpJck85PcxSvJ8tScQsUpBUqPDgTkYor042gcFgOJ2H3KAACUwAARwwFBODQMBiDwNKpPZYatiKGh+RybT6wbMVLHdfQKhoGcHByPxymBa8VvONaNq23aDqOsATrOi6qKcmjXMWr1inMRbDPrRaPDPKxDEvRaAXMQF7BewGYni4huqgbcouOCASDAGhuq4QgAGt6bg4htrJ6QAEE6DwHtLuPTJLEbMw1gDXkKxKBwCPdb6cbnQE6hFCocnFSKTM6MmKapzWyGkdgexoB58AEns0BodnOeIYgeb5gX+sHQaCxFzSTFRyXSUcWWcVwxj-oDPDRSyesYKXYhCD7eBknZ6jnZHYx3TWO6xWcEOfRcSw9g1kNzm4x446uzI8MCwm3FLGWbF0sdqxxkOHBRytwIegGc-4mLOsSqByq-aOBqLxBcLdlGibAh71kMd0LBx2aq2MUVtjWCLjNz7L1ukUH9sO47TvOwuhd8CxFm0wUK35ZZCTo4FTH+DYjBR96HFWEn2G1lhddz-eZOuuoylyb6G7GDRhsSeOJRT6EvOxNWfhdIAjDv4IAA */
   id: 'simulation',
   context: ({ input }) => ({
     detectedSchemaFields: [],
+    detectedSchemaFieldsCache: new Map(),
     previewDocsFilter: 'outcome_filter_all',
-    previewDocuments: [],
     explicitlyDisabledPreviewColumns: [],
     explicitlyEnabledPreviewColumns: [],
     previewColumnsOrder: [],
     previewColumnsSorting: { fieldName: undefined, direction: 'asc' },
-    processors: input.processors,
+    steps: input.steps,
     samples: [],
     streamName: input.streamName,
+    streamType: input.streamType,
   }),
   initial: 'idle',
   on: {
@@ -139,7 +148,11 @@ export const simulationMachine = setup({
     },
     'simulation.reset': {
       target: '.idle',
-      actions: [{ type: 'resetSimulationOutcome' }, { type: 'resetProcessors' }],
+      actions: [{ type: 'resetSimulationOutcome' }, { type: 'resetSteps' }],
+    },
+    'simulation.receive_steps': {
+      target: '.assertingRequirements',
+      actions: [{ type: 'storeSteps', params: ({ event }) => event }],
     },
     'simulation.receive_samples': [
       {
@@ -149,8 +162,8 @@ export const simulationMachine = setup({
       },
       {
         guard: {
-          type: 'hasProcessors',
-          params: ({ context }) => ({ processors: context.processors }),
+          type: 'hasSteps',
+          params: ({ context }) => ({ steps: context.steps }),
         },
         target: '.assertingRequirements',
         actions: [{ type: 'storeSamples', params: ({ event }) => event }],
@@ -160,77 +173,24 @@ export const simulationMachine = setup({
         actions: [{ type: 'storeSamples', params: ({ event }) => event }],
       },
     ],
-    'previewColumns.updateExplicitlyEnabledColumns': {
-      actions: [
-        {
-          type: 'storeExplicitlyEnabledPreviewColumns',
-          params: ({ event }) => event,
-        },
-      ],
-      target: '.idle',
-    },
-    'previewColumns.updateExplicitlyDisabledColumns': {
-      actions: [
-        {
-          type: 'storeExplicitlyDisabledPreviewColumns',
-          params: ({ event }) => event,
-        },
-      ],
-      target: '.idle',
-    },
-    'previewColumns.order': {
-      actions: [
-        {
-          type: 'storePreviewColumnsOrder',
-          params: ({ event }) => event,
-        },
-      ],
-      target: '.idle',
-    },
-    'previewColumns.setSorting': {
-      actions: [
-        {
-          type: 'storePreviewColumnsSorting',
-          params: ({ event }) => event,
-        },
-      ],
-      target: '.idle',
-    },
-    // Handle adding/reordering processors
-    'processors.*': {
-      target: '.assertingRequirements',
-      actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
-    },
-    'processor.cancel': {
-      target: '.assertingRequirements',
-      actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
-    },
-    'processor.edit': {
-      target: '.assertingRequirements',
-      actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
-    },
-    'processor.save': {
-      target: '.assertingRequirements',
-      actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
-    },
-    'processor.change': {
+    'step.change': {
       target: '.debouncingChanges',
       reenter: true,
       description: 'Re-enter debouncing state and reinitialize the delayed processing.',
-      actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
+      actions: [{ type: 'storeSteps', params: ({ event }) => event }],
     },
-    'processor.delete': [
+    'step.delete': [
       {
         guard: {
-          type: 'hasProcessors',
-          params: ({ event }) => ({ processors: event.processors }),
+          type: 'hasSteps',
+          params: ({ event }) => ({ steps: event.steps }),
         },
         target: '.assertingRequirements',
-        actions: [{ type: 'storeProcessors', params: ({ event }) => event }],
+        actions: [{ type: 'storeSteps', params: ({ event }) => event }],
       },
       {
         target: '.idle',
-        actions: [{ type: 'resetSimulationOutcome' }, { type: 'resetProcessors' }],
+        actions: [{ type: 'resetSimulationOutcome' }, { type: 'resetSteps' }],
       },
     ],
   },
@@ -244,6 +204,38 @@ export const simulationMachine = setup({
         'simulation.fields.unmap': {
           target: 'assertingRequirements',
           actions: [{ type: 'unmapField', params: ({ event }) => event }],
+        },
+        'previewColumns.updateExplicitlyEnabledColumns': {
+          actions: [
+            {
+              type: 'storeExplicitlyEnabledPreviewColumns',
+              params: ({ event }) => event,
+            },
+          ],
+        },
+        'previewColumns.updateExplicitlyDisabledColumns': {
+          actions: [
+            {
+              type: 'storeExplicitlyDisabledPreviewColumns',
+              params: ({ event }) => event,
+            },
+          ],
+        },
+        'previewColumns.order': {
+          actions: [
+            {
+              type: 'storePreviewColumnsOrder',
+              params: ({ event }) => event,
+            },
+          ],
+        },
+        'previewColumns.setSorting': {
+          actions: [
+            {
+              type: 'storePreviewColumnsSorting',
+              params: ({ event }) => event,
+            },
+          ],
         },
       },
     },
@@ -270,7 +262,7 @@ export const simulationMachine = setup({
           documents: context.samples
             .map((doc) => doc.document)
             .map(flattenObjectNestedLast) as FlattenRecord[],
-          processors: context.processors.filter(isValidProcessor),
+          steps: getValidSteps(context.steps),
           detectedFields: context.detectedSchemaFields,
         }),
         onDone: {
@@ -297,6 +289,6 @@ export const createSimulationMachineImplementations = ({
     runSimulation: createSimulationRunnerActor({ streamsRepositoryClient }),
   },
   actions: {
-    notifySimulationRunFailure: createSimulationRunFailureNofitier({ toasts }),
+    notifySimulationRunFailure: createSimulationRunFailureNotifier({ toasts }),
   },
 });

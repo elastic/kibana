@@ -14,6 +14,7 @@ export class AutoDetectFlowPage {
   private readonly receivedDataIndicator: Locator;
   private readonly autoDetectSystemIntegrationActionLink: Locator;
   private readonly codeBlock: Locator;
+  private readonly logsDataReceivedIndicator: Locator;
 
   constructor(page: Page) {
     this.page = page;
@@ -27,6 +28,9 @@ export class AutoDetectFlowPage {
       'observabilityOnboardingDataIngestStatusActionLink-inventory-host-details'
     );
     this.codeBlock = this.page.getByTestId('observabilityOnboardingAutoDetectPanelCodeSnippet');
+    this.logsDataReceivedIndicator = this.page
+      .getByTestId('observabilityOnboardingAutoDetectPanelDataReceivedProgressIndicator')
+      .getByText(/logs.*ready|data.*ready|ready.*explore/i);
   }
 
   public async copyToClipboard() {
@@ -41,6 +45,13 @@ export class AutoDetectFlowPage {
     await expect(
       this.receivedDataIndicator,
       'Received data indicator should be visible'
+    ).toBeVisible();
+  }
+
+  public async assertLogsDataReceivedIndicator() {
+    await expect(
+      this.logsDataReceivedIndicator,
+      'Logs data received indicator should be visible'
     ).toBeVisible();
   }
 

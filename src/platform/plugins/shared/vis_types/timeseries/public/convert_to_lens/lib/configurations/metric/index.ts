@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { MetricVisConfiguration } from '@kbn/visualizations-plugin/common';
+import type { MetricVisualizationState as MetricVisConfiguration } from '@kbn/lens-common';
 import { getValidColor } from '@kbn/coloring';
-import { Panel } from '../../../../../common/types';
-import { Column, Layer } from '../../convert';
+import type { Panel } from '../../../../../common/types';
+import type { Column, Layer } from '../../convert';
 import { getPalette } from '../palette';
 import { findMetricColumn, getMetricWithCollapseFn } from '../../../utils';
 

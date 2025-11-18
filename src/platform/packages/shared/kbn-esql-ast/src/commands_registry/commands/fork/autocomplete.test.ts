@@ -15,16 +15,13 @@ import { Location } from '../../types';
 import { autocomplete } from './autocomplete';
 import {
   expectSuggestions,
+  suggest,
   getFieldNamesByType,
   getFunctionSignaturesByReturnType,
 } from '../../../__tests__/autocomplete';
-import { ICommandCallbacks } from '../../types';
-import {
-  ESQL_STRING_TYPES,
-  ESQL_NUMBER_TYPES,
-  FunctionReturnType,
-  FieldType,
-} from '../../../definitions/types';
+import type { ICommandCallbacks } from '../../types';
+import type { FunctionReturnType, FieldType } from '../../../definitions/types';
+import { ESQL_STRING_TYPES, ESQL_NUMBER_TYPES } from '../../../definitions/types';
 import { correctQuerySyntax, findAstPosition } from '../../../definitions/utils/ast';
 import { parse } from '../../../parser';
 
@@ -78,6 +75,14 @@ export const EXPECTED_FIELD_AND_FUNCTION_SUGGESTIONS = [
 // types accepted by the AVG function
 export const AVG_TYPES: Array<FieldType & FunctionReturnType> = ['double', 'integer', 'long'];
 
+export const EXPECTED_FOR_FIRST_EMPTY_EXPRESSION = [
+  'BY ',
+  ' = ',
+  ...allAggFunctions,
+  ...allGroupingFunctions,
+  ...allEvalFunctionsForStats,
+];
+
 export const EXPECTED_FOR_EMPTY_EXPRESSION = [
   ' = ',
   ...allAggFunctions,
@@ -85,22 +90,29 @@ export const EXPECTED_FOR_EMPTY_EXPRESSION = [
   ...allEvalFunctionsForStats,
 ];
 
-const forkExpectSuggestions = (
+type ExpectedSuggestions = string[] | { contains?: string[]; notContains?: string[] };
+
+const forkExpectSuggestions = async (
   query: string,
-  expectedSuggestions: string[],
+  expected: ExpectedSuggestions,
   mockCallbacks?: ICommandCallbacks,
   context = mockContext,
   offset?: number
-) => {
-  return expectSuggestions(
-    query,
-    expectedSuggestions,
-    context,
-    'fork',
-    mockCallbacks,
-    autocomplete,
-    offset
-  );
+): Promise<void> => {
+  if (Array.isArray(expected)) {
+    return expectSuggestions(query, expected, context, 'fork', mockCallbacks, autocomplete, offset);
+  }
+
+  const results = await suggest(query, context, 'fork', mockCallbacks, autocomplete, offset);
+  const texts = results.map(({ text }) => text);
+
+  if (expected.contains?.length) {
+    expect(texts).toEqual(expect.arrayContaining(expected.contains));
+  }
+
+  if (expected.notContains?.length) {
+    expect(texts).not.toEqual(expect.arrayContaining(expected.notContains));
+  }
 };
 
 describe('FORK Autocomplete', () => {
@@ -277,6 +289,7 @@ describe('FORK Autocomplete', () => {
 
         test('lookup join after command name', async () => {
           await forkExpectSuggestions('FROM a | FORK (LOOKUP JOIN ', [
+            '', // This is the default text that the "Create lookup index" suggestions has if no index name provided.
             'join_index ',
             'join_index_with_alias ',
             'lookup_index ',
@@ -286,24 +299,28 @@ describe('FORK Autocomplete', () => {
         });
 
         test('lookup join after ON keyword', async () => {
-          const expected = getFieldNamesByType('any')
-            .sort()
-            .map((field) => field.trim());
-
-          for (const { name } of lookupIndexFields) {
-            expected.push(name.trim());
-          }
-
           await forkExpectSuggestions(
             'FROM a | FORK (LOOKUP JOIN join_index ON ',
-            expected,
+            {
+              contains: [
+                'textField',
+                'keywordField',
+                'booleanField',
+                'joinIndexOnlyField ',
+                'STARTS_WITH($0)',
+                'CONTAINS($0)',
+              ],
+            },
             mockCallbacks
           );
         });
 
         describe('stats', () => {
           it('suggests for empty expression', async () => {
-            await forkExpectSuggestions('FROM a | FORK (STATS ', EXPECTED_FOR_EMPTY_EXPRESSION);
+            await forkExpectSuggestions(
+              'FROM a | FORK (STATS ',
+              EXPECTED_FOR_FIRST_EMPTY_EXPRESSION
+            );
             await forkExpectSuggestions(
               'FROM a | FORK (STATS AVG(integerField), ',
               EXPECTED_FOR_EMPTY_EXPRESSION
@@ -319,7 +336,11 @@ describe('FORK Autocomplete', () => {
               'FROM a | FORK (STATS AVG(',
               [
                 ...getFieldNamesByType(AVG_TYPES),
-                ...getFunctionSignaturesByReturnType(Location.STATS, AVG_TYPES, { scalar: true }),
+                ...getFunctionSignaturesByReturnType(
+                  Location.STATS,
+                  [...AVG_TYPES, 'aggregate_metric_double'],
+                  { scalar: true }
+                ),
               ],
               mockCallbacks
             );
@@ -348,7 +369,7 @@ describe('FORK Autocomplete', () => {
                 ...getFunctionSignaturesByReturnType(
                   Location.STATS_WHERE,
                   'any',
-                  { operators: true },
+                  { operators: true, skipAssign: true },
                   ['integer']
                 ),
               ]
@@ -440,27 +461,20 @@ describe('FORK Autocomplete', () => {
       });
 
       describe('user-defined columns', () => {
-        const suggest = async (query: string) => {
-          const correctedQuery = correctQuerySyntax(query);
-          const { ast } = parse(correctedQuery, { withFormatting: true });
-          const cursorPosition = query.length;
-          const { command } = findAstPosition(ast, cursorPosition);
-          if (!command) {
-            throw new Error('Command not found in the parsed query');
-          }
-          return autocomplete(query, command, mockCallbacks, mockContext, cursorPosition);
-        };
         it('suggests user-defined columns from earlier in this branch', async () => {
-          const suggestions = await suggest(
-            'FROM a | FORK (EVAL col0 = 1 | EVAL var0 = 2 | WHERE '
+          await forkExpectSuggestions(
+            'FROM a | FORK (EVAL col0 = 1 | EVAL var0 = 2 | WHERE ',
+            { contains: ['col0', 'var0'] },
+            mockCallbacks
           );
-          expect(suggestions.map(({ label }) => label)).toContain('col0');
-          expect(suggestions.map(({ label }) => label)).toContain('var0');
         });
 
         it('does NOT suggest user-defined columns from another branch', async () => {
-          const suggestions = await suggest('FROM a | FORK (EVAL foo = 1) (WHERE ');
-          expect(suggestions.map(({ label }) => label)).not.toContain('foo');
+          await forkExpectSuggestions(
+            'FROM a | FORK (EVAL foo = 1) (WHERE ',
+            { notContains: ['foo'] },
+            mockCallbacks
+          );
         });
       });
     });

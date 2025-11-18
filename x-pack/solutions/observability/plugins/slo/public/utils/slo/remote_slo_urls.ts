@@ -6,9 +6,10 @@
  */
 
 import { encode } from '@kbn/rison';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import path from 'path';
 import { paths } from '../../../common/locators/paths';
+import { transformSloToCloneState } from '../../pages/slo_edit/helpers/transform_slo_to_clone_state';
 
 function createBaseRemoteSloDetailsUrl(
   slo: SLOWithSummaryResponse,
@@ -75,19 +76,6 @@ export function createRemoteSloDisableUrl(
   return remoteUrl.toString();
 }
 
-export function createRemoteSloAddToCaseUrl(
-  slo: SLOWithSummaryResponse,
-  spaceId: string = 'default'
-) {
-  const remoteUrl = createBaseRemoteSloDetailsUrl(slo, spaceId);
-  if (!remoteUrl) {
-    return undefined;
-  }
-
-  remoteUrl.searchParams.append('addToCase', 'true');
-  return remoteUrl.toString();
-}
-
 export function createRemoteSloEditUrl(slo: SLOWithSummaryResponse, spaceId: string = 'default') {
   if (!slo.remote || slo.remote.kibanaUrl === '') {
     return undefined;
@@ -107,7 +95,7 @@ export function createRemoteSloCloneUrl(slo: SLOWithSummaryResponse, spaceId: st
 
   const spacePath = spaceId !== 'default' ? `/s/${spaceId}` : '';
   const clonePath = paths.sloCreateWithEncodedForm(
-    encode({ ...slo, name: `[Copy] ${slo.name}`, id: undefined })
+    encodeURIComponent(encode(transformSloToCloneState(slo)))
   );
   const remoteUrl = new URL(path.join(spacePath, clonePath), slo.remote.kibanaUrl);
   return remoteUrl.toString();

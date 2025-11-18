@@ -5,10 +5,10 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 // Note: this suite is currently only called from the feature flags test config:
-// x-pack/test_serverless/functional/test_suites/search/config.feature_flags.ts
+// x-pack/solutions/search/test/serverless/functional/configs/config.feature_flags.ts
 // This can be moved into the common config groups once custom roles are enabled
 // permanently in serverless.
 

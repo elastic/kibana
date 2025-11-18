@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { ObjectRemover } from '../../../lib/object_remover';
 import { generateUniqueKey } from '../../../lib/get_test_data';
 import { createMaintenanceWindow } from './utils';
@@ -278,9 +278,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.maintenanceWindows.getMaintenanceWindowsList();
 
       await testSubjects.click('tablePaginationPopoverButton');
-      await testSubjects.click('tablePagination-25-rows');
-      await testSubjects.missingOrFail('pagination-button-1');
-      await testSubjects.click('tablePaginationPopoverButton');
       await testSubjects.click('tablePagination-10-rows');
       const listedOnFirstPageMWs = await testSubjects.findAll('list-item');
       expect(listedOnFirstPageMWs.length).to.be(10);
@@ -288,8 +285,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.isEnabled('pagination-button-1');
       await testSubjects.click('pagination-button-1');
       await testSubjects.isEnabled('pagination-button-0');
-      const listedOnSecondPageMWs = await testSubjects.findAll('list-item');
-      expect(listedOnSecondPageMWs.length).to.be(2);
+
+      await retry.try(async () => {
+        const listedOnSecondPageMWs = await testSubjects.findAll('list-item');
+        expect(listedOnSecondPageMWs.length).to.be(2);
+      });
     });
 
     it('should delete a maintenance window', async () => {

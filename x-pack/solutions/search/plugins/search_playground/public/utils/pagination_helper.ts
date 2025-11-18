@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Pagination } from '../../common/types';
+import type { Pagination } from '../../common/types';
 
 export const getPaginationFromPage = (page: number, size: number, previousValue: Pagination) => {
   const from = page < 0 ? 0 : page * size;

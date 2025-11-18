@@ -17,11 +17,11 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import { SerializedPanelState, ViewMode } from '@kbn/presentation-publishing';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { SerializedPanelState, ViewMode } from '@kbn/presentation-publishing';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject, of } from 'rxjs';
-import { BookApi } from '../../react_embeddables/saved_book/types';
+import type { BookApi } from '../../react_embeddables/saved_book/types';
 import { savedStateManager, unsavedStateManager } from './session_storage';
 import { BOOK_EMBEDDABLE_TYPE, type BookEmbeddableState } from '../../../common';
 

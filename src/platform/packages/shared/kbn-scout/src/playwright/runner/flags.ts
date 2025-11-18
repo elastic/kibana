@@ -9,17 +9,19 @@
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import path from 'path';
-import { FlagOptions, FlagsReader } from '@kbn/dev-cli-runner';
+import type { FlagOptions, FlagsReader } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { SERVER_FLAG_OPTIONS, parseServerFlags } from '../../servers';
-import { CliSupportedServerModes } from '../../types';
+import type { CliSupportedServerModes } from '../../types';
 import { validatePlaywrightConfig } from './config_validator';
+import { validateAndProcessTestFiles } from '../../common/utils';
 
 export interface RunTestsOptions {
   configPath: string;
   headed: boolean;
   mode: CliSupportedServerModes;
   testTarget: 'local' | 'cloud';
+  testFiles?: string[];
   esFrom: 'serverless' | 'source' | 'snapshot' | undefined;
   installDir: string | undefined;
   logsDir: string | undefined;
@@ -28,12 +30,13 @@ export interface RunTestsOptions {
 export const TEST_FLAG_OPTIONS: FlagOptions = {
   ...SERVER_FLAG_OPTIONS,
   boolean: [...(SERVER_FLAG_OPTIONS.boolean || []), 'headed'],
-  string: [...(SERVER_FLAG_OPTIONS.string || []), 'config', 'testTarget'],
+  string: [...(SERVER_FLAG_OPTIONS.string || []), 'config', 'testTarget', 'testFiles'],
   default: { headed: false, testTarget: 'local' },
   help: `${SERVER_FLAG_OPTIONS.help}
-    --config             Playwright config file path
+    --config             Playwright config file path (required if --testFiles not provided)
+    --testFiles          Comma-separated list of test file paths or test directory path (required if --config not provided)
     --headed             Run Playwright with browser head
-    --testTarget         Run tests agaist locally started servers or Cloud deployment / MKI project
+    --testTarget         Run tests against locally started servers or Cloud deployment / MKI project
   `,
 };
 
@@ -42,18 +45,40 @@ export async function parseTestFlags(flags: FlagsReader) {
   const configPath = flags.string('config');
   const headed = flags.boolean('headed');
   const testTarget = flags.enum('testTarget', ['local', 'cloud']) || 'local';
+  const testFilesList = flags.string('testFiles');
 
-  if (!configPath) {
-    throw createFlagError(`Path to playwright config is required: --config <file path>`);
+  // Validate that either config or testFiles is provided, but not both
+  if (!configPath && !testFilesList) {
+    throw createFlagError(`Either '--config' or '--testFiles' flag is required`);
   }
 
-  const configFullPath = path.resolve(REPO_ROOT, configPath);
+  if (configPath && testFilesList) {
+    throw createFlagError(`Cannot use both '--config' or '--testFiles' flags at the same time`);
+  }
+
+  let scoutConfigPath: string;
+  const testFiles: string[] = [];
+
+  if (testFilesList) {
+    // Process testFiles and derive config path
+    const { testFiles: validatedTestFiles, configPath: derivedConfigPath } =
+      validateAndProcessTestFiles(testFilesList);
+
+    testFiles.push(...validatedTestFiles);
+    scoutConfigPath = derivedConfigPath;
+  } else {
+    // Use provided config path
+    scoutConfigPath = configPath!;
+  }
+
+  const configFullPath = path.resolve(REPO_ROOT, scoutConfigPath);
   await validatePlaywrightConfig(configFullPath);
 
   return {
     ...options,
-    configPath,
+    configPath: scoutConfigPath,
     headed,
     testTarget,
+    ...(testFiles.length > 0 && { testFiles }),
   };
 }

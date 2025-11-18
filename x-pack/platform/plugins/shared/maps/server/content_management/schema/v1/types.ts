@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import {
-  mapAttributesSchema,
+import type { TypeOf } from '@kbn/config-schema';
+import type {
   mapsGetResultSchema,
   mapsCreateOptionsSchema,
   mapsCreateResultSchema,
   mapsSearchOptionsSchema,
   mapsUpdateOptionsSchema,
 } from './cm_services';
-
-export type MapsSavedObjectAttributes = TypeOf<typeof mapAttributesSchema>;
 
 export type MapsCreateOptions = TypeOf<typeof mapsCreateOptionsSchema>;
 export type MapsUpdateOptions = TypeOf<typeof mapsUpdateOptionsSchema>;

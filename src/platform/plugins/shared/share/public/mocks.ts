@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
-import { SharePublicSetup, SharePublicStart } from './plugin';
-import { LocatorPublic, UrlService } from '../common/url_service';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { SharePublicSetup, SharePublicStart } from './plugin';
+import type { LocatorPublic } from '../common/url_service';
+import { UrlService } from '../common/url_service';
 import { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
 

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -79,6 +79,8 @@
     "@kbn/config-schema",
     "@kbn/aiops-utils",
     "@kbn/presentation-util",
+    "@kbn/licensing-types",
+    "@kbn/unified-data-table",
   ],
   "exclude": [
     "target/**/*",

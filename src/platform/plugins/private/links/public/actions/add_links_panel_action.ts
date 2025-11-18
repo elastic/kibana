@@ -19,7 +19,8 @@ import {
 } from '@kbn/presentation-publishing';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import type { LinksParentApi } from '../types';
-import { APP_ICON, APP_NAME, LINKS_EMBEDDABLE_TYPE, LinksEmbeddableState } from '../../common';
+import type { LinksEmbeddableState } from '../../common';
+import { APP_ICON, APP_NAME, LINKS_EMBEDDABLE_TYPE } from '../../common';
 import { ADD_LINKS_PANEL_ACTION_ID } from './constants';
 import { coreServices } from '../services/kibana_services';
 import { getEditorFlyout } from '../editor/get_editor_flyout';

@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AggParamsDateHistogram } from '@kbn/data-plugin/common';
+import type { AggParamsDateHistogram } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
-import { DataType, DateHistogramParams } from '../../types';
+import type { DataType } from '@kbn/lens-common';
+import type { DateHistogramParams } from '../../types';
 import { getFieldNameFromField } from '../utils';
-import { DateHistogramColumn } from './types';
+import type { DateHistogramColumn } from './types';
 
 export const getLabel = (aggParams: AggParamsDateHistogram, fieldName: string) => {
   return aggParams && 'customLabel' in aggParams ? aggParams.customLabel ?? fieldName : fieldName;

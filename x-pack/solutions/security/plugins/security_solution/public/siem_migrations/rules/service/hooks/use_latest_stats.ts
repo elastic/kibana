@@ -5,23 +5,13 @@
  * 2.0.
  */
 
-import useObservable from 'react-use/lib/useObservable';
-import { useCallback, useEffect, useMemo } from 'react';
 import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import { useLatestStats as useLatestStatsBase } from '../../../common/service';
 
 export const useLatestStats = () => {
   const { siemMigrations } = useKibana().services;
 
-  useEffect(() => {
-    siemMigrations.rules.startPolling();
-  }, [siemMigrations.rules]);
+  const result = useLatestStatsBase(siemMigrations.rules);
 
-  const refreshStats = useCallback(() => {
-    siemMigrations.rules.getRuleMigrationsStats(); // this updates latestStats$ internally
-  }, [siemMigrations.rules]);
-
-  const latestStats$ = useMemo(() => siemMigrations.rules.getLatestStats$(), [siemMigrations]);
-  const latestStats = useObservable(latestStats$, null);
-
-  return { data: latestStats ?? [], isLoading: latestStats === null, refreshStats };
+  return result;
 };

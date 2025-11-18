@@ -12,7 +12,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import type { FileLayer } from '@elastic/ems-client';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import { ChartSizeEvent } from '@kbn/chart-expressions-common';
+import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { MapsPluginStartDependencies } from '../../plugin';
 import { getCore } from '../../kibana_services';

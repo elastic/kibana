@@ -13,10 +13,19 @@ import {
   expectSuggestions,
   getFieldNamesByType,
   getFunctionSignaturesByReturnType,
+  getOperatorSuggestions,
 } from '../../../__tests__/autocomplete';
-import { ICommandCallbacks } from '../../types';
+import type { ICommandCallbacks } from '../../types';
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../../definitions/types';
 import { timeUnitsToSuggest } from '../../../definitions/constants';
+import {
+  logicalOperators,
+  arithmeticOperators,
+  comparisonFunctions,
+  patternMatchOperators,
+  inOperators,
+  nullCheckOperators,
+} from '../../../definitions/all_operators';
 
 const roundParameterTypes = ['double', 'integer', 'long', 'unsigned_long'] as const;
 
@@ -177,7 +186,9 @@ describe('EVAL Autocomplete', () => {
     );
     await evalExpectSuggestions(
       'from index | EVAL keywordField not ',
-      ['LIKE $0', 'RLIKE $0', 'IN $0'],
+      getOperatorSuggestions(
+        [...inOperators, ...patternMatchOperators].filter((op) => !op.name.startsWith('not '))
+      ),
       mockCallbacks
     );
 
@@ -223,10 +234,7 @@ describe('EVAL Autocomplete', () => {
           { operators: true, skipAssign: true },
           ['double', 'long']
         ),
-        'IN $0',
-        'IS NOT NULL',
-        'IS NULL',
-        'NOT IN $0',
+        ...getOperatorSuggestions([...inOperators, ...nullCheckOperators]),
       ],
       mockCallbacks
     );
@@ -250,34 +258,8 @@ describe('EVAL Autocomplete', () => {
     (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
       expectedDoubleIntegerFields.map((name) => ({ label: name, text: name }))
     );
-    await evalExpectSuggestions(
-      'from a | eval a=round(doubleField, ',
-      [
-        ...expectedDoubleIntegerFields,
-        ...getFunctionSignaturesByReturnType(
-          Location.EVAL,
-          ['integer', 'long'],
-          { scalar: true },
-          undefined,
-          ['round']
-        ),
-      ],
-      mockCallbacks
-    );
-    await evalExpectSuggestions(
-      'from a | eval round(doubleField, ',
-      [
-        ...expectedDoubleIntegerFields,
-        ...getFunctionSignaturesByReturnType(
-          Location.EVAL,
-          ['integer', 'long'],
-          { scalar: true },
-          undefined,
-          ['round']
-        ),
-      ],
-      mockCallbacks
-    );
+    await evalExpectSuggestions('from a | eval a=round(doubleField, ', [], mockCallbacks);
+    await evalExpectSuggestions('from a | eval round(doubleField, ', [], mockCallbacks);
     const expectedAny = getFieldNamesByType('any');
     (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
       expectedAny.map((name) => ({ label: name, text: name }))
@@ -451,7 +433,7 @@ describe('EVAL Autocomplete', () => {
     );
 
     await evalExpectSuggestions(
-      'from a | eval col0 = abs(b ) | eval abs(col0) ',
+      'from a | eval col0 = abs(doubleField ) | eval abs(col0) ',
       [
         ...getFieldNamesByType(['double', 'integer', 'long', 'unsigned_long']),
         ...getFunctionSignaturesByReturnType(
@@ -499,23 +481,41 @@ describe('EVAL Autocomplete', () => {
       ]),
     ];
 
-    const comparisonOperators = ['==', '!=', '>', '<', '>=', '<='];
-
     test('first position', async () => {
       await evalExpectSuggestions('from a | eval case(', allSuggestions);
       await evalExpectSuggestions('from a | eval case(', allSuggestions);
     });
 
-    test('suggests comparison operators after initial column', async () => {
-      // case( field /) suggest comparison operators at this point to converge to a boolean
-      await evalExpectSuggestions('from a | eval case( textField ', [...comparisonOperators, ',']);
-      await evalExpectSuggestions('from a | eval case( doubleField ', [
-        ...comparisonOperators,
-        ',',
+    test('suggests operators after initial column based on type', async () => {
+      // case( field ) suggests all appropriate operators for that field type
+      // Note: CASE is expression-heavy, comma is not automatically suggested after fields
+      await evalExpectSuggestions('from a | eval case( textField ', [
+        ...getOperatorSuggestions([
+          ...patternMatchOperators,
+          ...inOperators,
+          ...nullCheckOperators,
+        ]),
       ]);
+
+      await evalExpectSuggestions('from a | eval case( doubleField ', [
+        ...getOperatorSuggestions([
+          ...comparisonFunctions,
+          // Exclude unary-only operators (negation) - autocomplete doesn't suggest them
+          ...arithmeticOperators.filter(
+            (op) => !op.signatures.every((sig) => sig.params.length === 1)
+          ),
+          ...inOperators,
+          ...nullCheckOperators,
+        ]),
+      ]);
+
       await evalExpectSuggestions('from a | eval case( booleanField ', [
-        ...comparisonOperators,
+        ...getOperatorSuggestions(
+          comparisonFunctions.filter(({ name }) => name === '==' || name === '!=')
+        ),
         ',',
+        ...getOperatorSuggestions([...logicalOperators, ...inOperators, ...nullCheckOperators]),
+        'NOT',
       ]);
     });
 

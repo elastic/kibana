@@ -159,7 +159,9 @@
               "\nCurrent session management\n{@link ISessionService}"
             ],
             "signature": [
-              "{ start: () => string; clear: () => void; save: () => Promise<void>; destroy: () => void; readonly state$: ",
+              "{ start: () => string; clear: () => void; reset: () => void; save: (trackingProps: { entryPoint: string; }) => Promise<",
+              "SearchSessionSavedObject",
+              ">; destroy: () => void; readonly state$: ",
               "Observable",
               "<",
               {
@@ -177,7 +179,13 @@
               "Observable",
               "<boolean>; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => TrackSearchHandler; getSessionId: () => string | undefined; getSession$: () => ",
               "Observable",
-              "<string | undefined>; isStored: () => boolean; isRestore: () => boolean; restore: (sessionId: string) => void; continue: (sessionId: string) => void; cancel: () => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
+              "<string | undefined>; isSaving: (state?: ",
+              "SessionStateContainer",
+              "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; isStored: (state?: ",
+              "SessionStateContainer",
+              "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; isRestore: (state?: ",
+              "SessionStateContainer",
+              "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; restore: (sessionId: string) => Promise<void>; continue: (sessionId: string, keepSearches?: boolean) => void; cancel: ({ source }: { source: string; }) => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
               {
                 "pluginId": "@kbn/search-types",
                 "scope": "common",
@@ -601,6 +609,93 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-public.ISearchStart.showSearchSessionsFlyout",
+            "type": "Function",
+            "tags": [],
+            "label": "showSearchSessionsFlyout",
+            "description": [
+              "\nShows a flyout with a table to manage search sessions."
+            ],
+            "signature": [
+              "(attrs: { appId: string; trackingProps: { openedFrom: string; }; onBackgroundSearchOpened?: ",
+              "BackgroundSearchOpenedHandler",
+              " | undefined; }) => void"
+            ],
+            "path": "src/platform/plugins/shared/data/public/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-public.ISearchStart.showSearchSessionsFlyout.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "attrs",
+                "description": [],
+                "path": "src/platform/plugins/shared/data/public/search/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-public.ISearchStart.showSearchSessionsFlyout.$1.appId",
+                    "type": "string",
+                    "tags": [],
+                    "label": "appId",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/data/public/search/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-public.ISearchStart.showSearchSessionsFlyout.$1.trackingProps",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "trackingProps",
+                    "description": [],
+                    "signature": [
+                      "{ openedFrom: string; }"
+                    ],
+                    "path": "src/platform/plugins/shared/data/public/search/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "data",
+                    "id": "def-public.ISearchStart.showSearchSessionsFlyout.$1.onBackgroundSearchOpened",
+                    "type": "Function",
+                    "tags": [],
+                    "label": "onBackgroundSearchOpened",
+                    "description": [],
+                    "signature": [
+                      "BackgroundSearchOpenedHandler",
+                      " | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/data/public/search/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-public.ISearchStart.isBackgroundSearchEnabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "isBackgroundSearchEnabled",
+            "description": [
+              "\nFeature flag value to make it easier to use in different plugins"
+            ],
+            "path": "src/platform/plugins/shared/data/public/search/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-public.ISearchStart.searchSource",
             "type": "Object",
             "tags": [],
@@ -631,7 +726,9 @@
               "\nCurrent session management\n{@link ISessionService}"
             ],
             "signature": [
-              "{ start: () => string; clear: () => void; save: () => Promise<void>; destroy: () => void; readonly state$: ",
+              "{ start: () => string; clear: () => void; reset: () => void; save: (trackingProps: { entryPoint: string; }) => Promise<",
+              "SearchSessionSavedObject",
+              ">; destroy: () => void; readonly state$: ",
               "Observable",
               "<",
               {
@@ -649,7 +746,13 @@
               "Observable",
               "<boolean>; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => TrackSearchHandler; getSessionId: () => string | undefined; getSession$: () => ",
               "Observable",
-              "<string | undefined>; isStored: () => boolean; isRestore: () => boolean; restore: (sessionId: string) => void; continue: (sessionId: string) => void; cancel: () => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
+              "<string | undefined>; isSaving: (state?: ",
+              "SessionStateContainer",
+              "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; isStored: (state?: ",
+              "SessionStateContainer",
+              "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; isRestore: (state?: ",
+              "SessionStateContainer",
+              "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; restore: (sessionId: string) => Promise<void>; continue: (sessionId: string, keepSearches?: boolean) => void; cancel: ({ source }: { source: string; }) => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
               {
                 "pluginId": "@kbn/search-types",
                 "scope": "common",
@@ -1133,7 +1236,9 @@
         "label": "ISessionService",
         "description": [],
         "signature": [
-          "{ start: () => string; clear: () => void; save: () => Promise<void>; destroy: () => void; readonly state$: ",
+          "{ start: () => string; clear: () => void; reset: () => void; save: (trackingProps: { entryPoint: string; }) => Promise<",
+          "SearchSessionSavedObject",
+          ">; destroy: () => void; readonly state$: ",
           "Observable",
           "<",
           {
@@ -1151,7 +1256,13 @@
           "Observable",
           "<boolean>; hasAccess: () => boolean; trackSearch: (searchDescriptor: TrackSearchDescriptor) => TrackSearchHandler; getSessionId: () => string | undefined; getSession$: () => ",
           "Observable",
-          "<string | undefined>; isStored: () => boolean; isRestore: () => boolean; restore: (sessionId: string) => void; continue: (sessionId: string) => void; cancel: () => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
+          "<string | undefined>; isSaving: (state?: ",
+          "SessionStateContainer",
+          "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; isStored: (state?: ",
+          "SessionStateContainer",
+          "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; isRestore: (state?: ",
+          "SessionStateContainer",
+          "<TrackSearchDescriptor, TrackSearchMeta>) => boolean; restore: (sessionId: string) => Promise<void>; continue: (sessionId: string, keepSearches?: boolean) => void; cancel: ({ source }: { source: string; }) => Promise<void>; renameCurrentSession: (newName: string) => Promise<void>; isCurrentSession: (sessionId?: string | undefined) => boolean; getSearchOptions: (sessionId?: string | undefined) => Required<Pick<",
           {
             "pluginId": "@kbn/search-types",
             "scope": "common",
@@ -1667,7 +1778,7 @@
             "label": "find",
             "description": [],
             "signature": [
-              "({ savedObjectsClient, internalElasticsearchClient }: ",
+              "({ savedObjectsClient, asCurrentUserElasticsearchClient }: ",
               "SearchSessionStatusDependencies",
               ", user: ",
               "AuthenticatedUser",
@@ -1692,7 +1803,7 @@
                 "id": "def-server.SearchSessionService.find.$1",
                 "type": "Object",
                 "tags": [],
-                "label": "{ savedObjectsClient, internalElasticsearchClient }",
+                "label": "{ savedObjectsClient, asCurrentUserElasticsearchClient }",
                 "description": [],
                 "signature": [
                   "SearchSessionStatusDependencies"
@@ -2252,15 +2363,7 @@
                 "section": "def-common.ISearchOptions",
                 "text": "ISearchOptions"
               },
-              ") => Promise<string>; trackId: (searchRequest: ",
-              {
-                "pluginId": "@kbn/search-types",
-                "scope": "common",
-                "docId": "kibKbnSearchTypesPluginApi",
-                "section": "def-common.IKibanaSearchRequest",
-                "text": "IKibanaSearchRequest"
-              },
-              "<any>, searchId: string, options: ",
+              ") => Promise<string>; trackId: (searchId: string, options: ",
               {
                 "pluginId": "@kbn/search-types",
                 "scope": "common",
@@ -12835,7 +12938,7 @@
             "section": "def-common.SerializedSearchSourceFields",
             "text": "SerializedSearchSourceFields"
           },
-          ") => [",
+          ", options?: { refNamePrefix?: string | undefined; } | undefined) => [",
           {
             "pluginId": "data",
             "scope": "common",
@@ -12871,6 +12974,33 @@
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
+          },
+          {
+            "parentPluginId": "data",
+            "id": "def-common.extractReferences.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "path": "src/platform/plugins/shared/data/common/search/search_source/extract_references.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "data",
+                "id": "def-common.extractReferences.$2.refNamePrefix",
+                "type": "string",
+                "tags": [],
+                "label": "refNamePrefix",
+                "description": [],
+                "signature": [
+                  "string | undefined"
+                ],
+                "path": "src/platform/plugins/shared/data/common/search/search_source/extract_references.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
           }
         ],
         "returnComment": [],
@@ -29909,6 +30039,29 @@
           },
           {
             "parentPluginId": "data",
+            "id": "def-common.SearchSourceFields.nonHighlightingFilters",
+            "type": "Array",
+            "tags": [],
+            "label": "nonHighlightingFilters",
+            "description": [
+              "\nFilters that should not trigger highlighting.\nThese filters will be included in the search query for document retrieval,\nbut excluded from the highlight_query parameter in Elasticsearch.\n{@link Filter}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.Filter",
+                "text": "Filter"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/plugins/shared/data/common/search/search_source/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "data",
             "id": "def-common.SearchSourceFields.sort",
             "type": "CompoundType",
             "tags": [],
@@ -34187,6 +34340,14 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
+          "[] | undefined; nonHighlightingFilters?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
+          },
           "[] | undefined; sort?: ",
           {
             "pluginId": "data",
@@ -35240,9 +35401,9 @@
             "signature": [
               "(input: null, args: Arguments) => { $state?: { store: ",
               {
-                "pluginId": "@kbn/es-query",
+                "pluginId": "@kbn/es-query-constants",
                 "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
+                "docId": "kibKbnEsQueryConstantsPluginApi",
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               },
@@ -38943,9 +39104,9 @@
             "signature": [
               "(input: null, args: Arguments) => { $state?: { store: ",
               {
-                "pluginId": "@kbn/es-query",
+                "pluginId": "@kbn/es-query-constants",
                 "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
+                "docId": "kibKbnEsQueryConstantsPluginApi",
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               },
@@ -39480,9 +39641,9 @@
             "signature": [
               "(input: null, args: Arguments) => { $state?: { store: ",
               {
-                "pluginId": "@kbn/es-query",
+                "pluginId": "@kbn/es-query-constants",
                 "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
+                "docId": "kibKbnEsQueryConstantsPluginApi",
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               },
@@ -40119,7 +40280,15 @@
                 "section": "def-common.ESQLControlVariable",
                 "text": "ESQLControlVariable"
               },
-              "[] | undefined; }"
+              "[] | undefined; projectRouting?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              "; }"
             ],
             "path": "src/platform/plugins/shared/data/common/search/expressions/remove_filter.ts",
             "deprecated": false,
@@ -40470,7 +40639,15 @@
                 "section": "def-common.ESQLControlVariable",
                 "text": "ESQLControlVariable"
               },
-              "[] | undefined; }"
+              "[] | undefined; projectRouting?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              "; }"
             ],
             "path": "src/platform/plugins/shared/data/common/search/expressions/select_filter.ts",
             "deprecated": false,

@@ -5,66 +5,148 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
-import { css } from '@emotion/css';
-import { EuiSuperSelect, EuiSuperSelectOption, EuiText } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React, { useState, useMemo, useCallback } from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { css } from '@emotion/react';
+import {
+  EuiButtonEmpty,
+  EuiPopover,
+  EuiPopoverTitle,
+  EuiSelectable,
+  EuiText,
+  EuiLink,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopoverFooter,
+  EuiButton,
+  useEuiTheme,
+} from '@elastic/eui';
 import type { AgentDefinition } from '@kbn/onechat-common';
-import { oneChatDefaultAgentId } from '@kbn/onechat-common';
-import { useOnechatAgents } from '../../hooks/agents/use_agents';
+import { appPaths } from '../../utils/app_paths';
+import { useNavigation } from '../../hooks/use_navigation';
+import { labels } from '../../utils/i18n';
+
+const agentSelectId = 'agentBuilderAgentSelect';
+
+interface AgentSelectButtonProps {
+  selectedAgentName?: string;
+  onClick: () => void;
+}
+
+const AgentSelectButton: React.FC<AgentSelectButtonProps> = ({ selectedAgentName, onClick }) => (
+  <EuiButtonEmpty
+    iconSide="right"
+    iconType="arrowDown"
+    onClick={onClick}
+    aria-haspopup="menu"
+    aria-labelledby={agentSelectId}
+    data-test-subj="agentBuilderAgentSelectorButton"
+  >
+    {selectedAgentName}
+  </EuiButtonEmpty>
+);
 
 interface AgentSelectDropdownProps {
-  selectedAgentId?: string;
+  selectedAgent?: AgentDefinition;
   onAgentChange: (agentId: string) => void;
-  disabled?: boolean;
+  agents?: AgentDefinition[];
 }
 
 export const AgentSelectDropdown: React.FC<AgentSelectDropdownProps> = ({
-  selectedAgentId,
+  selectedAgent,
   onAgentChange,
-  disabled = false,
+  agents = [],
 }) => {
-  const { agents, isLoading } = useOnechatAgents();
+  const { euiTheme } = useEuiTheme();
+  const { createOnechatUrl } = useNavigation();
 
-  const agentDropdownClass = css`
-    min-width: 200px;
+  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+
+  const options: EuiSelectableOption[] = useMemo(
+    () =>
+      agents.map((agent) => ({
+        key: agent.id,
+        label: agent.name,
+        checked: agent.id === selectedAgent?.id ? 'on' : undefined,
+      })),
+    [agents, selectedAgent?.id]
+  );
+
+  const handleAgentChange = useCallback(
+    (value: EuiSelectableOption[]) => {
+      const newAgentId = value.find((v) => v.checked === 'on')?.key;
+      if (newAgentId) {
+        onAgentChange(newAgentId);
+        setIsPopoverOpen(false);
+      }
+    },
+    [onAgentChange]
+  );
+
+  const panelStyles = css`
+    inline-size: calc(${euiTheme.size.xxl} * 7);
   `;
-  const selectClass = css`
-    border: none;
-    box-shadow: none;
-  `;
-
-  const agentOptions: Array<EuiSuperSelectOption<string>> = useMemo(() => {
-    const options = agents.map((agent: AgentDefinition) => ({
-      value: agent.id,
-      inputDisplay: agent.name,
-      dropdownDisplay: (
-        <div>
-          <EuiText size="s">{agent.name}</EuiText>
-          <EuiText size="xs" color="subdued">
-            {agent.description}
-          </EuiText>
-        </div>
-      ),
-    }));
-
-    return options;
-  }, [agents]);
 
   return (
-    <div className={agentDropdownClass}>
-      <EuiSuperSelect
-        className={selectClass}
-        options={agentOptions}
-        valueOfSelected={selectedAgentId}
-        onChange={onAgentChange}
-        disabled={disabled || isLoading}
-        isLoading={isLoading}
-        defaultValue={oneChatDefaultAgentId}
-        placeholder={i18n.translate('xpack.onechat.agentDropdown.placeholder', {
-          defaultMessage: 'Select an agent...',
-        })}
-      />
-    </div>
+    <EuiPopover
+      panelProps={{ css: panelStyles }}
+      panelPaddingSize="none"
+      button={
+        <AgentSelectButton
+          selectedAgentName={selectedAgent?.name}
+          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+        />
+      }
+      isOpen={isPopoverOpen}
+      anchorPosition="upRight"
+      closePopover={() => setIsPopoverOpen(false)}
+    >
+      <EuiSelectable
+        id={agentSelectId}
+        aria-label={labels.conversations.selectAgentAriaLabel}
+        searchable={false}
+        options={options}
+        onChange={handleAgentChange}
+        singleSelection
+      >
+        {(list) => (
+          <>
+            <EuiPopoverTitle paddingSize="s">
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <EuiText
+                    css={css`
+                      font-weight: ${euiTheme.font.weight.bold};
+                    `}
+                    size="xs"
+                  >
+                    {labels.conversations.title}
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs">
+                    <EuiLink href={createOnechatUrl(appPaths.agents.list)}>
+                      {labels.conversations.manageAgents}
+                    </EuiLink>
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPopoverTitle>
+            {list}
+            <EuiPopoverFooter paddingSize="s">
+              <EuiButton
+                iconSide="left"
+                iconType="plus"
+                size="s"
+                fullWidth
+                href={createOnechatUrl(appPaths.agents.new)}
+              >
+                {labels.conversations.createAnAgent}
+              </EuiButton>
+            </EuiPopoverFooter>
+          </>
+        )}
+      </EuiSelectable>
+    </EuiPopover>
   );
 };

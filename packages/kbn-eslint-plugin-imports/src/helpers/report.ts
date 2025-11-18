@@ -8,7 +8,7 @@
  */
 
 import type { Rule } from 'eslint';
-import { SomeNode } from './visit_all_import_statements';
+import type { SomeNode } from './visit_all_import_statements';
 
 interface ReportOptions {
   node: SomeNode;

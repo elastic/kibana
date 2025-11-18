@@ -9,10 +9,10 @@
 
 /* eslint-disable no-console */
 
-import { readdirSync, readFileSync } from 'fs';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
-import { ElasticsearchCommandDefinition } from '../src/definitions/types';
+import type { ElasticsearchCommandDefinition } from '../src/definitions/types';
+import { readElasticsearchDefinitions } from './utils/elasticsearch_definitions';
 
 const GENERATED_COMMANDS_BASE_PATH = '../src/definitions/generated/commands';
 const ELASTICSEARCH_COMMANDS_PATH =
@@ -21,39 +21,11 @@ const ELASTICSEARCH_COMMANDS_PATH =
 async function generateElasticsearchCommandDefinitions(): Promise<void> {
   const pathToElasticsearch = process.argv[2];
 
-  if (!pathToElasticsearch) {
-    console.error('Error: Path to Elasticsearch is required.');
-    console.error('Usage: yarn make:defs <path/to/elasticsearch>');
-    process.exit(1);
-  }
-
-  const esCommandsDirectory = join(pathToElasticsearch, ELASTICSEARCH_COMMANDS_PATH);
-  let esCommandDefinitions: ElasticsearchCommandDefinition[] = [];
-
-  try {
-    // Read and parse all Elasticsearch command definition files
-    esCommandDefinitions = readdirSync(esCommandsDirectory)
-      .map((fileName) => {
-        const filePath = join(esCommandsDirectory, fileName);
-        const fileContent = readFileSync(filePath, 'utf-8');
-
-        return JSON.parse(fileContent);
-      })
-      .map(({ comment, ...rest }) => rest);
-  } catch (error) {
-    const errorMessage =
-      error.code === 'ENOENT'
-        ? `Commands directory not found at "${esCommandsDirectory}".`
-        : `An error occurred while reading command definitions from "${esCommandsDirectory}": ${error.message}`;
-
-    console.warn(`Warning: ${errorMessage} Skipping command definitions generation.`);
-    process.exit(0);
-  }
-
-  if (esCommandDefinitions.length === 0) {
-    console.log(`No command definitions found in "${esCommandsDirectory}".`);
-    process.exit(0);
-  }
+  const esCommandDefinitions = readElasticsearchDefinitions<ElasticsearchCommandDefinition>({
+    pathToElasticsearch,
+    definitionsPath: ELASTICSEARCH_COMMANDS_PATH,
+    definitionType: 'Commands',
+  });
 
   const outputCommandsDir = join(__dirname, GENERATED_COMMANDS_BASE_PATH);
   await mkdir(outputCommandsDir, { recursive: true });
@@ -62,7 +34,12 @@ async function generateElasticsearchCommandDefinitions(): Promise<void> {
 
   // Populate the metadata object without the comment field
   esCommandDefinitions.forEach((command) => {
-    commandsMetadata[command.name] = command;
+    // Normalize the license field to lowercase, to agree with the licensing types
+    const updatedComand = {
+      ...command,
+      license: command.license?.toLowerCase() as typeof command.license,
+    };
+    commandsMetadata[command.name] = updatedComand;
   });
 
   const outputTsPath = join(outputCommandsDir, 'commands.ts');

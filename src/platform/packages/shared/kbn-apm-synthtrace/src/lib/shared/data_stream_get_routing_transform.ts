@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESDocumentWithOperation, Fields } from '@kbn/apm-synthtrace-client';
+import type { ESDocumentWithOperation, Fields } from '@kbn/apm-synthtrace-client';
 import { Transform } from 'stream';
 
 export function getRoutingTransform<T extends Fields>(dataStreamType: string) {

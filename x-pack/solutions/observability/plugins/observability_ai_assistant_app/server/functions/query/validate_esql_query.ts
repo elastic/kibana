@@ -7,9 +7,9 @@
 
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { ESQLSearchResponse, ESQLRow } from '@kbn/es-types';
+import type { ESQLSearchResponse, ESQLRow } from '@kbn/es-types';
 import { esFieldTypeToKibanaFieldType } from '@kbn/field-types';
-import { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { splitIntoCommands } from '@kbn/inference-plugin/common';
 
 export async function runAndValidateEsqlQuery({
@@ -28,10 +28,7 @@ export async function runAndValidateEsqlQuery({
 }> {
   const queryWithoutLineBreaks = query.replaceAll(/\n/g, '');
 
-  const { errors } = await validateQuery(queryWithoutLineBreaks, {
-    // setting this to true, we don't want to validate the index / fields existence
-    ignoreOnMissingCallbacks: true,
-  });
+  const { errors } = await validateQuery(queryWithoutLineBreaks);
 
   const asCommands = splitIntoCommands(queryWithoutLineBreaks);
 
@@ -49,7 +46,10 @@ export async function runAndValidateEsqlQuery({
   });
 
   try {
-    const res = await client.esql.query({ query, drop_null_columns: true }, { signal });
+    const res = await client.esql.query(
+      { query, drop_null_columns: true },
+      { signal, requestTimeout: '10s' }
+    );
     const esqlResponse = res as unknown as ESQLSearchResponse;
 
     const columns =

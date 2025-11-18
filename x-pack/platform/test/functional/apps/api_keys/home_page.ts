@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import clearAllApiKeys from './api_keys_helpers';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const es = getService('es');
@@ -45,6 +45,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.apiKeys.ensureApiKeyExists(apiKeyName);
         log.debug(`API key ("${apiKeyName}") exists.`);
       }
+    });
+  }
+
+  async function ensureApiKeyDoesNotExist(apiKeyName: string) {
+    await retry.try(async () => {
+      log.debug(`Checking if API key ("${apiKeyName}") does not exist.`);
+      const exists = await pageObjects.apiKeys.doesApiKeyExist(apiKeyName);
+      if (exists) {
+        throw new Error(`API key ("${apiKeyName}") still exists when it should not.`);
+      }
+      log.debug(`API key ("${apiKeyName}") does not exist.`);
     });
   }
 
@@ -483,8 +494,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           username: 'elastic',
           password: 'changeme',
         });
-
-        await pageObjects.common.navigateToApp('apiKeys');
       });
 
       after(async () => {
@@ -492,14 +501,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await clearAllApiKeys(es, log);
       });
 
+      beforeEach(async () => {
+        await pageObjects.common.navigateToApp('apiKeys');
+      });
+
       it('active/expired filter buttons work as expected', async () => {
         await pageObjects.apiKeys.clickExpiryFilters('active');
         await ensureApiKeysExist(['my api key', 'Alerting: Managed', 'test_cross_cluster']);
-        expect(await pageObjects.apiKeys.doesApiKeyExist('test_api_key')).to.be(false);
+        await ensureApiKeyDoesNotExist('test_api_key');
 
         await pageObjects.apiKeys.clickExpiryFilters('expired');
         await ensureApiKeysExist(['test_api_key']);
-        expect(await pageObjects.apiKeys.doesApiKeyExist('my api key')).to.be(false);
+        await ensureApiKeyDoesNotExist('my api key');
 
         // reset filter buttons
         await pageObjects.apiKeys.clickExpiryFilters('expired');
@@ -539,12 +552,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await ensureApiKeysExist(['my api key', 'Alerting: Managed', 'test_cross_cluster']);
       });
 
-      it.skip('search bar works as expected', async () => {
+      it('search bar works as expected', async () => {
         await pageObjects.apiKeys.setSearchBarValue('test_user_api_key');
 
         await ensureApiKeysExist(['test_user_api_key']);
 
         await pageObjects.apiKeys.setSearchBarValue('"my api key"');
+        await ensureApiKeysExist(['my api key']);
+
+        await pageObjects.apiKeys.setSearchBarValue('"api"');
         await ensureApiKeysExist(['my api key']);
       });
     });

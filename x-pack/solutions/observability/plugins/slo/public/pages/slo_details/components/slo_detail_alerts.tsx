@@ -8,7 +8,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { ObservabilityAlertsTable } from '@kbn/observability-plugin/public';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { AlertConsumers, SLO_RULE_TYPE_IDS } from '@kbn/rule-data-utils';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { Fragment } from 'react';
 import { useKibana } from '../../../hooks/use_kibana';
 
@@ -37,7 +37,7 @@ export function SloDetailsAlerts({ slo }: Props) {
                 ],
               },
             }}
-            initialPageSize={100}
+            pageSize={100}
             services={{
               data,
               http,

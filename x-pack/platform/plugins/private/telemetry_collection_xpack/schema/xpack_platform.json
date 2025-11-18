@@ -316,6 +316,257 @@
         }
       }
     },
+    "agent_builder": {
+      "properties": {
+        "custom_tools": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of custom tools created by users"
+              }
+            },
+            "by_type": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "type": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "Tool type (esql, index_search, workflow, builtin)"
+                    }
+                  },
+                  "count": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "Number of tools of this type"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "custom_agents": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of custom agents created by users"
+              }
+            }
+          }
+        },
+        "conversations": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of conversations"
+              }
+            },
+            "total_rounds": {
+              "type": "long",
+              "_meta": {
+                "description": "Total conversation rounds across all conversations"
+              }
+            },
+            "avg_rounds_per_conversation": {
+              "type": "float",
+              "_meta": {
+                "description": "Average rounds per conversation"
+              }
+            },
+            "rounds_distribution": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "bucket": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "Round count bucket (1-5, 6-10, 11-20, 21-50, 51+)"
+                    }
+                  },
+                  "count": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "Number of conversations in this bucket"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "query_to_result_time": {
+          "properties": {
+            "p50": {
+              "type": "long",
+              "_meta": {
+                "description": "50th percentile query-to-result time in milliseconds"
+              }
+            },
+            "p75": {
+              "type": "long",
+              "_meta": {
+                "description": "75th percentile query-to-result time in milliseconds"
+              }
+            },
+            "p90": {
+              "type": "long",
+              "_meta": {
+                "description": "90th percentile query-to-result time in milliseconds"
+              }
+            },
+            "p95": {
+              "type": "long",
+              "_meta": {
+                "description": "95th percentile query-to-result time in milliseconds"
+              }
+            },
+            "p99": {
+              "type": "long",
+              "_meta": {
+                "description": "99th percentile query-to-result time in milliseconds"
+              }
+            },
+            "mean": {
+              "type": "long",
+              "_meta": {
+                "description": "Mean query-to-result time in milliseconds"
+              }
+            }
+          }
+        },
+        "tool_calls": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total tool calls across all sources"
+              }
+            },
+            "by_source": {
+              "properties": {
+                "default_agent": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Tool calls from default agents"
+                  }
+                },
+                "custom_agent": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Tool calls from custom agents"
+                  }
+                },
+                "mcp": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Tool calls from MCP clients"
+                  }
+                },
+                "api": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Direct tool calls via API"
+                  }
+                },
+                "a2a": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Tool calls from agent-to-agent communication"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "llm_usage": {
+          "properties": {
+            "by_provider": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "provider": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "LLM provider name (e.g., openai, bedrock)"
+                    }
+                  },
+                  "count": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "Number of LLM invocations for this provider"
+                    }
+                  }
+                }
+              }
+            },
+            "by_model": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "model": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "LLM model identifier"
+                    }
+                  },
+                  "count": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "Number of LLM invocations for this model"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "errors": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of errors surfaced to users"
+              }
+            },
+            "avg_errors_per_conversation": {
+              "type": "float",
+              "_meta": {
+                "description": "Average number of errors per conversation that had errors"
+              }
+            },
+            "total_conversations_with_errors": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of unique conversations that had at least one error"
+              }
+            },
+            "by_type": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "type": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "Error type/code (e.g., internalError, badRequest)"
+                    }
+                  },
+                  "count": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "Number of errors of this type"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "alerts": {
       "properties": {
         "has_errors": {
@@ -3512,6 +3763,66 @@
                 "syncAlertsOff": {
                   "type": "long"
                 },
+                "extractObservablesOn": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Automatically extract observables setting enabled"
+                  }
+                },
+                "extractObservablesOff": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Automatically extract observables setting disabled"
+                  }
+                },
+                "observables": {
+                  "properties": {
+                    "auto": {
+                      "properties": {
+                        "default": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of default type observables automatically extracted"
+                          }
+                        },
+                        "custom": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom type observables automatically extracted"
+                          }
+                        }
+                      }
+                    },
+                    "manual": {
+                      "properties": {
+                        "default": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of default type observables manually added"
+                          }
+                        },
+                        "custom": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom type observables manually added"
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of observables"
+                      }
+                    }
+                  }
+                },
+                "totalWithMaxObservables": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of cases with maximum observables"
+                  }
+                },
                 "totalUsers": {
                   "type": "long"
                 },
@@ -3639,6 +3950,70 @@
                       }
                     }
                   }
+                },
+                "totalWithAlerts": {
+                  "type": "long"
+                },
+                "status": {
+                  "properties": {
+                    "open": {
+                      "type": "long"
+                    },
+                    "inProgress": {
+                      "type": "long"
+                    },
+                    "closed": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "observables": {
+                  "properties": {
+                    "auto": {
+                      "properties": {
+                        "default": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of default type observables automatically extracted"
+                          }
+                        },
+                        "custom": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom type observables automatically extracted"
+                          }
+                        }
+                      }
+                    },
+                    "manual": {
+                      "properties": {
+                        "default": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of default type observables manually added"
+                          }
+                        },
+                        "custom": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom type observables manually added"
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of observables"
+                      }
+                    }
+                  }
+                },
+                "totalWithMaxObservables": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of cases with maximum observables"
+                  }
                 }
               }
             },
@@ -3738,6 +4113,70 @@
                         }
                       }
                     }
+                  }
+                },
+                "totalWithAlerts": {
+                  "type": "long"
+                },
+                "status": {
+                  "properties": {
+                    "open": {
+                      "type": "long"
+                    },
+                    "inProgress": {
+                      "type": "long"
+                    },
+                    "closed": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "observables": {
+                  "properties": {
+                    "auto": {
+                      "properties": {
+                        "default": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of default type observables automatically extracted"
+                          }
+                        },
+                        "custom": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom type observables automatically extracted"
+                          }
+                        }
+                      }
+                    },
+                    "manual": {
+                      "properties": {
+                        "default": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of default type observables manually added"
+                          }
+                        },
+                        "custom": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom type observables manually added"
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of observables"
+                      }
+                    }
+                  }
+                },
+                "totalWithMaxObservables": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of cases with maximum observables"
                   }
                 }
               }
@@ -3839,6 +4278,70 @@
                       }
                     }
                   }
+                },
+                "totalWithAlerts": {
+                  "type": "long"
+                },
+                "status": {
+                  "properties": {
+                    "open": {
+                      "type": "long"
+                    },
+                    "inProgress": {
+                      "type": "long"
+                    },
+                    "closed": {
+                      "type": "long"
+                    }
+                  }
+                },
+                "observables": {
+                  "properties": {
+                    "auto": {
+                      "properties": {
+                        "default": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of default type observables automatically extracted"
+                          }
+                        },
+                        "custom": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom type observables automatically extracted"
+                          }
+                        }
+                      }
+                    },
+                    "manual": {
+                      "properties": {
+                        "default": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of default type observables manually added"
+                          }
+                        },
+                        "custom": {
+                          "type": "long",
+                          "_meta": {
+                            "description": "Number of custom type observables manually added"
+                          }
+                        }
+                      }
+                    },
+                    "total": {
+                      "type": "long",
+                      "_meta": {
+                        "description": "Total number of observables"
+                      }
+                    }
+                  }
+                },
+                "totalWithMaxObservables": {
+                  "type": "long",
+                  "_meta": {
+                    "description": "Number of cases with maximum observables"
+                  }
                 }
               }
             }
@@ -3893,6 +4396,63 @@
         "alerts": {
           "properties": {
             "all": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
+                "maxOnACase": {
+                  "type": "long"
+                }
+              }
+            },
+            "obs": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
+                "maxOnACase": {
+                  "type": "long"
+                }
+              }
+            },
+            "sec": {
+              "properties": {
+                "total": {
+                  "type": "long"
+                },
+                "monthly": {
+                  "type": "long"
+                },
+                "weekly": {
+                  "type": "long"
+                },
+                "daily": {
+                  "type": "long"
+                },
+                "maxOnACase": {
+                  "type": "long"
+                }
+              }
+            },
+            "main": {
               "properties": {
                 "total": {
                   "type": "long"
@@ -5639,13 +6199,141 @@
         }
       }
     },
+    "observability_ai_assistant": {
+      "properties": {
+        "knowledge_base": {
+          "properties": {
+            "users_with_global_entries": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users with global knowledge base entries"
+              }
+            },
+            "users_with_global_entries_user_created": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users with global knowledge base entries created by user"
+              }
+            },
+            "users_with_global_entries_assistant_created": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users with global knowledge base entries created by assistant"
+              }
+            },
+            "users_with_private_entries": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users with private knowledge base entries"
+              }
+            },
+            "users_with_private_entries_user_created": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users with private knowledge base entries created by user"
+              }
+            },
+            "users_with_private_entries_assistant_created": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users with private knowledge base entries created by assistant"
+              }
+            },
+            "users_with_user_instructions": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users who have configured custom user instructions"
+              }
+            }
+          }
+        },
+        "conversations": {
+          "properties": {
+            "users_with_archived_conversations": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users with archived conversations"
+              }
+            },
+            "users_with_private_conversations": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users with private conversations"
+              }
+            },
+            "users_with_shared_conversations": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of users with shared conversations"
+              }
+            }
+          }
+        }
+      }
+    },
     "reporting": {
       "properties": {
+        "has_errors": {
+          "type": "boolean"
+        },
+        "error_messages": {
+          "type": "array",
+          "items": {
+            "type": "text"
+          }
+        },
         "available": {
           "type": "boolean"
         },
         "enabled": {
           "type": "boolean"
+        },
+        "number_of_scheduled_reports": {
+          "type": "long"
+        },
+        "number_of_enabled_scheduled_reports": {
+          "type": "long"
+        },
+        "number_of_scheduled_reports_by_type": {
+          "properties": {
+            "csv_searchsource": {
+              "type": "long"
+            },
+            "csv_v2": {
+              "type": "long"
+            },
+            "printable_pdf_v2": {
+              "type": "long"
+            },
+            "printable_pdf": {
+              "type": "long"
+            },
+            "PNGV2": {
+              "type": "long"
+            }
+          }
+        },
+        "number_of_enabled_scheduled_reports_by_type": {
+          "properties": {
+            "csv_searchsource": {
+              "type": "long"
+            },
+            "csv_v2": {
+              "type": "long"
+            },
+            "printable_pdf_v2": {
+              "type": "long"
+            },
+            "printable_pdf": {
+              "type": "long"
+            },
+            "PNGV2": {
+              "type": "long"
+            }
+          }
+        },
+        "number_of_scheduled_reports_with_notifications": {
+          "type": "long"
         }
       }
     },
@@ -5786,6 +6474,16 @@
               }
             },
             "osquery-saved-query": {
+              "properties": {
+                "usedTags": {
+                  "type": "integer"
+                },
+                "taggedObjects": {
+                  "type": "integer"
+                }
+              }
+            },
+            "alerting_rule_template": {
               "properties": {
                 "usedTags": {
                   "type": "integer"
@@ -6183,6 +6881,182 @@
           "type": "long",
           "_meta": {
             "description": "The number of times the \"Disable Legacy URL Aliases\" API has been called."
+          }
+        }
+      }
+    },
+    "stack_connectors": {
+      "properties": {
+        "inference_count_by_provider": {
+          "properties": {
+            "alibabacloud-ai-search": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the AlibabaCloud AI Search provider."
+              }
+            },
+            "amazonbedrock": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Amazon Bedrock provider."
+              }
+            },
+            "amazon_sagemaker": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Amazon SageMaker provider."
+              }
+            },
+            "anthropic": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Anthropic provider."
+              }
+            },
+            "azureaistudio": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Azure AI Studio provider."
+              }
+            },
+            "azureopenai": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Azure OpenAI provider."
+              }
+            },
+            "cohere": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Cohere provider."
+              }
+            },
+            "deepseek": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the DeepSeek provider."
+              }
+            },
+            "elastic": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Elastic Inference Service provider."
+              }
+            },
+            "elasticsearch": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Elasticsearch provider."
+              }
+            },
+            "googleaistudio": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Google AI Studio provider."
+              }
+            },
+            "googlevertexai": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Google Vertex AI provider."
+              }
+            },
+            "hugging_face": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Hugging Face provider."
+              }
+            },
+            "jinaai": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Jina AI provider."
+              }
+            },
+            "mistral": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Mistral provider."
+              }
+            },
+            "openai": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the OpenAI provider."
+              }
+            },
+            "voyageai": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Voyage AI provider."
+              }
+            },
+            "watsonxai": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the IBM Watsonx provider."
+              }
+            },
+            "ai21": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the AI21 labs provider."
+              }
+            },
+            "llama": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Llama Stack provider."
+              }
+            },
+            "contextualai": {
+              "type": "long",
+              "_meta": {
+                "description": "The number of inference connectors created using the Contextual AI provider."
+              }
+            }
+          }
+        }
+      }
+    },
+    "streams": {
+      "properties": {
+        "classic_streams": {
+          "properties": {
+            "changed_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of classic streams that have been modified from their default configuration. Calculated by presence in .kibana_streams (managed) index and type is \"classic\"."
+              }
+            },
+            "with_processing_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of classic streams with custom processing steps configured. Calculated by counting streams with non-empty ingest.processing.steps arrays."
+              }
+            },
+            "with_fields_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of classic streams with custom field overrides configured. Calculated by counting streams with non-empty ingest.classic.field_overrides objects."
+              }
+            },
+            "with_changed_retention_count": {
+              "type": "long",
+              "_meta": {
+                "description": "Number of classic streams with changed retention. Calculated by confirming stream lifecycle is not \"inherited\"."
+              }
+            }
+          }
+        },
+        "wired_streams": {
+          "properties": {
+            "count": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of wired streams in the system."
+              }
+            }
           }
         }
       }

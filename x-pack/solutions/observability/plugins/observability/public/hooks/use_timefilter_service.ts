@@ -6,7 +6,7 @@
  */
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ObservabilityPublicPluginsStart } from '..';
+import type { ObservabilityPublicPluginsStart } from '..';
 
 export function useTimefilterService() {
   const { services } = useKibana<ObservabilityPublicPluginsStart>();

@@ -10,13 +10,15 @@ import { EuiBetaBadge, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { Route, Routes } from '@kbn/shared-ux-router';
 import { useHistory, useParams } from 'react-router-dom';
-import { ILicense } from '@kbn/licensing-plugin/public';
-import { ClientConfigType, useInternalApiClient, useKibana } from '@kbn/reporting-public';
+import type { ILicense } from '@kbn/licensing-types';
+import type { ClientConfigType } from '@kbn/reporting-public';
+import { useInternalApiClient, useKibana } from '@kbn/reporting-public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
 import { Observable } from 'rxjs';
 import { SCHEDULED_REPORT_VALID_LICENSES } from '@kbn/reporting-common';
-import { REPORTING_EXPORTS_PATH, REPORTING_SCHEDULES_PATH, Section } from '../../constants';
+import type { Section } from '../../constants';
+import { REPORTING_EXPORTS_PATH, REPORTING_SCHEDULES_PATH } from '../../constants';
 import ReportExportsTable from './report_exports_table';
 import ReportSchedulesTable from './report_schedules_table';
 import { LicensePrompt } from './license_prompt';
@@ -119,7 +121,7 @@ export const ReportingTabs: React.FunctionComponent<{ config: ClientConfigType }
         }
         data-test-subj="reportingPageHeader"
         pageTitle={
-          <FormattedMessage id="xpack.reporting.reports.titleStateful" defaultMessage="Reports" />
+          <FormattedMessage id="xpack.reporting.reports.titleStateful" defaultMessage="Reporting" />
         }
         description={
           <FormattedMessage
@@ -138,6 +140,7 @@ export const ReportingTabs: React.FunctionComponent<{ config: ClientConfigType }
                 size="s"
                 iconType="flask"
                 label={TECH_PREVIEW_LABEL}
+                aria-label={TECH_PREVIEW_LABEL}
                 tooltipContent={TECH_PREVIEW_DESCRIPTION}
               />
             </>

@@ -13,7 +13,7 @@ import { resolve } from 'path';
 import url from 'url';
 
 import { isKibanaDistributable } from '@kbn/repo-info';
-import { readKeystore } from '../keystore/read_keystore';
+import { readKeystore } from '../keystore/lib/read_keystore';
 import { compileConfigStack } from './compile_config_stack';
 import { getConfigFromFiles } from '@kbn/config';
 
@@ -126,8 +126,6 @@ export function applyConfigOverrides(rawConfig, opts, extraCliOptions, keystoreC
       );
     }
 
-    set('server.prototypeHardening', true);
-
     if (!has('elasticsearch.serviceAccountToken') && opts.devCredentials !== false) {
       if (!has('elasticsearch.username')) {
         set('elasticsearch.username', 'kibana_system');
@@ -238,6 +236,7 @@ export default function (program) {
       pluginPathCollector,
       []
     )
+    .option('--allow-root', 'Required if Kibana is ran as root')
     .option('--optimize', 'Deprecated, running the optimizer is no longer required');
 
   if (!isKibanaDistributable()) {
@@ -248,7 +247,7 @@ export default function (program) {
         'Adds plugin paths for all the Kibana example plugins and runs with no base path'
       )
       .option(
-        '--serverless [oblt|security|es|chat]',
+        '--serverless [oblt|security|es|workplaceai]',
         'Start Kibana in a specific serverless project mode. ' +
           'If no mode is provided, it starts Kibana in the most recent serverless project mode (default is es)'
       );
@@ -276,6 +275,10 @@ export default function (program) {
       .option(
         '--extended-stack-trace',
         'Collect more complete stack traces. See src/cli/dev.js for explanation.'
+      )
+      .option(
+        '--uiam',
+        'Configure Kibana with Universal Identity and Access Management (UIAM) support when running in serverless project mode.'
       );
   }
 
@@ -318,6 +321,7 @@ export default function (program) {
       cache: !!opts.cache,
       dist: !!opts.dist,
       serverless: isServerlessMode,
+      uiam: isServerlessSamlSupported && !!opts.uiam,
     };
 
     // In development mode, the main process uses the @kbn/dev-cli-mode
@@ -363,8 +367,12 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
   }
 
   // Ensure the plugin is loaded in dynamically to exclude from production build
-  // eslint-disable-next-line import/no-dynamic-require
-  const { MOCK_IDP_REALM_NAME } = require(MOCK_IDP_PLUGIN_PATH);
+  const {
+    MOCK_IDP_REALM_NAME,
+    MOCK_IDP_UIAM_SHARED_SECRET,
+    MOCK_IDP_UIAM_ORGANIZATION_ID,
+    MOCK_IDP_UIAM_PROJECT_ID, // eslint-disable-next-line import/no-dynamic-require
+  } = require(MOCK_IDP_PLUGIN_PATH);
 
   // Check if there are any custom authentication providers already configured with the order `0` reserved for the
   // Serverless SAML provider or if there is an existing SAML provider with the name MOCK_IDP_REALM_NAME. We check
@@ -429,6 +437,33 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
     lodashSet(rawConfig, 'xpack.security.authc.providers.basic.basic', {
       order: Number.MAX_SAFE_INTEGER,
     });
+  }
+
+  if (opts.uiam) {
+    console.info('Kibana will be configured to support UIAM.');
+    lodashSet(rawConfig, 'xpack.security.uiam.enabled', true);
+    lodashSet(rawConfig, 'mockIdpPlugin.uiam.enabled', true);
+
+    if (!_.has(rawConfig, 'xpack.security.uiam.url')) {
+      lodashSet(rawConfig, 'xpack.security.uiam.url', 'http://localhost:8080');
+    }
+
+    if (!_.has(rawConfig, 'xpack.security.uiam.sharedSecret')) {
+      lodashSet(rawConfig, 'xpack.security.uiam.sharedSecret', MOCK_IDP_UIAM_SHARED_SECRET);
+    }
+
+    if (!_.has(rawConfig, 'xpack.cloud.organization_id')) {
+      lodashSet(rawConfig, 'xpack.cloud.organization_id', MOCK_IDP_UIAM_ORGANIZATION_ID);
+    }
+
+    if (!_.has(rawConfig, 'xpack.cloud.serverless.project_id')) {
+      lodashSet(rawConfig, 'xpack.cloud.serverless.project_id', MOCK_IDP_UIAM_PROJECT_ID);
+    }
+
+    // By default, projects URL is used as the logout destination, but for local development it's inconvenient.
+    if (!_.has(rawConfig, 'xpack.cloud.projects_url')) {
+      lodashSet(rawConfig, 'xpack.cloud.projects_url', '');
+    }
   }
 
   return true;

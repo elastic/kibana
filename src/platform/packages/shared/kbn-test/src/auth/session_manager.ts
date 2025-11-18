@@ -7,17 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import Url from 'url';
 import { KbnClient } from '../kbn_client';
 import { isValidHostname, readCloudUsersFromFile } from './helper';
-import {
-  createCloudSAMLSession,
-  createLocalSAMLSession,
-  getSecurityProfile,
-  Session,
-} from './saml_auth';
-import { GetSessionByRole, Role, User } from './types';
+import type { Session } from './saml_auth';
+import { createCloudSAMLSession, createLocalSAMLSession, getSecurityProfile } from './saml_auth';
+import type { GetSessionByRole, Role, User } from './types';
 
 export interface HostOptions {
   protocol: 'http' | 'https';
@@ -193,11 +189,15 @@ Set env variable 'TEST_CLOUD=1' to run FTR against your Cloud deployment`
 
   private validateRole = (role: string): void => {
     if (this.supportedRoles && !this.supportedRoles.roles.includes(role)) {
-      throw new Error(
-        `Role '${role}' is not in the supported list: ${this.supportedRoles.roles.join(
-          ', '
-        )}. Add role descriptor in ${this.supportedRoles.sourcePath} to enable it for testing`
-      );
+      throw new Error(`Role '${role}' not found in ${
+        this.supportedRoles.sourcePath
+      }. Available predefined roles: ${this.supportedRoles.roles.join(', ')}
+
+      Is '${role}' a custom test role? → Use loginWithCustomRole() to log in with custom Kibana and Elasticsearch privileges (see Scout docs to create reusable login methods)
+
+      Is '${role}' a predefined role? (e.g., admin, viewer, editor) → Add the role descriptor to ${
+        this.supportedRoles.sourcePath
+      } to enable it for testing.`);
     }
   };
 

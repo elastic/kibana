@@ -6,8 +6,9 @@
  */
 
 import React, { useState } from 'react';
-import { Streams } from '@kbn/streams-schema';
-import {
+import { css } from '@emotion/react';
+import type { Streams } from '@kbn/streams-schema';
+import type {
   ContentPackEntry,
   ContentPackIncludedObjects,
   ContentPackManifest,
@@ -15,6 +16,7 @@ import {
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiButtonIcon,
   EuiFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,17 +24,19 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiIcon,
+  EuiPanel,
   EuiSpacer,
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../hooks/use_kibana';
+import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import { ContentPackObjectsList } from './objects_list';
 import { importContent, previewContent } from './requests';
-import { ContentPackMetadata } from './manifest';
 import { getFormattedError } from '../../../util/errors';
-import { hasSelectedObjects } from './helpers';
+import { hasSelectedObjects, isEmptyContentPack } from './helpers';
 
 export function ImportContentPackFlyout({
   definition,
@@ -47,11 +51,17 @@ export function ImportContentPackFlyout({
     core: { http, notifications },
   } = useKibana();
 
+  const {
+    features: { significantEvents },
+  } = useStreamsPrivileges();
+
   const modalTitleId = useGeneratedHtmlId();
 
   const [isLoading, setIsLoading] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
-  const [contentPackObjects, setContentPackObjects] = useState<ContentPackEntry[]>([]);
+  const [file, setFile] = useState<File | undefined>(undefined);
+  const [contentPackObjects, setContentPackObjects] = useState<ContentPackEntry[] | undefined>(
+    undefined
+  );
   const [includedObjects, setIncludedObjects] = useState<ContentPackIncludedObjects>({
     objects: { all: {} },
   });
@@ -69,59 +79,104 @@ export function ImportContentPackFlyout({
         </EuiTitle>
       </EuiFlyoutHeader>
 
-      <EuiFlyoutBody>
-        <EuiFilePicker
-          id={'streams-content-import'}
-          multiple={false}
-          initialPromptText="Select a streams content file"
-          fullWidth
-          onChange={async (files) => {
-            if (files?.length) {
-              const archiveFile = files.item(0);
-              if (!archiveFile) return;
-
-              setFile(archiveFile);
-
-              try {
-                const contentPackParsed = await previewContent({
-                  http,
-                  definition,
-                  file: archiveFile,
-                });
-
-                setManifest({
-                  name: contentPackParsed.name,
-                  version: contentPackParsed.version,
-                  description: contentPackParsed.description,
-                });
-                setContentPackObjects(contentPackParsed.entries);
-              } catch (err) {
-                setFile(null);
-
-                notifications.toasts.addError(err, {
-                  title: i18n.translate('xpack.streams.failedToPreviewContentError', {
-                    defaultMessage: 'Failed to preview content pack',
-                  }),
-                  toastMessage: getFormattedError(err).message,
-                });
+      <EuiFlyoutBody
+        css={css`
+          .euiFlyoutBody__overflowContent {
+            height: 100%;
+          }
+        `}
+      >
+        {!file && (
+          <EuiFilePicker
+            css={css`
+              height: 100%;
+              > div {
+                height: 100%;
               }
-            } else {
-              setFile(null);
-            }
-          }}
-          display={'large'}
-        />
+            `}
+            id={'streams-content-import'}
+            multiple={false}
+            initialPromptText={i18n.translate(
+              'xpack.streams.streamDetailDashboard.importContentFilePickerPrompt',
+              {
+                defaultMessage:
+                  'You can drop your streams .zip content here and install them right away.',
+              }
+            )}
+            fullWidth
+            onChange={async (files) => {
+              if (files?.length) {
+                const archiveFile = files.item(0);
+                if (!archiveFile) return;
 
-        {file && manifest ? (
+                setFile(archiveFile);
+
+                try {
+                  const contentPackParsed = await previewContent({
+                    http,
+                    definition,
+                    file: archiveFile,
+                  });
+
+                  setManifest({
+                    name: contentPackParsed.name,
+                    version: contentPackParsed.version,
+                    description: contentPackParsed.description,
+                  });
+                  setContentPackObjects(contentPackParsed.entries);
+                } catch (err) {
+                  setFile(undefined);
+
+                  notifications.toasts.addError(err, {
+                    title: i18n.translate('xpack.streams.failedToPreviewContentError', {
+                      defaultMessage: 'Failed to preview content pack',
+                    }),
+                    toastMessage: getFormattedError(err).message,
+                  });
+                }
+              } else {
+                setFile(undefined);
+              }
+            }}
+            display={'large'}
+          />
+        )}
+
+        {file && manifest && contentPackObjects ? (
           <>
-            <EuiSpacer />
-            <ContentPackMetadata manifest={manifest} readonly={true} />
+            <EuiPanel hasBorder={true} hasShadow={false} paddingSize="s">
+              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+                <EuiFlexGroup alignItems="center" gutterSize="m">
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="package" />
+                  </EuiFlexItem>
+
+                  <EuiFlexItem grow={false}>
+                    {manifest.name} {manifest.version}
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    iconType="cross"
+                    color="danger"
+                    onClick={() => {
+                      setFile(undefined);
+                      setManifest(undefined);
+                      setContentPackObjects(undefined);
+                      setIncludedObjects({ objects: { all: {} } });
+                    }}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+
             <EuiSpacer />
 
             <ContentPackObjectsList
-              definition={definition}
               objects={contentPackObjects}
               onSelectionChange={setIncludedObjects}
+              significantEventsAvailable={significantEvents?.available ?? false}
             />
           </>
         ) : null}
@@ -140,7 +195,11 @@ export function ImportContentPackFlyout({
           <EuiFlexItem grow={false}>
             <EuiButton
               data-test-subj="streamsAppModalFooterButton"
-              isDisabled={!file || !hasSelectedObjects(includedObjects)}
+              isDisabled={
+                !file ||
+                isEmptyContentPack(contentPackObjects ?? []) ||
+                !hasSelectedObjects(includedObjects)
+              }
               isLoading={isLoading}
               fill
               onClick={async () => {
@@ -157,8 +216,13 @@ export function ImportContentPackFlyout({
                   });
 
                   setIsLoading(false);
-                  setContentPackObjects([]);
-                  setFile(null);
+                  setContentPackObjects(undefined);
+                  setFile(undefined);
+                  notifications.toasts.addSuccess(
+                    i18n.translate('xpack.streams.exportContentPackFlyout.importSuccess', {
+                      defaultMessage: 'Content imported successfully',
+                    })
+                  );
                   onImport();
                 } catch (err) {
                   setIsLoading(false);

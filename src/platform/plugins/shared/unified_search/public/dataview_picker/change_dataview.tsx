@@ -8,22 +8,25 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { css } from '@emotion/react';
+import type { EuiContextMenuPanelProps } from '@elastic/eui';
 import {
-  EuiPopover,
-  EuiHorizontalRule,
-  EuiContextMenuPanel,
+  EuiButtonEmpty,
   EuiContextMenuItem,
+  EuiContextMenuPanel,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormControlButton,
+  EuiFormControlLayout,
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiPopover,
+  EuiText,
   useEuiTheme,
   useGeneratedHtmlId,
   useIsWithinBreakpoints,
-  EuiIcon,
-  EuiText,
-  EuiContextMenuPanelProps,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButtonEmpty,
+  htmlIdGenerator,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
@@ -34,32 +37,24 @@ import adhoc from './assets/adhoc.svg';
 import { changeDataViewStyles } from './change_dataview.styles';
 import { DataViewSelector } from './data_view_selector';
 
-const mapDataViewListItem = (
-  dataView: DataView,
-  partial: Partial<DataViewListItemEnhanced>
-): DataViewListItemEnhanced => ({
-  title: dataView.title,
-  name: dataView.name,
-  id: dataView.id!,
-  type: dataView.type,
-  ...partial,
+const mapAdHocDataView = (adHocDataView: DataView): DataViewListItemEnhanced => ({
+  title: adHocDataView.title,
+  name: adHocDataView.name,
+  id: adHocDataView.id!,
+  type: adHocDataView.type,
+  isAdhoc: true,
+  managed: adHocDataView.managed,
 });
-
-const mapAdHocDataView = (adHocDataView: DataView) =>
-  mapDataViewListItem(adHocDataView, { isAdhoc: true });
-
-const mapManagedDataView = (managedDataView: DataView) =>
-  mapDataViewListItem(managedDataView, { isManaged: true });
 
 const shrinkableContainerCss = css`
   min-width: 0;
+  flex-direction: row;
 `;
 
 export function ChangeDataView({
   isMissingCurrent,
   currentDataViewId,
   adHocDataViews,
-  managedDataViews,
   savedDataViews,
   onChangeDataView,
   onAddField,
@@ -70,10 +65,13 @@ export function ChangeDataView({
   onEditDataView,
   onCreateDefaultAdHocDataView,
   onClosePopover,
+  getDataViewHelpText,
 }: DataViewPickerProps) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
   const [dataViewsList, setDataViewsList] = useState<DataViewListItemEnhanced[]>([]);
+
+  const popoverId = useMemo(() => htmlIdGenerator()(), []);
 
   const kibana = useKibana<IUnifiedSearchPluginServices>();
   const { application, data, dataViews, dataViewEditor } = kibana.services;
@@ -103,50 +101,119 @@ export function ChangeDataView({
         ? savedDataViews
         : (await data.dataViews.getIdsWithTitle()) ?? [];
       const adHocDataViewRefs = adHocDataViews?.map(mapAdHocDataView) ?? [];
-      const managedDataViewRefs = managedDataViews?.map(mapManagedDataView) ?? [];
-
-      setDataViewsList([...savedDataViewRefs, ...adHocDataViewRefs, ...managedDataViewRefs]);
+      setDataViewsList([...savedDataViewRefs, ...adHocDataViewRefs]);
     };
+
     fetchDataViews();
-  }, [data, currentDataViewId, adHocDataViews, savedDataViews, managedDataViews]);
+  }, [data, currentDataViewId, adHocDataViews, savedDataViews]);
 
   const isAdHocSelected = useMemo(() => {
     return adHocDataViews?.some((dataView) => dataView.id === currentDataViewId);
   }, [adHocDataViews, currentDataViewId]);
 
+  const closeDataViewEditor = useRef<() => void | undefined>();
+
+  useEffect(() => {
+    return () => {
+      // Make sure to close the editors when unmounting
+      if (closeDataViewEditor.current) {
+        closeDataViewEditor.current();
+      }
+    };
+  }, []);
+
   const createTrigger = function () {
     const { label, title, 'data-test-subj': dataTestSubj, fullWidth, ...rest } = trigger;
     return (
-      <EuiButtonEmpty
+      <EuiFormControlButton
+        compressed
         css={styles.trigger}
+        isInvalid={isMissingCurrent}
+        title={trigger.label}
+        disabled={isDisabled}
         data-test-subj={dataTestSubj}
+        aria-expanded={isPopoverOpen}
+        aria-controls={popoverId}
         onClick={() => {
           setPopoverIsOpen(!isPopoverOpen);
         }}
-        color={isMissingCurrent ? 'danger' : 'text'}
-        iconSide="right"
-        iconType="arrowDown"
-        title={trigger.label}
-        disabled={isDisabled}
-        textProps={{ className: 'eui-textTruncate' }}
         {...rest}
       >
-        <>
+        <EuiFlexGroup
+          component="span"
+          alignItems="center"
+          gutterSize="s"
+          responsive={false}
+          css={{ maxWidth: '100%' }}
+        >
           {/* we don't want to display the adHoc icon on text based mode */}
-          {isAdHocSelected && (
-            <EuiIcon
-              type={adhoc}
-              color="primary"
-              css={css`
-                margin-right: ${euiTheme.size.s};
-              `}
-            />
-          )}
-          {trigger.label}
-        </>
-      </EuiButtonEmpty>
+          {isAdHocSelected && <EuiIcon type={adhoc} color="primary" size="s" />}
+          <span className="eui-textTruncate">{trigger.label}</span>
+        </EuiFlexGroup>
+      </EuiFormControlButton>
     );
   };
+  const onDuplicate = useCallback(async () => {
+    if (!currentDataViewId || !onDataViewCreated) {
+      return;
+    }
+    const dataView = await dataViews.get(currentDataViewId);
+    const editData = await dataViews.create({
+      ...dataView.toSpec(),
+      id: undefined,
+      version: undefined,
+      managed: false,
+    });
+
+    closeDataViewEditor.current = dataViewEditor.openEditor({
+      editData,
+      onSave: (newDataView) => {
+        onDataViewCreated(newDataView);
+      },
+      allowAdHocDataView: true,
+      isDuplicating: true,
+    });
+  }, [currentDataViewId, dataViews, dataViewEditor, onDataViewCreated]);
+
+  const onEdit = useCallback(async () => {
+    if (onEditDataView && currentDataViewId) {
+      const dataView = await dataViews.get(currentDataViewId);
+      closeDataViewEditor.current = dataViewEditor.openEditor({
+        editData: dataView,
+        onSave: (updatedDataView) => {
+          onEditDataView(updatedDataView);
+        },
+        onDuplicate,
+        getDataViewHelpText,
+      });
+    } else {
+      application.navigateToApp('management', {
+        path: `/kibana/indexPatterns/patterns/${currentDataViewId}`,
+      });
+    }
+    closePopover();
+  }, [
+    currentDataViewId,
+    dataViews,
+    onEditDataView,
+    dataViewEditor,
+    application,
+    closePopover,
+    onDuplicate,
+    getDataViewHelpText,
+  ]);
+
+  const onCreate = useCallback(() => {
+    if (onDataViewCreated) {
+      closeDataViewEditor.current = dataViewEditor.openEditor({
+        onSave: (newDataView) => {
+          onDataViewCreated(newDataView);
+        },
+        allowAdHocDataView: true,
+      });
+    }
+    closePopover();
+  }, [onDataViewCreated, dataViewEditor, closePopover]);
 
   const items = useMemo(() => {
     const panelItems: EuiContextMenuPanelProps['items'] = [];
@@ -170,22 +237,7 @@ export function ChangeDataView({
             key="manage"
             icon="indexSettings"
             data-test-subj="indexPattern-manage-field"
-            onClick={async () => {
-              if (onEditDataView) {
-                const dataView = await dataViews.get(currentDataViewId!);
-                dataViewEditor.openEditor({
-                  editData: dataView,
-                  onSave: (updatedDataView) => {
-                    onEditDataView(updatedDataView);
-                  },
-                });
-              } else {
-                application.navigateToApp('management', {
-                  path: `/kibana/indexPatterns/patterns/${currentDataViewId}`,
-                });
-              }
-              closePopover();
-            }}
+            onClick={onEdit}
           >
             {i18n.translate('unifiedSearch.query.queryBar.indexPattern.manageFieldButton', {
               defaultMessage: 'Manage this data view',
@@ -225,10 +277,7 @@ export function ChangeDataView({
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
-                onClick={() => {
-                  closePopover();
-                  onDataViewCreated();
-                }}
+                onClick={onCreate}
                 size="xs"
                 iconType="plusInCircleFilled"
                 iconSide="left"
@@ -258,17 +307,17 @@ export function ChangeDataView({
 
     return panelItems;
   }, [
-    application,
     closePopover,
     currentDataViewId,
     dataViewEditor,
-    dataViews,
     dataViewsList,
     euiTheme.size.s,
     onAddField,
     onChangeDataView,
     onCreateDefaultAdHocDataView,
+    onCreate,
     onDataViewCreated,
+    onEdit,
     onEditDataView,
     searchListInputId,
     selectableProps,
@@ -278,41 +327,33 @@ export function ChangeDataView({
     <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
       <>
         <EuiFlexItem grow={true} css={shrinkableContainerCss}>
-          <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
-            <EuiFlexItem
-              grow={false}
-              css={css`
-                padding: 11px;
-                border-radius: ${euiTheme.border.radius.small} 0 0 ${euiTheme.border.radius.small};
-                background-color: ${euiTheme.colors.lightestShade};
-                border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain};
-                border-right: 0;
-              `}
+          <EuiFormControlLayout
+            compressed
+            isDropdown
+            prepend={i18n.translate('unifiedSearch.query.queryBar.esqlMenu.switcherLabelTitle', {
+              defaultMessage: 'Data view',
+            })}
+          >
+            <EuiPopover
+              id={popoverId}
+              panelClassName="changeDataViewPopover"
+              button={createTrigger()}
+              panelProps={{
+                ['data-test-subj']: 'changeDataViewPopover',
+              }}
+              isOpen={isPopoverOpen}
+              closePopover={() => setPopoverIsOpen(false)}
+              panelPaddingSize="none"
+              initialFocus={`[id="${searchListInputId}"]`}
+              display="block"
+              buffer={8}
+              css={{ inlineSize: '100%' }}
             >
-              {i18n.translate('unifiedSearch.query.queryBar.esqlMenu.switcherLabelTitle', {
-                defaultMessage: 'Data view',
-              })}
-            </EuiFlexItem>
-            <EuiFlexItem grow={true} css={shrinkableContainerCss}>
-              <EuiPopover
-                panelClassName="changeDataViewPopover"
-                button={createTrigger()}
-                panelProps={{
-                  ['data-test-subj']: 'changeDataViewPopover',
-                }}
-                isOpen={isPopoverOpen}
-                closePopover={() => setPopoverIsOpen(false)}
-                panelPaddingSize="none"
-                initialFocus={`[id="${searchListInputId}"]`}
-                display="block"
-                buffer={8}
-              >
-                <div css={styles.popoverContent}>
-                  <EuiContextMenuPanel size="s" items={items} />
-                </div>
-              </EuiPopover>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+              <div css={styles.popoverContent}>
+                <EuiContextMenuPanel size="s" items={items} />
+              </div>
+            </EuiPopover>
+          </EuiFormControlLayout>
         </EuiFlexItem>
       </>
     </EuiFlexGroup>

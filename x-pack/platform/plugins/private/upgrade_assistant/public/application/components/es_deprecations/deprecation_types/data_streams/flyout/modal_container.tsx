@@ -10,9 +10,9 @@ import { EuiModal } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 
 import moment from 'moment';
-import { EnrichedDeprecationInfo } from '../../../../../../../common/types';
+import type { EnrichedDeprecationInfo } from '../../../../../../../common/types';
 
-import { MigrationStateContext } from '../context';
+import type { MigrationStateContext } from '../context';
 
 import {
   UIM_DATA_STREAM_START_READONLY_CLICK,

@@ -6,18 +6,16 @@
  */
 
 import * as t from 'io-ts';
+import type { EmptyStringArrayDecoded } from '@kbn/securitysolution-io-ts-types';
 import {
   EmptyStringArray,
-  EmptyStringArrayDecoded,
   NonEmptyStringArray,
   StringToPositiveNumber,
 } from '@kbn/securitysolution-io-ts-types';
 
-import {
-  DefaultNamespaceArray,
-  DefaultNamespaceArrayTypeDecoded,
-} from '../../common/default_namespace_array';
-import { RequiredKeepUndefined } from '../../common/required_keep_undefined';
+import type { DefaultNamespaceArrayTypeDecoded } from '../../common/default_namespace_array';
+import { DefaultNamespaceArray } from '../../common/default_namespace_array';
+import type { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { sort_field } from '../../common/sort_field';
 import { sort_order } from '../../common/sort_order';
 import { search } from '../../common/search';

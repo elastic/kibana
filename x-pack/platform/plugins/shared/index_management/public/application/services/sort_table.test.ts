@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Index } from '../../../common';
-import { ExtensionsService } from '../../services/extensions_service';
+import type { Index } from '../../../common';
+import type { ExtensionsService } from '../../services/extensions_service';
 import { sortTable } from './sort_table';
 describe('sortTable', () => {
   describe('sorts by name', () => {

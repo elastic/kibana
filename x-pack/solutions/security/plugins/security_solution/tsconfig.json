@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -15,17 +15,12 @@
     "scripts/**/*.json",
     "public/**/*.json",
     "../../../../../typings/**/*",
-    "emotion.d.ts" ],
-  "exclude": [
-    "target/**/*",
-    "**/cypress/**",
-    "public/management/cypress.config.ts"
+    "emotion.d.ts"
   ],
+  "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
   "kbn_references": [
+    "@kbn/setup-node-env",
     "@kbn/core",
-    {
-      "path": "../../../../../src/setup_node_env/tsconfig.json"
-    },
     "@kbn/data-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/files-plugin",
@@ -77,7 +72,6 @@
     "@kbn/lens-plugin",
     "@kbn/dashboard-plugin",
     "@kbn/saved-objects-tagging-oss-plugin",
-    "@kbn/guided-onboarding-plugin",
     "@kbn/i18n-react",
     "@kbn/kibana-react-plugin",
     "@kbn/ecs-data-quality-dashboard",
@@ -171,7 +165,6 @@
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-styled",
     "@kbn/unified-doc-viewer-plugin",
-    "@kbn/openapi-generator",
     "@kbn/unified-data-table",
     "@kbn/unified-doc-viewer",
     "@kbn/dom-drag-drop",
@@ -212,6 +205,7 @@
     "@kbn/security-solution-distribution-bar",
     "@kbn/cloud-security-posture-common",
     "@kbn/cloud-security-posture-graph",
+    "@kbn/siem-readiness",
     "@kbn/presentation-publishing",
     "@kbn/entityManager-plugin",
     "@kbn/entities-schema",
@@ -254,6 +248,18 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/elastic-assistant-shared-state",
     "@kbn/elastic-assistant-shared-state-plugin",
-    "@kbn/spaces-utils",
+    "@kbn/core-lifecycle-server-mocks",
+    "@kbn/licensing-types",
+    "@kbn/core-metrics-server",
+    "@kbn/core-elasticsearch-server-utils",
+    "@kbn/rrule",
+    "@kbn/onechat-genai-utils",
+    "@kbn/onechat-server",
+    "@kbn/core-analytics-server-mocks",
+    "@kbn/object-utils",
+    "@kbn/react-query",
+    "@kbn/core-chrome-layout-constants",
+    "@kbn/response-ops-rule-form",
+    "@kbn/core-lifecycle-browser-mocks"
   ]
 }

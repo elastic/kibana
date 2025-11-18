@@ -11,16 +11,33 @@ import {
   isBinaryExpression,
   isColumn,
   isDoubleLiteral,
+  isIdentifier,
   isIntegerLiteral,
   isLiteral,
+  isParamLiteral,
   isProperNode,
 } from '../ast/is';
-import { BinaryExpressionGroup, binaryExpressionGroup } from '../ast/grouping';
-import { ESQLAstBaseItem, ESQLAstCommand, ESQLAstQueryExpression } from '../types';
-import { ESQLAstExpressionNode, Visitor } from '../visitor';
+import {
+  BinaryExpressionGroup,
+  binaryExpressionGroup,
+  unaryExpressionGroup,
+} from '../ast/grouping';
+import type { ESQLAstExpressionNode } from '../visitor';
+import { Visitor } from '../visitor';
 import { resolveItem } from '../visitor/utils';
-import { commandOptionsWithEqualsSeparator, commandsWithNoCommaArgSeparator } from './constants';
+import {
+  commandOptionsWithEqualsSeparator,
+  commandsWithNoCommaArgSeparator,
+  commandsWithSpecialCommaRules,
+} from './constants';
 import { LeafPrinter } from './leaf_printer';
+import type {
+  ESQLAstBaseItem,
+  ESQLAstCommand,
+  ESQLAstItem,
+  ESQLAstQueryExpression,
+  ESQLProperNode,
+} from '../types';
 
 export interface BasicPrettyPrinterOptions {
   /**
@@ -34,6 +51,13 @@ export interface BasicPrettyPrinterOptions {
    * to two spaces.
    */
   pipeTab?: string;
+
+  /**
+   * Whether to skip printing header commands (e.g., SET instructions).
+   *
+   * @default false
+   */
+  skipHeader?: boolean;
 
   /**
    * The default lowercase setting to use for all options. Defaults to `false`.
@@ -69,11 +93,16 @@ export class BasicPrettyPrinter {
    * @returns A single-line string representation of the query.
    */
   public static readonly print = (
-    query: ESQLAstQueryExpression,
+    node: ESQLProperNode,
     opts?: BasicPrettyPrinterOptions
   ): string => {
-    const printer = new BasicPrettyPrinter(opts);
-    return printer.print(query);
+    return node.type === 'query'
+      ? BasicPrettyPrinter.query(node, opts)
+      : node.type === 'command'
+      ? BasicPrettyPrinter.command(node, opts)
+      : node.type === 'header-command'
+      ? BasicPrettyPrinter.command(node as any, opts)
+      : BasicPrettyPrinter.expression(node, opts);
   };
 
   /**
@@ -87,8 +116,17 @@ export class BasicPrettyPrinter {
   public static readonly multiline = (
     query: ESQLAstQueryExpression,
     opts?: BasicPrettyPrinterMultilineOptions
+  ): string => BasicPrettyPrinter.print(query, { ...opts, multiline: true });
+
+  /**
+   * @param query ES|QL query AST to print.
+   * @returns A single-line string representation of the query.
+   */
+  public static readonly query = (
+    query: ESQLAstQueryExpression,
+    opts?: BasicPrettyPrinterOptions
   ): string => {
-    const printer = new BasicPrettyPrinter({ ...opts, multiline: true });
+    const printer = new BasicPrettyPrinter(opts);
     return printer.print(query);
   };
 
@@ -122,6 +160,7 @@ export class BasicPrettyPrinter {
     this.opts = {
       pipeTab: opts.pipeTab ?? '  ',
       multiline: opts.multiline ?? false,
+      skipHeader: opts.skipHeader ?? false,
       lowercase: opts.lowercase ?? false,
       lowercaseCommands: opts.lowercaseCommands ?? opts.lowercase ?? false,
       lowercaseOptions: opts.lowercaseOptions ?? opts.lowercase ?? false,
@@ -223,6 +262,22 @@ export class BasicPrettyPrinter {
       return '<EXPRESSION>';
     })
 
+    .on('visitHeaderCommand', (ctx) => {
+      const opts = this.opts;
+      const cmd = opts.lowercaseCommands ? ctx.node.name : ctx.node.name.toUpperCase();
+
+      let args = '';
+
+      for (const arg of ctx.visitArgs()) {
+        args += (args ? ', ' : '') + arg;
+      }
+
+      const argsFormatted = args ? ` ${args}` : '';
+      const cmdFormatted = `${cmd}${argsFormatted};`;
+
+      return this.decorateWithComments(ctx.node, cmdFormatted);
+    })
+
     .on('visitIdentifierExpression', (ctx) => {
       const formatted = LeafPrinter.identifier(ctx.node);
       return this.decorateWithComments(ctx.node, formatted);
@@ -294,6 +349,13 @@ export class BasicPrettyPrinter {
       return this.decorateWithComments(ctx.node, formatted);
     })
 
+    .on('visitParensExpression', (ctx) => {
+      const child = ctx.visitChild();
+      const formatted = `(${child})`;
+
+      return this.decorateWithComments(ctx.node, formatted);
+    })
+
     .on('visitFunctionCallExpression', (ctx) => {
       const opts = this.opts;
       const node = ctx.node;
@@ -305,7 +367,21 @@ export class BasicPrettyPrinter {
           operator = this.keyword(operator);
 
           const separator = operator === '-' || operator === '+' ? '' : ' ';
-          const formatted = `${operator}${separator}${ctx.visitArgument(0, undefined)}`;
+
+          const argument = ctx.arguments()[0];
+          let argumentFormatted = ctx.visitArgument(0, undefined);
+
+          const operatorPrecedence = unaryExpressionGroup(ctx.node);
+          const argumentPrecedence = binaryExpressionGroup(argument);
+
+          if (
+            argumentPrecedence !== BinaryExpressionGroup.none &&
+            argumentPrecedence < operatorPrecedence
+          ) {
+            argumentFormatted = `(${argumentFormatted})`;
+          }
+
+          const formatted = `${operator}${separator}${argumentFormatted}`;
 
           return this.decorateWithComments(ctx.node, formatted);
         }
@@ -320,14 +396,29 @@ export class BasicPrettyPrinter {
           operator = this.keyword(operator);
 
           const group = binaryExpressionGroup(ctx.node);
+          // Note: right operand may be undefined for incomplete expressions.
+          // For assignments (=), left is the target name, right is the expression to assign.
           const [left, right] = ctx.arguments();
-          const groupLeft = binaryExpressionGroup(left);
-          const groupRight = binaryExpressionGroup(right);
+
+          const formatOperand = (operand: ESQLAstItem, index: number): string => {
+            const operandGroup = binaryExpressionGroup(operand);
+            let formatted = ctx.visitArgument(index);
+
+            const shouldGroup =
+              operandGroup &&
+              (operandGroup === BinaryExpressionGroup.unknown || operandGroup < group);
+
+            if (shouldGroup) {
+              formatted = `(${formatted})`;
+            }
+
+            return formatted;
+          };
 
           if (
             node.name === '*' &&
             ((isIntegerLiteral(left) && Math.abs(left.value) === 1) ||
-              (isIntegerLiteral(right) && Math.abs(right.value) === 1))
+              (right && isIntegerLiteral(right) && Math.abs(right.value) === 1))
           ) {
             const formatted = this.simplifyMultiplicationByOne(node);
 
@@ -336,30 +427,22 @@ export class BasicPrettyPrinter {
             }
           }
 
-          let leftFormatted = ctx.visitArgument(0);
-          let rightFormatted = ctx.visitArgument(1);
-
-          const shouldGroupLeftExpressions =
-            groupLeft && (groupLeft === BinaryExpressionGroup.unknown || groupLeft < group);
-
-          if (shouldGroupLeftExpressions) {
-            leftFormatted = `(${leftFormatted})`;
-          }
-
-          const shouldGroupRightExpressions =
-            groupRight && (groupRight === BinaryExpressionGroup.unknown || groupRight < group);
-
-          if (shouldGroupRightExpressions) {
-            rightFormatted = `(${rightFormatted})`;
-          }
+          const leftFormatted = formatOperand(left, 0);
+          const rightFormatted = right ? formatOperand(right, 1) : '';
 
           const formatted = `${leftFormatted} ${operator} ${rightFormatted}`;
 
           return this.decorateWithComments(ctx.node, formatted);
         }
         default: {
-          if (opts.lowercaseFunctions) {
-            operator = operator.toLowerCase();
+          // Check if function name is a parameter stored in node.operator
+          if (ctx.node.operator && isParamLiteral(ctx.node.operator)) {
+            operator = LeafPrinter.param(ctx.node.operator);
+          } else {
+            if (ctx.node.operator && isIdentifier(ctx.node.operator)) {
+              operator = ctx.node.operator.name;
+            }
+            operator = opts.lowercaseFunctions ? operator.toLowerCase() : operator.toUpperCase();
           }
 
           let args = '';
@@ -439,11 +522,19 @@ export class BasicPrettyPrinter {
       let args = '';
       let options = '';
 
+      let argIndex = 0;
       for (const source of ctx.visitArguments()) {
         const needsSeparator = !!args;
-        const needsComma = !commandsWithNoCommaArgSeparator.has(ctx.node.name);
+
+        // Check if this command has special comma rules
+        const specialRule = commandsWithSpecialCommaRules.get(ctx.node.name);
+        const needsComma = specialRule
+          ? specialRule(argIndex)
+          : !commandsWithNoCommaArgSeparator.has(ctx.node.name);
+
         const separator = needsSeparator ? (needsComma ? ',' : '') + ' ' : '';
         args += separator + source;
+        argIndex++;
       }
 
       for (const option of ctx.visitOptions()) {
@@ -471,9 +562,27 @@ export class BasicPrettyPrinter {
       const cmdSeparator = useMultiLine ? `\n${opts.pipeTab ?? '  '}| ` : ' | ';
       let text = '';
 
+      // Print header commands first (e.g., SET instructions)
+      if (!opts.skipHeader) {
+        for (const headerCmd of ctx.visitHeaderCommands()) {
+          if (text) text += ' ';
+          text += headerCmd;
+        }
+      }
+
+      let hasCommands = false;
+
       for (const cmd of ctx.visitCommands()) {
-        if (text) text += cmdSeparator;
+        if (hasCommands) {
+          // Separate main commands with pipe `|`
+          text += cmdSeparator;
+        } else if (text) {
+          // Separate header commands from main commands with just a space
+          text += ' ';
+        }
+
         text += cmd;
+        hasCommands = true;
       }
 
       return text;

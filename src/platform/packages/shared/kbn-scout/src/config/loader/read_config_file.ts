@@ -9,7 +9,7 @@
 
 import path from 'path';
 import { Config } from '../config';
-import { ScoutServerConfig } from '../../types';
+import type { ScoutServerConfig } from '../../types';
 
 /**
  * Dynamically loads server configuration file in the "kbn-scout" framework. It reads

@@ -18,8 +18,8 @@ import {
   EuiText,
   EuiLink,
 } from '@elastic/eui';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { Connector } from '@kbn/search-connectors';
+import { useMutation, useQueryClient } from '@kbn/react-query';
+import type { Connector } from '@kbn/search-connectors';
 import { CANCEL_LABEL, EDIT_LABEL, SAVE_LABEL } from '../../../../common/i18n_string';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { useConnector } from '../../hooks/api/use_connector';

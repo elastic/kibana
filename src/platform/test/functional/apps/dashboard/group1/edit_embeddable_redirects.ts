@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { dashboard, header, visualize } = getPageObjects(['dashboard', 'header', 'visualize']);
@@ -28,8 +28,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await dashboard.navigateToApp();
       await dashboard.preserveCrossAppState();
-      await dashboard.loadSavedDashboard('few panels');
-      await dashboard.switchToEditMode();
+      await dashboard.loadDashboardInEditMode('few panels');
     });
 
     after(async () => {
@@ -88,8 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('loses originatingApp connection after first save when redirectToOrigin is false', async () => {
       const newTitle = 'test create panel originatingApp';
-      await dashboard.loadSavedDashboard('few panels');
-      await dashboard.switchToEditMode();
+      await dashboard.loadDashboardInEditMode('few panels');
       await dashboardAddPanel.clickAddCustomVisualization();
       await visualize.saveVisualizationExpectSuccess(newTitle, {
         saveAsNew: true,

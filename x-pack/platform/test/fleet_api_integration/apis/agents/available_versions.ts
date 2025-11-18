@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import semverCoerce from 'semver/functions/coerce';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;

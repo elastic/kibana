@@ -9,7 +9,7 @@ import type { estypes } from '@elastic/elasticsearch';
 
 import { LOG_RATE_ANALYSIS_TYPE } from '@kbn/aiops-log-rate-analysis';
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const LOG_RATE_ANALYSYS_DATA_GENERATOR = {
   KIBANA_SAMPLE_DATA_LOGS: 'kibana_sample_data_logs',

@@ -2,7 +2,7 @@
   "type": "plugin",
   "id": "@kbn/dataset-quality-plugin",
   "owner": [
-    "@elastic/obs-ux-logs-team"
+    "@elastic/obs-onboarding-team"
   ],
   "group": "platform",
   "visibility": "shared",
@@ -30,6 +30,7 @@
       "share",
       "taskManager",
       "triggersActionsUi",
+      "unifiedSearch",
     ],
     "optionalPlugins": [
       "alerting",
@@ -39,6 +40,7 @@
     "requiredBundles": [
       "charts",
       "discover",
+      "esUiShared",
       "stackAlerts",
     ],
     "extraPublicDirs": [

@@ -8,19 +8,19 @@
 import { omit } from 'lodash';
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
-import {
-  ConfigKey,
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type {
   EncryptedSyntheticsSavedMonitor,
   MonitorFields,
   PrivateLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
+import { ConfigKey } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
 import { SyntheticsMonitorTestService } from '../../services/synthetics_monitor';
 import { omitMonitorKeys } from './create_monitor';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { PrivateLocationTestService } from '../../services/synthetics_private_location';
 import { getFixtureJson } from './helpers/get_fixture_json';
 

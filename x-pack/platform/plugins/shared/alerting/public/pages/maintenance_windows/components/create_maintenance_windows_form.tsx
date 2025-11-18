@@ -47,10 +47,8 @@ import { useGetRuleTypes } from '../../../hooks/use_get_rule_types';
 import { useUiSetting } from '../../../utils/kibana_react';
 import { DatePickerRangeField } from './fields/date_picker_range_field';
 import { useArchiveMaintenanceWindow } from '../../../hooks/use_archive_maintenance_window';
-import { MaintenanceWindowSolutionSelection } from './maintenance_window_category_selection';
 import { MaintenanceWindowScopedQuerySwitch } from './maintenance_window_scoped_query_switch';
 import { MaintenanceWindowScopedQuery } from './maintenance_window_scoped_query';
-import { VALID_CATEGORIES } from '../constants';
 
 const UseField = getUseField({ component: Field });
 
@@ -59,14 +57,15 @@ export interface CreateMaintenanceWindowFormProps {
   onSuccess: () => void;
   initialValue?: FormProps;
   maintenanceWindowId?: string;
+  showMultipleSolutionsWarning?: boolean;
 }
 
 const useDefaultTimezone = () => {
   const kibanaTz: string = useUiSetting('dateFormat:tz');
   if (!kibanaTz || kibanaTz === 'Browser') {
-    return { defaultTimezone: moment.tz?.guess() ?? 'UTC', isBrowser: true };
+    return { defaultTimezone: moment.tz?.guess() ?? 'UTC' };
   }
-  return { defaultTimezone: kibanaTz, isBrowser: false };
+  return { defaultTimezone: kibanaTz };
 };
 
 const TIMEZONE_OPTIONS = UI_TIMEZONE_OPTIONS.map((timezoneOption) => ({
@@ -74,12 +73,18 @@ const TIMEZONE_OPTIONS = UI_TIMEZONE_OPTIONS.map((timezoneOption) => ({
 })) ?? [{ label: 'UTC' }];
 
 export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFormProps>((props) => {
-  const { onCancel, onSuccess, initialValue, maintenanceWindowId } = props;
+  const {
+    onCancel,
+    onSuccess,
+    initialValue,
+    maintenanceWindowId,
+    showMultipleSolutionsWarning = false,
+  } = props;
 
   const [defaultStartDateValue] = useState<string>(moment().toISOString());
   const [defaultEndDateValue] = useState<string>(moment().add(30, 'minutes').toISOString());
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const { defaultTimezone, isBrowser } = useDefaultTimezone();
+  const { defaultTimezone } = useDefaultTimezone();
 
   const [isScopedQueryEnabled, setIsScopedQueryEnabled] = useState(!!initialValue?.scopedQuery);
   const [query, setQuery] = useState<string>(initialValue?.scopedQuery?.kql || '');
@@ -141,17 +146,6 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     };
   }, [isScopedQueryEnabled, query, filters]);
 
-  const validRuleTypes = useMemo(() => {
-    if (!ruleTypes) {
-      return [];
-    }
-    return ruleTypes.filter((ruleType) => VALID_CATEGORIES.includes(ruleType.category));
-  }, [ruleTypes]);
-
-  const availableSolutions = useMemo(() => {
-    return [...new Set(validRuleTypes.map((ruleType) => ruleType.category))];
-  }, [validRuleTypes]);
-
   const submitMaintenanceWindow = useCallback<FormSubmitHandler<FormProps>>(
     async (formData, isValid) => {
       if (!isValid || scopedQueryErrors.length !== 0) {
@@ -173,8 +167,8 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
           timezone: formData.timezone ? formData.timezone[0] : defaultTimezone,
           recurringSchedule: formData.recurringSchedule,
         }),
-        categoryIds: formData.solutionId ? [formData.solutionId] : null,
-        scopedQuery: availableSolutions.length !== 0 ? scopedQueryPayload : null,
+        scopedQuery: scopedQueryPayload ?? null,
+        ...(showMultipleSolutionsWarning || scopedQueryPayload ? { categoryIds: null } : {}),
       };
 
       if (isEditMode) {
@@ -191,8 +185,8 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       isScopedQueryEnabled,
       scopedQueryPayload,
       defaultTimezone,
-      availableSolutions.length,
       isEditMode,
+      showMultipleSolutionsWarning,
       updateMaintenanceWindow,
       maintenanceWindowId,
       onSuccess,
@@ -207,56 +201,32 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     onSubmit: submitMaintenanceWindow,
   });
 
-  const [{ recurring, timezone, solutionId, startDate, endDate }, _, mounted] =
-    useFormData<FormProps>({
-      form,
-      watch: ['recurring', 'timezone', 'solutionId', 'scopedQuery', 'startDate', 'endDate'],
-    });
+  const [{ recurring, timezone, startDate, endDate }, _, mounted] = useFormData<FormProps>({
+    form,
+    watch: ['recurring', 'timezone', 'scopedQuery', 'startDate', 'endDate'],
+  });
 
   const isRecurring = recurring || false;
-  const showTimezone = isBrowser || initialValue?.timezone !== undefined;
 
   const closeModal = useCallback(() => setIsModalVisible(false), []);
   const showModal = useCallback(() => setIsModalVisible(true), []);
 
-  const { setFieldValue } = form;
-
   const ruleTypeIds = useMemo(() => {
-    if (!Array.isArray(validRuleTypes) || !mounted) {
+    if (!Array.isArray(ruleTypes) || !mounted) {
       return [];
     }
 
-    const uniqueRuleTypeIds = new Set<string>();
-
-    validRuleTypes.forEach((ruleType) => {
-      if (solutionId === ruleType.category) {
-        uniqueRuleTypeIds.add(ruleType.id);
-      }
-    });
-
-    return [...uniqueRuleTypeIds];
-  }, [validRuleTypes, solutionId, mounted]);
-
-  const onSolutionIdChange = useCallback(
-    (id: string) => {
-      if (!solutionId) {
-        return;
-      }
-      setFieldValue('solutionId', id);
-    },
-    [solutionId, setFieldValue]
-  );
+    return ruleTypes.map((ruleType) => ruleType.id);
+  }, [ruleTypes, mounted]);
 
   const onScopeQueryToggle = useCallback(
     (isEnabled: boolean) => {
-      if (isEnabled) {
-        setFieldValue('solutionId', availableSolutions.sort()[0]);
-      } else {
-        setFieldValue('solutionId', undefined);
-      }
       setIsScopedQueryEnabled(isEnabled);
+      if (scopedQueryErrors.length) {
+        setScopedQueryErrors([]);
+      }
     },
-    [setFieldValue, availableSolutions]
+    [setIsScopedQueryEnabled, scopedQueryErrors, setScopedQueryErrors]
   );
 
   const onQueryChange = useCallback(
@@ -306,23 +276,8 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     modalTitleId,
   ]);
 
-  const showNoAvailableSolutionsWarning =
-    availableSolutions.length === 0 && isScopedQueryEnabled && isEditMode;
-
   return (
     <Form form={form} data-test-subj="createMaintenanceWindowForm">
-      {showNoAvailableSolutionsWarning && (
-        <>
-          <EuiCallOut
-            data-test-subj="maintenanceWindowNoAvailableSolutionsWarning"
-            title={i18n.NO_AVAILABLE_SOLUTIONS_WARNING_TITLE}
-            color="warning"
-          >
-            <p>{i18n.NO_AVAILABLE_SOLUTIONS_WARNING_SUBTITLE}</p>
-          </EuiCallOut>
-          <EuiSpacer size="xl" />
-        </>
-      )}
       <EuiFlexGroup direction="column" responsive={false}>
         <EuiFlexItem>
           <UseField
@@ -377,35 +332,31 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
                 )}
               </UseMultiFields>
             </EuiFlexItem>
-            {showTimezone ? (
-              <EuiFlexItem grow={1}>
-                <UseField
-                  path="timezone"
-                  config={{
-                    type: FIELD_TYPES.COMBO_BOX,
-                    validations: [],
-                    defaultValue: [defaultTimezone],
-                  }}
-                  componentProps={{
-                    'data-test-subj': 'timezone-field',
-                    id: 'timezone',
-                    euiFieldProps: {
-                      fullWidth: true,
-                      options: TIMEZONE_OPTIONS,
-                      singleSelection: { asPlainText: true },
-                      isClearable: false,
-                      noSuggestions: false,
-                      placeholder: '',
-                      prepend: (
-                        <EuiFormLabel htmlFor={'timezone'}>
-                          {i18n.CREATE_FORM_TIMEZONE}
-                        </EuiFormLabel>
-                      ),
-                    },
-                  }}
-                />
-              </EuiFlexItem>
-            ) : null}
+            <EuiFlexItem grow={1}>
+              <UseField
+                path="timezone"
+                config={{
+                  type: FIELD_TYPES.COMBO_BOX,
+                  validations: [],
+                  defaultValue: [defaultTimezone],
+                }}
+                componentProps={{
+                  'data-test-subj': 'timezone-field',
+                  id: 'timezone',
+                  euiFieldProps: {
+                    fullWidth: true,
+                    options: TIMEZONE_OPTIONS,
+                    singleSelection: { asPlainText: true },
+                    isClearable: false,
+                    noSuggestions: false,
+                    placeholder: '',
+                    prepend: (
+                      <EuiFormLabel htmlFor={'timezone'}>{i18n.CREATE_FORM_TIMEZONE}</EuiFormLabel>
+                    ),
+                  },
+                }}
+              />
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem>
@@ -428,74 +379,75 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
             />
           </EuiFlexItem>
         )}
-
-        {availableSolutions.length > 0 && (
-          <>
-            <EuiFlexItem>
-              <EuiHorizontalRule margin="xl" />
-              <UseField path="scopedQuery">
-                {() => (
-                  <MaintenanceWindowScopedQuerySwitch
-                    checked={isScopedQueryEnabled}
-                    onEnabledChange={onScopeQueryToggle}
-                  />
-                )}
-              </UseField>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <UseField path="solutionId">
-                {(field) => (
-                  <MaintenanceWindowSolutionSelection
-                    isScopedQueryEnabled={isScopedQueryEnabled}
-                    isLoading={isLoadingRuleTypes}
-                    selectedSolution={solutionId}
-                    availableSolutions={availableSolutions}
-                    errors={field.errors.map((error) => error.message)}
-                    onChange={onSolutionIdChange}
-                  />
-                )}
-              </UseField>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <UseField path="scopedQuery">
-                {() => (
-                  <MaintenanceWindowScopedQuery
-                    ruleTypeIds={ruleTypeIds}
-                    query={query}
-                    filters={filters}
-                    isLoading={isLoadingRuleTypes}
-                    isEnabled={isScopedQueryEnabled}
-                    errors={scopedQueryErrors}
-                    onQueryChange={onQueryChange}
-                    onFiltersChange={setFilters}
-                  />
-                )}
-              </UseField>
-            </EuiFlexItem>
-          </>
-        )}
-        <EuiHorizontalRule margin="xl" />
-      </EuiFlexGroup>
-      {isEditMode && (
         <>
-          <EuiCallOut title={i18n.ARCHIVE_TITLE} color="danger" iconType="trash">
-            <p>{i18n.ARCHIVE_SUBTITLE}</p>
+          <EuiFlexItem>
+            <EuiHorizontalRule margin="xl" />
+            <UseField path="scopedQuery">
+              {() => (
+                <MaintenanceWindowScopedQuerySwitch
+                  checked={isScopedQueryEnabled}
+                  onEnabledChange={onScopeQueryToggle}
+                />
+              )}
+            </UseField>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <UseField path="scopedQuery">
+              {() => (
+                <MaintenanceWindowScopedQuery
+                  ruleTypeIds={ruleTypeIds}
+                  query={query}
+                  filters={filters}
+                  isLoading={isLoadingRuleTypes}
+                  isEnabled={isScopedQueryEnabled}
+                  errors={scopedQueryErrors}
+                  onQueryChange={onQueryChange}
+                  onFiltersChange={setFilters}
+                />
+              )}
+            </UseField>
+          </EuiFlexItem>
+        </>
+        {(isScopedQueryEnabled && scopedQueryPayload) || showMultipleSolutionsWarning ? (
+          <EuiFlexItem>
+            <EuiHorizontalRule margin="xl" />
+            <EuiCallOut
+              announceOnMount
+              data-test-subj="maintenanceWindowMultipleSolutionsRemovedWarning"
+              title={i18n.SOLUTION_CONFIG_REMOVAL_WARNING_TITLE}
+              color="warning"
+            >
+              <p>{i18n.SOLUTION_CONFIG_REMOVAL_WARNING_SUBTITLE}</p>
+            </EuiCallOut>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+      <EuiHorizontalRule margin="m" />
+      <EuiFlexGroup
+        alignItems="center"
+        justifyContent={isEditMode ? 'spaceBetween' : 'flexEnd'}
+        gutterSize="l"
+        responsive={false}
+      >
+        {isEditMode && (
+          <EuiFlexItem grow={false}>
             <EuiButton fill color="danger" onClick={showModal}>
               {i18n.ARCHIVE}
             </EuiButton>
             {modal}
-          </EuiCallOut>
-          <EuiHorizontalRule margin="xl" />
-        </>
-      )}
-      <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="l" responsive={false}>
+          </EuiFlexItem>
+        )}
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={onCancel} size="s" data-test-subj="cancelMaintenanceWindow">
-            {i18n.CANCEL}
-          </EuiButtonEmpty>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <SubmitButton isLoading={isCreateLoading || isUpdateLoading} editMode={isEditMode} />
+          <EuiFlexGroup>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty onClick={onCancel} size="s" data-test-subj="cancelMaintenanceWindow">
+                {i18n.CANCEL}
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <SubmitButton isLoading={isCreateLoading || isUpdateLoading} editMode={isEditMode} />
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
     </Form>

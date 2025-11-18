@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { ReactElement } from 'react';
+import type { ReactElement } from 'react';
 import type { SensorAPI } from '@hello-pangea/dnd';
-import { Store } from 'redux';
-import { CoreStart } from '@kbn/core/public';
+import type { Store } from 'redux';
+import type { CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { CasesPublicStart } from '@kbn/cases-plugin/public';
-import { ApmBase } from '@elastic/apm-rum';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
+import type { ApmBase } from '@elastic/apm-rum';
 import type { UseAddToTimeline, UseAddToTimelineProps } from './hooks/use_add_to_timeline';
-import { HoverActionsConfig } from './components/hover_actions';
-import { LastUpdatedAtProps } from './components/last_updated';
+import type { HoverActionsConfig } from './components/hover_actions';
+import type { LastUpdatedAtProps } from './components/last_updated';
 
 export interface TimelinesUIStart {
   /**

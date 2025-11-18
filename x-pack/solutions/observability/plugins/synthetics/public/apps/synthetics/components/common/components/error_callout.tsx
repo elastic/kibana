@@ -8,7 +8,7 @@
 import { EuiCallOut, EuiDescriptionList } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { IHttpSerializedFetchError } from '../../../state';
+import type { IHttpSerializedFetchError } from '../../../state';
 
 /**
  * Use this component when displaying fetch-related errors.

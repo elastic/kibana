@@ -8,7 +8,7 @@
 import { render, screen } from '@testing-library/react';
 import React from 'react';
 import { ServiceProvider } from './service_provider';
-import { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
+import type { InferenceInferenceEndpointInfo } from '@elastic/elasticsearch/lib/api/types';
 import { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
 
 jest.mock('@kbn/ml-trained-models-utils', () => ({
@@ -201,9 +201,9 @@ describe('ServiceProvider component', () => {
     });
   });
 
-  describe('with elasticsearch service', () => {
+  describe('with elasticsearch service preconfigured endpoint', () => {
     const mockEndpoint: InferenceInferenceEndpointInfo = {
-      inference_id: 'model-123',
+      inference_id: '.model-123',
       service: 'elasticsearch',
       service_settings: {
         num_allocations: 5,
@@ -213,13 +213,26 @@ describe('ServiceProvider component', () => {
       task_type: 'sparse_embedding',
     };
 
-    it('renders the component with endpoint model_id', () => {
-      renderComponent(ServiceProviderKeys.elasticsearch, mockEndpoint);
+    it('renders the component with modelId', () => {
+      renderComponent(ServiceProviderKeys.elasticsearch, {
+        ...mockEndpoint,
+        inference_id: 'model-123',
+      });
 
       expect(screen.getByText('Elasticsearch')).toBeInTheDocument();
       const icon = screen.getByTestId('table-column-service-provider-elasticsearch');
       expect(icon).toBeInTheDocument();
       expect(screen.getByText('settings-model-123')).toBeInTheDocument();
+    });
+
+    it('renders the component with description', () => {
+      renderComponent(ServiceProviderKeys.elasticsearch, mockEndpoint);
+
+      expect(screen.getByText('Elasticsearch')).toBeInTheDocument();
+      const icon = screen.getByTestId('table-column-service-provider-elasticsearch');
+      expect(icon).toBeInTheDocument();
+      expect(screen.queryByText('settings-model-123')).toBeNull();
+      expect(screen.getByText('Runs on ML Nodes (resource-based billing)')).toBeInTheDocument();
     });
 
     it('renders the MIT license badge if the model is eligible', () => {
@@ -303,6 +316,33 @@ describe('ServiceProvider component', () => {
 
       expect(screen.getByText('AlibabaCloud AI Search')).toBeInTheDocument();
       const icon = screen.getByTestId('table-column-service-provider-alibabacloud-ai-search');
+      expect(icon).toBeInTheDocument();
+    });
+  });
+
+  describe('with custom service', () => {
+    const mockEndpoint: InferenceInferenceEndpointInfo = {
+      inference_id: 'custom-endpoint-1',
+      service: 'custom',
+      service_settings: {
+        api_key: 'test-key',
+      },
+      task_type: 'text_embedding',
+    };
+
+    it('renders the component with custom service name', () => {
+      renderComponent('custom' as ServiceProviderKeys, mockEndpoint);
+
+      expect(screen.getByText('custom')).toBeInTheDocument();
+      const icon = screen.getByTestId('table-column-service-provider-custom');
+      expect(icon).toBeInTheDocument();
+    });
+
+    it('renders the component with unknown service name', () => {
+      renderComponent('unknown_service' as ServiceProviderKeys, mockEndpoint);
+
+      expect(screen.getByText('unknown_service')).toBeInTheDocument();
+      const icon = screen.getByTestId('table-column-service-provider-unknown_service');
       expect(icon).toBeInTheDocument();
     });
   });

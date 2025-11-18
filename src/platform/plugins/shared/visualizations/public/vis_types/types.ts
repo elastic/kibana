@@ -17,9 +17,9 @@ import type {
   TimefilterContract,
 } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
+import type { NavigateToLensContext } from '@kbn/lens-common';
 import type { Vis, VisEditorOptionsProps, VisParams, VisToExpressionAst } from '../types';
-import { VisGroups } from './vis_groups_enum';
-import { NavigateToLensContext } from '../../common';
+import type { VisGroups } from './vis_groups_enum';
 
 export interface VisTypeOptions {
   showTimePicker: boolean;

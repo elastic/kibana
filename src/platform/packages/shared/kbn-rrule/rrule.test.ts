@@ -465,7 +465,25 @@ describe('RRule', () => {
       tzid: 'UTC',
       until: new Date(DATE_2020_MINUS_1_MONTH),
     });
-    expect(rule.all().length).toBe(12);
+
+    const result = rule.all();
+
+    expect(result.length).toBe(11);
+    expect(rule.all()).toMatchInlineSnapshot(`
+      Array [
+        2019-01-01T00:00:00.000Z,
+        2019-02-01T00:00:00.000Z,
+        2019-03-01T00:00:00.000Z,
+        2019-04-01T00:00:00.000Z,
+        2019-05-01T00:00:00.000Z,
+        2019-06-01T00:00:00.000Z,
+        2019-07-01T00:00:00.000Z,
+        2019-08-01T00:00:00.000Z,
+        2019-09-01T00:00:00.000Z,
+        2019-10-01T00:00:00.000Z,
+        2019-11-01T00:00:00.000Z,
+      ]
+    `);
   });
 
   it('works with count', () => {

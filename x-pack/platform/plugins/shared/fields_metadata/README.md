@@ -32,6 +32,7 @@ const timestampField = await client.getByName('@timestamp')
 | fieldNames | <EcsFieldName \| string>[] | ['@timestamp', 'onepassword.client.platform_version'] | ✅ |
 | integration | string | 1password | ✅ |
 | dataset | string | 1password.item_usages | ✅ |
+| source | Array<'ecs' | 'metadata' | 'otel' | 'integration'> | ecs | ✅ |
 
 ```ts
 const fields = await client.find({
@@ -84,6 +85,7 @@ A REST API endpoint is exposed to facilitate the retrieval of field metadata:
 | attributes | FieldAttribute[] | ['type', 'description', 'name'] | ✅ |
 | integration | string | 1password | ✅ |
 | dataset | string | 1password.item_usages | ✅ |
+| source | Array<'ecs' | 'metadata' | 'otel' | 'integration'> | ecs | ✅ |
 
 ### FieldsMetadataService (Client-side)
 
@@ -115,6 +117,7 @@ For simpler use cases, the `useFieldsMetadata` React custom hook is provided. Th
 | attributes | FieldAttribute[] | ['type', 'description', 'name'] | ✅ |
 | integration | string | 1password | ✅ |
 | dataset | string | 1password.item_usages | ✅ |
+| source | Array<'ecs' | 'metadata' | 'otel' | 'integration'> | ecs | ✅ |
 
 It also accepts a second argument, an array of dependencies to determine when the hook should update the retrieved data.
 

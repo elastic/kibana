@@ -13,10 +13,10 @@ import { omit } from 'lodash';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import type { RoleCredentials } from '../../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { ApmAlertFields } from './helpers/alerting_helper';
 import {
   fetchServiceInventoryAlertCounts,
   fetchServiceTabAlertCount,
-  ApmAlertFields,
   getIndexAction,
   APM_ACTION_VARIABLE_INDEX,
   APM_ALERTS_INDEX,
@@ -34,6 +34,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
     before(async () => {
       roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('admin');
+
+      await alertingApi.cleanUpAlerts({
+        roleAuthc,
+        consumer: 'apm',
+        alertIndexName: APM_ALERTS_INDEX,
+        connectorIndexName: APM_ACTION_VARIABLE_INDEX,
+      });
 
       const opbeansJava = apm
         .service({ name: 'opbeans-java', environment: 'production', agentName: 'java' })
@@ -241,6 +248,13 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       let alerts: ApmAlertFields[];
 
       before(async () => {
+        await alertingApi.cleanUpAlerts({
+          roleAuthc,
+          consumer: 'apm',
+          alertIndexName: APM_ALERTS_INDEX,
+          connectorIndexName: APM_ACTION_VARIABLE_INDEX,
+        });
+
         const createdRule = await alertingApi.createRule({
           ruleTypeId: ApmRuleType.TransactionErrorRate,
           name: 'Apm transaction error rate without kql query',

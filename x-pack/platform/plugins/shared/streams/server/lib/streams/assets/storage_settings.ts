@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { IndexStorageSettings, types } from '@kbn/storage-adapter';
+import type { IndexStorageSettings } from '@kbn/storage-adapter';
+import { types } from '@kbn/storage-adapter';
 import {
   ASSET_ID,
   ASSET_TYPE,
@@ -25,6 +26,7 @@ export const assetStorageSettings = {
       [STREAM_NAME]: types.keyword(),
       [QUERY_KQL_BODY]: types.match_only_text(),
       [QUERY_TITLE]: types.keyword(),
+      experimental: types.object({ enabled: false }),
     },
   },
 } satisfies IndexStorageSettings;

@@ -19,15 +19,16 @@ import {
 import { BehaviorSubject } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { DragDropIdentifier, ReorderProvider, DropType } from '@kbn/dom-drag-drop';
+import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
+import { ReorderProvider } from '@kbn/dom-drag-drop';
 import { DimensionButton } from '@kbn/visualization-ui-components';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { LayerAction, VisualizationDimensionGroupConfig } from '@kbn/lens-common';
 import { LayerActions } from './layer_actions';
-import { isOperation, LayerAction, VisualizationDimensionGroupConfig } from '../../../types';
+import { isOperation } from '../../../types_guards';
 import { LayerHeader } from './layer_header';
-import { LayerPanelProps } from './types';
+import type { LayerPanelProps } from './types';
 import { DimensionContainer } from './dimension_container';
 import { EmptyDimensionButton } from './buttons/empty_dimension_button';
 import { DraggableDimensionButton } from './buttons/draggable_dimension_button';
@@ -42,10 +43,13 @@ import { getSharedActions } from './layer_actions/layer_actions';
 import { FlyoutContainer } from '../../../shared_components/flyout_container';
 import { FakeDimensionButton } from './buttons/fake_dimension_button';
 import { getLongMessage } from '../../../user_messages_utils';
-import { isApiESQLVariablesCompatible } from '../../../react_embeddable/types';
+import { isApiESQLVariablesCompatible } from '../../../react_embeddable/type_guards';
 import { ESQLEditor } from './esql_editor';
+import { useEditorFrameService } from '../../editor_frame_service_context';
 
 export function LayerPanel(props: LayerPanelProps) {
+  const { datasourceMap } = useEditorFrameService();
+
   const [openDimension, setOpenDimension] = useState<{
     isComplete?: boolean;
     openColumnId?: string;
@@ -65,8 +69,6 @@ export function LayerPanel(props: LayerPanelProps) {
     registerNewLayerRef,
     layerIndex,
     activeVisualization,
-    visualizationMap,
-    datasourceMap,
     updateVisualization,
     updateDatasource,
     toggleFullscreen,
@@ -149,7 +151,7 @@ export function LayerPanel(props: LayerPanelProps) {
       layerDatasourceState = datasourceStates[aliasId].state;
     }
   }
-  const layerDatasource = datasourceId ? props.datasourceMap[datasourceId] : undefined;
+  const layerDatasource = datasourceId ? datasourceMap[datasourceId] : undefined;
 
   const layerDatasourceConfigProps = {
     state: layerDatasourceState,
@@ -412,8 +414,6 @@ export function LayerPanel(props: LayerPanelProps) {
                       }),
                   }}
                   activeVisualizationId={activeVisualization.id}
-                  visualizationMap={visualizationMap}
-                  datasourceMap={datasourceMap}
                   onlyAllowSwitchToSubtypes={onlyAllowSwitchToSubtypes}
                 />
               </EuiFlexItem>
@@ -446,11 +446,10 @@ export function LayerPanel(props: LayerPanelProps) {
               />
             )}
             <ESQLEditor
+              uiSettings={core.uiSettings}
               isTextBasedLanguage={isTextBasedLanguage}
               framePublicAPI={framePublicAPI}
-              datasourceMap={datasourceMap}
               layerId={layerId}
-              visualizationMap={visualizationMap}
               {...editorProps}
             />
             {activeVisualization.LayerPanelComponent && (
@@ -741,7 +740,7 @@ export function LayerPanel(props: LayerPanelProps) {
                 <EuiText
                   size="s"
                   css={css`
-                    margin-bottom: ${euiThemeVars.euiSize};
+                    margin-bottom: ${euiTheme.size.base};
                   `}
                 >
                   <h4>
@@ -768,7 +767,7 @@ export function LayerPanel(props: LayerPanelProps) {
                 <EuiText
                   size="s"
                   css={css`
-                    margin-bottom: ${euiThemeVars.euiSize};
+                    margin-bottom: ${euiTheme.size.base};
                   `}
                 >
                   <h4>

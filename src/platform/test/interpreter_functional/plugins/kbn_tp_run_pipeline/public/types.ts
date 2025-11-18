@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExpressionsStart, ExpressionRenderHandler } from '@kbn/expressions-plugin/public';
-import { Adapters } from '@kbn/inspector-plugin/public';
+import type { ExpressionsStart, ExpressionRenderHandler } from '@kbn/expressions-plugin/public';
+import type { Adapters } from '@kbn/inspector-plugin/public';
 
 export type { ExpressionsStart, ExpressionRenderHandler, Adapters };

@@ -7,6 +7,8 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 
+import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+
 import type {
   ASSETS_SAVED_OBJECT_TYPE,
   agentAssetTypes,
@@ -26,6 +28,7 @@ export enum InstallStatus {
   installing = 'installing',
   reinstalling = 'reinstalling',
   uninstalling = 'uninstalling',
+  rollingBack = 'rolling_back',
 }
 
 export interface DefaultPackagesInstallationError {
@@ -62,7 +65,7 @@ export enum KibanaAssetType {
   securityAIPrompt = 'security_ai_prompt',
   securityRule = 'security_rule',
   cloudSecurityPostureRuleTemplate = 'csp_rule_template',
-  alert = 'alert',
+  alertingRuleTemplate = 'alerting_rule_template',
   osqueryPackAsset = 'osquery_pack_asset',
   osquerySavedQuery = 'osquery_saved_query',
   tag = 'tag',
@@ -82,10 +85,11 @@ export enum KibanaSavedObjectType {
   securityAIPrompt = 'security-ai-prompt',
   securityRule = 'security-rule',
   cloudSecurityPostureRuleTemplate = 'csp-rule-template',
-  alert = 'alert',
+  alertingRuleTemplate = 'alerting_rule_template',
   osqueryPackAsset = 'osquery-pack-asset',
   osquerySavedQuery = 'osquery-saved-query',
   tag = 'tag',
+  alert = 'alert',
 }
 
 export enum ElasticsearchAssetType {
@@ -97,7 +101,9 @@ export enum ElasticsearchAssetType {
   dataStreamIlmPolicy = 'data_stream_ilm_policy',
   transform = 'transform',
   mlModel = 'ml_model',
+  knowledgeBase = 'knowledge_base',
 }
+
 export type FleetElasticsearchAssetType = Exclude<
   ElasticsearchAssetType,
   ElasticsearchAssetType.index
@@ -246,6 +252,7 @@ export enum RegistryPolicyTemplateKeys {
   screenshots = 'screenshots',
   deployment_modes = 'deployment_modes',
   configuration_links = 'configuration_links',
+  fips_compatible = 'fips_compatible',
 }
 interface BaseTemplate {
   [RegistryPolicyTemplateKeys.name]: string;
@@ -256,6 +263,7 @@ interface BaseTemplate {
   [RegistryPolicyTemplateKeys.multiple]?: boolean;
   [RegistryPolicyTemplateKeys.deployment_modes]?: DeploymentsModes;
   [RegistryPolicyTemplateKeys.configuration_links]?: ConfigurationLink[];
+  [RegistryPolicyTemplateKeys.fips_compatible]?: boolean | undefined;
 }
 export interface RegistryPolicyIntegrationTemplate extends BaseTemplate {
   [RegistryPolicyTemplateKeys.categories]?: Array<PackageSpecCategory | undefined>;
@@ -310,6 +318,7 @@ export enum RegistryStreamKeys {
   required_vars = 'required_vars',
   vars = 'vars',
   template_path = 'template_path',
+  ingestion_method = 'ingestion_method',
 }
 
 export interface RegistryStream {
@@ -320,6 +329,7 @@ export interface RegistryStream {
   [RegistryStreamKeys.required_vars]?: RegistryRequiredVars;
   [RegistryStreamKeys.vars]?: RegistryVarsEntry[];
   [RegistryStreamKeys.template_path]: string;
+  [RegistryStreamKeys.ingestion_method]?: string;
 }
 
 export type RegistryStreamWithDataStream = RegistryStream & { data_stream: RegistryDataStream };
@@ -484,7 +494,9 @@ export type RegistryVarType =
   | 'text'
   | 'yaml'
   | 'string'
-  | 'textarea';
+  | 'textarea'
+  | 'duration'
+  | 'url';
 export enum RegistryVarsEntryKeys {
   name = 'name',
   title = 'title',
@@ -499,6 +511,9 @@ export enum RegistryVarsEntryKeys {
   secret = 'secret',
   hide_in_deployment_modes = 'hide_in_deployment_modes',
   full_width = 'full_width',
+  min_duration = 'min_duration',
+  max_duration = 'max_duration',
+  url_allowed_schemes = 'url_allowed_schemes',
 }
 
 // EPR types this as `[]map[string]interface{}`
@@ -522,6 +537,9 @@ export interface RegistryVarsEntry {
   };
   [RegistryVarsEntryKeys.hide_in_deployment_modes]?: string[];
   [RegistryVarsEntryKeys.full_width]?: boolean;
+  [RegistryVarsEntryKeys.min_duration]?: string;
+  [RegistryVarsEntryKeys.max_duration]?: string;
+  [RegistryVarsEntryKeys.url_allowed_schemes]?: string[];
 }
 
 // Deprecated as part of the removing public references to saved object schemas
@@ -637,8 +655,10 @@ export interface CustomAssetFailedAttempt extends FailedAttempt {
 
 export enum INSTALL_STATES {
   CREATE_RESTART_INSTALLATION = 'create_restart_installation',
+  INSTALL_PRECHECK = 'install_precheck',
   INSTALL_KIBANA_ASSETS = 'install_kibana_assets',
   INSTALL_ILM_POLICIES = 'install_ilm_policies',
+  CREATE_ALERTING_RULES = 'create_alerting_rules',
   INSTALL_ML_MODEL = 'install_ml_model',
   INSTALL_INDEX_TEMPLATE_PIPELINES = 'install_index_template_pipelines',
   REMOVE_LEGACY_TEMPLATES = 'remove_legacy_templates',
@@ -646,6 +666,7 @@ export enum INSTALL_STATES {
   INSTALL_TRANSFORMS = 'install_transforms',
   DELETE_PREVIOUS_PIPELINES = 'delete_previous_pipelines',
   SAVE_ARCHIVE_ENTRIES = 'save_archive_entries_from_assets_map',
+  SAVE_KNOWLEDGE_BASE = 'save_knowledge_base',
   RESOLVE_KIBANA_PROMISE = 'resolve_kibana_promise',
   UPDATE_SO = 'update_so',
 }
@@ -690,10 +711,13 @@ export interface Installation {
   latest_executed_state?: InstallLatestExecutedState;
   latest_custom_asset_install_failed_attempts?: { [asset: string]: CustomAssetFailedAttempt };
   previous_version?: string | null;
+  rolled_back?: boolean;
+  is_rollback_ttl_expired?: boolean;
 }
 
 export interface PackageUsageStats {
   agent_policy_count: number;
+  package_policy_count: number;
 }
 
 export type Installable<T> =
@@ -733,6 +757,7 @@ export interface KibanaAssetReference {
   id: string;
   originId?: string;
   type: KibanaSavedObjectType;
+  deferred?: boolean;
 }
 export interface EsAssetReference {
   id: string;
@@ -768,6 +793,22 @@ export interface IndexTemplate {
   composed_of: string[];
   ignore_missing_component_templates?: string[];
   _meta: object;
+
+  // These properties are returned on ES read operations and
+  // not allowed to be set on ES write operations
+  created_date?: number;
+  created_date_millis?: number;
+  modified_date?: number;
+  modified_date_millis?: number;
+}
+
+export interface IngestPipelineWithDateFields extends IngestPipeline {
+  // These properties are returned on ES read operations and
+  // not allowed to be set on ES write operations
+  created_date?: number;
+  created_date_millis?: number;
+  modified_date?: number;
+  modified_date_millis?: number;
 }
 
 export interface ESAssetMetadata {
@@ -795,6 +836,22 @@ export type TemplateMap = Record<string, TemplateMapEntry>;
 export interface IndexTemplateEntry {
   templateName: string;
   indexTemplate: IndexTemplate;
+}
+
+export interface KnowledgeBaseItem {
+  fileName: string;
+  content: string;
+  path?: string;
+  installed_at?: string;
+  version?: string;
+}
+
+export interface PackageKnowledgeBase {
+  package: {
+    name: string;
+  };
+
+  items: KnowledgeBaseItem[];
 }
 
 // Experimental support for Otel integrations

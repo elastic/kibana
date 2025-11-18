@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ImportListItemSchema } from '.';
+import type { ImportListItemSchema } from '.';
 
 export const getImportListItemSchemaMock = (): ImportListItemSchema => ({
   file: {},

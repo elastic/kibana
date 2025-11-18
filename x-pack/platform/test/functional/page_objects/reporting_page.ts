@@ -187,7 +187,11 @@ export class ReportingPageObject extends FtrService {
     });
     // Close toast so it doesn't obscure the UI.
     if (isToastPresent) {
-      await this.testSubjects.click('completeReportSuccess > toastCloseButton');
+      await this.retry.try(async () => {
+        await this.testSubjects.click('completeReportSuccess > toastCloseButton');
+        // Wait for toast to disappear to confirm it was closed
+        await this.testSubjects.waitForDeleted('completeReportSuccess');
+      });
     }
 
     return isToastPresent;

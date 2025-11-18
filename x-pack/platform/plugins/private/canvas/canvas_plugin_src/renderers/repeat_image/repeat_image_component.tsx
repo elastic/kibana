@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import React, { ReactElement, useEffect, useState } from 'react';
+import type { ReactElement } from 'react';
+import React, { useEffect, useState } from 'react';
 import { times } from 'lodash';
-import { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
-import { RepeatImageRendererConfig } from './types';
+import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
+import type { RepeatImageRendererConfig } from './types';
 
 export interface RepeatImageComponentProps extends RepeatImageRendererConfig {
   onLoaded: IInterpreterRenderHandlers['done'];

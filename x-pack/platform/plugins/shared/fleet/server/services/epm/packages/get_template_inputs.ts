@@ -16,7 +16,7 @@ import {
   getStreamsForInputType,
   packageToPackagePolicy,
 } from '../../../../common/services/package_to_package_policy';
-import { getInputsWithStreamIds, _compilePackagePolicyInputs } from '../../package_policy';
+import { _compilePackagePolicyInputs } from '../../package_policy';
 import { appContextService } from '../../app_context';
 import type {
   PackageInfo,
@@ -29,13 +29,14 @@ import type {
   RegistryInput,
 } from '../../../../common/types';
 import { _sortYamlKeys } from '../../../../common/services/full_agent_policy_to_yaml';
+import { generateOtelcolConfig } from '../../agent_policies/otel_collector';
+import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../common/constants';
+import { getInputsWithIds } from '../../package_policies/get_input_with_ids';
 
 import { getFullInputStreams } from '../../agent_policies/package_policies_to_agent_inputs';
 
 import { getPackageInfo } from '.';
 import { getAgentTemplateAssetsMap } from './get';
-import { generateOtelcolConfig } from '../../agent_policies/full_agent_policy';
-import { OTEL_COLLECTOR_INPUT_TYPE } from '../../../../common/constants';
 
 type Format = 'yml' | 'json';
 
@@ -131,7 +132,7 @@ export async function getTemplateInputs(
 
   const emptyPackagePolicy = packageToPackagePolicy(packageInfo, '');
 
-  const inputsWithStreamIds = getInputsWithStreamIds(emptyPackagePolicy, undefined, true);
+  const inputsWithStreamIds = getInputsWithIds(emptyPackagePolicy, undefined, true, packageInfo);
 
   const indexedInputsAndStreams = buildIndexedPackage(packageInfo);
 

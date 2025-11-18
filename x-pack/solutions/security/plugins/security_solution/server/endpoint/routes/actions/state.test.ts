@@ -101,9 +101,11 @@ describe('when calling the Action state route handler', () => {
           canSuspendProcess: false,
           canGetRunningProcesses: false,
           canAccessResponseConsole: false,
+          canCancelAction: false,
           canWriteExecuteOperations: false,
           canWriteFileOperations: false,
           canWriteScanOperations: false,
+          canReadActionsLogManagement: false,
         },
       });
 

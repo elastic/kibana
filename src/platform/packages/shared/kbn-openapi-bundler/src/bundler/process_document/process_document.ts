@@ -8,17 +8,17 @@
  */
 
 import { dirname } from 'path';
-import { IRefResolver } from '../ref_resolver/ref_resolver';
-import { ResolvedDocument } from '../ref_resolver/resolved_document';
+import type { IRefResolver } from '../ref_resolver/ref_resolver';
+import type { ResolvedDocument } from '../ref_resolver/resolved_document';
 import { parseRef } from '../../utils/parse_ref';
 import { toAbsolutePath } from '../../utils/to_absolute_path';
 import { isPlainObjectType } from '../../utils/is_plain_object_type';
 import { isChildContext } from './is_child_context';
-import { TraverseItem } from './traverse_item';
+import type { TraverseItem } from './traverse_item';
 import { createNodeContext } from './transform_traverse_item_to_node_context';
-import { DocumentNodeProcessor } from './document_processors/types/document_node_processor';
-import { DocumentNode, PlainObjectNode, RefNode } from './types/node';
-import { TraverseDocumentContext } from './types/context';
+import type { DocumentNodeProcessor } from './document_processors/types/document_node_processor';
+import type { DocumentNode, PlainObjectNode, RefNode } from './types/node';
+import type { TraverseDocumentContext } from './types/context';
 
 export async function processDocument(
   resolvedDocument: ResolvedDocument,

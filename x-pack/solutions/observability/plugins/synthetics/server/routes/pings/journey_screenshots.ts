@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { journeyScreenshotHandler } from '../../queries/journey_screenshots';
-import { SyntheticsRestApiRouteFactory } from '../types';
+import type { SyntheticsRestApiRouteFactory } from '../types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 
 export const createJourneyScreenshotRoute: SyntheticsRestApiRouteFactory = () => ({

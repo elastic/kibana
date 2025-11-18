@@ -9,13 +9,13 @@ import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { inferenceMock } from '@kbn/inference-plugin/server/mocks';
-import { MockedKeys } from '@kbn/utility-types-jest';
-import { AwaitedProperties } from '@kbn/utility-types';
-import {
+import type { MockedKeys } from '@kbn/utility-types-jest';
+import type { AwaitedProperties } from '@kbn/utility-types';
+import type {
   ElasticAssistantApiRequestHandlerContext,
   ElasticAssistantRequestHandlerContext,
 } from '../types';
-import { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import {
   attackDiscoveryDataClientMock,
   attackDiscoveryScheduleDataClientMock,
@@ -23,17 +23,17 @@ import {
   dataClientMock,
   knowledgeBaseDataClientMock,
 } from './data_clients.mock';
-import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
-import { AIAssistantDataClient } from '../ai_assistant_data_clients';
-import {
+import type { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
+import type { AIAssistantDataClient } from '../ai_assistant_data_clients';
+import type {
   AIAssistantKnowledgeBaseDataClient,
   GetAIAssistantKnowledgeBaseDataClientParams,
 } from '../ai_assistant_data_clients/knowledge_base';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
-import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
-import { DefendInsightsDataClient } from '../lib/defend_insights/persistence';
+import type { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
+import type { DefendInsightsDataClient } from '../lib/defend_insights/persistence';
 import { authenticatedUser } from './user';
-import { AttackDiscoveryScheduleDataClient } from '../lib/attack_discovery/schedules/data_client';
+import type { AttackDiscoveryScheduleDataClient } from '../lib/attack_discovery/schedules/data_client';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -113,6 +113,11 @@ const createElasticAssistantRequestContextMock = (
     actions: clients.elasticAssistant.actions as unknown as ActionsPluginStart,
     eventLogger: clients.eventLogger,
     eventLogIndex: '.kibana-event-log-*',
+    userProfile: {
+      suggest: jest.fn(),
+      getCurrent: jest.fn(),
+      bulkGet: jest.fn(),
+    },
     getRegisteredFeatures: jest.fn((pluginName: string) => defaultAssistantFeatures),
     getRegisteredTools: jest.fn(),
     logger: clients.elasticAssistant.logger,
@@ -164,6 +169,7 @@ const createElasticAssistantRequestContextMock = (
       ((
         params?: GetAIAssistantKnowledgeBaseDataClientParams
       ) => Promise<AIAssistantKnowledgeBaseDataClient | null>),
+    getCheckpointSaver: jest.fn().mockReturnValue(null),
     getCurrentUser: jest.fn().mockReturnValue(authenticatedUser),
     getServerBasePath: jest.fn(),
     getSpaceId: jest.fn().mockReturnValue('default'),
@@ -173,6 +179,7 @@ const createElasticAssistantRequestContextMock = (
     savedObjectsClient: clients.elasticAssistant.savedObjectsClient,
     telemetry: clients.elasticAssistant.telemetry,
     checkPrivileges: jest.fn(),
+    updateAnonymizationFields: jest.fn(),
   };
 };
 

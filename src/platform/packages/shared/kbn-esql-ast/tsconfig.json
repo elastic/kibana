@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -12,9 +12,11 @@
     "**/*.ts",
   ],
   "kbn_references": [
-    "@kbn/utility-types",
     "@kbn/i18n",
     "@kbn/esql-types",
+    "@kbn/core-pricing-common",
+    "@kbn/licensing-types",
+    "@kbn/core-ui-settings-common",
   ],
   "exclude": [
     "target/**/*",

@@ -13,16 +13,18 @@ import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
-import { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import {
-  APP_WRAPPER_CLASS,
+import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
+import type {
   App,
   AppMountParameters,
   AppUpdater,
-  DEFAULT_APP_CATEGORIES,
   Plugin,
   PluginInitializerContext,
   ScopedHistory,
+} from '@kbn/core/public';
+import {
+  APP_WRAPPER_CLASS,
+  DEFAULT_APP_CATEGORIES,
   type CoreSetup,
   type CoreStart,
 } from '@kbn/core/public';
@@ -30,7 +32,7 @@ import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plu
 import type { LensPublicSetup, LensPublicStart } from '@kbn/lens-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/public/plugin';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public/plugin';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
@@ -60,19 +62,20 @@ import type {
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
 
-import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
-import { DashboardMountContextProps } from './dashboard_app/types';
-import { DASHBOARD_APP_ID, LANDING_PAGE_PATH, SEARCH_SESSION_ID } from '../common/constants';
+import type { DashboardMountContextProps } from './dashboard_app/types';
 import {
-  GetPanelPlacementSettings,
-  registerDashboardPanelPlacementSetting,
-} from './panel_placement';
-import type { FindDashboardsService } from './services/dashboard_content_management_service/types';
+  DASHBOARD_APP_ID,
+  LANDING_PAGE_PATH,
+  SEARCH_SESSION_ID,
+} from '../common/page_bundle_constants';
+import type { GetPanelPlacementSettings } from './panel_placement';
+import { registerDashboardPanelSettings } from './panel_placement';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { setLogger } from './services/logger';
 import { registerActions } from './dashboard_actions/register_actions';
 import { setupUrlForwarding } from './dashboard_app/url/setup_url_forwarding';
+import type { FindDashboardsService } from './dashboard_client';
 
 export interface DashboardSetupDependencies {
   data: DataPublicPluginSetup;
@@ -119,7 +122,7 @@ interface DashboardSetup {}
 
 export interface DashboardStart {
   findDashboardsService: () => Promise<FindDashboardsService>;
-  registerDashboardPanelPlacementSetting: <SerializedState extends object = object>(
+  registerDashboardPanelSettings: <SerializedState extends object = object>(
     embeddableType: string,
     getPanelPlacementSettings: GetPanelPlacementSettings<SerializedState>
   ) => void;
@@ -139,7 +142,7 @@ export class DashboardPlugin
 
   public setup(
     core: CoreSetup<DashboardStartDependencies, DashboardStart>,
-    { share, home, data, contentManagement, urlForwarding }: DashboardSetupDependencies
+    { share, home, data, urlForwarding }: DashboardSetupDependencies
   ) {
     core.analytics.registerEventType({
       eventType: 'dashboard_loaded_with_data',
@@ -151,14 +154,13 @@ export class DashboardPlugin
         new DashboardAppLocatorDefinition({
           useHashedUrl: core.uiSettings.get('state:storeInSessionStorage'),
           getDashboardFilterFields: async (dashboardId: string) => {
-            const [{ getDashboardContentManagementService }] = await Promise.all([
-              import('./services/dashboard_content_management_service'),
+            const [{ dashboardClient }] = await Promise.all([
+              import('./dashboard_client'),
               untilPluginStartServicesReady(),
             ]);
-            return (
-              (await getDashboardContentManagementService().loadDashboardState({ id: dashboardId }))
-                .dashboardInput?.filters ?? []
-            );
+
+            const result = await dashboardClient.get(dashboardId);
+            return result.data.filters ?? [];
           },
         })
       );
@@ -277,30 +279,24 @@ export class DashboardPlugin
       });
     }
 
-    // register content management
-    contentManagement.registry.register({
-      id: CONTENT_ID,
-      version: {
-        latest: LATEST_VERSION,
-      },
-      name: dashboardAppTitle,
-    });
-
     return {};
   }
 
   public start(core: CoreStart, plugins: DashboardStartDependencies): DashboardStart {
     setKibanaServices(core, plugins);
 
-    untilPluginStartServicesReady().then(() => registerActions(plugins));
+    registerActions(plugins);
+
+    plugins.uiActions.registerActionAsync('searchDashboardAction', async () => {
+      const { searchAction } = await import('./dashboard_client');
+      return searchAction;
+    });
 
     return {
-      registerDashboardPanelPlacementSetting,
+      registerDashboardPanelSettings,
       findDashboardsService: async () => {
-        const { getDashboardContentManagementService } = await import(
-          './services/dashboard_content_management_service'
-        );
-        return getDashboardContentManagementService().findDashboards;
+        const { findService } = await import('./dashboard_client');
+        return findService;
       },
     };
   }

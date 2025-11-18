@@ -8,7 +8,7 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { JobStat } from '@kbn/ml-plugin/public';
+import type { JobStat } from '@kbn/ml-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { MachineLearningFlyout } from './ml_flyout_container';
 import {

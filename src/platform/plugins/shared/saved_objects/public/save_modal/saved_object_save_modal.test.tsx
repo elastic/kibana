@@ -33,13 +33,16 @@ jest.mock('@elastic/eui', () => {
   };
 });
 
+const mockSave = jest.fn();
+const mockClose = jest.fn();
+
 describe('SavedObjectSaveModal', () => {
   it('should render', async () => {
     const { findByTestId, getByText } = render(
       <I18nProvider>
         <SavedObjectSaveModal
-          onSave={() => void 0}
-          onClose={() => void 0}
+          onSave={mockSave}
+          onClose={mockClose}
           title={'Saved Object title'}
           showCopyOnSave={false}
           objectType="visualization"
@@ -56,8 +59,8 @@ describe('SavedObjectSaveModal', () => {
     const { getByText } = render(
       <I18nProvider>
         <SavedObjectSaveModal
-          onSave={() => void 0}
-          onClose={() => void 0}
+          onSave={mockSave}
+          onClose={mockClose}
           title={'Saved Object title'}
           showCopyOnSave={false}
           objectType="visualization"
@@ -75,8 +78,8 @@ describe('SavedObjectSaveModal', () => {
     const { getByText, rerender } = render(
       <I18nProvider>
         <SavedObjectSaveModal
-          onSave={() => void 0}
-          onClose={() => void 0}
+          onSave={mockSave}
+          onClose={mockClose}
           title={'Saved Object title'}
           showCopyOnSave={false}
           objectType="visualization"
@@ -90,8 +93,8 @@ describe('SavedObjectSaveModal', () => {
     rerender(
       <I18nProvider>
         <SavedObjectSaveModal
-          onSave={() => void 0}
-          onClose={() => void 0}
+          onSave={mockSave}
+          onClose={mockClose}
           title={'Saved Object title'}
           showCopyOnSave={false}
           objectType="visualization"
@@ -109,8 +112,8 @@ describe('SavedObjectSaveModal', () => {
     render(
       <I18nProvider>
         <SavedObjectSaveModal
-          onSave={() => void 0}
-          onClose={() => void 0}
+          onSave={mockSave}
+          onClose={mockClose}
           title={'Saved Object title'}
           showCopyOnSave={false}
           objectType="visualization"
@@ -131,7 +134,7 @@ describe('SavedObjectSaveModal', () => {
         <I18nProvider>
           <SavedObjectSaveModal
             onSave={onSave}
-            onClose={() => void 0}
+            onClose={mockClose}
             title={'Saved Object title'}
             objectType="visualization"
             showDescription={true}

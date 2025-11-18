@@ -7,11 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { i18n } from '@kbn/i18n';
+import React from 'react';
+
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { ADD_PANEL_ANNOTATION_GROUP } from '@kbn/embeddable-plugin/public';
-import { apiCanAddNewSection, CanAddNewSection } from '@kbn/presentation-containers';
-import { EmbeddableApiContext } from '@kbn/presentation-publishing';
-import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
+import { i18n } from '@kbn/i18n';
+import type { CanAddNewSection } from '@kbn/presentation-containers';
+import { apiCanAddNewSection } from '@kbn/presentation-containers';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { ACTION_ADD_SECTION } from './constants';
 
@@ -36,6 +41,24 @@ export class AddSectionAction implements Action<EmbeddableApiContext> {
     return 'section';
   }
 
+  public readonly MenuItem = () => {
+    return (
+      <EuiFlexGroup gutterSize="s">
+        <EuiFlexItem>
+          <EuiText size="s">{this.getDisplayName()}</EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <EuiBadge color="accent">
+            {i18n
+              .translate('dashboard.collapsibleSection.newBadge', {
+                defaultMessage: 'New',
+              })
+              .toLocaleUpperCase()}
+          </EuiBadge>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
     return isApiCompatible(embeddable);
   }

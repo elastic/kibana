@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import { BuildkiteMetadata, HostMetadata } from '../../../datasources';
+import type { ScoutTestRunConfigCategory } from '@kbn/scout-info';
+import type { BuildkiteMetadata, HostMetadata } from '../../../datasources';
 
 /**
  * Scout reporter event type
@@ -71,6 +71,12 @@ export interface ScoutTestRunInfo {
   };
   status?: string;
   duration?: number;
+  tests?: {
+    passes?: number;
+    pending?: number;
+    failures?: number;
+    total?: number;
+  };
 }
 
 /**
@@ -116,4 +122,7 @@ export interface ScoutReportEvent {
   test_run: ScoutTestRunInfo;
   suite?: ScoutSuiteInfo;
   test?: ScoutTestInfo;
+  process?: {
+    uptime?: number;
+  };
 }

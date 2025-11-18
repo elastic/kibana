@@ -7,14 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
+import { ESQLEditorTelemetryService } from '@kbn/esql-editor';
 import type { TimeRange } from '@kbn/es-query';
-import { ESQLVariableType, type ESQLControlVariable, type ESQLControlState } from '@kbn/esql-types';
+import {
+  ESQLVariableType,
+  EsqlControlType,
+  VariableNamePrefix,
+  TelemetryControlCancelledReason,
+  type ESQLControlVariable,
+  type ESQLControlState,
+  type ControlTriggerSource,
+} from '@kbn/esql-types';
 import { getValuesFromQueryField } from '@kbn/esql-utils';
-import { EsqlControlType, VariableNamePrefix } from '@kbn/esql-types';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ValueControlForm } from './value_control_form';
 import { Header, ControlType, VariableName, Footer } from './shared_form_components';
 import { IdentifierControlForm } from './identifier_control_form';
@@ -29,6 +38,7 @@ import {
   getVariableNamePrefix,
   checkVariableExistence,
 } from './helpers';
+import type { ServiceDeps } from '../../../kibana_services';
 
 interface ESQLControlsFlyoutProps {
   search: ISearchGeneric;
@@ -42,6 +52,8 @@ interface ESQLControlsFlyoutProps {
   initialState?: ESQLControlState;
   closeFlyout: () => void;
   ariaLabelledBy: string;
+  currentApp?: string;
+  telemetryTriggerSource: ControlTriggerSource;
 }
 
 export function ESQLControlsFlyout({
@@ -56,6 +68,8 @@ export function ESQLControlsFlyout({
   initialState,
   closeFlyout,
   ariaLabelledBy,
+  currentApp,
+  telemetryTriggerSource,
 }: ESQLControlsFlyoutProps) {
   // ?? or ?
   const [variableNamePrefix, setVariableNamePrefix] = useState(
@@ -113,6 +127,11 @@ export function ESQLControlsFlyout({
       : true;
   }, [variableType, controlState?.availableOptions]);
 
+  const kibana = useKibana<ServiceDeps>();
+  const { core } = kibana.services;
+
+  const telemetryServiceRef = useRef(new ESQLEditorTelemetryService(core.analytics));
+
   const onVariableNameChange = useCallback(
     (e: { target: { value: React.SetStateAction<string> } }) => {
       const text = validateVariableName(String(e.target.value), variableNamePrefix);
@@ -138,12 +157,12 @@ export function ESQLControlsFlyout({
       !variableNameWithoutQuestionmark ||
         variableExists ||
         !areValuesValid ||
-        !controlState?.availableOptions.length
+        !controlState?.availableOptions?.length
     );
   }, [
     isControlInEditMode,
     areValuesValid,
-    controlState?.availableOptions.length,
+    controlState?.availableOptions?.length,
     esqlVariables,
     variableName,
     variableType,
@@ -154,7 +173,7 @@ export function ESQLControlsFlyout({
   }, []);
 
   const onCreateControl = useCallback(async () => {
-    if (controlState && controlState.availableOptions.length) {
+    if (controlState && controlState.availableOptions?.length) {
       if (!isControlInEditMode) {
         if (cursorPosition) {
           const query = updateQueryStringWithVariable(queryString, variableName, cursorPosition);
@@ -165,6 +184,7 @@ export function ESQLControlsFlyout({
       } else {
         await onSaveControl?.(controlState, '');
       }
+      telemetryServiceRef.current.trackEsqlControlConfigSaved(variableType, telemetryTriggerSource);
     }
     closeFlyout();
   }, [
@@ -175,7 +195,17 @@ export function ESQLControlsFlyout({
     queryString,
     variableName,
     onSaveControl,
+    variableType,
+    telemetryTriggerSource,
   ]);
+
+  const onCloseFlyout = useCallback(() => {
+    telemetryServiceRef.current.trackEsqlControlConfigCancelled(
+      initialVariableType,
+      TelemetryControlCancelledReason.CANCEL_BUTTON
+    );
+    closeFlyout();
+  }, [closeFlyout, initialVariableType]);
 
   const formBody =
     variableNamePrefix === VariableNamePrefix.VALUE ? (
@@ -189,6 +219,7 @@ export function ESQLControlsFlyout({
         search={search}
         valuesRetrieval={valuesField}
         timeRange={timeRange}
+        currentApp={currentApp}
       />
     ) : (
       <IdentifierControlForm
@@ -200,6 +231,7 @@ export function ESQLControlsFlyout({
         initialState={initialState}
         search={search}
         cursorPosition={cursorPosition}
+        currentApp={currentApp}
       />
     );
 
@@ -222,11 +254,9 @@ export function ESQLControlsFlyout({
         {formBody}
       </EuiFlyoutBody>
       <Footer
-        isControlInEditMode={isControlInEditMode}
-        variableName={variableName}
         onCancelControl={onCancelControl}
         isSaveDisabled={formIsInvalid}
-        closeFlyout={closeFlyout}
+        closeFlyout={onCloseFlyout}
         onCreateControl={onCreateControl}
       />
     </>

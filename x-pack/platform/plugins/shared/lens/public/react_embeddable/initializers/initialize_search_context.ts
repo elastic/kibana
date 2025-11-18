@@ -5,26 +5,18 @@
  * 2.0.
  */
 
-import { Filter, Query, AggregateQuery } from '@kbn/es-query';
-import {
-  PublishesUnifiedSearch,
-  StateComparators,
-  initializeTimeRangeManager,
-  timeRangeComparators,
-} from '@kbn/presentation-publishing';
-import {
-  PublishesSearchSession,
-  apiPublishesSearchSession,
-} from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
-import { BehaviorSubject, Observable, merge, map, distinctUntilChanged } from 'rxjs';
+import type { Filter, Query, AggregateQuery } from '@kbn/es-query';
+import type { PublishesUnifiedSearch, StateComparators } from '@kbn/presentation-publishing';
+import { initializeTimeRangeManager, timeRangeComparators } from '@kbn/presentation-publishing';
+import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import { apiPublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, merge, map, distinctUntilChanged } from 'rxjs';
 import { isEqual } from 'lodash';
-import {
-  LensEmbeddableStartServices,
-  LensInternalApi,
-  LensRuntimeState,
-  LensSerializedState,
-  LensUnifiedSearchContext,
-} from '../types';
+import type { LensInternalApi, LensRuntimeState, LensUnifiedSearchContext } from '@kbn/lens-common';
+import type { LensSerializedAPIConfig } from '@kbn/lens-common-2';
+
+import type { LensEmbeddableStartServices } from '../types';
 
 export const searchContextComparators: StateComparators<LensUnifiedSearchContext> = {
   ...timeRangeComparators,
@@ -40,7 +32,7 @@ export interface SearchContextConfig {
   anyStateChange$: Observable<void>;
   cleanup: () => void;
   getLatestState: () => LensUnifiedSearchContext;
-  reinitializeState: (lastSaved?: LensSerializedState) => void;
+  reinitializeState: (lastSaved?: LensSerializedAPIConfig) => void;
 }
 
 export function initializeSearchContext(
@@ -104,7 +96,7 @@ export function initializeSearchContext(
       lastReloadRequestTime: lastReloadRequestTime$.getValue(),
       ...timeRangeManager.getLatestState(),
     }),
-    reinitializeState: (lastSaved?: LensSerializedState) => {
+    reinitializeState: (lastSaved?: LensSerializedAPIConfig) => {
       timeRangeManager.reinitializeState(lastSaved);
     },
   };

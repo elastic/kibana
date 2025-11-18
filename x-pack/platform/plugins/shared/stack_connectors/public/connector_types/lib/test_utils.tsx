@@ -8,15 +8,17 @@
 import React, { useCallback } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiButton } from '@elastic/eui';
-import { Form, useForm, FormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { FormData } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { act } from 'react-dom/test-utils';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import { render as reactRender, RenderOptions, RenderResult } from '@testing-library/react';
+import type { RenderOptions, RenderResult } from '@testing-library/react';
+import { render as reactRender } from '@testing-library/react';
 
-import { ConnectorServices } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { TriggersAndActionsUiServices } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ConnectorServices } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { TriggersAndActionsUiServices } from '@kbn/triggers-actions-ui-plugin/public';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
-import { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/types';
+import type { ConnectorFormSchema, InternalConnectorForm } from '@kbn/alerts-ui-shared';
 import { ConnectorFormFieldsGlobal } from '@kbn/triggers-actions-ui-plugin/public/application/sections/action_connector_form/connector_form_fields_global';
 import { ConnectorProvider } from '@kbn/triggers-actions-ui-plugin/public/application/context/connector_context';
 
@@ -25,6 +27,8 @@ interface FormTestProviderProps {
   defaultValue?: Record<string, unknown>;
   onSubmit?: ({ data, isValid }: { data: FormData; isValid: boolean }) => Promise<void>;
   connectorServices?: ConnectorServices;
+  serializer?: (formData: ConnectorFormSchema) => InternalConnectorForm;
+  deserializer?: (formData: ConnectorFormSchema) => InternalConnectorForm;
 }
 
 type ConnectorFormTestProviderProps = Omit<FormTestProviderProps, 'defaultValue'> & {
@@ -36,12 +40,16 @@ const ConnectorFormTestProviderComponent: React.FC<ConnectorFormTestProviderProp
   connector,
   onSubmit,
   connectorServices,
+  serializer,
+  deserializer,
 }) => {
   return (
     <FormTestProviderComponent
       defaultValue={connector}
       onSubmit={onSubmit}
       connectorServices={connectorServices}
+      serializer={serializer}
+      deserializer={deserializer}
     >
       <ConnectorFormFieldsGlobal canSave={true} />
       {children}
@@ -76,8 +84,10 @@ const FormTestProviderComponent: React.FC<FormTestProviderProps> = ({
     isWebhookSslWithPfxEnabled: true,
     enabledEmailServices: ['*'],
   },
+  serializer,
+  deserializer,
 }) => {
-  const { form } = useForm({ defaultValue });
+  const { form } = useForm({ defaultValue, serializer, deserializer });
   const { submit } = form;
 
   const onClick = useCallback(async () => {

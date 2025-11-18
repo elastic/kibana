@@ -22,7 +22,7 @@ const createI18nLoaderMock = (translations: TranslationsMock) => {
 };
 
 import { getTranslationCount } from './telemetry_localization_collector';
-import { i18nLoader } from '@kbn/i18n';
+import type { i18nLoader } from '@kbn/i18n';
 
 describe('getTranslationCount', () => {
   it('returns 0 if no translations registered', async () => {

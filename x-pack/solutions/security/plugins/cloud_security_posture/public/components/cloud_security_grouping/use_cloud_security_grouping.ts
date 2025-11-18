@@ -8,7 +8,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { isNoneGroup, useGrouping } from '@kbn/grouping';
 import * as uuid from 'uuid';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { GroupOption, GroupPanelRenderer, GetGroupStats } from '@kbn/grouping/src';
+import type { GroupOption, GroupPanelRenderer, GetGroupStats } from '@kbn/grouping/src';
 import {
   GROUP_BY_CLICK,
   uiMetricService,
@@ -17,7 +17,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 
 import { useUrlQuery } from '../../common/hooks/use_url_query';
 
-import { FindingsBaseURLQuery } from '../../common/types';
+import type { FindingsBaseURLQuery } from '../../common/types';
 import { useBaseEsQuery, usePersistedQuery } from '../../common/hooks/use_cloud_posture_data_table';
 import { VULNERABILITY_GROUPING_MULTIPLE_VALUE_FIELDS } from '../../common/constants';
 

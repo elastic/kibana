@@ -6,10 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  ActionConnectorFieldsProps,
-  SimpleConnectorForm,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { SimpleConnectorForm } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   FilePickerField,
   SelectField,
@@ -128,6 +126,22 @@ const ConnectorFields: React.FC<ActionConnectorFieldsProps> = ({ readOnly, isEdi
             secretsFormSchema={otherOpenAiSecrets}
           />
           <EuiSpacer size="s" />
+          <UseField
+            path="config.enableNativeFunctionCalling"
+            component={ToggleField}
+            config={{
+              label: i18n.USE_NATIVE_FUNCTION_CALLING_LABEL,
+              helpText: i18n.USE_NATIVE_FUNCTION_CALLING_DESC,
+              defaultValue: false,
+            }}
+            componentProps={{
+              euiFieldProps: {
+                disabled: readOnly,
+                'data-test-subj': 'config.enableNativeFunctionCallingSwitch',
+              },
+            }}
+          />
+          <EuiSpacer size="m" />
           <UseField
             path="__internal__.hasPKI"
             component={ToggleField}

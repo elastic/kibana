@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { DarkModeValue as ColorMode } from '@kbn/user-profile-components';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function UserProfilePageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');

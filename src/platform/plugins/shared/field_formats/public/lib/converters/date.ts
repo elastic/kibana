@@ -12,7 +12,7 @@ import { memoize, noop } from 'lodash';
 import moment from 'moment';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormat, FIELD_FORMAT_IDS } from '../../../common';
-import { TextContextTypeConvert } from '../../../common/types';
+import type { TextContextTypeConvert } from '../../../common/types';
 
 export class DateFormat extends FieldFormat {
   static id = FIELD_FORMAT_IDS.DATE;

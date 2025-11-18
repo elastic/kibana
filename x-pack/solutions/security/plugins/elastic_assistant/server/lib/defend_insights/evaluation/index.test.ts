@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import { evaluateDefendInsights } from '.';
-import { runDefendInsightsEvaluations } from './run_evaluations';
+import type { Logger } from '@kbn/logging';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
+import type { ActionsClient, Connector } from '@kbn/actions-plugin/server';
 import { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
-import { getLlmType } from '../../../routes/utils';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { DefendInsightType } from '@kbn/elastic-assistant-common';
-import { Logger } from '@kbn/logging';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { ActionsClient } from '@kbn/actions-plugin/server';
+
+import { getLlmType } from '../../../routes/utils';
+import { runDefendInsightsEvaluations } from './run_evaluations';
+import { evaluateDefendInsights } from '.';
+import { createMockConnector } from '@kbn/actions-plugin/server/application/connector/mocks';
 
 jest.mock('./run_evaluations');
 jest.mock('@kbn/langchain/server', () => ({
@@ -25,6 +28,18 @@ jest.mock('@kbn/langchain/server/tracers/langsmith', () => ({
 }));
 jest.mock('../../../routes/utils', () => ({
   getLlmType: jest.fn().mockReturnValue('mock-llm-type'),
+}));
+jest.mock('../graphs/default_defend_insights_graph/prompts', () => ({
+  getDefendInsightsPrompt: jest.fn().mockReturnValue({
+    default: 'default',
+    refine: 'refine',
+    continue: 'continue',
+    group: 'group',
+    events: 'events',
+    eventsId: 'eventsId',
+    eventsEndpointId: 'eventsEndpointId',
+    eventsValue: 'eventsValue',
+  }),
 }));
 
 const mockLogger = { debug: jest.fn(), error: jest.fn(), warn: jest.fn(), info: jest.fn() };
@@ -42,19 +57,15 @@ describe('evaluateDefendInsights', () => {
       {
         getDefaultDefendInsightsGraph: mockGetDefaultDefendInsightsGraph,
         graphType: 'defend-insights' as const,
+        insightType: DefendInsightType.Enum.incompatible_antivirus,
       },
     ];
 
     const mockConnectors = [
-      {
+      createMockConnector({
         id: '1',
         name: 'Test Connector',
         actionTypeId: '.test',
-        isPreconfigured: false,
-        isDeprecated: false,
-        isSystemAction: false,
-        config: {},
-        secrets: {},
         prompts: {
           default: 'default',
           refine: 'refine',
@@ -65,11 +76,12 @@ describe('evaluateDefendInsights', () => {
           eventsEndpointId: 'eventsEndpointId',
           eventsValue: 'eventsValue',
         },
-      },
+      } as unknown as Connector),
     ];
 
     const mockActionsClient = {} as unknown as PublicMethodsOf<ActionsClient>;
     const mockEsClient = {} as unknown as ElasticsearchClient;
+    const mockSoClient = savedObjectsClientMock.create();
     const mockEsClientInternalUser = {} as unknown as ElasticsearchClient;
 
     await evaluateDefendInsights({
@@ -80,6 +92,7 @@ describe('evaluateDefendInsights', () => {
       connectorTimeout: 1000,
       datasetName: 'test-dataset',
       esClient: mockEsClient,
+      soClient: mockSoClient,
       esClientInternalUser: mockEsClientInternalUser,
       evaluationId: 'eval-1',
       evaluatorConnectorId: 'eval-connector',
@@ -114,6 +127,7 @@ describe('evaluateDefendInsights', () => {
       endpointIds: [],
       esClient: mockEsClient,
       llm: expect.any(Object),
+      kbDataClient: null,
       logger: mockLogger,
       size: 10,
       anonymizationFields: [],

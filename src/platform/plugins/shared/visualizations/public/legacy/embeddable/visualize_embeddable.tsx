@@ -8,21 +8,23 @@
  */
 
 import _, { get } from 'lodash';
-import { Subscription, ReplaySubject, mergeMap } from 'rxjs';
+import type { Subscription } from 'rxjs';
+import { ReplaySubject, mergeMap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { render } from 'react-dom';
 import { EuiLoadingChart, type UseEuiTheme } from '@elastic/eui';
-import { Filter, onlyDisabledFiltersChanged, Query, TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { onlyDisabledFiltersChanged } from '@kbn/es-query';
 import type { KibanaExecutionContext, SavedObjectAttributes } from '@kbn/core/public';
 import type { ErrorLike } from '@kbn/expressions-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { TimefilterContract } from '@kbn/data-plugin/public';
+import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { Warnings } from '@kbn/charts-plugin/public';
 import { hasUnsupportedDownsampledAggregationFailure } from '@kbn/search-response-warnings';
-import { Adapters } from '@kbn/inspector-plugin/public';
-import {
+import type { Adapters } from '@kbn/inspector-plugin/public';
+import type {
   ExpressionAstExpression,
   ExpressionLoader,
   ExpressionRendererEvent,
@@ -33,23 +35,26 @@ import type { RenderMode } from '@kbn/expressions-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import { mapAndFlattenFilters } from '@kbn/data-plugin/public';
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
-import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { css } from '@emotion/react';
+import {
+  VISUALIZE_EMBEDDABLE_TYPE,
+  VisualizationError,
+  visContainerStyle,
+  visualizeClassName,
+} from '@kbn/visualizations-common';
 import { isFallbackDataView } from '../../visualize_app/utils';
 import { VisualizationMissedSavedObjectError } from '../../components/visualization_missed_saved_object_error';
-import VisualizationError from '../../components/visualization_error';
-import { VISUALIZE_EMBEDDABLE_TYPE } from '../../../common/constants';
-import { SerializedVis, Vis } from '../../vis';
+import type { SerializedVis, Vis } from '../../vis';
 import { getApplication, getExpressions, getUiActions } from '../../services';
 import { VIS_EVENT_TO_TRIGGER } from '../../embeddable/events';
 import { getSavedVisualization } from '../../utils/saved_visualize_utils';
-import { VisSavedObject } from '../../types';
+import type { VisSavedObject } from '../../types';
 import { toExpressionAst } from '../../embeddable/to_ast';
-import { AttributeService } from './attribute_service';
-import { VisualizationsStartDeps } from '../../plugin';
+import type { AttributeService } from './attribute_service';
+import type { VisualizationsStartDeps } from '../../plugin';
 import { Embeddable } from './embeddable';
-import { EmbeddableInput, EmbeddableOutput } from './i_embeddable';
-import { visualizeClassName, visContainerStyle } from '../../vis.styles';
+import type { EmbeddableInput, EmbeddableOutput } from './i_embeddable';
 
 export interface VisualizeEmbeddableDeps {
   start: StartServicesGetter<

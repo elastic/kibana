@@ -18,11 +18,9 @@ import type { AlertTableContextMenuItem } from '../types';
 export interface UseAddToCaseActions {
   onMenuItemClick: () => void;
   ariaLabel?: string;
-  ecsData?: Ecs;
-  nonEcsData?: TimelineNonEcsData[];
+  ecsData: Ecs;
+  nonEcsData: TimelineNonEcsData[];
   onSuccess?: () => Promise<void>;
-  isActiveTimelines: boolean;
-  isInDetections: boolean;
   refetch?: (() => void) | undefined;
 }
 
@@ -32,8 +30,6 @@ export const useAddToCaseActions = ({
   ecsData,
   nonEcsData,
   onSuccess,
-  isActiveTimelines,
-  isInDetections,
   refetch,
 }: UseAddToCaseActions) => {
   const { cases: casesUi } = useKibana().services;
@@ -44,6 +40,18 @@ export const useAddToCaseActions = ({
   }, [ecsData]);
 
   const caseAttachments: CaseAttachmentsWithoutOwner = useMemo(() => {
+    if (!isAlert) {
+      return ecsData?._id
+        ? [
+            {
+              eventId: ecsData?._id ?? '',
+              index: ecsData?._index ?? '',
+              type: AttachmentType.event,
+            },
+          ]
+        : [];
+    }
+
     return ecsData?._id
       ? [
           {
@@ -54,7 +62,7 @@ export const useAddToCaseActions = ({
           },
         ]
       : [];
-  }, [casesUi.helpers, ecsData, nonEcsData]);
+  }, [casesUi.helpers, ecsData, isAlert, nonEcsData]);
 
   const onCaseSuccess = useCallback(() => {
     if (onSuccess) {
@@ -83,28 +91,30 @@ export const useAddToCaseActions = ({
   }, [onMenuItemClick, onCaseSuccess]);
 
   const selectCaseModal = casesUi.hooks.useCasesAddToExistingCaseModal(selectCaseArgs);
-
+  const observables = useMemo(
+    () => casesUi.helpers.getObservablesFromEcs(nonEcsData ? [nonEcsData] : []),
+    [casesUi.helpers, nonEcsData]
+  );
   const handleAddToNewCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
     onMenuItemClick();
     createCaseFlyout.open({
       attachments: caseAttachments,
+      observables,
     });
-  }, [onMenuItemClick, createCaseFlyout, caseAttachments]);
+  }, [onMenuItemClick, createCaseFlyout, caseAttachments, observables]);
 
   const handleAddToExistingCaseClick = useCallback(() => {
     // TODO rename this, this is really `closePopover()`
     onMenuItemClick();
-    selectCaseModal.open({ getAttachments: () => caseAttachments });
-  }, [caseAttachments, onMenuItemClick, selectCaseModal]);
+    selectCaseModal.open({
+      getAttachments: () => caseAttachments,
+      getObservables: observables ? () => observables : undefined,
+    });
+  }, [caseAttachments, onMenuItemClick, observables, selectCaseModal]);
 
   const addToCaseActionItems: AlertTableContextMenuItem[] = useMemo(() => {
-    if (
-      (isActiveTimelines || isInDetections) &&
-      userCasesPermissions.createComment &&
-      userCasesPermissions.read &&
-      isAlert
-    ) {
+    if (userCasesPermissions.createComment && userCasesPermissions.read) {
       return [
         // add to existing case menu item
         {
@@ -128,11 +138,8 @@ export const useAddToCaseActions = ({
     }
     return [];
   }, [
-    isActiveTimelines,
-    isInDetections,
     userCasesPermissions.createComment,
     userCasesPermissions.read,
-    isAlert,
     ariaLabel,
     handleAddToExistingCaseClick,
     handleAddToNewCaseClick,

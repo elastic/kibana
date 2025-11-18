@@ -6,20 +6,19 @@
  */
 import { z } from '@kbn/zod';
 import { IngestBase, IngestBaseStream } from './base';
-import { RoutingDefinition, routingDefinitionListSchema } from './routing';
-import {
-  WiredIngestStreamEffectiveLifecycle,
-  wiredIngestStreamEffectiveLifecycleSchema,
-} from './lifecycle';
-import {
-  FieldDefinition,
-  InheritedFieldDefinition,
-  fieldDefinitionSchema,
-  inheritedFieldDefinitionSchema,
-} from '../../fields';
-import { Validation, validation } from '../validation/validation';
-import { ModelValidation, modelValidation } from '../validation/model_validation';
+import type { RoutingDefinition } from './routing';
+import { routingDefinitionListSchema } from './routing';
+import type { WiredIngestStreamEffectiveLifecycle } from './lifecycle';
+import { wiredIngestStreamEffectiveLifecycleSchema } from './lifecycle';
+import type { FieldDefinition, InheritedFieldDefinition } from '../../fields';
+import { fieldDefinitionSchema, inheritedFieldDefinitionSchema } from '../../fields';
+import type { Validation } from '../validation/validation';
+import { validation } from '../validation/validation';
+import type { ModelValidation } from '../validation/model_validation';
+import { modelValidation } from '../validation/model_validation';
 import { BaseStream } from '../base';
+import type { WiredIngestStreamEffectiveSettings } from './settings';
+import { wiredIngestStreamEffectiveSettingsSchema } from './settings';
 
 /* eslint-disable @typescript-eslint/no-namespace */
 
@@ -61,6 +60,7 @@ export namespace WiredStream {
   export interface GetResponse extends IngestBaseStream.GetResponse<Definition> {
     inherited_fields: InheritedFieldDefinition;
     effective_lifecycle: WiredIngestStreamEffectiveLifecycle;
+    effective_settings: WiredIngestStreamEffectiveSettings;
   }
 
   export type UpsertRequest = IngestBaseStream.UpsertRequest<Definition>;
@@ -81,6 +81,7 @@ export const WiredStream: ModelValidation<BaseStream.Model, WiredStream.Model> =
       z.object({
         inherited_fields: inheritedFieldDefinitionSchema,
         effective_lifecycle: wiredIngestStreamEffectiveLifecycleSchema,
+        effective_settings: wiredIngestStreamEffectiveSettingsSchema,
       })
     ),
     UpsertRequest: z.intersection(IngestBaseStream.UpsertRequest.right, z.object({})),

@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
 import { asyncForEach } from '@kbn/std';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
@@ -382,7 +382,6 @@ export default function (providerContext: FtrProviderContext) {
             path: `/metrics-prometheus.remote_write-default/_doc?refresh=true`,
             body: {
               '@timestamp': new Date().toISOString(),
-              prometheus: { labels: { test: 'label1' } },
               agent: {
                 id: 'agent1',
               },
@@ -417,17 +416,16 @@ export default function (providerContext: FtrProviderContext) {
       it('should rollover datastream if dynamic template dimension mappings changed', async () => {
         await installPackage('prometheus', '1.16.0');
         await writeMetricDoc();
+        const backingIndices = await getMetricsDefaultBackingIndicesLength();
 
-        expect(await getMetricsDefaultBackingIndicesLength()).to.be(1);
-
-        await installPackage('prometheus', '1.17.0');
+        await installPackage('prometheus', '1.24.2');
 
         await writeMetricDoc();
-        expect(await getMetricsDefaultBackingIndicesLength()).to.be(2);
+        expect(await getMetricsDefaultBackingIndicesLength()).to.be(backingIndices + 1);
       });
 
       afterEach(async () => {
-        await uninstallPackage('prometheus', '1.17.0');
+        await uninstallPackage('prometheus', '1.24.2');
       });
     });
   });

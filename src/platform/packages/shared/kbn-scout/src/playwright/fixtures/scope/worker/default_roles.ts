@@ -12,7 +12,7 @@ import {
   STATEFUL_ROLES_ROOT_PATH,
   readRolesDescriptorsFromResource,
 } from '@kbn/es';
-import { ElasticsearchRoleDescriptor } from '../../../../common';
+import type { ElasticsearchRoleDescriptor } from '../../../../common';
 import { coreWorkerFixtures } from './core_fixtures';
 
 export type DefaultRolesFixture = Map<string, ElasticsearchRoleDescriptor>;
@@ -27,6 +27,8 @@ export const defaultRolesFixture = coreWorkerFixtures.extend<
 >({
   defaultRoles: [
     async ({ log, config }, use) => {
+      // TODO: Add support for serverless projects with different tiers
+      // ref https://github.com/elastic/kibana/pull/229919
       const resourcePath = config.serverless
         ? `${SERVERLESS_ROLES_ROOT_PATH}/${config.projectType!}/roles.yml`
         : `${STATEFUL_ROLES_ROOT_PATH}/roles.yml`;

@@ -6,7 +6,8 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { Controller, FieldErrors, useFormContext } from 'react-hook-form';
+import type { FieldErrors } from 'react-hook-form';
+import { Controller, useFormContext } from 'react-hook-form';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,
@@ -27,7 +28,8 @@ import { AnalyticsEvents } from '../analytics/constants';
 import { useAutoBottomScroll } from '../hooks/use_auto_bottom_scroll';
 import { ChatSidebar } from './chat_sidebar';
 import { useChat } from '../hooks/use_chat';
-import { PlaygroundForm, PlaygroundFormFields, ChatRequestData, MessageRole } from '../types';
+import type { PlaygroundForm, ChatRequestData } from '../types';
+import { PlaygroundFormFields, MessageRole } from '../types';
 
 import { MessageList } from './message_list/message_list';
 import { QuestionInput } from './question_input';
@@ -134,9 +136,9 @@ export const Chat = () => {
             css={{
               paddingTop: euiTheme.size.l,
               paddingBottom: euiTheme.size.l,
-              // don't allow the chat to shrink below 66.6% of the screen
+              // don't allow the chat to shrink below 700px
               flexBasis: 0,
-              minWidth: '66.6%',
+              minWidth: 700,
             }}
           >
             <EuiFlexGroup direction="column" className="eui-fullHeight">

@@ -3,7 +3,6 @@
 set -euo pipefail
 
 source .buildkite/scripts/common/util.sh
-source .buildkite/scripts/common/setup_bazel.sh
 
 echo "--- yarn install and bootstrap"
 
@@ -24,6 +23,17 @@ if [[ "$(pwd)" != *"/local-ssd/"* && "$(pwd)" != "/dev/shm"* ]]; then
     echo "Using ~/.kibana/.yarn-local-mirror as a starting point"
     mv ~/.kibana/.yarn-local-mirror ./
   fi
+  # Check if there's a cache artifact uploaded from a previous step
+  if (buildkite-agent artifact download --step "store_cache" "moon-cache.tar.gz" ~/); then
+    echo "Found moon-cache.tar.gz artifact, extracting to ./.moon/cache"
+    mkdir -p ./.moon/cache
+    echo "Extracting moon-cache.tar.gz to ./.moon/cache"
+    tar -xzf ~/moon-cache.tar.gz -C ./
+  elif [[ -d ~/.kibana-moon-cache ]]; then
+    echo "Using ~/.moon/cache as a starting point"
+    mkdir -p ./.moon/cache
+    mv ~/.kibana-moon-cache/* ./.moon/cache
+  fi
 fi
 
 # TODO: revisit the double bootstrap per attempt after removing Bazel and changing package manager.
@@ -35,6 +45,7 @@ if ! (yarn kbn bootstrap "${BOOTSTRAP_PARAMS[@]}" || yarn kbn bootstrap "${BOOTS
   # So, we should just delete node_modules in between attempts
   rm -rf node_modules
 
+  export MOON_LOG=debug
   echo "--- yarn install and bootstrap, attempt 2"
   yarn kbn bootstrap --force-install || yarn kbn bootstrap
 fi
@@ -42,4 +53,3 @@ fi
 if [[ "$DISABLE_BOOTSTRAP_VALIDATION" != "true" ]]; then
   check_for_changed_files 'yarn kbn bootstrap'
 fi
-

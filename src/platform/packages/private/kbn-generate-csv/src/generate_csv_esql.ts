@@ -18,12 +18,8 @@ import { type Filter, buildEsQuery, extractTimeRange } from '@kbn/es-query';
 import { getTimeFieldFromESQLQuery, getStartEndParams } from '@kbn/esql-utils';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
-import {
-  AuthenticationExpiredError,
-  CancellationToken,
-  ReportingError,
-  byteSizeValueToNumber,
-} from '@kbn/reporting-common';
+import type { CancellationToken, ReportingError } from '@kbn/reporting-common';
+import { AuthenticationExpiredError, byteSizeValueToNumber } from '@kbn/reporting-common';
 import type { TaskRunResult } from '@kbn/reporting-common/types';
 import type { ReportingConfigType } from '@kbn/reporting-server';
 import { type TaskInstanceFields } from '@kbn/reporting-common/types';
@@ -219,7 +215,7 @@ export class CsvESQLGenerator {
       }
 
       if (!builder.tryAppend(rowDefinition.join(settings.separator) + '\n')) {
-        this.logger.warn(`Max Size Reached after ${this.csvRowCount} rows.`);
+        this.logger.warn(`ES|QL CSV report: Max Size Reached after ${this.csvRowCount} rows.`);
         this.maxSizeReached = true;
         if (this.cancellationToken) {
           this.cancellationToken.cancel();

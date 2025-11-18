@@ -13,6 +13,7 @@ import {
   buildGenericEntityFlyoutPreviewQuery,
   buildMisconfigurationEntityFlyoutPreviewQuery,
   buildVulnerabilityEntityFlyoutPreviewQuery,
+  getEnrichPolicyId,
 } from './helpers';
 
 const fallbackMessage = 'thisIsAFallBackMessage';
@@ -460,6 +461,38 @@ describe('test helper methods', () => {
       expect(buildEntityAlertsQuery(testObjectParams)).toEqual(
         getExpectedAlertsQuery(size, 'low', sortField, sortDirection)
       );
+    });
+  });
+
+  describe('getEnrichPolicyId', () => {
+    it('should return the default policy ID when no space is provided', () => {
+      const policyId = getEnrichPolicyId();
+      const expected = 'entity_store_field_retention_generic_default_v1.0.0';
+      expect(policyId).toEqual(expected);
+    });
+
+    it('should return a policy ID with the provided space', () => {
+      const space = 'test-space';
+      const policyId = getEnrichPolicyId(space);
+      const expected = 'entity_store_field_retention_generic_test-space_v1.0.0';
+      expect(policyId).toEqual(expected);
+    });
+
+    it('should handle special characters in space IDs', () => {
+      const space = 'special-chars_123';
+      const policyId = getEnrichPolicyId(space);
+      const expected = 'entity_store_field_retention_generic_special-chars_123_v1.0.0';
+      expect(policyId).toEqual(expected);
+    });
+
+    it('should produce a different ID for each space', () => {
+      const space1 = 'space1';
+      const space2 = 'space2';
+      const policyId1 = getEnrichPolicyId(space1);
+      const policyId2 = getEnrichPolicyId(space2);
+      expect(policyId1).not.toEqual(policyId2);
+      expect(policyId1).toEqual('entity_store_field_retention_generic_space1_v1.0.0');
+      expect(policyId2).toEqual('entity_store_field_retention_generic_space2_v1.0.0');
     });
   });
 });

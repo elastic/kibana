@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ESQLCommand } from '../../../types';
-import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
+import type { ESQLAstAllCommands } from '../../../types';
+import type { ICommandCallbacks } from '../../types';
+import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { pipeCompleteItem } from '../../complete_items';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition?: number
@@ -22,7 +23,7 @@ export async function autocomplete(
   const innerText = query.substring(0, cursorPosition);
   // SHOW INFO /
   if (/INFO\s+$/i.test(innerText)) {
-    return [{ ...pipeCompleteItem, command: TRIGGER_SUGGESTION_COMMAND }];
+    return [withAutoSuggest(pipeCompleteItem)];
   }
   // SHOW LOLZ /
   else if (/SHOW\s+\S+\s+$/i.test(innerText)) {

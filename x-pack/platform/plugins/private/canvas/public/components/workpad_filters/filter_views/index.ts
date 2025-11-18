@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FilterViewSpec } from '../../../../types';
+import type { FilterViewSpec } from '../../../../types';
 import { defaultFilter } from './default_filter';
 import { timeFilter } from './time_filter';
 

@@ -6,18 +6,19 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { CoreSetup, Logger } from '@kbn/core/server';
+import type { CoreSetup, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import {
-  OBSERVABILITY_ENABLE_STREAMS_UI,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
+  OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS,
+  OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
+  OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
 } from '@kbn/management-settings-ids';
-import { StreamsPluginSetupDependencies, StreamsPluginStartDependencies } from './types';
+import type { StreamsPluginStartDependencies } from './types';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '../common';
 
 export function registerFeatureFlags(
   core: CoreSetup<StreamsPluginStartDependencies>,
-  plugins: StreamsPluginSetupDependencies,
   logger: Logger
 ) {
   core.pricing
@@ -47,25 +48,58 @@ export function registerFeatureFlags(
       logger.error(`Failed to register significant events ui settings: ${error}`);
     });
 
-  const isObservabilityServerless =
-    plugins.cloud?.isServerlessEnabled && plugins.cloud?.serverless.projectType === 'observability';
-
   core.uiSettings.register({
-    [OBSERVABILITY_ENABLE_STREAMS_UI]: {
+    [OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS]: {
       category: ['observability'],
-      name: 'Streams UI',
-      value: isObservabilityServerless,
-      description: i18n.translate('xpack.streams.enableStreamsUIDescription', {
-        defaultMessage: 'Enable the {streamsLink}.',
-        values: {
-          streamsLink: `<a href="https://www.elastic.co/docs/solutions/observability/logs/streams/streams">Streams UI</href>`,
-        },
+      name: i18n.translate('xpack.streams.groupStreamsSettingsName', {
+        defaultMessage: 'Group streams',
+      }) as string,
+      value: false,
+      description: i18n.translate('xpack.streams.groupStreamsSettingsDescription', {
+        defaultMessage: 'Enable Group streams.',
       }),
       type: 'boolean',
       schema: schema.boolean(),
       requiresPageReload: true,
       solutionViews: ['classic', 'oblt'],
       technicalPreview: true,
+      readonly: true,
+      readonlyMode: 'ui',
+    },
+  });
+
+  core.uiSettings.register({
+    [OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS]: {
+      category: ['observability'],
+      name: i18n.translate('xpack.streams.streamsContentPacksSettingsName', {
+        defaultMessage: 'Streams content packs',
+      }) as string,
+      value: false,
+      description: i18n.translate('xpack.streams.streamsContentPacksSettingsDescription', {
+        defaultMessage: 'Enable Streams content packs.',
+      }),
+      type: 'boolean',
+      schema: schema.boolean(),
+      requiresPageReload: true,
+      solutionViews: ['classic', 'oblt'],
+      technicalPreview: true,
+    },
+    [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: {
+      category: ['observability'],
+      name: i18n.translate('xpack.streams.streamsAttachmentsSettingsName', {
+        defaultMessage: 'Streams attachments',
+      }),
+      value: false,
+      description: i18n.translate('xpack.streams.streamsAttachmentsSettingsDescription', {
+        defaultMessage: 'Enable Streams attachments tab.',
+      }),
+      type: 'boolean',
+      schema: schema.boolean(),
+      requiresPageReload: true,
+      solutionViews: ['classic', 'oblt'],
+      technicalPreview: true,
+      readonly: true,
+      readonlyMode: 'ui',
     },
   });
 }

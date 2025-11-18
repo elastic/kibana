@@ -24,12 +24,24 @@ xpack.features.overrides:
   ### The following features are Security features hidden in Role management UI for this specific tier.
   securitySolutionTimeline.hidden: true
   securitySolutionNotes.hidden: true
-  siem.description: null
-  siemV2.description: null
-  siemV3.description: null
   securitySolutionSiemMigrations.hidden: true
 
   ## Fine-tune the security solution essentials feature privileges. These feature privilege overrides are set individually for each project type. Also, refer to `serverless.yml` for the project-agnostic overrides.
+  siemV4:
+    privileges:
+      all.composedOf:
+        ## Limited values so the fields from serverless.yml or serverless.security.yml are overwritten
+        ## We do not need to compose siemV4 from maps and visualizations because these functionalities are disabled in this tier
+        - feature: "discover_v2"
+          privileges: [ "all" ]
+          ## We need limited access to fleet (v1) in order to use integrations
+        - feature: "fleet"
+          privileges: [ "all" ]
+      read.composedOf:
+        - feature: "discover_v2"
+          privileges: [ "read" ]
+        - feature: "fleet"
+          privileges: [ "read" ]
   siemV3:
     privileges:
       all.composedOf:

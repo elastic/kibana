@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ItemBuffer, ItemBufferParams } from './item_buffer';
+import type { ItemBufferParams } from './item_buffer';
+import { ItemBuffer } from './item_buffer';
 
 export interface TimedItemBufferParams<Item> extends ItemBufferParams<Item> {
   /**

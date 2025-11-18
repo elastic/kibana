@@ -10,6 +10,7 @@ import type { UserProfile } from '@kbn/security-plugin/common';
 import type { IBasePath } from '@kbn/core-http-browser';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
+import { v4 } from 'uuid';
 import type {
   ActionConnector,
   Attachment,
@@ -22,6 +23,7 @@ import type {
   ConnectorMappingTarget,
   CustomFieldsConfiguration,
   ExternalService,
+  Observable,
   User,
 } from '../../../common/types/domain';
 import { AttachmentType, CaseStatuses, UserActionTypes } from '../../../common/types/domain';
@@ -29,6 +31,7 @@ import type {
   CasePostRequest,
   CaseRequestCustomFields,
   CaseUserActionsDeprecatedResponse,
+  ObservablePost,
 } from '../../../common/types/api';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { isPushedUserAction } from '../../../common/utils/user_actions';
@@ -645,3 +648,27 @@ export const normalizeCreateCaseRequest = (
     customFieldsConfiguration,
   }),
 });
+
+export const isObservable = (observable: ObservablePost | Observable): observable is Observable =>
+  'id' in observable && 'typeKey' in observable && 'value' in observable;
+
+export const processObservables = (
+  observablesMap: Map<string, Observable>,
+  observable: ObservablePost | Observable
+) => {
+  const key = `${observable.typeKey}-${observable.value}`;
+  const isExistingObservable = observablesMap.has(key);
+  if (isExistingObservable) {
+    return;
+  }
+  if (isObservable(observable)) {
+    observablesMap.set(key, observable);
+  } else {
+    observablesMap.set(key, {
+      ...observable,
+      id: v4(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    });
+  }
+};

@@ -77,6 +77,14 @@ export async function findBackfill(
     if (params.end) {
       timeFilters.push(`ad_hoc_run_params.attributes.end <= "${params.end}"`);
     }
+    if (params.initiator) {
+      timeFilters.push(`ad_hoc_run_params.attributes.initiator: ${params.initiator}`);
+    }
+
+    if (params.initiatorId) {
+      timeFilters.push(`ad_hoc_run_params.attributes.initiatorId: ${params.initiatorId}`);
+    }
+
     const timeFilter = timeFilters.length > 0 ? timeFilters.join(` AND `) : undefined;
     const filterKueryNode = buildKueryNodeFilter(timeFilter);
 

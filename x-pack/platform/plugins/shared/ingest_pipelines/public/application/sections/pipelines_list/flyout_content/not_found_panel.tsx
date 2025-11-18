@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiCallOut,
@@ -16,7 +17,7 @@ import {
   EuiSplitPanel,
 } from '@elastic/eui';
 import { EuiTitle } from '@elastic/eui';
-import { Error } from '../../../../shared_imports';
+import type { Error } from '../../../../shared_imports';
 import { getErrorText, isIntegrationsPipeline } from '../../utils';
 
 interface Props {
@@ -37,6 +38,7 @@ export const NotFoundPanel: FunctionComponent<Props> = ({
     if (displayWarning || (error.statusCode === 404 && isCustom)) {
       return (
         <EuiCallOut
+          announceOnMount
           title={
             isCustom ? (
               <FormattedMessage
@@ -57,17 +59,6 @@ export const NotFoundPanel: FunctionComponent<Props> = ({
           iconType="warning"
           data-test-subj="missingCustomPipeline"
         >
-          {isCustom && (
-            <p data-test-subj="cause">
-              <FormattedMessage
-                id="xpack.ingestPipelines.list.missingCustomPipeline.text"
-                defaultMessage="The pipeline {pipelineName} does not exist."
-                values={{
-                  pipelineName: <EuiCode>{pipelineName}</EuiCode>,
-                }}
-              />
-            </p>
-          )}
           <EuiButton
             color="warning"
             onClick={onCreatePipeline}

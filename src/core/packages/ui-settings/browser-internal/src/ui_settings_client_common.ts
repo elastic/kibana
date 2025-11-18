@@ -8,17 +8,18 @@
  */
 
 import { cloneDeep, defaultsDeep } from 'lodash';
-import { Observable, Subject, concat, defer, of } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { Subject, concat, defer, of } from 'rxjs';
 import { filter, map } from 'rxjs';
 
-import { UserProvidedValues } from '@kbn/core-ui-settings-common';
-import {
+import type { UserProvidedValues } from '@kbn/core-ui-settings-common';
+import type {
   IUiSettingsClient,
   UiSettingsState,
   PublicUiSettingsParams,
 } from '@kbn/core-ui-settings-browser';
 
-import { UiSettingsApi } from './ui_settings_api';
+import type { UiSettingsApi } from './ui_settings_api';
 
 export interface UiSettingsClientParams {
   api: UiSettingsApi;
@@ -113,7 +114,11 @@ You can use \`IUiSettingsClient.get("${key}", defaultValue)\`, which will just r
   }
 
   isDefault(key: string) {
-    return !this.isDeclared(key) || this.cache[key].userValue == null;
+    return (
+      !this.isDeclared(key) ||
+      !this.cache[key].userValue ||
+      this.cache[key].userValue === this.cache[key].value
+    );
   }
 
   isCustom(key: string) {

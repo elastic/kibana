@@ -9,14 +9,10 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 
-import {
-  TagEnhancedSavedObjectSaveModalOrigin,
-  OriginSaveProps,
-} from './tags_saved_object_save_modal_origin_wrapper';
-import {
-  TagEnhancedSavedObjectSaveModalDashboard,
-  DashboardSaveProps,
-} from './tags_saved_object_save_modal_dashboard_wrapper';
+import type { OriginSaveProps } from './tags_saved_object_save_modal_origin_wrapper';
+import { TagEnhancedSavedObjectSaveModalOrigin } from './tags_saved_object_save_modal_origin_wrapper';
+import type { DashboardSaveProps } from './tags_saved_object_save_modal_dashboard_wrapper';
+import { TagEnhancedSavedObjectSaveModalDashboard } from './tags_saved_object_save_modal_dashboard_wrapper';
 
 export type SaveProps = OriginSaveProps | DashboardSaveProps;
 
@@ -37,7 +33,7 @@ export interface Props {
   returnToOriginSwitchLabel?: string;
   returnToOrigin?: boolean;
   onClose: () => void;
-  onSave: (props: SaveProps, options: { saveToLibrary: boolean }) => void;
+  onSave: (props: SaveProps, options: { saveToLibrary: boolean }) => Promise<void>;
 
   managed: boolean;
 }
@@ -89,9 +85,9 @@ export const SaveModal = (props: Props) => {
       savedObjectsTagging={savedObjectsTagging}
       initialTags={tagsIds}
       canSaveByReference={Boolean(savingToLibraryPermitted)}
-      onSave={(saveProps) => {
+      onSave={async (saveProps) => {
         const saveToLibrary = Boolean(saveProps.addToLibrary);
-        onSave(saveProps, { saveToLibrary });
+        await onSave(saveProps, { saveToLibrary });
       }}
       onClose={onClose}
       documentInfo={{

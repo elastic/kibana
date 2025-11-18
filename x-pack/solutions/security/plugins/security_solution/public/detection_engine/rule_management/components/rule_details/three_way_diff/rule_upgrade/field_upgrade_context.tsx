@@ -13,7 +13,7 @@ import { assertUnreachable } from '../../../../../../../common/utility_types';
 import {
   ThreeWayDiffOutcome,
   type DiffableRule,
-  type FieldsDiff,
+  type ThreeWayFieldsDiff,
   type ThreeWayDiff,
 } from '../../../../../../../common/api/detection_engine';
 import { invariant } from '../../../../../../../common/utils/invariant';
@@ -208,7 +208,7 @@ function calcFinalDiffableRule(ruleUpgradeState: RuleUpgradeState): DiffableRule
  * Assembles a `DiffableRule` from rule fields diff `merged_version`s.
  */
 function convertRuleFieldsDiffToDiffable(
-  ruleFieldsDiff: FieldsDiff<Record<string, unknown>>
+  ruleFieldsDiff: ThreeWayFieldsDiff<Record<string, unknown>>
 ): Partial<DiffableRule> {
   const mergeVersionRule: Record<string, unknown> = {};
 

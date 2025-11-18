@@ -8,7 +8,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 
-import { Panel } from '../types';
+import type { Panel } from '../types';
 import {
   LEFT_SECTION_TEST_ID,
   PREVIEW_SECTION_TEST_ID,

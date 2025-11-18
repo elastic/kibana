@@ -245,54 +245,6 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture",
-        "id": "def-public.createMisconfigurationFindingsQuery",
-        "type": "Function",
-        "tags": [],
-        "label": "createMisconfigurationFindingsQuery",
-        "description": [],
-        "signature": [
-          "(resourceId?: string | undefined, ruleId?: string | undefined) => { bool: { filter: ({ term: { 'rule.id': string | undefined; 'resource.id'?: undefined; }; } | { term: { 'resource.id': string | undefined; 'rule.id'?: undefined; }; })[]; }; }"
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/findings_query_builders.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/cloud-security-posture",
-            "id": "def-public.createMisconfigurationFindingsQuery.$1",
-            "type": "string",
-            "tags": [],
-            "label": "resourceId",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/findings_query_builders.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "@kbn/cloud-security-posture",
-            "id": "def-public.createMisconfigurationFindingsQuery.$2",
-            "type": "string",
-            "tags": [],
-            "label": "ruleId",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/findings_query_builders.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cloud-security-posture",
         "id": "def-public.CspEvaluationBadge",
         "type": "Function",
         "tags": [],
@@ -477,6 +429,80 @@
               "string"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/vulnerability_reference.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.firstNonNullValue",
+        "type": "Function",
+        "tags": [],
+        "label": "firstNonNullValue",
+        "description": [
+          "\nReturn first non-null value. If the field contains an array, this will return the first value that isn't null.\nIf the field isn't an array it'll be returned unless it's null."
+        ],
+        "signature": [
+          "(valueOrCollection: ",
+          "ECSField",
+          "<T>) => T | undefined"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/grouping/utils/first_non_null_value.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.firstNonNullValue.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "valueOrCollection",
+            "description": [],
+            "signature": [
+              "ECSField",
+              "<T>"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/grouping/utils/first_non_null_value.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.GenericGroupRenderer",
+        "type": "Function",
+        "tags": [],
+        "label": "GenericGroupRenderer",
+        "description": [],
+        "signature": [
+          "({\n  groupKey,\n  context,\n  registry,\n}: ",
+          "GenericGroupRendererProps",
+          "<TGroup>) => React.JSX.Element | null"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/grouping/generic_group_renderer.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.GenericGroupRenderer.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  groupKey,\n  context,\n  registry,\n}",
+            "description": [],
+            "signature": [
+              "GenericGroupRendererProps",
+              "<TGroup>"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/grouping/generic_group_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -785,70 +811,6 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture",
-        "id": "def-public.getVulnerabilitiesQuery",
-        "type": "Function",
-        "tags": [],
-        "label": "getVulnerabilitiesQuery",
-        "description": [],
-        "signature": [
-          "({ query, sort }: ",
-          {
-            "pluginId": "@kbn/cloud-security-posture",
-            "scope": "public",
-            "docId": "kibKbnCloudSecurityPosturePluginApi",
-            "section": "def-public.UseCspOptions",
-            "text": "UseCspOptions"
-          },
-          ", isPreview?: boolean) => { index: string; size: number; aggs: { count: { filters: { other_bucket_key: string; filters: { [x: string]: { term: { 'vulnerability.severity': { value: string; case_insensitive: boolean; }; }; }; }; }; }; }; ignore_unavailable: boolean; query: { bool: { filter: (",
-          "QueryDslQueryContainer",
-          " | undefined)[]; }; }; sort: { [key: string]: string; }[] | undefined; }"
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/findings_query_builders.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/cloud-security-posture",
-            "id": "def-public.getVulnerabilitiesQuery.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "{ query, sort }",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/cloud-security-posture",
-                "scope": "public",
-                "docId": "kibKbnCloudSecurityPosturePluginApi",
-                "section": "def-public.UseCspOptions",
-                "text": "UseCspOptions"
-              }
-            ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/findings_query_builders.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/cloud-security-posture",
-            "id": "def-public.getVulnerabilitiesQuery.$2",
-            "type": "boolean",
-            "tags": [],
-            "label": "isPreview",
-            "description": [],
-            "signature": [
-              "boolean"
-            ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/utils/findings_query_builders.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cloud-security-posture",
         "id": "def-public.getVulnerabilityStats",
         "type": "Function",
         "tags": [],
@@ -943,6 +905,81 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.GroupWrapper",
+        "type": "Function",
+        "tags": [],
+        "label": "GroupWrapper",
+        "description": [],
+        "signature": [
+          "<T>({ data, renderChildComponent, grouping, activePageIndex, isFetching, pageSize, onChangeGroupsItemsPerPage, onChangeGroupsPage, selectedGroup, groupingLevel, groupSelectorComponent, testSubjects, }: ",
+          "GroupWrapperProps",
+          "<T>) => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/grouping/group_wrapper.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.GroupWrapper.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  data,\n  renderChildComponent,\n  grouping,\n  activePageIndex,\n  isFetching,\n  pageSize,\n  onChangeGroupsItemsPerPage,\n  onChangeGroupsPage,\n  selectedGroup,\n  groupingLevel = 0,\n  groupSelectorComponent,\n  testSubjects = DEFAULT_TEST_SUBJECTS,\n}",
+            "description": [],
+            "signature": [
+              "GroupWrapperProps",
+              "<T>"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/grouping/group_wrapper.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.GroupWrapperLoading",
+        "type": "Function",
+        "tags": [],
+        "label": "GroupWrapperLoading",
+        "description": [
+          "\nThis component is used to render the loading state of the GroupWrapper component\nIt's used to avoid the flickering of the table when the data is loading"
+        ],
+        "signature": [
+          "<T>({ grouping, pageSize, testSubjects, }: Pick<",
+          "GroupWrapperProps",
+          "<T>, \"pageSize\" | \"grouping\" | \"testSubjects\">) => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/grouping/group_wrapper.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.GroupWrapperLoading.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  grouping,\n  pageSize,\n  testSubjects = DEFAULT_TEST_SUBJECTS,\n}",
+            "description": [],
+            "signature": [
+              "Pick<",
+              "GroupWrapperProps",
+              "<T>, \"pageSize\" | \"grouping\" | \"testSubjects\">"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/grouping/group_wrapper.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
         "id": "def-public.hasVulnerabilitiesData",
         "type": "Function",
         "tags": [],
@@ -1026,6 +1063,23 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.LoadingGroup",
+        "type": "Function",
+        "tags": [],
+        "label": "LoadingGroup",
+        "description": [],
+        "signature": [
+          "() => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/grouping/loading_group.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
         "id": "def-public.MultiValueCellPopover",
         "type": "Function",
         "tags": [],
@@ -1054,6 +1108,76 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.NullGroup",
+        "type": "Function",
+        "tags": [],
+        "label": "NullGroup",
+        "description": [],
+        "signature": [
+          "({ title, field, unit }: ",
+          "NullGroupProps",
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/grouping/null_group.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.NullGroup.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ title, field, unit }",
+            "description": [],
+            "signature": [
+              "NullGroupProps"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/grouping/null_group.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.RadioGroup",
+        "type": "Function",
+        "tags": [],
+        "label": "RadioGroup",
+        "description": [],
+        "signature": [
+          "({ idSelected, size, options, disabled, onChange, name, }: ",
+          "CspRadioGroupProps",
+          ") => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/csp_boxed_radio_group.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.RadioGroup.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  idSelected,\n  size,\n  options,\n  disabled,\n  onChange,\n  name,\n}",
+            "description": [],
+            "signature": [
+              "CspRadioGroupProps"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/csp_boxed_radio_group.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
         "initialIsOpen": false
       },
       {
@@ -1204,28 +1328,124 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture",
-        "id": "def-public.CspBaseEsQuery",
+        "id": "def-public.CloudSetupConfig",
         "type": "Interface",
         "tags": [],
-        "label": "CspBaseEsQuery",
+        "label": "CloudSetupConfig",
         "description": [],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/cloud-security-posture",
-            "id": "def-public.CspBaseEsQuery.query",
-            "type": "Object",
+            "id": "def-public.CloudSetupConfig.policyTemplate",
+            "type": "string",
             "tags": [],
-            "label": "query",
+            "label": "policyTemplate",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.CloudSetupConfig.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.CloudSetupConfig.shortName",
+            "type": "string",
+            "tags": [],
+            "label": "shortName",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.CloudSetupConfig.defaultProvider",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "defaultProvider",
             "description": [],
             "signature": [
-              "{ bool: { filter: (",
-              "QueryDslQueryContainer",
-              " | undefined)[] | undefined; }; } | undefined"
+              "\"aws\" | \"azure\" | \"gcp\""
             ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.CloudSetupConfig.namespaceSupportEnabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "namespaceSupportEnabled",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.CloudSetupConfig.overviewPath",
+            "type": "string",
+            "tags": [],
+            "label": "overviewPath",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.CloudSetupConfig.getStartedPath",
+            "type": "string",
+            "tags": [],
+            "label": "getStartedPath",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.CloudSetupConfig.showCloudTemplates",
+            "type": "boolean",
+            "tags": [],
+            "label": "showCloudTemplates",
+            "description": [],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.CloudSetupConfig.providers",
+            "type": "Object",
+            "tags": [],
+            "label": "providers",
+            "description": [],
+            "signature": [
+              "{ aws: ",
+              "AwsCloudProviderConfig",
+              "; gcp: ",
+              "CloudProviderConfig",
+              "; azure: AzureProviderConfig; }"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1414,13 +1634,7 @@
                 "text": "FrequentCompatibilityChangeAction"
               },
               "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
-              {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.UiActionsService",
-                "text": "UiActionsService"
-              },
+              "UiActionsService",
               "; }"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
@@ -1570,7 +1784,7 @@
                 "section": "def-public.ShowShareMenuOptions",
                 "text": "ShowShareMenuOptions"
               },
-              ") => void; } & { url: ",
+              ") => Promise<void>; } & { url: ",
               {
                 "pluginId": "share",
                 "scope": "public",
@@ -2517,6 +2731,96 @@
       },
       {
         "parentPluginId": "@kbn/cloud-security-posture",
+        "id": "def-public.GroupRenderRegistry",
+        "type": "Interface",
+        "tags": [],
+        "label": "GroupRenderRegistry",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/cloud-security-posture",
+            "scope": "public",
+            "docId": "kibKbnCloudSecurityPosturePluginApi",
+            "section": "def-public.GroupRenderRegistry",
+            "text": "GroupRenderRegistry"
+          },
+          "<TGroup>"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/grouping/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.GroupRenderRegistry.renderers",
+            "type": "Object",
+            "tags": [],
+            "label": "renderers",
+            "description": [],
+            "signature": [
+              "{ [x: string]: ",
+              "GroupRenderer",
+              "<TGroup>; }"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/grouping/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.GroupRenderRegistry.defaultRenderer",
+            "type": "Function",
+            "tags": [],
+            "label": "defaultRenderer",
+            "description": [],
+            "signature": [
+              "(props: { context: ",
+              "GroupRenderContext",
+              "<TGroup>; }) => React.ReactElement<any, string | React.JSXElementConstructor<any>> | null"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/grouping/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "returnComment": [],
+            "children": [
+              {
+                "parentPluginId": "@kbn/cloud-security-posture",
+                "id": "def-public.GroupRenderRegistry.defaultRenderer.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "props",
+                "description": [],
+                "signature": [
+                  "{ context: ",
+                  "GroupRenderContext",
+                  "<TGroup>; }"
+                ],
+                "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/grouping/types.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              }
+            ]
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture",
+            "id": "def-public.GroupRenderRegistry.nullGroup",
+            "type": "Function",
+            "tags": [],
+            "label": "nullGroup",
+            "description": [],
+            "signature": [
+              "GroupRenderer",
+              "<TGroup> | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/grouping/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture",
         "id": "def-public.MultiValueCellAction",
         "type": "Interface",
         "tags": [],
@@ -2575,87 +2879,6 @@
               "string | undefined"
             ],
             "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/actionable_badge.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cloud-security-posture",
-        "id": "def-public.UseCspOptions",
-        "type": "Interface",
-        "tags": [],
-        "label": "UseCspOptions",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "@kbn/cloud-security-posture",
-            "scope": "public",
-            "docId": "kibKbnCloudSecurityPosturePluginApi",
-            "section": "def-public.UseCspOptions",
-            "text": "UseCspOptions"
-          },
-          " extends ",
-          {
-            "pluginId": "@kbn/cloud-security-posture",
-            "scope": "public",
-            "docId": "kibKbnCloudSecurityPosturePluginApi",
-            "section": "def-public.CspBaseEsQuery",
-            "text": "CspBaseEsQuery"
-          }
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/cloud-security-posture",
-            "id": "def-public.UseCspOptions.sort",
-            "type": "Array",
-            "tags": [],
-            "label": "sort",
-            "description": [],
-            "signature": [
-              "{ [key: string]: string; }[] | undefined"
-            ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/cloud-security-posture",
-            "id": "def-public.UseCspOptions.enabled",
-            "type": "boolean",
-            "tags": [],
-            "label": "enabled",
-            "description": [],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/cloud-security-posture",
-            "id": "def-public.UseCspOptions.pageSize",
-            "type": "number",
-            "tags": [],
-            "label": "pageSize",
-            "description": [],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/cloud-security-posture",
-            "id": "def-public.UseCspOptions.ignore_unavailable",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "ignore_unavailable",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2907,36 +3130,6 @@
     "misc": [
       {
         "parentPluginId": "@kbn/cloud-security-posture",
-        "id": "def-public.AWS_ORGANIZATION_ACCOUNT",
-        "type": "string",
-        "tags": [],
-        "label": "AWS_ORGANIZATION_ACCOUNT",
-        "description": [],
-        "signature": [
-          "\"organization-account\""
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cloud-security-posture",
-        "id": "def-public.AWS_SINGLE_ACCOUNT",
-        "type": "string",
-        "tags": [],
-        "label": "AWS_SINGLE_ACCOUNT",
-        "description": [],
-        "signature": [
-          "\"single-account\""
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cloud-security-posture",
         "id": "def-public.FindingsMisconfigurationPanelExpandableFlyoutProps",
         "type": "Type",
         "tags": [],
@@ -3077,36 +3270,6 @@
           " & { id: \"findings-vulnerability-panel-preview\"; params: BaseVulnerabilityFlyoutProps & PreviewModeProps; }"
         ],
         "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/types.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cloud-security-posture",
-        "id": "def-public.GCP_ORGANIZATION_ACCOUNT",
-        "type": "string",
-        "tags": [],
-        "label": "GCP_ORGANIZATION_ACCOUNT",
-        "description": [],
-        "signature": [
-          "\"organization-account\""
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/cloud-security-posture",
-        "id": "def-public.GCP_SINGLE_ACCOUNT",
-        "type": "string",
-        "tags": [],
-        "label": "GCP_SINGLE_ACCOUNT",
-        "description": [],
-        "signature": [
-          "\"single-account\""
-        ],
-        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/public/src/components/fleet_extensions/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/public';
+import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/public';
 // @ts-expect-error unconverted local lib
 import { getState } from '../state/store';
 import { getAssetById } from '../state/selectors/assets';

@@ -13,11 +13,14 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import { DatasourceDimensionTriggerProps, DatasourceDimensionEditorProps } from '../../../types';
-import { GenericIndexPatternColumn } from '../form_based';
-import { FormBasedPrivateState } from '../types';
+import type {
+  DateRange,
+  FormBasedPrivateState,
+  GenericIndexPatternColumn,
+  DatasourceDimensionTriggerProps,
+  DatasourceDimensionEditorProps,
+} from '@kbn/lens-common';
 import { DimensionEditor } from './dimension_editor';
-import { DateRange } from '../../../../common/types';
 import { getOperationSupportMatrix } from './operation_support';
 
 export type FormBasedDimensionTriggerProps =

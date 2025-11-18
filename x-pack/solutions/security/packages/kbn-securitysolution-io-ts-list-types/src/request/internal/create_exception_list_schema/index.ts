@@ -8,10 +8,8 @@
 import { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import * as t from 'io-ts';
 
-import {
-  createExceptionListSchema,
-  CreateExceptionListSchemaDecoded,
-} from '../../create_exception_list_schema';
+import type { CreateExceptionListSchemaDecoded } from '../../create_exception_list_schema';
+import { createExceptionListSchema } from '../../create_exception_list_schema';
 
 export const internalCreateExceptionListSchema = t.intersection([
   t.exact(
@@ -21,6 +19,7 @@ export const internalCreateExceptionListSchema = t.intersection([
         endpoint_events: null,
         endpoint_host_isolation_exceptions: null,
         endpoint_blocklists: null,
+        endpoint_trusted_devices: null,
       }),
     })
   ),

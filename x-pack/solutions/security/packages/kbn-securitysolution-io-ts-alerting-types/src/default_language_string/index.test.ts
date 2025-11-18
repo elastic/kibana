@@ -7,7 +7,7 @@
 
 import { pipe } from 'fp-ts/pipeable';
 import { left } from 'fp-ts/Either';
-import { Language } from '../language';
+import type { Language } from '../language';
 import { DefaultLanguageString } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 

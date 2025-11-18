@@ -15,6 +15,23 @@ describe('ReportScheduleIndicator', () => {
     jest.clearAllMocks();
   });
 
+  it('renders hourly schedule indicator correctly', async () => {
+    render(
+      <ReportScheduleIndicator
+        schedule={{
+          rrule: {
+            freq: Frequency.HOURLY,
+            interval: 1,
+            tzid: 'UTC',
+          },
+        }}
+      />
+    );
+
+    expect(await screen.findByTestId('reportScheduleIndicator-4')).toBeInTheDocument();
+    expect(await screen.findByText('Hourly')).toBeInTheDocument();
+  });
+
   it('renders daily schedule indicator correctly', async () => {
     render(
       <ReportScheduleIndicator

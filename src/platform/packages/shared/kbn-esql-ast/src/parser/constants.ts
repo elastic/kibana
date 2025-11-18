@@ -12,63 +12,9 @@ import { Token } from 'antlr4';
 export const DEFAULT_CHANNEL: number = +(Token as any).DEFAULT_CHANNEL;
 export const HIDDEN_CHANNEL: number = +(Token as any).HIDDEN_CHANNEL;
 
+export const HEADER_COMMANDS = new Set<string>(['SET']);
 export const SOURCE_COMMANDS = new Set<string>(['FROM', 'ROW', 'SHOW', 'TS', 'EXPLAIN']);
 
-export const PROCESSING_COMMANDS = new Set<string>([
-  'EVAL',
-  'WHERE',
-  'KEEP',
-  'LIMIT',
-  'STATS',
-  'SORT',
-  'DROP',
-  'RENAME',
-  'DISSECT',
-  'GROK',
-  'ENRICH',
-  'MV_EXPAND',
-  'JOIN',
-  'CHANGE_POINT',
-  'COMPLETION',
-  'SAMPLE',
-  'FORK',
-  'INLINESTATS',
-  'LOOKUP',
-  'INSIST',
-  'RERANK',
-  'FUSE',
-]);
-
-export const COMMANDS = new Set<string>([...SOURCE_COMMANDS, ...PROCESSING_COMMANDS]);
-
-export const KEYWORDS = new Set<string>([
-  ...COMMANDS,
-  'AND',
-  'ASC',
-  'BY',
-  'DESC',
-  'FALSE',
-  'FIRST',
-  'FULL',
-  'IN',
-  'INFO',
-  'INNER',
-  'IS',
-  'LAST',
-  'LEFT',
-  'LIKE',
-  'METADATA',
-  'NOT',
-  'NULL',
-  'NULLS',
-  'ON',
-  'OR',
-  'OUTER',
-  'RIGHT',
-  'RLIKE',
-  'TRUE',
-  'WITH',
-]);
 // FROM https://github.com/elastic/elasticsearch/blob/a2dbb7b9174b109d89fa2da87645ecd4d4e8de14/x-pack/plugin/esql/src/main/java/org/elasticsearch/xpack/esql/type/EsqlDataTypeConverter.java#L174
 export const TIME_DURATION_UNITS = new Set([
   'millisecond',

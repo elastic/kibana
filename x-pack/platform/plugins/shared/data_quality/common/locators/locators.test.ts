@@ -6,7 +6,7 @@
  */
 
 import { DatasetQualityLocatorDefinition } from './dataset_quality_locator';
-import { DataQualityLocatorDependencies } from './types';
+import type { DataQualityLocatorDependencies } from './types';
 
 const createMockLocator = (id: string, section: string) => ({
   id,

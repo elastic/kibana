@@ -7,47 +7,51 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { AssistantResponse, ConversationRoundStep } from '@kbn/onechat-common';
+import type {
+  AssistantResponse,
+  ConversationRound,
+  ConversationRoundStep,
+} from '@kbn/onechat-common';
 import React from 'react';
-import { useTimer } from '../../../hooks/use_timer';
+import { StreamingText } from './streaming_text';
 import { ChatMessageText } from './chat_message_text';
-import { RoundThinking } from './round_thinking';
-import { RoundTimer } from './round_timer';
+import { RoundThinking } from './round_thinking/round_thinking';
 
 export interface RoundResponseProps {
+  rawRound: ConversationRound;
   response: AssistantResponse;
   steps: ConversationRoundStep[];
   isLoading: boolean;
 }
 
 export const RoundResponse: React.FC<RoundResponseProps> = ({
+  rawRound,
   response: { message },
   steps,
   isLoading,
 }) => {
-  const { showTimer, elapsedTime, isStopped } = useTimer({ isLoading });
-  const showThinking = showTimer || steps.length > 0;
+  const showThinking = steps.length > 0;
   return (
     <EuiFlexGroup
       direction="column"
-      gutterSize="s"
+      gutterSize="m"
       aria-label={i18n.translate('xpack.onechat.round.assistantResponse', {
         defaultMessage: 'Assistant response',
       })}
+      data-test-subj="agentBuilderRoundResponse"
     >
       {showThinking && (
         <EuiFlexItem grow={false}>
-          <RoundThinking
-            steps={steps}
-            loadingIndicator={
-              showTimer ? <RoundTimer elapsedTime={elapsedTime} isStopped={isStopped} /> : null
-            }
-          />
+          <RoundThinking steps={steps} isLoading={isLoading} rawRound={rawRound} />
         </EuiFlexItem>
       )}
 
       <EuiFlexItem>
-        <ChatMessageText content={message} />
+        {isLoading ? (
+          <StreamingText content={message} steps={steps} />
+        ) : (
+          <ChatMessageText content={message} steps={steps} />
+        )}
       </EuiFlexItem>
     </EuiFlexGroup>
   );

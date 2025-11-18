@@ -72,6 +72,7 @@ export * from './omit';
 export * from './configuration';
 export * from './files';
 export * from './telemetry';
+export * from './observables';
 
 export { getSpaceUrlPrefix } from './helpers';
 
@@ -906,17 +907,21 @@ export const findInternalCaseUserActions = async ({
 };
 
 export const deleteAllCaseAnalyticsItems = async (es: Client) => {
-  await Promise.all([
-    deleteCasesAnalytics(es),
-    deleteAttachmentsAnalytics(es),
-    deleteCommentsAnalytics(es),
-    deleteActivityAnalytics(es),
-  ]);
+  try {
+    await Promise.all([
+      deleteCasesAnalytics(es),
+      deleteAttachmentsAnalytics(es),
+      deleteCommentsAnalytics(es),
+      deleteActivityAnalytics(es),
+    ]);
+  } catch (_) {
+    // ignore errors, indexes might not exist yet
+  }
 };
 
 export const deleteCasesAnalytics = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: '.internal.cases',
+    index: ['.internal.cases.securitysolution-default', '.internal.cases.securitysolution-space1'],
     query: { match_all: {} },
     wait_for_completion: true,
     refresh: true,
@@ -926,7 +931,10 @@ export const deleteCasesAnalytics = async (es: Client): Promise<void> => {
 
 export const deleteAttachmentsAnalytics = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: '.internal.cases-attachments',
+    index: [
+      '.internal.cases-attachments.securitysolution-default',
+      '.internal.cases-attachments.securitysolution-space1',
+    ],
     query: { match_all: {} },
     wait_for_completion: true,
     refresh: true,
@@ -936,7 +944,10 @@ export const deleteAttachmentsAnalytics = async (es: Client): Promise<void> => {
 
 export const deleteCommentsAnalytics = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: '.internal.cases-comments',
+    index: [
+      '.internal.cases-comments.securitysolution-default',
+      '.internal.cases-comments.securitysolution-space1',
+    ],
     query: { match_all: {} },
     wait_for_completion: true,
     refresh: true,
@@ -946,7 +957,10 @@ export const deleteCommentsAnalytics = async (es: Client): Promise<void> => {
 
 export const deleteActivityAnalytics = async (es: Client): Promise<void> => {
   await es.deleteByQuery({
-    index: '.internal.cases-activity',
+    index: [
+      '.internal.cases-activity.securitysolution-default',
+      '.internal.cases-activity.securitysolution-space1',
+    ],
     query: { match_all: {} },
     wait_for_completion: true,
     refresh: true,

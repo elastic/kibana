@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityDefinition } from '@kbn/entities-schema';
+import type { EntityDefinition } from '@kbn/entities-schema';
 
 export function generateLatestMetadataAggregations(definition: EntityDefinition) {
   if (!definition.metadata) {
@@ -13,44 +13,20 @@ export function generateLatestMetadataAggregations(definition: EntityDefinition)
   }
 
   return definition.metadata.reduce((aggs, metadata) => {
-    const lookbackPeriod = metadata.aggregation.lookbackPeriod || definition.latest.lookbackPeriod;
     let agg;
+
     if (metadata.aggregation.type === 'terms') {
       agg = {
-        filter: {
-          range: {
-            '@timestamp': {
-              gte: `now-${lookbackPeriod}`,
-            },
-          },
-        },
-        aggs: {
-          data: {
-            terms: {
-              field: metadata.source,
-              size: metadata.aggregation.limit,
-            },
-          },
+        terms: {
+          field: metadata.source,
+          size: metadata.aggregation.limit,
         },
       };
     } else if (metadata.aggregation.type === 'top_value') {
       agg = {
         filter: {
-          bool: {
-            must: [
-              {
-                range: {
-                  '@timestamp': {
-                    gte: `now-${lookbackPeriod}`,
-                  },
-                },
-              },
-              {
-                exists: {
-                  field: metadata.source,
-                },
-              },
-            ],
+          exists: {
+            field: metadata.source,
           },
         },
         aggs: {

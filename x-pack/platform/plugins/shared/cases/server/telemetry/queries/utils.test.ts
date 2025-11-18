@@ -7,10 +7,15 @@
 
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { CustomFieldTypes } from '../../../common/types/domain';
+import {
+  OBSERVABLE_TYPE_IPV4,
+  OBSERVABLE_TYPE_HOSTNAME,
+} from '../../../common/constants/observables';
 import type {
   AttachmentAggregationResult,
   AttachmentFrameworkAggsResult,
   CaseAggregationResult,
+  CasesTelemetryWithAlertsAggsByOwnerResults,
   FileAttachmentAggregationResults,
 } from '../types';
 import {
@@ -31,6 +36,9 @@ import {
   getReferencesAggregationQuery,
   getSolutionValues,
   getUniqueAlertCommentsCountQuery,
+  processWithAlertsByOwner,
+  getObservablesTotalsByType,
+  getTotalWithMaxObservables,
 } from './utils';
 import { TelemetrySavedObjectsClient } from '../telemetry_saved_objects_client';
 
@@ -58,9 +66,41 @@ describe('utils', () => {
       totalAssignees: { value: 5 },
     };
 
+    const observables = {
+      observables: {
+        doc_count: 1,
+        byDescription: {
+          buckets: [
+            {
+              key: 'Auto extract observables',
+              doc_count: 1,
+              byType: {
+                buckets: [
+                  {
+                    key: OBSERVABLE_TYPE_IPV4.key,
+                    doc_count: 1,
+                  },
+                ],
+              },
+            },
+          ],
+        },
+      },
+      totalWithMaxObservables: {
+        doc_count: 3,
+        buckets: [
+          {
+            key: 3,
+            doc_count: 3,
+          },
+        ],
+      },
+    };
+
     const caseSolutionValues = {
       counts,
       ...assignees,
+      ...observables,
     };
 
     const caseAggsResult: CaseAggregationResult = {
@@ -71,6 +111,7 @@ describe('utils', () => {
       securitySolution: { ...caseSolutionValues },
       observability: { ...caseSolutionValues },
       cases: { ...caseSolutionValues },
+      ...observables,
       syncAlerts: {
         buckets: [
           {
@@ -79,6 +120,14 @@ describe('utils', () => {
           },
           {
             key: 1,
+            doc_count: 1,
+          },
+        ],
+      },
+      extractObservables: {
+        buckets: [
+          {
+            key: 0,
             doc_count: 1,
           },
         ],
@@ -234,7 +283,45 @@ describe('utils', () => {
         ],
       },
     };
-
+    const withAlertsByOwnerResults: CasesTelemetryWithAlertsAggsByOwnerResults = {
+      by_owner: {
+        buckets: [
+          {
+            key: 'cases',
+            doc_count: 10,
+            references: {
+              referenceType: {
+                referenceAgg: {
+                  value: 10,
+                },
+              },
+            },
+          },
+          {
+            key: 'observability',
+            doc_count: 8,
+            references: {
+              referenceType: {
+                referenceAgg: {
+                  value: 5,
+                },
+              },
+            },
+          },
+          {
+            key: 'securitySolution',
+            doc_count: 10,
+            references: {
+              referenceType: {
+                referenceAgg: {
+                  value: 20,
+                },
+              },
+            },
+          },
+        ],
+      },
+    };
     it('constructs the solution values correctly', () => {
       expect(
         getSolutionValues({
@@ -242,6 +329,7 @@ describe('utils', () => {
           attachmentAggregations: attachmentAggsResult,
           filesAggregations: filesRes,
           owner: 'securitySolution',
+          casesTotalWithAlerts: withAlertsByOwnerResults,
         })
       ).toMatchInlineSnapshot(`
         Object {
@@ -298,7 +386,25 @@ describe('utils', () => {
           },
           "daily": 3,
           "monthly": 1,
+          "observables": Object {
+            "auto": Object {
+              "custom": 0,
+              "default": 1,
+            },
+            "manual": Object {
+              "custom": 0,
+              "default": 0,
+            },
+            "total": 1,
+          },
+          "status": Object {
+            "closed": 0,
+            "inProgress": 0,
+            "open": 0,
+          },
           "total": 5,
+          "totalWithAlerts": 20,
+          "totalWithMaxObservables": 0,
           "weekly": 2,
         }
       `);
@@ -307,6 +413,7 @@ describe('utils', () => {
           caseAggregations: caseAggsResult,
           attachmentAggregations: attachmentAggsResult,
           filesAggregations: filesRes,
+          casesTotalWithAlerts: withAlertsByOwnerResults,
           owner: 'cases',
         })
       ).toMatchInlineSnapshot(`
@@ -364,7 +471,25 @@ describe('utils', () => {
           },
           "daily": 3,
           "monthly": 1,
+          "observables": Object {
+            "auto": Object {
+              "custom": 0,
+              "default": 1,
+            },
+            "manual": Object {
+              "custom": 0,
+              "default": 0,
+            },
+            "total": 1,
+          },
+          "status": Object {
+            "closed": 0,
+            "inProgress": 0,
+            "open": 0,
+          },
           "total": 1,
+          "totalWithAlerts": 10,
+          "totalWithMaxObservables": 0,
           "weekly": 2,
         }
       `);
@@ -373,6 +498,7 @@ describe('utils', () => {
           caseAggregations: caseAggsResult,
           attachmentAggregations: attachmentAggsResult,
           filesAggregations: filesRes,
+          casesTotalWithAlerts: withAlertsByOwnerResults,
           owner: 'observability',
         })
       ).toMatchInlineSnapshot(`
@@ -430,7 +556,25 @@ describe('utils', () => {
           },
           "daily": 3,
           "monthly": 1,
+          "observables": Object {
+            "auto": Object {
+              "custom": 0,
+              "default": 1,
+            },
+            "manual": Object {
+              "custom": 0,
+              "default": 0,
+            },
+            "total": 1,
+          },
+          "status": Object {
+            "closed": 0,
+            "inProgress": 0,
+            "open": 0,
+          },
           "total": 1,
+          "totalWithAlerts": 5,
+          "totalWithMaxObservables": 0,
           "weekly": 2,
         }
       `);
@@ -1193,15 +1337,95 @@ describe('utils', () => {
       per_page: 1,
       page: 1,
       aggregations: {
-        counts: {
+        by_owner: {
+          doc_count_error_upper_bound: 0,
+          sum_other_doc_count: 0,
           buckets: [
-            { doc_count: 1, key: 1, topAlertsPerBucket: { value: 5 } },
-            { doc_count: 2, key: 2, topAlertsPerBucket: { value: 3 } },
-            { doc_count: 3, key: 3, topAlertsPerBucket: { value: 1 } },
+            {
+              key: 'cases',
+              doc_count: 4,
+              counts: {
+                buckets: [
+                  {
+                    doc_count: 4,
+                    topAlertsPerBucket: { value: 4 },
+                  },
+                  {
+                    doc_count: 4,
+                    topAlertsPerBucket: { value: 4 },
+                  },
+                  {
+                    doc_count: 4,
+                    topAlertsPerBucket: { value: 4 },
+                  },
+                ],
+              },
+              uniqueAlertCommentsCount: {
+                value: 4,
+              },
+              references: {
+                cases: {
+                  max: {
+                    value: 2,
+                  },
+                },
+              },
+            },
+            {
+              key: 'securitySolution',
+              doc_count: 4,
+              counts: {
+                buckets: [
+                  {
+                    doc_count: 4,
+                    topAlertsPerBucket: { value: 4 },
+                  },
+                  {
+                    doc_count: 4,
+                    topAlertsPerBucket: { value: 4 },
+                  },
+                  {
+                    doc_count: 4,
+                    topAlertsPerBucket: { value: 4 },
+                  },
+                ],
+              },
+              uniqueAlertCommentsCount: {
+                value: 4,
+              },
+              references: {
+                cases: {
+                  max: {
+                    value: 1,
+                  },
+                },
+              },
+            },
+            {
+              key: 'observability',
+              doc_count: 4,
+              counts: {
+                buckets: [
+                  {
+                    doc_count: 4,
+                    topAlertsPerBucket: { value: 4 },
+                  },
+                  {
+                    doc_count: 4,
+                    topAlertsPerBucket: { value: 4 },
+                  },
+                  {
+                    doc_count: 4,
+                    topAlertsPerBucket: { value: 4 },
+                  },
+                ],
+              },
+              uniqueAlertCommentsCount: {
+                value: 4,
+              },
+            },
           ],
         },
-        references: { cases: { max: { value: 1 } } },
-        uniqueAlertCommentsCount: { value: 5 },
       },
     });
 
@@ -1217,11 +1441,32 @@ describe('utils', () => {
       });
       expect(res).toEqual({
         all: {
-          total: 5,
-          daily: 1,
-          weekly: 3,
-          monthly: 5,
+          total: 12,
+          daily: 12,
+          weekly: 12,
+          monthly: 12,
+          maxOnACase: 2,
+        },
+        obs: {
+          total: 4,
+          daily: 4,
+          weekly: 4,
+          monthly: 4,
+          maxOnACase: 0,
+        },
+        sec: {
+          total: 4,
+          daily: 4,
+          weekly: 4,
+          monthly: 4,
           maxOnACase: 1,
+        },
+        main: {
+          total: 4,
+          daily: 4,
+          weekly: 4,
+          monthly: 4,
+          maxOnACase: 2,
         },
       });
     });
@@ -1246,6 +1491,27 @@ describe('utils', () => {
           monthly: 0,
           maxOnACase: 0,
         },
+        main: {
+          total: 0,
+          daily: 0,
+          weekly: 0,
+          monthly: 0,
+          maxOnACase: 0,
+        },
+        obs: {
+          total: 0,
+          daily: 0,
+          weekly: 0,
+          monthly: 0,
+          maxOnACase: 0,
+        },
+        sec: {
+          total: 0,
+          daily: 0,
+          weekly: 0,
+          monthly: 0,
+          maxOnACase: 0,
+        },
       });
     });
 
@@ -1258,74 +1524,83 @@ describe('utils', () => {
 
       expect(savedObjectsClient.find).toBeCalledWith({
         aggs: {
-          counts: {
-            date_range: {
-              field: 'cases-comments.attributes.created_at',
-              format: 'dd/MM/yyyy',
-              ranges: [
-                {
-                  from: 'now-1d',
-                  to: 'now',
+          by_owner: {
+            aggs: {
+              counts: {
+                date_range: {
+                  field: 'cases-comments.attributes.created_at',
+                  format: 'dd/MM/yyyy',
+                  ranges: [
+                    {
+                      from: 'now-1d',
+                      to: 'now',
+                    },
+                    {
+                      from: 'now-1w',
+                      to: 'now',
+                    },
+                    {
+                      from: 'now-1M',
+                      to: 'now',
+                    },
+                  ],
                 },
-                {
-                  from: 'now-1w',
-                  to: 'now',
+                aggregations: {
+                  topAlertsPerBucket: {
+                    cardinality: {
+                      field: 'cases-comments.attributes.alertId',
+                    },
+                  },
                 },
-                {
-                  from: 'now-1M',
-                  to: 'now',
+              },
+              references: {
+                aggregations: {
+                  cases: {
+                    aggregations: {
+                      ids: {
+                        terms: {
+                          field: 'cases-comments.references.id',
+                        },
+                        aggregations: {
+                          reverse: {
+                            reverse_nested: {},
+                            aggregations: {
+                              topAlerts: {
+                                cardinality: {
+                                  field: 'cases-comments.attributes.alertId',
+                                },
+                              },
+                            },
+                          },
+                        },
+                      },
+                      max: {
+                        max_bucket: {
+                          buckets_path: 'ids>reverse.topAlerts',
+                        },
+                      },
+                    },
+                    filter: {
+                      term: {
+                        'cases-comments.references.type': 'cases',
+                      },
+                    },
+                  },
                 },
-              ],
-            },
-            aggregations: {
-              topAlertsPerBucket: {
+                nested: {
+                  path: 'cases-comments.references',
+                },
+              },
+              uniqueAlertCommentsCount: {
                 cardinality: {
                   field: 'cases-comments.attributes.alertId',
                 },
               },
             },
-          },
-          references: {
-            aggregations: {
-              cases: {
-                aggregations: {
-                  ids: {
-                    terms: {
-                      field: 'cases-comments.references.id',
-                    },
-                    aggregations: {
-                      reverse: {
-                        reverse_nested: {},
-                        aggregations: {
-                          topAlerts: {
-                            cardinality: {
-                              field: 'cases-comments.attributes.alertId',
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                  max: {
-                    max_bucket: {
-                      buckets_path: 'ids>reverse.topAlerts',
-                    },
-                  },
-                },
-                filter: {
-                  term: {
-                    'cases-comments.references.type': 'cases',
-                  },
-                },
-              },
-            },
-            nested: {
-              path: 'cases-comments.references',
-            },
-          },
-          uniqueAlertCommentsCount: {
-            cardinality: {
-              field: 'cases-comments.attributes.alertId',
+            terms: {
+              field: 'cases-comments.attributes.owner',
+              include: ['securitySolution', 'observability', 'cases'],
+              size: 3,
             },
           },
         },
@@ -1502,6 +1777,126 @@ describe('utils', () => {
         totals: 0,
         required: 0,
       });
+    });
+
+    it('parses and returns the correct cases with alerts by owner', () => {
+      const withAlertsByOwnerResults: CasesTelemetryWithAlertsAggsByOwnerResults = {
+        by_owner: {
+          buckets: [
+            {
+              key: 'cases',
+              doc_count: 10,
+              references: {
+                referenceType: {
+                  referenceAgg: {
+                    value: 10,
+                  },
+                },
+              },
+            },
+            {
+              key: 'observability',
+              doc_count: 8,
+              references: {
+                referenceType: {
+                  referenceAgg: {
+                    value: 5,
+                  },
+                },
+              },
+            },
+            {
+              key: 'securitySolution',
+              doc_count: 10,
+              references: {
+                referenceType: {
+                  referenceAgg: {
+                    value: 20,
+                  },
+                },
+              },
+            },
+          ],
+        },
+      };
+      expect(processWithAlertsByOwner(withAlertsByOwnerResults)).toEqual({
+        securitySolution: 20,
+        observability: 5,
+        cases: 10,
+      });
+    });
+  });
+
+  describe('getObservablesTotalsByType', () => {
+    it('returns the correct observables totals by type', () => {
+      expect(
+        getObservablesTotalsByType({
+          doc_count: 6,
+          byDescription: {
+            buckets: [
+              {
+                key: 'Auto extract observables',
+                doc_count: 2,
+                byType: {
+                  buckets: [
+                    {
+                      key: OBSERVABLE_TYPE_IPV4.key,
+                      doc_count: 2,
+                    },
+                  ],
+                },
+              },
+              {
+                key: 'Bad host',
+                doc_count: 3,
+                byType: {
+                  buckets: [
+                    {
+                      key: OBSERVABLE_TYPE_HOSTNAME.key,
+                      doc_count: 3,
+                    },
+                  ],
+                },
+              },
+              {
+                key: 'User added',
+                doc_count: 1,
+                byType: {
+                  buckets: [
+                    {
+                      key: 'key1',
+                      doc_count: 1,
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        })
+      ).toEqual({
+        manual: { default: 3, custom: 1 },
+        auto: { default: 2, custom: 0 },
+        total: 6,
+      });
+    });
+  });
+
+  describe('getTotalWithMaxObservables', () => {
+    it('returns the correct total when response is undefined', () => {
+      expect(getTotalWithMaxObservables(undefined)).toEqual(0);
+    });
+
+    it('returns the correct total when no case has observables', () => {
+      expect(getTotalWithMaxObservables([])).toEqual(0);
+    });
+
+    it('returns the correct total when there are cases with max observables', () => {
+      expect(
+        getTotalWithMaxObservables([
+          { key: 50, doc_count: 20 },
+          { key: 49, doc_count: 15 },
+        ])
+      ).toEqual(20);
     });
   });
 });

@@ -7,13 +7,9 @@
 
 import { waitFor, renderHook } from '@testing-library/react';
 
-import {
-  DeleteConversationParams,
-  GetConversationByIdParams,
-  deleteConversation,
-  getConversationById,
-} from './conversations';
-import { HttpSetupMock } from '@kbn/core-http-browser-mocks';
+import type { DeleteConversationParams, GetConversationByIdParams } from './conversations';
+import { deleteConversation, getConversationById } from './conversations';
+import type { HttpSetupMock } from '@kbn/core-http-browser-mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 
 let http: HttpSetupMock = coreMock.createSetup().http;

@@ -7,7 +7,7 @@
 
 import { useDispatch, useSelector } from 'react-redux';
 import React, { useCallback, useEffect } from 'react';
-import { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
 import { EuiSpacer } from '@elastic/eui';
 import { buildPhrasesFilter } from '@kbn/es-query';

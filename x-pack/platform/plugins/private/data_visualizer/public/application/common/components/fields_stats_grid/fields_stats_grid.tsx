@@ -8,7 +8,7 @@
 import type { FC } from 'react';
 import React, { useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiSpacer } from '@elastic/eui';
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common';
+import type { FindFileStructureResponse } from '@kbn/file-upload-common';
 import type { DataVisualizerTableState } from '../../../../../common/types';
 import type { ItemIdToExpandedRowMap } from '../stats_table';
 import { DataVisualizerTable } from '../stats_table';

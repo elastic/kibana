@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  OtelInstance,
-  ApmOtelFields,
-  ApmSynthtracePipelineSchema,
-} from '@kbn/apm-synthtrace-client';
+/**
+ * Generates a simple OpenTelemetry trace with both native OTLP and Elastic OpenTelemetry agents.
+ */
+
+import type { OtelInstance, ApmOtelFields } from '@kbn/apm-synthtrace-client';
+import { ApmSynthtracePipelineSchema } from '@kbn/apm-synthtrace-client';
 import { apm } from '@kbn/apm-synthtrace-client/src/lib/apm';
-import { Scenario } from '../cli/scenario';
+import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 

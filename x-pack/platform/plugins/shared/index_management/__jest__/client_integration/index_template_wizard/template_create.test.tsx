@@ -18,7 +18,7 @@ import {
   INDEX_PATTERNS as DEFAULT_INDEX_PATTERNS,
 } from './constants';
 import { setup } from './template_create.helpers';
-import { TemplateFormTestBed } from './template_form.helpers';
+import type { TemplateFormTestBed } from './template_form.helpers';
 
 jest.mock('@kbn/code-editor', () => {
   const original = jest.requireActual('@kbn/code-editor');
@@ -490,9 +490,8 @@ describe('<TemplateCreate />', () => {
           body: JSON.stringify({
             name: 'my_logs_template',
             indexPatterns: ['logs-*-*'],
-            indexMode: 'logsdb',
             allowAutoCreate: 'NO_OVERWRITE',
-            dataStream: {},
+            indexMode: 'logsdb',
             _kbnMeta: {
               type: 'default',
               hasDatastream: false,
@@ -636,9 +635,9 @@ describe('<TemplateCreate />', () => {
           body: JSON.stringify({
             name: TEMPLATE_NAME,
             indexPatterns: DEFAULT_INDEX_PATTERNS,
-            indexMode: 'time_series',
             allowAutoCreate: 'TRUE',
             dataStream: {},
+            indexMode: 'time_series',
             _kbnMeta: {
               type: 'default',
               hasDatastream: false,

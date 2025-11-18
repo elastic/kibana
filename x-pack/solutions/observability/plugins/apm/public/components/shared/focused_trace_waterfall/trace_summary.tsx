@@ -10,7 +10,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 
-type TraceSummary = APIReturnType<'GET /internal/apm/traces/{traceId}/{docId}'>['summary'];
+type TraceSummary = APIReturnType<'GET /internal/apm/unified_traces/{traceId}/summary'>['summary'];
 
 interface Props {
   summary: TraceSummary;

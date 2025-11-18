@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ConversationWithoutRounds } from '@kbn/onechat-common';
+import type { ConversationWithoutRounds } from '@kbn/onechat-common';
 import moment from 'moment';
 
 enum SectionGroup {
@@ -22,31 +22,31 @@ enum SectionGroup {
 const toLabel = (section: SectionGroup): string => {
   switch (section) {
     case SectionGroup.Today:
-      return i18n.translate('xpack.onechat.conversationSidebar.group.today', {
+      return i18n.translate('xpack.onechat.conversationsHistory.group.today', {
         defaultMessage: 'Today',
       });
     case SectionGroup.Yesterday:
-      return i18n.translate('xpack.onechat.conversationSidebar.group.yesterday', {
+      return i18n.translate('xpack.onechat.conversationsHistory.group.yesterday', {
         defaultMessage: 'Yesterday',
       });
     case SectionGroup.LastWeek:
-      return i18n.translate('xpack.onechat.conversationSidebar.group.lastWeek', {
+      return i18n.translate('xpack.onechat.conversationsHistory.group.lastWeek', {
         defaultMessage: 'Last Week',
       });
     case SectionGroup.Last2Weeks:
-      return i18n.translate('xpack.onechat.conversationSidebar.group.last2Weeks', {
+      return i18n.translate('xpack.onechat.conversationsHistory.group.last2Weeks', {
         defaultMessage: 'Last 2 Weeks',
       });
     case SectionGroup.LastMonth:
-      return i18n.translate('xpack.onechat.conversationSidebar.group.lastMonth', {
+      return i18n.translate('xpack.onechat.conversationsHistory.group.lastMonth', {
         defaultMessage: 'Last Month',
       });
     case SectionGroup.Last3Months:
-      return i18n.translate('xpack.onechat.conversationSidebar.group.last3Months', {
+      return i18n.translate('xpack.onechat.conversationsHistory.group.last3Months', {
         defaultMessage: 'Last 3 Months',
       });
     case SectionGroup.Older:
-      return i18n.translate('xpack.onechat.conversationSidebar.group.older', {
+      return i18n.translate('xpack.onechat.conversationsHistory.group.older', {
         defaultMessage: 'Older',
       });
   }

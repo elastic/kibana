@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MonitorFilters } from '../monitors_overview/types';
+import type { MonitorFilters } from '../monitors_overview/types';
 
 export const areFiltersEmpty = (filters: MonitorFilters) => {
   if (!filters) {

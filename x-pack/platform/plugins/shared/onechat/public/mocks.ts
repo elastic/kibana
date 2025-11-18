@@ -5,14 +5,29 @@
  * 2.0.
  */
 
-import { OnechatPluginSetup, OnechatPluginStart } from './types';
+import type { OnechatPluginSetup, OnechatPluginStart, ConversationFlyoutRef } from './types';
+import type { OpenConversationFlyoutOptions } from './flyout/types';
 
 const createSetupContractMock = (): jest.Mocked<OnechatPluginSetup> => {
   return {};
 };
 
 const createStartContractMock = (): jest.Mocked<OnechatPluginStart> => {
-  return {};
+  return {
+    tools: {} as any,
+    setConversationFlyoutActiveConfig: jest.fn(),
+    clearConversationFlyoutActiveConfig: jest.fn(),
+    openConversationFlyout: jest
+      .fn()
+      .mockImplementation((options: OpenConversationFlyoutOptions) => {
+        const mockFlyoutRef: ConversationFlyoutRef = {
+          close: jest.fn(),
+        };
+        return {
+          flyoutRef: mockFlyoutRef,
+        };
+      }),
+  };
 };
 
 export const onechatMocks = {

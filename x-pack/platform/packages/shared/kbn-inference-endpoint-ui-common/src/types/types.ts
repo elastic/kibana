@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ConfigProperties } from './dynamic_config/types';
+import type { ConfigProperties } from './dynamic_config/types';
 
 interface ConfigEntry extends ConfigProperties {
   key: string;
@@ -13,10 +13,12 @@ interface ConfigEntry extends ConfigProperties {
 
 export * from './dynamic_config/types';
 
+export type Map = Record<string, string>;
+
 export interface ConfigEntryView extends ConfigEntry {
   isValid: boolean;
   validationErrors: string[];
-  value: string | number | boolean | null;
+  value: string | number | boolean | null | Map;
 }
 
 export type FieldsConfiguration = Record<string, ConfigProperties>;
@@ -27,6 +29,8 @@ export interface Config {
   inferenceId: string;
   provider: string;
   providerConfig?: Record<string, unknown>;
+  contextWindowLength?: number;
+  temperature?: number;
 }
 
 export interface Secrets {
@@ -50,4 +54,13 @@ export const INFERENCE_ENDPOINT_INTERNAL_API_VERSION = '1';
 export interface InferenceEndpoint {
   config: Config;
   secrets: Secrets;
+}
+
+// Helper function to check if an object is a Record<string, string> - supports custom headers
+export function isMapWithStringValues(value: unknown): value is Map {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    Object.values(value).every((v) => typeof v === 'string')
+  );
 }

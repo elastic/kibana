@@ -8,13 +8,17 @@
  */
 
 import { parse } from '../../parser';
-import { ESQLFunction, ESQLMap } from '../../types';
+import type { ESQLFunction, ESQLMap } from '../../types';
 import { Walker } from '../../walker';
-import { BasicPrettyPrinter, BasicPrettyPrinterMultilineOptions } from '../basic_pretty_printer';
+import type {
+  BasicPrettyPrinterMultilineOptions,
+  BasicPrettyPrinterOptions,
+} from '../basic_pretty_printer';
+import { BasicPrettyPrinter } from '../basic_pretty_printer';
 
-const reprint = (src: string) => {
+const reprint = (src: string, opts?: BasicPrettyPrinterOptions) => {
   const { root } = parse(src);
-  const text = BasicPrettyPrinter.print(root);
+  const text = BasicPrettyPrinter.print(root, opts);
 
   // console.log(JSON.stringify(root, null, 2));
 
@@ -28,6 +32,53 @@ const assertReprint = (src: string, expected: string = src) => {
 };
 
 describe('single line query', () => {
+  describe('header commands', () => {
+    describe('SET', () => {
+      test('single SET command (with keyword "KEY")', () => {
+        const { text } = reprint('SET key = "value"; FROM index');
+
+        expect(text).toBe('SET `key` = "value"; FROM index');
+      });
+
+      test('multiple SET commands', () => {
+        const { text } = reprint(
+          'SET key1 = "value1"; SET key2 = "value2"; FROM index | LIMIT 123'
+        );
+
+        expect(text).toBe('SET key1 = "value1"; SET key2 = "value2"; FROM index | LIMIT 123');
+      });
+
+      test('SET with numeric value', () => {
+        const { text } = reprint('SET timeout = 30; FROM index');
+
+        expect(text).toBe('SET timeout = 30; FROM index');
+      });
+
+      test('SET with boolean value', () => {
+        const { text } = reprint('SET flag = true; FROM index');
+
+        expect(text).toBe('SET flag = TRUE; FROM index');
+      });
+
+      test('can skip printing header commands', () => {
+        const { text } = reprint('SET flag = true; FROM index', { skipHeader: true });
+
+        expect(text).toBe('FROM index');
+      });
+
+      test('can sckip multiple SET commands', () => {
+        const { text } = reprint(
+          'SET key1 = "value1"; SET key2 = "value2"; FROM index | LIMIT 123',
+          {
+            skipHeader: true,
+          }
+        );
+
+        expect(text).toBe('FROM index | LIMIT 123');
+      });
+    });
+  });
+
   describe('commands', () => {
     describe('FROM', () => {
       test('FROM command with a single source', () => {
@@ -106,11 +157,35 @@ describe('single line query', () => {
       });
     });
 
+    describe('INLINE STATS', () => {
+      test('with aggregates assignment', () => {
+        const { text } = reprint('FROM a | INLINE STATS var = avg(field)');
+
+        expect(text).toBe('FROM a | INLINE STATS var = AVG(field)');
+      });
+
+      test('with BY clause', () => {
+        const { text } = reprint('FROM a | INLINE STATS count(), sum(value) by category');
+
+        expect(text).toBe('FROM a | INLINE STATS COUNT(), SUM(value) BY category');
+      });
+    });
+
     describe('GROK', () => {
       test('two basic arguments', () => {
         const { text } = reprint('FROM search-movies | GROK Awards "text"');
 
         expect(text).toBe('FROM search-movies | GROK Awards "text"');
+      });
+
+      test('multiple patterns', () => {
+        const { text } = reprint(
+          'FROM logs | GROK message "%{IP:client}", "%{WORD:method}", "%{NUMBER:status}"'
+        );
+
+        expect(text).toBe(
+          'FROM logs | GROK message "%{IP:client}", "%{WORD:method}", "%{NUMBER:status}"'
+        );
       });
     });
 
@@ -153,6 +228,10 @@ describe('single line query', () => {
 
         expect(text).toBe('FROM employees | LEFT JOIN a ON b, c, d.e.f');
       });
+
+      test('supports binary expressions', () => {
+        reprint('FROM employees | LEFT JOIN a ON b, c > d, d.e.f == 42 AND NOT MATCH(g, "hallo")');
+      });
     });
 
     describe('ENRICH', () => {
@@ -173,9 +252,9 @@ describe('single line query', () => {
       });
 
       test('value and key', () => {
-        const { text } = reprint(`FROM a | CHANGE_POINT value ON key`);
+        const { text } = reprint(`FROM a | CHANGE_POINT value ON type`);
 
-        expect(text).toBe('FROM a | CHANGE_POINT value ON key');
+        expect(text).toBe('FROM a | CHANGE_POINT value ON type');
       });
 
       test('value and target', () => {
@@ -185,9 +264,9 @@ describe('single line query', () => {
       });
 
       test('value, key, and target', () => {
-        const { text } = reprint(`FROM a | CHANGE_POINT value ON key AS type, pvalue`);
+        const { text } = reprint(`FROM a | CHANGE_POINT value ON typeField AS type, pvalue`);
 
-        expect(text).toBe('FROM a | CHANGE_POINT value ON key AS type, pvalue');
+        expect(text).toBe('FROM a | CHANGE_POINT value ON typeField AS type, pvalue');
       });
 
       test('example from docs', () => {
@@ -204,39 +283,49 @@ describe('single line query', () => {
       });
     });
 
-    /**
-     * @todo Tests skipped, while RERANK command grammar is being stabilized. We will
-     * get back to it after 9.1 release.
-     */
-    describe.skip('RERANK', () => {
-      test('single field', () => {
-        const { text } = reprint(`FROM a | RERANK "query" ON field1 WITH some_id`);
+    describe('RERANK', () => {
+      test('single field with inference map', () => {
+        const { text } = reprint(
+          `FROM a | RERANK "query" ON field1 WITH {"inference_id": "reranker"}`
+        );
 
-        expect(text).toBe('FROM a | RERANK "query" ON field1 WITH some_id');
+        expect(text).toBe('FROM a | RERANK "query" ON field1 WITH {"inference_id": "reranker"}');
       });
 
-      test('two fields', () => {
-        const { text } = reprint(`FROM a | RERANK "query" ON field1,field2 WITH some_id`);
+      test('target assignment and multiple fields', () => {
+        const { text } = reprint(
+          `FROM a | RERANK col = "query" ON field1, field2 WITH {"inference_id": "my_reranker"}`
+        );
 
-        expect(text).toBe('FROM a | RERANK "query" ON field1, field2 WITH some_id');
+        expect(text).toBe(
+          'FROM a | RERANK col = "query" ON field1, field2 WITH {"inference_id": "my_reranker"}'
+        );
       });
 
-      test('param as query', () => {
-        const { text } = reprint(`FROM a | RERANK ?param ON field1,field2 WITH some_id`);
+      test('field assignment in ON clause', () => {
+        const { text } = reprint(
+          `FROM a | RERANK "query" ON field1 = X(field1, 2), field2 WITH {"inference_id": "model"}`
+        );
 
-        expect(text).toBe('FROM a | RERANK ?param ON field1, field2 WITH some_id');
+        expect(text).toBe(
+          'FROM a | RERANK "query" ON field1 = X(field1, 2), field2 WITH {"inference_id": "model"}'
+        );
       });
 
-      test('param as field part', () => {
-        const { text } = reprint(`FROM a | RERANK ?param ON nested.?par, field2 WITH some_id`);
+      test('multi props in WITH clause', () => {
+        const { text } = reprint(
+          `FROM a | RERANK "query" ON field1 WITH {"inference_id": "model", "another_id": "another_model"}`
+        );
 
-        expect(text).toBe('FROM a | RERANK ?param ON nested.?par, field2 WITH some_id');
+        expect(text).toBe(
+          'FROM a | RERANK "query" ON field1 WITH {"inference_id": "model", "another_id": "another_model"}'
+        );
       });
 
-      test('param as inference ID', () => {
-        const { text } = reprint(`FROM a | RERANK ?param ON nested.?par, field2 WITH ?`);
+      test('without WITH clause', () => {
+        const { text } = reprint(`FROM a | RERANK "query" ON field1`);
 
-        expect(text).toBe('FROM a | RERANK ?param ON nested.?par, field2 WITH ?');
+        expect(text).toBe('FROM a | RERANK "query" ON field1');
       });
     });
 
@@ -291,6 +380,16 @@ describe('single line query', () => {
         );
       });
 
+      test('from singlelinewith with options', () => {
+        const { text } =
+          reprint(`FROM search-movies | FUSE linear SCORE BY s1 KEY BY k1, k2 GROUP BY g WITH { "normalizer": "minmax" }
+        `);
+
+        expect(text).toBe(
+          'FROM search-movies | FUSE linear SCORE BY s1 KEY BY k1, k2 GROUP BY g WITH {"normalizer": "minmax"}'
+        );
+      });
+
       test('from multiline', () => {
         const { text } = reprint(`FROM search-movies METADATA _score, _id, _index
   | FORK
@@ -304,29 +403,43 @@ describe('single line query', () => {
           'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | FUSE | KEEP title, _score'
         );
       });
+
+      test('from multiline with options', () => {
+        const { text } = reprint(`FROM search-movies
+  | FUSE linear
+        SCORE BY s1
+        KEY BY k1, k2
+        GROUP BY g
+        WITH {"normalizer": "minmax"}
+        `);
+
+        expect(text).toBe(
+          'FROM search-movies | FUSE linear SCORE BY s1 KEY BY k1, k2 GROUP BY g WITH {"normalizer": "minmax"}'
+        );
+      });
     });
 
     describe('COMPLETION', () => {
       test('from single line', () => {
         const { text } =
-          reprint(`FROM search-movies | COMPLETION result = "Shakespeare" WITH inferenceId
+          reprint(`FROM search-movies | COMPLETION result = "Shakespeare" WITH {"inference_id": "my-inference-id"}
         `);
 
         expect(text).toBe(
-          'FROM search-movies | COMPLETION result = "Shakespeare" WITH inferenceId'
+          'FROM search-movies | COMPLETION result = "Shakespeare" WITH {"inference_id": "my-inference-id"}'
         );
       });
 
       test('from multiline', () => {
         const { text } = reprint(
           `FROM kibana_sample_data_ecommerce
-                 | COMPLETION result = "prompt" WITH \`openai-completion\`
+                 | COMPLETION result = "prompt" WITH {"inference_id": "my-inference-id"}
                  | LIMIT 2
           `
         );
 
         expect(text).toBe(
-          'FROM kibana_sample_data_ecommerce | COMPLETION result = "prompt" WITH `openai-completion` | LIMIT 2'
+          'FROM kibana_sample_data_ecommerce | COMPLETION result = "prompt" WITH {"inference_id": "my-inference-id"} | LIMIT 2'
         );
       });
     });
@@ -427,6 +540,18 @@ describe('single line query', () => {
           const { text } = reprint('ROW f(*)');
 
           expect(text).toBe('ROW F(*)');
+        });
+
+        test('parameter function name is printed as specified', () => {
+          const { text } = reprint('ROW ??functionName(*)');
+
+          expect(text).toBe('ROW ??functionName(*)');
+        });
+
+        test('parameter function name is printed as specified (single ?)', () => {
+          const { text } = reprint('ROW ?functionName(42)');
+
+          expect(text).toBe('ROW ?functionName(42)');
         });
       });
 
@@ -635,6 +760,10 @@ describe('single line query', () => {
 
         expect(text).toBe('ROW FN(1, {"foo": "bar", "baz": NULL})');
       });
+
+      test('supports nested maps', () => {
+        assertReprint('ROW FN(1, {"foo": "bar", "baz": {"a": 1, "b": 2}})');
+      });
     });
 
     describe('literals expressions', () => {
@@ -840,10 +969,10 @@ describe('multiline query', () => {
     const query = `FROM kibana_sample_data_logs
 | SORT @timestamp
 | EVAL t = NOW()
-| EVAL key = CASE(timestamp < t - 1 hour AND timestamp > t - 2 hour, "Last hour", "Other")
-| STATS sum = SUM(bytes), count = COUNT_DISTINCT(clientip) BY key, extension.keyword
-| EVAL sum_last_hour = CASE(key == "Last hour", sum), sum_rest = CASE(key == "Other", sum), count_last_hour = CASE(key == "Last hour", count), count_rest = CASE(key == "Other", count)
-| STATS sum_last_hour = MAX(sum_last_hour), sum_rest = MAX(sum_rest), count_last_hour = MAX(count_last_hour), count_rest = MAX(count_rest) BY key, extension.keyword
+| EVAL newColumn = CASE(timestamp < t - 1 hour AND timestamp > t - 2 hour, "Last hour", "Other")
+| STATS sum = SUM(bytes), count = COUNT_DISTINCT(clientip) BY newColumn, extension.keyword
+| EVAL sum_last_hour = CASE(newColumn == "Last hour", sum), sum_rest = CASE(newColumn == "Other", sum), count_last_hour = CASE(newColumn == "Last hour", count), count_rest = CASE(newColumn == "Other", count)
+| STATS sum_last_hour = MAX(sum_last_hour), sum_rest = MAX(sum_rest), count_last_hour = MAX(count_last_hour), count_rest = MAX(count_rest) BY newColumn, extension.keyword
 | EVAL total_bytes = TO_DOUBLE(COALESCE(sum_last_hour, 0::LONG) + COALESCE(sum_rest, 0::LONG))
 | EVAL total_visits = TO_DOUBLE(COALESCE(count_last_hour, 0::LONG) + COALESCE(count_rest, 0::LONG))
 | EVAL bytes_transform = ROUND(total_bytes / 1000000.0, 1)
@@ -908,4 +1037,75 @@ describe('single line expression', () => {
   });
 });
 
-it.todo('test for NOT unary expression');
+describe('unary operator precedence and grouping', () => {
+  test('NOT should not parenthesize literals', () => {
+    assertReprint('ROW NOT a');
+  });
+
+  test('NOT should not parenthesize literals unnecessarily', () => {
+    assertReprint('ROW NOT (a)', 'ROW NOT a');
+  });
+
+  test('NOT should parenthesize OR expressions', () => {
+    assertReprint('ROW NOT (a OR b)');
+  });
+
+  test('NOT should parenthesize AND expressions', () => {
+    assertReprint('ROW NOT (a AND b)');
+  });
+
+  test('NOT should not parenthesize expressions with higher precedence', () => {
+    assertReprint('ROW NOT (a > b)', 'ROW NOT a > b');
+  });
+
+  test('NOT should parenthesize OR expressions on the right side', () => {
+    assertReprint('ROW NOT a OR NOT (a == b OR b == c)');
+  });
+
+  test('unary minus should parenthesize addition', () => {
+    assertReprint('ROW -(a + b)');
+  });
+
+  test('unary minus should parenthesize subtraction', () => {
+    assertReprint('ROW -(a - b)');
+  });
+
+  test('unary minus should not parenthesize addition of negative number', () => {
+    assertReprint('ROW -a + -b');
+  });
+
+  test('unary minus should not parenthesize subtraction of negative number', () => {
+    assertReprint('ROW -a - -b');
+  });
+
+  test('unary minus should not parenthesize multiplication', () => {
+    assertReprint('ROW -a * b');
+  });
+
+  test('should not unnecessarily parenthesize multiplication', () => {
+    assertReprint('ROW a * b', 'ROW a * b');
+  });
+
+  test('should parenthesize addition in multiplication', () => {
+    assertReprint('ROW (a + b) * c');
+  });
+
+  test('should not parenthesize multiplication in addition', () => {
+    assertReprint('ROW a + b * c');
+  });
+
+  test('should parenthesize multiplication of addition', () => {
+    assertReprint('ROW (a + b) * (c + d)');
+  });
+});
+
+describe('subqueries (parens)', () => {
+  test('can print complex subqueries with processing', () => {
+    const src =
+      'FROM index1, (FROM index2 | WHERE a > 10 | EVAL b = a * 2 | STATS cnt = COUNT(*) BY c | SORT cnt DESC | LIMIT 10), index3, (FROM index4 | STATS count(*)) | WHERE d > 10 | STATS max = max(*) BY e | SORT max DESC';
+    const expected =
+      'FROM index1, (FROM index2 | WHERE a > 10 | EVAL b = a * 2 | STATS cnt = COUNT(*) BY c | SORT cnt DESC | LIMIT 10), index3, (FROM index4 | STATS COUNT(*)) | WHERE d > 10 | STATS max = MAX(*) BY e | SORT max DESC';
+
+    assertReprint(src, expected);
+  });
+});

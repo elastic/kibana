@@ -11,9 +11,9 @@ import { SIEM_RULE_MIGRATION_PATH } from '../../../../../common/siem_migrations/
 import type { GetRuleMigrationResponse } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { GetRuleMigrationRequestParams } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { SiemMigrationAuditLogger } from '../../common/utils/audit';
-import { authz } from '../../common/utils/authz';
-import { withLicense } from '../../common/utils/with_license';
+import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
+import { authz } from '../../common/api/util/authz';
+import { withLicense } from '../../common/api/util/with_license';
 import { MIGRATION_ID_NOT_FOUND } from '../../common/translations';
 
 export const registerSiemRuleMigrationsGetRoute = (
@@ -36,7 +36,10 @@ export const registerSiemRuleMigrationsGetRoute = (
         },
       },
       withLicense(async (context, req, res): Promise<IKibanaResponse<GetRuleMigrationResponse>> => {
-        const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+        const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+          context.securitySolution,
+          'rules'
+        );
 
         const { migration_id: migrationId } = req.params;
         try {
@@ -44,9 +47,7 @@ export const registerSiemRuleMigrationsGetRoute = (
           const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
           await siemMigrationAuditLogger.logGetMigration({ migrationId });
 
-          const storedMigration = await ruleMigrationsClient.data.migrations.get({
-            id: migrationId,
-          });
+          const storedMigration = await ruleMigrationsClient.data.migrations.get(migrationId);
 
           if (!storedMigration) {
             return res.notFound({

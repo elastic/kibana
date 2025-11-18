@@ -4,16 +4,7 @@ An adaptive side navigation system built with [Elastic UI](https://eui.elastic.c
 
 | Expanded mode                 | Collapsed mode                 |
 | ----------------------------- | ------------------------------ |
-| ![image](./expanded-mode.png) | ![image](./collapsed-mode.png) |
-
-## Features
-
-- **Responsive design** - automatically adapts between collapsed and expanded states based on screen size.
-- **Smart menu system** - dynamic "More" menu that consolidates overflow items during window resize.
-- **Nested navigation** - multi-level menu support with nested popover panels in collapsed mode.
-- **Accessibility-first** - WCAG-compliant with proper ARIA labels, keyboard navigation, and screen reader support.
-- **Modular architecture** - composable components with clean separation of concerns. Exported as a self-contained widget.
-- **Dark mode** and **High contrast mode support**
+| ![image](./assets/expanded_mode.png) | ![image](./assets/collapsed_mode.png) |
 
 ## Usage
 
@@ -66,15 +57,28 @@ const navigationItems = {
 
 function App() {
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [activeItemId, setActiveItemId] = useState('dashboard');
+
+  const handleItemClick = (item: MenuItem | SecondaryMenuItem | SideNavLogo) => {
+    setActiveItemId(item.id);
+    trackAnalytics(item.id);
+  };
 
   return (
     <div className="app">
       <TopBar isCollapsed={isCollapsed} setIsCollapsed={setIsCollapsed} />
       <Navigation
-        title="Observability"
-        logo="observabilityApp"
-        items={navigationItems}
+        activeItemId={activeItemId}
         isCollapsed={isCollapsed}
+        items={navigationItems}
+        logo={{
+          label: 'Observability',
+          id: 'observability',
+          iconType: 'observabilityApp',
+          href: '/observability',
+        }}
+        onItemClick={handleItemClick}
+        setWidth={setNavigationWidth}
       />
       <main className="app-content">{/* Your application content */}</main>
     </div>
@@ -95,6 +99,7 @@ export const navigationItems = {
       label: 'Overview',
       iconType: 'info',
       href: '/overview',
+      badgeType: 'techPreview', // for tech preview items
     },
     // Menu item with nested sections
     {
@@ -105,10 +110,10 @@ export const navigationItems = {
       sections: [
         {
           id: 'reports-section',
-          label: 'Reports', // or null for unlabeled sections
+          label: 'Reports', // omit for unlabeled sections
           items: [
             {
-              id: 'overview',
+              id: 'analytics', // has the same `id` as the parent item
               label: 'Overview',
               href: '/analytics/reports', // has the same `href` as the parent item
             },
@@ -116,12 +121,13 @@ export const navigationItems = {
               id: 'sales-report',
               label: 'Sales report',
               href: '/analytics/sales',
+              badgeType: 'beta', // for beta items
             },
             {
               id: 'traffic-report',
               label: 'Traffic report',
               href: '/analytics/traffic',
-              external: true, // opens in new tab and shows an "external resource" icon
+              isExternal: true, // opens in new tab and shows an "external resource" icon
             },
           ],
         },

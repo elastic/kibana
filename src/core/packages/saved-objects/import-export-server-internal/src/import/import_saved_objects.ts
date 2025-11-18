@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Readable } from 'stream';
+import type { Readable } from 'stream';
 import type {
   SavedObjectsImportFailure,
   SavedObjectsImportResponse,

@@ -9,7 +9,7 @@
 
 import { Position } from '@elastic/charts';
 import { strings } from '../i18n';
-import { XAxisConfigFn } from '../types';
+import type { XAxisConfigFn } from '../types';
 import { X_AXIS_CONFIG } from '../constants';
 import { commonAxisConfigArgs } from './common_axis_args';
 

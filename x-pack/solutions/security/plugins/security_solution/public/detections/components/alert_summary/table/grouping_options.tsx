@@ -7,6 +7,7 @@
 
 import type { GroupOption } from '@kbn/grouping/src';
 import { i18n } from '@kbn/i18n';
+import { RELATED_INTEGRATION } from '../../../constants';
 
 const INTEGRATION_NAME = i18n.translate(
   'xpack.securitySolution.alertsTable.groups.integrationName',
@@ -26,7 +27,7 @@ const RULE_NAME = i18n.translate('xpack.securitySolution.alertsTable.groups.rule
 /**
  * Returns a list of fields for the default grouping options. These are displayed in the `Group alerts by` dropdown button.
  * The default values are:
- * - signal.rule.rule_id
+ * - relatedIntegration (a runTime field we're creating and using in the adhoc dataView)
  * - kibana.alert.severity
  * - kibana.alert.rule.name
  *
@@ -35,7 +36,7 @@ const RULE_NAME = i18n.translate('xpack.securitySolution.alertsTable.groups.rule
 export const groupingOptions: GroupOption[] = [
   {
     label: INTEGRATION_NAME,
-    key: 'signal.rule.rule_id',
+    key: RELATED_INTEGRATION,
   },
   {
     label: SEVERITY,

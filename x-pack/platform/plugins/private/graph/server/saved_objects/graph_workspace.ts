@@ -6,7 +6,7 @@
  */
 
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import { graphMigrations } from './migrations';
 
 export const graphWorkspace: SavedObjectsType = {

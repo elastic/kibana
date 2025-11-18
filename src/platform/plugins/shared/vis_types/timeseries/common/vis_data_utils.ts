@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TimeseriesVisData, TableData, SeriesData } from './types';
+import type { TimeseriesVisData, TableData, SeriesData } from './types';
 import { PANEL_TYPES } from './enums';
 
 export const isVisTableData = (data: TimeseriesVisData): data is TableData =>

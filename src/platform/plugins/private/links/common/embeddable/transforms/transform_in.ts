@@ -9,7 +9,7 @@
 
 import { LINKS_SAVED_OBJECT_TYPE } from '../../constants';
 import { extractReferences } from './references';
-import { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../types';
+import type { LinksByReferenceState, LinksByValueState, LinksEmbeddableState } from '../types';
 
 export function transformIn(state: LinksEmbeddableState) {
   if ((state as LinksByReferenceState).savedObjectId) {

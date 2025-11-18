@@ -8,6 +8,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiPopover,
   EuiButtonIcon,
@@ -21,7 +22,6 @@ import {
   EuiFlexItem,
   EuiPopoverFooter,
   EuiToolTip,
-  EuiSelectableOption,
 } from '@elastic/eui';
 import type { ActionVariable } from '@kbn/alerting-types';
 import { TruncatedText } from './truncated_text';
@@ -77,7 +77,11 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
     }));
   }, [messageVariablesToShow]);
 
-  const addVariableButtonTitle = buttonTitle ? buttonTitle : i18n.ADD_VARIABLE_TITLE;
+  const addVariableButtonTitle = !messageVariables?.length
+    ? i18n.NO_VARIABLES_AVAILABLE
+    : buttonTitle
+    ? buttonTitle
+    : i18n.ADD_VARIABLE_TITLE;
 
   const Button = useMemo(
     () =>
@@ -88,6 +92,7 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
           size="xs"
           onClick={() => setIsVariablesPopoverOpen(true)}
           aria-label={i18n.ADD_VARIABLE_POPOVER_BUTTON}
+          disabled={!messageVariables?.length}
         >
           {addVariableButtonTitle}
         </EuiButtonEmpty>
@@ -99,12 +104,14 @@ export const AddMessageVariables: React.FunctionComponent<Props> = ({
           onClick={() => setIsVariablesPopoverOpen(true)}
           iconType="indexOpen"
           aria-label={i18n.ADD_VARIABLE_POPOVER_BUTTON}
+          disabled={!messageVariables?.length}
         />
       ),
-    [addVariableButtonTitle, paramsProperty, showButtonTitle]
+    [addVariableButtonTitle, messageVariables?.length, paramsProperty, showButtonTitle]
   );
+
   if ((messageVariables?.length ?? 0) === 0) {
-    return <></>;
+    return Button;
   }
 
   const ToolTipContent = ({ description, label }: { description: string; label: string }) => {

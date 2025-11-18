@@ -9,13 +9,14 @@ import { EuiDescriptionList, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { chunk, get, isEmpty, isNumber, pick } from 'lodash/fp';
 import React, { memo, useState } from 'react';
 import styled from 'styled-components';
-import type { ThreatMapping, Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { Threats, Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { DataViewBase, Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
 import type {
   RelatedIntegrationArray,
   RequiredFieldArray,
+  ThreatMapping,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { buildRelatedIntegrationsDescription } from '../../../common/components/related_integrations/integrations_description';
 import { DEFAULT_TIMELINE_TITLE } from '../../../../timelines/components/timeline/translations';

@@ -10,22 +10,25 @@
 import { EOL, hostname } from 'node:os';
 import url, { URL } from 'node:url';
 import type { Duration } from 'moment';
-import { ByteSizeValue, offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
-import { IHttpConfig, SslConfig, sslSchema, TLS_V1_2, TLS_V1_3 } from '@kbn/server-http-tools';
+import type { ByteSizeValue, TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema } from '@kbn/config-schema';
+import type { IHttpConfig } from '@kbn/server-http-tools';
+import { SslConfig, sslSchema, TLS_V1_2, TLS_V1_3 } from '@kbn/server-http-tools';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { uuidRegexp } from '@kbn/core-base-server-internal';
 import type { HttpProtocol, ICspConfig, IExternalUrlConfig } from '@kbn/core-http-server';
 import type { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import type { HandlerResolutionStrategy } from '@kbn/core-http-router-server-internal';
 import { get } from 'lodash';
-import { CspConfig, CspConfigType } from './csp';
-import { ExternalUrlConfig } from './external_url';
+import type { CspConfigType } from './csp';
+import { CspConfig } from './csp';
+import type { ExternalUrlConfig } from './external_url';
 import {
   parseRawSecurityResponseHeadersConfig,
   securityResponseHeadersSchema,
 } from './security_response_headers_config';
 import { CdnConfig } from './cdn_config';
-import { PermissionsPolicyConfigType } from './permissions_policy';
+import type { PermissionsPolicyConfigType } from './permissions_policy';
 import { type RateLimiterConfig, rateLimiterConfigSchema } from './rate_limiter';
 
 const SECOND = 1000;
@@ -135,7 +138,7 @@ const configSchema = schema.object(
         defaultValue: 'http1',
       })
     ),
-    prototypeHardening: schema.boolean({ defaultValue: false }),
+    prototypeHardening: schema.boolean({ defaultValue: true }),
     host: schema.string({
       defaultValue: 'localhost',
       hostname: true,

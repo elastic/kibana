@@ -9,9 +9,13 @@ import type { ActionResult as ActionConnector } from '@kbn/actions-plugin/server
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import { InferenceConnectorType } from '@kbn/inference-common';
 import { getConnectorById } from './get_connector_by_id';
+import { httpServerMock } from '@kbn/core/server/mocks';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 
 describe('getConnectorById', () => {
   let actionsClient: ReturnType<typeof actionsClientMock.create>;
+  let actions: ReturnType<typeof actionsMock.createStart>;
+  let request: ReturnType<typeof httpServerMock.createKibanaRequest>;
   const connectorId = 'my-connector-id';
 
   const createMockConnector = (parts: Partial<ActionConnector> = {}): ActionConnector => {
@@ -26,6 +30,9 @@ describe('getConnectorById', () => {
   beforeEach(() => {
     actionsClient = actionsClientMock.create();
     actionsClient.get.mockResolvedValue(createMockConnector());
+    actions = actionsMock.createStart();
+    actions.getActionsClientWithRequest = jest.fn().mockResolvedValue(actionsClient);
+    request = httpServerMock.createKibanaRequest();
   });
 
   it('calls `actionsClient.get` with the right parameters', async () => {
@@ -37,7 +44,7 @@ describe('getConnectorById', () => {
       })
     );
 
-    await getConnectorById({ actionsClient, connectorId });
+    await getConnectorById({ actions, request, connectorId });
 
     expect(actionsClient.get).toHaveBeenCalledTimes(1);
     expect(actionsClient.get).toHaveBeenCalledWith({
@@ -51,7 +58,7 @@ describe('getConnectorById', () => {
       throw new Error('Something wrong');
     });
 
-    await expect(() => getConnectorById({ actionsClient, connectorId })).rejects
+    await expect(() => getConnectorById({ actions, request, connectorId })).rejects
       .toThrowErrorMatchingInlineSnapshot(`
       "No connector found for id 'my-connector-id'
       Something wrong"
@@ -68,7 +75,7 @@ describe('getConnectorById', () => {
     );
 
     await expect(() =>
-      getConnectorById({ actionsClient, connectorId })
+      getConnectorById({ actions, request, connectorId })
     ).rejects.toThrowErrorMatchingInlineSnapshot(
       `"Connector 'tcp-pigeon-3-0' of type '.tcp-pigeon' not recognized as a supported connector"`
     );
@@ -87,7 +94,7 @@ describe('getConnectorById', () => {
       })
     );
 
-    const connector = await getConnectorById({ actionsClient, connectorId });
+    const connector = await getConnectorById({ actions, request, connectorId });
 
     expect(connector).toEqual({
       connectorId: 'my-id',

@@ -351,6 +351,23 @@ describe('utils', () => {
       expect(tuples.length).toEqual(1);
       expect(warningStatusMessage).toEqual(undefined);
     });
+
+    test('should return originalFrom and originalTo in response', async () => {
+      const { originalFrom, originalTo } = await getRuleRangeTuples({
+        previousStartedAt: moment().subtract(30, 's').toDate(),
+        startedAt: moment().toDate(),
+        interval: '30s',
+        from: 'now-30s',
+        to: 'now',
+        maxSignals: 20,
+        ruleExecutionLogger,
+        alerting,
+      });
+
+      expect(originalFrom).toBeDefined();
+      expect(originalTo).toBeDefined();
+      expect(moment.duration(originalTo.diff(originalFrom)).asSeconds()).toEqual(30);
+    });
   });
 
   describe('calculateFromValue', () => {
@@ -410,12 +427,13 @@ describe('utils', () => {
       const exceptions = await getExceptions({
         client,
         lists: getListArrayMock(),
+        shouldFilterOutEndpointExceptions: true,
       });
 
       expect(client.findExceptionListsItemPointInTimeFinder).toHaveBeenCalledWith(
         expect.objectContaining({
-          listId: ['list_id_single', 'endpoint_list'],
-          namespaceType: ['single', 'agnostic'],
+          listId: ['list_id_single'],
+          namespaceType: ['single'],
           perPage: 1_000,
           filter: [],
           maxSize: undefined,
@@ -437,6 +455,7 @@ describe('utils', () => {
         getExceptions({
           client: listMock.getExceptionListClient(),
           lists: getListArrayMock(),
+          shouldFilterOutEndpointExceptions: true,
         })
       ).rejects.toThrowError(
         'unable to fetch exception list items, message: "error fetching list" full error: "Error: error fetching list"'
@@ -452,6 +471,7 @@ describe('utils', () => {
       const exceptions = await getExceptions({
         client: listMock.getExceptionListClient(),
         lists: [],
+        shouldFilterOutEndpointExceptions: true,
       });
 
       expect(exceptions).toEqual([]);

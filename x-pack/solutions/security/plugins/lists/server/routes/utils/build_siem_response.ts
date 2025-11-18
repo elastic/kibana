@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   CustomHttpResponseOptions,
   HttpResponsePayload,
   KibanaResponseFactory,

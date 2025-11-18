@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter } from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { BehaviorSubject, skip } from 'rxjs';
 import { initSelectionsManager } from './selections_manager';
-import { ControlGroupApi } from './types';
+import type { ControlGroupApi } from './types';
 
 describe('selections manager', () => {
   const control1Api = {
@@ -28,34 +28,80 @@ describe('selections manager', () => {
       timeslice$?: BehaviorSubject<[number, number] | undefined>;
     };
   }>({});
+  const setupControlChildren = () => {
+    control1Api.filters$.next(undefined);
+    control2Api.filters$.next([
+      {
+        meta: {
+          alias: 'control2 original filter',
+        },
+      },
+    ]);
+    control3Api.timeslice$.next([
+      Date.parse('2024-06-09T06:00:00.000Z'),
+      Date.parse('2024-06-09T12:00:00.000Z'),
+    ]);
+    controlGroupApi.children$.next({
+      control1: control1Api,
+      control2: control2Api,
+      control3: control3Api,
+    });
+  };
   const controlGroupApi = {
     autoApplySelections$: new BehaviorSubject(false),
     children$,
-    untilInitialized: async () => {
-      control1Api.filters$.next(undefined);
-      control2Api.filters$.next([
-        {
-          meta: {
-            alias: 'control2 original filter',
-          },
-        },
-      ]);
-      control3Api.timeslice$.next([
-        Date.parse('2024-06-09T06:00:00.000Z'),
-        Date.parse('2024-06-09T12:00:00.000Z'),
-      ]);
-      controlGroupApi.children$.next({
-        control1: control1Api,
-        control2: control2Api,
-        control3: control3Api,
-      });
-    },
+    untilInitialized: async () => setupControlChildren(),
   };
 
   const onFireMock = jest.fn();
   beforeEach(() => {
     onFireMock.mockReset();
     controlGroupApi.children$.next({});
+  });
+
+  describe('initialization', () => {
+    it('should wait for all child apis to be available before publishing initial filters', async () => {
+      let resolveChildren: (() => void) | undefined;
+      const childrenResolvePromise = new Promise<void>((r) => (resolveChildren = r));
+
+      const slowControlGroupApi = {
+        ...controlGroupApi,
+        untilInitialized: async () => {
+          await childrenResolvePromise;
+          return setupControlChildren();
+        },
+      };
+      const selectionsManager = initSelectionsManager(
+        slowControlGroupApi as unknown as Pick<
+          ControlGroupApi,
+          'autoApplySelections$' | 'children$' | 'untilInitialized'
+        >
+      );
+
+      // instrumentation to tell when filters are published.
+      let filtersPublished = false;
+      (async () => {
+        await selectionsManager.api.untilFiltersPublished();
+        filtersPublished = true;
+      })();
+
+      // filters should not have been published yet even after waiting 5 ms.
+      await new Promise((resolve) => setTimeout(resolve, 5));
+      expect(selectionsManager.api.filters$.value).toEqual([]); // default empty state for filters
+      expect(filtersPublished).toBe(false);
+
+      // resolve children and ensure initial filters are reported
+      resolveChildren?.();
+      await new Promise((resolve) => setTimeout(resolve, 1));
+      expect(filtersPublished).toBe(true);
+      expect(selectionsManager.api.filters$.value).toEqual([
+        {
+          meta: {
+            alias: 'control2 original filter',
+          },
+        },
+      ]);
+    });
   });
 
   describe('auto apply selections disabled', () => {

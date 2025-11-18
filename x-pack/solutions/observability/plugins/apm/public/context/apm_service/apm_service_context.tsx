@@ -9,6 +9,8 @@ import type { ReactNode } from 'react';
 import React, { createContext } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { History } from 'history';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { ApmIndexSettingsResponse } from '@kbn/apm-sources-access-plugin/server/routes/settings';
 import { ApmDocumentType } from '../../../common/document_type';
 import { getDefaultTransactionType } from '../../../common/transaction_types';
 import { useServiceTransactionTypesFetcher } from './use_service_transaction_types_fetcher';
@@ -17,10 +19,10 @@ import { useAnyOfApmParams } from '../../hooks/use_apm_params';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useFallbackToTransactionsFetcher } from '../../hooks/use_fallback_to_transactions_fetcher';
 import { replace } from '../../components/shared/links/url_helpers';
-import { FETCH_STATUS } from '../../hooks/use_fetcher';
+import { FETCH_STATUS, useFetcher } from '../../hooks/use_fetcher';
 import type { ServerlessType } from '../../../common/serverless';
 import { usePreferredDataSourceAndBucketSize } from '../../hooks/use_preferred_data_source_and_bucket_size';
-
+import type { ApmPluginStartDeps } from '../../plugin';
 export interface APMServiceContextValue {
   serviceName: string;
   agentName?: string;
@@ -33,6 +35,8 @@ export interface APMServiceContextValue {
   runtimeName?: string;
   fallbackToTransactions: boolean;
   serviceAgentStatus: FETCH_STATUS;
+  indexSettings: ApmIndexSettingsResponse['apmIndexSettings'];
+  indexSettingsStatus: FETCH_STATUS;
 }
 
 export const APMServiceContext = createContext<APMServiceContextValue>({
@@ -41,11 +45,13 @@ export const APMServiceContext = createContext<APMServiceContextValue>({
   transactionTypes: [],
   fallbackToTransactions: false,
   serviceAgentStatus: FETCH_STATUS.NOT_INITIATED,
+  indexSettings: [],
+  indexSettingsStatus: FETCH_STATUS.NOT_INITIATED,
 });
 
 export function ApmServiceContextProvider({ children }: { children: ReactNode }) {
   const history = useHistory();
-
+  const { services } = useKibana<ApmPluginStartDeps>();
   const {
     path: { serviceName },
     query,
@@ -94,6 +100,11 @@ export function ApmServiceContextProvider({ children }: { children: ReactNode })
     kuery,
   });
 
+  const { data = { apmIndexSettings: [] }, status: indexSettingsStatus } = useFetcher(
+    (_, signal) => services.apmSourcesAccess.getApmIndexSettings({ signal }),
+    [services.apmSourcesAccess]
+  );
+
   return (
     <APMServiceContext.Provider
       value={{
@@ -108,6 +119,8 @@ export function ApmServiceContextProvider({ children }: { children: ReactNode })
         runtimeName,
         fallbackToTransactions,
         serviceAgentStatus,
+        indexSettings: data?.apmIndexSettings,
+        indexSettingsStatus,
       }}
       children={children}
     />

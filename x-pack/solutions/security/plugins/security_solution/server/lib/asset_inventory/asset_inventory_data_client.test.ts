@@ -13,6 +13,12 @@ import {
 import type { InitEntityStoreRequestBody } from '../../../common/api/entity_analytics/entity_store/enable.gen';
 import type { SecuritySolutionApiRequestHandlerContext } from '../..';
 import { AssetInventoryDataClient } from './asset_inventory_data_client';
+import type { CoreStart } from '@kbn/core/server';
+import type {
+  SecuritySolutionPluginStartDependencies,
+  SecuritySolutionPluginStart,
+} from '../../plugin_contract';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 const mockSecSolutionContext = {
   getEntityStoreDataClient: jest.fn(),
@@ -40,15 +46,35 @@ const mockEntityStorePrivileges = {
   },
 };
 
+const mockCoreServicesTuple: [
+  CoreStart,
+  SecuritySolutionPluginStartDependencies,
+  SecuritySolutionPluginStart
+] = [
+  {} as CoreStart,
+  {} as SecuritySolutionPluginStartDependencies,
+  {} as SecuritySolutionPluginStart,
+];
+
 describe('AssetInventoryDataClient', () => {
   const loggerMock = loggingSystemMock.createLogger();
   const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
   const uiSettingsClientMock = uiSettingsServiceMock.createClient();
 
+  const mockUsageCollection = {
+    makeUsageCollector: jest.fn().mockImplementation((config) => config),
+    registerCollector: jest.fn(),
+  } as unknown as UsageCollectionSetup & {
+    makeUsageCollector: jest.Mock;
+    registerCollector: jest.Mock;
+  };
+
   const client: AssetInventoryDataClient = new AssetInventoryDataClient({
     logger: loggerMock,
     clusterClient: clusterClientMock,
     uiSettingsClient: uiSettingsClientMock,
+    usageCollection: mockUsageCollection,
+    coreStartPromise: Promise.resolve(mockCoreServicesTuple),
   });
 
   describe('status function', () => {
@@ -118,7 +144,7 @@ describe('AssetInventoryDataClient', () => {
       expect(
         mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count
       ).toHaveBeenCalledWith({
-        index: '.entities.v1.latest.security_generic_default',
+        index: '.entities.*.latest.security_*_default',
       });
       // Verify that installAssetInventoryDataView was called
       expect(mockDataViewService.get).toHaveBeenCalledWith('asset-inventory-default', false);
@@ -156,7 +182,7 @@ describe('AssetInventoryDataClient', () => {
       expect(
         mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count
       ).toHaveBeenCalledWith({
-        index: '.entities.v1.latest.security_generic_custom-space',
+        index: '.entities.*.latest.security_*_custom-space',
       });
       // Verify that installAssetInventoryDataView was called with custom space
       expect(mockDataViewService.get).toHaveBeenCalledWith('asset-inventory-custom-space', false);
@@ -191,7 +217,7 @@ describe('AssetInventoryDataClient', () => {
       expect(
         mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count
       ).toHaveBeenCalledWith({
-        index: '.entities.v1.latest.security_generic_default',
+        index: '.entities.*.latest.security_*_default',
       });
       // Verify that installAssetInventoryDataView was attempted but failed
       expect(mockDataViewService.get).toHaveBeenCalledWith('asset-inventory-default', false);
@@ -222,11 +248,11 @@ describe('AssetInventoryDataClient', () => {
       expect(
         mockSecSolutionContext.core.elasticsearch.client.asInternalUser.count
       ).toHaveBeenCalledWith({
-        index: '.entities.v1.latest.security_generic_default',
+        index: '.entities.*.latest.security_*_default',
       });
       // Verify error was logged
       expect(loggerMock.error).toHaveBeenCalledWith(
-        'Error checking for generic documents: Index not found'
+        'Error checking for the presence of entities documents: Index not found'
       );
     });
 

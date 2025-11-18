@@ -9,10 +9,10 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { renderHook } from '@testing-library/react';
 import { useSourcererDataView } from '../containers';
 import { mockSourcererScope } from '../containers/mocks';
-import { SourcererScopeName } from '../store/model';
 import type { UseGetScopedSourcererDataViewArgs } from './use_get_sourcerer_data_view';
 import { useGetScopedSourcererDataView } from './use_get_sourcerer_data_view';
 import { TestProviders } from '../../common/mock';
+import { PageScope } from '../../data_view_manager/constants';
 
 const renderHookCustom = (args: UseGetScopedSourcererDataViewArgs) => {
   return renderHook(({ sourcererScope }) => useGetScopedSourcererDataView({ sourcererScope }), {
@@ -27,12 +27,14 @@ jest.mock('../containers');
 
 const mockGetSourcererDataView = jest.fn(() => mockSourcererScope);
 
-describe('useGetScopedSourcererDataView', () => {
+// WARN: skipping this test as data view picker is the new default implementation.
+// See https://github.com/elastic/security-team/issues/11959
+describe.skip('useGetScopedSourcererDataView', () => {
   beforeEach(() => {
     (useSourcererDataView as jest.Mock).mockImplementation(mockGetSourcererDataView);
   });
   it('should return DataView when correct spec is provided', () => {
-    const { result } = renderHookCustom({ sourcererScope: SourcererScopeName.timeline });
+    const { result } = renderHookCustom({ sourcererScope: PageScope.timeline });
 
     expect(result.current).toBeInstanceOf(DataView);
   });
@@ -41,7 +43,7 @@ describe('useGetScopedSourcererDataView', () => {
       ...mockSourcererScope,
       sourcererDataView: {},
     });
-    const { result } = renderHookCustom({ sourcererScope: SourcererScopeName.timeline });
+    const { result } = renderHookCustom({ sourcererScope: PageScope.timeline });
     expect(result.current).toBeUndefined();
   });
   it('should return undefined when no spec is provided and should update the return when spec is updated to correct value', () => {
@@ -49,10 +51,10 @@ describe('useGetScopedSourcererDataView', () => {
       ...mockSourcererScope,
       sourcererDataView: {},
     });
-    const { rerender, result } = renderHookCustom({ sourcererScope: SourcererScopeName.timeline });
+    const { rerender, result } = renderHookCustom({ sourcererScope: PageScope.timeline });
     expect(result.current).toBeUndefined();
 
-    rerender({ sourcererScope: SourcererScopeName.timeline });
+    rerender({ sourcererScope: PageScope.timeline });
     expect(result.current).toBeInstanceOf(DataView);
   });
 });

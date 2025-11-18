@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React, { cloneElement } from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -23,30 +24,34 @@ export const MANAGED_POLICY_TOOLTIP_MESSAGE = i18n.translate(
   }
 );
 
-interface Props {
-  isManaged?: boolean;
-  tooltipMessage: string;
-  component: ReactElement;
-}
-
 /**
  * Component that wraps a given component (disabled field) with a tooltip if a repository
  * or policy is managed (isManaged === true).
- *
- * @param {boolean} isManaged - Determines if the tooltip should be displayed.
- * @param {string} tooltipMessage - The message to display inside the tooltip.
- * @param {React.ReactElement} component - The component to wrap with the tooltip.
  */
-export const DisableToolTip: React.FunctionComponent<Props> = ({
-  isManaged,
-  tooltipMessage,
-  component,
-}) => {
+export interface Props {
+  /** Determines if the tooltip should be displayed.
+   *  @optional
+   */
+  isManaged?: boolean;
+  /** The message to display inside the tooltip. */
+  tooltipMessage: string;
+  /** Tooltip anchor element  */
+  children: ReactElement;
+}
+
+export const DisableToolTip = ({ isManaged, tooltipMessage, children, ...props }: Props) => {
+  // Ensures that any implicitly passed down props from meta parent component via `cloneElement` like in EuiFormRow [here](https://github.com/elastic/eui/blob/bc9c0a0b3faab449f88e45a588dfe0a53d842cf7/packages/eui/src/components/form/form_row/form_row.tsx#L210-L213) are forwarded down to anchor element.
+  // At the same time, explicitly provided props on anchor component, should always take precedence to avoid confusion.
+  const childrenWithProps = cloneElement(children, {
+    ...props,
+    ...children.props,
+  });
+
   return isManaged ? (
     <EuiToolTip content={tooltipMessage} display="block">
-      {component}
+      {childrenWithProps}
     </EuiToolTip>
   ) : (
-    component
+    childrenWithProps
   );
 };

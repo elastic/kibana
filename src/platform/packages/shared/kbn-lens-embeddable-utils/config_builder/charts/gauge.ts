@@ -7,18 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  FormBasedPersistedState,
-  FormulaPublicApi,
-  GaugeVisualizationState,
-} from '@kbn/lens-plugin/public';
+import type { FormBasedPersistedState, GaugeVisualizationState } from '@kbn/lens-common';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensGaugeConfig } from '../types';
+import type { BuildDependencies, LensAttributes, LensGaugeConfig } from '../types';
+import { DEFAULT_LAYER_ID } from '../types';
 import {
   addLayerFormulaColumns,
   buildDatasourceStates,
-  buildReferences,
-  getAdhocDataviews,
+  extractReferences,
   mapToFormula,
 } from '../utils';
 import { getFormulaColumn, getValueColumn } from '../columns';
@@ -63,12 +59,11 @@ function buildVisualizationState(config: LensGaugeConfig): GaugeVisualizationSta
 function buildFormulaLayer(
   layer: LensGaugeConfig,
   i: number,
-  dataView: DataView,
-  formulaAPI?: FormulaPublicApi
+  dataView: DataView
 ): FormBasedPersistedState['layers'][0] {
   const layers = {
     [DEFAULT_LAYER_ID]: {
-      ...getFormulaColumn(ACCESSOR, mapToFormula(layer), dataView, formulaAPI),
+      ...getFormulaColumn(ACCESSOR, mapToFormula(layer), dataView),
     },
   };
 
@@ -76,36 +71,21 @@ function buildFormulaLayer(
 
   if (layer.queryGoalValue) {
     const columnName = getAccessorName('goal');
-    const formulaColumn = getFormulaColumn(
-      columnName,
-      { formula: layer.queryGoalValue },
-      dataView,
-      formulaAPI
-    );
+    const formulaColumn = getFormulaColumn(columnName, { formula: layer.queryGoalValue }, dataView);
 
     addLayerFormulaColumns(defaultLayer, formulaColumn);
   }
 
   if (layer.queryMinValue) {
     const columnName = getAccessorName('min');
-    const formulaColumn = getFormulaColumn(
-      columnName,
-      { formula: layer.queryMinValue },
-      dataView,
-      formulaAPI
-    );
+    const formulaColumn = getFormulaColumn(columnName, { formula: layer.queryMinValue }, dataView);
 
     addLayerFormulaColumns(defaultLayer, formulaColumn);
   }
 
   if (layer.queryMaxValue) {
     const columnName = getAccessorName('max');
-    const formulaColumn = getFormulaColumn(
-      columnName,
-      { formula: layer.queryMaxValue },
-      dataView,
-      formulaAPI
-    );
+    const formulaColumn = getFormulaColumn(columnName, { formula: layer.queryMaxValue }, dataView);
 
     addLayerFormulaColumns(defaultLayer, formulaColumn);
   }
@@ -126,11 +106,11 @@ function getValueColumns(layer: LensGaugeConfig) {
 
 export async function buildGauge(
   config: LensGaugeConfig,
-  { dataViewsAPI, formulaAPI }: BuildDependencies
+  { dataViewsAPI }: BuildDependencies
 ): Promise<LensAttributes> {
   const dataviews: Record<string, DataView> = {};
   const _buildFormulaLayer = (cfg: unknown, i: number, dataView: DataView) =>
-    buildFormulaLayer(cfg as LensGaugeConfig, i, dataView, formulaAPI);
+    buildFormulaLayer(cfg as LensGaugeConfig, i, dataView);
   const datasourceStates = await buildDatasourceStates(
     config,
     dataviews,
@@ -138,18 +118,19 @@ export async function buildGauge(
     getValueColumns,
     dataViewsAPI
   );
+  const { references, internalReferences, adHocDataViews } = extractReferences(dataviews);
+
   return {
     title: config.title,
     visualizationType: 'lnsGauge',
-    references: buildReferences(dataviews),
+    references,
     state: {
       datasourceStates,
-      internalReferences: [],
+      internalReferences,
       filters: [],
       query: { language: 'kuery', query: '' },
       visualization: buildVisualizationState(config),
-      // Getting the spec from a data view is a heavy operation, that's why the result is cached.
-      adHocDataViews: getAdhocDataviews(dataviews),
+      adHocDataViews,
     },
   };
 }

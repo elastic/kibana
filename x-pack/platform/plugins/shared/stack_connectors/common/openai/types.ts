@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type {
   ConfigSchema,
   SecretsSchema,
@@ -18,12 +18,12 @@ import type {
   InvokeAIActionResponseSchema,
 } from './schema';
 
-export type Config = TypeOf<typeof ConfigSchema>;
-export type Secrets = TypeOf<typeof SecretsSchema>;
-export type RunActionParams = TypeOf<typeof RunActionParamsSchema>;
-export type InvokeAIActionParams = TypeOf<typeof InvokeAIActionParamsSchema>;
-export type InvokeAIActionResponse = TypeOf<typeof InvokeAIActionResponseSchema>;
-export type RunActionResponse = TypeOf<typeof RunActionResponseSchema>;
-export type DashboardActionParams = TypeOf<typeof DashboardActionParamsSchema>;
-export type DashboardActionResponse = TypeOf<typeof DashboardActionResponseSchema>;
-export type StreamActionParams = TypeOf<typeof StreamActionParamsSchema>;
+export type Config = z.input<typeof ConfigSchema>;
+export type Secrets = z.infer<typeof SecretsSchema>;
+export type RunActionParams = z.infer<typeof RunActionParamsSchema>;
+export type InvokeAIActionParams = z.infer<typeof InvokeAIActionParamsSchema>;
+export type InvokeAIActionResponse = z.infer<typeof InvokeAIActionResponseSchema>;
+export type RunActionResponse = z.infer<typeof RunActionResponseSchema>;
+export type DashboardActionParams = z.infer<typeof DashboardActionParamsSchema>;
+export type DashboardActionResponse = z.infer<typeof DashboardActionResponseSchema>;
+export type StreamActionParams = z.infer<typeof StreamActionParamsSchema>;

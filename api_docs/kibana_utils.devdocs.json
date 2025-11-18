@@ -1123,6 +1123,17 @@
           },
           {
             "parentPluginId": "kibanaUtils",
+            "id": "def-public.SavedObjectNotFound.savedObjectTypeDisplayName",
+            "type": "string",
+            "tags": [],
+            "label": "savedObjectTypeDisplayName",
+            "description": [],
+            "path": "src/platform/plugins/shared/kibana_utils/common/errors/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kibanaUtils",
             "id": "def-public.SavedObjectNotFound.savedObjectId",
             "type": "string",
             "tags": [],
@@ -1152,62 +1163,82 @@
               {
                 "parentPluginId": "kibanaUtils",
                 "id": "def-public.SavedObjectNotFound.Unnamed.$1",
-                "type": "string",
+                "type": "Object",
                 "tags": [],
-                "label": "type",
+                "label": "{\n    type,\n    typeDisplayName = type,\n    id,\n    link,\n    customMessage,\n  }",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
                 "path": "src/platform/plugins/shared/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "kibanaUtils",
-                "id": "def-public.SavedObjectNotFound.Unnamed.$2",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "src/platform/plugins/shared/kibana_utils/common/errors/errors.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              },
-              {
-                "parentPluginId": "kibanaUtils",
-                "id": "def-public.SavedObjectNotFound.Unnamed.$3",
-                "type": "string",
-                "tags": [],
-                "label": "link",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "src/platform/plugins/shared/kibana_utils/common/errors/errors.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              },
-              {
-                "parentPluginId": "kibanaUtils",
-                "id": "def-public.SavedObjectNotFound.Unnamed.$4",
-                "type": "string",
-                "tags": [],
-                "label": "customMessage",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "src/platform/plugins/shared/kibana_utils/common/errors/errors.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
+                "children": [
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-public.SavedObjectNotFound.Unnamed.$1.type",
+                    "type": "string",
+                    "tags": [],
+                    "label": "type",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/kibana_utils/common/errors/errors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-public.SavedObjectNotFound.Unnamed.$1.typeDisplayName",
+                    "type": "string",
+                    "tags": [],
+                    "label": "typeDisplayName",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/kibana_utils/common/errors/errors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-public.SavedObjectNotFound.Unnamed.$1.id",
+                    "type": "string",
+                    "tags": [],
+                    "label": "id",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/kibana_utils/common/errors/errors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-public.SavedObjectNotFound.Unnamed.$1.link",
+                    "type": "string",
+                    "tags": [],
+                    "label": "link",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/kibana_utils/common/errors/errors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-public.SavedObjectNotFound.Unnamed.$1.customMessage",
+                    "type": "string",
+                    "tags": [],
+                    "label": "customMessage",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/kibana_utils/common/errors/errors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -8210,6 +8241,17 @@
           },
           {
             "parentPluginId": "kibanaUtils",
+            "id": "def-common.SavedObjectNotFound.savedObjectTypeDisplayName",
+            "type": "string",
+            "tags": [],
+            "label": "savedObjectTypeDisplayName",
+            "description": [],
+            "path": "src/platform/plugins/shared/kibana_utils/common/errors/errors.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kibanaUtils",
             "id": "def-common.SavedObjectNotFound.savedObjectId",
             "type": "string",
             "tags": [],
@@ -8239,62 +8281,82 @@
               {
                 "parentPluginId": "kibanaUtils",
                 "id": "def-common.SavedObjectNotFound.Unnamed.$1",
-                "type": "string",
+                "type": "Object",
                 "tags": [],
-                "label": "type",
+                "label": "{\n    type,\n    typeDisplayName = type,\n    id,\n    link,\n    customMessage,\n  }",
                 "description": [],
-                "signature": [
-                  "string"
-                ],
                 "path": "src/platform/plugins/shared/kibana_utils/common/errors/errors.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "kibanaUtils",
-                "id": "def-common.SavedObjectNotFound.Unnamed.$2",
-                "type": "string",
-                "tags": [],
-                "label": "id",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "src/platform/plugins/shared/kibana_utils/common/errors/errors.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              },
-              {
-                "parentPluginId": "kibanaUtils",
-                "id": "def-common.SavedObjectNotFound.Unnamed.$3",
-                "type": "string",
-                "tags": [],
-                "label": "link",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "src/platform/plugins/shared/kibana_utils/common/errors/errors.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              },
-              {
-                "parentPluginId": "kibanaUtils",
-                "id": "def-common.SavedObjectNotFound.Unnamed.$4",
-                "type": "string",
-                "tags": [],
-                "label": "customMessage",
-                "description": [],
-                "signature": [
-                  "string | undefined"
-                ],
-                "path": "src/platform/plugins/shared/kibana_utils/common/errors/errors.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
+                "children": [
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-common.SavedObjectNotFound.Unnamed.$1.type",
+                    "type": "string",
+                    "tags": [],
+                    "label": "type",
+                    "description": [],
+                    "path": "src/platform/plugins/shared/kibana_utils/common/errors/errors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-common.SavedObjectNotFound.Unnamed.$1.typeDisplayName",
+                    "type": "string",
+                    "tags": [],
+                    "label": "typeDisplayName",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/kibana_utils/common/errors/errors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-common.SavedObjectNotFound.Unnamed.$1.id",
+                    "type": "string",
+                    "tags": [],
+                    "label": "id",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/kibana_utils/common/errors/errors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-common.SavedObjectNotFound.Unnamed.$1.link",
+                    "type": "string",
+                    "tags": [],
+                    "label": "link",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/kibana_utils/common/errors/errors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "kibanaUtils",
+                    "id": "def-common.SavedObjectNotFound.Unnamed.$1.customMessage",
+                    "type": "string",
+                    "tags": [],
+                    "label": "customMessage",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "src/platform/plugins/shared/kibana_utils/common/errors/errors.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -8923,6 +8985,35 @@
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "kibanaUtils",
+        "id": "def-common.makeRegEx",
+        "type": "Function",
+        "tags": [],
+        "label": "makeRegEx",
+        "description": [],
+        "signature": [
+          "((glob: string) => RegExp) & _.MemoizedFunction"
+        ],
+        "path": "src/platform/plugins/shared/kibana_utils/common/field_wildcard.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "kibanaUtils",
+            "id": "def-common.makeRegEx.$1",
+            "type": "string",
+            "tags": [],
+            "label": "glob",
+            "description": [],
+            "path": "src/platform/plugins/shared/kibana_utils/common/field_wildcard.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {

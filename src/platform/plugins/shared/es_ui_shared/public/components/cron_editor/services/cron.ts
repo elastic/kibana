@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FieldToValueMap } from '../types';
+import type { FieldToValueMap } from '../types';
 
 export function cronExpressionToParts(expression: string): FieldToValueMap {
   const parsedCron: FieldToValueMap = {

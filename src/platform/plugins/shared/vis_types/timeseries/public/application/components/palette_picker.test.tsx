@@ -9,8 +9,9 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { ReactWrapper } from 'enzyme';
-import { PalettePicker, PalettePickerProps } from './palette_picker';
+import type { ReactWrapper } from 'enzyme';
+import type { PalettePickerProps } from './palette_picker';
+import { PalettePicker } from './palette_picker';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { EuiColorPalettePicker } from '@elastic/eui';
 import { PALETTES } from '../../../common/enums';

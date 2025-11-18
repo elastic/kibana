@@ -8,15 +8,15 @@
  */
 
 import pMap from 'p-map';
-import {
+import type {
   AuthorizeUpdateObject,
-  SavedObjectsErrorHelpers,
   ISavedObjectTypeRegistry,
   SavedObjectsRawDoc,
   ISavedObjectsSecurityExtension,
 } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import {
+import type {
   SavedObjectsBulkDeleteObject,
   SavedObjectsBulkDeleteOptions,
   SavedObjectsBulkDeleteResponse,

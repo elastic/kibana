@@ -9,7 +9,8 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_SEARCH_SESSION_REST_VERSION } from '@kbn/data-plugin/server';
 import expect from '@kbn/expect';
 import { SearchSessionStatus } from '@kbn/data-plugin/common';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { faker } from '@faker-js/faker';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -178,6 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
               wait_for_completion_timeout: '1ms',
             },
+            requestHash: faker.string.alpha(64),
           })
           .expect(200);
 
@@ -213,6 +215,7 @@ export default function ({ getService }: FtrProviderContext) {
               },
               wait_for_completion_timeout: '1ms',
             },
+            requestHash: faker.string.alpha(64),
           })
           .expect(200);
 
@@ -294,6 +297,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send({
           sessionId,
           params: searchParams,
+          requestHash: faker.string.alpha(64),
         })
         .expect(200);
 
@@ -322,6 +326,7 @@ export default function ({ getService }: FtrProviderContext) {
           sessionId,
           params: searchParams,
           isStored: true,
+          requestHash: faker.string.alpha(64),
         })
         .expect(200);
 
@@ -571,6 +576,7 @@ export default function ({ getService }: FtrProviderContext) {
           .send({
             sessionId,
             params: searchParams,
+            requestHash: faker.string.alpha(64),
           })
           .expect(200);
 
@@ -599,6 +605,7 @@ export default function ({ getService }: FtrProviderContext) {
             sessionId,
             params: searchParams,
             isStored: true,
+            requestHash: faker.string.alpha(64),
           })
           .expect(200);
 

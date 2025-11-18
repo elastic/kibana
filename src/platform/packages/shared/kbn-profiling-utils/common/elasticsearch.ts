@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UnionToIntersection, ValuesType } from 'utility-types';
+import type { UnionToIntersection, ValuesType } from 'utility-types';
 
 /**
  * Profiling Elasticsearch fields

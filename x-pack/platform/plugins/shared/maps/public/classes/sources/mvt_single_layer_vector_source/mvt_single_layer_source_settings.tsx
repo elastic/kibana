@@ -7,14 +7,16 @@
 
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
-import React, { Fragment, Component, ChangeEvent } from 'react';
-import { EuiFieldText, EuiFormRow, EuiToolTip, EuiIcon } from '@elastic/eui';
+import type { ChangeEvent } from 'react';
+import React, { Fragment, Component } from 'react';
+import { EuiFieldText, EuiFormRow, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import _ from 'lodash';
-import { ValidatedDualRange, Value } from '@kbn/kibana-react-plugin/public';
+import type { Value } from '@kbn/kibana-react-plugin/public';
+import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
 import { MAX_ZOOM, MIN_ZOOM } from '../../../../common/constants';
 import { MVTFieldConfigEditor } from './mvt_field_config_editor';
-import { MVTFieldDescriptor } from '../../../../common/descriptor_types';
+import type { MVTFieldDescriptor } from '../../../../common/descriptor_types';
 
 export type MVTSettings = {
   layerName: string;
@@ -28,6 +30,7 @@ interface State {
   currentMinSourceZoom: number;
   currentMaxSourceZoom: number;
   currentFields: MVTFieldDescriptor[];
+  touchedLayerName: boolean;
 }
 
 interface Props {
@@ -48,6 +51,7 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
     currentMinSourceZoom: this.props.minSourceZoom,
     currentMaxSourceZoom: this.props.maxSourceZoom,
     currentFields: _.cloneDeep(this.props.fields),
+    touchedLayerName: false,
   };
 
   _handleChange = _.debounce(() => {
@@ -61,6 +65,10 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
 
   _handleLayerNameInputChange = (e: ChangeEvent<HTMLInputElement>) => {
     this.setState({ currentLayerName: e.target.value }, this._handleChange);
+  };
+
+  _handleLayerNameInputBlur = () => {
+    this.setState({ touchedLayerName: true });
   };
 
   _handleFieldChange = (fields: MVTFieldDescriptor[]) => {
@@ -78,6 +86,13 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
   };
 
   render() {
+    const isInvalidLayerName = this.state.currentLayerName === '' && this.state.touchedLayerName;
+    const layerNameErrorMessage = i18n.translate(
+      'xpack.maps.source.MVTSingleLayerVectorSourceEditor.layerNameErrorMessage',
+      {
+        defaultMessage: 'Source layer is required',
+      }
+    );
     const preMessage = i18n.translate(
       'xpack.maps.source.MVTSingleLayerVectorSourceEditor.fieldsPreHelpMessage',
       {
@@ -99,26 +114,22 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
       this.props.showFields && this.state.currentLayerName !== '' ? (
         <EuiFormRow
           label={
-            <EuiToolTip
-              anchorClassName="eui-alignMiddle"
-              content={
-                <>
-                  {preMessage}
-                  {message}
-                  {postMessage}
-                </>
-              }
-            >
-              <span>
-                {i18n.translate(
-                  'xpack.maps.source.MVTSingleLayerVectorSourceEditor.fieldsMessage',
-                  {
-                    defaultMessage: 'Fields',
-                  }
-                )}{' '}
-                <EuiIcon type="question" color="subdued" />
-              </span>
-            </EuiToolTip>
+            <span>
+              {i18n.translate('xpack.maps.source.MVTSingleLayerVectorSourceEditor.fieldsMessage', {
+                defaultMessage: 'Fields',
+              })}{' '}
+              <EuiIconTip
+                type="question"
+                color="subdued"
+                content={
+                  <>
+                    {preMessage}
+                    {message}
+                    {postMessage}
+                  </>
+                }
+              />
+            </span>
           }
         >
           <MVTFieldConfigEditor
@@ -138,37 +149,39 @@ export class MVTSingleLayerSourceSettings extends Component<Props, State> {
               defaultMessage: 'Source layer',
             }
           )}
+          isInvalid={isInvalidLayerName}
+          error={isInvalidLayerName ? layerNameErrorMessage : undefined}
         >
           <EuiFieldText
             value={this.state.currentLayerName}
             onChange={this._handleLayerNameInputChange}
-            isInvalid={this.state.currentLayerName === ''}
+            onBlur={this._handleLayerNameInputBlur}
+            isInvalid={isInvalidLayerName}
             compressed
           />
         </EuiFormRow>
 
         <ValidatedDualRange
           label={
-            <EuiToolTip
-              anchorClassName="eui-alignMiddle"
-              content={i18n.translate(
-                'xpack.maps.source.MVTSingleLayerVectorSourceEditor.zoomRangeHelpMessage',
+            <span>
+              {i18n.translate(
+                'xpack.maps.source.MVTSingleLayerVectorSourceEditor.zoomRangeTopMessage',
                 {
-                  defaultMessage:
-                    'Zoom levels where the layer is present in the tiles. This does not correspond directly to visibility. Layer data from lower levels can always be displayed at higher zoom levels (but not vice versa).',
+                  defaultMessage: 'Available levels',
                 }
-              )}
-            >
-              <span>
-                {i18n.translate(
-                  'xpack.maps.source.MVTSingleLayerVectorSourceEditor.zoomRangeTopMessage',
+              )}{' '}
+              <EuiIconTip
+                type="question"
+                color="subdued"
+                content={i18n.translate(
+                  'xpack.maps.source.MVTSingleLayerVectorSourceEditor.zoomRangeHelpMessage',
                   {
-                    defaultMessage: 'Available levels',
+                    defaultMessage:
+                      'Zoom levels where the layer is present in the tiles. This does not correspond directly to visibility. Layer data from lower levels can always be displayed at higher zoom levels (but not vice versa).',
                   }
-                )}{' '}
-                <EuiIcon type="question" color="subdued" />
-              </span>
-            </EuiToolTip>
+                )}
+              />
+            </span>
           }
           formRowDisplay="columnCompressed"
           value={[this.state.currentMinSourceZoom, this.state.currentMaxSourceZoom]}

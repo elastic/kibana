@@ -11,23 +11,23 @@ import { lastValueFrom } from 'rxjs';
 import type { Filter, Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
-import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SearchBarProps, StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { mapAndFlattenFilters, getTime } from '@kbn/data-plugin/public';
 import type { SavedQuery, ISearchSource } from '@kbn/data-plugin/public';
+import type { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
 import {
   BUCKET_SELECTOR_FIELD,
   buildAggregation,
-  FieldOption,
   isCountAggregation,
   isGroupAggregation,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import { getComparatorScript } from '../../../../common';
-import { Comparator } from '../../../../common/comparator_types';
-import {
+import type { Comparator } from '../../../../common/comparator_types';
+import type {
   CommonRuleParams,
   EsQueryRuleMetaData,
   EsQueryRuleParams,
@@ -119,7 +119,8 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         ruleParams.size ?? (isServerless ? SERVERLESS_DEFAULT_VALUES.SIZE : DEFAULT_VALUES.SIZE),
       excludeHitsFromPreviousRun:
         ruleParams.excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
-      sourceFields: ruleParams.sourceFields,
+      // The sourceFields param is ignored
+      sourceFields: [],
     }
   );
 
@@ -132,7 +133,6 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
   const onSelectDataView = useCallback((newDataView: DataView) => {
     dispatch({ type: 'index', payload: newDataView });
-    dispatch({ type: 'sourceFields', payload: undefined });
     setEsFields(convertFieldSpecToFieldOption(newDataView.fields.map((field) => field.toSpec())));
   }, []);
 
@@ -238,12 +238,6 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
 
   const onChangeExcludeHitsFromPreviousRun = useCallback(
     (exclude: boolean) => dispatch({ type: 'excludeHitsFromPreviousRun', payload: exclude }),
-    []
-  );
-
-  const onChangeSourceFields = useCallback(
-    (selectedSourceFields: SourceField[]) =>
-      dispatch({ type: 'sourceFields', payload: selectedSourceFields }),
     []
   );
 
@@ -394,8 +388,6 @@ export const SearchSourceExpressionForm = (props: SearchSourceExpressionFormProp
         excludeHitsFromPreviousRun={ruleConfiguration.excludeHitsFromPreviousRun}
         onChangeExcludeHitsFromPreviousRun={onChangeExcludeHitsFromPreviousRun}
         canSelectMultiTerms={DEFAULT_VALUES.CAN_SELECT_MULTI_TERMS}
-        onChangeSourceFields={onChangeSourceFields}
-        sourceFields={ruleConfiguration.sourceFields}
       />
       <EuiSpacer />
     </Fragment>

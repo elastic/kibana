@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CelInputState } from '../../server/types';
+import type { CelInputState } from '../../server/types';
 
 export const celTestState: CelInputState = {
   dataStreamName: 'testDataStream',

@@ -14,7 +14,7 @@ import { REPO_ROOT } from '@kbn/repo-info';
 import { findPlugins } from './find_plugins';
 import { getPluginApi } from './get_plugin_api';
 import { getKibanaPlatformPlugin } from './integration_tests/kibana_platform_plugin_mock';
-import { PluginApi, PluginOrPackage } from './types';
+import type { PluginApi, PluginOrPackage } from './types';
 import { getPluginForPath, getServiceForPath, removeBrokenLinks, getFileName } from './utils';
 
 const log = new ToolingLog({

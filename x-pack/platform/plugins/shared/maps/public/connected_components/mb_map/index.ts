@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { AnyAction } from 'redux';
-import { ThunkDispatch } from 'redux-thunk';
+import type { AnyAction } from 'redux';
+import type { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
 import { MbMap } from './mb_map';
 import {
@@ -29,7 +29,7 @@ import {
 } from '../../selectors/map_selectors';
 import { getDrawMode, getIsFullScreen } from '../../selectors/ui_selectors';
 import { getInspectorAdapters, getOnMapMove } from '../../reducers/non_serializable_instances';
-import { MapStoreState } from '../../reducers/store';
+import type { MapStoreState } from '../../reducers/store';
 import { DRAW_MODE } from '../../../common/constants';
 import type { MapExtentState } from '../../reducers/map/types';
 

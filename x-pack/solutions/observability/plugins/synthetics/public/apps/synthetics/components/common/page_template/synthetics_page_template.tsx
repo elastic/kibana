@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
+import type { LazyObservabilityPageTemplateProps } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 
 export const WrappedPageTemplate = (props: LazyObservabilityPageTemplateProps) => {
   const { observabilityShared } = useKibana<ClientPluginsStart>().services;

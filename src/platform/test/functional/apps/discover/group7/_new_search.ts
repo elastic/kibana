@@ -8,7 +8,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -113,9 +113,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await discover.clickNewSearchButton();
       await discover.waitUntilSearchingHasFinished();
-      expect(await monacoEditor.getCodeEditorValue()).to.be('FROM logstash-* | LIMIT 10');
+      expect(await monacoEditor.getCodeEditorValue()).to.be('FROM logstash-*');
       expect(await discover.getVisContextSuggestionType()).to.be('histogramForESQL');
-      expect(await discover.getHitCount()).to.be('10');
+      expect(await discover.getHitCount()).to.be('1,000');
     });
 
     it('should work correctly for a saved search in ESQL mode', async () => {
@@ -134,8 +134,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await discover.clickNewSearchButton();
       await discover.waitUntilSearchingHasFinished();
-      expect(await monacoEditor.getCodeEditorValue()).to.be('FROM logstash-* | LIMIT 10');
-      expect(await discover.getHitCount()).to.be('10');
+      expect(await monacoEditor.getCodeEditorValue()).to.be('FROM logstash-*');
+      expect(await discover.getHitCount()).to.be('1,000');
     });
   });
 }

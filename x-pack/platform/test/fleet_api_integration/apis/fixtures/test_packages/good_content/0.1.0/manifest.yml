@@ -17,6 +17,8 @@ conditions:
 discovery:
   fields:
     - name: process.pid
+  datasets:
+    - name: good_content.dataset 
 screenshots:
   - src: /img/kibana-system.png
     title: kibana system

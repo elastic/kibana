@@ -16,6 +16,12 @@ jest.mock('../../../../../../../plugin', () => ({
   getUnifiedDocViewerServices: jest.fn(),
 }));
 
+jest.mock('../../../../hooks/use_data_sources', () => ({
+  useDataSourcesContext: () => ({
+    indexes: { apm: { traces: 'test-index' } },
+  }),
+}));
+
 const mockSearch = jest.fn();
 const mockAddDanger = jest.fn();
 
@@ -36,7 +42,7 @@ const mockServices = {
 
 describe('useSpan', () => {
   const spanId = 'test-span-id';
-  const indexPattern = 'test-index';
+  const traceId = 'test-trace-id';
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -57,7 +63,7 @@ describe('useSpan', () => {
         })
       );
 
-      const { result } = renderHook(() => useSpan({ spanId, indexPattern }));
+      const { result } = renderHook(() => useSpan({ spanId, traceId }));
       await waitFor(() => !result.current.loading);
 
       expect(result.current.loading).toBe(false);
@@ -66,22 +72,12 @@ describe('useSpan', () => {
     });
   });
 
-  describe('when parameters are missing', () => {
-    it('should set span to null and loading to false', () => {
-      const { result } = renderHook(() => useSpan({ spanId: undefined, indexPattern }));
-
-      expect(result.current.loading).toBe(false);
-      expect(result.current.span).toBe(null);
-      expect(result.current.docId).toBe(null);
-    });
-  });
-
   describe('when there is an error', () => {
     it('should show an error toast and set span to null', async () => {
       const error = new Error('something went wrong');
       mockSearch.mockReturnValue(throwError(() => error));
 
-      const { result } = renderHook(() => useSpan({ spanId, indexPattern }));
+      const { result } = renderHook(() => useSpan({ spanId, traceId }));
       await waitFor(() => !result.current.loading);
 
       expect(result.current.loading).toBe(false);

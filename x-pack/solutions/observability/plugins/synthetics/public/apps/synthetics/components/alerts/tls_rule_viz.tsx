@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import { inspectTLSRuleAction } from '../../state/alert_rules';
-import { TLSRuleParamsProps } from './tls_rule_ui';
+import type { TLSRuleParamsProps } from './tls_rule_ui';
 import { RuleViz } from './rule_viz';
 
 export const TLSRuleViz = ({ ruleParams }: { ruleParams: TLSRuleParamsProps['ruleParams'] }) => {

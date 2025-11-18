@@ -6,8 +6,8 @@
  */
 
 import { INTERNAL_API_BASE_PATH } from './constants';
-import { RoleCredentials } from '../../../shared/services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { RoleCredentials } from '../../../shared/services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export function SvlEnrichPoliciesApi({ getService }: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');

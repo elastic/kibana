@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useEffect, useState } from 'react';
-import { Ping } from '../../../../../../common/runtime_types';
+import type { Ping } from '../../../../../../common/runtime_types';
 import { useSimpleRunOnceMonitors } from '../hooks/use_simple_run_once_monitors';
 import { TestResultHeader } from '../test_result_header';
 import { PingListTable } from './ping_list/ping_list_table';

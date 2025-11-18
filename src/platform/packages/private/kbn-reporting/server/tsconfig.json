@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -28,11 +28,11 @@
     "@kbn/core-saved-objects-api-server",
     "@kbn/core-saved-objects-server",
     "@kbn/core-ui-settings-server",
-    "@kbn/licensing-plugin",
     "@kbn/spaces-plugin",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/config-schema",
     "@kbn/core-http-server-utils",
+    "@kbn/licensing-types",
   ]
 }

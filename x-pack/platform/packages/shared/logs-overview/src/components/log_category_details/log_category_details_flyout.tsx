@@ -18,17 +18,16 @@ import {
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import { css } from '@emotion/react';
 import { FilterStateStore, buildCustomFilter } from '@kbn/es-query';
-import { LogCategory } from '../../types';
+import type { LogCategory } from '../../types';
 import { LogCategoryPattern } from '../shared/log_category_pattern';
-import {
-  LogCategoryDocumentExamplesTable,
-  LogCategoryDocumentExamplesTableDependencies,
-} from './log_category_document_examples_table';
+import type { LogCategoryDocumentExamplesTableDependencies } from './log_category_document_examples_table';
+import { LogCategoryDocumentExamplesTable } from './log_category_document_examples_table';
 import { type ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
-import { DiscoverLink, DiscoverLinkDependencies } from '../discover_link';
+import type { DiscoverLinkDependencies } from '../discover_link';
+import { DiscoverLink } from '../discover_link';
 import { createCategoryQuery } from '../../services/categorize_logs_service/queries';
 
 export type LogCategoriesFlyoutDependencies = LogCategoryDocumentExamplesTableDependencies &

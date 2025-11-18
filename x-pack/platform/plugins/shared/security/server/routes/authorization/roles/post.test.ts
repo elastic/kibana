@@ -9,7 +9,7 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { MockedVersionedRouter } from '@kbn/core-http-router-server-mocks';
 import { KibanaFeature } from '@kbn/features-plugin/server';
-import type { LicenseCheck } from '@kbn/licensing-plugin/server';
+import type { LicenseCheck } from '@kbn/licensing-types';
 import { GLOBAL_RESOURCE } from '@kbn/security-plugin-types-server';
 
 import type { BulkCreateOrUpdateRolesPayloadSchemaType } from './model/bulk_create_or_update_payload';

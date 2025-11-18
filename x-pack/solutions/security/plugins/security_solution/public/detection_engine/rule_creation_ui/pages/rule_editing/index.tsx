@@ -134,6 +134,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
     scheduleStepData,
     actionsStepForm,
     actionsStepData,
+    handleNewConnectorCreated,
   } = useRuleForms({
     defineStepDefault: defineRuleData,
     aboutStepDefault: aboutRuleData,
@@ -327,6 +328,8 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                   summaryActionMessageParams={actionMessageParams}
                   form={actionsStepForm}
                   key="actionsStep"
+                  ruleInterval={scheduleStepData.interval}
+                  onNewConnectorCreated={handleNewConnectorCreated}
                 />
               )}
               <EuiSpacer />
@@ -361,6 +364,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
       actionsStepData,
       actionMessageParams,
       actionsStepForm,
+      handleNewConnectorCreated,
     ]
   );
 
@@ -548,7 +552,12 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                       />
                       {isRulesCustomizationEnabled && upgradeCallout}
                       {invalidSteps.length > 0 && (
-                        <EuiCallOut title={i18n.SORRY_ERRORS} color="danger" iconType="warning">
+                        <EuiCallOut
+                          announceOnMount
+                          title={i18n.SORRY_ERRORS}
+                          color="danger"
+                          iconType="warning"
+                        >
                           <FormattedMessage
                             id="xpack.securitySolution.detectionEngine.rule.editRule.errorMsgDescription"
                             defaultMessage="You have an invalid input in {countError, plural, one {this tab} other {these tabs}}: {tabHasError}"

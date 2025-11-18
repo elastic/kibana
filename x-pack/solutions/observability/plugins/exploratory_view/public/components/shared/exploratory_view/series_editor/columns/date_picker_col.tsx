@@ -12,7 +12,7 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { DateRangePicker } from '../../components/date_range_picker';
 import { SeriesDatePicker } from '../../components/series_date_picker';
-import { AppDataType, SeriesUrl } from '../../types';
+import type { AppDataType, SeriesUrl } from '../../types';
 import { ReportTypes } from '../../configurations/constants';
 import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { SyntheticsAddData } from '../../../add_data_buttons/synthetics_add_data';

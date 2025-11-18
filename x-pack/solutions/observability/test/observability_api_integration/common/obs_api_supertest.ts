@@ -6,9 +6,10 @@
  */
 
 import { format } from 'url';
-import supertest from 'supertest';
-import request from 'superagent';
-import { formatRequest, ClientRequestParamsOf, ReturnOf } from '@kbn/server-route-repository';
+import type supertest from 'supertest';
+import type request from 'superagent';
+import type { ClientRequestParamsOf, ReturnOf } from '@kbn/server-route-repository';
+import { formatRequest } from '@kbn/server-route-repository';
 import type {
   ObservabilityServerRouteRepository,
   APIEndpoint,

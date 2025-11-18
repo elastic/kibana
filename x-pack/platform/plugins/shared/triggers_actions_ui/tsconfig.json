@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -58,7 +58,6 @@
     "@kbn/code-editor-mock",
     "@kbn/io-ts-utils",
     "@kbn/lens-plugin",
-    "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-theme",
     "@kbn/controls-plugin",
@@ -89,7 +88,9 @@
     "@kbn/esql-types",
     "@kbn/elastic-assistant-common",
     "@kbn/ebt-tools",
-    "@kbn/presentation-util"
+    "@kbn/presentation-util",
+    "@kbn/discover-utils",
+    "@kbn/react-query"
   ],
   "exclude": ["target/**/*"]
 }

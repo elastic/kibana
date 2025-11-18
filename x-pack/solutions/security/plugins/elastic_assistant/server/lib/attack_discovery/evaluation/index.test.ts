@@ -13,8 +13,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 
 import { evaluateAttackDiscovery } from '.';
-import { DefaultAttackDiscoveryGraph } from '../graphs/default_attack_discovery_graph';
-import { AttackDiscoveryGraphMetadata } from '../../langchain/graphs';
+import type { DefaultAttackDiscoveryGraph } from '../graphs/default_attack_discovery_graph';
+import type { AttackDiscoveryGraphMetadata } from '../../langchain/graphs';
 import { mockExperimentConnector } from './__mocks__/mock_experiment_connector';
 import { getLlmType } from '../../../routes/utils';
 

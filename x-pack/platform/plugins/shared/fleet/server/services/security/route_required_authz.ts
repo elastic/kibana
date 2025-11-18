@@ -180,6 +180,24 @@ const ROUTE_AUTHZ_REQUIREMENTS = deepFreeze<Record<string, FleetRouteRequiredAut
       },
     },
   },
+
+  // EPM Package Knowledge Base API
+  [`get:${EPM_API_ROUTES.KNOWLEDGE_BASE_PATTERN}`]: {
+    any: {
+      integrations: {
+        readPackageInfo: true,
+      },
+      packagePrivileges: {
+        endpoint: {
+          actions: {
+            readSecuritySolution: {
+              executePackageAction: true,
+            },
+          },
+        },
+      },
+    },
+  },
 });
 
 /**

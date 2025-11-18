@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { TickFormatter, DomainRange, BarStyleAccessor } from '@elastic/charts';
+import type { TickFormatter, DomainRange, BarStyleAccessor } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 
 import { useWaterfallContext } from './context/waterfall_context';

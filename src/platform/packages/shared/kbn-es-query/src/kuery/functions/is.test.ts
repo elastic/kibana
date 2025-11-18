@@ -11,11 +11,11 @@ import { nodeTypes } from '../node_types';
 import { fields } from '../../filters/stubs';
 
 import * as is from './is';
-import { DataViewBase } from '../../..';
+import type { DataViewBase } from '../../..';
 import type { estypes } from '@elastic/elasticsearch';
 import { KQL_NODE_TYPE_WILDCARD } from '../node_types/wildcard';
 import { KQL_NODE_TYPE_LITERAL } from '../node_types/literal';
-import { KqlIsFunctionNode } from './is';
+import type { KqlIsFunctionNode } from './is';
 
 describe('kuery functions', () => {
   describe('is', () => {

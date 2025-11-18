@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Query, AggregateQuery, isOfAggregateQueryType } from '@kbn/es-query';
+import type { Query, AggregateQuery } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { has } from 'lodash';
 
 /**

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
+import type { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import { PluginSetup as SecuritySolutionPluginSetup } from '@kbn/security-solution-plugin/public';
+import type { PluginSetup as SecuritySolutionPluginSetup } from '@kbn/security-solution-plugin/public';
 
 export type ResolverTestPluginSetup = void;
 export type ResolverTestPluginStart = void;

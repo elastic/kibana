@@ -7,42 +7,72 @@
 
 import React, { useCallback, useState } from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { EuiCallOut, EuiFlexItem, EuiLink, EuiSpacer, OnRefreshProps } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import type { TimeRange } from '@kbn/es-query';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSkeletonTitle,
+  EuiSpacer,
+  EuiSplitPanel,
+} from '@elastic/eui';
+import type { QualityIssueType } from '../../../state_machines/dataset_quality_details_controller';
 import { useDatasetQualityDetailsState } from '../../../hooks';
 import { AggregationNotSupported } from './aggregation_not_supported';
 import { QualityIssues } from './quality_issues';
 import { FailureStoreWarning } from '../../failure_store/failure_store_warning';
-import { useKibanaContextForPlugin } from '../../../utils/use_kibana';
+import { Panel, PanelIndicator } from './summary/panel';
+import { Card } from './quality_summary_cards/card';
 
-const OverviewHeader = dynamic(() => import('./header'));
-const Summary = dynamic(() => import('./summary'));
+const OverviewHeader = dynamic(() => import('./header'), {
+  fallback: <EuiSkeletonTitle size="m" />,
+});
+const Summary = dynamic(() => import('./summary'), {
+  fallback: (
+    <EuiFlexGroup gutterSize="m">
+      <Panel title="" isLoading={true}>
+        <PanelIndicator label="" isLoading={true} value="" />
+        <PanelIndicator label="" isLoading={true} value="" />
+      </Panel>
+      <Panel title="" isLoading={true}>
+        <PanelIndicator label="" isLoading={true} value="" />
+        <PanelIndicator label="" isLoading={true} value="" />
+      </Panel>
+    </EuiFlexGroup>
+  ),
+});
+const QualitySummaryCards = dynamic(() => import('./quality_summary_cards'), {
+  fallback: (
+    <EuiFlexGroup gutterSize="m" direction="column" style={{ height: '100%' }}>
+      <EuiFlexItem grow={true}>
+        <Card title="" isLoading={true} kpiValue="" footer={null} />
+      </EuiFlexItem>
+      <EuiFlexItem grow={true}>
+        <Card title="" isLoading={true} kpiValue="" footer={null} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  ),
+});
+
 const DocumentTrends = dynamic(() => import('./document_trends'));
 
-export function Overview() {
+export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
   const {
     dataStream,
     isNonAggregatable,
     canUserReadFailureStore,
-    hasFailureStore,
     updateTimeRange,
     loadingState: { dataStreamSettingsLoading },
+    view,
   } = useDatasetQualityDetailsState();
-
-  const {
-    services: {
-      share: { url: urlService },
-    },
-  } = useKibanaContextForPlugin();
-
-  const locator = urlService.locators.get('INDEX_MANAGEMENT_LOCATOR_ID');
-  const locatorParams = { page: 'data_streams_details', dataStreamName: dataStream } as const;
 
   const [lastReloadTime, setLastReloadTime] = useState<number>(Date.now());
 
-  const handleRefresh = useCallback(
-    (refreshProps: OnRefreshProps) => {
-      updateTimeRange(refreshProps);
+  const [selectedQualityCard, setSelectedQualityCard] =
+    React.useState<QualityIssueType>('degraded');
+
+  const handleTimeChange = useCallback(
+    (refreshProps: TimeRange) => {
+      updateTimeRange({ start: refreshProps.from, end: refreshProps.to });
       setLastReloadTime(Date.now());
     },
     [updateTimeRange]
@@ -50,32 +80,8 @@ export function Overview() {
   return (
     <>
       {isNonAggregatable && <AggregationNotSupported dataStream={dataStream} />}
-      <OverviewHeader handleRefresh={handleRefresh} />
+      <OverviewHeader handleTimeChange={handleTimeChange} />
       <EuiSpacer size="m" />
-      {!dataStreamSettingsLoading && !hasFailureStore && canUserReadFailureStore && (
-        <div style={{ marginBottom: 16 }}>
-          <EuiCallOut
-            color="warning"
-            title={
-              <>
-                {i18n.translate('xpack.datasetQuality.noFailureStoreTitle', {
-                  defaultMessage: 'Failure store is not enabled for this data stream. ',
-                })}
-                <EuiLink
-                  href={locator?.getRedirectUrl(locatorParams)}
-                  target="_blank"
-                  external={false}
-                  css={{ textDecoration: 'underline' }}
-                >
-                  {i18n.translate('xpack.datasetQuality.enableFailureStore', {
-                    defaultMessage: 'Enable failure store',
-                  })}
-                </EuiLink>
-              </>
-            }
-          />
-        </div>
-      )}
 
       {!dataStreamSettingsLoading && !canUserReadFailureStore && (
         <EuiFlexItem>
@@ -83,9 +89,38 @@ export function Overview() {
           <EuiSpacer size="m" />
         </EuiFlexItem>
       )}
-      <Summary />
-      <EuiSpacer size="m" />
-      <DocumentTrends lastReloadTime={lastReloadTime} />
+
+      {view === 'dataQuality' && (
+        <>
+          <Summary />
+          <EuiSpacer size="m" />
+        </>
+      )}
+
+      <EuiSplitPanel.Outer
+        direction="row"
+        data-test-subj="datasetQualityDetailsOverview"
+        hasShadow={false}
+        hasBorder={true}
+      >
+        <EuiSplitPanel.Inner color="subdued" grow={false}>
+          <QualitySummaryCards
+            selectedCard={selectedQualityCard}
+            setSelectedCard={setSelectedQualityCard}
+          />
+        </EuiSplitPanel.Inner>
+        <EuiSplitPanel.Inner grow={true}>
+          <DocumentTrends
+            lastReloadTime={lastReloadTime}
+            openAlertFlyout={openAlertFlyout}
+            displayActions={{
+              displayCreateRuleButton: selectedQualityCard === 'degraded',
+              displayEditFailureStore: selectedQualityCard === 'failed' && view !== 'wired', // Don't allow editing failure store for Wired Streams
+            }}
+          />
+        </EuiSplitPanel.Inner>
+      </EuiSplitPanel.Outer>
+
       <EuiSpacer size="m" />
       <QualityIssues />
     </>

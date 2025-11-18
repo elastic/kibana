@@ -7,14 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { EsWorkflow } from '@kbn/workflows';
-import {
-  convertWorkflowScheduleToTaskSchedule,
-  getScheduledTriggers,
-  WorkflowTrigger,
-} from '../lib/schedule_utils';
+import { getReadableFrequency, getReadableInterval } from '../lib/rrule_logging_utils';
+import type { WorkflowTrigger } from '../lib/schedule_utils';
+import { convertWorkflowScheduleToTaskSchedule, getScheduledTriggers } from '../lib/schedule_utils';
 
 export interface WorkflowTaskSchedulerParams {
   workflowId: string;
@@ -29,15 +27,19 @@ export class WorkflowTaskScheduler {
   ) {}
 
   /**
-   * Schedules tasks for all enabled scheduled triggers in a workflow
+   * Schedules tasks for all scheduled triggers in a workflow
    */
-  async scheduleWorkflowTasks(workflow: EsWorkflow, spaceId: string): Promise<string[]> {
-    const scheduledTriggers = getScheduledTriggers(workflow.definition.workflow.triggers);
+  async scheduleWorkflowTasks(
+    workflow: EsWorkflow,
+    spaceId: string,
+    request?: KibanaRequest
+  ): Promise<string[]> {
+    const scheduledTriggers = getScheduledTriggers(workflow.definition?.triggers ?? []);
     const scheduledTaskIds: string[] = [];
 
     for (const trigger of scheduledTriggers) {
       try {
-        const taskId = await this.scheduleWorkflowTask(workflow.id, spaceId, trigger);
+        const taskId = await this.scheduleWorkflowTask(workflow.id, spaceId, trigger, request);
         scheduledTaskIds.push(taskId);
         this.logger.info(
           `Scheduled workflow task for workflow ${workflow.id}, trigger ${trigger.type}, task ID: ${taskId}`
@@ -59,9 +61,20 @@ export class WorkflowTaskScheduler {
   async scheduleWorkflowTask(
     workflowId: string,
     spaceId: string,
-    trigger: WorkflowTrigger
+    trigger: WorkflowTrigger,
+    request?: KibanaRequest
   ): Promise<string> {
     const schedule = convertWorkflowScheduleToTaskSchedule(trigger);
+
+    // Log RRule-specific scheduling details
+    if ('rrule' in schedule && schedule.rrule) {
+      const freqText = getReadableFrequency(schedule.rrule.freq);
+      const intervalText = getReadableInterval(schedule.rrule.freq, schedule.rrule.interval);
+
+      this.logger.info(
+        `RRule schedule created for workflow ${workflowId}: ${freqText} every ${schedule.rrule.interval} ${intervalText}`
+      );
+    }
 
     const taskInstance = {
       id: `workflow:${workflowId}:${trigger.type}`,
@@ -81,7 +94,12 @@ export class WorkflowTaskScheduler {
       enabled: true,
     };
 
-    const scheduledTask = await this.taskManager.schedule(taskInstance);
+    // Use Task Manager's first-class API key support by passing the request
+    // Task Manager will automatically create and manage the API key for user context
+    const scheduledTask = request
+      ? await this.taskManager.schedule(taskInstance, { request })
+      : await this.taskManager.schedule(taskInstance);
+
     return scheduledTask.id;
   }
 
@@ -97,7 +115,7 @@ export class WorkflowTaskScheduler {
           bool: {
             must: [
               { term: { 'task.taskType': 'workflow:scheduled' } },
-              { term: { _id: `task:workflow:${workflowId}:triggers.elastic.scheduled` } },
+              { ids: { values: [`task:workflow:${workflowId}:scheduled`] } },
             ],
           },
         },
@@ -118,11 +136,15 @@ export class WorkflowTaskScheduler {
   /**
    * Updates scheduled tasks when a workflow is updated
    */
-  async updateWorkflowTasks(workflow: EsWorkflow, spaceId: string): Promise<void> {
+  async updateWorkflowTasks(
+    workflow: EsWorkflow,
+    spaceId: string,
+    request?: KibanaRequest
+  ): Promise<void> {
     // First, unschedule all existing tasks
     await this.unscheduleWorkflowTasks(workflow.id);
 
-    // Then, schedule new tasks for enabled scheduled triggers
-    await this.scheduleWorkflowTasks(workflow, spaceId);
+    // Then, schedule new tasks for scheduled triggers
+    await this.scheduleWorkflowTasks(workflow, spaceId, request);
   }
 }

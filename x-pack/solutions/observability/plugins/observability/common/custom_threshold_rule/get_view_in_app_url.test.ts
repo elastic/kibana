@@ -6,9 +6,10 @@
  */
 
 import { Aggregators } from './types';
-import { LocatorPublic } from '@kbn/share-plugin/common';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { LogsLocatorParams } from '@kbn/logs-shared-plugin/common';
-import { getViewInAppUrl, GetViewInAppUrlArgs } from './get_view_in_app_url';
+import type { GetViewInAppUrlArgs } from './get_view_in_app_url';
+import { getViewInAppUrl } from './get_view_in_app_url';
 
 describe('getViewInAppUrl', () => {
   const logsLocator = {

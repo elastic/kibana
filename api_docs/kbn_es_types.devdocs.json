@@ -122,10 +122,10 @@
           },
           {
             "parentPluginId": "@kbn/es-types",
-            "id": "def-common.ESQLSearchParams.include_ccs_metadata",
+            "id": "def-common.ESQLSearchParams.include_execution_metadata",
             "type": "CompoundType",
             "tags": [],
-            "label": "include_ccs_metadata",
+            "label": "include_execution_metadata",
             "description": [],
             "signature": [
               "boolean | undefined"
@@ -157,7 +157,7 @@
             "description": [],
             "signature": [
               "ScalarValue",
-              "[] | Record<string, string | number | Record<string, string | number> | undefined>[] | undefined"
+              "[] | Record<string, string | number | (string | number)[] | Record<string, string | number> | undefined>[] | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
             "deprecated": false,
@@ -246,6 +246,20 @@
             "type": "number",
             "tags": [],
             "label": "took",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-es-types/src/search.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/es-types",
+            "id": "def-common.ESQLSearchResponse.documents_found",
+            "type": "number",
+            "tags": [],
+            "label": "documents_found",
             "description": [],
             "signature": [
               "number | undefined"

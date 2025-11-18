@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { resolve } from 'path';
 import { pageObjects } from './page_objects';
 import { services } from './services';
 import type { CreateTestConfigOptions } from '../shared/types';
 
-export function createTestConfig<TServices extends {} = typeof services>(
-  options: CreateTestConfigOptions<TServices>
-) {
+export function createTestConfig<
+  TServices extends {} = typeof services,
+  TPageObjects extends {} = typeof pageObjects
+>(options: CreateTestConfigOptions<TServices, TPageObjects>) {
   return async ({ readConfigFile }: FtrConfigProviderContext) => {
     const svlSharedConfig = await readConfigFile(require.resolve('../shared/config.base.ts'));
 
@@ -22,7 +23,7 @@ export function createTestConfig<TServices extends {} = typeof services>(
       ...svlSharedConfig.getAll(),
 
       testConfigCategory: ScoutTestRunConfigCategory.UI_TEST,
-      pageObjects,
+      pageObjects: { ...pageObjects, ...options.pageObjects },
       services: { ...services, ...options.services },
       esTestCluster: {
         ...svlSharedConfig.get('esTestCluster'),

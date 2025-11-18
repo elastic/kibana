@@ -6,14 +6,14 @@
  */
 
 import type { IKibanaResponse, IRouter, RequestHandlerContext } from '@kbn/core/server';
-import { Logger } from '@kbn/logging';
+import type { Logger } from '@kbn/logging';
 import { schema } from '@kbn/config-schema';
-import {
+import type {
   InferenceInferenceEndpointInfo,
   InferenceTaskType,
 } from '@elastic/elasticsearch/lib/api/types';
 
-import { InferenceServicesGetResponse } from '../types';
+import type { InferenceServicesGetResponse } from '../types';
 import { INFERENCE_ENDPOINT_INTERNAL_API_VERSION } from '../../common';
 import { inferenceEndpointExists } from '../lib/inference_endpoint_exists';
 import { unflattenObject } from '../utils/unflatten_object';
@@ -24,6 +24,7 @@ const inferenceEndpointSchema = schema.object({
     provider: schema.string(),
     taskType: schema.string(),
     providerConfig: schema.any(),
+    headers: schema.maybe(schema.recordOf(schema.string(), schema.string())),
   }),
   secrets: schema.object({
     providerSecrets: schema.any(),
@@ -106,6 +107,18 @@ export const getInferenceServicesRoute = (
 
           const { config, secrets } = request.body;
 
+          // NOTE: This is a temporary workaround for anthropic max_tokens handling until the services endpoint is updated to reflect the correct structure.
+          // Anthropic is unique in that it requires max_tokens to be sent as part of the task_settings instead of the usual service_settings.
+          // Until the services endpoint is updated to reflect that, there is no way for the form UI to know where to put max_tokens. This can be removed once that update is made.
+          let taskSettings;
+          if (config?.provider === 'anthropic' && config?.providerConfig?.max_tokens) {
+            taskSettings = {
+              max_tokens: config.providerConfig.max_tokens,
+            };
+            // This field is unknown to the anthropic service config, so we remove it
+            delete config.providerConfig.max_tokens;
+          }
+
           const serviceSettings = {
             ...unflattenObject(config?.providerConfig ?? {}),
             ...unflattenObject(secrets?.providerSecrets ?? {}),
@@ -117,6 +130,7 @@ export const getInferenceServicesRoute = (
             inference_config: {
               service: config?.provider,
               service_settings: serviceSettings,
+              ...(taskSettings ? { task_settings: taskSettings } : {}),
             },
           });
 

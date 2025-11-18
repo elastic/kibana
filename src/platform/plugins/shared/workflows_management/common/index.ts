@@ -10,8 +10,15 @@
 export const PLUGIN_ID = 'workflows';
 export const PLUGIN_NAME = 'Workflows';
 
-export const WORKFLOWS_EXECUTIONS_INDEX = '.kibana-workflow-executions';
-export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.kibana-workflow-step-executions';
-export const WORKFLOWS_EXECUTION_LOGS_INDEX = '.kibana-workflow-execution-logs';
+export const WORKFLOWS_EXECUTIONS_INDEX = '.workflows-executions';
+export const WORKFLOWS_STEP_EXECUTIONS_INDEX = '.workflows-step-executions';
+export const WORKFLOWS_EXECUTION_LOGS_INDEX = '.workflows-execution-logs';
+
+// These kibana connectors that are not supported in the workflows management UI
+export const UNSUPPORTED_CONNECTOR_TYPES = ['.index', '.webhook', '.cases-webhook', '.server-log'];
+
+// Export shared utilities that are needed by both server and client
+// NOTE: buildRequestFromConnector removed from here to avoid main bundle bloat
+// Import directly from './elasticsearch_request_builder' if needed
 
 // DO NOT IMPORT MODULES HERE. Otherwise it will inflate the initial plugin bundle size.

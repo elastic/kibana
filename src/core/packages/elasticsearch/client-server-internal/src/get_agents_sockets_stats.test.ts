@@ -8,7 +8,8 @@
  */
 
 import { Socket } from 'net';
-import { Agent, IncomingMessage } from 'http';
+import type { Agent } from 'http';
+import { IncomingMessage } from 'http';
 import { getAgentsSocketsStats } from './get_agents_sockets_stats';
 import { getHttpAgentMock, getHttpsAgentMock } from './get_agents_sockets_stats.test.mocks';
 

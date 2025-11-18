@@ -7,12 +7,11 @@
 
 import React, { useCallback, useMemo } from 'react';
 import type { EuiStepProps, EuiStepStatus } from '@elastic/eui';
-import { ResourceIdentifier } from '../../../../../../../../../common/siem_migrations/rules/resources';
+import { useAppToasts } from '../../../../../../../../common/hooks/use_app_toasts';
+import type { SiemMigrationResourceData } from '../../../../../../../../../common/siem_migrations/model/common.gen';
+import { RuleResourceIdentifier } from '../../../../../../../../../common/siem_migrations/rules/resources';
 import { useUpsertResources } from '../../../../../../service/hooks/use_upsert_resources';
-import type {
-  RuleMigrationResourceData,
-  RuleMigrationTaskStats,
-} from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationTaskStats } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { OnResourcesCreated } from '../../../../types';
 import { MacrosFileUpload } from './macros_file_upload';
 import * as i18n from './translations';
@@ -29,19 +28,20 @@ export const useMacrosFileUploadStep = ({
   missingMacros,
   onMacrosCreated,
 }: RulesFileUploadStepProps): EuiStepProps => {
+  const { addWarning } = useAppToasts();
   const { upsertResources, isLoading, error } = useUpsertResources(onMacrosCreated);
 
   const upsertMigrationResources = useCallback(
-    (macrosFromFile: RuleMigrationResourceData[]) => {
-      const macrosIndexed: Record<string, RuleMigrationResourceData> = Object.fromEntries(
+    (macrosFromFile: SiemMigrationResourceData[]) => {
+      const macrosIndexed: Record<string, SiemMigrationResourceData> = Object.fromEntries(
         macrosFromFile.map((macro) => [macro.name, macro])
       );
-      const resourceIdentifier = new ResourceIdentifier('splunk');
-      const macrosToUpsert: RuleMigrationResourceData[] = [];
+      const resourceIdentifier = new RuleResourceIdentifier('splunk');
+      const macrosToUpsert: SiemMigrationResourceData[] = [];
       let missingMacrosIt: string[] = missingMacros;
 
       while (missingMacrosIt.length > 0) {
-        const macros: RuleMigrationResourceData[] = [];
+        const macros: SiemMigrationResourceData[] = [];
         missingMacrosIt.forEach((macroName) => {
           const macro = macrosIndexed[macroName];
           if (macro) {
@@ -63,11 +63,12 @@ export const useMacrosFileUploadStep = ({
       }
 
       if (macrosToUpsert.length === 0) {
+        addWarning({ title: i18n.NO_MISSING_MACROS_PROVIDED });
         return; // No missing macros provided
       }
       upsertResources(migrationStats.id, macrosToUpsert);
     },
-    [upsertResources, migrationStats, missingMacros]
+    [missingMacros, upsertResources, migrationStats.id, addWarning]
   );
 
   const uploadStepStatus = useMemo(() => {

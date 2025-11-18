@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TileMetaFeature } from '../../../common/descriptor_types';
+import type { TileMetaFeature } from '../../../common/descriptor_types';
 
 // Elasticsearch vector tile API returns "meta" layer containing a single metadata feature for each tile request
 // This file contains utility methods for pulling values out of metadata features

@@ -7,7 +7,7 @@
 
 import { isObject, transform, snakeCase, isEmpty } from 'lodash';
 import { fold } from 'fp-ts/Either';
-import { identity } from 'fp-ts/function';
+import { identity, pipe as v2Pipe } from 'fp-ts/function';
 import { pipe } from 'fp-ts/pipeable';
 
 import type { ToastInputFields } from '@kbn/core/public';
@@ -24,11 +24,13 @@ import type {
   CasePatchRequest,
   CaseResolveResponse,
   CaseUserActionStatsResponse,
+  FindCasesContainingAllAlertsResponse,
   SingleCaseMetricsResponse,
 } from '../../common/types/api';
 import {
   CaseResolveResponseRt,
   CaseUserActionStatsResponseRt,
+  FindCasesContainingAllAlertsResponseRt,
   SingleCaseMetricsResponseRt,
 } from '../../common/types/api';
 import type {
@@ -94,6 +96,14 @@ export const decodeCaseUserActionStatsResponse = (
     fold(throwErrors(createToasterPlainError), identity)
   );
 
+export const decodeFindAllAttachedAlertsResponse = (
+  respCase?: FindCasesContainingAllAlertsResponse
+) =>
+  v2Pipe(
+    FindCasesContainingAllAlertsResponseRt.decode(respCase),
+    fold(throwErrors(createToasterPlainError), identity)
+  );
+
 export const valueToUpdateIsSettings = (
   key: UpdateByKey['updateKey'],
   value: UpdateByKey['updateValue']
@@ -128,10 +138,25 @@ export const createUpdateSuccessToaster = (
     className: 'eui-textBreakWord',
   };
 
-  if (valueToUpdateIsSettings(key, value) && value?.syncAlerts && caseHasAlerts) {
+  if (
+    valueToUpdateIsSettings(key, value) &&
+    value?.syncAlerts &&
+    caseHasAlerts &&
+    caseBeforeUpdate.settings.syncAlerts !== value?.syncAlerts
+  ) {
     return {
       ...toast,
       title: i18n.SYNC_CASE(caseAfterUpdate.title),
+    };
+  }
+
+  if (
+    valueToUpdateIsSettings(key, value) &&
+    caseBeforeUpdate.settings.extractObservables !== value?.extractObservables
+  ) {
+    return {
+      ...toast,
+      title: i18n.EXTRACT_OBSERVABLES(caseAfterUpdate.title),
     };
   }
 
@@ -207,4 +232,23 @@ export const constructCustomFieldsFilter = (
         customFields: valuesByCustomFieldKey,
       }
     : {};
+};
+
+export const getIncrementalIdSearchOverrides = (search: string) => {
+  const incrementalIdRegEx = /^#(\d{1,50})\s*$/;
+  // overrides for incremental_id search
+  let overrides: Partial<FilterOptions> = {};
+  let trimmedSearch = search?.trim();
+  const isIncrementalIdSearch = incrementalIdRegEx.test(trimmedSearch ?? '');
+  if (trimmedSearch && isIncrementalIdSearch) {
+    // extract the number portion of the inc id search: #123 -> 123
+    trimmedSearch = incrementalIdRegEx.exec(trimmedSearch)?.[1] ?? trimmedSearch;
+    // search only in `incremental_id` since types with `title`
+    // and `description` don't overlap
+    overrides = {
+      searchFields: ['incremental_id.text'],
+      search: trimmedSearch,
+    };
+  }
+  return overrides;
 };

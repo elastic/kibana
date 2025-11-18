@@ -6,16 +6,17 @@
  */
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
+import type { ExecutionContextSearch } from '@kbn/es-query';
 import {
   type AggregateQuery,
   type Filter,
   isOfAggregateQueryType,
   type Query,
   type TimeRange,
-  ExecutionContextSearch,
 } from '@kbn/es-query';
-import { PublishingSubject, apiPublishesTimeslice } from '@kbn/presentation-publishing';
-import type { LensRuntimeState } from '../types';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
+import { apiPublishesTimeslice } from '@kbn/presentation-publishing';
+import type { LensRuntimeState } from '@kbn/lens-common';
 import { nonNullable } from '../../utils';
 
 export interface MergedSearchContext {

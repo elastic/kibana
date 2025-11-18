@@ -6,17 +6,66 @@
  */
 
 import expect from '@kbn/expect';
-import { Streams } from '@kbn/streams-schema';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { Streams } from '@kbn/streams-schema';
+import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { disableStreams, enableStreams, indexDocument } from './helpers/requests';
-import {
-  StreamsSupertestRepositoryClient,
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import { loadDashboards } from './helpers/dashboards';
 
 const TEST_STREAM_NAME = 'logs-test-default';
+const WIRED_STREAM_NAME = 'logs.wiredChild';
 const TEST_DASHBOARD_ID = '9230e631-1f1a-476d-b613-4b074c6cfdd0';
+
+const oldProcessing = [
+  {
+    grok: {
+      field: 'message',
+      patterns: [
+        '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
+      ],
+      if: { always: {} },
+    },
+  },
+  {
+    set: {
+      field: 'message',
+      value: 'newValue',
+      if: { operator: 'eq', field: 'message', value: 'oldValue' },
+    },
+  },
+];
+
+const migratedProcessing = {
+  steps: [
+    {
+      action: 'manual_ingest_pipeline' as const,
+      ignore_failure: true,
+      processors: [
+        {
+          grok: {
+            field: 'message',
+            if: 'return true',
+            patterns: [
+              '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
+            ],
+          },
+        },
+        {
+          set: {
+            field: 'message',
+            if: "\n  try {\n  if (($('message', null) !== null && (($('message', null) instanceof Number && $('message', null).toString() == \"oldValue\") || $('message', null) == \"oldValue\"))) {\n    return true;\n  }\n  return false;\n} catch (Exception e) {\n  return false;\n}\n",
+            value: 'newValue',
+          },
+        },
+      ],
+      where: {
+        always: {},
+      },
+    },
+  ],
+};
 
 // Do not update these if tests are failing - this is testing whether they get migrated correctly - you should
 // always make sure that existing definitions and links keep working.
@@ -30,11 +79,14 @@ const assetLinks = [
     'query.title': 'Test',
     'query.kql.query': 'atest',
   },
+];
+
+const attachmentLinks = [
   {
-    'asset.type': 'dashboard',
-    'asset.id': TEST_DASHBOARD_ID,
-    'asset.uuid': 'a9e60eb2bc5fa77d1f66a612db29d2764ff8cf4a',
-    'stream.name': TEST_STREAM_NAME,
+    'attachment.type': 'dashboard',
+    'attachment.id': TEST_DASHBOARD_ID,
+    'attachment.uuid': 'a9e60eb2bc5fa77d1f66a612db29d2764ff8cf4a',
+    'stream.names': [TEST_STREAM_NAME],
   },
 ];
 
@@ -46,18 +98,37 @@ const streamDefinition = {
         policy: 'logs-default',
       },
     },
-    processing: [
-      {
-        grok: {
-          field: 'message',
-          patterns: [
-            '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
-          ],
-          if: { always: {} },
+    processing: oldProcessing,
+    unwired: {},
+  },
+};
+
+const wiredStreamDefinition = {
+  name: WIRED_STREAM_NAME,
+  ingest: {
+    lifecycle: {
+      ilm: {
+        policy: 'logs-default',
+      },
+    },
+    processing: oldProcessing,
+    wired: {
+      routing: [
+        {
+          destination: 'logs.wiredChild.child',
+          if: {
+            field: 'resource.attributes.host.name',
+            operator: 'eq' as const,
+            value: 'myHost',
+          },
+        },
+      ],
+      fields: {
+        'attributes.message2': {
+          type: 'match_only_text',
         },
       },
-    ],
-    unwired: {},
+    },
   },
 };
 
@@ -70,18 +141,44 @@ const expectedStreamsResponse: Streams.ClassicStream.Definition = {
         policy: 'logs-default',
       },
     },
-    processing: [
-      {
-        grok: {
-          field: 'message',
-          patterns: [
-            '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
-          ],
-          if: { always: {} },
+    // The old processing array is migrated to Streamlang DSL.
+    // Old processor definitions are migrated to a single manual_ingest_pipeline processor.
+    processing: migratedProcessing,
+    settings: {},
+    classic: {},
+  },
+};
+
+const expectedWiredStreamsResponse: Streams.WiredStream.Definition = {
+  name: WIRED_STREAM_NAME,
+  description: '',
+  ingest: {
+    lifecycle: {
+      ilm: {
+        policy: 'logs-default',
+      },
+    },
+    // The old processing array is migrated to Streamlang DSL.
+    // Old processor definitions are migrated to a single manual_ingest_pipeline processor.
+    processing: migratedProcessing,
+    settings: {},
+    wired: {
+      routing: [
+        {
+          destination: 'logs.wiredChild.child',
+          where: {
+            field: 'resource.attributes.host.name',
+            eq: 'myHost',
+          },
+          status: 'enabled',
+        },
+      ],
+      fields: {
+        'attributes.message2': {
+          type: 'match_only_text',
         },
       },
-    ],
-    classic: {},
+    },
   },
 };
 
@@ -90,6 +187,7 @@ const expectedDashboardsResponse = {
     {
       id: TEST_DASHBOARD_ID,
       title: 'dashboard-4-panels',
+      type: 'dashboard',
       tags: [],
     },
   ],
@@ -131,7 +229,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await loadDashboards(kibanaServer, ARCHIVES, SPACE_ID);
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
-      // link and unlink dashboard to make sure assets index is created
+      await kibanaServer.uiSettings.update({
+        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: true,
+      });
+      // link and unlink dashboard to make sure attachments index is created
       await apiClient.fetch('PUT /api/streams/{name}/dashboards/{dashboardId} 2023-10-31', {
         params: {
           path: {
@@ -148,11 +249,40 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           },
         },
       });
+      // link and unlink query asset to make sure assets index is created
+      await apiClient.fetch('PUT /api/streams/{name}/queries/{queryId} 2023-10-31', {
+        params: {
+          path: {
+            name: 'logs',
+            queryId: 'test-query-init',
+          },
+          body: {
+            title: 'Init Query',
+            kql: { query: 'test' },
+          },
+        },
+      });
+      await apiClient.fetch('DELETE /api/streams/{name}/queries/{queryId} 2023-10-31', {
+        params: {
+          path: {
+            name: 'logs',
+            queryId: 'test-query-init',
+          },
+        },
+      });
+
       await esClient.index({
         index: '.kibana_streams-000001',
         id: TEST_STREAM_NAME,
         document: streamDefinition,
       });
+
+      await esClient.index({
+        index: '.kibana_streams-000001',
+        id: WIRED_STREAM_NAME,
+        document: wiredStreamDefinition,
+      });
+
       await Promise.all(
         assetLinks.map((link) =>
           esClient.index({
@@ -163,13 +293,27 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         )
       );
 
+      await Promise.all(
+        attachmentLinks.map((link) =>
+          esClient.index({
+            index: '.kibana_streams_attachments-000001',
+            id: link['attachment.uuid'],
+            document: link,
+          })
+        )
+      );
+
       // Refresh the index to make the document searchable
       await esClient.indices.refresh({ index: '.kibana_streams-000001' });
       await esClient.indices.refresh({ index: '.kibana_streams_assets-000001' });
+      await esClient.indices.refresh({ index: '.kibana_streams_attachments-000001' });
     });
 
     after(async () => {
       await disableStreams(apiClient);
+      await kibanaServer.uiSettings.update({
+        [OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS]: false,
+      });
     });
 
     it('should read and return existing orphaned classic stream', async () => {
@@ -245,6 +389,16 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
       expect(response.status).to.eql(200);
       expect(response.body.queries).to.eql(expectedQueriesResponse.queries);
+    });
+
+    it('should migrate routing "if" condition to Streamlang syntax in wired streams', async () => {
+      const getResponse = await apiClient.fetch('GET /api/streams/{name} 2023-10-31', {
+        params: {
+          path: { name: WIRED_STREAM_NAME },
+        },
+      });
+      expect(getResponse.status).to.eql(200);
+      expect(getResponse.body.stream).to.eql(expectedWiredStreamsResponse);
     });
   });
 }

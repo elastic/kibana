@@ -11,8 +11,10 @@ import type {
   IndexAutocompleteItem,
   InferenceEndpointAutocompleteItem,
   ESQLControlVariable,
+  ESQLSourceResult,
 } from '@kbn/esql-types';
-import { ESQLLicenseType } from '@kbn/esql-types';
+import type { LicenseType } from '@kbn/licensing-types';
+import type { PricingProduct } from '@kbn/core-pricing-common/src/types';
 import type { ESQLLocation } from '../types';
 import type { FieldType, SupportedDataType } from '../definitions/types';
 import type { EditorExtensions } from './options/recommended_queries';
@@ -69,6 +71,7 @@ export interface ISuggestionItem {
   command?: {
     title: string;
     id: string;
+    arguments?: { [key: string]: string }[];
   };
   /**
    * The range that should be replaced when the suggestion is applied
@@ -82,6 +85,12 @@ export interface ISuggestionItem {
     start: number;
     end: number;
   };
+  /**
+   * If the suggestions list is incomplete and should be re-requested when the user types more characters.
+   * If a completion item with incomplete true is shown, the editor will ask for new suggestions in every keystroke
+   * until there are no more incomplete suggestions returned.
+   */
+  incomplete?: boolean;
 }
 
 export type GetColumnsByTypeFn = (
@@ -95,9 +104,11 @@ export type GetColumnsByTypeFn = (
   }
 ) => Promise<ISuggestionItem[]>;
 
+// TODO consider not exporting this
 export interface ESQLFieldWithMetadata {
   name: string;
   type: FieldType;
+  userDefined: false;
   isEcs?: boolean;
   hasConflict?: boolean;
   metadata?: {
@@ -105,14 +116,18 @@ export interface ESQLFieldWithMetadata {
   };
 }
 
+// TODO consider not exporting this
 export interface ESQLUserDefinedColumn {
   name: string;
   // invalid expressions produce columns of type "unknown"
   // also, there are some cases where we can't yet infer the type of
   // a valid expression as with `CASE` which can return union types
   type: SupportedDataType | 'unknown';
-  location: ESQLLocation;
+  userDefined: true;
+  location: ESQLLocation; // TODO should this be optional?
 }
+
+export type ESQLColumnData = ESQLUserDefinedColumn | ESQLFieldWithMetadata;
 
 export interface ESQLPolicy {
   name: string;
@@ -124,13 +139,15 @@ export interface ESQLPolicy {
 export interface ICommandCallbacks {
   getByType?: GetColumnsByTypeFn;
   getSuggestedUserDefinedColumnName?: (extraFieldNames?: string[] | undefined) => string;
-  getColumnsForQuery?: (query: string) => Promise<ESQLFieldWithMetadata[]>;
-  hasMinimumLicenseRequired?: (minimumLicenseRequired: ESQLLicenseType) => boolean;
+  getColumnsForQuery?: (query: string) => Promise<ESQLColumnData[]>;
+  hasMinimumLicenseRequired?: (minimumLicenseRequired: LicenseType) => boolean;
+  getJoinIndices?: () => Promise<{ indices: IndexAutocompleteItem[] }>;
+  canCreateLookupIndex?: (indexName: string) => Promise<boolean>;
+  isServerless?: boolean;
 }
 
 export interface ICommandContext {
-  userDefinedColumns: Map<string, ESQLUserDefinedColumn[]>;
-  fields: Map<string, ESQLFieldWithMetadata>;
+  columns: Map<string, ESQLColumnData>;
   sources?: ESQLSourceResult[];
   joinSources?: IndexAutocompleteItem[];
   timeSeriesSources?: IndexAutocompleteItem[];
@@ -140,8 +157,9 @@ export interface ICommandContext {
   variables?: ESQLControlVariable[];
   supportsControls?: boolean;
   histogramBarTarget?: number;
+  activeProduct?: PricingProduct | undefined;
+  isCursorInSubquery?: boolean;
 }
-
 /**
  * This is a list of locations within an ES|QL query.
  *
@@ -185,7 +203,7 @@ export enum Location {
   STATS_WHERE = 'stats_where',
 
   /**
-   * WHEN TS is used as a source command, inner STATS functions
+   * WHEN TS is used as a source command, and we are within an aggregation function
    */
   STATS_TIMESERIES = 'stats_timeseries',
 
@@ -211,6 +229,11 @@ export enum Location {
   RENAME = 'rename',
 
   /**
+   * In the RERANK command
+   */
+  RERANK = 'rerank',
+
+  /**
    * In the JOIN command (used only for AS)
    */
   JOIN = 'join',
@@ -225,35 +248,3 @@ export enum Location {
    */
   COMPLETION = 'completion',
 }
-
-export interface ESQLSourceResult {
-  name: string;
-  hidden: boolean;
-  title?: string;
-  dataStreams?: Array<{ name: string; title?: string }>;
-  type?: string;
-}
-
-const commandOptionNameToLocation: Record<string, Location> = {
-  eval: Location.EVAL,
-  where: Location.WHERE,
-  row: Location.ROW,
-  sort: Location.SORT,
-  stats: Location.STATS,
-  by: Location.STATS_BY,
-  enrich: Location.ENRICH,
-  with: Location.ENRICH_WITH,
-  dissect: Location.DISSECT,
-  rename: Location.RENAME,
-  join: Location.JOIN,
-  show: Location.SHOW,
-  completion: Location.COMPLETION,
-};
-
-/**
- * Pause before using this in new places. Where possible, use the Location enum directly.
- *
- * This is primarily around for backwards compatibility with the old system of command and option names.
- */
-export const getLocationFromCommandOrOptionName = (name: string) =>
-  commandOptionNameToLocation[name];

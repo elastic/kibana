@@ -8,6 +8,9 @@
 export const ELASTIC_AI_ASSISTANT_URL = '/api/security_ai_assistant';
 export const ELASTIC_AI_ASSISTANT_INTERNAL_URL = '/internal/elastic_assistant';
 
+export const UPDATE_ANONYMIZATION_FIELDS_URL =
+  `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/update_anonymization_fields` as const;
+
 export const POST_ACTIONS_CONNECTOR_EXECUTE =
   `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/actions/connector/{connectorId}/_execute` as const;
 
@@ -54,8 +57,6 @@ export const ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND =
 export const ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BULK_ACTION =
   `${ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL}/_bulk_action` as const;
 
-export const ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL =
-  `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/knowledge_base/_indices` as const;
 export const ELASTIC_AI_ASSISTANT_EVALUATE_URL =
   `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/evaluate` as const;
 
@@ -73,35 +74,60 @@ export const ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL =
 export const ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND =
   `${ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL}/_find` as const;
 
+// Users suggest (user profiles)
+export const ELASTIC_USERS_SUGGEST_URL =
+  `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/users/_suggest` as const;
+
 // Defend insights
 export const DEFEND_INSIGHTS_ID = 'defend-insights';
 export const DEFEND_INSIGHTS = `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/defend_insights`;
 export const DEFEND_INSIGHTS_BY_ID = `${DEFEND_INSIGHTS}/{id}`;
 
 // Attack Discovery
-export const ATTACK_DISCOVERY_SCHEDULES_ENABLED_FEATURE_FLAG =
-  'securitySolution.assistantAttackDiscoverySchedulingEnabled' as const;
 export const ATTACK_DISCOVERY_SCHEDULES_ALERT_TYPE_ID = 'attack-discovery' as const;
 export const ATTACK_DISCOVERY_SCHEDULES_CONSUMER_ID = 'siem' as const;
 
-export const ATTACK_DISCOVERY = `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/attack_discovery` as const;
+// Attack discovery public API
+export const ATTACK_DISCOVERY = '/api/attack_discovery';
 export const ATTACK_DISCOVERY_BULK = `${ATTACK_DISCOVERY}/_bulk` as const;
-export const ATTACK_DISCOVERY_BY_CONNECTOR_ID = `${ATTACK_DISCOVERY}/{connectorId}` as const;
-export const ATTACK_DISCOVERY_CANCEL_BY_CONNECTOR_ID =
-  `${ATTACK_DISCOVERY}/cancel/{connectorId}` as const;
 export const ATTACK_DISCOVERY_FIND = `${ATTACK_DISCOVERY}/_find` as const;
+export const ATTACK_DISCOVERY_GENERATE = `${ATTACK_DISCOVERY}/_generate` as const;
 export const ATTACK_DISCOVERY_GENERATIONS = `${ATTACK_DISCOVERY}/generations` as const;
 export const ATTACK_DISCOVERY_GENERATIONS_BY_ID =
   `${ATTACK_DISCOVERY_GENERATIONS}/{execution_uuid}` as const;
 export const ATTACK_DISCOVERY_GENERATIONS_BY_ID_DISMISS =
   `${ATTACK_DISCOVERY_GENERATIONS_BY_ID}/_dismiss` as const;
-export const ATTACK_DISCOVERY_SCHEDULES = `${ATTACK_DISCOVERY}/schedules` as const;
+export const ATTACK_DISCOVERY_SCHEDULES = `${ATTACK_DISCOVERY}/schedules` as const; // <-- create
 export const ATTACK_DISCOVERY_SCHEDULES_BY_ID = `${ATTACK_DISCOVERY_SCHEDULES}/{id}` as const;
 export const ATTACK_DISCOVERY_SCHEDULES_BY_ID_ENABLE =
   `${ATTACK_DISCOVERY_SCHEDULES}/{id}/_enable` as const;
 export const ATTACK_DISCOVERY_SCHEDULES_BY_ID_DISABLE =
   `${ATTACK_DISCOVERY_SCHEDULES}/{id}/_disable` as const;
 export const ATTACK_DISCOVERY_SCHEDULES_FIND = `${ATTACK_DISCOVERY_SCHEDULES}/_find` as const;
+
+// Attack discovery internal API (depreciated)
+export const ATTACK_DISCOVERY_INTERNAL =
+  `${ELASTIC_AI_ASSISTANT_INTERNAL_URL}/attack_discovery` as const;
+export const ATTACK_DISCOVERY_INTERNAL_BULK = `${ATTACK_DISCOVERY_INTERNAL}/_bulk` as const;
+export const ATTACK_DISCOVERY_INTERNAL_FIND = `${ATTACK_DISCOVERY_INTERNAL}/_find` as const;
+export const ATTACK_DISCOVERY_GENERATIONS_INTERNAL =
+  `${ATTACK_DISCOVERY_INTERNAL}/generations` as const;
+export const ATTACK_DISCOVERY_INTERNAL_GENERATIONS_BY_ID =
+  `${ATTACK_DISCOVERY_GENERATIONS_INTERNAL}/{execution_uuid}` as const;
+export const ATTACK_DISCOVERY_INTERNAL_GENERATIONS_BY_ID_DISMISS =
+  `${ATTACK_DISCOVERY_INTERNAL_GENERATIONS_BY_ID}/_dismiss` as const;
+
+// Attack discovery internal schedules API (depreciated)
+export const ATTACK_DISCOVERY_INTERNAL_SCHEDULES =
+  `${ATTACK_DISCOVERY_INTERNAL}/schedules` as const;
+export const ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID =
+  `${ATTACK_DISCOVERY_INTERNAL_SCHEDULES}/{id}` as const;
+export const ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID_ENABLE =
+  `${ATTACK_DISCOVERY_INTERNAL_SCHEDULES}/{id}/_enable` as const;
+export const ATTACK_DISCOVERY_INTERNAL_SCHEDULES_BY_ID_DISABLE =
+  `${ATTACK_DISCOVERY_INTERNAL_SCHEDULES}/{id}/_disable` as const;
+export const ATTACK_DISCOVERY_INTERNAL_SCHEDULES_FIND =
+  `${ATTACK_DISCOVERY_INTERNAL_SCHEDULES}/_find` as const;
 
 /** A fake `kibana.alert.rule.uuid` for ad hock rules */
 export const ATTACK_DISCOVERY_AD_HOC_RULE_ID = 'attack_discovery_ad_hoc_rule_id' as const;
@@ -110,16 +136,16 @@ export const ATTACK_DISCOVERY_AD_HOC_RULE_ID = 'attack_discovery_ad_hoc_rule_id'
 export const ATTACK_DISCOVERY_AD_HOC_RULE_TYPE_ID = 'attack_discovery_ad_hoc_rule_type_id' as const;
 
 /**
- * This feature flag enables the Attack discoveries alerts feature.
+ * This feature flag enables the Attack discoveries public API feature.
  *
  * It may be overridden via the following setting in `kibana.yml` or `kibana.dev.yml`:
  * ```
  * feature_flags.overrides:
- *   securitySolution.attackDiscoveryAlertsEnabled: true
+ *   securitySolution.attackDiscoveryPublicApiEnabled: true
  * ```
  */
-export const ATTACK_DISCOVERY_ALERTS_ENABLED_FEATURE_FLAG =
-  'securitySolution.attackDiscoveryAlertsEnabled' as const;
+export const ATTACK_DISCOVERY_PUBLIC_API_ENABLED_FEATURE_FLAG =
+  'securitySolution.attackDiscoveryPublicApiEnabled' as const;
 
 /**
  * The common prefix for all (ad hoc and scheduled) Attack discovery alerts indices
@@ -138,3 +164,9 @@ export const ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX =
  */
 export const INFERENCE_CHAT_MODEL_DISABLED_FEATURE_FLAG =
   'securitySolution.inferenceChatModelDisabled' as const;
+
+export const ELASTIC_AI_ASSISTANT_CHECKPOINT_SAVER_ENABLED_FEATURE_FLAG =
+  'elasticAssistant.checkpointSaverEnabled' as const;
+
+export const ASSISTANT_INTERRUPTS_ENABLED_FEATURE_FLAG =
+  'securitySolution.assistantInterruptsEnabled' as const;

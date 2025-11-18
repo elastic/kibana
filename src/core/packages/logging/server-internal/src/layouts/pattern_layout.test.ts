@@ -9,7 +9,8 @@
 
 import stripAnsi from 'strip-ansi';
 import hasAnsi from 'has-ansi';
-import { LogLevel, LogRecord } from '@kbn/logging';
+import type { LogRecord } from '@kbn/logging';
+import { LogLevel } from '@kbn/logging';
 import { PatternLayout, patternSchema } from './pattern_layout';
 
 const stripAnsiSnapshotSerializer: jest.SnapshotSerializerPlugin = {

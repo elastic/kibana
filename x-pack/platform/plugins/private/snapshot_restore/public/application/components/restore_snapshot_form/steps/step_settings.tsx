@@ -22,10 +22,10 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
-import { RestoreSettings } from '../../../../../common/types';
+import type { RestoreSettings } from '../../../../../common/types';
 import { REMOVE_INDEX_SETTINGS_SUGGESTIONS } from '../../../constants';
 import { useCore, useServices } from '../../../app_context';
-import { StepProps } from '.';
+import type { StepProps } from '.';
 
 export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = ({
   restoreSettings,
@@ -72,7 +72,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
   );
 
   return (
-    <div className="snapshotRestore__restoreForm__stepSettings">
+    <div>
       {/* Step title and doc link */}
       <EuiFlexGroup justifyContent="spaceBetween">
         <EuiFlexItem grow={false}>
@@ -105,6 +105,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
+            announceOnMount
             iconType="question"
             title={i18n.translate(
               'xpack.snapshotRestore.restoreForm.stepSettings.dataStreamsCallout.title',

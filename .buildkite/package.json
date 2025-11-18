@@ -15,6 +15,7 @@
     "js-yaml": "^4.1.0",
     "minimatch": "^5.0.1",
     "minimist": "^1.2.8",
+    "p-limit": "^3.1.0",
     "tslib": "*"
   },
   "devDependencies": {
@@ -23,7 +24,7 @@
     "@types/jscodeshift": "^0.12.0",
     "@types/minimatch": "^3.0.5",
     "@types/minimist": "^1.2.5",
-    "@types/node": "^15.12.2",
+    "@types/node": "^22.17.1",
     "jest": "^30.0.3",
     "jscodeshift": "^17.1.2",
     "nock": "^12.0.2",

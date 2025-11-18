@@ -16,6 +16,7 @@ export const INDEX_FRAMES = 'profiling-stackframes';
 export const INDEX_EXECUTABLES = 'profiling-executables';
 
 const BASE_ROUTE_PATH = '/internal/profiling';
+const PUBLIC_BASE_ROUTE_PATH = '/api/profiling';
 
 export function getRoutePaths() {
   return {
@@ -29,7 +30,7 @@ export function getRoutePaths() {
     TopNTraces: `${BASE_ROUTE_PATH}/topn/traces`,
     APMTransactions: `${BASE_ROUTE_PATH}/topn/functions/apm/transactions`,
     Flamechart: `${BASE_ROUTE_PATH}/flamechart`,
-    HasSetupESResources: `${BASE_ROUTE_PATH}/setup/es_resources`,
+    HasSetupESResources: `${PUBLIC_BASE_ROUTE_PATH}/setup/es_resources`,
     SetupDataCollectionInstructions: `${BASE_ROUTE_PATH}/setup/instructions`,
     StorageExplorerSummary: `${BASE_ROUTE_PATH}/storage_explorer/summary`,
     StorageExplorerHostStorageDetails: `${BASE_ROUTE_PATH}/storage_explorer/host_storage_details`,

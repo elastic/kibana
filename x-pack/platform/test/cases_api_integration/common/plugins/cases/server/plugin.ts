@@ -12,7 +12,6 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { CasesServerStart, CasesServerSetup } from '@kbn/cases-plugin/server';
 import type { FilesSetup } from '@kbn/files-plugin/server';
 import type { PluginStartContract as ActionsPluginsStart } from '@kbn/actions-plugin/server/plugin';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { getPersistableStateAttachment } from './attachments/persistable_state';
 import { getExternalReferenceAttachment } from './attachments/external_reference';
@@ -55,7 +54,6 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       name: 'TestNoCasesConnectorFixture',
       app: ['kibana'],
       category: { id: 'cases-fixtures', label: 'Cases Fixtures' },
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       cases: ['testNoCasesConnectorFixture'],
       privileges: {
         all: {

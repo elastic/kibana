@@ -7,15 +7,15 @@
 
 import React from 'react';
 import { fireEvent, render, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useLocation } from 'react-router-dom';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { RuleTypeModalProps } from '@kbn/response-ops-rule-form/src/rule_type_modal/components/rule_type_modal';
+import type { RuleTypeModalProps } from '@kbn/response-ops-rule-form/src/rule_type_modal/components/rule_type_modal';
 import * as pluginContext from '../../hooks/use_plugin_context';
-import { ObservabilityPublicPluginsStart } from '../../plugin';
+import type { ObservabilityPublicPluginsStart } from '../../plugin';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { RulesPage } from './rules';
@@ -79,6 +79,7 @@ jest.spyOn(pluginContext, 'usePluginContext').mockImplementation(() => ({
         observability: { enabled: false },
       },
     },
+    managedOtlpServiceUrl: '',
   },
   observabilityRuleTypeRegistry: createObservabilityRuleTypeRegistryMock(),
   ObservabilityPageTemplate: KibanaPageTemplate,

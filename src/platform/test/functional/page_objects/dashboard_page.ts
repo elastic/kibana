@@ -13,7 +13,7 @@ export const LINE_CHART_VIS_NAME = 'Visualization漢字 LineChart';
 
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
-import { CommonPageObject } from './common_page';
+import type { CommonPageObject } from './common_page';
 
 interface SaveDashboardOptions {
   /**
@@ -143,8 +143,22 @@ export class DashboardPageObject extends FtrService {
 
   public async getDashboardIdFromCurrentUrl() {
     const currentUrl = await this.browser.getCurrentUrl();
-    const id = this.getDashboardIdFromUrl(currentUrl);
 
+    // If URL is a redirect URL, wait for it to resolve
+    if (currentUrl.includes('/app/r?l=DASHBOARD')) {
+      await this.retry.waitFor('dashboard redirect to complete', async () => {
+        const url = await this.browser.getCurrentUrl();
+        return !url.includes('/app/r?l=DASHBOARD');
+      });
+      const resolvedUrl = await this.browser.getCurrentUrl();
+      const id = this.getDashboardIdFromUrl(resolvedUrl);
+      this.log.debug(
+        `Dashboard id extracted from ${resolvedUrl} (after redirect from ${currentUrl}) is ${id}`
+      );
+      return id;
+    }
+
+    const id = this.getDashboardIdFromUrl(currentUrl);
     this.log.debug(`Dashboard id extracted from ${currentUrl} is ${id}`);
 
     return id;
@@ -241,6 +255,9 @@ export class DashboardPageObject extends FtrService {
   public async duplicateDashboard(dashboardNameOverride?: string) {
     this.log.debug('Clicking duplicate');
 
+    if (!(await this.testSubjects.exists('dashboardInteractiveSaveMenuItem'))) {
+      await this.openSaveSplitMenu();
+    }
     await this.testSubjects.click('dashboardInteractiveSaveMenuItem');
 
     if (dashboardNameOverride) {
@@ -308,6 +325,11 @@ export class DashboardPageObject extends FtrService {
     });
   }
 
+  public async getIsInEditMode() {
+    this.log.debug('getIsInEditMode');
+    return await this.testSubjects.exists('dashboardViewOnlyMode');
+  }
+
   public async getIsInViewMode() {
     this.log.debug('getIsInViewMode');
     return await this.testSubjects.exists('dashboardEditMode');
@@ -322,7 +344,7 @@ export class DashboardPageObject extends FtrService {
 
   public async clickCancelOutOfEditMode(accept = true) {
     this.log.debug('clickCancelOutOfEditMode');
-    if (await this.getIsInViewMode()) return;
+    if (!(await this.getIsInEditMode())) return;
     await this.retry.waitFor('leave edit mode button enabled', async () => {
       const leaveEditModeButton = await this.testSubjects.find('dashboardViewOnlyMode');
       const isDisabled = await leaveEditModeButton.getAttribute('disabled');
@@ -339,6 +361,9 @@ export class DashboardPageObject extends FtrService {
 
   public async clickDiscardChanges(accept = true) {
     await this.retry.try(async () => {
+      if (!(await this.testSubjects.exists('dashboardDiscardChangesMenuItem'))) {
+        await this.openSaveSplitMenu();
+      }
       await this.expectDiscardChangesButtonEnabled();
       this.log.debug('clickDiscardChanges');
       await this.testSubjects.click('dashboardDiscardChangesMenuItem');
@@ -360,7 +385,7 @@ export class DashboardPageObject extends FtrService {
   public async clearUnsavedChanges() {
     this.log.debug('clearUnsavedChanges');
     let switchMode = false;
-    if (await this.getIsInViewMode()) {
+    if (!(await this.getIsInEditMode())) {
       await this.switchToEditMode();
       switchMode = true;
     }
@@ -445,11 +470,6 @@ export class DashboardPageObject extends FtrService {
     await this.visualize.gotoLandingPage();
     await this.navigateToAppFromAppsMenu();
     await this.gotoDashboardLandingPage();
-  }
-
-  public async gotoDashboardEditMode(dashboardName: string) {
-    await this.loadSavedDashboard(dashboardName);
-    await this.switchToEditMode();
   }
 
   public async gotoDashboardURL({
@@ -591,6 +611,9 @@ export class DashboardPageObject extends FtrService {
     });
 
     if (!isSaveModalOpen) {
+      if (!(await this.testSubjects.exists('dashboardInteractiveSaveMenuItem'))) {
+        await this.openSaveSplitMenu();
+      }
       await this.testSubjects.click('dashboardInteractiveSaveMenuItem');
     }
 
@@ -627,6 +650,17 @@ export class DashboardPageObject extends FtrService {
     await this.testSubjects.click('savedObjectTitle');
   }
 
+  public async openSaveSplitMenu() {
+    await this.testSubjects.click('dashboardQuickSaveMenuItem-secondary-button');
+  }
+
+  public async clickInteractiveSave() {
+    if (await !this.testSubjects.exists('dashboardInteractiveSaveMenuItem')) {
+      await this.openSaveSplitMenu();
+    }
+    await this.testSubjects.click('dashboardInteractiveSaveMenuItem');
+  }
+
   /**
    * @param dashboardTitle {String}
    */
@@ -643,20 +677,31 @@ export class DashboardPageObject extends FtrService {
     await this.testSubjects.waitForDeleted(modalDialog);
   }
 
-  // use the search filter box to narrow the results down to a single
-  // entry, or at least to a single page of results
-  public async loadSavedDashboard(dashboardName: string) {
+  // use the search filter box to narrow the results down to a single entry
+  private async _loadDashboard(dashboardName: string, openInEditMode: boolean) {
     this.log.debug(`Load Saved Dashboard ${dashboardName}`);
 
     await this.gotoDashboardLandingPage();
 
     await this.listingTable.searchForItemWithName(dashboardName, { escape: false });
     await this.retry.try(async () => {
-      await this.listingTable.clickItemLink('dashboard', dashboardName);
+      if (openInEditMode) {
+        await this.listingTable.clickActionButton('edit-action');
+      } else {
+        await this.listingTable.clickItemLink('dashboard', dashboardName);
+      }
       await this.header.waitUntilLoadingHasFinished();
       // check Dashboard landing page is not present
       await this.testSubjects.missingOrFail('dashboardLandingPage', { timeout: 10000 });
     });
+  }
+
+  public async loadSavedDashboard(dashboardName: string) {
+    await this._loadDashboard(dashboardName, false);
+  }
+
+  public async loadDashboardInEditMode(dashboardName: string) {
+    await this._loadDashboard(dashboardName, true);
   }
 
   public async getPanelTitles() {
@@ -790,6 +835,9 @@ export class DashboardPageObject extends FtrService {
 
   public async verifyNoRenderErrors() {
     const errorEmbeddables = await this.testSubjects.findAll('embeddableStackError');
+    for (const errorEmbeddable of errorEmbeddables) {
+      this.log.error(`Found embeddable with error: "${await errorEmbeddable.getVisibleText()}"`);
+    }
     expect(errorEmbeddables.length).to.be(0);
   }
 

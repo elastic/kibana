@@ -8,68 +8,88 @@
  */
 
 import expect from '@kbn/expect';
-
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { visEditor, visChart, header, dashboard } = getPageObjects([
-    'dashboard',
-    'visEditor',
-    'visChart',
-    'header',
-  ]);
-  const find = getService('find');
-  const inspector = getService('inspector');
+  const { dashboard, header, markdownVis } = getPageObjects(['dashboard', 'header', 'markdownVis']);
+  const kibanaServer = getService('kibanaServer');
   const dashboardAddPanel = getService('dashboardAddPanel');
-  const markdown = `
-# Heading 1
+  const dashboardPanelActions = getService('dashboardPanelActions');
+  const retry = getService('retry');
 
+  const sample = {
+    markdown: `# Original Heading 1
+text
 <h3>Inline HTML that should not be rendered as html</h3>
-  `;
+  `,
+    result: `Original Heading 1\ntext`,
+  };
 
-  describe('markdown app', () => {
-    before(async function () {
-      await dashboard.initTests();
+  const modifiedSample = {
+    markdown: `# Modified Heading 1
+text
+<h3>Inline HTML that should not be rendered as html</h3>
+  `,
+    result: `Modified Heading 1\ntext`,
+  };
+
+  describe('inline markdown visualization', () => {
+    before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+      await kibanaServer.importExport.load(
+        'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/kibana'
+      );
+      await kibanaServer.uiSettings.replace({
+        defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
+      });
+      await dashboard.navigateToApp();
+      await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();
+
+      // 1. adds markdown panel and saves
+      const originalPanelCount = await dashboard.getPanelCount();
       await dashboardAddPanel.clickAddMarkdownPanel();
-      await visEditor.setMarkdownTxt(markdown);
-      await visEditor.clickGo();
+      await header.waitUntilLoadingHasFinished();
+      await markdownVis.typeText(sample.markdown);
+      await markdownVis.applyChanges();
+      expect(await dashboard.getPanelCount()).to.eql(originalPanelCount + 1);
     });
 
-    describe('markdown vis', () => {
-      it('should not have inspector enabled', async function () {
-        await inspector.expectIsNotEnabled();
-      });
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
 
-      it('should render markdown as html', async function () {
-        const h1Txt = await visChart.getMarkdownBodyDescendentText('h1');
-        expect(h1Txt).to.equal('Heading 1');
-      });
+    it('Markdown flow', async () => {
+      // 2. does not add a panel when discarded immediately
+      const originalPanelCount = await dashboard.getPanelCount();
+      await dashboardAddPanel.clickAddMarkdownPanel();
+      await header.waitUntilLoadingHasFinished();
+      await markdownVis.discardChanges();
 
-      it('should not render html in markdown as html', async function () {
-        const actual = await visChart.getMarkdownText();
+      await retry.try(
+        async () => expect(await dashboard.getPanelCount()).to.eql(originalPanelCount),
+        undefined,
+        1000
+      );
 
-        expect(actual).to.equal(
-          'Heading 1\n<h3>Inline HTML that should not be rendered as html</h3>'
-        );
-      });
+      // 3. edits markdown panel - handles preview and editor mode and discards unsaved changes
+      await dashboardPanelActions.clickEdit();
+      await header.waitUntilLoadingHasFinished();
+      await markdownVis.typeText('text that wont be saved');
+      await markdownVis.clickPreview();
+      expect(await markdownVis.getRenderedText()).to.eql('text that wont be saved');
+      await markdownVis.clickEditor();
+      expect(await markdownVis.getEditedText()).to.eql('text that wont be saved');
+      await markdownVis.discardChanges();
+      expect(await markdownVis.getRenderedText()).to.eql(sample.result);
 
-      it('should auto apply changes if auto mode is turned on', async function () {
-        const markdown2 = '## Heading 2';
-        await visEditor.toggleAutoMode();
-        await visEditor.setMarkdownTxt(markdown2);
-        await header.waitUntilLoadingHasFinished();
-        const h1Txt = await visChart.getMarkdownBodyDescendentText('h2');
-        expect(h1Txt).to.equal('Heading 2');
-      });
-
-      it('should resize the editor', async function () {
-        const editorSidebar = await find.byCssSelector('.visEditor__collapsibleSidebar');
-        const initialSize = await editorSidebar.getSize();
-        await visEditor.sizeUpEditor();
-        const afterSize = await editorSidebar.getSize();
-        expect(afterSize.width).to.be.greaterThan(initialSize.width);
-      });
+      // 4. edits markdown panel and saves
+      await dashboardPanelActions.clickEdit();
+      await header.waitUntilLoadingHasFinished();
+      await markdownVis.typeText(modifiedSample.markdown);
+      await markdownVis.applyChanges();
+      expect(await markdownVis.getRenderedText()).to.eql(modifiedSample.result);
+      expect(await markdownVis.getMarkdownTextByTag('h1')).to.equal('Modified Heading 1');
     });
   });
 }

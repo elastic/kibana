@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
@@ -40,6 +40,7 @@
     "@kbn/unsaved-changes-prompt",
     "@kbn/shared-ux-table-persist",
     "@kbn/index-lifecycle-management-common-shared",
+    "@kbn/licensing-types",
   ],
   "exclude": [
     "target/**/*",

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -19,7 +19,8 @@
     "@kbn/i18n",
     "@kbn/intercepts-plugin",
     "@kbn/i18n-react",
-    "@kbn/cloud-plugin"
+    "@kbn/cloud-plugin",
+    "@kbn/core-analytics-browser-mocks"
   ],
   "exclude": ["target/**/*"]
 }

@@ -12,10 +12,11 @@
 import { isStringLiteral } from '../ast/is';
 import { TIME_DURATION_UNITS } from '../parser/constants';
 import { LeafPrinter } from '../pretty_print';
-import {
+import type {
   ESQLAstComment,
   ESQLAstCommentMultiLine,
   ESQLAstCommentSingleLine,
+  ESQLAstExpression,
   ESQLAstQueryExpression,
   ESQLColumn,
   ESQLCommand,
@@ -28,6 +29,7 @@ import {
   ESQLLocation,
   ESQLNamedParamLiteral,
   ESQLParam,
+  ESQLParens,
   ESQLPositionalParamLiteral,
   ESQLOrderExpression,
   ESQLSource,
@@ -45,8 +47,10 @@ import {
   ESQLMapEntry,
   ESQLTimeDurationLiteral,
   ESQLDatePeriodLiteral,
+  ESQLAstHeaderCommand,
+  ESQLAstSetHeaderCommand,
 } from '../types';
-import { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
+import type { AstNodeParserFields, AstNodeTemplate, PartialFields } from './types';
 
 export namespace Builder {
   /**
@@ -103,10 +107,12 @@ export namespace Builder {
   export namespace expression {
     export const query = (
       commands: ESQLAstQueryExpression['commands'] = [],
-      fromParser?: Partial<AstNodeParserFields>
+      fromParser?: Partial<AstNodeParserFields>,
+      header?: ESQLAstHeaderCommand[]
     ): ESQLAstQueryExpression => {
       return {
         ...Builder.parserFields(fromParser),
+        header,
         commands,
         type: 'query',
         name: '',
@@ -180,6 +186,18 @@ export namespace Builder {
         );
       };
     }
+
+    export const parens = (
+      child: ESQLAstExpression,
+      fromParser?: Partial<AstNodeParserFields>
+    ): ESQLParens => {
+      return {
+        type: 'parens',
+        name: '',
+        child,
+        ...Builder.parserFields(fromParser),
+      };
+    };
 
     export type ColumnTemplate = Omit<AstNodeTemplate<ESQLColumn>, 'name' | 'quoted' | 'parts'>;
 
@@ -302,10 +320,10 @@ export namespace Builder {
       export const binary = <Name extends BinaryExpressionOperator = BinaryExpressionOperator>(
         name: Name,
         args: [left: ESQLAstItem, right: ESQLAstItem],
-        template?: Omit<AstNodeTemplate<ESQLFunction>, 'subtype' | 'name' | 'operator' | 'args'>,
+        template?: Omit<AstNodeTemplate<ESQLBinaryExpression<Name>>, 'subtype' | 'name' | 'args'>,
         fromParser?: Partial<AstNodeParserFields>
       ): ESQLBinaryExpression<Name> => {
-        const operator = Builder.identifier({ name });
+        const operator = template?.operator ?? Builder.identifier({ name });
         return Builder.expression.func.node(
           { ...template, name, operator, args, subtype: 'binary-expression' },
           fromParser
@@ -640,5 +658,47 @@ export namespace Builder {
         return Builder.param.named({ ...options, paramKind, value }, fromParser);
       }
     };
+  }
+
+  export namespace header {
+    export interface HeaderCommandBuilder {
+      <Name extends string>(
+        template: PartialFields<AstNodeTemplate<ESQLAstHeaderCommand<Name>>, 'args'>,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLAstHeaderCommand<Name>;
+
+      set: (
+        args: ESQLAstSetHeaderCommand['args'],
+        template?: Omit<PartialFields<AstNodeTemplate<ESQLAstSetHeaderCommand>, 'args'>, 'name'>,
+        fromParser?: Partial<AstNodeParserFields>
+      ) => ESQLAstSetHeaderCommand;
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-shadow
+    export const command: HeaderCommandBuilder = Object.assign(
+      <Name extends string>(
+        template: PartialFields<AstNodeTemplate<ESQLAstHeaderCommand<Name>>, 'args'>,
+        fromParser?: Partial<AstNodeParserFields>
+      ): ESQLAstHeaderCommand<Name> => {
+        return {
+          ...template,
+          ...Builder.parserFields(fromParser),
+          args: template.args ?? [],
+          type: 'header-command',
+        };
+      },
+      {
+        set: (
+          args: ESQLAstSetHeaderCommand['args'],
+          template?: Omit<PartialFields<AstNodeTemplate<ESQLAstSetHeaderCommand>, 'args'>, 'name'>,
+          fromParser?: Partial<AstNodeParserFields>
+        ): ESQLAstSetHeaderCommand => {
+          return Builder.header.command(
+            { args, ...template, name: 'set' },
+            fromParser
+          ) as ESQLAstSetHeaderCommand;
+        },
+      }
+    );
   }
 }

@@ -9,7 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { SavedObjectsType } from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import { SEARCH_SESSION_TYPE } from '../../../common';
 import { searchSessionSavedObjectMigrations } from './search_session_migration';
 

@@ -52,6 +52,51 @@
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "mockIdpPlugin",
+        "id": "def-common.MOCK_IDP_UIAM_ORGANIZATION_ID",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_UIAM_ORGANIZATION_ID",
+        "description": [],
+        "signature": [
+          "\"1234567890\""
+        ],
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "mockIdpPlugin",
+        "id": "def-common.MOCK_IDP_UIAM_PROJECT_ID",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_UIAM_PROJECT_ID",
+        "description": [],
+        "signature": [
+          "\"abcde1234567890\""
+        ],
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "mockIdpPlugin",
+        "id": "def-common.MOCK_IDP_UIAM_SHARED_SECRET",
+        "type": "string",
+        "tags": [],
+        "label": "MOCK_IDP_UIAM_SHARED_SECRET",
+        "description": [],
+        "signature": [
+          "\"Dw7eRt5yU2iO9pL3aS4dF6gH8jK0lZ1xC2vB3nM4qW5=\""
+        ],
+        "path": "src/platform/packages/private/kbn-mock-idp-utils/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
       }
     ],
     "objects": []

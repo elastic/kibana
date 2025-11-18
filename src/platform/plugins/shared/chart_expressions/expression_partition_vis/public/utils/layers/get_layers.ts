@@ -7,27 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Datum, PartitionLayer } from '@elastic/charts';
-import { ColorHandlingFn, PaletteRegistry, getColorFactory } from '@kbn/coloring';
-import { i18n } from '@kbn/i18n';
-import { FieldFormat } from '@kbn/field-formats-plugin/common';
+import type { Datum, PartitionLayer } from '@elastic/charts';
+import type { ColorHandlingFn, PaletteRegistry } from '@kbn/coloring';
+import { getColorFactory } from '@kbn/coloring';
+import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { Datatable, DatatableRow } from '@kbn/expressions-plugin/public';
 
 import { getColorCategories } from '@kbn/chart-expressions-common';
-import { KbnPalettes } from '@kbn/palettes';
+import type { KbnPalettes } from '@kbn/palettes';
 import { getDistinctSeries } from '..';
-import { BucketColumns, ChartTypes, PartitionVisParams } from '../../../common/types';
+import type { BucketColumns, PartitionVisParams } from '../../../common/types';
+import { ChartTypes } from '../../../common/types';
 import { sortPredicateByType, sortPredicateSaveSourceOrder } from './sort_predicate';
 import { byDataColorPaletteMap, getColor } from './get_color';
 import { getNodeLabel } from './get_node_labels';
 import { getPartitionFillColor } from '../colors/color_mapping_accessors';
-
-// This is particularly useful in case of a text based languages where
-// it's no possible to use a missingBucketLabel
-const emptySliceLabel = i18n.translate('expressionPartitionVis.emptySlice', {
-  defaultMessage: '(empty)',
-});
 
 export const getLayers = (
   chartType: ChartTypes,
@@ -86,7 +81,7 @@ export const getLayers = (
 
   return columns.map((col, layerIndex) => {
     return {
-      groupByRollup: (d: Datum) => (col.id ? d[col.id] ?? emptySliceLabel : col.name),
+      groupByRollup: (d: Datum) => (col.id ? d[col.id] : col.name),
       showAccessor: (d: Datum) => true,
       nodeLabel: (d: unknown) => getNodeLabel(d, col, formatters, formatter.deserialize),
       fillLabel:

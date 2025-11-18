@@ -15,7 +15,7 @@ import { NumericField } from '../../../../../../shared_imports';
 import { ToggleFieldWithDescribedFormRow } from '../../described_form_row';
 // import { LearnMoreLink } from '../../learn_more_link';
 import { i18nTexts } from '../../../i18n_texts';
-import { PhaseWithDownsample } from '../../../../../../../common/types';
+import type { PhaseWithDownsample } from '../../../../../../../common/types';
 
 interface Props {
   phase: PhaseWithDownsample;

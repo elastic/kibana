@@ -37,3 +37,13 @@ Contains all code shared by client and server.
 * **[/constants](./common/constants.ts)** (General contants)
 * **[/field_types](./common/field_types.ts)** (Field types constants)
 * **[/locator](./common/locator)** (Registration with the URL service for BWC deep-linking to Discover views.)
+
+## Feature flags
+
+See the [Feature flag service](https://docs.elastic.dev/kibana-dev-docs/tutorials/feature-flags-service#dynamic-config) documentation for details on how to use feature flags.
+
+Set constants for feature flag keys in [public/constants.ts](./public/constants.ts).
+
+These are the feature flags used by Discover:
+
+* `discover.tabsEnabled`: Enabled the tabs feature.

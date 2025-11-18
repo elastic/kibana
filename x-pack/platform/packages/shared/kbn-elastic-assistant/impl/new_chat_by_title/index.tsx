@@ -9,7 +9,7 @@ import type { EuiButtonColor } from '@elastic/eui';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
-import { EuiButtonEmptySizes } from '@elastic/eui/src/components/button/button_empty/button_empty';
+import type { EuiButtonEmptySizes } from '@elastic/eui/src/components/button/button_empty/button_empty';
 import * as i18n from './translations';
 
 export const BUTTON_TEST_ID = 'newChatByTitle';

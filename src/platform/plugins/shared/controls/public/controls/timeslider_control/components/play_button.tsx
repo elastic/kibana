@@ -8,9 +8,10 @@
  */
 
 import React from 'react';
-import { EuiButtonIcon, EuiToolTip, UseEuiTheme } from '@elastic/eui';
-import { ViewMode } from '@kbn/presentation-publishing';
-import { Observable } from 'rxjs';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import type { ViewMode } from '@kbn/presentation-publishing';
+import type { Observable } from 'rxjs';
 import { css } from '@emotion/react';
 import { TimeSliderStrings } from './time_slider_strings';
 

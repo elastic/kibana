@@ -38,5 +38,7 @@ export {
 export { parseDate } from './parse_date';
 export type { RelatedSavedObjects } from './related_saved_objects';
 export { getBasicAuthHeader, combineHeadersWithBasicAuthHeader } from './get_basic_auth_header';
+export { mergeConfigHeadersWithSecretHeaders } from './merge_config_headers_with_secret_headers';
 export { tryCatch } from './try_catch';
 export type { TelemetryMetadata } from './token_tracking/gen_ai_token_tracking';
+export { formatZodError } from './format_zod_error';

@@ -7,46 +7,96 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import nunjucks from 'nunjucks';
-import Mustache from 'mustache';
+import { Liquid } from 'liquidjs';
 
 export class WorkflowTemplatingEngine {
-  private syntax: 'mustache' | 'nunjucks';
+  private readonly engine: Liquid;
 
-  constructor(syntax: 'mustache' | 'nunjucks' = 'nunjucks') {
-    this.syntax = syntax;
+  constructor() {
+    this.engine = new Liquid({
+      strictFilters: true,
+      strictVariables: false,
+    });
+
+    // register json_parse filter that converts JSON string to object
+    this.engine.registerFilter('json_parse', (value: unknown): unknown => {
+      if (typeof value !== 'string') {
+        return value;
+      }
+      try {
+        return JSON.parse(value);
+      } catch (error) {
+        return value;
+      }
+    });
   }
 
-  public render(template: string, context: Record<string, any>): string {
-    switch (this.syntax) {
-      case 'nunjucks':
-        return this.renderNunjucks(template, context);
-      case 'mustache':
-        return this.renderMustache(template, context);
-      default:
-        throw new Error(`Unsupported syntax: ${this.syntax}`);
+  public render<T>(obj: T, context: Record<string, unknown>): T {
+    return this.renderValueRecursively(obj, context) as T;
+  }
+
+  public evaluateExpression(template: string, context: Record<string, unknown>): unknown {
+    let resolvedExpression = template.trim();
+    const openExpressionIndex = resolvedExpression.indexOf('{{');
+    const closeExpressionIndex = resolvedExpression.lastIndexOf('}}');
+
+    if (openExpressionIndex === -1 || closeExpressionIndex === -1) {
+      throw new Error(`The provided expression is invalid. Got: ${template}.`);
+    }
+
+    resolvedExpression = resolvedExpression
+      .substring(openExpressionIndex + 2, closeExpressionIndex)
+      .trim();
+
+    try {
+      return this.engine.evalValueSync(resolvedExpression, context);
+    } catch (err) {
+      throw new Error(`The provided expression is invalid. Got: ${template}.`);
     }
   }
 
-  private renderNunjucks(template: string, context: Record<string, any>): string {
-    const env = nunjucks.configure({
-      autoescape: true,
-    });
+  private renderValueRecursively(value: unknown, context: Record<string, unknown>): unknown {
+    // Handle null and undefined
+    if (value === null || value === undefined) {
+      return value;
+    }
 
-    // We can add custom functions to the Nunjucks environment here.
-    // In theory, this could be same as `keep.` functions
-    env.addGlobal('now', function (format: string = 'iso') {
-      const date = new Date();
-      if (format === 'iso') return date.toISOString();
-      if (format === 'locale') return date.toLocaleString();
-      return date;
-    });
+    if (typeof value === 'string' && value.startsWith('${{') && value.endsWith('}}')) {
+      // remove the first $ only as the evaluateExpression removes the {{ and }} later
+      return this.evaluateExpression(value.substring(1), context);
+    }
 
-    return env.renderString(template, context);
+    // Handle string values - render them using the template engine
+    if (typeof value === 'string') {
+      return this.renderString(value, context);
+    }
+
+    // Handle arrays - recursively render each element
+    if (Array.isArray(value)) {
+      return value.map((item) => this.renderValueRecursively(item, context));
+    }
+
+    // Handle objects - recursively render each property
+    if (typeof value === 'object') {
+      const renderedObject: Record<string, unknown> = {};
+      for (const [key, val] of Object.entries(value)) {
+        renderedObject[key] = this.renderValueRecursively(val, context);
+      }
+      return renderedObject;
+    }
+
+    // Return primitive values as-is (numbers, booleans, etc.)
+    return value;
   }
 
-  private renderMustache(template: string, context: Record<string, any>): string {
-    // Assuming Mustache is available globally or imported
-    return Mustache.render(template, context);
+  private renderString(template: string, context: Record<string, unknown>): string {
+    try {
+      return this.engine.parseAndRenderSync(template, context);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      // customer-facing error message without the default line number and column number
+      const customerFacingErrorMessage = errorMessage.replace(/, line:\d+, col:\d+/g, '');
+      throw new Error(customerFacingErrorMessage);
+    }
   }
 }

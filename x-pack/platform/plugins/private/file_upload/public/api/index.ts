@@ -6,9 +6,14 @@
  */
 
 import { fromByteArray } from 'base64-js';
+import type {
+  HasImportPermission,
+  PreviewTikaResponse,
+  AnalysisResult,
+  ImportFactoryOptions,
+} from '@kbn/file-upload-common';
 import { lazyLoadModules } from '../lazy_load_bundle';
-import type { IImporter, ImportFactoryOptions } from '../importer';
-import type { HasImportPermission, PreviewTikaResponse, AnalysisResult } from '../../common/types';
+import type { IImporter } from '../importer';
 import type {
   getMaxBytes,
   getMaxBytesFormatted,
@@ -31,12 +36,18 @@ export interface FileUploadStartApi {
   getTimeFieldRange: typeof getTimeFieldRange;
   analyzeFile: typeof analyzeFile;
   previewTikaFile: typeof previewTikaFile;
+  isIndexSearchable: typeof isIndexSearchable;
 }
 
 export interface GetTimeFieldRangeResponse {
   success: boolean;
   start: { epoch: number; string: string };
   end: { epoch: number; string: string };
+}
+
+export interface IsIndexSearchableResponse {
+  isSearchable: boolean;
+  count: number;
 }
 
 export const FileUploadComponent = GeoUploadWizardAsyncWrapper;
@@ -58,8 +69,11 @@ interface HasImportPermissionParams {
 
 export async function analyzeFile(
   file: string,
-  params: Record<string, string> = {}
+  params: Record<string, string> = {},
+  includePreview: boolean,
+  signal?: AbortSignal
 ): Promise<AnalysisResult> {
+  const query = includePreview ? { ...params, includePreview: 'true' } : params;
   const { getHttp } = await lazyLoadModules();
   const body = JSON.stringify(file);
   return await getHttp().fetch<AnalysisResult>({
@@ -67,13 +81,14 @@ export async function analyzeFile(
     method: 'POST',
     version: '1',
     body,
-    query: params,
+    query,
+    signal,
   });
 }
 
 export async function previewTikaFile(
   data: ArrayBuffer,
-  params: Record<string, string> = {}
+  signal?: AbortSignal
 ): Promise<PreviewTikaResponse> {
   const { getHttp } = await lazyLoadModules();
   const base64File = fromByteArray(new Uint8Array(data));
@@ -85,7 +100,7 @@ export async function previewTikaFile(
     method: 'POST',
     version: '1',
     body,
-    query: params,
+    signal,
   });
 }
 
@@ -130,6 +145,23 @@ export async function getTimeFieldRange(index: string, query: unknown, timeField
   const fileUploadModules = await lazyLoadModules();
   return await fileUploadModules.getHttp().fetch<GetTimeFieldRangeResponse>({
     path: `/internal/file_upload/time_field_range`,
+    method: 'POST',
+    version: '1',
+    body,
+  });
+}
+
+export async function isIndexSearchable(
+  index: string,
+  expectedCount: number
+): Promise<IsIndexSearchableResponse> {
+  const { getHttp } = await lazyLoadModules();
+  const body = JSON.stringify({
+    index,
+    expectedCount,
+  });
+  return await getHttp().fetch<IsIndexSearchableResponse>({
+    path: `/internal/file_upload/index_searchable`,
     method: 'POST',
     version: '1',
     body,

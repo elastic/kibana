@@ -7,14 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 
 import {
   NoDataConfigPageProvider,
   NoDataConfigPageKibanaProvider,
 } from '@kbn/shared-ux-page-no-data-config';
 
-import {
+import type {
   KibanaPageTemplateServices,
   KibanaPageTemplateKibanaDependencies,
 } from '@kbn/shared-ux-page-kibana-template-types';

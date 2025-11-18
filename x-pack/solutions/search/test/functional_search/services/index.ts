@@ -7,6 +7,9 @@
 
 import { services as functionalServices } from '@kbn/test-suites-xpack-platform/functional/services';
 
+import { SearchSpaceServiceProvider } from './search_space';
+
 export const services = {
   ...functionalServices,
+  searchSpace: SearchSpaceServiceProvider,
 };

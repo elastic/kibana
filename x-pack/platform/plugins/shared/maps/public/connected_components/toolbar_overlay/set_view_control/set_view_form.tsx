@@ -17,7 +17,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { MapCenter, MapSettings } from '../../../../common/descriptor_types';
+import type { MapCenter, MapSettings } from '../../../../common/descriptor_types';
 import { DecimalDegreesForm } from './decimal_degrees_form';
 import { MgrsForm } from './mgrs_form';
 import { UtmForm } from './utm_form';
@@ -99,6 +99,7 @@ export const SetViewForm = React.memo<SetViewFormProps>(({ settings, zoom, cente
         `}
       >
         <EuiRadioGroup
+          name="coordinateSystem"
           options={COORDINATE_SYSTEM_OPTIONS}
           idSelected={coordinateSystem}
           onChange={onCoordinateSystemChange}

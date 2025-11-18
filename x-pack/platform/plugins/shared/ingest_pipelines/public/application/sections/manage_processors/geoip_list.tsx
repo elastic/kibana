@@ -7,21 +7,21 @@
 
 import React, { useState } from 'react';
 
+import type { EuiInMemoryTableProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInMemoryTable,
-  EuiInMemoryTableProps,
   EuiPageTemplate,
   EuiSpacer,
   EuiTitle,
   EuiButtonIcon,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 
 import { getDatabaseText } from './utils';
 import type { GeoipDatabase } from '../../../../common/types';
@@ -31,6 +31,12 @@ import { EmptyList } from './empty_list';
 import { AddDatabaseModal } from './add_database_modal';
 import { DeleteDatabaseModal } from './delete_database_modal';
 import { getErrorMessage } from './get_error_message';
+
+const styles = {
+  table: css`
+    height: 100%;
+  `,
+};
 
 export const GeoipList: React.FunctionComponent = () => {
   const { services } = useKibana();
@@ -170,12 +176,7 @@ export const GeoipList: React.FunctionComponent = () => {
         </EuiFlexGroup>
 
         <EuiSpacer size="l" />
-        <EuiInMemoryTable
-          css={css`
-            height: 100%;
-          `}
-          {...tableProps}
-        />
+        <EuiInMemoryTable css={styles.table} {...tableProps} />
       </>
     );
   }

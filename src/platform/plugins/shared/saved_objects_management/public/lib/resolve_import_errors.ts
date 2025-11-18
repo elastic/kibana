@@ -14,8 +14,8 @@ import type {
   SavedObjectsImportResponse,
   SavedObjectsImportAmbiguousConflictError,
 } from '@kbn/core/public';
-import { Required } from '@kbn/utility-types';
-import { FailedImport, ProcessedImportResponse } from './process_import_response';
+import type { Required } from '@kbn/utility-types';
+import type { FailedImport, ProcessedImportResponse } from './process_import_response';
 
 // the HTTP route requires type and ID; all other field are optional
 type RetryObject = Required<Partial<SavedObjectsImportRetry>, 'type' | 'id'>;

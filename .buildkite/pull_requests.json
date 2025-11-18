@@ -34,7 +34,7 @@
       "always_require_ci_on_changed": [
         "^docs/developer/plugin-list.asciidoc$",
         "^\\.github/CODEOWNERS$",
-        "/plugins/[^/]+/readme\\.(md|asciidoc)$"
+        "/plugins/([^/]+/)+readme\\.(md|asciidoc)$"
       ],
       "enable_trigger_checkbox": true,
       "kibana_versions_check": true,
@@ -44,8 +44,6 @@
         "^test/",
         "^x-pack/platform/test/",
         "^x-pack/solutions/(search|observability|security)/test/",
-        "^x-pack/test/",
-        "^x-pack/test_serverless/",
         "/__snapshots__/",
         "\\.test\\.(ts|tsx|js|jsx)"
       ]
@@ -71,8 +69,6 @@
       "kibana_build_reuse_pipeline_slugs": ["kibana-pull-request", "kibana-on-merge", "kibana-deploy-project-from-pr"],
       "kibana_build_reuse_regexes": [
         "^test/",
-        "^x-pack/test/",
-        "^x-pack/test_serverless/",
         "^x-pack/platform/test/",
         "^x-pack/solutions/(search|observability|security)/test/",
         "/__snapshots__/",
@@ -100,8 +96,6 @@
       "kibana_build_reuse_pipeline_slugs": ["kibana-pull-request", "kibana-on-merge", "kibana-deploy-cloud-from-pr"],
       "kibana_build_reuse_regexes": [
         "^test/",
-        "^x-pack/test/",
-        "^x-pack/test_serverless/",
         "^x-pack/platform/test/",
         "^x-pack/solutions/(search|observability|security)/test/",
         "/__snapshots__/",
@@ -116,7 +110,7 @@
       "enabled": true,
       "allow_org_users": true,
       "allowed_repo_permissions": ["admin", "write"],
-      "allowed_list": ["elastic-vault-github-plugin-prod[bot]"],
+      "allowed_list": ["elastic-vault-github-plugin-prod[bot]", "elastic-renovate-prod[bot]"],
       "build_on_commit": true,
       "build_on_comment": true,
       "build_drafts": false,

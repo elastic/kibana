@@ -7,10 +7,10 @@
 import expect from '@kbn/expect';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { PROCESSOR_EVENT } from '@kbn/apm-plugin/common/es_fields/apm';
-import { SpanRaw } from '@kbn/apm-plugin/typings/es_schemas/raw/span_raw';
-import { ErrorRaw } from '@kbn/apm-plugin/typings/es_schemas/raw/error_raw';
-import { TransactionRaw } from '@kbn/apm-plugin/typings/es_schemas/raw/transaction_raw';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { SpanRaw } from '@kbn/apm-plugin/typings/es_schemas/raw/span_raw';
+import type { ErrorRaw } from '@kbn/apm-plugin/typings/es_schemas/raw/error_raw';
+import type { TransactionRaw } from '@kbn/apm-plugin/typings/es_schemas/raw/transaction_raw';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');

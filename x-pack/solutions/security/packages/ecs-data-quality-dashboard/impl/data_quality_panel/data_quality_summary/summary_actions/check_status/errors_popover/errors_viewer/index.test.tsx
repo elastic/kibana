@@ -10,7 +10,7 @@ import React from 'react';
 
 import { INDEX } from '../../../../../translations';
 import { TestExternalProviders } from '../../../../../mock/test_providers/test_providers';
-import { ErrorSummary } from '../../../../../types';
+import type { ErrorSummary } from '../../../../../types';
 import { ERROR, PATTERN } from '../../../translations';
 import { ErrorsViewer } from '.';
 

@@ -8,12 +8,12 @@
 import { Router } from '@kbn/shared-ux-router';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { useMemo } from 'react';
 import styled from 'styled-components';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import {
+import type {
   DataAccessLayer,
   ResolverPluginSetup,
 } from '@kbn/security-solution-plugin/public/resolver/types';

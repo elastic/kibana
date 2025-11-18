@@ -16,7 +16,7 @@ exports[`TOCEntryActionsPopover is rendered 1`] = `
               "alpha": 0.75,
               "id": "testLayer",
               "includeInFitToBounds": true,
-              "label": null,
+              "label": undefined,
               "maxZoom": 24,
               "minZoom": 0,
               "sourceDescriptor": Object {
@@ -130,7 +130,7 @@ exports[`TOCEntryActionsPopover should disable Edit features when edit mode acti
               "alpha": 0.75,
               "id": "testLayer",
               "includeInFitToBounds": true,
-              "label": null,
+              "label": undefined,
               "maxZoom": 24,
               "minZoom": 0,
               "sourceDescriptor": Object {
@@ -244,7 +244,7 @@ exports[`TOCEntryActionsPopover should disable fit to data when supportsFitToBou
               "alpha": 0.75,
               "id": "testLayer",
               "includeInFitToBounds": true,
-              "label": null,
+              "label": undefined,
               "maxZoom": 24,
               "minZoom": 0,
               "sourceDescriptor": Object {
@@ -358,7 +358,7 @@ exports[`TOCEntryActionsPopover should have "show layer" action when layer is no
               "alpha": 0.75,
               "id": "testLayer",
               "includeInFitToBounds": true,
-              "label": null,
+              "label": undefined,
               "maxZoom": 24,
               "minZoom": 0,
               "sourceDescriptor": Object {
@@ -473,7 +473,7 @@ exports[`TOCEntryActionsPopover should not show edit actions in read only mode 1
               "alpha": 0.75,
               "id": "testLayer",
               "includeInFitToBounds": true,
-              "label": null,
+              "label": undefined,
               "maxZoom": 24,
               "minZoom": 0,
               "sourceDescriptor": Object {
@@ -556,7 +556,7 @@ exports[`TOCEntryActionsPopover should show "show this layer only" action when t
               "alpha": 0.75,
               "id": "testLayer",
               "includeInFitToBounds": true,
-              "label": null,
+              "label": undefined,
               "maxZoom": 24,
               "minZoom": 0,
               "sourceDescriptor": Object {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { getSavedObjectsCounts } from './get_saved_object_counts';
 

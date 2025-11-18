@@ -11,7 +11,8 @@ import Mustache from 'mustache';
 import { join } from 'path';
 import { readFileSync, writeFileSync, mkdirSync } from 'fs';
 import globby from 'globby';
-import { copyAll, Task } from '../../lib';
+import type { Task } from '../../lib';
+import { copyAll } from '../../lib';
 
 export const CopyBinScripts: Task = {
   description: 'Copying bin scripts into platform-specific build directory',

@@ -9,7 +9,10 @@ import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import type { FilterControlConfig } from '@kbn/alerts-ui-shared';
 import * as i18n from './translations';
 
-export { SecurityPageName } from '@kbn/security-solution-navigation';
+export {
+  SecurityPageName,
+  ATTACKS_ALERTS_ALIGNMENT_ENABLED,
+} from '@kbn/security-solution-navigation';
 /**
  * as const
  *
@@ -25,7 +28,7 @@ export const CASES_FEATURE_ID = 'securitySolutionCasesV3' as const;
 export const TIMELINE_FEATURE_ID = 'securitySolutionTimeline' as const;
 export const NOTES_FEATURE_ID = 'securitySolutionNotes' as const;
 export const SERVER_APP_ID = 'siem' as const;
-export const SECURITY_FEATURE_ID = 'siemV3' as const;
+export const SECURITY_FEATURE_ID = 'siemV4' as const;
 export const APP_NAME = 'Security' as const;
 export const APP_ICON_SOLUTION = 'logoSecurity' as const;
 export const APP_PATH = `/app/security` as const;
@@ -39,6 +42,7 @@ export const DEFAULT_INDEX_KEY = 'securitySolution:defaultIndex' as const;
 export const DEFAULT_NUMBER_FORMAT = 'format:number:defaultPattern' as const;
 export const DEFAULT_DATA_VIEW_ID = 'security-solution' as const;
 export const DEFAULT_ALERT_DATA_VIEW_ID = 'security-solution-alert' as const;
+export const DEFAULT_ATTACK_DATA_VIEW_ID = 'security-solution-attack' as const;
 export const DEFAULT_TIME_FIELD = '@timestamp' as const;
 export const DEFAULT_TIME_RANGE = 'timepicker:timeDefaults' as const;
 export const DEFAULT_REFRESH_RATE_INTERVAL = 'timepicker:refreshIntervalDefaults' as const;
@@ -96,7 +100,13 @@ export const REPORTS_PATH = '/reports' as const;
 export const AI_VALUE_PATH = `${REPORTS_PATH}/ai_value` as const;
 export const DETECTION_RESPONSE_PATH = '/detection_response' as const;
 export const DETECTIONS_PATH = '/detections' as const;
+
+// TODO: https://github.com/elastic/kibana/issues/242434
+// Investigate possibility of using `detections` instead
 export const ALERTS_PATH = '/alerts' as const;
+export const ATTACKS_PATH = '/attacks' as const;
+export const ALERT_DETECTIONS = '/alert_detections' as const;
+
 export const ALERT_DETAILS_REDIRECT_PATH = `${ALERTS_PATH}/redirect` as const;
 export const ALERT_SUMMARY_PATH = `/alert_summary` as const;
 export const RULES_PATH = '/rules' as const;
@@ -109,6 +119,7 @@ export const EXCEPTION_LIST_DETAIL_PATH = `${EXCEPTIONS_PATH}/details/:detailNam
 export const HOSTS_PATH = '/hosts' as const;
 export const ATTACK_DISCOVERY_PATH = '/attack_discovery' as const;
 export const ASSET_INVENTORY_PATH = '/asset_inventory' as const;
+export const SIEM_READINESS_PATH = '/siem_readiness' as const;
 export const USERS_PATH = '/users' as const;
 export const KUBERNETES_PATH = '/kubernetes' as const;
 export const NETWORK_PATH = '/network' as const;
@@ -117,7 +128,9 @@ export const COVERAGE_OVERVIEW_PATH = '/rules_coverage_overview' as const;
 export const THREAT_INTELLIGENCE_PATH = '/threat_intelligence' as const;
 export const ENDPOINTS_PATH = `${MANAGEMENT_PATH}/endpoints` as const;
 export const POLICIES_PATH = `${MANAGEMENT_PATH}/policy` as const;
+export const ENDPOINT_EXCEPTIONS_PATH = `${MANAGEMENT_PATH}/endpoint_exceptions` as const;
 export const TRUSTED_APPS_PATH = `${MANAGEMENT_PATH}/trusted_apps` as const;
+export const TRUSTED_DEVICES_PATH = `${MANAGEMENT_PATH}/trusted_devices` as const;
 export const EVENT_FILTERS_PATH = `${MANAGEMENT_PATH}/event_filters` as const;
 export const HOST_ISOLATION_EXCEPTIONS_PATH =
   `${MANAGEMENT_PATH}/host_isolation_exceptions` as const;
@@ -137,7 +150,10 @@ export const APP_ALERTS_PATH = `${APP_PATH}${ALERTS_PATH}` as const;
 export const APP_CASES_PATH = `${APP_PATH}${CASES_PATH}` as const;
 export const APP_ENDPOINTS_PATH = `${APP_PATH}${ENDPOINTS_PATH}` as const;
 export const APP_POLICIES_PATH = `${APP_PATH}${POLICIES_PATH}` as const;
+export const APP_ENDPOINT_EXCEPTIONS_PATH = `${APP_PATH}${ENDPOINT_EXCEPTIONS_PATH}` as const;
+export const APP_MANAGE_PATH = `${APP_PATH}${MANAGE_PATH}` as const;
 export const APP_TRUSTED_APPS_PATH = `${APP_PATH}${TRUSTED_APPS_PATH}` as const;
+export const APP_TRUSTED_DEVICES_PATH = `${APP_PATH}${TRUSTED_DEVICES_PATH}` as const;
 export const APP_EVENT_FILTERS_PATH = `${APP_PATH}${EVENT_FILTERS_PATH}` as const;
 export const APP_HOST_ISOLATION_EXCEPTIONS_PATH =
   `${APP_PATH}${HOST_ISOLATION_EXCEPTIONS_PATH}` as const;
@@ -146,9 +162,11 @@ export const APP_RESPONSE_ACTIONS_HISTORY_PATH =
   `${APP_PATH}${RESPONSE_ACTIONS_HISTORY_PATH}` as const;
 export const NOTES_PATH = `${MANAGEMENT_PATH}/notes` as const;
 export const SIEM_MIGRATIONS_PATH = '/siem_migrations' as const;
+export const SIEM_MIGRATIONS_LANDING_PATH = `${SIEM_MIGRATIONS_PATH}/landing` as const;
 export const SIEM_MIGRATIONS_RULES_PATH = `${SIEM_MIGRATIONS_PATH}/rules` as const;
+export const SIEM_MIGRATIONS_DASHBOARDS_PATH = `${SIEM_MIGRATIONS_PATH}/dashboards` as const;
 
-// AI SOC exclusive paths
+// EASE exclusive paths
 export const CONFIGURATIONS_PATH = '/configurations' as const;
 export const CONFIGURATIONS_INTEGRATIONS_PATH =
   `${APP_PATH}/${CONFIGURATIONS_PATH}/integrations/browse` as const;
@@ -173,7 +191,7 @@ export const DEFAULT_INDEX_PATTERN = [...INCLUDE_INDEX_PATTERN, ...EXCLUDE_ELAST
 /** This Kibana Advanced Setting enables the `Security news` feed widget */
 export const ENABLE_NEWS_FEED_SETTING = 'securitySolution:enableNewsFeed' as const;
 
-/** This Kibana Advanced Setting sets a default AI connector for serverless AI features (AI for SOC) */
+/** This Kibana Advanced Setting sets a default AI connector for serverless AI features (EASE) */
 export const DEFAULT_AI_CONNECTOR = 'securitySolution:defaultAIConnector' as const;
 
 /** This Kibana Advanced Setting allows users to enable/disable querying cold and frozen data tiers in analyzer */
@@ -182,6 +200,15 @@ export const EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER =
 
 /** This Kibana Advanced Setting enables the warnings for CCS read permissions */
 export const ENABLE_CCS_READ_WARNING_SETTING = 'securitySolution:enableCcsWarning' as const;
+
+/** This Kibana Advanced Setting when turned on keeps the suppression window open when an alert is closed */
+export const SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING =
+  'securitySolution:suppressionBehaviorOnAlertClosure' as const;
+
+export enum SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM {
+  RestartWindow = 'restart-suppression',
+  ContinueWindow = 'continue-until-window-ends',
+}
 
 /** This Kibana Advanced Setting sets the auto refresh interval for the detections all rules table */
 export const DEFAULT_RULES_TABLE_REFRESH_SETTING = 'securitySolution:rulesTableRefresh' as const;
@@ -227,9 +254,16 @@ export const ENABLE_ASSET_INVENTORY_SETTING = 'securitySolution:enableAssetInven
 /** This Kibana Advanced Setting allows users to enable/disable the Cloud Connector Feature */
 export const ENABLE_CLOUD_CONNECTOR_SETTING = 'securitySolution:enableCloudConnector' as const;
 
+/** This Kibana Advanced Setting allows users to enable/disable the SIEM Readiness Feature */
+export const ENABLE_SIEM_READINESS_SETTING = 'securitySolution:enableSiemReadiness' as const;
+
 /** This Kibana Advanced Setting allows users to enable/disable the privilged user monitoring feature */
 export const ENABLE_PRIVILEGED_USER_MONITORING_SETTING =
   'securitySolution:enablePrivilegedUserMonitoring' as const;
+
+/** This Kibana Advanced Setting allows users to enable/disable ESQL-based risk scoring */
+export const ENABLE_ESQL_RISK_SCORING = 'securitySolution:enableEsqlRiskScoring' as const;
+
 /**
  * Id for the notifications alerting type
  * @deprecated Once we are confident all rules relying on side-car actions SO's have been migrated to SO references we should remove this function
@@ -427,10 +461,11 @@ export const RULES_TABLE_MAX_PAGE_SIZE = 100;
  * we will need to update these constants with the corresponding version.
  */
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
-  RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.13',
+  RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v9.2',
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
   SIEM_MAIN_LANDING_PAGE: 'securitySolution.siemMigrations.setupGuide.v8.18',
   SIEM_RULE_TRANSLATION_PAGE: 'securitySolution.siemMigrations.ruleTranslationGuide.v8.18',
+  DEFAULT_LLM: `elasticAssistant.elasticLLM.costAwarenessTour.assistantHeader.v8.19.default`,
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =
@@ -520,7 +555,7 @@ export const MAX_BULK_FILL_RULE_GAPS_BULK_SIZE = 100;
 export const JEST_ENVIRONMENT = typeof jest !== 'undefined';
 
 /*
- * The tag to mark promotion rules that are related to the AI for SOC integrations
+ * The tag to mark promotion rules that are related to EASE integrations
  */
 export const PROMOTION_RULE_TAGS = [
   'Promotion', // This is the legacy tag for promotion rules and can be safely removed once promotion rules go live

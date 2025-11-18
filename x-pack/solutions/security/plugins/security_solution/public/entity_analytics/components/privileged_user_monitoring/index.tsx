@@ -61,6 +61,7 @@ export const PrivilegedUserMonitoring = ({
       <EuiFlexItem>
         {error && (
           <EuiCallOut
+            announceOnMount={false}
             title={
               <FormattedMessage
                 id="xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.dashboard.errorTitle"
@@ -75,6 +76,8 @@ export const PrivilegedUserMonitoring = ({
         )}
         {callout && !dismissCallout && (
           <EuiCallOut
+            announceOnMount
+            data-test-subj="privilegedUserMonitoringOnboardingCallout"
             title={
               callout.userCount > 0 ? (
                 <FormattedMessage

@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import {
   EuiText,
   EuiFlexGroup,
@@ -16,7 +16,7 @@ import {
   EuiButtonEmpty,
   EuiLink,
 } from '@elastic/eui';
-import { SavedObjectsReference } from '@kbn/content-management-content-editor';
+import type { SavedObjectsReference } from '@kbn/content-management-content-editor';
 import type { RelatedDashboard } from '@kbn/observability-schema';
 import { useKibana } from '../../../../utils/kibana_react';
 
@@ -31,12 +31,15 @@ export interface ActionButtonProps {
 export function DashboardTile({
   dashboard,
   actionButtonProps,
+  timeRange,
 }: {
   dashboard: RelatedDashboard;
   actionButtonProps?: ActionButtonProps;
+  timeRange: NonNullable<DashboardLocatorParams['timeRange']>;
 }) {
   const {
     services: {
+      telemetryClient,
       share: { url: urlService },
       savedObjectsTagging: { ui: savedObjectsTaggingUi },
     },
@@ -52,12 +55,22 @@ export function DashboardTile({
     <>
       <EuiFlexGroup gutterSize="xs" responsive={false} key={dashboard.id} alignItems="center">
         <EuiFlexGroup key={dashboard.id} gutterSize="s" direction="column">
+          {/* Allowing both href and onClick to allow telemetry to be reported */}
+          {/* eslint-disable-next-line @elastic/eui/href-or-on-click */}
           <EuiLink
-            data-test-subj="o11yDashboardTileLink"
+            data-test-subj={`alertDetails_viewLinkedDashboard_${actionButtonProps?.ruleType}`}
             href={dashboardLocator?.getRedirectUrl({
               dashboardId: dashboard.id,
+              timeRange,
             })}
             target="_blank"
+            onClick={() => {
+              if (telemetryClient) {
+                telemetryClient.reportLinkedDashboardViewed(
+                  actionButtonProps?.ruleType || 'unknown'
+                );
+              }
+            }}
           >
             {dashboard.title}
           </EuiLink>
@@ -76,7 +89,10 @@ export function DashboardTile({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               data-test-subj={`addSuggestedDashboard_alertDetailsPage_${actionButtonProps.ruleType}`}
-              onClick={() => actionButtonProps.onClick(dashboard)}
+              onClick={() => {
+                actionButtonProps.onClick(dashboard);
+                telemetryClient.reportSuggestedDashboardAdded(actionButtonProps.ruleType);
+              }}
               isLoading={actionButtonProps.isLoading}
               isDisabled={actionButtonProps.isDisabled}
               iconType="plus"

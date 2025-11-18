@@ -5,126 +5,72 @@
  * 2.0.
  */
 
-import { runAgent, RunAgentParams } from './run_agent';
-import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
-import { AgentState } from '../types';
-import { loggerMock } from '@kbn/logging-mocks';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { AIMessage } from '@langchain/core/messages';
-import { INCLUDE_CITATIONS } from '../../../../prompt/prompts';
-import { newContentReferencesStoreMock } from '@kbn/elastic-assistant-common/impl/content_references/content_references_store/__mocks__/content_references_store.mock';
+import { loggingSystemMock } from '@kbn/core/server/mocks';
+import { runAgent } from './run_agent';
+import type { AIMessageChunk } from '@langchain/core/messages';
+import { AIMessage, HumanMessage, SystemMessage } from '@langchain/core/messages';
+import type { BaseLanguageModelInput } from '@langchain/core/language_models/base';
+import type { BaseChatModelCallOptions } from '@langchain/core/language_models/chat_models';
+import type { Runnable } from '@langchain/core/runnables';
 
-jest.mock('../../../../prompt', () => ({
-  getPrompt: jest.fn(),
-  promptDictionary: {},
-}));
+class ModelForTesting {
+  private result: string;
 
-const agentState = {
-  messages: [new AIMessage({ content: 'This message contains a reference {reference(1234)}' })],
-  formattedTime: 'mockFormattedTime',
-} as unknown as AgentState;
+  withConfig: jest.Mock;
+  invoke: jest.Mock;
 
-const invokeMock = jest.fn().mockResolvedValue({});
+  constructor(result: string) {
+    this.result = result;
 
-const testParams = {
-  actionsClient: actionsClientMock.create(),
-  logger: loggerMock.create(),
-  savedObjectsClient: savedObjectsClientMock.create(),
-  state: agentState,
-  agentRunnable: {
-    withConfig: jest.fn().mockReturnValue({
-      invoke: invokeMock,
-    }),
-  },
-  config: undefined,
-  kbDataClient: {
-    getRequiredKnowledgeBaseDocumentEntries: jest
-      .fn()
-      .mockResolvedValue([{ text: 'foobar', id: 1234 }]),
-  },
-  contentReferencesStore: newContentReferencesStoreMock(),
-} as unknown as RunAgentParams;
+    this.withConfig = jest.fn().mockReturnThis();
+    this.invoke = jest.fn().mockResolvedValue(new AIMessage(this.result));
+  }
+}
 
-describe('runAgent', () => {
+describe('run agent', () => {
+  const mockLoggerFactory = loggingSystemMock.create();
+
   beforeEach(() => {
     jest.clearAllMocks();
   });
-  it('invoked with formattedTime placeholder', async () => {
-    await runAgent(testParams);
-    expect(invokeMock).toHaveBeenCalledTimes(1);
-    expect(invokeMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        formattedTime: 'mockFormattedTime',
-      }),
-      undefined
-    );
-  });
 
-  it('invoked with knowledgeHistory', async () => {
-    await runAgent(testParams);
-    expect(invokeMock).toHaveBeenCalledTimes(1);
-    expect(invokeMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        knowledge_history:
-          'Knowledge History:\n["Citation: {reference(exampleContentReferenceId)}\\nfoobar"]',
-      }),
-      undefined
-    );
-  });
-
-  it('invoked with knowledgeHistory placeholder', async () => {
-    await runAgent({
-      ...testParams,
-      kbDataClient: {
-        getRequiredKnowledgeBaseDocumentEntries: jest.fn().mockResolvedValue([]),
+  it('invoke called with correct params', async () => {
+    const model = new ModelForTesting('This is the response') as unknown as Runnable<
+      BaseLanguageModelInput,
+      AIMessageChunk,
+      BaseChatModelCallOptions
+    >;
+    const abortController = new AbortController();
+    const messages = [
+      new SystemMessage('You are a system prompt'),
+      new HumanMessage('["some","json","string"]'),
+    ];
+    const stateUpdate = await runAgent({
+      logger: mockLoggerFactory.get(),
+      model,
+      state: {
+        messages,
       },
-    } as unknown as RunAgentParams);
-    expect(invokeMock).toHaveBeenCalledTimes(1);
-    expect(invokeMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        knowledge_history: 'Knowledge History:\n[No existing knowledge history]',
-      }),
-      undefined
-    );
-  });
-
-  it('invoked with sanitized chat history', async () => {
-    await runAgent(testParams);
-    expect(invokeMock).toHaveBeenCalledTimes(1);
-    expect(invokeMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        chat_history: expect.arrayContaining([
-          expect.objectContaining({
-            content: 'This message contains a reference',
-          }),
-        ]),
-      }),
-      undefined
-    );
-  });
-
-  it('invoked with citations prompt', async () => {
-    await runAgent(testParams);
-    expect(invokeMock).toHaveBeenCalledTimes(1);
-    expect(invokeMock).toHaveBeenCalledWith(
-      expect.objectContaining({
-        citations_prompt: INCLUDE_CITATIONS,
-      }),
-      undefined
-    );
-  });
-
-  it('invoked without citations prompt', async () => {
-    await runAgent({
-      ...testParams,
-      contentReferencesStore: newContentReferencesStoreMock({ disabled: true }),
+      config: {
+        signal: abortController.signal,
+      },
     });
-    expect(invokeMock).toHaveBeenCalledTimes(1);
-    expect(invokeMock).toHaveBeenCalledWith(
+
+    expect(stateUpdate).toEqual(
       expect.objectContaining({
-        citations_prompt: '',
-      }),
-      undefined
+        lastNode: 'agent',
+        messages: [new AIMessage('This is the response')],
+      })
     );
+    expect(model.withConfig).toHaveBeenCalledTimes(1);
+    expect(model.withConfig).toHaveBeenCalledWith({
+      tags: ['agent_run'],
+      signal: abortController.signal,
+    });
+    expect(model.invoke).toBeCalledTimes(1);
+    expect(model.invoke).toHaveBeenCalledWith([
+      new SystemMessage('You are a system prompt'),
+      new HumanMessage('["some","json","string"].'),
+    ]);
   });
 });

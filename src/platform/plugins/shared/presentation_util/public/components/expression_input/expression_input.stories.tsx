@@ -9,9 +9,9 @@
 
 import React from 'react';
 import { action } from '@storybook/addon-actions';
-import { Meta } from '@storybook/react';
+import type { Meta } from '@storybook/react';
 
-import {
+import type {
   ExpressionFunction,
   ExpressionFunctionParameter,
   Style,
@@ -80,8 +80,7 @@ export default {
       <div
         style={{
           padding: 40,
-          backgroundColor:
-            globals.euiTheme === 'v8.dark' || globals.euiTheme === 'v7.dark' ? '#1D1E24' : '#FFF',
+          backgroundColor: globals.euiTheme === 'borealis.dark' ? '#0B1628' : '#FFF',
         }}
       >
         {storyFn()}

@@ -10,11 +10,8 @@
 import { resolve } from 'path';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import {
-  type KibanaGroup,
-  KIBANA_SOLUTIONS,
-  ModuleVisibility,
-} from '@kbn/projects-solutions-groups';
+import type { ModuleVisibility } from '@kbn/projects-solutions-groups';
+import { type KibanaGroup, KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
 
 export const TEMPLATE_DIR = resolve(__dirname, '../templates');
 export const PKG_TEMPLATE_DIR = resolve(TEMPLATE_DIR, 'package');

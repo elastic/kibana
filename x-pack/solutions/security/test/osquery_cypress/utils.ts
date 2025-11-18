@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { PackagePolicy, CreatePackagePolicyResponse, API_VERSIONS } from '@kbn/fleet-plugin/common';
-import { KbnClient } from '@kbn/test';
-import {
+import type { PackagePolicy, CreatePackagePolicyResponse } from '@kbn/fleet-plugin/common';
+import { API_VERSIONS } from '@kbn/fleet-plugin/common';
+import type { KbnClient } from '@kbn/test';
+import type {
   GetEnrollmentAPIKeysResponse,
   CreateAgentPolicyResponse,
 } from '@kbn/fleet-plugin/common/types';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import chalk from 'chalk';
 
 export const DEFAULT_HEADERS = Object.freeze({

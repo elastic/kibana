@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { fetchConnectors } from '@kbn/search-connectors';
 
 import { isNotNullish } from '@kbn/search-connectors';

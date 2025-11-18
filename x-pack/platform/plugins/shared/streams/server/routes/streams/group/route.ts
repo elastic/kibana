@@ -8,10 +8,11 @@
 import { z } from '@kbn/zod';
 import { badData, badRequest } from '@hapi/boom';
 import { Group, Streams } from '@kbn/streams-schema';
+import { OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS } from '@kbn/management-settings-ids';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { createServerRoute } from '../../create_server_route';
-import { ASSET_TYPE, ASSET_UUID } from '../../../lib/streams/assets/fields';
-import { QueryAsset } from '../../../../common/assets';
+import { ASSET_TYPE } from '../../../lib/streams/assets/fields';
+import type { QueryAsset } from '../../../../common/assets';
 
 export interface GroupObjectGetResponse {
   group: Streams.GroupStream.Definition['group'];
@@ -75,12 +76,17 @@ const upsertGroupRoute = createServerRoute({
       group: Group.right,
     }),
   }),
-  handler: async ({ params, request, getScopedClients }) => {
-    const { streamsClient, assetClient } = await getScopedClients({
+  handler: async ({ params, request, getScopedClients, context }) => {
+    const { streamsClient, assetClient, attachmentClient } = await getScopedClients({
       request,
     });
 
-    if (!(await streamsClient.isStreamsEnabled())) {
+    const core = await context.core;
+    const groupStreamsEnabled = await core.uiSettings.client.get(
+      OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS
+    );
+
+    if (!groupStreamsEnabled) {
       throw badData('Streams are not enabled for Group streams.');
     }
 
@@ -93,11 +99,18 @@ const upsertGroupRoute = createServerRoute({
       throw badData(`Cannot update group capabilities of non-group stream`);
     }
 
-    const assets = await assetClient.getAssets(name);
+    const [assets, attachments] = await Promise.all([
+      assetClient.getAssets(name),
+      attachmentClient.getAttachments(name),
+    ]);
 
-    const dashboards = assets
-      .filter((asset) => asset[ASSET_TYPE] === 'dashboard')
-      .map((asset) => asset[ASSET_UUID]);
+    const dashboards = attachments
+      .filter((attachment) => attachment.type === 'dashboard')
+      .map((attachment) => attachment.id);
+
+    const rules = attachments
+      .filter((attachment) => attachment.type === 'rule')
+      .map((attachment) => attachment.id);
 
     const queries = assets
       .filter((asset): asset is QueryAsset => asset[ASSET_TYPE] === 'query')
@@ -112,6 +125,7 @@ const upsertGroupRoute = createServerRoute({
         group,
       },
       queries,
+      rules,
     };
 
     return await streamsClient.upsertStream({

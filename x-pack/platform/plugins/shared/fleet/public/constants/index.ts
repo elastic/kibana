@@ -33,6 +33,7 @@ export {
   AGENT_POLICY_MAPPINGS,
   AGENT_MAPPINGS,
   ENROLLMENT_API_KEY_MAPPINGS,
+  CLOUD_CONNECTOR_API_ROUTES,
 } from '../../common/constants';
 
 export * from './page_paths';

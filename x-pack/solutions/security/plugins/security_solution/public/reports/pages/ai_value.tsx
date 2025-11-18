@@ -4,30 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import type { DocLinks } from '@kbn/doc-links';
 import { pick } from 'lodash/fp';
+import { css } from '@emotion/css';
 import { useSyncTimerangeUrlParam } from '../../common/hooks/search_bar/use_sync_timerange_url_param';
 import { ValueReportExporter } from '../components/ai_value/value_report_exporter';
-import { EXPORT_REPORT, METRICS_OVER_TIME } from '../components/ai_value/translations';
+import { EXPORT_REPORT } from '../components/ai_value/translations';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
 import { SuperDatePicker } from '../../common/components/super_date_picker';
 import { AIValueMetrics } from '../components/ai_value';
-import { APP_ID } from '../../../common';
 import { InputsModelId } from '../../common/store/inputs/constants';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useSourcererDataView } from '../../sourcerer/containers';
-import { useAlertsPrivileges } from '../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { HeaderPage } from '../../common/components/header_page';
 import * as i18n from './translations';
 import { NoPrivileges } from '../../common/components/no_privileges';
-import { useKibana } from '../../common/lib/kibana';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { PageLoader } from '../../common/components/page_loader';
 import { inputsSelectors } from '../../common/store';
-import { getTimeRangeAsDays } from '../components/ai_value/metrics';
+import { useHasSecurityCapability } from '../../helper_hooks';
 
 /**
  * The dashboard includes key performance metrics such as:
@@ -44,8 +42,6 @@ import { getTimeRangeAsDays } from '../components/ai_value/metrics';
  */
 
 const AIValueComponent = () => {
-  const { cases } = useKibana().services;
-
   const { loading: oldIsSourcererLoading } = useSourcererDataView();
   const { from, to } = useDeepEqualSelector((state) =>
     pick(['from', 'to'], inputsSelectors.valueReportTimeRangeSelector(state))
@@ -56,16 +52,15 @@ const AIValueComponent = () => {
 
   const isSourcererLoading = newDataViewPickerEnabled ? status !== 'ready' : oldIsSourcererLoading;
 
-  const { hasKibanaREAD, hasIndexRead } = useAlertsPrivileges();
-  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
-  const canReadCases = userCasesPermissions.read;
-  const canReadAlerts = hasKibanaREAD && hasIndexRead;
+  const hasSocManagementCapability = useHasSecurityCapability('socManagement');
 
   const [hasAttackDiscoveries, setHasAttackDiscoveries] = useState(false);
-  const subtitle = useMemo(() => METRICS_OVER_TIME(getTimeRangeAsDays({ from, to })), [from, to]);
+  const exportPDFRef = useRef<(() => void) | null>(null);
+
   // since we do not have a search bar in the AI Value page, we need to sync the timerange
   useSyncTimerangeUrlParam();
-  if (!canReadAlerts && !canReadCases) {
+
+  if (!hasSocManagementCapability) {
     return <NoPrivileges docLinkSelector={(docLinks: DocLinks) => docLinks.siem.privileges} />;
   }
 
@@ -74,49 +69,59 @@ const AIValueComponent = () => {
   }
 
   return (
-    <ValueReportExporter>
-      {(exportPDF) => (
-        <SecuritySolutionPageWrapper data-test-subj="aiValuePage">
-          <HeaderPage
-            title={i18n.AI_VALUE_DASHBOARD}
-            subtitle={subtitle}
-            rightSideItems={[
-              <SuperDatePicker
-                id={InputsModelId.valueReport}
-                showUpdateButton="iconOnly"
-                width="auto"
-                compressed
-              />,
-              ...(hasAttackDiscoveries
-                ? [
-                    <EuiButtonEmpty
-                      className="exportPdfButton"
-                      iconType="download"
-                      onClick={exportPDF}
-                      size="s"
-                    >
-                      {EXPORT_REPORT}
-                    </EuiButtonEmpty>,
-                  ]
-                : []),
-            ]}
-          />
-          {isSourcererLoading ? (
-            <EuiLoadingSpinner size="l" data-test-subj="aiValueLoader" />
-          ) : (
-            <EuiFlexGroup direction="column" data-test-subj="aiValueSections">
-              <EuiFlexItem>
-                <AIValueMetrics
-                  from={from}
-                  to={to}
-                  setHasAttackDiscoveries={setHasAttackDiscoveries}
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          )}
-        </SecuritySolutionPageWrapper>
+    <SecuritySolutionPageWrapper
+      data-test-subj="aiValuePage"
+      className={css`
+        max-width: 1440px;
+        margin: 0 auto;
+      `}
+    >
+      <HeaderPage
+        title={i18n.AI_VALUE_DASHBOARD}
+        rightSideItems={[
+          <SuperDatePicker
+            id={InputsModelId.valueReport}
+            showUpdateButton="iconOnly"
+            width="auto"
+            compressed
+          />,
+          ...(hasAttackDiscoveries
+            ? [
+                <EuiButtonEmpty
+                  className="exportPdfButton"
+                  iconType="export"
+                  onClick={() => exportPDFRef.current?.()}
+                  size="s"
+                >
+                  {EXPORT_REPORT}
+                </EuiButtonEmpty>,
+              ]
+            : []),
+        ]}
+      />
+      {isSourcererLoading ? (
+        <EuiLoadingSpinner size="l" data-test-subj="aiValueLoader" />
+      ) : (
+        <EuiFlexGroup direction="column" data-test-subj="aiValueSections">
+          <EuiFlexItem>
+            <ValueReportExporter>
+              {(exportPDF) => {
+                // Store the export function in the ref
+                exportPDFRef.current = exportPDF;
+
+                return (
+                  <AIValueMetrics
+                    from={from}
+                    to={to}
+                    setHasAttackDiscoveries={setHasAttackDiscoveries}
+                  />
+                );
+              }}
+            </ValueReportExporter>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       )}
-    </ValueReportExporter>
+    </SecuritySolutionPageWrapper>
   );
 };
 

@@ -8,7 +8,7 @@
  */
 
 import { UI_SETTINGS } from '../../../constants';
-import { GetConfigFn } from '../../../types';
+import type { GetConfigFn } from '../../../types';
 import { getSearchParamsFromRequest, getEsPreference } from './get_search_params';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_views/data_view.stub';
 

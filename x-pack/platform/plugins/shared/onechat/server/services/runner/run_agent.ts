@@ -24,19 +24,28 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
   manager: RunnerManager;
 }): Promise<AgentHandlerContext> => {
   const { onEvent } = agentExecutionParams;
-  const { request, defaultConnectorId, elasticsearch, modelProviderFactory, toolsService, logger } =
-    manager.deps;
+  const {
+    request,
+    elasticsearch,
+    modelProvider,
+    toolsService,
+    attachmentsService,
+    resultStore,
+    logger,
+  } = manager.deps;
   return {
     request,
     logger,
+    modelProvider,
     esClient: elasticsearch.client.asScoped(request),
-    modelProvider: modelProviderFactory({ request, defaultConnectorId }),
     runner: manager.getRunner(),
     toolProvider: registryToProvider({
       registry: await toolsService.getRegistry({ request }),
       getRunner: manager.getRunner,
       request,
     }),
+    resultStore,
+    attachments: attachmentsService,
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
   };
 };
@@ -54,8 +63,8 @@ export const runAgent = async ({
   const manager = parentManager.createChild(context);
 
   const { agentsService, request } = manager.deps;
-  const agentClient = await agentsService.getScopedClient({ request });
-  const agent = await agentClient.get(agentId);
+  const agentRegistry = await agentsService.getRegistry({ request });
+  const agent = await agentRegistry.get(agentId);
 
   const agentResult = await withAgentSpan({ agent }, async () => {
     const agentHandler = createAgentHandler({ agent });
@@ -71,7 +80,6 @@ export const runAgent = async ({
   });
 
   return {
-    runId: manager.context.runId,
     result: agentResult.result,
   };
 };

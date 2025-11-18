@@ -8,9 +8,9 @@
  */
 
 import React, { lazy } from 'react';
-import { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
-import { InputControlVisDependencies } from '../../plugin';
-import { InputControlVisParams } from '../../types';
+import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
+import type { InputControlVisDependencies } from '../../plugin';
+import type { InputControlVisParams } from '../../types';
 
 const ControlsTab = lazy(() => import('./controls_tab'));
 const OptionsTab = lazy(() => import('./options_tab'));

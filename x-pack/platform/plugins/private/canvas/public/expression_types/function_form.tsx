@@ -5,20 +5,25 @@
  * 2.0.
  */
 
-import React, { ReactElement } from 'react';
+import type { ReactElement } from 'react';
+import React from 'react';
 import { EuiButtonIcon, EuiCallOut, EuiFlexGroup, EuiFormRow, EuiToolTip } from '@elastic/eui';
 import { isPlainObject, uniq, last, compact } from 'lodash';
-import { Ast, fromExpression } from '@kbn/interpreter';
-import { ArgAddPopover, ArgOptions } from '../components/arg_add_popover';
+import type { Ast } from '@kbn/interpreter';
+import { fromExpression } from '@kbn/interpreter';
+import type { ArgOptions } from '../components/arg_add_popover';
+import { ArgAddPopover } from '../components/arg_add_popover';
 // @ts-expect-error unconverted components
 import { SidebarSection } from '../components/sidebar/sidebar_section';
 // @ts-expect-error unconverted components
 import { SidebarSectionTitle } from '../components/sidebar/sidebar_section_title';
-import { BaseForm, BaseFormProps } from './base_form';
-import { Arg, ArgUiConfig, ResolvedArgProps } from './arg';
-import { ArgDisplayType, Args, ArgType, ArgTypeDef, ArgValue, ExpressionType } from './types';
+import type { BaseFormProps } from './base_form';
+import { BaseForm } from './base_form';
+import type { ArgUiConfig, ResolvedArgProps } from './arg';
+import { Arg } from './arg';
+import type { ArgDisplayType, Args, ArgType, ArgTypeDef, ArgValue, ExpressionType } from './types';
 import { Model, Transform, View } from '.';
-import {
+import type {
   AssetType,
   CanvasElement,
   ExpressionAstExpression,

@@ -9,7 +9,8 @@
 
 import React from 'react';
 import classNames from 'classnames';
-import { EuiToken, EuiTokenProps } from '@elastic/eui';
+import type { EuiTokenProps } from '@elastic/eui';
+import { EuiToken } from '@elastic/eui';
 
 // defaultIcon => a unknown datatype
 const defaultIcon = { iconType: 'question', color: 'gray' };
@@ -45,6 +46,8 @@ export const typeToEuiIconMap = {
   rank_feature: { iconType: 'tokenRankFeature' },
   rank_features: { iconType: 'tokenRankFeatures' },
   histogram: { iconType: 'tokenHistogram' },
+  exponential_histogram: { iconType: 'tokenHistogram' },
+  tdigest: { iconType: 'tokenHistogram' },
   _source: { iconType: 'editorCodeBlock', color: 'gray' },
   point: { iconType: 'tokenShape' }, // there is no separate icon for `point` yet
   shape: { iconType: 'tokenShape' },

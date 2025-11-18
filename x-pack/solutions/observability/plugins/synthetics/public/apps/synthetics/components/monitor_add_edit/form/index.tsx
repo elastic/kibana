@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren, useMemo } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useMemo } from 'react';
 import { EuiForm, EuiSpacer } from '@elastic/eui';
 import { FormProvider } from 'react-hook-form';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { SpacesContextProps } from '@kbn/spaces-plugin/public';
+import type { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import { useFormWrapped } from '../../../../../hooks/use_form_wrapped';
-import { FormMonitorType, SyntheticsMonitor } from '../types';
+import type { SyntheticsMonitor } from '../types';
+import { FormMonitorType } from '../types';
 import { getDefaultFormFields, formatDefaultFormValues } from './defaults';
 import { ActionBar } from './submit';
 import { Disclaimer } from './disclaimer';
-import { ClientPluginsStart } from '../../../../../plugin';
+import type { ClientPluginsStart } from '../../../../../plugin';
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
 export const MonitorForm: FC<

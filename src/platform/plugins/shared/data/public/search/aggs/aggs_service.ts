@@ -7,18 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
 
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
-import {
-  aggsRequiredUiSettings,
-  AggsCommonStartDependencies,
-  AggsCommonService,
-} from '../../../common/search/aggs';
-import { calculateBounds, TimeRange } from '../../../common';
+import type { AggsCommonStartDependencies } from '../../../common/search/aggs';
+import { aggsRequiredUiSettings, AggsCommonService } from '../../../common/search/aggs';
+import type { TimeRange } from '../../../common';
+import { calculateBounds } from '../../../common';
 import type { AggsSetup, AggsStart } from './types';
 import type { NowProviderInternalContract } from '../../now_provider';
 
@@ -57,7 +55,7 @@ export interface AggsSetupDependencies {
 /** @internal */
 export interface AggsStartDependencies {
   fieldFormats: FieldFormatsStart;
-  indexPatterns: DataViewsContract;
+  dataViews: DataViewsContract;
 }
 
 /**
@@ -89,10 +87,10 @@ export class AggsService {
     });
   }
 
-  public start({ indexPatterns, fieldFormats }: AggsStartDependencies): AggsStart {
+  public start({ dataViews, fieldFormats }: AggsStartDependencies): AggsStart {
     const { calculateAutoTimeExpression, types, createAggConfigs } = this.aggsCommonService.start({
       getConfig: this.getConfig!,
-      getIndexPattern: indexPatterns.get,
+      getIndexPattern: dataViews.get,
       calculateBounds: this.calculateBounds,
       fieldFormats,
     });

@@ -20,8 +20,8 @@ import {
 import React, { useState } from 'react';
 import ReactDOM from 'react-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { ControlsExampleStartDeps } from '../plugin';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { ControlsExampleStartDeps } from '../plugin';
 import { ControlGroupRendererExamples } from './control_group_renderer_examples';
 import { ReactControlExample } from './react_control_example/react_control_example';
 

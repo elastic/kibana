@@ -12,8 +12,9 @@ import { documentationService } from '../../../../../services/documentation';
 import { EditFieldFormRow } from '../fields/edit_field';
 import { PARAMETERS_OPTIONS } from '../../../constants';
 import { getFieldConfig } from '../../../lib';
-import { SuperSelectOption } from '../../../types';
-import { UseField, Field, FieldConfig } from '../../../shared_imports';
+import type { SuperSelectOption } from '../../../types';
+import type { FieldConfig } from '../../../shared_imports';
+import { UseField, Field } from '../../../shared_imports';
 
 interface Props {
   hasIndexOptions?: boolean;

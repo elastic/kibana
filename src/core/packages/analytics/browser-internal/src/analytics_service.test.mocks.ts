@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AnalyticsClient } from '@elastic/ebt/client';
+import type { AnalyticsClient } from '@elastic/ebt/client';
 import { Subject } from 'rxjs';
+import { lazyObject } from '@kbn/lazy-object';
 
-export const analyticsClientMock: jest.Mocked<AnalyticsClient> = {
+export const analyticsClientMock: jest.Mocked<AnalyticsClient> = lazyObject({
   optIn: jest.fn(),
   reportEvent: jest.fn(),
   registerEventType: jest.fn(),
@@ -20,7 +21,7 @@ export const analyticsClientMock: jest.Mocked<AnalyticsClient> = {
   telemetryCounter$: new Subject(),
   flush: jest.fn(),
   shutdown: jest.fn(),
-};
+});
 
 jest.doMock('@elastic/ebt/client', () => ({
   createAnalytics: () => analyticsClientMock,

@@ -8,14 +8,14 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import { PercentageModeConfigWithMinMax } from '@kbn/visualizations-plugin/common';
+import type { PercentageModeConfigWithMinMax } from '@kbn/visualizations-plugin/common';
 import {
   getConvertToLensModule,
   getDataViewByIndexPatternId,
 } from '@kbn/visualizations-plugin/public';
 import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { getDataViewsStart } from '../services';
-import { ConvertGoalVisToLensVisualization } from './types';
+import type { ConvertGoalVisToLensVisualization } from './types';
 import { getConfiguration } from './configurations/goal';
 
 export const convertToLens: ConvertGoalVisToLensVisualization = async (vis, timefilter) => {

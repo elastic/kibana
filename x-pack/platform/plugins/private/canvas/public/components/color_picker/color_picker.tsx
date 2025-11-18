@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { FC } from 'react';
+import type { FC } from 'react';
+import React from 'react';
 import PropTypes from 'prop-types';
 import chroma from 'chroma-js';
 
-import { ColorManager, Props as ColorManagerProps } from '../color_manager';
+import type { Props as ColorManagerProps } from '../color_manager';
+import { ColorManager } from '../color_manager';
 import { ColorPalette } from '../color_palette';
 
 export interface Props extends ColorManagerProps {

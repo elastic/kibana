@@ -11,7 +11,8 @@ import { Server } from '@hapi/hapi';
 import { duration } from 'moment';
 import { URL } from 'url';
 import fetch, { Response } from 'node-fetch';
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import type { KibanaConfig } from '../kibana_config';
 import { StatusHandler } from './status';
 

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { StreamlangProcessorDefinition } from '../../../types/processors';
-import { Condition } from '../../../types/conditions';
-import { StreamlangStep, isWhereBlock } from '../../../types/streamlang';
+import type { StreamlangProcessorDefinition } from '../../../types/processors';
+import type { Condition } from '../../../types/conditions';
+import type { StreamlangStep } from '../../../types/streamlang';
+import { isWhereBlockSchema } from '../../../types/streamlang';
 
 /**
  * Helper to combine two conditions as an "and" logical condition.
@@ -29,7 +30,7 @@ export function flattenSteps(
 ): StreamlangProcessorDefinition[] {
   return steps.flatMap((step) => {
     // Handle where blocks (conditional execution)
-    if (isWhereBlock(step)) {
+    if (isWhereBlockSchema(step)) {
       const conditionWithSteps = step.where;
       // Strip steps for the resursive call, everything left is the condition.
       const { steps: nestedSteps, ...rest } = conditionWithSteps;
@@ -42,7 +43,7 @@ export function flattenSteps(
     // Handle processor steps
     const processor = step;
     // If the processor has an inline where, combine with parent as "and"
-    if (processor.where) {
+    if ('where' in processor && processor.where) {
       const { where, ...rest } = processor;
       const combinedCondition = combineConditionsAsAnd(parentCondition, where);
       return [
@@ -54,10 +55,11 @@ export function flattenSteps(
     }
 
     // Normal processor, just return as-is (strip undefined where), but add parentCondition if present
-    const { where, ...rest } = processor;
+    const processorCopy = { ...processor };
+    if ('where' in processorCopy) delete processorCopy.where;
     if (parentCondition) {
-      return [{ ...rest, where: parentCondition }];
+      return [{ ...processorCopy, where: parentCondition }];
     }
-    return [rest];
+    return [processorCopy];
   });
 }

@@ -151,6 +151,14 @@ export const sendEndpointActionResponse = async (
             .content as unknown as ResponseActionRunScriptOutputContent
         ).stderr = 'runscript command timed out';
       }
+
+      if (
+        endpointResponse.EndpointActions.data.command === 'cancel' &&
+        endpointResponse.EndpointActions.data.output
+      ) {
+        (endpointResponse.EndpointActions.data.output.content as unknown as { code: string }).code =
+          'ra_cancel_error';
+      }
     }
 
     await esClient
@@ -345,6 +353,29 @@ const getOutputDataIfNeeded = (action: ActionDetails): ResponseOutput => {
           content: executeOutput,
         }),
       } as unknown as ResponseOutput<ResponseActionExecuteOutputContent>;
+
+    case 'cancel':
+      return {
+        output: {
+          type: 'json',
+          content: {
+            code: 'ra_cancel_success_done',
+          },
+        },
+      } as unknown as ResponseOutput;
+
+    case 'memory-dump':
+      return {
+        output: {
+          type: 'json',
+          content: {
+            code: 'ra_memory-dump_success_done',
+            file_size: 2322000,
+            path: `/tmp/elastic_defend/memory_dump/dump.${new Date().toISOString()}.zip`,
+            disk_free_space: 123045678009,
+          },
+        },
+      } as unknown as ResponseOutput;
 
     default:
       return { output: undefined };

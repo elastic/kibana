@@ -6,60 +6,38 @@
  */
 
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import type { MapItem, MapAttributes } from '../../../../common/content_management';
-import type { MapsCreateOptions, MapsSavedObjectAttributes } from './types';
+import type { MapItem } from '../../../../common/content_management';
+import type { MapAttributes } from './map_attributes_schema';
+import type { StoredMapAttributes } from '../../../saved_objects/types';
+import { transformMapAttributesOut } from '../../../../common/content_management/transform_map_attributes_out';
 
 type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;
 };
 
 interface PartialMapsItem {
-  attributes: Partial<MapItem['attributes']>;
+  attributes: Partial<MapAttributes>;
   references: SavedObjectReference[] | undefined;
 }
 
 export function savedObjectToItem(
-  savedObject: SavedObject<MapsSavedObjectAttributes>,
+  savedObject: SavedObject<StoredMapAttributes>,
   partial: false
 ): MapItem;
 
 export function savedObjectToItem(
-  savedObject: PartialSavedObject<MapsSavedObjectAttributes>,
+  savedObject: PartialSavedObject<StoredMapAttributes>,
   partial: true
 ): PartialMapsItem;
 
-// export function savedObjectToItem(
-//   savedObject:
-//     | SavedObject<MapsSavedObjectAttributes>
-//     | PartialSavedObject<MapsSavedObjectAttributes>,
-//   partial: boolean
-// ): MapItem | PartialMapsItem {
-//   return savedObject;
-// }
-
 export function savedObjectToItem(
-  savedObject:
-    | SavedObject<MapsSavedObjectAttributes>
-    | PartialSavedObject<MapsSavedObjectAttributes>,
+  savedObject: SavedObject<StoredMapAttributes> | PartialSavedObject<StoredMapAttributes>,
   partial: boolean
 ): MapItem | PartialMapsItem {
-  const normalizedAttributes = {
-    ...savedObject.attributes,
-    description: savedObject.attributes?.description ?? undefined,
-    mapStateJSON: savedObject.attributes?.mapStateJSON ?? undefined,
-    layerListJSON: savedObject.attributes?.layerListJSON ?? undefined,
-    uiStateJSON: savedObject.attributes?.uiStateJSON ?? undefined,
-  };
-
+  const { references, attributes, ...rest } = savedObject;
   return {
-    ...savedObject,
-    attributes: normalizedAttributes,
+    ...rest,
+    attributes: transformMapAttributesOut(attributes as MapAttributes, references ?? []),
+    references: (references ?? []).filter(({ type }) => type === 'tag'),
   };
-}
-
-export function itemToSavedObject(item: {
-  attributes: MapAttributes;
-  references?: MapsCreateOptions['references'];
-}) {
-  return item as SavedObject<MapsSavedObjectAttributes>;
 }

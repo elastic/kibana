@@ -6,11 +6,15 @@
  */
 
 import type { NavigationTreeDefinition } from '@kbn/core-chrome-browser';
-import { SecurityPageName } from '@kbn/security-solution-navigation';
+import {
+  ATTACKS_ALERTS_ALIGNMENT_ENABLED,
+  SecurityPageName,
+} from '@kbn/security-solution-navigation';
+import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import { defaultNavigationTree } from '@kbn/security-solution-navigation/navigation_tree';
-import { securityLink, i18nStrings } from '@kbn/security-solution-navigation/links';
 import { type Services } from '../common/services';
 import { SOLUTION_NAME } from './translations';
+import { v2FooterItems } from './v2_footer_items';
 
 export const createNavigationTree = (services: Services): NavigationTreeDefinition => ({
   body: [
@@ -24,37 +28,62 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
       isCollapsible: false,
       children: [
         {
-          link: 'discover',
+          link: securityLink(SecurityPageName.landing),
+          title: SOLUTION_NAME,
+          icon: 'logoSecurity',
+          renderAs: 'home',
+          sideNavVersion: 'v2',
         },
-        defaultNavigationTree.dashboards(),
+        {
+          link: 'discover',
+          iconV2: 'discoverApp',
+          sideNavVersion: 'v1',
+        },
+        defaultNavigationTree.dashboards({ sideNavVersion: 'v1' }),
         {
           breadcrumbStatus: 'hidden',
           children: [
-            defaultNavigationTree.rules(),
+            defaultNavigationTree.rules({ sideNavVersion: 'v1' }),
+            services.featureFlags.getBooleanValue(ATTACKS_ALERTS_ALIGNMENT_ENABLED, false)
+              ? defaultNavigationTree.alertDetections({ sideNavVersion: 'v1' })
+              : {
+                  id: SecurityPageName.alerts,
+                  link: securityLink(SecurityPageName.alerts),
+                  sideNavVersion: 'v1',
+                },
             {
-              id: SecurityPageName.alerts,
-              link: securityLink(SecurityPageName.alerts),
+              link: 'workflows',
+              withBadge: true,
+              badgeTypeV2: 'techPreview' as const,
+              badgeOptions: {
+                icon: 'beaker',
+                tooltip: i18nStrings.workflows.badgeTooltip,
+              },
+              sideNavVersion: 'v1',
             },
             {
               id: SecurityPageName.attackDiscovery,
               link: securityLink(SecurityPageName.attackDiscovery),
+              sideNavVersion: 'v1',
             },
             {
               id: SecurityPageName.cloudSecurityPostureFindings,
               link: securityLink(SecurityPageName.cloudSecurityPostureFindings),
+              sideNavVersion: 'v1',
             },
-            defaultNavigationTree.cases(),
+            defaultNavigationTree.cases({ sideNavVersion: 'v1' }),
           ],
         },
         {
           breadcrumbStatus: 'hidden',
           children: [
-            defaultNavigationTree.entityAnalytics(),
-            defaultNavigationTree.explore(),
-            defaultNavigationTree.investigations(),
+            defaultNavigationTree.entityAnalytics({ sideNavVersion: 'v1' }),
+            defaultNavigationTree.explore({ sideNavVersion: 'v1' }),
+            defaultNavigationTree.investigations({ sideNavVersion: 'v1' }),
             {
               id: SecurityPageName.threatIntelligence,
               link: securityLink(SecurityPageName.threatIntelligence),
+              sideNavVersion: 'v1',
             },
           ],
         },
@@ -64,11 +93,19 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
             {
               id: SecurityPageName.assetInventory,
               link: securityLink(SecurityPageName.assetInventory),
+              sideNavVersion: 'v1',
             },
-            defaultNavigationTree.assets(services),
+            {
+              id: SecurityPageName.siemReadiness,
+              link: securityLink(SecurityPageName.siemReadiness),
+              sideNavVersion: 'v1',
+            },
+            defaultNavigationTree.assets(services, { sideNavVersion: 'v1' }),
           ],
         },
-        defaultNavigationTree.ml(),
+        defaultNavigationTree.ml({ sideNavVersion: 'v1' }),
+        // version 2 sidenav
+        ...defaultNavigationTree.v2(services),
       ],
     },
   ],
@@ -80,19 +117,66 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
         {
           id: SecurityPageName.landing,
           link: securityLink(SecurityPageName.landing),
+          sideNavVersion: 'v1',
           icon: 'launch',
+        },
+        // version 2 sidenav launchpad
+        {
+          id: 'launchpad',
+          title: i18nStrings.launchPad.title,
+          renderAs: 'panelOpener',
+          sideNavVersion: 'v2',
+          iconV2: 'launch',
+          children: [
+            {
+              children: [
+                {
+                  id: 'launchpad_get_started',
+                  link: securityLink(SecurityPageName.landing),
+                  sideNavVersion: 'v2',
+                },
+                {
+                  link: securityLink(SecurityPageName.siemReadiness),
+                  sideNavVersion: 'v2',
+                },
+                {
+                  // value report
+                  link: securityLink(SecurityPageName.aiValue),
+                  sideNavVersion: 'v2',
+                },
+              ],
+            },
+            {
+              title: i18nStrings.launchPad.migrations.title,
+              children: [
+                {
+                  id: SecurityPageName.siemMigrationsRules,
+                  link: securityLink(SecurityPageName.siemMigrationsRules),
+                  sideNavVersion: 'v2',
+                },
+                {
+                  id: SecurityPageName.siemMigrationsDashboards,
+                  link: securityLink(SecurityPageName.siemMigrationsDashboards),
+                  sideNavVersion: 'v2',
+                },
+              ],
+            },
+          ],
         },
         {
           link: 'dev_tools',
           title: i18nStrings.devTools,
           icon: 'editorCodeBlock',
         },
+        // version 2 sidenav footer items
+        ...v2FooterItems,
         {
           title: i18nStrings.management.title,
           icon: 'gear',
           breadcrumbStatus: 'hidden',
           renderAs: 'accordion',
           spaceBefore: null,
+          sideNavVersion: 'v1',
           children: [
             {
               id: 'stack_management',
@@ -168,13 +252,19 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
                     { link: 'management:objects' },
                     { link: 'management:tags' },
                     { link: 'management:search_sessions' },
-                    { link: 'management:aiAssistantManagementSelection' },
                     { link: 'management:spaces' },
                     { link: 'maps' },
                     { link: 'visualize' },
                     { link: 'graph' },
                     { link: 'canvas' },
                     { link: 'management:settings' },
+                  ],
+                },
+                {
+                  title: 'AI',
+                  children: [
+                    { link: 'management:genAiSettings' },
+                    { link: 'management:aiAssistantManagementSelection' },
                   ],
                 },
                 {
@@ -188,9 +278,11 @@ export const createNavigationTree = (services: Services): NavigationTreeDefiniti
             },
             {
               link: 'monitoring',
+              sideNavVersion: 'v1',
             },
             {
               link: 'integrations',
+              sideNavVersion: 'v1',
             },
           ],
         },

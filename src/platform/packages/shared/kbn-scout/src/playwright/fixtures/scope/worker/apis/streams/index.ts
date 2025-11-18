@@ -7,19 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Condition } from '@kbn/streams-schema';
-import { IngestStream } from '@kbn/streams-schema/src/models/ingest';
+import type { Condition, StreamlangDSL } from '@kbn/streamlang';
+import type { IngestStream } from '@kbn/streams-schema/src/models/ingest';
+import { type Ingest } from '@kbn/streams-schema/src/models/ingest';
 import { WiredStream } from '@kbn/streams-schema/src/models/ingest/wired';
-import { KbnClient, ScoutLogger, measurePerformanceAsync } from '../../../../../../common';
-import { ScoutSpaceParallelFixture } from '../../scout_space';
+import type { RoutingStatus } from '@kbn/streams-schema';
+import type { KbnClient, ScoutLogger } from '../../../../../../common';
+import { measurePerformanceAsync } from '../../../../../../common';
+import type { ScoutSpaceParallelFixture } from '../../scout_space';
 
 export interface StreamsApiService {
   enable: () => Promise<void>;
   disable: () => Promise<void>;
-  forkStream: (streamName: string, destination: string, condition: Condition) => Promise<void>;
+  forkStream: (
+    streamName: string,
+    destination: string,
+    condition: Condition,
+    status?: RoutingStatus
+  ) => Promise<void>;
   getStreamDefinition: (streamName: string) => Promise<IngestStream.all.GetResponse>;
   deleteStream: (streamName: string) => Promise<void>;
+  updateStream: (streamName: string, updateBody: { ingest: Ingest }) => Promise<void>;
   clearStreamChildren: (streamName: string) => Promise<void>;
+  clearStreamMappings: (streamName: string) => Promise<void>;
+  clearStreamProcessors: (streamName: string) => Promise<void>;
+  updateStreamProcessors: (
+    streamName: string,
+    getProcessors: StreamlangDSL | ((prevProcessors: StreamlangDSL) => StreamlangDSL)
+  ) => Promise<void>;
 }
 
 export const getStreamsApiService = ({
@@ -50,13 +65,19 @@ export const getStreamsApiService = ({
         });
       });
     },
-    forkStream: async (streamName: string, newStreamName: string, condition: Condition) => {
+    forkStream: async (
+      streamName: string,
+      newStreamName: string,
+      condition: Condition,
+      status: RoutingStatus = 'enabled'
+    ) => {
       await measurePerformanceAsync(log, 'streamsApi.createRoutingRule', async () => {
         await kbnClient.request({
           method: 'POST',
           path: `${basePath}/api/streams/${streamName}/_fork`,
           body: {
-            if: condition,
+            where: condition,
+            status,
             stream: {
               name: newStreamName,
             },
@@ -81,6 +102,15 @@ export const getStreamsApiService = ({
         });
       });
     },
+    updateStream: async (streamName: string, updateBody: { ingest: Ingest }) => {
+      await measurePerformanceAsync(log, 'streamsApi.updateStream', async () => {
+        await kbnClient.request({
+          method: 'PUT',
+          path: `${basePath}/api/streams/${streamName}/_ingest`,
+          body: updateBody,
+        });
+      });
+    },
     clearStreamChildren: async (streamName: string) => {
       await measurePerformanceAsync(log, 'streamsApi.clearStreamChildren', async () => {
         const definition = await service.getStreamDefinition(streamName);
@@ -91,6 +121,53 @@ export const getStreamsApiService = ({
             )
           );
         }
+      });
+    },
+    clearStreamMappings: async (streamName: string) => {
+      await measurePerformanceAsync(log, 'streamsApi.clearStreamMappings', async () => {
+        const definition = await service.getStreamDefinition(streamName);
+        if (!WiredStream.Definition.is(definition.stream)) {
+          throw new Error(`Stream ${streamName} is not a wired stream, cannot clear mappings.`);
+        }
+        await service.updateStream(streamName, {
+          ingest: {
+            ...definition.stream.ingest,
+            wired: {
+              ...definition.stream.ingest.wired,
+              fields: {},
+            },
+          },
+        });
+      });
+    },
+    clearStreamProcessors: async (streamName: string) => {
+      await measurePerformanceAsync(log, 'streamsApi.clearStreamProcessors', async () => {
+        const definition = await service.getStreamDefinition(streamName);
+        await service.updateStream(streamName, {
+          ingest: {
+            ...definition.stream.ingest,
+            processing: {
+              steps: [],
+            },
+          },
+        });
+      });
+    },
+    updateStreamProcessors: async (
+      streamName: string,
+      getProcessors: StreamlangDSL | ((prevProcessors: StreamlangDSL) => StreamlangDSL)
+    ) => {
+      await measurePerformanceAsync(log, 'streamsApi.updateStreamProcessors', async () => {
+        const definition = await service.getStreamDefinition(streamName);
+        const processing = !(typeof getProcessors === 'function')
+          ? getProcessors
+          : getProcessors(definition.stream.ingest.processing);
+        await service.updateStream(streamName, {
+          ingest: {
+            ...definition.stream.ingest,
+            processing,
+          },
+        });
       });
     },
   };

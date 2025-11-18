@@ -1,127 +1,129 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
 exports[`ViewApiRequestFlyout is rendered 1`] = `
-<div
-  data-eui="EuiFlyout"
-  data-test-subj="apiRequestFlyout"
-  role="dialog"
->
-  <button
-    aria-label="Close this dialog"
-    data-test-subj="euiFlyoutCloseButton"
-    type="button"
-  />
+<div>
   <div
-    class="euiFlyoutHeader emotion-euiFlyoutHeader"
+    data-eui="EuiFlyout"
+    data-test-subj="apiRequestFlyout"
+    role="dialog"
   >
-    <h2
-      class="euiTitle emotion-euiTitle-m"
-      data-test-subj="apiRequestFlyoutTitle"
-      id="generated-id"
-    >
-      Test title
-    </h2>
-  </div>
-  <div
-    class="euiFlyoutBody emotion-euiFlyoutBody"
-  >
+    <button
+      aria-label="Close this dialog"
+      data-test-subj="euiFlyoutCloseButton"
+      type="button"
+    />
     <div
-      class="euiFlyoutBody__overflow emotion-euiFlyoutBody__overflow-noBanner"
-      tabindex="0"
+      class="euiFlyoutHeader emotion-euiFlyoutHeader"
+    >
+      <h2
+        class="euiTitle emotion-euiTitle-m"
+        data-test-subj="apiRequestFlyoutTitle"
+        id="generated-id"
+      >
+        Test title
+      </h2>
+    </div>
+    <div
+      class="euiFlyoutBody emotion-euiFlyoutBody"
     >
       <div
-        class="euiFlyoutBody__overflowContent"
+        class="euiFlyoutBody__overflow emotion-euiFlyoutBody__overflow-noBanner"
+        tabindex="0"
       >
         <div
-          class="euiText emotion-euiText-m"
+          class="euiFlyoutBody__overflowContent"
         >
-          <p
-            data-test-subj="apiRequestFlyoutDescription"
+          <div
+            class="euiText emotion-euiText-m"
           >
-            Test description
-          </p>
-        </div>
-        <div
-          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
-        />
-        <div
-          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-        />
-        <div
-          class="eui-textRight"
-        >
-          <span
-            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-          >
-            <button
-              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary-flush-right"
-              data-test-subj="apiRequestFlyoutCopyClipboardButton"
-              type="button"
+            <p
+              data-test-subj="apiRequestFlyoutDescription"
             >
-              <span
-                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
-              >
-                <span
-                  color="inherit"
-                  data-euiicon-type="copyClipboard"
-                />
-                <span
-                  class="eui-textTruncate euiButtonEmpty__text"
-                >
-                  Copy to clipboard
-                </span>
-              </span>
-            </button>
-          </span>
-        </div>
-        <div
-          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
-        />
-        <div
-          aria-labelledby="generated-id"
-        >
-          <h3
-            class="emotion-euiScreenReaderOnly"
-            id="generated-id"
+              Test description
+            </p>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+          />
+          <div
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+          />
+          <div
+            class="eui-textRight"
           >
-            Request code block
-          </h3>
-          <div>
-            <pre>
-              <code
-                data-code-language="json"
-                data-test-subj="apiRequestFlyoutBody"
+            <span
+              class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
+            >
+              <button
+                class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary-flush-right"
+                data-test-subj="apiRequestFlyoutCopyClipboardButton"
+                type="button"
               >
-                Hello world
-              </code>
-            </pre>
+                <span
+                  class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                >
+                  <span
+                    color="inherit"
+                    data-euiicon-type="copyClipboard"
+                  />
+                  <span
+                    class="eui-textTruncate euiButtonEmpty__text"
+                  >
+                    Copy to clipboard
+                  </span>
+                </span>
+              </button>
+            </span>
+          </div>
+          <div
+            class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+          />
+          <div
+            aria-labelledby="generated-id"
+          >
+            <h3
+              class="emotion-euiScreenReaderOnly"
+              id="generated-id"
+            >
+              Request code block
+            </h3>
+            <div>
+              <pre>
+                <code
+                  data-code-language="json"
+                  data-test-subj="apiRequestFlyoutBody"
+                >
+                  Hello world
+                </code>
+              </pre>
+            </div>
           </div>
         </div>
       </div>
     </div>
-  </div>
-  <div
-    class="euiFlyoutFooter emotion-euiFlyoutFooter"
-  >
-    <button
-      class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary-flush-left"
-      data-test-subj="apiRequestFlyoutClose"
-      type="button"
+    <div
+      class="euiFlyoutFooter emotion-euiFlyoutFooter"
     >
-      <span
-        class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+      <button
+        class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-m-empty-primary-flush-left"
+        data-test-subj="apiRequestFlyoutClose"
+        type="button"
       >
         <span
-          color="inherit"
-          data-euiicon-type="cross"
-        />
-        <span
-          class="eui-textTruncate euiButtonEmpty__text"
+          class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
         >
-          Close
+          <span
+            color="inherit"
+            data-euiicon-type="cross"
+          />
+          <span
+            class="eui-textTruncate euiButtonEmpty__text"
+          >
+            Close
+          </span>
         </span>
-      </span>
-    </button>
+      </button>
+    </div>
   </div>
 </div>
 `;

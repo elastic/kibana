@@ -6,11 +6,13 @@
  */
 
 import {
-  OBSERVABILITY_ENABLE_STREAMS_UI,
+  OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
+  OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
+  OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
 } from '@kbn/management-settings-ids';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '@kbn/streams-plugin/common';
-import { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
+import type { STREAMS_UI_PRIVILEGES } from '@kbn/streams-plugin/public';
 import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from './use_kibana';
 
@@ -22,6 +24,15 @@ export interface StreamsFeatures {
     available: boolean;
     enabled: boolean;
   };
+  groupStreams?: {
+    enabled: boolean;
+  };
+  contentPacks?: {
+    enabled: boolean;
+  };
+  attachments?: {
+    enabled: boolean;
+  };
 }
 
 export interface StreamsPrivileges {
@@ -30,6 +41,7 @@ export interface StreamsPrivileges {
     show: boolean;
   };
   features: StreamsFeatures;
+  isLoading?: boolean;
 }
 
 export function useStreamsPrivileges(): StreamsPrivileges {
@@ -48,7 +60,7 @@ export function useStreamsPrivileges(): StreamsPrivileges {
 
   const license = useObservable(licensing.license$);
 
-  const uiEnabled = uiSettings.get<boolean>(OBSERVABILITY_ENABLE_STREAMS_UI);
+  const groupStreamsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS, false);
 
   const significantEventsEnabled = uiSettings.get<boolean>(
     OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
@@ -59,6 +71,10 @@ export function useStreamsPrivileges(): StreamsPrivileges {
     STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE.id
   );
 
+  const contentPacksEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS, false);
+
+  const attachmentsEnabled = uiSettings.get(OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS, false);
+
   return {
     ui: streams as {
       [STREAMS_UI_PRIVILEGES.manage]: boolean;
@@ -66,7 +82,7 @@ export function useStreamsPrivileges(): StreamsPrivileges {
     },
     features: {
       ui: {
-        enabled: uiEnabled,
+        enabled: true,
       },
       significantEvents: license && {
         enabled: significantEventsEnabled,
@@ -75,6 +91,16 @@ export function useStreamsPrivileges(): StreamsPrivileges {
           license.hasAtLeast('enterprise') &&
           significantEventsAvailableForTier,
       },
+      groupStreams: {
+        enabled: groupStreamsEnabled,
+      },
+      contentPacks: {
+        enabled: contentPacksEnabled,
+      },
+      attachments: {
+        enabled: attachmentsEnabled,
+      },
     },
+    isLoading: !license,
   };
 }

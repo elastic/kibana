@@ -8,8 +8,8 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { useEuiTheme } from '@elastic/eui';
-import { RawBucket } from '@kbn/grouping/src';
-import { FindingsGroupingAggregation } from '@kbn/cloud-security-posture';
+import type { RawBucket } from '@kbn/grouping/src';
+import type { FindingsGroupingAggregation } from '@kbn/cloud-security-posture';
 import { ComplianceBarComponent } from './latest_findings_group_renderer';
 import { ComplianceScoreBar } from '../../../components/compliance_score_bar';
 

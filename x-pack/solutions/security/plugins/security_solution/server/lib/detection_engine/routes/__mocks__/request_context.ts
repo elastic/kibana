@@ -8,7 +8,7 @@
 import type { AwaitedProperties } from '@kbn/utility-types';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { KibanaRequest } from '@kbn/core/server';
-import { coreMock } from '@kbn/core/server/mocks';
+import { analyticsServiceMock, coreMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 
 import type { ActionsApiRequestHandlerContext } from '@kbn/actions-plugin/server';
@@ -45,10 +45,11 @@ import { packageServiceMock } from '@kbn/fleet-plugin/server/services/epm/packag
 import type { EndpointInternalFleetServicesInterface } from '../../../../endpoint/services/fleet';
 import { siemMigrationsServiceMock } from '../../../siem_migrations/__mocks__/mocks';
 import { AssetInventoryDataClientMock } from '../../../asset_inventory/asset_inventory_data_client.mock';
-import { privilegeMonitorDataClientMock } from '../../../entity_analytics/privilege_monitoring/privilege_monitoring_data_client.mock';
 import { createProductFeaturesServiceMock } from '../../../product_features_service/mocks';
 import type { EndpointAppContextService } from '../../../../endpoint/endpoint_app_context_services';
 import { padPackageInstallationClientMock } from '../../../entity_analytics/privilege_monitoring/privileged_access_detection/pad_package_installation_client.mock';
+import { privilegeMonitorDataClientMock } from '../../../entity_analytics/privilege_monitoring/engine/data_client.mock';
+import { entityStoreCrudClientMock } from '../../../entity_analytics/entity_store/entity_store_crud_client.mock';
 
 export const createMockClients = () => {
   const core = coreMock.createRequestHandlerContext();
@@ -81,6 +82,7 @@ export const createMockClients = () => {
     riskScoreDataClient: riskScoreDataClientMock.create(),
     assetCriticalityDataClient: assetCriticalityDataClientMock.create(),
     entityStoreDataClient: entityStoreDataClientMock.create(),
+    entityStoreCrudClient: entityStoreCrudClientMock.create(),
     privilegeMonitorDataClient: privilegeMonitorDataClientMock.create(),
     padPackageInstallationClient: padPackageInstallationClientMock.create(),
 
@@ -96,7 +98,7 @@ export const createMockClients = () => {
   };
 };
 
-type MockClients = ReturnType<typeof createMockClients>;
+export type MockClients = ReturnType<typeof createMockClients>;
 
 export type SecuritySolutionRequestHandlerContextMock = MockedKeys<
   AwaitedProperties<Omit<SecuritySolutionRequestHandlerContext, 'resolve'>>
@@ -151,6 +153,7 @@ const createSecuritySolutionRequestContextMock = (
 
   return {
     core,
+    getAnalytics: jest.fn(() => analyticsServiceMock.createAnalyticsServiceSetup()),
     getServerBasePath: jest.fn(() => ''),
     getEndpointAuthz: jest.fn(async () =>
       getEndpointAuthzInitialStateMock(overrides.endpointAuthz)
@@ -195,6 +198,7 @@ const createSecuritySolutionRequestContextMock = (
     getDataViewsService: jest.fn(),
     getEntityStoreApiKeyManager: jest.fn(),
     getPrivilegedUserMonitoringApiKeyManager: jest.fn(),
+    getEntityStoreCrudClient: jest.fn(() => clients.entityStoreCrudClient),
     getEntityStoreDataClient: jest.fn(() => clients.entityStoreDataClient),
     getPrivilegeMonitoringDataClient: jest.fn(() => clients.privilegeMonitorDataClient),
     getPadPackageInstallationClient: jest.fn(() => clients.padPackageInstallationClient),

@@ -8,7 +8,7 @@
  */
 
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
-import { WebElementWrapper } from './web_element_wrapper';
+import type { WebElementWrapper } from './web_element_wrapper';
 import type { TimeoutOpt } from '../types';
 import { FtrService } from './ftr_provider_context';
 
@@ -163,10 +163,16 @@ export class TestSubjects extends FtrService {
   public async click(
     selector: string,
     timeout: number = this.FIND_TIME,
-    topOffset?: number
+    topOffsetOrOptions?: number | { topOffset?: number; bottomOffset?: number },
+    preclickDelay: number = 0
   ): Promise<void> {
     this.log.debug(`TestSubjects.click(${selector})`);
-    await this.findService.clickByCssSelector(testSubjSelector(selector), timeout, topOffset);
+    await this.findService.clickByCssSelector(
+      testSubjSelector(selector),
+      timeout,
+      topOffsetOrOptions,
+      preclickDelay
+    );
   }
 
   public async pressEnter(selector: string, timeout: number = this.FIND_TIME): Promise<void> {

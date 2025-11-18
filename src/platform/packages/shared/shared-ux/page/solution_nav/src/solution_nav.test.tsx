@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import { SolutionNav, SolutionNavProps } from './solution_nav';
+import type { SolutionNavProps } from './solution_nav';
+import { SolutionNav } from './solution_nav';
 
 jest.mock('@elastic/eui', () => {
   const original = jest.requireActual('@elastic/eui');

@@ -8,15 +8,16 @@
  */
 
 import React, { useCallback, useMemo } from 'react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiFormRow,
   EuiFieldText,
   EuiComboBox,
-  EuiComboBoxOptionOption,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
+import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '@kbn/alerting-types/rule/latest';
 import {
   RULE_INVESTIGATION_GUIDE_LABEL,
   RULE_INVESTIGATION_GUIDE_LABEL_TOOLTIP_CONTENT,
@@ -28,7 +29,6 @@ import { useRuleFormState, useRuleFormDispatch } from '../hooks';
 import { OptionalFieldLabel } from '../optional_field_label';
 import { InvestigationGuideEditor } from './rule_investigation_guide_editor';
 import { RuleDashboards } from './rule_dashboards';
-import { MAX_ARTIFACTS_INVESTIGATION_GUIDE_LENGTH } from '../constants';
 import { LabelWithTooltip } from './label_with_tooltip';
 
 export const RULE_DETAIL_MIN_ROW_WIDTH = 600;

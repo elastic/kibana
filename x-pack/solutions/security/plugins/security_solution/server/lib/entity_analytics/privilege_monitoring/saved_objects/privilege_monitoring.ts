@@ -7,7 +7,7 @@
 
 import type { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 
-import type { MonitoringEngineDescriptor } from '../../../../../common/api/entity_analytics/privilege_monitoring/common.gen';
+import type { MonitoringEngineDescriptor } from '../../../../../common/api/entity_analytics';
 import { privilegeMonitoringTypeName } from './privilege_monitoring_type';
 import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../constants';
 
@@ -16,12 +16,14 @@ interface PrivilegeMonitoringEngineDescriptorDependencies {
   namespace: string;
 }
 
-interface PrivilegedMonitoringEngineDescriptor {
+export interface PrivilegedMonitoringEngineDescriptor {
   status: MonitoringEngineDescriptor['status'];
   error?: Record<string, unknown> & {
     message?: string;
   };
 }
+
+export const MAX_PER_PAGE = 10_000;
 
 export class PrivilegeMonitoringEngineDescriptorClient {
   constructor(private readonly deps: PrivilegeMonitoringEngineDescriptorDependencies) {}
@@ -40,7 +42,7 @@ export class PrivilegeMonitoringEngineDescriptorClient {
       {
         status: PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED,
       },
-      { id: this.getSavedObjectId() }
+      { id: this.getSavedObjectId(), refresh: 'wait_for' }
     );
     return attributes;
   }
@@ -83,20 +85,50 @@ export class PrivilegeMonitoringEngineDescriptorClient {
     return this.deps.soClient.find<PrivilegedMonitoringEngineDescriptor>({
       type: privilegeMonitoringTypeName,
       namespaces: [this.deps.namespace],
+      perPage: MAX_PER_PAGE,
     });
   }
 
   async get() {
-    const id = this.getSavedObjectId();
-    const { attributes } = await this.deps.soClient.get<PrivilegedMonitoringEngineDescriptor>(
-      privilegeMonitoringTypeName,
-      id
-    );
-    return attributes;
+    const so = await this.maybeGet();
+
+    if (!so) {
+      return {
+        status: PRIVILEGE_MONITORING_ENGINE_STATUS.NOT_INSTALLED,
+        error: undefined,
+      };
+    }
+
+    return so.attributes;
+  }
+
+  async maybeGet() {
+    try {
+      const result = await this.deps.soClient.get<PrivilegedMonitoringEngineDescriptor>(
+        privilegeMonitoringTypeName,
+        this.getSavedObjectId()
+      );
+
+      return result;
+    } catch (e) {
+      if (e.output && e.output.statusCode === 404) {
+        return undefined;
+      }
+      throw e;
+    }
+  }
+
+  async getStatus() {
+    const engineDescriptor = await this.get();
+
+    return {
+      status: engineDescriptor.status,
+      error: engineDescriptor.error,
+    };
   }
 
   async delete() {
     const id = this.getSavedObjectId();
-    return this.deps.soClient.delete(privilegeMonitoringTypeName, id);
+    return this.deps.soClient.delete(privilegeMonitoringTypeName, id, { refresh: 'wait_for' });
   }
 }

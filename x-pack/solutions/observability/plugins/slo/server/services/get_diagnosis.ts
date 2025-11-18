@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 
 export const MINIMUM_INDEX_PRIVILEGE_SET_EDITOR = [
   'write',

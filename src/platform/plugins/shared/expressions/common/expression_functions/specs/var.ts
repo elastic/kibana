@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ExpressionFunctionDefinition } from '../types';
+import type { ExpressionFunctionDefinition } from '../types';
 
 interface Arguments {
   name: string;

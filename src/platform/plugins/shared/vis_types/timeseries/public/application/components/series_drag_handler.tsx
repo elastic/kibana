@@ -8,9 +8,9 @@
  */
 
 import React, { PureComponent } from 'react';
-import { EuiFlexItem, EuiToolTip, EuiIcon } from '@elastic/eui';
+import { EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { DragHandleProps } from '../../types';
+import type { DragHandleProps } from '../../types';
 
 interface SeriesDragHandlerProps {
   hideDragHandler: boolean;
@@ -29,19 +29,16 @@ export class SeriesDragHandler extends PureComponent<SeriesDragHandlerProps> {
       <EuiFlexItem grow={false}>
         <div {...dragHandleProps}>
           {!hideDragHandler && (
-            <EuiToolTip
+            <EuiIconTip
               content={i18n.translate('visTypeTimeseries.sort.dragToSortTooltip', {
                 defaultMessage: 'Drag to sort',
               })}
-            >
-              <EuiIcon
-                className="tvbSeries__sortHandle"
-                aria-label={i18n.translate('visTypeTimeseries.sort.dragToSortAriaLabel', {
-                  defaultMessage: 'Drag to sort',
-                })}
-                type="grab"
-              />
-            </EuiToolTip>
+              className="tvbSeries__sortHandle"
+              aria-label={i18n.translate('visTypeTimeseries.sort.dragToSortAriaLabel', {
+                defaultMessage: 'Drag to sort',
+              })}
+              type="grab"
+            />
           )}
         </div>
       </EuiFlexItem>

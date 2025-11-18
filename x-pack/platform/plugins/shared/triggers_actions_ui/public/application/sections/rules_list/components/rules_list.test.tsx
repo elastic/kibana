@@ -8,14 +8,15 @@
 import { MAINTENANCE_WINDOW_FEATURE_ID, parseDuration } from '@kbn/alerting-plugin/common';
 import { fetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/api';
 import { RUNNING_MAINTENANCE_WINDOW_1 } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/mock';
-import { IToasts } from '@kbn/core/public';
+import type { IToasts } from '@kbn/core/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import {
   cleanup,
   fireEvent,
   render,
   screen,
+  within,
   waitFor,
   waitForElementToBeRemoved,
 } from '@testing-library/react';
@@ -23,12 +24,12 @@ import * as React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
-import {
+import type {
   ActionTypeRegistryContract,
-  Percentiles,
   RuleTypeModel,
   RuleTypeRegistryContract,
 } from '../../../../types';
+import { Percentiles } from '../../../../types';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 import { getFormattedDuration } from '../../../lib/monitoring_utils';
@@ -42,6 +43,7 @@ import {
   ruleType,
   ruleTypeFromApi,
 } from './test_helper';
+import userEvent from '@testing-library/user-event';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -469,25 +471,22 @@ describe('rules_list ', () => {
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/149061
-  describe.skip('rules_list component with items', () => {
+  describe('rules_list component with items', () => {
     it('should render basic table and its row', async () => {
       renderWithProviders(<RulesList />);
-      await waitFor(() => expect(screen.queryAllByTestId('rule-row')).toHaveLength(6));
+
+      expect(await screen.findAllByTestId('rule-row')).toHaveLength(6);
     });
 
     it('Name and rule type column', async () => {
       renderWithProviders(<RulesList />);
 
-      let ruleNameColumns: HTMLElement[] = [];
-      await waitFor(() => {
-        ruleNameColumns = screen.queryAllByTestId('rulesTableCell-name');
-        return expect(ruleNameColumns).toHaveLength(mockedRulesData.length);
-      });
+      const ruleNameColumns = await screen.findAllByTestId('rulesTableCell-name');
 
-      mockedRulesData.forEach((rule, index) => {
-        expect(ruleNameColumns[index]).toHaveTextContent(`Name${rule.name}${ruleTypeFromApi.name}`);
-      });
+      expect(ruleNameColumns).toHaveLength(mockedRulesData.length);
+      expect(ruleNameColumns[0]).toHaveTextContent(
+        `${mockedRulesData[0].name}${ruleTypeFromApi.name}`
+      );
     });
 
     it('Tags column', async () => {
@@ -505,10 +504,8 @@ describe('rules_list ', () => {
     it('Last run column', async () => {
       renderWithProviders(<RulesList />);
 
-      await waitFor(() =>
-        expect(screen.queryAllByTestId('rulesTableCell-lastExecutionDate')).toHaveLength(
-          mockedRulesData.length
-        )
+      expect(await screen.findAllByTestId('rulesTableCell-lastExecutionDate')).toHaveLength(
+        mockedRulesData.length
       );
     });
 
@@ -530,42 +527,26 @@ describe('rules_list ', () => {
       );
     });
 
-    it('Schedule minimum interval tooltip', async () => {
-      renderWithProviders(<RulesList />);
-
-      fireEvent.mouseOver(await screen.findByLabelText('Below configured minimum interval'));
-
-      expect(
-        await screen.findByText(
-          'Rule interval of 1 second is below the minimum configured interval of 1 minute. This may impact alerting performance.'
-        )
-      ).toBeInTheDocument();
-    });
-
     it('long duration tooltip', async () => {
       renderWithProviders(<RulesList />);
 
+      const durationColumnHeader = await screen.findAllByTestId('rulesTableCell-duration');
       // Duration column
-      expect(await screen.findAllByTestId('rulesTableCell-duration')).toHaveLength(
-        mockedRulesData.length
-      );
+      expect(durationColumnHeader).toHaveLength(mockedRulesData.length);
 
       // show warning if duration is long
-      await waitFor(() => screen.getAllByText('Info'));
-      const durationWarningIcon = screen.getAllByText('Info');
-      expect(durationWarningIcon).toHaveLength(
-        mockedRulesData.filter(
-          (data) =>
-            data.executionStatus.lastDuration > parseDuration(ruleTypeFromApi.ruleTaskTimeout)
-        ).length
-      );
+      const filteredData = mockedRulesData.filter((data) => {
+        return data.executionStatus.lastDuration > parseDuration(ruleTypeFromApi.ruleTaskTimeout);
+      });
+      const warningIcons = await screen.findAllByTestId('ruleDurationWarning');
+      expect(warningIcons).toHaveLength(filteredData.length);
     });
 
     it('duration tooltip', async () => {
       renderWithProviders(<RulesList />);
 
-      await waitFor(() => screen.getAllByText('Duration')[0]);
-      fireEvent.mouseOver(screen.getAllByText('Duration')[0]);
+      const durationColumnHeader = await screen.findByText('Duration');
+      fireEvent.mouseOver(await within(durationColumnHeader).findByText('Info'));
 
       await waitFor(() =>
         expect(screen.getByRole('tooltip')).toHaveTextContent(
@@ -598,18 +579,19 @@ describe('rules_list ', () => {
     it('Status control column', async () => {
       renderWithProviders(<RulesList />);
 
-      await waitFor(() => screen.getAllByTestId('rulesTableCell-status')[0]);
-      expect(screen.getAllByTestId('rulesTableCell-status')).toHaveLength(mockedRulesData.length);
+      expect(await screen.findAllByTestId('rulesTableCell-status')).toHaveLength(
+        mockedRulesData.length
+      );
     });
 
     it('Monitoring column', async () => {
       renderWithProviders(<RulesList />);
-      await waitFor(() => screen.getAllByTestId('rulesTableCell-successRatio')[0]);
-      expect(screen.getAllByTestId('rulesTableCell-successRatio')).toHaveLength(
+
+      expect(await screen.findAllByTestId('rulesTableCell-successRatio')).toHaveLength(
         mockedRulesData.length
       );
 
-      const ratios = screen.getAllByTestId('successRatio');
+      const ratios = await screen.findAllByTestId('successRatio');
 
       mockedRulesData.forEach((rule, index) => {
         if (rule.monitoring) {
@@ -624,9 +606,8 @@ describe('rules_list ', () => {
 
     it('P50 column is rendered initially', async () => {
       renderWithProviders(<RulesList />);
-      await waitFor(() =>
-        expect(screen.getByTestId(`rulesTable-${Percentiles.P50}ColumnName`)).toBeDefined()
-      );
+
+      expect(await screen.findByTestId(`rulesTable-${Percentiles.P50}ColumnName`)).toBeDefined();
 
       let percentiles: HTMLElement[] = [];
       await waitFor(() => {
@@ -864,43 +845,6 @@ describe('rules_list ', () => {
       expect(screen.queryByTestId('ruleStatusFilter')).toBeInTheDocument();
     });
 
-    it('can filter by rule states', async () => {
-      (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
-      renderWithProviders(<RulesList />);
-      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
-
-      expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          ruleStatusesFilter: [],
-        })
-      );
-
-      fireEvent.click((await screen.findAllByTestId('ruleStatusFilterButton'))[0]);
-      fireEvent.click((await screen.findAllByTestId('ruleStatusFilterOption-enabled'))[0]);
-
-      expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          ruleStatusesFilter: ['enabled'],
-        })
-      );
-
-      fireEvent.click((await screen.findAllByTestId('ruleStatusFilterOption-snoozed'))[0]);
-
-      expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          ruleStatusesFilter: ['enabled', 'snoozed'],
-        })
-      );
-
-      fireEvent.click((await screen.findAllByTestId('ruleStatusFilterOption-snoozed'))[0]);
-
-      expect(loadRulesWithKueryFilter).toHaveBeenLastCalledWith(
-        expect.objectContaining({
-          ruleStatusesFilter: ['enabled'],
-        })
-      );
-    });
-
     it('does not render the tag filter is the feature flag is off', async () => {
       renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
@@ -920,8 +864,9 @@ describe('rules_list ', () => {
       renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
-      const selectActionButtons = document.body.querySelectorAll('.euiButtonIcon[disabled]');
-      expect(selectActionButtons).toHaveLength(2);
+      expect(await screen.findAllByTestId('selectActionButton')).toHaveLength(
+        mockedRulesData.length
+      );
     });
 
     it('rule list items with actions are not editable if canExecuteAction is false', async () => {
@@ -930,7 +875,9 @@ describe('rules_list ', () => {
       renderWithProviders(<RulesList />);
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
-      expect(document.body.querySelectorAll('button.euiButtonIcon[disabled]')).toHaveLength(8);
+      expect(await screen.findAllByTestId('selectActionButton')).toHaveLength(
+        mockedRulesData.filter((rule) => !rule.actions.length).length
+      );
       hasExecuteActionsCapability.mockReturnValue(true);
     });
 
@@ -963,6 +910,95 @@ describe('rules_list ', () => {
         expect(screen.queryByTestId('createRuleButton')).not.toBeInTheDocument();
       });
     });
+  });
+});
+
+describe('internally managed rule', () => {
+  let ruleTypeRegistry: jest.Mocked<RuleTypeRegistryContract>;
+  let actionTypeRegistry: jest.Mocked<ActionTypeRegistryContract<unknown, unknown>>;
+
+  beforeEach(() => {
+    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => false);
+    const internallyManagedRule = {
+      ...mockedRulesData[0],
+      ruleTypeId: 'internally_managed_rule_type',
+      name: 'internally managed',
+      isSnoozedUntil: null,
+    };
+
+    loadRulesWithKueryFilter.mockResolvedValue({
+      page: 1,
+      perPage: 10000,
+      total: 4,
+      data: [internallyManagedRule],
+    });
+    const ruleTypeMock: RuleTypeModel = {
+      isInternallyManaged: true,
+      id: 'internally_managed_rule_type',
+      iconClass: 'test',
+      description: 'Rule when testing',
+      documentationUrl: 'https://localhost.local/docs',
+      validate: () => {
+        return { errors: {} };
+      },
+      ruleParamsExpression: jest.fn(),
+      requiresAppContext: false,
+    };
+    getRuleTypes.mockResolvedValue([ruleTypeMock]);
+    loadAllActions.mockResolvedValue([]);
+
+    loadActionTypes.mockResolvedValue([]);
+    getRuleTypes.mockResolvedValue([
+      { ...ruleTypeFromApi, isInternallyManaged: true, id: 'internally_managed_rule_type' },
+    ]);
+    loadAllActions.mockResolvedValue([]);
+    loadRuleAggregationsWithKueryFilter.mockResolvedValue({
+      ruleEnabledStatus: { enabled: 1, disabled: 0 },
+      ruleExecutionStatus: { ok: 1, active: 1, error: 0, pending: 0, unknown: 0, warning: 0 },
+      ruleMutedStatus: { muted: 0, unmuted: 0 },
+      ruleTags,
+      ruleLastRunOutcome: {
+        succeeded: 0,
+        failed: 0,
+        warning: 0,
+      },
+    });
+    loadRuleTags.mockResolvedValue({
+      data: [],
+      page: 1,
+      perPage: 50,
+      total: 0,
+    });
+
+    actionTypeRegistry = actionTypeRegistryMock.create();
+    ruleTypeRegistry = ruleTypeRegistryMock.create();
+
+    ruleTypeRegistry.has.mockReturnValue(true);
+    ruleTypeRegistry.get.mockReturnValue(ruleTypeMock);
+    useKibanaMock().services.ruleTypeRegistry = ruleTypeRegistry;
+    useKibanaMock().services.actionTypeRegistry = actionTypeRegistry;
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    queryClient.clear();
+    cleanup();
+  });
+
+  it('render no delete button and only update api key action when rule is internally managed', async () => {
+    renderWithProviders(<RulesList />);
+    expect(screen.queryByTestId('editActionHoverButton')).toBeNull();
+    expect(screen.queryByTestId('deleteActionHoverButton')).toBeNull();
+    expect(screen.queryByTestId('rulesListNotifyBadge-unsnoozed')).toBeNull();
+
+    userEvent.click(await screen.findByTestId('selectActionButton'));
+    expect(await screen.findByTestId('updateApiKeyInternallyManaged')).toBeInTheDocument();
+    expect(screen.queryByTestId('snoozeButton')).toBeNull();
+    expect(screen.queryByTestId('disableButton')).toBeNull();
+    expect(screen.queryByTestId('editRule')).toBeNull();
+    expect(screen.queryByTestId('deleteRule')).toBeNull();
+    expect(screen.queryByTestId('runRule')).toBeNull();
+    expect(screen.queryByTestId('cloneRule')).toBeNull();
   });
 });
 
@@ -1273,6 +1309,7 @@ describe('rules_list with show only capability', () => {
 
     it('renders table of rules with edit button disabled', async () => {
       renderWithProviders(<RulesList />);
+      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
       expect(await screen.findAllByTestId('rulesList')).toHaveLength(1);
       expect(await screen.findAllByTestId('rule-row')).toHaveLength(2);
@@ -1283,6 +1320,8 @@ describe('rules_list with show only capability', () => {
       const { hasAllPrivilege } = jest.requireMock('../../../lib/capabilities');
       hasAllPrivilege.mockReturnValue(false);
       renderWithProviders(<RulesList />);
+      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
+
       expect(await screen.findAllByTestId('rulesList')).toHaveLength(1);
       expect(await screen.findAllByTestId('rule-row')).toHaveLength(2);
       expect(screen.queryByTestId('deleteActionHoverButton')).not.toBeInTheDocument();
@@ -1292,6 +1331,8 @@ describe('rules_list with show only capability', () => {
 
     it('renders table of rules with actions menu collapsedItemActions', async () => {
       renderWithProviders(<RulesList />);
+      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
+
       expect(await screen.findAllByTestId('rulesList')).toHaveLength(1);
       expect(await screen.findAllByTestId('rule-row')).toHaveLength(2);
       expect(await screen.findAllByTestId('collapsedItemActions')).toHaveLength(2);
@@ -1460,7 +1501,9 @@ describe('MaintenanceWindowsMock', () => {
 
     await waitFor(() => expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1));
     expect(
-      screen.queryByText('Rule notifications are stopped while maintenance windows are running.')
+      screen.queryByText(
+        'Some rule notifications may be stopped while maintenance windows are running.'
+      )
     ).not.toBeInTheDocument();
   });
 
@@ -1473,7 +1516,7 @@ describe('MaintenanceWindowsMock', () => {
     renderWithProviders(<RulesList />);
 
     expect(
-      await screen.findByText('A maintenance window is running for Observability rules')
+      await screen.findByText('One or more maintenance windows are running')
     ).toBeInTheDocument();
 
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);

@@ -47,6 +47,7 @@ import {
   PackageFailedVerificationError,
   PackageUnsupportedMediaTypeError,
   ArchiveNotFoundError,
+  RegistryConnectionError,
 } from '../../../errors';
 
 import { getBundledPackageByName } from '../packages/bundled_packages';
@@ -59,6 +60,10 @@ import type { ArchiveIterator } from '../../../../common/types';
 
 import { airGappedUtils } from '../airgapped';
 
+import { getPackageAssetsMapCache } from '../packages/cache';
+
+import { createArchiveIteratorFromMap } from '../archive/archive_iterator';
+
 import { fetchUrl, getResponse, getResponseStreamWithSize } from './requests';
 import { getRegistryUrl } from './registry_url';
 
@@ -70,12 +75,11 @@ export const pkgToPkgKey = ({ name, version }: { name: string; version: string }
 export async function fetchList(
   params?: GetPackagesRequest['query']
 ): Promise<RegistrySearchResults> {
+  const logger = appContextService.getLogger();
   if (airGappedUtils().shouldSkipRegistryRequests) {
-    appContextService
-      .getLogger()
-      .debug(
-        'fetchList: isAirGapped enabled and no registryUrl or RegistryProxyUrl configured, skipping registry requests'
-      );
+    logger.debug(
+      'fetchList: isAirGapped enabled and no registryUrl or RegistryProxyUrl configured, skipping registry requests'
+    );
     return [];
   }
 
@@ -128,6 +132,7 @@ async function _fetchFindLatestPackage(
         const latestPackageFromRegistry = searchResults[0] ?? null;
 
         if (bundledPackage && !latestPackageFromRegistry) {
+          logger.debug(`_fetchFindLatestPackage - Use bundled package of ${packageName}`);
           return bundledPackage;
         }
 
@@ -138,7 +143,9 @@ async function _fetchFindLatestPackage(
           return bundledPackage;
         }
         return latestPackageFromRegistry;
-      } else if (airGappedUtils().shouldSkipRegistryRequests && bundledPackage) {
+      } else if (bundledPackage) {
+        logger.debug(`_fetchFindLatestPackage - Fall back on bundled package of ${packageName}`);
+        // falling back on bundled package if exists
         return bundledPackage;
       } else {
         return null;
@@ -150,6 +157,7 @@ async function _fetchFindLatestPackage(
 
       // Fall back to the bundled version of the package if it exists
       if (bundledPackage) {
+        logger.debug(`_fetchFindLatestPackage - Fall back on bundled package of ${packageName}`);
         return bundledPackage;
       }
 
@@ -196,13 +204,15 @@ export async function fetchInfo(
   pkgVersion: string
 ): Promise<RegistryPackage | ArchivePackage> {
   const registryUrl = getRegistryUrl();
+  let archivePackage;
   // if isAirGapped config enabled and bundled package, use the bundled version
   if (airGappedUtils().shouldSkipRegistryRequests) {
-    const archivePackage = await getBundledArchive(pkgName, pkgVersion);
+    archivePackage = await getBundledArchive(pkgName, pkgVersion);
     if (archivePackage) {
       return archivePackage.packageInfo;
     }
   }
+
   try {
     // Trailing slash avoids 301 redirect / extra hop
     const res = await fetchUrl(`${registryUrl}/package/${pkgName}/${pkgVersion}/`).then(JSON.parse);
@@ -210,7 +220,7 @@ export async function fetchInfo(
     return res;
   } catch (err) {
     if (err instanceof RegistryResponseError && err.status === 404) {
-      const archivePackage = await getBundledArchive(pkgName, pkgVersion);
+      archivePackage = await getBundledArchive(pkgName, pkgVersion);
       if (archivePackage) {
         return archivePackage.packageInfo;
       }
@@ -248,15 +258,17 @@ export async function getFile(
 }
 
 export async function fetchFile(filePath: string): Promise<Response | null> {
+  const logger = appContextService.getLogger();
+
   if (airGappedUtils().shouldSkipRegistryRequests) {
-    appContextService
-      .getLogger()
-      .debug(
-        'fetchFile: isAirGapped enabled and no registryUrl or RegistryProxyUrl configured, skipping registry requests'
-      );
+    logger.debug(
+      'fetchFile: isAirGapped enabled and no registryUrl or RegistryProxyUrl configured, skipping registry requests'
+    );
     return null;
   }
   const registryUrl = getRegistryUrl();
+  logger.debug(`fetchFile getting url: ${registryUrl}`);
+
   return getResponse(`${registryUrl}${filePath}`);
 }
 
@@ -380,11 +392,23 @@ export async function getPackage(
 }> {
   const logger = appContextService.getLogger();
   let packageInfo: ArchivePackage | undefined = getPackageInfo({ name, version });
+
   let verificationResult: PackageVerificationResult | undefined = getVerificationResult({
     name,
     version,
   });
   try {
+    let buffer;
+    let archivePathToUse: string = '';
+
+    if (airGappedUtils().shouldSkipRegistryRequests) {
+      const bundledPackage = await getBundledPackageByName(name);
+      if (bundledPackage) {
+        logger.debug(`getPackage - Use bundled package of ${name}-${version}`);
+        buffer = await bundledPackage?.getBuffer();
+        archivePathToUse = `${name}-${version}.zip`;
+      }
+    }
     const {
       archiveBuffer,
       archivePath,
@@ -397,31 +421,85 @@ export async function getPackage(
         ignoreUnverified: options?.ignoreUnverified,
       })
     );
+    logger.debug('getPackage - Fetch package archive from archive buffer');
+    buffer = archiveBuffer;
+    archivePathToUse = archivePath;
 
     if (latestVerificationResult) {
       verificationResult = latestVerificationResult;
       setVerificationResult({ name, version }, latestVerificationResult);
     }
 
-    const contentType = ensureContentType(archivePath);
+    const contentType = ensureContentType(archivePathToUse);
     const { paths, assetsMap, archiveIterator } = await unpackBufferToAssetsMap({
-      archiveBuffer,
+      archiveBuffer: buffer,
       contentType,
       useStreaming: options?.useStreaming,
     });
 
     if (!packageInfo) {
-      packageInfo = await getPackageInfoFromArchiveOrCache(
-        name,
-        version,
-        archiveBuffer,
-        archivePath
-      );
+      packageInfo = await getPackageInfoFromArchiveOrCache(name, version, buffer, archivePathToUse);
     }
 
-    return { paths, packageInfo, assetsMap, archiveIterator, verificationResult };
+    return {
+      paths,
+      packageInfo,
+      assetsMap,
+      archiveIterator,
+      verificationResult,
+    };
   } catch (error) {
-    logger.warn(`getPackage failed with error: ${error}`);
+    logger.warn(`getPackage - ${name}-${version} failed with error: ${error}`);
+
+    if (error instanceof RegistryConnectionError) {
+      let buffer;
+      let bundledArchivePath: string = '';
+      // use bundled package as fallback
+      const bundledPackage = await getBundledPackageByName(name);
+      if (bundledPackage) {
+        logger.debug(`getPackage - Fall back on bundled package of ${name}-${version}`);
+        buffer = await bundledPackage?.getBuffer();
+        bundledArchivePath = `${name}-${version}.zip`;
+
+        const contentType = ensureContentType(bundledArchivePath);
+        const { paths, assetsMap, archiveIterator } = await unpackBufferToAssetsMap({
+          archiveBuffer: buffer,
+          contentType,
+          useStreaming: options?.useStreaming,
+        });
+        if (!packageInfo) {
+          packageInfo = await getPackageInfoFromArchiveOrCache(
+            name,
+            version,
+            buffer,
+            bundledArchivePath
+          );
+        }
+        return {
+          paths,
+          packageInfo,
+          assetsMap,
+          archiveIterator,
+          verificationResult,
+        };
+      }
+      logger.debug(`getPackage - Fall back on value from cache of ${name}-${version}`);
+      const assetsMap = getPackageAssetsMapCache(name, version);
+
+      if (!packageInfo || !assetsMap) {
+        throw new PackageNotFoundError(
+          `Error while retrieving package from cache: ${name}-${version} not found`
+        );
+      }
+      const archiveIterator = createArchiveIteratorFromMap(assetsMap);
+      return {
+        paths: [],
+        packageInfo,
+        assetsMap,
+        archiveIterator,
+        verificationResult,
+      };
+    }
     throw error;
   }
 }
@@ -534,6 +612,22 @@ export async function fetchArchiveBuffer({
     return { archiveBuffer, archivePath };
   } catch (error) {
     logger.warn(`fetchArchiveBuffer failed with error: ${error}`);
+    if (error instanceof RegistryConnectionError) {
+      const bundledPackage = await getBundledPackageByName(pkgName);
+      if (bundledPackage) {
+        logger.debug(
+          `fetchArchiveBuffer - Fall back on bundled package of ${pkgName}-${pkgVersion}`
+        );
+        const buffer = await bundledPackage?.getBuffer();
+        const bundledArchivePath = `${pkgName}-${pkgVersion}.zip`;
+        return {
+          archiveBuffer: buffer,
+          archivePath: bundledArchivePath,
+          verificationResult: undefined,
+        };
+      }
+      throw new PackageNotFoundError(`${pkgName}@${pkgVersion} not found`);
+    }
     throw error;
   }
 }
@@ -572,6 +666,44 @@ export function groupPathsByService(paths: string[]): AssetsGroupedByServiceByTy
 
   // ASK: best way, if any, to avoid `any`?
   const assets = paths.reduce((map: any, path) => {
+    // Handle knowledge base assets specially - they include all .md files from the docs/ folder
+    if (path.includes('/docs/') && path.endsWith('.md')) {
+      // Extract package info and filename from the path
+      const pathWithoutPrefix = path.replace(/^\/package\//, '');
+      const [pkgkey, ...rest] = pathWithoutPrefix.split('/');
+      const docsIndex = rest.indexOf('docs');
+
+      if (docsIndex >= 0) {
+        // Get path after docs/
+        const pathAfterDocs = rest.slice(docsIndex + 1).join('/');
+
+        let fileName: string;
+        // If it's in knowledge_base subfolder, remove that prefix for backward compatibility
+        if (pathAfterDocs.startsWith('knowledge_base/')) {
+          fileName = pathAfterDocs.substring('knowledge_base/'.length);
+        } else {
+          // For other .md files in docs/, use the full path relative to docs/
+          fileName = pathAfterDocs;
+        }
+
+        // Create KB asset parts with elasticsearch service but keep original file reference
+        const kbParts = {
+          pkgkey,
+          service: 'elasticsearch' as const,
+          type: 'knowledge_base' as const,
+          file: fileName,
+          // For KB assets, we want the path to still reference the original docs location
+          path: path.replace(/^\/package\//, ''),
+        };
+
+        if (!map.elasticsearch) map.elasticsearch = {};
+        if (!map.elasticsearch.knowledge_base) map.elasticsearch.knowledge_base = [];
+        map.elasticsearch.knowledge_base.push(kbParts);
+        return map;
+      }
+    }
+
+    // Handle regular assets
     const parts = getPathParts(path.replace(/^\/package\//, ''));
     if (
       (parts.service === 'kibana' && kibanaAssetTypes.includes(parts.type)) ||

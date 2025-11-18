@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { ALL_SPACES_ID } from '@kbn/security-plugin/common/constants';
 import { getServiceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');

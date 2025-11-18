@@ -1,0 +1,20 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "src/**/*",
+    "**/*.ts",
+    "scripts"
+  ],
+  "kbn_references": [
+  ],
+  "exclude": [
+    "target/**/*"
+  ]
+}

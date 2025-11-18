@@ -5,16 +5,20 @@
  * 2.0.
  */
 
-import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import expect from '@kbn/expect';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
 
-import { SupertestWithRoleScopeType } from '../../services';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { RoleCredentials, SupertestWithRoleScopeType } from '../../services';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import { customRoles } from './custom_roles';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
+  const customRoleScopedSupertest = getService('customRoleScopedSupertest');
+  const saml = getService('samlAuth');
   const synthtrace = getService('synthtrace');
+  const retry = getService('retry');
   const start = '2023-12-11T18:00:00.000Z';
   const end = '2023-12-11T18:01:00.000Z';
   const type = 'logs';
@@ -128,6 +132,47 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         );
         expect(resp.body.services).to.eql({ ['service.name']: [serviceName] });
         expect(resp.body.hosts?.['host.name']).to.eql([hostName]);
+      });
+    });
+
+    describe('Dataset quality monitor user', () => {
+      let supertestDatasetQualityMonitorWithCookieCredentials: SupertestWithRoleScopeType;
+      let roleAuthc: RoleCredentials;
+
+      before(async () => {
+        await saml.setCustomRole(customRoles.datasetQualityMonitorUserRole);
+        roleAuthc = await saml.createM2mApiKeyWithCustomRoleScope();
+        supertestDatasetQualityMonitorWithCookieCredentials =
+          await customRoleScopedSupertest.getSupertestWithCustomRoleScope({
+            useCookieHeader: true,
+            withInternalHeaders: true,
+          });
+      });
+
+      after(async () => {
+        await saml.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+        await saml.deleteCustomRole();
+      });
+
+      it('returns "sizeBytes" correctly', async () => {
+        // Metering stats api is cached and refreshed every 30 seconds
+        await retry.waitForWithTimeout('Metering stats cache is refreshed', 45000, async () => {
+          const detailsResponse = await callApiAs(
+            supertestDatasetQualityMonitorWithCookieCredentials,
+            `${type}-${dataset}-${namespace}`
+          );
+          if (detailsResponse.body.sizeBytes === 0) {
+            throw new Error("Metering stats cache hasn't refreshed");
+          }
+          return true;
+        });
+        const resp = await callApiAs(
+          supertestDatasetQualityMonitorWithCookieCredentials,
+          `${type}-${dataset}-${namespace}`
+        );
+
+        expect(isNaN(resp.body.sizeBytes as number)).to.be(false);
+        expect(resp.body.sizeBytes).to.be.greaterThan(0);
       });
     });
   });

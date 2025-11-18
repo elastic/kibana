@@ -6,14 +6,13 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const { common, dashboard, spaceSelector, header } = getPageObjects([
+  const { common, dashboard, spaceSelector } = getPageObjects([
     'common',
     'dashboard',
     'spaceSelector',
-    'header',
   ]);
   const globalNav = getService('globalNav');
   const kibanaServer = getService('kibanaServer');
@@ -44,7 +43,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await common.navigateToApp('home');
       await dashboard.navigateToAppFromAppsMenu();
       await dashboard.loadSavedDashboard('A Dashboard');
-      await header.waitUntilLoadingHasFinished();
       const activeTitle = await globalNav.getLastBreadcrumb();
       expect(activeTitle).to.be('A Dashboard');
     });

@@ -113,7 +113,15 @@ export function AgentConfigurationCreateEdit({
 
       {isEditMode && existingConfigResult?.data?.error ? (
         <>
-          <EuiCallOut title="Error applying configuration" color="danger" iconType="error">
+          <EuiCallOut
+            announceOnMount
+            title={i18n.translate(
+              'xpack.apm.agentConfigurationCreateEdit.euiCallOut.errorApplyingConfigurationLabel',
+              { defaultMessage: 'Error applying configuration' }
+            )}
+            color="danger"
+            iconType="error"
+          >
             <p>{existingConfigResult.data.error}</p>
           </EuiCallOut>
           <EuiSpacer size="m" />
@@ -147,7 +155,7 @@ export function AgentConfigurationCreateEdit({
 
       {pageStep === 'choose-settings-step' && (
         <SettingsPage
-          status={existingConfigResult?.status}
+          initialConfig={existingConfigResult}
           unsavedChanges={unsavedChanges}
           onClickEdit={() => setPage('choose-service-step', history)}
           newConfig={newConfig}

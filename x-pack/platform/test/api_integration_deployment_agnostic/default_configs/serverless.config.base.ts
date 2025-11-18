@@ -4,17 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
-  fleetPackageRegistryDockerImage,
-  FtrConfigProviderContext,
-  Config,
-  defineDockerServersConfig,
-} from '@kbn/test';
+import type { FtrConfigProviderContext, Config } from '@kbn/test';
+import { fleetPackageRegistryDockerImage, defineDockerServersConfig } from '@kbn/test';
 
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
-import { ServerlessProjectType } from '@kbn/es';
+import type { ServerlessProjectType } from '@kbn/es';
 import path from 'path';
-import { DeploymentAgnosticCommonServices, services } from '../services';
+import type { DeploymentAgnosticCommonServices } from '../services';
+import { services } from '../services';
 import { LOCAL_PRODUCT_DOC_PATH } from './common_paths';
 
 interface CreateTestConfigOptions<T> {
@@ -26,6 +23,7 @@ interface CreateTestConfigOptions<T> {
   junit: { reportName: string };
   suiteTags?: { include?: string[]; exclude?: string[] };
   tier?: 'oblt_logs_essentials';
+  indexRefreshInterval?: string | false;
 }
 
 // include settings from elasticsearch controller
@@ -34,7 +32,7 @@ const esServerArgsFromController = {
   es: [],
   oblt: ['xpack.apm_data.enabled=true'],
   security: ['xpack.security.authc.api_key.cache.max_keys=70000'],
-  chat: [],
+  workplaceai: [],
 };
 
 // include settings from kibana controller
@@ -54,7 +52,7 @@ const kbnServerArgsFromController = {
     // disable fleet task that writes to metrics.fleet_server.* data streams, impacting functional tests
     `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify(['Fleet-Metrics-Task'])}`,
   ],
-  chat: [],
+  workplaceai: [],
 };
 
 export function createServerlessTestConfig<T extends DeploymentAgnosticCommonServices>(
@@ -99,7 +97,7 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
           port: dockerRegistryPort,
           args: dockerArgs,
           waitForLogLine: 'package manifests loaded',
-          waitForLogLineTimeoutMs: 60 * 4 * 1000, // 4 minutes
+          waitForLogLineTimeoutMs: 60 * 6 * 1000, // 6 minutes
         },
       }),
       esTestCluster: {
@@ -150,6 +148,7 @@ export function createServerlessTestConfig<T extends DeploymentAgnosticCommonSer
         include: options.suiteTags?.include,
         exclude: [...(options.suiteTags?.exclude || []), 'skipServerless'],
       },
+      indexRefreshInterval: options.indexRefreshInterval,
     };
   };
 }

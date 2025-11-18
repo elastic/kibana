@@ -9,14 +9,14 @@ import React, { useCallback } from 'react';
 import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
 
-import type { Entry } from './types';
+import type { ThreatMappingEntry } from '../../../../common/api/detection_engine/model/rule_schema';
 
 const MyFirstRowContainer = styled(EuiFlexItem)`
   padding-top: 20px;
 `;
 
 interface EntryDeleteButtonProps {
-  entries: Entry[];
+  entries: ThreatMappingEntry[];
   isOnlyItem: boolean;
   entryIndex: number;
   itemIndex: number;

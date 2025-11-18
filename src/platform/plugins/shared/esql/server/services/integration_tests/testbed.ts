@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import {
   createTestServers,
   request,
@@ -22,7 +22,16 @@ export class EsqlServiceTestbed {
   public kibana?: TestKibanaUtils;
 
   public async start() {
-    this.servers = createTestServers({ adjustTimeout: jest.setTimeout });
+    this.servers = createTestServers({
+      adjustTimeout: jest.setTimeout,
+      settings: {
+        kbn: {
+          cliArgs: {
+            oss: false,
+          },
+        },
+      },
+    });
     this.es = await this.servers.startES();
     this.kibana = await this.servers.startKibana();
   }

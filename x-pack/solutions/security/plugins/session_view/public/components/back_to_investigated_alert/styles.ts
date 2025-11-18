@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { CSSObject } from '@emotion/react';
+import type { CSSObject } from '@emotion/react';
 import { euiLightVars } from '@kbn/ui-theme';
 import { useEuiTheme } from '../../hooks';
 

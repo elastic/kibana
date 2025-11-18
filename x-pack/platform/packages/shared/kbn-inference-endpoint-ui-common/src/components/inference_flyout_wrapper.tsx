@@ -19,7 +19,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import { HttpSetup, IToasts } from '@kbn/core/public';
+import type { HttpSetup, IToasts } from '@kbn/core/public';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import * as LABELS from '../translations';
 import type { InferenceEndpoint } from '../types/types';
@@ -125,6 +125,8 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
         taskType: inferenceEndpoint?.config.taskType ?? '',
         provider: inferenceEndpoint?.config.provider ?? '',
         providerConfig: inferenceEndpoint?.config.providerConfig,
+        contextWindowLength: inferenceEndpoint?.config.contextWindowLength ?? undefined,
+        temperature: inferenceEndpoint?.config.temperature ?? undefined,
       },
       secrets: {
         providerSecrets: {},
@@ -161,9 +163,12 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
           <InferenceServiceFormFields
             http={http}
             toasts={toasts}
-            isEdit={isEdit}
-            enforceAdaptiveAllocations={enforceAdaptiveAllocations}
-            isPreconfigured={isPreconfigured}
+            config={{
+              isEdit,
+              enforceAdaptiveAllocations,
+              isPreconfigured,
+              reenterSecretsOnEdit: false,
+            }}
           />
           <EuiSpacer size="m" />
           {isPreconfigured ? null : (

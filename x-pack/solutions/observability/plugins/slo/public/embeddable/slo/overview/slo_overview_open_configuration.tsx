@@ -7,13 +7,13 @@
 
 import React, { Suspense, lazy } from 'react';
 import type { CoreStart } from '@kbn/core/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiSkeletonText } from '@elastic/eui';
 import type { GroupSloCustomInput, SingleSloCustomInput } from './types';
-import { SLOPublicPluginsStart } from '../../..';
-import { SLORepositoryClient } from '../../../types';
+import type { SLOPublicPluginsStart } from '../../..';
+import type { SLORepositoryClient } from '../../../types';
 import { PluginContext } from '../../../context/plugin_context';
 
 export async function openSloConfiguration(

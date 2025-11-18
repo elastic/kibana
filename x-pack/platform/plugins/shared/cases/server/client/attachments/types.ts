@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import type { KueryNode } from '@kbn/es-query';
 import type { Readable } from 'stream';
 import type { ReplaySubject } from 'rxjs';
 import type {
@@ -118,6 +120,7 @@ export interface GetAllAlertsAttachToCase {
    * The ID of the case to retrieve the alerts from
    */
   caseId: string;
+  filter?: KueryNode;
 }
 
 /**

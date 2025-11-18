@@ -8,9 +8,9 @@
 import type { ValidFeatureId } from '@kbn/rule-data-utils';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 export {
-  HOST_NAME_FIELD,
-  CONTAINER_ID_FIELD,
-  KUBERNETES_POD_UID_FIELD,
+  HOST_NAME as HOST_NAME_FIELD,
+  CONTAINER_ID as CONTAINER_ID_FIELD,
+  KUBERNETES_POD_UID as KUBERNETES_POD_UID_FIELD,
 } from '@kbn/metrics-data-access-plugin/common';
 
 export const METRICS_INDEX_PATTERN = 'metrics-*,metricbeat-*';
@@ -38,7 +38,7 @@ export const TIEBREAKER_FIELD = '_doc';
 
 // processes
 export const TOP_N = 10;
-export const MANDATORY_PROCESS_FIELDS = [
+export const MANDATORY_PROCESS_FIELDS_ECS = [
   'system.process.cpu.total.pct',
   'system.process.memory.rss.pct',
   'system.process.cpu.start_time',
@@ -46,6 +46,11 @@ export const MANDATORY_PROCESS_FIELDS = [
   'user.name',
   'process.pid',
   'process.command_line',
+];
+export const MANDATORY_PROCESS_FIELDS_SEMCONV = [
+  'process.pid',
+  'process.command_line',
+  'process.owner',
 ];
 export const PROCESS_COMMANDLINE_FIELD = 'process.command_line';
 
@@ -69,3 +74,5 @@ export const DEFAULT_METRICS_VIEW_ATTRIBUTES = {
 };
 
 export const SNAPSHOT_API_MAX_METRICS = 20;
+
+export const SCHEMA_SELECTOR_DOCS_LINK = 'https://ela.st/schema-selector-hosts';

@@ -5,7 +5,8 @@
  * 2.0.
  */
 import React from 'react';
-import { LastUpdatedAt, LastUpdatedAtProps } from '../components';
+import type { LastUpdatedAtProps } from '../components';
+import { LastUpdatedAt } from '../components';
 import { useAddToTimeline, useAddToTimelineSensor } from '../hooks/use_add_to_timeline';
 import { mockHoverActions } from './mock_hover_actions';
 

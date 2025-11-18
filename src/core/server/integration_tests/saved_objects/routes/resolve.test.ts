@@ -11,7 +11,7 @@ import supertest from 'supertest';
 import { ContextService } from '@kbn/core-http-context-server-internal';
 import type { HttpService, InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import { createCoreContext } from '@kbn/core-http-server-mocks';
-import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
+import type { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import type { ICoreUsageStatsClient } from '@kbn/core-usage-data-base-server-internal';
 import {
   coreUsageStatsClientMock,
@@ -27,6 +27,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { deprecationMock, setupConfig } from './routes_test_utils';
 import { contextServiceMock, coreMock } from '../../../mocks';
 import { createInternalHttpService } from '../../utilities';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 
 const coreId = Symbol('core');
 
@@ -48,7 +49,10 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
   beforeEach(async () => {
     const coreContext = createCoreContext({ coreId });
     server = createInternalHttpService(coreContext);
-    await server.preboot({ context: contextServiceMock.createPrebootContract() });
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
 
     const contextService = new ContextService(coreContext);
     httpSetup = await server.setup({

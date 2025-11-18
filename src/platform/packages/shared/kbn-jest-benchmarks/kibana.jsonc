@@ -1,0 +1,8 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/jest-benchmarks",
+  "owner": "@elastic/obs-ui-devex-team",
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
+}

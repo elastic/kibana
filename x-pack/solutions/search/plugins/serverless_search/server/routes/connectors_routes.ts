@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { IngestPipelineParams } from '@kbn/search-connectors';
 import {
   createConnector,
   deleteConnectorById,
@@ -13,7 +14,6 @@ import {
   fetchConnectors,
   fetchSyncJobs,
   generateConnectorName,
-  IngestPipelineParams,
   startConnectorSync,
   updateConnectorConfiguration,
   updateConnectorIndexName,
@@ -22,7 +22,7 @@ import {
   updateConnectorServiceType,
 } from '@kbn/search-connectors';
 import { DEFAULT_INGESTION_PIPELINE } from '../../common';
-import { RouteDependencies } from '../plugin';
+import type { RouteDependencies } from '../plugin';
 import { errorHandler } from '../utils/error_handler';
 
 export const registerConnectorsRoutes = ({ logger, http, router }: RouteDependencies) => {

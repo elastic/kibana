@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -142,6 +142,16 @@
     "@kbn/apm-ui-shared",
     "@kbn/shared-ux-error-boundary",
     "@kbn/react-kibana-mount",
+    "@kbn/licensing-types",
+    "@kbn/esql-composer",
+    "@kbn/discover-shared-plugin",
+    "@kbn/core-chrome-browser",
+    "@kbn/react-query",
+    "@kbn/core-chrome-layout-constants",
+    "@kbn/zod",
+    "@kbn/onechat-server",
+    "@kbn/onechat-common",
+    "@kbn/onechat-plugin"
   ],
   "exclude": ["target/**/*"]
 }

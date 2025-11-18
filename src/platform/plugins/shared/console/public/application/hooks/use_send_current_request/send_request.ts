@@ -12,7 +12,7 @@ import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { KIBANA_API_PREFIX } from '../../../../common/constants';
 import { extractWarningMessages } from '../../../lib/utils';
 import { send } from '../../../lib/es/es';
-import { BaseResponseType } from '../../../types';
+import type { BaseResponseType } from '../../../types';
 
 const { collapseLiteralStrings } = XJson;
 
@@ -20,6 +20,7 @@ export interface RequestArgs {
   http: HttpSetup;
   requests: Array<{ url: string; method: string; data: string[]; lineNumber?: number }>;
   host?: string;
+  isPackagedEnvironment?: boolean;
 }
 
 export interface ResponseObject<V = unknown> {
@@ -117,6 +118,7 @@ export function sendRequest(args: RequestArgs): Promise<RequestResult[]> {
           data,
           asResponse: true,
           host: args.host,
+          isPackagedEnvironment: args.isPackagedEnvironment,
         });
 
         const { statusCode, statusText } = extractStatusCodeAndText(response, path);

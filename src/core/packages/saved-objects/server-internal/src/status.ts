@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable, combineLatest } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { startWith, map } from 'rxjs';
 import { type ServiceStatus, ServiceStatusLevels } from '@kbn/core-status-common';
 import type { SavedObjectStatusMeta } from '@kbn/core-saved-objects-server';

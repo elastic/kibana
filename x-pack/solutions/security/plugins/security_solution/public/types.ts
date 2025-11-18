@@ -44,7 +44,6 @@ import type {
   SavedObjectsTaggingApi,
   SavedObjectTaggingOssPluginStart,
 } from '@kbn/saved-objects-tagging-oss-plugin/public';
-import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
@@ -63,6 +62,7 @@ import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/publ
 import type { AutomaticImportPluginStart } from '@kbn/automatic-import-plugin/public';
 import type { ProductFeatureKeys } from '@kbn/security-solution-features';
 import type { ElasticAssistantSharedStatePublicPluginStart } from '@kbn/elastic-assistant-shared-state-plugin/public';
+import type { InferencePublicStart } from '@kbn/inference-plugin/public';
 import type { ResolverPluginSetup } from './resolver/types';
 import type { Inspect } from '../common/search_strategy';
 import type { Detections } from './detections';
@@ -78,6 +78,7 @@ import type { CloudSecurityPosture } from './cloud_security_posture';
 import type { ThreatIntelligence } from './threat_intelligence';
 import type { SecuritySolutionTemplateWrapper } from './app/home/template_wrapper';
 import type { AssetInventory } from './asset_inventory';
+import type { SiemReadiness } from './siem_readiness';
 import type { AttackDiscovery } from './attack_discovery';
 import type { Explore } from './explore';
 import type { EntityAnalytics } from './entity_analytics';
@@ -90,6 +91,7 @@ import type { TopValuesPopoverService } from './app/components/top_values_popove
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import type { SetComponents, GetComponents$ } from './contract_components';
 import type { ConfigSettings } from '../common/config_settings';
+import type { SecuritySolutionUiConfigType } from './common/types';
 import type { OnboardingService } from './onboarding/service';
 import type { TelemetryServiceStart } from './common/lib/telemetry';
 import type { SiemMigrationsService } from './siem_migrations/service';
@@ -125,7 +127,6 @@ export interface StartPlugins {
   embeddable: EmbeddableStart;
   inspector: InspectorStart;
   fleet?: FleetStart;
-  guidedOnboarding?: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   lists?: ListsPluginStart;
   licensing: LicensingPluginStart;
@@ -156,6 +157,7 @@ export interface StartPlugins {
   serverless?: ServerlessPluginStart;
   productDocBase: ProductDocBasePluginStart;
   elasticAssistantSharedState: ElasticAssistantSharedStatePublicPluginStart;
+  inference: InferencePublicStart;
 }
 
 export interface StartPluginsDependencies extends StartPlugins {
@@ -172,6 +174,7 @@ export interface ContractStartServices {
 export type StartServices = CoreStart &
   StartPlugins &
   ContractStartServices & {
+    config: SecuritySolutionUiConfigType;
     configSettings: ConfigSettings;
     storage: Storage;
     sessionStorage: Storage;
@@ -242,6 +245,7 @@ export interface SubPlugins {
   timelines: Timelines;
   entityAnalytics: EntityAnalytics;
   siemMigrations: SiemMigrations;
+  siemReadiness: SiemReadiness;
   configurations: Configurations;
 }
 
@@ -264,5 +268,6 @@ export interface StartedSubPlugins {
   timelines: ReturnType<Timelines['start']>;
   entityAnalytics: ReturnType<EntityAnalytics['start']>;
   siemMigrations: ReturnType<SiemMigrations['start']>;
+  siemReadiness: ReturnType<SiemReadiness['start']>;
   configurations: ReturnType<Configurations['start']>;
 }

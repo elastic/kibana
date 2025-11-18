@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { StartServices } from '../../../types';
+import type { StartServices } from '../../../types';
 import { useKibana } from '../../context/typed_kibana_context/typed_kibana_context';
 
 export const useToasts = (): StartServices['notifications']['toasts'] =>

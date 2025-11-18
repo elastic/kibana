@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
+import type { UseGenAIConnectorsResult } from '../hooks/use_genai_connectors';
 
 export const INFERENCE_CONNECTOR_ACTION_TYPE_ID = '.inference';
 

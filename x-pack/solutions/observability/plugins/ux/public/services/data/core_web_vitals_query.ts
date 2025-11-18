@@ -6,14 +6,14 @@
  */
 
 import type { ESSearchResponse } from '@kbn/es-types';
-import { UXMetrics } from '@kbn/observability-shared-plugin/public';
+import type { UXMetrics } from '@kbn/observability-shared-plugin/public';
 import {
   TBT_FIELD,
   FCP_FIELD,
   CLS_FIELD,
   LCP_FIELD,
 } from '../../../common/elasticsearch_fieldnames';
-import { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
+import type { SetupUX, UxUIFilters } from '../../../typings/ui_filters';
 import { mergeProjection } from '../../../common/utils/merge_projection';
 import { getRumPageLoadTransactionsProjection } from './projections';
 

@@ -69,6 +69,7 @@ import { TaskValidator } from '../task_validator';
 import { getRetryAt, getRetryDate, getTimeout } from '../lib/get_retry_at';
 import { getNextRunAt } from '../lib/get_next_run_at';
 import { TaskErrorSource } from '../../common/constants';
+import { getExecutionId } from '../lib/get_execution_id';
 
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
@@ -250,8 +251,7 @@ export class TaskManagerRunner implements TaskRunner {
    * @param id
    */
   public isSameTask(executionId: string) {
-    const executionIdParts = executionId.split('::');
-    const executionIdCompare = executionIdParts.length > 0 ? executionIdParts[0] : executionId;
+    const executionIdCompare = getExecutionId(executionId);
     return executionIdCompare === this.id;
   }
 
@@ -394,7 +394,20 @@ export class TaskManagerRunner implements TaskRunner {
         modifiedContext.taskInstance.apiKey,
         modifiedContext.taskInstance.userScope?.spaceId
       );
-      this.task = definition.createTaskRunner({ taskInstance: sanitizedTaskInstance, fakeRequest });
+
+      const abortController = new AbortController();
+
+      this.task = definition.createTaskRunner({
+        taskInstance: sanitizedTaskInstance,
+        fakeRequest,
+        abortController,
+      });
+
+      const originalTaskCancel = this.task.cancel;
+      this.task.cancel = async function () {
+        abortController.abort();
+        if (originalTaskCancel) return originalTaskCancel.call(this);
+      };
 
       const ctx = {
         type: 'task manager',
@@ -664,6 +677,7 @@ export class TaskManagerRunner implements TaskRunner {
     result: Result<SuccessfulRunResult, FailedRunResult>
   ): Promise<TaskRunResult> {
     const hasTaskRunFailed = isOk(result);
+    let shouldTaskBeDisabled = false;
     const fieldUpdates: Partial<ConcreteTaskInstance> & Pick<ConcreteTaskInstance, 'status'> = flow(
       // if running the task has failed ,try to correct by scheduling a retry in the near future
       mapErr(this.rescheduleFailedRun),
@@ -675,10 +689,16 @@ export class TaskManagerRunner implements TaskRunner {
           state,
           attempts = 0,
           shouldDeleteTask,
+          shouldDisableTask,
         }: SuccessfulRunResult & { attempts: number }) => {
           if (shouldDeleteTask) {
             // set the status to failed so task will get deleted
             return asOk({ status: TaskStatus.ShouldDelete });
+          }
+
+          if (shouldDisableTask) {
+            shouldTaskBeDisabled = true;
+            return asOk({ status: TaskStatus.Idle });
           }
 
           const updatedTaskSchedule = reschedule ?? this.instance.task.schedule;
@@ -744,6 +764,14 @@ export class TaskManagerRunner implements TaskRunner {
         }
       } else {
         shouldUpdateTask = true;
+
+        if (shouldTaskBeDisabled) {
+          const label = `${this.taskType}:${this.instance.task.id}`;
+          this.logger.warn(`Disabling task ${label} as it indicated it should disable itself`, {
+            tags: [this.taskType],
+          });
+        }
+
         partialTask = {
           ...partialTask,
           ...fieldUpdates,
@@ -751,6 +779,7 @@ export class TaskManagerRunner implements TaskRunner {
           startedAt: null,
           retryAt: null,
           ownerId: null,
+          ...(shouldTaskBeDisabled ? { enabled: false } : {}),
         };
       }
 

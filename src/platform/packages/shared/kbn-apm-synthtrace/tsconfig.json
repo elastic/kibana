@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": ["node", "jest"]
@@ -14,6 +14,8 @@
     "@kbn/sample-log-parser",
     "@kbn/tooling-log",
     "@kbn/streams-schema",
+    "@kbn/streamlang",
+    "@kbn/repo-info",
   ],
   "exclude": [
     "target/**/*",

@@ -9,12 +9,10 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { mockedAlertSummaryResponse, mockedChartProps } from '../../../mock/alert_summary_widget';
-import {
-  AlertSummaryWidgetFullSize,
-  AlertSummaryWidgetFullSizeProps,
-} from './alert_summary_widget_full_size';
+import type { AlertSummaryWidgetFullSizeProps } from './alert_summary_widget_full_size';
+import { AlertSummaryWidgetFullSize } from './alert_summary_widget_full_size';
 import { ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ, TOTAL_ALERT_COUNT_DATA_TEST_SUBJ } from './constants';
-import { DependencyProps } from '../types';
+import type { DependencyProps } from '../types';
 import { LIGHT_THEME } from '@elastic/charts';
 
 const dependencyProps: DependencyProps = {

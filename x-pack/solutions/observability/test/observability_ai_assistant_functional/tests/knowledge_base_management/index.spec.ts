@@ -15,8 +15,8 @@ import {
   teardownTinyElserModelAndInferenceEndpoint,
 } from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/model_and_inference';
 import { clearKnowledgeBase } from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/knowledge_base';
-import { ObservabilityAIAssistantApiClient } from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/observability_ai_assistant_api_client';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { ObservabilityAIAssistantApiClient } from '../../../api_integration_deployment_agnostic/apis/ai_assistant/utils/observability_ai_assistant_api_client';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ApiTest({ getService, getPageObjects }: FtrProviderContext) {
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
@@ -70,7 +70,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       async function getKnowledgeBaseEntries() {
         await common.navigateToUrlWithBrowserHistory(
           'management',
-          '/kibana/observabilityAiAssistantManagement',
+          '/ai/observabilityAiAssistantManagement',
           'tab=knowledge_base'
         );
 
@@ -138,17 +138,25 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
       async function setUserInstructionContent(content?: string) {
         const editor = await find.byCssSelector(`#${ui.pages.kbManagementTab.entryMarkdownEditor}`);
-        await editor.clearValue();
-        if (content) {
-          await editor.type(content);
-        }
+        await retry.try(async () => {
+          await editor.clearValue();
+          if (content) {
+            await editor.type(content);
+          }
+          const actualValue = await editor.getAttribute('value');
+          if (actualValue !== (content ?? '')) {
+            throw new Error(
+              `Expected editor value to be "${content ?? ''}" but found "${actualValue}"`
+            );
+          }
+        });
       }
 
       before(async () => {
         await clearKnowledgeBase(es);
         await common.navigateToUrlWithBrowserHistory(
           'management',
-          '/kibana/observabilityAiAssistantManagement',
+          '/ai/observabilityAiAssistantManagement',
           'tab=knowledge_base'
         );
       });
@@ -171,7 +179,12 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         await openUserInstructionFlyout();
         const instruction = 'Always respond in a formal tone';
         await setUserInstructionContent(instruction);
-        await testSubjects.click(ui.pages.kbManagementTab.saveEntryButton);
+        await retry.waitFor('save button to be enabled after typing instruction', async () => {
+          const saveButton = await testSubjects.find(ui.pages.kbManagementTab.saveEntryButton);
+          return await saveButton.isEnabled();
+        });
+        const saveButton = await testSubjects.find(ui.pages.kbManagementTab.saveEntryButton);
+        await saveButton.click();
 
         // Re-open to verify content was saved
         await openUserInstructionFlyout();
@@ -184,7 +197,13 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         await openUserInstructionFlyout();
         const originalInstruction = 'Original instruction';
         await setUserInstructionContent(originalInstruction);
-        await testSubjects.click(ui.pages.kbManagementTab.saveEntryButton);
+        await retry.waitFor('save button to be enabled after typing instruction', async () => {
+          const saveButton = await testSubjects.find(ui.pages.kbManagementTab.saveEntryButton);
+          return await saveButton.isEnabled();
+        });
+
+        const saveButton = await testSubjects.find(ui.pages.kbManagementTab.saveEntryButton);
+        await saveButton.click();
 
         // Make changes but cancel
         await openUserInstructionFlyout();
@@ -216,7 +235,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
       async function getKnowledgeBaseEntryCount() {
         await common.navigateToUrlWithBrowserHistory(
           'management',
-          '/kibana/observabilityAiAssistantManagement',
+          '/ai/observabilityAiAssistantManagement',
           'tab=knowledge_base'
         );
 
@@ -228,6 +247,9 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         await testSubjects.click(ui.pages.kbManagementTab.newEntryButton);
         await testSubjects.exists(ui.pages.kbManagementTab.bulkImportEntryButton);
         await testSubjects.click(ui.pages.kbManagementTab.bulkImportEntryButton);
+        await testSubjects.exists(ui.pages.kbManagementTab.bulkImportFlyout);
+        await testSubjects.exists(ui.pages.kbManagementTab.bulkImportSaveButton);
+        await testSubjects.exists(ui.pages.kbManagementTab.bulkImportFilePicker);
       }
 
       async function uploadBulkImportFile(content: string) {
@@ -236,7 +258,9 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         log.debug(`File saved to: ${tempFilePath}`);
 
         try {
-          await common.setFileInputPath(tempFilePath);
+          const filePicker = await testSubjects.find(ui.pages.kbManagementTab.bulkImportFilePicker);
+          await filePicker.type(tempFilePath);
+          await testSubjects.waitForEnabled(ui.pages.kbManagementTab.bulkImportSaveButton);
         } catch (error) {
           log.debug(`Error uploading file: ${error}`);
           throw error;
@@ -248,7 +272,7 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         await clearKnowledgeBase(es);
         await common.navigateToUrlWithBrowserHistory(
           'management',
-          '/kibana/observabilityAiAssistantManagement',
+          '/ai/observabilityAiAssistantManagement',
           'tab=knowledge_base'
         );
       });
@@ -278,9 +302,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
         await uploadBulkImportFile(entries.map((entry) => JSON.stringify(entry)).join('\n'));
 
         await testSubjects.click(ui.pages.kbManagementTab.bulkImportSaveButton);
-
-        const toast = await testSubjects.find(ui.pages.kbManagementTab.toastTitle);
-        const toastText = await toast.getVisibleText();
+        await testSubjects.waitForDeleted(ui.pages.kbManagementTab.bulkImportFlyout);
+        const toastText = await toasts.getTitleAndDismiss();
         expect(toastText).to.eql('Successfully imported ' + entries.length + ' items');
 
         const finalCount = await getKnowledgeBaseEntryCount();

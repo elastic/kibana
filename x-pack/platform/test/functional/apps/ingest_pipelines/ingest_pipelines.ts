@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const TEST_PIPELINE_NAME = 'test_pipeline';
 const TREE_PIPELINE_NAME = 'tree_pipeline';
@@ -218,6 +218,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           expect(detailsPanelTitle).to.be(TREE_PIPELINE_NAME);
 
           await pageObjects.ingestPipelines.clickTreeNode(TEST_PIPELINE_NAME);
+
+          // Allow for new pipeline data to load
+          await pageObjects.common.sleep(1000);
 
           // The details panel should have changed
           detailsPanelTitle = await pageObjects.ingestPipelines.getDetailsFlyoutTitle();

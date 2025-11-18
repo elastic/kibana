@@ -6,12 +6,12 @@
  */
 
 import { chunk } from 'lodash';
-import {
+import type {
   DataStreamMetadata,
-  DataStreamMigrationStatus,
   DataStreamMigrationOperation,
 } from '../../../../../../common/types';
-import { ApiService } from '../../../../lib/api';
+import { DataStreamMigrationStatus } from '../../../../../../common/types';
+import type { ApiService } from '../../../../lib/api';
 
 interface ReadOnlyExecuteResponse {
   migrationOp: DataStreamMigrationOperation;

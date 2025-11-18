@@ -7,17 +7,10 @@ exports[`IntegrationLink component renders a disabled link when href is undefine
   <EuiFlexItem
     grow={false}
   >
-    <EuiToolTip
+    <EuiIconTip
       content="Required data for this integration was not found."
-      delay="regular"
-      disableScreenReaderOutput={false}
-      display="inlineBlock"
-      position="top"
-    >
-      <EuiIcon
-        type="apmApp"
-      />
-    </EuiToolTip>
+      type="apmApp"
+    />
   </EuiFlexItem>
   <EuiFlexItem>
     <EuiText
@@ -41,17 +34,11 @@ exports[`IntegrationLink component renders without errors 1`] = `
     <EuiFlexItem
       grow={false}
     >
-      <EuiToolTip
+      <EuiIconTip
         content="info for bar"
-        delay="regular"
-        disableScreenReaderOutput={false}
-        display="inlineBlock"
         position="top"
-      >
-        <EuiIcon
-          type="apmApp"
-        />
-      </EuiToolTip>
+        type="apmApp"
+      />
     </EuiFlexItem>
     <EuiFlexItem>
       click for bar

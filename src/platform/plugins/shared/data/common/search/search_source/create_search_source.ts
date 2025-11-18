@@ -7,12 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewsContract, DataView, DataViewLazy } from '@kbn/data-views-plugin/common';
-import { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
+import type { DataViewsContract, DataViewLazy } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { migrateLegacyQuery } from './migrate_legacy_query';
-import { SearchSource, SearchSourceDependencies } from './search_source';
-import { SerializedSearchSourceFields } from '../..';
-import { SearchSourceFields } from './types';
+import type { SearchSourceDependencies } from './search_source';
+import { SearchSource } from './search_source';
+import type { SerializedSearchSourceFields } from '../..';
+import type { SearchSourceFields } from './types';
 
 /**
  * Deserializes a json string and a set of referenced objects to a `SearchSource` instance.

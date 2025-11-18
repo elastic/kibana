@@ -23,7 +23,7 @@ import {
   EuiCode,
 } from '@elastic/eui';
 
-import { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
+import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import {
   SectionLoading,
   TabSettings,
@@ -35,8 +35,10 @@ import { useAppContext } from '../../../app_context';
 import { useComponentTemplatesContext } from '../component_templates_context';
 import { DeprecatedBadge } from '../components';
 import { TabSummary } from './tab_summary';
-import { ComponentTemplateTabs, TabType } from './tabs';
-import { ManageButton, ManageAction } from './manage_button';
+import type { TabType } from './tabs';
+import { ComponentTemplateTabs } from './tabs';
+import type { ManageAction } from './manage_button';
+import { ManageButton } from './manage_button';
 import { INDEX_MANAGEMENT_LOCATOR_ID } from '../../../../locator';
 
 export interface Props {
@@ -100,6 +102,7 @@ export const ComponentTemplateDetailsFlyoutContent: React.FunctionComponent<Prop
     ) {
       content = (
         <EuiCallOut
+          announceOnMount
           title={
             <FormattedMessage
               id="xpack.idxMgmt.componentTemplateDetails.createMissingIntegrationTemplate.calloutTitle"
@@ -132,6 +135,7 @@ export const ComponentTemplateDetailsFlyoutContent: React.FunctionComponent<Prop
     } else {
       content = (
         <EuiCallOut
+          announceOnMount
           title={
             <FormattedMessage
               id="xpack.idxMgmt.componentTemplateDetails.loadingErrorMessage"

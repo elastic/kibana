@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
-import { ReportingHealthInfo } from '@kbn/reporting-common/types';
+import type { ReportingHealthInfo } from '@kbn/reporting-common/types';
 
 export const getReportingHealth = async ({
   http,

@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { OperationDocumentationType } from './types';
+import type { OperationDocumentationType } from './types';
 
 export const OVERALL_SUM_ID = 'overall_sum';
 export const OVERALL_SUM_NAME = i18n.translate('lensFormulaDocs.overallSum', {

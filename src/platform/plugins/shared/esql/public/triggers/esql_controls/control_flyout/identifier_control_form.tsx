@@ -18,14 +18,14 @@ import {
   type EuiSwitchEvent,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { monaco } from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import type { ISearchGeneric } from '@kbn/search-types';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import {
   ESQLVariableType,
   EsqlControlType,
   type ESQLControlState,
   type ControlWidthOptions,
-  ESQLControlVariable,
 } from '@kbn/esql-types';
 import { aggFunctionDefinitions } from '@kbn/esql-ast/src/definitions/generated/aggregation_functions';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
@@ -41,6 +41,7 @@ interface IdentifierControlFormProps {
   setControlState: (state: ESQLControlState) => void;
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
+  currentApp?: string;
 }
 
 export function IdentifierControlForm({
@@ -50,6 +51,7 @@ export function IdentifierControlForm({
   queryString,
   cursorPosition,
   esqlVariables,
+  currentApp,
   setControlState,
   search,
 }: IdentifierControlFormProps) {
@@ -60,7 +62,7 @@ export function IdentifierControlForm({
   >([]);
 
   const [selectedIdentifiers, setSelectedIdentifiers] = useState<EuiComboBoxOptionOption[]>(
-    initialState
+    initialState?.availableOptions
       ? initialState.availableOptions.map((option) => {
           return {
             label: option,
@@ -233,6 +235,9 @@ export function IdentifierControlForm({
         grow={grow}
         onMinimumSizeChange={onMinimumSizeChange}
         onGrowChange={onGrowChange}
+        // This property is not compatible with the unified search yet
+        // we will hide this possibility for now
+        hideFitToSpace={currentApp === 'discover'}
       />
     </>
   );

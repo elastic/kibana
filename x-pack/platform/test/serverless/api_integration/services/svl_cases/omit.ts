@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { Case, Attachment } from '@kbn/cases-plugin/common/types/domain';
+import type { Case, Attachment } from '@kbn/cases-plugin/common/types/domain';
 import { omit } from 'lodash';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export interface CommonSavedObjectAttributes {
   id?: string | null;

@@ -8,7 +8,7 @@
  */
 
 import type { Reference } from '@kbn/content-management-utils';
-import {
+import type {
   EmbeddablePersistableStateService,
   EmbeddableStateWithType,
 } from '@kbn/embeddable-plugin/common';
@@ -17,10 +17,10 @@ import {
   convertPanelMapToSavedPanels,
   convertSavedPanelsToPanelMap,
 } from '../dashboard_panel_converters';
-import { DashboardAttributes } from '../../schema/v1';
+import type { DashboardAttributes } from '../../schema/v1';
 import { createExtract, createInject } from './dashboard_container_references';
-import { DashboardPanelMap810 } from '../types';
-import { SavedDashboardPanel } from '../../schema/v2';
+import type { DashboardPanelMap810 } from '../types';
+import type { SavedDashboardPanel } from '../../schema/v2';
 
 export interface InjectExtractDeps {
   embeddablePersistableStateService: EmbeddablePersistableStateService;

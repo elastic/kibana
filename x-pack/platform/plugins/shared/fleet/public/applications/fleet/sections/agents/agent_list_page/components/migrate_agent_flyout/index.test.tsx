@@ -35,7 +35,8 @@ describe('MigrateAgentFlyout', () => {
             enrolled_at: new Date().toISOString(),
           },
         ]}
-        protectedAndFleetAgents={[]}
+        agentCount={1}
+        unsupportedMigrateAgents={[]}
       />
     );
   });
@@ -65,11 +66,11 @@ describe('MigrateAgentFlyout', () => {
     expect(submitButton).not.toBeDisabled();
   });
 
-  it('replace token button should be visible when there is one agent', () => {
-    const replaceTokenButton = component.getByTestId('migrateAgentFlyoutReplaceTokenButton');
-    expect(replaceTokenButton).toBeInTheDocument();
+  it('replace token field should be visible when there is one agent', () => {
+    const replaceTokenInput = component.getByTestId('migrateAgentFlyoutReplaceTokenInput');
+    expect(replaceTokenInput).toBeInTheDocument();
   });
-  it('replace token button should not be visible when there is more than one agent', () => {
+  it('replace token field should not be visible when there is more than one agent', () => {
     component.rerender(
       <AgentMigrateFlyout
         onClose={jest.fn()}
@@ -94,11 +95,12 @@ describe('MigrateAgentFlyout', () => {
             enrolled_at: new Date().toISOString(),
           },
         ]}
-        protectedAndFleetAgents={[]}
+        agentCount={2}
+        unsupportedMigrateAgents={[]}
       />
     );
-    const replaceTokenButton = component.queryByTestId('migrateAgentFlyoutReplaceTokenButton');
-    expect(replaceTokenButton).not.toBeInTheDocument();
+    const replaceTokenInput = component.queryByTestId('migrateAgentFlyoutReplaceTokenInput');
+    expect(replaceTokenInput).not.toBeInTheDocument();
   });
   it('alert panel should be visible and show protected and or fleet-server agents when there are any', () => {
     component.rerender(
@@ -116,12 +118,13 @@ describe('MigrateAgentFlyout', () => {
             enrolled_at: new Date().toISOString(),
           },
         ]}
-        protectedAndFleetAgents={[
+        agentCount={1}
+        unsupportedMigrateAgents={[
           {
             active: true,
             status: 'online',
             local_metadata: { elastic: { agent: { version: '8.8.0' } } },
-            id: '2',
+            id: '1',
             packages: [],
             type: 'PERMANENT',
             enrolled_at: new Date().toISOString(),
@@ -131,9 +134,74 @@ describe('MigrateAgentFlyout', () => {
     );
     const alertPanel = component.getByTestId('migrateAgentFlyoutAlertPanel');
     expect(alertPanel).toBeInTheDocument();
+    const submitButton = component.getByTestId('migrateAgentFlyoutSubmitButton');
+    expect(submitButton.textContent).toEqual('Migrate 0 agents');
+
+    // set the value of the url
+    const urlInput = component.getByTestId('migrateAgentFlyoutClusterUrlInput');
+    fireEvent.change(urlInput, { target: { value: 'https://www.example.com' } });
+    //  also set the value of enrollment token
+    const tokenInput = component.getByTestId('migrateAgentFlyoutEnrollmentTokenInput');
+    fireEvent.change(tokenInput, { target: { value: 'someToken' } });
+
+    expect(submitButton).toBeDisabled();
   });
   it('alert panel should not be visible when there are no protected or fleet-server agents', () => {
     const alertPanel = component.queryByTestId('migrateAgentFlyoutAlertPanel');
     expect(alertPanel).not.toBeInTheDocument();
+  });
+
+  it('should show containerized agents warning message', () => {
+    component.rerender(
+      <AgentMigrateFlyout
+        onClose={jest.fn()}
+        onSave={jest.fn()}
+        agents={[
+          {
+            active: true,
+            status: 'online',
+            local_metadata: {
+              elastic: {
+                agent: {
+                  version: '9.2.0',
+                  upgradeable: false, // Containerized agent
+                },
+              },
+            },
+            id: 'containerized-agent',
+            packages: [],
+            type: 'PERMANENT',
+            enrolled_at: new Date().toISOString(),
+          },
+        ]}
+        agentCount={1}
+        unsupportedMigrateAgents={[
+          {
+            active: true,
+            status: 'online',
+            local_metadata: {
+              elastic: {
+                agent: {
+                  version: '9.2.0',
+                  upgradeable: false, // Containerized agent
+                },
+              },
+            },
+            id: 'containerized-agent',
+            packages: [],
+            type: 'PERMANENT',
+            enrolled_at: new Date().toISOString(),
+          },
+        ]}
+      />
+    );
+
+    const alertPanel = component.getByTestId('migrateAgentFlyoutAlertPanel');
+    expect(alertPanel).toBeInTheDocument();
+
+    // Check that the warning message includes containerized agents
+    expect(alertPanel).toHaveTextContent(
+      'tamper-protected agents, Fleet Server agents, containerized agents, or agents on an unsupported version'
+    );
   });
 });

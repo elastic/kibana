@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Result } from '@elastic/elasticsearch/lib/api/types';
+import type { Result } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 
 import { fetchConnectorById } from './fetch_connectors';
-import { FilteringRules } from '../types/connectors';
+import type { FilteringRules } from '../types/connectors';
 
 export const updateFiltering = async (
   client: ElasticsearchClient,

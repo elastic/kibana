@@ -50,6 +50,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             to: 1680027660000,
             command:
               '/System/Library/CoreServices/NotificationCenter.app/Contents/MacOS/NotificationCenter',
+            schema: 'ecs',
           })
         )
         .expect(200);

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { getPromptsByGroupId, promptDictionary } from '../../../../prompt';
 import { promptGroupId } from '../../../../prompt/local_prompt_object';

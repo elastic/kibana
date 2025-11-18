@@ -109,7 +109,7 @@
     "xpack.observabilityLogsOverview": [
       "platform/packages/shared/logs-overview/src/components"
     ],
-    "xpack.onechat": ["platform/plugins/shared/onechat"],
+    "xpack.onechat": ["platform/plugins/shared/onechat", "platform/packages/shared/onechat"],
     "xpack.osquery": [
       "platform/plugins/shared/osquery"
     ],
@@ -117,6 +117,7 @@
     "xpack.profiling": [
       "solutions/observability/plugins/profiling"
     ],
+    "xpack.reindexService": "platform/plugins/private/reindex_service",
     "xpack.remoteClusters": "platform/plugins/private/remote_clusters",
     "xpack.reporting": [
       "platform/plugins/private/reporting"
@@ -150,7 +151,6 @@
     "xpack.securitySolutionServerless": "solutions/security/plugins/security_solution_serverless",
     "xpack.sessionView": "solutions/security/plugins/session_view",
     "xpack.streams": [
-      "solutions/observability/plugins/observability_streams_wrapper",
       "platform/plugins/shared/streams_app"
     ],
     "xpack.slo": "solutions/observability/plugins/slo",
@@ -166,7 +166,9 @@
     "xpack.triggersActionsUI": "platform/plugins/shared/triggers_actions_ui",
     "xpack.upgradeAssistant": [
       "platform/plugins/private/upgrade_assistant",
-      "platform/packages/private/upgrade-assistant"
+      "platform/packages/private/upgrade-assistant/common",
+      "platform/packages/private/upgrade-assistant/public",
+      "platform/packages/private/upgrade-assistant/server"
     ],
     "xpack.uptime": [
       "solutions/observability/plugins/uptime"

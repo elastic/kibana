@@ -15,6 +15,7 @@ import type {
   QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 
+import { ALL_SPACES_ID } from '../../../common/constants';
 import { agentStatusesToSummary } from '../../../common/services';
 import { AGENTS_INDEX } from '../../constants';
 import type { AgentStatus } from '../../types';
@@ -70,7 +71,11 @@ export async function getAgentStatusForAgentPolicy(
     if (spaceId === DEFAULT_SPACE_ID) {
       clauses.push(toElasticsearchQuery(fromKueryExpression(DEFAULT_NAMESPACES_FILTER)));
     } else {
-      clauses.push(toElasticsearchQuery(fromKueryExpression(`namespaces:"${spaceId}"`)));
+      clauses.push(
+        toElasticsearchQuery(
+          fromKueryExpression(`namespaces:"${spaceId}" or namespaces:"${ALL_SPACES_ID}"`)
+        )
+      );
     }
   }
 
@@ -194,7 +199,7 @@ export async function getIncomingDataByAgentsId({
     const { has_all_requested: hasAllPrivileges } = await esClient.security.hasPrivileges({
       index: [
         {
-          names: [dataStreamPattern],
+          names: dataStreamPattern.split(','),
           privileges: ['read'],
         },
       ],
@@ -245,19 +250,16 @@ export async function getIncomingDataByAgentsId({
 
     if (!searchResult.aggregations?.agent_ids) {
       return {
-        items: agentsIds.map((id) => {
-          return { [id]: { data: false } };
-        }),
+        items: agentsIds.map((id) => ({ [id]: { data: false } })),
         dataPreview: [],
       };
     }
 
-    // @ts-expect-error aggregation type is not specified
-    const agentIdsWithData: string[] = searchResult.aggregations.agent_ids.buckets.map(
-      (bucket: any) => bucket.key as string
-    );
-
     const dataPreview = searchResult.hits?.hits || [];
+
+    const agentIdsWithData: string[] =
+      // @ts-expect-error aggregation type is not specified
+      searchResult.aggregations.agent_ids.buckets.map((bucket: any) => bucket.key as string) ?? [];
 
     const items = agentsIds.map((id) =>
       agentIdsWithData.includes(id) ? { [id]: { data: true } } : { [id]: { data: false } }

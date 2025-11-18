@@ -6,7 +6,7 @@
  */
 
 import { SEARCH_SESSIONS_TABLE_ID } from '@kbn/data-plugin/common';
-import { FtrProviderContext } from '../ftr_provider_context';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const log = getService('log');
@@ -37,7 +37,7 @@ export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrPr
             id: ((await row.getAttribute('data-test-search-session-id')) ?? '').split('id-')[1],
             name: $.findTestSubject('sessionManagementNameCol').text().trim(),
             status: $.findTestSubject('sessionManagementStatusLabel').attr('data-test-status'),
-            mainUrl: $.findTestSubject('sessionManagementNameCol').attr('href'),
+            mainUrl: $.findTestSubject('sessionManagementNameLink').attr('href'),
             created: $.findTestSubject('sessionManagementCreatedCol').text(),
             expires: $.findTestSubject('sessionManagementExpiresCol').text(),
             searchesCount: Number($.findTestSubject('sessionManagementNumSearchesCol').text()),
@@ -66,6 +66,17 @@ export function SearchSessionsPageProvider({ getService, getPageObjects }: FtrPr
                 '[data-test-subj="sessionManagementPopoverAction-extend"]'
               );
               await PageObjects.common.clickConfirmOnModal();
+            },
+            rename: async (newName: string) => {
+              log.debug('management ui: rename the session');
+              await actionsCell.click();
+              await find.clickByCssSelector(
+                '[data-test-subj="sessionManagementPopoverAction-rename"]'
+              );
+              await testSubjects.setValue('editNameInput', newName, {
+                clearWithKeyboard: true,
+              });
+              await testSubjects.click('confirmEditName');
             },
           };
         })

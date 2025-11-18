@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiThemeColorMode, EuiThemeComputed } from '@elastic/eui';
-import { SerializedStyles } from '@emotion/serialize';
+import type { EuiThemeColorMode, EuiThemeComputed } from '@elastic/eui';
+import type { SerializedStyles } from '@emotion/serialize';
 
 export type EmotionFn = ({
   euiTheme,

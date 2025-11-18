@@ -104,7 +104,11 @@ export const performRuleInstallationHandler = async (
       const rulesToInstall = ruleInstallQueue.splice(0, BATCH_SIZE);
       const ruleAssets = await ruleAssetsClient.fetchAssetsByVersion(rulesToInstall);
 
-      const { results, errors } = await createPrebuiltRules(detectionRulesClient, ruleAssets);
+      const { results, errors } = await createPrebuiltRules(
+        detectionRulesClient,
+        ruleAssets,
+        logger
+      );
       installedRules.push(...results);
       ruleErrors.push(...errors);
     }
@@ -137,6 +141,7 @@ export const performRuleInstallationHandler = async (
 
     return response.ok({ body });
   } catch (err) {
+    logger.error(`performRuleInstallationHandler: Caught error:`, err);
     const error = transformError(err);
     return siemResponse.error({
       body: error.message,

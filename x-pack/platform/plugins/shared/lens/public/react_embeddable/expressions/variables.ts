@@ -6,8 +6,8 @@
  */
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
-import type { TextBasedPersistedState } from '../../datasources/form_based/esql_layer/types';
-import { LensApi, LensRuntimeState } from '../types';
+import type { TextBasedPersistedState, LensRuntimeState } from '@kbn/lens-common';
+import type { LensApi } from '@kbn/lens-common-2';
 
 function getInternalTables(states: Record<string, unknown>) {
   const result: Record<string, Datatable> = {};

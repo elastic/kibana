@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 
-import { FieldHook, FieldConfig, FormData } from '../types';
+import type { FieldHook, FieldConfig, FormData } from '../types';
 import { useFieldFromProps } from '../hooks';
 
 export interface Props<T, FormType = FormData, I = T> {

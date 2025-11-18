@@ -1,7 +1,551 @@
 {
   "id": "@kbn/esql-editor",
   "client": {
-    "classes": [],
+    "classes": [
+      {
+        "parentPluginId": "@kbn/esql-editor",
+        "id": "def-public.ESQLEditorTelemetryService",
+        "type": "Class",
+        "tags": [],
+        "label": "ESQLEditorTelemetryService",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.ESQLEditorTelemetryService.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-editor",
+                "id": "def-public.ESQLEditorTelemetryService.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "_analytics",
+                "description": [],
+                "signature": [
+                  "AnalyticsServiceStart"
+                ],
+                "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.ESQLEditorTelemetryService.trackLookupJoinHoverActionShown",
+            "type": "Function",
+            "tags": [],
+            "label": "trackLookupJoinHoverActionShown",
+            "description": [
+              "\nReceives an hover message content.\nIf it corresponds to a lookup index action, the event is tracked.\n\nExample of hover message:\n`[Create index](command:esql.lookup_index.create?%7B%22indexName%22%3A%22my_index%22%2C%22doesIndexExist%22%3Afalse%2C%22canEditIndex%22%3Afalse%2C%22triggerSource%22%3A%22esql_hover%22%7D)`\n"
+            ],
+            "signature": [
+              "(hoverMessage: string) => void"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-editor",
+                "id": "def-public.ESQLEditorTelemetryService.trackLookupJoinHoverActionShown.$1",
+                "type": "string",
+                "tags": [],
+                "label": "hoverMessage",
+                "description": [
+                  "The hover message content."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.ESQLEditorTelemetryService.trackSuggestionsWithCustomCommandShown",
+            "type": "Function",
+            "tags": [],
+            "label": "trackSuggestionsWithCustomCommandShown",
+            "description": [],
+            "signature": [
+              "(commandIds: string[]) => void"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-editor",
+                "id": "def-public.ESQLEditorTelemetryService.trackSuggestionsWithCustomCommandShown.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "commandIds",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.ESQLEditorTelemetryService.trackQueryHistoryOpened",
+            "type": "Function",
+            "tags": [],
+            "label": "trackQueryHistoryOpened",
+            "description": [],
+            "signature": [
+              "(isOpen: boolean) => void"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-editor",
+                "id": "def-public.ESQLEditorTelemetryService.trackQueryHistoryOpened.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "isOpen",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.ESQLEditorTelemetryService.trackQueryHistoryClicked",
+            "type": "Function",
+            "tags": [],
+            "label": "trackQueryHistoryClicked",
+            "description": [],
+            "signature": [
+              "(isStarredQuery?: boolean) => void"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-editor",
+                "id": "def-public.ESQLEditorTelemetryService.trackQueryHistoryClicked.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "isStarredQuery",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.ESQLEditorTelemetryService.trackQuerySubmitted",
+            "type": "Function",
+            "tags": [],
+            "label": "trackQuerySubmitted",
+            "description": [],
+            "signature": [
+              "({ source, query }: ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.TelemetryQuerySubmittedProps",
+                "text": "TelemetryQuerySubmittedProps"
+              },
+              ") => void"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-editor",
+                "id": "def-public.ESQLEditorTelemetryService.trackQuerySubmitted.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "{ source, query }",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-types",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlTypesPluginApi",
+                    "section": "def-common.TelemetryQuerySubmittedProps",
+                    "text": "TelemetryQuerySubmittedProps"
+                  }
+                ],
+                "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.ESQLEditorTelemetryService.trackRecommendedQueryClicked",
+            "type": "Function",
+            "tags": [],
+            "label": "trackRecommendedQueryClicked",
+            "description": [],
+            "signature": [
+              "(source: ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.QuerySource",
+                "text": "QuerySource"
+              },
+              ".HELP | ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.QuerySource",
+                "text": "QuerySource"
+              },
+              ".AUTOCOMPLETE, label: string) => void"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-editor",
+                "id": "def-public.ESQLEditorTelemetryService.trackRecommendedQueryClicked.$1",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "source",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-types",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlTypesPluginApi",
+                    "section": "def-common.QuerySource",
+                    "text": "QuerySource"
+                  },
+                  ".HELP | ",
+                  {
+                    "pluginId": "@kbn/esql-types",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlTypesPluginApi",
+                    "section": "def-common.QuerySource",
+                    "text": "QuerySource"
+                  },
+                  ".AUTOCOMPLETE"
+                ],
+                "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-editor",
+                "id": "def-public.ESQLEditorTelemetryService.trackRecommendedQueryClicked.$2",
+                "type": "string",
+                "tags": [],
+                "label": "label",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.ESQLEditorTelemetryService.trackEsqlControlFlyoutOpened",
+            "type": "Function",
+            "tags": [],
+            "label": "trackEsqlControlFlyoutOpened",
+            "description": [],
+            "signature": [
+              "(prefilled: boolean, controlType: ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLVariableType",
+                "text": "ESQLVariableType"
+              },
+              ", triggerSource: ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ControlTriggerSource",
+                "text": "ControlTriggerSource"
+              },
+              ", query: string) => void"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-editor",
+                "id": "def-public.ESQLEditorTelemetryService.trackEsqlControlFlyoutOpened.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "prefilled",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-editor",
+                "id": "def-public.ESQLEditorTelemetryService.trackEsqlControlFlyoutOpened.$2",
+                "type": "Enum",
+                "tags": [],
+                "label": "controlType",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-types",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlTypesPluginApi",
+                    "section": "def-common.ESQLVariableType",
+                    "text": "ESQLVariableType"
+                  }
+                ],
+                "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-editor",
+                "id": "def-public.ESQLEditorTelemetryService.trackEsqlControlFlyoutOpened.$3",
+                "type": "Enum",
+                "tags": [],
+                "label": "triggerSource",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-types",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlTypesPluginApi",
+                    "section": "def-common.ControlTriggerSource",
+                    "text": "ControlTriggerSource"
+                  }
+                ],
+                "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-editor",
+                "id": "def-public.ESQLEditorTelemetryService.trackEsqlControlFlyoutOpened.$4",
+                "type": "string",
+                "tags": [],
+                "label": "query",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.ESQLEditorTelemetryService.trackEsqlControlConfigSaved",
+            "type": "Function",
+            "tags": [],
+            "label": "trackEsqlControlConfigSaved",
+            "description": [],
+            "signature": [
+              "(controlType: ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLVariableType",
+                "text": "ESQLVariableType"
+              },
+              ", triggerSource: ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ControlTriggerSource",
+                "text": "ControlTriggerSource"
+              },
+              ") => void"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-editor",
+                "id": "def-public.ESQLEditorTelemetryService.trackEsqlControlConfigSaved.$1",
+                "type": "Enum",
+                "tags": [],
+                "label": "controlType",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-types",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlTypesPluginApi",
+                    "section": "def-common.ESQLVariableType",
+                    "text": "ESQLVariableType"
+                  }
+                ],
+                "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-editor",
+                "id": "def-public.ESQLEditorTelemetryService.trackEsqlControlConfigSaved.$2",
+                "type": "Enum",
+                "tags": [],
+                "label": "triggerSource",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-types",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlTypesPluginApi",
+                    "section": "def-common.ControlTriggerSource",
+                    "text": "ControlTriggerSource"
+                  }
+                ],
+                "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-editor",
+            "id": "def-public.ESQLEditorTelemetryService.trackEsqlControlConfigCancelled",
+            "type": "Function",
+            "tags": [],
+            "label": "trackEsqlControlConfigCancelled",
+            "description": [],
+            "signature": [
+              "(controlType: ",
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.ESQLVariableType",
+                "text": "ESQLVariableType"
+              },
+              ", reason: string) => void"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-editor",
+                "id": "def-public.ESQLEditorTelemetryService.trackEsqlControlConfigCancelled.$1",
+                "type": "Enum",
+                "tags": [],
+                "label": "controlType",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/esql-types",
+                    "scope": "common",
+                    "docId": "kibKbnEsqlTypesPluginApi",
+                    "section": "def-common.ESQLVariableType",
+                    "text": "ESQLVariableType"
+                  }
+                ],
+                "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/esql-editor",
+                "id": "def-public.ESQLEditorTelemetryService.trackEsqlControlConfigCancelled.$2",
+                "type": "string",
+                "tags": [],
+                "label": "reason",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/telemetry_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
     "functions": [
       {
         "parentPluginId": "@kbn/esql-editor",
@@ -35,15 +579,7 @@
             "section": "def-public.ESQLEditorRestorableState",
             "text": "ESQLEditorRestorableState"
           },
-          ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<",
-          {
-            "pluginId": "@kbn/restorable-state",
-            "scope": "public",
-            "docId": "kibKbnRestorableStatePluginApi",
-            "section": "def-public.RestorableStateProviderApi",
-            "text": "RestorableStateProviderApi"
-          },
-          ">>"
+          ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<never>>"
         ],
         "path": "src/platform/packages/private/kbn-esql-editor/src/esql_editor.tsx",
         "deprecated": false,
@@ -69,192 +605,54 @@
       },
       {
         "parentPluginId": "@kbn/esql-editor",
-        "id": "def-public.fetchFieldsFromESQL",
+        "id": "def-public.registerESQLEditorAnalyticsEvents",
         "type": "Function",
         "tags": [],
-        "label": "fetchFieldsFromESQL",
-        "description": [],
-        "signature": [
-          "(query: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.AggregateQuery",
-            "text": "AggregateQuery"
-          },
-          ", expressions: ",
-          {
-            "pluginId": "expressions",
-            "scope": "public",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-public.ExpressionsStart",
-            "text": "ExpressionsStart"
-          },
-          ", time: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
-          " | undefined, abortController: AbortController | undefined, timeFieldName: string | undefined, esqlVariables: ",
-          {
-            "pluginId": "@kbn/esql-types",
-            "scope": "common",
-            "docId": "kibKbnEsqlTypesPluginApi",
-            "section": "def-common.ESQLControlVariable",
-            "text": "ESQLControlVariable"
-          },
-          "[] | undefined) => Promise<",
-          {
-            "pluginId": "expressions",
-            "scope": "common",
-            "docId": "kibExpressionsPluginApi",
-            "section": "def-common.Datatable",
-            "text": "Datatable"
-          },
-          " | undefined>"
+        "label": "registerESQLEditorAnalyticsEvents",
+        "description": [
+          "\nRegisters the esql editor analytics events.\nThis function is wrapped in `once` to ensure that the events are registered only once."
         ],
-        "path": "src/platform/packages/private/kbn-esql-editor/src/fetch_fields_from_esql.ts",
+        "signature": [
+          "(analytics: ",
+          "AnalyticsServiceSetup",
+          ") => void"
+        ],
+        "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/events_registration.ts",
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/esql-editor",
-            "id": "def-public.fetchFieldsFromESQL.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "query",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.Query",
-                "text": "Query"
-              },
-              " | ",
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.AggregateQuery",
-                "text": "AggregateQuery"
-              }
-            ],
-            "path": "src/platform/packages/private/kbn-esql-editor/src/fetch_fields_from_esql.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/esql-editor",
-            "id": "def-public.fetchFieldsFromESQL.$2",
+            "id": "def-public.registerESQLEditorAnalyticsEvents.$1",
             "type": "Object",
             "tags": [],
-            "label": "expressions",
+            "label": "analytics",
             "description": [],
             "signature": [
-              {
-                "pluginId": "expressions",
-                "scope": "public",
-                "docId": "kibExpressionsPluginApi",
-                "section": "def-public.ExpressionsStart",
-                "text": "ExpressionsStart"
-              }
+              "{ optIn: (optInConfig: ",
+              "OptInConfig",
+              ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+              "Observable",
+              "<",
+              "TelemetryCounter",
+              ">; registerEventType: <EventTypeData>(eventTypeOps: ",
+              "EventTypeOpts",
+              "<EventTypeData>) => void; registerShipper: <Shipper extends ",
+              "IShipper",
+              ", ShipperConfig>(Shipper: ",
+              "ShipperClassConstructor",
+              "<Shipper, ShipperConfig>, shipperConfig: ShipperConfig, opts?: ",
+              "RegisterShipperOpts",
+              " | undefined) => void; registerContextProvider: <Context>(contextProviderOpts: ",
+              "ContextProviderOpts",
+              "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
             ],
-            "path": "src/platform/packages/private/kbn-esql-editor/src/fetch_fields_from_esql.ts",
+            "path": "src/platform/packages/private/kbn-esql-editor/src/telemetry/events_registration.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          },
-          {
-            "parentPluginId": "@kbn/esql-editor",
-            "id": "def-public.fetchFieldsFromESQL.$3",
-            "type": "Object",
-            "tags": [],
-            "label": "time",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.TimeRange",
-                "text": "TimeRange"
-              },
-              " | undefined"
-            ],
-            "path": "src/platform/packages/private/kbn-esql-editor/src/fetch_fields_from_esql.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-editor",
-            "id": "def-public.fetchFieldsFromESQL.$4",
-            "type": "Object",
-            "tags": [],
-            "label": "abortController",
-            "description": [],
-            "signature": [
-              "AbortController | undefined"
-            ],
-            "path": "src/platform/packages/private/kbn-esql-editor/src/fetch_fields_from_esql.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-editor",
-            "id": "def-public.fetchFieldsFromESQL.$5",
-            "type": "string",
-            "tags": [],
-            "label": "timeFieldName",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/private/kbn-esql-editor/src/fetch_fields_from_esql.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
-          },
-          {
-            "parentPluginId": "@kbn/esql-editor",
-            "id": "def-public.fetchFieldsFromESQL.$6",
-            "type": "Array",
-            "tags": [],
-            "label": "esqlVariables",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/esql-types",
-                "scope": "common",
-                "docId": "kibKbnEsqlTypesPluginApi",
-                "section": "def-common.ESQLControlVariable",
-                "text": "ESQLControlVariable"
-              },
-              "[] | undefined"
-            ],
-            "path": "src/platform/packages/private/kbn-esql-editor/src/fetch_fields_from_esql.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": false
+            "trackAdoption": false
           }
         ],
-        "returnComment": [],
         "initialIsOpen": false
       }
     ],
@@ -411,15 +809,7 @@
             "section": "def-public.ESQLEditorRestorableState",
             "text": "ESQLEditorRestorableState"
           },
-          ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<",
-          {
-            "pluginId": "@kbn/restorable-state",
-            "scope": "public",
-            "docId": "kibKbnRestorableStatePluginApi",
-            "section": "def-public.RestorableStateProviderApi",
-            "text": "RestorableStateProviderApi"
-          },
-          ">"
+          ">, \"initialState\" | \"onInitialStateChange\"> & React.RefAttributes<never>"
         ],
         "path": "src/platform/packages/private/kbn-esql-editor/src/esql_editor.tsx",
         "deprecated": false,

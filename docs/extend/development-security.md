@@ -145,7 +145,6 @@ Registering a feature consists of the following fields. For more information, co
 | `app` (required)<br> | `string[]`<br> | `["sample_app", "kibana"]`<br> | An array of applications this feature enables. Typically, all of your plugin’s apps (from `uiExports`) will be included here.<br> |
 | `privileges` (required)<br> | [`KibanaFeatureConfig`](https://github.com/elastic/kibana/blob/master/x-pack/platform/plugins/shared/features/common/kibana_feature.ts).<br> | See [Example 1](#example-1-canvas) and [Example 2](#example-2-dev-tools)<br> | The set of privileges this feature requires to function.<br> |
 | `subFeatures` (optional)<br> | [`KibanaFeatureConfig`](https://github.com/elastic/kibana/blob/master/x-pack/platform/plugins/shared/features/common/kibana_feature.ts).<br> | See [Example 3](#example-3-discover)<br> | The set of subfeatures that enables finer access control than the `all` and `read` feature privileges. These options are only available in the Gold subscription level and higher.<br> |
-| `scope` (optional)<br> | `string[]`<br> | `["spaces", "security"]`<br> | Default `security`. Scope identifies if feature should appear in both Spaces Visibility Toggles and Security Feature Privileges or only in Security Feature Privileges.<br> |
 
 #### Privilege definition [_privilege_definition]
 

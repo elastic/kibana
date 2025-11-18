@@ -10,11 +10,12 @@
 import { schema } from '@kbn/config-schema';
 import type { Version } from '@kbn/object-versioning';
 import { versionSchema } from './constants';
-import { GetResult, getResultSchema } from './get';
+import type { GetResult } from './get';
+import { getResultSchema } from './get';
 
 import type { ProcedureSchemas } from './types';
 
-export const bulkGetSchemas: ProcedureSchemas = {
+export const bulkGetSchemas = {
   in: schema.object(
     {
       contentTypeId: schema.string(),
@@ -31,7 +32,7 @@ export const bulkGetSchemas: ProcedureSchemas = {
     },
     { unknowns: 'forbid' }
   ),
-};
+} satisfies ProcedureSchemas;
 
 export interface BulkGetIn<T extends string = string, Options extends void | object = object> {
   contentTypeId: T;

@@ -7,6 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { OnechatConfig } from './config';
 import { ServiceManager } from './services';
 import type {
@@ -18,6 +19,12 @@ import type {
 import { registerFeatures } from './features';
 import { registerRoutes } from './routes';
 import { registerUISettings } from './ui_settings';
+import type { OnechatHandlerContext } from './request_handler_context';
+import { registerOnechatHandlerContext } from './request_handler_context';
+import { createOnechatUsageCounter } from './telemetry/usage_counters';
+import { TrackingService } from './telemetry/tracking_service';
+import { registerTelemetryCollector } from './telemetry/telemetry_collector';
+import { registerBuiltinTools } from './services/tools';
 
 export class OnechatPlugin
   implements
@@ -32,6 +39,8 @@ export class OnechatPlugin
   // @ts-expect-error unused for now
   private config: OnechatConfig;
   private serviceManager = new ServiceManager();
+  private usageCounter?: UsageCounter;
+  private trackingService?: TrackingService;
 
   constructor(context: PluginInitializerContext<OnechatConfig>) {
     this.logger = context.logger.get();
@@ -40,21 +49,45 @@ export class OnechatPlugin
 
   setup(
     coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>,
-    pluginsSetup: OnechatSetupDependencies
+    setupDeps: OnechatSetupDependencies
   ): OnechatPluginSetup {
+    // Create usage counter for telemetry (if usageCollection is available)
+    if (setupDeps.usageCollection) {
+      this.usageCounter = createOnechatUsageCounter(setupDeps.usageCollection);
+      if (this.usageCounter) {
+        this.trackingService = new TrackingService(this.usageCounter, this.logger.get('telemetry'));
+        registerTelemetryCollector(setupDeps.usageCollection, this.logger.get('telemetry'));
+      }
+
+      this.logger.info('Onechat telemetry initialized');
+    } else {
+      this.logger.warn('Usage collection plugin not available, telemetry disabled');
+    }
+
     const serviceSetups = this.serviceManager.setupServices({
       logger: this.logger.get('services'),
+      workflowsManagement: setupDeps.workflowsManagement,
+      trackingService: this.trackingService,
     });
 
-    registerFeatures({ features: pluginsSetup.features });
+    registerFeatures({ features: setupDeps.features });
 
     registerUISettings({ uiSettings: coreSetup.uiSettings });
 
-    const router = coreSetup.http.createRouter();
+    registerOnechatHandlerContext({ coreSetup });
+
+    registerBuiltinTools({
+      registry: serviceSetups.tools,
+      coreSetup,
+      setupDeps,
+    });
+
+    const router = coreSetup.http.createRouter<OnechatHandlerContext>();
     registerRoutes({
       router,
       coreSetup,
       logger: this.logger,
+      pluginsSetup: setupDeps,
       getInternalServices: () => {
         const services = this.serviceManager.internalStart;
         if (!services) {
@@ -62,40 +95,44 @@ export class OnechatPlugin
         }
         return services;
       },
+      trackingService: this.trackingService,
     });
 
     return {
       tools: {
         register: serviceSetups.tools.register.bind(serviceSetups.tools),
       },
+      agents: {
+        register: serviceSetups.agents.register.bind(serviceSetups.agents),
+      },
+      attachments: {
+        registerType: serviceSetups.attachments.registerType.bind(serviceSetups.attachments),
+      },
     };
   }
 
   start(
-    { elasticsearch, security }: CoreStart,
-    { actions, inference }: OnechatStartDependencies
+    { elasticsearch, security, uiSettings, savedObjects }: CoreStart,
+    { inference, spaces }: OnechatStartDependencies
   ): OnechatPluginStart {
     const startServices = this.serviceManager.startServices({
       logger: this.logger.get('services'),
       security,
       elasticsearch,
-      actions,
       inference,
+      spaces,
+      uiSettings,
+      savedObjects,
+      trackingService: this.trackingService,
     });
 
-    const { tools, agents, runnerFactory } = startServices;
+    const { tools, runnerFactory } = startServices;
     const runner = runnerFactory.getRunner();
 
     return {
       tools: {
         getRegistry: ({ request }) => tools.getRegistry({ request }),
         execute: runner.runTool.bind(runner),
-      },
-      agents: {
-        getScopedClient: (args) => agents.getScopedClient(args),
-        execute: async (args) => {
-          return agents.execute(args);
-        },
       },
     };
   }

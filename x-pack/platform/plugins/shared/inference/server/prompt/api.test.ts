@@ -10,6 +10,7 @@ import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { createRegexWorkerServiceMock } from '../test_utils';
+import type { Message } from '@kbn/inference-common';
 import {
   MessageRole,
   type PromptAPI,
@@ -18,16 +19,15 @@ import {
   getConnectorProvider,
   getConnectorModel,
   createPrompt,
-  Message,
   ChatCompletionEventType,
 } from '@kbn/inference-common';
 import { z } from '@kbn/zod';
 
-import {
+import type {
   ChatCompleteApiWithCallback,
   ChatCompleteApiWithCallbackCallback,
-  createChatCompleteCallbackApi,
 } from '../chat_complete/callback_api';
+import { createChatCompleteCallbackApi } from '../chat_complete/callback_api';
 import { promptToMessageOptions } from '../../common/prompt/prompt_to_message_options';
 import { createPromptApi } from './api';
 import { createInferenceExecutorMock, createInferenceConnectorMock } from '../test_utils';
@@ -81,13 +81,16 @@ describe('createPromptApi', () => {
     mockCallbackApi = jest.fn();
     mockCreateChatCompleteCallbackApi.mockReturnValue(mockCallbackApi);
 
-    promptApi = createPromptApi({
+    const callbackApi = createChatCompleteCallbackApi({
       request,
       actions,
       logger,
       anonymizationRulesPromise: Promise.resolve([]),
       regexWorker,
       esClient: mockEsClient,
+    });
+    promptApi = createPromptApi({
+      callbackApi,
     });
   });
 

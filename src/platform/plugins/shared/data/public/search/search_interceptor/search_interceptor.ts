@@ -9,16 +9,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { memoize, once } from 'lodash';
-import {
-  BehaviorSubject,
-  EMPTY,
-  from,
-  fromEvent,
-  Observable,
-  of,
-  Subscription,
-  throwError,
-} from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, EMPTY, from, fromEvent, of, throwError } from 'rxjs';
 import {
   catchError,
   filter,
@@ -38,7 +30,7 @@ import type {
   SqlGetAsyncResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 import { type Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
 
@@ -56,7 +48,8 @@ import type {
 } from '@kbn/core/public';
 
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
+import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
+import { AbortError } from '@kbn/kibana-utils-plugin/public';
 import type {
   SanitizedConnectionRequestParams,
   IKibanaSearchRequest,
@@ -70,26 +63,30 @@ import {
   EVENT_PROPERTY_SEARCH_TIMEOUT_MS,
   EVENT_PROPERTY_EXECUTION_CONTEXT,
 } from '../constants';
+import type { IAsyncSearchOptions } from '../../../common';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   ESQL_ASYNC_SEARCH_STRATEGY,
   getTotalLoaded,
-  IAsyncSearchOptions,
   isRunningResponse,
   pollSearch,
   shimHitsTotal,
   UI_SETTINGS,
 } from '../../../common';
-import { SearchUsageCollector } from '../collectors';
+import type { SearchUsageCollector } from '../collectors';
 import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
 import { SearchSessionIncompleteWarning } from './search_session_incomplete_warning';
 import { toPartialResponseAfterTimeout } from './to_partial_response';
-import { ISessionService, SearchSessionState } from '../session';
+import type { ISessionService } from '../session';
+import { SearchSessionState } from '../session';
 import { SearchResponseCache } from './search_response_cache';
 import { SearchAbortController } from './search_abort_controller';
 import type { SearchConfigSchema } from '../../../server/config';
 import type { SearchServiceStartDependencies } from '../search_service';
-import { createRequestHash } from './create_request_hash';
+import {
+  createRequestHashForBackgroundSearches,
+  createRequestHashForClientCache,
+} from './create_request_hash';
 
 export interface SearchInterceptorDeps {
   http: HttpSetup;
@@ -125,7 +122,6 @@ export class SearchInterceptor {
   private application!: ApplicationStart;
   private docLinks!: DocLinksStart;
   private inspector!: InspectorStart;
-
   /*
    * Services for toMountPoint
    * @internal
@@ -180,19 +176,14 @@ export class SearchInterceptor {
     options: IAsyncSearchOptions
   ): Observable<string | undefined> {
     const { sessionId } = options;
-    // Preference is used to ensure all queries go to the same set of shards and it doesn't need to be hashed
-    // https://www.elastic.co/guide/en/elasticsearch/reference/current/search-shard-routing.html#shard-and-node-preference
-    const { preference, ...params } = request.params || {};
     const hashOptions = {
-      ...params,
+      ...request.params,
       sessionId,
     };
 
     if (!sessionId) return of(undefined); // don't use cache if doesn't belong to a session
-    const sessionOptions = this.deps.session.getSearchOptions(options.sessionId);
-    if (sessionOptions?.isRestore) return of(undefined); // don't use cache if restoring a session
 
-    return from(createRequestHash(hashOptions));
+    return from(Promise.resolve(createRequestHashForClientCache(hashOptions)));
   }
 
   /*
@@ -299,7 +290,9 @@ export class SearchInterceptor {
   ) {
     const { sessionId, strategy } = options;
 
-    const search = () => {
+    const search = ({
+      abortSignal = searchAbortController.getSignal(),
+    }: Pick<ISearchOptions, 'abortSignal'> = {}) => {
       const [{ isSearchStored }, afterPoll] = searchTracker?.beforePoll() ?? [
         { isSearchStored: false },
         () => {},
@@ -309,7 +302,7 @@ export class SearchInterceptor {
         {
           ...options,
           ...this.deps.session.getSearchOptions(sessionId),
-          abortSignal: searchAbortController.getSignal(),
+          abortSignal,
           isSearchStored,
         }
       )
@@ -326,9 +319,9 @@ export class SearchInterceptor {
     const searchTracker = this.deps.session.isCurrentSession(sessionId)
       ? this.deps.session.trackSearch({
           abort: () => searchAbortController.abort(),
-          poll: async () => {
+          poll: async (abortSignal) => {
             if (id) {
-              await search();
+              await search({ abortSignal });
             }
           },
         })
@@ -337,7 +330,10 @@ export class SearchInterceptor {
     // track if this search's session will be send to background
     // if yes, then we don't need to cancel this search when it is aborted
     let isSavedToBackground =
-      this.deps.session.isCurrentSession(sessionId) && this.deps.session.isStored();
+      this.deps.session.isCurrentSession(sessionId) &&
+      (this.deps.session.isSaving() || this.deps.session.isStored());
+    if (isSavedToBackground) searchAbortController.cleanup();
+
     const savedToBackgroundSub =
       this.deps.session.isCurrentSession(sessionId) &&
       this.deps.session.state$
@@ -351,6 +347,7 @@ export class SearchInterceptor {
           take(1)
         )
         .subscribe(() => {
+          searchAbortController.cleanup();
           isSavedToBackground = true;
         });
 
@@ -390,7 +387,7 @@ export class SearchInterceptor {
         id = response.id;
 
         if (!isRunningResponse(response)) {
-          searchTracker?.complete();
+          searchTracker?.complete(response);
         }
       }),
       map((response) => {
@@ -422,8 +419,11 @@ export class SearchInterceptor {
             })
           );
         } else {
-          searchTracker?.error();
-          cancel();
+          // Don't error out the search or cancel if it is being saved to the background
+          if (!isSavedToBackground) {
+            searchTracker?.error(e);
+            cancel();
+          }
           return throwError(e);
         }
       }),
@@ -450,6 +450,23 @@ export class SearchInterceptor {
   ): Promise<IKibanaSearchResponse> {
     const { abortSignal } = options || {};
 
+    const requestHash = request.params
+      ? createRequestHashForBackgroundSearches(request.params)
+      : undefined;
+
+    if (request.id) {
+      // just polling an existing search, no need to send the body, just the hash
+
+      const { params, ...requestWithoutParams } = request;
+      if (params) {
+        const { body, ...paramsWithoutBody } = params;
+        request = {
+          ...requestWithoutParams,
+          params: paramsWithoutBody,
+        };
+      }
+    }
+
     const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
     return this.deps.http
       .post<IKibanaSearchResponse | ErrorResponseBase>(
@@ -461,6 +478,7 @@ export class SearchInterceptor {
           body: JSON.stringify({
             ...request,
             ...searchOptions,
+            requestHash,
             stream:
               strategy === ESQL_ASYNC_SEARCH_STRATEGY ||
               strategy === ENHANCED_ES_SEARCH_STRATEGY ||
@@ -516,6 +534,7 @@ export class SearchInterceptor {
               rawResponse: esqlResponse,
               isPartial: esqlResponse.is_partial,
               isRunning: esqlResponse.is_running,
+              isRestored,
               requestParams,
               warning,
             };
@@ -537,12 +556,11 @@ export class SearchInterceptor {
    * Creates a new search observable and a corresponding search abort controller
    * If requestHash is defined, tries to return them first from cache.
    */
-  private getSearchResponse$(
-    request: IKibanaSearchRequest,
-    options: IAsyncSearchOptions,
-    requestHash?: string
-  ) {
-    const cached = requestHash ? this.responseCache.get(requestHash) : undefined;
+  private getSearchResponse$(request: IKibanaSearchRequest, options: IAsyncSearchOptions) {
+    const { requestHash } = options;
+    const sessionOptions = this.deps.session.getSearchOptions(options.sessionId);
+    const cached =
+      requestHash && !sessionOptions?.isRestore ? this.responseCache.get(requestHash) : undefined; // don't use cache if restoring a session
 
     const searchAbortController =
       cached?.searchAbortController || new SearchAbortController(this.searchTimeout);
@@ -586,10 +604,10 @@ export class SearchInterceptor {
 
     return this.createRequestHash$(request, searchOptions).pipe(
       switchMap((requestHash) => {
+        searchOptions.requestHash = requestHash;
         const { searchAbortController, response$ } = this.getSearchResponse$(
           request,
-          searchOptions,
-          requestHash
+          searchOptions
         );
 
         this.pendingCount$.next(this.pendingCount$.getValue() + 1);
@@ -651,10 +669,12 @@ export class SearchInterceptor {
     }
   );
 
-  private showRestoreWarningToast = (_sessionId?: string) => {
+  private showRestoreWarningToast = async (_sessionId?: string) => {
     this.deps.toasts.addWarning(
       {
-        title: 'Your search session is still running',
+        title: i18n.translate('data.searchService.backgroundSearchRestoreWarning', {
+          defaultMessage: 'Your background search is still running',
+        }),
         text: toMountPoint(SearchSessionIncompleteWarning(this.docLinks), this.startRenderServices),
       },
       {

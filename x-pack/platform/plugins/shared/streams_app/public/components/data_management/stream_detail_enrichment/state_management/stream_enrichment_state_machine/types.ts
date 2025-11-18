@@ -5,21 +5,27 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
-import { ProcessorDefinition, Streams } from '@kbn/streams-schema';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { GrokCollection } from '@kbn/grok-ui';
-import { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
-import { ProcessorActorRef, ProcessorToParentEvent } from '../processor_state_machine';
-import {
+import type { CoreStart } from '@kbn/core/public';
+import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
+import type { Streams } from '@kbn/streams-schema';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type { GrokCollection } from '@kbn/grok-ui';
+import type {
+  StreamlangProcessorDefinition,
+  StreamlangStepWithUIAttributes,
+} from '@kbn/streamlang';
+import type { StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
+import type { StreamsTelemetryClient } from '../../../../../telemetry/client';
+import type { EnrichmentDataSource, EnrichmentUrlState } from '../../../../../../common/url_schema';
+import type { StepActorRef, StepToParentEvent } from '../steps_state_machine';
+import type {
   PreviewDocsFilterOption,
   SimulationActorRef,
   SimulationContext,
 } from '../simulation_state_machine';
-import { MappedSchemaField } from '../../../schema_editor/types';
-import { DataSourceActorRef, DataSourceToParentEvent } from '../data_source_state_machine';
+import type { MappedSchemaField } from '../../../schema_editor/types';
+import type { DataSourceActorRef, DataSourceToParentEvent } from '../data_source_state_machine';
 
 export interface StreamEnrichmentServiceDependencies {
   refreshDefinition: () => void;
@@ -27,6 +33,7 @@ export interface StreamEnrichmentServiceDependencies {
   core: CoreStart;
   data: DataPublicPluginStart;
   urlStateStorageContainer: IKbnUrlStateStorage;
+  telemetryClient: StreamsTelemetryClient;
 }
 
 export interface StreamEnrichmentInput {
@@ -35,9 +42,9 @@ export interface StreamEnrichmentInput {
 
 export interface StreamEnrichmentContextType {
   definition: Streams.ingest.all.GetResponse;
-  initialProcessorsRefs: ProcessorActorRef[];
+  initialStepRefs: SimulationActorRef[];
   dataSourcesRefs: DataSourceActorRef[];
-  processorsRefs: ProcessorActorRef[];
+  stepRefs: StepActorRef[];
   grokCollection: GrokCollection;
   simulatorRef: SimulationActorRef;
   urlState: EnrichmentUrlState;
@@ -45,7 +52,7 @@ export interface StreamEnrichmentContextType {
 
 export type StreamEnrichmentEvent =
   | DataSourceToParentEvent
-  | ProcessorToParentEvent
+  | StepToParentEvent
   | { type: 'stream.received'; definition: Streams.ingest.all.GetResponse }
   | { type: 'stream.reset' }
   | { type: 'stream.update' }
@@ -53,6 +60,7 @@ export type StreamEnrichmentEvent =
   | { type: 'simulation.viewDataPreview' }
   | { type: 'simulation.viewDetectedFields' }
   | { type: 'dataSources.add'; dataSource: EnrichmentDataSource }
+  | { type: 'dataSources.select'; id: string }
   | { type: 'dataSources.closeManagement' }
   | { type: 'dataSources.openManagement' }
   | { type: 'simulation.changePreviewDocsFilter'; filter: PreviewDocsFilterOption }
@@ -62,7 +70,20 @@ export type StreamEnrichmentEvent =
   | { type: 'previewColumns.updateExplicitlyDisabledColumns'; columns: string[] }
   | { type: 'previewColumns.order'; columns: string[] }
   | { type: 'previewColumns.setSorting'; sorting: SimulationContext['previewColumnsSorting'] }
-  | { type: 'processors.add'; processor?: ProcessorDefinition }
-  | { type: 'processors.reorder'; from: number; to: number }
+  | {
+      type: 'step.addProcessor';
+      step?: StreamlangProcessorDefinition;
+      options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
+    }
+  | {
+      type: 'step.duplicateProcessor';
+      processorStepId: string;
+    }
+  | {
+      type: 'step.addCondition';
+      step?: StreamlangWhereBlock;
+      options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
+    }
+  | { type: 'step.reorder'; stepId: string; direction: 'up' | 'down' }
   | { type: 'url.initialized'; urlState: EnrichmentUrlState }
   | { type: 'url.sync' };

@@ -19,19 +19,19 @@ import {
   EuiText,
   EuiLink,
 } from '@elastic/eui';
-import {
+import type {
   AppMountParameters,
   I18nStart,
   IUiSettingsClient,
   ThemeServiceStart,
   UserProfileService,
 } from '@kbn/core/public';
-import { ExpressionsStart } from '@kbn/expressions-plugin/public';
-import { Start as InspectorStart } from '@kbn/inspector-plugin/public';
-import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { RunExpressionsExample } from './run_expressions';
 import { RenderExpressionsExample } from './render_expressions';
 import { ActionsExpressionsExample } from './actions_and_expressions';

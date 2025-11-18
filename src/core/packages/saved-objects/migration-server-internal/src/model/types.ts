@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as Either from 'fp-ts/Either';
-import { RetryableEsClientError } from '../actions';
+import type * as Either from 'fp-ts/Either';
+import type { RetryableEsClientError } from '../actions';
 
 export type ExcludeRetryableEsError<Response> = Exclude<
   | Exclude<

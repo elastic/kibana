@@ -6,13 +6,15 @@
  */
 
 import { z } from '@kbn/zod';
-import { builtinToolIds, builtinTags } from '@kbn/onechat-common';
+import { platformCoreTools, ToolType } from '@kbn/onechat-common';
 import { indexExplorer } from '@kbn/onechat-genai-utils';
-import { BuiltinToolDefinition } from '@kbn/onechat-server';
+import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 
 const indexExplorerSchema = z.object({
-  query: z.string().describe('A natural language query to infer which indices to use.'),
+  query: z
+    .string()
+    .describe('A natural language query to infer which indices, aliases or datastreams to use.'),
   limit: z
     .number()
     .optional()
@@ -25,25 +27,29 @@ const indexExplorerSchema = z.object({
 
 export const indexExplorerTool = (): BuiltinToolDefinition<typeof indexExplorerSchema> => {
   return {
-    id: builtinToolIds.indexExplorer,
-    description: `List relevant indices and corresponding mappings based on a natural language query.
+    id: platformCoreTools.indexExplorer,
+    type: ToolType.builtin,
+    description: `List relevant indices, aliases and datastreams based on a natural language query.
 
-                  The 'indexPattern' parameter can be used to filter indices by a specific pattern, e.g. 'foo*'.
-                  This should *only* be used if you know what you're doing (e.g. if the user explicitly specified a pattern).
-                  Otherwise, leave it empty to list all indices.
+The 'indexPattern' parameter can be used to filter indices by a specific pattern, e.g. 'foo*'.
+This should *only* be used if you know what you're doing (e.g. if the user explicitly specified a pattern).
+Otherwise, leave it empty to search against all indices.
 
-                  *Example:*
-                  User: "Show me my latest alerts"
-                  You: call tool 'indexExplorer' with { query: 'indices containing alerts' }
-                  Tool result: [{ indexName: '.alerts', mappings: {...} }]
-                  `,
+*Example:*
+User: "Show me my latest alerts"
+You: call tool 'index_explorer' with { query: 'indices containing user alerts' }
+Tool result: [{ type: "index", name: '.alerts' }]
+`,
     schema: indexExplorerSchema,
     handler: async (
       { query: nlQuery, indexPattern = '*', limit = 1 },
-      { esClient, modelProvider }
+      { esClient, modelProvider, logger }
     ) => {
+      logger.debug(
+        `Index explorer tool called with query: ${nlQuery}, indexPattern: ${indexPattern}, limit: ${limit}`
+      );
       const model = await modelProvider.getDefaultModel();
-      const result = await indexExplorer({
+      const response = await indexExplorer({
         nlQuery,
         indexPattern,
         limit,
@@ -56,15 +62,16 @@ export const indexExplorerTool = (): BuiltinToolDefinition<typeof indexExplorerS
           {
             type: ToolResultType.other,
             data: {
-              indices: result,
-              nlQuery,
-              index_pattern: indexPattern,
-              limit,
+              resources: response.resources.map((resource) => ({
+                type: resource.type,
+                name: resource.name,
+                reason: resource.reason,
+              })),
             },
           },
         ],
       };
     },
-    tags: [builtinTags.retrieval],
+    tags: [],
   };
 };

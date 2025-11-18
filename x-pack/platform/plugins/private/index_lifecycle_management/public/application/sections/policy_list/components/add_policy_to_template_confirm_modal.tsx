@@ -8,6 +8,7 @@
 import React, { Fragment, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiComboBox,
@@ -19,11 +20,10 @@ import {
   EuiText,
   EuiSwitch,
   EuiButton,
-  EuiComboBoxOptionOption,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 
-import { PolicyFromES } from '../../../../../common/types';
+import type { PolicyFromES } from '../../../../../common/types';
 import { addLifecyclePolicyToTemplate, useLoadIndexTemplates } from '../../../services/api';
 import { toasts } from '../../../services/notification';
 import { showApiError } from '../../../services/api_errors';

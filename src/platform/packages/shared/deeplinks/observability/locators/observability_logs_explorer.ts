@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 
 // Will become a union once we have more origins
 export interface ObservabilityLogsExplorerLocationState extends SerializableRecord {

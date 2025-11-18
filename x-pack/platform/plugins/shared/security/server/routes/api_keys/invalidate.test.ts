@@ -10,7 +10,7 @@ import Boom from '@hapi/boom';
 import type { Type } from '@kbn/config-schema';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
-import type { LicenseCheck } from '@kbn/licensing-plugin/server';
+import type { LicenseCheck } from '@kbn/licensing-types';
 
 import { defineInvalidateApiKeysRoutes } from './invalidate';
 import { routeDefinitionParamsMock } from '../index.mock';

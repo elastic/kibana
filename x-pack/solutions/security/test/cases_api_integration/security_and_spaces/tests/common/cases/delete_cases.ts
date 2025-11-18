@@ -68,7 +68,7 @@ import {
   createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-} from '@kbn/test-suites-xpack/common/utils/security_solution';
+} from '@kbn/detections-response-ftr-services';
 import {
   createSecuritySolutionAlerts,
   getSecuritySolutionAlerts,

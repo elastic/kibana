@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": ["jest", "node", "react"]
@@ -12,7 +12,6 @@
     "@kbn/core",
     "@kbn/i18n-react",
     "@kbn/rrule",
-    "@kbn/core-application-common",
     "@kbn/triggers-actions-ui-types",
     "@kbn/alerting-types",
     "@kbn/actions-types",
@@ -36,5 +35,7 @@
     "@kbn/presentation-publishing",
     "@kbn/response-ops-rules-apis",
     "@kbn/controls-constants",
+    "@kbn/es-ui-shared-plugin",
+    "@kbn/react-query",
   ]
 }

@@ -15,10 +15,6 @@ export const DRAGGABLE_KEYBOARD_WRAPPER_CLASS_NAME = 'draggable-keyboard-wrapper
 
 export const ROW_RENDERER_CLASS_NAME = 'row-renderer';
 
-export const NOTES_CONTAINER_CLASS_NAME = 'notes-container';
-
-export const NOTE_CONTENT_CLASS_NAME = 'note-content';
-
 /** This class is added to the document body while dragging */
 export const IS_DRAGGING_CLASS_NAME = 'is-dragging';
 

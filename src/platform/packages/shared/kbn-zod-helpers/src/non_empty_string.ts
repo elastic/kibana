@@ -19,3 +19,17 @@ export function isNonEmptyString(input: string, ctx: z.RefinementCtx): void {
 }
 
 export const NonEmptyString = z.string().min(1).superRefine(isNonEmptyString);
+
+/**
+ * Checks that the input is a string that is not empty while allowing whitespace.
+ */
+export function isNonEmptyOrWhitespace(input: string, ctx: z.RefinementCtx): void {
+  if (typeof input !== 'string' || input.length === 0) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: 'Must be a non-empty string or whitespace',
+    });
+  }
+}
+
+export const NonEmptyOrWhitespaceString = z.string().min(1).superRefine(isNonEmptyOrWhitespace);

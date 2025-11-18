@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
+
 import { INTEGRATIONS, navigateTo } from '../tasks/navigation';
 import {
   addIntegration,
   installPackageWithVersion,
   deleteIntegrations,
   clickIfVisible,
+  calculateAssetCount,
 } from '../tasks/integrations';
 import {
   AGENT_POLICY_NAME_LINK,
@@ -60,7 +63,16 @@ function getAllIntegrations() {
   const cardItems = new Set<string>();
 
   for (let i = 0; i < 10; i++) {
-    cy.scrollTo(0, i * 600);
+    cy.window().then((win) => {
+      const scrollContainer = win.document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID);
+
+      if (scrollContainer) {
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
+      } else {
+        cy.scrollTo(0, i * 600);
+      }
+    });
+
     cy.wait(50);
     cy.getBySel(INTEGRATION_LIST)
       .find('.euiCard')
@@ -90,33 +102,28 @@ describe('Add Integration - Real API', () => {
   afterEach(() => {});
 
   it('should install integration without policy', () => {
+    // Intercept the package info API to get the asset count
+    cy.intercept('GET', '**/api/fleet/epm/packages/tomcat**').as('getPackageInfo');
     cy.visit('/app/integrations/detail/tomcat/settings');
 
-    cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).click();
-    cy.get('.euiCallOut').contains('This action will install 1 assets');
-    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
+    cy.wait('@getPackageInfo').then((interception) => {
+      const packageInfo = interception.response?.body.item;
+      const assetCount = calculateAssetCount(packageInfo);
 
-    cy.getBySel(LOADING_SPINNER).should('not.exist');
+      cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).click();
+      // Assert against the actual asset count from the package
+      cy.get('.euiCallOut').contains(
+        `This action will install ${assetCount} asset${assetCount === 1 ? '' : 's'}`
+      );
+      cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
 
-    cy.getBySel(SETTINGS.UNINSTALL_ASSETS_BTN).click();
-    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
-    cy.getBySel(LOADING_SPINNER).should('not.exist');
-    cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).should('exist');
-  });
+      cy.getBySel(LOADING_SPINNER).should('not.exist');
 
-  it('should install integration without policy', () => {
-    cy.visit('/app/integrations/detail/tomcat/settings');
-
-    cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).click();
-    cy.get('.euiCallOut').contains('This action will install 1 assets');
-    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
-
-    cy.getBySel(LOADING_SPINNER).should('not.exist');
-
-    cy.getBySel(SETTINGS.UNINSTALL_ASSETS_BTN).click();
-    cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
-    cy.getBySel(LOADING_SPINNER).should('not.exist');
-    cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).should('exist');
+      cy.getBySel(SETTINGS.UNINSTALL_ASSETS_BTN).click();
+      cy.getBySel(CONFIRM_MODAL.CONFIRM_BUTTON).click();
+      cy.getBySel(LOADING_SPINNER).should('not.exist');
+      cy.getBySel(SETTINGS.INSTALL_ASSETS_BTN).should('exist');
+    });
   });
 
   it('should display Apache integration in the Policies list once installed ', () => {
@@ -215,6 +222,17 @@ describe('Add Integration - Real API', () => {
     });
     cy.getBySel(INTEGRATIONS_SEARCHBAR.REMOVE_BADGE_BUTTON).click();
     cy.getBySel(INTEGRATIONS_SEARCHBAR.BADGE).should('not.exist');
+  });
+});
+
+describe('It should handle non existing package', () => {
+  beforeEach(() => {
+    login();
+  });
+  it('should display error when visiting a non existing package details page', () => {
+    cy.visit('/app/integrations/detail/packagedonotexists');
+
+    cy.contains('[packagedonotexists] package not installed or found in registry').should('exist');
   });
 });
 

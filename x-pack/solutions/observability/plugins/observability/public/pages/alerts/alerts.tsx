@@ -6,10 +6,10 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { BrushEndListener, XYBrushEvent } from '@elastic/charts';
+import type { BrushEndListener, XYBrushEvent } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
-import { BoolQuery, Filter } from '@kbn/es-query';
+import type { BoolQuery, Filter } from '@kbn/es-query';
 import { usePageReady } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
 import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
@@ -23,7 +23,7 @@ import { renderGroupPanel } from '../../components/alerts_table/grouping/render_
 import { getGroupStats } from '../../components/alerts_table/grouping/get_group_stats';
 import { getAggregationsByGroupingField } from '../../components/alerts_table/grouping/get_aggregations_by_grouping_field';
 import { DEFAULT_GROUPING_OPTIONS } from '../../components/alerts_table/grouping/constants';
-import {
+import type {
   AlertsByGroupingAgg,
   GetObservabilityAlertsTableProp,
 } from '../../components/alerts_table/types';
@@ -32,7 +32,7 @@ import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useTimeBuckets } from '../../hooks/use_time_buckets';
 import { useToasts } from '../../hooks/use_toast';
-import { RulesParams } from '../../locators/rules';
+import type { RulesParams } from '../../locators/rules';
 import { useKibana } from '../../utils/kibana_react';
 import {
   alertSearchBarStateContainer,
@@ -52,7 +52,8 @@ import { ObservabilityAlertsTable } from '../../components/alerts_table/alerts_t
 import { getColumns } from '../../components/alerts_table/common/get_columns';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 import { buildEsQuery } from '../../utils/build_es_query';
-import { renderRuleStats, RuleStatsState } from './components/rule_stats';
+import type { RuleStatsState } from './components/rule_stats';
+import { renderRuleStats } from './components/rule_stats';
 import { mergeBoolQueries } from './helpers/merge_bool_queries';
 import { GroupingToolbarControls } from '../../components/alerts_table/grouping/grouping_toolbar_controls';
 import { AlertsLoader } from './components/alerts_loader';
@@ -217,18 +218,13 @@ function InternalAlertsPage() {
     [alertSearchBarStateProps.rangeFrom, alertSearchBarStateProps.rangeTo, bucketSize, esQuery]
   );
 
-  useBreadcrumbs(
-    [
-      {
-        text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
-          defaultMessage: 'Alerts',
-        }),
-      },
-    ],
+  useBreadcrumbs([
     {
-      classicOnly: true,
-    }
-  );
+      text: i18n.translate('xpack.observability.breadcrumbs.alertsLinkText', {
+        defaultMessage: 'Alerts',
+      }),
+    },
+  ]);
 
   async function loadRuleStats() {
     setRuleStatsLoading(true);
@@ -373,7 +369,7 @@ function InternalAlertsPage() {
                       ruleTypeIds={OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES}
                       consumers={observabilityAlertFeatureIds}
                       query={mergeBoolQueries(esQuery, groupQuery)}
-                      initialPageSize={ALERTS_PER_PAGE}
+                      pageSize={ALERTS_PER_PAGE}
                       onUpdate={onUpdate}
                       columns={tableColumns}
                       renderAdditionalToolbarControls={() => (

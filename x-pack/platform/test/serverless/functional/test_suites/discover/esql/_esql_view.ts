@@ -6,7 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import { NULL_LABEL } from '@kbn/field-formats-common';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
@@ -214,7 +215,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.discover.waitUntilSearchingHasFinished();
         const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
-        expect(await cell.getVisibleText()).to.be(' - ');
+        expect(await cell.getVisibleText()).to.be(NULL_LABEL);
         expect((await dataGrid.getHeaders()).slice(-2)).to.eql([
           'Numberbytes',
           'machine.ram_range',
@@ -346,7 +347,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             'logstash-*',
           ]);
         } else {
-          expect(availableDataViews).to.eql(['kibana_sample_data_flights', 'logstash-*']);
+          ['kibana_sample_data_flights', 'logstash-*'].forEach((item) => {
+            expect(availableDataViews).to.contain(item);
+          });
         }
         await dataViews.switchToAndValidate('kibana_sample_data_flights');
       });
@@ -397,7 +400,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await testSubjects.click('ESQLEditor-toggle-query-history-button');
         const historyItems = await esql.getHistoryItems();
-        await esql.isQueryPresentInTable('FROM logstash-* | LIMIT 10', historyItems);
+        await esql.isQueryPresentInTable('FROM logstash-*', historyItems);
       });
 
       it('updating the query should add this to the history', async () => {
@@ -597,7 +600,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.clickNewDashboard();
         await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await dashboardAddPanel.clickOpenAddPanel();
+        await dashboardAddPanel.clickAddFromLibrary();
         await dashboardAddPanel.addSavedSearch(savedSearchName);
         await PageObjects.header.waitUntilLoadingHasFinished();
 

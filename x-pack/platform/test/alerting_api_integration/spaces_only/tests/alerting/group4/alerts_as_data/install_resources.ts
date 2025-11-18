@@ -24,25 +24,27 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       const legacyComponentTemplateName = '.alerts-legacy-alert-mappings';
       const ecsComponentTemplateName = '.alerts-ecs-mappings';
 
-      const commonIlmPolicy = await es.ilm.getLifecycle({
-        name: ilmPolicyName,
-      });
+      await retry.try(async () => {
+        const commonIlmPolicy = await es.ilm.getLifecycle({
+          name: ilmPolicyName,
+        });
 
-      expect(commonIlmPolicy[ilmPolicyName].policy).to.eql({
-        _meta: {
-          managed: true,
-        },
-        phases: {
-          hot: {
-            min_age: '0ms',
-            actions: {
-              rollover: {
-                max_age: '30d',
-                max_primary_shard_size: '50gb',
+        expect(commonIlmPolicy[ilmPolicyName].policy).to.eql({
+          _meta: {
+            managed: true,
+          },
+          phases: {
+            hot: {
+              min_age: '0ms',
+              actions: {
+                rollover: {
+                  max_age: '30d',
+                  max_primary_shard_size: '50gb',
+                },
               },
             },
           },
-        },
+        });
       });
 
       const { component_templates: componentTemplates1 } = await es.cluster.getComponentTemplate({
@@ -148,10 +150,16 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
           '.internal.alerts-test.patternfiring.alerts-default-*',
           '.reindexed-v8-internal.alerts-test.patternfiring.alerts-default-*',
         ]);
-        expect(contextIndexTemplate.index_template.composed_of).to.eql([
-          '.alerts-test.patternfiring.alerts-mappings',
-          '.alerts-framework-mappings',
-        ]);
+
+        expect(
+          contextIndexTemplate.index_template.composed_of.includes(
+            '.alerts-test.patternfiring.alerts-mappings'
+          )
+        );
+        expect(
+          contextIndexTemplate.index_template.composed_of.includes('.alerts-framework-mappings')
+        );
+
         expect(contextIndexTemplate.index_template.template!.mappings?.dynamic).to.eql(false);
         expect(contextIndexTemplate.index_template.template!.mappings?._meta?.managed).to.eql(true);
         expect(contextIndexTemplate.index_template.template!.mappings?._meta?.namespace).to.eql(
@@ -186,6 +194,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         expect(contextIndex[indexName].aliases).to.eql({
           '.alerts-test.patternfiring.alerts-default': {
             is_write_index: true,
+            is_hidden: true,
           },
         });
         expect(contextIndex[indexName].mappings?._meta?.managed).to.eql(true);

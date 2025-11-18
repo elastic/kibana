@@ -5,20 +5,18 @@
  * 2.0.
  */
 import moment from 'moment';
-import {
+import type {
   SavedObjectsClientContract,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
-import { Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { intersection, isEmpty } from 'lodash';
 import { getAlertDetailsUrl } from '@kbn/observability-plugin/common';
-import {
-  type StatusRuleCondition,
-  SyntheticsMonitorStatusRuleParams as StatusRuleParams,
-} from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import type { SyntheticsMonitorStatusRuleParams as StatusRuleParams } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
+import { type StatusRuleCondition } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { syntheticsMonitorAttributes } from '../../../common/types/saved_objects';
 import { MonitorConfigRepository } from '../../services/monitor_config_repository';
-import {
+import type {
   AlertOverviewStatus,
   AlertPendingStatusConfigs,
   AlertPendingStatusMetaData,
@@ -28,7 +26,7 @@ import {
   StatusRuleInspect,
 } from '../../../common/runtime_types/alert_rules/common';
 import { queryFilterMonitors } from './queries/filter_monitors';
-import { MonitorSummaryStatusRule, StatusRuleExecutorOptions } from './types';
+import type { MonitorSummaryStatusRule, StatusRuleExecutorOptions } from './types';
 import {
   AND_LABEL,
   getFullViewInAppMessage,
@@ -42,12 +40,13 @@ import {
 } from './message_utils';
 import { queryMonitorStatusAlert } from './queries/query_monitor_status_alert';
 import { parseArrayFilters, parseLocationFilter } from '../../routes/common';
-import { SyntheticsServerSetup } from '../../types';
-import { SyntheticsEsClient } from '../../lib';
+import type { SyntheticsServerSetup } from '../../types';
+import type { SyntheticsEsClient } from '../../lib';
 import { processMonitors } from '../../saved_objects/synthetics_monitor/process_monitors';
 import { getConditionType } from '../../../common/rules/status_rule';
-import { ConfigKey, EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
-import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
+import type { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
+import { ConfigKey } from '../../../common/runtime_types';
+import type { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { AlertConfigKey } from '../../../common/constants/monitor_management';
 import { ALERT_DETAILS_URL, VIEW_IN_APP_URL } from '../action_variables';
 import { MONITOR_STATUS } from '../../../common/constants/synthetics_alerts';
@@ -245,28 +244,25 @@ export class StatusRuleExecutor {
   }
 
   getRange = (maxPeriod: number) => {
-    let from = this.previousStartedAt
-      ? moment(this.previousStartedAt).subtract(1, 'minute').toISOString()
-      : 'now-2m';
+    const { numberOfChecks, useLatestChecks, timeWindow } = getConditionType(this.params.condition);
 
-    const condition = this.params.condition;
-    if (condition && 'numberOfChecks' in condition?.window) {
-      const numberOfChecks = condition.window.numberOfChecks;
-      from = moment()
+    if (useLatestChecks) {
+      const from = moment()
         .subtract(maxPeriod * numberOfChecks, 'milliseconds')
         .subtract(5, 'minutes')
         .toISOString();
-    } else if (condition && 'time' in condition.window) {
-      const time = condition.window.time;
-      const { unit, size } = time;
-
-      from = moment().subtract(size, unit).toISOString();
+      this.debug(
+        `Using range from ${from} to now, diff of ${moment().diff(from, 'minutes')} minutes`
+      );
+      return { from, to: 'now' };
     }
 
+    // `timeWindow` is guaranteed to be defined here.
+    const { unit, size } = timeWindow;
+    const from = moment().subtract(size, unit).toISOString();
     this.debug(
       `Using range from ${from} to now, diff of ${moment().diff(from, 'minutes')} minutes`
     );
-
     return { from, to: 'now' };
   };
 
@@ -339,7 +335,9 @@ export class StatusRuleExecutor {
         alertId,
         monitorSummary,
         statusConfig: configs[0],
-        locationNames: configs.map(({ locationId, ping }) => ping?.observer.geo.name || locationId),
+        locationNames: configs.map(
+          ({ locationId, latestPing }) => latestPing?.observer.geo.name || locationId
+        ),
         locationIds: configs.map(({ locationId }) => locationId),
       });
     }
@@ -373,7 +371,7 @@ export class StatusRuleExecutor {
     if (groupBy === 'locationId' && locationsThreshold === 1) {
       Object.entries(downConfigs).forEach(([idWithLocation, statusConfig]) => {
         // Skip scheduling if recoveryStrategy is 'firstUp' and latest ping is up
-        if (recoveryStrategy === 'firstUp' && (statusConfig.ping.summary?.up ?? 0) > 0) {
+        if (recoveryStrategy === 'firstUp' && (statusConfig.latestPing.summary?.up ?? 0) > 0) {
           return;
         }
 
@@ -396,8 +394,8 @@ export class StatusRuleExecutor {
             statusConfig,
             downThreshold,
             useLatestChecks,
-            locationNames: [statusConfig.ping.observer.geo?.name!],
-            locationIds: [statusConfig.ping.observer.name!],
+            locationNames: [statusConfig.latestPing.observer.geo?.name!],
+            locationIds: [statusConfig.latestPing.observer.name!],
           });
         }
       });
@@ -408,7 +406,7 @@ export class StatusRuleExecutor {
         // If recoveryStrategy is 'firstUp', we only consider configs that are not up
         const configs =
           recoveryStrategy === 'firstUp'
-            ? locationConfigs.filter((c) => (c.ping.summary?.up ?? 0) === 0)
+            ? locationConfigs.filter((c) => (c.latestPing.summary?.up ?? 0) === 0)
             : locationConfigs;
 
         if (!configs.length) {
@@ -434,8 +432,8 @@ export class StatusRuleExecutor {
             statusConfig: configs[0],
             downThreshold,
             useLatestChecks,
-            locationNames: configs.map((c) => c.ping.observer.geo?.name!),
-            locationIds: configs.map((c) => c.ping.observer.name!),
+            locationNames: configs.map((c) => c.latestPing.observer.geo?.name!),
+            locationIds: configs.map((c) => c.latestPing.observer.name!),
           });
         }
       }
@@ -443,7 +441,7 @@ export class StatusRuleExecutor {
   };
 
   getMonitorDownSummary({ statusConfig }: { statusConfig: AlertStatusMetaData }) {
-    const { ping, configId, locationId, checks } = statusConfig;
+    const { latestPing: ping, configId, locationId, checks } = statusConfig;
 
     return getMonitorSummary({
       monitorInfo: ping,
@@ -473,11 +471,11 @@ export class StatusRuleExecutor {
 
   getUngroupedDownSummary({ statusConfigs }: { statusConfigs: AlertStatusMetaData[] }) {
     const sampleConfig = statusConfigs[0];
-    const { ping, configId, checks } = sampleConfig;
+    const { latestPing: ping, configId, checks } = sampleConfig;
     const baseSummary = getMonitorSummary({
       monitorInfo: ping,
       reason: 'down',
-      locationId: statusConfigs.map((c) => c.ping.observer.name!),
+      locationId: statusConfigs.map((c) => c.latestPing.observer.name!),
       configId,
       dateFormat: this.dateFormat!,
       tz: this.tz!,
@@ -492,7 +490,7 @@ export class StatusRuleExecutor {
     });
     if (statusConfigs.length > 1) {
       baseSummary.locationNames = statusConfigs
-        .map((c) => c.ping.observer.geo?.name!)
+        .map((c) => c.latestPing.observer.geo?.name!)
         .join(` ${AND_LABEL} `);
     }
 
@@ -565,6 +563,16 @@ export class StatusRuleExecutor {
       });
     }
 
+    const grouping: Record<string, unknown> = {
+      monitor: { id: monitorSummary.monitorId, config_id: monitorSummary.configId },
+    };
+    if (locationIds.length === 1) {
+      grouping.location = { id: locationIds[0] };
+    }
+    if (monitorSummary.serviceName) {
+      grouping.service = { name: monitorSummary.serviceName };
+    }
+
     const context = {
       ...monitorSummary,
       idWithLocation,
@@ -574,6 +582,7 @@ export class StatusRuleExecutor {
         : '',
       [VIEW_IN_APP_URL]: getViewInAppUrl(basePath, spaceId, relativeViewInAppUrl),
       [ALERT_DETAILS_URL]: getAlertDetailsUrl(basePath, spaceId, alertUuid),
+      grouping,
     };
 
     // downThreshold and checks are only available for down alerts
@@ -590,7 +599,8 @@ export class StatusRuleExecutor {
       locationNames,
       locationIds,
       useLatestChecks,
-      'downThreshold' in params ? params.downThreshold : 1
+      'downThreshold' in params ? params.downThreshold : 1,
+      grouping
     );
 
     alertsClient.setAlertData({

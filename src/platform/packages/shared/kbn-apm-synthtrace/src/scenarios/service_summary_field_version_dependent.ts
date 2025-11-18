@@ -7,13 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ApmFields, ApmSynthtracePipelineSchema, apm } from '@kbn/apm-synthtrace-client';
+/**
+ * Generates APM data that is dependent on the Elasticsearch version for service summary fields.
+ */
+
+import type { ApmFields } from '@kbn/apm-synthtrace-client';
+import { ApmSynthtracePipelineSchema, apm } from '@kbn/apm-synthtrace-client';
 import { random } from 'lodash';
 import semver from 'semver';
-import { Scenario } from '../cli/scenario';
+import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
-import { RunOptions } from '../cli/utils/parse_run_cli_flags';
-import { Logger } from '../lib/utils/create_logger';
+import type { RunOptions } from '../cli/utils/parse_run_cli_flags';
+import type { Logger } from '../lib/utils/create_logger';
 
 const scenario: Scenario<ApmFields> = async ({
   logger,

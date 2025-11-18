@@ -18,7 +18,6 @@ import { KIBANA_SOLUTIONS } from '@kbn/projects-solutions-groups';
  */
 export const IGNORE_FILE_GLOBS = [
   '.node-version',
-  'sonar-project.properties',
   '.github/**/*',
   'docs/**/*',
   '**/bin/**/*',
@@ -73,10 +72,6 @@ export const IGNORE_FILE_GLOBS = [
   'x-pack/platform/plugins/shared/maps/server/fonts/**/*',
 
   'x-pack/solutions/observability/plugins/profiling/Makefile',
-
-  // Bazel default files
-  '**/WORKSPACE.bazel',
-  '**/BUILD.bazel',
 
   // Buildkite
   '.buildkite/**/*',

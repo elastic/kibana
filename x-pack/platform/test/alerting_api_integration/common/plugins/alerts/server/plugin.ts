@@ -30,7 +30,6 @@ import type { IEventLogClientService, IEventLogService } from '@kbn/event-log-pl
 import type { NotificationsPluginStart } from '@kbn/notifications-plugin/server';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
-import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import { defineRoutes } from './routes';
 import { defineActionTypes } from './action_types';
 import { defineRuleTypes } from './rule_types';
@@ -82,6 +81,7 @@ const testRuleTypes = [
   'test.severity',
   'test.dangerouslyCreateAlertsInAllSpaces',
   'test.persistenceDangerouslyCreateAlertsInAllSpaces',
+  'test.internal-rule-type',
 ];
 
 const testAlertingFeatures = testRuleTypes.map((ruleTypeId) => ({
@@ -115,7 +115,6 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       app: ['alerts', 'kibana'],
       category: { id: 'foo', label: 'foo' },
       alerting: testAlertingFeatures,
-      scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
       privileges: {
         all: {
           app: ['alerts', 'kibana'],
@@ -144,6 +143,44 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
           ui: [],
         },
       },
+      subFeatures: [
+        {
+          name: 'Manual run',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  name: 'Manual run',
+                  id: 'manual_run',
+                  includeIn: 'all',
+                  savedObject: { all: [], read: [] },
+                  alerting: { rule: { manual_run: testAlertingFeatures } },
+                  ui: [],
+                },
+              ],
+            },
+          ],
+        },
+        {
+          name: 'Enable and disable rules',
+          privilegeGroups: [
+            {
+              groupType: 'independent',
+              privileges: [
+                {
+                  name: 'Enable and disable rules',
+                  id: 'enable_disable',
+                  includeIn: 'all',
+                  savedObject: { all: [], read: [] },
+                  alerting: { rule: { enable: testAlertingFeatures } },
+                  ui: [],
+                },
+              ],
+            },
+          ],
+        },
+      ],
     });
 
     defineActionTypes(core, { actions });

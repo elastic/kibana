@@ -12,9 +12,9 @@ import type { ConnectionRequestParams } from '@elastic/transport';
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { AbstractDataView } from '@kbn/data-views-plugin/common';
-import { Observable } from 'rxjs';
-import { IEsSearchRequest, IEsSearchResponse } from './es_search_types';
-import { IKibanaSearchRequest, IKibanaSearchResponse } from './kibana_search_types';
+import type { Observable } from 'rxjs';
+import type { IEsSearchRequest, IEsSearchResponse } from './es_search_types';
+import type { IKibanaSearchRequest, IKibanaSearchResponse } from './kibana_search_types';
 
 export type ISearchGeneric = <
   SearchStrategyRequest extends IKibanaSearchRequest = IEsSearchRequest,
@@ -119,6 +119,11 @@ export interface ISearchOptions {
    * When set es results are streamed back to the caller without any parsing of the content.
    */
   stream?: boolean;
+
+  /**
+   * A hash of the request params. This is attached automatically by the search interceptor. It is used to link this request with a search session.
+   */
+  requestHash?: string;
 }
 
 /**

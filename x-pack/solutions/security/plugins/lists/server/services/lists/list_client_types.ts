@@ -31,7 +31,7 @@ import type {
   _VersionOrUndefined,
 } from '@kbn/securitysolution-io-ts-list-types';
 import type { Version, VersionOrUndefined } from '@kbn/securitysolution-io-ts-types';
-import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 
 import type { ConfigType } from '../../config';
 

@@ -7,19 +7,14 @@
 
 import * as Gemini from '@google/generative-ai';
 import { defer, map } from 'rxjs';
-import {
-  Message,
-  MessageRole,
-  ToolChoiceType,
-  ToolOptions,
-  ToolSchema,
-  ToolSchemaType,
-} from '@kbn/inference-common';
+import type { Message, ToolOptions, ToolSchema, ToolSchemaType } from '@kbn/inference-common';
+import { MessageRole, ToolChoiceType } from '@kbn/inference-common';
 import type { InferenceConnectorAdapter } from '../../types';
 import { handleConnectorResponse } from '../../utils';
 import { eventSourceStreamIntoObservable } from '../../../util/event_source_stream_into_observable';
 import { processVertexStream } from './process_vertex_stream';
 import type { GenerateContentResponseChunk, GeminiMessage, GeminiToolConfig } from './types';
+import { getTemperatureIfValid } from '../../utils/get_temperature';
 
 export const geminiAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
@@ -33,6 +28,7 @@ export const geminiAdapter: InferenceConnectorAdapter = {
     abortSignal,
     metadata,
   }) => {
+    const connector = executor.getConnector();
     return defer(() => {
       return executor.invoke({
         subAction: 'invokeStream',
@@ -41,7 +37,7 @@ export const geminiAdapter: InferenceConnectorAdapter = {
           systemInstruction: system,
           tools: toolsToGemini(tools),
           toolConfig: toolChoiceToConfig(toolChoice),
-          temperature,
+          ...getTemperatureIfValid(temperature, { connector, modelName }),
           model: modelName,
           signal: abortSignal,
           stopSequences: ['\n\nHuman:'],
@@ -116,7 +112,7 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
         return {
           type: Gemini.SchemaType.ARRAY,
           description: def.description,
-          items: convertSchemaType({ def: def.items }) as Gemini.FunctionDeclarationSchema,
+          items: convertSchemaType({ def: def.items }),
         };
       case 'object':
         return {
@@ -124,33 +120,33 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
           description: def.description,
           required: def.required as string[],
           properties: def.properties
-            ? Object.entries(def.properties).reduce<
-                Record<string, Gemini.FunctionDeclarationSchema>
-              >((properties, [key, prop]) => {
-                properties[key] = convertSchemaType({
-                  def: prop,
-                }) as Gemini.FunctionDeclarationSchema;
-                return properties;
-              }, {})
-            : undefined,
+            ? Object.entries(def.properties).reduce<Record<string, Gemini.Schema>>(
+                (properties, [key, prop]) => {
+                  properties[key] = convertSchemaType({
+                    def: prop,
+                  }) as Gemini.Schema;
+                  return properties;
+                },
+                {}
+              )
+            : {},
         };
       case 'string':
         return {
           type: Gemini.SchemaType.STRING,
+          format: 'enum',
           description: def.description,
-          enum: def.enum ? (def.enum as string[]) : def.const ? [def.const] : undefined,
+          enum: def.enum ? (def.enum as string[]) : def.const ? [def.const] : [],
         };
       case 'boolean':
         return {
           type: Gemini.SchemaType.BOOLEAN,
           description: def.description,
-          enum: def.enum ? (def.enum as string[]) : def.const ? [def.const] : undefined,
         };
       case 'number':
         return {
           type: Gemini.SchemaType.NUMBER,
           description: def.description,
-          enum: def.enum ? (def.enum as string[]) : def.const ? [def.const] : undefined,
         };
     }
   };
@@ -234,9 +230,10 @@ function messageToGeminiMapper() {
               functionResponse: {
                 name: message.toolCallId,
                 // gemini expects a structured response shape, making sure we're not sending a string
-                response: (typeof message.response === 'string'
-                  ? { response: message.response }
-                  : (message.response as string)) as object,
+                response:
+                  typeof message.response === 'string'
+                    ? { response: message.response }
+                    : message.response,
               },
             },
           ],

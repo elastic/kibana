@@ -8,7 +8,7 @@
  */
 
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import { ExpressionFunctionIpPrefix, IpPrefix } from './ip_prefix';
+import type { ExpressionFunctionIpPrefix, IpPrefix } from './ip_prefix';
 
 export const ipPrefixToAst = (ipPrefix: IpPrefix) => {
   return buildExpression([

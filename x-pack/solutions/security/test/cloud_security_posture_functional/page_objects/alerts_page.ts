@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrService } from '@kbn/test-suites-xpack/functional/ftr_provider_context';
+import { FtrService } from '@kbn/test-suites-xpack-platform/functional/ftr_provider_context';
 import { testSubjectIds } from '../constants/test_subject_ids';
 
 const {
@@ -17,6 +17,7 @@ const {
   VISUALIZATIONS_SECTION_CONTENT_TEST_ID,
   GRAPH_PREVIEW_CONTENT_TEST_ID,
   GRAPH_PREVIEW_LOADING_TEST_ID,
+  GROUPED_ITEM_TEST_ID,
 } = testSubjectIds;
 
 export class AlertsPageObject extends FtrService {
@@ -115,11 +116,20 @@ export class AlertsPageObject extends FtrService {
       await this.testSubjects.missingOrFail(GRAPH_PREVIEW_LOADING_TEST_ID, { timeout: 10000 });
     },
 
-    assertPreviewPanelIsOpen: async (type: 'alert' | 'event') => {
+    assertPreviewPanelIsOpen: async (type: 'alert' | 'event' | 'group') => {
       await this.testSubjects.existOrFail(PREVIEW_SECTION_TEST_ID, { timeout: 10000 });
       expect(await this.testSubjects.getVisibleText(PREVIEW_SECTION_HEADER_TEST_ID)).to.be(
-        type === 'alert' ? 'Preview alert details' : 'Preview event details'
+        type === 'alert'
+          ? 'Preview alert details'
+          : type === 'event'
+          ? 'Preview event details'
+          : 'Grouped entities panel'
       );
+    },
+    assertPreviewPanelGroupedItemsNumber: async (expected: number) => {
+      await this.testSubjects.existOrFail(PREVIEW_SECTION_TEST_ID, { timeout: 10000 });
+      const groupedItems = await this.testSubjects.findAll(GROUPED_ITEM_TEST_ID);
+      expect(groupedItems.length).to.be(expected);
     },
   };
 }

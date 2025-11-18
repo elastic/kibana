@@ -12,7 +12,7 @@ import type {
   PersistableStateAttachmentType,
   PersistableStateAttachmentViewProps,
 } from '@kbn/cases-plugin/public/client/attachment_framework/types';
-import { EmbeddableComponentProps, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type { EmbeddableComponentProps, TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
 const getLazyComponent = (
   EmbeddableComponent: React.ComponentType<EmbeddableComponentProps>

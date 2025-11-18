@@ -5,11 +5,12 @@
  * 2.0.
  */
 
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiAvatar,
   EuiBadge,
-  EuiBasicTableColumn,
   EuiIcon,
+  EuiIconTip,
   EuiText,
   EuiLoadingSpinner,
   EuiToolTip,
@@ -17,13 +18,10 @@ import {
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
 import { FormattedDate } from '@kbn/i18n-react';
-import {
-  DocumentEntryType,
-  IndexEntryType,
-  KnowledgeBaseEntryResponse,
-} from '@kbn/elastic-assistant-common';
-import { UserProfileAvatarData } from '@kbn/user-profile-components';
-import { useQuery } from '@tanstack/react-query';
+import type { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common';
+import { DocumentEntryType, IndexEntryType } from '@kbn/elastic-assistant-common';
+import type { UserProfileAvatarData } from '@kbn/user-profile-components';
+import { useQuery } from '@kbn/react-query';
 import { useAssistantContext } from '../../..';
 import * as i18n from './translations';
 import { BadgesColumn } from '../../assistant/common/components/assistant_settings_management/badges';
@@ -115,19 +113,18 @@ const NameColumn = ({
     <>
       <EuiText size={'s'}>{entry.name}</EuiText>
       {showMissingIndexWarning && (
-        <EuiToolTip
+        <EuiIconTip
           data-test-subj="missing-index-tooltip"
           content={i18n.MISSING_INDEX_TOOLTIP_CONTENT}
-        >
-          <EuiIcon
-            data-test-subj="missing-index-icon"
-            type="warning"
-            color="danger"
-            css={css`
-              margin-left: 10px;
-            `}
-          />
-        </EuiToolTip>
+          type="warning"
+          color="danger"
+          css={css`
+            margin-left: 10px;
+          `}
+          iconProps={{
+            'data-test-subj': 'missing-index-icon',
+          }}
+        />
       )}
     </>
   );

@@ -10,9 +10,17 @@ import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import { useAppToastsMock } from '../../../../../common/hooks/use_app_toasts.mock';
 import { renderQuery } from '../../../../../management/hooks/test_utils';
 import { findAttackDiscoverySchedule } from '../api';
+import type { FindAttackDiscoverySchedulesResponse } from '@kbn/elastic-assistant-common';
 
 jest.mock('../api');
 jest.mock('../../../../../common/hooks/use_app_toasts');
+
+const mockUseKibanaFeatureFlags = jest
+  .fn()
+  .mockReturnValue({ attackDiscoveryPublicApiEnabled: false });
+jest.mock('../../../use_kibana_feature_flags', () => ({
+  useKibanaFeatureFlags: () => mockUseKibanaFeatureFlags(),
+}));
 
 const findAttackDiscoveryScheduleMock = findAttackDiscoverySchedule as jest.MockedFunction<
   typeof findAttackDiscoverySchedule
@@ -27,15 +35,41 @@ describe('useFindAttackDiscoverySchedules', () => {
     appToastsMock = useAppToastsMock.create();
     (useAppToasts as jest.Mock).mockReturnValue(appToastsMock);
 
-    findAttackDiscoveryScheduleMock.mockReturnValue(
-      {} as unknown as jest.Mocked<ReturnType<typeof findAttackDiscoverySchedule>>
-    );
+    // Mock data in camelCase format (internal API format)
+    findAttackDiscoveryScheduleMock.mockResolvedValue({
+      data: [
+        {
+          id: 'schedule-1',
+          name: 'Test Schedule',
+          createdBy: 'test-user',
+          updatedBy: 'test-user',
+          createdAt: '2024-01-01T00:00:00Z',
+          updatedAt: '2024-01-01T00:00:00Z',
+          enabled: true,
+          params: {
+            alertsIndexPattern: 'test-*',
+            apiConfig: {
+              name: 'test-config',
+              actionTypeId: 'test-action',
+              connectorId: 'test-connector',
+            },
+            size: 100,
+            query: { query: '*', language: 'kuery' },
+            filters: [],
+          },
+          schedule: { interval: '1h' },
+          actions: [],
+        },
+      ],
+      total: 1,
+    } as unknown as FindAttackDiscoverySchedulesResponse);
   });
 
   it('should invoke `findAttackDiscoverySchedule`', async () => {
     await renderQuery(() => useFindAttackDiscoverySchedules({ page: 1 }), 'isSuccess');
 
     expect(findAttackDiscoveryScheduleMock).toHaveBeenCalledWith({
+      attackDiscoveryPublicApiEnabled: false,
       page: 1,
       signal: expect.anything(),
     });

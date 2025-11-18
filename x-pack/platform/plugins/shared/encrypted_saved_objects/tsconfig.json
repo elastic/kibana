@@ -1,9 +1,12 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["server/**/*"],
+  "include": [
+    "server/**/*",
+    "integration_tests/**/*"
+  ],
   "kbn_references": [
     "@kbn/security-plugin",
     "@kbn/config-schema",
@@ -17,6 +20,10 @@
     "@kbn/config",
     "@kbn/encrypted-saved-objects-shared",
     "@kbn/core-saved-objects-utils-server",
+    "@kbn/core-saved-objects-api-server-internal",
+    "@kbn/core-root-server-internal",
+    "@kbn/core-test-helpers-kbn-server",
+    "@kbn/core-test-helpers-so-type-serializer",
   ],
   "exclude": [
     "target/**/*",

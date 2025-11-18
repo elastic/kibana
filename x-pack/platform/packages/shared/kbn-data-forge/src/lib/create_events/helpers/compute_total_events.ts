@@ -6,8 +6,9 @@
  */
 
 import { isNumber } from 'lodash';
-import { ToolingLog } from '@kbn/tooling-log';
-import { Config, EventsPerCycleTransitionDefRT, ParsedSchedule } from '../../../types';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { Config, ParsedSchedule } from '../../../types';
+import { EventsPerCycleTransitionDefRT } from '../../../types';
 import {
   createExponentialFunction,
   createLinearFunction,

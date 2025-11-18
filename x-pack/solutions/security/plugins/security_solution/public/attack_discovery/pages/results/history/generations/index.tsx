@@ -6,10 +6,7 @@
  */
 
 import type { AIConnector } from '@kbn/elastic-assistant';
-import type {
-  GenerationInterval,
-  GetAttackDiscoveryGenerationsResponse,
-} from '@kbn/elastic-assistant-common';
+import type { GetAttackDiscoveryGenerationsResponse } from '@kbn/elastic-assistant-common';
 import { EuiSpacer } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
@@ -18,8 +15,6 @@ import { getConnectorNameFromId } from '../../../utils/get_connector_name_from_i
 import { LoadingCallout } from '../../../loading_callout';
 
 const N_LATEST_NON_DISMISSED_GENERATIONS = 5; // show only the latest n non-dismissed generations
-
-const EMPTY_INTERVALS: GenerationInterval[] = [];
 
 interface Props {
   aiConnectors: AIConnector[] | undefined;
@@ -66,7 +61,6 @@ const GenerationsComponent: React.FC<Props> = ({
                 averageSuccessfulDurationNanoseconds={
                   connectorStats?.average_successful_duration_nanoseconds
                 }
-                connectorIntervals={EMPTY_INTERVALS}
                 connectorName={getConnectorNameFromId({
                   aiConnectors,
                   connectorId,

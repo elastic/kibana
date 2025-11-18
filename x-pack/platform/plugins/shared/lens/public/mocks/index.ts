@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { DragContextState, DragContextValue } from '@kbn/dom-drag-drop';
-import { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type { DragContextState, DragContextValue } from '@kbn/dom-drag-drop';
+import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
+import type { FramePublicAPI } from '@kbn/lens-common';
 import { createMockDataViewsState } from '../data_views_service/mocks';
-import { FramePublicAPI } from '../types';
 export { mockDataPlugin } from './data_plugin_mock';
 export {
   visualizationMap,

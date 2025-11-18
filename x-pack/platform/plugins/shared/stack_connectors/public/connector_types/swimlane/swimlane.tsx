@@ -11,7 +11,8 @@ import type {
   ActionTypeModel as ConnectorTypeModel,
   GenericValidationResult,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { SwimlaneConfig, SwimlaneSecrets, SwimlaneActionParams } from './types';
+import { CONNECTOR_ID } from '@kbn/connector-schemas/swimlane/constants';
+import type { SwimlaneConfig, SwimlaneSecrets, SwimlaneActionParams } from './types';
 
 export const SW_SELECT_MESSAGE_TEXT = i18n.translate(
   'xpack.stackConnectors.components.swimlane.selectMessageText',
@@ -33,7 +34,7 @@ export function getConnectorType(): ConnectorTypeModel<
   SwimlaneActionParams
 > {
   return {
-    id: '.swimlane',
+    id: CONNECTOR_ID,
     iconClass: lazy(() => import('./logo')),
     selectMessage: SW_SELECT_MESSAGE_TEXT,
     actionTypeTitle: SW_ACTION_TYPE_TITLE,

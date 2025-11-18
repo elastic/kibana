@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import {
+import type { TypeOf } from '@kbn/config-schema';
+import type {
   chainingSchema,
   controlsGroupSchema,
   labelPositionSchema,
   ignoreParentSettingsSchema,
 } from './controls_group_schema';
-import { controlSchema, controlWidthSchema } from './control_schema';
+import type { controlSchema, controlWidthSchema } from './control_schema';
 
 export type ControlsGroupState = TypeOf<typeof controlsGroupSchema>;
 

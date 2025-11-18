@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { NonEmptyTimestamp, NonEmptyString, User } from '../common_attributes.gen';
+import { NonEmptyString, User, NonEmptyTimestamp } from '../common_attributes.gen';
 
 /**
  * Trace Data
@@ -32,6 +32,175 @@ export const TraceData = z.object({
    */
   traceId: z.string().optional(),
 });
+
+/**
+ * The type of interrupt
+ */
+export type InterruptType = z.infer<typeof InterruptType>;
+export const InterruptType = z.enum(['SELECT_OPTION', 'INPUT_TEXT']);
+export type InterruptTypeEnum = typeof InterruptType.enum;
+export const InterruptTypeEnum = InterruptType.enum;
+
+/**
+ * The basis of an agent interrupt
+ */
+export type BaseInterruptValue = z.infer<typeof BaseInterruptValue>;
+export const BaseInterruptValue = z.object({
+  /**
+   * Type of the interrupt
+   */
+  type: InterruptType,
+  /**
+   * Whether the interrupt has expired and can no longer be resumed.
+   */
+  expired: z.boolean().optional(),
+  /**
+   * Thread ID of the graph execution that produced this message.
+   */
+  threadId: z.string(),
+});
+
+/**
+ * The basis of an interrupt resume value
+ */
+export type BaseInterruptResumeValue = z.infer<typeof BaseInterruptResumeValue>;
+export const BaseInterruptResumeValue = z.object({
+  /**
+   * Type of the resume value
+   */
+  type: InterruptType,
+});
+
+/**
+ * A request approval option
+ */
+export type SelectOptionInterruptOption = z.infer<typeof SelectOptionInterruptOption>;
+export const SelectOptionInterruptOption = z.object({
+  label: z.string(),
+  value: z.string(),
+  buttonColor: z
+    .enum([
+      'text',
+      'accent',
+      'accentSecondary',
+      'primary',
+      'success',
+      'warning',
+      'danger',
+      'neutral',
+      'risk',
+    ])
+    .optional(),
+});
+
+/**
+ * Interrupt that requests user to select one of the provided options
+ */
+export type SelectOptionInterruptValue = z.infer<typeof SelectOptionInterruptValue>;
+export const SelectOptionInterruptValue = BaseInterruptValue.merge(
+  z.object({
+    type: z.literal('SELECT_OPTION'),
+    /**
+     * Description of action required
+     */
+    description: z.string(),
+    /**
+     * List of actions to choose from
+     */
+    options: z.array(SelectOptionInterruptOption),
+  })
+);
+
+/**
+ * A request approval resume schema
+ */
+export type SelectOptionInterruptResumeValue = z.infer<typeof SelectOptionInterruptResumeValue>;
+export const SelectOptionInterruptResumeValue = BaseInterruptResumeValue.merge(
+  z.object({
+    type: z.literal('SELECT_OPTION'),
+    /**
+     * The value of the selected option to resume the graph execution with
+     */
+    value: z.string(),
+  })
+);
+
+/**
+ * A request approval interrupt
+ */
+export type SelectOptionInterrupt = z.infer<typeof SelectOptionInterrupt>;
+export const SelectOptionInterrupt = z.object({
+  /**
+   * The interrupt value
+   */
+  interruptValue: SelectOptionInterruptValue,
+  /**
+   * The resume value
+   */
+  resumeValue: SelectOptionInterruptResumeValue,
+});
+
+/**
+ * Interrupt that requests user to provide text input
+ */
+export type InputTextInterruptValue = z.infer<typeof InputTextInterruptValue>;
+export const InputTextInterruptValue = BaseInterruptValue.merge(
+  z.object({
+    type: z.literal('INPUT_TEXT'),
+    /**
+     * Description of action required
+     */
+    description: z.string().optional(),
+    /**
+     * Placeholder text for the input field
+     */
+    placeholder: z.string().optional(),
+  })
+);
+
+/**
+ * A resume value for input text
+ */
+export type InputTextInterruptResumeValue = z.infer<typeof InputTextInterruptResumeValue>;
+export const InputTextInterruptResumeValue = BaseInterruptResumeValue.merge(
+  z.object({
+    type: z.literal('INPUT_TEXT'),
+    /**
+     * Text value used to resume the graph execution with.
+     */
+    value: z.string(),
+  })
+);
+
+/**
+ * A request text interrupt
+ */
+export type InputTextInterrupt = z.infer<typeof InputTextInterrupt>;
+export const InputTextInterrupt = z.object({
+  /**
+   * The interrupt value
+   */
+  interruptValue: InputTextInterruptValue,
+  /**
+   * The resume value
+   */
+  resumeValue: InputTextInterruptResumeValue,
+});
+
+/**
+ * Union of the interrupt values
+ */
+export type InterruptValue = z.infer<typeof InterruptValue>;
+export const InterruptValue = z.union([SelectOptionInterruptValue, InputTextInterruptValue]);
+
+/**
+ * Union of the interrupt resume values
+ */
+export type InterruptResumeValue = z.infer<typeof InterruptResumeValue>;
+export const InterruptResumeValue = z.union([
+  SelectOptionInterruptResumeValue,
+  InputTextInterruptResumeValue,
+]);
 
 /**
  * The basis of a content reference
@@ -196,6 +365,14 @@ export const MessageMetadata = z.object({
    * Data referred to by the message content.
    */
   contentReferences: ContentReferences.optional(),
+  /**
+   * When the agent is interrupted (for example, when user input is required), this field is populated with the details of the interrupt. Messages containing interruptValues in the metadata are excluded from the LLM context.
+   */
+  interruptValue: InterruptValue.optional(),
+  /**
+   * When the agent is resumed after an interrupt, this field is populated with the details of the resume value.
+   */
+  interruptResumeValue: InterruptResumeValue.optional(),
 });
 
 /**
@@ -232,18 +409,14 @@ export type ConversationCategoryEnum = typeof ConversationCategory.enum;
 export const ConversationCategoryEnum = ConversationCategory.enum;
 
 /**
- * The conversation confidence.
- */
-export type ConversationConfidence = z.infer<typeof ConversationConfidence>;
-export const ConversationConfidence = z.enum(['low', 'medium', 'high']);
-export type ConversationConfidenceEnum = typeof ConversationConfidence.enum;
-export const ConversationConfidenceEnum = ConversationConfidence.enum;
-
-/**
  * AI assistant conversation message.
  */
 export type Message = z.infer<typeof Message>;
 export const Message = z.object({
+  /**
+   * Message id
+   */
+  id: NonEmptyString.optional(),
   /**
    * Message content.
    */
@@ -256,6 +429,10 @@ export const Message = z.object({
    * Message role.
    */
   role: MessageRole,
+  /**
+   * The user who sent the message.
+   */
+  user: User.optional(),
   /**
    * The timestamp message was sent or received.
    */
@@ -298,26 +475,6 @@ export const ApiConfig = z.object({
   model: z.string().optional(),
 });
 
-export type ConversationSummary = z.infer<typeof ConversationSummary>;
-export const ConversationSummary = z.object({
-  /**
-   * Summary text of the conversation over time.
-   */
-  content: z.string().optional(),
-  /**
-   * The timestamp summary was updated.
-   */
-  timestamp: NonEmptyTimestamp.optional(),
-  /**
-   * Define if summary is marked as publicly available.
-   */
-  public: z.boolean().optional(),
-  /**
-   * How confident you are about this being a correct and useful learning.
-   */
-  confidence: ConversationConfidence.optional(),
-});
-
 export type ErrorSchema = z.infer<typeof ErrorSchema>;
 export const ErrorSchema = z
   .object({
@@ -340,7 +497,6 @@ export const ConversationResponse = z.object({
    * The conversation category.
    */
   category: ConversationCategory,
-  summary: ConversationSummary.optional(),
   timestamp: NonEmptyTimestamp.optional(),
   /**
    * The last time conversation was updated.
@@ -351,6 +507,10 @@ export const ConversationResponse = z.object({
    */
   createdAt: z.string(),
   replacements: Replacements.optional(),
+  /**
+   * The user who created the conversation.
+   */
+  createdBy: User,
   users: z.array(User),
   /**
    * The conversation messages.
@@ -389,12 +549,12 @@ export const ConversationUpdateProps = z.object({
    * LLM API configuration.
    */
   apiConfig: ApiConfig.optional(),
-  summary: ConversationSummary.optional(),
   /**
    * Exclude from last conversation storage.
    */
   excludeFromLastConversationStorage: z.boolean().optional(),
   replacements: Replacements.optional(),
+  users: z.array(User).optional(),
 });
 
 export type ConversationCreateProps = z.infer<typeof ConversationCreateProps>;

@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const TEST_PIPELINE_NAME = 'test_pipeline';
 
@@ -52,8 +52,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        // Delete the test pipeline
-        await es.ingest.deletePipeline({ id: TEST_PIPELINE_NAME });
+        const pipeline = await es.ingest.getPipeline({ id: TEST_PIPELINE_NAME });
+
+        // Only if the pipeline exists after all runs, we delete it
+        if (pipeline) {
+          await es.ingest.deletePipeline({ id: TEST_PIPELINE_NAME });
+        }
       });
 
       it('Displays the test pipeline in the list of pipelines', async () => {

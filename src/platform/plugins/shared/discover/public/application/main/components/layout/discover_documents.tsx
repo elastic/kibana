@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { memo, useCallback, useMemo, useRef } from 'react';
+import React, { memo, useCallback, useMemo, useRef, useState } from 'react';
 import {
   EuiFlexItem,
   EuiLoadingSpinner,
@@ -18,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SortOrder } from '@kbn/saved-search-plugin/public';
 import { CellActionsProvider } from '@kbn/cell-actions';
@@ -62,7 +63,6 @@ import {
   getAllowedSampleSize,
 } from '../../../../utils/get_allowed_sample_size';
 import { DiscoverGridFlyout } from '../../../../components/discover_grid_flyout';
-import { useSavedSearchInitial } from '../../state_management/discover_state_provider';
 import { useFetchMoreRecords } from './use_fetch_more_records';
 import { SelectedVSAvailableCallout } from './selected_vs_available_callout';
 import { useDiscoverCustomization } from '../../../../customizations';
@@ -91,7 +91,7 @@ export const onResize = (
   colSettings: { columnId: string; width: number | undefined },
   stateContainer: DiscoverStateContainer
 ) => {
-  const state = stateContainer.appState.getState();
+  const state = stateContainer.appState.get();
   const newGrid = onResizeGridColumn(colSettings, state.grid);
   stateContainer.appState.update({ grid: newGrid });
 };
@@ -107,13 +107,17 @@ function DiscoverDocumentsComponent({
   dataView: DataView;
   onAddFilter?: DocViewFilterFn;
   stateContainer: DiscoverStateContainer;
-  onFieldEdited?: () => void;
+  onFieldEdited?: (options: { editedDataView: DataView }) => void;
 }) {
+  const [isDataGridFullScreen, setIsDataGridFullScreen] = useState(false);
+  const styles = useMemoCss(componentStyles);
   const services = useDiscoverServices();
   const { scopedEBTManager } = useScopedServices();
   const dispatch = useInternalStateDispatch();
   const documents$ = stateContainer.dataState.data$.documents$;
-  const savedSearch = useSavedSearchInitial();
+  const persistedDiscoverSession = useInternalStateSelector(
+    (state) => state.persistedDiscoverSession
+  );
   const { dataViews, capabilities, uiSettings, uiActions, fieldsMetadata } = services;
   const requestParams = useCurrentTabSelector((state) => state.dataRequestParams);
   const [
@@ -307,7 +311,7 @@ function DiscoverDocumentsComponent({
         // if default columns are used, dont make them part of the URL - the context state handling will take care to restore them
         columns={displayedColumns}
         columnsMeta={customColumnsMeta}
-        savedSearchId={savedSearch.id}
+        savedSearchId={persistedDiscoverSession?.id}
         onFilter={onAddFilter}
         onRemoveColumn={onRemoveColumnWithTracking}
         onAddColumn={onAddColumnWithTracking}
@@ -320,7 +324,7 @@ function DiscoverDocumentsComponent({
     ),
     [
       dataView,
-      savedSearch.id,
+      persistedDiscoverSession?.id,
       onAddFilter,
       onRemoveColumnWithTracking,
       onAddColumnWithTracking,
@@ -330,20 +334,38 @@ function DiscoverDocumentsComponent({
     ]
   );
 
+  const dataGridUiState = useCurrentTabSelector((state) => state.uiState.dataGrid);
+  const setDataGridUiState = useCurrentTabAction(internalStateActions.setDataGridUiState);
+  const onInitialStateChange = useCallback(
+    (newDataGridUiState: Partial<UnifiedDataTableRestorableState>) => {
+      dispatch(setDataGridUiState({ dataGridUiState: newDataGridUiState }));
+    },
+    [dispatch, setDataGridUiState]
+  );
+
   const configRowHeight = uiSettings.get(ROW_HEIGHT_OPTION);
+  const cellRendererDensity = useMemo(
+    () => density ?? dataGridUiState?.density ?? getDataGridDensity(services.storage, 'discover'),
+    [density, dataGridUiState, services.storage]
+  );
+  const cellRendererRowHeight = useMemo(
+    () =>
+      getRowHeight({
+        storage: services.storage,
+        consumer: 'discover',
+        rowHeightState: rowHeight ?? dataGridUiState?.rowHeight,
+        configRowHeight,
+      }),
+    [rowHeight, dataGridUiState, services.storage, configRowHeight]
+  );
   const cellRendererParams: CellRenderersExtensionParams = useMemo(
     () => ({
       actions: { addFilter: onAddFilter },
       dataView,
-      density: density ?? getDataGridDensity(services.storage, 'discover'),
-      rowHeight: getRowHeight({
-        storage: services.storage,
-        consumer: 'discover',
-        rowHeightState: rowHeight,
-        configRowHeight,
-      }),
+      density: cellRendererDensity,
+      rowHeight: cellRendererRowHeight,
     }),
-    [onAddFilter, dataView, density, services.storage, rowHeight, configRowHeight]
+    [onAddFilter, dataView, cellRendererDensity, cellRendererRowHeight]
   );
 
   const { rowAdditionalLeadingControls } = useDiscoverCustomization('data_table') || {};
@@ -382,13 +404,13 @@ function DiscoverDocumentsComponent({
           css={styles.progress}
         />
       ) : null,
-    [isDataLoading]
+    [isDataLoading, styles.progress]
   );
 
   const renderCustomToolbarWithElements = useMemo(
     () =>
       getRenderCustomToolbarWithElements({
-        leftSide: viewModeToggle,
+        leftSide: isDataGridFullScreen ? undefined : viewModeToggle,
         bottomSection: (
           <>
             {callouts}
@@ -396,15 +418,7 @@ function DiscoverDocumentsComponent({
           </>
         ),
       }),
-    [viewModeToggle, callouts, loadingIndicator]
-  );
-
-  const dataGridUiState = useCurrentTabSelector((state) => state.uiState.dataGrid);
-  const setDataGridUiState = useCurrentTabAction(internalStateActions.setDataGridUiState);
-  const onInitialStateChange = useCallback(
-    (newDataGridUiState: Partial<UnifiedDataTableRestorableState>) =>
-      dispatch(setDataGridUiState({ dataGridUiState: newDataGridUiState })),
-    [dispatch, setDataGridUiState]
+    [viewModeToggle, callouts, loadingIndicator, isDataGridFullScreen]
   );
 
   if (isDataViewLoading || (isEmptyDataResult && isDataLoading)) {
@@ -428,7 +442,7 @@ function DiscoverDocumentsComponent({
           <FormattedMessage id="discover.documentsAriaLabel" defaultMessage="Documents" />
         </h2>
       </EuiScreenReaderOnly>
-      <div className="unifiedDataTable">
+      <div className="unifiedDataTable" css={styles.dataTable}>
         <CellActionsProvider getTriggerCompatibleActions={uiActions.getTriggerCompatibleActions}>
           <DiscoverGridMemoized
             ariaLabelledBy="documentsAriaLabel"
@@ -445,8 +459,8 @@ function DiscoverDocumentsComponent({
             }
             rows={rows}
             sort={(sort as SortOrder[]) || []}
-            searchDescription={savedSearch.description}
-            searchTitle={savedSearch.title}
+            searchDescription={persistedDiscoverSession?.description}
+            searchTitle={persistedDiscoverSession?.title} // TODO: should it be rather a tab label?
             setExpandedDoc={setExpandedDoc}
             showTimeCol={showTimeCol}
             settings={grid}
@@ -487,6 +501,7 @@ function DiscoverDocumentsComponent({
             cellActionsHandling="append"
             initialState={dataGridUiState}
             onInitialStateChange={onInitialStateChange}
+            onFullScreenChange={setIsDataGridFullScreen}
           />
         </CellActionsProvider>
       </div>
@@ -496,7 +511,7 @@ function DiscoverDocumentsComponent({
 
 export const DiscoverDocuments = memo(DiscoverDocumentsComponent);
 
-const styles = {
+const componentStyles = {
   container: css({
     position: 'relative',
     minHeight: 0,
@@ -511,5 +526,11 @@ const styles = {
     textAlign: 'center',
     height: '100%',
     width: '100%',
+  }),
+  dataTable: css({
+    width: '100%',
+    maxWidth: '100%',
+    height: '100%',
+    overflow: 'hidden',
   }),
 };

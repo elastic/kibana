@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ObservabilityStreamsFeatureRenderDeps } from '@kbn/discover-shared-plugin/public';
+import type { ObservabilityStreamsFeatureRenderDeps } from '@kbn/discover-shared-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import React from 'react';
 import type { DiscoverFlyoutStreamFieldProps } from './discover_flyout_stream_field';
-import { DiscoverFlyoutStreamProcessingLinkProps } from './discover_flyout_stream_processing_link';
+import type { DiscoverFlyoutStreamProcessingLinkProps } from './discover_flyout_stream_processing_link';
 
 const DiscoverFlyoutStreamField = dynamic(() =>
   import('./discover_flyout_stream_field').then((m) => ({ default: m.DiscoverFlyoutStreamField }))
@@ -30,7 +30,7 @@ const DiscoverFlyoutStreamProcessingLink = dynamic(() =>
 );
 
 export function createDiscoverFlyoutStreamProcessingLink(
-  services: Omit<DiscoverFlyoutStreamProcessingLinkProps, 'doc'>
+  services: Omit<DiscoverFlyoutStreamProcessingLinkProps, 'doc' | 'dataView'>
 ) {
   return (props: ObservabilityStreamsFeatureRenderDeps) => (
     <DiscoverFlyoutStreamProcessingLink {...services} {...props} />

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FindSLODefinitionsResponse } from '@kbn/slo-schema';
-import { useQuery } from '@tanstack/react-query';
+import type { FindSLODefinitionsResponse } from '@kbn/slo-schema';
+import { useQuery } from '@kbn/react-query';
 import { sloKeys } from './query_key_factory';
 import { usePluginContext } from './use_plugin_context';
 
@@ -24,6 +24,7 @@ interface SLODefinitionParams {
   tags?: string[];
   page?: number;
   perPage?: number;
+  includeHealth?: boolean;
 }
 
 export function useFetchSloDefinitions({
@@ -32,6 +33,7 @@ export function useFetchSloDefinitions({
   tags = [],
   page = 1,
   perPage = 100,
+  includeHealth = false,
 }: SLODefinitionParams): UseFetchSloDefinitionsResponse {
   const { sloClient } = usePluginContext();
   const search = name.endsWith('*') ? name : `${name}*`;
@@ -46,6 +48,7 @@ export function useFetchSloDefinitions({
             query: {
               ...(search !== undefined && { search }),
               ...(!!includeOutdatedOnly && { includeOutdatedOnly }),
+              ...(!!includeHealth && { includeHealth }),
               ...(validTags?.length && { tags: validTags }),
               ...(page !== undefined && { page: String(page) }),
               ...(perPage !== undefined && { perPage: String(perPage) }),

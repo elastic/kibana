@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactNode, ReactElement } from 'react';
+import type { ReactNode, ReactElement } from 'react';
+import React from 'react';
 import { EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 

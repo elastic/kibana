@@ -141,7 +141,7 @@ describe('Stack Connectors Plugin', () => {
           name: 'Torq',
         })
       );
-      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(13);
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenCalledTimes(14);
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         1,
         expect.objectContaining({
@@ -152,68 +152,75 @@ describe('Stack Connectors Plugin', () => {
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
         2,
         expect.objectContaining({
+          id: '.jira-service-management',
+          name: 'Jira Service Management',
+        })
+      );
+      expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
+        3,
+        expect.objectContaining({
           id: '.tines',
           name: 'Tines',
         })
       );
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
-        3,
+        4,
         expect.objectContaining({
           id: '.gen-ai',
           name: 'OpenAI',
         })
       );
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
-        4,
+        5,
         expect.objectContaining({
           id: '.bedrock',
           name: 'Amazon Bedrock',
         })
       );
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
-        5,
+        6,
         expect.objectContaining({
           id: '.gemini',
           name: 'Google Gemini',
         })
       );
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
-        6,
+        7,
         expect.objectContaining({
           id: '.d3security',
           name: 'D3 Security',
         })
       );
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
-        7,
+        8,
         expect.objectContaining({
           id: '.resilient',
           name: 'IBM Resilient',
         })
       );
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
-        8,
+        9,
         expect.objectContaining({
           id: '.thehive',
           name: 'TheHive',
         })
       );
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
-        9,
+        10,
         expect.objectContaining({
           id: '.xsoar',
           name: 'XSOAR',
         })
       );
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
-        10,
+        11,
         expect.objectContaining({
           id: '.sentinelone',
           name: 'Sentinel One',
         })
       );
       expect(actionsSetup.registerSubActionConnectorType).toHaveBeenNthCalledWith(
-        11,
+        12,
         expect.objectContaining({
           id: '.crowdstrike',
           name: 'CrowdStrike',

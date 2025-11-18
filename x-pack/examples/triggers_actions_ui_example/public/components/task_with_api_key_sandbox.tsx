@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiButton } from '@elastic/eui';
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 
 export interface TaskWithApiKeySandboxProps {
   http: HttpSetup;

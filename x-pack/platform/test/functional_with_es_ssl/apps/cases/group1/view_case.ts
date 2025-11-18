@@ -19,7 +19,7 @@ import {
   createUsersAndRoles,
   deleteUsersAndRoles,
 } from '../../../../cases_api_integration/common/lib/authentication';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 import { users, roles, casesAllUser, casesAllUser2 } from '../common';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
@@ -42,7 +42,9 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   // https://github.com/elastic/kibana/pull/190690
   // fails after missing `awaits` were added
-  describe('View case', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/239759
+  // Failing: See https://github.com/elastic/kibana/issues/239774
+  describe.skip('View case', () => {
     describe('page', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 

@@ -6,8 +6,7 @@
  */
 
 import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
-import React, { useCallback } from 'react';
-import useEffectOnce from 'react-use/lib/useEffectOnce';
+import React, { useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { ASSET_DETAILS_FLYOUT_COMPONENT_NAME } from '../constants';
@@ -25,20 +24,23 @@ export const Flyout = ({
   closeFlyout,
 }: ContentTemplateProps & { closeFlyout: () => void }) => {
   const [, setUrlState] = useAssetDetailsUrlState();
-  const { entity, loading } = useAssetDetailsRenderPropsContext();
+  const { entity, loading, schema } = useAssetDetailsRenderPropsContext();
   const { rightSideItems, tabEntries } = usePageHeader(tabs, links);
   const { activeTabId } = useTabSwitcherContext();
   const {
     services: { telemetry },
   } = useKibanaContextForPlugin();
 
-  useEffectOnce(() => {
-    telemetry.reportAssetDetailsFlyoutViewed({
-      componentName: ASSET_DETAILS_FLYOUT_COMPONENT_NAME,
-      assetType: entity.type,
-      tabId: activeTabId,
-    });
-  });
+  useEffect(() => {
+    if (!loading) {
+      telemetry.reportAssetDetailsFlyoutViewed({
+        componentName: ASSET_DETAILS_FLYOUT_COMPONENT_NAME,
+        assetType: entity.type,
+        tabId: activeTabId,
+        schema_selected: schema || 'ecs',
+      });
+    }
+  }, [schema, entity.type, activeTabId, telemetry, loading]);
 
   const handleOnClose = useCallback(() => {
     setUrlState(null);
@@ -50,6 +52,7 @@ export const Flyout = ({
       onClose={handleOnClose}
       data-component-name={ASSET_DETAILS_FLYOUT_COMPONENT_NAME}
       data-asset-type={entity.type}
+      data-schema-selected={schema}
       aria-labelledby={i18n.translate('xpack.infra.assetDetails.flyout.ariaLabel', {
         defaultMessage: '{name} details',
         values: { name: entity.name },
@@ -63,6 +66,7 @@ export const Flyout = ({
             rightSideItems={rightSideItems}
             entityType={entity.type}
             loading={loading}
+            schema={schema}
           />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>

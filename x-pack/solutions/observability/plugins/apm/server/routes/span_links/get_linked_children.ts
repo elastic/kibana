@@ -10,7 +10,6 @@ import { isEmpty } from 'lodash';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
-  PROCESSOR_EVENT,
   SPAN_ID,
   SPAN_LINKS,
   SPAN_LINKS_TRACE_ID,
@@ -41,7 +40,7 @@ async function fetchLinkedChildrenOfSpan({
     end,
   });
 
-  const requiredFields = asMutableArray([TRACE_ID, PROCESSOR_EVENT] as const);
+  const requiredFields = asMutableArray([TRACE_ID] as const);
   const optionalFields = asMutableArray([
     SPAN_ID,
     TRANSACTION_ID,
@@ -49,44 +48,48 @@ async function fetchLinkedChildrenOfSpan({
     OTEL_SPAN_LINKS_TRACE_ID,
   ] as const);
 
-  const response = await apmEventClient.search('fetch_linked_children_of_span', {
-    apm: {
-      events: [ProcessorEvent.span, ProcessorEvent.transaction],
-    },
-    _source: [SPAN_LINKS],
-    fields: [...requiredFields, ...optionalFields],
-    track_total_hits: false,
-    size: 1000,
-    query: {
-      bool: {
-        filter: [
-          ...rangeQuery(startWithBuffer, endWithBuffer),
-          {
-            bool: {
-              minimum_should_match: 1,
-              should: [
-                ...termQuery(SPAN_LINKS_TRACE_ID, traceId),
-                ...termQuery(OTEL_SPAN_LINKS_TRACE_ID, traceId),
-              ],
+  const response = await apmEventClient.search(
+    'fetch_linked_children_of_span',
+    {
+      apm: {
+        events: [ProcessorEvent.span, ProcessorEvent.transaction],
+      },
+      _source: [SPAN_LINKS],
+      fields: [...requiredFields, ...optionalFields],
+      track_total_hits: false,
+      size: 1000,
+      query: {
+        bool: {
+          filter: [
+            ...rangeQuery(startWithBuffer, endWithBuffer),
+            {
+              bool: {
+                minimum_should_match: 1,
+                should: [
+                  ...termQuery(SPAN_LINKS_TRACE_ID, traceId),
+                  ...termQuery(OTEL_SPAN_LINKS_TRACE_ID, traceId),
+                ],
+              },
             },
-          },
-          ...(spanId
-            ? [
-                {
-                  bool: {
-                    minimum_should_match: 1,
-                    should: [
-                      ...termQuery(SPAN_LINKS_SPAN_ID, spanId),
-                      ...termQuery(OTEL_SPAN_LINKS_SPAN_ID, spanId),
-                    ],
+            ...(spanId
+              ? [
+                  {
+                    bool: {
+                      minimum_should_match: 1,
+                      should: [
+                        ...termQuery(SPAN_LINKS_SPAN_ID, spanId),
+                        ...termQuery(OTEL_SPAN_LINKS_SPAN_ID, spanId),
+                      ],
+                    },
                   },
-                },
-              ]
-            : []),
-        ],
+                ]
+              : []),
+          ],
+        },
       },
     },
-  });
+    { skipProcessorEventFilter: true }
+  );
 
   const linkedChildren = response.hits.hits.map((hit) => {
     const source = 'span' in hit._source ? hit._source : undefined;

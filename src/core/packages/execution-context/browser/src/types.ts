@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
 // Should be exported from elastic/apm-rum

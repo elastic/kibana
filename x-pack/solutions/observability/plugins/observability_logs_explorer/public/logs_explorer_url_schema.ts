@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { TimeRange, RefreshInterval, Query } from '@kbn/data-plugin/common/types';
-import { DiscoverAppState } from '@kbn/discover-plugin/public';
+import type { TimeRange, RefreshInterval, Query } from '@kbn/data-plugin/common/types';
+import type { DiscoverAppState } from '@kbn/discover-plugin/public';
 import { SMART_FALLBACK_FIELDS } from '@kbn/discover-utils';
-import { ExistsFilter, Filter, PhrasesFilter } from '@kbn/es-query';
+import type { ExistsFilter, Filter, PhrasesFilter } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
-import { PhraseFilterValue } from '@kbn/es-query/src/filters/build_filters';
+import type { PhraseFilterValue } from '@kbn/es-query/src/filters/build_filters';
 
 import { ALL_LOGS_DATA_VIEW_ID } from '@kbn/discover-utils/src';
-import {
+import type {
   Column,
   DataSourceSelectionPlain,
   DataViewSelectionPayload,
@@ -85,6 +85,7 @@ export const hydrateDataSourceSelection = (
     name: 'All logs',
     title: 'logs-*,dataset-logs-*-*',
     timeFieldName: '@timestamp',
+    managed: true,
   };
 };
 

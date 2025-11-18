@@ -6,39 +6,34 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLCommand, ESQLSource } from '../../../types';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
+import { findFinalWord, findPreviousWord } from '../../../definitions/utils/autocomplete/helpers';
+import { buildFieldsDefinitions } from '../../../definitions/utils/functions';
+import { getOperatorSuggestions } from '../../../definitions/utils/operators';
+import { unescapeColumnName } from '../../../definitions/utils/shared';
+import type { ESQLAstAllCommands, ESQLSource } from '../../../types';
 import {
-  pipeCompleteItem,
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
+  pipeCompleteItem,
 } from '../../complete_items';
-import { findFinalWord, findPreviousWord } from '../../../definitions/utils/autocomplete/helpers';
-import { unescapeColumnName } from '../../../definitions/utils/shared';
-import {
-  type ISuggestionItem,
-  type ICommandContext,
-  Location,
-  ESQLPolicy,
-  ICommandCallbacks,
-} from '../../types';
+import type { ESQLColumnData, ESQLPolicy, ICommandCallbacks } from '../../types';
+import { Location, type ICommandContext, type ISuggestionItem } from '../../types';
 import {
   Position,
   buildMatchingFieldsDefinition,
+  buildPoliciesDefinitions,
+  getPolicyMetadata,
   getPosition,
   modeSuggestions,
   noPoliciesAvailableSuggestion,
   onSuggestion,
   withSuggestion,
-  getPolicyMetadata,
-  buildPoliciesDefinitions,
 } from './util';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
-import { getOperatorSuggestions } from '../../../definitions/utils/operators';
-import { buildFieldsDefinitions } from '../../../definitions/utils/functions';
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition?: number
@@ -46,8 +41,14 @@ export async function autocomplete(
   const innerText = query.substring(0, cursorPosition);
   const pos = getPosition(innerText, command);
   const policies = context?.policies ?? new Map<string, ESQLPolicy>();
-  const fieldsMap = context?.fields ?? new Map<string, string>();
-  const allColumnNames = Array.from(fieldsMap.keys());
+  const columnMap = context?.columns ?? new Map<string, ESQLColumnData>();
+
+  const fieldNames: string[] = [];
+  for (const name of columnMap.keys()) {
+    const col = columnMap.get(name);
+    if (col && !col.userDefined) fieldNames.push(name);
+  }
+
   const policyName = (
     command.args.find((arg) => !Array.isArray(arg) && arg.type === 'source') as
       | ESQLSource
@@ -112,7 +113,7 @@ export async function autocomplete(
         return [];
       }
 
-      return buildMatchingFieldsDefinition(policyMetadata.matchField, allColumnNames);
+      return buildMatchingFieldsDefinition(policyMetadata.matchField, fieldNames);
     }
 
     case Position.AFTER_ON_CLAUSE:
@@ -151,10 +152,14 @@ export async function autocomplete(
       const word = findPreviousWord(innerText);
       if (policyMetadata.enrichFields.includes(unescapeColumnName(word))) {
         // complete field name
-        return [pipeCompleteItem, { ...commaCompleteItem, command: TRIGGER_SUGGESTION_COMMAND }];
+        return [pipeCompleteItem, withAutoSuggest(commaCompleteItem)];
       } else {
         // not recognized as a field name, assume new user-defined column name
-        return getOperatorSuggestions({ location: Location.ENRICH });
+        return getOperatorSuggestions(
+          { location: Location.ENRICH },
+          callbacks?.hasMinimumLicenseRequired,
+          context?.activeProduct
+        );
       }
     }
 
@@ -165,7 +170,7 @@ export async function autocomplete(
     }
 
     case Position.WITH_AFTER_COMPLETE_CLAUSE: {
-      return [pipeCompleteItem, { ...commaCompleteItem, command: TRIGGER_SUGGESTION_COMMAND }];
+      return [pipeCompleteItem, withAutoSuggest(commaCompleteItem)];
     }
 
     default:

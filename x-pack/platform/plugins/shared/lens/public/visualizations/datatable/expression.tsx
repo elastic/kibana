@@ -10,7 +10,7 @@ import ReactDOM from 'react-dom';
 import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
 import type { IAggType } from '@kbn/data-plugin/public';
-import { CoreSetup, IUiSettingsClient } from '@kbn/core/public';
+import type { CoreSetup, IUiSettingsClient } from '@kbn/core/public';
 import type {
   Datatable,
   DatatableColumnMeta,
@@ -18,20 +18,20 @@ import type {
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { ChartSizeEvent } from '@kbn/chart-expressions-common';
+import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
 import {
   createPerformanceTracker,
   PERFORMANCE_TRACKER_MARKS,
   PERFORMANCE_TRACKER_TYPES,
 } from '@kbn/ebt-tools';
-import { trackUiCounterEvents } from '../../lens_ui_telemetry';
-import { DatatableComponent } from './components/table_basic';
-
 import type {
   GetCompatibleCellValueActions,
   ILensInterpreterRenderHandlers,
   LensCellValueAction,
-} from '../../types';
+} from '@kbn/lens-common';
+import { trackUiCounterEvents } from '../../lens_ui_telemetry';
+import { DatatableComponent } from './components';
+
 import type { FormatFactory } from '../../../common/types';
 import type { DatatableProps } from '../../../common/expressions';
 

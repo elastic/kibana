@@ -5,15 +5,20 @@
  * 2.0.
  */
 
-import { Page, BrowserContext } from '@playwright/test';
+import { expect, type Page, type BrowserContext, type Locator } from '@playwright/test';
+import { DiscoverValidationPage } from './discover_validation.page';
 
 export class OtelKubernetesFlowPage {
   page: Page;
   context: BrowserContext;
 
+  private readonly exploreLogsButton: Locator;
+
   constructor(page: Page, context: BrowserContext) {
     this.page = page;
     this.context = context;
+
+    this.exploreLogsButton = this.page.getByText('Explore logs');
   }
 
   public async copyHelmRepositorySnippetToClipboard() {
@@ -76,5 +81,18 @@ export class OtelKubernetesFlowPage {
     } else {
       throw new Error('Service inventory URL not found');
     }
+  }
+
+  public async assertLogsExplorationButtonVisible() {
+    await expect(this.exploreLogsButton, 'Logs exploration button should be visible').toBeVisible();
+  }
+
+  public async clickExploreLogsCTA() {
+    await this.exploreLogsButton.click();
+  }
+
+  public async clickExploreLogsAndGetDiscoverValidation(): Promise<DiscoverValidationPage> {
+    await this.exploreLogsButton.click();
+    return new DiscoverValidationPage(this.page);
   }
 }

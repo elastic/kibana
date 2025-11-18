@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import {
-  DEFAULT_OVERVIEW_VIEW,
-  MonitorOverviewState,
-  OverviewView,
-  isOverviewView,
-} from '../../state';
+import type { MonitorOverviewState, OverviewView } from '../../state';
+import { DEFAULT_OVERVIEW_VIEW, isOverviewView } from '../../state';
 import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../common/constants/synthetics/client_defaults';
-import { CLIENT_DEFAULTS, UseLogicalAndField } from '../../../../../common/constants';
+import type { UseLogicalAndField } from '../../../../../common/constants';
+import { CLIENT_DEFAULTS } from '../../../../../common/constants';
 import { parseAbsoluteDate } from './parse_absolute_date';
 
 // TODO: Change for Synthetics App if needed (Copied from legacy_uptime)

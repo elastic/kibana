@@ -14,7 +14,7 @@ import {
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiIcon,
+  EuiIconTip,
   EuiPanel,
   EuiText,
   EuiToolTip,
@@ -22,20 +22,18 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { RuleActionParam, RuleSystemAction } from '@kbn/alerting-types';
+import type { RuleActionParam, RuleSystemAction } from '@kbn/alerting-types';
+import type { IsDisabledResult, IsEnabledResult, ActionConnector } from '@kbn/alerts-ui-shared';
 import {
   getAvailableActionVariables,
-  IsDisabledResult,
-  IsEnabledResult,
   checkActionFormActionTypeEnabled,
-  ActionConnector,
 } from '@kbn/alerts-ui-shared';
-import { SavedObjectAttribute } from '@kbn/core/types';
+import type { SavedObjectAttribute } from '@kbn/core/types';
 import { i18n } from '@kbn/i18n';
 import { isEmpty, some } from 'lodash';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
 import { useRuleFormDispatch, useRuleFormState } from '../hooks';
-import { RuleFormParamsErrors } from '../common';
+import type { RuleFormParamsErrors } from '../common';
 import {
   ACTION_ERROR_TOOLTIP,
   ACTION_WARNING_TITLE,
@@ -150,6 +148,8 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
       : [];
   }, [selectedRuleType]);
 
+  const connectorConfig = connector && 'config' in connector ? connector.config : undefined;
+
   const showActionGroupErrorIcon = (): boolean => {
     return !isOpen && some(actionParamsError, (error) => !isEmpty(error));
   };
@@ -176,7 +176,7 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
     async (params: RuleActionParam) => {
       const res: { errors: RuleFormParamsErrors } = await actionTypeRegistry
         .get(action.actionTypeId)
-        ?.validateParams(params);
+        ?.validateParams(params, connectorConfig);
 
       dispatch({
         type: 'setActionParamsError',
@@ -186,7 +186,7 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
         },
       });
     },
-    [actionTypeRegistry, action, dispatch]
+    [actionTypeRegistry, action, connectorConfig, dispatch]
   );
 
   const onParamsChange = useCallback(
@@ -280,19 +280,22 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
               {showActionGroupErrorIcon() ? (
-                <EuiToolTip content={ACTION_ERROR_TOOLTIP}>
-                  <EuiIcon
-                    data-test-subj="action-group-error-icon"
-                    type="warning"
-                    color="danger"
-                    size="l"
-                  />
-                </EuiToolTip>
+                <EuiIconTip
+                  content={ACTION_ERROR_TOOLTIP}
+                  type="warning"
+                  color="danger"
+                  size="l"
+                  iconProps={{
+                    'data-test-subj': 'action-group-error-icon',
+                  }}
+                />
               ) : (
                 <Suspense fallback={null}>
-                  <EuiToolTip content={actionType?.name}>
-                    <EuiIcon size="l" type={actionTypeModel.iconClass} />
-                  </EuiToolTip>
+                  <EuiIconTip
+                    content={actionType?.name}
+                    size="l"
+                    type={actionTypeModel.iconClass}
+                  />
                 </Suspense>
               )}
             </EuiFlexItem>
@@ -317,7 +320,12 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
               {warning && !isOpen && (
                 <EuiFlexItem grow={false}>
                   <EuiToolTip content={ACTION_WARNING_TITLE}>
-                    <EuiBadge data-test-subj="warning-badge" iconType="warning" color="warning" />
+                    <EuiBadge
+                      tabIndex={0}
+                      data-test-subj="warning-badge"
+                      iconType="warning"
+                      color="warning"
+                    />
                   </EuiToolTip>
                 </EuiFlexItem>
               )}

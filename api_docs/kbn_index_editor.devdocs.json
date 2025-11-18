@@ -1,0 +1,591 @@
+{
+  "id": "@kbn/index-editor",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/index-editor",
+        "id": "def-public.registerIndexEditorActions",
+        "type": "Function",
+        "tags": [],
+        "label": "registerIndexEditorActions",
+        "description": [],
+        "signature": [
+          "(deps: ",
+          {
+            "pluginId": "@kbn/index-editor",
+            "scope": "public",
+            "docId": "kibKbnIndexEditorPluginApi",
+            "section": "def-public.EditLookupIndexFlyoutDeps",
+            "text": "EditLookupIndexFlyoutDeps"
+          },
+          ") => void"
+        ],
+        "path": "src/platform/packages/private/kbn-index-editor/src/ui_action/register_trigger_actions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-editor",
+            "id": "def-public.registerIndexEditorActions.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "deps",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/index-editor",
+                "scope": "public",
+                "docId": "kibKbnIndexEditorPluginApi",
+                "section": "def-public.EditLookupIndexFlyoutDeps",
+                "text": "EditLookupIndexFlyoutDeps"
+              }
+            ],
+            "path": "src/platform/packages/private/kbn-index-editor/src/ui_action/register_trigger_actions.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-editor",
+        "id": "def-public.registerIndexEditorAnalyticsEvents",
+        "type": "Function",
+        "tags": [],
+        "label": "registerIndexEditorAnalyticsEvents",
+        "description": [
+          "\nRegisters the index editor analytics events.\nThis function is wrapped in `once` to ensure that the events are registered only once."
+        ],
+        "signature": [
+          "(analytics: ",
+          "AnalyticsServiceSetup",
+          ") => void"
+        ],
+        "path": "src/platform/packages/private/kbn-index-editor/src/telemetry/events_registration.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-editor",
+            "id": "def-public.registerIndexEditorAnalyticsEvents.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics",
+            "description": [],
+            "signature": [
+              "{ optIn: (optInConfig: ",
+              "OptInConfig",
+              ") => void; reportEvent: <EventTypeData extends object>(eventType: string, eventData: EventTypeData) => void; readonly telemetryCounter$: ",
+              "Observable",
+              "<",
+              "TelemetryCounter",
+              ">; registerEventType: <EventTypeData>(eventTypeOps: ",
+              "EventTypeOpts",
+              "<EventTypeData>) => void; registerShipper: <Shipper extends ",
+              "IShipper",
+              ", ShipperConfig>(Shipper: ",
+              "ShipperClassConstructor",
+              "<Shipper, ShipperConfig>, shipperConfig: ShipperConfig, opts?: ",
+              "RegisterShipperOpts",
+              " | undefined) => void; registerContextProvider: <Context>(contextProviderOpts: ",
+              "ContextProviderOpts",
+              "<Context>) => void; removeContextProvider: (contextProviderName: string) => void; }"
+            ],
+            "path": "src/platform/packages/private/kbn-index-editor/src/telemetry/events_registration.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/index-editor",
+        "id": "def-public.EditLookupIndexContentContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "EditLookupIndexContentContext",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-editor",
+            "id": "def-public.EditLookupIndexContentContext.indexName",
+            "type": "string",
+            "tags": [],
+            "label": "indexName",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-editor",
+            "id": "def-public.EditLookupIndexContentContext.doesIndexExist",
+            "type": "boolean",
+            "tags": [],
+            "label": "doesIndexExist",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-editor",
+            "id": "def-public.EditLookupIndexContentContext.canEditIndex",
+            "type": "boolean",
+            "tags": [],
+            "label": "canEditIndex",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-editor",
+            "id": "def-public.EditLookupIndexContentContext.triggerSource",
+            "type": "string",
+            "tags": [],
+            "label": "triggerSource",
+            "description": [],
+            "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-editor",
+            "id": "def-public.EditLookupIndexContentContext.onClose",
+            "type": "Function",
+            "tags": [],
+            "label": "onClose",
+            "description": [],
+            "signature": [
+              "((result: { indexName: string | null; indexCreatedDuringFlyout: boolean; indexHasNewFields: boolean; }) => void) | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-editor",
+                "id": "def-public.EditLookupIndexContentContext.onClose.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "result",
+                "description": [],
+                "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/index-editor",
+                    "id": "def-public.EditLookupIndexContentContext.onClose.$1.indexName",
+                    "type": "CompoundType",
+                    "tags": [],
+                    "label": "indexName",
+                    "description": [],
+                    "signature": [
+                      "string | null"
+                    ],
+                    "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/index-editor",
+                    "id": "def-public.EditLookupIndexContentContext.onClose.$1.indexCreatedDuringFlyout",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "indexCreatedDuringFlyout",
+                    "description": [
+                      "Indicates if the index was created"
+                    ],
+                    "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/index-editor",
+                    "id": "def-public.EditLookupIndexContentContext.onClose.$1.indexHasNewFields",
+                    "type": "boolean",
+                    "tags": [],
+                    "label": "indexHasNewFields",
+                    "description": [
+                      "Indicates if new fields have been added to the index"
+                    ],
+                    "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/index-editor",
+            "id": "def-public.EditLookupIndexContentContext.onOpenIndexInDiscover",
+            "type": "Function",
+            "tags": [],
+            "label": "onOpenIndexInDiscover",
+            "description": [],
+            "signature": [
+              "((indexName: string, esqlQuery: string) => Promise<void>) | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/index-editor",
+                "id": "def-public.EditLookupIndexContentContext.onOpenIndexInDiscover.$1",
+                "type": "string",
+                "tags": [],
+                "label": "indexName",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/index-editor",
+                "id": "def-public.EditLookupIndexContentContext.onOpenIndexInDiscover.$2",
+                "type": "string",
+                "tags": [],
+                "label": "esqlQuery",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-editor",
+        "id": "def-public.EditLookupIndexFlyoutDeps",
+        "type": "Interface",
+        "tags": [],
+        "label": "EditLookupIndexFlyoutDeps",
+        "description": [],
+        "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/index-editor",
+            "id": "def-public.EditLookupIndexFlyoutDeps.coreStart",
+            "type": "Object",
+            "tags": [],
+            "label": "coreStart",
+            "description": [],
+            "signature": [
+              "CoreStart"
+            ],
+            "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-editor",
+            "id": "def-public.EditLookupIndexFlyoutDeps.data",
+            "type": "Object",
+            "tags": [],
+            "label": "data",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "data",
+                "scope": "public",
+                "docId": "kibDataPluginApi",
+                "section": "def-public.DataPublicPluginStart",
+                "text": "DataPublicPluginStart"
+              }
+            ],
+            "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-editor",
+            "id": "def-public.EditLookupIndexFlyoutDeps.uiActions",
+            "type": "Object",
+            "tags": [],
+            "label": "uiActions",
+            "description": [],
+            "signature": [
+              "{ readonly registerTrigger: (trigger: ",
+              {
+                "pluginId": "@kbn/ui-actions-browser",
+                "scope": "common",
+                "docId": "kibKbnUiActionsBrowserPluginApi",
+                "section": "def-common.Trigger",
+                "text": "Trigger"
+              },
+              ") => void; readonly hasTrigger: (triggerId: string) => boolean; readonly getTrigger: (triggerId: string) => ",
+              "TriggerContract",
+              "<object>; readonly registerAction: <Context extends object>(definition: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<Context>) => ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<Context>; readonly registerActionAsync: <Context extends object>(id: string, getDefinition: () => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<Context>>) => void; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<any>) => void; readonly addTriggerActionAsync: (triggerId: string, actionId: string, getDefinition: () => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
+              },
+              "<any>>) => void; readonly getAction: (id: string) => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<object>>; readonly getTriggerActions: (triggerId: string) => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<object>[]>; readonly getTriggerCompatibleActions: (triggerId: string, context: object) => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.Action",
+                "text": "Action"
+              },
+              "<object>[]>; readonly getFrequentlyChangingActionsForTrigger: (triggerId: string, context: object) => Promise<",
+              {
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.FrequentCompatibilityChangeAction",
+                "text": "FrequentCompatibilityChangeAction"
+              },
+              "<object>[]>; readonly executeTriggerActions: (triggerId: string, context: object) => Promise<void>; readonly clear: () => void; readonly fork: () => ",
+              "UiActionsService",
+              "; }"
+            ],
+            "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-editor",
+            "id": "def-public.EditLookupIndexFlyoutDeps.fieldFormats",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "fieldFormats",
+            "description": [],
+            "signature": [
+              "Omit<",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FieldFormatsRegistry",
+                "text": "FieldFormatsRegistry"
+              },
+              ", \"init\" | \"register\"> & { deserialize: ",
+              {
+                "pluginId": "fieldFormats",
+                "scope": "common",
+                "docId": "kibFieldFormatsPluginApi",
+                "section": "def-common.FormatFactory",
+                "text": "FormatFactory"
+              },
+              "; }"
+            ],
+            "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-editor",
+            "id": "def-public.EditLookupIndexFlyoutDeps.share",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "share",
+            "description": [],
+            "signature": [
+              "{ toggleShareContextMenu: (options: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.ShowShareMenuOptions",
+                "text": "ShowShareMenuOptions"
+              },
+              ") => Promise<void>; } & { url: ",
+              {
+                "pluginId": "share",
+                "scope": "public",
+                "docId": "kibSharePluginApi",
+                "section": "def-public.BrowserUrlService",
+                "text": "BrowserUrlService"
+              },
+              "; navigate(options: ",
+              "RedirectOptions",
+              "<",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.SerializableRecord",
+                "text": "SerializableRecord"
+              },
+              ">): void; availableIntegrations: (objectType: string, groupId?: string | undefined) => ",
+              "ShareActionIntents",
+              "[]; }"
+            ],
+            "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/index-editor",
+            "id": "def-public.EditLookupIndexFlyoutDeps.fileUpload",
+            "type": "Object",
+            "tags": [],
+            "label": "fileUpload",
+            "description": [],
+            "signature": [
+              "FileUploadStartApi"
+            ],
+            "path": "src/platform/packages/private/kbn-index-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/index-editor",
+        "id": "def-public.ACTION_EDIT_LOOKUP_INDEX",
+        "type": "string",
+        "tags": [],
+        "label": "ACTION_EDIT_LOOKUP_INDEX",
+        "description": [],
+        "signature": [
+          "\"ACTION_EDIT_LOOKUP_INDEX\""
+        ],
+        "path": "src/platform/packages/private/kbn-index-editor/src/ui_action/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/index-editor",
+        "id": "def-public.EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID",
+        "type": "string",
+        "tags": [],
+        "label": "EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID",
+        "description": [],
+        "signature": [
+          "\"EDIT_LOOKUP_INDEX_CONTENT_TRIGGER_ID\""
+        ],
+        "path": "src/platform/packages/private/kbn-index-editor/src/ui_action/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": [
+      {
+        "parentPluginId": "@kbn/index-editor",
+        "id": "def-public.EDIT_LOOKUP_INDEX_CONTENT_TRIGGER",
+        "type": "Object",
+        "tags": [],
+        "label": "EDIT_LOOKUP_INDEX_CONTENT_TRIGGER",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/ui-actions-browser",
+            "scope": "common",
+            "docId": "kibKbnUiActionsBrowserPluginApi",
+            "section": "def-common.Trigger",
+            "text": "Trigger"
+          }
+        ],
+        "path": "src/platform/packages/private/kbn-index-editor/src/ui_action/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

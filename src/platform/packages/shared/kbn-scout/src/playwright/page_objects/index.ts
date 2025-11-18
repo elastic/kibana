@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ScoutPage } from '..';
-import { ScoutLogger } from '../../common';
-import { ScoutTestConfig } from '../../types';
+import type { ScoutPage } from '..';
+import type { ScoutLogger } from '../../common';
+import type { ScoutTestConfig } from '../../types';
 import { CollapsibleNav } from './collapsible_nav';
 import { DashboardApp } from './dashboard_app';
 import { DatePicker } from './date_picker';
@@ -17,7 +17,9 @@ import { DiscoverApp } from './discover_app';
 import { FilterBar } from './fiter_bar';
 import { MapsPage } from './maps_page';
 import { RenderablePage } from './renderable_page';
+import { Toasts } from './toasts';
 import { createLazyPageObject } from './utils';
+import { Inspector } from './inspector';
 
 export interface PageObjectsFixtures {
   page: ScoutPage;
@@ -33,6 +35,8 @@ export interface PageObjects {
   maps: MapsPage;
   renderable: RenderablePage;
   collapsibleNav: CollapsibleNav;
+  toasts: Toasts;
+  inspector: Inspector;
 }
 
 /**
@@ -50,6 +54,8 @@ export function createCorePageObjects(fixtures: PageObjectsFixtures): PageObject
     maps: createLazyPageObject(MapsPage, fixtures.page),
     renderable: createLazyPageObject(RenderablePage, fixtures.page),
     collapsibleNav: createLazyPageObject(CollapsibleNav, fixtures.page, fixtures.config),
+    toasts: createLazyPageObject(Toasts, fixtures.page),
+    inspector: createLazyPageObject(Inspector, fixtures.page),
     // Add new page objects here
   };
 }

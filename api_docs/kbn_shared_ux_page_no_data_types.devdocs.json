@@ -1,0 +1,156 @@
+{
+  "id": "@kbn/shared-ux-page-no-data-types",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/shared-ux-page-no-data-types",
+        "id": "def-public.ActionCardProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "ActionCardProps",
+        "description": [],
+        "path": "src/platform/packages/shared/shared-ux/page/no_data/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-page-no-data-types",
+            "id": "def-public.ActionCardProps.action",
+            "type": "Object",
+            "tags": [],
+            "label": "action",
+            "description": [
+              "\nAn object of `NoDataPageActions`.\n\nUse `elasticAgent` as the primary key for pre-configured cards of this type.\nOtherwise use a custom key that contains `EuiCard` props."
+            ],
+            "signature": [
+              "{ [x: string]: ",
+              {
+                "pluginId": "@kbn/shared-ux-card-no-data-types",
+                "scope": "public",
+                "docId": "kibKbnSharedUxCardNoDataTypesPluginApi",
+                "section": "def-public.NoDataCardComponentProps",
+                "text": "NoDataCardComponentProps"
+              },
+              "; }"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/page/no_data/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-no-data-types",
+        "id": "def-public.NoDataPageProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "NoDataPageProps",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/shared-ux-page-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageNoDataTypesPluginApi",
+            "section": "def-public.NoDataPageProps",
+            "text": "NoDataPageProps"
+          },
+          " extends ",
+          "CommonProps",
+          ",",
+          {
+            "pluginId": "@kbn/shared-ux-page-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxPageNoDataTypesPluginApi",
+            "section": "def-public.ActionCardProps",
+            "text": "ActionCardProps"
+          }
+        ],
+        "path": "src/platform/packages/shared/shared-ux/page/no_data/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/shared-ux-page-no-data-types",
+        "id": "def-public.NoDataPageActions",
+        "type": "Type",
+        "tags": [],
+        "label": "NoDataPageActions",
+        "description": [],
+        "signature": [
+          "Pick<",
+          "EuiEmptyPromptProps",
+          ", \"icon\"> & { title?: string | undefined; description?: React.ReactNode; canAccessFleet?: boolean | undefined; buttonText?: string | undefined; buttonIsDisabled?: boolean | undefined; disabledButtonTooltipText?: string | undefined; href?: string | undefined; docsLink?: string | undefined; onClick?: ((e: React.MouseEvent<HTMLAnchorElement, MouseEvent>) => void) | undefined; 'data-test-subj'?: string | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/page/no_data/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-no-data-types",
+        "id": "def-public.NoDataPageKibanaDependencies",
+        "type": "Type",
+        "tags": [],
+        "label": "NoDataPageKibanaDependencies",
+        "description": [
+          "\nAn interface containing a collection of Kibana plugins and services required to\nrender this component."
+        ],
+        "signature": [
+          "KibanaDependencies"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/page/no_data/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-page-no-data-types",
+        "id": "def-public.NoDataPageServices",
+        "type": "Type",
+        "tags": [],
+        "label": "NoDataPageServices",
+        "description": [
+          "\nA list of services that are consumed by this component."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/shared-ux-card-no-data-types",
+            "scope": "public",
+            "docId": "kibKbnSharedUxCardNoDataTypesPluginApi",
+            "section": "def-public.Services",
+            "text": "Services"
+          }
+        ],
+        "path": "src/platform/packages/shared/shared-ux/page/no_data/types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

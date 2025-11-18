@@ -9,10 +9,13 @@ import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 
 import type { CoreSetup, UiSettingsParams } from '@kbn/core/server';
-import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import {
+  SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES,
+  SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE,
+  SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE,
+} from '@kbn/management-settings-ids';
 import {
   APP_ID,
-  DEFAULT_AI_CONNECTOR,
   DEFAULT_ALERT_TAGS_KEY,
   DEFAULT_ALERT_TAGS_VALUE,
   DEFAULT_ANOMALY_SCORE,
@@ -30,10 +33,13 @@ import {
   DEFAULT_THREAT_INDEX_VALUE,
   DEFAULT_TO,
   ENABLE_ASSET_INVENTORY_SETTING,
-  ENABLE_CLOUD_CONNECTOR_SETTING,
   ENABLE_CCS_READ_WARNING_SETTING,
+  ENABLE_CLOUD_CONNECTOR_SETTING,
+  ENABLE_ESQL_RISK_SCORING,
   ENABLE_GRAPH_VISUALIZATION_SETTING,
   ENABLE_NEWS_FEED_SETTING,
+  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+  ENABLE_SIEM_READINESS_SETTING,
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
   EXTENDED_RULE_EXECUTION_LOGGING_ENABLED_SETTING,
@@ -43,7 +49,8 @@ import {
   NEWS_FEED_URL_SETTING,
   NEWS_FEED_URL_SETTING_DEFAULT,
   SHOW_RELATED_INTEGRATIONS_SETTING,
-  ENABLE_PRIVILEGED_USER_MONITORING_SETTING,
+  SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING,
+  SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -246,6 +253,26 @@ export const initUiSettings = (
       solutionViews: ['classic', 'security'],
       technicalPreview: true,
     },
+    ...(experimentalFeatures.siemReadinessDashboard && {
+      [ENABLE_SIEM_READINESS_SETTING]: {
+        name: i18n.translate('xpack.securitySolution.uiSettings.enableSiemReadinessLabel', {
+          defaultMessage: 'Enable SIEM Readiness Dashboard',
+        }),
+        description: i18n.translate(
+          'xpack.securitySolution.uiSettings.enableSiemReadinessDescription',
+          {
+            defaultMessage: `Enable the SIEM Readiness Dashboard within Security Solution. When enabled, you can access the new SIEM Readiness page through the navigation menu.`,
+          }
+        ),
+        type: 'boolean',
+        value: false,
+        category: [APP_ID],
+        requiresPageReload: true,
+        schema: schema.boolean(),
+        solutionViews: ['classic', 'security'],
+        technicalPreview: true,
+      },
+    }),
     [ENABLE_CLOUD_CONNECTOR_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableAssetInventoryLabel', {
         defaultMessage: 'Enable Cloud Connector',
@@ -257,7 +284,7 @@ export const initUiSettings = (
         }
       ),
       type: 'boolean',
-      value: false,
+      value: true,
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
@@ -343,6 +370,47 @@ export const initUiSettings = (
       schema: schema.boolean(),
       solutionViews: ['classic', 'security'],
     },
+    [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING]: {
+      name: i18n.translate(
+        'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosureLabel',
+        {
+          defaultMessage: 'Default suppression behavior on alert closure',
+        }
+      ),
+      value: SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow,
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosureDescription',
+        {
+          defaultMessage:
+            'If an alert is closed while suppression is active, you can choose whether suppression continues or resets.',
+        }
+      ),
+      type: 'select',
+      schema: schema.oneOf([
+        schema.literal(SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow),
+        schema.literal(SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow),
+      ]),
+      options: [
+        SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow,
+        SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow,
+      ],
+      optionLabels: {
+        [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.RestartWindow]: i18n.translate(
+          'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosure.restart',
+          {
+            defaultMessage: 'Restart suppression',
+          }
+        ),
+        [SUPPRESSION_BEHAVIOR_ON_ALERT_CLOSURE_SETTING_ENUM.ContinueWindow]: i18n.translate(
+          'xpack.securitySolution.uiSettings.suppressionBehaviorOnAlertClosure.continue',
+          {
+            defaultMessage: 'Continue suppression until window ends',
+          }
+        ),
+      },
+      category: [APP_ID],
+      requiresPageReload: false,
+    },
     [SHOW_RELATED_INTEGRATIONS_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.showRelatedIntegrationsLabel', {
         defaultMessage: 'Related integrations',
@@ -402,22 +470,41 @@ export const initUiSettings = (
       requiresPageReload: false,
       solutionViews: ['classic', 'security'],
     },
-    ...(experimentalFeatures.privilegedUserMonitoringDisabled
+    [ENABLE_PRIVILEGED_USER_MONITORING_SETTING]: {
+      name: i18n.translate(
+        'xpack.securitySolution.uiSettings.enablePrivilegedUserMonitoringLabel',
+        {
+          defaultMessage: 'Privileged user monitoring',
+        }
+      ),
+      value: true,
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.enablePrivilegedUserMonitoringDescription',
+        {
+          defaultMessage:
+            '<p>Enables the privileged user monitoring dashboard and onboarding experience which are in technical preview.</p>',
+          values: { p: (chunks) => `<p>${chunks}</p>` },
+        }
+      ),
+      type: 'boolean',
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+      solutionViews: ['classic', 'security'],
+    },
+    ...(experimentalFeatures.disableESQLRiskScoring
       ? {}
       : {
-          [ENABLE_PRIVILEGED_USER_MONITORING_SETTING]: {
-            name: i18n.translate(
-              'xpack.securitySolution.uiSettings.enablePrivilegedUserMonitoringLabel',
-              {
-                defaultMessage: 'Privileged user monitoring',
-              }
-            ),
-            value: false,
+          [ENABLE_ESQL_RISK_SCORING]: {
+            name: i18n.translate('xpack.securitySolution.uiSettings.enableEsqlRiskScoringLabel', {
+              defaultMessage: 'Enable ESQL-based risk scoring',
+            }),
+            value: true,
             description: i18n.translate(
-              'xpack.securitySolution.uiSettings.enablePrivilegedUserMonitoringDescription',
+              'xpack.securitySolution.uiSettings.enableEsqlRiskScoringDescription',
               {
                 defaultMessage:
-                  '<p>Enables the privileged user monitoring dashboard and onboarding experience which are in technical preview.</p>',
+                  '<p>Enables risk scoring based on ESQL queries. Disabling this will revert to using scripted metrics</p>',
                 values: { p: (chunks) => `<p>${chunks}</p>` },
               }
             ),
@@ -533,30 +620,55 @@ export const initUiSettings = (
 
   uiSettings.register(orderSettings(securityUiSettings));
 };
-export const getDefaultAIConnectorSetting = (connectors: Connector[]): SettingsConfig | null =>
-  connectors.length > 0
-    ? {
-        [DEFAULT_AI_CONNECTOR]: {
-          name: i18n.translate('xpack.securitySolution.uiSettings.defaultAIConnectorLabel', {
-            defaultMessage: 'Default AI Connector',
-          }),
-          // TODO, make Elastic LLM the default value once fully available in serverless
-          value: connectors[0].id,
-          description: i18n.translate(
-            'xpack.securitySolution.uiSettings.defaultAIConnectorDescription',
-            {
-              // TODO update this copy, waiting on James Spiteri's input
-              defaultMessage:
-                'Default AI connector for serverless AI features (Elastic AI SOC Engine)',
-            }
-          ),
-          type: 'select',
-          options: connectors.map(({ id }) => id),
-          optionLabels: Object.fromEntries(connectors.map(({ id, name }) => [id, name])),
-          category: [APP_ID],
-          requiresPageReload: true,
-          schema: schema.string(),
-          solutionViews: ['classic', 'security'],
-        },
+
+export const getDefaultValueReportSettings = (): SettingsConfig => ({
+  [SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES]: {
+    name: i18n.translate('xpack.securitySolution.uiSettings.defaultValueMinutesLabel', {
+      defaultMessage: 'Value report minutes per alert',
+    }),
+    value: 8,
+    description: i18n.translate(
+      'xpack.securitySolution.uiSettings.defaultValueMinutesDescription',
+      {
+        defaultMessage:
+          'The average review time for an analyst to review an alert. Used for calculations in the Value report.',
       }
-    : null;
+    ),
+    type: 'number',
+    category: [APP_ID],
+    requiresPageReload: true,
+    schema: schema.number(),
+    solutionViews: ['classic', 'security'],
+  },
+  [SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE]: {
+    name: i18n.translate('xpack.securitySolution.uiSettings.defaultValueRateLabel', {
+      defaultMessage: 'Value report analyst hourly rate',
+    }),
+    value: 75,
+    description: i18n.translate('xpack.securitySolution.uiSettings.defaultValueRateDescription', {
+      defaultMessage:
+        'The average hourly rate for a security analyst. Used for calculations in the Value report.',
+    }),
+    type: 'number',
+    category: [APP_ID],
+    requiresPageReload: true,
+    schema: schema.number(),
+    solutionViews: ['classic', 'security'],
+  },
+  [SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_TITLE]: {
+    name: i18n.translate('xpack.securitySolution.uiSettings.defaultValueTitleLabel', {
+      defaultMessage: 'Value report title',
+    }),
+    value: i18n.translate('xpack.securitySolution.reports.uiSettings.defaultValueTitleTitle', {
+      defaultMessage: 'Elastic AI value report',
+    }),
+    description: i18n.translate('xpack.securitySolution.uiSettings.defaultValueTitleDescription', {
+      defaultMessage: 'The title of the Value report.',
+    }),
+    type: 'string',
+    category: [APP_ID],
+    requiresPageReload: true,
+    schema: schema.string(),
+    solutionViews: ['classic', 'security'],
+  },
+});

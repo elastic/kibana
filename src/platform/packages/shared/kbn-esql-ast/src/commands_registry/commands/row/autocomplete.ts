@@ -6,21 +6,22 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLCommand } from '../../../types';
-import { type ISuggestionItem, type ICommandContext, ICommandCallbacks } from '../../types';
+import { getFunctionsSuggestions } from '../../../definitions/utils';
+import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
+import type { ESQLAstAllCommands } from '../../../types';
+import type { ICommandCallbacks } from '../../types';
+import { type ISuggestionItem, type ICommandContext } from '../../types';
 import {
   pipeCompleteItem,
   commaCompleteItem,
   getNewUserDefinedColumnSuggestion,
 } from '../../complete_items';
 import { Location } from '../../types';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../constants';
-import { getFunctionSuggestions } from '../../../definitions/utils';
 import { isRestartingExpression } from '../../../definitions/utils/shared';
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
   cursorPosition?: number
@@ -28,14 +29,20 @@ export async function autocomplete(
   const innerText = query.substring(0, cursorPosition);
   // ROW col0 = /
   if (/=\s*$/.test(innerText)) {
-    return getFunctionSuggestions({ location: Location.ROW }, callbacks?.hasMinimumLicenseRequired);
+    return getFunctionsSuggestions({
+      location: Location.ROW,
+      types: ['any'],
+      options: { ignored: [] },
+      context,
+      callbacks,
+    });
   }
 
   // ROW col0 = 23 /
   else if (command.args.length > 0 && !isRestartingExpression(innerText)) {
     return [
-      { ...pipeCompleteItem, command: TRIGGER_SUGGESTION_COMMAND },
-      { ...commaCompleteItem, text: ', ', command: TRIGGER_SUGGESTION_COMMAND },
+      withAutoSuggest(pipeCompleteItem),
+      withAutoSuggest({ ...commaCompleteItem, text: ', ' }),
     ];
   }
 
@@ -43,6 +50,12 @@ export async function autocomplete(
   // ROW foo = "bar", /
   return [
     getNewUserDefinedColumnSuggestion(callbacks?.getSuggestedUserDefinedColumnName?.() || ''),
-    ...getFunctionSuggestions({ location: Location.ROW }, callbacks?.hasMinimumLicenseRequired),
+    ...getFunctionsSuggestions({
+      location: Location.ROW,
+      types: ['any'],
+      options: { ignored: [] },
+      context,
+      callbacks,
+    }),
   ];
 }

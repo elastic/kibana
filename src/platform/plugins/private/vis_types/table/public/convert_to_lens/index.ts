@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { METRIC_TYPES } from '@kbn/data-plugin/common';
-import { SchemaConfig } from '@kbn/visualizations-plugin/common';
+import type { METRIC_TYPES } from '@kbn/data-plugin/common';
+import type { SchemaConfig } from '@kbn/visualizations-plugin/common';
 import {
   getConvertToLensModule,
   getVisSchemas,
@@ -18,7 +18,7 @@ import { excludeMetaFromColumn } from '@kbn/visualizations-plugin/common/convert
 import { v4 as uuidv4 } from 'uuid';
 import { getDataViewsStart } from '../services';
 import { getConfiguration } from './configurations';
-import { ConvertTableToLensVisualization } from './types';
+import type { ConvertTableToLensVisualization } from './types';
 
 export const convertToLens: ConvertTableToLensVisualization = async (vis, timefilter) => {
   if (!timefilter) {

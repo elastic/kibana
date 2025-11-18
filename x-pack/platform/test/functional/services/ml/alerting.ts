@@ -7,11 +7,11 @@
 
 import expect from '@kbn/expect';
 import { ML_ALERT_TYPES } from '@kbn/ml-plugin/common/constants/alerts';
-import { Rule } from '@kbn/alerting-plugin/common';
-import { MlAnomalyDetectionAlertParams } from '@kbn/ml-plugin/common/types/alerts';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { MlApi } from './api';
-import { MlCommonUI } from './common_ui';
+import type { Rule } from '@kbn/alerting-plugin/common';
+import type { MlAnomalyDetectionAlertParams } from '@kbn/ml-plugin/common/types/alerts';
+import type { FtrProviderContext } from '../../ftr_provider_context';
+import type { MlApi } from './api';
+import type { MlCommonUI } from './common_ui';
 
 export function MachineLearningAlertingProvider(
   { getService }: FtrProviderContext,
@@ -172,6 +172,27 @@ export function MachineLearningAlertingProvider(
       await this.ensureAdvancedSectionOpen();
       await testSubjects.setValue('mlAnomalyAlertTopNBuckets', numberOfBuckets.toString());
       await this.assertTopNBuckets(numberOfBuckets, isInvalid);
+    },
+
+    async setIncludeInterim(includeInterim: boolean) {
+      await retry.tryForTime(5000, async () => {
+        const attr = await testSubjects.getAttribute(
+          'mlAnomalyAlertIncludeInterimSwitch',
+          'aria-checked'
+        );
+        const isChecked = attr === 'true';
+        if (isChecked !== includeInterim) {
+          await testSubjects.click('mlAnomalyAlertIncludeInterimSwitch');
+        }
+        const after = await testSubjects.getAttribute(
+          'mlAnomalyAlertIncludeInterimSwitch',
+          'aria-checked'
+        );
+        expect(after).to.eql(
+          String(includeInterim),
+          `Expected includeInterim to be '${includeInterim}' but got '${after}'`
+        );
+      });
     },
 
     async isAdvancedSectionOpened() {

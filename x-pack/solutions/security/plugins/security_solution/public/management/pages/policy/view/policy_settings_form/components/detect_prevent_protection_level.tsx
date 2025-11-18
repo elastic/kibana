@@ -87,6 +87,7 @@ export const DetectPreventProtectionLevel = memo<DetectPreventProtectionLevelPro
               return (
                 <EuiFlexItem grow={flexGrow} key={id}>
                   <ProtectionRadio
+                    name="protectionLevel"
                     policy={policy}
                     onChange={onChange}
                     mode={mode}
@@ -114,6 +115,7 @@ interface ProtectionRadioProps extends PolicyFormComponentCommonProps {
   protectionMode: ProtectionModes;
   osList: ImmutableArray<Partial<keyof UIPolicyConfig>>;
   label: string;
+  name: string;
 }
 
 const ProtectionRadio = React.memo(
@@ -125,6 +127,7 @@ const ProtectionRadio = React.memo(
     onChange,
     policy,
     mode,
+    name,
     'data-test-subj': dataTestSubj,
   }: ProtectionRadioProps) => {
     const selected = policy.windows[protection].mode;
@@ -174,6 +177,7 @@ const ProtectionRadio = React.memo(
 
     return (
       <EuiRadio
+        name={name}
         label={label}
         id={radioId}
         checked={selected === protectionMode}

@@ -7,15 +7,14 @@
 
 import { once } from 'lodash';
 import { useEffect } from 'react';
-import { getUserConversationsExist } from '@kbn/elastic-assistant';
+import { getUserConversationsExist, useAssistantContext } from '@kbn/elastic-assistant';
 import { createConversations } from './create_conversation';
 import { useKibana } from '../../common/lib/kibana';
 import { licenseService } from '../../common/hooks/use_license';
-import { useAssistantAvailability } from '../use_assistant_availability';
 
 export const useMigrateConversationsFromLocalStorage = () => {
   const hasEnterpriseLicense = licenseService.isEnterprise();
-  const assistantAvailability = useAssistantAvailability();
+  const { assistantAvailability, currentUser } = useAssistantContext();
   const { http, notifications, storage } = useKibana().services;
 
   useEffect(() => {
@@ -29,7 +28,7 @@ export const useMigrateConversationsFromLocalStorage = () => {
           http,
         });
         if (!conversationsExist) {
-          await createConversations(notifications, http, storage);
+          await createConversations(notifications, http, storage, currentUser);
         }
       }
     });
@@ -37,6 +36,7 @@ export const useMigrateConversationsFromLocalStorage = () => {
   }, [
     assistantAvailability.hasAssistantPrivilege,
     assistantAvailability.isAssistantEnabled,
+    currentUser,
     hasEnterpriseLicense,
     http,
     notifications,

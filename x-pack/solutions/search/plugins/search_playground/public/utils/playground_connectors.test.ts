@@ -21,7 +21,7 @@ import {
 import { type ActionConnector } from '../types';
 
 import { parsePlaygroundConnectors } from './playground_connectors';
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 
 describe('PlaygroundConnector utilities', () => {
   const mockHttp = {} as unknown as HttpSetup;

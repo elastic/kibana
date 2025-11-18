@@ -5,20 +5,16 @@
  * 2.0.
  */
 
-import React, { ReactNode, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
+import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 
-import {
-  EuiLink,
-  EuiLoadingSpinner,
-  EuiToolTip,
-  EuiButtonIcon,
-  Criteria,
-  EuiBasicTable,
-} from '@elastic/eui';
-import { SnapshotDetails } from '../../../../../../common/types';
-import { UseRequestResponse, reactRouterNavigate } from '../../../../../shared_imports';
+import type { Criteria } from '@elastic/eui';
+import { EuiLink, EuiLoadingSpinner, EuiToolTip, EuiButtonIcon, EuiBasicTable } from '@elastic/eui';
+import type { SnapshotDetails } from '../../../../../../common/types';
+import type { UseRequestResponse } from '../../../../../shared_imports';
+import { reactRouterNavigate } from '../../../../../shared_imports';
 import { SNAPSHOT_STATE, UIM_SNAPSHOT_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useServices } from '../../../../app_context';
 import {
@@ -26,25 +22,10 @@ import {
   linkToRestoreSnapshot,
   linkToSnapshot as openSnapshotDetailsUrl,
 } from '../../../../services/navigation';
-import { SnapshotListParams, SortDirection, SortField } from '../../../../lib';
+import type { SnapshotListParams, SortDirection, SortField } from '../../../../lib';
 import { DataPlaceholder, FormattedDateTime, SnapshotDeleteProvider } from '../../../../components';
 import { SnapshotSearchBar } from './snapshot_search_bar';
 import { SnapshotState } from '../snapshot_details/tabs/snapshot_state';
-
-const getLastSuccessfulManagedSnapshot = (
-  snapshots: SnapshotDetails[]
-): SnapshotDetails | undefined => {
-  const successfulSnapshots = snapshots
-    .filter(
-      ({ state, repository, managedRepository }) =>
-        repository === managedRepository && state === 'SUCCESS'
-    )
-    .sort((a, b) => {
-      return +new Date(b.endTime) - +new Date(a.endTime);
-    });
-
-  return successfulSnapshots[0];
-};
 
 interface Props {
   snapshots: SnapshotDetails[];
@@ -72,8 +53,6 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
   } = props;
   const { i18n, uiMetricService, history } = useServices();
   const [selectedItems, setSelectedItems] = useState<SnapshotDetails[]>([]);
-
-  const lastSuccessfulManagedSnapshot = getLastSuccessfulManagedSnapshot(snapshots);
 
   const columns = [
     {
@@ -234,13 +213,17 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
           },
         },
         {
-          render: ({ snapshot, repository }: SnapshotDetails) => {
+          render: (snapshotDetails: SnapshotDetails) => {
+            const { snapshot, repository, managedRepository, isLastSuccessfulSnapshot } =
+              snapshotDetails;
             return (
               <SnapshotDeleteProvider>
                 {(deleteSnapshotPrompt) => {
-                  const isDeleteDisabled = Boolean(lastSuccessfulManagedSnapshot)
-                    ? snapshot === lastSuccessfulManagedSnapshot!.snapshot
-                    : false;
+                  const isDeleteDisabled = Boolean(
+                    managedRepository &&
+                      repository === managedRepository &&
+                      isLastSuccessfulSnapshot
+                  );
                   const label = isDeleteDisabled
                     ? i18n.translate(
                         'xpack.snapshotRestore.snapshotList.table.deleteManagedRepositorySnapshotTooltip',
@@ -299,10 +282,8 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
 
   const selection = {
     onSelectionChange: (newSelectedItems: SnapshotDetails[]) => setSelectedItems(newSelectedItems),
-    selectable: ({ snapshot }: SnapshotDetails) =>
-      Boolean(lastSuccessfulManagedSnapshot)
-        ? snapshot !== lastSuccessfulManagedSnapshot!.snapshot
-        : true,
+    selectable: ({ repository, managedRepository, isLastSuccessfulSnapshot }: SnapshotDetails) =>
+      !(managedRepository && repository === managedRepository && isLastSuccessfulSnapshot),
     selectableMessage: (selectable: boolean) => {
       if (!selectable) {
         return i18n.translate(
@@ -331,7 +312,7 @@ export const SnapshotTable: React.FunctionComponent<Props> = (props: Props) => {
       ) : (
         <EuiBasicTable
           items={snapshots}
-          itemId="uuid"
+          itemId={(item) => `${item?.uuid}-${item?.repository}`}
           columns={columns}
           sorting={sorting}
           onChange={(criteria: Criteria<SnapshotDetails>) => {

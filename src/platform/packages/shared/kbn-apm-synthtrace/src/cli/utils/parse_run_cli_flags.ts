@@ -11,7 +11,7 @@ import { existsSync } from 'fs';
 import { pick } from 'lodash';
 import path from 'path';
 import { LogLevel } from '../../lib/utils/create_logger';
-import { RunCliFlags } from '../run_synthtrace';
+import type { RunCliFlags } from '../run_synthtrace';
 
 function getParsedFiles(flags: RunCliFlags) {
   const { _: parsedFiles } = flags;
@@ -75,12 +75,14 @@ export function parseRunCliFlags(flags: RunCliFlags) {
       'target',
       'workers',
       'kibana',
+      'apiKey',
       'concurrency',
       'versionOverride',
       'clean',
       'assume-package-version',
       'liveBucketSize',
-      'uniqueIds'
+      'uniqueIds',
+      'insecure'
     ),
     scenarioOpts: flags.scenarioOpts as unknown as Record<string, any>,
     logLevel: parsedLogLevel,

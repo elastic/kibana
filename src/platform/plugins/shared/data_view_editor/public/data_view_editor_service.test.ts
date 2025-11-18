@@ -8,8 +8,8 @@
  */
 
 import { DataViewEditorService } from './data_view_editor_service';
-import { HttpSetup } from '@kbn/core/public';
-import { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
+import type { HttpSetup } from '@kbn/core/public';
+import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 
 describe('DataViewEditorService', () => {
   it('should check for rollup indices when rolls are enabled', () => {

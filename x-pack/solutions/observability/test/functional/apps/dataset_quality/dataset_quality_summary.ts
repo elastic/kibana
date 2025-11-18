@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { DatasetQualityFtrProviderContext } from './config';
+import type { DatasetQualityFtrProviderContext } from './config';
 import { datasetNames, getInitialTestLogs, getLogsForDataset } from './data';
 
 export default function ({ getService, getPageObjects }: DatasetQualityFtrProviderContext) {
@@ -47,7 +47,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     ]);
   };
 
-  describe('Dataset quality summary', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/240003
+  describe.skip('Dataset quality summary', function () {
     // this mutes the forward-compatibility test with Elasticsearch, 8.19 kibana and 9.0 ES.
     // There are not expected to work together.
     this.onlyEsVersion('8.19 || >=9.1');

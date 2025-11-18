@@ -7,10 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import { from } from 'rxjs';
 
-import { AbstractSearchStrategy, EsSearchRequest } from './abstract_search_strategy';
+import type { EsSearchRequest } from './abstract_search_strategy';
+import { AbstractSearchStrategy } from './abstract_search_strategy';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import type { CachedIndexPatternFetcher } from '../lib/cached_index_pattern_fetcher';
 import type {
@@ -97,6 +98,7 @@ describe('AbstractSearchStrategy', () => {
         sessionId: '1',
         isRestore: false,
         isStored: true,
+        requestHash: expect.any(String),
       }
     );
   });

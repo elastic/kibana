@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -33,7 +33,6 @@
     "@kbn/core-deprecations-browser-internal",
     "@kbn/core-integrations-browser-internal",
     "@kbn/core-overlays-browser-internal",
-    "@kbn/core-saved-objects-browser-internal",
     "@kbn/core-notifications-browser-internal",
     "@kbn/core-chrome-browser-internal",
     "@kbn/core-rendering-browser-internal",
@@ -72,6 +71,8 @@
     "@kbn/react-mute-legacy-root-warning",
     "@kbn/core-pricing-browser-internal",
     "@kbn/core-pricing-browser-mocks",
+    "@kbn/core-di-browser-internal",
+    "@kbn/core-di-mocks",
   ],
   "exclude": [
     "target/**/*",

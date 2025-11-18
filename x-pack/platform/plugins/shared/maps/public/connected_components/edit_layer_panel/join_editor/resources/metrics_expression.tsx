@@ -15,11 +15,11 @@ import {
   EuiFormHelpText,
 } from '@elastic/eui';
 
-import { DataViewField } from '@kbn/data-views-plugin/public';
+import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MetricsEditor } from '../../../../components/metrics_editor';
 import { AGG_TYPE } from '../../../../../common/constants';
-import { AggDescriptor, FieldedAggDescriptor } from '../../../../../common/descriptor_types';
+import type { AggDescriptor, FieldedAggDescriptor } from '../../../../../common/descriptor_types';
 
 interface Props {
   metrics: AggDescriptor[];

@@ -42,3 +42,11 @@ export type AlertStatus = z.infer<typeof AlertStatus>;
 export const AlertStatus = z.enum(['open', 'closed', 'acknowledged', 'in-progress']);
 export type AlertStatusEnum = typeof AlertStatus.enum;
 export const AlertStatusEnum = AlertStatus.enum;
+
+/**
+ * The status of an alert, which can be `open`, `acknowledged`, `in-progress`, or `closed`.
+ */
+export type AlertStatusExceptClosed = z.infer<typeof AlertStatusExceptClosed>;
+export const AlertStatusExceptClosed = z.enum(['open', 'acknowledged', 'in-progress']);
+export type AlertStatusExceptClosedEnum = typeof AlertStatusExceptClosed.enum;
+export const AlertStatusExceptClosedEnum = AlertStatusExceptClosed.enum;

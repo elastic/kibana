@@ -615,4 +615,138 @@ describe('handleState', () => {
       })
     );
   });
+
+  describe('async behavior', () => {
+    const getAsyncTestDefinition = () => {
+      const executionOrder: string[] = [];
+
+      const slowAsyncStep = async (context: any) => {
+        executionOrder.push('async_step_started');
+        // Simulate slow operation
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        executionOrder.push('async_step_completed');
+        return { asyncResult: 'done' };
+      };
+
+      const fastSyncStep = async (context: any) => {
+        executionOrder.push('sync_step_executed');
+        return { syncResult: 'done' };
+      };
+
+      return {
+        context: { testData: 'initial' },
+        states: {
+          async_step: {
+            onTransition: slowAsyncStep,
+            nextState: 'sync_step',
+            isAsync: true, // This should not block the state machine
+          },
+          sync_step: {
+            onTransition: fastSyncStep,
+            nextState: 'end',
+          },
+        },
+        executionOrder,
+      };
+    };
+
+    it('should not block state machine execution when step is marked as async', async () => {
+      const testDef = getAsyncTestDefinition();
+      const startTime = Date.now();
+
+      // Run the state machine
+      const result = await handleState('async_step', testDef, testDef.context);
+
+      const executionTime = Date.now() - startTime;
+
+      // State machine should complete quickly (< 50ms) because async step doesn't block
+      expect(executionTime).toBeLessThan(50);
+
+      // Should have started the async step and completed the sync step
+      expect(testDef.executionOrder).toContain('async_step_started');
+      expect(testDef.executionOrder).toContain('sync_step_executed');
+
+      // Result should contain the async operation reference
+      expect(result).toHaveProperty('async_stepAsyncOperation');
+      expect(result.syncResult).toBe('done');
+
+      // Wait for async operation to complete and verify it finishes
+      await new Promise((resolve) => setTimeout(resolve, 150));
+      expect(testDef.executionOrder).toContain('async_step_completed');
+    });
+
+    it('should handle async step errors without breaking the state machine', async () => {
+      const executionOrder: string[] = [];
+
+      const failingAsyncStep = async (context: any) => {
+        executionOrder.push('async_step_started');
+        await new Promise((resolve) => setTimeout(resolve, 50));
+        throw new Error('Async step failed');
+      };
+
+      const syncStep = async (context: any) => {
+        executionOrder.push('sync_step_executed');
+        return { result: 'success' };
+      };
+
+      const testDef = {
+        context: { testData: 'initial' },
+        states: {
+          failing_async: {
+            onTransition: failingAsyncStep,
+            nextState: 'sync_step',
+            isAsync: true,
+          },
+          sync_step: {
+            onTransition: syncStep,
+            nextState: 'end',
+          },
+        },
+      };
+
+      const result = await handleState('failing_async', testDef, testDef.context);
+
+      // State machine should continue despite async failure
+      expect(executionOrder).toContain('async_step_started');
+      expect(executionOrder).toContain('sync_step_executed');
+      expect(result.result).toBe('success');
+
+      // Should have the async operation promise stored
+      expect(result).toHaveProperty('failing_asyncAsyncOperation');
+      const asyncPromise = result.failing_asyncAsyncOperation;
+
+      // The async operation should eventually fail
+      await expect(asyncPromise).rejects.toThrow('Async step failed');
+    });
+
+    it('should wait for sync steps to complete normally', async () => {
+      const executionOrder: string[] = [];
+
+      const slowSyncStep = async (context: any) => {
+        executionOrder.push('sync_step_started');
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        executionOrder.push('sync_step_completed');
+        return { syncResult: 'done' };
+      };
+
+      const testDef = {
+        context: { testData: 'initial' },
+        states: {
+          sync_step: {
+            onTransition: slowSyncStep,
+            nextState: 'end',
+          },
+        },
+      };
+
+      const startTime = Date.now();
+      const result = await handleState('sync_step', testDef, testDef.context);
+      const executionTime = Date.now() - startTime;
+
+      // Should wait for sync step to complete
+      expect(executionTime).toBeGreaterThan(90);
+      expect(executionOrder).toEqual(['sync_step_started', 'sync_step_completed']);
+      expect(result.syncResult).toBe('done');
+    });
+  });
 });

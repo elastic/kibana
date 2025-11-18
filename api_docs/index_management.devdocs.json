@@ -203,6 +203,20 @@
           },
           {
             "parentPluginId": "indexManagement",
+            "id": "def-public.Index.mode",
+            "type": "string",
+            "tags": [],
+            "label": "mode",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
             "id": "def-public.Index.isRollupIndex",
             "type": "CompoundType",
             "tags": [],
@@ -1065,6 +1079,20 @@
           },
           {
             "parentPluginId": "indexManagement",
+            "id": "def-server.Index.mode",
+            "type": "string",
+            "tags": [],
+            "label": "mode",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
             "id": "def-server.Index.isRollupIndex",
             "type": "CompoundType",
             "tags": [],
@@ -1355,7 +1383,7 @@
         "label": "IndexManagementConfig",
         "description": [],
         "signature": [
-          "{ readonly ui: Readonly<{} & { enabled: boolean; }>; readonly enableIndexActions: boolean; readonly enableLegacyTemplates: boolean; readonly dev: Readonly<{} & { enableIndexDetailsPage: boolean; enableSemanticText: boolean; }>; readonly enableSizeAndDocCount: boolean; readonly enableIndexStats: boolean; readonly enableDataStreamStats: boolean; readonly editableIndexSettings: \"all\" | \"limited\"; readonly enableMappingsSourceFieldSection: boolean; readonly enableTogglingDataRetention: boolean; readonly enableProjectLevelRetentionChecks: boolean; }"
+          "{ readonly ui: Readonly<{} & { enabled: boolean; }>; readonly dev: Readonly<{} & { enableIndexDetailsPage: boolean; enableSemanticText: boolean; }>; readonly enableIndexActions: boolean; readonly enableLegacyTemplates: boolean; readonly enableSizeAndDocCount: boolean; readonly enableIndexStats: boolean; readonly enableDataStreamStats: boolean; readonly editableIndexSettings: \"all\" | \"limited\"; readonly enableMappingsSourceFieldSection: boolean; readonly enableTogglingDataRetention: boolean; readonly enableProjectLevelRetentionChecks: boolean; }"
         ],
         "path": "x-pack/platform/plugins/shared/index_management/server/config.ts",
         "deprecated": false,
@@ -2086,7 +2114,7 @@
             "label": "health",
             "description": [],
             "signature": [
-              "\"green\" | \"yellow\" | \"red\""
+              "\"red\" | \"green\" | \"yellow\""
             ],
             "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
@@ -2262,6 +2290,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataStream.failureStoreRetention",
+            "type": "Object",
+            "tags": [],
+            "label": "failureStoreRetention",
+            "description": [],
+            "signature": [
+              "{ customRetentionPeriod?: string | undefined; defaultRetentionPeriod?: string | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
@@ -2496,20 +2538,6 @@
             "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
-          },
-          {
-            "parentPluginId": "indexManagement",
-            "id": "def-common.EnhancedDataStreamFromEs.index_mode",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "index_mode",
-            "description": [],
-            "signature": [
-              "string | null | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
-            "deprecated": false,
-            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2709,6 +2737,20 @@
             "type": "string",
             "tags": [],
             "label": "data_stream",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/index-management/index_management_shared_types/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.Index.mode",
+            "type": "string",
+            "tags": [],
+            "label": "mode",
             "description": [],
             "signature": [
               "string | undefined"
@@ -3255,7 +3297,9 @@
               },
               " | undefined; data_stream_options?: ",
               "DataStreamOptions",
-              " | undefined; } | undefined"
+              " | undefined; lifecycle?: (",
+              "IndicesDataStreamLifecycleWithRollover",
+              " & { enabled?: boolean | undefined; effective_retention?: string | undefined; retention_determined_by?: string | undefined; globalMaxRetention?: string | undefined; }) | undefined; } | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
             "deprecated": false,
@@ -3913,7 +3957,7 @@
         "label": "Health",
         "description": [],
         "signature": [
-          "\"green\" | \"yellow\" | \"red\""
+          "\"red\" | \"green\" | \"yellow\""
         ],
         "path": "x-pack/platform/plugins/shared/index_management/common/types/data_streams.ts",
         "deprecated": false,
@@ -3973,7 +4017,7 @@
         "label": "TemplateType",
         "description": [],
         "signature": [
-          "\"default\" | \"managed\" | \"system\" | \"cloudManaged\""
+          "\"system\" | \"default\" | \"managed\" | \"cloudManaged\""
         ],
         "path": "x-pack/platform/plugins/shared/index_management/common/types/templates.ts",
         "deprecated": false,

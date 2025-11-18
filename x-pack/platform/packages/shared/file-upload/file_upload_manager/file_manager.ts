@@ -10,23 +10,25 @@ import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
 import type { Subscription } from 'rxjs';
 import type { Observable } from 'rxjs';
 import { switchMap, combineLatest, BehaviorSubject, of } from 'rxjs';
-import type { HttpSetup, NotificationsStart } from '@kbn/core/public';
+import type { CoreStart, HttpSetup, NotificationsStart } from '@kbn/core/public';
 import type { IImporter } from '@kbn/file-upload-plugin/public/importer/types';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
-import type {
-  FindFileStructureResponse,
-  IngestPipeline,
-  InitializeImportResponse,
-  InputOverrides,
-} from '@kbn/file-upload-plugin/common/types';
+import { AbortError, FileUploadTelemetryService } from '@kbn/file-upload-common';
 import type {
   IndicesIndexSettings,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 
-import { FileUploadResults } from '@kbn/file-upload-common';
+import type {
+  FileUploadResults,
+  FindFileStructureResponse,
+  IngestPipeline,
+  InitializeImportResponse,
+  InputOverrides,
+} from '@kbn/file-upload-common';
 import { isEqual } from 'lodash';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FileAnalysis } from './file_wrapper';
 import { FileWrapper } from './file_wrapper';
 
@@ -40,6 +42,7 @@ import {
 
 import { AutoDeploy } from './auto_deploy';
 import { createUrlOverrides } from '../src/utils';
+import { DocCountService } from './doc_count_service';
 
 export enum STATUS {
   NA,
@@ -47,6 +50,7 @@ export enum STATUS {
   STARTED,
   COMPLETED,
   FAILED,
+  ABORTED,
 }
 
 export interface Config<T = IndicesIndexSettings | MappingTypeMapping> {
@@ -57,6 +61,7 @@ export interface Config<T = IndicesIndexSettings | MappingTypeMapping> {
 export interface UploadStatus {
   analysisStatus: STATUS;
   overallImportStatus: STATUS;
+  overallImportProgress: number;
   indexCreated: STATUS;
   pipelineCreated: STATUS;
   modelDeployed: STATUS;
@@ -69,10 +74,15 @@ export interface UploadStatus {
   mappingsJsonValid: boolean;
   settingsJsonValid: boolean;
   pipelinesJsonValid: boolean;
+  indexSearchable: boolean;
+  allDocsSearchable: boolean;
   errors: Array<{ title: string; error: any }>;
 }
 
 export class FileUploadManager {
+  private uploadSessionId: string;
+  private http: HttpSetup;
+  private notifications: NotificationsStart;
   private readonly files$ = new BehaviorSubject<FileWrapper[]>([]);
   private readonly analysisValid$ = new BehaviorSubject<boolean>(false);
   public readonly fileAnalysisStatus$: Observable<FileAnalysis[]> = this.files$.pipe(
@@ -88,6 +98,7 @@ export class FileUploadManager {
   private readonly existingIndexMappings$ = new BehaviorSubject<MappingTypeMapping | null>(null);
 
   private mappingsCheckSubscription: Subscription;
+  private progressSubscription: Subscription;
   private readonly _settings$ = new BehaviorSubject<Config<IndicesIndexSettings>>({
     json: {},
     valid: false,
@@ -107,6 +118,10 @@ export class FileUploadManager {
   private importer: IImporter | null = null;
   private timeFieldName: string | undefined | null = null;
   private commonFileFormat: string | null = null;
+  private docCountService: DocCountService;
+  private initializedWithExistingIndex: boolean = false;
+  private fileUploadTelemetryService: FileUploadTelemetryService;
+  private importAbortController: AbortController | null = null;
 
   private readonly _uploadStatus$ = new BehaviorSubject<UploadStatus>({
     analysisStatus: STATUS.NOT_STARTED,
@@ -123,7 +138,10 @@ export class FileUploadManager {
     mappingsJsonValid: true,
     settingsJsonValid: true,
     pipelinesJsonValid: true,
+    indexSearchable: false,
+    allDocsSearchable: false,
     errors: [],
+    overallImportProgress: 0,
   });
   public readonly uploadStatus$ = this._uploadStatus$.asObservable();
 
@@ -131,19 +149,49 @@ export class FileUploadManager {
 
   constructor(
     private fileUpload: FileUploadStartApi,
-    private http: HttpSetup,
-    private dataViewsContract: DataViewsServicePublic,
-    private notifications: NotificationsStart,
+    coreStart: CoreStart,
+    private data: DataPublicPluginStart,
     private autoAddInferenceEndpointName: string | null = null,
     private autoCreateDataView: boolean = true,
     private removePipelinesAfterImport: boolean = true,
     existingIndexName: string | null = null,
-    indexSettingsOverride: IndicesIndexSettings | undefined = undefined
+    indexSettingsOverride: IndicesIndexSettings | undefined = undefined,
+    location: string | null = null,
+    onIndexSearchable?: (indexName: string) => void,
+    onAllDocsSearchable?: (indexName: string) => void
   ) {
+    this.uploadSessionId = Math.random().toString(36).substring(2, 15);
+    this.http = coreStart.http;
+    this.notifications = coreStart.notifications;
     this.setExistingIndexName(existingIndexName);
+    this.initializedWithExistingIndex = existingIndexName !== null;
 
     this.autoAddSemanticTextField = this.autoAddInferenceEndpointName !== null;
     this.updateSettings(indexSettingsOverride ?? {});
+    this.docCountService = new DocCountService(
+      this.fileUpload,
+      (indexName) => {
+        this.setStatus({
+          indexSearchable: true,
+        });
+        if (onIndexSearchable) {
+          onIndexSearchable(indexName);
+        }
+      },
+      (indexName) => {
+        this.setStatus({
+          allDocsSearchable: true,
+        });
+        if (onAllDocsSearchable) {
+          onAllDocsSearchable(indexName);
+        }
+      }
+    );
+
+    this.fileUploadTelemetryService = new FileUploadTelemetryService(
+      coreStart.analytics,
+      location ?? 'unknown'
+    );
 
     this.mappingsCheckSubscription = combineLatest([
       this.fileAnalysisStatus$,
@@ -202,9 +250,26 @@ export class FileUploadManager {
         });
       }
     });
+
+    // Track overall import progress across files
+    this.progressSubscription = this.fileAnalysisStatus$.subscribe((statuses) => {
+      if (statuses.length === 0) {
+        this.setStatus({ overallImportProgress: 0 });
+        return;
+      }
+
+      const totalProgress = statuses.reduce((sum, s) => sum + (s.importProgress ?? 0), 0);
+      // Normalize to a 0-100 scale by averaging across files
+      const normalized = Math.round(totalProgress / statuses.length);
+
+      this.setStatus({ overallImportProgress: normalized });
+    });
   }
 
   destroy() {
+    this.importAbortController?.abort();
+    this.getFiles().forEach((file) => file.destroy());
+
     this.files$.complete();
     this.analysisValid$.complete();
     this._settings$.complete();
@@ -212,6 +277,8 @@ export class FileUploadManager {
     this.existingIndexMappings$.complete();
     this._uploadStatus$.complete();
     this.mappingsCheckSubscription.unsubscribe();
+    this.docCountService.destroy();
+    this.progressSubscription.unsubscribe();
   }
   private setStatus(status: Partial<UploadStatus>) {
     this._uploadStatus$.next({
@@ -220,16 +287,23 @@ export class FileUploadManager {
     });
   }
 
-  async addFiles(fileList: FileList) {
+  async addFiles(fileList: FileList | File[]) {
     this.setStatus({
       analysisStatus: STATUS.STARTED,
     });
-    const promises = Array.from(fileList).map((file) => this.addFile(file));
+    const arrayOfFiles = Array.isArray(fileList) ? fileList : Array.from(fileList);
+    const promises = arrayOfFiles.map((file) => this.addFile(file));
     await Promise.all(promises);
   }
 
   async addFile(file: File) {
-    const f = new FileWrapper(file, this.fileUpload);
+    const f = new FileWrapper(
+      file,
+      this.fileUpload,
+      this.data,
+      this.fileUploadTelemetryService,
+      this.uploadSessionId
+    );
     const files = this.getFiles();
     files.push(f);
     this.files$.next(files);
@@ -248,6 +322,17 @@ export class FileUploadManager {
       this.setStatus({
         analysisStatus: STATUS.NOT_STARTED,
       });
+    }
+  }
+
+  async abortAnalysis() {
+    const files = this.getFiles();
+    files.forEach((file) => file.abortAnalysis());
+  }
+
+  async abortImport() {
+    if (this.importAbortController) {
+      this.importAbortController.abort();
     }
   }
 
@@ -285,6 +370,10 @@ export class FileUploadManager {
     return this._uploadStatus$.getValue();
   }
 
+  public getInitializedWithExistingIndex() {
+    return this.initializedWithExistingIndex;
+  }
+
   public getExistingIndexName() {
     return this._existingIndexName$.getValue();
   }
@@ -295,6 +384,7 @@ export class FileUploadManager {
     this._existingIndexName$.next(name);
     if (name === null) {
       this.existingIndexMappings$.next(null);
+      this.autoCreateDataView = true;
     } else {
       this.loadExistingIndexMappings();
       this.autoCreateDataView = false;
@@ -307,6 +397,23 @@ export class FileUploadManager {
 
   public getFiles() {
     return this.files$.getValue();
+  }
+
+  private getFileClashes(index: number): () => FileClash | null {
+    return () => {
+      const uploadStatus = this._uploadStatus$.getValue();
+      return uploadStatus.fileClashes[index] ?? null;
+    };
+  }
+  private getFileClashTotals() {
+    return this._uploadStatus$.getValue().fileClashes.reduce(
+      (acc, clash) => {
+        acc.mappingClashTotalMissingFields += clash.missingFields?.length ?? 0;
+        acc.mappingClashTotalNewFields += clash.newFields?.length ?? 0;
+        return acc;
+      },
+      { mappingClashTotalNewFields: 0, mappingClashTotalMissingFields: 0 }
+    );
   }
 
   private getFormatClashes(): {
@@ -411,20 +518,35 @@ export class FileUploadManager {
     indexName: string,
     dataViewName?: string | null
   ): Promise<FileUploadResults | null> {
+    this.importAbortController = new AbortController();
+    const signal = this.importAbortController.signal;
+
     const mappings = this.getMappings().json;
     const pipelines = this.getPipelines();
+
+    const isExistingIndex = this.isExistingIndexUpload();
+    const files = this.getFiles();
+    const { sendTelemetry } = this.sendTelemetryProvider(
+      files,
+      new Date().getTime(),
+      isExistingIndex,
+      dataViewName
+    );
+    const { checkImportAborted } = this.checkImportAbortedProvider(sendTelemetry);
 
     if (mappings === null || pipelines === null || this.commonFileFormat === null) {
       this.setStatus({
         overallImportStatus: STATUS.FAILED,
       });
 
+      sendTelemetry(false);
       return null;
     }
 
     this.setStatus({
       overallImportStatus: STATUS.STARTED,
-      dataViewCreated: this.autoCreateDataView ? STATUS.NOT_STARTED : STATUS.NA,
+      dataViewCreated:
+        this.autoCreateDataView && dataViewName !== null ? STATUS.NOT_STARTED : STATUS.NA,
     });
 
     this.importer = await this.fileUpload.importerFactory(this.commonFileFormat, {});
@@ -437,7 +559,7 @@ export class FileUploadManager {
       this.setStatus({
         modelDeployed: STATUS.STARTED,
       });
-      await this.autoDeploy();
+      await this.autoDeploy(signal);
       this.setStatus({
         modelDeployed: STATUS.COMPLETED,
       });
@@ -454,14 +576,26 @@ export class FileUploadManager {
     let pipelinesCreated = false;
     let initializeImportResp: InitializeImportResponse | undefined;
 
+    this.docCountService.resetInitialDocCount();
+
+    if (isExistingIndex) {
+      await this.docCountService.loadInitialIndexCount(indexName);
+    }
+
     try {
       initializeImportResp = await this.importer.initializeImport(
         indexName,
         this.getSettings().json,
         mappings,
         pipelines,
-        this.isExistingIndexUpload()
+        isExistingIndex,
+        signal
       );
+
+      checkImportAborted();
+
+      this.docCountService.startIndexSearchableCheck(indexName);
+
       this.timeFieldName = this.importer.getTimeField();
       indexCreated = initializeImportResp.index !== undefined;
       pipelinesCreated = initializeImportResp.pipelineIds.length > 0;
@@ -476,6 +610,8 @@ export class FileUploadManager {
         throw initializeImportResp.error;
       }
     } catch (e) {
+      checkImportAborted();
+
       this.setStatus({
         overallImportStatus: STATUS.FAILED,
         errors: [
@@ -487,6 +623,8 @@ export class FileUploadManager {
           },
         ],
       });
+      sendTelemetry(false);
+
       return null;
     }
 
@@ -495,6 +633,7 @@ export class FileUploadManager {
       (createPipelines && pipelinesCreated === false) ||
       !initializeImportResp
     ) {
+      sendTelemetry(false);
       return null;
     }
 
@@ -502,14 +641,19 @@ export class FileUploadManager {
       fileImport: STATUS.STARTED,
     });
 
-    // import data
-    const files = this.getFiles();
+    // import files
     const createdPipelineIds = initializeImportResp.pipelineIds;
 
     try {
       await Promise.all(
         files.map(async (file, i) => {
-          await file.import(indexName, mappings!, createdPipelineIds[i] ?? undefined);
+          await file.import(
+            indexName,
+            mappings!,
+            createdPipelineIds[i] ?? undefined,
+            this.getFileClashes(i), // passing in file clashes for telemetry
+            signal
+          );
         })
       );
     } catch (error) {
@@ -524,8 +668,19 @@ export class FileUploadManager {
           },
         ],
       });
+      sendTelemetry(false);
       return null;
     }
+
+    checkImportAborted();
+
+    const totalDocCount = files.reduce((acc, file) => {
+      const { docCount, failures } = file.getStatus();
+      const count = docCount - failures.length;
+      return acc + count;
+    }, 0);
+
+    this.docCountService.startAllDocsSearchableCheck(indexName, totalDocCount);
 
     this.setStatus({
       fileImport: STATUS.COMPLETED,
@@ -536,7 +691,7 @@ export class FileUploadManager {
         this.setStatus({
           pipelinesDeleted: STATUS.STARTED,
         });
-        await this.importer.deletePipelines();
+        await this.importer.deletePipelines(signal);
         this.setStatus({
           pipelinesDeleted: STATUS.COMPLETED,
         });
@@ -558,6 +713,8 @@ export class FileUploadManager {
       }
     }
 
+    checkImportAborted();
+
     let dataViewResp;
     if (this.autoCreateDataView && dataViewName !== null) {
       this.setStatus({
@@ -566,7 +723,7 @@ export class FileUploadManager {
       const dataViewName2 = dataViewName === undefined ? indexName : dataViewName;
       dataViewResp = await createKibanaDataView(
         dataViewName2,
-        this.dataViewsContract,
+        this.data.dataViews,
         this.timeFieldName ?? undefined
       );
       if (dataViewResp.success === false) {
@@ -581,6 +738,7 @@ export class FileUploadManager {
             },
           ],
         });
+        sendTelemetry(false);
         return null;
       } else {
         this.setStatus({
@@ -589,9 +747,15 @@ export class FileUploadManager {
       }
     }
 
+    checkImportAborted();
+
     this.setStatus({
       overallImportStatus: STATUS.COMPLETED,
     });
+
+    sendTelemetry(true);
+
+    this.importAbortController = null;
 
     return {
       index: indexName,
@@ -610,13 +774,13 @@ export class FileUploadManager {
     };
   }
 
-  private async autoDeploy() {
+  private async autoDeploy(signal?: AbortSignal) {
     if (this.inferenceId === null) {
       return;
     }
     try {
       const autoDeploy = new AutoDeploy(this.http, this.inferenceId);
-      await autoDeploy.deploy();
+      await autoDeploy.deploy(signal);
     } catch (error) {
       this.setStatus({
         modelDeployed: STATUS.FAILED,
@@ -694,6 +858,76 @@ export class FileUploadManager {
         ),
       });
     }
+  }
+  private sendTelemetryProvider(
+    files: FileWrapper[],
+    startTime: number,
+    isExistingIndex: boolean,
+    dataViewName: string | null | undefined
+  ) {
+    return {
+      sendTelemetry: (success: boolean) => {
+        const containsAutoAddedSemanticTextField =
+          this.getMappings().json.properties?.content?.type === 'semantic_text';
+
+        const { mappingClashTotalNewFields, mappingClashTotalMissingFields } =
+          this.getFileClashTotals();
+
+        this.fileUploadTelemetryService.trackUploadSession({
+          upload_session_id: this.uploadSessionId,
+          total_files: files.length,
+          total_size_bytes: files.reduce((acc, file) => acc + file.getSizeInBytes(), 0),
+          session_success: success,
+          session_cancelled: this.importAbortController?.signal.aborted ?? false,
+          session_time_ms: new Date().getTime() - startTime,
+          new_index_created: isExistingIndex === false,
+          data_view_created: this.autoCreateDataView && dataViewName !== null,
+          mapping_clash_total_new_fields: mappingClashTotalNewFields,
+          mapping_clash_total_missing_fields: mappingClashTotalMissingFields,
+          contains_auto_added_semantic_text_field: containsAutoAddedSemanticTextField,
+        });
+      },
+    };
+  }
+
+  private checkImportAbortedProvider(
+    sendTelemetry: (success: boolean, cancelled?: boolean) => void
+  ) {
+    return {
+      checkImportAborted: () => {
+        if (this.importAbortController?.signal.aborted) {
+          this.setStatus({ overallImportStatus: STATUS.ABORTED });
+          const { modelDeployed, indexCreated, pipelineCreated, fileImport, dataViewCreated } =
+            this._uploadStatus$.getValue();
+          this.setStatus({
+            modelDeployed:
+              modelDeployed === STATUS.STARTED || modelDeployed === STATUS.NOT_STARTED
+                ? STATUS.ABORTED
+                : modelDeployed,
+            indexCreated:
+              indexCreated === STATUS.STARTED || indexCreated === STATUS.NOT_STARTED
+                ? STATUS.ABORTED
+                : indexCreated,
+            pipelineCreated:
+              pipelineCreated === STATUS.STARTED || pipelineCreated === STATUS.NOT_STARTED
+                ? STATUS.ABORTED
+                : pipelineCreated,
+            fileImport:
+              fileImport === STATUS.STARTED || fileImport === STATUS.NOT_STARTED
+                ? STATUS.ABORTED
+                : fileImport,
+            dataViewCreated:
+              dataViewCreated === STATUS.STARTED || dataViewCreated === STATUS.NOT_STARTED
+                ? STATUS.ABORTED
+                : dataViewCreated,
+          });
+
+          sendTelemetry(false);
+
+          throw new AbortError();
+        }
+      },
+    };
   }
 }
 

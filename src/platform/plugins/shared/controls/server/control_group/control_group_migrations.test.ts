@@ -7,11 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
+import type { SerializableRecord } from '@kbn/utility-types';
 import { OPTIONS_LIST_CONTROL, RANGE_SLIDER_CONTROL } from '@kbn/controls-constants';
 import type { ControlWidth } from '@kbn/controls-schemas';
 import type { DefaultDataControlState } from '../../common';
-import { OptionsListControlState } from '../../common/options_list';
+import type { OptionsListControlState } from '../../common/options_list';
 import { mockDataControlState, mockOptionsListControlState } from '../mocks';
 import { removeHideExcludeAndHideExists } from './control_group_migrations';
 import { getDefaultControlGroupState } from './control_group_persistence';

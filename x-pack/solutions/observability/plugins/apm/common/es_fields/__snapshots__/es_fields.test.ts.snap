@@ -152,7 +152,11 @@ exports[`Error HTTP_REQUEST_METHOD 1`] = `undefined`;
 
 exports[`Error HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
 
+exports[`Error ID 1`] = `undefined`;
+
 exports[`Error INDEX 1`] = `undefined`;
+
+exports[`Error KIND 1`] = `undefined`;
 
 exports[`Error KUBERNETES 1`] = `undefined`;
 
@@ -187,6 +191,10 @@ exports[`Error LABEL_NAME 1`] = `undefined`;
 exports[`Error LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
 exports[`Error LABEL_TYPE 1`] = `undefined`;
+
+exports[`Error LINKS_SPAN_ID 1`] = `undefined`;
+
+exports[`Error LINKS_TRACE_ID 1`] = `undefined`;
 
 exports[`Error LOG_LEVEL 1`] = `undefined`;
 
@@ -269,6 +277,8 @@ exports[`Error PROCESS_PID 1`] = `undefined`;
 exports[`Error PROCESSOR_EVENT 1`] = `"error"`;
 
 exports[`Error PROCESSOR_NAME 1`] = `"error"`;
+
+exports[`Error RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE 1`] = `undefined`;
 
 exports[`Error SERVER_ADDRESS 1`] = `undefined`;
 
@@ -547,7 +557,11 @@ exports[`Span HTTP_REQUEST_METHOD 1`] = `undefined`;
 
 exports[`Span HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
 
+exports[`Span ID 1`] = `undefined`;
+
 exports[`Span INDEX 1`] = `undefined`;
+
+exports[`Span KIND 1`] = `undefined`;
 
 exports[`Span KUBERNETES 1`] = `undefined`;
 
@@ -582,6 +596,10 @@ exports[`Span LABEL_NAME 1`] = `undefined`;
 exports[`Span LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
 exports[`Span LABEL_TYPE 1`] = `undefined`;
+
+exports[`Span LINKS_SPAN_ID 1`] = `undefined`;
+
+exports[`Span LINKS_TRACE_ID 1`] = `undefined`;
 
 exports[`Span LOG_LEVEL 1`] = `undefined`;
 
@@ -664,6 +682,8 @@ exports[`Span PROCESS_PID 1`] = `undefined`;
 exports[`Span PROCESSOR_EVENT 1`] = `"span"`;
 
 exports[`Span PROCESSOR_NAME 1`] = `"transaction"`;
+
+exports[`Span RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE 1`] = `undefined`;
 
 exports[`Span SERVER_ADDRESS 1`] = `undefined`;
 
@@ -946,7 +966,11 @@ exports[`Transaction HTTP_REQUEST_METHOD 1`] = `"GET"`;
 
 exports[`Transaction HTTP_RESPONSE_STATUS_CODE 1`] = `200`;
 
+exports[`Transaction ID 1`] = `undefined`;
+
 exports[`Transaction INDEX 1`] = `undefined`;
+
+exports[`Transaction KIND 1`] = `undefined`;
 
 exports[`Transaction KUBERNETES 1`] = `
 Object {
@@ -987,6 +1011,10 @@ exports[`Transaction LABEL_NAME 1`] = `undefined`;
 exports[`Transaction LABEL_TELEMETRY_AUTO_VERSION 1`] = `undefined`;
 
 exports[`Transaction LABEL_TYPE 1`] = `undefined`;
+
+exports[`Transaction LINKS_SPAN_ID 1`] = `undefined`;
+
+exports[`Transaction LINKS_TRACE_ID 1`] = `undefined`;
 
 exports[`Transaction LOG_LEVEL 1`] = `undefined`;
 
@@ -1069,6 +1097,8 @@ exports[`Transaction PROCESS_PID 1`] = `undefined`;
 exports[`Transaction PROCESSOR_EVENT 1`] = `"transaction"`;
 
 exports[`Transaction PROCESSOR_NAME 1`] = `"transaction"`;
+
+exports[`Transaction RESOURCE_ATTRIBUTES_TELEMETRY_SDK_LANGUAGE 1`] = `undefined`;
 
 exports[`Transaction SERVER_ADDRESS 1`] = `undefined`;
 

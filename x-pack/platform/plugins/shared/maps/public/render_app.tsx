@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Redirect, RouteComponentProps } from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
+import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart, AppMountParameters } from '@kbn/core/public';
@@ -26,7 +27,7 @@ import {
 import { ListPage, MapPage } from './routes';
 import { APP_ID } from '../common/constants';
 import { registerLayerWizards } from './classes/layers/wizards/load_layer_wizards';
-import { MapSerializedState } from './react_embeddable/types';
+import type { MapEmbeddableState } from '../common';
 
 function setAppChrome() {
   if (!getMapsCapabilities().save) {
@@ -80,19 +81,19 @@ export async function renderApp(
     const { embeddableId, originatingApp, valueInput, originatingPath } =
       stateTransfer.getIncomingEditorState(APP_ID) || {};
 
-    let mapSerializedState: MapSerializedState | undefined;
+    let mapEmbeddableState: MapEmbeddableState | undefined;
     if (routeProps.match.params.savedMapId) {
-      mapSerializedState = {
+      mapEmbeddableState = {
         savedObjectId: routeProps.match.params.savedMapId,
       };
     } else if (valueInput) {
-      mapSerializedState = valueInput as MapSerializedState;
+      mapEmbeddableState = valueInput as MapEmbeddableState;
     }
 
     return (
       <ExitFullScreenButtonKibanaProvider coreStart={getCore()}>
         <MapPage
-          mapSerializedState={mapSerializedState}
+          mapEmbeddableState={mapEmbeddableState}
           embeddableId={embeddableId}
           onAppLeave={onAppLeave}
           setHeaderActionMenu={setHeaderActionMenu}

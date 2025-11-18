@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { LegacyMetricState } from '../../../../common/types';
+import type { LegacyMetricState } from '@kbn/lens-common';
 import { SizeOptions } from './size_options';
 import { AlignOptions } from './align_options';
 

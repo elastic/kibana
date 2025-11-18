@@ -10,7 +10,7 @@
 import expect from '@kbn/expect';
 import type { SavedObject } from '@kbn/core/types';
 import type { SavedObjectsExportResultDetails } from '@kbn/core/server';
-import { PluginFunctionalProviderContext } from '../../services';
+import type { PluginFunctionalProviderContext } from '../../services';
 
 function parseNdJson(input: string): Array<SavedObject<any>> {
   return input.split('\n').map((str) => JSON.parse(str));

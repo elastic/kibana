@@ -11,10 +11,11 @@ import { ToolingLog } from '@kbn/tooling-log';
 import crypto from 'crypto';
 import { Cookie } from 'tough-cookie';
 import { Session } from './saml_auth';
-import { SamlSessionManager, SupportedRoles } from './session_manager';
+import type { SupportedRoles } from './session_manager';
+import { SamlSessionManager } from './session_manager';
 import * as samlAuth from './saml_auth';
 import * as helper from './helper';
-import { Role, User, UserProfile } from './types';
+import type { Role, User, UserProfile } from './types';
 import { SERVERLESS_ROLES_ROOT_PATH } from '@kbn/es';
 import { resolve } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -159,9 +160,15 @@ describe('SamlSessionManager', () => {
 
     test(`throws error when role is not in 'supportedRoles'`, async () => {
       const nonExistingRole = 'tester';
-      const expectedErrorMessage = `Role '${nonExistingRole}' is not in the supported list: ${supportedRoles.roles.join(
-        ', '
-      )}. Add role descriptor in ${supportedRoles.sourcePath} to enable it for testing`;
+      const expectedErrorMessage = `Role '${nonExistingRole}' not found in ${
+        supportedRoles.sourcePath
+      }. Available predefined roles: ${supportedRoles.roles.join(', ')}
+
+      Is '${nonExistingRole}' a custom test role? → Use loginWithCustomRole() to log in with custom Kibana and Elasticsearch privileges (see Scout docs to create reusable login methods)
+
+      Is '${nonExistingRole}' a predefined role? (e.g., admin, viewer, editor) → Add the role descriptor to ${
+        supportedRoles.sourcePath
+      } to enable it for testing.`;
       const samlSessionManager = new SamlSessionManager({
         ...samlSessionManagerOptions,
         supportedRoles,
@@ -369,9 +376,15 @@ describe('SamlSessionManager', () => {
 
     test(`throws error for non-existing role when 'supportedRoles' is defined`, async () => {
       const nonExistingRole = 'tester';
-      const expectedErrorMessage = `Role '${nonExistingRole}' is not in the supported list: ${supportedRoles.roles.join(
-        ', '
-      )}. Add role descriptor in ${supportedRoles.sourcePath} to enable it for testing`;
+      const expectedErrorMessage = `Role '${nonExistingRole}' not found in ${
+        supportedRoles.sourcePath
+      }. Available predefined roles: ${supportedRoles.roles.join(', ')}
+
+      Is '${nonExistingRole}' a custom test role? → Use loginWithCustomRole() to log in with custom Kibana and Elasticsearch privileges (see Scout docs to create reusable login methods)
+
+      Is '${nonExistingRole}' a predefined role? (e.g., admin, viewer, editor) → Add the role descriptor to ${
+        supportedRoles.sourcePath
+      } to enable it for testing.`;
       const samlSessionManager = new SamlSessionManager({
         ...samlSMOptionsWithCloudHostName,
         supportedRoles,

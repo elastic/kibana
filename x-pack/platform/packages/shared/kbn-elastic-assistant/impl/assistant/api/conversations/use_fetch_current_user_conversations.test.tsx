@@ -7,17 +7,15 @@
 
 import { waitFor, renderHook } from '@testing-library/react';
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { ReactNode } from 'react';
 import React from 'react';
-import {
-  UseFetchCurrentUserConversationsParams,
-  useFetchCurrentUserConversations,
-} from './use_fetch_current_user_conversations';
-import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
+import type { UseFetchCurrentUserConversationsParams } from './use_fetch_current_user_conversations';
+import { useFetchCurrentUserConversations } from './use_fetch_current_user_conversations';
+import { welcomeConvo } from '../../../mock/conversation';
 
 const http = {
-  fetch: jest.fn().mockResolvedValue(defaultAssistantFeatures),
+  fetch: jest.fn().mockResolvedValue({ page: 1, perPage: 28, total: 0, data: [welcomeConvo] }),
 };
 const defaultProps = {
   http,
@@ -50,11 +48,61 @@ describe('useFetchCurrentUserConversations', () => {
             per_page: 28,
             sort_field: 'updated_at',
             sort_order: 'desc',
+            is_owner: false,
           },
           version: '2023-10-31',
           signal: undefined,
         }
       );
+    });
+  });
+  it(`should enhance the response with isConversationOwner=true when no currentUser`, async () => {
+    const { result } = renderHook(() => useFetchCurrentUserConversations(defaultProps), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(result.current.data).toEqual({
+        [welcomeConvo.id]: {
+          ...welcomeConvo,
+          isConversationOwner: true,
+        },
+      });
+    });
+  });
+  it(`should enhance the response with isConversationOwner=true when current user is conversation user`, async () => {
+    const { result } = renderHook(
+      () =>
+        useFetchCurrentUserConversations({ ...defaultProps, currentUser: welcomeConvo.createdBy }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
+
+    await waitFor(() => {
+      expect(result.current.data).toEqual({
+        [welcomeConvo.id]: {
+          ...welcomeConvo,
+          isConversationOwner: true,
+        },
+      });
+    });
+  });
+  it(`should enhance the response with isConversationOwner=false when current user is not conversation user`, async () => {
+    const { result } = renderHook(
+      () => useFetchCurrentUserConversations({ ...defaultProps, currentUser: { name: 'nobody' } }),
+      {
+        wrapper: createWrapper(),
+      }
+    );
+
+    await waitFor(() => {
+      expect(result.current.data).toEqual({
+        [welcomeConvo.id]: {
+          ...welcomeConvo,
+          isConversationOwner: false,
+        },
+      });
     });
   });
 });

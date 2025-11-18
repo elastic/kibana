@@ -7,16 +7,22 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { AggregateQuery, Filter, FilterStateStore, Query } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import { FilterStateStore } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import { FiltersNotificationActionApi } from './filters_notification_action';
+import type { FiltersNotificationActionApi } from './filters_notification_action';
 import { FiltersNotificationPopover } from './filters_notification_popover';
-import { ViewMode } from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
+
+// Mock FilterItems to avoid expensive rendering and lazy-loading delays in tests
+jest.mock('@kbn/unified-search-plugin/public', () => ({
+  FilterItems: () => <div data-test-subj="mocked-filter-items">Mocked FilterItems</div>,
+}));
 
 const canEditUnifiedSearch = jest.fn().mockReturnValue(true);
 

@@ -734,7 +734,7 @@
         "label": "JsonEditorWithMessageVariables",
         "description": [],
         "signature": [
-          "({ buttonTitle, messageVariables, paramsProperty, inputTargetValue, label, errors, ariaLabel, onDocumentsChange, helpText, onBlur, showButtonTitle, dataTestSubj, euiCodeEditorProps, isOptionalField, }: Props) => React.JSX.Element"
+          "({ buttonTitle, messageVariables, paramsProperty, inputTargetValue, label, errors, ariaLabel, onDocumentsChange, helpText, onBlur, showButtonTitle, dataTestSubj, euiCodeEditorProps, isOptionalField, readOnly, }: Props) => React.JSX.Element"
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/components/json_editor_with_message_variables.tsx",
         "deprecated": false,
@@ -745,7 +745,7 @@
             "id": "def-public.JsonEditorWithMessageVariables.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  buttonTitle,\n  messageVariables,\n  paramsProperty,\n  inputTargetValue,\n  label,\n  errors,\n  ariaLabel,\n  onDocumentsChange,\n  helpText,\n  onBlur,\n  showButtonTitle,\n  dataTestSubj,\n  euiCodeEditorProps = {},\n  isOptionalField = false,\n}",
+            "label": "{\n  buttonTitle,\n  messageVariables,\n  paramsProperty,\n  inputTargetValue,\n  label,\n  errors,\n  ariaLabel,\n  onDocumentsChange,\n  helpText,\n  onBlur,\n  showButtonTitle,\n  dataTestSubj,\n  euiCodeEditorProps = {},\n  isOptionalField = false,\n  readOnly = false,\n}",
             "description": [],
             "signature": [
               "Props"
@@ -1971,6 +1971,33 @@
             "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionType.isDeprecated",
+            "type": "boolean",
+            "tags": [],
+            "label": "isDeprecated",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionType.validate",
+            "type": "Object",
+            "tags": [],
+            "label": "validate",
+            "description": [],
+            "signature": [
+              "{ params: ",
+              "PublicValidatorType",
+              "; } | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/actions/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -2068,7 +2095,7 @@
             "label": "validateParams",
             "description": [],
             "signature": [
-              "(actionParams: ActionParams) => Promise<",
+              "(actionParams: ActionParams, connectorConfig: ActionConfig | null) => Promise<",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
                 "scope": "public",
@@ -2096,6 +2123,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.ActionTypeModel.validateParams.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "connectorConfig",
+                "description": [],
+                "signature": [
+                  "ActionConfig | null"
+                ],
+                "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -2296,17 +2338,50 @@
           },
           {
             "parentPluginId": "triggersActionsUi",
-            "id": "def-public.ActionTypeModel.hideInUi",
-            "type": "CompoundType",
+            "id": "def-public.ActionTypeModel.getHideInUi",
+            "type": "Function",
             "tags": [],
-            "label": "hideInUi",
+            "label": "getHideInUi",
             "description": [],
             "signature": [
-              "boolean | undefined"
+              "((actionTypes: ",
+              {
+                "pluginId": "@kbn/actions-types",
+                "scope": "common",
+                "docId": "kibKbnActionsTypesPluginApi",
+                "section": "def-common.ActionType",
+                "text": "ActionType"
+              },
+              "[]) => boolean) | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "triggersActionsUi",
+                "id": "def-public.ActionTypeModel.getHideInUi.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "actionTypes",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/actions-types",
+                    "scope": "common",
+                    "docId": "kibKbnActionsTypesPluginApi",
+                    "section": "def-common.ActionType",
+                    "text": "ActionType"
+                  },
+                  "[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           },
           {
             "parentPluginId": "triggersActionsUi",
@@ -2345,6 +2420,58 @@
             "description": [],
             "signature": [
               "\"endpointSecurity\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.ActionTypeModel.connectorForm",
+            "type": "Object",
+            "tags": [],
+            "label": "connectorForm",
+            "description": [
+              "\nConnector form config"
+            ],
+            "signature": [
+              "{ deserializer?: ",
+              "SerializerFunc",
+              "<",
+              {
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "public",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-public.InternalConnectorForm",
+                "text": "InternalConnectorForm"
+              },
+              ", ",
+              {
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "public",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-public.ConnectorFormSchema",
+                "text": "ConnectorFormSchema"
+              },
+              "<Record<string, unknown>, Record<string, unknown>>> | undefined; serializer?: ",
+              "SerializerFunc",
+              "<",
+              {
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "public",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-public.ConnectorFormSchema",
+                "text": "ConnectorFormSchema"
+              },
+              "<Record<string, unknown>, Record<string, unknown>>, ",
+              {
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "public",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-public.InternalConnectorForm",
+                "text": "InternalConnectorForm"
+              },
+              "> | undefined; hideSettingsTitle?: boolean | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
             "deprecated": false,
@@ -3616,6 +3743,17 @@
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTableItem.isInternallyManaged",
+            "type": "boolean",
+            "tags": [],
+            "label": "isInternallyManaged",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3643,7 +3781,7 @@
             "section": "def-common.RuleType",
             "text": "RuleType"
           },
-          "<ActionGroupIds, RecoveryActionGroupId>, \"id\" | \"name\" | \"recoveryActionGroup\" | \"actionGroups\" | \"defaultActionGroupId\" | \"category\" | \"producer\" | \"minimumLicenseRequired\" | \"isExportable\" | \"defaultScheduleInterval\" | \"ruleTaskTimeout\" | \"doesSetRecoveryContext\" | \"autoRecoverAlerts\">"
+          "<ActionGroupIds, RecoveryActionGroupId>, \"id\" | \"name\" | \"minimumLicenseRequired\" | \"recoveryActionGroup\" | \"actionGroups\" | \"defaultActionGroupId\" | \"category\" | \"producer\" | \"isExportable\" | \"defaultScheduleInterval\" | \"ruleTaskTimeout\" | \"doesSetRecoveryContext\" | \"autoRecoverAlerts\">"
         ],
         "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
         "deprecated": false,
@@ -3701,6 +3839,17 @@
             "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleType.isInternallyManaged",
+            "type": "boolean",
+            "tags": [],
+            "label": "isInternallyManaged",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-triggers-actions-ui-types/rule_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3744,6 +3893,21 @@
             "tags": [],
             "label": "description",
             "description": [],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeModel.getDescriptionFields",
+            "type": "Function",
+            "tags": [],
+            "label": "getDescriptionFields",
+            "description": [],
+            "signature": [
+              "GetDescriptionFieldsFn",
+              "<Params> | undefined"
+            ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3934,6 +4098,20 @@
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "triggersActionsUi",
+            "id": "def-public.RuleTypeModel.isInternallyManaged",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isInternallyManaged",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -4078,7 +4256,7 @@
             "label": "setRuleProperty",
             "description": [],
             "signature": [
-              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"monitoring\" | \"tags\" | \"actions\" | \"enabled\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"artifacts\" | \"ruleTypeId\">(key: Prop, value: ",
+              "<Prop extends \"params\" | \"id\" | \"consumer\" | \"name\" | \"enabled\" | \"monitoring\" | \"tags\" | \"actions\" | \"schedule\" | \"mapped_params\" | \"scheduledTaskId\" | \"createdBy\" | \"updatedBy\" | \"createdAt\" | \"updatedAt\" | \"apiKeyOwner\" | \"apiKeyCreatedByUser\" | \"throttle\" | \"muteAll\" | \"notifyWhen\" | \"mutedInstanceIds\" | \"executionStatus\" | \"snoozeSchedule\" | \"activeSnoozes\" | \"isSnoozedUntil\" | \"lastRun\" | \"nextRun\" | \"revision\" | \"running\" | \"viewInAppRelativeUrl\" | \"alertDelay\" | \"flapping\" | \"artifacts\" | \"ruleTypeId\">(key: Prop, value: ",
               "SanitizedRule",
               "<Params>[Prop] | null) => void"
             ],
@@ -5133,21 +5311,6 @@
       },
       {
         "parentPluginId": "triggersActionsUi",
-        "id": "def-public.ALERT_HISTORY_PREFIX",
-        "type": "string",
-        "tags": [],
-        "label": "ALERT_HISTORY_PREFIX",
-        "description": [],
-        "signature": [
-          "\"kibana-alert-history-\""
-        ],
-        "path": "x-pack/platform/plugins/shared/actions/common/alert_history_schema.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "triggersActionsUi",
         "id": "def-public.AlertHistoryDefaultIndexName",
         "type": "string",
         "tags": [],
@@ -5247,9 +5410,7 @@
         "type": "Type",
         "tags": [],
         "label": "ConnectorFormSchema",
-        "description": [
-          "\nThe following type is equivalent to:\n\ninterface ConnectorFormSchema<Config, Secrets> {\n id?: string,\n name?: string,\n actionTypeId: string,\n isDeprecated: boolean,\n config: Config,\n secrets: Secrets,\n}"
-        ],
+        "description": [],
         "signature": [
           "Pick<",
           {
@@ -5269,7 +5430,7 @@
           },
           "<Config, Secrets>, \"id\" | \"name\">>"
         ],
-        "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/action_connector_form/types.ts",
+        "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5370,7 +5531,7 @@
         "label": "RuleStatus",
         "description": [],
         "signature": [
-          "\"disabled\" | \"enabled\" | \"snoozed\""
+          "\"enabled\" | \"disabled\" | \"snoozed\""
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/types.ts",
         "deprecated": false,
@@ -6388,6 +6549,21 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "triggersActionsUi",
+        "id": "def-public.RULE_PREBUILD_DESCRIPTION_FIELDS",
+        "type": "Object",
+        "tags": [],
+        "label": "RULE_PREBUILD_DESCRIPTION_FIELDS",
+        "description": [],
+        "signature": [
+          "{ readonly INDEX_PATTERN: \"indexPattern\"; readonly CUSTOM_QUERY: \"customQuery\"; readonly ESQL_QUERY: \"esqlQuery\"; readonly DATA_VIEW_ID: \"dataViewId\"; readonly DATA_VIEW_INDEX_PATTERN: \"dataViewIndexPattern\"; readonly QUERY_FILTERS: \"queryFilters\"; readonly KQL_FILTERS: \"kqlFilters\"; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/application/sections/rule_details/components/rule_detail_description_type.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -7439,7 +7615,7 @@
         "label": "buildAggregation",
         "description": [],
         "signature": [
-          "({ timeSeries, aggType, aggField, termField, termSize, sourceFieldsParams, condition, topHitsSize, loggerCb, }: ",
+          "({ timeSeries, aggType, aggField, termField, termSize, condition, topHitsSize, loggerCb, }: ",
           {
             "pluginId": "triggersActionsUi",
             "scope": "common",
@@ -7460,7 +7636,7 @@
             "id": "def-common.buildAggregation.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  timeSeries,\n  aggType,\n  aggField,\n  termField,\n  termSize,\n  sourceFieldsParams,\n  condition,\n  topHitsSize,\n  loggerCb,\n}",
+            "label": "{\n  timeSeries,\n  aggType,\n  aggField,\n  termField,\n  termSize,\n  condition,\n  topHitsSize,\n  loggerCb,\n}",
             "description": [],
             "signature": [
               {
@@ -7708,20 +7884,6 @@
             "description": [],
             "signature": [
               "string | string[] | undefined"
-            ],
-            "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/build_agg.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "triggersActionsUi",
-            "id": "def-common.BuildAggregationOpts.sourceFieldsParams",
-            "type": "Array",
-            "tags": [],
-            "label": "sourceFieldsParams",
-            "description": [],
-            "signature": [
-              "{ label: string; searchPath: string; }[] | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/common/data/lib/build_agg.ts",
             "deprecated": false,

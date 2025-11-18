@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -58,5 +58,7 @@
     "@kbn/usage-collection-plugin",
     "@kbn/discover-utils",
     "@kbn/xstate-utils",
+    "@kbn/ml-plugin",
+    "@kbn/saved-search-component",
   ]
 }

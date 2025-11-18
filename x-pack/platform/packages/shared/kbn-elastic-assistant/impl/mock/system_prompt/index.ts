@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PromptResponse } from '@kbn/elastic-assistant-common';
-import { SystemPromptSettings } from '../../assistant/settings/use_settings_updater/use_system_prompt_updater';
+import type { PromptResponse } from '@kbn/elastic-assistant-common';
+import type { SystemPromptSettings } from '../../assistant/settings/use_settings_updater/use_system_prompt_updater';
 
 export const mockSystemPrompt: PromptResponse = {
   id: 'mock-system-prompt-1',

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiFlyoutProps } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
@@ -18,6 +19,7 @@ export interface CategorizeFieldContext {
     to: number;
     field?: { name: string; value: string };
   };
+  focusTrapProps?: EuiFlyoutProps['focusTrapProps'];
 }
 
 export const ACTION_CATEGORIZE_FIELD = 'ACTION_CATEGORIZE_FIELD';

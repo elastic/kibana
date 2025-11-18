@@ -9,7 +9,7 @@
 
 import { execSync } from 'child_process';
 import { appendFile, readFile, writeFile } from 'fs/promises';
-import { join } from 'path';
+import Path from 'path';
 import { getGithubClient } from '#pipeline-utils';
 
 const octokit = getGithubClient();
@@ -66,27 +66,30 @@ async function getDependenciesDiff() {
 
 async function main() {
   // Skipping PRs from Renovate
-  if (process.env.GIT_BRANCH?.startsWith('renovate')) {
+  if (process.env.GIT_BRANCH?.startsWith('elastic:renovate')) {
     return;
   }
 
-  const changedFiles = execSync(
-    `git diff --name-only --diff-filter=M ${process.env.GITHUB_PR_MERGE_BASE} HEAD`
+  const packageJsonPath = Path.join(__dirname, '../../../../package.json');
+  const thirdPartyPackagesPath = Path.join(__dirname, './third_party_packages.txt');
+
+  const diffOutput = execSync(
+    `git diff --name-only --diff-filter=M ${process.env.GITHUB_PR_MERGE_BASE} HEAD -- ${packageJsonPath} ${thirdPartyPackagesPath}`
   )
     .toString()
-    .trim()
-    .split('\n');
+    .trim();
 
-  const packageJsonChanged = changedFiles.some((file) => file === 'package.json');
-  const dependenciesAdded = changedFiles.some((file) => file.match('third_party_packages.txt'));
-  const filePath = join(__dirname, 'third_party_packages.txt');
+  const changedFiles = diffOutput ? diffOutput.split('\n') : [];
+
+  const packageJsonChanged = changedFiles.includes('package.json');
+  const dependenciesAdded = changedFiles.includes(thirdPartyPackagesPath);
 
   // Reverting changes (if dependency was added, then removed in the same PR)
   if (!packageJsonChanged && dependenciesAdded) {
-    console.info(`Reverting changes for ${filePath}`);
+    console.info(`Reverting changes for ${thirdPartyPackagesPath}`);
 
     try {
-      execSync(`git cat-file -e ${process.env.GITHUB_PR_MERGE_BASE}:${filePath}`, {
+      execSync(`git cat-file -e ${process.env.GITHUB_PR_MERGE_BASE}:${thirdPartyPackagesPath}`, {
         stdio: 'ignore',
       });
     } catch (error) {
@@ -94,7 +97,7 @@ async function main() {
       return;
     }
 
-    execSync(`git checkout ${process.env.GITHUB_PR_MERGE_BASE} -- ${filePath}`);
+    execSync(`git checkout ${process.env.GITHUB_PR_MERGE_BASE} -- ${thirdPartyPackagesPath}`);
 
     return;
   }
@@ -106,7 +109,7 @@ async function main() {
     return;
   }
 
-  const existingContent = await readFile(filePath, 'utf8');
+  const existingContent = await readFile(thirdPartyPackagesPath, 'utf8');
 
   const existingLines = new Set(existingContent.split('\n').filter(Boolean));
 
@@ -115,7 +118,7 @@ async function main() {
 
     if (newEntries.length) {
       const data = newEntries.join('\n') + '\n';
-      await appendFile(filePath, data);
+      await appendFile(thirdPartyPackagesPath, data);
     }
 
     return;
@@ -125,7 +128,7 @@ async function main() {
     (line) => !removed.includes(line)
   );
 
-  await writeFile(filePath, updatedLines.join('\n') + '\n');
+  await writeFile(thirdPartyPackagesPath, updatedLines.join('\n') + '\n');
 }
 
 main();

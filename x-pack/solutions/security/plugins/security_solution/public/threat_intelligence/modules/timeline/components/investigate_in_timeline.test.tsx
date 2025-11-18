@@ -14,26 +14,23 @@ import {
 } from '../../../../../common/threat_intelligence/types/indicator';
 import { TestProvidersComponent } from '../../../mocks/test_providers';
 import {
-  InvestigateInTimelineContextMenu,
   InvestigateInTimelineButtonIcon,
+  InvestigateInTimelineContextMenu,
 } from './investigate_in_timeline';
 import { EMPTY_VALUE } from '../../../constants/common';
-import { useSecurityContext } from '../../../hooks/use_security_context';
-import type { SecuritySolutionPluginContext } from '../../../types';
 import { useInvestigateInTimeline } from '../../../hooks/use_investigate_in_timeline';
+import { extractTimelineCapabilities } from '../../../../common/utils/timeline_capabilities';
 
 const TEST_ID = 'test';
 
-jest.mock('../../../hooks/use_security_context', () => ({ useSecurityContext: jest.fn() }));
+jest.mock('../../../../common/utils/timeline_capabilities');
 jest.mock('../../../hooks/use_investigate_in_timeline', () => ({
   useInvestigateInTimeline: jest.fn(),
 }));
 
 describe('<InvestigateInTimelineContextMenu /> <InvestigateInTimelineButtonIcon />', () => {
   beforeEach(() => {
-    jest.mocked(useSecurityContext).mockReturnValue({
-      hasAccessToTimeline: true,
-    } as unknown as SecuritySolutionPluginContext);
+    (extractTimelineCapabilities as jest.Mock).mockReturnValue({ read: true });
 
     jest
       .mocked(useInvestigateInTimeline)
@@ -106,9 +103,7 @@ describe('<InvestigateInTimelineContextMenu /> <InvestigateInTimelineButtonIcon 
   it('should render an empty component when the user does not have access to timeline', () => {
     const mockData: Indicator = generateMockUrlIndicator();
 
-    jest.mocked(useSecurityContext).mockReturnValue({
-      hasAccessToTimeline: false,
-    } as unknown as SecuritySolutionPluginContext);
+    (extractTimelineCapabilities as jest.Mock).mockReturnValue({ read: false });
 
     const { container } = render(
       <TestProvidersComponent>

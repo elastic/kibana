@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { PopoverAnchorPosition } from '@elastic/eui';
 import { DocLink } from '../../../../../common/components/links_to_docs/doc_link';
 import { SecurityPageName } from '../../../../../../common/constants';
-import { SIEM_MIGRATIONS_SELECT_MIGRATION_BUTTON_ID } from '../../header_buttons';
+import { SIEM_MIGRATIONS_SELECT_MIGRATION_BUTTON_ID } from '../../../../common/components';
 import { SIEM_MIGRATIONS_STATUS_HEADER_ID } from '../../rules_table_columns';
 import * as i18n from './translations';
 
@@ -44,7 +44,7 @@ export const tourSteps: {
     content: (
       <FormattedMessage
         id="xpack.securitySolution.siemMigrations.rules.tour.statusStepContent"
-        defaultMessage="{installed} rules have a check mark. Click {view} to access rule details. {translated} rules are ready to {install}, or for your to {edit}. Rules with errors can be {reprocessed}.
+        defaultMessage="{installed} rules have a check mark. Click {view} to access rule details. {translated} rules are ready to {install}, or for you to {edit}. Rules with errors can be {reprocessed}.
         {lineBreak}{lineBreak}
         Learn more about our {link}"
         values={{

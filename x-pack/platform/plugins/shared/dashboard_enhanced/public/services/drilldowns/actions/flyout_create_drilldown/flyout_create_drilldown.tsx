@@ -11,7 +11,7 @@ import {
 } from '@kbn/embeddable-enhanced-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { type PresentationContainer } from '@kbn/presentation-containers';
 import { openLazyFlyout } from '@kbn/presentation-util';
 import {
@@ -30,8 +30,8 @@ import {
 } from '@kbn/presentation-publishing';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import React from 'react';
-import { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
-import { StartDependencies } from '../../../../plugin';
+import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
+import type { StartDependencies } from '../../../../plugin';
 import {
   createDrilldownTemplatesFromSiblings,
   DRILLDOWN_ACTION_GROUP,

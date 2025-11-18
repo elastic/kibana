@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { ActionsCommonServiceProvider } from './common';
 import { ActionsOpsgenieServiceProvider } from './opsgenie';
 import { ActionsTinesServiceProvider } from './tines';
 import { ActionsAPIServiceProvider } from './api';
 import { ActionsSlackServiceProvider } from './slack';
+import { ActionsJsmServiceProvider } from './jsm';
+import { ActionsWebhookServiceProvider } from './webhook';
 
 export function ActionsServiceProvider(context: FtrProviderContext) {
   const common = ActionsCommonServiceProvider(context);
@@ -19,7 +21,9 @@ export function ActionsServiceProvider(context: FtrProviderContext) {
     api: ActionsAPIServiceProvider(context),
     common: ActionsCommonServiceProvider(context),
     opsgenie: ActionsOpsgenieServiceProvider(context, common),
+    jsm: ActionsJsmServiceProvider(context, common),
     tines: ActionsTinesServiceProvider(context, common),
     slack: ActionsSlackServiceProvider(context, common),
+    webhook: ActionsWebhookServiceProvider(context, common),
   };
 }

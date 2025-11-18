@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useQuerySubscriber } from '@kbn/unified-field-list/src/hooks/use_query_subscriber';
 import type {
   UnifiedHistogramApi,
   UnifiedHistogramState,
@@ -98,7 +97,7 @@ export const useDiscoverHistogram = (
       unifiedHistogramApi?.state$
     )?.subscribe((changes) => {
       const { lensRequestAdapter, ...stateChanges } = changes;
-      const appState = stateContainer.appState.getState();
+      const appState = stateContainer.appState.get();
       const oldState = {
         hideChart: appState.hideChart,
         interval: appState.interval,
@@ -207,12 +206,13 @@ export const useDiscoverHistogram = (
   /**
    * Request params
    */
-  const { query, filters } = useQuerySubscriber({ data: services.data });
   const requestParams = useCurrentTabSelector((state) => state.dataRequestParams);
+  const currentTabControlState = useCurrentTabSelector((tab) => tab.controlGroupState);
   const {
     timeRangeRelative: relativeTimeRange,
     timeRangeAbsolute: timeRange,
     searchSessionId,
+    lastReloadRequestTime,
   } = requestParams;
   // When in ES|QL mode, update the data view, query, and
   // columns only when documents are done fetching so the Lens suggestions
@@ -299,13 +299,18 @@ export const useDiscoverHistogram = (
 
   const histogramCustomization = useDiscoverCustomization('unified_histogram');
 
+  const query = useAppStateSelector((state) => state.query);
+  const appFilters = useAppStateSelector((state) => state.filters);
+  const { filters: globalFilters } = useCurrentTabSelector((state) => state.globalState);
+
   const filtersMemoized = useMemo(() => {
-    const allFilters = [...(filters ?? [])];
+    const allFilters = [...(globalFilters ?? []), ...(appFilters ?? [])];
     return allFilters.length ? allFilters : EMPTY_FILTERS;
-  }, [filters]);
+  }, [appFilters, globalFilters]);
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const timeRangeMemoized = useMemo(() => timeRange, [timeRange?.from, timeRange?.to]);
+
   const setOverriddenVisContextAfterInvalidation = useCurrentTabAction(
     internalStateActions.setOverriddenVisContextAfterInvalidation
   );
@@ -371,6 +376,7 @@ export const useDiscoverHistogram = (
   const chartHidden = useAppStateSelector((state) => state.hideChart);
   const timeInterval = useAppStateSelector((state) => state.interval);
   const breakdownField = useAppStateSelector((state) => state.breakdownField);
+  const esqlVariables = useCurrentTabSelector((tab) => tab.esqlVariables);
 
   const onBreakdownFieldChange = useCallback<
     NonNullable<UseUnifiedHistogramProps['onBreakdownFieldChange']>
@@ -398,9 +404,10 @@ export const useDiscoverHistogram = (
     },
     dataView: isEsqlMode ? esqlDataView : dataView,
     query: isEsqlMode ? esqlQuery : query,
-    filters: filtersMemoized,
+    filters: isEsqlMode ? EMPTY_FILTERS : filtersMemoized,
     timeRange: timeRangeMemoized,
     relativeTimeRange,
+    lastReloadRequestTime,
     columns: isEsqlMode ? esqlColumns : undefined,
     table: isEsqlMode ? table : undefined,
     onFilter: histogramCustomization?.onFilter,
@@ -415,6 +422,8 @@ export const useDiscoverHistogram = (
         : undefined,
     onVisContextChanged: isEsqlMode ? onVisContextChanged : undefined,
     breakdownField,
+    esqlVariables,
+    controlsState: currentTabControlState,
     onBreakdownFieldChange,
     searchSessionId,
     getModifiedVisAttributes,
@@ -484,6 +493,12 @@ const createFetchCompleteObservable = (stateContainer: DiscoverStateContainer) =
   return stateContainer.dataState.data$.documents$.pipe(
     distinctUntilChanged((prev, curr) => prev.fetchStatus === curr.fetchStatus),
     filter(({ fetchStatus }) => [FetchStatus.COMPLETE, FetchStatus.ERROR].includes(fetchStatus)),
+    filter(({ fetchStatus }) => {
+      const isAlreadyAborted = stateContainer.dataState.getAbortController()?.signal.aborted;
+      // skip updating the histogram props if the fetch was aborted
+      // this will prevent the redundant histogram fetching
+      return !(fetchStatus === FetchStatus.ERROR && isAlreadyAborted);
+    }),
     map((documentsValue) => {
       return getUnifiedHistogramPropsForEsql({
         documentsValue,

@@ -9,27 +9,47 @@ import { useCallback } from 'react';
 import { ONECHAT_APP_ID } from '../../../common/features';
 import { useKibana } from './use_kibana';
 
+export interface LocationState {
+  shouldStickToBottom?: boolean;
+}
+
 export const useNavigation = () => {
   const {
     services: { application },
   } = useKibana();
 
   const navigateToOnechatUrl = useCallback(
-    (path: string) => {
-      application.navigateToApp(ONECHAT_APP_ID, { path });
+    (path: string, params?: Record<string, string>, state?: LocationState) => {
+      const queryParams = new URLSearchParams(params);
+      application.navigateToApp(ONECHAT_APP_ID, {
+        path: queryParams.size ? `${path}?${queryParams}` : path,
+        state,
+      });
     },
     [application]
   );
 
   const createOnechatUrl = useCallback(
-    (path: string) => {
-      return application.getUrlForApp(ONECHAT_APP_ID, { path });
+    (path: string, params?: Record<string, string>) => {
+      const queryParams = new URLSearchParams(params);
+      return application.getUrlForApp(ONECHAT_APP_ID, {
+        path: queryParams.size ? `${path}?${queryParams}` : path,
+      });
     },
+    [application]
+  );
+
+  const navigateToManageConnectors = useCallback(
+    () =>
+      application.navigateToApp('management', {
+        path: '/insightsAndAlerting/triggersActionsConnectors/connectors',
+      }),
     [application]
   );
 
   return {
     createOnechatUrl,
     navigateToOnechatUrl,
+    navigateToManageConnectors,
   };
 };

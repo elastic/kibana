@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { $Values } from '@kbn/utility-types';
+import type { $Values } from '@kbn/utility-types';
 import { FtrService } from '../ftr_provider_context';
 
 export const Operation = {

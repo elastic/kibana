@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { RuleType } from '@kbn/alerting-plugin/server';
+import type { RuleType } from '@kbn/alerting-plugin/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import {
-  DegradedDocsRuleParams,
-  degradedDocsParamsSchema,
-} from '@kbn/response-ops-rule-params/degraded_docs';
+import type { DegradedDocsRuleParams } from '@kbn/response-ops-rule-params/degraded_docs';
+import { degradedDocsParamsSchema } from '@kbn/response-ops-rule-params/degraded_docs';
 import {
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -20,14 +18,13 @@ import {
   DEGRADED_DOCS_RULE_TYPE_ID,
   STACK_ALERTS_FEATURE_ID,
 } from '@kbn/rule-data-utils';
-import { LocatorClient } from '@kbn/share-plugin/common/url_service';
-import {
-  DATASET_QUALITY_REGISTRATION_CONTEXT,
+import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
+import type {
   DatasetQualityAlert,
   DatasetQualityAlertContext,
   DatasetQualityAllowedActionGroups,
-  THRESHOLD_MET_GROUP,
 } from '../types';
+import { DATASET_QUALITY_REGISTRATION_CONTEXT, THRESHOLD_MET_GROUP } from '../types';
 import { getRuleExecutor } from './executor';
 
 export function DegradedDocsRuleType(

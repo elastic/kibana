@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SearchSourceSearchOptions } from '../../search_source/types';
+import type { SearchSourceSearchOptions } from '../../search_source/types';
 
 export const ENHANCED_ES_SEARCH_STRATEGY = 'ese';
 

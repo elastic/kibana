@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { TypeOf } from '@kbn/config-schema';
-import { SavedDashboardPanel as SavedDashboardPanelV2 } from '../v2';
-import { dashboardAttributesSchema, gridDataSchema, sectionSchema } from './v3';
+import type { TypeOf } from '@kbn/config-schema';
+import type { SavedDashboardPanel as SavedDashboardPanelV2 } from '../v2';
+import type { dashboardAttributesSchema, gridDataSchema, sectionSchema } from './v3';
 
 export type DashboardAttributes = TypeOf<typeof dashboardAttributesSchema>;
 export type GridData = TypeOf<typeof gridDataSchema>;

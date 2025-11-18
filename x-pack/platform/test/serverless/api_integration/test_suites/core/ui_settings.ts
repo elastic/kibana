@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { SupertestWithRoleScopeType } from '../../services';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { SupertestWithRoleScopeType } from '../../services';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 // To test setting validations we are using the existing 'defaultColumns' setting that is available in all serverless projects
 // (See list of common serverless settings in /src/platform/packages/private/serverless/settings/common/index.ts)

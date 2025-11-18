@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { estypes } from '@elastic/elasticsearch';
-import { KUBERNETES_POD_UID_FIELD, HOST_NAME_FIELD, CONTAINER_ID_FIELD } from '../constants';
+import { KUBERNETES_POD_UID, HOST_NAME, CONTAINER_ID } from '../constants';
 import { host } from './host';
 import { pod } from './kubernetes/pod';
 import { awsEC2 } from './aws_ec2';
@@ -50,11 +50,11 @@ const LEGACY_TYPES = ['host', 'pod', 'container'];
 export const getFieldByType = (type: InventoryItemType) => {
   switch (type) {
     case 'pod':
-      return KUBERNETES_POD_UID_FIELD;
+      return KUBERNETES_POD_UID;
     case 'host':
-      return HOST_NAME_FIELD;
+      return HOST_NAME;
     case 'container':
-      return CONTAINER_ID_FIELD;
+      return CONTAINER_ID;
   }
 };
 

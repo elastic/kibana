@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RulesClient } from '@kbn/alerting-plugin/server';
-import { AlertsClient } from '@kbn/rule-registry-plugin/server';
+import type { RulesClient } from '@kbn/alerting-plugin/server';
+import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import {
   ALERT_GROUP_FIELD,
   ALERT_GROUP_VALUE,

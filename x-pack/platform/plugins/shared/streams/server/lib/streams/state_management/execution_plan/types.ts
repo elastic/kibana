@@ -12,6 +12,7 @@ import type {
   IngestPutPipelineRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IngestStreamLifecycle, Streams } from '@kbn/streams-schema';
+import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
 
 export interface UpsertComponentTemplateAction {
   type: 'upsert_component_template';
@@ -74,10 +75,18 @@ export interface UpsertDatastreamAction {
   };
 }
 
-export interface UpsertWriteIndexOrRolloverAction {
-  type: 'upsert_write_index_or_rollover';
+export interface RolloverAction {
+  type: 'rollover';
   request: {
     name: string;
+  };
+}
+
+export interface UpdateDefaultIngestPipelineAction {
+  type: 'update_default_ingest_pipeline';
+  request: {
+    name: string;
+    pipeline: string | undefined;
   };
 }
 
@@ -86,6 +95,14 @@ export interface UpdateLifecycleAction {
   request: {
     name: string;
     lifecycle: IngestStreamLifecycle;
+  };
+}
+
+export interface UpdateDataStreamMappingsAction {
+  type: 'update_data_stream_mappings';
+  request: {
+    name: string;
+    mappings: StreamsMappingProperties;
   };
 }
 
@@ -115,6 +132,32 @@ export interface DeleteQueriesAction {
   };
 }
 
+export interface UnlinkAssetsAction {
+  type: 'unlink_assets';
+  request: {
+    name: string;
+  };
+}
+
+export interface UnlinkFeaturesAction {
+  type: 'unlink_features';
+  request: {
+    name: string;
+  };
+}
+
+export interface UpdateIngestSettingsAction {
+  type: 'update_ingest_settings';
+  request: {
+    name: string;
+    settings: {
+      'index.number_of_replicas'?: number | null;
+      'index.number_of_shards'?: number | null;
+      'index.refresh_interval': string | -1 | null;
+    };
+  };
+}
+
 export type ElasticsearchAction =
   | UpsertComponentTemplateAction
   | DeleteComponentTemplateAction
@@ -125,12 +168,17 @@ export type ElasticsearchAction =
   | AppendProcessorToIngestPipelineAction
   | DeleteProcessorFromIngestPipelineAction
   | UpsertDatastreamAction
-  | UpsertWriteIndexOrRolloverAction
+  | RolloverAction
   | UpdateLifecycleAction
   | DeleteDatastreamAction
+  | UpdateDefaultIngestPipelineAction
   | UpsertDotStreamsDocumentAction
   | DeleteDotStreamsDocumentAction
-  | DeleteQueriesAction;
+  | UpdateDataStreamMappingsAction
+  | DeleteQueriesAction
+  | UnlinkAssetsAction
+  | UnlinkFeaturesAction
+  | UpdateIngestSettingsAction;
 
 export interface ActionsByType {
   upsert_component_template: UpsertComponentTemplateAction[];
@@ -142,10 +190,15 @@ export interface ActionsByType {
   append_processor_to_ingest_pipeline: AppendProcessorToIngestPipelineAction[];
   delete_processor_from_ingest_pipeline: DeleteProcessorFromIngestPipelineAction[];
   upsert_datastream: UpsertDatastreamAction[];
-  upsert_write_index_or_rollover: UpsertWriteIndexOrRolloverAction[];
+  rollover: RolloverAction[];
+  update_default_ingest_pipeline: UpdateDefaultIngestPipelineAction[];
   update_lifecycle: UpdateLifecycleAction[];
   delete_datastream: DeleteDatastreamAction[];
   upsert_dot_streams_document: UpsertDotStreamsDocumentAction[];
   delete_dot_streams_document: DeleteDotStreamsDocumentAction[];
+  update_data_stream_mappings: UpdateDataStreamMappingsAction[];
   delete_queries: DeleteQueriesAction[];
+  unlink_assets: UnlinkAssetsAction[];
+  unlink_features: UnlinkFeaturesAction[];
+  update_ingest_settings: UpdateIngestSettingsAction[];
 }

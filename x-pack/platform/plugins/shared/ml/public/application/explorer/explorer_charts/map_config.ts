@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { VectorLayerDescriptor } from '@kbn/maps-plugin/common';
 import { FIELD_ORIGIN, LAYER_TYPE, STYLE_TYPE } from '@kbn/maps-plugin/common';
 import { getMlSeverityColorRampValue } from '@kbn/ml-anomaly-utils';
 import type { EuiThemeComputed } from '@elastic/eui';
@@ -85,7 +86,7 @@ export const getMLAnomaliesTypicalLayer = (anomalies: AnomaliesTableData['anomal
       },
     },
     type: LAYER_TYPE.GEOJSON_VECTOR,
-  };
+  } as VectorLayerDescriptor;
 };
 
 export const getMLAnomaliesActualLayer = (anomalies: any, euiTheme: EuiThemeComputed) => {
@@ -118,6 +119,9 @@ export const getMLAnomaliesActualLayer = (anomalies: any, euiTheme: EuiThemeComp
               name: 'record_score',
               origin: FIELD_ORIGIN.SOURCE,
             },
+            fieldMetaOptions: {
+              isEnabled: false,
+            },
             useCustomColorRamp: true,
           },
         },
@@ -142,5 +146,5 @@ export const getMLAnomaliesActualLayer = (anomalies: any, euiTheme: EuiThemeComp
       },
     },
     type: LAYER_TYPE.GEOJSON_VECTOR,
-  };
+  } as VectorLayerDescriptor;
 };

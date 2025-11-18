@@ -14,7 +14,7 @@ import { getOptionsListContextMock } from '../../mocks/api_mocks';
 import { OptionsListControlContext } from '../options_list_context_provider';
 import type { OptionsListComponentApi } from '../types';
 import { OptionsListPopoverActionBar } from './options_list_popover_action_bar';
-import { OptionsListDisplaySettings } from '../../../../../common/options_list';
+import type { OptionsListDisplaySettings } from '../../../../../common/options_list';
 import { MAX_OPTIONS_LIST_BULK_SELECT_SIZE } from '../constants';
 
 const allOptions = [
@@ -36,10 +36,12 @@ const renderComponent = ({
   componentApi,
   displaySettings,
   showOnlySelected,
+  disableMultiValueEmptySelection = false,
 }: {
   componentApi: OptionsListComponentApi;
   displaySettings: OptionsListDisplaySettings;
   showOnlySelected?: boolean;
+  disableMultiValueEmptySelection?: boolean;
 }) => {
   return render(
     <OptionsListControlContext.Provider
@@ -51,6 +53,7 @@ const renderComponent = ({
       <OptionsListPopoverActionBar
         showOnlySelected={showOnlySelected ?? false}
         setShowOnlySelected={() => {}}
+        disableMultiValueEmptySelection={disableMultiValueEmptySelection}
       />
     </OptionsListControlContext.Provider>
   );
@@ -137,6 +140,23 @@ describe('Options list popover', () => {
     contextMock.componentApi.setTotalCardinality(0);
     contextMock.componentApi.setAvailableOptions([]);
     renderComponent({ ...contextMock, showOnlySelected: true });
+
+    expect(getSelectAllCheckbox()).toBeDisabled();
+  });
+
+  test('bulk selections are disabled when multi-value empty selection is disabled and all options are selected', async () => {
+    const contextMock = getOptionsListContextMock();
+    contextMock.componentApi.setTotalCardinality(3);
+    contextMock.componentApi.setAvailableOptions([
+      { value: 'moo', docCount: 1 },
+      { value: 'miau', docCount: 2 },
+      { value: 'oink', docCount: 3 },
+    ]);
+    contextMock.componentApi.setSelectedOptions(['moo', 'miau', 'oink']);
+    renderComponent({
+      ...contextMock,
+      disableMultiValueEmptySelection: true,
+    });
 
     expect(getSelectAllCheckbox()).toBeDisabled();
   });

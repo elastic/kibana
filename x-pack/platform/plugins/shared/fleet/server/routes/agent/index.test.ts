@@ -12,6 +12,7 @@ import type { FleetRequestHandlerContext } from '../..';
 import { xpackMocks } from '../../mocks';
 import {
   BulkMigrateAgentsResponseSchema,
+  ChangeAgentPrivilegeLevelResponseSchema,
   DeleteAgentResponseSchema,
   DeleteAgentUploadFileResponseSchema,
   GetActionStatusResponseSchema,
@@ -59,6 +60,7 @@ import {
 import { postNewAgentActionHandlerBuilder } from './actions_handlers';
 
 import { bulkMigrateAgentsHandler, migrateSingleAgentHandler } from './migrate_handlers';
+import { changeAgentPrivilegeLevelHandler } from './change_privilege_level_handlers';
 jest.mock('./handlers', () => ({
   ...jest.requireActual('./handlers'),
   getAgentHandler: jest.fn(),
@@ -81,6 +83,10 @@ jest.mock('./handlers', () => ({
 jest.mock('./migrate_handlers', () => ({
   migrateSingleAgentHandler: jest.fn(),
   bulkMigrateAgentsHandler: jest.fn(),
+}));
+
+jest.mock('./change_privilege_level_handlers', () => ({
+  changeAgentPrivilegeLevelHandler: jest.fn(),
 }));
 
 jest.mock('./actions_handlers', () => ({
@@ -514,6 +520,22 @@ describe('schema validation', () => {
       body: expectedResponse,
     });
     const validationResp = BulkMigrateAgentsResponseSchema.validate(expectedResponse);
+    expect(validationResp).toEqual(expectedResponse);
+  });
+
+  it('change privilege level of single agent should return valid response', async () => {
+    const expectedResponse = {
+      actionId: 'change-privilege-action-123',
+    };
+    (changeAgentPrivilegeLevelHandler as jest.Mock).mockImplementation((ctx, request, res) => {
+      return res.ok({ body: expectedResponse });
+    });
+    await changeAgentPrivilegeLevelHandler(context, {} as any, response);
+
+    expect(response.ok).toHaveBeenCalledWith({
+      body: expectedResponse,
+    });
+    const validationResp = ChangeAgentPrivilegeLevelResponseSchema.validate(expectedResponse);
     expect(validationResp).toEqual(expectedResponse);
   });
 });

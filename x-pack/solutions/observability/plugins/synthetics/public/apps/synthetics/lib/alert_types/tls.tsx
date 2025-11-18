@@ -7,14 +7,15 @@
 
 import React from 'react';
 import { ALERT_REASON, SYNTHETICS_ALERT_RULE_TYPES } from '@kbn/rule-data-utils';
-import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
+import type { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
-import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import type { TLSRuleParams } from '@kbn/response-ops-rule-params/synthetics_tls';
 import { TlsTranslations } from '../../../../../common/rules/synthetics/translations';
 import { CERTIFICATES_ROUTE } from '../../../../../common/constants/ui';
 
 import type { AlertTypeInitializer } from './types';
+import { getDescriptionFields } from './get_description_fields';
 
 let validateFunc: (ruleParams: any) => ValidationResult;
 
@@ -55,4 +56,5 @@ export const initTlsAlertType: AlertTypeInitializer = ({
     reason: fields[ALERT_REASON] || '',
     link: `/app/synthetics${CERTIFICATES_ROUTE}`,
   }),
+  getDescriptionFields,
 });

@@ -9,25 +9,23 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import usePrevious from 'react-use/lib/usePrevious';
 import { isEqual } from 'lodash';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { DatatableColumn, ExpressionsStart } from '@kbn/expressions-plugin/public';
+import type { DatatableColumn, ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import type { FieldListGroupedProps, GetCustomFieldType } from '@kbn/unified-field-list';
 import {
   FieldList,
   FieldListFilters,
   FieldListGrouped,
-  FieldListGroupedProps,
   FieldsGroupNames,
-  GetCustomFieldType,
   useGroupedFields,
 } from '@kbn/unified-field-list';
-import { OverrideFieldGroupDetails } from '@kbn/unified-field-list/src/types';
+import type { OverrideFieldGroupDetails } from '@kbn/unified-field-list/src/types';
 import { useEuiTheme } from '@elastic/eui';
-import type { DatasourceDataPanelProps } from '../../../../types';
-import type { TextBasedPrivateState } from '../types';
+import type { DatasourceDataPanelProps, TextBasedPrivateState } from '@kbn/lens-common';
 import { getStateFromAggregateQuery } from '../utils';
 import { FieldItem } from '../../../common/field_item';
 import { getColumnsFromCache } from '../fieldlist_cache';
@@ -69,6 +67,7 @@ export function TextBasedDataPanel({
           dataViews,
           data,
           expressions,
+          core.http,
           frameDataViews
         );
         setDataHasLoaded(true);
@@ -76,7 +75,7 @@ export function TextBasedDataPanel({
       }
     }
     fetchData();
-  }, [data, dataViews, expressions, prevQuery, query, setState, state, frame.dataViews]);
+  }, [data, dataViews, expressions, prevQuery, query, setState, state, frame.dataViews, core.http]);
   const fieldList = isOfAggregateQueryType(query) ? getColumnsFromCache(query) : [];
 
   const onSelectedFieldFilter = useCallback(

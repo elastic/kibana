@@ -15,21 +15,23 @@ import { EuiFormRow, EuiLink, EuiSpacer } from '@elastic/eui';
 
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { CodeEditor } from '@kbn/code-editor';
-import { getFields, RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { getFields } from '@kbn/triggers-actions-ui-plugin/public';
 import { parseDuration } from '@kbn/alerting-plugin/common';
+import type { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
 import {
-  FieldOption,
   buildAggregation,
   parseAggregationResults,
   isGroupAggregation,
   isCountAggregation,
   BUCKET_SELECTOR_FIELD,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
-import { Comparator } from '../../../../common/comparator_types';
+import type { Comparator } from '../../../../common/comparator_types';
 import { getComparatorScript } from '../../../../common';
 import { hasExpressionValidationErrors } from '../validation';
 import { buildSortedEventsQuery } from '../../../../common/build_sorted_events_query';
-import { EsQueryRuleParams, EsQueryRuleMetaData, SearchType, SourceField } from '../types';
+import type { EsQueryRuleParams, EsQueryRuleMetaData } from '../types';
+import { SearchType } from '../types';
 import { IndexSelectPopover } from '../../components/index_select_popover';
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { RuleCommonExpressions } from '../rule_common_expressions';
@@ -58,7 +60,6 @@ export const EsQueryExpression: React.FC<
     termSize,
     termField,
     excludeHitsFromPreviousRun,
-    sourceFields,
   } = ruleParams;
 
   const [currentRuleParams, setCurrentRuleParams] = useState<EsQueryRuleParams<SearchType.esQuery>>(
@@ -76,7 +77,8 @@ export const EsQueryExpression: React.FC<
       searchType: SearchType.esQuery,
       excludeHitsFromPreviousRun:
         excludeHitsFromPreviousRun ?? DEFAULT_VALUES.EXCLUDE_PREVIOUS_HITS,
-      sourceFields,
+      // The sourceFields param is ignored
+      sourceFields: [],
     }
   );
 
@@ -362,11 +364,6 @@ export const EsQueryExpression: React.FC<
           [setParam]
         )}
         canSelectMultiTerms={DEFAULT_VALUES.CAN_SELECT_MULTI_TERMS}
-        onChangeSourceFields={useCallback(
-          (selectedSourceFields: SourceField[]) => setParam('sourceFields', selectedSourceFields),
-          [setParam]
-        )}
-        sourceFields={sourceFields}
       />
 
       <EuiSpacer />

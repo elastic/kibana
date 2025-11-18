@@ -7,9 +7,8 @@
 
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
-import type { FieldsConfiguration } from './types/types';
-import { FieldType } from './types/types';
 import { GEMINI, DOCUMENTATION_BASE as DOCUMENTATION } from './translations';
+import { FieldType, type InternalOverrideFieldsType } from './types/types';
 
 export enum ServiceProviderKeys {
   'alibabacloud-ai-search' = 'alibabacloud-ai-search',
@@ -30,6 +29,9 @@ export enum ServiceProviderKeys {
   openai = 'openai',
   voyageai = 'voyageai',
   watsonxai = 'watsonxai',
+  ai21 = 'ai21',
+  llama = 'llama',
+  contextualai = 'contextualai',
 }
 
 export const GEMINI_REGION_DOC_LINK = (
@@ -64,19 +66,13 @@ export const serviceProviderLinkComponents: Partial<
 };
 
 export const DEFAULT_TASK_TYPE = 'completion';
+export const CHAT_COMPLETION_TASK_TYPE = 'chat_completion';
 export const internalProviderKeys: Array<ServiceProviderKeys | string> = [
   ServiceProviderKeys.elasticsearch,
 ];
 
-type ServiceProviderKeysType = keyof typeof ServiceProviderKeys;
-type InternalOverrideFieldsType = {
-  [Key in ServiceProviderKeysType | string]?: {
-    hidden: string[];
-    additional: FieldsConfiguration[];
-  };
-};
-
 export const MAX_NUMBER_OF_ALLOCATIONS = 'max_number_of_allocations';
+export const CONTEXT_WINDOW_LENGTH = 'contextWindowLength';
 
 // This is a temporaray solution to handle the internal overrides for field configurations that have not been updated in the services endpoint
 export const INTERNAL_OVERRIDE_FIELDS: InternalOverrideFieldsType = {
@@ -93,9 +89,10 @@ export const INTERNAL_OVERRIDE_FIELDS: InternalOverrideFieldsType = {
           sensitive: false,
           supported_task_types: ['text_embedding', 'sparse_embedding', 'rerank'],
           type: FieldType.INTEGER,
-          updatable: false,
+          updatable: true,
         },
       },
     ],
+    serverlessOnly: true,
   },
 };

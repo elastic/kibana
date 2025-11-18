@@ -7,7 +7,7 @@
 
 import { Key } from 'selenium-webdriver';
 import expect from 'expect';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -231,7 +231,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         expect.objectContaining({
           name: 'test custom threshold rule',
           tags: ['tag1'],
-          consumer: 'logs',
+          consumer: 'alerts',
           params: expect.objectContaining({
             alertOnGroupDisappear: false,
             alertOnNoData: false,

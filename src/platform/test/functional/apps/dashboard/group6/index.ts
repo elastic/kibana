@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, loadTestFile }: FtrProviderContext) {
   const browser = getService('browser');
@@ -35,6 +35,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
     loadTestFile(require.resolve('./dashboard_grid'));
     loadTestFile(require.resolve('./view_edit'));
+    loadTestFile(require.resolve('./lose_changes_warning'));
     loadTestFile(require.resolve('./dashboard_saved_query'));
     // Order of test suites *shouldn't* be important but there's a bug for the view_edit test above
     // https://github.com/elastic/kibana/issues/46752

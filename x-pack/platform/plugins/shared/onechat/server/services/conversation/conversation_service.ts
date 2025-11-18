@@ -11,30 +11,33 @@ import type {
   SecurityServiceStart,
   ElasticsearchServiceStart,
 } from '@kbn/core/server';
-import { ConversationClient, createClient } from './client';
-import { createStorage } from './storage';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
+import { getCurrentSpaceId } from '../../utils/spaces';
+import type { ConversationClient } from './client';
+import { createClient } from './client';
 
 export interface ConversationService {
   getScopedClient(options: { request: KibanaRequest }): Promise<ConversationClient>;
+}
+
+interface ConversationServiceDeps {
+  logger: Logger;
+  security: SecurityServiceStart;
+  elasticsearch: ElasticsearchServiceStart;
+  spaces?: SpacesPluginStart;
 }
 
 export class ConversationServiceImpl implements ConversationService {
   private readonly logger: Logger;
   private readonly security: SecurityServiceStart;
   private readonly elasticsearch: ElasticsearchServiceStart;
+  private readonly spaces?: SpacesPluginStart;
 
-  constructor({
-    logger,
-    security,
-    elasticsearch,
-  }: {
-    logger: Logger;
-    security: SecurityServiceStart;
-    elasticsearch: ElasticsearchServiceStart;
-  }) {
+  constructor({ logger, security, elasticsearch, spaces }: ConversationServiceDeps) {
     this.logger = logger;
     this.security = security;
     this.elasticsearch = elasticsearch;
+    this.spaces = spaces;
   }
 
   async getScopedClient({ request }: { request: KibanaRequest }): Promise<ConversationClient> {
@@ -44,9 +47,9 @@ export class ConversationServiceImpl implements ConversationService {
     }
 
     const esClient = this.elasticsearch.client.asScoped(request).asInternalUser;
-    const storage = createStorage({ logger: this.logger, esClient });
     const user = { id: authUser.profile_uid!, username: authUser.username };
+    const space = getCurrentSpaceId({ request, spaces: this.spaces });
 
-    return createClient({ user, storage });
+    return createClient({ user, esClient, logger: this.logger, space });
   }
 }

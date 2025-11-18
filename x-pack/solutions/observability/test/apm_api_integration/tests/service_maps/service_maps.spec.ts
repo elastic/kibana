@@ -6,12 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import { first, isEmpty, last, orderBy, uniq } from 'lodash';
-import { ServiceConnectionNode } from '@kbn/apm-plugin/common/service_map';
-import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import { ApmApiError, SupertestReturnType } from '../../common/apm_api_supertest';
+import { first, last, orderBy, uniq } from 'lodash';
+import type { ApmApiError, SupertestReturnType } from '../../common/apm_api_supertest';
 import archives_metadata from '../../common/fixtures/es_archiver/archives_metadata';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import type { FtrProviderContext } from '../../common/ftr_provider_context';
 
 type DependencyResponse = SupertestReturnType<'GET /internal/apm/service-map/dependency'>;
 type ServiceNodeResponse =
@@ -24,14 +22,6 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
 
   const archiveName = 'apm_8.0.0';
   const metadata = archives_metadata[archiveName];
-
-  const getElements = ({ body }: { body: APIReturnType<'GET /internal/apm/service-map'> }) => {
-    if ('elements' in body) {
-      return body.elements;
-    }
-
-    return [];
-  };
 
   registry.when('Service map with a basic license', { config: 'basic', archives: [] }, () => {
     describe('basic license', function () {
@@ -79,41 +69,28 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
 
       it('returns service map elements', () => {
         expect(response.status).to.be(200);
-        expect(getElements(response).length).to.be.greaterThan(0);
+        expect(response.body.spans.length).to.be.greaterThan(0);
       });
 
-      it('returns the correct data', () => {
-        const elements: Array<{ data: Record<string, any> }> = getElements(response);
-        const serviceNames = uniq(
-          elements
-            .filter((element) => element.data['service.name'] !== undefined)
-            .map((element) => element.data['service.name'])
-        ).sort();
-        expectSnapshot(serviceNames).toMatchInline(`
-              Array [
-                "auditbeat",
-                "opbeans-dotnet",
-                "opbeans-go",
-                "opbeans-java",
-                "opbeans-node",
-                "opbeans-python",
-                "opbeans-ruby",
-                "opbeans-rum",
-              ]
-            `);
+      it('returns servicesData equal empty array if services have no traces', () => {
+        const { spans, servicesData } = response.body;
+
+        expect(servicesData.length).to.be.equal(0);
 
         const externalDestinations = uniq(
-          elements
-            .filter((element) => element.data.target?.startsWith('>'))
-            .map((element) => element.data.target)
+          spans
+            .filter((element) => element.spanDestinationServiceResource)
+            .map((element) => element.spanDestinationServiceResource)
         ).sort();
 
         expectSnapshot(externalDestinations).toMatchInline(`
               Array [
-                ">elasticsearch",
-                ">postgresql",
-                ">redis",
-                ">sqlite",
+                "elasticsearch",
+                "opbeans-frontend:3000",
+                "opbeans:3000",
+                "postgresql",
+                "redis",
+                "sqlite",
               ]
             `);
       });
@@ -132,73 +109,36 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
               },
             });
           });
-          it('returns service map elements with anomaly stats', () => {
-            expect(response.status).to.be(200);
-            const dataWithAnomalies = getElements(response).filter(
-              (el) => !isEmpty((el.data as ServiceConnectionNode).serviceAnomalyStats)
-            );
-            expect(dataWithAnomalies).not.to.be.empty();
-            dataWithAnomalies.forEach(({ data }: any) => {
-              expect(
-                Object.values(data.serviceAnomalyStats).filter((value) => isEmpty(value))
-              ).to.not.empty();
-            });
-          });
+
           it('returns the correct anomaly stats', () => {
-            const dataWithAnomalies = getElements(response).filter(
-              (el) => !isEmpty((el.data as ServiceConnectionNode).serviceAnomalyStats)
-            );
+            const dataWithAnomalies = response.body.anomalies?.serviceAnomalies;
             expect(dataWithAnomalies).not.to.be.empty();
             expectSnapshot(dataWithAnomalies.length).toMatchInline(`7`);
-            expectSnapshot(orderBy(dataWithAnomalies, 'data.id').slice(0, 3)).toMatchInline(`
+            expectSnapshot(orderBy(dataWithAnomalies, 'serviceName').slice(0, 3)).toMatchInline(`
                     Array [
                       Object {
-                        "data": Object {
-                          "agent.name": "dotnet",
-                          "id": "opbeans-dotnet",
-                          "service.environment": "production",
-                          "service.name": "opbeans-dotnet",
-                          "serviceAnomalyStats": Object {
-                            "actualValue": 868025.86875,
-                            "anomalyScore": 0,
-                            "healthStatus": "healthy",
-                            "jobId": "apm-production-6117-high_mean_transaction_duration",
-                            "serviceName": "opbeans-dotnet",
-                            "transactionType": "request",
-                          },
-                        },
+                        "actualValue": 868025.86875,
+                        "anomalyScore": 0,
+                        "healthStatus": "healthy",
+                        "jobId": "apm-production-6117-high_mean_transaction_duration",
+                        "serviceName": "opbeans-dotnet",
+                        "transactionType": "request",
                       },
                       Object {
-                        "data": Object {
-                          "agent.name": "go",
-                          "id": "opbeans-go",
-                          "service.environment": "testing",
-                          "service.name": "opbeans-go",
-                          "serviceAnomalyStats": Object {
-                            "actualValue": 102786.319148936,
-                            "anomalyScore": 0,
-                            "healthStatus": "healthy",
-                            "jobId": "apm-testing-41e5-high_mean_transaction_duration",
-                            "serviceName": "opbeans-go",
-                            "transactionType": "request",
-                          },
-                        },
+                        "actualValue": 102786.319148936,
+                        "anomalyScore": 0,
+                        "healthStatus": "healthy",
+                        "jobId": "apm-testing-41e5-high_mean_transaction_duration",
+                        "serviceName": "opbeans-go",
+                        "transactionType": "request",
                       },
                       Object {
-                        "data": Object {
-                          "agent.name": "java",
-                          "id": "opbeans-java",
-                          "service.environment": "production",
-                          "service.name": "opbeans-java",
-                          "serviceAnomalyStats": Object {
-                            "actualValue": 175568.855769231,
-                            "anomalyScore": 0,
-                            "healthStatus": "healthy",
-                            "jobId": "apm-production-6117-high_mean_transaction_duration",
-                            "serviceName": "opbeans-java",
-                            "transactionType": "request",
-                          },
-                        },
+                        "actualValue": 175568.855769231,
+                        "anomalyScore": 0,
+                        "healthStatus": "healthy",
+                        "jobId": "apm-production-6117-high_mean_transaction_duration",
+                        "serviceName": "opbeans-java",
+                        "transactionType": "request",
                       },
                     ]
                   `);
@@ -219,9 +159,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           });
           it('returns service map elements without anomaly stats', () => {
             expect(response.status).to.be(200);
-            const dataWithAnomalies = getElements(response).filter(
-              (el) => !isEmpty((el.data as ServiceConnectionNode).serviceAnomalyStats)
-            );
+            const dataWithAnomalies = response.body.anomalies?.serviceAnomalies;
             expect(dataWithAnomalies).to.be.empty();
           });
         });
@@ -248,7 +186,7 @@ export default function serviceMapsApiTests({ getService }: FtrProviderContext) 
           });
 
           it('returns some elements', () => {
-            expect(getElements(response).length).to.be.greaterThan(1);
+            expect(response.body.spans.length).to.be.greaterThan(1);
           });
         });
       });

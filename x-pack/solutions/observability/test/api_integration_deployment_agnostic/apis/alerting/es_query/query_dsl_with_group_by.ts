@@ -6,10 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import { cleanup, generate, Dataset, PartialConfig } from '@kbn/data-forge';
-import { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
-import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import { ActionDocument } from './types';
+import { get } from 'lodash';
+import type { Dataset, PartialConfig } from '@kbn/data-forge';
+import { cleanup, generate } from '@kbn/data-forge';
+import type { RoleCredentials, InternalRequestHeader } from '@kbn/ftr-common-functional-services';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
+import type { ActionDocument } from './types';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const esClient = getService('es');
@@ -168,7 +170,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ruleId,
         });
 
-        expect(resp.hits.hits[0]._source).property('host.name', 'host-0');
+        expect(get(resp.hits.hits[0]._source, 'host.name')).eql(['host-0', 'host-0', 'host-0']);
         expect(resp.hits.hits[0]._source).property('kibana.alert.rule.consumer', expectedConsumer);
         expect(resp.hits.hits[0]._source).property(
           'kibana.alert.reason',

@@ -6,6 +6,7 @@
  */
 
 import type { EuiThemeComputed } from '@elastic/eui';
+import { getAlertIndexFilter } from './helpers';
 import type { ExtraOptions, LensAttributes } from '../../types';
 
 const xColumn0 = 'cost_columnX0';
@@ -20,12 +21,14 @@ export type MyGetLensAttributes = (params: {
   esql?: string;
   minutesPerAlert: number;
   analystHourlyRate: number;
+  signalIndexName: string;
 }) => LensAttributes;
 
 export const getCostSavingsTrendAreaLensAttributes: MyGetLensAttributes = ({
   analystHourlyRate,
   extraOptions,
   minutesPerAlert,
+  signalIndexName,
 }) => {
   return {
     description: '',
@@ -60,7 +63,7 @@ export const getCostSavingsTrendAreaLensAttributes: MyGetLensAttributes = ({
                   customLabel: true,
                   dataType: 'number',
                   isBucketed: false,
-                  label: 'Part of count() * ((8/60)*75)',
+                  label: `Part of count() * ((${minutesPerAlert}/60)*${analystHourlyRate})`,
                   operationType: 'count',
                   params: {
                     emptyAsNull: false,
@@ -71,7 +74,7 @@ export const getCostSavingsTrendAreaLensAttributes: MyGetLensAttributes = ({
                   customLabel: true,
                   dataType: 'number',
                   isBucketed: false,
-                  label: 'Part of count() * ((8/60)*75)',
+                  label: `Part of count() * ((${minutesPerAlert}/60)*${analystHourlyRate})`,
                   operationType: 'math',
                   params: {
                     tinymathAst: {
@@ -80,23 +83,23 @@ export const getCostSavingsTrendAreaLensAttributes: MyGetLensAttributes = ({
                         {
                           args: [
                             {
-                              args: [8, 60],
+                              args: [minutesPerAlert, 60],
                               location: {
                                 max: 16,
                                 min: 12,
                               },
                               name: 'divide',
-                              text: '8/60',
+                              text: `${minutesPerAlert}/60`,
                               type: 'function',
                             },
-                            75,
+                            analystHourlyRate,
                           ],
                           location: {
                             max: 20,
                             min: 11,
                           },
                           name: 'multiply',
-                          text: '(8/60)*75',
+                          text: `(${minutesPerAlert}/60)*${analystHourlyRate}`,
                           type: 'function',
                         },
                       ],
@@ -128,7 +131,7 @@ export const getCostSavingsTrendAreaLensAttributes: MyGetLensAttributes = ({
           },
         },
       },
-      filters: extraOptions?.filters ?? [],
+      filters: [getAlertIndexFilter(signalIndexName), ...(extraOptions?.filters ?? [])],
       internalReferences: [],
       query: {
         language: 'kuery',
@@ -186,8 +189,5 @@ export const getCostSavingsTrendAreaLensAttributes: MyGetLensAttributes = ({
         type: 'index-pattern',
       },
     ],
-    type: 'lens',
-    updated_at: '2025-07-21T15:51:38.660Z',
-    version: 'WzI0LDFd',
   } as LensAttributes;
 };

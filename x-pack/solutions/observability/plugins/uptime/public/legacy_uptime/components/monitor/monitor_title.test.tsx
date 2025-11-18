@@ -12,7 +12,7 @@ import { render } from '../../lib/helper/rtl_helpers';
 // eslint-disable-next-line no-restricted-imports
 import * as reactRouterDom from 'react-router-dom';
 
-import { Ping } from '../../../../common/runtime_types';
+import type { Ping } from '../../../../common/runtime_types';
 import { MonitorPageTitle } from './monitor_title';
 
 jest.mock('react-router-dom', () => {

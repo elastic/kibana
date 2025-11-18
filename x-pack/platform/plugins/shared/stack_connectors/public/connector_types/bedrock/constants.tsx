@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
+import type { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 import {
@@ -14,6 +14,7 @@ import {
   DEFAULT_BEDROCK_URL,
   DEFAULT_TOKEN_LIMIT,
 } from '../../../common/bedrock/constants';
+import { contextWindowLengthField, temperatureField } from '../../common/genai_connectors';
 import * as i18n from './translations';
 
 const human = '\n\nHuman:';
@@ -71,6 +72,8 @@ export const bedrockConfig: ConfigFieldSchema[] = [
     ),
     defaultValue: DEFAULT_BEDROCK_MODEL,
   },
+  contextWindowLengthField,
+  temperatureField,
 ];
 
 export const bedrockSecrets: SecretsFieldSchema[] = [

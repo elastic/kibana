@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { config, generateData } from './generate_data';
-import { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const apmApiClient = getService('apmApi');

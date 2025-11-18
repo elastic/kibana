@@ -7,10 +7,11 @@
 
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import TheHiveParamsFields from './params';
 import { SUB_ACTION, TheHiveSeverity } from '../../../common/thehive/constants';
-import { ExecutorParams, ExecutorSubActionPushParams } from '../../../common/thehive/types';
+import type { ExecutorParams, ExecutorSubActionPushParams } from '../../../common/thehive/types';
+import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
 describe('TheHiveParamsFields renders', () => {
   const subActionParams: ExecutorSubActionPushParams = {
@@ -28,16 +29,11 @@ describe('TheHiveParamsFields renders', () => {
     subAction: SUB_ACTION.PUSH_TO_SERVICE,
     subActionParams,
   };
-  const connector: ActionConnector = {
-    secrets: {},
-    config: {},
+  const connector: ActionConnector = createMockActionConnector({
     id: 'test',
     actionTypeId: '.test',
     name: 'Test',
-    isPreconfigured: false,
-    isDeprecated: false,
-    isSystemAction: false as const,
-  };
+  });
 
   const editAction = jest.fn();
   const defaultProps = {

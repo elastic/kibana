@@ -9,7 +9,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { TestExternalProviders } from '../../../../../mock/test_providers/test_providers';
-import { UnallowedValueCount } from '../../../../../types';
+import type { UnallowedValueCount } from '../../../../../types';
 import { IndexInvalidValues } from '.';
 import { EMPTY_PLACEHOLDER } from '../../../../../constants';
 

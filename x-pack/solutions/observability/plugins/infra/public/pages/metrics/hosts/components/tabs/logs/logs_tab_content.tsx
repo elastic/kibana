@@ -5,153 +5,96 @@
  * 2.0.
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiSpacer, EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { getEsQueryConfig } from '@kbn/data-plugin/public';
+import { buildEsQuery, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import React, { useMemo } from 'react';
-import { LazySavedSearchComponent } from '@kbn/saved-search-component';
-import useAsync from 'react-use/lib/useAsync';
-import { getLogsLocatorFromUrlService } from '@kbn/logs-shared-plugin/common';
-import { OpenInLogsExplorerButton } from '@kbn/logs-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
 import { buildCombinedAssetFilter } from '../../../../../../utils/filters/build';
 import { useHostsViewContext } from '../../../hooks/use_hosts_view';
-import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { useLogsSearchUrlState } from '../../../hooks/use_logs_search_url_state';
+import { useUnifiedSearchContext } from '../../../hooks/use_unified_search';
 import { LogsSearchBar } from './logs_search_bar';
 
 export const LogsTabContent = () => {
   const {
     services: {
       logsShared: { LogsOverview },
-    },
-  } = useKibanaContextForPlugin();
-  const isLogsOverviewEnabled = LogsOverview.useIsEnabled();
-  return isLogsOverviewEnabled ? <LogsTabLogsOverviewContent /> : <LogsSavedSearchComponent />;
-};
-
-export const LogsSavedSearchComponent = () => {
-  const {
-    services: {
-      logsDataAccess: {
-        services: { logSourcesService },
-      },
-      embeddable,
-      dataViews,
-      data: {
-        search: { searchSource },
-      },
-      share: { url },
+      uiSettings,
     },
   } = useKibanaContextForPlugin();
 
-  const logSources = useAsync(logSourcesService.getFlattenedLogSources);
-
-  const logsLocator = getLogsLocatorFromUrlService(url);
-
-  const {
-    parsedDateRange: { from, to },
-  } = useUnifiedSearchContext();
-
-  const { hostNodes, loading } = useHostsViewContext();
-
-  const [filterQuery] = useLogsSearchUrlState();
-
-  const hostsFilterQuery = useMemo(() => {
-    const hostsQueryPart = hostNodes.length
-      ? hostNodes.map((node) => `host.name: "${node.name}"`).join(' or ')
-      : '';
-
-    const urlQueryPart = filterQuery?.query ? String(filterQuery.query) : '';
-
-    const parts = [] as string[];
-    if (hostsQueryPart) parts.push(hostsQueryPart);
-    if (urlQueryPart) parts.push(`(${urlQueryPart})`);
-
-    return {
-      language: 'kuery',
-      query: parts.join(' and '),
-    };
-  }, [hostNodes, filterQuery]);
-
-  const memoizedTimeRange = useMemo(() => ({ from, to }), [from, to]);
-
-  const discoverLink = logsLocator?.getRedirectUrl({
-    timeRange: memoizedTimeRange,
-    query: hostsFilterQuery,
-  });
-
-  if (!hostNodes.length && !loading) {
-    return <LogsTabNoResults />;
-  }
-
-  return logSources.value ? (
-    <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="hostsView-logs">
-      <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-        <EuiFlexItem>
-          <LogsSearchBar />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <OpenInLogsExplorerButton
-            href={discoverLink}
-            testSubject="hostsView-logs-link-to-stream-button"
-            flush="both"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiFlexItem>
-        <LazySavedSearchComponent
-          dependencies={{ embeddable, searchSource, dataViews }}
-          index={logSources.value}
-          timeRange={memoizedTimeRange}
-          query={hostsFilterQuery}
-          height="60vh"
-          displayOptions={{
-            solutionNavIdOverride: 'oblt',
-            enableDocumentViewer: true,
-            enableFilters: false,
-          }}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  ) : null;
-};
-
-const LogsTabNoResults = () => (
-  <EuiFlexGroup css={{ height: '60vh' }} direction="column" alignItems="stretch">
-    <EuiFlexItem grow>
-      <EuiText size="xs" color="subdued">
-        <EuiIcon type="discoverApp" size="m" color="subdued" />
-        <EuiSpacer size="s" />
-        <FormattedMessage id="xpack.infra.logs.noResultsFound" defaultMessage="No results found" />
-      </EuiText>
-    </EuiFlexItem>
-  </EuiFlexGroup>
-);
-
-const LogsTabLogsOverviewContent = () => {
-  const {
-    services: {
-      logsShared: { LogsOverview },
-    },
-  } = useKibanaContextForPlugin();
-
-  const { parsedDateRange } = useUnifiedSearchContext();
+  const { parsedDateRange, searchCriteria } = useUnifiedSearchContext();
   const timeRange = useMemo(
     () => ({ start: parsedDateRange.from, end: parsedDateRange.to }),
     [parsedDateRange.from, parsedDateRange.to]
   );
 
   const { hostNodes, loading, error } = useHostsViewContext();
-  const logFilters = useMemo(
+
+  const [filterQuery] = useLogsSearchUrlState();
+
+  // Top search bar filters - these should be highlighted
+  // These would be passed to Elasticsearch as well to filter by the logs component,
+  // but I don't care because the data is already filtered at that point
+  const topSearchFilters = useMemo(() => {
+    const hasQuery = searchCriteria?.query?.query;
+    const hasFilters = searchCriteria?.filters?.length > 0;
+    const hasPanelFilters = searchCriteria?.panelFilters?.length > 0;
+
+    if (!hasQuery && !hasFilters && !hasPanelFilters) {
+      return [];
+    }
+
+    try {
+      return [
+        buildEsQuery(
+          undefined,
+          searchCriteria.query,
+          [...(searchCriteria.filters ?? []), ...(searchCriteria.panelFilters ?? [])],
+          getEsQueryConfig(uiSettings)
+        ),
+      ];
+    } catch (err) {
+      // Invalid/incomplete query, return empty array to avoid breaking the component
+      return [];
+    }
+  }, [searchCriteria.query, searchCriteria.filters, searchCriteria.panelFilters, uiSettings]);
+
+  // Logs search bar filters - these should be highlighted
+  const logsSearchFilters = useMemo(() => {
+    if (!filterQuery || !filterQuery.query) {
+      return [];
+    }
+
+    try {
+      return [toElasticsearchQuery(fromKueryExpression(filterQuery.query))];
+    } catch (err) {
+      // Invalid/incomplete query, return empty array to avoid breaking the component
+      return [];
+    }
+  }, [filterQuery]);
+
+  // Combine all user search filters (from both search bars)
+  const documentLogFilters = useMemo(
+    () => [...topSearchFilters, ...logsSearchFilters],
+    [topSearchFilters, logsSearchFilters]
+  );
+
+  // Host name context filters - these should NOT be highlighted
+  const nonHighlightingLogFilters = useMemo(
     () => [
-      buildCombinedAssetFilter({
-        field: 'host.name',
-        values: hostNodes.map((p) => p.name),
-      }).query as QueryDslQueryContainer,
+      buildEsQuery(
+        undefined,
+        [],
+        buildCombinedAssetFilter({
+          field: 'host.name',
+          values: hostNodes.map((p) => p.name),
+        }),
+        getEsQueryConfig(uiSettings)
+      ),
     ],
-    [hostNodes]
+    [hostNodes, uiSettings]
   );
 
   if (loading) {
@@ -159,6 +102,20 @@ const LogsTabLogsOverviewContent = () => {
   } else if (error != null) {
     return <LogsOverview.ErrorContent error={error} />;
   } else {
-    return <LogsOverview documentFilters={logFilters} timeRange={timeRange} />;
+    return (
+      <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="hostsView-logs">
+        <EuiFlexItem>
+          <LogsSearchBar />
+        </EuiFlexItem>
+        <EuiFlexItem>
+          <LogsOverview
+            documentFilters={documentLogFilters}
+            nonHighlightingFilters={nonHighlightingLogFilters}
+            timeRange={timeRange}
+            height="60vh"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
   }
 };

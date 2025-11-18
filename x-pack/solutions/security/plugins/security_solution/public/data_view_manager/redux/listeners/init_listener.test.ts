@@ -11,8 +11,11 @@ import { createInitListener } from './init_listener';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public';
 import type { RootState } from '../reducer';
 import { sharedDataViewManagerSlice } from '../slices';
-import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, DataViewManagerScopeName } from '../../constants';
-import { DEFAULT_ALERT_DATA_VIEW_ID } from '../../../../common/constants';
+import { DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, PageScope } from '../../constants';
+import {
+  DEFAULT_ALERT_DATA_VIEW_ID,
+  DEFAULT_ATTACK_DATA_VIEW_ID,
+} from '../../../../common/constants';
 import { selectDataViewAsync } from '../actions';
 import type { CoreStart } from '@kbn/core/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
@@ -42,7 +45,8 @@ const mockGetState = jest.fn(() => {
   const state = structuredClone(mockDataViewManagerState);
 
   state.dataViewManager.default.dataViewId = null;
-  state.dataViewManager.detections = structuredClone(state.dataViewManager.default);
+  state.dataViewManager.alerts = structuredClone(state.dataViewManager.default);
+  state.dataViewManager.attacks = structuredClone(state.dataViewManager.default);
   state.dataViewManager.timeline = structuredClone(state.dataViewManager.default);
   state.dataViewManager.analyzer = structuredClone(state.dataViewManager.default);
   state.dataViewManager.explore = structuredClone(state.dataViewManager.default);
@@ -64,16 +68,20 @@ describe('createInitListener', () => {
     jest.mocked(createDefaultDataView).mockResolvedValue({
       defaultDataView: { id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID, title: '' },
       alertDataView: { id: DEFAULT_ALERT_DATA_VIEW_ID, title: '' },
+      attackDataView: { id: DEFAULT_ATTACK_DATA_VIEW_ID, title: '' },
       kibanaDataViews: [],
     } as unknown as Awaited<ReturnType<typeof createDefaultDataView>>);
 
-    listener = createInitListener({
-      dataViews: mockDataViewsService,
-      http,
-      application,
-      uiSettings,
-      spaces,
-    });
+    listener = createInitListener(
+      {
+        dataViews: mockDataViewsService,
+        http,
+        application,
+        uiSettings,
+        spaces,
+      },
+      false
+    );
   });
 
   it('should load the data views and dispatch further actions', async () => {
@@ -96,25 +104,31 @@ describe('createInitListener', () => {
     expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-        scope: DataViewManagerScopeName.default,
+        scope: PageScope.default,
       })
     );
     expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-        scope: DataViewManagerScopeName.timeline,
-      })
-    );
-    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
-      selectDataViewAsync({
-        id: DEFAULT_ALERT_DATA_VIEW_ID,
-        scope: DataViewManagerScopeName.detections,
+        scope: PageScope.timeline,
       })
     );
     expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
       selectDataViewAsync({
         id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
-        scope: DataViewManagerScopeName.analyzer,
+        scope: PageScope.alerts,
+      })
+    );
+    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+      selectDataViewAsync({
+        id: DEFAULT_ATTACK_DATA_VIEW_ID,
+        scope: PageScope.attacks,
+      })
+    );
+    expect(jest.mocked(mockListenerApi.dispatch)).toBeCalledWith(
+      selectDataViewAsync({
+        id: DEFAULT_SECURITY_SOLUTION_DATA_VIEW_ID,
+        scope: PageScope.analyzer,
       })
     );
   });

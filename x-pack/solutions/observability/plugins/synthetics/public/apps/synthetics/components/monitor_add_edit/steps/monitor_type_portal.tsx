@@ -8,7 +8,7 @@
 import React from 'react';
 import { InPortal } from 'react-reverse-portal';
 import { MonitorTypePortalNode } from '../portals';
-import { FormMonitorType } from '../types';
+import type { FormMonitorType } from '../types';
 
 import { MonitorType } from './monitor_type';
 

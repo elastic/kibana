@@ -6,13 +6,21 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type { CoreSetup, IRouter } from '@kbn/core/server';
-import type { OnechatPluginStart, OnechatStartDependencies } from '../types';
+import type { CoreSetup } from '@kbn/core/server';
+import type {
+  OnechatPluginStart,
+  OnechatStartDependencies,
+  OnechatSetupDependencies,
+} from '../types';
 import type { InternalStartServices } from '../services';
+import type { OnechatRouter } from '../request_handler_context';
+import type { TrackingService } from '../telemetry/tracking_service';
 
 export interface RouteDependencies {
-  router: IRouter;
+  router: OnechatRouter;
   logger: Logger;
   coreSetup: CoreSetup<OnechatStartDependencies, OnechatPluginStart>;
   getInternalServices: () => InternalStartServices;
+  pluginsSetup: OnechatSetupDependencies;
+  trackingService?: TrackingService;
 }

@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -23,10 +24,9 @@ import {
   EuiTitle,
   EuiLink,
   EuiBetaBadge,
-  UseEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Trigger } from '@kbn/ui-actions-plugin/public';
+import type { Trigger } from '@kbn/ui-actions-plugin/public';
 import { css } from '@emotion/react';
 import {
   txtBetaActionFactoryLabel,
@@ -36,7 +36,11 @@ import {
   txtTriggerPickerLabel,
   txtTriggerPickerHelpTooltip,
 } from './i18n';
-import { ActionFactory, BaseActionConfig, BaseActionFactoryContext } from '../../dynamic_actions';
+import type {
+  ActionFactory,
+  BaseActionConfig,
+  BaseActionFactoryContext,
+} from '../../dynamic_actions';
 
 export interface ActionWizardProps<
   ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext

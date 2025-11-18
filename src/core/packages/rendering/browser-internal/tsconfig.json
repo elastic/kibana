@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -35,7 +35,9 @@
     "@kbn/react-kibana-context-render",
     "@kbn/core-feature-flags-browser",
     "@kbn/core-chrome-layout",
-    "@kbn/core-feature-flags-browser-mocks"
+    "@kbn/core-feature-flags-browser-mocks",
+    "@kbn/core-chrome-layout-feature-flags",
+    "@kbn/global-redirect-app-links"
   ],
   "exclude": [
     "target/**/*"

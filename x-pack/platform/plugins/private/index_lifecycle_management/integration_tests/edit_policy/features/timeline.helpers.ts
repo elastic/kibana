@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core/public';
+import type { HttpSetup } from '@kbn/core/public';
 import { createTogglePhaseAction } from '../../helpers';
 import { initTestBed } from '../init_test_bed';
-import { Phase } from '../../../common/types';
+import type { Phase } from '../../../common/types';
 
 type SetupReturn = ReturnType<typeof setupTimelineTestBed>;
 

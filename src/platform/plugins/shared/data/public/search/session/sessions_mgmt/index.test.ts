@@ -9,19 +9,19 @@
 
 import { APP } from '.';
 
-jest.mock('../constants', () => ({
-  ...jest.requireActual('../constants'),
-  BACKGROUND_SEARCH_ENABLED: false,
-}));
-
 describe('Sessions management - APP', () => {
-  it('should return the id', () => {
-    expect(APP.id).toBe('search_sessions');
-  });
+  describe.each([{ expectedName: 'Background Search' }])(
+    'when background search is $backgroundSearchEnabled',
+    ({ expectedName }) => {
+      it('should return the id', () => {
+        expect(APP.id).toBe('search_sessions');
+      });
 
-  describe('when background search is disabled', () => {
-    it('should return the correct i18n name', () => {
-      expect(APP.getI18nName()).toBe('Search Sessions');
-    });
-  });
+      describe('when background search is disabled', () => {
+        it('should return the correct i18n name', () => {
+          expect(APP.getI18nName()).toBe(expectedName);
+        });
+      });
+    }
+  );
 });

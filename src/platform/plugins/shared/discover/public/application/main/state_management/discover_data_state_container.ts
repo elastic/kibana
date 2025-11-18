@@ -18,6 +18,7 @@ import {
   Subject,
   switchMap,
   tap,
+  withLatestFrom,
 } from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -28,6 +29,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { DEFAULT_COLUMNS_SETTING, SEARCH_ON_PAGE_LOAD_SETTING } from '@kbn/discover-utils';
+import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { getEsqlDataView } from './utils/get_esql_data_view';
 import type { DiscoverAppStateContainer } from './discover_app_state_container';
 import type { DiscoverServices } from '../../../build_services';
@@ -222,6 +224,9 @@ export function getDataStateContainer({
   const setAutoRefreshDone = (fn: AutoRefreshDoneFn | undefined) => {
     autoRefreshDone = fn;
   };
+
+  const lastReloadRequestTime$ = new Subject<number | undefined>();
+
   const fetch$ = getFetch$({
     setAutoRefreshDone,
     data,
@@ -229,6 +234,7 @@ export function getDataStateContainer({
     refetch$,
     searchSource: savedSearchContainer.getState().searchSource,
     searchSessionManager,
+    lastReloadRequestTime$,
   }).pipe(
     filter(() => validateTimeRange(timefilter.getTime(), toastNotifications)),
     tap(() => inspectorAdapters.requests.reset()),
@@ -246,16 +252,24 @@ export function getDataStateContainer({
   function subscribe() {
     const subscription = fetch$
       .pipe(
-        mergeMap(async ({ options }) => {
+        withLatestFrom(lastReloadRequestTime$),
+        mergeMap(async ([{ options }, lastReloadRequestTime]) => {
           const { id: currentTabId, resetDefaultProfileState, dataRequestParams } = getCurrentTab();
           const { scopedProfilesManager$, scopedEbtManager$, currentDataView$ } =
             selectTabRuntimeState(runtimeStateManager, currentTabId);
           const scopedProfilesManager = scopedProfilesManager$.getValue();
           const scopedEbtManager = scopedEbtManager$.getValue();
 
-          const searchSessionId =
-            (options.fetchMore && dataRequestParams.searchSessionId) ||
-            searchSessionManager.getNextSearchSessionId();
+          let searchSessionId: string;
+          let isSearchSessionRestored: boolean;
+
+          if (options.fetchMore && dataRequestParams.searchSessionId) {
+            searchSessionId = dataRequestParams.searchSessionId;
+            isSearchSessionRestored = dataRequestParams.isSearchSessionRestored;
+          } else {
+            ({ searchSessionId, isSearchSessionRestored } =
+              searchSessionManager.getNextSearchSessionId());
+          }
 
           const commonFetchParams: Omit<CommonFetchParams, 'abortController'> = {
             dataSubjects,
@@ -277,12 +291,19 @@ export function getDataStateContainer({
             abortControllerFetchMore = new AbortController();
             const fetchMoreTracker = scopedEbtManager.trackPerformanceEvent('discoverFetchMore');
 
+            // Calculate query range in seconds
+            const timeRange = timefilter.getAbsoluteTime();
+            const queryRangeSeconds = getTimeDifferenceInSeconds(timeRange);
+
             await fetchMoreDocuments({
               ...commonFetchParams,
               abortController: abortControllerFetchMore,
             });
 
-            fetchMoreTracker.reportEvent();
+            fetchMoreTracker.reportEvent({
+              key1: 'query_range_secs',
+              value1: queryRangeSeconds,
+            });
 
             return;
           }
@@ -293,14 +314,16 @@ export function getDataStateContainer({
                 timeRangeAbsolute: timefilter.getAbsoluteTime(),
                 timeRangeRelative: timefilter.getTime(),
                 searchSessionId,
+                isSearchSessionRestored,
+                lastReloadRequestTime,
               },
             })
           );
 
           await scopedProfilesManager.resolveDataSourceProfile({
-            dataSource: appStateContainer.getState().dataSource,
+            dataSource: appStateContainer.get().dataSource,
             dataView: savedSearchContainer.getState().searchSource.getField('index'),
-            query: appStateContainer.getState().query,
+            query: appStateContainer.get().query,
           });
 
           const dataView = currentDataView$.getValue();
@@ -315,13 +338,18 @@ export function getDataStateContainer({
             disableNextFetchOnStateChange$.next(false);
           }
 
+          abortController = new AbortController();
+
           // Trigger chart fetching after the pre fetch state has been updated
           // to ensure state values that would affect data fetching are set
           fetchChart$.next();
 
-          abortController = new AbortController();
           const prevAutoRefreshDone = autoRefreshDone;
           const fetchAllTracker = scopedEbtManager.trackPerformanceEvent('discoverFetchAll');
+
+          // Calculate query range in seconds
+          const timeRange = timefilter.getAbsoluteTime();
+          const queryRangeSeconds = getTimeDifferenceInSeconds(timeRange);
 
           await fetchAll({
             ...commonFetchParams,
@@ -361,7 +389,10 @@ export function getDataStateContainer({
             },
           });
 
-          fetchAllTracker.reportEvent();
+          fetchAllTracker.reportEvent({
+            key1: 'query_range_secs',
+            value1: queryRangeSeconds,
+          });
 
           // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call
           // replacing this current one, call it to make sure we tell that the auto refresh is done
@@ -381,7 +412,7 @@ export function getDataStateContainer({
   }
 
   const fetchQuery = async () => {
-    const query = appStateContainer.getState().query;
+    const query = appStateContainer.get().query;
     const currentDataView = savedSearchContainer.getState().searchSource.getField('index');
 
     if (isOfAggregateQueryType(query)) {

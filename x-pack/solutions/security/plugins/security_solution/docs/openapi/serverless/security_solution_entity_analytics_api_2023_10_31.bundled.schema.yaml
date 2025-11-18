@@ -219,7 +219,7 @@ paths:
               - id_value
               - id_field
               - criticality_level
-              - \@timestamp
+              - '@timestamp'
             type: string
         - description: The order to sort by.
           in: query
@@ -355,7 +355,40 @@ paths:
               schema:
                 $ref: '#/components/schemas/MonitoringEngineDescriptor'
           description: Successful response
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MonitoringEngineDescriptor'
+          description: Internal Server Error
       summary: Initialize the Privilege Monitoring Engine
+      tags:
+        - Security Entity Analytics API
+  /api/entity_analytics/monitoring/engine/schedule_now:
+    post:
+      operationId: ScheduleMonitoringEngine
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    description: Indicates the scheduling was successful
+                    type: boolean
+          description: Successful response
+        '409':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    description: Error message indicating the engine is already running
+                    type: string
+          description: Conflict - Monitoring engine is already running
+      summary: Schedule the Privilege Monitoring Engine
       tags:
         - Security Entity Analytics API
   /api/entity_analytics/monitoring/privileges/health:
@@ -377,6 +410,21 @@ paths:
                       - status
                   status:
                     $ref: '#/components/schemas/PrivilegeMonitoringEngineStatus'
+                  users:
+                    description: User statistics for privilege monitoring
+                    type: object
+                    properties:
+                      current_count:
+                        description: Current number of privileged users being monitored
+                        type: integer
+                      max_allowed:
+                        description: >-
+                          Maximum number of privileged users allowed to be
+                          monitored
+                        type: integer
+                    required:
+                      - current_count
+                      - max_allowed
                 required:
                   - status
           description: Successful response
@@ -487,7 +535,7 @@ paths:
               schema:
                 type: object
                 properties:
-                  aknowledged:
+                  acknowledged:
                     description: Indicates if the deletion was successful
                     type: boolean
                   message:
@@ -513,7 +561,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/MonitoredUserDoc'
+              $ref: '#/components/schemas/MonitoredUserUpdateDoc'
         required: true
       responses:
         '200':
@@ -698,6 +746,60 @@ paths:
       tags:
         - Security Entity Analytics API
   /api/entity_store/engines:
+    delete:
+      operationId: DeleteEntityEngines
+      parameters:
+        - description: >-
+            The entity type of the engine ('user', 'host', 'service',
+            'generic').
+          examples:
+            hostAndService:
+              value: host,service
+          in: query
+          name: entityTypes
+          required: false
+          schema:
+            description: >-
+              Array of engine types to delete. Empty by default, which results
+              in all the engines being deleted.
+            items:
+              $ref: '#/components/schemas/EntityType'
+            type: array
+        - description: Control flag to also delete the entity data.
+          in: query
+          name: delete_data
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                deleteEntityEnginesExample:
+                  description: Example response after deleting 'host' engine
+                  value:
+                    deleted:
+                      - host
+                    still_running:
+                      - generic
+                      - user
+                      - service
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    items:
+                      $ref: '#/components/schemas/EntityType'
+                    type: array
+                  still_running:
+                    items:
+                      $ref: '#/components/schemas/EntityType'
+                    type: array
+          description: Successful response
+      summary: Delete Entity Engines
+      tags:
+        - Security Entity Analytics API
     get:
       operationId: ListEntityEngines
       responses:
@@ -722,12 +824,22 @@ paths:
       operationId: DeleteEntityEngine
       parameters:
         - description: The entity type of the engine (either 'user' or 'host').
+          examples:
+            host:
+              value: host
           in: path
           name: entityType
           required: true
           schema:
             $ref: '#/components/schemas/EntityType'
         - description: Control flag to also delete the entity data.
+          in: query
+          name: delete_data
+          required: false
+          schema:
+            type: boolean
+        - deprecated: true
+          description: Control flag to also delete the entity data.
           in: query
           name: data
           required: false
@@ -737,6 +849,11 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                deleteEntityEngineExample:
+                  description: Example response after deleting 'host' engine
+                  value:
+                    deleted: true
               schema:
                 type: object
                 properties:
@@ -935,6 +1052,152 @@ paths:
       summary: Apply DataView indices to all installed engines
       tags:
         - Security Entity Analytics API
+  /api/entity_store/entities/{entityType}:
+    delete:
+      description: >
+        Delete a single entity in Entity Store.
+
+        The entity will be immediately deleted from the latest index.  It will
+        remain available in historical snapshots if it has been snapshotted. 
+        The delete operation does not prevent the entity from being recreated if
+        it is observed again in the future. 
+      operationId: DeleteSingleEntity
+      parameters:
+        - in: path
+          name: entityType
+          required: true
+          schema:
+            $ref: '#/components/schemas/EntityType'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                id:
+                  description: >-
+                    Identifier of the entity to be deleted, commonly entity.id
+                    value.
+                  type: string
+              required:
+                - id
+        description: Schema for the deleting entity
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  deleted:
+                    type: boolean
+          description: Successful response. Entity deleted.
+        '404':
+          description: Entity Not Found. No entity with this ID and Type exists.
+        '503':
+          description: >-
+            Operation on an uninitialized Engine or in a cluster without CRUD
+            API Enabled
+      summary: Delete an entity in Entity Store
+      tags:
+        - Security Entity Analytics API
+    put:
+      description: >
+        Update or create an entity in Entity Store.
+
+        If the specified entity already exists, it is updated with the provided
+        values.  If the entity does not exist, a new one is created. By default,
+        only the following fields can be updated: * `entity.attributes.*` *
+        `entity.lifecycle.*` * `entity.behavior.*` To update other fields, set
+        the `force` query parameter to `true`. > info > Some fields always
+        retain the first observed value. Updates to these fields will not appear
+        in the final index.
+
+        > Due to technical limitations, not all updates are guaranteed to appear
+        in the final list of observed values.
+
+        > Due to technical limitations, create is an async operation. The time
+        for a document to be present in the  > final index depends on the entity
+        store transform and usually takes more than 1 minute.
+      operationId: UpsertEntity
+      parameters:
+        - in: path
+          name: entityType
+          required: true
+          schema:
+            $ref: '#/components/schemas/EntityType'
+        - in: query
+          name: force
+          required: false
+          schema:
+            default: false
+            type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Entity'
+        description: Schema for the updating a single entity
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Entity'
+          description: Entity updated or created
+        '403':
+          description: Operation on a restricted field
+        '409':
+          description: >-
+            Conflict. The entity was updated while another update was happening
+            in ElasticSearch
+        '503':
+          description: >-
+            Operation on an uninitialized Engine or in a cluster without CRUD
+            API Enabled
+      summary: Upsert an entity in Entity Store
+      tags:
+        - Security Entity Analytics API
+  /api/entity_store/entities/bulk:
+    put:
+      description: >
+        Update or create many entities in Entity Store.
+
+        If the specified entity already exists, it is updated with the provided
+        values.  If the entity does not exist, a new one is created.
+
+        The creation is asynchronous. The time for a document to be present in
+        the  final index depends on the entity store transform and usually takes
+        more than 1 minute.
+      operationId: UpsertEntitiesBulk
+      parameters:
+        - in: query
+          name: force
+          required: false
+          schema:
+            default: false
+            type: boolean
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EntitiesContainer'
+        description: Schema for the updating many entities
+        required: true
+      responses:
+        '200':
+          description: Entities updated or created
+        '403':
+          description: Operation on a restricted field
+        '503':
+          description: >-
+            Operation on an uninitialized Engine or in a cluster without CRUD
+            API Enabled
+      summary: Upsert many entities in Entity Store
+      tags:
+        - Security Entity Analytics API
   /api/entity_store/entities/list:
     get:
       description: List entities records, paging, sorting and filtering as needed.
@@ -1090,6 +1353,8 @@ paths:
             schema:
               type: object
               properties:
+                enable_reset_to_zero:
+                  type: boolean
                 exclude_alert_statuses:
                   items:
                     type: string
@@ -1097,6 +1362,25 @@ paths:
                 exclude_alert_tags:
                   items:
                     type: string
+                  type: array
+                filters:
+                  items:
+                    type: object
+                    properties:
+                      entity_types:
+                        items:
+                          enum:
+                            - host
+                            - user
+                            - service
+                          type: string
+                        type: array
+                      filter:
+                        description: KQL filter string
+                        type: string
+                    required:
+                      - entity_types
+                      - filter
                   type: array
                 range:
                   type: object
@@ -1166,6 +1450,28 @@ paths:
         - Security Entity Analytics API
 components:
   schemas:
+    Asset:
+      additionalProperties: false
+      type: object
+      properties:
+        business_unit:
+          type: string
+        criticality:
+          $ref: '#/components/schemas/AssetCriticalityLevel'
+        environment:
+          type: string
+        id:
+          type: string
+        model:
+          type: string
+        name:
+          type: string
+        owner:
+          type: string
+        serial_number:
+          type: string
+        vendor:
+          type: string
     AssetCriticalityBulkUploadErrorItem:
       type: object
       properties:
@@ -1370,12 +1676,14 @@ components:
         - entity_engine
         - entity_definition
         - index
+        - data_stream
         - component_template
         - index_template
         - ingest_pipeline
         - enrich_policy
         - task
         - transform
+        - ilm_policy
       type: string
     EngineComponentStatus:
       type: object
@@ -1394,6 +1702,7 @@ components:
             - green
             - yellow
             - red
+            - unavailable
             - unknown
           type: string
         id:
@@ -1473,6 +1782,7 @@ components:
         - status
         - fieldHistoryLength
     EngineMetadata:
+      additionalProperties: false
       type: object
       properties:
         Type:
@@ -1487,6 +1797,15 @@ components:
         - updating
         - error
       type: string
+    EntitiesContainer:
+      type: object
+      properties:
+        entities:
+          items:
+            $ref: '#/components/schemas/EntityContainer'
+          type: array
+      required:
+        - entities
     Entity:
       oneOf:
         - $ref: '#/components/schemas/UserEntity'
@@ -1527,6 +1846,126 @@ components:
       required:
         - has_all_required
         - privileges
+    EntityContainer:
+      type: object
+      properties:
+        record:
+          $ref: '#/components/schemas/Entity'
+        type:
+          $ref: '#/components/schemas/EntityType'
+      required:
+        - type
+        - record
+    EntityField:
+      additionalProperties: false
+      type: object
+      properties:
+        attributes:
+          additionalProperties: false
+          type: object
+          properties:
+            asset:
+              type: boolean
+            managed:
+              type: boolean
+            mfa_enabled:
+              type: boolean
+            privileged:
+              type: boolean
+        behaviors:
+          additionalProperties: false
+          type: object
+          properties:
+            brute_force_victim:
+              type: boolean
+            new_country_login:
+              type: boolean
+            used_usb_device:
+              type: boolean
+        EngineMetadata:
+          $ref: '#/components/schemas/EngineMetadata'
+        id:
+          type: string
+        lifecycle:
+          additionalProperties: false
+          type: object
+          properties:
+            first_seen:
+              format: date-time
+              type: string
+            last_activity:
+              format: date-time
+              type: string
+        name:
+          type: string
+        relationships:
+          additionalProperties: false
+          type: object
+          properties:
+            accessed_frequently_by:
+              items:
+                type: string
+              type: array
+            accesses_frequently:
+              items:
+                type: string
+              type: array
+            communicates_with:
+              items:
+                type: string
+              type: array
+            dependent_of:
+              items:
+                type: string
+              type: array
+            depends_on:
+              items:
+                type: string
+              type: array
+            owned_by:
+              items:
+                type: string
+              type: array
+            owns:
+              items:
+                type: string
+              type: array
+            supervised_by:
+              items:
+                type: string
+              type: array
+            supervises:
+              items:
+                type: string
+              type: array
+        risk:
+          additionalProperties: false
+          type: object
+          properties:
+            calculated_level:
+              $ref: '#/components/schemas/EntityRiskLevels'
+              description: Lexical description of the entity's risk.
+              example: Critical
+            calculated_score:
+              description: The raw numeric value of the given entity's risk score.
+              format: double
+              type: number
+            calculated_score_norm:
+              description: >-
+                The normalized numeric value of the given entity's risk score.
+                Useful for comparing with other entities.
+              format: double
+              maximum: 100
+              minimum: 0
+              type: number
+        source:
+          type: string
+        sub_type:
+          type: string
+        type:
+          type: string
+      required:
+        - id
     EntityRiskLevels:
       enum:
         - Unknown
@@ -1563,8 +2002,7 @@ components:
           description: >-
             The number of risk input documents that contributed to the Category
             1 score (`category_1_score`).
-          format: integer
-          type: number
+          type: integer
         category_1_score:
           description: >-
             The contribution of Category 1 to the overall risk score
@@ -1572,8 +2010,7 @@ components:
           format: double
           type: number
         category_2_count:
-          format: integer
-          type: number
+          type: integer
         category_2_score:
           format: double
           type: number
@@ -1624,74 +2061,40 @@ components:
         - generic
       type: string
     GenericEntity:
+      additionalProperties: false
       type: object
       properties:
         '@timestamp':
           format: date-time
           type: string
         asset:
-          type: object
-          properties:
-            criticality:
-              $ref: '#/components/schemas/AssetCriticalityLevel'
-          required:
-            - criticality
+          $ref: '#/components/schemas/Asset'
+          additionalProperties: false
         entity:
-          type: object
-          properties:
-            category:
-              type: string
-            EngineMetadata:
-              $ref: '#/components/schemas/EngineMetadata'
-            id:
-              type: string
-            name:
-              type: string
-            source:
-              type: string
-            type:
-              type: string
-          required:
-            - id
-            - name
-            - type
+          $ref: '#/components/schemas/EntityField'
       required:
         - entity
     HostEntity:
+      additionalProperties: false
       type: object
       properties:
         '@timestamp':
           format: date-time
           type: string
         asset:
-          type: object
-          properties:
-            criticality:
-              $ref: '#/components/schemas/AssetCriticalityLevel'
-          required:
-            - criticality
+          $ref: '#/components/schemas/Asset'
+          additionalProperties: false
         entity:
-          type: object
-          properties:
-            EngineMetadata:
-              $ref: '#/components/schemas/EngineMetadata'
-            name:
-              type: string
-            source:
-              type: string
-            type:
-              type: string
-          required:
-            - name
-            - source
-            - type
+          $ref: '#/components/schemas/EntityField'
         event:
+          additionalProperties: false
           type: object
           properties:
             ingested:
               format: date-time
               type: string
         host:
+          additionalProperties: false
           type: object
           properties:
             architecture:
@@ -1702,6 +2105,8 @@ components:
               items:
                 type: string
               type: array
+            entity:
+              $ref: '#/components/schemas/EntityField'
             hostname:
               items:
                 type: string
@@ -1729,7 +2134,6 @@ components:
           required:
             - name
       required:
-        - host
         - entity
     IdField:
       enum:
@@ -1765,37 +2169,52 @@ components:
     Metadata:
       $ref: '#/components/schemas/TransformStatsMetadata'
     MonitoredUserDoc:
+      allOf:
+        - $ref: '#/components/schemas/MonitoredUserUpdateDoc'
+        - type: object
+          properties:
+            '@timestamp':
+              format: date-time
+              type: string
+            event:
+              type: object
+              properties:
+                ingested:
+                  format: date-time
+                  type: string
+            user:
+              type: object
+              properties:
+                entity:
+                  type: object
+                  properties:
+                    attributes:
+                      type: object
+                      properties:
+                        Privileged:
+                          description: Indicates if the user is privileged.
+                          type: boolean
+                is_privileged:
+                  description: Indicates if the user is privileged.
+                  type: boolean
+                name:
+                  type: string
+    MonitoredUserUpdateDoc:
       type: object
       properties:
-        '@timestamp':
-          format: date-time
-          type: string
         entity_analytics_monitoring:
           type: object
           properties:
             labels:
               items:
-                type: object
-                properties:
-                  field:
-                    type: string
-                  source:
-                    type: string
-                  value:
-                    type: string
+                $ref: '#/components/schemas/MonitoringLabel'
               type: array
-        event:
-          type: object
-          properties:
-            ingested:
-              format: date-time
-              type: string
         id:
           type: string
         labels:
           type: object
           properties:
-            source_indices:
+            source_ids:
               items:
                 type: string
               type: array
@@ -1821,12 +2240,33 @@ components:
     MonitoringEngineDescriptor:
       type: object
       properties:
+        error:
+          type: object
+          properties:
+            message:
+              description: >-
+                Error message typically only present if the engine is in error
+                state
+              type: string
         status:
           $ref: '#/components/schemas/PrivilegeMonitoringEngineStatus'
       required:
-        - type
         - status
+    MonitoringLabel:
+      type: object
+      properties:
+        field:
+          type: string
+        source:
+          type: string
+        value:
+          type: string
+      required:
+        - field
+        - value
+        - source
     PrivilegeMonitoringEngineStatus:
+      description: The status of the Privilege Monitoring Engine
       enum:
         - started
         - error
@@ -1915,42 +2355,30 @@ components:
         - description
         - category
     ServiceEntity:
+      additionalProperties: false
       type: object
       properties:
         '@timestamp':
           format: date-time
           type: string
         asset:
-          type: object
-          properties:
-            criticality:
-              $ref: '#/components/schemas/AssetCriticalityLevel'
-          required:
-            - criticality
+          $ref: '#/components/schemas/Asset'
+          additionalProperties: false
         entity:
-          type: object
-          properties:
-            EngineMetadata:
-              $ref: '#/components/schemas/EngineMetadata'
-            name:
-              type: string
-            source:
-              type: string
-            type:
-              type: string
-          required:
-            - name
-            - source
-            - type
+          $ref: '#/components/schemas/EntityField'
         event:
+          additionalProperties: false
           type: object
           properties:
             ingested:
               format: date-time
               type: string
         service:
+          additionalProperties: false
           type: object
           properties:
+            entity:
+              $ref: '#/components/schemas/EntityField'
             name:
               type: string
             risk:
@@ -1958,7 +2386,6 @@ components:
           required:
             - name
       required:
-        - service
         - entity
     StoreStatus:
       enum:
@@ -2034,40 +2461,26 @@ components:
         - exponential_avg_documents_indexed
         - exponential_avg_documents_processed
     UserEntity:
+      additionalProperties: false
       type: object
       properties:
         '@timestamp':
           format: date-time
           type: string
         asset:
-          type: object
-          properties:
-            criticality:
-              $ref: '#/components/schemas/AssetCriticalityLevel'
-          required:
-            - criticality
+          $ref: '#/components/schemas/Asset'
+          additionalProperties: false
         entity:
-          type: object
-          properties:
-            EngineMetadata:
-              $ref: '#/components/schemas/EngineMetadata'
-            name:
-              type: string
-            source:
-              type: string
-            type:
-              type: string
-          required:
-            - name
-            - source
-            - type
+          $ref: '#/components/schemas/EntityField'
         event:
+          additionalProperties: false
           type: object
           properties:
             ingested:
               format: date-time
               type: string
         user:
+          additionalProperties: false
           type: object
           properties:
             domain:
@@ -2094,6 +2507,7 @@ components:
               type: string
             risk:
               $ref: '#/components/schemas/EntityRiskScoreRecord'
+              additionalProperties: false
             roles:
               items:
                 type: string
@@ -2101,7 +2515,6 @@ components:
           required:
             - name
       required:
-        - user
         - entity
     UserName:
       type: object

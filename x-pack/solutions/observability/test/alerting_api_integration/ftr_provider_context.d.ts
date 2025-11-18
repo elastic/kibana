@@ -7,6 +7,6 @@
 
 import type { GenericFtrProviderContext } from '@kbn/test';
 
-import { services } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/services';
+import type { services } from '@kbn/test-suites-xpack-platform/alerting_api_integration/common/services';
 
 export type FtrProviderContext = GenericFtrProviderContext<typeof services, {}>;

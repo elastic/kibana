@@ -17,7 +17,7 @@ import type {
 } from './shared/metrics/types';
 import type { HOST_METRICS_RECEIVER_OTEL, SYSTEM_INTEGRATION } from '../constants';
 
-export { DataSchemaFormat } from './shared/metrics/types';
+export { DataSchemaFormatEnum, type DataSchemaFormat } from './shared/metrics/types';
 export const ItemTypeRT = rt.keyof({
   host: null,
   pod: null,
@@ -122,12 +122,21 @@ export const TSVBMetricModelVariableRT = rt.type({
   name: rt.string,
 });
 
-export const TSVBMetricModelBucketScriptRT = rt.type({
-  id: rt.string,
-  script: rt.string,
-  type: rt.literal('calculation'),
-  variables: rt.array(TSVBMetricModelVariableRT),
-});
+export const TSVBMetricModelBucketScriptRT = rt.intersection([
+  rt.type({
+    id: rt.string,
+    script: rt.string,
+    type: rt.literal('calculation'),
+    variables: rt.array(TSVBMetricModelVariableRT),
+  }),
+  rt.partial({
+    gap_policy: rt.union([
+      rt.literal('skip'),
+      rt.literal('insert_zeros'),
+      rt.literal('keep_values'),
+    ]),
+  }),
+]);
 
 export const TSVBMetricModelDerivativeRT = rt.type({
   id: rt.string,

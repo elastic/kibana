@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UseFetchDataViewsResponse } from '../use_fetch_data_views';
+import type { UseFetchDataViewsResponse } from '../use_fetch_data_views';
 
 export const useFetchDataViews = (): UseFetchDataViewsResponse => {
   return {

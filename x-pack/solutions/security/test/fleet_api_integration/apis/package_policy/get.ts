@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { INGEST_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 import { testUsers } from '../test_users';
 
@@ -25,6 +25,14 @@ export default function (providerContext: FtrProviderContext) {
   const deleteEndpointPackage = async () => {
     await supertest
       .delete(`/api/fleet/epm/packages/endpoint/8.6.1`)
+      .set('kbn-xsrf', 'xxxx')
+      .send({ force: true })
+      .expect(200);
+  };
+
+  const installEndpointPackage = async () => {
+    await supertest
+      .post(`/api/fleet/epm/packages/endpoint/8.6.1`)
       .set('kbn-xsrf', 'xxxx')
       .send({ force: true })
       .expect(200);
@@ -52,6 +60,8 @@ export default function (providerContext: FtrProviderContext) {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
           return;
         }
+
+        await installEndpointPackage();
 
         const { body: agentPolicyResponse } = await supertest
           .post(`/api/fleet/agent_policies`)
@@ -156,6 +166,8 @@ export default function (providerContext: FtrProviderContext) {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
           return;
         }
+
+        await installEndpointPackage();
 
         const { body: agentPolicyResponse } = await supertest
           .post(`/api/fleet/agent_policies`)
@@ -333,7 +345,7 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agent_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'Test policy',
+            name: 'Test policy 2',
             namespace: 'default',
           });
 
@@ -362,7 +374,7 @@ export default function (providerContext: FtrProviderContext) {
         const esClient = getService('es');
         await esClient.delete({
           index: INGEST_SAVED_OBJECT_INDEX,
-          id: `ingest-agent-policies:${agentPolicyId}`,
+          id: `fleet-agent-policies:${agentPolicyId}`,
           refresh: 'wait_for',
         });
       });
@@ -397,6 +409,8 @@ export default function (providerContext: FtrProviderContext) {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
           return;
         }
+
+        await installEndpointPackage();
 
         const { body: agentPolicyResponse } = await supertest
           .post(`/api/fleet/agent_policies`)

@@ -7,7 +7,8 @@
 
 import { v4 } from 'uuid';
 import { MessageRole } from '..';
-import { MessageAddEvent, StreamingChatResponseEventType } from '../conversation_complete';
+import type { MessageAddEvent } from '../conversation_complete';
+import { StreamingChatResponseEventType } from '../conversation_complete';
 
 export function createFunctionRequestMessage({
   name,

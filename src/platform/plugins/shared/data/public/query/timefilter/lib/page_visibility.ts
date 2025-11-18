@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fromEvent, Observable } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { fromEvent } from 'rxjs';
 import { map, shareReplay, startWith } from 'rxjs';
 
 export function createPageVisibility$(): Observable<DocumentVisibilityState> {

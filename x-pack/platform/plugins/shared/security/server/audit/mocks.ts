@@ -5,26 +5,26 @@
  * 2.0.
  */
 
+import { lazyObject } from '@kbn/lazy-object';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 
 import type { AuditService } from './audit_service';
 
 export const auditLoggerMock = {
   create() {
-    return {
+    return lazyObject({
       log: jest.fn(),
       enabled: true,
       includeSavedObjectNames: false,
-    } as jest.Mocked<AuditLogger>;
+    }) as jest.Mocked<AuditLogger>;
   },
 };
 
 export const auditServiceMock = {
   create() {
-    return {
-      getLogger: jest.fn(),
+    return lazyObject({
       asScoped: jest.fn().mockReturnValue(auditLoggerMock.create()),
       withoutRequest: auditLoggerMock.create(),
-    } as jest.Mocked<ReturnType<AuditService['setup']>>;
+    }) as jest.Mocked<ReturnType<AuditService['setup']>>;
   },
 };

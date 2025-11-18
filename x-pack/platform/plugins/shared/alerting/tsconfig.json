@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -57,7 +57,6 @@
     "@kbn/serverless",
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-elasticsearch-server",
-    "@kbn/core-application-common",
     "@kbn/core-saved-objects-api-server",
     "@kbn/alerts-ui-shared",
     "@kbn/core-http-browser",
@@ -65,7 +64,6 @@
     "@kbn/core-ui-settings-server-mocks",
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/core-execution-context-server-mocks",
-    "@kbn/react-kibana-context-render",
     "@kbn/search-types",
     "@kbn/alerting-state-types",
     "@kbn/core-security-server",
@@ -78,7 +76,12 @@
     "@kbn/response-ops-rule-params",
     "@kbn/datemath",
     "@kbn/elastic-assistant-common",
-    "@kbn/response-ops-recurring-schedule-form"
+    "@kbn/response-ops-recurring-schedule-form",
+    "@kbn/licensing-types",
+    "@kbn/core-elasticsearch-server-utils",
+    "@kbn/es-types",
+    "@kbn/lazy-object",
+    "@kbn/react-query"
   ],
   "exclude": [
     "target/**/*"

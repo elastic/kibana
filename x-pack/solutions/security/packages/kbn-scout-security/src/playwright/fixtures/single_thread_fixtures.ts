@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import { test as baseTest, mergeTests, ApiServicesFixture } from '@kbn/scout';
-import { SecurityApiServicesFixture, SecurityTestFixtures, SecurityWorkerFixtures } from './types';
+import type { ApiServicesFixture } from '@kbn/scout';
+import { test as baseTest, mergeTests } from '@kbn/scout';
+import type {
+  SecurityApiServicesFixture,
+  SecurityTestFixtures,
+  SecurityWorkerFixtures,
+} from './types';
 import { getDetectionRuleApiService } from './worker';
 import { extendPageObjects, securityBrowserAuthFixture } from './test';
 

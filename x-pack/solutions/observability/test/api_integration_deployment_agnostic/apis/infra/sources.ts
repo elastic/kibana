@@ -6,11 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import {
+import type {
   MetricsSourceConfigurationResponse,
   PartialMetricsSourceConfigurationProperties,
-  metricsSourceConfigurationResponseRT,
 } from '@kbn/infra-plugin/common/metrics_sources';
+import { metricsSourceConfigurationResponseRT } from '@kbn/infra-plugin/common/metrics_sources';
 import type { SupertestWithRoleScopeType } from '../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
@@ -22,7 +22,9 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const kibanaServer = getService('kibanaServer');
 
-  describe('API /api/metrics/source', () => {
+  describe('API /api/metrics/source', function () {
+    // Fails on MKI: https://github.com/elastic/kibana/issues/242627
+    this.tags(['failsOnMKI']);
     let supertestWithAdminScope: SupertestWithRoleScopeType;
 
     const patchRequest = async (

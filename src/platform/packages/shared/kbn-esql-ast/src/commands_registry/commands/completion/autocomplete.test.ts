@@ -8,34 +8,65 @@
  */
 import { mockContext, getMockCallbacks } from '../../../__tests__/context_fixtures';
 import { autocomplete } from './autocomplete';
-import { expectSuggestions, getFieldNamesByType } from '../../../__tests__/autocomplete';
-import { ICommandCallbacks, Location } from '../../types';
-import { getFunctionSuggestions } from '../../../definitions/utils';
+import {
+  expectSuggestions,
+  getFieldNamesByType,
+  DATE_DIFF_TIME_UNITS,
+  suggest as testSuggest,
+  mockFieldsWithTypes,
+} from '../../../__tests__/autocomplete';
+import type { ICommandCallbacks } from '../../types';
+import { Location } from '../../types';
+import { getFunctionsSuggestions } from '../../../definitions/utils/autocomplete/helpers';
 import { ESQL_STRING_TYPES } from '../../../definitions/types';
 
-const completionExpectSuggestions = (
+interface SuggestionItem {
+  text: string;
+  [key: string]: unknown;
+}
+
+type ExpectedCompletion =
+  | string[]
+  | {
+      contains?: string[];
+      notContains?: string[];
+      containsItems?: SuggestionItem[];
+    };
+
+const completionExpectSuggestions = async (
   query: string,
-  expectedSuggestions: string[],
+  expected: ExpectedCompletion,
   mockCallbacks?: ICommandCallbacks,
   context = mockContext
 ) => {
-  return expectSuggestions(
-    query,
-    expectedSuggestions,
-    context,
-    'completion',
-    mockCallbacks,
-    autocomplete
-  );
+  if (Array.isArray(expected)) {
+    return expectSuggestions(query, expected, context, 'completion', mockCallbacks, autocomplete);
+  }
+
+  const results = await testSuggest(query, context, 'completion', mockCallbacks, autocomplete);
+  const texts = results.map(({ text }) => text);
+
+  if (expected.contains?.length) {
+    expect(texts).toEqual(expect.arrayContaining(expected.contains));
+  }
+
+  if (expected.notContains?.length) {
+    expected.notContains.forEach((excludedText) => expect(texts).not.toContain(excludedText));
+  }
+
+  if (expected.containsItems?.length) {
+    expect(results).toEqual(expect.arrayContaining(expected.containsItems));
+  }
 };
 
 const PROMPT_SUGGESTIONS = [
   ' = ',
-  ...getFieldNamesByType(ESQL_STRING_TYPES).map((v) => `${v} `),
-  ...getFunctionSuggestions({
+  ...getFieldNamesByType(ESQL_STRING_TYPES).map((fieldName) => `${fieldName} `),
+  ...getFunctionsSuggestions({
     location: Location.COMPLETION,
-    returnTypes: ['text', 'keyword', 'unknown'],
-  }).map((fn) => `${fn.text} `),
+    types: ['text', 'keyword', 'unknown'],
+    options: {},
+  }).map(({ text }) => `${text} `),
 ];
 
 describe('COMPLETION Autocomplete', () => {
@@ -46,9 +77,7 @@ describe('COMPLETION Autocomplete', () => {
     mockCallbacks = getMockCallbacks();
 
     const expectedFields = getFieldNamesByType(ESQL_STRING_TYPES);
-    (mockCallbacks.getByType as jest.Mock).mockResolvedValue(
-      expectedFields.map((name) => ({ label: name, text: name }))
-    );
+    mockFieldsWithTypes(mockCallbacks, expectedFields);
   });
 
   it('suggests PROMPT_SUGGESTIONS + default prompt after COMPLETION keyword', async () => {
@@ -72,26 +101,122 @@ describe('COMPLETION Autocomplete', () => {
   });
 
   it('suggests WITH after the user writes a colum name that already exists', async () => {
-    await completionExpectSuggestions(`FROM a | COMPLETION textField `, ['WITH ']);
+    await completionExpectSuggestions(`FROM a | COMPLETION textField `, ['WITH { $0 }']);
   });
 
   it('suggests WITH after the user writes a param as prompt', async () => {
-    await completionExpectSuggestions(`FROM a | COMPLETION ? /`, ['WITH ']);
+    await completionExpectSuggestions(`FROM a | COMPLETION ? /`, ['WITH { $0 }']);
   });
 
   it('suggests WITH after the prompt', async () => {
-    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" /`, ['WITH ']);
-    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WIT/`, ['WITH ']);
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" /`, ['WITH { $0 }']);
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WIT/`, ['WITH { $0 }']);
   });
 
-  it('suggests inference endpoints after WITH', async () => {
-    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH `, ['`inference_1` ']);
+  it('suggests opening braces when WITH is already typed', async () => {
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH `, [
+      '{ "inference_id": "$0" }',
+    ]);
+  });
+
+  it('suggests inference_id parameter within the named parameters map', async () => {
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH {`, [
+      '"inference_id": "$0"',
+    ]);
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH { `, [
+      '"inference_id": "$0"',
+    ]);
+    await completionExpectSuggestions(
+      `FROM a | COMPLETION "prompt" WITH {
+      `,
+      ['"inference_id": "$0"']
+    );
+  });
+
+  it('suggests inference endpoints as the values for inference_id', async () => {
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH { "inference_id": "`, [
+      '"inference_1"',
+    ]);
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH { "inference_id": "i/`, [
+      '"inference_1"',
+    ]);
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH { "inference_id": "inf/`, [
+      '"inference_1"',
+    ]);
+  });
+
+  it('does not suggest anything if all the parameters are already provided', async () => {
+    await completionExpectSuggestions(
+      `FROM a | COMPLETION "prompt" WITH { "inference_id": "inference_1", `,
+      []
+    );
+  });
+
+  it('does not suggest anything if the parameter name is unsupported', async () => {
+    await completionExpectSuggestions(
+      `FROM a | COMPLETION "prompt" WITH { "unsupported_param": "`,
+      []
+    );
   });
 
   it('suggests pipe after complete command', async () => {
     await completionExpectSuggestions(
-      `FROM a | COMPLETION "prompt" WITH inferenceId AS completion /`,
+      `FROM a | COMPLETION "prompt" WITH { "inference_id": "inference_1" }`,
       ['| ']
     );
+  });
+
+  it('suggests pipe after incomplete but enclosed map expression', async () => {
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH { "inference_id": "" }`, [
+      '| ',
+    ]);
+    await completionExpectSuggestions(`FROM a | COMPLETION "prompt" WITH { "inference_id": "" } `, [
+      '| ',
+    ]);
+  });
+
+  describe('expressions in prompt', () => {
+    it('supports string functions and enforces type compatibility', async () => {
+      await completionExpectSuggestions(
+        'FROM a | COMPLETION ',
+        {
+          contains: ['CONCAT($0) ', 'textField ', 'keywordField '],
+          notContains: ['doubleField '],
+        },
+        mockCallbacks
+      );
+    });
+  });
+
+  describe('function parameter constraints', () => {
+    it('constantOnly constraint - DATE_DIFF should suggest only constants', async () => {
+      await completionExpectSuggestions(
+        'from a | completion CONCAT(field, DATE_DIFF(',
+        DATE_DIFF_TIME_UNITS,
+        mockCallbacks
+      );
+    });
+
+    it('function parameter type filtering - ABS should include numeric fields', async () => {
+      const expectedNumericFields = getFieldNamesByType([
+        'double',
+        'integer',
+        'long',
+        'unsigned_long',
+      ]);
+      mockFieldsWithTypes(mockCallbacks, expectedNumericFields);
+
+      const results = await testSuggest(
+        'from a | completion CONCAT("Number: ", ABS(',
+        mockContext,
+        'completion',
+        mockCallbacks,
+        autocomplete
+      );
+      const texts = results.map(({ text }) => text);
+      expectedNumericFields.forEach((fieldName) =>
+        expect(texts).toEqual(expect.arrayContaining([fieldName]))
+      );
+    });
   });
 });

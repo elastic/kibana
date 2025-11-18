@@ -16,8 +16,8 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import { AzureRepository, Repository } from '../../../../../common/types';
-import { RepositorySettingsValidation } from '../../../services/validation';
+import type { AzureRepository, Repository } from '../../../../../common/types';
+import type { RepositorySettingsValidation } from '../../../services/validation';
 import { ChunkSizeField, MaxSnapshotsField, MaxRestoreField } from './common';
 import { DisableToolTip, MANAGED_REPOSITORY_TOOLTIP_MESSAGE } from '../../disable_tooltip';
 
@@ -110,21 +110,20 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           <DisableToolTip
             isManaged={isManagedRepository}
             tooltipMessage={MANAGED_REPOSITORY_TOOLTIP_MESSAGE}
-            component={
-              <EuiFieldText
-                defaultValue={client || ''}
-                fullWidth
-                onChange={(e) => {
-                  updateRepositorySettings({
-                    client: e.target.value,
-                  });
-                }}
-                data-test-subj="clientInput"
-                disabled={isManagedRepository}
-                aria-labelledby={clientId}
-              />
-            }
-          />
+          >
+            <EuiFieldText
+              defaultValue={client || ''}
+              fullWidth
+              onChange={(e) => {
+                updateRepositorySettings({
+                  client: e.target.value,
+                });
+              }}
+              data-test-subj="clientInput"
+              disabled={isManagedRepository}
+              aria-labelledby={clientId}
+            />
+          </DisableToolTip>
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
@@ -164,21 +163,20 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           <DisableToolTip
             isManaged={isManagedRepository}
             tooltipMessage={MANAGED_REPOSITORY_TOOLTIP_MESSAGE}
-            component={
-              <EuiFieldText
-                defaultValue={container || ''}
-                fullWidth
-                onChange={(e) => {
-                  updateRepositorySettings({
-                    container: e.target.value,
-                  });
-                }}
-                data-test-subj="containerInput"
-                disabled={isManagedRepository}
-                aria-labelledby={containerId}
-              />
-            }
-          />
+          >
+            <EuiFieldText
+              defaultValue={container || ''}
+              fullWidth
+              onChange={(e) => {
+                updateRepositorySettings({
+                  container: e.target.value,
+                });
+              }}
+              data-test-subj="containerInput"
+              disabled={isManagedRepository}
+              aria-labelledby={containerId}
+            />
+          </DisableToolTip>
         </EuiFormRow>
       </EuiDescribedFormGroup>
 
@@ -218,21 +216,20 @@ export const AzureSettings: React.FunctionComponent<Props> = ({
           <DisableToolTip
             isManaged={isManagedRepository}
             tooltipMessage={MANAGED_REPOSITORY_TOOLTIP_MESSAGE}
-            component={
-              <EuiFieldText
-                defaultValue={basePath || ''}
-                fullWidth
-                onChange={(e) => {
-                  updateRepositorySettings({
-                    basePath: e.target.value,
-                  });
-                }}
-                data-test-subj="basePathInput"
-                disabled={isManagedRepository}
-                aria-labelledby={basePathId}
-              />
-            }
-          />
+          >
+            <EuiFieldText
+              defaultValue={basePath || ''}
+              fullWidth
+              onChange={(e) => {
+                updateRepositorySettings({
+                  basePath: e.target.value,
+                });
+              }}
+              data-test-subj="basePathInput"
+              disabled={isManagedRepository}
+              aria-labelledby={basePathId}
+            />
+          </DisableToolTip>
         </EuiFormRow>
       </EuiDescribedFormGroup>
 

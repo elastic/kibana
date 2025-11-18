@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({
   getPageObjects,

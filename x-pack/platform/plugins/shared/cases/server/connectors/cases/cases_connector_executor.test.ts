@@ -262,6 +262,7 @@ describe('CasesConnectorExecutor', () => {
                       "id": "mock-id-1",
                       "owner": "cases",
                       "settings": Object {
+                        "extractObservables": false,
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -288,6 +289,7 @@ describe('CasesConnectorExecutor', () => {
                       "id": "mock-id-2",
                       "owner": "cases",
                       "settings": Object {
+                        "extractObservables": false,
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -314,6 +316,7 @@ describe('CasesConnectorExecutor', () => {
                       "id": "mock-id-3",
                       "owner": "cases",
                       "settings": Object {
+                        "extractObservables": false,
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -571,6 +574,7 @@ describe('CasesConnectorExecutor', () => {
                   "id": "mock-id-3",
                   "owner": "cases",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": false,
                   },
                   "tags": Array [
@@ -945,6 +949,7 @@ describe('CasesConnectorExecutor', () => {
                   "id": "mock-id-4",
                   "owner": "cases",
                   "settings": Object {
+                    "extractObservables": false,
                     "syncAlerts": false,
                   },
                   "tags": Array [
@@ -1194,6 +1199,7 @@ describe('CasesConnectorExecutor', () => {
                     "id": "mock-id-4",
                     "owner": "cases",
                     "settings": Object {
+                      "extractObservables": false,
                       "syncAlerts": false,
                     },
                     "tags": Array [
@@ -1306,6 +1312,7 @@ describe('CasesConnectorExecutor', () => {
                     "id": "mock-id-3",
                     "owner": "cases",
                     "settings": Object {
+                      "extractObservables": false,
                       "syncAlerts": false,
                     },
                     "tags": Array [
@@ -1380,6 +1387,7 @@ describe('CasesConnectorExecutor', () => {
                     "id": "mock-id-4",
                     "owner": "cases",
                     "settings": Object {
+                      "extractObservables": false,
                       "syncAlerts": false,
                     },
                     "tags": Array [
@@ -3260,6 +3268,7 @@ describe('CasesConnectorExecutor', () => {
                       "id": "mock-id-1",
                       "owner": "cases",
                       "settings": Object {
+                        "extractObservables": false,
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -3284,6 +3293,7 @@ describe('CasesConnectorExecutor', () => {
                       "id": "mock-id-2",
                       "owner": "cases",
                       "settings": Object {
+                        "extractObservables": false,
                         "syncAlerts": false,
                       },
                       "tags": Array [
@@ -3308,6 +3318,7 @@ describe('CasesConnectorExecutor', () => {
                       "id": "mock-id-3",
                       "owner": "cases",
                       "settings": Object {
+                        "extractObservables": false,
                         "syncAlerts": false,
                       },
                       "tags": Array [

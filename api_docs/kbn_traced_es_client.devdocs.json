@@ -19,7 +19,7 @@
         "label": "createTracedEsClient",
         "description": [],
         "signature": [
-          "({\n  client,\n  logger,\n  plugin,\n  labels,\n}: { client: ",
+          "({\n  client,\n  abortSignal,\n  logger,\n  plugin,\n  labels,\n}: { client: ",
           "ElasticsearchClient",
           "; logger: ",
           {
@@ -29,7 +29,7 @@
             "section": "def-common.Logger",
             "text": "Logger"
           },
-          "; plugin?: string | undefined; labels?: Record<string, string> | undefined; }) => ",
+          "; abortSignal?: AbortSignal | undefined; plugin?: string | undefined; labels?: Record<string, string> | undefined; }) => ",
           {
             "pluginId": "@kbn/traced-es-client",
             "scope": "server",
@@ -47,7 +47,7 @@
             "id": "def-server.createTracedEsClient.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  client,\n  logger,\n  plugin,\n  labels,\n}",
+            "label": "{\n  client,\n  abortSignal,\n  logger,\n  plugin,\n  labels,\n}",
             "description": [],
             "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
             "deprecated": false,
@@ -169,7 +169,7 @@
                   "TransportRequestOptions",
                   " | undefined): Promise<",
                   "SearchResponse",
-                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+                  "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
                   "default",
                   "; child: (opts: ",
                   "ClientOptions",
@@ -953,6 +953,8 @@
                   "default",
                   "; ssl: ",
                   "default",
+                  "; streams: ",
+                  "default",
                   "; synonyms: ",
                   "default",
                   "; tasks: ",
@@ -1066,6 +1068,20 @@
                     "section": "def-common.Logger",
                     "text": "Logger"
                   }
+                ],
+                "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/traced-es-client",
+                "id": "def-server.createTracedEsClient.$1.abortSignal",
+                "type": "Object",
+                "tags": [],
+                "label": "abortSignal",
+                "description": [],
+                "signature": [
+                  "AbortSignal | undefined"
                 ],
                 "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
                 "deprecated": false,
@@ -1683,7 +1699,7 @@
               "TransportRequestOptions",
               " | undefined): Promise<",
               "SearchResponse",
-              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
+              "<TDocument, TAggregations>>; }; name: string | symbol; [kAsyncSearch]: symbol | null; [kAutoscaling]: symbol | null; [kCat]: symbol | null; [kCcr]: symbol | null; [kCluster]: symbol | null; [kConnector]: symbol | null; [kDanglingIndices]: symbol | null; [kEnrich]: symbol | null; [kEql]: symbol | null; [kEsql]: symbol | null; [kFeatures]: symbol | null; [kFleet]: symbol | null; [kGraph]: symbol | null; [kIlm]: symbol | null; [kIndices]: symbol | null; [kInference]: symbol | null; [kIngest]: symbol | null; [kLicense]: symbol | null; [kLogstash]: symbol | null; [kMigration]: symbol | null; [kMl]: symbol | null; [kMonitoring]: symbol | null; [kNodes]: symbol | null; [kProfiling]: symbol | null; [kQueryRules]: symbol | null; [kRollup]: symbol | null; [kSearchApplication]: symbol | null; [kSearchableSnapshots]: symbol | null; [kSecurity]: symbol | null; [kShutdown]: symbol | null; [kSimulate]: symbol | null; [kSlm]: symbol | null; [kSnapshot]: symbol | null; [kSql]: symbol | null; [kSsl]: symbol | null; [kStreams]: symbol | null; [kSynonyms]: symbol | null; [kTasks]: symbol | null; [kTextStructure]: symbol | null; [kTransform]: symbol | null; [kWatcher]: symbol | null; [kXpack]: symbol | null; transport: ",
               "default",
               "; child: (opts: ",
               "ClientOptions",
@@ -2467,6 +2483,8 @@
               "default",
               "; ssl: ",
               "default",
+              "; streams: ",
+              "default",
               "; synonyms: ",
               "default",
               "; tasks: ",
@@ -2606,16 +2624,16 @@
             "pluginId": "@kbn/traced-es-client",
             "scope": "server",
             "docId": "kibKbnTracedEsClientPluginApi",
-            "section": "def-server.UnparsedEsqlResponse",
-            "text": "UnparsedEsqlResponse"
+            "section": "def-server.ParsedEsqlResponse",
+            "text": "ParsedEsqlResponse"
           },
           " | ",
           {
             "pluginId": "@kbn/traced-es-client",
             "scope": "server",
             "docId": "kibKbnTracedEsClientPluginApi",
-            "section": "def-server.ParsedEsqlResponse",
-            "text": "ParsedEsqlResponse"
+            "section": "def-server.UnparsedEsqlResponse",
+            "text": "UnparsedEsqlResponse"
           }
         ],
         "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
@@ -2668,9 +2686,9 @@
           "FieldValue",
           "[] | undefined; filter?: ",
           "QueryDslQueryContainer",
-          " | undefined; query: string; profile?: boolean | undefined; body?: string | ({ [key: string]: any; } & { format?: undefined; delimiter?: undefined; drop_null_columns?: undefined; columnar?: undefined; filter?: undefined; locale?: undefined; params?: undefined; profile?: undefined; query?: undefined; tables?: undefined; include_ccs_metadata?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { format?: undefined; delimiter?: undefined; drop_null_columns?: undefined; columnar?: undefined; filter?: undefined; locale?: undefined; params?: undefined; profile?: undefined; query?: undefined; tables?: undefined; include_ccs_metadata?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; locale?: string | undefined; delimiter?: string | undefined; tables?: Record<string, Record<string, ",
+          " | undefined; query: string; body?: string | ({ [key: string]: any; } & { format?: undefined; delimiter?: undefined; drop_null_columns?: undefined; allow_partial_results?: undefined; columnar?: undefined; filter?: undefined; locale?: undefined; params?: undefined; profile?: undefined; query?: undefined; tables?: undefined; include_ccs_metadata?: undefined; }) | undefined; querystring?: ({ [key: string]: any; } & { format?: undefined; delimiter?: undefined; drop_null_columns?: undefined; allow_partial_results?: undefined; columnar?: undefined; filter?: undefined; locale?: undefined; params?: undefined; profile?: undefined; query?: undefined; tables?: undefined; include_ccs_metadata?: undefined; }) | undefined; error_trace?: boolean | undefined; filter_path?: string | string[] | undefined; human?: boolean | undefined; pretty?: boolean | undefined; profile?: boolean | undefined; locale?: string | undefined; delimiter?: string | undefined; tables?: Record<string, Record<string, ",
           "EsqlTableValuesContainer",
-          ">> | undefined; drop_null_columns?: boolean | undefined; include_ccs_metadata?: boolean | undefined; }"
+          ">> | undefined; drop_null_columns?: boolean | undefined; allow_partial_results?: boolean | undefined; include_ccs_metadata?: boolean | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",
         "deprecated": false,

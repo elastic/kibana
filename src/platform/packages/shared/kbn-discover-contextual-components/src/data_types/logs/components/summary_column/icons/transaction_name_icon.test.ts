@@ -8,7 +8,7 @@
  */
 
 import { render } from '@testing-library/react';
-import { AgentName } from '@kbn/elastic-agent-utils';
+import type { AgentName } from '@kbn/elastic-agent-utils';
 import { TransactionNameIcon } from './transaction_name_icon';
 
 jest.mock('@elastic/eui', () => ({

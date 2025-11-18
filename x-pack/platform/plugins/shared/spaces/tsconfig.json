@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -21,8 +21,6 @@
     "@kbn/utility-types",
     "@kbn/std",
     "@kbn/core-saved-objects-server",
-    "@kbn/core-test-helpers-kbn-server",
-    "@kbn/test",
     "@kbn/utils",
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/core-saved-objects-common",
@@ -56,7 +54,9 @@
     "@kbn/core-lifecycle-server",
     "@kbn/core-user-profile-browser-mocks",
     "@kbn/spaces-utils",
-    "@kbn/css-utils"
+    "@kbn/css-utils",
+    "@kbn/licensing-types",
+    "@kbn/react-query",
   ],
   "exclude": ["target/**/*"]
 }

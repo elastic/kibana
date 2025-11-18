@@ -6,9 +6,10 @@
  */
 import { i18n } from '@kbn/i18n';
 
-import { SavedObjectsErrorHelpers, SavedObjectsType } from '@kbn/core-saved-objects-server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { DynamicSettingsAttributes } from '../runtime_types/settings';
+import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { DynamicSettingsAttributes } from '../runtime_types/settings';
 import { fromSettingsAttribute } from '../routes/settings/dynamic_settings';
 import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../constants/settings';
 

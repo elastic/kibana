@@ -7,11 +7,51 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { StoredLinksEmbeddableState } from '../types';
-import { StoredLinksByValueState910 } from './bwc';
+import type { LinkOptions } from '../../../server';
+import type { LinksEmbeddableState, StoredLinksEmbeddableState } from '../types';
+import type { StoredLinksByValueState910 } from './bwc';
 import { transformOut } from './transform_out';
 
 describe('transformOut', () => {
+  test('should remove options for other link types in by-value state', () => {
+    const byValueState = {
+      title: 'Custom title',
+      layout: 'vertical',
+      links: [
+        {
+          type: 'externalLink',
+          id: 'e2ab286f-0945-4e17-b256-f497b6c3102e',
+          order: 0,
+          destination: 'https://github.com/',
+          options: {
+            openInNewTab: true,
+            // these are dashboard link options saved in external link
+            // state because of editor UI bug
+            useCurrentDateRange: true,
+            useCurrentFilters: true,
+          } as LinkOptions,
+        },
+      ],
+    } as LinksEmbeddableState;
+    expect(transformOut(byValueState, [])).toMatchInlineSnapshot(`
+      Object {
+        "layout": "vertical",
+        "links": Array [
+          Object {
+            "destination": "https://github.com/",
+            "id": "e2ab286f-0945-4e17-b256-f497b6c3102e",
+            "options": Object {
+              "openInNewTab": true,
+            },
+            "order": 0,
+            "type": "externalLink",
+          },
+        ],
+        "title": "Custom title",
+      }
+    `);
+  });
+
   test('should inject dashboard references for by-value state', () => {
     const byValueState = {
       title: 'Custom title',

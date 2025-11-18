@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import { EXPRESSION_HEATMAP_GRID_NAME } from '../constants';
-import { HeatmapGridConfig, HeatmapGridConfigResult } from '../types';
+import type { HeatmapGridConfig, HeatmapGridConfigResult } from '../types';
 
 export const heatmapGridConfig: ExpressionFunctionDefinition<
   typeof EXPRESSION_HEATMAP_GRID_NAME,

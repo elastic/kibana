@@ -360,15 +360,14 @@ export class IndexTable extends Component {
     return columnConfigs.map(({ fieldName, label }) => {
       const isSorted = sortField === fieldName;
       // we only want to make index name column 25% width when there are more columns displayed
-      const widthClassName =
-        fieldName === 'name' && columnConfigs.length > 2 ? 'indTable__header__width' : '';
+      const widthStyle = fieldName === 'name' && columnConfigs.length > 2 ? { width: '25%' } : {};
       return (
         <EuiTableHeaderCell
           key={fieldName}
           onSort={() => this.onSort(fieldName)}
           isSorted={isSorted}
           isSortAscending={isSortAscending}
-          className={widthClassName}
+          style={widthStyle}
           data-test-subj={`indexTableHeaderCell-${fieldName}`}
         >
           {label}
@@ -388,13 +387,14 @@ export class IndexTable extends Component {
     return columnConfigs.map((columnConfig) => {
       const { name } = index;
       const { fieldName } = columnConfig;
+      const cellStyle = fieldName === 'name' ? { wordBreak: 'break-all' } : {};
       return (
         <EuiTableRowCell
           key={`${fieldName}-${name}`}
           truncateText={false}
           setScopeRow={fieldName === 'name'}
           data-test-subj={`indexTableCell-${fieldName}`}
-          className={'indTable__cell--' + fieldName}
+          style={cellStyle}
           header={fieldName}
         >
           {this.buildRowCell(index, columnConfig)}
@@ -415,7 +415,7 @@ export class IndexTable extends Component {
 
       return (
         <Fragment key={`bannerExtension${i}`}>
-          <EuiCallOut color={type} size="m" title={title}>
+          <EuiCallOut announceOnMount={false} color={type} size="m" title={title}>
             {message && <p>{message}</p>}
             {action || filter ? (
               <EuiFlexGroup gutterSize="s" alignItems="center">
@@ -702,7 +702,7 @@ export class IndexTable extends Component {
               <EuiSpacer size="m" />
 
               <div style={{ maxWidth: '100%', overflow: 'auto' }}>
-                <EuiTable className="indTable" data-test-subj="indexTable">
+                <EuiTable data-test-subj="indexTable">
                   <EuiScreenReaderOnly>
                     <caption role="status" aria-relevant="text" aria-live="polite">
                       <FormattedMessage

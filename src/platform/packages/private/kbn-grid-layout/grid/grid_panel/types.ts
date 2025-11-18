@@ -11,6 +11,7 @@ interface GridCoordinate {
   column: number;
   row: number;
 }
+
 interface GridRect extends GridCoordinate {
   width: number;
   height: number;
@@ -18,6 +19,12 @@ interface GridRect extends GridCoordinate {
 
 export interface GridPanelData extends GridRect {
   id: string;
+  resizeOptions?: {
+    minWidth?: number;
+    maxWidth?: number;
+    minHeight?: number;
+    maxHeight?: number;
+  };
 }
 
 export interface ActivePanelEvent {

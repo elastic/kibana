@@ -17,7 +17,8 @@ import { getEnterpriseSearchForClusters } from '../enterprise_search';
 import { getLogstashForClusters } from '../logstash';
 import { getLogstashPipelineIds } from '../logstash/get_pipeline_ids';
 import { getBeatsForClusters } from '../beats';
-import { getClustersSummary, EnhancedClusters } from './get_clusters_summary';
+import type { EnhancedClusters } from './get_clusters_summary';
+import { getClustersSummary } from './get_clusters_summary';
 import {
   STANDALONE_CLUSTER_CLUSTER_UUID,
   CODE_PATH_ML,
@@ -37,8 +38,8 @@ import { fetchStatus } from '../alerts/fetch_status';
 import { getStandaloneClusterDefinition, hasStandaloneClusters } from '../standalone_clusters';
 import { getLogTypes } from '../logs';
 import { isInCodePath } from './is_in_code_path';
-import { LegacyRequest, Cluster } from '../../types';
-import { RulesByType } from '../../../common/types/alerts';
+import type { LegacyRequest, Cluster } from '../../types';
+import type { RulesByType } from '../../../common/types/alerts';
 import { getClusterRuleDataForClusters, getInstanceRuleDataForClusters } from '../kibana/rules';
 import { Globals } from '../../static_globals';
 import { getIndexPatterns } from '../../../common/get_index_patterns';

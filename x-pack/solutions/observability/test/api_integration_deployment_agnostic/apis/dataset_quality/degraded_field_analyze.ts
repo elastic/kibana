@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 import { log, timerange } from '@kbn/apm-synthtrace-client';
-import { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import { SupertestWithRoleScopeType } from '../../services';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import type { SupertestWithRoleScopeType } from '../../services';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { createBackingIndexNameWithoutVersion, setDataStreamSettings } from './utils';
 import { logsSynthMappings } from './custom_mappings/custom_synth_mappings';
 

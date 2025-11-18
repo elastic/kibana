@@ -13,7 +13,7 @@ import {
   DEFAULT_QUALITY_ISSUE_SORT_FIELD,
   DEFAULT_TIME_RANGE,
 } from '../../../common/constants';
-import { DefaultDatasetQualityDetailsContext, QualityIssueType } from './types';
+import type { DefaultDatasetQualityDetailsContext, QualityIssueType } from './types';
 
 export const DEFAULT_CONTEXT: DefaultDatasetQualityDetailsContext = {
   qualityIssues: {
@@ -42,5 +42,8 @@ export const DEFAULT_CONTEXT: DefaultDatasetQualityDetailsContext = {
     refresh: DEFAULT_DATEPICKER_REFRESH,
   },
   showCurrentQualityIssues: false,
+  selectedIssueTypes: [],
+  selectedFields: [],
   qualityIssuesChart: 'degraded' as QualityIssueType,
+  view: 'dataQuality',
 };

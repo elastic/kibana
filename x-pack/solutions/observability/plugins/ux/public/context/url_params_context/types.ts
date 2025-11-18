@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { UxLocalUIFilterName } from '../../../common/ux_ui_filter';
+import type { UxLocalUIFilterName } from '../../../common/ux_ui_filter';
 
 export type UrlParams = {
   end?: string;

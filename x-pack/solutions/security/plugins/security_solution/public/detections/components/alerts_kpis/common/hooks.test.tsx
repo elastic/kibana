@@ -14,6 +14,7 @@ import { getAggregatableFields, useInspectButton, useStackByFields } from './hoo
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
 import { TestProviders } from '../../../../common/mock';
 import { useSourcererDataView } from '../../../../sourcerer/containers';
+import { useBrowserFields } from '../../../../data_view_manager/hooks/use_browser_fields';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -23,6 +24,7 @@ jest.mock('../../../../sourcerer/containers', () => ({
   useSourcererDataView: jest.fn(),
   getScopeFromPath: jest.fn(),
 }));
+jest.mock('../../../../data_view_manager/hooks/use_browser_fields');
 
 describe('getAggregatableFields', () => {
   test('getAggregatableFields when useLensCompatibleFields = false', () => {
@@ -67,6 +69,7 @@ describe('getAggregatableFields', () => {
 
 describe('hooks', () => {
   const mockUseSourcererDataView = useSourcererDataView as jest.Mock;
+  const mockUseBrowserFields = useBrowserFields as jest.Mock;
 
   describe('useInspectButton', () => {
     beforeEach(() => {
@@ -113,13 +116,15 @@ describe('hooks', () => {
 
   describe('useStackByFields', () => {
     beforeEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('returns only aggregateable fields', () => {
       mockUseSourcererDataView.mockReturnValue({
         browserFields: mockBrowserFields,
       });
+      mockUseBrowserFields.mockReturnValue(mockBrowserFields);
 
-      jest.clearAllMocks();
-    });
-    it('returns only aggregateable fields', () => {
       const wrapper = ({ children }: React.PropsWithChildren) => (
         <TestProviders>{children}</TestProviders>
       );
@@ -136,6 +141,7 @@ describe('hooks', () => {
       mockUseSourcererDataView.mockReturnValue({
         browserFields: { base: mockBrowserFields.base },
       });
+      mockUseBrowserFields.mockReturnValue({ base: mockBrowserFields.base });
 
       const wrapper = ({ children }: React.PropsWithChildren) => (
         <TestProviders>{children}</TestProviders>
@@ -154,6 +160,7 @@ describe('hooks', () => {
       mockUseSourcererDataView.mockReturnValue({
         browserFields: { nestedField: mockBrowserFields.nestedField },
       });
+      mockUseBrowserFields.mockReturnValue({ nestedField: mockBrowserFields.nestedField });
 
       const wrapper = ({ children }: React.PropsWithChildren) => (
         <TestProviders>{children}</TestProviders>

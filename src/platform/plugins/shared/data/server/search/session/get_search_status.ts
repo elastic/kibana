@@ -8,28 +8,51 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { TransportResult } from '@elastic/elasticsearch';
-import { ElasticsearchClient } from '@kbn/core/server';
-import { SearchSessionRequestStatus } from '../../../common';
+import type { ElasticsearchClient } from '@kbn/core/server';
+import type { SearchSessionRequestInfo, SearchSessionRequestStatus } from '../../../common';
 import { SearchStatus } from './types';
-import { AsyncSearchStatusResponse } from '../..';
 
-export async function getSearchStatus(
-  internalClient: ElasticsearchClient,
-  asyncId: string
-): Promise<SearchSessionRequestStatus> {
+function requestByStrategy({
+  session,
+  asyncId,
+  esClient,
+}: {
+  session: SearchSessionRequestInfo;
+  asyncId: string;
+  esClient: ElasticsearchClient;
+}) {
+  if (session.strategy === 'esql_async') {
+    return esClient.esql.asyncQueryGet({ id: asyncId }, { meta: true });
+  }
+
+  return esClient.asyncSearch.status(
+    {
+      id: asyncId,
+    },
+    { meta: true }
+  );
+}
+
+export async function getSearchStatus({
+  session,
+  asyncId,
+  esClient,
+}: {
+  session: SearchSessionRequestInfo;
+  asyncId: string;
+  esClient: ElasticsearchClient;
+}): Promise<SearchSessionRequestStatus> {
   // TODO: Handle strategies other than the default one
   // https://github.com/elastic/kibana/issues/127880
   try {
-    const apiResponse: TransportResult<AsyncSearchStatusResponse> =
-      await internalClient.asyncSearch.status(
-        {
-          id: asyncId,
-        },
-        { meta: true }
-      );
+    const apiResponse = await requestByStrategy({
+      session,
+      asyncId,
+      esClient,
+    });
+
     const response = apiResponse.body;
-    if (response.completion_status! >= 400) {
+    if ('completion_status' in response && response.completion_status! >= 400) {
       return {
         status: SearchStatus.ERROR,
         error: i18n.translate('data.search.statusError', {

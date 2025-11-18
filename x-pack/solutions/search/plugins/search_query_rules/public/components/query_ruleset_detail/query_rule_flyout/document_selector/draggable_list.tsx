@@ -12,7 +12,7 @@ import type { FieldArrayWithId, FieldError, FieldErrors } from 'react-hook-form'
 import type { QueryRulesQueryRuleType } from '@elastic/elasticsearch/lib/api/types';
 import type { OnDragEndResponder } from '@hello-pangea/dnd';
 import { isFieldError } from '../../../../utils/field_error_utils';
-import { QueryRuleEditorForm } from '../../../../../common/types';
+import type { QueryRuleEditorForm } from '../../../../../common/types';
 import { DocumentSelector } from './document_selector';
 
 interface DraggableListProps {
@@ -45,6 +45,7 @@ export const DraggableList: React.FC<DraggableListProps> = ({
         <>
           {actionFields.length === 0 && actionIdsFields?.length === 0 && (
             <EuiCallOut
+              announceOnMount
               title="At least one document is required"
               color="warning"
               size="s"

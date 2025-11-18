@@ -13,16 +13,17 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlyout } from '@elastic/eui';
-import { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
+import type { IndexManagementLocatorParams } from '@kbn/index-management-shared-types';
 import { attemptToURIDecode } from '@kbn/es-ui-shared-plugin/public';
-import { IndexTemplateFlyoutWithContextProps } from './index_template_flyout_with_context_types';
+import type { IndexTemplateFlyoutWithContextProps } from './index_template_flyout_with_context_types';
 import { httpService } from '../../../../services/http';
 import { notificationService } from '../../../../services/notification';
 import { UiMetricService } from '../../../../services/ui_metric';
 import { documentationService } from '../../../../services';
 import { UIM_APP_NAME } from '../../../../../../common/constants/ui_metric';
 import { setUiMetricService } from '../../../../services/api';
-import { AppDependencies, IndexManagementAppContext } from '../../../..';
+import type { AppDependencies } from '../../../..';
+import { IndexManagementAppContext } from '../../../..';
 import { INDEX_MANAGEMENT_LOCATOR_ID } from '../../../../../locator';
 import { TemplateDetailsContent } from './template_details_content';
 

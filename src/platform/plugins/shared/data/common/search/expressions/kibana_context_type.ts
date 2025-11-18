@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Filter, ExecutionContextSearch } from '@kbn/es-query';
-import { ExpressionValueBoxed } from '@kbn/expressions-plugin/common';
-import { Query } from '../../query';
-import { DataViewField } from '../..';
+import type { Filter, ExecutionContextSearch } from '@kbn/es-query';
+import type { ExpressionValueBoxed } from '@kbn/expressions-plugin/common';
+import type { Query } from '../../query';
+import type { DataViewField } from '../..';
 
 export type ExpressionValueSearchContext = ExpressionValueBoxed<
   'kibana_context',

@@ -5,17 +5,24 @@
  * 2.0.
  */
 
+import type { Plugin } from '@kbn/core/server';
 import {
-  Plugin,
   type CoreSetup,
   type CoreStart,
   type PluginInitializerContext,
   type Logger,
 } from '@kbn/core/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { InterceptsTriggerOrchestrator } from './orchestrator';
 import type { ServerConfigSchema } from '../common/config';
 
-export class InterceptsServerPlugin implements Plugin<object, object, object, never> {
+interface InterceptsServerSetupDeps {
+  usageCollection?: UsageCollectionSetup;
+}
+
+export class InterceptsServerPlugin
+  implements Plugin<object, object, InterceptsServerSetupDeps, never>
+{
   private readonly logger: Logger;
   private readonly config: ServerConfigSchema;
   private readonly interceptsOrchestrator?: InterceptsTriggerOrchestrator;
@@ -29,9 +36,11 @@ export class InterceptsServerPlugin implements Plugin<object, object, object, ne
     }
   }
 
-  public setup(core: CoreSetup) {
-    this.interceptsOrchestrator?.setup(core, this.logger, {
+  public setup(core: CoreSetup, { usageCollection }: InterceptsServerSetupDeps) {
+    this.interceptsOrchestrator?.setup(core, {
+      logger: this.logger,
       kibanaVersion: this.initContext.env.packageInfo.version,
+      usageCollection,
     });
 
     return {};

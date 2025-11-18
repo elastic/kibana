@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { action } from '@storybook/addon-actions';
-import { StoryContext } from '@storybook/react';
+import type { StoryContext } from '@storybook/react';
 import { EMPTY, of } from 'rxjs';
 import { I18nProvider } from '@kbn/i18n-react';
-import { KibanaThemeProvider, KibanaServices } from '@kbn/kibana-react-plugin/public';
+import type { KibanaServices } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import type { NotificationsStart, ApplicationStart } from '@kbn/core/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { KibanaContextProvider } from '../public/common/lib/kibana';
 import { ExperimentalFeaturesService } from '../public/common/experimental_features_service';
@@ -59,7 +61,7 @@ export const StorybookContextDecorator: FC<PropsWithChildren<StorybookContextDec
   const { globals } = context;
   const { euiTheme } = globals;
 
-  const darkMode = ['v8.dark', 'v7.dark'].includes(euiTheme);
+  const darkMode = ['borealis.dark'].includes(euiTheme);
   ExperimentalFeaturesService.init({
     experimentalFeatures: {
       rulesListDatagrid: true,

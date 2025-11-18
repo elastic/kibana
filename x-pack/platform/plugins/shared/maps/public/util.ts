@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EMSClient, FileLayer, TMSService } from '@elastic/ems-client';
+import type { EMSClient, FileLayer, TMSService } from '@elastic/ems-client';
+import type { MapConfig } from '@kbn/maps-ems-plugin/public';
 import { getEMSSettings, getMapsEmsStart } from './kibana_services';
 import { getLicenseId } from './licensed_features';
 
-export function getKibanaTileMap(): unknown {
+export function getKibanaTileMap(): Partial<MapConfig['tilemap']> {
   const mapsEms = getMapsEmsStart();
   return mapsEms.config.tilemap ? mapsEms.config.tilemap : {};
 }

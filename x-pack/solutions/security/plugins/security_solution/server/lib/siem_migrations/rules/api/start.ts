@@ -14,12 +14,12 @@ import {
   type StartRuleMigrationResponse,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { SiemMigrationAuditLogger } from '../../common/utils/audit';
-import { authz } from '../../common/utils/authz';
-import { getRetryFilter } from './util/retry';
-import { withLicense } from '../../common/utils/with_license';
-import { createTracersCallbacks } from './util/tracing';
-import { withExistingMigration } from './util/with_existing_migration_id';
+import { SiemMigrationAuditLogger } from '../../common/api/util/audit';
+import { authz } from '../../common/api/util/authz';
+import { getRetryFilter } from '../../common/api/util/retry';
+import { withLicense } from '../../common/api/util/with_license';
+import { createTracersCallbacks } from '../../common/api/util/tracing';
+import { withExistingMigration } from '../../common/api/util/with_existing_migration_id';
 
 export const registerSiemRuleMigrationsStartRoute = (
   router: SecuritySolutionPluginRouter,
@@ -52,9 +52,13 @@ export const registerSiemRuleMigrationsStartRoute = (
                 skip_prebuilt_rules_matching: skipPrebuiltRulesMatching = false,
               },
               retry,
+              selection,
             } = req.body;
 
-            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+              context.securitySolution,
+              'rules'
+            );
             try {
               const ctx = await context.resolve([
                 'core',
@@ -71,10 +75,17 @@ export const registerSiemRuleMigrationsStartRoute = (
 
               const ruleMigrationsClient = ctx.securitySolution.siemMigrations.getRulesClient();
               if (retry) {
-                const { updated } = await ruleMigrationsClient.task.updateToRetry(
-                  migrationId,
-                  getRetryFilter(retry)
-                );
+                let retryFilters = {};
+                try {
+                  retryFilters = getRetryFilter(retry, selection);
+                } catch (e) {
+                  return res.badRequest({
+                    body: e.message,
+                  });
+                }
+                const { updated } = await ruleMigrationsClient.task.updateToRetry(migrationId, {
+                  ...retryFilters,
+                });
                 if (!updated) {
                   return res.ok({ body: { started: false } });
                 }

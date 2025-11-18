@@ -8,7 +8,7 @@
 import { EuiComboBox, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { SeriesConfig, SeriesUrl } from '../../types';
+import type { SeriesConfig, SeriesUrl } from '../../types';
 import { useAppDataViewContext } from '../../hooks/use_app_data_view';
 import { useSeriesStorage } from '../../hooks/use_series_storage';
 import { LABEL_FIELDS_BREAKDOWN } from '../../configurations/constants';
@@ -47,6 +47,7 @@ export function LabelsBreakdown({ series, seriesId }: Props) {
         selectedOptions={labelFieldOptions?.filter((labelField) => labelField.label === breakdown)}
         options={labelFieldOptions}
         placeholder={CHOOSE_BREAKDOWN_FIELD}
+        aria-label={CHOOSE_BREAKDOWN_FIELD}
         onChange={(value) => {
           setSeries(seriesId, {
             ...series,

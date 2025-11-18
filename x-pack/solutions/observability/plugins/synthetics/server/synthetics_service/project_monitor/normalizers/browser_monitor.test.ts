@@ -5,12 +5,11 @@
  * 2.0.
  */
 
+import type { Locations, ProjectMonitor } from '../../../../common/runtime_types';
 import {
   MonitorTypeEnum,
   ScreenshotOption,
-  Locations,
   LocationStatus,
-  ProjectMonitor,
 } from '../../../../common/runtime_types';
 import {
   DEFAULT_FIELDS,
@@ -18,7 +17,7 @@ import {
   PROFILES_MAP,
 } from '../../../../common/constants/monitor_defaults';
 import { normalizeProjectMonitors } from '.';
-import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
+import type { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 
 describe('browser normalizers', () => {
   describe('normalize push monitors', () => {

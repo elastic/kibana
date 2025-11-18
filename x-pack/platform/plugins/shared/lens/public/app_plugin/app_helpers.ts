@@ -6,17 +6,20 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
-import { EuiBreadcrumb } from '@elastic/eui';
-import { AppLeaveHandler, ApplicationStart } from '@kbn/core-application-browser';
-import { ChromeStart } from '@kbn/core-chrome-browser';
-import { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import type { EuiBreadcrumb } from '@elastic/eui';
+import type { AppLeaveHandler, ApplicationStart } from '@kbn/core-application-browser';
+import type { ChromeStart } from '@kbn/core-chrome-browser';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { useRef, useCallback, useMemo, useState } from 'react';
-import { SharePublicStart } from '@kbn/share-plugin/public/plugin';
-import { LensAppLocator, LensAppLocatorParams } from '../../common/locator/locator';
-import { VisualizeEditorContext } from '../types';
-import { LensDocument } from '../persistence';
-import { RedirectToOriginProps } from './types';
+import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
+import type {
+  VisualizeEditorContext,
+  LensAppLocator,
+  LensAppLocatorParams,
+  LensDocument,
+} from '@kbn/lens-common';
+import type { RedirectToOriginProps } from './types';
 
 const VISUALIZE_APP_ID = 'visualize';
 

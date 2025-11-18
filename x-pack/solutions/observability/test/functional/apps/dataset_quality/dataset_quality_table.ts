@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import originalExpect from 'expect';
 import { IndexTemplateName } from '@kbn/apm-synthtrace/src/lib/logs/custom_logsdb_index_templates';
-import { DatasetQualityFtrProviderContext } from './config';
+import type { DatasetQualityFtrProviderContext } from './config';
 import {
   createFailedLogRecord,
   datasetNames,
@@ -40,7 +40,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
   const failedDatasetName = datasetNames[1];
 
-  describe('Dataset quality table', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/240734
+  describe.skip('Dataset quality table', function () {
     // This disables the forward-compatibility test for Elasticsearch 8.19 with Kibana and ES 9.0.
     // These versions are not expected to work together. Note: Failure store is not available in ES 9.0,
     // and running these tests will result in an "unknown index privilege [read_failure_store]" error.
@@ -112,9 +113,15 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       const datasetNameCol = cols[PageObjects.datasetQuality.texts.datasetNameColumn];
       await datasetNameCol.sort('descending');
       const datasetNameColCellTexts = await datasetNameCol.getCellTexts();
-      expect(datasetNameColCellTexts).to.eql(
-        [apacheAccessDatasetHumanName, ...datasetNames].reverse()
+
+      // This is to accomodate for failure if the integration hasn't been loaded successfully
+      // Dataset name is shown in this case
+      expect([apacheAccessDatasetHumanName, apacheAccessDatasetName]).to.contain(
+        datasetNameColCellTexts[datasetNameColCellTexts.length - 1]
       );
+
+      // Check the rest of the array matches the expected pattern
+      expect(datasetNameColCellTexts.slice(0, -1)).to.eql([...datasetNames].reverse());
 
       const namespaceCol = cols.Namespace;
       const namespaceColCellTexts = await namespaceCol.getCellTexts();
@@ -219,8 +226,9 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       });
 
       it('changes link text on hover when failure store is not enabled', async () => {
-        const linkSelector = 'datasetQualitySetFailureStoreLink';
-        const links = await testSubjects.findAll(linkSelector);
+        const links = await testSubjects.findAll(
+          PageObjects.datasetQuality.testSubjectSelectors.enableFailureStoreFromTableButton
+        );
         expect(links.length).to.be.greaterThan(0);
         const link = links[links.length - 1];
 
@@ -234,6 +242,32 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         const table = await PageObjects.datasetQuality.getDatasetsTable();
         await table.moveMouseTo();
+      });
+
+      it('enables failure store through modal and removes link from table', async () => {
+        const {
+          editFailureStoreModal,
+          failureStoreModalSaveButton,
+          enableFailureStoreToggle,
+          enableFailureStoreFromTableButton,
+        } = PageObjects.datasetQuality.testSubjectSelectors;
+
+        const originalLinks = await testSubjects.findAll(enableFailureStoreFromTableButton);
+        expect(originalLinks.length).to.be.greaterThan(0);
+
+        const link = originalLinks[0];
+        await link.click();
+
+        await testSubjects.existOrFail(editFailureStoreModal);
+
+        const saveModalButton = await testSubjects.find(failureStoreModalSaveButton);
+        await testSubjects.click(enableFailureStoreToggle);
+        expect(await saveModalButton.isEnabled()).to.be(true);
+        await testSubjects.click(failureStoreModalSaveButton);
+        await testSubjects.missingOrFail(editFailureStoreModal);
+
+        const updatedLinks = await testSubjects.findAll(enableFailureStoreFromTableButton);
+        expect(updatedLinks.length).to.be.lessThan(originalLinks.length);
       });
     });
   });

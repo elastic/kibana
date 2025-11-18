@@ -1,28 +1,32 @@
 disabled:
   # Base config files, only necessary to inform config finding script
-  - x-pack/test_serverless/functional/test_suites/observability/cypress/oblt_config.base.ts
+  - x-pack/solutions/observability/test/serverless/functional/test_suites/cypress/oblt_config.base.ts
   - x-pack/platform/test/serverless/functional/config.oblt.base.ts
   - x-pack/platform/test/serverless/functional/config.logs_essentials.base.ts
 
   # Cypress configs, for now these are still run manually
-  - x-pack/test_serverless/functional/test_suites/observability/cypress/config_headless.ts
-  - x-pack/test_serverless/functional/test_suites/observability/cypress/config_runner.ts
+  - x-pack/solutions/observability/test/serverless/functional/test_suites/cypress/config_headless.ts
+  - x-pack/solutions/observability/test/serverless/functional/test_suites/cypress/config_runner.ts
 
   # Observability AI Assistant local-only tests
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant_local.serverless.config.ts
 
+  # Empty configs
+  - x-pack/solutions/observability/test/serverless/api_integration/configs/config.feature_flags.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
-  - x-pack/test_serverless/api_integration/test_suites/observability/config.ts
-  - x-pack/test_serverless/api_integration/test_suites/observability/config.logs_essentials.ts
-  - x-pack/test_serverless/api_integration/test_suites/observability/config.feature_flags.ts
+  - x-pack/solutions/observability/test/serverless/api_integration/configs/config.ts
+  - x-pack/solutions/observability/test/serverless/api_integration/configs/config.logs_essentials.ts
   - x-pack/platform/test/serverless/api_integration/configs/observability/config.group1.ts
   - x-pack/platform/test/serverless/api_integration/configs/observability/config.logs_essentials.group1.ts
-  - x-pack/test_serverless/api_integration/test_suites/observability/fleet/config.ts
-  - x-pack/test_serverless/functional/test_suites/observability/config.ts
-  - x-pack/test_serverless/functional/test_suites/observability/config.logs_essentials.ts
+  - x-pack/solutions/observability/test/serverless/api_integration/test_suites/fleet/config.ts
+  - x-pack/solutions/observability/test/serverless/functional/configs/config.ts
+  - x-pack/solutions/observability/test/serverless/functional/configs/config.cases_and_rules.ts
+  - x-pack/solutions/observability/test/serverless/functional/configs/config.ml_and_discover.ts
+  - x-pack/solutions/observability/test/serverless/functional/configs/config.logs_essentials.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.examples.ts
-  - x-pack/test_serverless/functional/test_suites/observability/config.feature_flags.ts
+  - x-pack/solutions/observability/test/serverless/functional/configs/config.feature_flags.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.saved_objects_management.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.context_awareness.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.config_compat_mode.ts
@@ -39,8 +43,8 @@ enabled:
   - x-pack/platform/test/serverless/functional/configs/observability/config.group11.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.group12.ts
   - x-pack/platform/test/serverless/functional/configs/observability/config.logs_essentials.group1.ts
-  - x-pack/test_serverless/functional/test_suites/observability/config.screenshots.ts
-  - x-pack/test_serverless/functional/test_suites/observability/config.telemetry.ts
+  - x-pack/solutions/observability/test/serverless/functional/configs/config.screenshots.ts
+  - x-pack/solutions/observability/test/serverless/functional/configs/config.telemetry.ts
   # serverless config files that run deployment-agnostic tests
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.serverless.config.ts
   - x-pack/solutions/observability/test/api_integration_deployment_agnostic/configs/serverless/oblt.ai_assistant.serverless.config.ts

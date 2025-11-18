@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { FunctionComponent } from 'react';
+import type { FunctionComponent } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ExpressionContext } from '../../../types';
+import type { ExpressionContext } from '../../../types';
 
 const strings = {
   getContextErrorMessage: (errorMessage: string | null = '') =>

@@ -6,9 +6,9 @@
  */
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
-import { RoleCredentials } from '@kbn/ftr-common-functional-services';
+import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
-import { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
+import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import { addMonitorAPIHelper, omitMonitorKeys } from './create_monitor';
 import { LOCAL_PUBLIC_LOCATION } from './helpers/location';
 

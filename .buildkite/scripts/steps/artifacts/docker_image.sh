@@ -5,7 +5,6 @@ set -euo pipefail
 .buildkite/scripts/bootstrap.sh
 
 source .buildkite/scripts/steps/artifacts/env.sh
-
 source .buildkite/scripts/common/util.sh
 
 GIT_ABBREV_COMMIT=${BUILDKITE_COMMIT:0:12}
@@ -17,6 +16,40 @@ fi
 
 KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless"
 export KIBANA_IMAGE="$KIBANA_BASE_IMAGE:$KIBANA_IMAGE_TAG"
+
+KIBANA_WORKPLACE_AI_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-workplaceai"
+export KIBANA_WORKPLACE_AI_IMAGE="$KIBANA_WORKPLACE_AI_BASE_IMAGE:$KIBANA_IMAGE_TAG"
+
+KIBANA_OBSERVABILITY_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-observability"
+export KIBANA_OBSERVABILITY_IMAGE="$KIBANA_OBSERVABILITY_BASE_IMAGE:$KIBANA_IMAGE_TAG"
+
+KIBANA_SEARCH_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-search"
+export KIBANA_SEARCH_IMAGE="$KIBANA_SEARCH_BASE_IMAGE:$KIBANA_IMAGE_TAG"
+
+KIBANA_SECURITY_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless-security"
+export KIBANA_SECURITY_IMAGE="$KIBANA_SECURITY_BASE_IMAGE:$KIBANA_IMAGE_TAG"
+
+retag_image_with_architecture() {
+  local image="$1"
+  local artifact="$2"
+
+  docker rmi "$image" || true
+  docker load < "target/${artifact}-amd64.tar.gz"
+  docker tag "$image" "$image-amd64"
+
+  docker rmi "$image" || true
+  docker load < "target/${artifact}-arm64.tar.gz"
+  docker tag "$image" "$image-arm64"
+}
+
+create_and_push_manifest() {
+  local image="$1"
+  docker manifest create \
+    "$image" \
+    --amend "$image-arm64" \
+    --amend "$image-amd64"
+  docker manifest push "$image"
+}
 
 echo "--- Verify manifest does not already exist"
 echo "Checking manifest for $KIBANA_IMAGE"
@@ -43,47 +76,54 @@ if [[ "$SKIP_BUILD" == "false" ]]; then
     --docker-tag="$KIBANA_IMAGE_TAG"
 
   echo "--- Tag images"
-  docker rmi "$KIBANA_IMAGE"
-  docker load < "target/kibana-serverless-$BASE_VERSION-docker-image-amd64.tar.gz"
-  docker tag "$KIBANA_IMAGE" "$KIBANA_IMAGE-amd64"
-
-  docker rmi "$KIBANA_IMAGE"
-  docker load < "target/kibana-serverless-$BASE_VERSION-docker-image-arm64.tar.gz"
-  docker tag "$KIBANA_IMAGE" "$KIBANA_IMAGE-arm64"
+  retag_image_with_architecture "$KIBANA_IMAGE" "kibana-serverless-$BASE_VERSION-docker-image"
+  retag_image_with_architecture "$KIBANA_WORKPLACE_AI_IMAGE" "kibana-serverless-workplaceai-$BASE_VERSION-docker-image"
+  retag_image_with_architecture "$KIBANA_OBSERVABILITY_IMAGE" "kibana-serverless-observability-$BASE_VERSION-docker-image"
+  retag_image_with_architecture "$KIBANA_SEARCH_IMAGE" "kibana-serverless-search-$BASE_VERSION-docker-image"
+  retag_image_with_architecture "$KIBANA_SECURITY_IMAGE" "kibana-serverless-security-$BASE_VERSION-docker-image"
 
   echo "--- Push images"
   docker_with_retry push "$KIBANA_IMAGE-arm64"
   docker_with_retry push "$KIBANA_IMAGE-amd64"
+  docker_with_retry push "$KIBANA_WORKPLACE_AI_IMAGE-arm64"
+  docker_with_retry push "$KIBANA_WORKPLACE_AI_IMAGE-amd64"
+  docker_with_retry push "$KIBANA_OBSERVABILITY_IMAGE-arm64"
+  docker_with_retry push "$KIBANA_OBSERVABILITY_IMAGE-amd64"
+  docker_with_retry push "$KIBANA_SEARCH_IMAGE-arm64"
+  docker_with_retry push "$KIBANA_SEARCH_IMAGE-amd64"
+  docker_with_retry push "$KIBANA_SECURITY_IMAGE-arm64"
+  docker_with_retry push "$KIBANA_SECURITY_IMAGE-amd64"
 
   echo "--- Create and push manifests"
-  docker manifest create \
-    "$KIBANA_IMAGE" \
-    --amend "$KIBANA_IMAGE-arm64" \
-    --amend "$KIBANA_IMAGE-amd64"
-  docker manifest push "$KIBANA_IMAGE"
+  create_and_push_manifest "$KIBANA_IMAGE"
+  create_and_push_manifest "$KIBANA_WORKPLACE_AI_IMAGE"
+  create_and_push_manifest "$KIBANA_OBSERVABILITY_IMAGE"
+  create_and_push_manifest "$KIBANA_SEARCH_IMAGE"
+  create_and_push_manifest "$KIBANA_SECURITY_IMAGE"
 
+  # Update latest tags when building off main
   if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
-    docker manifest create \
-      "$KIBANA_BASE_IMAGE:latest" \
-      --amend "$KIBANA_IMAGE-arm64" \
-      --amend "$KIBANA_IMAGE-amd64"
-    docker manifest push "$KIBANA_BASE_IMAGE:latest"
+    docker buildx imagetools create -t "$KIBANA_BASE_IMAGE:latest" "$KIBANA_IMAGE"
+    docker buildx imagetools create -t "$KIBANA_WORKPLACE_AI_BASE_IMAGE:latest" "$KIBANA_WORKPLACE_AI_IMAGE"
+    docker buildx imagetools create -t "$KIBANA_OBSERVABILITY_BASE_IMAGE:latest" "$KIBANA_OBSERVABILITY_IMAGE"
+    docker buildx imagetools create -t "$KIBANA_SEARCH_BASE_IMAGE:latest" "$KIBANA_SEARCH_IMAGE"
+    docker buildx imagetools create -t "$KIBANA_SECURITY_BASE_IMAGE:latest" "$KIBANA_SECURITY_IMAGE"
   fi
 
   echo "--- Build dependencies report"
   node scripts/licenses_csv_report "--csv=target/dependencies-$GIT_ABBREV_COMMIT.csv"
 
   echo "--- Upload archives"
-  buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-linux-x86_64.tar.gz"
-  buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-linux-aarch64.tar.gz"
-  buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-docker-image-amd64.tar.gz"
-  buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-docker-image-arm64.tar.gz"
+  cd target
+  buildkite-agent artifact upload "kibana-serverless*-$BASE_VERSION-linux-x86_64.tar.gz"
+  buildkite-agent artifact upload "kibana-serverless*-$BASE_VERSION-linux-aarch64.tar.gz"
+  buildkite-agent artifact upload "kibana-serverless*-$BASE_VERSION-docker-image-amd64.tar.gz"
+  buildkite-agent artifact upload "kibana-serverless*-$BASE_VERSION-docker-image-arm64.tar.gz"
   buildkite-agent artifact upload "kibana-serverless-$BASE_VERSION-docker-build-context.tar.gz"
   buildkite-agent artifact upload "kibana-$BASE_VERSION-cdn-assets.tar.gz"
   buildkite-agent artifact upload "dependencies-$GIT_ABBREV_COMMIT.csv"
 
   echo "--- Upload CDN assets"
-  cd target
   gcloud auth activate-service-account --key-file <(echo "$GCS_SA_CDN_KEY")
 
   CDN_ASSETS_FOLDER=$(mktemp -d)

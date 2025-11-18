@@ -9,9 +9,9 @@ import { useMemo, useEffect, useCallback, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { isLogicalAndField } from '../../../../../../../common/constants';
-import { MonitorFiltersResult } from '../../../../../../../common/runtime_types';
+import type { MonitorFiltersResult } from '../../../../../../../common/runtime_types';
+import type { MonitorFilterState } from '../../../../state';
 import {
-  MonitorFilterState,
   selectMonitorFiltersAndQueryState,
   setOverviewPageStateAction,
   updateManagementPageStateAction,
@@ -20,13 +20,15 @@ import {
   selectOverviewState,
 } from '../../../../state';
 import { useSyntheticsRefreshContext } from '../../../../contexts';
-import { SyntheticsUrlParams } from '../../../../utils/url_params';
+import type { SyntheticsUrlParams } from '../../../../utils/url_params';
 import { useUrlParams } from '../../../../hooks';
+import type {
+  SyntheticsMonitorFilterChangeHandler,
+  SyntheticsMonitorFilterField,
+} from '../../../../utils/filters/filter_fields';
 import {
   getMonitorFilterFields,
   getSyntheticsFilterKeyForLabel,
-  SyntheticsMonitorFilterChangeHandler,
-  SyntheticsMonitorFilterField,
 } from '../../../../utils/filters/filter_fields';
 
 export const useFilters = (): MonitorFiltersResult | null => {

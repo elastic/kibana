@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import {
+import type {
   MlGetTrainedModelsStatsRequest,
   MlGetTrainedModelsRequest,
 } from '@elastic/elasticsearch/lib/api/types';
-import { MlTrainedModels } from '@kbn/ml-plugin/server';
+import type { MlTrainedModels } from '@kbn/ml-plugin/server';
 
-import { MlModelDeploymentStatus, MlModelDeploymentState } from '../../../common/types/ml';
+import type { MlModelDeploymentStatus } from '../../../common/types/ml';
+import { MlModelDeploymentState } from '../../../common/types/ml';
 
 import { isNotFoundExceptionError } from './ml_model_deployment_common';
 

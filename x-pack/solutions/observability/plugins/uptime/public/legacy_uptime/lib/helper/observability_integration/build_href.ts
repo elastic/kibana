@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Ping } from '../../../../../common/runtime_types';
+import type { Ping } from '../../../../../common/runtime_types';
 
 /**
  * Builds URLs to the designated features by extracting values from the provided

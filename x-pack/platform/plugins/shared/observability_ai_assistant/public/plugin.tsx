@@ -10,7 +10,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { Logger } from '@kbn/logging';
 import { withSuspense } from '@kbn/shared-ux-utility';
 import React, { type ComponentType, lazy, type Ref } from 'react';
-import { AssistantScope } from '@kbn/ai-assistant-common';
+import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { registerTelemetryEventTypes } from './analytics';
 import { ObservabilityAIAssistantChatServiceContext } from './context/observability_ai_assistant_chat_service_context';
 import { ObservabilityAIAssistantMultipaneFlyoutContext } from './context/observability_ai_assistant_multipane_flyout_context';

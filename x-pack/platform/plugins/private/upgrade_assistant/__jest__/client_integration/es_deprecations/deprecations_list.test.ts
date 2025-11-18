@@ -8,18 +8,20 @@
 import { act } from 'react-dom/test-utils';
 
 import { API_BASE_PATH } from '../../../common/constants';
-import {
-  ReindexStep,
+import type {
   ESUpgradeStatus,
   EnrichedDeprecationInfo,
   MlAction,
   ReindexAction,
   UnfreezeAction,
-  ReindexStatus,
-  DataStreamMigrationStatus,
 } from '../../../common/types';
+import { DataStreamMigrationStatus } from '../../../common/types';
+import { ReindexStep } from '@kbn/reindex-service-plugin/common';
+import { ReindexStatus } from '@kbn/upgrade-assistant-pkg-common';
+import { REINDEX_SERVICE_BASE_PATH } from '@kbn/reindex-service-plugin/server';
 import { setupEnvironment } from '../helpers';
-import { ElasticsearchTestBed, setupElasticsearchPage } from './es_deprecations.helpers';
+import type { ElasticsearchTestBed } from './es_deprecations.helpers';
+import { setupElasticsearchPage } from './es_deprecations.helpers';
 import {
   esDeprecationsMockResponse,
   MOCK_SNAPSHOT_ID,
@@ -96,7 +98,7 @@ describe('ES deprecations table', () => {
       expect.anything()
     );
     expect(httpSetup.get).toHaveBeenCalledWith(
-      `${API_BASE_PATH}/reindex/${reindexDeprecation.index}`,
+      `${REINDEX_SERVICE_BASE_PATH}/${reindexDeprecation.index}`,
       expect.anything()
     );
 

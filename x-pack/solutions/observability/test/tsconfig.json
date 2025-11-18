@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -7,7 +7,11 @@
       "cheerio",
       "@emotion/react/types/css-prop",
       "@kbn/ambient-ui-types",
-      "@kbn/ambient-ftr-types"
+      "@kbn/ambient-ftr-types",
+      "cypress",
+      "cypress-file-upload",
+      "cypress-real-events",
+      "cypress-recurse"
     ],
     "resolveJsonModule": true,
   },
@@ -85,6 +89,14 @@
     "@kbn/typed-react-router-config",
     "@kbn/observability-ai-assistant-app-plugin",
     "@kbn/dev-utils",
-    "@kbn/data-quality-plugin",
+    "@kbn/serverless-observability-settings",
+    "@kbn/cypress-config",
+    "@kbn/dev-proc-runner",
+    "@kbn/cypress-test-helper",
+    "@kbn/streams-schema",
+    "@kbn/data-quality",
+    "@kbn/onechat-common",
+    "@kbn/observability-agent-plugin",
+    "@kbn/onechat-plugin",
   ]
 }

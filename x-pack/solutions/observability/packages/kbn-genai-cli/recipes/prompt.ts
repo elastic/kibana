@@ -6,7 +6,8 @@
  */
 
 import { z } from '@kbn/zod';
-import { ToolOptions, createPrompt } from '@kbn/inference-common';
+import type { ToolOptions } from '@kbn/inference-common';
+import { createPrompt } from '@kbn/inference-common';
 import { runRecipe } from '@kbn/inference-cli';
 
 /**

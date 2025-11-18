@@ -5,15 +5,16 @@
  * 2.0.
  */
 
-import { BehaviorSubject, debounceTime, filter, map, merge, Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
+import { BehaviorSubject, debounceTime, filter, map, merge } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
-import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
-import { KibanaExecutionContext } from '@kbn/core-execution-context-common';
-import { PaletteRegistry } from '@kbn/coloring';
-import { AggregateQuery, Filter, Query } from '@kbn/es-query';
+import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
+import type { PaletteRegistry } from '@kbn/coloring';
+import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { MapCenterAndZoom } from '../../common/descriptor_types';
 import { APP_ID, getEditPath, RENDER_TIMEOUT } from '../../common/constants';
-import { MapStoreState } from '../reducers/store';
+import type { MapStoreState } from '../reducers/store';
 import { getIsLayerTOCOpen, getOpenTOCDetails } from '../selectors/ui_selectors';
 import {
   getLayerList,
@@ -31,15 +32,15 @@ import {
   setQuery,
   setReadOnly,
 } from '../actions';
-import type { MapSerializedState } from './types';
+import type { MapByReferenceState, MapEmbeddableState } from '../../common';
 import { getCharts, getExecutionContextService } from '../kibana_services';
+import type { EventHandlers } from '../reducers/non_serializable_instances';
 import {
-  EventHandlers,
   getInspectorAdapters,
   setChartsPaletteServiceGetColor,
   setEventHandlers,
 } from '../reducers/non_serializable_instances';
-import { SavedMap } from '../routes';
+import type { SavedMap } from '../routes';
 
 function getMapCenterAndZoom(state: MapStoreState) {
   return {
@@ -56,7 +57,7 @@ function getHiddenLayerIds(state: MapStoreState) {
 
 export const reduxSyncComparators: StateComparators<
   Pick<
-    MapSerializedState,
+    MapEmbeddableState,
     'hiddenLayers' | 'isLayerTOCOpen' | 'mapCenter' | 'mapBuffer' | 'openTOCDetails'
   >
 > = {
@@ -83,7 +84,7 @@ export function initializeReduxSync({
   uuid,
 }: {
   savedMap: SavedMap;
-  state: MapSerializedState;
+  state: MapEmbeddableState;
   syncColors$?: PublishingSubject<boolean | undefined>;
   uuid: string;
 }) {
@@ -142,30 +143,25 @@ export function initializeReduxSync({
       showTimesliderToggleButton: false,
     })
   );
-  store.dispatch(setExecutionContext(getExecutionContext(uuid, state.savedObjectId)));
+  store.dispatch(
+    setExecutionContext(getExecutionContext(uuid, (state as MapByReferenceState).savedObjectId))
+  );
 
   const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const query$ = new BehaviorSubject<AggregateQuery | Query | undefined>(undefined);
-  const mapStateJSON = savedMap.getAttributes().mapStateJSON;
-  if (mapStateJSON) {
-    try {
-      const mapState = JSON.parse(mapStateJSON);
-      if (mapState.filters) {
-        filters$.next(mapState.filters);
-      }
-      if (mapState.query) {
-        query$.next(mapState.query);
-      }
-      store.dispatch(
-        setEmbeddableSearchContext({
-          filters: mapState.filters,
-          query: mapState.query,
-        })
-      );
-    } catch (e) {
-      // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
-    }
+  const { filters, query } = savedMap.getAttributes();
+  if (filters) {
+    filters$.next(filters);
   }
+  if (query) {
+    query$.next(query);
+  }
+  store.dispatch(
+    setEmbeddableSearchContext({
+      filters: filters ?? [],
+      query,
+    })
+  );
 
   let syncColorsSubscription: Subscription | undefined;
   let syncColorsSymbol: symbol | undefined;

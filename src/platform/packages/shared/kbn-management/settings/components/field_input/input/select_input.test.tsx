@@ -9,7 +9,8 @@
 
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
-import { SelectInput, SelectInputProps } from './select_input';
+import type { SelectInputProps } from './select_input';
+import { SelectInput } from './select_input';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 import { wrap } from '../mocks';
 

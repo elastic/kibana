@@ -8,7 +8,7 @@
  */
 
 import { controlGroupTelemetry, initializeControlGroupTelemetry } from './control_group_telemetry';
-import { ControlGroupSavedObjectState, ControlGroupTelemetry } from './types';
+import type { ControlGroupSavedObjectState, ControlGroupTelemetry } from './types';
 
 // controls attributes with all settings ignored + 3 options lists + hierarchical chaining + label above
 const rawControlAttributes1: ControlGroupSavedObjectState = {

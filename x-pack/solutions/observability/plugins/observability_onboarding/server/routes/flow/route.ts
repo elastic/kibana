@@ -13,7 +13,7 @@ import {
   type PackageClient,
 } from '@kbn/fleet-plugin/server';
 import { dump } from 'js-yaml';
-import { PackageDataStreamTypes, Output } from '@kbn/fleet-plugin/common/types';
+import type { PackageDataStreamTypes, Output } from '@kbn/fleet-plugin/common/types';
 import { transformOutputToFullPolicyOutput } from '@kbn/fleet-plugin/server/services/output_client';
 import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../../common/telemetry_events';
 import { getObservabilityOnboardingFlow, saveObservabilityOnboardingFlow } from '../../lib/state';
@@ -22,7 +22,8 @@ import { createObservabilityOnboardingServerRoute } from '../create_observabilit
 import { getHasLogs } from './get_has_logs';
 import { getKibanaUrl } from '../../lib/get_fallback_urls';
 import { getAgentVersionInfo } from '../../lib/get_agent_version';
-import { ElasticAgentStepPayload, InstalledIntegration, StepProgressPayloadRT } from '../types';
+import type { ElasticAgentStepPayload, InstalledIntegration } from '../types';
+import { StepProgressPayloadRT } from '../types';
 import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { createInstallApiKey } from '../../lib/api_key/create_install_api_key';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';

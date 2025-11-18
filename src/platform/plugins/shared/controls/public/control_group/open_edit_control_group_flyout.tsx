@@ -10,9 +10,9 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { openLazyFlyout } from '@kbn/presentation-util';
-import { StateManager } from '@kbn/presentation-publishing/state_manager/types';
+import type { StateManager } from '@kbn/presentation-publishing/state_manager/types';
 
-import { ControlGroupApi, ControlGroupEditorState } from './types';
+import type { ControlGroupApi, ControlGroupEditorState } from './types';
 import { coreServices } from '../services/kibana_services';
 import { confirmDeleteAllControls } from '../common/confirm_delete_control';
 
@@ -53,7 +53,7 @@ export const openEditControlGroupFlyout = (
         defaultMessage: 'Edit control settings',
       }),
       outsideClickCloses: false,
-      triggerId: 'dashboard-controls-menu-button',
+      triggerId: 'dashboardAddTopNavButton',
     },
   });
 };

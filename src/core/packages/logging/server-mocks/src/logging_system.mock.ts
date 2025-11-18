@@ -9,8 +9,10 @@
 
 // Test helpers to simplify mocking logs and collecting all their outputs
 import type { LoggerFactory } from '@kbn/logging';
-import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
 import type { ILoggingSystem } from '@kbn/core-logging-server-internal';
+import { lazyObject } from '@kbn/lazy-object';
 
 const createLoggingSystemMock = () => {
   const mockLog = loggerMock.create();
@@ -20,18 +22,20 @@ const createLoggingSystemMock = () => {
     context,
   }));
 
-  const mocked: jest.Mocked<ILoggingSystem> = {
+  const mocked: jest.Mocked<ILoggingSystem> = lazyObject({
     get: jest.fn(),
     asLoggerFactory: jest.fn(),
     setContextConfig: jest.fn(),
     setGlobalContext: jest.fn(),
     upgrade: jest.fn(),
     stop: jest.fn(),
-  };
+  });
+
   mocked.get.mockImplementation((...context) => ({
     ...mockLog,
     context,
   }));
+
   mocked.asLoggerFactory.mockImplementation(() => mocked);
   mocked.upgrade.mockResolvedValue(undefined);
   mocked.stop.mockResolvedValue();

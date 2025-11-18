@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
-import { Client } from '@elastic/elasticsearch';
-import { JsonObject } from '@kbn/utility-types';
+import type { Readable } from 'stream';
+import type { Client } from '@elastic/elasticsearch';
+import type { JsonObject } from '@kbn/utility-types';
 import expect from '@kbn/expect';
-import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { Streams } from '@kbn/streams-schema';
-import { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
-import { StreamsRouteRepository } from '@kbn/streams-plugin/server';
-import { ContentPackIncludedObjects, ContentPackManifest } from '@kbn/content-packs-schema';
-import { StreamsSupertestRepositoryClient } from './repository_client';
+import type { SearchTotalHits, Refresh } from '@elastic/elasticsearch/lib/api/types';
+import type { Streams } from '@kbn/streams-schema';
+import type { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
+import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
+import type { ContentPackIncludedObjects, ContentPackManifest } from '@kbn/content-packs-schema';
+import type { StreamsSupertestRepositoryClient } from './repository_client';
 
 export async function enableStreams(client: StreamsSupertestRepositoryClient) {
   await client.fetch('POST /api/streams/_enable 2023-10-31').expect(200);
@@ -24,8 +24,13 @@ export async function disableStreams(client: StreamsSupertestRepositoryClient) {
   await client.fetch('POST /api/streams/_disable 2023-10-31').expect(200);
 }
 
-export async function indexDocument(esClient: Client, index: string, document: JsonObject) {
-  const response = await esClient.index({ index, document, refresh: 'wait_for' });
+export async function indexDocument(
+  esClient: Client,
+  index: string,
+  document: JsonObject,
+  refresh: Refresh = 'wait_for'
+) {
+  const response = await esClient.index({ index, document, refresh });
   return response;
 }
 
@@ -169,6 +174,65 @@ export async function linkDashboard(
   );
 
   expect(response.status).to.be(200);
+}
+
+export async function linkRule(
+  apiClient: StreamsSupertestRepositoryClient,
+  stream: string,
+  id: string
+) {
+  const response = await apiClient.fetch('PUT /api/streams/{name}/rules/{ruleId} 2023-10-31', {
+    params: { path: { name: stream, ruleId: id } },
+  });
+
+  expect(response.status).to.be(200);
+}
+
+export async function unlinkRule(
+  apiClient: StreamsSupertestRepositoryClient,
+  stream: string,
+  id: string
+) {
+  const response = await apiClient.fetch('DELETE /api/streams/{name}/rules/{ruleId} 2023-10-31', {
+    params: { path: { name: stream, ruleId: id } },
+  });
+
+  expect(response.status).to.be(200);
+}
+
+export async function getRules(apiClient: StreamsSupertestRepositoryClient, stream: string) {
+  const response = await apiClient.fetch('GET /api/streams/{name}/rules 2023-10-31', {
+    params: { path: { name: stream } },
+  });
+
+  expect(response.status).to.be(200);
+
+  return response.body;
+}
+
+export async function getDashboards(apiClient: StreamsSupertestRepositoryClient, stream: string) {
+  const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
+    params: { path: { name: stream } },
+  });
+
+  expect(response.status).to.be(200);
+
+  return response.body;
+}
+
+export async function getDashboardSuggestions(options: {
+  apiClient: StreamsSupertestRepositoryClient;
+  stream: string;
+  tags: string[];
+  query?: string;
+}) {
+  const { apiClient, stream, tags, query = '' } = options;
+  const response = await apiClient.fetch('POST /internal/streams/{name}/dashboards/_suggestions', {
+    params: { path: { name: stream }, body: { tags }, query: { query } },
+  });
+  expect(response.status).to.be(200);
+
+  return response.body;
 }
 
 export async function exportContent(

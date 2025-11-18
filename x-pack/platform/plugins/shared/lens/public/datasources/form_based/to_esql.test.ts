@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { IndexPattern } from '../../types';
+import type { IndexPattern, DateHistogramIndexPatternColumn } from '@kbn/lens-common';
 import { getESQLForLayer } from './to_esql';
 import { createCoreSetupMock } from '@kbn/core-lifecycle-browser-mocks/src/core_setup.mock';
-import { DateHistogramIndexPatternColumn } from '../..';
 
 const defaultUiSettingsGet = (key: string) => {
   switch (key) {

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { MappingProperty, SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import type { MappingProperty, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 
 import { Result, resultMetaData, resultToField } from '@kbn/search-index-documents';
 

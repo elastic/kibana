@@ -7,19 +7,20 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import type { ResourceSupportedVendor } from '../../../../../../common/siem_migrations/rules/resources/types';
 import type { RuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { SIEM_RULE_MIGRATION_RULES_PATH } from '../../../../../../common/siem_migrations/constants';
 import {
   CreateRuleMigrationRulesRequestBody,
   CreateRuleMigrationRulesRequestParams,
 } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
-import { ResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
+import { RuleResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import type { AddRuleMigrationRulesInput } from '../../data/rule_migrations_data_rules_client';
-import { SiemMigrationAuditLogger } from '../../../common/utils/audit';
-import { authz } from '../../../common/utils/authz';
-import { withExistingMigration } from '../util/with_existing_migration_id';
-import { withLicense } from '../../../common/utils/with_license';
+import type { CreateRuleMigrationRulesInput } from '../../data/rule_migrations_data_rules_client';
+import { SiemMigrationAuditLogger } from '../../../common/api/util/audit';
+import { authz } from '../../../common/api/util/authz';
+import { withExistingMigration } from '../../../common/api/util/with_existing_migration_id';
+import { withLicense } from '../../../common/api/util/with_license';
 
 export const registerSiemRuleMigrationsCreateRulesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -47,7 +48,10 @@ export const registerSiemRuleMigrationsCreateRulesRoute = (
             const { migration_id: migrationId } = req.params;
             const originalRules = req.body;
             const rulesCount = originalRules.length;
-            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(context.securitySolution);
+            const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
+              context.securitySolution,
+              'rules'
+            );
             try {
               const [firstOriginalRule] = originalRules;
               if (!firstOriginalRule) {
@@ -60,20 +64,25 @@ export const registerSiemRuleMigrationsCreateRulesRoute = (
                 count: rulesCount,
               });
 
-              const ruleMigrations = originalRules.map<AddRuleMigrationRulesInput>(
+              const ruleMigrations = originalRules.map<CreateRuleMigrationRulesInput>(
                 (originalRule) => ({
                   migration_id: migrationId,
                   original_rule: originalRule,
                 })
               );
 
-              await ruleMigrationsClient.data.rules.create(ruleMigrations);
+              await ruleMigrationsClient.data.items.create(ruleMigrations);
 
               // Create identified resource documents without content to keep track of them
-              const resourceIdentifier = new ResourceIdentifier(firstOriginalRule.vendor);
-              const resources = resourceIdentifier
-                .fromOriginalRules(originalRules)
-                .map((resource) => ({ ...resource, migration_id: migrationId }));
+              const resourceIdentifier = new RuleResourceIdentifier(
+                firstOriginalRule.vendor as ResourceSupportedVendor
+              );
+              const extractedResources = await resourceIdentifier.fromOriginals(originalRules);
+
+              const resources = extractedResources.map((resource) => ({
+                ...resource,
+                migration_id: migrationId,
+              }));
 
               if (resources.length > 0) {
                 await ruleMigrationsClient.data.resources.create(resources);

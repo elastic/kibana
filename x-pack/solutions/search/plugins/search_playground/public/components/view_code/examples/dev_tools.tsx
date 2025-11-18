@@ -9,7 +9,8 @@ import React from 'react';
 
 import { EuiCodeBlock } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
-import { PlaygroundForm, PlaygroundFormFields } from '../../../types';
+import type { PlaygroundForm } from '../../../types';
+import { PlaygroundFormFields } from '../../../types';
 import { elasticsearchQueryObject } from '../../../utils/user_query';
 
 export const DevToolsCode: React.FC = () => {

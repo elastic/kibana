@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { IESAggField } from './agg_field_types';
-import { IVectorSource } from '../../sources/vector_source';
-import { ITooltipProperty, TooltipProperty } from '../../tooltips/tooltip_property';
-import { TOP_TERM_PERCENTAGE_SUFFIX, FIELD_ORIGIN } from '../../../../common/constants';
-import { TileMetaFeature } from '../../../../common/descriptor_types';
+import type { IESAggField } from './agg_field_types';
+import type { IVectorSource } from '../../sources/vector_source';
+import type { ITooltipProperty } from '../../tooltips/tooltip_property';
+import { TooltipProperty } from '../../tooltips/tooltip_property';
+import type { FIELD_ORIGIN } from '../../../../common/constants';
+import { TOP_TERM_PERCENTAGE_SUFFIX } from '../../../../common/constants';
+import type { TileMetaFeature } from '../../../../common/descriptor_types';
 
 export class TopTermPercentageField implements IESAggField {
   private readonly _topTermAggField: IESAggField;

@@ -25,11 +25,11 @@ import {
   apiHasDynamicActions,
   type HasDynamicActions,
 } from '@kbn/embeddable-enhanced-plugin/public';
-import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
+import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
+import type { ActionDefinition } from '@kbn/ui-actions-plugin/public/actions';
 import { txtDisplayName } from './i18n';
 import { MenuItem } from './menu_item';
-import { StartDependencies } from '../../../../plugin';
+import type { StartDependencies } from '../../../../plugin';
 import {
   createDrilldownTemplatesFromSiblings,
   DRILLDOWN_ACTION_GROUP,

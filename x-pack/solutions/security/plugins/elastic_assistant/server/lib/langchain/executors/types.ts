@@ -5,38 +5,40 @@
  * 2.0.
  */
 
-import { ActionsClient } from '@kbn/actions-plugin/server';
-import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { BaseMessage } from '@langchain/core/messages';
-import { Logger } from '@kbn/logging';
-import { KibanaRequest, KibanaResponseFactory, ResponseHeaders } from '@kbn/core-http-server';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { BaseMessage } from '@langchain/core/messages';
+import type { Logger } from '@kbn/logging';
+import type { KibanaRequest, KibanaResponseFactory, ResponseHeaders } from '@kbn/core-http-server';
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
-import {
+import type {
   ContentReferencesStore,
   ExecuteConnectorRequestBody,
+  InterruptValue,
   Message,
   Replacements,
   ScreenContext,
 } from '@kbn/elastic-assistant-common';
-import { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
-import { PublicMethodsOf } from '@kbn/utility-types';
+import type { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
+import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
-import { TelemetryParams } from '@kbn/langchain/server/tracers/telemetry/telemetry_tracer';
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
+import type { TelemetryParams } from '@kbn/langchain/server/tracers/telemetry/telemetry_tracer';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import { CoreRequestHandlerContext } from '@kbn/core/server';
-import { ResponseBody } from '../types';
+import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import type { CoreRequestHandlerContext } from '@kbn/core/server';
+import type { ResponseBody } from '../types';
 import type { AssistantTool, ElasticAssistantApiRequestHandlerContext } from '../../../types';
-import { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
-import { AIAssistantConversationsDataClient } from '../../../ai_assistant_data_clients/conversations';
-import { AIAssistantDataClient } from '../../../ai_assistant_data_clients';
+import type { AIAssistantKnowledgeBaseDataClient } from '../../../ai_assistant_data_clients/knowledge_base';
+import type { AIAssistantConversationsDataClient } from '../../../ai_assistant_data_clients/conversations';
+import type { AIAssistantDataClient } from '../../../ai_assistant_data_clients';
 
-export type OnLlmResponse = (
-  content: string,
-  traceData?: Message['traceData'],
-  isError?: boolean
-) => Promise<void>;
+export type OnLlmResponse = (args: {
+  content: string;
+  interruptValue?: InterruptValue;
+  traceData?: Message['traceData'];
+  isError?: boolean;
+}) => Promise<void>;
 
 export interface AssistantDataClients {
   anonymizationFieldsDataClient?: AIAssistantDataClient;
@@ -51,6 +53,7 @@ export interface AgentExecutorParams<T extends boolean> {
   actionsClient: PublicMethodsOf<ActionsClient>;
   assistantTools?: AssistantTool[];
   connectorId: string;
+  threadId: string;
   conversationId?: string;
   contentReferencesStore: ContentReferencesStore;
   core: CoreRequestHandlerContext;

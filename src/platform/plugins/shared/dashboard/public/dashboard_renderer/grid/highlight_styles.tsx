@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UseEuiTheme } from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
 import { highlightAnimationDuration } from '../../dashboard_api/track_panel';
 
@@ -31,7 +31,7 @@ const getOutlineFadeKeyframes = ({ euiTheme }: UseEuiTheme) =>
       outline: `${euiTheme.border.width.thin} dashed transparent`,
     },
     '100%': {
-      outline: `${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseFormsControl}`,
+      outline: `${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseProminent}`,
     },
   });
 

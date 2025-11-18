@@ -6,40 +6,42 @@
  */
 import { createPortal } from 'react-dom';
 import { EuiFlexItem } from '@elastic/eui';
-import { AggregateQuery, Query, isOfAggregateQueryType } from '@kbn/es-query';
-import { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import type { AggregateQuery, Query } from '@kbn/es-query';
+import { isOfAggregateQueryType } from '@kbn/es-query';
+import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import { isEqual } from 'lodash';
-import { MutableRefObject, useCallback, useEffect, useRef, useState } from 'react';
+import type { MutableRefObject } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { BehaviorSubject } from 'rxjs';
+import type { Simplify } from '@kbn/chart-expressions-common';
 import { useCurrentAttributes } from '../../../app_plugin/shared/edit_on_the_fly/use_current_attributes';
 import { getActiveDataFromDatatable } from '../../../state_management/shared_logic';
-import type { Simplify } from '../../../types';
 import { onActiveDataChange, useLensDispatch, useLensSelector } from '../../../state_management';
-import {
-  ESQLDataGridAttrs,
-  getSuggestions,
-} from '../../../app_plugin/shared/edit_on_the_fly/helpers';
+import type { ESQLDataGridAttrs } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
+import { getSuggestions } from '../../../app_plugin/shared/edit_on_the_fly/helpers';
 import { useESQLVariables } from '../../../app_plugin/shared/edit_on_the_fly/use_esql_variables';
 import { MAX_NUM_OF_COLUMNS } from '../../../datasources/form_based/esql_layer/utils';
-import { isApiESQLVariablesCompatible } from '../../../react_embeddable/types';
+import { isApiESQLVariablesCompatible } from '../../../react_embeddable/type_guards';
 import type { LayerPanelProps } from './types';
 import { ESQLDataGridAccordion } from '../../../app_plugin/shared/edit_on_the_fly/esql_data_grid_accordion';
 import { useInitializeChart } from './use_initialize_chart';
+import { useEditorFrameService } from '../../editor_frame_service_context';
 
 export type ESQLEditorProps = Simplify<
   {
     isTextBasedLanguage: boolean;
+    uiSettings: IUiSettingsClient;
   } & Pick<
     LayerPanelProps,
     | 'attributes'
     | 'framePublicAPI'
-    | 'datasourceMap'
     | 'lensAdapters'
     | 'parentApi'
     | 'layerId'
@@ -48,7 +50,6 @@ export type ESQLEditorProps = Simplify<
     | 'data'
     | 'canEditTextBasedQuery'
     | 'editorContainer'
-    | 'visualizationMap'
     | 'setCurrentAttributes'
     | 'updateSuggestion'
     | 'dataLoading$'
@@ -65,11 +66,10 @@ export type ESQLEditorProps = Simplify<
  */
 export function ESQLEditor({
   data,
+  uiSettings,
   attributes,
   framePublicAPI,
   isTextBasedLanguage,
-  datasourceMap,
-  visualizationMap,
   lensAdapters,
   parentApi,
   panelId,
@@ -85,6 +85,8 @@ export function ESQLEditor({
   const [query, setQuery] = useState<AggregateQuery | Query>(
     attributes?.state.query || { esql: '' }
   );
+
+  const { visualizationMap, datasourceMap } = useEditorFrameService();
   const { visualization } = useLensSelector((state) => state.lens);
 
   const [errors, setErrors] = useState<Error[]>([]);
@@ -99,8 +101,6 @@ export function ESQLEditor({
   const currentAttributes = useCurrentAttributes({
     textBasedMode: isTextBasedLanguage,
     initialAttributes: attributes,
-    datasourceMap,
-    visualizationMap,
   });
 
   const adHocDataViews =
@@ -148,6 +148,7 @@ export function ESQLEditor({
       const attrs = await getSuggestions(
         q,
         data,
+        uiSettings,
         datasourceMap,
         visualizationMap,
         adHocDataViews,
@@ -167,14 +168,15 @@ export function ESQLEditor({
       setIsVisualizationLoading(false);
     },
     [
+      uiSettings,
       data,
       datasourceMap,
       visualizationMap,
       adHocDataViews,
       esqlVariables,
+      currentAttributes,
       setCurrentAttributes,
       updateSuggestion,
-      currentAttributes,
     ]
   );
 

@@ -1,5 +1,5 @@
 {
-  "type": "shared-server",
+  "type": "shared-common",
   "id": "@kbn/esql-composer",
   "owner": ["@elastic/obs-ux-infra_services-team", "@elastic/obs-ai-assistant"],
   "group": "platform",

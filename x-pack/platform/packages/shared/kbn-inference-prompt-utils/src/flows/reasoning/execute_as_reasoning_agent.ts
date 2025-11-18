@@ -4,127 +4,91 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import {
+import type {
   AssistantMessage,
-  MessageRole,
-  ToolMessage,
-  type Prompt,
-  type ToolCallsOf,
-  ToolCall,
   Message,
-  BoundInferenceClient,
   PromptOptions,
-  ToolCallbacksOf,
-  ToolOptionsOfPrompt,
+  ToolCall,
   ToolCallback,
-  PromptResponse,
+  ToolCallbackResult,
+  ToolCallbacksOfToolOptions,
+  ToolChoice,
+  ToolMessage,
+  ToolNamesOf,
+  ToolOptionsOfPrompt,
   UnboundPromptOptions,
 } from '@kbn/inference-common';
-import { withExecuteToolSpan } from '@kbn/inference-tracing';
-import { partition, last, takeRightWhile } from 'lodash';
-import { createReasonToolCall } from './create_reason_tool_call';
+import { MessageRole, ToolChoiceType, type Prompt } from '@kbn/inference-common';
+import { withActiveInferenceSpan, withExecuteToolSpan } from '@kbn/inference-tracing';
+import { trace } from '@opentelemetry/api';
+import { omit, partition } from 'lodash';
+import { z } from '@kbn/zod';
 import {
   createCompleteToolCall,
   createCompleteToolCallResponse,
 } from './create_complete_tool_call';
-
-const planningTools = {
-  reason: {
-    description: 'reason or reflect about the task ahead or the results',
-    schema: {
-      type: 'object',
-      properties: {},
-    },
-  },
-  complete: {
-    description: 'complete the task based on the last output',
-    schema: {
-      type: 'object',
-      properties: {},
-    },
-  },
-} as const;
-
-type PlanningTools = typeof planningTools;
-
-type PlanningToolCallName = keyof PlanningTools;
-
-type PlanningToolCall = ToolCallsOf<{ tools: PlanningTools }>['toolCalls'][number];
-
-function isPlanningToolName(name: string) {
-  return Object.keys(planningTools).includes(name);
-}
-
-function removeReasonToolCalls(messages: Message[]) {
-  return messages.filter((message) => {
-    const isInternalMessage =
-      (message.role === MessageRole.Tool && message.name === 'reason') ||
-      (message.role === MessageRole.Assistant &&
-        message.toolCalls?.some((toolCall) => toolCall.function.name === 'reason'));
-
-    return !isInternalMessage;
-  });
-}
-
-function prepareMessagesForLLM({
-  stepsLeft,
-  messages,
-  canCallTaskTools,
-  canCallPlanningTools,
-}: {
-  stepsLeft: number;
-  messages: Message[];
-  canCallTaskTools: boolean;
-  canCallPlanningTools: boolean;
-}) {
-  const lastMessage = last(messages);
-
-  const next =
-    lastMessage?.role === MessageRole.Tool && isPlanningToolName(lastMessage.name)
-      ? removeReasonToolCalls(messages.slice(0, -2)).concat(messages.slice(-2))
-      : removeReasonToolCalls(messages);
-
-  const lastToolResponse = next.findLast(
-    (message): message is ToolMessage => message.role === MessageRole.Tool
-  );
-
-  return next.map((message) => {
-    if (message === lastToolResponse) {
-      return {
-        ...lastToolResponse,
-        response: {
-          ...(lastToolResponse.response as Record<string, any>),
-          stepsLeft,
-        },
-      };
-    }
-    return message;
-  });
-}
-
-interface PromptReasoningAgentOptions {
-  inferenceClient: BoundInferenceClient;
-  maxSteps?: number;
-  prevMessages?: undefined;
-}
+import { createReasonToolCall, createReasonToolCallResponse } from './create_reason_tool_call';
+import { formatMessages, formatToolOptions } from './format_for_power';
+import { BEGIN_INTERNAL_REASONING_MARKER, END_INTERNAL_REASONING_MARKER } from './markers';
+import type { PlanningToolCall, PlanningToolMessage } from './planning_tools';
+import { PLANNING_TOOLS, isPlanningToolName, removeSystemToolCalls } from './planning_tools';
+import type {
+  ReasoningPromptOptions,
+  ReasoningPromptResponse,
+  ReasoningPromptResponseOf,
+} from './types';
 
 export function executeAsReasoningAgent<
   TPrompt extends Prompt,
-  TPromptOptions extends PromptOptions<TPrompt>
+  TPromptOptions extends PromptOptions<TPrompt>,
+  TToolCallbacks extends ToolCallbacksOfToolOptions<ToolOptionsOfPrompt<TPrompt>>,
+  TFinalToolChoice extends ToolChoice<ToolNamesOf<ToolOptionsOfPrompt<TPrompt>>> | undefined =
+    | ToolChoice<ToolNamesOf<ToolOptionsOfPrompt<TPrompt>>>
+    | undefined
 >(
-  options: UnboundPromptOptions &
-    PromptReasoningAgentOptions & { prompt: TPrompt } & {
-      toolCallbacks: ToolCallbacksOf<ToolOptionsOfPrompt<TPrompt>>;
+  options: UnboundPromptOptions<TPrompt> &
+    ReasoningPromptOptions & { prompt: TPrompt } & {
+      toolCallbacks: TToolCallbacks;
+      finalToolChoice?: TFinalToolChoice;
     }
-): Promise<PromptResponse<TPromptOptions>>;
+): Promise<
+  ReasoningPromptResponseOf<
+    TPrompt,
+    TPromptOptions & { toolChoice: TFinalToolChoice },
+    TToolCallbacks
+  >
+>;
 
-export function executeAsReasoningAgent(
+/**
+ * Executes a prompt in a loop in a way that the LLM will use the specified tools
+ * to gather context, and then produce a final output, which may or may not include
+ * a final tool call.
+ *
+ * The rules are as follows:
+ * - when `reason()` is called, the LLM SHOULD reason about the task or the tool call
+ * results
+ * - when `reason()` is called, the LLM CAN call another tool
+ * - when `complete()` is called, and `finalToolChoice` is NOT specified, the LLM
+ * MUST produce a summarization text
+ * - when `complete()` is called, and `finalToolChoice` is specified, the LLM MUST
+ * call a tool to complete the task, and the LLM SHOULD produce a summarization text
+ * - when `finalToolChoice` is specified, and the LLM calls this tool, the task MUST
+ * be completed by the orchestrator
+ * - when the available number of steps have been exhausted, the LLM MUST produce
+ * its final output
+ * - if the LLM fails to produce its final output (e.g. by calling an unavailable tool),
+ * the orchestrator MUST complete the task
+ * - if `finalToolChoice` is specified and is not included as part of the definitive output,
+ * the orchestrator MUST fail the task
+ */
+export async function executeAsReasoningAgent(
   options: UnboundPromptOptions &
-    PromptReasoningAgentOptions & {
+    ReasoningPromptOptions & {
       toolCallbacks: Record<string, ToolCallback>;
+      finalToolChoice?: ToolChoice;
     }
-): Promise<PromptResponse> {
-  const { inferenceClient, maxSteps = 10, toolCallbacks, tools, toolChoice } = options;
+): Promise<ReasoningPromptResponse> {
+  const { inferenceClient, maxSteps = 10, power = 'medium', toolCallbacks } = options;
 
   async function callTools(toolCalls: ToolCall[]): Promise<ToolMessage[]> {
     return await Promise.all(
@@ -136,15 +100,24 @@ export function executeAsReasoningAgent(
         const callback = toolCallbacks[toolCall.function.name];
 
         const response = await withExecuteToolSpan(
+          toolCall.function.name,
           {
-            name: toolCall.function.name,
-            input: 'arguments' in toolCall.function ? toolCall.function.arguments : undefined,
-            toolCallId: toolCall.toolCallId,
+            tool: {
+              input: 'arguments' in toolCall.function ? toolCall.function.arguments : undefined,
+              toolCallId: toolCall.toolCallId,
+            },
           },
           () => callback(toolCall)
-        );
+        ).catch((error): ToolCallbackResult => {
+          trace.getActiveSpan()?.recordException(error);
+          return {
+            response: { error, data: undefined },
+          };
+        });
+
         return {
-          response,
+          response: response.response,
+          data: response.data,
           name: toolCall.function.name,
           toolCallId: toolCall.toolCallId,
           role: MessageRole.Tool,
@@ -161,82 +134,142 @@ export function executeAsReasoningAgent(
     messages: Message[];
     stepsLeft: number;
     temperature?: number;
-  }): Promise<PromptResponse> {
-    const prevMessages =
-      stepsLeft <= 0 ? givenMessages.concat(createCompleteToolCall()) : givenMessages;
-
-    const withoutSystemToolCalls = removeReasonToolCalls(prevMessages);
-
-    const consecutiveReasoningSteps = takeRightWhile(withoutSystemToolCalls, (msg) => {
-      return msg.role === MessageRole.Assistant && !msg.toolCalls?.length;
-    }).length;
-
-    const lastSystemToolCall = prevMessages.findLast(
-      (msg): msg is ToolMessage<PlanningToolCallName, PlanningToolCall> =>
-        msg.role === MessageRole.Tool && isPlanningToolName(msg.name)
+  }): Promise<ReasoningPromptResponse> {
+    const lastAssistantMessage = givenMessages.findLast(
+      (msg): msg is AssistantMessage => msg.role === MessageRole.Assistant
     );
 
-    const lastSystemToolCallName = lastSystemToolCall?.name;
+    const lastSystemToolCallName = givenMessages.findLast(
+      (message): message is PlanningToolMessage =>
+        message.role === MessageRole.Tool && isPlanningToolName(message.name)
+    )?.name;
 
-    const isCompleting = lastSystemToolCallName === 'complete';
+    const shouldComplete = stepsLeft <= 0 || lastSystemToolCallName === 'complete';
 
-    const mustReason =
-      !isCompleting && lastSystemToolCallName === 'reason' && consecutiveReasoningSteps === 0;
+    // reason when:
+    // - not completing
+    // - AND power is medium or high
+    // - AND last assistant message contains a `reason` tool call
+    const shouldReason =
+      !shouldComplete &&
+      (power === 'medium' || power === 'high') &&
+      lastAssistantMessage?.toolCalls?.some((toolCall) =>
+        isPlanningToolName(toolCall.function.name)
+      );
 
-    const canCallTaskTools = !mustReason;
+    const prevMessages = givenMessages.concat();
 
-    const canCallPlanningTools = !mustReason && !isCompleting;
+    // these are hints
+    if (shouldComplete && lastSystemToolCallName !== 'complete') {
+      prevMessages.push(...createCompleteToolCall());
+    } else if (shouldReason && lastSystemToolCallName !== 'reason') {
+      prevMessages.push(...createReasonToolCall());
+    }
 
     const nextPrompt = {
       ...options.prompt,
       versions: options.prompt.versions.map((version) => {
-        const { tools: promptTools, toolChoice: promptToolChoice, ...rest } = version;
+        const { tools: promptTools, ...rest } = version;
 
-        const mergedToolOptions = {
-          tools: {
-            ...promptTools,
-            ...tools,
+        if (power === 'low') {
+          return {
+            ...rest,
+            tools: promptTools,
+          };
+        }
+
+        return formatToolOptions(
+          {
+            ...rest,
+            tools: {
+              ...promptTools,
+              ...PLANNING_TOOLS,
+            },
           },
-          toolChoice: toolChoice || promptToolChoice,
-        };
-
-        const nextTools = isCompleting
-          ? mergedToolOptions
-          : {
-              toolChoice: undefined,
-              tools: {
-                ...mergedToolOptions.tools,
-                ...planningTools,
-              },
-            };
-
-        return {
-          ...rest,
-          ...nextTools,
-        };
+          power
+        );
       }),
     };
 
+    const forceComplete = shouldComplete;
+    const forceReason = power === 'high' && shouldReason;
+
     const promptOptions = {
-      ...options,
+      ...omit(options, 'finalToolChoice'),
       prompt: nextPrompt,
     };
 
+    const toolChoice = forceComplete
+      ? options.finalToolChoice || ToolChoiceType.none
+      : forceReason
+      ? ToolChoiceType.none
+      : ToolChoiceType.auto;
+
     const response = await inferenceClient.prompt({
       ...promptOptions,
+      prompt: {
+        ...promptOptions.prompt,
+        input: z.intersection(
+          promptOptions.prompt.input,
+          z.object({
+            power: z.object({
+              low: z.boolean(),
+              medium: z.boolean(),
+              high: z.boolean(),
+            }),
+          })
+        ),
+      },
+      input: {
+        ...promptOptions.input,
+        power: {
+          low: power === 'low',
+          medium: power === 'medium',
+          high: power === 'high',
+        },
+      },
       stream: false,
       temperature,
-      prevMessages: prepareMessagesForLLM({
-        stepsLeft,
+      toolChoice,
+      prevMessages: formatMessages({
         messages: prevMessages,
-        canCallTaskTools,
-        canCallPlanningTools,
+        power,
+        stepsLeft,
       }),
+      stopSequences: [END_INTERNAL_REASONING_MARKER],
     });
+
+    let content = response.content;
+
+    /**
+     * If the LLM hasn't used these markers, we assume it wants to complete its
+     * output.
+     */
+
+    let completeNextTurn =
+      content &&
+      !content.includes(BEGIN_INTERNAL_REASONING_MARKER) &&
+      !content.includes(END_INTERNAL_REASONING_MARKER) &&
+      !response.toolCalls.length;
+
+    /**
+     * Remove content after <<<END_INTERNAL>>>. This means that the LLM has combined final output
+     * with internal reasoning, and it usually leads the LLM into a loop where it repeats itself.
+     */
+
+    const [internalContent, ...externalContentParts] = content.split(END_INTERNAL_REASONING_MARKER);
+
+    const externalContent = externalContentParts.join(END_INTERNAL_REASONING_MARKER).trim();
+
+    // use some kind of buffer to allow small artifacts around the markers, like markdown.
+    if (externalContent.length && externalContent.length > 25) {
+      content = internalContent + END_INTERNAL_REASONING_MARKER;
+      completeNextTurn = true;
+    }
 
     const assistantMessage: AssistantMessage = {
       role: MessageRole.Assistant,
-      content: response.content,
+      content,
       toolCalls: response.toolCalls,
     };
 
@@ -249,46 +282,73 @@ export function executeAsReasoningAgent(
       throw new Error(`When using system tools, only a single tool call is allowed`);
     }
 
-    if (isCompleting) {
-      return response;
-    }
+    const finalToolCallName =
+      options.finalToolChoice && typeof options.finalToolChoice === 'object'
+        ? options.finalToolChoice.function
+        : undefined;
 
-    if (response.toolCalls.length === 0 || nonSystemToolCalls.length > 0) {
-      const toolMessages = (await callTools(nonSystemToolCalls)).map((toolMessage) => {
-        return {
-          ...toolMessage,
-          response: {
-            ...(toolMessage.response as Record<string, any>),
-            stepsLeft,
-          },
-        };
-      });
+    const hasCalledFinalTool = response.toolCalls.some(
+      (toolCall) => toolCall.function.name === finalToolCallName
+    );
 
-      return innerCallPromptUntil({
-        messages: prevMessages.concat(
-          assistantMessage,
-          ...(toolMessages.length > 0 ? [...toolMessages, ...createReasonToolCall()] : [])
+    if (shouldComplete || hasCalledFinalTool) {
+      // We don't want to send these results back to the LLM, if we are already
+      // completing
+      return {
+        content: response.content,
+        tokens: response.tokens,
+        toolCalls: response.toolCalls.filter(
+          (toolCall) => toolCall.function.name === finalToolCallName
         ),
-        stepsLeft: stepsLeft - 1,
-      });
+        input: removeSystemToolCalls(prevMessages),
+      };
     }
 
-    const systemToolCall = systemToolCalls[0];
+    const toolMessagesForNonSystemToolCalls = nonSystemToolCalls.length
+      ? (await callTools(nonSystemToolCalls)).map((toolMessage) => {
+          return {
+            ...toolMessage,
+            response: {
+              ...(typeof toolMessage.response === 'string'
+                ? { content: toolMessage.response }
+                : toolMessage.response),
+              stepsLeft,
+            },
+          };
+        })
+      : [];
 
-    const systemToolCallName: PlanningToolCallName = systemToolCall.function.name;
+    const systemToolMessages = systemToolCalls.map((systemToolCall) => {
+      if (systemToolCall.function.name === 'reason') {
+        return createReasonToolCallResponse(systemToolCall.toolCallId);
+      }
+      return createCompleteToolCallResponse(systemToolCall.toolCallId);
+    });
+
+    const allToolMessages = [...toolMessagesForNonSystemToolCalls, ...systemToolMessages];
+
+    if (completeNextTurn) {
+      return innerCallPromptUntil({
+        messages: prevMessages.concat(assistantMessage, ...allToolMessages),
+        stepsLeft: 0,
+      });
+    }
 
     return innerCallPromptUntil({
-      stepsLeft: stepsLeft - 1,
       messages: prevMessages.concat(
-        systemToolCallName === 'complete'
-          ? [assistantMessage, createCompleteToolCallResponse(systemToolCall.toolCallId)]
-          : createReasonToolCall()
+        assistantMessage,
+        ...allToolMessages,
+        ...(nonSystemToolCalls.length ? createReasonToolCall() : [])
       ),
+      stepsLeft: stepsLeft - 1,
     });
   }
 
-  return innerCallPromptUntil({
-    messages: createReasonToolCall(),
-    stepsLeft: maxSteps,
-  });
+  return await withActiveInferenceSpan('reason', () =>
+    innerCallPromptUntil({
+      // nudge the LLM to go into reasoning mode
+      messages: createReasonToolCall(),
+      stepsLeft: maxSteps,
+    })
+  );
 }

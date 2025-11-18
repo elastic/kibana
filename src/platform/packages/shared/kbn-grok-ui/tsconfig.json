@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -24,5 +24,6 @@
     "@kbn/code-editor",
     "@kbn/i18n",
     "@kbn/object-utils",
+    "@kbn/react-hooks",
   ]
 }

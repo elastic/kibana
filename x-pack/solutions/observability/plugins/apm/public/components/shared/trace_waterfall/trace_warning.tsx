@@ -6,20 +6,31 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { useTraceWaterfallContext } from './trace_waterfall_context';
-
-const FALLBACK_WARNING = i18n.translate(
-  'xpack.apm.traceWaterfallContext.warningMessage.fallbackWarning',
-  {
-    defaultMessage:
-      'The trace document is incomplete and not all spans have arrived yet. Try refreshing the page or adjusting the time range.',
-  }
-);
+import { TraceDataState } from './use_trace_waterfall';
 
 export function TraceWarning({ children }: { children: React.ReactNode }) {
-  const { rootItem } = useTraceWaterfallContext();
+  const { traceState, message } = useTraceWaterfallContext();
 
-  return !rootItem ? <EuiCallOut color="warning" size="s" title={FALLBACK_WARNING} /> : children;
+  switch (traceState) {
+    case TraceDataState.Partial:
+      return (
+        <EuiFlexGroup direction="column">
+          <EuiFlexItem>
+            <EuiCallOut data-test-subj="traceWarning" color="warning" size="s" title={message} />
+          </EuiFlexItem>
+          <EuiFlexItem>{children}</EuiFlexItem>
+        </EuiFlexGroup>
+      );
+
+    case TraceDataState.Empty:
+      return <EuiCallOut data-test-subj="traceWarning" color="warning" size="s" title={message} />;
+
+    case TraceDataState.Invalid:
+      return <EuiCallOut data-test-subj="traceWarning" color="danger" size="s" title={message} />;
+
+    default:
+      return children;
+  }
 }

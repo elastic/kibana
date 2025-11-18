@@ -11,7 +11,7 @@ import React from 'react';
 
 import { shallowWithIntl, mountWithIntl } from '@kbn/test-jest-helpers';
 import { VisualizeEditorCommon } from './visualize_editor_common';
-import { VisualizeEditorVisInstance } from '../types';
+import type { VisualizeEditorVisInstance } from '../types';
 import { VizChartWarning } from './viz_chart_warning';
 
 const mockGetLegacyUrlConflict = jest.fn();

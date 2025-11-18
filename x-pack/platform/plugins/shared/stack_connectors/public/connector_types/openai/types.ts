@@ -25,6 +25,8 @@ export interface Config {
   privateKeyData?: string;
   verificationMode?: 'full' | 'certificate' | 'none';
   caData?: string;
+  // This property is only used when apiProvider is OpenAiProviderType.Other
+  enableNativeFunctionCalling?: boolean;
 }
 
 export interface InternalConfig {

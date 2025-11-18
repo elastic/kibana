@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KueryNode } from '@kbn/es-query';
-import { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
+import type { KueryNode } from '@kbn/es-query';
+import type { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
 import { alertMappings } from '@kbn/alerting-plugin/common';
 import { get } from 'lodash';
 

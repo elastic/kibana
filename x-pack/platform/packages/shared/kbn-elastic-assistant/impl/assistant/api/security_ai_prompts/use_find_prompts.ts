@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
-import { HttpHandler, IToasts } from '@kbn/core/public';
+import { useQuery } from '@kbn/react-query';
+import type { HttpHandler, IToasts } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import type {
+  FindSecurityAIPromptsRequestQuery,
+  FindSecurityAIPromptsResponse,
+} from '@kbn/elastic-assistant-common';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_SECURITY_AI_PROMPTS_URL_FIND,
-  FindSecurityAIPromptsRequestQuery,
-  FindSecurityAIPromptsResponse,
 } from '@kbn/elastic-assistant-common';
 
 export interface UseFindPromptsParams {

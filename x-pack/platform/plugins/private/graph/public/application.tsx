@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import {
+import type {
   ChromeStart,
   CoreStart,
   PluginInitializerContext,
@@ -20,20 +20,24 @@ import {
 } from '@kbn/core/public';
 import ReactDOM from 'react-dom';
 import React from 'react';
-import { DataPlugin, DataViewsContract } from '@kbn/data-plugin/public';
+import type { DataPlugin } from '@kbn/data-plugin/public';
+import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
+import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { FormattedRelative } from '@kbn/i18n-react';
-import { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
+import type { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
 import { TableListViewKibanaProvider } from '@kbn/content-management-table-list-view-table';
-import { SpacesApi } from '@kbn/spaces-plugin/public';
+import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import { ContentClient, ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import type {
+  ContentClient,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
 
-import { GraphSavePolicy } from './types';
+import type { GraphSavePolicy } from './types';
 import { graphRouter } from './router';
 import { checkLicense } from '../common/check_license';
 
@@ -54,7 +58,7 @@ export interface GraphDependencies {
   licensing: LicensingPluginStart;
   chrome: ChromeStart;
   toastNotifications: ToastsStart;
-  indexPatterns: DataViewsContract;
+  dataViews: DataViewsContract;
   data: ReturnType<DataPlugin['start']>;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   contentClient: ContentClient;

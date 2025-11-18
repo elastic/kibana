@@ -10,7 +10,7 @@ import semver from 'semver';
 import moment from 'moment';
 import { AGENTS_INDEX, PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 
-import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
+import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, generateAgent, makeSnapshotVersion } from '../../helpers';
 import { testUsers } from '../test_users';
 
@@ -637,8 +637,7 @@ export default function (providerContext: FtrProviderContext) {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/215025
-    describe.skip('multiple agents', () => {
+    describe('multiple agents', () => {
       const fleetServerVersion = '7.16.0';
 
       beforeEach(async () => {
@@ -999,7 +998,7 @@ export default function (providerContext: FtrProviderContext) {
               await verifyActionResult();
               resolve({});
             }
-          }, 1000);
+          }, 3000);
         }).catch((e) => {
           throw e;
         });

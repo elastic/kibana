@@ -7,7 +7,7 @@
 
 import type { ModelProvider } from '@kbn/onechat-server';
 import type { ModelProviderFactoryFn } from '../services/runner/model_provider';
-import { ChangeReturnType } from './common';
+import type { ChangeReturnType } from './common';
 
 export type ModelProviderMock = jest.Mocked<ModelProvider>;
 export type ModelProviderFactoryMock = jest.MockedFn<
@@ -18,6 +18,7 @@ export const createModelProviderMock = (): ModelProviderMock => {
   return {
     getDefaultModel: jest.fn(),
     getModel: jest.fn(),
+    getUsageStats: jest.fn(),
   };
 };
 
