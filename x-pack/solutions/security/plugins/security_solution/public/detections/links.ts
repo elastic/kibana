@@ -17,7 +17,6 @@ import {
   ALERTS_PATH,
   ATTACK_DISCOVERY_FEATURE_ID,
   ATTACKS_PATH,
-  SECURITY_FEATURE_ID,
   SecurityPageName,
 } from '../../common/constants';
 import { ALERT_SUMMARY, ALERTS, ATTACKS } from '../app/translations';
@@ -46,9 +45,7 @@ const alertsSubLink: LinkItem = {
 };
 
 const attacksSubLink: LinkItem = {
-  capabilities: [
-    [`${SECURITY_FEATURE_ID}.show`, `${ATTACK_DISCOVERY_FEATURE_ID}.attack-discovery`],
-  ],
+  capabilities: [[RULES_UI_READ_PRIVILEGE, `${ATTACK_DISCOVERY_FEATURE_ID}.attack-discovery`]],
   globalSearchKeywords: [
     i18n.translate('xpack.securitySolution.appLinks.attacks', {
       defaultMessage: 'Attacks',
@@ -70,8 +67,8 @@ export const alertDetectionsLinks: LinkItem = {
   }),
   path: ALERT_DETECTIONS,
   capabilities: [
-    [`${SECURITY_FEATURE_ID}.show`, `${SECURITY_FEATURE_ID}.detections`],
-    [`${SECURITY_FEATURE_ID}.show`, `${ATTACK_DISCOVERY_FEATURE_ID}.attack-discovery`],
+    [RULES_UI_READ_PRIVILEGE, RULES_UI_DETECTIONS_PRIVILEGE],
+    [RULES_UI_READ_PRIVILEGE, `${ATTACK_DISCOVERY_FEATURE_ID}.attack-discovery`],
   ],
   globalNavPosition: 3,
   globalSearchKeywords: [
