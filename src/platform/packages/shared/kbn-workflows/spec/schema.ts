@@ -201,7 +201,7 @@ export const GDriveStepSchema = BaseStepSchema.extend({
     // Service account credentials (JSON object)
     service_credential: z.record(z.string(), z.any()).optional(),
     // Operation to perform
-    operation: z.enum(['list', 'get', 'download', 'ping']).optional().default('list'),
+    operation: z.enum(['list', 'get', 'download', 'ping', 'search']).optional().default('list'),
     // File operations
     fileId: z.string().optional(), // Required for get, download, delete
     fileName: z.string().optional(), // Required for upload
@@ -209,6 +209,8 @@ export const GDriveStepSchema = BaseStepSchema.extend({
     folderId: z.string().optional(), // Optional folder filter for list, target folder for upload
     mimeType: z.string().optional(), // MIME type for upload
     subject: z.string().optional(), // For domain-wide delegation
+    query: z.string().optional(), // For search action
+    doc_limit: z.number().optional(), // For search and list to limit the number of results returned
   }),
 })
   .merge(StepWithIfConditionSchema)
