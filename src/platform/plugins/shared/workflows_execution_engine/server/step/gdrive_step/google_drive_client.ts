@@ -218,91 +218,34 @@ export class GoogleDriveClient {
    * Download file content by ID
    * Returns the file content as base64-encoded string for binary files or plain text for text files
    */
-  async downloadFile(fileId: string): Promise<{
-    content: string;
-    encoding: 'base64' | 'utf8';
-    size: number;
-  }> {
+  async downloadFile(fileId: string): Promise<Buffer> {
     if (!fileId) {
       throw new Error('fileId is required for download operation');
     }
-
     const accessToken = await this.getAccessToken();
-    const url = `${DRIVE_API_BASE_URL}/files/${fileId}`;
 
-    // First, get file metadata to determine if it's a Google Workspace file
-    const fileMetadata = await this.getFile(fileId);
-    const isGoogleWorkspaceFile = fileMetadata.mimeType?.startsWith('application/vnd.google-apps.');
-
-    let downloadUrl = url;
-    const params: Record<string, unknown> = {
-      supportsAllDrives: true,
+    const config = {
+      headers: { Authorization: `Bearer ${accessToken}` },
     };
 
-    // For Google Workspace files (Docs, Sheets, Slides), we need to export them
-    // For regular files, we use alt=media to download the content
-    if (isGoogleWorkspaceFile) {
-      // Determine export MIME type based on the Google Workspace file type
-      let exportMimeType = 'text/plain';
-      if (fileMetadata.mimeType === 'application/vnd.google-apps.document') {
-        exportMimeType = 'text/plain';
-      } else if (fileMetadata.mimeType === 'application/vnd.google-apps.spreadsheet') {
-        exportMimeType = 'text/csv';
-      } else if (fileMetadata.mimeType === 'application/vnd.google-apps.presentation') {
-        exportMimeType = 'text/plain';
-      }
-
-      downloadUrl = `${DRIVE_API_BASE_URL}/files/${fileId}/export`;
-      params.mimeType = exportMimeType;
-    } else {
-      // For regular files, use alt=media to download binary content
-      params.alt = 'media';
-    }
-
-    const config: AxiosRequestConfig = {
-      method: 'GET',
-      url: downloadUrl,
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-      params,
-      responseType: isGoogleWorkspaceFile ? 'text' : 'arraybuffer', // Text for exports, binary for regular files
-      timeout: DRIVE_API_TIMEOUT,
-    };
 
     try {
-      const response = await axios(config);
+      const downloadResponse = await axios.post(
+        `https://www.googleapis.com/drive/v3/files/${fileId}/download`,
+        {},
+        config
+      );
+      console.log(downloadResponse);
 
-      // Determine encoding based on file type
-      const isTextFile =
-        isGoogleWorkspaceFile ||
-        fileMetadata.mimeType?.startsWith('text/') ||
-        fileMetadata.mimeType === 'application/json' ||
-        fileMetadata.mimeType === 'application/xml';
+      console.log('Actually downloading it');
+      const fileContentResponse = await axios.get(downloadResponse.data.response.downloadUri, {
+        responseType: 'arraybuffer',
+        headers: { Authorization: `Bearer ${accessToken}` },
+      });
 
-      let content: string;
-      let encoding: 'base64' | 'utf8';
-      let size: number;
+      const data = fileContentResponse.data;
 
-      if (isTextFile) {
-        // Return as UTF-8 text
-        content =
-          typeof response.data === 'string' ? response.data : response.data.toString('utf8');
-        encoding = 'utf8';
-        size = Buffer.byteLength(content, 'utf8');
-      } else {
-        // Return as base64-encoded string for binary files
-        const buffer = Buffer.from(response.data);
-        content = buffer.toString('base64');
-        encoding = 'base64';
-        size = buffer.length;
-      }
-
-      return {
-        content,
-        encoding,
-        size,
-      };
+      return data;
     } catch (error) {
       if (error.response) {
         throw new Error(

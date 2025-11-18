@@ -212,6 +212,8 @@ export const GDriveStepSchema = BaseStepSchema.extend({
     query: z.string().optional(), // Required for search operation
     mimeType: z.string().optional(), // MIME type for upload
     subject: z.string().optional(), // For domain-wide delegation
+    query: z.string().optional(), // For search action
+    doc_limit: z.number().optional(), // For search and list to limit the number of results returned
   }),
 })
   .merge(StepWithIfConditionSchema)
