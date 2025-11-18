@@ -261,7 +261,6 @@
     "@kbn/llm-tasks-plugin",
     "@kbn/core-analytics-server-mocks",
     "@kbn/onechat-common",
-    "@kbn/core-ui-settings-common",
     "@kbn/react-query",
     "@kbn/core-chrome-layout-constants",
     "@kbn/response-ops-rule-form",

@@ -9,6 +9,14 @@
   "kbn_references": [
     "@kbn/evals",
     "@kbn/tooling-log",
-    "@kbn/core"
+    "@kbn/core",
+    "@kbn/test-suites-security-solution-apis",
+    "@kbn/security-solution-plugin",
+    "@kbn/detections-response-ftr-services",
+    "@kbn/es-archiver",
+    "@kbn/test-suites-xpack-security",
+    "@kbn/test",
+    "@kbn/test-suites-xpack-platform",
+    "@kbn/core-http-common"
   ]
 }
