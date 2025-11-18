@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { AlertHit } from '@kbn/alerting-plugin/server/types';
+
 export interface AlertSelection {
   _id: string;
   _index: string;
@@ -29,7 +31,7 @@ export interface AlertEventRule {
 }
 
 export interface AlertEvent {
-  alerts: unknown[];
+  alerts: AlertHit[];
   rule: AlertEventRule;
   ruleUrl?: string;
   spaceId: string;
