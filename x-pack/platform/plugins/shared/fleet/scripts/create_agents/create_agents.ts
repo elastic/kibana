@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import yargs from 'yargs';
 import { omit } from 'lodash';
 
-import type { AgentStatus } from '../../common';
+import { AGENT_POLICY_SAVED_OBJECT_TYPE, type AgentStatus } from '../../common';
 import type { Agent } from '../../common';
 const printUsage = () =>
   logger.info(`
@@ -280,7 +280,7 @@ async function createSuperUser() {
     body: JSON.stringify({
       indices: [
         {
-          names: ['.fleet*'],
+          names: ['.fleet*', '.kibana*'],
           privileges: ['all'],
           allow_restricted_indices: true,
         },
@@ -342,6 +342,104 @@ async function createAgentPolicy(id: string, name: string) {
       return getAgentPolicy(idMatch![1]);
     }
     logger.error('Agent policy not created, API response: ' + JSON.stringify(data));
+    process.exit(1);
+  }
+  return data;
+}
+
+async function createPolicyRevisions(policyId: string, latestRevisionIdx: number) {
+  const nextLatestRevisionIdx = latestRevisionIdx + revisionsCount;
+  await revisePolicySoRevisionIdx(policyId, nextLatestRevisionIdx);
+  await backfillPolicyRevisions(policyId, nextLatestRevisionIdx);
+
+  return nextLatestRevisionIdx;
+}
+
+async function getLatestFleetPolicyRevision(policyId: string) {
+  const auth = 'Basic ' + Buffer.from(ES_SUPERUSER + ':' + ES_PASSWORD).toString('base64');
+  const res = await fetch(`${ES_URL}/.fleet-policies/_search`, {
+    method: 'post',
+    body: JSON.stringify({
+      size: 1,
+      sort: { revision_idx: 'desc' },
+      query: {
+        match: {
+          policy_id: policyId,
+        },
+      },
+    }),
+    headers: {
+      Authorization: auth,
+      'Content-Type': 'application/x-ndjson',
+    },
+  });
+
+  const data = await res.json();
+  const latestPolicyRevision = data.hits.hits[0];
+
+  if (!latestPolicyRevision) {
+    logger.error('Error retrieving latest fleet policy revision: ' + JSON.stringify(data));
+    process.exit(1);
+  }
+  return latestPolicyRevision;
+}
+
+async function backfillPolicyRevisions(policyId: string, maxRevisionIdx: number) {
+  const latestPolicyRevision = await getLatestFleetPolicyRevision(policyId);
+
+  const auth = 'Basic ' + Buffer.from(ES_SUPERUSER + ':' + ES_PASSWORD).toString('base64');
+  const body = Array(maxRevisionIdx)
+    .fill(0)
+    .flatMap((_rev, idx) => [
+      INDEX_BULK_OP.replace(/{{id}}/, `${policyId}:${idx}`),
+      JSON.stringify({
+        ...latestPolicyRevision._source,
+        revision_idx: idx + 1,
+        '@timestamp': new Date().toISOString(),
+      }) + '\n',
+    ])
+    .join('');
+
+  const res = await fetch(`${ES_URL}/.fleet-policies/_bulk`, {
+    method: 'post',
+    body,
+    headers: {
+      Authorization: auth,
+      'Content-Type': 'application/x-ndjson',
+    },
+  });
+  const data = await res.json();
+
+  if (!data.items) {
+    logger.error('Error creating bulk policy revisions: ' + JSON.stringify(data));
+    process.exit(1);
+  }
+}
+
+async function revisePolicySoRevisionIdx(policyId: string, revisionIdx: number) {
+  const auth = 'Basic ' + Buffer.from(ES_SUPERUSER + ':' + ES_PASSWORD).toString('base64');
+  const body = JSON.stringify({
+    doc: {
+      [AGENT_POLICY_SAVED_OBJECT_TYPE]: {
+        revision: revisionIdx,
+      },
+    },
+  });
+  const res = await fetch(
+    `${ES_URL}/.kibana_ingest/_update/${AGENT_POLICY_SAVED_OBJECT_TYPE}:${policyId}`,
+    {
+      method: 'post',
+      body,
+      headers: {
+        Authorization: auth,
+        'Content-Type': 'application/x-ndjson',
+      },
+    }
+  );
+  const data = await res.json();
+
+  if (!data.result) {
+    logger.error('Error updating agent policy SO revision idx: ' + JSON.stringify(data));
     process.exit(1);
   }
   return data;
@@ -446,11 +544,7 @@ export async function run() {
           let latestRevision: number = agentPolicy.item.revision ?? 1;
           if (revisionsCount > 0) {
             logger.info(`Creating ${revisionsCount} revisions for agent policy ${agentPolicyId}`);
-
-            for (let rev = 0; rev < revisionsCount; rev++) {
-              const updatedPolicy = await bumpAgentPolicyRevision(agentPolicyId, agentPolicy.item);
-              latestRevision = updatedPolicy.item.revision;
-            }
+            latestRevision = await createPolicyRevisions(agentPolicyId, latestRevision);
           }
           const statusMap = statusesArg.reduce((acc, status) => ({ ...acc, [status]: count }), {});
           logStatusMap(statusMap);
