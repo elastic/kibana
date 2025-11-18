@@ -8,49 +8,31 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { AxiosError, AxiosInstance, AxiosResponse } from 'axios';
-import type { TypeOf } from '@kbn/config-schema';
+import type { z } from '@kbn/zod';
 import type { Logger } from '@kbn/core/server';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import type { ConnectorUsageCollector, ValidatorServices } from '@kbn/actions-plugin/server/types';
 import type {
+  ExecutorSubActionCloseIncidentParams,
+  ExecutorSubActionCommonFieldsParams,
+  ExecutorSubActionGetChoicesParams,
+  ExecutorSubActionGetIncidentParams,
+  ExecutorSubActionHandshakeParams,
+} from '@kbn/connector-schemas/servicenow';
+import type { ExecutorSubActionAddEventParams } from '@kbn/connector-schemas/servicenow_itom';
+import type {
   ExecutorParamsSchemaITSM,
-  ExecutorSubActionCommonFieldsParamsSchema,
-  ExecutorSubActionGetIncidentParamsSchema,
-  ExecutorSubActionHandshakeParamsSchema,
-  ExecutorSubActionPushParamsSchemaITSM,
-  ExternalIncidentServiceConfigurationSchema,
-  ExternalIncidentServiceSecretConfigurationSchema,
+  ExecutorSubActionPushParamsITSM,
+  ServiceNowITSMIncident,
+} from '@kbn/connector-schemas/servicenow_itsm';
+import type {
   ExecutorParamsSchemaSIR,
-  ExecutorSubActionPushParamsSchemaSIR,
-  ExecutorSubActionGetChoicesParamsSchema,
-  ExecutorParamsSchemaITOM,
-  ExecutorSubActionAddEventParamsSchema,
-  ExternalIncidentServiceConfigurationBaseSchema,
-  ExecutorSubActionCloseIncidentParamsSchema,
-} from './schema';
+  ExecutorSubActionPushParamsSIR,
+  ServiceNowSIRIncident,
+} from '@kbn/connector-schemas/servicenow_sir';
 import type { SNProductsConfigValue } from '../../../../common/servicenow_config';
 
 export type { SNProductsConfigValue, SNProductsConfig } from '../../../../common/servicenow_config';
-
-export type ServiceNowPublicConfigurationBaseType = TypeOf<
-  typeof ExternalIncidentServiceConfigurationBaseSchema
->;
-
-export type ServiceNowPublicConfigurationType = TypeOf<
-  typeof ExternalIncidentServiceConfigurationSchema
->;
-
-export type ServiceNowSecretConfigurationType = TypeOf<
-  typeof ExternalIncidentServiceSecretConfigurationSchema
->;
-
-export type ExecutorSubActionCommonFieldsParams = TypeOf<
-  typeof ExecutorSubActionCommonFieldsParamsSchema
->;
-
-export type ExecutorSubActionGetChoicesParams = TypeOf<
-  typeof ExecutorSubActionGetChoicesParamsSchema
->;
 
 export type ServiceNowExecutorResultData =
   | PushToServiceResponse
@@ -62,11 +44,8 @@ export interface CreateCommentRequest {
 }
 
 export type ExecutorParams =
-  | TypeOf<typeof ExecutorParamsSchemaITSM>
-  | TypeOf<typeof ExecutorParamsSchemaSIR>;
-
-export type ExecutorSubActionPushParamsITSM = TypeOf<typeof ExecutorSubActionPushParamsSchemaITSM>;
-export type ExecutorSubActionPushParamsSIR = TypeOf<typeof ExecutorSubActionPushParamsSchemaSIR>;
+  | z.infer<typeof ExecutorParamsSchemaITSM>
+  | z.infer<typeof ExecutorParamsSchemaSIR>;
 
 export type ExecutorSubActionPushParams =
   | ExecutorSubActionPushParamsITSM
@@ -135,28 +114,6 @@ export interface ExternalServiceApiHandlerArgs<T = ExternalService> {
   externalService: T;
   logger: Logger;
 }
-
-export type ExecutorSubActionGetIncidentParams = TypeOf<
-  typeof ExecutorSubActionGetIncidentParamsSchema
->;
-
-export type ExecutorSubActionHandshakeParams = TypeOf<
-  typeof ExecutorSubActionHandshakeParamsSchema
->;
-
-export type ExecutorSubActionCloseIncidentParams = TypeOf<
-  typeof ExecutorSubActionCloseIncidentParamsSchema
->;
-
-export type ServiceNowITSMIncident = Omit<
-  TypeOf<typeof ExecutorSubActionPushParamsSchemaITSM>['incident'],
-  'externalId'
->;
-
-export type ServiceNowSIRIncident = Omit<
-  TypeOf<typeof ExecutorSubActionPushParamsSchemaSIR>['incident'],
-  'externalId'
->;
 
 export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerArgs {
   params: PushToServiceApiParams;
@@ -320,9 +277,6 @@ export type ServiceFactory<T = ExternalService> = ({
 /**
  * ITOM
  */
-
-export type ExecutorSubActionAddEventParams = TypeOf<typeof ExecutorSubActionAddEventParamsSchema>;
-
 export interface ExternalServiceITOM {
   getChoices: ExternalService['getChoices'];
   addEvent: (params: ExecutorSubActionAddEventParams) => Promise<void>;
@@ -341,5 +295,3 @@ export interface ExternalServiceApiITOM {
   getChoices: ExternalServiceAPI['getChoices'];
   addEvent: (args: AddEventApiHandlerArgs) => Promise<void>;
 }
-
-export type ExecutorParamsITOM = TypeOf<typeof ExecutorParamsSchemaITOM>;

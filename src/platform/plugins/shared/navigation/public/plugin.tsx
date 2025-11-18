@@ -30,8 +30,6 @@ import type {
 import { TopNavMenuExtensionsRegistry, createTopNav } from './top_nav_menu';
 import type { RegisteredTopNavMenuData } from './top_nav_menu/top_nav_menu_data';
 
-import { registerNavigationEventTypes } from './analytics';
-
 import { SolutionNavigationTourManager } from './solution_tour/solution_tour';
 
 export class NavigationPublicPlugin
@@ -53,12 +51,7 @@ export class NavigationPublicPlugin
   constructor(private initializerContext: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, deps: NavigationPublicSetupDependencies): NavigationPublicSetup {
-    registerNavigationEventTypes(core);
-
-    const cloudTrialEndDate = deps.cloud?.trialEndDate;
-    if (cloudTrialEndDate) {
-      this.isCloudTrialUser = cloudTrialEndDate.getTime() > Date.now();
-    }
+    this.isCloudTrialUser = deps.cloud?.isInTrial() ?? false;
 
     return {
       registerMenuItem: this.topNavMenuExtensionsRegistry.register.bind(

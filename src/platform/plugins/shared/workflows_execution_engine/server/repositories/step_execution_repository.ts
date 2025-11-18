@@ -9,27 +9,12 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
-import {
-  WORKFLOWS_STEP_EXECUTIONS_INDEX,
-  WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
-} from '../../common';
-import { createIndexWithMappings } from '../../common/create_index';
+import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 
 export class StepExecutionRepository {
   private indexName = WORKFLOWS_STEP_EXECUTIONS_INDEX;
-  private indexInitialized = false;
+
   constructor(private esClient: ElasticsearchClient) {}
-
-  private async ensureIndexExists() {
-    if (this.indexInitialized) return; // Only 1 boolean check after first time
-
-    await createIndexWithMappings({
-      esClient: this.esClient,
-      indexName: this.indexName,
-      mappings: WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS,
-    });
-    this.indexInitialized = true;
-  }
 
   /**
    * Searches for step executions by workflow execution ID.
@@ -40,8 +25,6 @@ export class StepExecutionRepository {
   public async searchStepExecutionsByExecutionId(
     executionId: string
   ): Promise<EsWorkflowStepExecution[]> {
-    await this.ensureIndexExists();
-
     const response = await this.esClient.search<EsWorkflowStepExecution>({
       index: this.indexName,
       query: {
@@ -53,67 +36,40 @@ export class StepExecutionRepository {
     return response.hits.hits.map((hit) => hit._source as EsWorkflowStepExecution);
   }
 
-  /**
-   * Creates a new step execution document in Elasticsearch.
-   *
-   * @param stepExecution - A partial object representing the workflow step execution to be indexed.
-   * @returns A promise that resolves when the document has been successfully indexed.
-   */
-  public async createStepExecution(stepExecution: Partial<EsWorkflowStepExecution>): Promise<void> {
-    await this.ensureIndexExists();
-
-    if (!stepExecution.id) {
-      throw new Error('Step execution ID is required for creation');
+  public async bulkUpsert(stepExecutions: Array<Partial<EsWorkflowStepExecution>>): Promise<void> {
+    if (stepExecutions.length === 0) {
+      return;
     }
-
-    await this.esClient.index({
-      index: this.indexName,
-      id: stepExecution.id,
-      refresh: true,
-      document: stepExecution,
-    });
-  }
-
-  /**
-   * Updates a single workflow step execution in the repository.
-   *
-   * @param stepExecution - A partial object representing the workflow step execution to update.
-   * @returns A promise that resolves when the update operation is complete.
-   */
-  public updateStepExecution(stepExecution: Partial<EsWorkflowStepExecution>): Promise<void> {
-    return this.updateStepExecutions([stepExecution]);
-  }
-
-  /**
-   * Updates multiple step executions in Elasticsearch.
-   *
-   * This method takes an array of partial `EsWorkflowStepExecution` objects,
-   * validates that each has an `id`, and performs a bulk update operation
-   * in Elasticsearch for all provided step executions.
-   *
-   * @param stepExecutions - An array of partial step execution objects to update.
-   * Each object must include an `id` property.
-   * @throws {Error} If any step execution does not have an `id`.
-   * @returns A promise that resolves when the bulk update operation completes.
-   */
-  public async updateStepExecutions(
-    stepExecutions: Array<Partial<EsWorkflowStepExecution>>
-  ): Promise<void> {
-    await this.ensureIndexExists();
 
     stepExecutions.forEach((stepExecution) => {
       if (!stepExecution.id) {
-        throw new Error('Step execution ID is required for update');
+        throw new Error('Step execution ID is required for upsert');
       }
     });
 
-    await this.esClient?.bulk({
+    const bulkResponse = await this.esClient.bulk({
       refresh: true,
       index: this.indexName,
       body: stepExecutions.flatMap((stepExecution) => [
         { update: { _id: stepExecution.id } },
-        { doc: stepExecution },
+        { doc: stepExecution, doc_as_upsert: true },
       ]),
     });
+
+    if (bulkResponse.errors) {
+      const erroredDocuments = bulkResponse.items
+        .filter((item) => item.update?.error)
+        .map((item) => ({
+          id: item.update?._id,
+          error: item.update?.error,
+          status: item.update?.status,
+        }));
+
+      throw new Error(
+        `Failed to upsert ${erroredDocuments.length} step executions: ${JSON.stringify(
+          erroredDocuments
+        )}`
+      );
+    }
   }
 }

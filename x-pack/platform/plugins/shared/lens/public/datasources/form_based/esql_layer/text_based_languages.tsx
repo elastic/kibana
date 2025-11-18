@@ -680,7 +680,11 @@ export function getTextBasedDatasource({
 
       for (const { query } of Object.values(state.layers)) {
         if (query) {
-          const esqlAdhocDataview = await getESQLAdHocDataview(query.esql, dataViewsService);
+          const esqlAdhocDataview = await getESQLAdHocDataview({
+            dataViewsService,
+            query: query.esql,
+            options: { skipFetchFields: true },
+          });
           indexPatterns.push(esqlAdhocDataview);
         }
       }

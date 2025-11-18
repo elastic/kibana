@@ -1124,7 +1124,6 @@
             "label": "vars",
             "description": [],
             "signature": [
-              "Record<string, unknown> | ",
               "AwsCloudConnectorVars",
               " | ",
               "AzureCloudConnectorVars"
@@ -1221,6 +1220,20 @@
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-public.CloudConnectorListOptions.kuery",
+            "type": "string",
+            "tags": [],
+            "label": "kuery",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -1288,7 +1301,7 @@
         "tags": [],
         "label": "CreateCloudConnectorRequest",
         "description": [],
-        "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+        "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/cloud_connector.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1299,7 +1312,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/cloud_connector.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1311,12 +1324,11 @@
             "label": "vars",
             "description": [],
             "signature": [
-              "Record<string, unknown> | ",
               "AwsCloudConnectorVars",
               " | ",
               "AzureCloudConnectorVars"
             ],
-            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/cloud_connector.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1330,7 +1342,7 @@
             "signature": [
               "\"aws\" | \"azure\" | \"gcp\""
             ],
-            "path": "x-pack/platform/plugins/shared/fleet/common/types/models/cloud_connector.ts",
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/cloud_connector.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4726,7 +4738,6 @@
         "label": "CloudConnectorVars",
         "description": [],
         "signature": [
-          "Record<string, unknown> | ",
           "AwsCloudConnectorVars",
           " | ",
           "AzureCloudConnectorVars"
@@ -23288,6 +23299,48 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.CreateAgentlessPolicyRequest",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreateAgentlessPolicyRequest",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/agentless_policy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.CreateAgentlessPolicyRequest.body",
+            "type": "Object",
+            "tags": [],
+            "label": "body",
+            "description": [],
+            "signature": [
+              "{ readonly id?: string | undefined; readonly namespace?: string | undefined; readonly description?: string | undefined; readonly force?: boolean | undefined; readonly inputs?: Record<string, Readonly<{ enabled?: boolean | undefined; streams?: Record<string, Readonly<{ enabled?: boolean | undefined; vars?: Record<string, string | number | boolean | string[] | number[] | Readonly<{} & { id: string; isSecretRef: boolean; }> | null> | undefined; } & {}>> | undefined; vars?: Record<string, string | number | boolean | string[] | number[] | Readonly<{} & { id: string; isSecretRef: boolean; }> | null> | undefined; } & {}>> | undefined; readonly vars?: Record<string, string | number | boolean | string[] | number[] | Readonly<{} & { id: string; isSecretRef: boolean; }> | null> | undefined; readonly additional_datastreams_permissions?: string[] | null | undefined; readonly name: string; readonly package: Readonly<{ title?: string | undefined; experimental_data_stream_features?: Readonly<{} & { features: Readonly<{ synthetic_source?: boolean | undefined; tsdb?: boolean | undefined; doc_value_only_numeric?: boolean | undefined; doc_value_only_other?: boolean | undefined; } & {}>; data_stream: string; }>[] | undefined; requires_root?: boolean | undefined; fips_compatible?: boolean | undefined; } & { version: string; name: string; }>; }"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/agentless_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.CreateAgentlessPolicyRequest.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "{ readonly format: \"simplified\" | \"legacy\"; }"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/agentless_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.CreateAgentPolicyRequest",
         "type": "Interface",
         "tags": [],
@@ -23631,6 +23684,48 @@
               "Error"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.DeleteAgentlessPolicyRequest",
+        "type": "Interface",
+        "tags": [],
+        "label": "DeleteAgentlessPolicyRequest",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/agentless_policy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.DeleteAgentlessPolicyRequest.params",
+            "type": "Object",
+            "tags": [],
+            "label": "params",
+            "description": [],
+            "signature": [
+              "{ readonly policyId: string; }"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/agentless_policy.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.DeleteAgentlessPolicyRequest.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "{ readonly force?: boolean | undefined; }"
+            ],
+            "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/agentless_policy.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -30177,6 +30272,51 @@
       },
       {
         "parentPluginId": "fleet",
+        "id": "def-common.CLOUD_CONNECTOR_SAVED_OBJECT_TYPE",
+        "type": "string",
+        "tags": [],
+        "label": "CLOUD_CONNECTOR_SAVED_OBJECT_TYPE",
+        "description": [],
+        "signature": [
+          "\"fleet-cloud-connector\""
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/common/constants/saved_objects.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.CreateAgentlessPolicyResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "CreateAgentlessPolicyResponse",
+        "description": [],
+        "signature": [
+          "{ readonly item: Readonly<{ namespace?: string | undefined; version?: string | undefined; description?: string | undefined; inputs?: Record<string, Readonly<{ enabled?: boolean | undefined; streams?: Record<string, Readonly<{ enabled?: boolean | undefined; vars?: Record<string, string | number | boolean | string[] | number[] | Readonly<{} & { id: string; isSecretRef: boolean; }> | null> | undefined; } & {}>> | undefined; vars?: Record<string, string | number | boolean | string[] | number[] | Readonly<{} & { id: string; isSecretRef: boolean; }> | null> | undefined; } & {}>> | Readonly<{ id?: string | undefined; config?: Record<string, Readonly<{ value?: any; type?: string | undefined; frozen?: boolean | undefined; } & {}>> | undefined; vars?: Record<string, Readonly<{ value?: any; type?: string | undefined; frozen?: boolean | undefined; } & {}>> | undefined; keep_enabled?: boolean | undefined; policy_template?: string | undefined; compiled_input?: any; } & { type: string; enabled: boolean; streams: Readonly<{ id?: string | undefined; config?: Record<string, Readonly<{ value?: any; type?: string | undefined; frozen?: boolean | undefined; } & {}>> | undefined; vars?: Record<string, Readonly<{ value?: any; type?: string | undefined; frozen?: boolean | undefined; } & {}>> | undefined; release?: \"experimental\" | \"beta\" | \"ga\" | undefined; keep_enabled?: boolean | undefined; compiled_stream?: any; } & { enabled: boolean; data_stream: Readonly<{ elasticsearch?: Readonly<{ privileges?: Readonly<{ indices?: string[] | undefined; } & {}> | undefined; dynamic_dataset?: boolean | undefined; dynamic_namespace?: boolean | undefined; } & {}> | undefined; } & { type: string; dataset: string; }>; }>[]; }>[] | undefined; is_managed?: boolean | undefined; policy_id?: string | null | undefined; policy_ids?: string[] | undefined; output_id?: string | null | undefined; cloud_connector_id?: string | null | undefined; package?: Readonly<{ title?: string | undefined; experimental_data_stream_features?: Readonly<{} & { features: Readonly<{ synthetic_source?: boolean | undefined; tsdb?: boolean | undefined; doc_value_only_numeric?: boolean | undefined; doc_value_only_other?: boolean | undefined; } & {}>; data_stream: string; }>[] | undefined; requires_root?: boolean | undefined; fips_compatible?: boolean | undefined; } & { version: string; name: string; }> | undefined; vars?: Record<string, string | number | boolean | string[] | number[] | Readonly<{} & { id: string; isSecretRef: boolean; }> | null> | Record<string, Readonly<{ value?: any; type?: string | undefined; frozen?: boolean | undefined; } & {}>> | undefined; elasticsearch?: Readonly<{ privileges?: Readonly<{ cluster?: string[] | undefined; } & {}> | undefined; } & {}> | undefined; overrides?: Readonly<{ inputs?: Record<string, any> | undefined; } & {}> | null | undefined; supports_agentless?: boolean | null | undefined; supports_cloud_connector?: boolean | null | undefined; additional_datastreams_permissions?: string[] | null | undefined; agents?: number | undefined; secret_references?: Readonly<{} & { id: string; }>[] | undefined; spaceIds?: string[] | undefined; } & { id: string; name: string; enabled: boolean; revision: number; created_at: string; created_by: string; updated_at: string; updated_by: string; }>; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/agentless_policy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.DeleteAgentlessPolicyResponse",
+        "type": "Type",
+        "tags": [],
+        "label": "DeleteAgentlessPolicyResponse",
+        "description": [],
+        "signature": [
+          "{ readonly id: string; }"
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/agentless_policy.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
         "id": "def-common.DisplayedAssetTypes",
         "type": "Type",
         "tags": [],
@@ -31455,7 +31595,7 @@
         "signature": [
           "{ type?: ",
           "PackageSpecPackageType",
-          " | undefined; version: string; name: string; title: string; description?: string | undefined; path?: string | undefined; download?: string | undefined; internal?: boolean | undefined; icons?: (",
+          " | undefined; path?: string | undefined; version: string; name: string; title: string; description?: string | undefined; download?: string | undefined; internal?: boolean | undefined; icons?: (",
           {
             "pluginId": "fleet",
             "scope": "common",

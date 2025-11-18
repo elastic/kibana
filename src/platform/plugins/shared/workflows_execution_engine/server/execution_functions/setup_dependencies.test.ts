@@ -11,11 +11,12 @@ import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/act
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
 import type { CoreStart, ElasticsearchClient, KibanaRequest, Logger } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { WorkflowGraph } from '@kbn/workflows/graph';
 import { setupDependencies } from './setup_dependencies';
 import type { WorkflowsExecutionEngineConfig } from '../config';
 import { ConnectorExecutor } from '../connector_executor';
 import { UrlValidator } from '../lib/url_validator';
-import type { LogsRepository } from '../repositories/logs_repository/logs_repository';
+import type { LogsRepository } from '../repositories/logs_repository';
 import type { StepExecutionRepository } from '../repositories/step_execution_repository';
 import type { WorkflowExecutionRepository } from '../repositories/workflow_execution_repository';
 import { NodesFactory } from '../step/nodes_factory';
@@ -34,6 +35,7 @@ jest.mock('../workflow_context_manager/workflow_execution_runtime_manager');
 jest.mock('../workflow_context_manager/workflow_execution_state');
 jest.mock('../workflow_event_logger/workflow_event_logger');
 jest.mock('../workflow_task_manager/workflow_task_manager');
+jest.mock('@kbn/workflows/graph');
 
 describe('setupDependencies', () => {
   const workflowRunId = 'test-workflow-run-id';
@@ -51,8 +53,19 @@ describe('setupDependencies', () => {
     startedAt: Date.now(),
   };
 
+  const mockUnsecuredActionsClient = {
+    getAll: jest.fn(),
+    execute: jest.fn(),
+  };
+
+  const mockScopedActionsClient = {
+    getAll: jest.fn(),
+    execute: jest.fn(),
+  };
+
   const mockActionsPlugin = {
-    getUnsecuredActionsClient: jest.fn().mockResolvedValue({}),
+    getUnsecuredActionsClient: jest.fn().mockResolvedValue(mockUnsecuredActionsClient),
+    getActionsClientWithRequest: jest.fn().mockResolvedValue(mockScopedActionsClient),
   } as unknown as ActionsPluginStartContract;
 
   const mockTaskManager = {} as TaskManagerStartContract;
@@ -106,6 +119,9 @@ describe('setupDependencies', () => {
       createStepLogger: jest.fn(),
     }));
     (WorkflowTaskManager as jest.Mock).mockImplementation(() => ({}));
+    (WorkflowGraph as unknown as jest.Mock).mockImplementation(() => ({
+      fromWorkflowDefinition: jest.fn().mockReturnThis(),
+    }));
   });
 
   it('should use original esClient when fakeRequest is not provided', async () => {
@@ -169,5 +185,115 @@ describe('setupDependencies', () => {
     expect(mockAsScoped).toHaveBeenCalledWith(mockFakeRequest);
     expect(result.clientToUse).toBe(mockAsCurrentUser);
     expect(result.clientToUse).not.toBe(mockEsClient);
+  });
+
+  it('should use unsecured actions client when fakeRequest is not provided', async () => {
+    await setupDependencies(
+      workflowRunId,
+      spaceId,
+      mockActionsPlugin,
+      mockTaskManager,
+      mockEsClient,
+      mockLogger,
+      mockConfig,
+      mockWorkflowExecutionRepository,
+      mockStepExecutionRepository,
+      mockLogsRepository,
+      {} as CoreStart,
+      mockDependencies
+    );
+
+    expect(mockActionsPlugin.getUnsecuredActionsClient).toHaveBeenCalled();
+    expect(mockActionsPlugin.getActionsClientWithRequest).not.toHaveBeenCalled();
+    expect(ConnectorExecutor).toHaveBeenCalledWith(mockUnsecuredActionsClient, false);
+  });
+
+  it('should use scoped actions client when fakeRequest is provided', async () => {
+    const mockScopedClient = {
+      search: jest.fn(),
+      index: jest.fn(),
+    } as unknown as ElasticsearchClient;
+
+    const mockAsCurrentUser = mockScopedClient;
+    const mockAsScoped = jest.fn().mockReturnValue({
+      asCurrentUser: mockAsCurrentUser,
+    });
+
+    const mockCoreStart = {
+      elasticsearch: {
+        client: {
+          asScoped: mockAsScoped,
+        },
+      },
+    } as unknown as CoreStart;
+
+    const mockFakeRequest = {
+      headers: {},
+    } as KibanaRequest;
+
+    await setupDependencies(
+      workflowRunId,
+      spaceId,
+      mockActionsPlugin,
+      mockTaskManager,
+      mockEsClient,
+      mockLogger,
+      mockConfig,
+      mockWorkflowExecutionRepository,
+      mockStepExecutionRepository,
+      mockLogsRepository,
+      mockCoreStart,
+      mockDependencies,
+      mockFakeRequest
+    );
+
+    expect(mockActionsPlugin.getActionsClientWithRequest).toHaveBeenCalledWith(mockFakeRequest);
+    expect(mockActionsPlugin.getUnsecuredActionsClient).not.toHaveBeenCalled();
+    expect(ConnectorExecutor).toHaveBeenCalledWith(mockScopedActionsClient, true);
+  });
+
+  describe('WorkflowGraph', () => {
+    it('should call fromWorkflowDefinition with correct workflow definition', async () => {
+      await setupDependencies(
+        workflowRunId,
+        spaceId,
+        mockActionsPlugin,
+        mockTaskManager,
+        mockEsClient,
+        mockLogger,
+        mockConfig,
+        mockWorkflowExecutionRepository,
+        mockStepExecutionRepository,
+        mockLogsRepository,
+        {} as CoreStart,
+        mockDependencies
+      );
+
+      expect(WorkflowGraph.fromWorkflowDefinition).toHaveBeenCalledWith(
+        mockWorkflowExecution.workflowDefinition,
+        expect.anything()
+      );
+    });
+
+    it('should call fromWorkflowDefinition with correct default settings', async () => {
+      await setupDependencies(
+        workflowRunId,
+        spaceId,
+        mockActionsPlugin,
+        mockTaskManager,
+        mockEsClient,
+        mockLogger,
+        mockConfig,
+        mockWorkflowExecutionRepository,
+        mockStepExecutionRepository,
+        mockLogsRepository,
+        {} as CoreStart,
+        mockDependencies
+      );
+
+      expect(WorkflowGraph.fromWorkflowDefinition).toHaveBeenCalledWith(expect.anything(), {
+        timeout: '6h',
+      });
+    });
   });
 });

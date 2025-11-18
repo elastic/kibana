@@ -42,5 +42,6 @@ export default async function ({ readConfigFile }) {
         '--coreApp.allowDynamicConfigOverrides=true',
       ],
     },
+    indexRefreshInterval: '1s',
   };
 }

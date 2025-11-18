@@ -358,3 +358,7 @@ export function isLensLegacyAttributes(config: unknown): config is LensAttribute
     typeof config === 'object' && config !== null && 'state' in config && 'references' in config
   );
 }
+
+export function isEsqlTableTypeDataset(dataset: LensApiState['dataset']) {
+  return dataset.type === 'esql' || dataset.type === 'table';
+}

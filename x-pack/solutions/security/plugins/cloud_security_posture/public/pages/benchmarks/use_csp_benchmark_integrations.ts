@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { BENCHMARKS_ROUTE_PATH } from '../../../common/constants';
 import type { BenchmarksQueryParams } from '../../../common/types/benchmarks/v1';
 import { useKibana } from '../../common/hooks/use_kibana';

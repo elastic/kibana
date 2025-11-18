@@ -8,8 +8,7 @@
  */
 
 import React from 'react';
-import '@testing-library/jest-dom';
-import { act, fireEvent, render, waitFor } from '@testing-library/react';
+import { act, fireEvent, render } from '@testing-library/react';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
 import * as hooks from '../hooks';
 import { FIELD_VALUE_SEPARATOR } from '../common/constants';
@@ -23,16 +22,38 @@ import { Subject } from 'rxjs';
 import type { MetricField, Dimension } from '@kbn/metrics-experience-plugin/common/types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
+import * as metricsExperienceStateProvider from '../context/metrics_experience_state_provider';
 
-jest.mock('../store/hooks');
+jest.mock('../context/metrics_experience_state_provider');
 jest.mock('../hooks');
-jest.mock('./chart', () => ({
-  Chart: jest.fn(() => <div data-test-subj="metric-chart" />),
+jest.mock('./metrics_experience_grid_content', () => ({
+  MetricsExperienceGridContent: jest.fn(() => (
+    <div data-test-subj="metricsExperienceGridContent" />
+  )),
 }));
 
-const useMetricsGridStateMock = hooks.useMetricsGridState as jest.MockedFunction<
-  typeof hooks.useMetricsGridState
->;
+/**
+ * Mock EuiDelayRender to render immediately in tests.
+ *
+ * WITHOUT THIS MOCK: "renders the loading state when fields API is fetching" takes 521ms
+ * WITH THIS MOCK: Same test takes ~15ms
+ *
+ * The EmptyState component uses EuiDelayRender with a 500ms delay to avoid
+ * flashing loading states. In tests, this just slows things down.
+ */
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  return {
+    ...actual,
+    EuiDelayRender: ({ children }: { children: React.ReactNode }) => <>{children}</>,
+  };
+});
+
+const useMetricsExperienceStateMock =
+  metricsExperienceStateProvider.useMetricsExperienceState as jest.MockedFunction<
+    typeof metricsExperienceStateProvider.useMetricsExperienceState
+  >;
+
 const useMetricFieldsQueryMock = hooks.useMetricFieldsQuery as jest.MockedFunction<
   typeof hooks.useMetricFieldsQuery
 >;
@@ -42,12 +63,6 @@ const useDimensionsQueryMock = hooks.useDimensionsQuery as jest.MockedFunction<
 const useMetricsGridFullScreenMock = hooks.useMetricsGridFullScreen as jest.MockedFunction<
   typeof hooks.useMetricsGridFullScreen
 >;
-
-const usePaginatedFieldsMock = hooks.usePaginatedFields as jest.MockedFunction<
-  typeof hooks.usePaginatedFields
->;
-
-const input$ = new Subject<UnifiedHistogramInputMessage>();
 
 const dimensions: Dimension[] = [
   { name: 'foo', type: ES_FIELD_TYPES.KEYWORD },
@@ -59,64 +74,56 @@ const allFields: MetricField[] = [
     dimensions: [dimensions[0]],
     index: 'metrics-*',
     type: 'long',
-    noData: false,
   },
   {
     name: 'field2',
     dimensions: [dimensions[1]],
     index: 'metrics-*',
     type: 'long',
-    noData: false,
   },
 ];
 
 describe('MetricsExperienceGrid', () => {
-  const defaultProps: ChartSectionProps = {
-    dataView: { getIndexPattern: () => 'metrics-*' } as ChartSectionProps['dataView'],
-    renderToggleActions: () => <div data-test-subj="toggleActions" />,
-    chartToolbarCss: { name: '', styles: '' },
-    histogramCss: { name: '', styles: '' },
-    requestParams: {
-      getTimeRange: () => ({ from: 'now-15m', to: 'now' }),
-      filters: [],
-      query: { esql: 'FROM metrics-*' },
-      esqlVariables: [],
-      relativeTimeRange: { from: 'now-15m', to: 'now' },
-      updateTimeRange: () => {},
-    },
-    services: {
-      fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
-    } as unknown as UnifiedHistogramServices,
-    input$,
-    isComponentVisible: true,
-  };
-
-  beforeAll(() => {
-    jest.useFakeTimers();
-  });
+  let input$: Subject<UnifiedHistogramInputMessage>;
+  let defaultProps: ChartSectionProps;
 
   beforeEach(() => {
     jest.clearAllMocks();
 
-    useMetricsGridStateMock.mockReturnValue({
+    // Create new Subject for each test to prevent memory leaks
+    input$ = new Subject<UnifiedHistogramInputMessage>();
+
+    defaultProps = {
+      dataView: { getIndexPattern: () => 'metrics-*' } as ChartSectionProps['dataView'],
+      renderToggleActions: () => <div data-test-subj="toggleActions" />,
+      chartToolbarCss: { name: '', styles: '' },
+      histogramCss: { name: '', styles: '' },
+      requestParams: {
+        getTimeRange: () => ({ from: 'now-15m', to: 'now' }),
+        filters: [],
+        query: { esql: 'FROM metrics-*' },
+        esqlVariables: [],
+        relativeTimeRange: { from: 'now-15m', to: 'now' },
+        updateTimeRange: () => {},
+      },
+      services: {
+        fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
+      } as unknown as UnifiedHistogramServices,
+      input$,
+      isComponentVisible: true,
+    };
+
+    useMetricsExperienceStateMock.mockReturnValue({
       currentPage: 0,
       dimensions: [],
       valueFilters: [],
       onDimensionsChange: jest.fn(),
       onPageChange: jest.fn(),
       onValuesChange: jest.fn(),
-      onClearValues: jest.fn(),
-      onClearAllDimensions: jest.fn(),
       isFullscreen: false,
       searchTerm: '',
-      onSearchTermChange: () => {},
-      onToggleFullscreen: () => {},
-    });
-
-    usePaginatedFieldsMock.mockReturnValue({
-      totalPages: 1,
-      filteredFieldsCount: 1,
-      currentPageFields: [allFields[0]],
+      onSearchTermChange: jest.fn(),
+      onToggleFullscreen: jest.fn(),
     });
 
     useDimensionsQueryMock.mockReturnValue({
@@ -134,25 +141,18 @@ describe('MetricsExperienceGrid', () => {
       metricsGridWrapper: null,
       setMetricsGridWrapper: jest.fn(),
       styles: {
-        'metricsExperienceGrid--fullScreen': 'mock-fullscreen-class',
-        'metricsExperienceGrid--restrictBody': 'mock-restrict-body-class',
+        'metricsGrid--fullScreen': 'mock-fullscreen-class',
+        'metricsGrid--restrictBody': 'mock-restrict-body-class',
       },
     });
   });
 
-  afterAll(() => {
-    jest.useRealTimers();
+  afterEach(() => {
+    // Complete the Subject to prevent memory leaks and hanging tests
+    input$.complete();
   });
 
-  it('renders the <MetricsGrid />', async () => {
-    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
-      wrapper: IntlProvider,
-    });
-
-    await waitFor(() => expect(getByTestId('unifiedMetricsExperienceGrid')).toBeInTheDocument());
-  });
-
-  it('renders the loading state when fields API is fetching', async () => {
+  it('renders the loading state when fields API is fetching', () => {
     useMetricFieldsQueryMock.mockReturnValue({
       data: [],
       status: 'loading',
@@ -163,17 +163,7 @@ describe('MetricsExperienceGrid', () => {
       wrapper: IntlProvider,
     });
 
-    await waitFor(() => expect(getByTestId('metricsExperienceProgressBar')).toBeInTheDocument());
-  });
-
-  it('renders the loading state when Discover is reloading', async () => {
-    const props = { ...defaultProps, isChartLoading: true };
-
-    const { getByTestId } = render(<MetricsExperienceGrid {...props} />, {
-      wrapper: IntlProvider,
-    });
-
-    await waitFor(() => expect(getByTestId('metricsExperienceProgressBar')).toBeInTheDocument());
+    expect(getByTestId('metricsExperienceProgressBar')).toBeInTheDocument();
   });
 
   it('renders the no data state covering the entire container when Fields API returns no data', () => {
@@ -191,24 +181,6 @@ describe('MetricsExperienceGrid', () => {
     expect(getByTestId('metricsExperienceNoData')).toBeInTheDocument();
   });
 
-  it('renders the no data state covering only the grid section when paginated fields returns no fields', async () => {
-    usePaginatedFieldsMock.mockReturnValue({
-      totalPages: 0,
-      currentPageFields: [],
-      filteredFieldsCount: 0,
-    });
-
-    const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
-      wrapper: IntlProvider,
-    });
-
-    await waitFor(() => {
-      expect(getByTestId('toggleActions')).toBeInTheDocument();
-      expect(getByTestId('metricsExperienceBreakdownSelectorButton')).toBeInTheDocument();
-      expect(getByTestId('metricsExperienceNoData')).toBeInTheDocument();
-    });
-  });
-
   it('renders the toolbar', () => {
     const { getByTestId, queryByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
       wrapper: IntlProvider,
@@ -221,43 +193,39 @@ describe('MetricsExperienceGrid', () => {
     expect(queryByTestId('metricsExperienceValuesSelectorButton')).not.toBeInTheDocument();
   });
 
-  it('render <ValuesSelector /> when dimensions are selected', async () => {
-    useMetricsGridStateMock.mockReturnValue({
+  it('render <ValuesSelector /> when dimensions are selected', () => {
+    useMetricsExperienceStateMock.mockReturnValue({
       currentPage: 0,
-      dimensions: ['foo'],
+      dimensions: [{ name: 'foo', type: ES_FIELD_TYPES.KEYWORD }],
       valueFilters: [`foo${FIELD_VALUE_SEPARATOR}bar`],
       onDimensionsChange: jest.fn(),
       onPageChange: jest.fn(),
       onValuesChange: jest.fn(),
-      onClearValues: jest.fn(),
-      onClearAllDimensions: jest.fn(),
       isFullscreen: false,
       searchTerm: '',
-      onSearchTermChange: () => {},
-      onToggleFullscreen: () => {},
+      onSearchTermChange: jest.fn(),
+      onToggleFullscreen: jest.fn(),
     });
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
       wrapper: IntlProvider,
     });
 
-    await waitFor(() =>
-      expect(getByTestId('metricsExperienceValuesSelectorButton')).toBeInTheDocument()
-    );
+    expect(getByTestId('metricsExperienceValuesSelectorButton')).toBeInTheDocument();
   });
 
-  it('shows and updates the search input when the search button is clicked', async () => {
+  it('shows and updates the search input when the search button is clicked', () => {
+    jest.useFakeTimers();
+
     const onSearchTermChange = jest.fn();
 
-    useMetricsGridStateMock.mockReturnValue({
+    useMetricsExperienceStateMock.mockReturnValue({
       currentPage: 0,
       dimensions: [],
       valueFilters: [],
       onDimensionsChange: jest.fn(),
       onPageChange: jest.fn(),
       onValuesChange: jest.fn(),
-      onClearValues: jest.fn(),
-      onClearAllDimensions: jest.fn(),
       isFullscreen: false,
       searchTerm: '',
       onSearchTermChange,
@@ -266,10 +234,6 @@ describe('MetricsExperienceGrid', () => {
 
     const { getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
       wrapper: IntlProvider,
-    });
-
-    await waitFor(() => {
-      expect(getByTestId('metricsExperienceToolbarSearch')).toBeInTheDocument();
     });
 
     const inputButton = getByTestId('metricsExperienceToolbarSearch');
@@ -291,21 +255,21 @@ describe('MetricsExperienceGrid', () => {
     });
 
     expect(onSearchTermChange).toHaveBeenCalledWith('cpu');
+
+    jest.useRealTimers();
   });
 
-  it('toggles fullscreen mode when the fullscreen button is clicked', async () => {
+  it('toggles fullscreen mode when the fullscreen button is clicked', () => {
     const onToggleFullscreen = jest.fn();
     const isFullscreen = false;
 
-    useMetricsGridStateMock.mockReturnValue({
+    useMetricsExperienceStateMock.mockReturnValue({
       currentPage: 0,
       dimensions: [],
       valueFilters: [],
       onDimensionsChange: jest.fn(),
       onPageChange: jest.fn(),
       onValuesChange: jest.fn(),
-      onClearValues: jest.fn(),
-      onClearAllDimensions: jest.fn(),
       isFullscreen,
       searchTerm: '',
       onSearchTermChange: jest.fn(),
@@ -325,54 +289,5 @@ describe('MetricsExperienceGrid', () => {
     });
 
     expect(onToggleFullscreen).toHaveBeenCalled();
-  });
-
-  it('filters fields by search term and respects page size', async () => {
-    const onSearchTermChange = jest.fn();
-
-    // 20 fields, 10 with "cpu" in the name
-    const allFieldsSomeWithCpu = Array.from({ length: 20 }, (_, i) => ({
-      name: i % 2 === 0 ? `cpu_field_${i}` : `mem_field_${i}`,
-      dimensions: [dimensions[0]],
-      index: 'metrics-*',
-      type: 'long',
-      noData: false,
-    }));
-
-    useMetricsGridStateMock.mockReturnValue({
-      currentPage: 0,
-      dimensions: [],
-      valueFilters: [],
-      onDimensionsChange: jest.fn(),
-      onPageChange: jest.fn(),
-      onValuesChange: jest.fn(),
-      onClearValues: jest.fn(),
-      onClearAllDimensions: jest.fn(),
-      isFullscreen: false,
-      searchTerm: 'cpu',
-      onSearchTermChange,
-      onToggleFullscreen: jest.fn(),
-    });
-
-    usePaginatedFieldsMock.mockReturnValue({
-      totalPages: 2,
-      filteredFieldsCount: allFieldsSomeWithCpu.filter((f) => f.name.includes('cpu')).length,
-      currentPageFields: allFieldsSomeWithCpu.filter((f) => f.name.includes('cpu')).slice(0, 5),
-    });
-
-    const { getByText } = render(<MetricsExperienceGrid {...defaultProps} />, {
-      wrapper: IntlProvider,
-    });
-
-    expect(getByText('10 metrics')).toBeInTheDocument();
-  });
-
-  it('renders the technical preview badge', () => {
-    const { getByText, getByTestId } = render(<MetricsExperienceGrid {...defaultProps} />, {
-      wrapper: IntlProvider,
-    });
-
-    expect(getByTestId('metricsExperienceTechnicalPreviewBadge')).toBeInTheDocument();
-    expect(getByText('Technical preview')).toBeInTheDocument();
   });
 });

@@ -110,8 +110,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type config: [url]: expected value of type [string] but got [undefined]',
+              message: `error validating connector type config: Field \"url\": Required`,
             });
           });
       });
@@ -134,7 +133,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: error validating url: target url "http://tines.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating connector type config: error validating url: target url "http://tines.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -153,8 +152,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message:
-                'error validating action type secrets: [email]: expected value of type [string] but got [undefined]',
+              message: `error validating connector type secrets: 2 errors:\n [1]: Field \"email\": Required;\n [2]: Field \"token\": Required`,
             });
           });
       });
@@ -232,8 +230,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.USER,
-            service_message:
-              'Request validation failed (Error: [storyId]: expected value of type [number] but got [undefined])',
+            service_message: `Request validation failed (Field \"storyId\": Expected number, received nan)`,
           });
         });
 
@@ -276,8 +273,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.USER,
-            service_message:
-              'Request validation failed (Error: [webhook.storyId]: expected value of type [number] but got [undefined])',
+            service_message: `Request validation failed (Field \"webhook.storyId\": Expected number, received nan)`,
           });
         });
 
@@ -300,8 +296,7 @@ export default function tinesTest({ getService }: FtrProviderContext) {
             retry: true,
             message: 'an error occurred while running the action',
             errorSource: TaskErrorSource.USER,
-            service_message:
-              'Request validation failed (Error: [webhook.name]: expected value of type [string] but got [undefined])',
+            service_message: `Request validation failed (Field \"webhook.name\": Required)`,
           });
         });
       });

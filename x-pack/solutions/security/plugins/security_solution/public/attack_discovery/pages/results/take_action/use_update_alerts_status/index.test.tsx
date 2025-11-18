@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { renderHook, act } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useUpdateAlertsStatus } from '.';
 
 import * as updateAlertsModule from '../../../../../common/components/toolbar/bulk_actions/update_alerts';

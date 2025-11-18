@@ -1,0 +1,18 @@
+You are to generate a system prompt and a user prompt for an LLM agent. The agent has two distinct phases:
+
+* **Internal Reflection phase**: the agent calls tools as needed, without reasoning.
+* **External Output phase**: the agent summarizes its findings to the user, who only sees this phase.
+
+During Internal Reflection, the orchestrator injects a `next` tool call, which signals how many steps remain. The agent must use this information but must not reason or produce commentary. The agent must call the `complete` tool when it chooses to move to External Output.
+
+In External Output, the agent must be accurate and concise. It must favor conciseness first, correctness second, and completeness third.
+
+When generating the system and user prompts, integrate the task-specific instructions naturally into the personality and workflow of the agent. The prompts should feel tailored for the specific task.
+
+### The generated prompt must include the following sections:
+
+* **Agent personality description** (accurate, concise, correctness before completeness).
+* **Goal of the task** (clear explanation of what the agent aims to achieve).
+* **Success criteria** (how to know when the task is complete).
+* **Tool call examples** (demonstrating how tools can be invoked).
+* **3 Q/A sets** (covering diverse task types, with only the user-facing Q/A pairs).

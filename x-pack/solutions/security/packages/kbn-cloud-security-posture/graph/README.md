@@ -104,7 +104,7 @@ export default App;
 
 ### Storybook Example
 
-You can also see how the `Graph` component is used in the Storybook file `graph_layout.stories.tsx`. 
+You can also see how the `Graph` component is used in the Storybook file `graph_layout.stories.tsx`.
 
 ### Extras
 
@@ -116,3 +116,44 @@ General look of the component can be checked visually running the following stor
 `yarn storybook cloud_security_posture_graph`
 
 Note that all the interactions are mocked.
+
+## Grouped Item Click Event Bus
+
+When using `GraphGroupedNodePreviewPanel` the list of grouped entities / events renders clickable titles. Instead of wiring an `onOpenItem` callback (which would break URL serialization for flyout state) the package exposes an RxJS Subject:
+
+```ts
+import { groupedItemClick$, emitGroupedItemClick } from '@kbn/cloud-security-posture-graph';
+```
+
+### Consumption Pattern
+
+```ts
+useEffect(() => {
+  const sub = groupedItemClick$.subscribe((item) => {
+    // Decide how to open your own preview panel here
+  });
+  return () => sub.unsubscribe();
+}, []);
+```
+
+The Security Solution plugin, for example, maps:
+
+- `DOCUMENT_TYPE_ENTITY` -> Generic entity flyout
+- `DOCUMENT_TYPE_EVENT` -> Event document details
+- `DOCUMENT_TYPE_ALERT` -> Alert document details
+
+### Duplicate Suppression
+
+Rapid double clicks on the same item id (within 250ms) are ignored to prevent accidental duplicate flyout openings. For testing there is a private helper `__resetGroupedItemClickDedupe()`.
+
+### Rationale
+
+- Keeps this package decoupled from plugin‑specific imports (banners, panel keys, etc.)
+- Avoids leaking non‑serializable functions into flyout state persisted in the URL.
+- Keeps API surface minimal and future‑proof.
+
+### Future Ideas
+
+- Provide a `useGroupedItemClick` convenience hook.
+- Telemetry collection on click events.
+- Additional events (context menu, long press) if UX evolves.

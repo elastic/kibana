@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useQueryClient, useIsFetching } from '@tanstack/react-query';
+import { useQueryClient, useIsFetching } from '@kbn/react-query';
 
 export const useRefresh = (refreshQueryKey: string) => {
   const queryClient = useQueryClient();

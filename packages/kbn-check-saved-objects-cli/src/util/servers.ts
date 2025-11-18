@@ -10,14 +10,22 @@
 import * as os from 'os';
 import { resolve } from 'path';
 
+import type { TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';
 import { ENABLE_ALL_PLUGINS_CONFIG_PATH } from '@kbn/core-plugins-server-internal/src/constants';
 import { ToolingLog } from '@kbn/tooling-log';
+import { setTimeout as timer } from 'timers/promises';
+import type { Root } from '@kbn/core-root-server-internal';
 import type { ServerHandles } from '../types';
 
 export async function startServers(): Promise<ServerHandles> {
-  const kibanaLog = resolve(os.tmpdir(), 'kibana.log');
+  const [esServer, kibanaRoot] = await Promise.all([startElasticsearch(), startKibana()]);
+  const coreStart = await kibanaRoot.start();
+  const typeRegistry = coreStart.savedObjects.getTypeRegistry();
+  return { esServer, kibanaRoot, typeRegistry };
+}
 
+async function startElasticsearch(): Promise<TestElasticsearchUtils> {
   const { startES } = createTestServers({
     adjustTimeout: () => {},
     settings: {
@@ -28,7 +36,11 @@ export async function startServers(): Promise<ServerHandles> {
     },
   });
 
-  const esServer = await startES();
+  return await startES();
+}
+
+async function startKibana(): Promise<Root> {
+  const kibanaLog = resolve(os.tmpdir(), 'kibana.log');
   const kibanaRoot = createRootWithCorePlugins(
     {
       logging: {
@@ -45,8 +57,12 @@ export async function startServers(): Promise<ServerHandles> {
           file: { type: 'file', fileName: kibanaLog, layout: { type: 'json' } },
         },
       },
+
       plugins: {
         [ENABLE_ALL_PLUGINS_CONFIG_PATH]: true,
+      },
+      node: {
+        roles: ['ui'],
       },
     },
     {
@@ -57,53 +73,24 @@ export async function startServers(): Promise<ServerHandles> {
   );
   await kibanaRoot.preboot();
   await kibanaRoot.setup();
-  const coreStart = await kibanaRoot.start();
-  return { esServer, kibanaRoot, coreStart };
+  return kibanaRoot;
 }
 
-export async function stopServers({
-  log,
-  serverHandles,
-}: {
-  log: ToolingLog;
-  serverHandles?: ServerHandles;
-}) {
-  if (!serverHandles) {
-    log.debug('No server to terminate.');
-    return;
-  }
+export async function stopServers(serverHandles: ServerHandles) {
+  await timer(2_000);
+  await Promise.race([
+    serverHandles.kibanaRoot.shutdown(),
+    timeout(8_000, 'Timeout waiting for Kibana to stop'),
+  ]);
 
-  try {
-    await delay(2);
-    await Promise.race([
-      serverHandles.kibanaRoot?.shutdown(),
-      timeout(8, 'Timeout waiting for Kibana to stop'),
-    ]);
-
-    log.info("Kibana's shutdown done!");
-  } catch (ex) {
-    log.error('Error while stopping kibana.');
-    log.error(ex);
-  }
-
-  try {
-    await delay(5);
-    await Promise.race([
-      serverHandles.esServer.stop(),
-      timeout(5, 'Timeout waiting for ES to stop'),
-    ]);
-    log.info('ES Stopped!');
-  } catch (ex) {
-    log.error('Error while stopping ES.');
-    log.error(ex);
-  }
+  await timer(5_000);
+  await Promise.race([
+    serverHandles.esServer.stop(),
+    timeout(5_000, 'Timeout waiting for ES to stop'),
+  ]);
 }
 
-async function delay(seconds: number): Promise<void> {
-  await new Promise((r) => setTimeout(r, 1000 * seconds));
-}
-
-async function timeout(seconds: number, message: string): Promise<void> {
-  await delay(seconds);
+async function timeout(millis: number, message: string): Promise<void> {
+  await timer(millis);
   throw new Error(message);
 }

@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -29,6 +29,8 @@
     "@kbn/shared-ux-button-toolbar",
     "@kbn/apm-types",
     "@kbn/esql-utils",
-    "@kbn/field-utils"
+    "@kbn/field-utils",
+    "@kbn/react-query",
+    "@kbn/restorable-state"
   ]
 }

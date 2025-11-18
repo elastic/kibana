@@ -13,6 +13,7 @@ import {
   modelVersion5,
   modelVersion6,
   modelVersion7,
+  modelVersion8,
 } from '.';
 
 describe('Model versions', () => {
@@ -201,6 +202,26 @@ describe('Model versions', () => {
               },
             },
             "type": "mappings_addition",
+          },
+        ]
+      `);
+    });
+  });
+  describe('version 8', () => {
+    it('returns version 8 changes correctly', () => {
+      expect(modelVersion8.changes).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "addedMappings": Object {
+              "total_observables": Object {
+                "type": "integer",
+              },
+            },
+            "type": "mappings_addition",
+          },
+          Object {
+            "backfillFn": [Function],
+            "type": "data_backfill",
           },
         ]
       `);
