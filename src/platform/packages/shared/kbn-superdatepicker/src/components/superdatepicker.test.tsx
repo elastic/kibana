@@ -14,6 +14,7 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 const onTimeChangeMock = jest.fn();
+const getEntireTimeRangeMock = jest.fn().mockResolvedValue({ start: 'now-15m', end: 'now' });
 
 describe('KbnSuperDatePicker', () => {
   it('should render', async () => {
@@ -23,10 +24,13 @@ describe('KbnSuperDatePicker', () => {
     expect(superDatePicker).toBeInTheDocument();
   });
 
-  describe('props.enableEntireTimeRange', () => {
-    it('should render EntireTimeRangePanel when true', async () => {
+  describe('props.getEntireTimeRange', () => {
+    it('should render EntireTimeRangePanel when getEntireTimeRange is provided', async () => {
       renderWithI18n(
-        <KbnSuperDatePicker onTimeChange={onTimeChangeMock} enableEntireTimeRange={true} />
+        <KbnSuperDatePicker
+          onTimeChange={onTimeChangeMock}
+          getEntireTimeRange={getEntireTimeRangeMock}
+        />
       );
 
       await userEvent.click(screen.getByTestId('superDatePickerToggleQuickMenuButton'));
@@ -35,10 +39,8 @@ describe('KbnSuperDatePicker', () => {
       expect(entireTimeRangePanel).toBeInTheDocument();
     });
 
-    it('should not render EntireTimeRangePanel when falsy', async () => {
-      renderWithI18n(
-        <KbnSuperDatePicker onTimeChange={onTimeChangeMock} enableEntireTimeRange={false} />
-      );
+    it('should not render EntireTimeRangePanel when getEntireTimeRange is not provided', async () => {
+      renderWithI18n(<KbnSuperDatePicker onTimeChange={onTimeChangeMock} />);
 
       await userEvent.click(screen.getByTestId('superDatePickerToggleQuickMenuButton'));
 

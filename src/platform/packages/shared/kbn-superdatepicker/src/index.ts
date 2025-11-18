@@ -8,7 +8,7 @@
  */
 
 export type {
-  GetTimeFieldRangeResponse,
+  GetEntireTimeRange,
   EntireTimeRangePanelProps,
   UseCommonlyUsedRangesProps,
   KbnSuperDatePickerProps,
@@ -16,6 +16,5 @@ export type {
 
 export { KbnSuperDatePicker, EntireTimeRangePanel } from './components';
 export { useCommonlyUsedRanges } from './hooks';
-export { getTimeFieldRange } from './services';
 
-export { TIMEPICKER_QUICK_RANGES, TIME_FIELD_RANGE_ENDPOINT } from './constants';
+export { TIMEPICKER_QUICK_RANGES } from './constants';

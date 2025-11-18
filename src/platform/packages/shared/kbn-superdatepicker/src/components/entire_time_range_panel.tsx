@@ -11,37 +11,23 @@ import React, { useState, useCallback } from 'react';
 import { EuiLink, EuiLoadingSpinner, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EntireTimeRangePanelProps } from '../types';
-import { getTimeFieldRange } from '../services/time_field_range';
 
 export const EntireTimeRangePanel = ({
   onTimeChange,
-  http,
-  dataView,
-  query,
+  getEntireTimeRange,
 }: EntireTimeRangePanelProps) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const handleApplyTime = useCallback(async () => {
-    if (!http || !dataView) {
-      return;
-    }
-
     try {
       setIsLoading(true);
 
-      const runtimeMappings = dataView.getRuntimeMappings();
-      const response = await getTimeFieldRange({
-        index: dataView.getIndexPattern(),
-        timeFieldName: dataView.timeFieldName,
-        query,
-        ...(Object.keys(runtimeMappings).length > 0 ? { runtimeMappings } : {}),
-        http,
-      });
+      const response = await getEntireTimeRange();
 
-      if (response.start?.string && response.end?.string) {
+      if (response?.start && response?.end) {
         onTimeChange({
-          start: response.start.string,
-          end: response.end.string,
+          start: response.start,
+          end: response.end,
           isInvalid: false,
           isQuickSelection: true,
         });
@@ -51,7 +37,7 @@ export const EntireTimeRangePanel = ({
     } finally {
       setIsLoading(false);
     }
-  }, [http, dataView, query, onTimeChange]);
+  }, [onTimeChange, getEntireTimeRange]);
 
   return (
     <>

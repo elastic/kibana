@@ -9,16 +9,14 @@
 
 import type { EuiSuperDatePickerProps } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { estypes } from '@elastic/elasticsearch';
+
+export type GetEntireTimeRange = () =>
+  | Promise<{ start: string; end: string }>
+  | { start: string; end: string };
 
 export interface KbnSuperDatePickerProps extends EuiSuperDatePickerProps {
-  enableEntireTimeRange?: boolean;
   uiSettings?: CoreStart['uiSettings'];
-  http?: CoreStart['http'];
-  dataView?: DataView;
-  query?: QueryDslQueryContainer;
+  getEntireTimeRange?: GetEntireTimeRange;
 }
 
 export interface UseCommonlyUsedRangesProps {
@@ -27,27 +25,5 @@ export interface UseCommonlyUsedRangesProps {
 
 export interface EntireTimeRangePanelProps {
   onTimeChange: EuiSuperDatePickerProps['onTimeChange'];
-  http?: CoreStart['http'];
-  dataView?: DataView;
-  query?: QueryDslQueryContainer;
-}
-
-interface GetTimeFieldRangeResponseTime {
-  epoch: number;
-  string: string;
-}
-
-export interface GetTimeFieldRangeOptions {
-  index: string;
-  timeFieldName?: string;
-  query?: QueryDslQueryContainer;
-  runtimeMappings?: estypes.MappingRuntimeFields;
-  http: CoreStart['http'];
-  signal?: AbortSignal;
-}
-
-export interface GetTimeFieldRangeResponse {
-  success: boolean;
-  start: GetTimeFieldRangeResponseTime;
-  end: GetTimeFieldRangeResponseTime;
+  getEntireTimeRange: GetEntireTimeRange;
 }

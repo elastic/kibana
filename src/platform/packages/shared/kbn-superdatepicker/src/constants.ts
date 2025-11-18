@@ -8,4 +8,3 @@
  */
 
 export const TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges';
-export const TIME_FIELD_RANGE_ENDPOINT = '/internal/file_upload/time_field_range';

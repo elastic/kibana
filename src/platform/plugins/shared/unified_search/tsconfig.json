@@ -51,7 +51,6 @@
     "@kbn/split-button",
     "@kbn/cps",
     "@kbn/css-utils",
-    "@kbn/superdatepicker",
   ],
   "exclude": ["target/**/*"]
 }

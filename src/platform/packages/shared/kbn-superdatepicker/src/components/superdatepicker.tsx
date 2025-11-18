@@ -15,11 +15,8 @@ import { EntireTimeRangePanel } from './entire_time_range_panel';
 import { useCommonlyUsedRanges } from '../hooks';
 
 export const KbnSuperDatePicker = ({
-  enableEntireTimeRange,
   uiSettings,
-  http,
-  dataView,
-  query,
+  getEntireTimeRange,
   ...euiProps
 }: KbnSuperDatePickerProps) => {
   const commonlyUsedRangesFromUiSettings = useCommonlyUsedRanges({ uiSettings });
@@ -36,12 +33,10 @@ export const KbnSuperDatePicker = ({
     <>
       {quickSelect}
       {commonlyUsedRangesPanel}
-      {enableEntireTimeRange && (
+      {typeof getEntireTimeRange === 'function' && (
         <EntireTimeRangePanel
           onTimeChange={euiProps.onTimeChange}
-          http={http}
-          dataView={dataView}
-          query={query}
+          getEntireTimeRange={getEntireTimeRange}
         />
       )}
       {recentlyUsedRanges}
