@@ -8,19 +8,19 @@
 import { act, waitFor } from '@testing-library/react';
 import userEvent, { type UserEvent } from '@testing-library/user-event';
 import React from 'react';
-import { TRUSTED_APPS_PATH } from '../../../../../../common/constants';
-import type { AppContextTestRender } from '../../../../../common/mock/endpoint';
-import { createAppRootMockRenderer } from '../../../../../common/mock/endpoint';
-import { TrustedAppsList } from '../trusted_apps_list';
-import { exceptionsListAllHttpMocks } from '../../../../mocks/exceptions_list_http_mocks';
-import { SEARCHABLE_FIELDS } from '../../constants';
-import { parseQueryFilterToKQL } from '../../../../common/utils';
-import { useUserPrivileges } from '../../../../../common/components/user_privileges';
-import type { EndpointPrivileges } from '../../../../../../common/endpoint/types';
-import { ExceptionsListItemGenerator } from '../../../../../../common/endpoint/data_generators/exceptions_list_item_generator';
-import { TRUSTED_PROCESS_DESCENDANTS_TAG } from '../../../../../../common/endpoint/service/artifacts';
+import { TRUSTED_APPS_PATH } from '../../../../../common/constants';
+import type { AppContextTestRender } from '../../../../common/mock/endpoint';
+import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
+import { TrustedAppsList } from './trusted_apps_list';
+import { exceptionsListAllHttpMocks } from '../../../mocks/exceptions_list_http_mocks';
+import { SEARCHABLE_FIELDS } from '../constants';
+import { parseQueryFilterToKQL } from '../../../common/utils';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import type { EndpointPrivileges } from '../../../../../common/endpoint/types';
+import { ExceptionsListItemGenerator } from '../../../../../common/endpoint/data_generators/exceptions_list_item_generator';
+import { TRUSTED_PROCESS_DESCENDANTS_TAG } from '../../../../../common/endpoint/service/artifacts';
 
-jest.mock('../../../../../common/components/user_privileges');
+jest.mock('../../../../common/components/user_privileges');
 const mockUserPrivileges = useUserPrivileges as jest.Mock;
 
 describe('When on the trusted applications page', () => {
@@ -136,12 +136,15 @@ describe('When on the trusted applications page', () => {
       expect(renderResult.getAllByTestId(`${prefix}-tooltipIcon`)).toHaveLength(2);
       expect(renderResult.queryByTestId(`${prefix}-tooltipText`)).not.toBeInTheDocument();
 
-      await userEvent.hover(renderResult.getAllByTestId(`${prefix}-tooltipIcon`)[0]);
+      userEvent.hover(renderResult.getAllByTestId(`${prefix}-tooltipIcon`)[0]);
 
-      expect(await renderResult.findByTestId(`${prefix}-tooltipText`)).toBeInTheDocument();
-      expect(renderResult.getByTestId(`${prefix}-tooltipText`).textContent).toContain(
-        'event.category is process'
-      );
+      await waitFor(async () => {
+        expect(renderResult.queryByTestId(`${prefix}-tooltipText`)).toBeInTheDocument();
+        expect(renderResult.queryByTestId(`${prefix}-tooltipText`)?.textContent).toContain(
+          'event.category is process'
+        );
+      })
+
     });
   });
 
