@@ -251,9 +251,12 @@ const AttackDiscoveryPageComponent: React.FC = () => {
 
         <EuiSpacer size="s" />
 
-        {attacksAlertsAlignmentEnabled && <MovingAttacksCallout />}
-
-        <EuiSpacer size="s" />
+        {attacksAlertsAlignmentEnabled && (
+          <>
+            <MovingAttacksCallout />
+            <EuiSpacer size="s" />
+          </>
+        )}
 
         <History
           aiConnectors={aiConnectors}
