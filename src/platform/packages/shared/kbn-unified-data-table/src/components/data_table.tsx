@@ -231,10 +231,6 @@ interface InternalUnifiedDataTableProps {
    */
   showFullScreenButton?: boolean;
   /**
-   * Optional callback that gets fired when entering or exiting full screen mode
-   */
-  onFullScreenChange?: (isFullScreen: boolean) => void;
-  /**
    * Determines whether the keyboard shortcuts button should be displayed
    */
   showKeyboardShortcuts?: boolean;
