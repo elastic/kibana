@@ -16,7 +16,7 @@ import type {
   PluginStartContract as ActionsPluginStartContract,
 } from '@kbn/actions-plugin/server/plugin';
 import type { ActionType } from '@kbn/actions-plugin/server';
-import { createConnectorTypeFromSpec } from '@kbn/stack-connectors-plugin/server/connector_types_from_spec';
+import { createConnectorTypeFromSpec } from '@kbn/actions-plugin/server/lib';
 import { initPlugin as initPagerduty } from './pagerduty_simulation';
 import { initPlugin as initSwimlane } from './swimlane_simulation';
 import { initPlugin as initServiceNow } from './servicenow_simulation';
@@ -153,9 +153,7 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
     });
 
     // register a single file connector
-    actions.registerSubActionConnectorType(
-      createConnectorTypeFromSpec(TestSingleFileConnector, actions)
-    );
+    actions.registerType(createConnectorTypeFromSpec(TestSingleFileConnector, actions));
 
     const router = core.http.createRouter();
 
