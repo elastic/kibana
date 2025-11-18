@@ -80,29 +80,29 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       // Show actions by entity
       await expandedFlyoutGraph.showActionsByEntity('admin@example.com');
-      await expandedFlyoutGraph.expectFilterTextEquals(0, 'actor.entity.id: admin@example.com');
-      await expandedFlyoutGraph.expectFilterPreviewEquals(0, 'actor.entity.id: admin@example.com');
+      await expandedFlyoutGraph.expectFilterTextEquals(0, 'user.entity.id: admin@example.com');
+      await expandedFlyoutGraph.expectFilterPreviewEquals(0, 'user.entity.id: admin@example.com');
 
       // Show actions on entity
       await expandedFlyoutGraph.showActionsOnEntity('admin@example.com');
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
-        'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com'
+        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com'
       );
       await expandedFlyoutGraph.expectFilterPreviewEquals(
         0,
-        'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com'
+        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com'
       );
 
       // Explore related entities
       await expandedFlyoutGraph.exploreRelatedEntities('admin@example.com');
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
-        'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com'
+        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com OR related.entity: admin@example.com'
       );
       await expandedFlyoutGraph.expectFilterPreviewEquals(
         0,
-        'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com'
+        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com OR related.entity: admin@example.com'
       );
 
       // Show events with the same action
@@ -111,11 +111,11 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       );
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
-        'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com OR event.action: google.iam.admin.v1.CreateRole'
+        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com OR related.entity: admin@example.com OR event.action: google.iam.admin.v1.CreateRole'
       );
       await expandedFlyoutGraph.expectFilterPreviewEquals(
         0,
-        'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com OR event.action: google.iam.admin.v1.CreateRole'
+        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com OR related.entity: admin@example.com OR event.action: google.iam.admin.v1.CreateRole'
       );
 
       await expandedFlyoutGraph.clickOnFitGraphIntoViewControl();
@@ -126,22 +126,22 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
       );
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
-        'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com'
+        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com OR related.entity: admin@example.com'
       );
       await expandedFlyoutGraph.expectFilterPreviewEquals(
         0,
-        'actor.entity.id: admin@example.com OR target.entity.id: admin@example.com OR related.entity: admin@example.com'
+        'user.entity.id: admin@example.com OR user.target.entity.id: admin@example.com OR related.entity: admin@example.com'
       );
 
       // Hide actions on entity
       await expandedFlyoutGraph.hideActionsOnEntity('admin@example.com');
       await expandedFlyoutGraph.expectFilterTextEquals(
         0,
-        'actor.entity.id: admin@example.com OR related.entity: admin@example.com'
+        'user.entity.id: admin@example.com OR related.entity: admin@example.com'
       );
       await expandedFlyoutGraph.expectFilterPreviewEquals(
         0,
-        'actor.entity.id: admin@example.com OR related.entity: admin@example.com'
+        'user.entity.id: admin@example.com OR related.entity: admin@example.com'
       );
 
       // Clear filters
@@ -149,7 +149,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
       // Add custom filter
       await expandedFlyoutGraph.addFilter({
-        field: 'actor.entity.id',
+        field: 'user.entity.id',
         operation: 'is',
         value: 'admin2@example.com',
       });
