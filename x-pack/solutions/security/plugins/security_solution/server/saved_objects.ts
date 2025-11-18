@@ -27,6 +27,7 @@ import {
   PrivilegeMonitoringApiKeyEncryptionParams,
   PrivilegeMonitoringApiKeyType,
 } from './lib/entity_analytics/privilege_monitoring/auth/saved_object';
+import { hypothesisType } from './lib/threat_hunting/hypotheses/saved_object_mappings';
 
 const types = [
   noteType,
@@ -45,6 +46,7 @@ const types = [
   protectionUpdatesNoteType,
   promptType,
   referenceDataSavedObjectType,
+  hypothesisType,
 ];
 
 export const savedObjectTypes = types.map((type) => type.name);
