@@ -55,7 +55,7 @@ export const applyPrivmonModifier = async ({
   deps,
   globalWeight,
   experimentalFeatures,
-}: ApplyCriticalityModifierParams) => {
+}: ApplyCriticalityModifierParams): Promise<PrivmonRiskFields[]> => {
   if (buckets.length === 0) {
     return [];
   }

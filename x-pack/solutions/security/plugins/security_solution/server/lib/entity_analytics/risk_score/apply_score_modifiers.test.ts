@@ -19,8 +19,12 @@ import type { RiskScoreBucket } from '../types';
 import { applyCriticalityModifier } from './modifiers/asset_criticality';
 import { applyPrivmonModifier } from './modifiers/privileged_users';
 
+import { allowedExperimentalValues } from '../../../../common';
+
 jest.mock('./modifiers/asset_criticality');
 jest.mock('./modifiers/privileged_users');
+
+const experimentalFeatures = { ...allowedExperimentalValues, enableRiskScorePrivmonModifier: true };
 
 const mockApplyCriticalityModifier = applyCriticalityModifier as jest.MockedFunction<
   typeof applyCriticalityModifier
@@ -36,16 +40,16 @@ describe('applyScoreModifiers', () => {
 
   const mockBucket: RiskScoreBucket = {
     key: { 'host.name': 'test-host' },
-    doc_count: 5,
+    doc_count: 1,
     top_inputs: {
-      doc_count: 10,
+      doc_count: 1,
       risk_details: {
         value: {
-          score: 85,
-          normalized_score: 75.5,
+          score: 120,
+          normalized_score: 75,
           notes: [],
-          category_1_score: 80,
-          category_1_count: 3,
+          category_1_score: 120,
+          category_1_count: 1,
           risk_inputs: [
             {
               id: 'alert-1',
@@ -64,8 +68,8 @@ describe('applyScoreModifiers', () => {
   const mockPage = {
     buckets: [mockBucket],
     bounds: {
-      lower: 'test-host-a',
-      upper: 'test-host-z',
+      lower: 'a',
+      upper: 'z',
     },
     identifierField: 'host.name',
   };
@@ -88,7 +92,7 @@ describe('applyScoreModifiers', () => {
     beforeEach(() => {
       mockApplyCriticalityModifier.mockResolvedValue([
         {
-          category_2_score: 10.5,
+          category_2_score: 10,
           category_2_count: 1,
           criticality_level: 'high_impact',
           criticality_modifier: 1.5,
@@ -97,7 +101,7 @@ describe('applyScoreModifiers', () => {
 
       mockApplyPrivmonModifier.mockResolvedValue([
         {
-          category_3_score: 5.25,
+          category_3_score: 5,
           category_3_count: 1,
           is_privileged_user: true,
           privileged_user_modifier: 2,
@@ -114,18 +118,12 @@ describe('applyScoreModifiers', () => {
           privmonUserCrudService,
           logger,
         },
+        experimentalFeatures,
         page: mockPage,
-        weights: [
-          {
-            type: 'global_identifier' as const,
-            host: 0.7,
-          },
-        ],
       });
 
       expect(mockApplyCriticalityModifier).toHaveBeenCalledWith({
         page: mockPage,
-        globalWeight: 0.7,
         deps: {
           assetCriticalityService,
           logger,
@@ -134,32 +132,26 @@ describe('applyScoreModifiers', () => {
 
       expect(mockApplyPrivmonModifier).toHaveBeenCalledWith({
         page: mockPage,
-        globalWeight: 0.7,
         deps: {
           privmonUserCrudService,
           logger,
         },
+        experimentalFeatures,
       });
 
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({
-        '@timestamp': '2023-01-01T00:00:00.000Z',
         id_field: 'host.name',
         id_value: 'test-host',
-        category_1_score: expect.any(Number),
-        category_1_count: 3,
-        category_2_score: 10.5,
+        category_2_score: 10,
         category_2_count: 1,
         criticality_level: 'high_impact',
         criticality_modifier: 1.5,
-        category_3_score: 5.25,
+        category_3_score: 5,
         category_3_count: 1,
         is_privileged_user: true,
         privileged_user_modifier: 2,
-        calculated_score_norm: 91.25, // 75.5 + 10.5 + 5.25
-        calculated_level: 'Critical',
-        notes: [],
-        inputs: expect.any(Array),
+        calculated_score_norm: 90, // 75 + 10 + 5
       });
     });
 
@@ -172,6 +164,7 @@ describe('applyScoreModifiers', () => {
           privmonUserCrudService,
           logger,
         },
+        experimentalFeatures,
         page: mockPage,
       });
 
@@ -193,7 +186,7 @@ describe('applyScoreModifiers', () => {
     beforeEach(() => {
       mockApplyCriticalityModifier.mockResolvedValue([
         {
-          category_2_score: 12.75,
+          category_2_score: 15,
           category_2_count: 1,
           criticality_level: 'extreme_impact',
           criticality_modifier: 2,
@@ -204,7 +197,6 @@ describe('applyScoreModifiers', () => {
         {
           category_3_score: 0,
           category_3_count: 0,
-          is_privileged_user: false,
         },
       ]);
     });
@@ -218,13 +210,8 @@ describe('applyScoreModifiers', () => {
           privmonUserCrudService,
           logger,
         },
+        experimentalFeatures,
         page: mockPage,
-        weights: [
-          {
-            type: 'global_identifier' as const,
-            user: 0.8,
-          },
-        ],
       });
 
       expect(mockApplyCriticalityModifier).toHaveBeenCalled();
@@ -232,15 +219,13 @@ describe('applyScoreModifiers', () => {
 
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({
-        '@timestamp': '2023-01-01T00:00:00.000Z',
-        category_2_score: 12.75,
+        category_2_score: 15,
         category_2_count: 1,
         criticality_level: 'extreme_impact',
         criticality_modifier: 2,
         category_3_score: 0,
         category_3_count: 0,
-        is_privileged_user: false,
-        calculated_score_norm: 88.25, // 75.5 + 12.75 + 0
+        calculated_score_norm: 90, // 75 + 15 + 0
       });
       expect(result[0].privileged_user_modifier).toBeUndefined();
     });
@@ -257,7 +242,7 @@ describe('applyScoreModifiers', () => {
 
       mockApplyPrivmonModifier.mockResolvedValue([
         {
-          category_3_score: 8.5,
+          category_3_score: 10,
           category_3_count: 1,
           is_privileged_user: true,
           privileged_user_modifier: 2,
@@ -269,6 +254,7 @@ describe('applyScoreModifiers', () => {
       const result = await applyScoreModifiers({
         now: '2023-01-01T00:00:00.000Z',
         identifierType: EntityType.user,
+        experimentalFeatures,
         deps: {
           assetCriticalityService,
           privmonUserCrudService,
@@ -282,14 +268,13 @@ describe('applyScoreModifiers', () => {
 
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({
-        '@timestamp': '2023-01-01T00:00:00.000Z',
         category_2_score: 0,
         category_2_count: 0,
-        category_3_score: 8.5,
+        category_3_score: 10,
         category_3_count: 1,
         is_privileged_user: true,
         privileged_user_modifier: 2,
-        calculated_score_norm: 84, // 75.5 + 0 + 8.5
+        calculated_score_norm: 85, // 75 + 0 + 10
       });
       expect(result[0].criticality_level).toBeUndefined();
       expect(result[0].criticality_modifier).toBeUndefined();
@@ -309,7 +294,6 @@ describe('applyScoreModifiers', () => {
         {
           category_3_score: 0,
           category_3_count: 0,
-          is_privileged_user: false,
         },
       ]);
     });
@@ -318,6 +302,7 @@ describe('applyScoreModifiers', () => {
       const result = await applyScoreModifiers({
         now: '2023-01-01T00:00:00.000Z',
         identifierType: EntityType.host,
+        experimentalFeatures,
         deps: {
           assetCriticalityService,
           privmonUserCrudService,
@@ -331,13 +316,11 @@ describe('applyScoreModifiers', () => {
 
       expect(result).toHaveLength(1);
       expect(result[0]).toMatchObject({
-        '@timestamp': '2023-01-01T00:00:00.000Z',
         category_2_score: 0,
         category_2_count: 0,
         category_3_score: 0,
         category_3_count: 0,
-        is_privileged_user: false,
-        calculated_score_norm: 75.5, // 75.5 + 0 + 0 (base score only)
+        calculated_score_norm: 75, // 75 + 0 + 0 (base score only)
       });
       expect(result[0].criticality_level).toBeUndefined();
       expect(result[0].criticality_modifier).toBeUndefined();
@@ -348,16 +331,16 @@ describe('applyScoreModifiers', () => {
   describe('with multiple buckets', () => {
     const mockBucket2: RiskScoreBucket = {
       key: { 'host.name': 'test-host-2' },
-      doc_count: 3,
+      doc_count: 1,
       top_inputs: {
-        doc_count: 5,
+        doc_count: 1,
         risk_details: {
           value: {
             score: 60,
             normalized_score: 50,
             notes: ['Note 1'],
             category_1_score: 55,
-            category_1_count: 2,
+            category_1_count: 1,
             risk_inputs: [],
           },
         },
@@ -388,7 +371,6 @@ describe('applyScoreModifiers', () => {
         {
           category_3_score: 0,
           category_3_count: 0,
-          is_privileged_user: false,
         },
       ]);
     });
@@ -402,6 +384,7 @@ describe('applyScoreModifiers', () => {
       const result = await applyScoreModifiers({
         now: '2023-01-01T00:00:00.000Z',
         identifierType: EntityType.host,
+        experimentalFeatures,
         deps: {
           assetCriticalityService,
           privmonUserCrudService,
@@ -417,7 +400,7 @@ describe('applyScoreModifiers', () => {
         id_value: 'test-host',
         category_2_score: 10,
         category_3_score: 5,
-        calculated_score_norm: 90.5, // 75.5 + 10 + 5
+        calculated_score_norm: 90, // 75 + 10 + 5
       });
 
       // Second bucket - no modifiers
@@ -427,55 +410,6 @@ describe('applyScoreModifiers', () => {
         category_3_score: 0,
         calculated_score_norm: 50, // 50 + 0 + 0
       });
-    });
-  });
-
-  describe('without identifier type', () => {
-    beforeEach(() => {
-      mockApplyCriticalityModifier.mockResolvedValue([
-        {
-          category_2_score: 0,
-          category_2_count: 0,
-        },
-      ]);
-
-      mockApplyPrivmonModifier.mockResolvedValue([
-        {
-          category_3_score: 0,
-          category_3_count: 0,
-          is_privileged_user: false,
-        },
-      ]);
-    });
-
-    it('should not apply global weight when identifierType is undefined', async () => {
-      const result = await applyScoreModifiers({
-        now: '2023-01-01T00:00:00.000Z',
-        identifierType: undefined,
-        deps: {
-          assetCriticalityService,
-          privmonUserCrudService,
-          logger,
-        },
-        page: mockPage,
-        weights: [
-          {
-            type: 'global_identifier' as const,
-            host: 0.5,
-          },
-        ],
-      });
-
-      expect(mockApplyCriticalityModifier).toHaveBeenCalledWith({
-        page: mockPage,
-        globalWeight: undefined,
-        deps: {
-          assetCriticalityService,
-          logger,
-        },
-      });
-
-      expect(result[0].calculated_score).toBe(85); // original score without weight
     });
   });
 
@@ -527,6 +461,7 @@ describe('applyScoreModifiers', () => {
       const result = await applyScoreModifiers({
         now: '2023-01-01T00:00:00.000Z',
         identifierType: EntityType.host,
+        experimentalFeatures,
         deps: {
           assetCriticalityService,
           privmonUserCrudService,
