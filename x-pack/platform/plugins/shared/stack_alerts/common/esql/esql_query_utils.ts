@@ -106,6 +106,8 @@ export const getEsqlQueryHits = async (
     }
   }
 
+  console.log('Adding log');
+
   return {
     results: groupedHits,
     rows,
