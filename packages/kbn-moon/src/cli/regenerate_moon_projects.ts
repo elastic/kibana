@@ -210,10 +210,7 @@ function applyTsConfigSettings(
 
   const dependencies = tsConfig.kbn_references;
   if (includeDependencies && dependencies) {
-    projectConfig.dependsOn = dependencies
-      // TODO: some dependencies are referenced as objects
-      .filter((e: any) => typeof e === 'string')
-      .filter((e: string) => allPackageIds.includes(e));
+    projectConfig.dependsOn = dependencies.filter((e: string) => allPackageIds.includes(e));
   }
 }
 

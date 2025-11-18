@@ -50,7 +50,7 @@ export function filterPackages(allPackages: Package[], filter: string[]): Packag
   return allPackages.filter((pkg) => {
     return filter.some(
       (filterAllow) =>
-        pkg.name.includes(filterAllow) || pkg.normalizedRepoRelativeDir.includes(filterAllow)
+        pkg.name === filterAllow || pkg.normalizedRepoRelativeDir.includes(filterAllow)
     );
   });
 }
