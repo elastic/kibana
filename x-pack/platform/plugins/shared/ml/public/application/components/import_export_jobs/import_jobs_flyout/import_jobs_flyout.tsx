@@ -543,7 +543,9 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
                                     size="s"
                                     announceOnMount
                                   >
-                                    <p>{jobId.datafeedWarningMessage}</p>
+                                    <EuiText size="xs" className="eui-textBreakWord">
+                                      {jobId.datafeedWarningMessage}
+                                    </EuiText>
                                   </EuiCallOut>
                                 </EuiFormRow>
                               )}
