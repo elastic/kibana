@@ -65,7 +65,7 @@ export const buildAlert = <
       cleanedPayload,
       {
         [ALERT_RULE_UUID]: rule[ALERT_RULE_UUID],
-        'rule.family_id': rule[ALERT_RULE_PARAMETERS].familyId,
+        'rule.parent_id': rule[ALERT_RULE_PARAMETERS].parentId,
       },
       {
         [TIMESTAMP]: timestamp,

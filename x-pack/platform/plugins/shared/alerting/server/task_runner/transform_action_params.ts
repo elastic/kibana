@@ -55,7 +55,7 @@ export function transformActionParams({
     date: new Date().toISOString(),
     rule: {
       id: aadAlert['rule.id'],
-      familyId: aadAlert['rule.family_id'],
+      parentId: aadAlert['rule.parent_id'],
     },
     status: aadAlert.status,
   };

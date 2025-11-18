@@ -14,7 +14,7 @@ export const ESQL_EXPRESSION_ERRORS = {
   esqlQuery: new Array<string>(),
   timeField: new Array<string>(),
   timeWindowSize: new Array<string>(),
-  familyId: new Array<string>(),
+  parentId: new Array<string>(),
 };
 
 export const ESQL_EXPRESSION_ERROR_KEYS = Object.keys(ESQL_EXPRESSION_ERRORS) as Array<

@@ -111,7 +111,7 @@ const ALERT_RULE_EXECUTION_TIMESTAMP = `${ALERT_RULE_NAMESPACE}.execution.timest
 const ALERT_RULE_EXECUTION_UUID = `rule.execution.uuid` as const;
 
 // kibana.alert.rule.name - rule name for rule that generated this alert
-const ALERT_RULE_NAME = `rule.family_id` as const;
+const ALERT_RULE_NAME = `rule.parent_id` as const;
 
 // kibana.alert.rule.parameters - rule parameters for rule that generated this alert
 const ALERT_RULE_PARAMETERS = `${ALERT_RULE_NAMESPACE}.parameters` as const;
