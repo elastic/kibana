@@ -11,3 +11,4 @@ export { parseDuration } from './parse-duration/parse-duration';
 export { buildStepExecutionId } from './build_step_execution_id/build_step_execution_id';
 export { stringifyStackFrames } from './stringify_stack_frames';
 export { getKibanaUrl, buildWorkflowExecutionUrl } from './get_kibana_url';
+export { mapError } from './map_error/map_error';

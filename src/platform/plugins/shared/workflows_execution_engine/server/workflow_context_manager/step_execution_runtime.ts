@@ -7,13 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
+import type { EsWorkflowStepExecution, ExecutionError, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
 import type { WorkflowContextManager } from './workflow_context_manager';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { RunStepResult } from '../step/node_implementation';
+import { mapError } from '../utils';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 
 interface StepExecutionRuntimeInit {
@@ -164,9 +165,10 @@ export class StepExecutionRuntime {
     this.logStepComplete(stepExecutionUpdate);
   }
 
-  public async failStep(error: Error | string): Promise<void> {
+  public async failStep(error: Error | ExecutionError | string): Promise<void> {
     // if there is a last step execution, fail it
     // if not, create a new step execution with fail
+    const executionError = mapError(error);
     const startedStepExecution = this.workflowExecutionState.getStepExecution(this.stepExecutionId);
     const stepExecutionUpdate = {
       id: this.stepExecutionId,
@@ -174,7 +176,7 @@ export class StepExecutionRuntime {
       scopeStack: this.stackFrames,
       completedAt: new Date().toISOString(),
       output: null,
-      error: String(error),
+      error: executionError,
     } as Partial<EsWorkflowStepExecution>;
 
     if (startedStepExecution && startedStepExecution.startedAt) {
@@ -183,11 +185,11 @@ export class StepExecutionRuntime {
         new Date(startedStepExecution.startedAt).getTime();
     }
     this.workflowExecutionState.updateWorkflowExecution({
-      error: String(error),
+      error: executionError,
     });
     this.workflowExecutionState.upsertStep(stepExecutionUpdate);
     // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-    this.logStepFail(stepExecutionUpdate.id!, error);
+    this.logStepFail(stepExecutionUpdate.id!, executionError);
   }
 
   public async setWaitStep(): Promise<void> {
@@ -235,21 +237,15 @@ export class StepExecutionRuntime {
       },
       ...(step.error && {
         error: {
-          message:
-            typeof step.error === 'string'
-              ? step.error
-              : (step.error as Error)?.message || 'Unknown error',
-          type:
-            typeof step.error === 'string'
-              ? 'WorkflowStepError'
-              : (step.error as Error)?.name || 'Error',
-          stack_trace: typeof step.error === 'string' ? undefined : (step.error as Error)?.stack,
+          message: step.error.message,
+          type: step.error.type,
+          // stack_trace: typeof step.error === 'string' ? undefined : (step.error as Error)?.stack,
         },
       }),
     });
   }
 
-  private logStepFail(stepExecutionId: string, error: Error | string): void {
+  private logStepFail(stepExecutionId: string, error: ExecutionError): void {
     const stepName = this.node.stepId;
     const stepType = this.node.stepType || 'unknown';
     const _error = typeof error === 'string' ? Error(error) : error;
@@ -258,16 +254,16 @@ export class StepExecutionRuntime {
     const errorMsg = typeof error === 'string' ? error : error?.message || 'Unknown error';
     const message = `Step '${stepName}' failed: ${errorMsg}`;
 
-    this.stepLogger?.logError(message, _error, {
-      workflow: { step_id: this.node.stepId, step_execution_id: stepExecutionId },
-      event: { action: 'step-fail', category: ['workflow', 'step'] },
-      tags: ['workflow', 'step', 'fail'],
-      labels: {
-        step_type: stepType,
-        connector_type: stepType,
-        step_name: stepName,
-        step_id: this.node.stepId,
-      },
-    });
+    // this.stepLogger?.logError(message, _error, {
+    //   workflow: { step_id: this.node.stepId, step_execution_id: stepExecutionId },
+    //   event: { action: 'step-fail', category: ['workflow', 'step'] },
+    //   tags: ['workflow', 'step', 'fail'],
+    //   labels: {
+    //     step_type: stepType,
+    //     connector_type: stepType,
+    //     step_name: stepName,
+    //     step_id: this.node.stepId,
+    //   },
+    // });
   }
 }

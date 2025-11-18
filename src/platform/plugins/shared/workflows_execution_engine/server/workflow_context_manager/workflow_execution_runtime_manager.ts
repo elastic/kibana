@@ -20,6 +20,8 @@ import type { ContextDependencies } from './types';
 import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { IWorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
+import { ExecutionError } from '@kbn/workflows';
+import { mapError } from '../utils';
 
 interface WorkflowExecutionRuntimeManagerInit {
   workflowExecutionState: WorkflowExecutionState;
@@ -201,9 +203,9 @@ export class WorkflowExecutionRuntimeManager {
     });
   }
 
-  public setWorkflowError(error: Error | string | undefined): void {
+  public setWorkflowError(error: Error | ExecutionError | string | undefined): void {
     this.workflowExecutionState.updateWorkflowExecution({
-      error: error ? String(error) : undefined,
+      error: error ? mapError(error) : undefined,
     });
   }
 

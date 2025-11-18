@@ -10,9 +10,9 @@
 // TODO: Remove eslint exceptions comments and fix the issues
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
+import axios, { AxiosError, type AxiosRequestConfig, type AxiosResponse } from 'axios';
 import https from 'https';
-import type { FetcherConfigSchema } from '@kbn/workflows';
+import type { ExecutionError, FetcherConfigSchema } from '@kbn/workflows';
 import type { HttpGraphNode } from '@kbn/workflows/graph';
 import type { z } from '@kbn/zod';
 import type { UrlValidator } from '../../lib/url_validator';
@@ -174,42 +174,79 @@ export class HttpStepImpl extends BaseAtomicNodeImplementation<HttpStep> {
   }
 
   protected async handleFailure(input: any, error: any): Promise<RunStepResult> {
-    let errorMessage: string;
-    let isAborted = false;
+    let executionError: ExecutionError;
 
     if (axios.isAxiosError(error)) {
-      if (error.code === 'ERR_CANCELED') {
-        errorMessage = 'HTTP request was cancelled';
-        isAborted = true;
-      } else if (error.response) {
-        errorMessage = `${error.response.status} ${error.response.statusText}`;
-      } else {
-        errorMessage = `${error.message ? error.message : error.name}`;
-      }
-    } else if (error instanceof Error) {
-      errorMessage = error.message;
-      // Check if this is an AbortError
-      if (error.name === 'AbortError') {
-        isAborted = true;
-      }
+      executionError = this.mapAxiosError(error);
+    }
+    // else if (error instanceof AggregateError) {
+    //   executionError = {
+    //     type: 'AggregateError',
+    //     message: error.message,
+    //     details: error.errors.map((err) =>
+    //       err instanceof Error
+    //         ? { type: err.name, message: err.message }
+    //         : { type: 'UnknownError', message: String(err) }
+    //     ),
+    //   };
+    // }
+    else if (error instanceof Error) {
+      executionError = {
+        type: error.name,
+        message: error.message,
+      };
     } else {
-      errorMessage = String(error);
+      executionError = {
+        type: 'UnknownError',
+        message: String(error),
+      };
     }
 
-    this.workflowLogger.logError(
-      `HTTP request failed: ${errorMessage}`,
-      error instanceof Error ? error : new Error(errorMessage),
-      {
-        workflow: { step_id: this.step.name },
-        event: { action: 'http_request', outcome: 'failure' },
-        tags: isAborted ? ['http', 'cancelled'] : ['http', 'error'],
-      }
-    );
+    // this.workflowLogger.logError(
+    //   `HTTP request failed: ${executionError.message}`,
+    //   error instanceof Error ? error : new Error(errorMessage),
+    //   {
+    //     workflow: { step_id: this.step.name },
+    //     event: { action: 'http_request', outcome: 'failure' },
+    //     tags: ['http', 'error', executionError.type],
+    //   }
+    // );
 
     return {
       input,
       output: undefined,
-      error: errorMessage,
+      error: executionError,
+    };
+  }
+
+  private mapAxiosError(error: AxiosError): ExecutionError {
+    if (error.code === 'ECONNREFUSED') {
+      const url = new URL(this.step.with.url);
+      return {
+        type: 'ConnectionRefused',
+        message: `Connection refused to ${url.origin}`,
+      };
+    }
+
+    if (error.response) {
+      return {
+        type: 'HttpRequestError',
+        message: error.message,
+        details: {
+          headers: error.response.headers,
+          status: error.response.status,
+          statusText: error.response.statusText,
+          data: error.response.data,
+        },
+      };
+    }
+
+    return {
+      type: error.code || 'UnknownHttpRequestError',
+      message: error.message,
+      details: error.config && {
+        config: error.config,
+      },
     };
   }
 }

@@ -589,3 +589,19 @@ export const DynamicStepContextSchema = DynamicWorkflowContextSchema.extend({
   steps: z.object({}),
 });
 export type DynamicStepContext = z.infer<typeof DynamicStepContextSchema>;
+
+export const ExecutionErrorSchema = z.object({
+  type: z.string(),
+  message: z.string(),
+  details: z.any().optional(),
+});
+export type ExecutionError = z.infer<typeof ExecutionErrorSchema>;
+
+export const HttpStepErrorSchema = ExecutionErrorSchema.extend({
+  details: z.object({
+    statusCode: z.number().optional(),
+    statusText: z.string().optional(),
+    responseBody: z.any().optional(),
+  }),
+});
+export type HttpStepError = z.infer<typeof HttpStepErrorSchema>;

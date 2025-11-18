@@ -12,14 +12,16 @@
 
 // Import specific step types as needed from schema
 // import { evaluate } from '@marcbachmann/cel-js'
+import type { ExecutionError } from '@kbn/workflows';
 import type { ConnectorExecutor } from '../connector_executor';
+import { mapError } from '../utils';
 import type { StepExecutionRuntime } from '../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 
 export interface RunStepResult {
   input: any;
   output: any;
-  error: any;
+  error: ExecutionError | undefined;
 }
 
 // TODO: To remove it and replace with AtomicGraphNode
@@ -47,9 +49,7 @@ export interface MonitorableNode {
   monitor(monitoredContext: StepExecutionRuntime): Promise<void>;
 }
 
-export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
-  implements NodeImplementation
-{
+export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep> implements NodeImplementation {
   protected step: TStep;
   protected stepExecutionRuntime: StepExecutionRuntime;
   protected connectorExecutor: ConnectorExecutor;
@@ -96,7 +96,7 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
       }
     } catch (error) {
       const result = await this.handleFailure(input, error);
-      await this.stepExecutionRuntime.failStep(result.error);
+      await this.stepExecutionRuntime.failStep(result.error || error);
     }
 
     this.workflowExecutionRuntime.navigateToNextNode();
@@ -107,20 +107,10 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
 
   // Helper for handling on-failure, retries, etc.
   protected async handleFailure(input: any, error: any): Promise<RunStepResult> {
-    // Implement retry logic based on step['on-failure']
-    // Build comprehensive error message including cause chain (messages only)
-    const getErrorMessage = (err: any): string => {
-      if (!(err instanceof Error)) return String(err);
-      let msg = err.message;
-      if (err.cause) {
-        msg += `\nCaused by: ${getErrorMessage(err.cause)}`;
-      }
-      return msg;
-    };
     return {
       input,
       output: undefined,
-      error: getErrorMessage(error),
+      error: mapError(error),
     };
   }
 }
