@@ -79,11 +79,21 @@ export interface WaitForParams {
   state?: 'visible' | 'hidden' | 'attached' | 'detached';
 }
 
+/**
+ * Login parameters for Scout authentication
+ *
+ * @property role - Role name to authenticate with. Can be:
+ *   - 'admin': Full Kibana and Elasticsearch access
+ *   - 'viewer': Read-only permissions
+ *   - 'privileged': Non-admin role (editor for stateful, developer for ES serverless, editor for Security/Oblt serverless)
+ *   - Any other supported role name from roles.yml
+ * @property customRole - Optional custom role definition (KibanaRole or ElasticsearchRoleDescriptor)
+ *   When provided, a unique custom role will be created with the specified privileges
+ */
 export interface LoginParams {
   role: 'admin' | 'viewer' | 'privileged' | string;
   customRole?: {
-    name: string;
-    kibana: Array<{
+    kibana?: Array<{
       spaces: string[];
       base?: string[];
       feature?: Record<string, string[]>;
@@ -95,6 +105,12 @@ export interface LoginParams {
         privileges: string[];
       }>;
     };
+    // For Elasticsearch role descriptors
+    applications?: Array<{
+      application: string;
+      privileges: string[];
+      resources: string[];
+    }>;
   };
 }
 
@@ -104,4 +120,26 @@ export interface EuiComponentParams {
   selector?: string;
   action: string;
   params?: any;
+}
+
+// Test Analysis Tool Parameters
+export interface AnalyzeTestSuitabilityParams {
+  testDescription: string;
+  testCode?: string;
+  context?: 'cypress_migration' | 'new_test_generation' | 'general';
+}
+
+export interface AnalyzeTestSuiteParams {
+  cypressTestDirectory: string;
+  filePattern?: string;
+}
+
+// Migration Tool Parameters
+export interface AssessMigrationRiskParams {
+  cypressTestCode: string;
+}
+
+export interface SuggestTestConversionParams {
+  cypressTestCode: string;
+  testDescription: string;
 }

@@ -95,6 +95,10 @@ describe('ScoutSession', () => {
       getByText: jest.fn().mockReturnValue({
         waitFor: jest.fn(),
       }),
+      // Event listener methods (from Playwright Page API)
+      on: jest.fn(),
+      off: jest.fn(),
+      once: jest.fn(),
       // ScoutPage extensions
       testSubj: {
         click: jest.fn(),
@@ -417,7 +421,7 @@ describe('ScoutSession', () => {
 
       expect(esClient.security.deleteRole).toHaveBeenCalledWith(
         expect.objectContaining({
-          name: 'custom_role_mcp',
+          name: expect.stringMatching(/^custom_role_mcp_\d+_\w+$/),
         })
       );
     });

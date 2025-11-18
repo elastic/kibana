@@ -53,6 +53,8 @@ describe('Auth Tools', () => {
         goto: jest.fn().mockResolvedValue(null),
       }),
       getScoutConfig: jest.fn().mockReturnValue(null),
+      validateRole: jest.fn().mockReturnValue({ valid: true }),
+      getSupportedRoles: jest.fn().mockReturnValue(['admin', 'viewer', 'editor']),
     } as any;
   });
 
@@ -67,7 +69,7 @@ describe('Auth Tools', () => {
       expect(mockContext.clearCookies).toHaveBeenCalled();
       expect(mockContext.addCookies).toHaveBeenCalled();
       expect(mockSession.setAuthenticated).toHaveBeenCalledWith(true, 'admin');
-      expect(result.data.message).toContain('Logged in');
+      expect(result.data.message).toContain('logged in');
     });
 
     it('should login with viewer role', async () => {

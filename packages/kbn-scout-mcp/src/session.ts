@@ -351,8 +351,29 @@ export class ScoutSession {
   private esClient: EsClient | null = null;
   private kbnClient: KbnClient | null = null;
   private kbnUrl: any = null;
-  private customRoleName: string = 'custom_role_mcp';
+
+  // Custom role management - generate unique names to avoid conflicts
+  private customRoleName: string = '';
   private customRoleHash: string = '';
+  private activeCustomRoles: Set<string> = new Set();
+
+  // Session caching - track which roles we've authenticated with
+  private roleSessionCache: Map<string, { timestamp: number; cookieHash: string }> = new Map();
+  private supportedRoles: string[] = [];
+
+  // Tracking for test generation and debugging
+  private consoleLogs: Array<{ type: string; text: string; timestamp: number }> = [];
+  private networkActivity: Array<{
+    url: string;
+    method: string;
+    status: number;
+    timestamp: number;
+  }> = [];
+  private actionHistory: Array<{
+    type: string;
+    timestamp: number;
+    [key: string]: any;
+  }> = [];
 
   // Mutex for thread-safe operations
   private readonly mutex = new Mutex();
@@ -439,7 +460,11 @@ export class ScoutSession {
     const supportedRoleDescriptors = readRolesDescriptorsFromResource(
       rolesDefinitionPath
     ) as Record<string, unknown>;
-    const supportedRoles = [...Object.keys(supportedRoleDescriptors)].concat(customRoleName || []);
+
+    // Store supported roles for validation
+    this.supportedRoles = Object.keys(supportedRoleDescriptors);
+
+    const supportedRolesWithCustom = [...this.supportedRoles].concat(customRoleName || []);
 
     const kibanaUrl = new URL(config.hosts.kibana);
     kibanaUrl.username = config.auth.username;
@@ -464,7 +489,7 @@ export class ScoutSession {
       isCloud: config.isCloud,
       cloudHostName: config.cloudHostName,
       supportedRoles: {
-        roles: supportedRoles,
+        roles: supportedRolesWithCustom,
         sourcePath: rolesDefinitionPath,
       },
       cloudUsersFilePath: config.cloudUsersFilePath,
@@ -538,10 +563,19 @@ export class ScoutSession {
 
     const newRoleHash = JSON.stringify(role);
 
-    if (this.customRoleHash === newRoleHash) {
-      this.log.info('Custom role is already set');
+    // If the role definition is the same, reuse the existing custom role
+    if (this.customRoleHash === newRoleHash && this.customRoleName) {
+      this.log.debug('Custom role with same definition already exists, reusing it');
       return;
     }
+
+    // Cleanup previous custom role if switching to a new one
+    if (this.customRoleName && this.customRoleHash !== newRoleHash) {
+      await this.cleanupCustomRole(this.customRoleName);
+    }
+
+    // Generate a unique custom role name
+    this.customRoleName = this.generateUniqueCustomRoleName();
 
     const isElasticsearchRole = (r: any): r is ElasticsearchRoleDescriptor => {
       return 'applications' in r;
@@ -553,7 +587,11 @@ export class ScoutSession {
       await createCustomRole(await this.getKbnClient(), this.customRoleName, role);
     }
 
+    // Track the active custom role
+    this.activeCustomRoles.add(this.customRoleName);
     this.customRoleHash = newRoleHash;
+
+    this.log.debug(`Created custom role: ${this.customRoleName}`);
   }
 
   /**
@@ -561,6 +599,67 @@ export class ScoutSession {
    */
   getCustomRoleName(): string {
     return this.customRoleName;
+  }
+
+  /**
+   * Generate a unique custom role name to avoid conflicts
+   */
+  private generateUniqueCustomRoleName(): string {
+    const timestamp = Date.now();
+    const random = Math.random().toString(36).substring(2, 8);
+    return `custom_role_mcp_${timestamp}_${random}`;
+  }
+
+  /**
+   * Validate that a role exists in the supported roles list
+   */
+  validateRole(role: string): { valid: boolean; error?: string } {
+    if (!this.supportedRoles || this.supportedRoles.length === 0) {
+      return {
+        valid: false,
+        error: 'Supported roles not loaded. Ensure Scout services are initialized.',
+      };
+    }
+
+    // Custom roles are always valid if they match our pattern
+    if (role.startsWith('custom_role_mcp_')) {
+      return { valid: true };
+    }
+
+    if (!this.supportedRoles.includes(role)) {
+      return {
+        valid: false,
+        error: `Role '${role}' is not supported. Available roles: ${this.supportedRoles.join(
+          ', '
+        )}`,
+      };
+    }
+
+    return { valid: true };
+  }
+
+  /**
+   * Get list of supported roles
+   */
+  getSupportedRoles(): string[] {
+    return [...this.supportedRoles];
+  }
+
+  /**
+   * Cleanup a specific custom role
+   */
+  async cleanupCustomRole(roleName: string): Promise<void> {
+    if (!this.esClient) {
+      return;
+    }
+
+    try {
+      this.log.debug(`Deleting custom role: ${roleName}`);
+      await this.esClient.security.deleteRole({ name: roleName });
+      this.activeCustomRoles.delete(roleName);
+    } catch (error) {
+      this.log.debug(`Failed to delete custom role ${roleName}: ${error}`);
+    }
   }
 
   /**
@@ -601,6 +700,9 @@ export class ScoutSession {
       // Initialize Scout services for authentication
       await this.initializeScoutServices();
 
+      // Setup console and network listeners
+      this.setupPageListeners(page);
+
       // Extend page with Scout functionality
       const kbnUrl = await this.getKbnUrl();
       this.currentPage = extendPageWithScoutHelpers(page, kbnUrl);
@@ -622,6 +724,8 @@ export class ScoutSession {
           // If context exists but page doesn't, create and extend it
           this.log.debug('Creating new page...');
           const page = await this.context.newPage();
+          // Setup console and network listeners
+          this.setupPageListeners(page);
           const kbnUrl = await this.getKbnUrl();
           this.currentPage = extendPageWithScoutHelpers(page, kbnUrl);
         }
@@ -780,14 +884,13 @@ export class ScoutSession {
 
     this.clearEuiComponents();
 
-    // Clean up custom role if it was created
-    if (this.customRoleHash && this.esClient) {
-      try {
-        this.log.debug(`Deleting custom role with name ${this.customRoleName}`);
-        await this.esClient.security.deleteRole({ name: this.customRoleName });
-      } catch (error) {
-        this.log.debug(`Failed to delete custom role: ${error}`);
-      }
+    // Clean up all active custom roles
+    if (this.activeCustomRoles.size > 0 && this.esClient) {
+      this.log.debug(`Cleaning up ${this.activeCustomRoles.size} custom role(s)`);
+      const cleanupPromises = Array.from(this.activeCustomRoles).map((roleName) =>
+        this.cleanupCustomRole(roleName)
+      );
+      await Promise.all(cleanupPromises);
     }
 
     if (this.currentPage) {
@@ -812,8 +915,90 @@ export class ScoutSession {
     this.kbnClient = null;
     this.kbnUrl = null;
     this.scoutConfig = null;
+    this.customRoleName = '';
     this.customRoleHash = '';
+    this.activeCustomRoles.clear();
+    this.roleSessionCache.clear();
+    this.supportedRoles = [];
+
+    // Clear tracking data
+    this.consoleLogs = [];
+    this.networkActivity = [];
+    this.actionHistory = [];
 
     this.log.success('Scout session closed');
+  }
+
+  /**
+   * Get console logs captured during the session
+   */
+  getConsoleLogs(): Array<{ type: string; text: string; timestamp: number }> {
+    return [...this.consoleLogs];
+  }
+
+  /**
+   * Get network activity captured during the session
+   */
+  getNetworkActivity(): Array<{
+    url: string;
+    method: string;
+    status: number;
+    timestamp: number;
+  }> {
+    return [...this.networkActivity];
+  }
+
+  /**
+   * Get action history captured during the session
+   */
+  getActionHistory(): Array<{
+    type: string;
+    timestamp: number;
+    [key: string]: any;
+  }> {
+    return [...this.actionHistory];
+  }
+
+  /**
+   * Add an action to the history
+   */
+  private addAction(action: { type: string; [key: string]: any }): void {
+    this.actionHistory.push({
+      ...action,
+      timestamp: Date.now(),
+    });
+  }
+
+  /**
+   * Setup console and network listeners on a page
+   */
+  private setupPageListeners(page: Page): void {
+    // Console log listener
+    page.on('console', (msg) => {
+      this.consoleLogs.push({
+        type: msg.type(),
+        text: msg.text(),
+        timestamp: Date.now(),
+      });
+    });
+
+    // Network request listener
+    page.on('request', (request) => {
+      this.addAction({
+        type: 'network_request',
+        url: request.url(),
+        method: request.method(),
+      });
+    });
+
+    // Network response listener
+    page.on('response', (response) => {
+      this.networkActivity.push({
+        url: response.url(),
+        method: response.request().method(),
+        status: response.status(),
+        timestamp: Date.now(),
+      });
+    });
   }
 }

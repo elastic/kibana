@@ -26,13 +26,17 @@ const PROJECT_DEFAULT_ROLES = new Map<string, string>([
  * Login with a role using Scout's SAML authentication
  *
  * This follows the same pattern as Scout's browserAuth fixture:
- * 1. Uses SAML session manager to get a session cookie for the role
- * 2. Sets the cookie in the browser context
- * 3. The cookie authenticates subsequent requests
+ * 1. Validates the role exists (unless it's a custom role)
+ * 2. Uses SAML session manager to get a session cookie for the role
+ * 3. Sets the cookie in the browser context
+ * 4. The cookie authenticates subsequent requests
+ *
+ * Session caching: SamlSessionManager internally caches sessions by role,
+ * so repeated logins with the same role will reuse the cached session.
  */
 export async function scoutLogin(session: ScoutSession, params: LoginParams): Promise<ToolResult> {
   if (!session.isInitialized()) {
-    return error('Session not initialized');
+    return error('Session not initialized. Please initialize the session first.');
   }
 
   return executeSafely(async () => {
@@ -62,6 +66,7 @@ export async function scoutLogin(session: ScoutSession, params: LoginParams): Pr
 
     if (params.customRole) {
       // Handle custom role - set it first, then use the custom role name
+      // setCustomRole will cleanup any previous custom role
       await session.setCustomRole(params.customRole as KibanaRole);
       roleToUse = session.getCustomRoleName();
     } else if (params.role === 'privileged') {
@@ -74,9 +79,22 @@ export async function scoutLogin(session: ScoutSession, params: LoginParams): Pr
     } else {
       // Use the role directly (admin, viewer, etc.)
       roleToUse = params.role;
+
+      // Validate role exists (unless it's a custom role)
+      if (!roleToUse.startsWith('custom_role_mcp_')) {
+        const validation = session.validateRole(roleToUse);
+        if (!validation.valid) {
+          throw new Error(
+            validation.error ||
+              `Role '${roleToUse}' is not valid. Please check available roles with scout_get_auth_status.`
+          );
+        }
+      }
     }
 
     // Get cookie and set it (matches browserAuth's loginAs pattern)
+    // Note: SamlSessionManager caches sessions internally, so this will reuse
+    // existing sessions for the same role
     let cookie: string;
     try {
       cookie = await samlSessionManager.getInteractiveUserSessionCookieWithRoleScope(roleToUse);
@@ -95,7 +113,13 @@ export async function scoutLogin(session: ScoutSession, params: LoginParams): Pr
       } else {
         errorDetails = String(samlError) || 'Unknown SAML error';
       }
-      throw new Error(`SAML authentication failed for role '${roleToUse}': ${errorDetails}`);
+
+      // Add helpful context based on the error
+      const supportedRoles = session.getSupportedRoles();
+      const helpText = `\n\nAvailable roles: ${supportedRoles.join(', ')}`;
+      throw new Error(
+        `SAML authentication failed for role '${roleToUse}': ${errorDetails}${helpText}`
+      );
     }
     await setSessionCookie(cookie);
 
@@ -103,7 +127,8 @@ export async function scoutLogin(session: ScoutSession, params: LoginParams): Pr
 
     return {
       role: params.role,
-      message: `Logged in as ${roleToUse}`,
+      actualRole: roleToUse,
+      message: `Successfully logged in as '${roleToUse}'`,
     };
   }, 'Login failed');
 }
@@ -146,8 +171,36 @@ export async function scoutGetAuthStatus(session: ScoutSession): Promise<ToolRes
     return error('Session not initialized');
   }
 
+  const scoutConfig = session.getScoutConfig();
+
   return success({
     authenticated: session.isUserAuthenticated(),
     role: session.getCurrentRole(),
+    supportedRoles: session.getSupportedRoles(),
+    deploymentType: scoutConfig?.serverless ? 'serverless' : 'stateful',
+    projectType: scoutConfig?.projectType || null,
   });
+}
+
+/**
+ * Login as admin - convenience method
+ */
+export async function scoutLoginAsAdmin(session: ScoutSession): Promise<ToolResult> {
+  return scoutLogin(session, { role: 'admin' });
+}
+
+/**
+ * Login as viewer - convenience method
+ */
+export async function scoutLoginAsViewer(session: ScoutSession): Promise<ToolResult> {
+  return scoutLogin(session, { role: 'viewer' });
+}
+
+/**
+ * Login as privileged user - convenience method
+ * Uses 'editor' for stateful, 'developer' for ES serverless,
+ * or 'editor' for Security/Observability serverless
+ */
+export async function scoutLoginAsPrivileged(session: ScoutSession): Promise<ToolResult> {
+  return scoutLogin(session, { role: 'privileged' });
 }

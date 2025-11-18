@@ -21,10 +21,61 @@ export {
 } from './browser';
 
 // Authentication tools
-export { scoutLogin, scoutLogout, scoutGetAuthStatus } from './auth';
+export {
+  scoutLogin,
+  scoutLogout,
+  scoutGetAuthStatus,
+  scoutLoginAsAdmin,
+  scoutLoginAsViewer,
+  scoutLoginAsPrivileged,
+} from './auth';
 
 // EUI component tools
 export { scoutEuiComponent, scoutListEuiComponents } from './eui';
 
 // API service tools
 export { scoutListApiServices } from './api';
+
+// Test generation tools
+export {
+  scoutGenerateTestFile,
+  scoutSuggestAssertions,
+  scoutFindSelectors,
+} from './test_generation';
+
+// Migration tools
+export {
+  scoutAnalyzeCypressPatterns,
+  scoutConvertCypressCommand,
+  scoutGenerateMigrationPlan,
+  scoutAssessMigrationRisk,
+  scoutSuggestTestConversion,
+  scoutCheckTestCoverage,
+  scoutGenerateUnitOrIntegrationTest,
+} from './migration';
+
+// Code generation tools
+export { scoutGeneratePageObjectCode, scoutGenerateApiServiceCode } from './code_generation';
+
+// Debugging tools
+export {
+  scoutGetConsoleLogs,
+  scoutGetNetworkActivity,
+  scoutCompareSnapshots,
+  scoutSuggestFix,
+  scoutAnalyzeWaitFailure,
+} from './debugging';
+
+// Test analyzer tools
+export { scoutAnalyzeTestSuitability, scoutAnalyzeTestSuite } from './test_analyzer';
+
+// Test execution tools
+export { scoutRunTest, scoutWatchTest, scoutGetTestResults } from './test_execution';
+
+// File operation tools
+export {
+  scoutWriteFile,
+  scoutReadFile,
+  scoutSuggestFileLocation,
+  scoutFindExistingFiles,
+} from './file_operations';
