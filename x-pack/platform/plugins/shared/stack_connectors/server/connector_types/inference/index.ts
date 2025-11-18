@@ -10,6 +10,7 @@ import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/t
 import {
   GenerativeAIForSearchPlaygroundConnectorFeatureId,
   GenerativeAIForSecurityConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common';
@@ -62,6 +63,7 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
     GenerativeAIForSecurityConnectorFeatureId,
     GenerativeAIForSearchPlaygroundConnectorFeatureId,
     GenerativeAIForObservabilityConnectorFeatureId,
+    WorkflowsConnectorFeatureId,
   ],
   minimumLicenseRequired: 'enterprise' as const,
   preSaveHook: async ({ config, secrets, logger, services, isUpdate }) => {
