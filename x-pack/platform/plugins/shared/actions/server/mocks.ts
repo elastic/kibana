@@ -38,6 +38,7 @@ const createSetupMock = () => {
         authType: z.literal('none'),
       })
     ),
+    getAxiosInstanceWithAuth: jest.fn(),
     isPreconfiguredConnector: jest.fn(),
     getSubActionConnectorClass: jest.fn(),
     getCaseConnectorClass: jest.fn(),
@@ -62,7 +63,6 @@ const createStartMock = () => {
     getActionsAuthorizationWithRequest: jest
       .fn()
       .mockReturnValue(actionsAuthorizationMock.create()),
-    getAxiosInstanceWithAuth: jest.fn(),
     inMemoryConnectors: [],
     renderActionParameterTemplates: jest.fn(),
     isSystemActionConnector: jest.fn(),

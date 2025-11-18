@@ -126,6 +126,8 @@ export interface PluginSetupContract {
 
   getSchemaForAuthType: AuthTypeRegistry['getSchemaForAuthType'];
 
+  getAxiosInstanceWithAuth(validatedSecrets: Record<string, unknown>): Promise<AxiosInstance>;
+
   isPreconfiguredConnector(connectorId: string): boolean;
 
   getSubActionConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
@@ -162,8 +164,6 @@ export interface PluginStartContract {
   inMemoryConnectors: InMemoryConnector[];
 
   getUnsecuredActionsClient(): IUnsecuredActionsClient;
-
-  getAxiosInstanceWithAuth(validatedSecrets: Record<string, unknown>): Promise<AxiosInstance>;
 
   renderActionParameterTemplates<Params extends ActionTypeParams = ActionTypeParams>(
     actionTypeId: string,
@@ -372,6 +372,15 @@ export class ActionsPlugin
       actionsConfigUtils,
     });
 
+    const getAxiosInstanceFn = getAxiosInstanceWithAuth({
+      authTypeRegistry: this.authTypeRegistry!,
+      configurationUtilities: actionsConfigUtils,
+      logger: this.logger,
+    });
+    const getAxiosInstanceWithAuthHelper = async (validatedSecrets: Record<string, unknown>) => {
+      return await getAxiosInstanceFn(validatedSecrets);
+    };
+
     // Routes
     defineRoutes({
       router: core.http.createRouter<ActionsRequestHandlerContext>(),
@@ -401,6 +410,7 @@ export class ActionsPlugin
         subActionFramework.registerConnector(connector);
       },
       getSchemaForAuthType: (...args) => this.authTypeRegistry!.getSchemaForAuthType(...args),
+      getAxiosInstanceWithAuth: getAxiosInstanceWithAuthHelper,
       isPreconfiguredConnector: (connectorId: string): boolean => {
         return !!this.inMemoryConnectors.find(
           (inMemoryConnector) =>
@@ -540,15 +550,6 @@ export class ActionsPlugin
     const secureGetActionsClientWithRequest = (request: KibanaRequest) =>
       getActionsClientWithRequest(request);
 
-    const getAxiosInstanceFn = getAxiosInstanceWithAuth({
-      authTypeRegistry: this.authTypeRegistry!,
-      configurationUtilities: actionsConfigUtils,
-      logger,
-    });
-    const getAxiosInstanceWithAuthHelper = async (validatedSecrets: Record<string, unknown>) => {
-      return await getAxiosInstanceFn(validatedSecrets);
-    };
-
     this.eventLogService!.registerSavedObjectProvider('action', (request) => {
       const client = secureGetActionsClientWithRequest(request);
       return (objects?: SavedObjectsBulkGetObject[]) =>
@@ -645,7 +646,6 @@ export class ActionsPlugin
       },
       getActionsClientWithRequest: secureGetActionsClientWithRequest,
       getUnsecuredActionsClient,
-      getAxiosInstanceWithAuth: getAxiosInstanceWithAuthHelper,
       inMemoryConnectors: this.inMemoryConnectors,
       renderActionParameterTemplates: (...args) =>
         renderActionParameterTemplates(this.logger, actionTypeRegistry, ...args),
