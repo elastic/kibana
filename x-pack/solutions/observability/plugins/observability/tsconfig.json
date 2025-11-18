@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -138,6 +138,7 @@
     "@kbn/deeplinks-management",
     "@kbn/observability-nav-icons",
     "@kbn/react-query",
+    "@kbn/content-management-utils",
     "@kbn/maintenance-windows-plugin"
   ],
   "exclude": ["target/**/*"]

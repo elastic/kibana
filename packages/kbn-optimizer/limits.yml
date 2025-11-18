@@ -21,8 +21,8 @@ pageLoadAssetSize:
   contentConnectors: 33014
   contentManagement: 8350
   controls: 12234
-  core: 569528
-  cps: 1580
+  core: 569774
+  cps: 5918
   crossClusterReplication: 12662
   customIntegrations: 11715
   dashboard: 19000
@@ -50,7 +50,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 6524
   embeddableEnhanced: 8448
   enterpriseSearch: 38000
-  esql: 16500
+  esql: 20000
   esqlDataGrid: 10209
   esUiShared: 101220
   eventAnnotation: 22361
@@ -93,7 +93,7 @@ pageLoadAssetSize:
   kibanaReact: 22503
   kibanaUsageCollection: 1736
   kibanaUtils: 54848
-  lens: 64791
+  lens: 71718
   licenseManagement: 8265
   licensing: 10073
   links: 8620
@@ -167,9 +167,9 @@ pageLoadAssetSize:
   snapshotRestore: 22068
   spaces: 30665
   stackAlerts: 31499
-  stackConnectors: 83751
-  streams: 9000
-  streamsApp: 17000
+  stackConnectors: 85053
+  streams: 10000
+  streamsApp: 19225
   synthetics: 31571
   telemetry: 25755
   telemetryManagementSection: 5522

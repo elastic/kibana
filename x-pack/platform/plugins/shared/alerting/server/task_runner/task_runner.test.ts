@@ -369,8 +369,31 @@ describe('Task Runner', () => {
       ongoing: { count: 0, data: [] },
       recovered: { count: 0, data: [] },
     });
+    alertsClient.getAlertsToUpdateWithMaintenanceWindows.mockReturnValue([
+      mockAAD['kibana.alert.uuid'],
+    ]);
+    alertsClient.getAlertsToUpdateWithLastScheduledActions.mockReturnValue({
+      [mockAAD['kibana.alert.uuid']]: {
+        group: 'default',
+        date: new Date().toISOString(),
+      },
+    });
+    alertsClient.getRawAlertInstancesForState.mockReturnValue({
+      rawActiveAlerts: {
+        [mockAAD['kibana.alert.uuid']]: {
+          meta: {
+            uuid: mockAAD['kibana.alert.uuid'],
+            lastScheduledActions: {
+              group: 'default',
+              date: new Date().toISOString(),
+            },
+          },
+          state: {},
+        },
+      },
+      rawRecoveredAlerts: {},
+    });
 
-    alertsClient.getRawAlertInstancesForState.mockResolvedValueOnce({ state: {}, meta: {} });
     alertsService.createAlertsClient.mockImplementation(() => alertsClient);
 
     const taskRunner = new TaskRunner({
@@ -405,6 +428,8 @@ describe('Task Runner', () => {
     await taskRunner.run();
 
     expect(alertsClient.updatePersistedAlerts).toHaveBeenCalledTimes(1);
+    expect(alertsClient.getAlertsToUpdateWithMaintenanceWindows).toHaveBeenCalledTimes(1);
+    expect(alertsClient.getAlertsToUpdateWithLastScheduledActions).toHaveBeenCalledTimes(1);
   });
 
   test('throws error when schedule.interval is not provided', async () => {
