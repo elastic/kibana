@@ -79,14 +79,13 @@ describe('TaskManagerService Integration Tests', () => {
       await automaticImportService.initialize(mockSecurity, coreStart.savedObjects);
       savedObjectService = (automaticImportService as any).savedObjectService;
 
-      // Initialize TaskManagerService to test the actual run task functionality
-      // TODO: Replace the run task
+      // Initialize TaskManagerService
       taskManagerService = new TaskManagerService(kbnRoot.logger.get(), taskManagerSetup, {
-        mockAIProcess: async ({ integrationId, dataStreamId, samples }) => {
+        invokeDeepAgent: async (integrationId: string, dataStreamId: string) => {
           // Simulate AI workflow processing (long-running task)
           await new Promise((resolve) => setTimeout(resolve, 8000)); // 8 seconds processing
 
-          // Update datastream status to completed (like real AI workflow would)
+          // Update datastream status to completed
           const dataStream = await savedObjectService.getDataStream(dataStreamId);
           const currentVersion = dataStream.attributes.metadata?.version || '0.0.0';
           await savedObjectService.updateDataStream(
@@ -99,6 +98,11 @@ describe('TaskManagerService Integration Tests', () => {
             },
             currentVersion
           );
+
+          // Return mock result
+          return {
+            messages: [{ role: 'assistant', content: 'Test pipeline generated' }],
+          };
         },
       });
       taskManagerService.initialize(taskManagerStart);

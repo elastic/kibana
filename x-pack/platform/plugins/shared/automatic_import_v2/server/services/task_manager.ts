@@ -20,27 +20,17 @@ const TASK_TYPE = 'autoImport-task';
 export class TaskManagerService {
   private logger: Logger;
   private taskManager: TaskManagerStartContract | null = null;
-  // Mock AI process for testing
-  // This will be replaced with the real AIWorkflowService
-  private mockAIProcess?: (params: {
-    integrationId: string;
-    dataStreamId: string;
-    samples?: any[];
-  }) => Promise<void>;
+  private invokeDeepAgent?: (integrationId: string, dataStreamId: string) => Promise<any>;
 
   constructor(
     logger: Logger,
     taskManagerSetup: TaskManagerSetupContract,
     options?: {
-      mockAIProcess?: (params: {
-        integrationId: string;
-        dataStreamId: string;
-        samples?: any[];
-      }) => Promise<void>;
+      invokeDeepAgent?: (integrationId: string, dataStreamId: string) => Promise<any>;
     }
   ) {
     this.logger = logger.get('taskManagerService');
-    this.mockAIProcess = options?.mockAIProcess;
+    this.invokeDeepAgent = options?.invokeDeepAgent;
 
     // Register task definitions during setup phase
     taskManagerSetup.registerTaskDefinitions({
@@ -77,6 +67,7 @@ export class TaskManagerService {
     }
 
     // Generate a task ID that is always under 50 characters
+    // TODO: Should we increase the length of id to more characters?
     // Pattern: ai-task-{integrationId}-{dataStreamId}
     const taskId = `ai-task-${params.integrationId}-${params.dataStreamId}`;
 
@@ -118,22 +109,12 @@ export class TaskManagerService {
     this.logger.info(`Running task ${taskId}`, params);
 
     try {
-      // TODO: Inject AIWorkflowService here
-      // Production will look like:
-      //   await this.aiWorkflowService.executeWorkflow({
-      //     integrationId: params.integrationId,
-      //     dataStreamId: params.dataStreamId,
-      //     samples: params.samples,
-      //   });
-
-      if (this.mockAIProcess) {
-        // Test mode: Execute mock AI workflow (includes status updates)
-        await this.mockAIProcess({
-          integrationId: params.integrationId,
-          dataStreamId: params.dataStreamId,
-          samples: params.samples,
-        });
+      if (this.invokeDeepAgent) {
+        // Instantiate the AgentService from API in the future and use in the the runTask function
+        await this.invokeDeepAgent(params.integrationId, params.dataStreamId);
+        this.logger.debug(`Task ${taskId}: Deep agent invocation completed`);
       } else {
+        this.logger.warn(`Task ${taskId}: No invokeDeepAgent function provided, using mock delay`);
         await new Promise((resolve) => setTimeout(resolve, 5000));
       }
 
