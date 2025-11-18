@@ -87,7 +87,7 @@ export const initializeFiltersManager = (
     }
   };
 
-  /** when auto publish is `true`, push filters from `unpublishedFilters$` directly to published */
+  /** when auto-apply is `true`, push filters from `unpublishedFilters$` directly to published */
   const autoPublishFiltersSubscription = unpublishedChildFilters$
     .pipe(
       combineLatestWith(settingsManager.api.settings.autoApplyFilters$),
@@ -97,7 +97,7 @@ export const initializeFiltersManager = (
       publishFilters();
     });
 
-  /** when auto-apply is `false`, publish filters when the children are done loading them */
+  /** when auto-apply is `false`, publish the first set of filters once the children are done loading them */
   if (!settingsManager.api.settings.autoApplyFilters$.getValue()) {
     unpublishedChildFilters$.pipe(skip(1), first()).subscribe(() => {
       publishFilters();

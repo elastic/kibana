@@ -11,8 +11,8 @@ import type { StateComparators, WithAllKeys } from '@kbn/presentation-publishing
 import { diffComparators, initializeStateManager } from '@kbn/presentation-publishing';
 import type { BehaviorSubject } from 'rxjs';
 import { combineLatestWith, debounceTime, map } from 'rxjs';
-import type { DashboardState, DashboardOptions } from '../../server/content_management';
-import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/content_management';
+import type { DashboardState, DashboardOptions } from '../../server';
+import { DEFAULT_DASHBOARD_OPTIONS } from '../../common/constants';
 
 export type DashboardSettings = Required<DashboardOptions> & {
   description?: DashboardState['description'];
@@ -81,7 +81,12 @@ export function initializeSettingsManager(initialState: DashboardState) {
         useMargins$: stateManager.api.useMargins$,
         autoApplyFilters$: stateManager.api.autoApplyFilters$,
       },
-      setSettings: stateManager.reinitializeState,
+      setSettings: (settings: Partial<DashboardSettings>) => {
+        stateManager.reinitializeState({
+          ...stateManager.getLatestState(),
+          ...settings,
+        });
+      },
       setTags: stateManager.api.setTags,
       timeRestore$: stateManager.api.timeRestore$,
       title$: stateManager.api.title$,

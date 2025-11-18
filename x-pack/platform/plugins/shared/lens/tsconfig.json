@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -123,9 +123,11 @@
     "@kbn/core-http-server",
     "@kbn/presentation-util",
     "@kbn/content-management-table-list-view-common",
+    "@kbn/lens-embeddable-utils",
     "@kbn/visualizations-common",
     "@kbn/css-utils",
     "@kbn/lens-common",
+    "@kbn/lens-common-2",
     "@kbn/react-kibana-context-common",
     "@kbn/control-group-renderer",
   ],

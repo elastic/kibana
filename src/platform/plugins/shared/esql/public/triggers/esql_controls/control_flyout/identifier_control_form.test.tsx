@@ -9,11 +9,13 @@
 
 import React from 'react';
 import { render, within, fireEvent } from '@testing-library/react';
+import { coreMock } from '@kbn/core/public/mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { monaco } from '@kbn/monaco';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import type { ESQLControlState } from '@kbn/esql-types';
-import { ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
+import { ControlTriggerSource, ESQLVariableType, EsqlControlType } from '@kbn/esql-types';
 import { ESQLControlsFlyout } from '.';
 
 jest.mock('@kbn/esql-utils', () => ({
@@ -31,6 +33,11 @@ const defaultProps = {
   cursorPosition: { column: 19, lineNumber: 1 } as monaco.Position,
   esqlVariables: [],
   ariaLabelledBy: 'esqlControlFlyoutTitle',
+  telemetryTriggerSource: ControlTriggerSource.QUESTION_MARK,
+};
+
+const services = {
+  core: coreMock.createStart(),
 };
 
 describe('IdentifierControlForm', () => {
@@ -42,7 +49,9 @@ describe('IdentifierControlForm', () => {
     it('should default correctly if no initial state is given', async () => {
       const { findByTestId, findByTitle } = render(
         <IntlProvider locale="en">
-          <ESQLControlsFlyout {...defaultProps} />
+          <KibanaContextProvider services={services}>
+            <ESQLControlsFlyout {...defaultProps} />
+          </KibanaContextProvider>
         </IntlProvider>
       );
       // control type dropdown should be rendered and default to 'STATIC_VALUES'
@@ -70,7 +79,9 @@ describe('IdentifierControlForm', () => {
     it('should be able to change in value type', async () => {
       const { findByTestId } = render(
         <IntlProvider locale="en">
-          <ESQLControlsFlyout {...defaultProps} queryString="FROM foo | STATS BY" />
+          <KibanaContextProvider services={services}>
+            <ESQLControlsFlyout {...defaultProps} queryString="FROM foo | STATS BY" />
+          </KibanaContextProvider>
         </IntlProvider>
       );
       // variable name input should be rendered and with the default value
@@ -91,11 +102,13 @@ describe('IdentifierControlForm', () => {
       const onCreateControlSpy = jest.fn();
       const { findByTestId, findByTitle } = render(
         <IntlProvider locale="en">
-          <ESQLControlsFlyout
-            {...defaultProps}
-            queryString="FROM foo | STATS BY"
-            onSaveControl={onCreateControlSpy}
-          />
+          <KibanaContextProvider services={services}>
+            <ESQLControlsFlyout
+              {...defaultProps}
+              queryString="FROM foo | STATS BY"
+              onSaveControl={onCreateControlSpy}
+            />
+          </KibanaContextProvider>
         </IntlProvider>
       );
 
@@ -114,11 +127,13 @@ describe('IdentifierControlForm', () => {
       const onCancelControlSpy = jest.fn();
       const { findByTestId } = render(
         <IntlProvider locale="en">
-          <ESQLControlsFlyout
-            {...defaultProps}
-            queryString="FROM foo | STATS BY"
-            onCancelControl={onCancelControlSpy}
-          />
+          <KibanaContextProvider services={services}>
+            <ESQLControlsFlyout
+              {...defaultProps}
+              queryString="FROM foo | STATS BY"
+              onCancelControl={onCancelControlSpy}
+            />
+          </KibanaContextProvider>
         </IntlProvider>
       );
       // click on the cancel button
@@ -140,7 +155,9 @@ describe('IdentifierControlForm', () => {
       } as ESQLControlState;
       const { findByTestId } = render(
         <IntlProvider locale="en">
-          <ESQLControlsFlyout {...defaultProps} initialState={initialState} />
+          <KibanaContextProvider services={services}>
+            <ESQLControlsFlyout {...defaultProps} initialState={initialState} />
+          </KibanaContextProvider>
         </IntlProvider>
       );
       // variable name input should be rendered and with the default value
@@ -170,12 +187,14 @@ describe('IdentifierControlForm', () => {
       const onEditControlSpy = jest.fn();
       const { findByTestId, findByTitle } = render(
         <IntlProvider locale="en">
-          <ESQLControlsFlyout
-            {...defaultProps}
-            queryString="FROM foo | STATS BY"
-            onSaveControl={onEditControlSpy}
-            initialState={initialState}
-          />
+          <KibanaContextProvider services={services}>
+            <ESQLControlsFlyout
+              {...defaultProps}
+              queryString="FROM foo | STATS BY"
+              onSaveControl={onEditControlSpy}
+              initialState={initialState}
+            />
+          </KibanaContextProvider>
         </IntlProvider>
       );
 
@@ -195,12 +214,14 @@ describe('IdentifierControlForm', () => {
     it('should default correctly if no initial state is given', async () => {
       const { findByTestId, findByTitle } = render(
         <IntlProvider locale="en">
-          <ESQLControlsFlyout
-            {...defaultProps}
-            initialVariableType={ESQLVariableType.FUNCTIONS}
-            queryString="FROM foo | STATS "
-            cursorPosition={{ column: 17, lineNumber: 1 } as monaco.Position}
-          />
+          <KibanaContextProvider services={services}>
+            <ESQLControlsFlyout
+              {...defaultProps}
+              initialVariableType={ESQLVariableType.FUNCTIONS}
+              queryString="FROM foo | STATS "
+              cursorPosition={{ column: 17, lineNumber: 1 } as monaco.Position}
+            />
+          </KibanaContextProvider>
         </IntlProvider>
       );
       // control type dropdown should be rendered and default to 'STATIC_VALUES'

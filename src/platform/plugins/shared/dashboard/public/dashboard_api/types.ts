@@ -11,7 +11,7 @@ import type { Reference } from '@kbn/content-management-utils';
 import type { SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import type { PublishesESQLVariables } from '@kbn/esql-types';
+import type { ESQLControlVariable, PublishesESQLVariables } from '@kbn/esql-types';
 import type { GridLayoutData } from '@kbn/grid-layout';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type {
@@ -51,7 +51,7 @@ import type { TimeSlice } from '@kbn/controls-schemas';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { BehaviorSubject, Observable, Subject } from 'rxjs';
 import type { DashboardLocatorParams } from '../../common';
-import type { DashboardAPIGetOut, DashboardState, GridData } from '../../server/content_management';
+import type { DashboardReadResponseBody, DashboardState, GridData } from '../../server';
 import type { SaveDashboardReturn } from './save_modal/types';
 import type { DashboardLayout } from './layout_manager/types';
 import type { DashboardSettings } from './settings_manager';
@@ -84,7 +84,9 @@ export interface DashboardCreationOptions {
   useUnifiedSearchIntegration?: boolean;
   unifiedSearchSettings?: { kbnUrlStateStorage: IKbnUrlStateStorage };
 
-  validateLoadedSavedObject?: (result: DashboardAPIGetOut) => 'valid' | 'invalid' | 'redirected';
+  validateLoadedSavedObject?: (
+    result: DashboardReadResponseBody
+  ) => 'valid' | 'invalid' | 'redirected';
 
   fullScreenMode?: boolean;
   isEmbeddedExternally?: boolean;
@@ -163,6 +165,10 @@ export type DashboardApi = CanExpandPanels &
     publishedTimeslice$: PublishingSubject<TimeSlice | undefined>;
     unpublishedTimeslice$: PublishingSubject<TimeSlice | undefined>;
     publishTimeslice: () => void;
+
+    publishedEsqlVariables$: PublishingSubject<ESQLControlVariable[] | undefined>;
+    unpublishedEsqlVariables$: PublishingSubject<ESQLControlVariable[] | undefined>;
+    publishVariables: () => void;
 
     layout$: BehaviorSubject<DashboardLayout>;
 

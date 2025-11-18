@@ -6,6 +6,7 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
+import type { Interpolation, Theme } from '@emotion/react';
 import { css } from '@emotion/react';
 import {
   EuiFlyoutHeader,
@@ -51,6 +52,7 @@ export function FlyoutContainer({
   children,
   customFooter,
   isInlineEditing,
+  overrideContainerCss,
 }: {
   isOpen: boolean;
   handleClose: () => void;
@@ -61,6 +63,7 @@ export function FlyoutContainer({
   panelContainerRef?: (el: HTMLDivElement) => void;
   customFooter?: React.ReactElement;
   isInlineEditing?: boolean;
+  overrideContainerCss?: Interpolation<Theme>;
 }) {
   const [focusTrapIsEnabled, setFocusTrapIsEnabled] = useState(false);
   const euiThemeContext = useEuiTheme();
@@ -113,6 +116,7 @@ export function FlyoutContainer({
             `,
             flyoutContainerStyles(euiThemeContext),
             dimensionContainerStyles.self(euiThemeContext),
+            overrideContainerCss,
           ]}
           onAnimationEnd={() => {
             if (isOpen) {

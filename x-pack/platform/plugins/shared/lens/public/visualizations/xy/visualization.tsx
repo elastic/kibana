@@ -52,9 +52,6 @@ import {
   getColorMappingDefaults,
 } from '../../utils';
 import { getSuggestions } from './xy_suggestions';
-import { XyToolbar } from './toolbar';
-import { XyStyleSettings } from './toolbar/style_settings';
-import { updateLayer } from './toolbar';
 import {
   DataDimensionEditor,
   DataDimensionEditorDataSectionExtra,
@@ -142,8 +139,8 @@ import {
 import { AnnotationsPanel } from './xy_config_panel/annotations_config_panel/annotations_panel';
 import { ReferenceLinePanel } from './xy_config_panel/reference_line_config_panel/reference_line_panel';
 import { convertToRuntimeState } from './runtime_state';
-import { XyLegendSettings } from './toolbar/legend_settings';
 import { FlyoutToolbar } from '../../shared_components/flyout_toolbar';
+import { XyStyleSettings, XyLegendSettings, updateLayer } from './toolbar';
 
 const XY_ID = 'lnsXY';
 
@@ -709,6 +706,10 @@ export const getXyVisualization = ({
       (!isHorizontalSeries(subtype1 as SeriesType) && !isHorizontalSeries(subtype2 as SeriesType))
     );
   },
+
+  isSubtypeSupported(subtype) {
+    return visualizationSubtypes.some(({ id }) => id === subtype);
+  },
   getSubtypeSwitch({ state, setState, layerId }) {
     const index = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[index];
@@ -744,10 +745,6 @@ export const getXyVisualization = ({
       );
     }
     return undefined;
-  },
-
-  ToolbarComponent(props) {
-    return <XyToolbar {...props} />;
   },
 
   FlyoutToolbarComponent(props) {
