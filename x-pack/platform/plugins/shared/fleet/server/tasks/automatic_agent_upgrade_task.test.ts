@@ -209,6 +209,7 @@ describe('AutomaticAgentUpgradeTask', () => {
         {
           agents: agents.slice(0, 3),
           version: '8.18.0',
+          force: true,
         }
       );
     });
@@ -233,6 +234,7 @@ describe('AutomaticAgentUpgradeTask', () => {
         {
           agents: agents.slice(0, 2), // As theres already one upgrading, and 30% of 11 is 3, we only want two items to be sent for upgrade
           version: '8.18.0',
+          force: true,
         }
       );
     });
@@ -257,6 +259,7 @@ describe('AutomaticAgentUpgradeTask', () => {
         {
           agents: agents.slice(0, 2),
           version: '8.18.0',
+          force: true,
         }
       );
     });
@@ -294,12 +297,13 @@ describe('AutomaticAgentUpgradeTask', () => {
         {
           agents: activeAgents.slice(0, 3),
           version: '8.18.0',
+          force: true,
         }
       );
       expect(mockedSendAutomaticUpgradeAgentsActions).not.toHaveBeenCalledWith(
         expect.anything(),
         expect.anything(),
-        { agents: uninstalledAgents, version: '8.18.0' }
+        { agents: uninstalledAgents, version: '8.18.0', force: true }
       );
     });
 
@@ -376,6 +380,7 @@ describe('AutomaticAgentUpgradeTask', () => {
           agents: agents.slice(0, 30),
           version: '8.18.0',
           upgradeDurationSeconds: 600,
+          force: true,
         }
       );
     });
@@ -416,6 +421,7 @@ describe('AutomaticAgentUpgradeTask', () => {
         {
           agents: agents.slice(0, 3),
           version: '8.18.0',
+          force: true,
         }
       );
     });
@@ -453,6 +459,7 @@ describe('AutomaticAgentUpgradeTask', () => {
           agents: firstAgentsBatch,
           version: '8.18.0',
           upgradeDurationSeconds: 600,
+          force: true,
         }
       );
       expect(mockedSendAutomaticUpgradeAgentsActions).toHaveBeenCalledWith(
@@ -461,6 +468,7 @@ describe('AutomaticAgentUpgradeTask', () => {
         {
           agents: secondAgentsBatch.slice(0, 4),
           version: '8.18.0',
+          force: true,
         }
       );
     });
