@@ -75,8 +75,6 @@ export class SiemEntityAnalyticsEvaluationChatClient {
         }),
       });
 
-      // Extract conversation ID and response from the API response
-
       const {
         conversation_id: conversationIdFromResponse,
         response: latestResponse,

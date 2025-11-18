@@ -52,12 +52,6 @@ export const entityAnalyticsAgentCreator = (): BuiltInAgentDefinition => {
         { tool_ids: ['platform.core.generate_esql'] },
         { tool_ids: ['platform.core.get_index_mapping'] },
         { tool_ids: ['platform.core.list_indices'] },
-
-        // { tool_ids: ['platform.core.get_document_by_id'] },
-        // { tool_ids: ['platform.core.index_explorer'] },
-        // { tool_ids: ['platform.core.search'] },
-        // Include all built-in tools for comprehensive security analysis
-        // { tool_ids: ['*'] },
       ],
     },
   };

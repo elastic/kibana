@@ -78,14 +78,6 @@ node scripts/playwright test --config x-pack/solutions/security/packages/kbn-eva
 EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/solutions/security/packages/kbn-evals-suite-siem-entity-analytics/playwright.config.ts
 ```
 
-## Test Structure
-
-The evaluation suite is organized into the following test categories:
-
-- **Basic Tests** (`evals/basic/`): Tests basic functionality and behavior of the agent
-  - Basic security questions
-  - Off-topic question handling
-
 ## Adding New Tests
 
 To add new evaluation tests:

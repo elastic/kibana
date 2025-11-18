@@ -67,8 +67,7 @@ export const evaluate = base.extend<
     },
   ],
   reportModelScore: [
-    // eslint-disable-next-line no-empty-pattern
-    async ({}, use) => {
+    async (_, use) => {
       await use(createDefaultTerminalReporter());
     },
     { scope: 'worker' },

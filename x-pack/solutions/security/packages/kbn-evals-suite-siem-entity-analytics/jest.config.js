@@ -10,4 +10,3 @@ module.exports = {
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/solutions/security/packages/kbn-evals-suite-siem-entity-analytics'],
 };
-

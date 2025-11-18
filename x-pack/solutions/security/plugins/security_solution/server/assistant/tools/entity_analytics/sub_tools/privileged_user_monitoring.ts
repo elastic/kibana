@@ -7,15 +7,12 @@
 
 import { PRIVILEGE_MONITORING_ENGINE_STATUS } from '../../../../lib/entity_analytics/privilege_monitoring/constants';
 import { PrivilegeMonitoringEngineDescriptorClient } from '../../../../lib/entity_analytics/privilege_monitoring/saved_objects';
-import {
-  getPrivilegedMonitorUsersIndex,
-  getPrivilegedMonitorUsersJoin,
-} from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
+import { getPrivilegedMonitorUsersIndex } from '../../../../../common/entity_analytics/privileged_user_monitoring/utils';
 import type { EntityType } from '../../../../../common/search_strategy';
 import { EntityTypeEnum } from '../../../../../common/api/entity_analytics';
-import type { EntityAnalyticsSubPlugin } from './types';
+import type { EntityAnalyticsSubTool } from './types';
 
-export const getPrivilegedUserMonitoringSubPlugin: EntityAnalyticsSubPlugin = async (
+export const getPrivilegedUserMonitoringSubTool: EntityAnalyticsSubTool = async (
   entityType: EntityType,
   { spaceId, soClient }
 ) => {
@@ -29,13 +26,11 @@ export const getPrivilegedUserMonitoringSubPlugin: EntityAnalyticsSubPlugin = as
   if (engine.status === PRIVILEGE_MONITORING_ENGINE_STATUS.STARTED) {
     if (entityType === EntityTypeEnum.user) {
       return {
-        message: `This is a set of rules that you must follow strictly:    
-    * A user is privileged if the field 'user.is_privileged' is true.
-    * When searching the privileged user you must **ALWAYS** filter by: 'where user.name == {identifier}'.
-    * The filed entity_analytics_monitoring.labels.value contains information the group in which the privileged user is part of.
-    * When querying a different index with user data, you can filter by privileged users using the following ESQL query:
-    '${getPrivilegedMonitorUsersJoin(spaceId)}'
-    `,
+        message: `
+          This is a set of rules that you must follow strictly:    
+          * A user is privileged if the field 'user.is_privileged' is true.
+          * When searching the privileged user you must **ALWAYS** filter by: 'where user.name == {identifier}'.
+          * The field 'entity_analytics_monitoring.labels' contains information about the group to which the privileged user belongs.`,
         index: getPrivilegedMonitorUsersIndex(spaceId),
       };
     }
@@ -44,7 +39,7 @@ export const getPrivilegedUserMonitoringSubPlugin: EntityAnalyticsSubPlugin = as
     };
   } else {
     return {
-      message: `The privileged user monitoring engine is not enabled in this environment. The current status is: ${engine.status}. The user needs to enable the privileged user monitoring engine se this assistant can answer privileged user related questions.`,
+      message: `The privileged user monitoring engine is not enabled in this environment. The current status is: ${engine.status}. The user needs to enable the privileged user monitoring engine se this agent can answer privileged user-related questions.`,
     };
   }
 };

@@ -8,18 +8,18 @@
 import { EntityTypeToIdentifierField } from '../../../../../common/entity_analytics/types';
 import { getAssetCriticalityIndex } from '../../../../../common/entity_analytics/asset_criticality';
 import type { EntityType } from '../../../../../common/search_strategy';
-import type { EntityAnalyticsSubPlugin } from './types';
+import type { EntityAnalyticsSubTool } from './types';
 
-export const getAssetCriticalitySubPlugin: EntityAnalyticsSubPlugin = async (
+export const getAssetCriticalitySubTool: EntityAnalyticsSubTool = async (
   entityType: EntityType,
   { spaceId }
 ) => {
   const assetCriticalityIndexPattern = getAssetCriticalityIndex(spaceId);
   return {
-    message: `This is a set of rules that you must follow strictly:
-  * When searching asset criticality for '${entityType}' you **MUST ALWAYS** filter by: 'where id_field == "${EntityTypeToIdentifierField[entityType]}"'.
-  * The criticality value is stored in the field 'criticality_level'.
-  `,
+    message: `
+      This is a set of rules that you must follow strictly:
+      * When searching asset criticality for '${entityType}' you **MUST ALWAYS** filter by: 'where id_field == "${EntityTypeToIdentifierField[entityType]}"'.
+      * The criticality value is stored in the field 'criticality_level'.`,
     index: assetCriticalityIndexPattern,
   };
 };

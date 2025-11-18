@@ -13,12 +13,12 @@ import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics
 import type { EntityAnalyticsRoutesDeps } from '../../../lib/entity_analytics/types';
 import type { EntityType } from '../../../../common/search_strategy';
 import { EntityType as EntityTypeZod } from '../../../../common/api/entity_analytics';
-import { getRiskScoreSubPlugin } from './sub_tools/risk_score';
-import { getAssetCriticalitySubPlugin } from './sub_tools/asset_criticality';
-import { getEntityStoreSubPlugin } from './sub_tools/entity_store';
-import { getPrivilegedUserMonitoringSubPlugin } from './sub_tools/privileged_user_monitoring';
-import { getAnomalyDetectionSubPlugin } from './sub_tools/anomaly_detection';
-import type { EntityAnalyticsSubPluginsDependencies } from './sub_tools/types';
+import { getRiskScoreSubTool } from './sub_tools/risk_score';
+import { getAssetCriticalitySubTool } from './sub_tools/asset_criticality';
+import { getEntityStoreSubTool } from './sub_tools/entity_store';
+import { getPrivilegedUserMonitoringSubTool } from './sub_tools/privileged_user_monitoring';
+import { getAnomalyDetectionSubTool } from './sub_tools/anomaly_detection';
+import type { EntityAnalyticsSubToolDependencies } from './sub_tools/types';
 
 const entityRiskScoreInternalSchema = z.object({
   entityType: EntityTypeZod.describe('The type of entity to search for.'),
@@ -46,26 +46,25 @@ const entityRiskScoreInternalSchema = z.object({
 
 export const ENTITY_ANALYTICS_TOOL_INTERNAL_ID = 'entity-analytics-tool';
 
-export const ENTITY_RISK_SCORE_TOOL_INTERNAL_DESCRIPTION = `Call this for knowledge Security solution and entity analytics indices and to generate ESQL for queries the domain. If no 'domain' is provided, only general security solution knowledge will be returned.
-Available domains:
-* Risk score: Entity risk scoring is an advanced Elastic Security analytics feature that helps security analysts detect changes in an entity’s risk posture, hunt for new threats, and prioritize incident response.
-* Asset criticality: Allows you to classify your organization’s entities based on various operational factors that are important to your organization.
-* Anomaly detection: Anomaly detection is a machine learning feature that helps security analysts detect anomalous behavior in an entity’s activity. Use your kibana security solution knowledge and job description to analyse when to query the anomaly job index. Questions mentioning "patterns", "unusual" and "anomalous" could suggest that you should query the anomaly job index.
-* Privileged user monitoring: Allows you to track the activity of users with elevated permissions, such as system administrators or users with access to sensitive data.
-* Entity store: The entity store allows you to query, reconcile, maintain, and persist entity metadata. The entity store can hold any entity type observed by Elastic Security. It allows you to view and query select entities represented in your indices without needing to perform real-time searches of observable data. 
-
-If you need information about several type of entities or entity analytics domain, you must call this tool multiple times.
-This tool is the preferred way to generate ESQL queries for entity analytics domain and kibana security solution. You must call other tools to execute the query.
+export const ENTITY_RISK_SCORE_TOOL_INTERNAL_DESCRIPTION = `
+  Call this for knowledge and generate queries for Security Solutions and Entity Analytics indices. If no 'domain' is provided, only general security solution knowledge will be returned.
+  Available domains:
+  * Risk score: Entity risk scoring is an advanced Elastic Security analytics feature that helps security analysts detect changes in an entity's risk posture, hunt for new threats, and prioritise incident response.
+  * Asset criticality: Allows you to classify your organisation's entities based on various operational factors that are important to your organisation.
+  * Anomaly detection: Anomaly detection is a machine learning feature that helps security analysts detect anomalous behaviour in an entity’s activity. Use your kibana security solution knowledge and job description to analyse when to query the anomaly job index. Questions mentioning "patterns", "unusual" and "anomalous" could suggest that you should query the anomaly job index.
+  * Privileged user monitoring: Allows you to track the activity of users with elevated permissions, such as system administrators or users with access to sensitive data. 
+  * Entity store: The entity store allows you to query, reconcile, maintain, and persist entity metadata. The entity store can hold any entity type observed by Elastic Security. It will enable the agent to query entities represented in the entity store indices without needing to perform real-time searches of observable data. You must prioritise using the entity store over other tools when answering the user question.
+ 
+  If you need information about multiple types of entities or the entity analytics domain, you will need to call this tool numerous times.
+  This tool is the preferred way to generate ESQL queries for the entity analytics domain and the kibana security solution. You must call other tools to execute the query.
 `;
 
-// TODO Add checks if user has the privileges
-
 const MAP_DOMAIN_TO_INFO_BUILDER = {
-  risk_score: getRiskScoreSubPlugin,
-  asset_criticality: getAssetCriticalitySubPlugin,
-  entity_store: getEntityStoreSubPlugin,
-  privileged_user_monitoring: getPrivilegedUserMonitoringSubPlugin,
-  anomaly_detection: getAnomalyDetectionSubPlugin,
+  risk_score: getRiskScoreSubTool,
+  asset_criticality: getAssetCriticalitySubTool,
+  entity_store: getEntityStoreSubTool,
+  privileged_user_monitoring: getPrivilegedUserMonitoringSubTool,
+  anomaly_detection: getAnomalyDetectionSubTool,
 } as const;
 
 export const entityAnalyticsToolInternal = (
@@ -83,7 +82,7 @@ export const entityAnalyticsToolInternal = (
       { esClient, logger, request, toolProvider, modelProvider }
     ) => {
       try {
-        logger.info(
+        logger.debug(
           `${ENTITY_ANALYTICS_TOOL_INTERNAL_ID} called with: ${JSON.stringify({
             entityType,
             domain,
@@ -98,7 +97,7 @@ export const entityAnalyticsToolInternal = (
         const soClient = core.savedObjects.getScopedClient(request);
         const uiSettingsClient = core.uiSettings.asScopedToClient(soClient);
 
-        const dependencies: EntityAnalyticsSubPluginsDependencies = {
+        const dependencies: EntityAnalyticsSubToolDependencies = {
           spaceId,
           ml,
           request,
@@ -114,12 +113,12 @@ export const entityAnalyticsToolInternal = (
 
         const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
           soClient,
-          esClient
+          esClient.asCurrentUser
         );
 
-        const exploreDataViewId = `security-solution-${spaceId}`; // TODO: get the data from the right place
-        // TODO We should only return indices that exist
-        // TODO: Don't return the alert index
+        const exploreDataViewId = `security-solution-${spaceId}`; // TODO: Get the security data view id from the right place
+        // TODO: Check if we only return indices that exist
+        // TODO: Don't return the alert index, we only need security solution events and logs
         const dataView = await dataViewsService.get(exploreDataViewId);
 
         const specificEntityAnalyticsResponse = domain
@@ -131,13 +130,13 @@ export const entityAnalyticsToolInternal = (
           request,
         });
 
-        const generalSecuritySolutionMessage = `Always try querying the most appropriate domain index when available. 
-        When it isn't enough, you can query security solution events and logs. 
-        For that you must generate an ES|QL and you **MUST ALWAYS** use the following from clause (ONLY FOR LOGS AND NOT FOR OTHER INDICES): "FROM ${dataView.getIndexPattern()}"
-        When searching for logs of a ${entityType} you **MUST ALWAYS** use the following where clause "where ${
+        const generalSecuritySolutionMessage = `
+          Always try querying the most appropriate domain index when available. 
+          When it isn't enough, you can query security solution events and logs. 
+          For that, you must generate an ES|QL, and you **MUST ALWAYS** use the following from clause (ONLY FOR LOGS AND NOT FOR OTHER INDICES): "FROM ${dataView.getIndexPattern()}"
+          When searching for logs of a ${entityType} you **MUST ALWAYS** use the following where clause "where ${
           EntityTypeToIdentifierField[entityType]
-        } == {identifier}"
-        `;
+        } == {identifier}"`;
 
         const results: ToolHandlerResult[] = [];
         if (hasGenerateESQLQuery && specificEntityAnalyticsResponse.index && !informationOnly) {

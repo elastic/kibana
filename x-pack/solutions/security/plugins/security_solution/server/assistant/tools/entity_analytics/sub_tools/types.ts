@@ -16,7 +16,7 @@ import type { ModelProvider, ToolProvider } from '@kbn/onechat-server';
 import type { EntityAnalyticsRoutesDeps } from '../../../../lib/entity_analytics/types';
 import type { EntityType } from '../../../../../common/search_strategy';
 
-export interface EntityAnalyticsSubPluginsDependencies {
+export interface EntityAnalyticsSubToolDependencies {
   ml: EntityAnalyticsRoutesDeps['ml'];
   request: KibanaRequest;
   soClient: SavedObjectsClientContract;
@@ -30,7 +30,7 @@ export interface EntityAnalyticsSubPluginsDependencies {
   prompt: string;
 }
 
-export type EntityAnalyticsSubPlugin = (
+export type EntityAnalyticsSubTool = (
   entityType: EntityType,
-  dependencies: EntityAnalyticsSubPluginsDependencies
+  dependencies: EntityAnalyticsSubToolDependencies
 ) => Promise<{ message: string; index?: string }>;
