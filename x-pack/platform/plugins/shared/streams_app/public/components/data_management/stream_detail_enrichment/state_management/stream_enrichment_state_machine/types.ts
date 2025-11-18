@@ -13,6 +13,7 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { GrokCollection } from '@kbn/grok-ui';
 import type {
   StreamlangProcessorDefinition,
+  StreamlangDSL,
   StreamlangStepWithUIAttributes,
 } from '@kbn/streamlang';
 import type { StreamlangWhereBlock } from '@kbn/streamlang/types/streamlang';
@@ -84,5 +85,6 @@ export type StreamEnrichmentEvent =
       options?: { parentId: StreamlangStepWithUIAttributes['parentId'] };
     }
   | { type: 'step.reorder'; stepId: string; direction: 'up' | 'down' }
+  | { type: 'step.reassignSteps'; steps: StreamlangDSL['steps'] }
   | { type: 'url.initialized'; urlState: EnrichmentUrlState }
   | { type: 'url.sync' };

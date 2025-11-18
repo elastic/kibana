@@ -24,6 +24,7 @@ import type { UseFormSetValue, FieldValues } from 'react-hook-form';
 import { useWatch } from 'react-hook-form';
 import type { GrokProcessorResult } from '@kbn/grok-heuristics';
 import type { APIReturnType } from '@kbn/streams-plugin/public/api';
+import { useAbortController } from '@kbn/react-hooks';
 import { useStreamDetail } from '../../../../../../../hooks/use_stream_detail';
 import { selectPreviewRecords } from '../../../../state_management/simulation_state_machine/selectors';
 import { useSimulatorSelector } from '../../../../state_management/stream_enrichment_state_machine';
@@ -52,7 +53,8 @@ export const GrokPatternAISuggestions = ({
     selectPreviewRecords(snapshot.context)
   );
 
-  const [suggestionsState, refreshSuggestions] = useGrokPatternSuggestion();
+  const abortController = useAbortController();
+  const [suggestionsState, refreshSuggestions] = useGrokPatternSuggestion(abortController);
 
   const fieldValue = useWatch<ProcessorFormState, 'from'>({ name: 'from' });
   const isValidField = useMemo(() => {

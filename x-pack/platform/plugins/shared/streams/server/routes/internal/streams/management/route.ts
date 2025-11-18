@@ -6,11 +6,11 @@
  */
 
 import { suggestPartitionsRoute } from './suggest_partitions_route';
-import { suggestIngestPipelineRoute } from './suggest_ingest_pipeline_route';
+import { suggestProcessingPipelineRoute } from './suggest_processing_pipeline_route';
 import { unmanagedAssetsRoute } from './unmanaged_assets_route';
 
 export const internalManagementRoutes = {
   ...unmanagedAssetsRoute,
   ...suggestPartitionsRoute,
-  ...suggestIngestPipelineRoute,
+  ...suggestProcessingPipelineRoute,
 };

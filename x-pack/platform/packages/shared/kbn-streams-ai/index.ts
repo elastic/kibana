@@ -8,5 +8,5 @@
 export { generateStreamDescription } from './src/description/generate_description';
 export { identifyFeatures } from './src/features/identify_features';
 export { partitionStream } from './workflows/partition_stream';
-export { suggestIngestPipeline, type IngestPipeline } from './workflows/suggest_ingest_pipeline';
+export { suggestProcessingPipeline } from './workflows/suggest_processing_pipeline';
 export { generateSignificantEvents } from './src/significant_events/generate_significant_events';

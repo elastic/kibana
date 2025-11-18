@@ -43,6 +43,13 @@ export function emptyEqualsToAlways(condition: Condition) {
   return condition;
 }
 
+export function undefinedToAlways(condition: Condition | undefined) {
+  if (!condition) {
+    return ALWAYS_CONDITION;
+  }
+  return condition;
+}
+
 const UI_SUPPORTED_OPERATORS_AND_VALUE_TYPES: Record<Exclude<OperatorKeys, 'range'>, string[]> = {
   // Allow both string and boolean for eq/neq so that boolean shorthand (e.g. "equals true") can rendered in UI
   eq: ['string', 'boolean'],

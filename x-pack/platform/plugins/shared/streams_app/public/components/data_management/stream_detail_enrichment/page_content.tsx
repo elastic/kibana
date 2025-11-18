@@ -12,7 +12,12 @@ import {
   EuiPanel,
   EuiResizableContainer,
   EuiSplitPanel,
+  EuiTitle,
   EuiText,
+  EuiSpacer,
+  EuiEmptyPrompt,
+  EuiLoadingLogo,
+  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
@@ -21,6 +26,7 @@ import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { useAbortController } from '@kbn/react-hooks';
 import { useKbnUrlStateStorageFromRouterContext } from '../../../util/kbn_url_state_context';
 import { useKibana } from '../../../hooks/use_kibana';
 import { ManagementBottomBar } from '../management_bottom_bar';
@@ -37,6 +43,11 @@ import { StreamsAppContextProvider } from '../../streams_app_context_provider';
 import { getStreamTypeFromDefinition } from '../../../util/get_stream_type_from_definition';
 import { SchemaChangesReviewModal, getChanges } from '../schema_editor/schema_changes_review_modal';
 import { getDefinitionFields } from '../schema_editor/hooks/use_schema_fields';
+import { useAIFeatures } from '../../../hooks/use_ai_features';
+import { useSuggestProcessingPipeline } from './use_suggest_processing_pipeline';
+import { GenerateSuggestionButton } from '../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
+import { useStreamDetail } from '../../../hooks/use_stream_detail';
+import { ProcessingSuggestion } from './processing_suggestion';
 
 const MemoSimulationPlayground = React.memo(SimulationPlayground);
 
@@ -186,8 +197,8 @@ export function StreamDetailEnrichmentContentImpl() {
 }
 
 const StepsEditor = React.memo(() => {
+  const { reassignSteps } = useStreamEnrichmentEvents();
   const stepRefs = useStreamEnrichmentSelector((state) => state.context.stepRefs);
-
   const simulation = useSimulatorSelector((snapshot) => snapshot.context.simulation);
 
   const errors = useMemo(() => {
@@ -221,9 +232,102 @@ const StepsEditor = React.memo(() => {
 
   const hasSteps = !isEmpty(stepRefs);
 
+  const abortController = useAbortController();
+  const aiFeatures = useAIFeatures();
+  const [suggestionsState, suggestProcessing] = useSuggestProcessingPipeline(abortController);
+  const {
+    definition: { stream },
+  } = useStreamDetail();
+
+  if (suggestionsState.loading) {
+    return (
+      <EuiEmptyPrompt
+        icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
+        body={
+          <>
+            <EuiText>
+              {i18n.translate('xpack.streams.stepsEditor.loadingDashboardsLabel', {
+                defaultMessage: 'Analysing your documents...',
+              })}
+            </EuiText>
+            <EuiLink
+              onClick={() => {
+                abortController.abort();
+                abortController.refresh();
+              }}
+            >
+              {i18n.translate('xpack.streams.stepsEditor.cancelLabel', {
+                defaultMessage: 'Cancel',
+              })}
+            </EuiLink>
+          </>
+        }
+      />
+    );
+  }
+
+  if (suggestionsState.value) {
+    return (
+      <ProcessingSuggestion
+        pipeline={suggestionsState.value}
+        onAccept={() => {
+          reassignSteps(suggestionsState.value.steps);
+          suggestProcessing(null);
+        }}
+        onDismiss={() => suggestProcessing(null)}
+      />
+    );
+  }
+
   return (
     <>
-      {hasSteps ? <RootSteps stepRefs={stepRefs} /> : <NoStepsEmptyPrompt />}
+      {hasSteps ? (
+        <RootSteps stepRefs={stepRefs} />
+      ) : (
+        <NoStepsEmptyPrompt>
+          {aiFeatures && (
+            <EuiPanel
+              hasBorder
+              grow={false}
+              css={css`
+                text-align: left;
+              `}
+            >
+              <EuiTitle size="xxs">
+                <h5>
+                  {i18n.translate('xpack.streams.stepsEditor.h3.suggestAPipelineLabel', {
+                    defaultMessage: 'Suggest a pipeline',
+                  })}
+                </h5>
+              </EuiTitle>
+              <EuiText size="s">
+                {i18n.translate('xpack.streams.stepsEditor.useThePowerOfTextLabel', {
+                  defaultMessage: 'Use the power of AI to generate the most effective pipeline',
+                })}
+              </EuiText>
+              <EuiSpacer size="m" />
+              <GenerateSuggestionButton
+                aiFeatures={aiFeatures}
+                onClick={(connectorId) => {
+                  suggestProcessing({
+                    connectorId,
+                    streamName: stream.name,
+                    fieldName: 'body.text',
+                  });
+                }}
+                isLoading={suggestionsState.loading}
+              >
+                {i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.refreshSuggestions',
+                  {
+                    defaultMessage: 'Suggest pipeline',
+                  }
+                )}
+              </GenerateSuggestionButton>
+            </EuiPanel>
+          )}
+        </NoStepsEmptyPrompt>
+      )}
       {(!isEmpty(errors.ignoredFields) ||
         !isEmpty(errors.mappingFailures) ||
         errors.definition_error) && (

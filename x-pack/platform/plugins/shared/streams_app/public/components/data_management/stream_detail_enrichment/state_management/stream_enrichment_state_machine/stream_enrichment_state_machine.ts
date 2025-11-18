@@ -21,7 +21,7 @@ import {
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { Streams } from '@kbn/streams-schema';
 import { GrokCollection } from '@kbn/grok-ui';
-import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
+import type { StreamlangStepWithUIAttributes, StreamlangDSL } from '@kbn/streamlang';
 import {
   ALWAYS_CONDITION,
   convertStepsForUI,
@@ -222,7 +222,23 @@ export const streamEnrichmentMachine = setup({
         stepRefs: [...reorderSteps(context.stepRefs, params.stepId, params.direction)],
       };
     }),
-    reassignSteps: assign(({ context }) => ({
+    reassignSteps: assign((assignArgs, params: { steps: StreamlangDSL['steps'] }) => {
+      // Clean-up existing step refs
+      assignArgs.context.stepRefs.forEach(stopChild);
+
+      // Convert new steps to UI format and spawn new step refs
+      const uiSteps = convertStepsForUI({ steps: params.steps });
+      const stepRefs = uiSteps.map((step) => {
+        const stepRef = spawnStep(step, assignArgs, { isNew: true });
+        stepRef.send({ type: 'step.save' });
+        return stepRef;
+      });
+
+      return {
+        stepRefs,
+      };
+    }),
+    refreshSteps: assign(({ context }) => ({
       stepRefs: [...context.stepRefs],
     })),
     /* Data sources actions */
@@ -533,6 +549,13 @@ export const streamEnrichmentMachine = setup({
                       target: 'creating',
                       actions: [{ type: 'addCondition', params: ({ event }) => event }],
                     },
+                    'step.reassignSteps': {
+                      guard: 'hasManagePrivileges',
+                      actions: [
+                        { type: 'reassignSteps', params: ({ event }) => event },
+                        { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
+                      ],
+                    },
                   },
                 },
                 creating: {
@@ -541,7 +564,7 @@ export const streamEnrichmentMachine = setup({
                   on: {
                     'step.change': {
                       actions: [
-                        { type: 'reassignSteps' },
+                        { type: 'refreshSteps' },
                         { type: 'sendStepsEventToSimulator', params: ({ event }) => event },
                       ],
                     },
@@ -555,7 +578,7 @@ export const streamEnrichmentMachine = setup({
                     },
                     'step.save': {
                       target: 'idle',
-                      actions: [{ type: 'reassignSteps' }],
+                      actions: [{ type: 'refreshSteps' }],
                     },
                   },
                 },
@@ -579,7 +602,7 @@ export const streamEnrichmentMachine = setup({
                     },
                     'step.save': {
                       target: 'idle',
-                      actions: [{ type: 'reassignSteps' }],
+                      actions: [{ type: 'refreshSteps' }],
                     },
                   },
                 },

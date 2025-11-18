@@ -53,7 +53,11 @@ export const TargetFieldSelector = () => {
         }
       }
 
-      if ('where' in formValues && !isAlwaysCondition(formValues.where)) {
+      if (
+        'where' in formValues &&
+        formValues.where !== undefined &&
+        !isAlwaysCondition(formValues.where)
+      ) {
         if (!hasTargetField) {
           return i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processor.convertTargetFieldRequiredWithCondition',

@@ -277,6 +277,7 @@ export type ConvertProcessor = BaseConvertProcessor &
   (
     | {
         to?: string;
+        where?: undefined;
       }
     | {
         to: string;
@@ -287,16 +288,25 @@ export type ConvertProcessor = BaseConvertProcessor &
 export const convertProcessorSchema = processorBaseWithWhereSchema
   .extend({
     action: z.literal('convert'),
-    from: StreamlangSourceField,
-    to: z.optional(StreamlangTargetField),
-    type: z.enum(convertTypes),
-    ignore_missing: z.optional(z.boolean()),
+    from: StreamlangSourceField.describe('Source field to convert to a different data type'),
+    to: z
+      .optional(StreamlangTargetField)
+      .describe('Target field for the converted value (defaults to source)'),
+    type: z
+      .enum(convertTypes)
+      .describe('Target data type: integer, long, double, boolean, or string'),
+    ignore_missing: z
+      .optional(z.boolean())
+      .describe('Skip processing when source field is missing'),
   })
   .refine((obj) => (obj.where && obj.to && obj.from !== obj.to) || !obj.where, {
     message:
       'Convert processor must have the "to" parameter when there is a "where" condition. It should not be the same as the source field.',
     path: ['to', 'where'],
-  }) satisfies z.Schema<ConvertProcessor>;
+  })
+  .describe(
+    'Convert processor - Change the data type of a field value (integer, long, double, boolean, or string)'
+  ) satisfies z.Schema<ConvertProcessor>;
 
 /**
  * RemoveByPrefix processor
@@ -307,10 +317,14 @@ export interface RemoveByPrefixProcessor extends ProcessorBase {
   from: string;
 }
 
-export const removeByPrefixProcessorSchema = processorBaseSchema.extend({
-  action: z.literal('remove_by_prefix'),
-  from: StreamlangSourceField,
-}) satisfies z.Schema<RemoveByPrefixProcessor>;
+export const removeByPrefixProcessorSchema = processorBaseSchema
+  .extend({
+    action: z.literal('remove_by_prefix'),
+    from: StreamlangSourceField.describe('Field to remove along with all its nested fields'),
+  })
+  .describe(
+    'Remove by prefix processor - Remove a field and all nested fields matching the prefix'
+  ) satisfies z.Schema<RemoveByPrefixProcessor>;
 
 /**
  * Remove processor
@@ -322,11 +336,17 @@ export interface RemoveProcessor extends ProcessorBaseWithWhere {
   ignore_missing?: boolean;
 }
 
-export const removeProcessorSchema = processorBaseWithWhereSchema.extend({
-  action: z.literal('remove'),
-  from: StreamlangSourceField,
-  ignore_missing: z.optional(z.boolean()),
-}) satisfies z.Schema<RemoveProcessor>;
+export const removeProcessorSchema = processorBaseWithWhereSchema
+  .extend({
+    action: z.literal('remove'),
+    from: StreamlangSourceField.describe('Field to remove from the document'),
+    ignore_missing: z
+      .optional(z.boolean())
+      .describe('Skip processing when source field is missing'),
+  })
+  .describe(
+    'Remove processor - Delete one or more fields from the document'
+  ) satisfies z.Schema<RemoveProcessor>;
 
 export type StreamlangProcessorDefinition =
   | DateProcessor

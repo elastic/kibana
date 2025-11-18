@@ -13,6 +13,7 @@ import { isActionBlock } from '@kbn/streamlang/types/streamlang';
 import type {
   StreamlangProcessorDefinition,
   StreamlangStepWithUIAttributes,
+  StreamlangDSL,
 } from '@kbn/streamlang';
 import type { EnrichmentDataSource } from '../../../../../../common/url_schema';
 import {
@@ -46,6 +47,9 @@ export const useStreamEnrichmentEvents = () => {
 
   return useMemo(
     () => ({
+      reassignSteps: (steps: StreamlangDSL['steps']) => {
+        service.send({ type: 'step.reassignSteps', steps });
+      },
       addProcessor: (
         step?: StreamlangProcessorDefinition,
         options?: { parentId: StreamlangStepWithUIAttributes['parentId'] }

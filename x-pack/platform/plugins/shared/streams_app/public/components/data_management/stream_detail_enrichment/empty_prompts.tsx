@@ -11,6 +11,7 @@ import {
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiHorizontalRule,
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
@@ -71,7 +72,7 @@ export const RootStreamEmptyPrompt = () => {
   );
 };
 
-export const NoStepsEmptyPrompt = () => {
+export const NoStepsEmptyPrompt: React.FC<React.PropsWithChildren> = ({ children }) => {
   return (
     <EuiEmptyPrompt
       aria-live="polite"
@@ -108,6 +109,8 @@ export const NoStepsEmptyPrompt = () => {
             </EuiText>
           </EuiFlexItem>
           <EuiSpacer size="m" />
+          {children && <EuiFlexItem>{children}</EuiFlexItem>}
+          <EuiHorizontalRule />
           <EuiFlexItem>
             <CreateStepButton mode="prominent" />
           </EuiFlexItem>

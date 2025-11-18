@@ -26,6 +26,8 @@ import {
   dissectProcessorSchema,
   dateProcessorSchema,
   renameProcessorSchema,
+  removeProcessorSchema,
+  convertProcessorSchema,
 } from '@kbn/streamlang';
 
 export const pipelineDefinitionSchema = z
@@ -33,11 +35,13 @@ export const pipelineDefinitionSchema = z
     steps: z
       .array(
         // Explicitly set list of processors we want to include in suggestions
-        z.discriminatedUnion('action', [
+        z.union([
           grokProcessorSchema,
           dissectProcessorSchema,
           dateProcessorSchema,
           renameProcessorSchema,
+          removeProcessorSchema,
+          convertProcessorSchema,
         ])
       )
       .describe(

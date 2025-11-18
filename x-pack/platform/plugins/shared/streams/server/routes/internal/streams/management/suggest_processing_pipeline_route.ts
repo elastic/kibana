@@ -7,12 +7,18 @@
 
 import { z } from '@kbn/zod';
 import { Streams } from '@kbn/streams-schema';
-import { suggestIngestPipeline, type IngestPipeline } from '@kbn/streams-ai';
+import { suggestProcessingPipeline } from '@kbn/streams-ai';
 import { from, map } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
 import type { Observable } from 'rxjs';
 import { type FlattenRecord, flattenRecord } from '@kbn/streams-schema';
-import { type StreamlangDSL } from '@kbn/streamlang';
+import {
+  type StreamlangDSL,
+  type GrokProcessor,
+  type DissectProcessor,
+  grokProcessorSchema,
+  dissectProcessorSchema,
+} from '@kbn/streamlang';
 import { STREAMS_TIERED_ML_FEATURE } from '../../../../../common';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
@@ -28,6 +34,7 @@ export interface SuggestIngestPipelineParams {
     start: number;
     end: number;
     documents: FlattenRecord[];
+    parsing_processor: GrokProcessor | DissectProcessor;
   };
 }
 
@@ -38,15 +45,22 @@ export const suggestIngestPipelineSchema = z.object({
     start: z.number(),
     end: z.number(),
     documents: z.array(flattenRecord),
+    parsing_processor: z.discriminatedUnion('action', [
+      grokProcessorSchema,
+      dissectProcessorSchema,
+    ]),
   }),
 }) satisfies z.Schema<SuggestIngestPipelineParams>;
 
-type SuggestIngestPipelineResponse = Observable<
-  ServerSentEventBase<'suggested_ingest_pipeline', { pipeline: IngestPipeline | null }>
+type SuggestProcessingPipelineResponse = Observable<
+  ServerSentEventBase<
+    'suggested_processing_pipeline',
+    { pipeline: Awaited<ReturnType<typeof suggestProcessingPipeline>> }
+  >
 >;
 
-export const suggestIngestPipelineRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{name}/_suggest_ingest_pipeline',
+export const suggestProcessingPipelineRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{name}/_suggest_processing_pipeline',
   options: {
     access: 'internal',
   },
@@ -62,7 +76,7 @@ export const suggestIngestPipelineRoute = createServerRoute({
     getScopedClients,
     server,
     logger,
-  }): Promise<SuggestIngestPipelineResponse> => {
+  }): Promise<SuggestProcessingPipelineResponse> => {
     const isAvailableForTier = server.core.pricing.isFeatureAvailable(STREAMS_TIERED_ML_FEATURE.id);
     if (!isAvailableForTier) {
       throw new SecurityError('Cannot access API on the current pricing tier');
@@ -81,16 +95,18 @@ export const suggestIngestPipelineRoute = createServerRoute({
 
     const abortController = new AbortController();
 
-    const pipelinePromise = suggestIngestPipeline({
+    const pipelinePromise = suggestProcessingPipeline({
       definition: stream,
       inferenceClient: inferenceClient.bindTo({ connectorId: params.body.connector_id }),
       esClient: scopedClusterClient.asCurrentUser,
       logger,
       start: params.body.start,
       end: params.body.end,
+      parsingProcessor: params.body.parsing_processor,
       maxSteps: undefined, // Allow full reasoning for pipeline generation
       signal: abortController.signal,
       documents: params.body.documents,
+      fieldsMetadataClient,
       simulatePipeline: (pipeline: StreamlangDSL) =>
         simulateProcessing({
           params: {
@@ -107,8 +123,8 @@ export const suggestIngestPipelineRoute = createServerRoute({
     // response here is to avoid timeout issues prevalent with long-running requests to LLMs.
     return from(pipelinePromise).pipe(
       map((pipeline) => ({
+        type: 'suggested_processing_pipeline' as const,
         pipeline,
-        type: 'suggested_ingest_pipeline' as const,
       }))
     );
   },

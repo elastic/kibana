@@ -59,11 +59,13 @@ export const SuggestIngestPipelinePrompt = createPrompt({
         schema: {
           type: 'object',
           properties: {
-            message: {
-              type: 'string',
-              description: 'Optional commit message describing the pipeline.',
+            pipeline: {
+              type: 'object',
+              description: 'The pipeline definition object containing processing steps',
+              properties: {},
             },
           },
+          required: ['pipeline'],
         },
       },
     } as const,
