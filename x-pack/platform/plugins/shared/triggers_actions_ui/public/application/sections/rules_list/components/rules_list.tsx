@@ -774,7 +774,7 @@ export const RulesList = ({
         showSpinner={showSpinner}
         onCreateRulesClick={openRuleTypeModal}
       />
-      <EuiPageTemplate.Section data-test-subj="rulesList" grow={false} paddingSize="none">
+      <EuiPageTemplate.Section data-test-subj="rulesListSection" grow={false} paddingSize="none">
         {isDeleteModalFlyoutVisible && (
           <RulesDeleteModalConfirmation
             onConfirm={onDeleteConfirm}

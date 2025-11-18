@@ -9,30 +9,34 @@ import { STREAMS_TIERED_AI_FEATURE } from '@kbn/streams-plugin/common';
 import { isEmpty } from 'lodash';
 import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../../../../hooks/use_kibana';
+import { useGenAIConnectors } from '../../../../hooks/use_genai_connectors';
 
 export function useAIFeatures() {
   const {
     dependencies: {
-      start: { observabilityAIAssistant, licensing },
+      start: { licensing, streams },
     },
     core,
   } = useKibana();
 
   const isAIAvailableForTier = core.pricing.isFeatureAvailable(STREAMS_TIERED_AI_FEATURE.id);
   const license = useObservable(licensing.license$);
-  const genAiConnectors = observabilityAIAssistant?.useGenAIConnectors();
+  const genAiConnectors = useGenAIConnectors({
+    streamsRepositoryClient: streams.streamsRepositoryClient,
+    uiSettings: core.uiSettings,
+  });
 
-  if (!observabilityAIAssistant || !genAiConnectors) {
+  // Check if actions plugin access is available (read permission)
+  const hasActionsAccess = core.application.capabilities.actions?.show;
+
+  if (!hasActionsAccess || !genAiConnectors) {
     return null;
   }
 
   const couldBeEnabled = Boolean(
-    isAIAvailableForTier &&
-      license?.hasAtLeast('enterprise') &&
-      core.application.capabilities.actions?.save
+    isAIAvailableForTier && license?.hasAtLeast('enterprise') && hasActionsAccess
   );
-  const enabled =
-    observabilityAIAssistant.service.isEnabled() && !isEmpty(genAiConnectors.connectors);
+  const enabled = Boolean(couldBeEnabled && !isEmpty(genAiConnectors.connectors));
 
   return {
     enabled,
