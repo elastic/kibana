@@ -69,10 +69,12 @@ describe('When rendering the command list (help output)', () => {
       renderAndOpenHelpPanel();
 
       expect(renderResult.getByTestId('test-commandList-helpfulTips')).toHaveTextContent(
-        'Helpful tips:You can enter consecutive response actions — no need to wait for previous ' +
-          'actions to complete.Leaving the response console does not terminate any actions that have ' +
-          'been submitted.Learn more(external, opens in a new tab or window) about response actions ' +
-          'and using the console.'
+        'Helpful tips:' +
+          'Double consecutive dashes (--) for anything other than to reference a command argument must be escaped as \\-\\-. ' +
+          'Without escaping them, the console will interpret it as an argument and attempt to process it as such.' +
+          'You can enter consecutive response actions — no need to wait for previous actions to complete.' +
+          'Leaving the response console does not terminate any actions that have been submitted.' +
+          'Learn more(external, opens in a new tab or window) about response actions and using the console.'
       );
 
       expect(renderResult.getByTestId('test-commandList-helpfulHintDocLink')).toBeTruthy();
