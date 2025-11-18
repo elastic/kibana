@@ -378,8 +378,11 @@ function visitOnFailure(
     graph = createFallback(stepId, graph, onFailureConfiguration.fallback, context);
   }
 
-  if (onFailureConfiguration.continue) {
-    graph = createContinue(stepId, graph);
+  if (
+    typeof onFailureConfiguration.continue === 'string' ||
+    onFailureConfiguration.continue === true
+  ) {
+    graph = createContinue(stepId, onFailureConfiguration.continue, graph);
   }
 
   context.stack.pop();
@@ -470,7 +473,11 @@ function handleWorkflowLevelOnFailure(
   return result;
 }
 
-function createContinue(stepId: string, innerGraph: WorkflowGraphType): WorkflowGraphType {
+function createContinue(
+  stepId: string,
+  condition: string | boolean,
+  innerGraph: WorkflowGraphType
+): WorkflowGraphType {
   const graph = createTypedGraph({ directed: true });
   const enterContinueNodeId = `enterContinue_${stepId}`;
   const exitNodeId = `exitContinue_${stepId}`;
@@ -480,6 +487,7 @@ function createContinue(stepId: string, innerGraph: WorkflowGraphType): Workflow
     stepId,
     stepType: 'continue',
     exitNodeId,
+    condition,
   };
   const exitContinueNode: ExitContinueNode = {
     type: 'exit-continue',

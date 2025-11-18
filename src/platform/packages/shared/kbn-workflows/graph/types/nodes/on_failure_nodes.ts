@@ -14,7 +14,7 @@ import { WorkflowRetrySchema } from '../../../spec/schema';
 export const EnterContinueNodeSchema = GraphNodeSchema.extend({
   id: z.string(),
   type: z.literal('enter-continue'),
-
+  condition: z.union([z.string(), z.boolean()]),
   exitNodeId: z.string(),
 });
 export type EnterContinueNode = z.infer<typeof EnterContinueNodeSchema>;

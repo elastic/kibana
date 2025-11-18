@@ -42,7 +42,7 @@ export interface NodeImplementation {
 }
 
 export interface NodeWithErrorCatching {
-  catchError(): Promise<void>;
+  catchError(failedContext: StepExecutionRuntime): Promise<void>;
 }
 
 export interface MonitorableNode {

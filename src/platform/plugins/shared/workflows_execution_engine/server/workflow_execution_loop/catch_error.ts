@@ -100,9 +100,13 @@ export async function catchError(
 
       if ((stepImplementation as unknown as NodeWithErrorCatching).catchError) {
         const stepErrorCatcher = stepImplementation as unknown as NodeWithErrorCatching;
-
+        const scopeStepExecutionRuntime =
+          params.stepExecutionRuntimeFactory.createStepExecutionRuntime({
+            nodeId: scopeEntry.nodeId,
+            stackFrames: workflowScopeStack.stackFrames,
+          });
         try {
-          await stepErrorCatcher.catchError();
+          await stepErrorCatcher.catchError(scopeStepExecutionRuntime);
         } catch (error) {
           params.workflowExecutionState.updateWorkflowExecution({
             error,
