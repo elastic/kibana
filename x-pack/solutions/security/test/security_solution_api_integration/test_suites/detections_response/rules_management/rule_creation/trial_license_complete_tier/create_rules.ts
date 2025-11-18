@@ -26,15 +26,11 @@ import {
   getSavedQueryRuleParams,
   getMLRuleParams,
   getThresholdRuleParams,
-  generateEvent,
   fetchRule,
-  waitForAlertToComplete,
-  refreshIndex,
 } from '../../../utils';
 import {
   deleteAllRules,
   waitForRuleSuccess,
-  waitForAlertsToBePresent,
   waitForRulePartialFailure,
   deleteAllAlerts,
 } from '../../../../../config/services/detections_response';
@@ -478,88 +474,6 @@ export default ({ getService }: FtrProviderContext) => {
             '[request body]: investigation_fields: Expected object, received array'
           );
         });
-      });
-    });
-
-    describe('@skipInServerless missing timestamps', () => {
-      const EVENTS_INDEX_NAME = 'myfakeindex-1';
-
-      beforeEach(async () => {
-        await es.indices.delete({ index: EVENTS_INDEX_NAME, ignore_unavailable: true });
-        await es.indices.create({
-          index: EVENTS_INDEX_NAME,
-          mappings: {
-            properties: {
-              '@timestamp': {
-                type: 'date',
-              },
-            },
-          },
-        });
-        await es.index({
-          index: EVENTS_INDEX_NAME,
-          document: generateEvent({ '@timestamp': Date.now() - 1 }),
-        });
-        await es.index({
-          index: EVENTS_INDEX_NAME,
-          document: generateEvent({ '@timestamp': Date.now() - 2 }),
-        });
-        await refreshIndex(es, EVENTS_INDEX_NAME);
-        await deleteAllAlerts(supertest, log, es);
-        await deleteAllRules(supertest, log);
-      });
-
-      it('expects partial failure for a rule with timestamp override and index pattern matching no indices', async () => {
-        const {
-          body: { id },
-        } = await detectionsApi
-          .createRule({
-            body: getCustomQueryRuleParams({
-              index: [EVENTS_INDEX_NAME],
-              timestamp_override: 'event.ingested',
-              enabled: true,
-            }),
-          })
-          .expect(200);
-
-        await waitForAlertToComplete(supertest, log, id);
-        await waitForRulePartialFailure({
-          supertest,
-          log,
-          id,
-        });
-
-        const rule = await fetchRule(supertest, { id });
-
-        expect(rule?.execution_summary?.last_execution.status).toEqual('partial failure');
-        expect(rule?.execution_summary?.last_execution.message).toEqual(
-          `The following indices are missing the timestamp override field "event.ingested": ["${EVENTS_INDEX_NAME}"]`
-        );
-      });
-
-      it('generates two alerts with a "partial failure" status', async () => {
-        const {
-          body: { id },
-        } = await detectionsApi
-          .createRule({
-            body: getCustomQueryRuleParams({
-              index: [EVENTS_INDEX_NAME],
-              timestamp_override: 'event.ingested',
-              enabled: true,
-            }),
-          })
-          .expect(200);
-
-        await waitForRulePartialFailure({
-          supertest,
-          log,
-          id,
-        });
-        await waitForAlertsToBePresent(supertest, log, 2, [id]);
-
-        const rule = await fetchRule(supertest, { id });
-
-        expect(rule?.execution_summary?.last_execution.status).toEqual('partial failure');
       });
     });
 

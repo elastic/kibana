@@ -14,7 +14,13 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 
-import { getAlerts, getEqlRuleForAlertTesting } from '../../../../utils';
+import type { Client } from '@elastic/elasticsearch';
+import {
+  getAlerts,
+  getEqlRuleForAlertTesting,
+  getCustomQueryRuleParams,
+  waitForAlertToComplete,
+} from '../../../../utils';
 import {
   createAlertsIndex,
   deleteAllRules,
@@ -30,6 +36,7 @@ import type { FtrProviderContext } from '../../../../../../ftr_provider_context'
 import { EsArchivePathBuilder } from '../../../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {
+  const detectionsApi = getService('detectionsApi');
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
@@ -125,219 +132,395 @@ export default ({ getService }: FtrProviderContext) => {
      * the rule's query will additionally search for events using the `@timestamp` field
      */
     describe('alerts generated from events with timestamp override field', () => {
+      const EVENTS_INDEX_NAME = 'myfakeindex-1';
+      const EVENT_DOC_WITHOUT_TIMESTAMPS = { message: 'hello world 1' };
+      const EVENT_DOC_WITH_DEFAULT_TIMESTAMP = {
+        message: 'hello world 3',
+        '@timestamp': new Date(Date.now() - 1),
+      };
+      const EVENT_DOC_WITH_CUSTOM_TIMESTAMP = {
+        message: 'hello world 2',
+        event: {
+          ingested: new Date(Date.now() - 2).toISOString(),
+        },
+      };
+      const EVENT_DOC_WITH_BOTH_TIMESTAMPS = {
+        message: 'hello world 4',
+        '@timestamp': new Date(Date.now() - 3).toISOString(),
+        event: {
+          ingested: new Date(Date.now() - 4).toISOString(),
+        },
+      };
+
       beforeEach(async () => {
+        await deleteAllRules(supertest, log);
         await deleteAllAlerts(supertest, log, es);
         await createAlertsIndex(supertest, log);
-        await esArchiver.load(
-          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_1'
-        );
-        await esArchiver.load(
-          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_2'
-        );
-        await esArchiver.load(
-          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_3'
-        );
-        await esArchiver.load(
-          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_4'
-        );
-      });
-
-      afterEach(async () => {
-        await deleteAllAlerts(supertest, log, es);
-        await deleteAllRules(supertest, log);
-        await esArchiver.unload(
-          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_1'
-        );
-        await esArchiver.unload(
-          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_2'
-        );
-        await esArchiver.unload(
-          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_3'
-        );
-        await esArchiver.unload(
-          'x-pack/solutions/security/test/fixtures/es_archives/security_solution/timestamp_override_4'
-        );
       });
 
       describe('KQL', () => {
-        it('should generate alerts with event.ingested, @timestamp and (event.ingested + timestamp)', async () => {
-          const rule: QueryRuleCreateProps = {
-            ...getRuleForAlertTesting(['myfa*']),
-            timestamp_override: 'event.ingested',
-          };
+        describe('timestamp fallback is enabled', () => {
+          it('generates alerts for events having the default timestamp field', async () => {
+            await ingestEvents({
+              es,
+              indexName: EVENTS_INDEX_NAME,
+              events: [
+                EVENT_DOC_WITHOUT_TIMESTAMPS,
+                EVENT_DOC_WITH_DEFAULT_TIMESTAMP,
+                EVENT_DOC_WITH_CUSTOM_TIMESTAMP,
+                EVENT_DOC_WITH_BOTH_TIMESTAMPS,
+              ],
+            });
 
-          const { id } = await createRule(supertest, log, rule);
+            const {
+              body: { id },
+            } = await detectionsApi
+              .createRule({
+                body: getCustomQueryRuleParams({
+                  ...getRuleForAlertTesting([EVENTS_INDEX_NAME]),
+                }),
+              })
+              .expect(200);
 
-          await waitForRulePartialFailure({
-            supertest,
-            log,
-            id,
+            await waitForRuleSuccess({
+              supertest,
+              log,
+              id,
+            });
+            await waitForAlertsToBePresent(supertest, log, 2, [id]);
+            const alertsResponse = await getAlertsByIds(supertest, log, [id]);
+            const alerts = alertsResponse.hits.hits.map((hit) => hit._source);
+            const alertsOrderedByEventId = orderBy(alerts, 'alert.parent.id', 'asc');
+
+            expect(alertsOrderedByEventId).toHaveLength(2);
           });
-          await waitForAlertsToBePresent(supertest, log, 3, [id]);
-          const alertsResponse = await getAlertsByIds(supertest, log, [id], 3);
-          const alerts = alertsResponse.hits.hits.map((hit) => hit._source);
-          const alertsOrderedByEventId = orderBy(alerts, 'alert.parent.id', 'asc');
 
-          expect(alertsOrderedByEventId).toHaveLength(3);
-        });
+          describe('with timestamp override', () => {
+            it('expects partial failure when matching events have the timestamp override field missing', async () => {
+              await ingestEvents({
+                es,
+                indexName: EVENTS_INDEX_NAME,
+                events: [EVENT_DOC_WITHOUT_TIMESTAMPS, EVENT_DOC_WITH_DEFAULT_TIMESTAMP],
+              });
 
-        it('should generate 2 alerts with event.ingested when timestamp fallback is disabled', async () => {
-          const rule: QueryRuleCreateProps = {
-            ...getRuleForAlertTesting(['myfa*']),
-            rule_id: 'rule-without-timestamp-fallback',
-            timestamp_override: 'event.ingested',
-            timestamp_override_fallback_disabled: true,
-          };
+              const {
+                body: { id },
+              } = await detectionsApi
+                .createRule({
+                  body: getCustomQueryRuleParams({
+                    index: [EVENTS_INDEX_NAME],
+                    timestamp_override: 'event.ingested',
+                    enabled: true,
+                  }),
+                })
+                .expect(200);
 
-          const { id } = await createRule(supertest, log, rule);
+              await waitForAlertToComplete(supertest, log, id);
+              await waitForRulePartialFailure({
+                supertest,
+                log,
+                id,
+              });
 
-          await waitForRulePartialFailure({
-            supertest,
-            log,
-            id,
+              const { body: rule } = await detectionsApi
+                .readRule({
+                  query: { id },
+                })
+                .expect(200);
+
+              expect(rule?.execution_summary?.last_execution.status).toEqual('partial failure');
+              expect(rule?.execution_summary?.last_execution.message).toEqual(
+                `The following indices are missing the timestamp override field "event.ingested": ["${EVENTS_INDEX_NAME}"]`
+              );
+            });
+
+            it('generates alerts for events having the default timestamp field but missing the timestamp override field', async () => {
+              await ingestEvents({
+                es,
+                indexName: EVENTS_INDEX_NAME,
+                events: [
+                  EVENT_DOC_WITHOUT_TIMESTAMPS,
+                  EVENT_DOC_WITH_DEFAULT_TIMESTAMP,
+                  EVENT_DOC_WITH_CUSTOM_TIMESTAMP,
+                  EVENT_DOC_WITH_BOTH_TIMESTAMPS,
+                ],
+              });
+
+              const {
+                body: { id },
+              } = await detectionsApi
+                .createRule({
+                  body: getCustomQueryRuleParams({
+                    ...getRuleForAlertTesting([EVENTS_INDEX_NAME]),
+                    timestamp_override: 'event.non-existent-field',
+                  }),
+                })
+                .expect(200);
+
+              await waitForRulePartialFailure({
+                supertest,
+                log,
+                id,
+              });
+              await waitForAlertsToBePresent(supertest, log, 2, [id]);
+              const alertsResponse = await getAlertsByIds(supertest, log, [id, id]);
+              const alerts = alertsResponse.hits.hits.map((hit) => hit._source);
+              const alertsOrderedByEventId = orderBy(alerts, 'alert.parent.id', 'asc');
+
+              expect(alertsOrderedByEventId).toHaveLength(2);
+            });
+
+            it('generates alerts for events having the default timestamp field, override timestamp field and both timestamps fields', async () => {
+              await ingestEvents({
+                es,
+                indexName: EVENTS_INDEX_NAME,
+                events: [
+                  EVENT_DOC_WITHOUT_TIMESTAMPS,
+                  EVENT_DOC_WITH_DEFAULT_TIMESTAMP,
+                  EVENT_DOC_WITH_CUSTOM_TIMESTAMP,
+                  EVENT_DOC_WITH_BOTH_TIMESTAMPS,
+                ],
+              });
+
+              const {
+                body: { id },
+              } = await detectionsApi
+                .createRule({
+                  body: getCustomQueryRuleParams({
+                    ...getRuleForAlertTesting([EVENTS_INDEX_NAME]),
+                    timestamp_override: 'event.ingested',
+                  }),
+                })
+                .expect(200);
+
+              await waitForRuleSuccess({
+                supertest,
+                log,
+                id,
+              });
+              await waitForAlertsToBePresent(supertest, log, 3, [id]);
+              const alertsResponse = await getAlertsByIds(supertest, log, [id], 3);
+              const alerts = alertsResponse.hits.hits.map((hit) => hit._source);
+              const alertsOrderedByEventId = orderBy(alerts, 'alert.parent.id', 'asc');
+
+              expect(alertsOrderedByEventId).toHaveLength(3);
+            });
+
+            /**
+             * We should not use the timestamp override as the "original_time" as that can cause
+             * confusion if you have both a timestamp and an override in the source event. Instead the "original_time"
+             * field should only be overridden by the "timestamp" since when we generate a alert
+             * and we add a new timestamp to the alert.
+             */
+            it('does NOT use the timestamp override as the "original_time"', async () => {
+              await ingestEvents({
+                es,
+                indexName: EVENTS_INDEX_NAME,
+                events: [EVENT_DOC_WITH_CUSTOM_TIMESTAMP],
+              });
+
+              const {
+                body: { id },
+              } = await detectionsApi
+                .createRule({
+                  body: getCustomQueryRuleParams({
+                    ...getRuleForAlertTesting([EVENTS_INDEX_NAME]),
+                    timestamp_override: 'event.ingested',
+                  }),
+                })
+                .expect(200);
+
+              await waitForRuleSuccess({ supertest, log, id });
+              await waitForAlertsToBePresent(supertest, log, 1, [id]);
+              const alertsResponse = await getAlertsByIds(supertest, log, [id, id]);
+              const hits = alertsResponse.hits.hits
+                .map((hit) => hit._source?.[ALERT_ORIGINAL_TIME])
+                .sort();
+              expect(hits).toEqual([undefined]);
+            });
           });
-          await waitForAlertsToBePresent(supertest, log, 2, [id]);
-          const alertsResponse = await getAlertsByIds(supertest, log, [id], 2);
-          const alerts = alertsResponse.hits.hits.map((hit) => hit._source);
-          const alertsOrderedByEventId = orderBy(alerts, 'alert.parent.id', 'asc');
-
-          expect(alertsOrderedByEventId).toHaveLength(2);
         });
 
-        it('should generate 2 alerts with @timestamp', async () => {
-          const rule: QueryRuleCreateProps = getRuleForAlertTesting(['myfa*']);
+        describe('timestamp fallback is disabled', () => {
+          describe('with timestamp override', () => {
+            it('generates alerts only for events having override timestamp field', async () => {
+              await ingestEvents({
+                es,
+                indexName: EVENTS_INDEX_NAME,
+                events: [
+                  EVENT_DOC_WITHOUT_TIMESTAMPS,
+                  EVENT_DOC_WITH_DEFAULT_TIMESTAMP,
+                  EVENT_DOC_WITH_CUSTOM_TIMESTAMP,
+                  EVENT_DOC_WITH_BOTH_TIMESTAMPS,
+                ],
+              });
 
-          const { id } = await createRule(supertest, log, rule);
+              const {
+                body: { id },
+              } = await detectionsApi
+                .createRule({
+                  body: getCustomQueryRuleParams({
+                    ...getRuleForAlertTesting([EVENTS_INDEX_NAME]),
+                    rule_id: 'rule-without-timestamp-fallback',
+                    timestamp_override: 'event.ingested',
+                    timestamp_override_fallback_disabled: true,
+                  }),
+                })
+                .expect(200);
 
-          await waitForRulePartialFailure({
-            supertest,
-            log,
-            id,
+              await waitForRuleSuccess({
+                supertest,
+                log,
+                id,
+              });
+              await waitForAlertsToBePresent(supertest, log, 2, [id]);
+              const alertsResponse = await getAlertsByIds(supertest, log, [id], 2);
+              const alerts = alertsResponse.hits.hits.map((hit) => hit._source);
+              const alertsOrderedByEventId = orderBy(alerts, 'alert.parent.id', 'asc');
+
+              expect(alertsOrderedByEventId).toHaveLength(2);
+            });
+
+            it('does NOT generate any alerts for events missing timestamp override field', async () => {
+              await ingestEvents({
+                es,
+                indexName: EVENTS_INDEX_NAME,
+                events: [
+                  EVENT_DOC_WITHOUT_TIMESTAMPS,
+                  EVENT_DOC_WITH_DEFAULT_TIMESTAMP,
+                  EVENT_DOC_WITH_CUSTOM_TIMESTAMP,
+                  EVENT_DOC_WITH_BOTH_TIMESTAMPS,
+                ],
+              });
+
+              const { body: createdRule } = await detectionsApi
+                .createRule({
+                  body: getCustomQueryRuleParams({
+                    ...getRuleForAlertTesting([EVENTS_INDEX_NAME]),
+                    rule_id: 'rule-without-timestamp-fallback',
+                    timestamp_override: 'event.fakeingestfield',
+                    timestamp_override_fallback_disabled: true,
+                  }),
+                })
+                .expect(200);
+
+              const alertsOpen = await getAlerts(
+                supertest,
+                log,
+                es,
+                createdRule,
+                RuleExecutionStatusEnum['partial failure']
+              );
+              expect(alertsOpen.hits.hits).toHaveLength(0);
+            });
           });
-          await waitForAlertsToBePresent(supertest, log, 2, [id]);
-          const alertsResponse = await getAlertsByIds(supertest, log, [id]);
-          const alerts = alertsResponse.hits.hits.map((hit) => hit._source);
-          const alertsOrderedByEventId = orderBy(alerts, 'alert.parent.id', 'asc');
-
-          expect(alertsOrderedByEventId).toHaveLength(2);
-        });
-
-        it('should generate 2 alerts when timestamp override does not exist', async () => {
-          const rule: QueryRuleCreateProps = {
-            ...getRuleForAlertTesting(['myfa*']),
-            timestamp_override: 'event.fakeingestfield',
-          };
-          const { id } = await createRule(supertest, log, rule);
-
-          await waitForRulePartialFailure({
-            supertest,
-            log,
-            id,
-          });
-          await waitForAlertsToBePresent(supertest, log, 2, [id]);
-          const alertsResponse = await getAlertsByIds(supertest, log, [id, id]);
-          const alerts = alertsResponse.hits.hits.map((hit) => hit._source);
-          const alertsOrderedByEventId = orderBy(alerts, 'alert.parent.id', 'asc');
-
-          expect(alertsOrderedByEventId).toHaveLength(2);
-        });
-
-        it('should not generate any alerts when timestamp override does not exist and timestamp fallback is disabled', async () => {
-          const rule: QueryRuleCreateProps = {
-            ...getRuleForAlertTesting(['myfa*']),
-            rule_id: 'rule-without-timestamp-fallback',
-            timestamp_override: 'event.fakeingestfield',
-            timestamp_override_fallback_disabled: true,
-          };
-
-          const createdRule = await createRule(supertest, log, rule);
-          const alertsOpen = await getAlerts(
-            supertest,
-            log,
-            es,
-            createdRule,
-            RuleExecutionStatusEnum['partial failure']
-          );
-          expect(alertsOpen.hits.hits).toHaveLength(0);
-        });
-
-        /**
-         * We should not use the timestamp override as the "original_time" as that can cause
-         * confusion if you have both a timestamp and an override in the source event. Instead the "original_time"
-         * field should only be overridden by the "timestamp" since when we generate a alert
-         * and we add a new timestamp to the alert.
-         */
-        it('should NOT use the timestamp override as the "original_time"', async () => {
-          const rule: QueryRuleCreateProps = {
-            ...getRuleForAlertTesting(['myfakeindex-2']),
-            timestamp_override: 'event.ingested',
-          };
-          const { id } = await createRule(supertest, log, rule);
-
-          await waitForRuleSuccess({ supertest, log, id });
-          await waitForAlertsToBePresent(supertest, log, 1, [id]);
-          const alertsResponse = await getAlertsByIds(supertest, log, [id, id]);
-          const hits = alertsResponse.hits.hits
-            .map((hit) => hit._source?.[ALERT_ORIGINAL_TIME])
-            .sort();
-          expect(hits).toEqual([undefined]);
         });
       });
 
       describe('EQL', () => {
-        it('should generate 2 alerts with @timestamp', async () => {
-          const rule: EqlRuleCreateProps = getEqlRuleForAlertTesting(['myfa*']);
+        describe('timestamp fallback is enabled', () => {
+          it('generates alerts for events having the default timestamp field', async () => {
+            await ingestEvents({
+              es,
+              indexName: EVENTS_INDEX_NAME,
+              events: [
+                EVENT_DOC_WITHOUT_TIMESTAMPS,
+                EVENT_DOC_WITH_DEFAULT_TIMESTAMP,
+                EVENT_DOC_WITH_CUSTOM_TIMESTAMP,
+                EVENT_DOC_WITH_BOTH_TIMESTAMPS,
+              ],
+            });
 
-          const { id } = await createRule(supertest, log, rule);
+            const {
+              body: { id },
+            } = await detectionsApi
+              .createRule({
+                body: getEqlRuleForAlertTesting([EVENTS_INDEX_NAME]),
+              })
+              .expect(200);
 
-          await waitForRulePartialFailure({
-            supertest,
-            log,
-            id,
+            await waitForRuleSuccess({
+              supertest,
+              log,
+              id,
+            });
+            await waitForAlertsToBePresent(supertest, log, 2, [id]);
+            const alertsResponse = await getAlertsByIds(supertest, log, [id]);
+            const alerts = alertsResponse.hits.hits.map((hit) => hit._source);
+            const alertsOrderedByEventId = orderBy(alerts, 'alert.parent.id', 'asc');
+
+            expect(alertsOrderedByEventId).toHaveLength(2);
           });
-          await waitForAlertsToBePresent(supertest, log, 2, [id]);
-          const alertsResponse = await getAlertsByIds(supertest, log, [id]);
-          const alerts = alertsResponse.hits.hits.map((hit) => hit._source);
-          const alertsOrderedByEventId = orderBy(alerts, 'alert.parent.id', 'asc');
 
-          expect(alertsOrderedByEventId).toHaveLength(2);
+          it('generates alerts for events having the default timestamp field and missing timestamp override field', async () => {
+            await ingestEvents({
+              es,
+              indexName: EVENTS_INDEX_NAME,
+              events: [
+                EVENT_DOC_WITHOUT_TIMESTAMPS,
+                EVENT_DOC_WITH_DEFAULT_TIMESTAMP,
+                EVENT_DOC_WITH_CUSTOM_TIMESTAMP,
+                EVENT_DOC_WITH_BOTH_TIMESTAMPS,
+              ],
+            });
+
+            const {
+              body: { id },
+            } = await detectionsApi
+              .createRule({
+                body: {
+                  ...getEqlRuleForAlertTesting([EVENTS_INDEX_NAME]),
+                  timestamp_override: 'event.non-existent-field',
+                },
+              })
+              .expect(200);
+
+            await waitForRulePartialFailure({
+              supertest,
+              log,
+              id,
+            });
+            await waitForAlertsToBePresent(supertest, log, 2, [id]);
+            const alertsResponse = await getAlertsByIds(supertest, log, [id, id]);
+            const alerts = alertsResponse.hits.hits.map((hit) => hit._source);
+            const alertsOrderedByEventId = orderBy(alerts, 'alert.parent.id', 'asc');
+
+            expect(alertsOrderedByEventId).toHaveLength(2);
+          });
         });
 
-        it('should generate 2 alerts when timestamp override does not exist', async () => {
-          const rule: EqlRuleCreateProps = {
-            ...getEqlRuleForAlertTesting(['myfa*']),
-            timestamp_override: 'event.fakeingestfield',
-          };
-          const { id } = await createRule(supertest, log, rule);
+        describe('timestamp fallback is disabled', () => {
+          it('does NOT generate any alerts for events missing timestamp override field', async () => {
+            await ingestEvents({
+              es,
+              indexName: EVENTS_INDEX_NAME,
+              events: [
+                EVENT_DOC_WITHOUT_TIMESTAMPS,
+                EVENT_DOC_WITH_DEFAULT_TIMESTAMP,
+                EVENT_DOC_WITH_CUSTOM_TIMESTAMP,
+                EVENT_DOC_WITH_BOTH_TIMESTAMPS,
+              ],
+            });
 
-          await waitForRulePartialFailure({
-            supertest,
-            log,
-            id,
+            const { body: createdRule } = await detectionsApi
+              .createRule({
+                body: {
+                  ...getEqlRuleForAlertTesting([EVENTS_INDEX_NAME]),
+                  timestamp_override: 'event.non-existent-field',
+                  timestamp_override_fallback_disabled: true,
+                },
+              })
+              .expect(200);
+
+            const alertsOpen = await getAlerts(
+              supertest,
+              log,
+              es,
+              createdRule,
+              RuleExecutionStatusEnum['partial failure']
+            );
+            expect(alertsOpen.hits.hits).toHaveLength(0);
           });
-          await waitForAlertsToBePresent(supertest, log, 2, [id]);
-          const alertsResponse = await getAlertsByIds(supertest, log, [id, id]);
-          const alerts = alertsResponse.hits.hits.map((hit) => hit._source);
-          const alertsOrderedByEventId = orderBy(alerts, 'alert.parent.id', 'asc');
-
-          expect(alertsOrderedByEventId).toHaveLength(2);
-        });
-
-        it('should not generate any alerts when timestamp override does not exist and timestamp fallback is disabled', async () => {
-          const rule: EqlRuleCreateProps = {
-            ...getEqlRuleForAlertTesting(['myfa*']),
-            timestamp_override: 'event.fakeingestfield',
-            timestamp_override_fallback_disabled: true,
-          };
-          const createdRule = await createRule(supertest, log, rule);
-          const alertsOpen = await getAlerts(
-            supertest,
-            log,
-            es,
-            createdRule,
-            RuleExecutionStatusEnum['partial failure']
-          );
-          expect(alertsOpen.hits.hits).toHaveLength(0);
         });
       });
     });
@@ -395,3 +578,29 @@ export default ({ getService }: FtrProviderContext) => {
     });
   });
 };
+
+interface IngestEventsParams {
+  es: Client;
+  indexName: string;
+  events: Array<Record<string, unknown>>;
+}
+
+async function ingestEvents({ es, indexName, events }: IngestEventsParams) {
+  await es.indices.delete({ index: indexName, ignore_unavailable: true });
+  await es.indices.create({
+    index: indexName,
+    mappings: {
+      properties: {
+        '@timestamp': {
+          type: 'date',
+        },
+      },
+    },
+  });
+
+  await es.bulk({
+    index: indexName,
+    refresh: true,
+    operations: events.flatMap((eventDoc) => [{ create: {} }, eventDoc]),
+  });
+}
