@@ -55,7 +55,7 @@ function getAgentImageConfig({ returnYaml = false } = {}): string | BuildkiteAge
     bk.setAnnotation(
       'agent image config',
       'info',
-      `#### FIPS Agents Enabled<br />\nFIPS mode can produce new test failures. If you did not intend this remove \`\`\`TEST_ENABLE_FIPS_AGENT\`\`\` environment variable and/or the \`\`\`ci:enable-fips-<version>-agent\`\`\` Github label.`
+      '#### FIPS Agents Enabled<br />\nFIPS mode can produce new test failures. If you did not intend this remove ```TEST_ENABLE_FIPS_AGENT``` environment variable and/or the ```ci:enable-fips-<version>-agent``` Github label.'
     );
   } else {
     config = DEFAULT_AGENT_IMAGE_CONFIG;
