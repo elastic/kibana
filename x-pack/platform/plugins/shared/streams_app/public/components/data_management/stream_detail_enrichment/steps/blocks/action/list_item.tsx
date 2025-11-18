@@ -6,29 +6,31 @@
  */
 
 import {
-  EuiFlexGroup,
-  EuiText,
-  EuiFlexItem,
   EuiBadge,
-  EuiPanel,
-  EuiTextTruncate,
-  useEuiTheme,
-  euiTextTruncate,
   EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPanel,
+  EuiText,
+  EuiTextTruncate,
+  euiTextTruncate,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { isActionBlock } from '@kbn/streamlang';
-import React from 'react';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
+import type { Condition } from '@kbn/streamlang';
+import { isActionBlock } from '@kbn/streamlang';
 import { useSelector } from '@xstate5/react';
-import { ProcessorMetricBadges } from './processor_metrics';
-import { getStepDescription } from './utils';
+import React from 'react';
 import type { ActionBlockProps } from '.';
-import { ProcessorStatusIndicator } from './processor_status_indicator';
+import { ConditionDisplay } from '../../../../shared';
 import { getStepPanelColour } from '../../../utils';
-import { StepContextMenu } from '../context_menu';
 import { BlockDisableOverlay } from '../block_disable_overlay';
+import { StepContextMenu } from '../context_menu';
+import { ProcessorMetricBadges } from './processor_metrics';
+import { ProcessorStatusIndicator } from './processor_status_indicator';
+import { getStepDescription } from './utils';
 
 export const ActionBlockListItem = ({
   processorMetrics,
@@ -162,21 +164,26 @@ export const ActionBlockListItem = ({
               padding: ${euiTheme.size.xs} ${euiTheme.size.s};
             `}
           >
-            <EuiTextTruncate
-              text={stepDescription}
-              truncation="end"
-              children={() => (
-                <EuiText
-                  size="xs"
-                  color="subdued"
-                  css={css`
-                    font-family: ${euiTheme.font.familyCode};
-                  `}
-                >
-                  {stepDescription}
-                </EuiText>
-              )}
-            />
+            {step.action === 'drop_document' ? (
+              // drop_document will always have a condition
+              <ConditionDisplay condition={step.where as Condition} keyword="WHERE" showKeyword />
+            ) : (
+              <EuiTextTruncate
+                text={stepDescription}
+                truncation="end"
+                children={() => (
+                  <EuiText
+                    size="xs"
+                    color="subdued"
+                    css={css`
+                      font-family: ${euiTheme.font.familyCode};
+                    `}
+                  >
+                    {stepDescription}
+                  </EuiText>
+                )}
+              />
+            )}
           </EuiPanel>
         </EuiFlexItem>
       </EuiFlexGroup>
