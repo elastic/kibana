@@ -15,6 +15,7 @@ import {
   getNewUserDefinedColumnSuggestion,
   onCompleteItem,
   assignCompletionItem,
+  withMapCompleteItem,
 } from '../../complete_items';
 import {
   withinQuotes,
@@ -115,6 +116,9 @@ export async function autocomplete(
         insideFunction: positionContext?.insideFunction,
       });
     }
+
+    case CaretPosition.AFTER_WITH_KEYWORD:
+      return [withMapCompleteItem];
 
     case CaretPosition.WITHIN_MAP_EXPRESSION: {
       const endpoints = context?.inferenceEndpoints;
