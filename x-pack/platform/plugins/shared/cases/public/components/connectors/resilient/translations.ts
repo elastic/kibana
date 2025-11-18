@@ -14,20 +14,6 @@ export const INCIDENT_FIELDS_API_ERROR = i18n.translate(
   }
 );
 
-export const INCIDENT_TYPES_API_ERROR = i18n.translate(
-  'xpack.cases.connectors.resilient.unableToGetIncidentTypesMessage',
-  {
-    defaultMessage: 'Unable to get incident types',
-  }
-);
-
-export const SEVERITY_API_ERROR = i18n.translate(
-  'xpack.cases.connectors.resilient.unableToGetSeverityMessage',
-  {
-    defaultMessage: 'Unable to get severity',
-  }
-);
-
 export const INCIDENT_TYPES_PLACEHOLDER = i18n.translate(
   'xpack.cases.connectors.resilient.incidentTypesPlaceholder',
   {
