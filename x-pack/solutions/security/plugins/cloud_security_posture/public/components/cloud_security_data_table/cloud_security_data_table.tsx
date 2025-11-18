@@ -207,7 +207,7 @@ export const CloudSecurityDataTable = ({
     const getWrapperHeight = () => {
       if (height) return height;
 
-      // constaint height when virtualization is enabled or for groups with more than 10 rows
+      // constrain height when virtualization is enabled or for groups with more than 10 rows
       if (isVirtualizationEnabled || (isGroupingEnabled && total > 10)) {
         const baseHeight = 362; // height of Kibana Header + Findings page header and search bar
         const filterBarHeight = filters?.length > 0 ? 40 : 0;
