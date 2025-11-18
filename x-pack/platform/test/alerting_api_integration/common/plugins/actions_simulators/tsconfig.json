@@ -23,7 +23,6 @@
     "@kbn/expect",
     "@kbn/dev-utils",
     "@kbn/zod",
-    "@kbn/stack-connectors-plugin",
     "@kbn/connector-specs",
   ],
 }
