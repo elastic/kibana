@@ -107,7 +107,6 @@ export function SloDetailsHistory({ slo, isAutoRefreshing }: Props) {
 
       <HistoricalDataCharts
         slo={slo}
-        hideMetadata={true}
         isAutoRefreshing={isAutoRefreshing}
         range={range}
         onBrushed={onBrushed}

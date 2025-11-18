@@ -14,7 +14,7 @@ import { useKibana } from '../../../hooks/use_kibana';
 import type { ChartData } from '../../../typings/slo';
 import { toDuration, toMinutes } from '../../../utils/slo/duration';
 import type { TimeBounds } from '../types';
-import { WideChart } from './wide_chart';
+import { BaseChart } from './base_chart';
 
 function formatTime(minutes: number) {
   if (minutes > 59) {
@@ -43,65 +43,68 @@ export function ErrorBudgetChart({ data, isLoading, slo, hideMetadata = false, o
   const { uiSettings } = useKibana().services;
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
   const isSloFailed = slo.summary.status === 'DEGRADING' || slo.summary.status === 'VIOLATED';
-  let errorBudgetTimeRemainingFormatted;
-  if (slo.budgetingMethod === 'timeslices' && slo.timeWindow.type === 'calendarAligned') {
-    const totalSlices =
-      toMinutes(toDuration(slo.timeWindow.duration)) /
-      toMinutes(toDuration(slo.objective.timesliceWindow!));
-    const errorBudgetRemainingInMinute =
-      slo.summary.errorBudget.remaining * (slo.summary.errorBudget.initial * totalSlices);
 
-    errorBudgetTimeRemainingFormatted = formatTime(
-      errorBudgetRemainingInMinute >= 0 ? errorBudgetRemainingInMinute : 0
-    );
-  }
-  return (
-    <>
-      {!hideMetadata && (
-        <EuiFlexGroup direction="row" gutterSize="l" alignItems="flexStart" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiStat
-              titleColor={isSloFailed ? 'danger' : 'success'}
-              title={numeral(slo.summary.errorBudget.remaining).format(percentFormat)}
-              titleSize="s"
-              description={i18n.translate('xpack.slo.sloDetails.errorBudgetChartPanel.remaining', {
-                defaultMessage: 'Remaining',
-              })}
-              reverse
-            />
-          </EuiFlexItem>
-          {errorBudgetTimeRemainingFormatted ? (
-            <EuiFlexItem grow={false}>
-              <EuiStat
-                titleColor={isSloFailed ? 'danger' : 'success'}
-                title={errorBudgetTimeRemainingFormatted}
-                titleSize="s"
-                description={i18n.translate(
-                  'xpack.slo.sloDetails.errorBudgetChartPanel.remaining',
-                  {
-                    defaultMessage: 'Remaining',
-                  }
-                )}
-                reverse
-              />
-            </EuiFlexItem>
-          ) : null}
-        </EuiFlexGroup>
-      )}
+  const errorBudgetTimeRemainingFormatted = React.useMemo(() => {
+    if (slo.budgetingMethod === 'timeslices' && slo.timeWindow.type === 'calendarAligned') {
+      const totalSlices =
+        toMinutes(toDuration(slo.timeWindow.duration)) /
+        toMinutes(toDuration(slo.objective.timesliceWindow!));
+      const errorBudgetRemainingInMinute =
+        slo.summary.errorBudget.remaining * (slo.summary.errorBudget.initial * totalSlices);
 
-      <EuiFlexItem>
-        <WideChart
-          chart="area"
-          id={i18n.translate('xpack.slo.sloDetails.errorBudgetChartPanel.chartTitle', {
-            defaultMessage: 'Error budget remaining',
+      return formatTime(errorBudgetRemainingInMinute >= 0 ? errorBudgetRemainingInMinute : 0);
+    }
+    return undefined;
+  }, [
+    slo.budgetingMethod,
+    slo.timeWindow.type,
+    slo.timeWindow.duration,
+    slo.objective.timesliceWindow,
+    slo.summary.errorBudget.remaining,
+    slo.summary.errorBudget.initial,
+  ]);
+
+  const metadata = (
+    <EuiFlexGroup direction="row" gutterSize="l" alignItems="flexStart" responsive={false}>
+      <EuiFlexItem grow={false}>
+        <EuiStat
+          titleColor={isSloFailed ? 'danger' : 'success'}
+          title={numeral(slo.summary.errorBudget.remaining).format(percentFormat)}
+          titleSize="s"
+          description={i18n.translate('xpack.slo.sloDetails.errorBudgetChartPanel.remaining', {
+            defaultMessage: 'Remaining',
           })}
-          state={isSloFailed ? 'error' : 'success'}
-          data={data}
-          isLoading={isLoading}
-          onBrushed={onBrushed}
-          slo={slo}
+          reverse
         />
       </EuiFlexItem>
-    </>
+      {errorBudgetTimeRemainingFormatted ? (
+        <EuiFlexItem grow={false}>
+          <EuiStat
+            titleColor={isSloFailed ? 'danger' : 'success'}
+            title={errorBudgetTimeRemainingFormatted}
+            titleSize="s"
+            description={i18n.translate('xpack.slo.sloDetails.errorBudgetChartPanel.remaining', {
+              defaultMessage: 'Remaining',
+            })}
+            reverse
+          />
+        </EuiFlexItem>
+      ) : null}
+    </EuiFlexGroup>
+  );
+
+  return (
+    <BaseChart
+      data={data}
+      isLoading={isLoading}
+      slo={slo}
+      hideMetadata={hideMetadata}
+      onBrushed={onBrushed}
+      chartType="area"
+      chartId={i18n.translate('xpack.slo.sloDetails.errorBudgetChartPanel.chartTitle', {
+        defaultMessage: 'Error budget remaining',
+      })}
+      metadata={metadata}
+    />
   );
 }

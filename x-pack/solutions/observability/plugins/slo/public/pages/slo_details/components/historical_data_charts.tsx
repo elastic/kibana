@@ -16,18 +16,11 @@ import { SliChartPanel } from './sli_chart_panel';
 export interface Props {
   slo: SLOWithSummaryResponse;
   isAutoRefreshing: boolean;
-  hideMetadata?: boolean;
   range?: { from: Date; to: Date };
   onBrushed?: (timeBounds: TimeBounds) => void;
 }
 
-export function HistoricalDataCharts({
-  slo,
-  range,
-  isAutoRefreshing,
-  hideMetadata = false,
-  onBrushed,
-}: Props) {
+export function HistoricalDataCharts({ slo, range, isAutoRefreshing, onBrushed }: Props) {
   const { data: historicalSummaries = [], isLoading } = useFetchHistoricalSummary({
     sloList: [slo],
     shouldRefetch: isAutoRefreshing,
@@ -45,6 +38,21 @@ export function HistoricalDataCharts({
   );
   const historicalSliData = formatHistoricalData(sloHistoricalSummary?.data, 'sli_value');
 
+  // Calculate observed value from the latest entry in historical data within the time range
+  // Historical data is already filtered by the time range when fetched
+  const observedValue = React.useMemo(() => {
+    if (!sloHistoricalSummary?.data || sloHistoricalSummary.data.length === 0) {
+      return undefined;
+    }
+
+    // Find the latest entry that is not NO_DATA
+    const validEntries = sloHistoricalSummary.data
+      .filter((entry) => entry.status !== 'NO_DATA')
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+    return validEntries.length > 0 ? validEntries[0].sliValue : undefined;
+  }, [sloHistoricalSummary?.data]);
+
   return (
     <>
       <EuiFlexItem>
@@ -52,7 +60,8 @@ export function HistoricalDataCharts({
           data={historicalSliData}
           isLoading={isLoading}
           slo={slo}
-          hideMetadata={hideMetadata}
+          hideMetadata={false}
+          observedValue={observedValue}
           onBrushed={onBrushed}
         />
       </EuiFlexItem>
@@ -61,7 +70,7 @@ export function HistoricalDataCharts({
           data={errorBudgetBurnDownData}
           isLoading={isLoading}
           slo={slo}
-          hideMetadata={hideMetadata}
+          hideMetadata={false}
           onBrushed={onBrushed}
         />
       </EuiFlexItem>

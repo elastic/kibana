@@ -131,11 +131,12 @@ export function SloErrorBudget({
       </EuiFlexGroup>
 
       <EuiFlexGroup direction="column" gutterSize="l">
-        <ErrorBudgetHeader hideTitle={true} slo={slo} />
+        <ErrorBudgetHeader hideTitle={true} slo={slo} hideMetadata={false} />
         <ErrorBudgetChart
           data={errorBudgetBurnDownData}
           isLoading={historicalSummaryLoading}
           slo={slo!}
+          hideMetadata={false}
         />
       </EuiFlexGroup>
 
