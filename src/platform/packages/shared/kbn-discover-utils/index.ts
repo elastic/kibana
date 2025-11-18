@@ -46,6 +46,7 @@ export {
   getMessageFieldWithFallbacks,
   getLogLevelFieldWithFallback,
   getLogEventTypeFieldWithFallback,
+  getLogExceptionTypeFieldWithFallback,
   getShouldShowFieldHandler,
   isNestedFieldParent,
   usePager,
