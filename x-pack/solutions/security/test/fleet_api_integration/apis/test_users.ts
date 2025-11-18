@@ -8,9 +8,15 @@
 import type { SecurityService } from '@kbn/ftr-common-functional-services';
 import { SECURITY_FEATURE_ID } from '@kbn/security-solution-plugin/common/constants';
 
-export const testUsers: {
-  [rollName: string]: { username: string; password: string; permissions?: any };
-} = {
+interface TestUsers {
+  [key: string]: {
+    username: string;
+    password: string;
+    permissions?: any;
+  };
+}
+
+export const testUsers = {
   fleet_all_int_all: {
     permissions: {
       feature: {
@@ -175,28 +181,69 @@ export const testUsers: {
     username: 'integr_all',
     password: 'changeme',
   },
-  // for package_policy get one, bulk get with ids, get list
-  endpoint_integr_read_policy: {
+
+  // --- for package_policy get one, bulk get with ids, get list, integration with Endpoint artifacts ---
+  endpoint_integr_read_policy_for_policy_management: {
     permissions: {
       feature: {
-        fleet: ['read'],
-        [SECURITY_FEATURE_ID]: [
-          'minimal_all',
-          'trusted_applications_read',
-          'host_isolation_exceptions_read',
-          'blocklist_read',
-          'event_filters_read',
-          'policy_management_read',
-          'trusted_devices_read',
-        ],
-        securitySolutionNotes: ['all'],
-        securitySolutionTimeline: ['all'],
+        [SECURITY_FEATURE_ID]: ['minimal_read', 'policy_management_read'],
       },
       spaces: ['*'],
     },
-    username: 'endpoint_integr_read_policy',
+    username: 'endpoint_integr_read_policy_for_policy_management',
     password: 'changeme',
   },
+  endpoint_integr_read_policy_for_trusted_apps: {
+    permissions: {
+      feature: {
+        [SECURITY_FEATURE_ID]: ['minimal_read', 'trusted_applications_read'],
+      },
+      spaces: ['*'],
+    },
+    username: 'endpoint_integr_read_policy_for_trusted_apps',
+    password: 'changeme',
+  },
+  endpoint_integr_read_policy_for_trusted_devices: {
+    permissions: {
+      feature: {
+        [SECURITY_FEATURE_ID]: ['minimal_read', 'trusted_devices_read'],
+      },
+      spaces: ['*'],
+    },
+    username: 'endpoint_integr_read_policy_for_trusted_devices',
+    password: 'changeme',
+  },
+  endpoint_integr_read_policy_for_event_filters: {
+    permissions: {
+      feature: {
+        [SECURITY_FEATURE_ID]: ['minimal_read', 'event_filters_read'],
+      },
+      spaces: ['*'],
+    },
+    username: 'endpoint_integr_read_policy_for_event_filters',
+    password: 'changeme',
+  },
+  endpoint_integr_read_policy_for_host_isolation_exceptions: {
+    permissions: {
+      feature: {
+        [SECURITY_FEATURE_ID]: ['minimal_read', 'host_isolation_exceptions_read'],
+      },
+      spaces: ['*'],
+    },
+    username: 'endpoint_integr_read_policy_for_host_isolation_exceptions',
+    password: 'changeme',
+  },
+  endpoint_integr_read_policy_for_blocklist: {
+    permissions: {
+      feature: {
+        [SECURITY_FEATURE_ID]: ['minimal_read', 'blocklist_read'],
+      },
+      spaces: ['*'],
+    },
+    username: 'endpoint_integr_read_policy_for_blocklist',
+    password: 'changeme',
+  },
+
   // for package_policy update API
   endpoint_integr_write_policy: {
     permissions: {
@@ -252,7 +299,16 @@ export const testUsers: {
     username: 'endpoint_integr_read_only_fleet_none',
     password: 'changeme',
   },
-};
+} satisfies TestUsers;
+
+export const endpointIntegrationTestUsers: [name: string, keyof typeof testUsers][] = [
+  ['policy management', 'endpoint_integr_read_policy_for_policy_management'],
+  ['trusted applications', 'endpoint_integr_read_policy_for_trusted_apps'],
+  ['trusted devices', 'endpoint_integr_read_policy_for_trusted_devices'],
+  ['event filters', 'endpoint_integr_read_policy_for_event_filters'],
+  ['host isolation exceptions', 'endpoint_integr_read_policy_for_host_isolation_exceptions'],
+  ['blocklist', 'endpoint_integr_read_policy_for_blocklist'],
+];
 
 export const setupTestUsers = async (security: SecurityService, spaceAwarenessEnabled = false) => {
   for (const roleName in testUsers) {
@@ -260,7 +316,7 @@ export const setupTestUsers = async (security: SecurityService, spaceAwarenessEn
       continue;
     }
     if (Object.hasOwn(testUsers, roleName)) {
-      const user = testUsers[roleName];
+      const user = testUsers[roleName as keyof typeof testUsers];
 
       if (user.permissions) {
         await security.role.create(roleName, {
