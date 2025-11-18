@@ -130,7 +130,7 @@ export const DeleteMonitor = ({
     >
       {isProjectMonitor && (
         <>
-          <EuiCallOut color="warning" title={PROJECT_MONITOR_TITLE}>
+          <EuiCallOut announceOnMount color="warning" title={PROJECT_MONITOR_TITLE}>
             <p>
               <ProjectMonitorDisclaimer />
             </p>

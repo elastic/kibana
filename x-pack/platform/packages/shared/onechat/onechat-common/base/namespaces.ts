@@ -18,6 +18,7 @@ export const internalNamespaces = {
  */
 export const protectedNamespaces: string[] = [
   internalNamespaces.platformCore,
+  'observability',
   'platform.dashboard', // Owned by dashboard_agent plugin
 ];
 

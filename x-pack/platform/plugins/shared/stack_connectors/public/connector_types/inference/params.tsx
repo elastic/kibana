@@ -82,7 +82,12 @@ const InferenceServiceParamsFields: React.FunctionComponent<
 
   if (!isEndpointExists) {
     return (
-      <EuiCallOut title="Missing configuration" color="warning" iconType="warning">
+      <EuiCallOut
+        announceOnMount={false}
+        title="Missing configuration"
+        color="warning"
+        iconType="warning"
+      >
         <FormattedMessage
           id="xpack.stackConnectors.components.inference.loadingErrorText"
           defaultMessage={'Inference Endpoint by ID {inferenceId} does not exist!'}

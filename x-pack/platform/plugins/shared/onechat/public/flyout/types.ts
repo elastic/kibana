@@ -7,11 +7,6 @@
 
 import type { EmbeddableConversationProps } from '../embeddable/types';
 
-export interface ConversationFlyoutProps extends EmbeddableConversationProps {
-  onClose: () => void;
-  ConversationComponent: React.FC<EmbeddableConversationProps>;
-}
-
 export interface OpenConversationFlyoutOptions extends EmbeddableConversationProps {
   onClose?: () => void;
 }

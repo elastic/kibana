@@ -8,6 +8,7 @@ The Failure Store Modal is a form-based modal component that allows users to:
 - Enable or disable failure store functionality
 - Configure retention periods (default or custom)
 - Set custom retention values with various time units (days, hours, minutes, seconds, milliseconds, microseconds, nanoseconds)
+- Inherit failure store configuration from parent streams or index templates
 - Validate and submit failure store configurations
 
 ## Installation
@@ -74,6 +75,25 @@ const MyComponent = () => {
 />
 ```
 
+### With Inheritance Options
+
+```typescript
+<FailureStoreModal
+  onCloseModal={handleClose}
+  onSaveModal={handleSave}
+  failureStoreProps={{
+    failureStoreEnabled: true,
+    defaultRetentionPeriod: '30d',
+    customRetentionPeriod: '40d'
+  }}
+  inheritOptions={{
+    canShowInherit: true,
+    isWired: true,
+    isCurrentlyInherited: false
+  }}
+/>
+```
+
 ## API Reference
 
 ### FailureStoreModal Props
@@ -81,23 +101,34 @@ const MyComponent = () => {
 | Prop | Type | Required | Description |
 |------|------|----------|-------------|
 | `onCloseModal` | `() => void` | ✓ | Callback function called when the modal is closed |
-| `onSaveModal` | `(data: FailureStoreFormData) => void` | ✓ | Callback function called when the form is submitted with valid data |
+| `onSaveModal` | `(data: FailureStoreFormData) => Promise<void> \| void` | ✓ | Callback function called when the form is submitted with valid data |
 | `failureStoreProps` | `FailureStoreFormProps` | ✓ | Configuration object for the failure store settings |
+| `inheritOptions` | `InheritOptions` | ✗ | Configuration for inheritance behavior from parent stream or index template |
+| `showIlmDescription` | `boolean` | ✗ | Whether to display tier-specific messaging |
 
 ### FailureStoreFormProps
 
 | Property | Type | Required | Description |
 |----------|------|----------|-------------|
 | `failureStoreEnabled` | `boolean` | ✓ | Whether failure store is currently enabled |
-| `defaultRetentionPeriod` | `string` | ✓ | Default retention period (e.g., "30d", "7h") |
+| `defaultRetentionPeriod` | `string` | ✗ | Default retention period (e.g., "30d", "7h") |
 | `customRetentionPeriod` | `string` | ✗ | Custom retention period if different from default |
+
+### InheritOptions
+
+| Property | Type | Required | Description |
+|----------|------|----------|-------------|
+| `canShowInherit` | `boolean` | ✓ | Whether to display the inherit toggle |
+| `isWired` | `boolean` | ✓ | If true, shows "parent stream" labels; if false, shows "index template" labels |
+| `isCurrentlyInherited` | `boolean` | ✓ | Initial state of the inherit toggle |
 
 ### FailureStoreFormData (Return Type)
 
 | Property | Type | Description |
 |----------|------|-------------|
-| `failureStoreEnabled` | `boolean` | Whether failure store should be enabled |
+| `failureStoreEnabled` | `boolean ` | Whether failure store should be enabled |
 | `customRetentionPeriod` | `string \| undefined` | Custom retention period if specified |
+| `inherit` | `object \| undefined` | Empty object when inheritance is enabled |
 
 ## Supported Time Units
 
@@ -119,6 +150,9 @@ The modal supports the following time units for retention periods:
 - **State Management**: Uses Kibana's form hook library for robust form state management
 - **Type Safety**: Full TypeScript support with comprehensive type definitions
 - **Storybook Integration**: Includes Storybook stories for component development and testing
+- **Inheritance Support**: Optional inheritance from parent streams or index templates
+  - When inheritance is enabled, all configuration fields are disabled
+  - Supports both wired (parent stream) and classic (index template) inheritance modes
 
 ## Development
 

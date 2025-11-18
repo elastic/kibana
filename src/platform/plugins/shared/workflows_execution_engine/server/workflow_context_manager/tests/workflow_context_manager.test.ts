@@ -32,6 +32,21 @@ jest.mock('../../utils', () => ({
   buildStepExecutionId: jest.fn().mockImplementation((executionId, stepId, path) => {
     return `${stepId}_generated`;
   }),
+  getKibanaUrl: jest.fn().mockReturnValue('http://localhost:5601'),
+  buildWorkflowExecutionUrl: jest
+    .fn()
+    .mockImplementation((kibanaUrl, spaceId, workflowId, executionId, stepExecutionId) => {
+      const spacePrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
+      const baseUrl = `${kibanaUrl}${spacePrefix}/app/workflows/${workflowId}`;
+      const params = new URLSearchParams({
+        executionId,
+        tab: 'executions',
+      });
+      if (stepExecutionId) {
+        params.set('stepExecutionId', stepExecutionId);
+      }
+      return `${baseUrl}?${params.toString()}`;
+    }),
 }));
 
 describe('WorkflowContextManager', () => {
@@ -812,39 +827,45 @@ describe('WorkflowContextManager', () => {
         testContainer.underTest.renderValueAccordingToContext(
           'Workflow {{workflow.name}} in space {{workflow.spaceId}}'
         );
-        expect(testContainer.templatingEngineMock.render).toHaveBeenCalledWith(expect.anything(), {
-          execution: {
-            id: 'exec-123',
-            isTestRun: false,
-            startedAt: new Date('2023-01-01T00:00:00.000Z'),
-          },
-          workflow: {
-            id: 'workflow-456',
-            name: 'Test Workflow',
-            enabled: true,
-            spaceId: 'space-789',
-          },
-          consts: {
-            API_URL: 'https://api.example.com',
-            TIMEOUT: 5000,
-          },
-          event: undefined,
-          inputs: {
-            userId: 'user-123',
-            count: 10,
-          },
-          steps: {
-            fetchData: {
-              input: undefined,
-              output: {
-                data: ['item1', 'item2'],
-                total: 2,
-              },
-              error: null,
-              status: 'completed',
+        const renderArgs = (testContainer.templatingEngineMock.render as jest.Mock).mock
+          .calls[0][1];
+        expect(renderArgs).toEqual(
+          expect.objectContaining({
+            execution: {
+              id: 'exec-123',
+              isTestRun: false,
+              startedAt: new Date('2023-01-01T00:00:00.000Z'),
+              url: 'http://localhost:5601/s/space-789/app/workflows/workflow-456?executionId=exec-123&tab=executions',
             },
-          },
-        });
+            workflow: {
+              id: 'workflow-456',
+              name: 'Test Workflow',
+              enabled: true,
+              spaceId: 'space-789',
+            },
+            kibanaUrl: 'http://localhost:5601',
+            consts: {
+              API_URL: 'https://api.example.com',
+              TIMEOUT: 5000,
+            },
+            event: undefined,
+            inputs: {
+              userId: 'user-123',
+              count: 10,
+            },
+            steps: {
+              fetchData: {
+                input: undefined,
+                output: {
+                  data: ['item1', 'item2'],
+                  total: 2,
+                },
+                error: null,
+                status: 'completed',
+              },
+            },
+          })
+        );
       });
 
       it('should provide rendering function with object having templates', () => {

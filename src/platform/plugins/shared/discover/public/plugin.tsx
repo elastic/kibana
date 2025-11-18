@@ -261,6 +261,7 @@ export class DiscoverPlugin
           return esqlLocatorGetLocation({
             discoverAppLocator,
             dataViews: plugins.dataViews,
+            http: core.http,
           });
         },
       });
@@ -474,8 +475,10 @@ export class DiscoverPlugin
     });
 
     plugins.embeddable.registerLegacyURLTransform(SEARCH_EMBEDDABLE_TYPE, async () => {
-      const { searchEmbeddableTransforms } = await getEmbeddableServices();
-      return searchEmbeddableTransforms.transformOut;
+      const { getSearchEmbeddableTransforms } = await getEmbeddableServices();
+      const { transformEnhancementsIn, transformEnhancementsOut } = plugins.embeddable;
+      return getSearchEmbeddableTransforms(transformEnhancementsIn, transformEnhancementsOut)
+        .transformOut;
     });
   }
 }

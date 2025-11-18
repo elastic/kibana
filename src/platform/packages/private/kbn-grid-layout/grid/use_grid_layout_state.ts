@@ -23,6 +23,7 @@ import {
 import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
 
 import { useEuiTheme } from '@elastic/eui';
+import { getScrollContainer } from '@kbn/core-chrome-layout-utils';
 
 import type { ActivePanelEvent } from './grid_panel';
 import type { ActiveSectionEvent } from './grid_section';
@@ -99,6 +100,7 @@ export const useGridLayoutState = ({
     const orderedLayout = getOrderedLayout(layout);
     const gridLayout$ = new BehaviorSubject<OrderedLayout>(orderedLayout);
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
+    const scrollContainer$ = new BehaviorSubject(getScrollContainer());
     const activePanelEvent$ = new BehaviorSubject<ActivePanelEvent | undefined>(undefined);
     const activeSectionEvent$ = new BehaviorSubject<ActiveSectionEvent | undefined>(undefined);
 
@@ -125,6 +127,7 @@ export const useGridLayoutState = ({
       accessMode$,
       gridDimensions$,
       runtimeSettings$,
+      scrollContainer$,
       expandedPanelId$,
       isMobileView$: new BehaviorSubject<boolean>(
         shouldShowMobileView(accessMode, euiTheme.breakpoint.m)

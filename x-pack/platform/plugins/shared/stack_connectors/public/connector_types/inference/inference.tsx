@@ -8,6 +8,7 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { formDeserializer, formSerializer } from './form_serialization';
 import type { RerankParams, TextEmbeddingParams } from '../../../common/inference/types';
 import { SUB_ACTION } from '../../../common/inference/constants';
 import {
@@ -124,5 +125,10 @@ export function getConnectorType(): InferenceConnector {
     actionConnectorFields: lazy(() => import('./connector')),
     actionParamsFields: lazy(() => import('./params')),
     actionReadOnlyExtraComponent: lazy(() => import('./usage_cost_message')),
+    connectorForm: {
+      serializer: formSerializer,
+      deserializer: formDeserializer,
+      hideSettingsTitle: true,
+    },
   };
 }

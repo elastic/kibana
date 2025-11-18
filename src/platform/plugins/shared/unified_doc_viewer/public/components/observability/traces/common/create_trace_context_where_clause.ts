@@ -8,8 +8,9 @@
  */
 import { SPAN_ID_FIELD, TRACE_ID_FIELD, TRANSACTION_ID_FIELD } from '@kbn/discover-utils';
 import { where } from '@kbn/esql-composer';
+import { PROCESSOR_EVENT, ERROR_LOG_LEVEL, OTEL_EVENT_NAME } from '@kbn/apm-types';
 
-export const createTraceContextWhereClause = ({
+const createBaseTraceContextFilters = ({
   traceId,
   spanId,
   transactionId,
@@ -27,6 +28,44 @@ export const createTraceContextWhereClause = ({
   } else if (spanId) {
     queryString += ` AND ${SPAN_ID_FIELD} == ?spanId`;
   }
+
+  return queryString;
+};
+
+export const createTraceContextWhereClause = ({
+  traceId,
+  spanId,
+  transactionId,
+}: {
+  traceId: string;
+  spanId?: string;
+  transactionId?: string;
+}) => {
+  const queryString = createBaseTraceContextFilters({ traceId, spanId, transactionId });
+  const params = [{ traceId }, { transactionId }, { spanId }];
+
+  return where(queryString, params);
+};
+
+export const createTraceContextWhereClauseForErrors = ({
+  traceId,
+  spanId,
+  transactionId,
+}: {
+  traceId: string;
+  spanId?: string;
+  transactionId?: string;
+}) => {
+  let queryString = createBaseTraceContextFilters({ traceId, spanId, transactionId });
+
+  const conditions = [
+    `${PROCESSOR_EVENT}: "error"`,
+    `${ERROR_LOG_LEVEL}: "error"`,
+    `${OTEL_EVENT_NAME}: "exception"`,
+    `${OTEL_EVENT_NAME}: "error" `,
+  ];
+
+  queryString += ` AND  KQL("""${conditions.join(' OR ')}""")`;
 
   const params = [{ traceId }, { transactionId }, { spanId }];
 

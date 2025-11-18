@@ -14,5 +14,3 @@ export enum AdditionalEmailServices {
 }
 
 export const INTERNAL_BASE_STACK_CONNECTORS_API_PATH = '/internal/stack_connectors';
-
-export { OpsgenieSubActions, OpsgenieConnectorTypeId } from './opsgenie';
