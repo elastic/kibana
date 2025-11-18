@@ -9,14 +9,14 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { EuiButtonEmpty, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
 
 export function QuickSearchAction({
   toggleVisor,
-  hideKeyboardShortcut,
+  isSpaceReduced,
 }: {
   toggleVisor: () => void;
-  hideKeyboardShortcut?: boolean;
+  isSpaceReduced?: boolean;
 }) {
   const quickSearchLabel = i18n.translate('esqlEditor.visor.quickSearchLabel', {
     defaultMessage: 'Quick search',
@@ -29,23 +29,37 @@ export function QuickSearchAction({
   const { euiTheme } = useEuiTheme();
   return (
     <>
-      <EuiFlexItem grow={false}>
-        <EuiToolTip position="top" content={quickSearchLabel} disableScreenReaderOutput>
-          <EuiButtonEmpty
-            size="xs"
-            color="primary"
-            flush="both"
-            onClick={toggleVisor}
-            data-test-subj="ESQLEditor-toggle-quick-search-visor"
-            aria-label={quickSearchLabel}
-            css={css`
-              margin-right: ${euiTheme.size.m};
-            `}
-          >
-            {hideKeyboardShortcut ? quickSearchLabel : `${quickSearchLabel} (${shortCut})`}
-          </EuiButtonEmpty>
-        </EuiToolTip>
-      </EuiFlexItem>
+      {isSpaceReduced && (
+        <EuiFlexItem grow={false} data-test-subj="ESQLEditor-toggle-query-history-icon">
+          <EuiToolTip position="top" content={quickSearchLabel} disableScreenReaderOutput>
+            <EuiButtonIcon
+              onClick={toggleVisor}
+              iconType="search"
+              data-test-subj="toggle-quick-search-visor"
+              aria-label={quickSearchLabel}
+            />
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
+      {!isSpaceReduced && (
+        <EuiFlexItem grow={false}>
+          <EuiToolTip position="top" content={quickSearchLabel} disableScreenReaderOutput>
+            <EuiButtonEmpty
+              size="xs"
+              color="primary"
+              flush="both"
+              onClick={toggleVisor}
+              data-test-subj="ESQLEditor-toggle-quick-search-visor"
+              aria-label={quickSearchLabel}
+              css={css`
+                margin-right: ${euiTheme.size.m};
+              `}
+            >
+              {`${quickSearchLabel} (${shortCut})`}
+            </EuiButtonEmpty>
+          </EuiToolTip>
+        </EuiFlexItem>
+      )}
     </>
   );
 }
