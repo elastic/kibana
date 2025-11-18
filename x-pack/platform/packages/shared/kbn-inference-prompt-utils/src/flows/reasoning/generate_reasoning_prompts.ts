@@ -41,7 +41,15 @@ export async function generateReasoningPrompts({
       const input = [
         prompt,
         mustache.render(taskDescriptionTemplate, view),
-        `Do not preface your output with any intro or summary. Directly output the prompt. Do not create a distinction between a user and a system prompt.`,
+        `## Quality gates
+        
+        - Do not preface your output with any intro or summary.
+        - Directly output the prompt.
+        - Do not create a distinction between a user and a system prompt.
+        - Use JSON for example tool calls.
+        - Pay close attention to rendering a variable_name ("\`foo\`") vs
+        rendering a variable value ("{{foo}}").
+        `,
       ].join('\n\n');
 
       const response = await inferenceClient.output({

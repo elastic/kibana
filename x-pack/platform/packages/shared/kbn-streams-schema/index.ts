@@ -125,6 +125,23 @@ export type {
   GeneratedSignificantEventQuery,
 } from './src/api/significant_events';
 
+export type {
+  DetectedField,
+  BaseSimulationError,
+  DocSimulationStatus,
+  IngestSimulationResult,
+  PipelineSimulationResult,
+  ProcessorMetrics,
+  SimulationDocReport,
+  SimulationError,
+  SuccessfulPipelineSimulateDocumentResult,
+  SuccessfulPipelineSimulateResponse,
+  FailedSimulationResponse,
+  SuccessfulSimulationResponse,
+  SimulationResponse,
+  SimulationResponseBase,
+} from './src/api/processing';
+
 export { emptyAssets } from './src/helpers/empty_assets';
 
 export {

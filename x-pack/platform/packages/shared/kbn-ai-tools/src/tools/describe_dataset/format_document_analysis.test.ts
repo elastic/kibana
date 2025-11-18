@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { DocumentAnalysis } from './document_analysis';
 import { formatDocumentAnalysis } from './format_document_analysis';
 
 // disable shuffle to get deterministic results
@@ -19,7 +18,7 @@ jest.mock('lodash', () => {
 
 describe('formatDocumentAnalysis', () => {
   it('creates a nested object with value distributions and missing coverage', () => {
-    const analysis: DocumentAnalysis = {
+    const analysis = {
       total: 100,
       sampled: 3,
       fields: [
@@ -62,7 +61,7 @@ describe('formatDocumentAnalysis', () => {
   });
 
   it('supports fields that are both leaves and have nested sub-fields', () => {
-    const analysis: DocumentAnalysis = {
+    const analysis = {
       total: 20,
       sampled: 2,
       fields: [

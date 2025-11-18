@@ -26,7 +26,11 @@ import { EsqlPrompt } from './prompt';
 
 const loadEsqlDocBase = once(() => EsqlDocumentBase.load());
 
-export async function executeAsEsqlAgent<TTools extends Record<string, ToolDefinition> | undefined>(
+export function executeAsEsqlAgent<
+  TTools extends Record<string, ToolDefinition> | undefined =
+    | Record<string, ToolDefinition>
+    | undefined
+>(
   options: {
     inferenceClient: BoundInferenceClient;
     esClient: ElasticsearchClient;
@@ -35,8 +39,11 @@ export async function executeAsEsqlAgent<TTools extends Record<string, ToolDefin
     end?: number;
     signal: AbortSignal;
     prompt: string;
+    tools?: TTools;
   } & (TTools extends Record<string, ToolDefinition>
-    ? { toolCallbacks: ToolCallbacksOfToolOptions<{ tools: TTools }> }
+    ? keyof TTools extends never
+      ? {}
+      : { toolCallbacks: ToolCallbacksOfToolOptions<{ tools: TTools }> }
     : {})
 ): PromptCompositeResponse<PromptOptions<typeof EsqlPrompt> & { tools: TTools; stream: false }>;
 
@@ -149,10 +156,19 @@ export async function executeAsEsqlAgent({
                     doc[col.name] = value;
                   }
                 });
+                return doc;
               }) ?? [];
 
             return {
               query,
+              ...(start !== undefined && end !== undefined
+                ? {
+                    timeRange: {
+                      start: new Date(start).toISOString(),
+                      end: new Date(end).toISOString(),
+                    },
+                  }
+                : {}),
               response: {
                 docs: truncateList(docs, 50),
               },

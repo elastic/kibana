@@ -14,6 +14,7 @@ interface ToolSchemaFragmentBase {
 export interface ToolSchemaTypeObject extends ToolSchemaFragmentBase {
   type: 'object';
   properties: Record<string, ToolSchemaType>;
+  additionalProperties?: boolean;
   required?: string[] | readonly string[];
 }
 

@@ -107,5 +107,7 @@ export function mergeSampleDocumentsWithFieldCaps({
     total,
     sampled: samples.length,
     fields,
+    fieldCaps,
+    samples: hits,
   };
 }

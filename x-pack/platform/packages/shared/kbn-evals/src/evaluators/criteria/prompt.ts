@@ -31,6 +31,7 @@ export const LlmCriteriaEvaluationPrompt = createPrompt({
         template: userPromptText,
       },
     },
+    temperature: 0.4,
     toolChoice: {
       function: 'score',
     },

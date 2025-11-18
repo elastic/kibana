@@ -10,6 +10,36 @@ import { createPrompt } from '@kbn/inference-common';
 import { Streams } from '@kbn/streams-schema';
 import systemPromptTemplate from './system_prompt.text';
 import contentPromptTemplate from './content_prompt.text';
+import { conditionSchema } from '../../json_schema/condition_schema';
+
+const partitionToolSchema = {
+  ...conditionSchema,
+  type: 'object',
+  properties: {
+    index: {
+      type: 'string',
+    },
+    partitions: {
+      type: 'array',
+      items: {
+        type: 'object',
+        properties: {
+          name: {
+            type: 'string',
+          },
+          condition: {
+            type: 'object',
+            description: 'The partitioning condition.',
+            properties: {},
+            additionalProperties: true,
+          },
+        },
+        required: ['name', 'condition'],
+      },
+    },
+  },
+  required: ['index'],
+} as const;
 
 export const SuggestStreamPartitionsPrompt = createPrompt({
   name: 'suggest_stream_partitions_prompt',
@@ -21,6 +51,7 @@ export const SuggestStreamPartitionsPrompt = createPrompt({
   }),
 })
   .version({
+    temperature: 0.4,
     system: {
       mustache: {
         template: systemPromptTemplate,
@@ -32,34 +63,14 @@ export const SuggestStreamPartitionsPrompt = createPrompt({
       },
     },
     tools: {
-      partition_logs: {
+      simulate_log_partitions: {
         description: `Simulates the partioning conditions specified, and clusters documents within each partition.`,
-        schema: {
-          type: 'object',
-          properties: {
-            index: {
-              type: 'string',
-            },
-            partitions: {
-              type: 'array',
-              items: {
-                type: 'object',
-                properties: {
-                  name: {
-                    type: 'string',
-                  },
-                  condition: {
-                    type: 'object',
-                    properties: {},
-                  },
-                },
-                required: ['name', 'condition'],
-              },
-            },
-          },
-          required: ['index'],
-        },
-      } as const,
+        schema: partitionToolSchema,
+      },
+      finalize_log_partitions: {
+        description: `Finalizes the partioning conditions specified and suggests them to the user`,
+        schema: partitionToolSchema,
+      },
     },
   })
   .get();

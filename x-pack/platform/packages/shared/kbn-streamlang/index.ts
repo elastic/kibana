@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-export type { StreamlangDSL } from './types/streamlang';
+export type { StreamlangDSL, StreamlangStep } from './types/streamlang';
 export { streamlangDSLSchema, isActionBlock, isWhereBlock } from './types/streamlang';
 export { transpile as transpileIngestPipeline } from './src/transpilers/ingest_pipeline';
 export { transpile as transpileEsql, conditionToESQL } from './src/transpilers/esql';
+
 export * from './types/processors';
 export * from './types/conditions';
 export type * from './types/ui';

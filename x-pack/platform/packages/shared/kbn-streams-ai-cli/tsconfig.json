@@ -1,0 +1,29 @@
+{
+  "extends": "../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": [
+      "jest",
+      "node"
+    ]
+  },
+  "include": [
+    "**/*.ts",
+  ],
+  "exclude": [
+    "target/**/*"
+  ],
+  "kbn_references": [
+    "@kbn/ai-tools",
+    "@kbn/kibana-api-cli",
+    "@kbn/inference-common",
+    "@kbn/streams-schema",
+    "@kbn/streamlang",
+    "@kbn/streams-ai",
+    "@kbn/object-utils",
+    "@kbn/inference-cli",
+    "@kbn/core",
+    "@kbn/inference-tracing",
+    "@kbn/inference-langchain",
+  ]
+}

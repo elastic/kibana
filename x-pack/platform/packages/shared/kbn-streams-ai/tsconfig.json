@@ -25,5 +25,8 @@
     "@kbn/inference-prompt-utils",
     "@kbn/es-query",
     "@kbn/zod-helpers",
+    "@kbn/dashboard-plugin",
+    "@kbn/grok-heuristics",
+    "@kbn/slo-schema",
   ]
 }

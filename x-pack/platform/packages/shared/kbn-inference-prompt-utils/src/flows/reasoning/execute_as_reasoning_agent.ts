@@ -135,6 +135,10 @@ export async function executeAsReasoningAgent(
     stepsLeft: number;
     temperature?: number;
   }): Promise<ReasoningPromptResponse> {
+    if (stepsLeft === 0) {
+      throw new Error(`Task did not complete in time`);
+    }
+
     const lastAssistantMessage = givenMessages.findLast(
       (msg): msg is AssistantMessage => msg.role === MessageRole.Assistant
     );
@@ -144,14 +148,14 @@ export async function executeAsReasoningAgent(
         message.role === MessageRole.Tool && isPlanningToolName(message.name)
     )?.name;
 
-    const shouldComplete = stepsLeft <= 0 || lastSystemToolCallName === 'complete';
+    const isFinalTurn = stepsLeft <= 1 || lastSystemToolCallName === 'complete';
 
     // reason when:
     // - not completing
     // - AND power is medium or high
     // - AND last assistant message contains a `reason` tool call
     const shouldReason =
-      !shouldComplete &&
+      !isFinalTurn &&
       (power === 'medium' || power === 'high') &&
       lastAssistantMessage?.toolCalls?.some((toolCall) =>
         isPlanningToolName(toolCall.function.name)
@@ -160,7 +164,7 @@ export async function executeAsReasoningAgent(
     const prevMessages = givenMessages.concat();
 
     // these are hints
-    if (shouldComplete && lastSystemToolCallName !== 'complete') {
+    if (isFinalTurn && lastSystemToolCallName !== 'complete') {
       prevMessages.push(...createCompleteToolCall());
     } else if (shouldReason && lastSystemToolCallName !== 'reason') {
       prevMessages.push(...createReasonToolCall());
@@ -191,7 +195,7 @@ export async function executeAsReasoningAgent(
       }),
     };
 
-    const forceComplete = shouldComplete;
+    const forceComplete = isFinalTurn;
     const forceReason = power === 'high' && shouldReason;
 
     const promptOptions = {
@@ -237,6 +241,7 @@ export async function executeAsReasoningAgent(
         stepsLeft,
       }),
       stopSequences: [END_INTERNAL_REASONING_MARKER],
+      power: 'low',
     });
 
     let content = response.content;
@@ -287,11 +292,15 @@ export async function executeAsReasoningAgent(
         ? options.finalToolChoice.function
         : undefined;
 
-    const hasCalledFinalTool = response.toolCalls.some(
-      (toolCall) => toolCall.function.name === finalToolCallName
-    );
+    const hasCalledFinalTool =
+      !!finalToolCallName &&
+      response.toolCalls.some((toolCall) => toolCall.function.name === finalToolCallName);
 
-    if (shouldComplete || hasCalledFinalTool) {
+    if (isFinalTurn && finalToolCallName && !hasCalledFinalTool) {
+      throw new Error(`Ran out of steps before final tool \`${finalToolCallName}\` was called`);
+    }
+
+    if (hasCalledFinalTool || isFinalTurn) {
       // We don't want to send these results back to the LLM, if we are already
       // completing
       return {
@@ -330,7 +339,7 @@ export async function executeAsReasoningAgent(
     if (completeNextTurn) {
       return innerCallPromptUntil({
         messages: prevMessages.concat(assistantMessage, ...allToolMessages),
-        stepsLeft: 0,
+        stepsLeft: 1,
       });
     }
 

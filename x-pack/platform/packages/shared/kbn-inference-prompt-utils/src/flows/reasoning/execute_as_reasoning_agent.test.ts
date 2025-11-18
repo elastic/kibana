@@ -67,7 +67,7 @@ describe('executeAsReasoningAgent', () => {
       input: {
         foo: '',
       },
-      finalToolChoice: { type: 'function', function: 'complete' },
+      finalToolChoice: { function: 'complete' },
     });
 
     expect(inferenceClient.prompt).toHaveBeenCalled();
@@ -121,7 +121,7 @@ describe('executeAsReasoningAgent', () => {
     await executeAsReasoningAgent({
       inferenceClient,
       prompt,
-      maxSteps: 1,
+      maxSteps: 2,
       toolCallbacks: { fetch_data: fetchData, complete: jest.fn() },
       input: { foo: '' },
     });
@@ -132,7 +132,7 @@ describe('executeAsReasoningAgent', () => {
     const prevMessages = secondArgs.prevMessages!;
     const toolMsg = prevMessages.find((m): m is ToolMessage => m.role === MessageRole.Tool);
 
-    expect(toolMsg?.response).toEqual({ result: 'ok', stepsLeft: 1 });
+    expect(toolMsg?.response).toEqual({ result: 'ok', stepsLeft: 2 });
   });
 
   test('completes next turn when content includes external part after END_INTERNAL marker', async () => {
@@ -179,7 +179,7 @@ describe('executeAsReasoningAgent', () => {
     await executeAsReasoningAgent({
       inferenceClient,
       prompt,
-      maxSteps: 1,
+      maxSteps: 2,
       toolCallbacks: { fetch_data: fetchData, complete: jest.fn() },
       input: { foo: '' },
     });
@@ -192,7 +192,7 @@ describe('executeAsReasoningAgent', () => {
       name: 'fetch_data',
       response: {
         error: expect.any(Object),
-        stepsLeft: 1,
+        stepsLeft: 2,
       },
       role: 'tool',
       toolCallId: 'x',
@@ -219,7 +219,7 @@ describe('executeAsReasoningAgent', () => {
     await executeAsReasoningAgent({
       inferenceClient,
       prompt,
-      maxSteps: 1,
+      maxSteps: 2,
       toolCallbacks: { fetch_data: fetchData, complete: jest.fn() },
       input: { foo: '' },
     });
@@ -229,7 +229,7 @@ describe('executeAsReasoningAgent', () => {
 
     const toolMsg = prevMessages.find((m): m is ToolMessage => m.role === MessageRole.Tool);
 
-    expect(toolMsg?.response).toEqual({ content: 'ok', stepsLeft: 1 });
+    expect(toolMsg?.response).toEqual({ content: 'ok', stepsLeft: 2 });
   });
 
   test('planning tools merged when not completing, omitted when completing; toolChoice set on completing', async () => {
@@ -242,48 +242,59 @@ describe('executeAsReasoningAgent', () => {
     await executeAsReasoningAgent({
       inferenceClient,
       prompt,
-      maxSteps: 1,
+      maxSteps: 2,
       toolCallbacks: { fetch_data: jest.fn(), complete: jest.fn() },
       input: { foo: '' },
     });
+
     const firstCall = inferenceClient.prompt.mock.calls[0][0];
     const toolsNonCompleting = Object.keys(firstCall.prompt.versions[0].tools ?? {});
+
     expect(toolsNonCompleting).toContain('reason');
 
     // Second run: completing turn from the start
     inferenceClient.prompt.mockClear();
+    inferenceClient.prompt.mockResolvedValue({
+      content: 'final',
+      toolCalls: [{ function: { name: 'fetch_data', arguments: {} }, toolCallId: 'x' }],
+    });
     await executeAsReasoningAgent({
       inferenceClient,
       prompt,
-      maxSteps: 0,
+      maxSteps: 1,
       toolCallbacks: { fetch_data: jest.fn(), complete: jest.fn() },
       input: { foo: '' },
-      finalToolChoice: { type: 'function', function: 'complete' },
+      finalToolChoice: { function: 'fetch_data' },
     });
     const completingCall = (inferenceClient.prompt as jest.Mock).mock.calls[0][0];
 
-    expect(completingCall.toolChoice).toEqual({ type: 'function', function: 'complete' });
+    expect(completingCall.toolChoice).toEqual({ function: 'fetch_data' });
   });
 
   test('input is sanitized on completion (system tool calls removed)', async () => {
     const prompt = makePrompt();
     const inferenceClient = {
-      prompt: jest.fn().mockResolvedValue({ content: 'final', toolCalls: [], tokens: 1 }),
+      prompt: jest.fn().mockResolvedValue({
+        content: 'final',
+        toolCalls: [{ function: { name: 'fetch_data', arguments: {} }, toolCallId: 'x' }],
+        tokens: 1,
+      }),
     } as Partial<jest.Mocked<BoundInferenceClient>> as jest.Mocked<BoundInferenceClient>;
 
     const res = await executeAsReasoningAgent({
       inferenceClient,
       prompt,
-      maxSteps: 0,
+      maxSteps: 1,
       toolCallbacks: { fetch_data: jest.fn(), complete: jest.fn() },
       input: { foo: '' },
-      finalToolChoice: { type: 'function', function: 'complete' },
+      finalToolChoice: { function: 'fetch_data' },
     });
 
     // No tool messages with planning tool names in sanitized input
     const hasPlanningTool = res.input.some(
       (m) => m.role === MessageRole.Tool && m.name && ['reason', 'complete'].includes(m.name)
     );
+
     expect(hasPlanningTool).toBe(false);
   });
 
@@ -294,16 +305,12 @@ describe('executeAsReasoningAgent', () => {
         .fn()
         .mockResolvedValueOnce({
           content: 'gathering-1',
-          toolCalls: [
-            { type: 'function', function: { name: 'fetch_data', arguments: {} }, toolCallId: 'f1' },
-          ],
+          toolCalls: [{ function: { name: 'fetch_data', arguments: {} }, toolCallId: 'f1' }],
           tokens: 1,
         })
         .mockResolvedValueOnce({
           content: 'gathering-2',
-          toolCalls: [
-            { type: 'function', function: { name: 'fetch_data', arguments: {} }, toolCallId: 'f2' },
-          ],
+          toolCalls: [{ function: { name: 'fetch_data', arguments: {} }, toolCallId: 'f2' }],
           tokens: 1,
         })
         .mockResolvedValueOnce({ content: 'final', toolCalls: [], tokens: 1 }),
@@ -312,7 +319,7 @@ describe('executeAsReasoningAgent', () => {
     await executeAsReasoningAgent({
       inferenceClient,
       prompt,
-      maxSteps: 2,
+      maxSteps: 3,
       toolCallbacks: {
         fetch_data: jest.fn().mockResolvedValue({ response: 'ok' }),
         complete: jest.fn(),

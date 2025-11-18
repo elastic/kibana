@@ -8,7 +8,7 @@
 import type { z } from '@kbn/zod';
 import type { MessageRole } from '../chat_complete';
 import type { Model } from '../model_provider';
-import type { ToolDefinitions } from '../chat_complete/tools';
+import type { ToolChoice, ToolDefinitions, ToolOptions } from '../chat_complete/tools';
 
 /**
  * Defines the matching criteria for a {@link PromptVersion},
@@ -122,6 +122,11 @@ export interface PromptFactory<
   get: () => Prompt<TInput, TPromptVersions>;
 }
 
+type WithToolChoice<TToolOptions extends ToolOptions> = TToolOptions &
+  (TToolOptions extends { tools: ToolDefinitions }
+    ? { toolChoice?: ToolChoice<keyof TToolOptions['tools'] & string> }
+    : {});
+
 /**
  * Utility function that returns the tool options for a Prompt that
  * can be used to infer the response shape.
@@ -130,6 +135,6 @@ export type ToolOptionsOfPrompt<TPrompt extends Prompt> = TPrompt['versions'] ex
   infer TPromptVersion
 >
   ? TPromptVersion extends PromptVersion
-    ? Pick<TPromptVersion, 'tools'>
+    ? WithToolChoice<Pick<TPromptVersion, 'tools'>>
     : {}
   : {};

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { FieldCapsResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
+
 export interface DocumentAnalysisField {
   name: string;
   types: string[];
@@ -18,6 +20,8 @@ export interface DocumentAnalysis {
   total: number;
   sampled: number;
   fields: DocumentAnalysisField[];
+  samples: SearchHit[];
+  fieldCaps: FieldCapsResponse;
 }
 
 export interface FormattedDocumentAnalysis {

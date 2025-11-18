@@ -30,6 +30,7 @@ type RunRecipeCallback = (options: {
 export interface RunRecipeOptions {
   name: string;
   flags?: FlagOptions;
+  disableRootSpan?: boolean;
 }
 
 export const createRunRecipe =
@@ -43,7 +44,10 @@ export const createRunRecipe =
     const callback = args.length === 1 ? args[0] : args[1];
     const options = args.length === 1 ? undefined : args[0];
 
-    const name = typeof options === 'string' ? options : options?.name;
+    const runOpts = typeof options === 'string' ? { name: options } : options;
+
+    const name = runOpts?.name;
+
     const flagOptions = typeof options === 'string' ? undefined : options?.flags;
 
     const nextFlagOptions = mergeFlagOptions(
@@ -89,8 +93,8 @@ export const createRunRecipe =
           connectorId: flags.connectorId as string | undefined,
         });
 
-        return await withActiveInferenceSpan(`RunRecipe${name ? `: ${name}` : ''}`, () =>
-          callback({
+        function runCallback() {
+          return callback({
             inferenceClient,
             kibanaClient,
             esClient,
@@ -99,13 +103,19 @@ export const createRunRecipe =
             logger,
             flags,
           })
-        )
-          .finally(async () => {
-            await shutdown?.();
-          })
-          .catch((error) => {
-            logger.error(error);
-          });
+            .finally(async () => {
+              await shutdown?.();
+            })
+            .catch((error) => {
+              logger.error(error);
+            });
+        }
+
+        if (runOpts?.disableRootSpan) {
+          return await runCallback();
+        }
+
+        return await withActiveInferenceSpan(`RunRecipe${name ? `: ${name}` : ''}`, runCallback);
       },
       {
         flags: nextFlagOptions,

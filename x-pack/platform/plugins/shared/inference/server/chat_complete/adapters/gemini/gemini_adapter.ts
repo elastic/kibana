@@ -124,6 +124,9 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
           type: Gemini.SchemaType.OBJECT,
           description: def.description,
           required: def.required as string[],
+          ...('additionalProperties' in def
+            ? { additionalProperties: def.additionalProperties }
+            : {}),
           properties: def.properties
             ? Object.entries(def.properties).reduce<Record<string, Gemini.Schema>>(
                 (properties, [key, prop]) => {
@@ -139,9 +142,12 @@ function toolSchemaToGemini({ schema }: { schema: ToolSchema }): Gemini.Function
       case 'string':
         return {
           type: Gemini.SchemaType.STRING,
-          format: 'enum',
           description: def.description,
-          enum: def.enum ? (def.enum as string[]) : def.const ? [def.const] : [],
+          ...(def.enum
+            ? { format: 'enum' as const, enum: def.enum as string[] }
+            : def.const
+            ? { format: 'enum' as const, enum: [def.const] }
+            : ({} as { format?: never })),
         };
       case 'boolean':
         return {

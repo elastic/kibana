@@ -20,5 +20,6 @@ export const bindClient = (
     chatComplete: bindChatComplete(unboundClient.chatComplete, boundParams),
     prompt: bindPrompt(unboundClient.prompt, boundParams),
     output: bindOutput(unboundClient.output, boundParams),
+    getConnectorId: () => boundParams.connectorId,
   };
 };

@@ -15,7 +15,7 @@ complete = <yes|no>
 <<<END_INTERNAL>>>
 ```
 
-The orchestrator injects a `reason` tool call to signal these reasoning steps. When the agent decides to stop internal reasoning and move to the External Output phase, it must call the `complete` tool.
+The orchestrator injects a `reason` tool call to signal these reasoning steps. When the agent decides to stop internal reasoning and move to the External Output phase, it must call the `complete` tool. Both tools take **no arguments**.
 
 In External Output, the agent must present accurate, complete, and self-critical conclusions to the user, ensuring correctness above all, completeness second, conciseness and speed afterward. The user only sees this external summary.
 

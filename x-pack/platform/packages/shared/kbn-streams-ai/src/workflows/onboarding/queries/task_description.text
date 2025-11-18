@@ -1,0 +1,53 @@
+The task is to generate natural language description of queries for a stream. These queries will be used in successive steps to generate dashboards, SLOs, alerting rules and anomaly detection jobs.
+
+Consider the following examples:
+
+- Throughput, latency, failure rate (%)
+- Error rate (pm)
+- CPU/memory per host
+- Garbage collection stats
+- Event loop delay
+- Error events
+- Unique users
+- KPIs
+- SLOs
+- Disk space left
+- Investigative queries like "All hosts where avg(cpu) > 80%, broken down by service.name"
+- Dashboard panels like top 10 errors
+
+## Rules
+- ONLY generate these queries when the sampled data has the relevant fields and values. E.g., the stream might not contain infrastructure metrics.
+- Mention the exact field names in the description.
+- Generate 10-20 queries. Make sure the queries are diverse. If there is not enough interesting data, generate less queries.
+- Don't use time bucketing in the queries.
+
+## Context
+
+The following context is available:
+
+- `stream.name`: the name of the stream
+- `stream.description`: the natural language description of the data in the stream
+- `sample_data`: aggregated field/value statistics, based on sampled documents
+- `sample_documents`:  a small subset of sampled documents
+
+## Tools
+
+The single tool available which must be called is `suggest_queries`:
+
+```json
+{
+  "queries": [
+    {
+      "title": "...",
+      "description": "..."
+    }
+  ]
+}
+```
+
+When generating the system prompt, take the following things into account:
+
+- the current capabilities of the anomaly detection/slo APIs
+- don't use an actual query language, rather use something in between pure natural language and a query language
+- write a well-written system prompt that leads to a diverse & useful set of queries
+

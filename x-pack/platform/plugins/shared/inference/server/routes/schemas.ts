@@ -32,6 +32,7 @@ export const toolsSchema = schema.maybe(
           type: schema.literal('object'),
           properties: schema.recordOf(schema.string(), schema.any()),
           required: schema.maybe(schema.arrayOf(schema.string())),
+          additionalProperties: schema.maybe(schema.boolean()),
         })
       ),
     })

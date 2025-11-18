@@ -77,4 +77,9 @@ export interface BoundInferenceClient extends InferenceEventEmitter {
    * Create a {@link BoundInferenceClient}.
    */
   bindTo: (options: BoundOptions) => BoundInferenceClient;
+
+  /**
+   * Returns the bound connector ID
+   */
+  getConnectorId(): string;
 }

@@ -1,0 +1,91 @@
+Help the user onboard a new data stream by generating processors that make sure that the message is parsed, the document is well-structured and fields are named appropriately.
+
+Task context:
+
+**System prompt**:
+- the schema of the processors (`processor_schema`).
+
+**User prompt** (will be embedded as JSON in the user prompt):
+- the name of the data stream (`stream.name`)
+- the description of the data in the stream (`stream.description`)
+- pattern analysis (suggested grok or dissect patterns) (`pattern_analysis`)
+- an aggregated set of values from sampled documents (`sample_data`)
+- a subset of individual sampled documents (`sample_documents`)
+- the current processors for the given data stream (`existing_processors`)
+
+The LLM will be given a `validate_pipeline` tool and a `finalize_pipeline` tool.
+
+The goal of this task is to generate useful and valid parsing rules that result in a well-formed, efficient and appropriately named document. The prompt should contain examples for each how they can be used, using the processor schema below. The execution LLM can call the tool until it is satisfied with the result. Any tool call should contain all processors the LLM wants to eventually add - they will only be added outside of the scope of this task, not during this process. Any processor in `existing_processors` should NOT be part of any `*_pipeline` tool call.
+
+In order, the LLM should:
+- first mention the available fields and some sample `message`s, and reason about them
+- if there is structured data to be extracted, append a dissect or grok processor
+- make sure that @timestamp is accurate. if the dissect/grok processors extracted a timestamp, it might be different from an existing value for @timestamp (which might just be time of ingest). IF the timestamp is different, make sure that it's parsed with a date processor and overrides @timestamp. make sure the date processor is successful with a parsed_rate of 1 (if applicable).
+- remove unneeded fields that are parts of a date (day, month, year) if @timestamp is available
+- rename fields to achieve a consistent naming schema
+- if previous processors are all successful, add additional processors. make sure all previously suggested processors (but nothing in `existing_processors`) are in the tool call request as well.
+
+qualitative success criteria:
+- a document is well-formed in terms of data types and queryable fields
+- the fields are consistently named and not ambigious
+- useless date-related fields that are only a side-effect of earlier processing and no longer needed are dropped
+- if there is a timestamp value, it should only be stored in a single `date` field - it should not have additional fields for parts of the date, as commonly happens after grok parsing
+- the `message` field is the original message
+- `message_details` COULD be a subset of the original message
+- there are no duplicate `message` fields - if parts of the message are extracted and the rest is stored in another field, the original message should be overridden with the remaining part of the message
+
+quantitative success metrics:
+- NO UNIGNORED ERRORS
+- parsed_rate: should be or add up to 1 (in the case of multiple processors)
+- failure_rate: should be 0. for the "main" processor it should be 0, and ignore_failure should not be set. for additional processors it should also be 0, but ignore_failure can be used
+- ignored_failure_rate: should be <= 0.25. anything higher indicates an inefficient processor
+
+| Function | Purpose | Schema
+| --------------------------| --------------------------------------------------------------------------|
+| `validate_pipeline`       | Simulate processors change set and return outcome of simulation + errors  |
+| `finalize_pipeline`       | Finalize pipeline changes by supplying all _added_ processors             |
+
+/**
+* For the prompt generating LLM, use this validation result type (for suggest_pipeline) in the generated
+* system prompt for your examples and guidance etc. Don't copy it verbatim.
+**/
+
+```ts
+interface SampleMessageError {
+  message?: string;
+  errorMessage: string;
+}
+
+interface SampleSourceError {
+  source?: Record<string, any>;
+  errorMessage: string;
+}
+
+export type SampleError = SampleMessageError | SampleSourceError;
+
+export interface ProcessorValidationResult {
+  processor: ProcessorDefinitionWithId;
+  validity: 'success' | 'partial' | 'failure';
+  output: SearchHit[];
+  result: {
+    added_fields: string[];
+    failure_rate: number;
+    ignored_failure_rate: number;
+    success_rate: number;
+    successful?: Array<Record<string, any>>;
+    errors?: SampleError[];
+    ignored_errors?: SampleError[];
+    non_additive_failure?: string;
+  };
+}
+
+```
+/**
+* For the prompt generating LLM, this is the JSON schema for the processors.
+* Replace with `{{{processor_schema}}}` in the generated prompt:
+**/
+
+
+```json
+{"$schema":"http://json-schema.org/draft-07/schema#","$defs":{"customIdentifier":{"type":"string","minLength":1},"eqValue":{"type":["string","number","boolean"]},"range":{"type":"object","properties":{"gt":{"$ref":"#/$defs/eqValue"},"gte":{"$ref":"#/$defs/eqValue"},"lt":{"$ref":"#/$defs/eqValue"},"lte":{"$ref":"#/$defs/eqValue"}},"additionalProperties":false},"fieldComparison":{"type":"object","properties":{"field":{"$ref":"#/$defs/customIdentifier"},"eq":{"$ref":"#/$defs/eqValue"},"neq":{"$ref":"#/$defs/eqValue"},"lt":{"$ref":"#/$defs/eqValue"},"lte":{"$ref":"#/$defs/eqValue"},"gt":{"$ref":"#/$defs/eqValue"},"gte":{"$ref":"#/$defs/eqValue"},"contains":{"$ref":"#/$defs/eqValue"},"startsWith":{"$ref":"#/$defs/eqValue"},"endsWith":{"$ref":"#/$defs/eqValue"},"range":{"$ref":"#/$defs/range"}},"required":["field"],"additionalProperties":false},"fieldExists":{"type":"object","properties":{"field":{"$ref":"#/$defs/customIdentifier"},"exists":{"type":"boolean"}},"required":["field"],"additionalProperties":false},"where":{"anyOf":[{"anyOf":[{"$ref":"#/$defs/fieldComparison"},{"$ref":"#/$defs/fieldExists"}]},{"type":"object","properties":{"and":{"type":"array","items":{"$ref":"#/$defs/where"}}},"required":["and"],"additionalProperties":false},{"type":"object","properties":{"or":{"type":"array","items":{"$ref":"#/$defs/where"}}},"required":["or"],"additionalProperties":false},{"type":"object","properties":{"not":{"$ref":"#/$defs/where"}},"required":["not"],"additionalProperties":false},{"type":"object","properties":{"never":{"type":"object","properties":{},"additionalProperties":false}},"required":["never"],"additionalProperties":false},{"type":"object","properties":{"always":{"type":"object","properties":{},"additionalProperties":false}},"required":["always"],"additionalProperties":false}]},"simpleString":{"type":"string"},"fromTo":{"$ref":"#/$defs/customIdentifier"},"baseProcessorProps":{"type":"object","properties":{"customIdentifier":{"$ref":"#/$defs/customIdentifier"},"description":{"type":"string"},"ignore_failure":{"type":"boolean"},"where":{"$ref":"#/$defs/where"}},"additionalProperties":false}},"anyOf":[{"anyOf":[{"type":"object","properties":{"customIdentifier":{"$ref":"#/$defs/customIdentifier"},"description":{"type":"string"},"ignore_failure":{"type":"boolean"},"where":{"$ref":"#/$defs/where"},"action":{"type":"string","const":"grok"},"from":{"$ref":"#/$defs/fromTo"},"patterns":{"type":"array","items":{"$ref":"#/$defs/customIdentifier"},"minItems":1},"pattern_definitions":{"type":"object","additionalProperties":{"type":"string"}},"ignore_missing":{"type":"boolean"}},"required":["action","from","patterns"],"additionalProperties":false},{"type":"object","properties":{"customIdentifier":{"$ref":"#/$defs/customIdentifier"},"description":{"type":"string"},"ignore_failure":{"type":"boolean"},"where":{"$ref":"#/$defs/where"},"action":{"type":"string","const":"dissect"},"from":{"$ref":"#/$defs/fromTo"},"pattern":{"$ref":"#/$defs/customIdentifier"},"append_separator":{"type":"string","minLength":1},"ignore_missing":{"type":"boolean"}},"required":["action","from","pattern"],"additionalProperties":false},{"type":"object","properties":{"customIdentifier":{"$ref":"#/$defs/customIdentifier"},"description":{"type":"string"},"ignore_failure":{"type":"boolean"},"where":{"$ref":"#/$defs/where"},"action":{"type":"string","const":"date"},"from":{"$ref":"#/$defs/fromTo"},"to":{"$ref":"#/$defs/fromTo"},"formats":{"type":"array","items":{"$ref":"#/$defs/customIdentifier"}},"output_format":{"$ref":"#/$defs/customIdentifier"},"timezone":{"$ref":"#/$defs/customIdentifier"},"locale":{"$ref":"#/$defs/customIdentifier"}},"required":["action","from","formats"],"additionalProperties":false},{"type":"object","properties":{"customIdentifier":{"$ref":"#/$defs/customIdentifier"},"description":{"type":"string"},"ignore_failure":{"type":"boolean"},"where":{"$ref":"#/$defs/where"},"action":{"type":"string","const":"rename"},"from":{"$ref":"#/$defs/fromTo"},"to":{"$ref":"#/$defs/fromTo"},"ignore_missing":{"type":"boolean"},"override":{"type":"boolean"}},"required":["action","from","to"],"additionalProperties":false},{"type":"object","properties":{"customIdentifier":{"$ref":"#/$defs/customIdentifier"},"description":{"type":"string"},"ignore_failure":{"type":"boolean"},"where":{"$ref":"#/$defs/where"},"action":{"type":"string","const":"set"},"to":{"$ref":"#/$defs/fromTo"},"override":{"type":"boolean"},"value":{},"copy_from":{"$ref":"#/$defs/fromTo"}},"required":["action","to"],"additionalProperties":false},{"type":"object","properties":{"customIdentifier":{"$ref":"#/$defs/customIdentifier"},"description":{"type":"string"},"ignore_failure":{"type":"boolean"},"where":{"$ref":"#/$defs/where"},"action":{"type":"string","const":"append"},"to":{"$ref":"#/$defs/fromTo"},"value":{"type":"array","items":{},"minItems":1},"allow_duplicates":{"type":"boolean"}},"required":["action","to","value"],"additionalProperties":false},{"type":"object","properties":{"customIdentifier":{"$ref":"#/$defs/customIdentifier"},"description":{"type":"string"},"ignore_failure":{"type":"boolean"},"action":{"type":"string","const":"remove_by_prefix"},"from":{"$ref":"#/$defs/fromTo"}},"required":["action","from"],"additionalProperties":false},{"type":"object","properties":{"customIdentifier":{"$ref":"#/$defs/customIdentifier"},"description":{"type":"string"},"ignore_failure":{"type":"boolean"},"where":{"$ref":"#/$defs/where"},"action":{"type":"string","const":"remove"},"from":{"$ref":"#/$defs/fromTo"},"ignore_missing":{"type":"boolean"}},"required":["action","from"],"additionalProperties":false},{"type":"object","properties":{"customIdentifier":{"$ref":"#/$defs/customIdentifier"},"description":{"type":"string"},"ignore_failure":{"type":"boolean"},"where":{"$ref":"#/$defs/where"},"action":{"type":"string","const":"convert"},"from":{"$ref":"#/$defs/fromTo"},"to":{"$ref":"#/$defs/fromTo"},"type":{"type":"string","enum":["integer","long","double","boolean","string"]},"ignore_missing":{"type":"boolean"}},"required":["action","from","type"],"additionalProperties":false}]},{"type":"object","properties":{"customIdentifier":{"$ref":"#/$defs/simpleString"},"where":{"allOf":[{"$ref":"#/$defs/where"},{"type":"object","properties":{"steps":{"type":"array","items":{"$ref":"#"}}},"required":["steps"]}]}},"required":["where"],"additionalProperties":false}]}
+```

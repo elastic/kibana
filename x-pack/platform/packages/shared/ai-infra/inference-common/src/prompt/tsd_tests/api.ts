@@ -256,7 +256,7 @@ const resPromptSpecificToolApiChoiceOverride = mockApi({
   prompt: promptWithGetWeatherToolChoice,
   input: minimalInput,
   tools: promptTools,
-  toolChoice: { type: 'function', function: 'get_stock_price' as const },
+  toolChoice: { function: 'get_stock_price' as const },
 });
 
 expectType<

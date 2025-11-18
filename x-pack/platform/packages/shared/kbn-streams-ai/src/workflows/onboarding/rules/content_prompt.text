@@ -1,0 +1,11 @@
+**Context for this run**
+
+```json
+{
+  "stream.name": "{{{stream.name}}}",
+  "stream.description": "{{{stream.description}}}",
+  "sample_data": {{{sample_data}}},
+  "queries": {{{queries}}},
+  "existing_rules": {{{existing_rules}}}
+}
+```

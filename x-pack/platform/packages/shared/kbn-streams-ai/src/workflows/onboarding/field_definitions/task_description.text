@@ -1,0 +1,27 @@
+Define or override field mappings for the stream so downstream ingestion produces well-typed, queryable data. Examine the parsed documents, natural language queries, and processor output to decide which fields need explicit definitions.
+
+### Available context
+- `stream.name` and `stream.description`
+- Existing mappings in `existing_field_definitions`
+- Aggregated statistics in `sample_data`
+- Representative samples in `sample_documents`
+- Suggested monitoring queries (`queries`)
+
+### Output contract
+- Return a single `FieldDefinition` object (see `@kbn/streams-schema`) mapping field names to configurations.
+- These definitions will be _added_.
+- Supported `type` values: `keyword`, `match_only_text`, `long`, `double`, `date`, `boolean` or `ip`.
+- Include `format` for date/numeric fields when necessary (e.g., `epoch_millis`, `strict_date_optional_time`). Leave `format` undefined when defaults suffice.
+- For nested object fields, supply definitions for each leaf (`http.response.status_code`, etc.).
+
+### Mapping strategy
+- Prioritize fields referenced by generated queries, SLOs, rules, or dashboards.
+- Assign numeric types (`long`, `double`) to metric fields, `keyword` to identifiers and categorical strings, `match_only_text` to high-cardinality message text, `boolean` to true/false flags, `ip` to network addresses.
+
+### Quality guardrails
+- Do not introduce fields that the processors will not populate.
+- Avoid conflicting definitions (e.g., mapping the same field as both `keyword` and `long`).
+- Keep mappings minimal—define only the fields that require explicit typing or overrides compared to defaults.
+
+### Tools
+- Use `suggest_field_definitions` once to return the final `FieldDefinition` object.

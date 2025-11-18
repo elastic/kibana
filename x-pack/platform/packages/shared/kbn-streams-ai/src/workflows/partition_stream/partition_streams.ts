@@ -12,9 +12,9 @@ import type { Streams } from '@kbn/streams-schema';
 import { isEqual } from 'lodash';
 import { conditionSchema, type Condition } from '@kbn/streamlang';
 import { DeepStrict } from '@kbn/zod-helpers';
-import { clusterLogs } from '../../src/cluster_logs/cluster_logs';
+import { conditionSchema as conditionJsonSchema } from '../../json_schema/condition_schema';
 import { SuggestStreamPartitionsPrompt } from './prompt';
-import { schema } from './schema';
+import { clusterLogs } from '../../cluster_logs/cluster_logs';
 
 const strictConditionSchema = DeepStrict(conditionSchema);
 
@@ -37,6 +37,14 @@ export async function partitionStream({
   maxSteps?: number | undefined;
   signal: AbortSignal;
 }): Promise<Array<{ name: string; condition: Condition }>> {
+  logger.info(
+    JSON.stringify({
+      start: new Date(start).toISOString(),
+      end: new Date(end).toISOString(),
+      stream: definition.name,
+    })
+  );
+
   const initialClusters = await clusterLogs({
     esClient,
     start,
@@ -52,22 +60,24 @@ export async function partitionStream({
     return [];
   }
 
-  // No need to involve reasoning if there are no sample documents
-  if (initialClusters.every((cluster) => cluster.clustering.sampled === 0)) {
-    return [];
-  }
-
   const response = await executeAsReasoningAgent({
     inferenceClient,
     prompt: SuggestStreamPartitionsPrompt,
     input: {
       stream: definition,
       initial_clustering: JSON.stringify(initialClusters),
-      condition_schema: JSON.stringify(schema),
+      condition_schema: JSON.stringify(conditionJsonSchema),
     },
     maxSteps,
     toolCallbacks: {
-      partition_logs: async (toolCall) => {
+      finalize_log_partitions: async () => {
+        return {
+          response: {
+            acknowledged: true,
+          },
+        };
+      },
+      simulate_log_partitions: async (toolCall) => {
         const partitions = (toolCall.function.arguments.partitions ?? []) as Array<{
           name: string;
           condition: Condition;
@@ -86,14 +96,13 @@ export async function partitionStream({
       },
     },
     finalToolChoice: {
-      type: 'function',
-      function: 'partition_logs',
+      function: 'finalize_log_partitions',
     },
     abortSignal: signal,
   });
 
   const proposedPartitions =
-    response?.toolCalls
+    response.toolCalls
       ?.flatMap((toolCall) => toolCall.function.arguments.partitions ?? [])
       .map(({ name, condition }) => {
         // Sanitize name to be alphanumeric with dashes only, lowercase

@@ -86,7 +86,10 @@ export class PhoenixSpanProcessor extends BaseInferenceSpanProcessor {
       span = getExecuteToolSpan(span);
     }
 
-    if (!span.parentSpanContext) {
+    const isRoot =
+      !span.parentSpanContext || span.parentSpanContext.traceId !== span.spanContext().traceId;
+
+    if (isRoot) {
       const traceId = span.spanContext().traceId;
       void this.getProjectId().then((projectId) => {
         if (!projectId || !this.config.public_url) {

@@ -33,6 +33,6 @@ export interface GeminiMessage {
 }
 
 export interface GeminiToolConfig {
-  mode: 'AUTO' | 'ANY' | 'NONE';
+  mode: 'AUTO' | 'ANY' | 'NONE' | 'VALIDATED';
   allowedFunctionNames?: string[];
 }

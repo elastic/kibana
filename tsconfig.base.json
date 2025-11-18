@@ -2180,6 +2180,8 @@
       "@kbn/streamlang-tests/*": ["x-pack/platform/packages/shared/kbn-streamlang-tests/*"],
       "@kbn/streams-ai": ["x-pack/platform/packages/shared/kbn-streams-ai"],
       "@kbn/streams-ai/*": ["x-pack/platform/packages/shared/kbn-streams-ai/*"],
+      "@kbn/streams-ai-cli": ["x-pack/platform/packages/shared/kbn-streams-ai-cli"],
+      "@kbn/streams-ai-cli/*": ["x-pack/platform/packages/shared/kbn-streams-ai-cli/*"],
       "@kbn/streams-app-plugin": ["x-pack/platform/plugins/shared/streams_app"],
       "@kbn/streams-app-plugin/*": ["x-pack/platform/plugins/shared/streams_app/*"],
       "@kbn/streams-plugin": ["x-pack/platform/plugins/shared/streams"],

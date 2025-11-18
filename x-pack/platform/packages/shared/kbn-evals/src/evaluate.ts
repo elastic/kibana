@@ -31,7 +31,6 @@ import { createGroundednessAnalysisEvaluator } from './evaluators/groundedness';
  * Test type for evaluations. Loads an inference client and a
  * (Kibana-flavored) Phoenix client.
  */
-
 export const evaluate = base.extend<{}, EvaluationSpecificWorkerFixtures>({
   fetch: [
     async ({ kbnClient, log }, use) => {

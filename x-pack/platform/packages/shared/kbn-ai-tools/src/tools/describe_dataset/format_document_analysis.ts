@@ -23,7 +23,7 @@ interface FormatDocumentAnalysisOptions {
 }
 
 export function formatDocumentAnalysis(
-  analysis: DocumentAnalysis,
+  analysis: Pick<DocumentAnalysis, 'total' | 'sampled' | 'fields'>,
   options?: FormatDocumentAnalysisOptions
 ): FormattedDocumentAnalysis {
   const { dropEmpty = false, dropUnmapped = false, limit = 500 } = options ?? {};

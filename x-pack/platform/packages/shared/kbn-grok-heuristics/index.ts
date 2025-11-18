@@ -13,3 +13,4 @@ export { mergeGrokProcessors } from './src/review/merge_grok_processors';
 export { groupMessagesByPattern } from './src/group_messages';
 export { extractGrokPatternDangerouslySlow } from './src/tokenization/extract_grok_pattern';
 export { ReviewFieldsPrompt } from './src/review/review_fields_prompt';
+export type { GrokPatternNode } from './src/types';

@@ -1,0 +1,30 @@
+Design Kibana dashboards that visualize the most valuable signals surfaced during onboarding. Use the generated monitoring queries, stream metadata, and sampled documents to decide which KPIs deserve visual treatment. Focus on coverage across reliability, performance, usage, and investigative pivots.
+
+### Available context
+- `stream.name` and `stream.description`
+- Aggregated field/value statistics in `sample_data`
+- Representative records in `sample_documents`
+- Suggested monitoring queries (`NaturalLanguageQuery[]`)
+- Any processors/field definitions produced earlier in the workflow
+- Existing dashboards (`existing_dshboards`)
+
+### Output contract
+- Return an array of `DashboardCreateRequestBody` objects (see `@kbn/dashboard-plugin/server`). Each object must contain a fully populated `data` block (title, description, panels, references, timeRange/query state, control group config, etc.) ready for submission to the Dashboard Create API.
+- Each panel requires explicit layout (`grid` with `x`, `y`, `w`, `h`), `type`, `config` (e.g., Lens attributes, saved search input), and stable `uid` identifiers.
+- Reference lenses or visualizations consistently: when creating on-the-fly Lens state, include the full serialized `attributes`. When embedding by-reference panels, add matching entries to `references`.
+
+### Dashboard strategy
+- Compose 1–3 dashboards depending on breadth of signals (e.g., “Service Reliability Overview”, “Error Deep Dive”).
+- Prioritize charts that map directly to previously generated queries: throughput trends, error ratios, latency distributions, top contributors, saturation metrics, investigative tables.
+- Balance high-level KPIs with drill-down panels (breakdowns by `service.name`, `host.name`, `user.id`, etc.) whenever those fields are present.
+- Configure time range, filter, and refresh interval defaults that make sense for the data (e.g., last 24h for high-volume logs).
+- Leverage control groups (e.g., field filters, time pickers) only when the underlying field exists and benefits interactive filtering.
+
+### Quality guardrails
+- Do not reference fields, saved objects, or index patterns absent from the sampled data. Avoid placeholder text like “TODO”.
+- Keep panel titles concise yet descriptive, mirroring the intent of the supporting query.
+- Ensure grid coordinates do not overlap and stay within the dashboard column count.
+- When telemetry is sparse, prefer a smaller dashboard with well-explained panels over speculative content.
+
+### Tools
+- Call `suggest_dashboards` once to return the final array of `DashboardCreateRequestBody` payloads.

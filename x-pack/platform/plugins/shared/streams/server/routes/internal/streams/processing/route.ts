@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FlattenRecord } from '@kbn/streams-schema';
+import type { FlattenRecord, SimulationResponse } from '@kbn/streams-schema';
 import { flattenRecord, namedFieldDefinitionConfigSchema } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { streamlangDSLSchema } from '@kbn/streamlang';
@@ -52,7 +52,7 @@ export const simulateProcessorRoute = createServerRoute({
     },
   },
   params: paramsSchema,
-  handler: async ({ params, request, getScopedClients }) => {
+  handler: async ({ params, request, getScopedClients }): Promise<SimulationResponse> => {
     const { scopedClusterClient, streamsClient, fieldsMetadataClient } = await getScopedClients({
       request,
     });
@@ -62,7 +62,14 @@ export const simulateProcessorRoute = createServerRoute({
       throw new SecurityError(`Cannot read stream ${params.path.name}, insufficient privileges`);
     }
 
-    return simulateProcessing({ params, scopedClusterClient, streamsClient, fieldsMetadataClient });
+    const simulateProcessingResult = await simulateProcessing({
+      params,
+      scopedClusterClient,
+      streamsClient,
+      fieldsMetadataClient,
+    });
+
+    return simulateProcessingResult;
   },
 });
 

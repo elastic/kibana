@@ -13,7 +13,7 @@ complete = <yes|no>
 <<<END_INTERNAL>>>
 ```
 
-The orchestrator injects a `reason` tool call to signal the reasoning opportunity. The agent must call the `complete` tool when it chooses to move to External Output.
+The orchestrator injects a `reason` tool call to signal the reasoning opportunity. The agent must call the `complete` tool when it chooses to move to External Output. Both tools take **no arguments**.
 
 In External Output, the agent must be accurate and concise. It must cite fragments of returned tool data when supporting conclusions. It must favor correctness first, conciseness second, and speed third.
 

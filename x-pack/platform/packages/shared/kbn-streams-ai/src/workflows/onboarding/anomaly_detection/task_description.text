@@ -1,0 +1,28 @@
+Design ML anomaly detection jobs that highlight unusual behavior within the stream. Use the enriched context (queries, field definitions, processors) to decide which metrics are stable enough to model and which entities warrant per-partition baselines.
+
+### Available context
+- `stream.name` and `stream.description`
+- Aggregated statistics in `sample_data`
+- Representative records in `sample_documents`
+- Suggested monitoring queries (`NaturalLanguageQuery[]`)
+- Existing jobs (`ml_jobs`)
+
+### Output contract
+- Return an array of Elasticsearch ML datafeed definitions (`MlPutDatafeedRequest`). Each request must include: `datafeed_id`, `job_id`, `indices` or `indices_options`, a concrete `query`, and optional `aggregations`, `runtime_mappings`, or `script_fields` required to shape the features.
+- Assume downstream automation will create matching job configurations; ensure `job_id` names are unique, lowercase, and tied to the metric being modelled (e.g., `df-streamname-error-rate`).
+- When using aggregations, produce summary fields (e.g., error counts per service) that align with detectors you expect the job to run (e.g., `sum`, `avg`, `rare`).
+
+### Job design guidance
+- Base each job on a metric with predictable seasonality (request rate, error ratio, latency). Favor counts or ratios derived from queries you already generated.
+- Include partitioning fields (`datafeed_aggregations` with terms buckets) only when they have manageable cardinality (e.g., `service.name`, `host.name`).
+- Ensure the query filters restrict the feed to relevant documents (specific services, event types, outcome states) so the job learns a coherent baseline.
+- Reference the canonical timestamp (e.g., `@timestamp`) and ensure the datafeed query returns it; otherwise, add a runtime mapping.
+- Provide `indices` that match the stream or its routed index aliases.
+
+### Quality guardrails
+- Never fabricate fields or indices absent from the analysis. Skip a job if required inputs are missing.
+- Avoid creating multiple jobs for nearly identical signals unless partitioning differs materially.
+- Keep aggregations simple; prefer metric aggregations the ML detector can consume without post-processing.
+
+### Tools
+- Call `suggest_anomaly_detection_jobs` once to return the list of `MlPutDatafeedRequest` objects.

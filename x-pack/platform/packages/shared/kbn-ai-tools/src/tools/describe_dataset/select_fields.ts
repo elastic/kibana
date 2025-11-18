@@ -9,7 +9,7 @@ import { partition, shuffle } from 'lodash';
 import type { DocumentAnalysis } from './document_analysis';
 
 export function selectFields(
-  analysis: DocumentAnalysis,
+  analysis: Pick<DocumentAnalysis, 'fields'>,
   { dropEmpty, dropUnmapped, limit }: { dropUnmapped: boolean; dropEmpty: boolean; limit: number }
 ) {
   const filteredFields = analysis.fields.filter((field) => {

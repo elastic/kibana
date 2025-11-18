@@ -14,7 +14,7 @@ import { createProxyTransport } from './proxy_transport';
 import { getInternalKibanaHeaders } from './get_internal_kibana_headers';
 
 type FetchInputOptions = string | URL;
-type FetchInitOptions = Omit<globalThis.RequestInit, 'body'> & { body: unknown };
+type FetchInitOptions = Omit<globalThis.RequestInit, 'body'> & { body?: unknown };
 
 interface KibanaClientOptions {
   baseUrl: string;

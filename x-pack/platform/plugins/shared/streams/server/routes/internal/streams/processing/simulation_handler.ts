@@ -27,9 +27,19 @@ import { flattenObjectNestedLast, calculateObjectDiff } from '@kbn/object-utils'
 import type {
   FlattenRecord,
   NamedFieldDefinitionConfig,
-  FieldDefinitionConfig,
-  InheritedFieldDefinitionConfig,
   FieldDefinition,
+  PipelineSimulationResult,
+  SuccessfulPipelineSimulateResponse,
+  IngestSimulationResult,
+  SimulationDocReport,
+  ProcessorMetrics,
+  SuccessfulPipelineSimulateDocumentResult,
+  SimulationError,
+  DocSimulationStatus,
+  DetectedField,
+  SimulationResponse,
+  FailedSimulationResponse,
+  SuccessfulSimulationResponse,
 } from '@kbn/streams-schema';
 import {
   getInheritedFieldsFromAncestors,
@@ -64,94 +74,7 @@ export interface SimulateProcessingDeps {
   fieldsMetadataClient: IFieldsMetadataClient;
 }
 
-export interface BaseSimulationError {
-  message: string;
-}
-
-export type SimulationError = BaseSimulationError &
-  (
-    | {
-        type: 'field_mapping_failure';
-      }
-    | {
-        type: 'generic_processor_failure';
-        processor_id: string;
-      }
-    | {
-        type: 'generic_simulation_failure';
-        processor_id?: string;
-      }
-    | {
-        type: 'ignored_fields_failure';
-        ignored_fields: Array<Record<string, string>>;
-      }
-    | {
-        type: 'non_namespaced_fields_failure';
-        processor_id: string;
-      }
-    | {
-        type: 'reserved_field_failure';
-        processor_id: string;
-      }
-  );
-
-export type DocSimulationStatus = 'parsed' | 'partially_parsed' | 'skipped' | 'failed';
-
-export interface SimulationDocReport {
-  detected_fields: Array<{ processor_id: string; name: string }>;
-  errors: SimulationError[];
-  status: DocSimulationStatus;
-  value: FlattenRecord;
-}
-
-export interface ProcessorMetrics {
-  detected_fields: string[];
-  errors: SimulationError[];
-  failed_rate: number;
-  skipped_rate: number;
-  parsed_rate: number;
-}
-
-// Narrow down the type to only successful processor results
-export type SuccessfulPipelineSimulateDocumentResult = WithRequired<
-  IngestSimulateDocumentResult,
-  'processor_results'
->;
-
-export interface SuccessfulPipelineSimulateResponse {
-  docs: SuccessfulPipelineSimulateDocumentResult[];
-}
-
-export type PipelineSimulationResult =
-  | {
-      status: 'success';
-      simulation: SuccessfulPipelineSimulateResponse;
-    }
-  | {
-      status: 'failure';
-      error: SimulationError;
-    };
-
-export type IngestSimulationResult =
-  | {
-      status: 'success';
-      simulation: SimulateIngestResponse;
-    }
-  | {
-      status: 'failure';
-      error: SimulationError;
-    };
-
-export type DetectedField =
-  | WithNameAndEsType
-  | WithNameAndEsType<FieldDefinitionConfig | InheritedFieldDefinitionConfig>;
-
-export type WithNameAndEsType<TObj = {}> = TObj & {
-  name: string;
-  esType?: string;
-  suggestedType?: string;
-};
-export type WithRequired<TObj, TKey extends keyof TObj> = TObj & { [TProp in TKey]-?: TObj[TProp] };
+type WithRequired<TObj, TKey extends keyof TObj> = TObj & { [TProp in TKey]-?: TObj[TProp] };
 
 /**
  * Detects and groups flattened geo_point fields (*.lat and *.lon) back into a single object.
@@ -200,12 +123,12 @@ const regroupGeoPointFields = (flattenedDoc: FlattenRecord): RecursiveRecord => 
   return result;
 };
 
-export const simulateProcessing = async ({
+export async function simulateProcessing({
   params,
   scopedClusterClient,
   streamsClient,
   fieldsMetadataClient,
-}: SimulateProcessingDeps) => {
+}: SimulateProcessingDeps): Promise<SimulationResponse> {
   /* 0. Retrieve required data to prepare the simulation */
   const [stream, { indexState: streamIndexState, fieldCaps: streamIndexFieldCaps }] =
     await Promise.all([
@@ -262,20 +185,17 @@ export const simulateProcessing = async ({
 
   /* 6. Derive general insights and process final response body */
   return prepareSimulationResponse(docReports, processorsMetrics, detectedFields);
-};
+}
 
-const prepareSimulationDocs = (
-  documents: FlattenRecord[],
-  streamName: string
-): IngestDocument[] => {
+function prepareSimulationDocs(documents: FlattenRecord[], streamName: string): IngestDocument[] {
   return documents.map((doc, id) => ({
     _index: streamName,
     _id: id.toString(),
     _source: regroupGeoPointFields(doc),
   }));
-};
+}
 
-const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessorContainer[] => {
+function prepareSimulationProcessors(processing: StreamlangDSL): IngestProcessorContainer[] {
   //
   /**
    * We want to simulate processors logic and collect data independently from the user config for simulation purposes.
@@ -310,12 +230,15 @@ const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessor
       },
     };
   });
-};
+}
 
-const prepareSimulationData = (
+function prepareSimulationData(
   params: ProcessingSimulationParams,
   stream: Streams.all.Definition
-) => {
+): {
+  docs: IngestDocument[];
+  processors: IngestProcessorContainer[];
+} {
   const { body } = params;
   const { processing, documents } = body;
 
@@ -327,11 +250,11 @@ const prepareSimulationData = (
     docs: prepareSimulationDocs(documents, targetStreamName),
     processors: prepareSimulationProcessors(processing),
   };
-};
+}
 
-const preparePipelineSimulationBody = (
+function preparePipelineSimulationBody(
   simulationData: ReturnType<typeof prepareSimulationData>
-): IngestSimulateRequest => {
+): IngestSimulateRequest {
   const { docs, processors } = simulationData;
 
   return {
@@ -340,14 +263,14 @@ const preparePipelineSimulationBody = (
     pipeline: { processors, field_access_pattern: 'flexible' },
     verbose: true,
   };
-};
+}
 
-const prepareIngestSimulationBody = (
+function prepareIngestSimulationBody(
   simulationData: ReturnType<typeof prepareSimulationData>,
   stream: Streams.all.Definition,
   streamIndex: IndicesIndexState,
   params: ProcessingSimulationParams
-): SimulateIngestRequest => {
+): SimulateIngestRequest {
   const { body } = params;
   const { detected_fields } = body;
 
@@ -392,7 +315,7 @@ const prepareIngestSimulationBody = (
   };
 
   return simulationBody;
-};
+}
 
 /**
  * When running a pipeline simulation, we want to fail fast on syntax failures, such as grok patterns.
@@ -830,11 +753,11 @@ const collectIngestDocumentErrors = (docResult: SimulateIngestSimulateIngestDocu
   return errors;
 };
 
-const prepareSimulationResponse = async (
+function prepareSimulationResponse(
   docReports: SimulationDocReport[],
   processorsMetrics: Record<string, ProcessorMetrics>,
   detectedFields: DetectedField[]
-) => {
+): SuccessfulSimulationResponse {
   const calculateRateByStatus = getRateCalculatorForDocs(docReports);
 
   const parsedRate = calculateRateByStatus('parsed');
@@ -854,9 +777,9 @@ const prepareSimulationResponse = async (
       parsed_rate: parseFloat(parsedRate.toFixed(3)),
     },
   };
-};
+}
 
-const prepareSimulationFailureResponse = (error: SimulationError) => {
+function prepareSimulationFailureResponse(error: SimulationError): FailedSimulationResponse {
   const failedBecauseNoSampleDocs = error.message.includes('must specify at least one document');
   return {
     detected_fields: [],
@@ -883,7 +806,7 @@ const prepareSimulationFailureResponse = (error: SimulationError) => {
       parsed_rate: 0,
     },
   };
-};
+}
 
 const getStreamIndex = async (
   scopedClusterClient: IScopedClusterClient,
@@ -938,13 +861,13 @@ const getStreamFields = async (
 /**
  * In case new fields have been detected, we want to tell the user which ones are inherited and already mapped.
  */
-const computeDetectedFields = async (
+async function computeDetectedFields(
   processorsMetrics: Record<string, ProcessorMetrics>,
   params: ProcessingSimulationParams,
   streamFields: FieldDefinition,
   streamFieldCaps: FieldCapsResponse['fields'],
   fieldsMetadataClient: IFieldsMetadataClient
-): Promise<DetectedField[]> => {
+): Promise<DetectedField[]> {
   const fields = Object.values(processorsMetrics).flatMap((metrics) => metrics.detected_fields);
 
   const uniqueFields = uniq(fields);
@@ -1001,7 +924,7 @@ const computeDetectedFields = async (
       description,
     };
   });
-};
+}
 
 const getRateCalculatorForDocs = (docs: SimulationDocReport[]) => (status: DocSimulationStatus) => {
   const matchCount = docs.reduce((rate, doc) => (rate += doc.status === status ? 1 : 0), 0);

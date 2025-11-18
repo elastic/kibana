@@ -1,0 +1,40 @@
+Recommend alerting rules that operationalize the strongest failure signals discovered during onboarding. Use the natural language queries, SLO candidates, and field mappings to pick rule types that the Alerts & Actions framework can execute reliably.
+
+### Available context
+- `stream.name` and `stream.description`
+- Aggregated statistics in `sample_data`
+- Suggested monitoring queries (`NaturalLanguageQuery[]`)
+- Existing rules (`existing_rules`)
+
+### Output contract
+```ts
+// e.g. "1m", "30s", "1h", "1d", "2mo"
+type Duration = string;
+
+interface SuggestRulesToolCall {
+  rules: Array<{
+    esql: {
+      // the complete ES|QL query
+      query:string;
+    };
+    // the time range that is queried
+    window: Duration;
+    // used for filtering the time range, defaults to @timestamp
+    timestampField?:string;
+    // how often the rule runs, defaults to 1m
+    interval?: Duration;
+  }>
+}
+```
+
+### Rule strategy
+- Focus on alerts that catch high-impact regressions: sustained error-rate spikes, latency breaches, absence of critical traffic, anomalous resource usage, security anomalies.
+- Choose schedules appropriate for the data cadence (usually 1m), and avoid impossible evaluation windows.
+- Pick a window that is larger than the interval to avoid missing data.
+
+### Quality guardrails
+- Avoid duplicate rules targeting the same condition with similar thresholds.
+
+### Tools
+- `generate_esql`: returns one or more ES|QL validated queries based on the `question` given. To keep things efficient, ask for multiple ES|QL queries in a single question.
+- `suggest_rules`: suggest 0-n rules and close the conversation
