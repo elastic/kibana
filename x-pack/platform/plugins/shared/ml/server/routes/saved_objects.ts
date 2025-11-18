@@ -88,6 +88,34 @@ export function savedObjectsRoutes(
             query: syncJobObjects,
           },
         },
+        options: {
+          oasOperationObject: () => ({
+            responses: {
+              200: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      successSyncResponse: {
+                        value: {
+                          savedObjectsCreated: {
+                            'anomaly-detector': {
+                              'test-job': {
+                                success: true,
+                              },
+                            },
+                          },
+                          savedObjectsDeleted: {},
+                          datafeedsAdded: {},
+                          datafeedsRemoved: {},
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          }),
+        },
       },
       routeGuard.fullLicenseAPIGuard(
         async ({ client, request, response, mlSavedObjectService }) => {
@@ -259,6 +287,60 @@ export function savedObjectsRoutes(
             body: updateJobsSpaces,
           },
         },
+        options: {
+          oasOperationObject: () => ({
+            requestBody: {
+              content: {
+                'application/json': {
+                  examples: {
+                    updateADJobSpacesRequest: {
+                      value: {
+                        jobType: 'anomaly-detector',
+                        jobIds: ['test-job'],
+                        spacesToAdd: ['default'],
+                        spacesToRemove: ['*'],
+                      },
+                    },
+                    updateDFAJobSpacesRequest: {
+                      value: {
+                        jobType: 'data-frame-analytics',
+                        jobIds: ['test-job'],
+                        spacesToAdd: ['default'],
+                        spacesToRemove: ['*'],
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            responses: {
+              200: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      successADResponse: {
+                        value: {
+                          'test-job': {
+                            success: true,
+                            type: 'anomaly-detector',
+                          },
+                        },
+                      },
+                      successDFAResponse: {
+                        value: {
+                          'test-job': {
+                            success: true,
+                            type: 'data-frame-analytics',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          }),
+        },
       },
       routeGuard.fullLicenseAPIGuard(async ({ request, response, mlSavedObjectService }) => {
         try {
@@ -346,6 +428,43 @@ export function savedObjectsRoutes(
           request: {
             body: updateTrainedModelsSpaces,
           },
+        },
+        options: {
+          oasOperationObject: () => ({
+            requestBody: {
+              content: {
+                'application/json': {
+                  examples: {
+                    updateModelSpacesRequest: {
+                      value: {
+                        modelIds: ['test-model'],
+                        spacesToAdd: ['default'],
+                        spacesToRemove: ['*'],
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            responses: {
+              200: {
+                content: {
+                  'application/json': {
+                    examples: {
+                      successADResponse: {
+                        value: {
+                          'test-model': {
+                            success: true,
+                            type: 'trained-model',
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          }),
         },
       },
       routeGuard.fullLicenseAPIGuard(async ({ request, response, mlSavedObjectService }) => {
