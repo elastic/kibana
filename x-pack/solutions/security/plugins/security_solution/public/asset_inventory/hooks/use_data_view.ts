@@ -24,6 +24,27 @@ export const useDataView = (indexPattern?: string) => {
       if (!indexPattern) {
         throw new Error('Index pattern is required');
       }
+
+      // If the input looks like a data view ID (starts with asset-inventory-), try to get by ID first
+      if (indexPattern.startsWith('asset-inventory-')) {
+        try {
+          return await dataViews.get(indexPattern, false);
+        } catch (getError) {
+          // If get fails, try find as fallback
+          try {
+            const [dataView] = await dataViews.find(indexPattern);
+            if (dataView) {
+              return dataView;
+            }
+          } catch (findError) {
+            // Both methods failed, throw the original get error
+            throw getError;
+          }
+          // find didn't throw but returned empty, throw original error
+          throw getError;
+        }
+      }
+
       const [dataView] = await dataViews.find(indexPattern);
 
       if (!dataView) {

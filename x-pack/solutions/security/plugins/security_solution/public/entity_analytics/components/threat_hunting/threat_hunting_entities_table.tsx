@@ -92,6 +92,71 @@ const getRiskLevelFromScore = (score: number): RiskSeverity => {
 };
 
 /**
+ * Helper to get risk score from entity-specific fields
+ */
+const getEntitySpecificRiskScore = (
+  entityType: string | undefined,
+  record: DataTableRecord,
+  source: GenericEntityRecord | undefined
+): number | undefined => {
+  if (!entityType) return undefined;
+
+  if (entityType === EntityType.user) {
+    const userRisk = record.flattened['user.risk.calculated_score_norm'];
+    if (userRisk != null && typeof userRisk === 'number') {
+      return userRisk;
+    }
+    return source?.user?.risk?.calculated_score_norm as number | undefined;
+  }
+
+  if (entityType === EntityType.host) {
+    const hostRisk = record.flattened['host.risk.calculated_score_norm'];
+    if (hostRisk != null && typeof hostRisk === 'number') {
+      return hostRisk;
+    }
+    return source?.host?.risk?.calculated_score_norm as number | undefined;
+  }
+
+  if (entityType === EntityType.service) {
+    const serviceRisk = record.flattened['service.risk.calculated_score_norm'];
+    if (serviceRisk != null && typeof serviceRisk === 'number') {
+      return serviceRisk;
+    }
+    return source?.service?.risk?.calculated_score_norm as number | undefined;
+  }
+
+  return undefined;
+};
+
+/**
+ * Helper to get risk level from various sources
+ */
+const getRiskLevelFromSources = (
+  entityType: string | undefined,
+  record: DataTableRecord,
+  source: GenericEntityRecord | undefined
+): RiskSeverity | undefined => {
+  const entityLevel =
+    record.flattened['entity.risk_level'] || source?.entity?.risk?.calculated_level;
+  if (entityLevel) return entityLevel as RiskSeverity;
+
+  if (entityType === EntityType.user) {
+    return (record.flattened['user.risk.calculated_level'] ||
+      source?.user?.risk?.calculated_level) as RiskSeverity | undefined;
+  }
+  if (entityType === EntityType.host) {
+    return (record.flattened['host.risk.calculated_level'] ||
+      source?.host?.risk?.calculated_level) as RiskSeverity | undefined;
+  }
+  if (entityType === EntityType.service) {
+    return (record.flattened['service.risk.calculated_level'] ||
+      source?.service?.risk?.calculated_level) as RiskSeverity | undefined;
+  }
+
+  return undefined;
+};
+
+/**
  * Custom cell renderer for Risk Score column with color scheme matching Privileged User Monitoring
  */
 const RiskScoreCellRenderer = ({
@@ -103,31 +168,36 @@ const RiskScoreCellRenderer = ({
   const source = record.raw._source as GenericEntityRecord | undefined;
   const entityType = source?.entity?.EngineMetadata?.Type;
 
-  // Get entity-specific risk score and level fields
-  let riskScore: number | undefined;
-  let riskLevel: RiskSeverity | undefined;
+  // Get risk score - try multiple sources in order of preference
+  // 1. Try flattened entity.risk (primary field used by asset inventory)
+  const entityRiskFlattened = record.flattened[ASSET_FIELDS.ENTITY_RISK];
+  let riskScore: number | undefined =
+    entityRiskFlattened != null && typeof entityRiskFlattened === 'number'
+      ? entityRiskFlattened
+      : undefined;
 
-  if (entityType === EntityType.user) {
-    riskScore = record.flattened['user.risk.calculated_score_norm'] as number | undefined;
-    riskLevel = record.flattened['user.risk.calculated_level'] as RiskSeverity | undefined;
-  } else if (entityType === EntityType.host) {
-    riskScore = record.flattened['host.risk.calculated_score_norm'] as number | undefined;
-    riskLevel = record.flattened['host.risk.calculated_level'] as RiskSeverity | undefined;
-  } else if (entityType === EntityType.service) {
-    riskScore = record.flattened['service.risk.calculated_score_norm'] as number | undefined;
-    riskLevel = record.flattened['service.risk.calculated_level'] as RiskSeverity | undefined;
-  } else {
-    // Fallback to generic entity.risk field if entity type is not recognized
-    riskScore = record.flattened[ASSET_FIELDS.ENTITY_RISK] as number | undefined;
-    riskLevel = record.flattened['entity.risk_level'] as RiskSeverity | undefined;
+  // 2. Try raw source entity.risk.calculated_score_norm
+  if (riskScore === undefined && source?.entity?.risk?.calculated_score_norm != null) {
+    riskScore = source.entity.risk.calculated_score_norm as number;
   }
 
-  if (riskScore === undefined && !riskLevel) {
+  // 3. Try entity-specific fields based on entity type
+  if (riskScore === undefined) {
+    riskScore = getEntitySpecificRiskScore(entityType, record, source);
+  }
+
+  // Get risk level
+  const riskLevel = getRiskLevelFromSources(entityType, record, source);
+
+  // If we have neither risk score nor risk level, show empty
+  // Note: riskScore can be 0, which is a valid score, so we check for undefined/null specifically
+  if ((riskScore === undefined || riskScore === null) && !riskLevel) {
     return getEmptyTagValue();
   }
 
   // Determine risk level from risk score if not directly available
-  const level = riskLevel || (riskScore ? getRiskLevelFromScore(riskScore) : RiskSeverity.Unknown);
+  const level =
+    riskLevel || (riskScore != null ? getRiskLevelFromScore(riskScore) : RiskSeverity.Unknown);
 
   const colors: { background: string; text: string } = (() => {
     switch (level) {
@@ -173,7 +243,7 @@ const RiskScoreCellRenderer = ({
         size={'s'}
         color={colors.text}
       >
-        {riskScore
+        {riskScore !== undefined && riskScore !== null
           ? formatRiskScoreWholeNumber(riskScore)
           : i18n.translate('xpack.securitySolution.entityAnalytics.threatHunting.riskScore.na', {
               defaultMessage: 'N/A',

@@ -20,7 +20,7 @@ import { useSourcererDataView } from '../../sourcerer/containers';
 import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { PageLoader } from '../../common/components/page_loader';
-import { DataViewManagerScopeName } from '../../data_view_manager/constants';
+import { PageScope } from '../../data_view_manager/constants';
 import { CombinedRiskDonutChart } from '../components/threat_hunting/combined_risk_donut_chart';
 import { AnomaliesPlaceholderPanel } from '../components/threat_hunting/anomalies_placeholder_panel';
 import { ThreatHuntingEntitiesTable } from '../components/threat_hunting/threat_hunting_entities_table';
@@ -36,6 +36,7 @@ import {
   ASSET_INVENTORY_DATA_VIEW_ID_PREFIX,
   LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
 } from '../../asset_inventory/constants';
+import { DataViewNotFound } from '../../asset_inventory/components/errors/data_view_not_found';
 const THREAT_HUNTING_COLUMNS_KEY = 'threat-hunting:columns';
 
 const getDefaultQuery = ({ query, filters, pageFilters }: AssetsBaseURLQuery): URLQuery => ({
@@ -52,7 +53,7 @@ export const EntityThreatHuntingPage = () => {
     sourcererDataView: oldSourcererDataViewSpec,
   } = useSourcererDataView();
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
-  const { dataView, status } = useDataView(DataViewManagerScopeName.explore);
+  const { dataView, status } = useDataView(PageScope.explore);
   const spaceId = useSpaceId();
 
   const isSourcererLoading = useMemo(
@@ -78,6 +79,18 @@ export const EntityThreatHuntingPage = () => {
 
   if (showEmptyPrompt) {
     return <EmptyPrompt onSkip={() => {}} />;
+  }
+
+  if (assetInventoryDataViewQuery.isLoading) {
+    return <PageLoader />;
+  }
+
+  if (assetInventoryDataViewQuery.isError) {
+    return (
+      <SecuritySolutionPageWrapper>
+        <DataViewNotFound refetchDataView={assetInventoryDataViewQuery.refetch} />
+      </SecuritySolutionPageWrapper>
+    );
   }
 
   if (!assetInventoryDataViewQuery.data) {
