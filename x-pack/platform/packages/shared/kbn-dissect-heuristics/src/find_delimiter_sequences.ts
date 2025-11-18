@@ -152,59 +152,9 @@ export function findDelimiterSequences(
   const filteredDelimiters = removeDuplicateSubstrings(sortedByLength);
 
   // Return unique delimiter literals (may have multiple occurrences, but buildDelimiterTree handles that)
-  let uniqueDelimiters = Array.from(new Set(filteredDelimiters.map((d) => d.literal)));
+  const uniqueDelimiters = Array.from(new Set(filteredDelimiters.map((d) => d.literal)));
 
-  // Bracket sanitization (2 phases):
-  // 1. Cross-delimiter ordering mismatch scan (median-order stack)
-  // 2. Strip bracket characters flagged by phase 1
-
-  const orderedForScan = uniqueDelimiters
-    .map((lit) => {
-      const positions = messages.map((msg) => msg.indexOf(lit));
-      const sorted = [...positions].sort((a, b) => a - b);
-      const median = sorted[Math.floor(sorted.length / 2)];
-      return { lit, median };
-    })
-    .sort((a, b) => a.median - b.median);
-
-  const crossMismatchChars = new Set<string>();
-  const bracketOpeners = new Set(['(', '[', '{']);
-  const bracketClosers: Record<string, string> = { ')': '(', ']': '[', '}': '{' };
-  const openerStack: string[] = [];
-  for (const { lit } of orderedForScan) {
-    for (const ch of lit) {
-      if (bracketOpeners.has(ch)) {
-        openerStack.push(ch);
-      } else if (bracketClosers[ch]) {
-        const expected = bracketClosers[ch];
-        const top = openerStack[openerStack.length - 1];
-        if (!top || top !== expected) {
-          crossMismatchChars.add(ch);
-          if (top && top !== expected) {
-            crossMismatchChars.add(top);
-            openerStack.pop();
-          }
-        } else {
-          openerStack.pop();
-        }
-      }
-    }
-  }
-  // Any unmatched openers on stack
-  for (const remaining of openerStack) crossMismatchChars.add(remaining);
-
-  if (crossMismatchChars.size) {
-    uniqueDelimiters = uniqueDelimiters
-      .map((d) => {
-        const sanitized = [...d]
-          .filter((c) => !('()[]{}'.includes(c) && crossMismatchChars.has(c)))
-          .join('');
-        return sanitized;
-      })
-      .filter((d) => d.length > 0);
-    uniqueDelimiters = Array.from(new Set(uniqueDelimiters));
-  }
-
+  // Return unique delimiters; bracket mismatch filtering happens later in the pipeline.
   return uniqueDelimiters;
 }
 

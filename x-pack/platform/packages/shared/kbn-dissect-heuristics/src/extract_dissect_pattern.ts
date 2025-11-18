@@ -6,6 +6,7 @@
  */
 
 import type { DissectPattern } from './types';
+import { sanitizeBracketDelimiters } from './sanitize_bracket_delimiters';
 import { findDelimiterSequences } from './find_delimiter_sequences';
 import { buildDelimiterTree } from './build_delimiter_tree';
 import { extractFields } from './extract_fields';
@@ -51,13 +52,20 @@ export function extractDissectPattern(messages: string[]): DissectPattern {
   const delimiters = findDelimiterSequences(normalizedStrings);
 
   // Step 2: Build ordered delimiter tree (on normalized messages)
-  const delimiterTree = buildDelimiterTree(normalizedStrings, delimiters);
+  let delimiterTree = buildDelimiterTree(normalizedStrings, delimiters);
 
   // Step 3: Extract fields between delimiters (on normalized messages)
-  const fields = extractFields(normalizedStrings, delimiterTree);
+  let fields = extractFields(normalizedStrings, delimiterTree);
 
   // Step 3.5: Normalize field boundaries (move trailing non-alphanumeric chars to delimiters)
   normalizeFieldBoundaries(fields, delimiterTree);
+
+  // Step 3.6: Bracket sanitization (mismatched/unmatched bracket characters removed from literals).
+  // This mirrors the previous in-place sanitization but is now executed after field boundary normalization.
+  delimiterTree = sanitizeBracketDelimiters(delimiterTree);
+
+  // Recompute fields to reflect updated delimiter literals.
+  fields = extractFields(normalizedStrings, delimiterTree);
 
   // Step 4: Detect modifiers for each field
   fields.forEach((field, index) => {
