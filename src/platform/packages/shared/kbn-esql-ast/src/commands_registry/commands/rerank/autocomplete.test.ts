@@ -307,6 +307,16 @@ describe('RERANK Autocomplete', () => {
   // ============================================================================
 
   describe('WITH clause functionality', () => {
+    test('suggests opening braces with inference_id when WITH is already typed', async () => {
+      const query =
+        buildRerankQuery({
+          query: '"search query"',
+          onClause: 'textField',
+        }) + ' WITH ';
+
+      await expectRerankSuggestions(query, ['{ "inference_id": "$0" }']);
+    });
+
     test('suggests inference_id key in WITH map', async () => {
       const query = buildRerankQuery({
         query: '"search query"',
