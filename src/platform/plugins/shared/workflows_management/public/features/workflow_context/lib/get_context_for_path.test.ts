@@ -22,7 +22,6 @@ describe('getContextSchemaForPath', () => {
     triggers: [
       {
         type: 'manual' as const,
-        enabled: true,
       },
     ],
     steps: [
@@ -125,7 +124,6 @@ describe('getContextSchemaForPath', () => {
       triggers: [
         {
           type: 'manual' as const,
-          enabled: true,
         },
       ],
       consts: {

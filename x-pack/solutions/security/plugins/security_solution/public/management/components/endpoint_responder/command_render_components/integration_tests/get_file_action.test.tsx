@@ -205,6 +205,7 @@ describe('When using get-file action from response actions console', () => {
     'ra_get-file_error_upload-api-unreachable',
     'ra_get-file_error_upload-timeout',
     'ra_get-file_error_queue-timeout',
+    'ra_get-file_error_not-enough-free-space',
   ])('should show detailed error if get-file failure returned code: %s', async (outputCode) => {
     const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
       path: '/api/endpoint/action/a.b.c',

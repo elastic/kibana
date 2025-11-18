@@ -7,7 +7,7 @@
 
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 import { applyDataViewIndicesEntityEngineRoute } from './apply_dataview_indices';
-import { deleteEntityEngineRoute } from './delete';
+import { deleteEntityEngineRoute, deleteEntityEnginesRoute } from './delete';
 import { listEntitiesRoute } from './entities/list';
 import { getEntityEngineRoute } from './get';
 import { initEntityEngineRoute } from './init';
@@ -19,6 +19,7 @@ import { getEntityStoreStatusRoute } from './status';
 import { enableEntityStoreRoute } from './enablement';
 import { upsertEntity } from './entity_crud/upsert_entity';
 import { upsertEntitiesBulk } from './entity_crud/upsert_entities_bulk';
+import { deleteEntity } from './entity_crud/delete_entity';
 
 export const registerEntityStoreRoutes = ({
   router,
@@ -32,6 +33,7 @@ export const registerEntityStoreRoutes = ({
   startEntityEngineRoute(router, logger);
   stopEntityEngineRoute(router, logger);
   deleteEntityEngineRoute(router, logger, getStartServices);
+  deleteEntityEnginesRoute(router, logger, getStartServices);
   getEntityEngineRoute(router, logger);
   listEntityEnginesRoute(router, logger);
   listEntitiesRoute(router, logger);
@@ -39,4 +41,5 @@ export const registerEntityStoreRoutes = ({
   entityStoreInternalPrivilegesRoute(router, logger, getStartServices);
   upsertEntity(router, logger);
   upsertEntitiesBulk(router, logger);
+  deleteEntity(router, logger);
 };

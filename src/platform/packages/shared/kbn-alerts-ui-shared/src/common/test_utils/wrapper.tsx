@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { AlertsQueryContext } from '../contexts/alerts_query_context';

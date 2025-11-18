@@ -6,9 +6,8 @@
  */
 
 import type { DatatableColumnType } from '@kbn/expressions-plugin/common';
-import type { GenericIndexPatternColumn } from '../../../datasources/form_based/types';
+import type { GenericIndexPatternColumn, GeneralDatasourceStates } from '@kbn/lens-common';
 import { getStructuredDatasourceStates } from '../../../react_embeddable/helper';
-import type { GeneralDatasourceStates } from '../../../state_management';
 
 export interface ColumnMeta {
   fieldType?: string | 'multi_terms' | 'range';

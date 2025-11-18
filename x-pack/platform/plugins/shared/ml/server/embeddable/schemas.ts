@@ -7,3 +7,4 @@
 
 export * from './anomaly_charts/anomaly_charts';
 export * from './anomaly_swimlane/anomaly_swimlane';
+export * from './single_metric_viewer/single_metric_viewer';

@@ -5,13 +5,22 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
+import styled from 'styled-components';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPanel, EuiLink, EuiText, EuiForm, EuiRadioGroup, EuiSpacer } from '@elastic/eui';
+import {
+  EuiPanel,
+  EuiLink,
+  EuiText,
+  EuiForm,
+  EuiRadioGroup,
+  EuiSpacer,
+  EuiSwitch,
+} from '@elastic/eui';
 
-import { useStartServices } from '../../../hooks';
+import { usePutSettingsMutation, useStartServices, useAuthz } from '../../../hooks';
 
 export type IntegrationPreferenceType = 'beats' | 'agent';
 
@@ -23,7 +32,12 @@ interface Option {
 export interface Props {
   initialType: IntegrationPreferenceType;
   onChange: (type: IntegrationPreferenceType) => void;
+  prereleaseIntegrationsEnabled: boolean;
 }
+
+const EuiSwitchNoWrap = styled(EuiSwitch)`
+  white-space: nowrap;
+`;
 
 const options: Option[] = [
   {
@@ -40,9 +54,42 @@ const options: Option[] = [
   },
 ];
 
-export const IntegrationPreference = ({ initialType, onChange }: Props) => {
+export const IntegrationPreference = ({
+  initialType,
+  onChange,
+  prereleaseIntegrationsEnabled,
+}: Props) => {
   const [idSelected, setIdSelected] = React.useState<IntegrationPreferenceType>(initialType);
-  const { docLinks } = useStartServices();
+  const [prereleaseIntegrationsChecked, setPrereleaseIntegrationsChecked] = React.useState<
+    boolean | undefined
+  >(undefined);
+  const authz = useAuthz();
+  const { docLinks, notifications } = useStartServices();
+
+  const { mutateAsync: mutateSettingsAsync } = usePutSettingsMutation();
+
+  const updateSettings = useCallback(
+    async (prerelease: boolean) => {
+      try {
+        setPrereleaseIntegrationsChecked(prerelease);
+        const res = await mutateSettingsAsync({
+          prerelease_integrations_enabled: prerelease,
+        });
+
+        if (res.error) {
+          throw res.error;
+        }
+      } catch (error) {
+        setPrereleaseIntegrationsChecked(!prerelease);
+        notifications.toasts.addError(error, {
+          title: i18n.translate('xpack.fleet.errorUpdatingSettings', {
+            defaultMessage: 'Error updating settings',
+          }),
+        });
+      }
+    },
+    [mutateSettingsAsync, notifications.toasts]
+  );
 
   const link = (
     <EuiLink href={docLinks.links.fleet.beatsAgentComparison}>
@@ -67,8 +114,34 @@ export const IntegrationPreference = ({ initialType, onChange }: Props) => {
     label: option.label,
   }));
 
+  const onPrereleaseSwitchChange = (
+    event: React.BaseSyntheticEvent<
+      React.MouseEvent<HTMLButtonElement>,
+      HTMLButtonElement,
+      EventTarget & { checked: boolean }
+    >
+  ) => {
+    updateSettings(event.target.checked);
+  };
+
+  const canUpdateBetaSetting = authz.fleet.allSettings;
+
   return (
     <EuiPanel hasShadow={false} paddingSize="none">
+      {canUpdateBetaSetting && (
+        <>
+          <EuiSwitchNoWrap
+            label="Display beta integrations"
+            checked={
+              typeof prereleaseIntegrationsChecked !== 'undefined'
+                ? prereleaseIntegrationsChecked
+                : prereleaseIntegrationsEnabled
+            }
+            onChange={onPrereleaseSwitchChange}
+          />
+          <EuiSpacer size="l" />
+        </>
+      )}
       <EuiForm>
         <EuiRadioGroup
           legend={{

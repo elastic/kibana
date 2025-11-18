@@ -17,6 +17,7 @@ export const CanUsePublicLocationsCallout = ({
     return (
       <>
         <EuiCallOut
+          announceOnMount
           color="warning"
           title={
             <FormattedMessage

@@ -23,8 +23,8 @@ import {
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { css } from '@emotion/react';
+import type { LayerAction, Visualization } from '@kbn/lens-common';
 import type { LayerType } from '../../../..';
-import type { LayerAction, Visualization } from '../../../../types';
 import { getCloneLayerAction } from './clone_layer_action';
 import { getRemoveLayerAction } from './remove_layer_action';
 import { getOpenLayerSettingsAction } from './open_layer_settings';

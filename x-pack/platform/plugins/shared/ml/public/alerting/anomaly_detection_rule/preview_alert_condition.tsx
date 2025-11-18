@@ -216,6 +216,7 @@ export const PreviewAlertCondition: FC<PreviewAlertConditionProps> = ({
         <>
           <EuiSpacer size="m" />
           <EuiCallOut
+            announceOnMount
             title={
               <FormattedMessage
                 id="xpack.ml.previewAlert.previewErrorTitle"

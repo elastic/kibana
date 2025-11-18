@@ -15,7 +15,8 @@ import type {
   OperationMetadata,
   UserMessage,
   VisualizationType,
-} from '../../types';
+} from '@kbn/lens-common';
+import { LENS_LAYER_TYPES as layerTypes } from '@kbn/lens-common';
 import type {
   State,
   XYState,
@@ -29,7 +30,6 @@ import type {
 } from './types';
 import { visualizationTypes, visualizationSubtypes } from './types';
 import { isHorizontalChart } from './state_helpers';
-import { layerTypes } from '../..';
 import type { ExtraAppendLayerArg } from './visualization';
 import { XY_BREAKDOWN_MISSING_AXIS, XY_Y_MISSING_AXIS } from '../../user_messages_ids';
 

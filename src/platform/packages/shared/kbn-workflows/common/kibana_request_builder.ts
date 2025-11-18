@@ -15,7 +15,8 @@
  */
 export function buildKibanaRequestFromAction(
   actionType: string,
-  params: Record<string, unknown>
+  params: Record<string, unknown>,
+  spaceId?: string
 ): {
   method: string;
   path: string;
@@ -126,7 +127,7 @@ export function buildKibanaRequestFromAction(
 
     const result = {
       method,
-      path: selectedPattern,
+      path: applySpacePrefix(selectedPattern, spaceId),
       body: Object.keys(body).length > 0 ? body : undefined,
       query: Object.keys(queryParams).length > 0 ? queryParams : undefined,
       headers: Object.keys(headers).length > 0 ? headers : undefined,
@@ -184,4 +185,17 @@ function selectBestPattern(patterns: string[], params: Record<string, unknown>):
   }
 
   return bestPattern;
+}
+
+/**
+ * Applies the space prefix to the path for non-default spaces
+ * Following Kibana's standard space-aware API pattern: /s/{spaceId}/api/...
+ */
+function applySpacePrefix(path: string, spaceId?: string): string {
+  // Only prepend space prefix for non-default spaces
+  // Default space can use /api/... directly without the /s/default prefix
+  if (spaceId && spaceId !== 'default') {
+    return `/s/${spaceId}${path}`;
+  }
+  return path;
 }

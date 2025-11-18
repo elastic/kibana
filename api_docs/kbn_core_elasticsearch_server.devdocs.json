@@ -306,20 +306,6 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.ElasticsearchClientConfig.pingTimeout",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "pingTimeout",
-            "description": [],
-            "signature": [
-              "number | moment.Duration | undefined"
-            ],
-            "path": "src/core/packages/elasticsearch/server/src/client/client_config.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-elasticsearch-server",
             "id": "def-server.ElasticsearchClientConfig.requestTimeout",
             "type": "CompoundType",
             "tags": [],
@@ -795,6 +781,40 @@
             "path": "src/core/packages/elasticsearch/server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-server.ElasticsearchServiceSetup.setCpsFeatureFlag",
+            "type": "Function",
+            "tags": [],
+            "label": "setCpsFeatureFlag",
+            "description": [
+              "\nSets the CPS feature flag in the Elasticsearch service.\nThis should only be called from the CPS plugin.\n"
+            ],
+            "signature": [
+              "(enabled: boolean) => void"
+            ],
+            "path": "src/core/packages/elasticsearch/server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-elasticsearch-server",
+                "id": "def-server.ElasticsearchServiceSetup.setCpsFeatureFlag.$1",
+                "type": "boolean",
+                "tags": [],
+                "label": "enabled",
+                "description": [],
+                "signature": [
+                  "boolean"
+                ],
+                "path": "src/core/packages/elasticsearch/server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -2188,6 +2208,19 @@
           },
           {
             "parentPluginId": "@kbn/core-elasticsearch-server",
+            "id": "def-server.IElasticsearchConfig.healthCheckRetry",
+            "type": "number",
+            "tags": [],
+            "label": "healthCheckRetry",
+            "description": [
+              "\nThe number of times to retry the health check request"
+            ],
+            "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-elasticsearch-server",
             "id": "def-server.IElasticsearchConfig.ignoreVersionMismatch",
             "type": "boolean",
             "tags": [],
@@ -2294,22 +2327,6 @@
             ],
             "signature": [
               "string[]"
-            ],
-            "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/core-elasticsearch-server",
-            "id": "def-server.IElasticsearchConfig.pingTimeout",
-            "type": "Object",
-            "tags": [],
-            "label": "pingTimeout",
-            "description": [
-              "\nTimeout after which PING HTTP request will be aborted and retried."
-            ],
-            "signature": [
-              "moment.Duration"
             ],
             "path": "src/core/packages/elasticsearch/server/src/elasticsearch_config.ts",
             "deprecated": false,

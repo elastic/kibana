@@ -13,7 +13,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { GenAiSettingsApp } from './gen_ai_settings_app';
 import { useEnabledFeatures } from '../contexts/enabled_features_context';
 import { SettingsContextProvider } from '../contexts/settings_context';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 // Mock the context hook
 jest.mock('../contexts/enabled_features_context');
@@ -22,12 +22,9 @@ const mockUseEnabledFeatures = useEnabledFeatures as jest.MockedFunction<typeof 
 describe('GenAiSettingsApp', () => {
   const coreStart = coreMock.createStart();
   const setBreadcrumbs = jest.fn();
-  const featureFlagsGetBooleanValueMock = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
-
-    featureFlagsGetBooleanValueMock.mockReturnValue(true);
 
     coreStart.application.capabilities = {
       ...coreStart.application.capabilities,
@@ -36,11 +33,6 @@ describe('GenAiSettingsApp', () => {
           spaces: true,
         },
       },
-    };
-
-    coreStart.featureFlags = {
-      ...coreStart.featureFlags,
-      getBooleanValue: featureFlagsGetBooleanValueMock,
     };
 
     // Default mock for enabled features
@@ -113,15 +105,6 @@ describe('GenAiSettingsApp', () => {
       // Feature visibility section (with default settings)
       expect(screen.getByTestId('aiFeatureVisibilitySection')).toBeInTheDocument();
       expect(screen.getByTestId('goToSpacesButton')).toBeInTheDocument();
-    });
-
-    it('does not render default llm setting when feature is disabled', () => {
-      featureFlagsGetBooleanValueMock.mockReturnValue(false);
-
-      renderComponent();
-
-      expect(screen.queryByTestId('defaultAiConnectorComboBox')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('defaultAiConnectorCheckbox')).not.toBeInTheDocument();
     });
 
     it('should conditionally render sections based on settings', () => {

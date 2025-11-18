@@ -19,32 +19,32 @@ import { ProtectionUpdatesLayout } from '../protection_updates/protection_update
 import { PolicySettingsLayout } from '../policy_settings_layout';
 import { useUserPrivileges } from '../../../../../common/components/user_privileges';
 import {
-  getPolicyDetailPath,
-  getPolicyEventFiltersPath,
-  getPolicyHostIsolationExceptionsPath,
-  getPolicyTrustedAppsPath,
+  getBlocklistsListPath,
   getEventFiltersListPath,
   getHostIsolationExceptionsListPath,
-  getTrustedAppsListPath,
-  getPolicyDetailsArtifactsListPath,
-  getBlocklistsListPath,
   getPolicyBlocklistsPath,
+  getPolicyDetailPath,
+  getPolicyDetailsArtifactsListPath,
+  getPolicyEventFiltersPath,
+  getPolicyHostIsolationExceptionsPath,
   getPolicyProtectionUpdatesPath,
-  getTrustedDevicesListPath,
+  getPolicyTrustedAppsPath,
   getPolicyTrustedDevicesPath,
+  getTrustedAppsListPath,
+  getTrustedDevicesListPath,
 } from '../../../../common/routing';
 import { useHttp, useToasts } from '../../../../../common/lib/kibana';
 import { ManagementPageLoader } from '../../../../components/management_page_loader';
 import {
+  isOnBlocklistsView,
   isOnHostIsolationExceptionsView,
   isOnPolicyEventFiltersView,
   isOnPolicyFormView,
   isOnPolicyTrustedAppsView,
-  isOnBlocklistsView,
+  isOnPolicyTrustedDevicesView,
+  isOnProtectionUpdatesView,
   policyDetails,
   policyIdFromParams,
-  isOnProtectionUpdatesView,
-  isOnPolicyTrustedDevicesView,
 } from '../../store/policy_details/selectors';
 import { PolicyArtifactsLayout } from '../artifacts/layout/policy_artifacts_layout';
 import { usePolicyDetailsSelector } from '../policy_hooks';
@@ -138,13 +138,9 @@ export const PolicyTabs = React.memo(() => {
   } = useUserPrivileges().endpointPrivileges;
   const { state: routeState = {} } = useLocation<PolicyDetailsRouteState>();
 
-  const isProtectionUpdatesFeatureEnabled = useIsExperimentalFeatureEnabled(
-    'protectionUpdatesEnabled'
-  );
   const isTrustedDevicesFeatureEnabled = useIsExperimentalFeatureEnabled('trustedDevices');
 
   const isEnterprise = useLicense().isEnterprise();
-  const isProtectionUpdatesEnabled = isEnterprise && isProtectionUpdatesFeatureEnabled;
   const isTrustedDevicesEnabled =
     isEnterprise && isTrustedDevicesFeatureEnabled && canReadTrustedDevices;
 
@@ -429,7 +425,7 @@ export const PolicyTabs = React.memo(() => {
           }
         : undefined,
 
-      [PolicyTabKeys.PROTECTION_UPDATES]: isProtectionUpdatesEnabled
+      [PolicyTabKeys.PROTECTION_UPDATES]: isEnterprise
         ? {
             id: PolicyTabKeys.PROTECTION_UPDATES,
             name: i18n.translate(
@@ -469,7 +465,7 @@ export const PolicyTabs = React.memo(() => {
     canReadBlocklist,
     getBlocklistsApiClientInstance,
     canWriteBlocklist,
-    isProtectionUpdatesEnabled,
+    isEnterprise,
   ]);
 
   // convert tabs object into an array EuiTabbedContent can understand

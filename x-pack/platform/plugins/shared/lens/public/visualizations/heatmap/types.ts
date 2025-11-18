@@ -7,7 +7,7 @@
 
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import type { HeatmapArguments } from '@kbn/expression-heatmap-plugin/common';
-import type { LayerType } from '../../../common/types';
+import type { LensLayerType as LayerType } from '@kbn/lens-common';
 export type ChartShapes = 'heatmap';
 
 export type HeatmapLayerState = Omit<HeatmapArguments, 'palette'> & {

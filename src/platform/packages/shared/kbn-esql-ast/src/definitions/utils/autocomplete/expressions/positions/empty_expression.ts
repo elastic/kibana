@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLVariableType } from '@kbn/esql-types';
+import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
 import { uniq } from 'lodash';
 import { matchesSpecialFunction } from '../utils';
 import { shouldSuggestComma, type CommaContext } from '../comma_decision_engine';
@@ -15,9 +15,8 @@ import type { ExpressionContext } from '../types';
 import { ensureKeywordAndText } from '../../functions';
 import { SuggestionBuilder } from '../suggestion_builder';
 import { SignatureAnalyzer } from '../signature_analyzer';
-import { getControlSuggestion, getVariablePrefix, getLiteralsSuggestions } from '../../helpers';
+import { getControlSuggestion, getVariablePrefix } from '../../helpers';
 import { buildValueDefinitions } from '../../../values';
-import { getCompatibleLiterals } from '../../../literals';
 import type {
   FunctionDefinition,
   FunctionParameter,
@@ -151,38 +150,44 @@ function buildLiteralSuggestions(
   config: ReturnType<typeof getParamSuggestionConfig>
 ): ISuggestionItem[] {
   const { paramDefinitions, functionDefinition } = functionParamContext;
-  const { location, context, command } = ctx;
+  const { command } = ctx;
 
   const hasMoreMandatoryArgs = Boolean(functionParamContext.hasMoreMandatoryArgs);
   const suggestions: ISuggestionItem[] = [];
+  const hasConstantOnlyParams = paramDefinitions.some(({ constantOnly }) => constantOnly);
 
   // Constant-only literals (true, false, null, string/number literals)
-  suggestions.push(
-    ...buildConstantOnlyLiteralSuggestions(
-      paramDefinitions,
-      context,
-      config.shouldAddComma,
-      hasMoreMandatoryArgs
-    )
+  const constantOnlySuggestions = buildConstantOnlyLiteralSuggestions(
+    paramDefinitions,
+    ctx,
+    config.shouldAddComma,
+    hasMoreMandatoryArgs
   );
+  suggestions.push(...constantOnlySuggestions);
 
-  // Date literals (now(), 1 hour, 2 days) except for FTS functions and BUCKET in STATS
+  // Date literals (now(), 1 hour, 2 days, ?_tstart, ?_tend) - only add if not already added by constantOnly path
+  // Skip for:
+  // - FTS functions
+  // - BUCKET first parameter (field) in STATS
+  // - When constantOnly params exist (already added via getCompatibleLiterals)
   const isFtsFunction = FULL_TEXT_SEARCH_FUNCTIONS.includes(functionDefinition!.name);
-  const isBucketInStatsBy =
-    matchesSpecialFunction(functionDefinition!.name, 'bucket') && command.name === 'stats';
+  const isBucketFirstParam =
+    matchesSpecialFunction(functionDefinition!.name, 'bucket') &&
+    command.name === 'stats' &&
+    (functionParamContext.currentParameterIndex ?? 0) === 0;
 
-  if (!isFtsFunction && !isBucketInStatsBy) {
-    const dateItems = getLiteralsSuggestions(
-      paramDefinitions.map(({ type }) => type),
-      location,
-      {
-        includeDateLiterals: true,
-        includeCompatibleLiterals: false,
-        addComma: config.shouldAddComma,
-        advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
-      }
-    );
-    suggestions.push(...dateItems);
+  if (!isFtsFunction && !isBucketFirstParam && !hasConstantOnlyParams) {
+    const builder = new SuggestionBuilder(ctx);
+
+    builder.addLiterals({
+      types: paramDefinitions.map(({ type }) => type),
+      includeDateLiterals: true,
+      includeCompatibleLiterals: false,
+      addComma: config.shouldAddComma,
+      advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
+    });
+
+    suggestions.push(...builder.build());
   }
 
   return suggestions;
@@ -203,20 +208,28 @@ async function buildFieldAndFunctionSuggestions(
   // Suggest fields when:
   // - there is at least one non-constant parameter, OR
   // - param definitions are empty (variadic/unknown position, e.g., CONCAT third+ arg)
-  const hasNonConstantParam = paramDefinitions.some(({ constantOnly }) => !constantOnly);
-  const isVariadicOrUnknownPosition = paramDefinitions.length === 0;
-  if (hasNonConstantParam || isVariadicOrUnknownPosition) {
+
+  const hasConstantOnlyParam = paramDefinitions.some(({ constantOnly }) => constantOnly);
+  const hasFieldsOnlyParam = paramDefinitions.some(({ fieldsOnly }) => fieldsOnly);
+
+  // constantOnly params require literal values, not fields
+  // (variadic functions work correctly: empty paramDefinitions → hasConstantOnlyParam = false)
+  if (!hasConstantOnlyParam) {
+    const canBeMultiValue = paramDefinitions.some(
+      (t) => t && (t.supportsMultiValues === true || t.name === 'values')
+    );
+
     await builder.addFields({
       types: config.acceptedTypes,
       ignoredColumns,
       addComma: config.shouldAddComma,
       promoteToTop: true,
+      canBeMultiValue,
     });
   }
 
-  // Always allow functions unless explicitly fieldsOnly, even for constant-only params.
-  // Functions can produce constant values (e.g., ABS(10)), which are valid for constant-only arguments.
-  if (paramDefinitions.every(({ fieldsOnly }) => !fieldsOnly)) {
+  // constantOnly params require literal values, not function results
+  if (!hasFieldsOnlyParam && !hasConstantOnlyParam) {
     builder.addFunctions({
       types: config.acceptedTypes,
       ignoredFunctions: functionParamContext.functionsToIgnore || [],
@@ -277,7 +290,11 @@ async function handleDefaultContext(ctx: ExpressionContext): Promise<ISuggestion
           ?.filter(({ type }) => type === controlType)
           .map(({ key }) => `${prefix}${key}`) ?? [];
 
-      const controlSuggestions = getControlSuggestion(controlType, variableNames);
+      const controlSuggestions = getControlSuggestion(
+        controlType,
+        ControlTriggerSource.SMART_SUGGESTION,
+        variableNames
+      );
       suggestions.push(...controlSuggestions);
     }
   }
@@ -359,7 +376,7 @@ function buildEnumValueSuggestions(
 /** Builds suggestions for constant-only literal parameters */
 function buildConstantOnlyLiteralSuggestions(
   paramDefinitions: FunctionParameter[],
-  context: ExpressionContext['context'],
+  ctx: ExpressionContext,
   shouldAddComma: boolean,
   hasMoreMandatoryArgs: boolean
 ): ISuggestionItem[] {
@@ -368,13 +385,23 @@ function buildConstantOnlyLiteralSuggestions(
     return [];
   }
 
-  return getCompatibleLiterals(
-    ensureKeywordAndText(constantOnlyParams.map(({ type }) => type)),
-    {
-      supportsControls: context?.supportsControls,
-      addComma: shouldAddComma,
-      advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
-    },
-    context?.variables
-  );
+  const types = ensureKeywordAndText(constantOnlyParams.map(({ type }) => type));
+
+  const builder = new SuggestionBuilder(ctx);
+
+  builder.addLiterals({
+    types,
+    addComma: shouldAddComma,
+    advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
+    includeDateLiterals: false, // Date literals are added separately in buildLiteralSuggestions
+    includeCompatibleLiterals: true,
+  });
+
+  builder.addFunctions({
+    types,
+    addComma: shouldAddComma,
+    constantGeneratingOnly: true,
+  });
+
+  return builder.build();
 }

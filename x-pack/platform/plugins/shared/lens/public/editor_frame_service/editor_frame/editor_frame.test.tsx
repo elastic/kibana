@@ -16,7 +16,8 @@ import type {
   DatasourcePublicAPI,
   Visualization,
   VisualizationMap,
-} from '../../types';
+  LensAppState,
+} from '@kbn/lens-common';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { DatasourceMock } from '../../mocks';
 import {
@@ -31,7 +32,6 @@ import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { mockDataPlugin } from '../../mocks';
-import type { LensAppState } from '../../state_management';
 import { setState } from '../../state_management';
 import { getLensInspectorService } from '../../lens_inspector_service';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';
@@ -92,7 +92,11 @@ describe('editor_frame', () => {
   let datasourceMap: DatasourceMap;
 
   beforeEach(() => {
-    mockVisualization = createMockVisualization();
+    mockVisualization = {
+      ...createMockVisualization(),
+      FlyoutToolbarComponent: jest.fn(() => <div />),
+    };
+
     mockVisualization2 = createMockVisualization('testVis2', ['second']);
 
     mockDatasource = createMockDatasource();
@@ -156,12 +160,15 @@ describe('editor_frame', () => {
     const queryWorkspacePanel = () => screen.queryByTestId('lnsWorkspace');
     const queryDataPanel = () => screen.queryByTestId('lnsDataPanelWrapper');
 
+    const queryVisualizationToolbar = () => screen.queryByTestId('lnsVisualizationToolbar');
+
     return {
       ...rtlRender,
       store,
       queryLayerPanel,
       queryWorkspacePanel,
       queryDataPanel,
+      queryVisualizationToolbar,
       simulateLoadingDatasource: () =>
         store.dispatch(
           setState({
@@ -180,24 +187,31 @@ describe('editor_frame', () => {
 
   describe('initialization', () => {
     it('should render workspace panel, data panel and layer panel when all datasources are initialized', async () => {
-      const { queryWorkspacePanel, queryDataPanel, queryLayerPanel, simulateLoadingDatasource } =
-        renderEditorFrame(undefined, {
-          preloadedStateOverrides: {
-            datasourceStates: {
-              testDatasource: {
-                isLoading: true,
-                state: {
-                  internalState: 'datasourceState',
-                },
+      const {
+        queryWorkspacePanel,
+        queryDataPanel,
+        queryLayerPanel,
+        queryVisualizationToolbar,
+        simulateLoadingDatasource,
+      } = renderEditorFrame(undefined, {
+        preloadedStateOverrides: {
+          datasourceStates: {
+            testDatasource: {
+              isLoading: true,
+              state: {
+                internalState: 'datasourceState',
               },
             },
           },
-        });
+        },
+      });
 
       expect(mockVisualization.getConfiguration).not.toHaveBeenCalled();
+
       expect(queryWorkspacePanel()).not.toBeInTheDocument();
       expect(queryDataPanel()).not.toBeInTheDocument();
       expect(queryLayerPanel()).not.toBeInTheDocument();
+      expect(queryVisualizationToolbar()).not.toBeInTheDocument();
 
       act(() => {
         simulateLoadingDatasource();
@@ -210,7 +224,9 @@ describe('editor_frame', () => {
       expect(queryWorkspacePanel()).toBeInTheDocument();
       expect(queryDataPanel()).toBeInTheDocument();
       expect(queryLayerPanel()).toBeInTheDocument();
+      expect(queryVisualizationToolbar()).toBeInTheDocument();
     });
+
     it('should render the resulting expression using the expression renderer', async () => {
       renderEditorFrame();
       expect(screen.getByTestId('lnsExpressionRenderer')).toHaveTextContent(

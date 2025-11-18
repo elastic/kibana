@@ -33,7 +33,7 @@ IF EXIST "%CONFIG_DIR%\node.options" (
 )
 
 TITLE Kibana Verification Code
-"%NODE%" "%DIR%\src\cli_verification_code\dist" %*
+"%NODE%" "%DIR%\src\cli\verification_code\dist" %*
 
 :finally
 

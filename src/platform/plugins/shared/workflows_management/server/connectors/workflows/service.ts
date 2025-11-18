@@ -34,7 +34,7 @@ export const createExternalService = (
   const runWorkflow = async ({
     workflowId,
     spaceId,
-    inputs = {},
+    inputs,
   }: RunWorkflowParams): Promise<WorkflowExecutionResponse> => {
     try {
       logger.info(`Attempting to run workflow ${workflowId} via internal service`);

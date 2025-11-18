@@ -11,10 +11,9 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ColorMode } from '@kbn/charts-plugin/common';
 import { css } from '@emotion/react';
-import type { LegacyMetricState } from '../../../common/types';
+import type { LegacyMetricState, VisualizationDimensionEditorProps } from '@kbn/lens-common';
 import { isNumericFieldForDatatable } from '../../../common/expressions/impl/datatable/utils';
 import { PalettePanelContainer } from '../../shared_components';
-import type { VisualizationDimensionEditorProps } from '../../types';
 import { defaultPaletteParams } from './palette_config';
 
 const idPrefix = htmlIdGenerator()();

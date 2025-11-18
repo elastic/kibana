@@ -17,7 +17,7 @@ import {
   CDR_VULNERABILITIES_DATA_VIEW_ID_PREFIX_LEGACY_VERSIONS,
 } from '@kbn/cloud-security-posture-common';
 import type { KbnClientSavedObjects } from '@kbn/test/src/kbn_client/kbn_client_saved_objects';
-import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
+import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 const TEST_SPACE = 'space-1';

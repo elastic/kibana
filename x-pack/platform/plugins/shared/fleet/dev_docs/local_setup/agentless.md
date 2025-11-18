@@ -23,4 +23,4 @@ xpack.fleet.agentless.api.tls.ca: './config/ca.crt'
 
 ## Which integrations to test with?
 
-At the time of writing, the Elastic Connectors integration is [agentless only](https://github.com/elastic/integrations/blob/2ebdf0cada6faed352e71a82cf71487672f27bf2/packages/elastic_connectors/manifest.yml#L35-L39) and the Cloud Security Posture Management (CSPM) integration offers both agent-based and agentless deployment modes.
+At the time of writing, the Elastic Connectors integration is [agentless only](https://github.com/elastic/integrations/blob/2ebdf0cada6faed352e71a82cf71487672f27bf2/packages/elastic_connectors/manifest.yml#L35-L39) and the Cloud Security Posture Management (CSPM) integration offers both agent-based and agentless deployment modes. These are still in technical preview, so "Display beta integrations" should be checked.

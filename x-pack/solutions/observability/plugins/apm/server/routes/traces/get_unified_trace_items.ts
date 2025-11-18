@@ -7,9 +7,10 @@
 
 import type { Sort } from '@elastic/elasticsearch/lib/api/types';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
+import type { StatusCode, EventOutcome } from '@kbn/apm-types';
 import type { APMConfig } from '../..';
 import {
   AT_TIMESTAMP,
@@ -29,6 +30,7 @@ import {
   SPAN_TYPE,
   SPAN_SUBTYPE,
   KIND,
+  SERVICE_NAME,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { TraceItem } from '../../../common/waterfall/unified_trace_item';
@@ -92,6 +94,7 @@ export async function getUnifiedTraceItems({
   start,
   end,
   config,
+  serviceName,
 }: {
   apmEventClient: APMEventClient;
   logsClient: LogsClient;
@@ -100,6 +103,7 @@ export async function getUnifiedTraceItems({
   start: number;
   end: number;
   config: APMConfig;
+  serviceName?: string;
 }): Promise<{ traceItems: TraceItem[]; unifiedTraceErrors: UnifiedTraceErrors }> {
   const maxTraceItems = maxTraceItemsFromUrlParam ?? config.ui.maxTraceItems;
   const size = Math.min(maxTraceItems, MAX_ITEMS_PER_PAGE);
@@ -125,7 +129,11 @@ export async function getUnifiedTraceItems({
           must: [
             {
               bool: {
-                filter: [...termQuery(TRACE_ID, traceId), ...rangeQuery(start, end)],
+                filter: [
+                  ...termQuery(TRACE_ID, traceId),
+                  ...rangeQuery(start, end),
+                  ...termQuery(SERVICE_NAME, serviceName),
+                ],
                 should: { exists: { field: PARENT_ID } },
               },
             },
@@ -167,31 +175,27 @@ export async function getUnifiedTraceItems({
   return {
     traceItems: unifiedTraceItems.hits.hits
       .map((hit) => {
-        const event = unflattenKnownApmEventFields(hit.fields, fields);
-        const apmDuration = event.span?.duration?.us || event.transaction?.duration?.us;
-        const id = event.span?.id || event.transaction?.id;
-        if (!id) {
+        const event = accessKnownApmEventFields(hit.fields).requireFields(fields);
+        const apmDuration = event[SPAN_DURATION] ?? event[TRANSACTION_DURATION];
+        const id = event[SPAN_ID] ?? event[TRANSACTION_ID];
+        const name = event[SPAN_NAME] ?? event[TRANSACTION_NAME];
+
+        if (!id || !name) {
           return undefined;
         }
 
-        const docErrors = errorsByDocId[id] || [];
         return {
-          id: event.span?.id ?? event.transaction?.id,
-          timestampUs: event.timestamp?.us ?? toMicroseconds(event[AT_TIMESTAMP]),
-          name: event.span?.name ?? event.transaction?.name,
-          traceId: event.trace.id,
-          duration: resolveDuration(apmDuration, event.duration),
-          ...((event.event?.outcome || event.status?.code) && {
-            status: {
-              fieldName: event.event?.outcome ? EVENT_OUTCOME : STATUS_CODE,
-              value: event.event?.outcome || event.status?.code,
-            },
-          }),
-          errors: docErrors,
-          parentId: event.parent?.id,
-          serviceName: event.service.name,
-          type: event.span?.subtype || event.span?.type || event.kind,
-        } as TraceItem;
+          id,
+          name,
+          timestampUs: event[TIMESTAMP_US] ?? toMicroseconds(event[AT_TIMESTAMP]),
+          traceId: event[TRACE_ID],
+          duration: resolveDuration(apmDuration, event[DURATION]),
+          status: resolveStatus(event[EVENT_OUTCOME], event[STATUS_CODE]),
+          errors: errorsByDocId[id] ?? [],
+          parentId: event[PARENT_ID],
+          serviceName: event[SERVICE_NAME],
+          type: event[SPAN_SUBTYPE] || event[SPAN_TYPE] || event[KIND],
+        } satisfies TraceItem;
       })
       .filter((_) => _) as TraceItem[],
     unifiedTraceErrors,
@@ -205,3 +209,18 @@ const resolveDuration = (apmDuration?: number, otelDuration?: number[] | string)
   apmDuration ?? parseOtelDuration(otelDuration);
 
 const toMicroseconds = (ts: string) => new Date(ts).getTime() * 1000; // Convert ms to us
+
+type EventStatus =
+  | { fieldName: 'event.outcome'; value: EventOutcome }
+  | { fieldName: 'status.code'; value: StatusCode }
+  | undefined;
+
+const resolveStatus = (eventOutcome?: EventOutcome, statusCode?: StatusCode): EventStatus => {
+  if (eventOutcome) {
+    return { fieldName: EVENT_OUTCOME, value: eventOutcome };
+  }
+
+  if (statusCode) {
+    return { fieldName: STATUS_CODE, value: statusCode };
+  }
+};

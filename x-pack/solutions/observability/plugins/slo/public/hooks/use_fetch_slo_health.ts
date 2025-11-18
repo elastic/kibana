@@ -7,7 +7,7 @@
 
 import type { FetchSLOHealthResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery } from '@kbn/react-query';
 import { sloKeys } from './query_key_factory';
 import { usePluginContext } from './use_plugin_context';
 
@@ -18,39 +18,29 @@ export interface UseFetchSloHealth {
 }
 
 export interface Params {
-  page?: number;
-  perPage?: number;
-  statusFilter?: 'healthy' | 'unhealthy';
-  list?: SLOWithSummaryResponse[];
+  list: SLOWithSummaryResponse[];
 }
 
-export function useFetchSloHealth({
-  list,
-  page,
-  perPage,
-  statusFilter = 'unhealthy',
-}: Params): UseFetchSloHealth {
+export function useFetchSloHealth({ list }: Params): UseFetchSloHealth {
   const { sloClient } = usePluginContext();
-  const payload = list
-    ? list.map((slo) => ({
-        sloId: slo.id,
-        sloInstanceId: slo.instanceId ?? ALL_VALUE,
-      }))
-    : [];
+  const payload = list.map((slo) => ({
+    sloId: slo.id,
+    sloInstanceId: slo.instanceId ?? ALL_VALUE,
+  }));
 
   const { isLoading, isError, data } = useQuery({
     queryKey: sloKeys.health(payload),
     queryFn: async ({ signal }) => {
       try {
         return await sloClient.fetch('POST /internal/observability/slos/_health', {
-          params: { body: { list: payload, page, perPage, statusFilter } },
+          params: { body: { list: payload } },
           signal,
         });
       } catch (error) {
         // ignore error
       }
     },
-    enabled: true,
+    enabled: Boolean(list.length > 0),
     refetchOnWindowFocus: false,
     keepPreviousData: true,
   });

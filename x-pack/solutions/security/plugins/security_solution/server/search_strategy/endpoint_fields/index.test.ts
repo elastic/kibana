@@ -93,6 +93,11 @@ describe('Endpoint fields', () => {
     );
   });
 
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
+  });
+
   afterAll(() => {
     getFieldsForWildcardMock.mockRestore();
   });
@@ -376,6 +381,11 @@ describe('Endpoint fields', () => {
         );
       }).rejects.toThrowError('Invalid indices request invalid, invalid2');
     });
+  });
+
+  afterEach(() => {
+    jest.clearAllMocks();
+    jest.restoreAllMocks();
   });
 
   describe('without right privileges', () => {

@@ -57,11 +57,16 @@ export const TestConnectorForm = ({
 
   useEffect(() => {
     (async () => {
-      const res = (await actionTypeModel?.validateParams(actionParams)).errors as IErrorObject;
+      const res = (
+        await actionTypeModel?.validateParams(
+          actionParams,
+          connector && 'config' in connector ? connector.config : undefined
+        )
+      ).errors as IErrorObject;
       setActionErrors({ ...res });
       setHasErrors(!!Object.values(res).find((errors) => (errors.length as number) > 0));
     })();
-  }, [actionTypeModel, actionParams]);
+  }, [actionTypeModel, actionParams, connector]);
 
   const steps = [
     {
@@ -117,7 +122,7 @@ export const TestConnectorForm = ({
         <>
           {executeEnabled ? null : (
             <>
-              <EuiCallOut iconType="warning" color="warning">
+              <EuiCallOut announceOnMount iconType="warning" color="warning">
                 <p>
                   <FormattedMessage
                     defaultMessage="Save your changes before testing the connector."

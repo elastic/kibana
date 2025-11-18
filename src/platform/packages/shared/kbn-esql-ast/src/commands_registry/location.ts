@@ -23,14 +23,14 @@ const commandOptionNameToLocation: Record<string, Location> = {
   by: Location.STATS_BY,
   enrich: Location.ENRICH,
   with: Location.ENRICH_WITH,
-  // Rerank is a special case, because it is the only command that requrire a boolen validation inside the ON Clause
-  on: Location.RERANK,
   dissect: Location.DISSECT,
   rename: Location.RENAME,
   join: Location.JOIN,
   show: Location.SHOW,
   completion: Location.COMPLETION,
   rerank: Location.RERANK,
+  'join:on': Location.JOIN,
+  'rerank:on': Location.RERANK,
 };
 
 /**
@@ -77,7 +77,10 @@ export function getLocationInfo(
 
   if (option) {
     const displayName = option.name;
-    const id = getLocationFromCommandOrOptionName(displayName);
+    const parentCommandName = parentCommand.name;
+    const contextualKey = `${parentCommandName}:${displayName}`;
+    const id =
+      commandOptionNameToLocation[contextualKey] ?? getLocationFromCommandOrOptionName(displayName);
     return { id, displayName };
   }
 

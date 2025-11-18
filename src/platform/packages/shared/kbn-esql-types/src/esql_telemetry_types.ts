@@ -17,12 +17,19 @@ export enum QuerySource {
   STARRED = 'starred',
   MANUAL = 'manual',
   HELP = 'help',
+  AUTOCOMPLETE = 'autocomplete',
 }
 
 export interface TelemetryQuerySubmittedProps {
-  query_source: QuerySource;
-  query_length: string;
-  query_lines: string;
-  anti_limit_before_aggregate: boolean;
-  anti_missing_sort_before_limit: boolean;
+  source: QuerySource;
+  query: string;
+}
+
+export enum ControlTriggerSource {
+  SMART_SUGGESTION = 'smart_suggestion',
+  QUESTION_MARK = 'question_mark',
+}
+
+export enum TelemetryControlCancelledReason {
+  CANCEL_BUTTON = 'cancel_button',
 }

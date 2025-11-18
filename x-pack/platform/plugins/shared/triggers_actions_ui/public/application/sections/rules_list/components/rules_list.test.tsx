@@ -10,7 +10,7 @@ import { fetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared/src/mainten
 import { RUNNING_MAINTENANCE_WINDOW_1 } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/mock';
 import type { IToasts } from '@kbn/core/public';
 import { usePerformanceContext } from '@kbn/ebt-tools';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import {
   cleanup,
   fireEvent,
@@ -1309,6 +1309,7 @@ describe('rules_list with show only capability', () => {
 
     it('renders table of rules with edit button disabled', async () => {
       renderWithProviders(<RulesList />);
+      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
       expect(await screen.findAllByTestId('rulesList')).toHaveLength(1);
       expect(await screen.findAllByTestId('rule-row')).toHaveLength(2);
@@ -1319,6 +1320,8 @@ describe('rules_list with show only capability', () => {
       const { hasAllPrivilege } = jest.requireMock('../../../lib/capabilities');
       hasAllPrivilege.mockReturnValue(false);
       renderWithProviders(<RulesList />);
+      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
+
       expect(await screen.findAllByTestId('rulesList')).toHaveLength(1);
       expect(await screen.findAllByTestId('rule-row')).toHaveLength(2);
       expect(screen.queryByTestId('deleteActionHoverButton')).not.toBeInTheDocument();
@@ -1328,6 +1331,8 @@ describe('rules_list with show only capability', () => {
 
     it('renders table of rules with actions menu collapsedItemActions', async () => {
       renderWithProviders(<RulesList />);
+      await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
+
       expect(await screen.findAllByTestId('rulesList')).toHaveLength(1);
       expect(await screen.findAllByTestId('rule-row')).toHaveLength(2);
       expect(await screen.findAllByTestId('collapsedItemActions')).toHaveLength(2);

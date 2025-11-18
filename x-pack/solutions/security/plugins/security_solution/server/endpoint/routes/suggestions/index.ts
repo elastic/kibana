@@ -8,17 +8,17 @@
 import type { Observable } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import type { RequestHandler } from '@kbn/core/server';
-import type { TypeOf } from '@kbn/config-schema';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
 import { termsEnumSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_enum';
 import { termsAggSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_agg';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
-import {
-  type EndpointSuggestionsBody,
-  EndpointSuggestionsSchema,
+import type {
+  EndpointSuggestionsParams,
+  EndpointSuggestionsBody,
 } from '../../../../common/api/endpoint';
+import { EndpointSuggestionsSchema } from '../../../../common/api/endpoint';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
@@ -26,8 +26,10 @@ import type {
 import type { EndpointAppContext } from '../../types';
 import {
   eventsIndexPattern,
+  DEVICE_EVENTS_INDEX_PATTERN,
   SUGGESTIONS_INTERNAL_ROUTE,
   METADATA_UNITED_INDEX,
+  alertsIndexPattern,
 } from '../../../../common/endpoint/constants';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { errorHandler } from '../error_handler';
@@ -58,18 +60,33 @@ export function registerEndpointSuggestionsRoutes(
         },
       },
       withEndpointAuthz(
-        { any: ['canWriteEventFilters', 'canWriteTrustedApplications'] },
+        {
+          any: [
+            'canWriteEventFilters',
+            'canWriteTrustedApplications',
+            'canWriteTrustedDevices',
+            'canWriteEndpointExceptions',
+          ],
+        },
         endpointContext.logFactory.get('endpointSuggestions'),
         getEndpointSuggestionsRequestHandler(config$, endpointContext)
       )
     );
 }
 
+const INDEX_PATTERNS: Record<EndpointSuggestionsParams['suggestion_type'], string> = {
+  endpointExceptions: alertsIndexPattern,
+  endpoints: METADATA_UNITED_INDEX,
+  eventFilters: eventsIndexPattern,
+  trustedApps: eventsIndexPattern,
+  trustedDevices: DEVICE_EVENTS_INDEX_PATTERN,
+};
+
 export const getEndpointSuggestionsRequestHandler = (
   config$: Observable<ConfigSchema>,
   endpointContext: EndpointAppContext
 ): RequestHandler<
-  TypeOf<typeof EndpointSuggestionsSchema.params>,
+  EndpointSuggestionsParams,
   never,
   EndpointSuggestionsBody,
   SecuritySolutionRequestHandlerContext
@@ -78,6 +95,8 @@ export const getEndpointSuggestionsRequestHandler = (
     const logger = endpointContext.logFactory.get('suggestions');
     const isTrustedAppsAdvancedModeFFEnabled =
       endpointContext.experimentalFeatures.trustedAppsAdvancedMode;
+    const isEndpointExceptionsUnderManagementFFEnabled =
+      endpointContext.experimentalFeatures.endpointExceptionsMovedUnderManagement;
     const { field: fieldName, query, filters, fieldMeta } = request.body;
     let index = '';
     try {
@@ -91,10 +110,16 @@ export const getEndpointSuggestionsRequestHandler = (
       let suggestionMethod: typeof termsEnumSuggestions | typeof termsAggSuggestions =
         termsEnumSuggestions;
 
+      const suggestionType = request.params.suggestion_type;
+
       if (
-        request.params.suggestion_type === 'eventFilters' ||
-        (isTrustedAppsAdvancedModeFFEnabled && request.params.suggestion_type === 'trustedApps')
+        suggestionType === 'eventFilters' ||
+        (isTrustedAppsAdvancedModeFFEnabled && suggestionType === 'trustedApps') ||
+        suggestionType === 'trustedDevices' ||
+        (isEndpointExceptionsUnderManagementFFEnabled && suggestionType === 'endpointExceptions')
       ) {
+        const baseIndexPattern = INDEX_PATTERNS[suggestionType];
+
         logger.debug('Using space-aware index pattern');
 
         const integrationNamespaces = await endpointContext.service
@@ -111,7 +136,7 @@ export const getEndpointSuggestionsRequestHandler = (
 
         const indexPattern = namespaces
           .map((namespace) =>
-            buildIndexNameWithNamespace(eventsIndexPattern, namespace, { preserveWildcard: true })
+            buildIndexNameWithNamespace(baseIndexPattern, namespace, { preserveWildcard: true })
           )
           .join(',');
 
@@ -124,9 +149,9 @@ export const getEndpointSuggestionsRequestHandler = (
             body: 'Failed to retrieve current space index patterns',
           });
         }
-      } else if (request.params.suggestion_type === 'endpoints') {
+      } else if (suggestionType === 'endpoints') {
         suggestionMethod = termsAggSuggestions;
-        index = METADATA_UNITED_INDEX;
+        index = INDEX_PATTERNS[suggestionType];
 
         const agentPolicyIds: string[] = [];
         const fleetService = securitySolutionContext.getInternalFleetServices();
@@ -146,16 +171,23 @@ export const getEndpointSuggestionsRequestHandler = (
         fullFilters = [...fullFilters, baseFilters];
       } else {
         return response.badRequest({
-          body: `Invalid suggestion_type: ${request.params.suggestion_type}`,
+          body: `Invalid suggestion_type: ${suggestionType}`,
         });
       }
 
-      const abortSignal = getRequestAbortedSignal(request.events.aborted$);
+      // Avoid adding endpoint alerts log access to kibana_system role by using current user,
+      // as the index may contain user data.
+      // https://docs.elastic.dev/kibana-dev-docs/key-concepts/security-kibana-system-user
+      const elasticsearchClient =
+        suggestionType === 'endpointExceptions'
+          ? elasticsearch.client.asCurrentUser
+          : elasticsearch.client.asInternalUser;
 
+      const abortSignal = getRequestAbortedSignal(request.events.aborted$);
       const body = await suggestionMethod(
         config,
         savedObjects.client,
-        elasticsearch.client.asInternalUser,
+        elasticsearchClient,
         index,
         fieldName,
         query,

@@ -34,7 +34,7 @@ import { BehaviorSubject } from 'rxjs';
 import type { DiscoverGridSettings } from '@kbn/saved-search-plugin/common';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { kbnFullBodyHeightCss } from '@kbn/css-utils/public/full_body_height_css';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useAppStateSelector } from '../../state_management/discover_app_state_container';
@@ -415,22 +415,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         `,
       ]}
     >
-      <h1
-        id="savedSearchTitle"
-        className="euiScreenReaderOnly"
-        data-test-subj="discoverSavedSearchTitle"
-      >
-        {discoverSession?.title
-          ? i18n.translate('discover.pageTitleWithSavedSearch', {
-              defaultMessage: 'Discover - {savedSearchTitle}',
-              values: {
-                savedSearchTitle: discoverSession.title,
-              },
-            })
-          : i18n.translate('discover.pageTitleWithoutSavedSearch', {
-              defaultMessage: 'Discover - Search not yet saved',
-            })}
-      </h1>
       <TopNavMemoized
         savedQuery={savedQuery}
         stateContainer={stateContainer}
@@ -440,7 +424,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
         isLoading={isLoading}
         onCancelClick={onCancelClick}
       />
-      <EuiPageBody aria-describedby="savedSearchTitle" css={styles.savedSearchTitle}>
+      <EuiPageBody css={styles.pageBody}>
         <div css={styles.sidebarContainer}>
           {dataViewLoading && (
             <EuiDelayRender delay={300}>
@@ -550,7 +534,7 @@ const componentStyles = {
       padding: 0,
       backgroundColor: euiTheme.colors.backgroundBasePlain,
     }),
-  savedSearchTitle: css({
+  pageBody: css({
     overflow: 'hidden',
   }),
   sidebarContainer: css({

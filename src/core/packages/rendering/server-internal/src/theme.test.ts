@@ -10,24 +10,6 @@
 import { getThemeTag, isThemeBundled } from './theme';
 
 describe('getThemeTag', () => {
-  it('returns the correct value for name:amsterdam and darkMode:false', () => {
-    expect(
-      getThemeTag({
-        name: 'v8',
-        darkMode: false,
-      })
-    ).toEqual('v8light');
-  });
-
-  it('returns the correct value for name:amsterdam and darkMode:true', () => {
-    expect(
-      getThemeTag({
-        name: 'v8',
-        darkMode: true,
-      })
-    ).toEqual('v8dark');
-  });
-
   it('returns the correct value for other other theme names and darkMode:false', () => {
     expect(
       getThemeTag({
@@ -59,14 +41,12 @@ describe('isThemeBundled', () => {
   });
 
   it('returns true when both light and dark mode theme tags are included in KBN_OPTIMIZER_THEMES', () => {
-    process.env.KBN_OPTIMIZER_THEMES = 'v8light,v8dark,borealislight,borealisdark';
-    expect(isThemeBundled('amsterdam')).toEqual(true);
+    process.env.KBN_OPTIMIZER_THEMES = 'borealislight,borealisdark';
     expect(isThemeBundled('borealis')).toEqual(true);
   });
 
   it('returns false when either theme tag is missing in KBN_OPTIMIZER_THEMES for given theme name', () => {
-    process.env.KBN_OPTIMIZER_THEMES = 'v8light,borealisdark,borealisdark';
-    expect(isThemeBundled('amsterdam')).toEqual(false);
+    process.env.KBN_OPTIMIZER_THEMES = 'borealisdark,borealisdark';
     expect(isThemeBundled('borealis')).toEqual(false);
   });
 

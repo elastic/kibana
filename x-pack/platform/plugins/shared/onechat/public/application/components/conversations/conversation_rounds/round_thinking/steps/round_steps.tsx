@@ -45,7 +45,11 @@ const mainThinkingResultTypes = [
   ToolResultType.error,
 ];
 // Populated in flyout
-const flyoutResultTypes = [ToolResultType.other, ToolResultType.resource];
+const flyoutResultTypes = [
+  ToolResultType.visualization,
+  ToolResultType.other,
+  ToolResultType.resource,
+];
 
 const ToolResultDisplay: React.FC<ToolResultDisplayProps> = ({ toolResult }) => {
   switch (toolResult.type) {
