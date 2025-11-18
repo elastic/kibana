@@ -9,7 +9,7 @@ jobs:
     if: |
       github.event.label.name == 'Team:apm'
     steps:
-      - uses: octokit/graphql-action@8ad880e4d437783ea2ab17010324de1075228110 # v2.3.2
+      - uses: octokit/graphql-action@abaeca7ba4f0325d63b8de7ef943c2418d161b93 # v3.0.0
         id: add_to_project
         with:
           query: |
@@ -27,7 +27,7 @@ jobs:
         env:
           PROJECT_ID: "PVT_kwDOAGc3Zs0VSg"
           GITHUB_TOKEN: ${{ secrets.APM_TECH_KIBANA_USER_TOKEN }}
-      - uses: octokit/graphql-action@8ad880e4d437783ea2ab17010324de1075228110 # v2.3.2
+      - uses: octokit/graphql-action@abaeca7ba4f0325d63b8de7ef943c2418d161b93 # v3.0.0
         id: label_team
         with:
           query: |
