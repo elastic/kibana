@@ -427,41 +427,6 @@ describe('fromStoredFilter', () => {
       `);
     });
 
-    it('should convert terms queries', () => {
-      const storedFilter = {
-        meta: { key: 'status' },
-        query: {
-          terms: {
-            status: ['active', 'pending'],
-          },
-        },
-      } as StoredFilter;
-
-      const result = convertToSimpleCondition(storedFilter);
-
-      expect(result).toEqual({
-        field: 'status',
-        operator: 'is_one_of',
-        value: ['active', 'pending'],
-      });
-    });
-
-    it('should throw for non-homogeneous terms arrays', () => {
-      const storedFilter = {
-        meta: { key: 'status' },
-        query: {
-          terms: {
-            status: ['active', 123, true], // Mixed types
-          },
-        },
-      } as StoredFilter;
-
-      expect(() => convertToSimpleCondition(storedFilter)).toThrow(FilterConversionError);
-      expect(() => convertToSimpleCondition(storedFilter)).toThrow(
-        /Terms query must have homogeneous value types/
-      );
-    });
-
     it('should handle negated filters', () => {
       const storedFilter = {
         meta: { key: 'status', negate: true },

@@ -41,6 +41,8 @@ import {
   hasExistsQuery,
   hasMatchQuery,
   hasMatchPhraseQuery,
+  isPhrasesFilter,
+  isCombinedFilter,
 } from './type_guards';
 
 /**
@@ -205,19 +207,32 @@ export function convertToSimpleCondition(
     };
   }
 
-  if (query.terms) {
-    const values = query.terms[field];
-    const valueArray = Array.isArray(values) ? values : [values];
+  // Handle phrases filter: meta.type='phrases' with bool.should containing match_phrase clauses
+  if (isPhrasesFilter(storedFilter)) {
+    // Extract values from match_phrase clauses
+    const values = query.bool.should
+      .map((clause: unknown) => {
+        if (typeof clause === 'object' && clause !== null && 'match_phrase' in clause) {
+          const matchPhrase = (clause as Record<string, unknown>).match_phrase as Record<
+            string,
+            unknown
+          >;
+          const clauseField = Object.keys(matchPhrase)[0];
+          return matchPhrase[clauseField];
+        }
+        return undefined;
+      })
+      .filter((v: unknown) => v !== undefined) as Array<string | number | boolean>;
 
-    // Validate that all values are the same type (homogeneous array)
-    validateHomogeneousArray(valueArray, 'Terms query');
+    // Validate homogeneous array
+    validateHomogeneousArray(values, 'Phrases filter');
 
     return {
       field,
       operator: meta.negate
         ? ASCODE_FILTER_OPERATOR.IS_NOT_ONE_OF
         : ASCODE_FILTER_OPERATOR.IS_ONE_OF,
-      value: valueArray as string[] | number[] | boolean[],
+      value: values as string[] | number[] | boolean[],
     };
   }
 
@@ -273,7 +288,7 @@ export function convertToSimpleCondition(
  */
 export function convertToFilterGroup(storedFilter: StoredFilter): AsCodeGroupFilter['group'] {
   // Handle combined filter format (legacy): meta.type === 'combined' with params array
-  if (storedFilter.meta?.type === 'combined' && Array.isArray(storedFilter.meta.params)) {
+  if (isCombinedFilter(storedFilter)) {
     // ExtendedFilter type includes optional 'relation' property
     // Note: relation can be 'or'/'OR' or 'and'/'AND' - normalize to lowercase
     const type = storedFilter.meta.relation?.toString().toLowerCase() === 'or' ? 'or' : 'and';
@@ -287,11 +302,7 @@ export function convertToFilterGroup(storedFilter: StoredFilter): AsCodeGroupFil
     const conditions = (params as StoredFilter[]).map((param) => {
       // Special handling for phrases filters with bool wrappers - treat as groups
       // This preserves the bool structure which is semantically important even for single values
-      if (
-        param.meta?.type === 'phrases' &&
-        param.query?.bool &&
-        (param.query.bool.should || param.query.bool.must)
-      ) {
+      if (isPhrasesFilter(param)) {
         // Recursively convert the phrases filter to a group
         return convertToFilterGroup(param);
       }
@@ -423,24 +434,6 @@ export function convertWithEnhancement(
       field,
       operator: meta.negate ? ASCODE_FILTER_OPERATOR.IS_NOT : ASCODE_FILTER_OPERATOR.IS,
       value: value as string | number | boolean,
-    };
-  }
-
-  // Handle terms queries (multiple values)
-  if (hasTermsQuery(query)) {
-    const field = Object.keys(query.terms)[0];
-    const values = query.terms[field] as unknown;
-
-    // Validate that all values are the same type (homogeneous array)
-    const valueArray = values as string[] | number[] | boolean[];
-    validateHomogeneousArray(valueArray, 'Terms query');
-
-    return {
-      field,
-      operator: meta.negate
-        ? ASCODE_FILTER_OPERATOR.IS_NOT_ONE_OF
-        : ASCODE_FILTER_OPERATOR.IS_ONE_OF,
-      value: valueArray,
     };
   }
 

@@ -47,15 +47,11 @@ export function isLegacyFilter(value: unknown): value is LegacyFilter {
   return !!(filter.range || filter.exists || filter.match_all || filter.match);
 }
 
-// ====================================================================
-// TIER DETECTION FUNCTIONS
-// ====================================================================
-
 /**
  * Type guard to check if value has the minimal structure of a StoredFilter
  */
-function isStoredFilter(value: unknown): value is StoredFilter {
-  return typeof value === 'object' && value !== null;
+function isStoredFilter(storedFilter: unknown): storedFilter is StoredFilter {
+  return typeof storedFilter === 'object' && storedFilter !== null;
 }
 
 /**
@@ -103,6 +99,56 @@ export function hasMatchPhraseQuery(
 }
 
 /**
+ * Type guard to check if a filter condition is an AsCodeConditionFilter['condition']
+ * with field and operator properties
+ */
+export function isAsCodeConditionFilter(
+  condition: unknown
+): condition is AsCodeConditionFilter['condition'] {
+  return (
+    typeof condition === 'object' &&
+    condition !== null &&
+    'field' in condition &&
+    'operator' in condition
+  );
+}
+
+/**
+ * Type guard for query objects with bool.should structure
+ */
+export function isPhrasesFilter(storedFilter: unknown): boolean {
+  if (!isStoredFilter(storedFilter)) {
+    return false;
+  }
+
+  const query = storedFilter.query;
+  return (
+    storedFilter.meta?.type === 'phrases' &&
+    typeof query === 'object' &&
+    query !== null &&
+    'bool' in query &&
+    typeof (query as { bool?: unknown }).bool === 'object' &&
+    (query as { bool?: { should?: unknown } }).bool !== null &&
+    'should' in (query as { bool: { should?: unknown } }).bool &&
+    Array.isArray((query as { bool: { should: unknown[] } }).bool.should)
+  );
+}
+
+/**
+ * Type guard for combined filter format
+ */
+export function isCombinedFilter(storedFilter: unknown): boolean {
+  if (!isStoredFilter(storedFilter)) {
+    return false;
+  }
+  return (
+    storedFilter.meta?.type === 'combined' &&
+    Array.isArray(storedFilter.meta.params) &&
+    storedFilter.meta.params.length > 0
+  );
+}
+
+/**
  * TIER 1: Full Compatibility - Can be directly converted to SimpleFilter
  */
 export function isFullyCompatible(storedFilter: unknown): boolean {
@@ -113,7 +159,7 @@ export function isFullyCompatible(storedFilter: unknown): boolean {
   const meta = storedFilter.meta || {};
 
   // Combined filter format
-  if (meta.type === 'combined' && Array.isArray(meta.params) && meta.params.length > 0) {
+  if (isCombinedFilter(storedFilter)) {
     return true;
   }
 
@@ -226,11 +272,7 @@ export function isStoredGroupFilter(storedFilter: unknown): boolean {
   }
 
   // Combined filter format (legacy): meta.type === 'combined' with params array
-  if (
-    storedFilter.meta?.type === 'combined' &&
-    Array.isArray(storedFilter.meta.params) &&
-    storedFilter.meta.params.length > 0
-  ) {
+  if (isCombinedFilter(storedFilter)) {
     return true;
   }
 
@@ -247,7 +289,7 @@ export function isStoredGroupFilter(storedFilter: unknown): boolean {
 }
 
 // ====================================================================
-// TYPE GUARDS FOR SIMPLIFIED FILTERS
+// TYPE GUARDS FOR AS CODE FILTERS
 // ====================================================================
 
 /**
