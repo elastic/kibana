@@ -23,6 +23,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       endpoint: `GET /internal/apm/unified_traces/{traceId}/spans/{spanId}`,
       params: {
         path: { traceId, spanId },
+        query: {
+          start: new Date(start).toISOString(),
+          end: new Date(end).toISOString(),
+        },
       },
     });
 
