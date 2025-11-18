@@ -30,13 +30,13 @@ export const createAlertAttachmentType = (): AttachmentTypeDefinition<
     format: (attachment) => {
       return {
         getRepresentation: () => {
-          return { type: 'text', value: formatAlertData(attachment.data) };
+          return { type: 'text', value: attachment.data.alert };
         },
       };
     },
     getTools: () => [EVALUATE_ALERT_TOOL_ID],
     getAgentDescription: () => {
-      return `Alert attachments contain security alert data. Use the ${EVALUATE_ALERT_TOOL_ID} tool to generate a comprehensive evaluation report. IMPORTANT: When the evaluation tool returns results, return them EXACTLY as provided without summarization or modification.`;
+      return `Alert attachments contain security alert data. Use the ${EVALUATE_ALERT_TOOL_ID} tool to generate a comprehensive evaluation report with enriched context from related alerts, risk scores, attack discoveries, and Security Labs. IMPORTANT: When the evaluation tool returns results, return them EXACTLY as provided without summarization or modification.`;
     },
   };
 };
