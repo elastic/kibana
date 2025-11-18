@@ -70,7 +70,7 @@ const WorkflowSelector: React.FC<WorkflowSelectorProps> = ({
     isLoading,
     error: fetchError,
   } = useWorkflows({
-    limit: 1000,
+    size: 1000,
     page: 1,
     query: '',
   });
