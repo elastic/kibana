@@ -27,7 +27,6 @@ import type {
 } from '../../schema';
 import type { LensAttributes } from '../../types';
 import { DEFAULT_LAYER_ID } from '../../types';
-import type { DeepMutable, DeepPartial } from '../utils';
 import {
   addLayerColumn,
   buildDatasetState,
@@ -37,8 +36,8 @@ import {
   generateLayer,
   getAdhocDataviews,
   operationFromColumn,
+  isTextBasedLayer,
 } from '../utils';
-import { isEsqlTableTypeDataset } from '../../utils';
 import { getValueApiColumn, getValueColumn } from '../columns/esql_column';
 import { fromColorMappingAPIToLensState, fromColorMappingLensStateToAPI } from '../coloring';
 import { fromMetricAPItoLensState } from '../columns/metric';
@@ -73,6 +72,55 @@ function buildVisualizationState(config: TagcloudState): LensTagCloudState {
   };
 }
 
+function getTagcloudDataset(
+  layer: FormBasedLayer | TextBasedLayer,
+  adHocDataViews: Record<string, DataViewSpec>,
+  references: SavedObjectReference[],
+  adhocReferences: SavedObjectReference[] = [],
+  layerId: string
+): TagcloudState['dataset'] {
+  const dataset = buildDatasetState(layer, adHocDataViews, references, adhocReferences, layerId);
+
+  if (!dataset || dataset.type == null) {
+    throw new Error('Unsupported dataset type');
+  }
+
+  return dataset;
+}
+
+function getTagcloudMetric(
+  layer: FormBasedLayer | TextBasedLayer,
+  visualization: LensTagCloudState
+): TagcloudState['metric'] | undefined {
+  if (!visualization.valueAccessor) return undefined;
+
+  return {
+    ...(isTextBasedLayer(layer)
+      ? getValueApiColumn(visualization.valueAccessor, layer)
+      : (operationFromColumn(
+          visualization.valueAccessor,
+          layer
+        ) as LensApiAllMetricOrFormulaOperations)),
+    show_metric_label: visualization.showLabel,
+  };
+}
+
+function getTagcloudTagBy(
+  layer: FormBasedLayer | TextBasedLayer,
+  visualization: LensTagCloudState
+): TagcloudState['tag_by'] | undefined {
+  if (!visualization.tagAccessor) return undefined;
+
+  const colorMapping = fromColorMappingLensStateToAPI(visualization.colorMapping);
+
+  return {
+    ...(isTextBasedLayer(layer)
+      ? getValueApiColumn(visualization.tagAccessor, layer)
+      : (operationFromColumn(visualization.tagAccessor, layer) as LensApiBucketOperations)),
+    ...(colorMapping ? { color: colorMapping } : {}),
+  };
+}
+
 function reverseBuildVisualizationState(
   visualization: LensTagCloudState,
   layer: FormBasedLayer | TextBasedLayer,
@@ -81,14 +129,16 @@ function reverseBuildVisualizationState(
   references: SavedObjectReference[],
   adhocReferences?: SavedObjectReference[]
 ): TagcloudState {
-  const dataset = buildDatasetState(layer, adHocDataViews, references, adhocReferences, layerId);
+  const dataset = getTagcloudDataset(layer, adHocDataViews, references, adhocReferences, layerId);
+  const metric = getTagcloudMetric(layer, visualization);
+  const tagBy = getTagcloudTagBy(layer, visualization);
 
-  if (!dataset || dataset.type == null) {
-    throw new Error('Unsupported dataset type');
-  }
-
-  const props: DeepPartial<DeepMutable<TagcloudState>> = {
+  return {
+    type: 'tagcloud',
+    dataset,
     ...generateApiLayer(layer),
+    ...(metric ? { metric } : {}),
+    ...(tagBy ? { tag_by: tagBy } : {}),
     orientation:
       visualization.orientation === TAGCLOUD_ORIENTATION.SINGLE
         ? 'horizontal'
@@ -99,43 +149,6 @@ function reverseBuildVisualizationState(
       min: visualization.minFontSize,
       max: visualization.maxFontSize,
     },
-    ...(visualization.valueAccessor
-      ? {
-          metric: isEsqlTableTypeDataset(dataset)
-            ? getValueApiColumn(visualization.valueAccessor, layer as TextBasedLayer)
-            : (operationFromColumn(
-                visualization.valueAccessor,
-                layer as FormBasedLayer
-              ) as LensApiAllMetricOrFormulaOperations),
-        }
-      : {}),
-    ...(visualization.tagAccessor
-      ? {
-          tag_by: isEsqlTableTypeDataset(dataset)
-            ? getValueApiColumn(visualization.tagAccessor, layer as TextBasedLayer)
-            : (operationFromColumn(
-                visualization.tagAccessor,
-                layer as FormBasedLayer
-              ) as LensApiBucketOperations),
-        }
-      : {}),
-  } as TagcloudState;
-
-  if (props.metric) {
-    props.metric.show_metric_label = visualization.showLabel;
-  }
-
-  if (props.tag_by) {
-    const colorMapping = fromColorMappingLensStateToAPI(visualization.colorMapping);
-    if (colorMapping) {
-      props.tag_by.color = colorMapping;
-    }
-  }
-
-  return {
-    type: 'tagcloud',
-    dataset: dataset satisfies TagcloudState['dataset'],
-    ...props,
   } as TagcloudState;
 }
 
