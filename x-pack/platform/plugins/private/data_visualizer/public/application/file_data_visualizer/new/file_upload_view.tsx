@@ -77,15 +77,15 @@ export const FileUploadView: FC<Props> = ({ reset, getAdditionalLinks }) => {
             </EuiFlexItem>
 
             <EuiFlexItem grow={false}>
+              <IndexSelection />
+            </EuiFlexItem>
+
+            <EuiFlexItem grow={false}>
               <FilePicker
                 fileUploadManager={fileUploadManager}
                 fullWidth={true}
                 large={filesStatus.length === 0}
               />
-            </EuiFlexItem>
-
-            <EuiFlexItem grow={false}>
-              <IndexSelection />
             </EuiFlexItem>
 
             {filesStatus.map((status, i) => (
