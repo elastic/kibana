@@ -87,8 +87,6 @@ export function findDelimiterSequences(
   // Step 3: Filter to likely delimiters
   const likelyDelimiters = commonSubstrings.filter(isLikelyDelimiter);
 
-  // No bracket scoring heuristics: keep logic minimal; rely only on position score + symmetry cleanup
-
   // Step 4: Score each delimiter by ALL occurrences, not just the first
   // This ensures delimiters with consistent 2nd/3rd occurrences aren't filtered out
   const scoredDelimiters: DelimiterCandidate[] = [];
@@ -154,7 +152,6 @@ export function findDelimiterSequences(
   // Return unique delimiter literals (may have multiple occurrences, but buildDelimiterTree handles that)
   const uniqueDelimiters = Array.from(new Set(filteredDelimiters.map((d) => d.literal)));
 
-  // Return unique delimiters; bracket mismatch filtering happens later in the pipeline.
   return uniqueDelimiters;
 }
 
