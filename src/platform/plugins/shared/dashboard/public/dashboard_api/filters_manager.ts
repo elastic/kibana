@@ -108,7 +108,7 @@ export const initializeFiltersManager = (
   filterManagerSubscription.add(
     publishedChildFilters$
       .pipe(
-        combineLatestWith(unifiedSearchManager.api.unifiedSearchFilters$),
+        combineLatestWith(unifiedSearchManager.internalApi.unifiedSearchFilters$),
         map(([childFilters, unifiedSearchFilters]) => {
           return [...(childFilters ?? []), ...(unifiedSearchFilters ?? [])];
         })
