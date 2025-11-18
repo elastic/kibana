@@ -50,8 +50,22 @@ export function isValidJsonSchema(schema: unknown): schema is JSONSchema7 {
 
   // Try to compile the schema to ensure it's valid
   try {
-    ajv.compile(schemaObj);
-    return true;
+    // Suppress console errors from Ajv compilation
+    // Ajv may log errors for very large/complex schemas (like meta-schemas)
+    // but these are expected and don't affect functionality
+    // eslint-disable-next-line no-console
+    const originalConsoleError = console.error;
+    // eslint-disable-next-line no-console
+    console.error = () => {
+      // Suppress Ajv compilation errors
+    };
+    try {
+      ajv.compile(schemaObj);
+      return true;
+    } finally {
+      // eslint-disable-next-line no-console
+      console.error = originalConsoleError;
+    }
   } catch (error) {
     // If compilation fails, it's not a valid schema
     // Suppress console errors for very large/complex schemas that might fail compilation

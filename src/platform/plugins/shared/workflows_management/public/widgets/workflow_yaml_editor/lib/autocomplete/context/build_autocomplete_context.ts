@@ -146,5 +146,8 @@ export function buildAutocompleteContext({
 
     // dynamic connector types
     dynamicConnectorTypes: currentDynamicConnectorTypes ?? null,
+
+    // workflow definition (for JSON Schema autocompletion)
+    workflowDefinition: workflowDefinition ?? null,
   };
 }

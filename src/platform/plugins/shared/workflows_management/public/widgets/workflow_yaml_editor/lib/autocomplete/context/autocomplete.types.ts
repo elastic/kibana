@@ -49,6 +49,12 @@ export interface AutocompleteContext {
 
   // dynamic connector types
   dynamicConnectorTypes: Record<string, ConnectorTypeInfo> | null;
+
+  // workflow definition (for JSON Schema autocompletion)
+  workflowDefinition: {
+    inputs?: unknown;
+    [key: string]: unknown;
+  } | null;
 }
 
 // we don't want to pass model and position, but currently it's used in getWithBlockSuggestions
