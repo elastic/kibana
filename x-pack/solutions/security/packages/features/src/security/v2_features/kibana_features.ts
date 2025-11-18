@@ -23,6 +23,7 @@ import {
   SECURITY_FEATURE_ID_V2,
   LEGACY_NOTIFICATIONS_ID,
   CLOUD_POSTURE_APP_ID,
+  CLOUD_DEFEND_APP_ID,
   SERVER_APP_ID,
   SECURITY_FEATURE_ID_V5,
   LISTS_API_ALL,
@@ -85,7 +86,8 @@ export const getSecurityV2BaseKibanaFeature = ({
   ),
   order: 1100,
   category: DEFAULT_APP_CATEGORIES.security,
-  app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
+  // scope: [KibanaFeatureScope.Spaces, KibanaFeatureScope.Security],
+  app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
   catalogue: [APP_ID],
   management: {
     insightsAndAlerting: ['triggersActions'],
@@ -112,7 +114,7 @@ export const getSecurityV2BaseKibanaFeature = ({
           { feature: RULES_FEATURE_ID, privileges: ['minimal_all'] },
         ],
       },
-      app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
+      app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       api: [
         APP_ID,
@@ -153,7 +155,7 @@ export const getSecurityV2BaseKibanaFeature = ({
           { feature: RULES_FEATURE_ID, privileges: ['minimal_read'] },
         ],
       },
-      app: [APP_ID, CLOUD_POSTURE_APP_ID, 'kibana'],
+      app: [APP_ID, CLOUD_POSTURE_APP_ID, CLOUD_DEFEND_APP_ID, 'kibana'],
       catalogue: [APP_ID],
       api: [
         APP_ID,
