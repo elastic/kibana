@@ -20,6 +20,10 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 import { catchAxiosErrorFormatAndThrow } from '@kbn/securitysolution-utils';
 
+import type {
+  CreateAlertTriageJobRequestBodyInput,
+  CreateAlertTriageJobResponse,
+} from './assistant/alert_triage/alert_triage.gen';
 import type { SetAlertAssigneesRequestBodyInput } from './detection_engine/alert_assignees/set_alert_assignees_route.gen';
 import type {
   SetAlertTagsRequestBodyInput,
@@ -691,6 +695,19 @@ Migrations are initiated per index. While the process is neither destructive nor
     return this.kbnClient
       .request<CreateAlertsMigrationResponse>({
         path: '/api/detection_engine/signals/migration',
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
+  async createAlertTriageJob(props: CreateAlertTriageJobProps) {
+    this.log.info(`${new Date().toISOString()} Calling API CreateAlertTriageJob`);
+    return this.kbnClient
+      .request<CreateAlertTriageJobResponse>({
+        path: '/internal/api/alert_triage/job/async',
         headers: {
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
@@ -3205,6 +3222,9 @@ export interface CopyTimelineProps {
 }
 export interface CreateAlertsMigrationProps {
   body: CreateAlertsMigrationRequestBodyInput;
+}
+export interface CreateAlertTriageJobProps {
+  body: CreateAlertTriageJobRequestBodyInput;
 }
 export interface CreateAssetCriticalityRecordProps {
   body: CreateAssetCriticalityRecordRequestBodyInput;

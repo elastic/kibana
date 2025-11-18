@@ -52,6 +52,7 @@ import { registerEntityAnalyticsRoutes } from '../lib/entity_analytics/register_
 import { registerSiemMigrationsRoutes } from '../lib/siem_migrations/routes';
 import { registerAssetInventoryRoutes } from '../lib/asset_inventory/routes';
 import { registerSiemReadinessRoutes } from '../lib/siem_readiness';
+import { registerAssistantRoutes } from '../assistant/routes';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
@@ -139,4 +140,7 @@ export const initRoutes = (
   registerAssetInventoryRoutes({ router, logger });
 
   registerSiemReadinessRoutes({ router, logger });
+
+  // Assistant
+  registerAssistantRoutes(router, logger);
 };

@@ -1,0 +1,65 @@
+openapi: 3.0.0
+info:
+  title: Alert Triage Job Schema
+  version: '2023-10-31'
+paths:
+  /internal/api/alert_triage/job/async:
+    post:
+      summary: Create an alert triage job
+      operationId: CreateAlertTriageJob
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - connectorId
+                - alertIds
+              properties:
+                connectorId:
+                  type: string
+                  description: The ID of the connector to use for the alert triage job
+                  minLength: 1
+                alertIds:
+                  type: array
+                  description: List of alert IDs to triage
+                  minItems: 1
+                  items:
+                    type: string
+                    minLength: 1
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - success
+                  - message
+                  - jobs
+                properties:
+                  success:
+                    type: boolean
+                  message:
+                    type: string
+                  jobs:
+                    type: array
+                    description: Array of alert triage jobs created, one per alert
+                    items:
+                      type: object
+                      required:
+                        - alertId
+                        - jobId
+                      properties:
+                        alertId:
+                          type: string
+                          description: The ID of the alert being triaged
+                        jobId:
+                          type: string
+                          description: The unique job ID for this alert's triage job
+
+
