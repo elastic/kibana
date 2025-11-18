@@ -43,7 +43,7 @@ export class ConnectorActions {
           response.status() === 200,
         { timeout: TIMEOUTS.UI_ELEMENT_EXTRA_LONG }
       );
-    } catch (e) {
+    } catch {
       // If the wait times out, continue anyway
       // This could happen if the conversation is new and hasn't been created yet
     }

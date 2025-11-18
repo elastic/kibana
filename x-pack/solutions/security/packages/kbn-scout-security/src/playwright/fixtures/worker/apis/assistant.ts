@@ -92,7 +92,7 @@ export const getAssistantCleanupService = ({
           if (result.count === 0) {
             break;
           }
-        } catch (error) {
+        } catch {
           // Index might not exist - that's fine
           break;
         }
@@ -125,7 +125,7 @@ export const getAssistantCleanupService = ({
           if (result.count === 0) {
             break;
           }
-        } catch (error) {
+        } catch {
           // Index might not exist - that's fine
           break;
         }
