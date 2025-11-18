@@ -13,12 +13,40 @@ import type { DashboardPanel, DashboardState } from './types';
 
 export function stripUnmappedKeys(dashboardState: DashboardState) {
   const warnings: string[] = [];
-  const { controlGroupInput, references, ...rest } = dashboardState;
+  const { controlGroupInput, references, panels, ...rest } = dashboardState;
   if (controlGroupInput) {
-    warnings.push('Dropped unmapped key, controlGroupInput, from dashboard');
+    warnings.push(`Dropped unmapped key, controlGroupInput, from dashboard`);
   }
+  if (references) {
+    warnings.push(`Dropped unmapped key, references, from dashboard`);
+  }
+
+  function isMappedPanelType(panel: DashboardPanel) {
+    const transforms = embeddableService?.getTransforms(panel.type);
+    if (!transforms?.schema) {
+      warnings.push(
+        `Dropped panel ${panel.uid}, panel schema not available for panel type: ${panel.type}. Panels without schemas are not supported by dashboard REST endpoints`
+      );
+    }
+    return Boolean(transforms?.schema);
+  }
+
+  const mappedPanels = panels
+    .map((panel) => {
+      if (!isDashboardSection(panel)) return panel;
+      const { panels: sectionPanels, ...restOfSection } = panel;
+      return {
+        ...restOfSection,
+        panels: sectionPanels.filter(isMappedPanelType),
+      };
+    })
+    .filter((panel) => isDashboardSection(panel) || isMappedPanelType(panel));
+
   return {
-    data: rest,
+    data: {
+      ...rest,
+      panels: mappedPanels,
+    },
     warnings,
   };
 }

@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { throwOnUnmappedKeys } from './scope_tooling';
+import { stripUnmappedKeys, throwOnUnmappedKeys } from './scope_tooling';
 import type { DashboardState } from './types';
 
 const mockGetTransforms = jest.fn();
@@ -22,6 +22,126 @@ beforeAll(() => {
 
 beforeEach(() => {
   mockGetTransforms.mockReset();
+});
+
+describe('stripUnmappedKeys', () => {
+  it('should not drop mapped panel types', () => {
+    mockGetTransforms.mockImplementation(() => {
+      return {
+        schema: schema.object({
+          foo: schema.string(),
+        }),
+      };
+    });
+    const dashboardState = {
+      title: 'my dashboard',
+      panels: [
+        {
+          config: {
+            foo: 'some value',
+          },
+          grid: {
+            h: 15,
+            w: 24,
+            x: 0,
+            y: 0,
+          },
+          type: 'typeWithSchema',
+        },
+      ],
+    };
+    expect(stripUnmappedKeys(dashboardState)).toMatchInlineSnapshot(`
+      Object {
+        "data": Object {
+          "panels": Array [
+            Object {
+              "config": Object {
+                "foo": "some value",
+              },
+              "grid": Object {
+                "h": 15,
+                "w": 24,
+                "x": 0,
+                "y": 0,
+              },
+              "type": "typeWithSchema",
+            },
+          ],
+          "title": "my dashboard",
+        },
+        "warnings": Array [],
+      }
+    `);
+  });
+
+  it('should drop unmapped panel types', () => {
+    const dashboardState = {
+      title: 'my dashboard',
+      panels: [
+        {
+          config: {
+            foo: 'some value',
+          },
+          grid: {
+            h: 15,
+            w: 24,
+            x: 0,
+            y: 0,
+          },
+          type: 'typeWithoutSchema',
+        },
+      ],
+    };
+    expect(stripUnmappedKeys(dashboardState)).toMatchInlineSnapshot(`
+      Object {
+        "data": Object {
+          "panels": Array [],
+          "title": "my dashboard",
+        },
+        "warnings": Array [
+          "Dropped panel undefined, panel schema not available for panel type: typeWithoutSchema. Panels without schemas are not supported by dashboard REST endpoints",
+        ],
+      }
+    `);
+  });
+
+  it('should drop references', () => {
+    const dashboardState = {
+      panels: [],
+      title: 'my dashboard',
+      references: [],
+    };
+    expect(stripUnmappedKeys(dashboardState)).toMatchInlineSnapshot(`
+      Object {
+        "data": Object {
+          "panels": Array [],
+          "title": "my dashboard",
+        },
+        "warnings": Array [
+          "Dropped unmapped key, references, from dashboard",
+        ],
+      }
+    `);
+  });
+
+  it('should drop controlGroupInput', () => {
+    const dashboardState = {
+      controlGroupInput: {} as unknown as DashboardState['controlGroupInput'],
+      panels: [],
+      title: 'my dashboard',
+    };
+    expect(stripUnmappedKeys(dashboardState)).toMatchInlineSnapshot(`
+      Object {
+        "data": Object {
+          "panels": Array [],
+          "title": "my dashboard",
+        },
+        "warnings": Array [
+          "Dropped unmapped key, controlGroupInput, from dashboard",
+        ],
+      }
+    `);
+  });
 });
 
 describe('throwOnUnmappedKeys', () => {
