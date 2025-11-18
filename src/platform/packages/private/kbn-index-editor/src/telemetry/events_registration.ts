@@ -18,7 +18,7 @@ export const INDEX_EDITOR_SAVE_SUBMITTED_EVENT_TYPE = 'index_editor.save_submitt
 export const INDEX_EDITOR_DATA_INTERACTION_EVENT_TYPE = 'index_editor.data_interaction';
 export const INDEX_EDITOR_CLICK_QUERY_THIS_INDEX_EVENT_TYPE =
   'index_editor.query_this_index_clicked';
-export const INDEX_EDITOR_DROP_ALL_COLUMNS_EVENT_TYPE = 'index_editor.drop_all_columns';
+export const INDEX_EDITOR_RESET_INDEX_EVENT_TYPE = 'index_editor.reset_index';
 
 /**
  * Registers the index editor analytics events.
@@ -157,7 +157,7 @@ export const registerIndexEditorAnalyticsEvents = once((analytics: AnalyticsServ
   });
 
   analytics.registerEventType({
-    eventType: INDEX_EDITOR_DROP_ALL_COLUMNS_EVENT_TYPE,
+    eventType: INDEX_EDITOR_RESET_INDEX_EVENT_TYPE,
     schema: {
       flyout_mode: {
         type: 'keyword',

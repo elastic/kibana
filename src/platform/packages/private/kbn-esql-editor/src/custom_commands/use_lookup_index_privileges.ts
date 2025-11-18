@@ -73,13 +73,12 @@ export const useLookupIndexPrivileges = () => {
     const privileges = await memoizedFetchPrivileges.current(indexNames);
 
     const permissions = (indexNames.length ? indexNames : ['*']).reduce((acc, indexName) => {
+      const canCreateIndex = hasPrivilege(privileges, indexName, 'create_index');
       acc[indexName] = {
-        canCreateIndex: hasPrivilege(privileges, indexName, 'create_index'),
+        canCreateIndex,
         canEditIndex: hasPrivilege(privileges, indexName, 'write'),
         canReadIndex: hasPrivilege(privileges, indexName, 'read'),
-        canRecreateIndex:
-          hasPrivilege(privileges, indexName, 'delete_index') &&
-          hasPrivilege(privileges, indexName, 'create_index'),
+        canRecreateIndex: canCreateIndex && hasPrivilege(privileges, indexName, 'delete_index'),
       };
       return acc;
     }, {} as Record<string, LookupIndexPrivileges>);

@@ -47,14 +47,14 @@ export const EmptyPrompt: FC = () => {
     setIsResettingMappings(true);
     try {
       await indexUpdateService.resetIndexMapping();
-      indexEditorTelemetryService.trackDropAllColumns('success');
+      indexEditorTelemetryService.trackResetIndex('success');
     } catch (error) {
       notifications.toasts.addError(error, {
         title: i18n.translate('indexEditor.emptyPrompt.resetMappingsErrorToastTitle', {
           defaultMessage: 'Error resetting index mappings',
         }),
       });
-      indexEditorTelemetryService.trackDropAllColumns('error');
+      indexEditorTelemetryService.trackResetIndex('error');
     } finally {
       setIsResettingMappings(false);
       setIsResetMappingsWarningModalOpen(false);
