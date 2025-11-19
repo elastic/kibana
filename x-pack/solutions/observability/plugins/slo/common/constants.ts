@@ -81,6 +81,9 @@ export const getSLOTransformId = (sloId: string, sloRevision: number) =>
 export const getSLOSummaryTransformId = (sloId: string, sloRevision: number) =>
   `slo-summary-${sloId}-${sloRevision}`;
 
+export const getWildcardTransformId = (sloId: string, sloRevision: number) =>
+  `slo-*${sloId}-${sloRevision}`;
+
 export const getSLOPipelineId = (sloId: string, sloRevision: number) =>
   `.slo-observability.sli.pipeline-${sloId}-${sloRevision}`;
 
