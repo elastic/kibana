@@ -262,6 +262,7 @@
     "@kbn/react-query",
     "@kbn/core-chrome-layout-constants",
     "@kbn/response-ops-rule-form",
-    "@kbn/core-lifecycle-browser-mocks"
+    "@kbn/core-lifecycle-browser-mocks",
+    "@kbn/apm-types-shared"
   ]
 }
