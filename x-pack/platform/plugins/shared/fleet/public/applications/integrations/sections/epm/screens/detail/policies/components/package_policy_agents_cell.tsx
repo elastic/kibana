@@ -101,34 +101,42 @@ export const PackagePolicyAgentsCell = ({
   const canAddAgents = useAuthz().fleet.addAgents;
   const canAddFleetServers = useAuthz().fleet.addFleetServers;
 
+  if (agentPolicies.length === 1 && agentPolicies[0].is_managed) {
+    return (
+      <LinkedAgentCount
+        count={agentCount}
+        agentPolicyId={agentPolicies[0].id}
+        className="eui-textTruncate"
+      />
+    );
+  }
+
+  // If multiple agent policies are supported and there are agents assigned to more than one
   if (canUseMultipleAgentPolicies && agentCount > 0 && agentPolicies.length > 1) {
     return <AgentsCountBreakDown agentCount={agentCount} agentPolicies={agentPolicies} />;
   }
 
-  if (!canUseMultipleAgentPolicies || (agentCount > 0 && agentPolicies.length === 1)) {
-    const agentPolicy = agentPolicies[0];
-    const canAddAgentsForPolicy = policyHasFleetServer(agentPolicy)
-      ? canAddFleetServers
-      : canAddAgents;
-    if (agentCount > 0 || agentPolicy.is_managed)
-      return (
-        <LinkedAgentCount
-          count={agentCount}
-          agentPolicyId={agentPolicy.id}
-          className="eui-textTruncate"
-        />
-      );
-    else {
-      <AddAgentButton onAddAgent={onAddAgent} canAddAgents={canAddAgentsForPolicy} />;
-    }
+  const agentPolicy = agentPolicies[0];
+  const canAddAgentsForPolicy = policyHasFleetServer(agentPolicy)
+    ? canAddFleetServers
+    : canAddAgents;
+  if (agentCount > 0) {
+    return (
+      <LinkedAgentCount
+        count={agentCount}
+        agentPolicyId={agentPolicy.id}
+        className="eui-textTruncate"
+      />
+    );
+  } else {
+    return (
+      <AddAgentButton
+        onAddAgent={onAddAgent}
+        canAddAgents={canAddAgentsForPolicy}
+        withPopover={hasHelpPopover}
+      />
+    );
   }
-  return (
-    <AddAgentButton
-      onAddAgent={onAddAgent}
-      canAddAgents={canAddAgents && canAddFleetServers}
-      withPopover={hasHelpPopover}
-    />
-  );
 };
 
 export const AgentsCountBreakDown = ({

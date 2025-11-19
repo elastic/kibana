@@ -13,6 +13,7 @@ export const HOST_NAME_FIELD = 'host.name';
 export const LOG_LEVEL_FIELD = 'log.level';
 export const ERROR_LOG_LEVEL_FIELD = 'error.log.level';
 export const MESSAGE_FIELD = 'message';
+export const OTEL_MESSAGE_FIELD = 'body.text';
 export const EXCEPTION_MESSAGE_FIELD = 'exception.message';
 export const ERROR_MESSAGE_FIELD = 'error.message';
 export const EVENT_ORIGINAL_FIELD = 'event.original';

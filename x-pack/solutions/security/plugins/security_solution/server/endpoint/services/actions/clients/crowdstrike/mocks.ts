@@ -6,9 +6,9 @@
  */
 
 import {
-  CROWDSTRIKE_CONNECTOR_ID,
+  CONNECTOR_ID as CROWDSTRIKE_CONNECTOR_ID,
   SUB_ACTION,
-} from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
+} from '@kbn/connector-schemas/crowdstrike/constants';
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import type { ConnectorWithExtraFindData } from '@kbn/actions-plugin/server/application/connector/types';
 import { merge } from 'lodash';
