@@ -884,6 +884,7 @@ const prepareSimulationFailureResponse = (error: SimulationError) => {
             failed_rate: 1,
             skipped_rate: 0,
             parsed_rate: 0,
+            dropped_rate: 0,
           },
         }),
     },
@@ -895,6 +896,7 @@ const prepareSimulationFailureResponse = (error: SimulationError) => {
       partially_parsed_rate: 0,
       skipped_rate: 0,
       parsed_rate: 0,
+      dropped_rate: 0,
     },
   };
 };

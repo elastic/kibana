@@ -119,7 +119,6 @@ const PreviewDocumentsGroupBy = () => {
   const simulationParsedRate = useSimulatorSelector((state) =>
     formatRateToPercentage(state.context.simulation?.documents_metrics.parsed_rate)
   );
-  // TODO - dropped_rate is not always present on the documents_metrics type for some reason
   const simulationDroppedRate = useSimulatorSelector((state) =>
     formatRateToPercentage(state.context.simulation?.documents_metrics.dropped_rate)
   );

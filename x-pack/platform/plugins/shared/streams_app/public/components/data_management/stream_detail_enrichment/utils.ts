@@ -145,7 +145,6 @@ const defaultDissectProcessorFormState = (sampleDocs: FlattenRecord[]): DissectF
 
 const defaultDropProcessorFormState = (): DropFormState => ({
   action: 'drop_document',
-  // TODO - what should this default to? and should we add UI to clarify what this does to customers?
   where: ALWAYS_CONDITION,
   ignore_failure: true,
 });
