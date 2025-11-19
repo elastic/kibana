@@ -90,7 +90,6 @@
     "@kbn/actions-plugin",
     "@kbn/core-saved-objects-api-server",
     "@kbn/es-archiver",
-    "@kbn/kubernetes-security-plugin",
     "@kbn/es-query",
     "@kbn/stack-alerts-plugin",
     "@kbn/triggers-actions-ui-plugin",

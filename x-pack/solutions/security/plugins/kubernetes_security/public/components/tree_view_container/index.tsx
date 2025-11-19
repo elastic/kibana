@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiSplitPanel, EuiText } from '@elastic/eui';
 import { useStyles } from './styles';
-import { IndexPattern, GlobalFilter } from '../../types';
+import type { IndexPattern, GlobalFilter } from '../../types';
 import { TreeNav } from './tree_nav';
 import { Breadcrumb } from './breadcrumb';
 import { TreeViewContextProvider, useTreeViewContext } from './contexts';

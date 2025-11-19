@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { KubernetesCollectionMap, KubernetesTreeViewLevels } from '../../../types';
+import type { KubernetesCollectionMap } from '../../../types';
+import { KubernetesTreeViewLevels } from '../../../types';
 import { showBreadcrumbDisplayText } from './helper';
 
 describe('showBreadcrumbDisplayText()', () => {

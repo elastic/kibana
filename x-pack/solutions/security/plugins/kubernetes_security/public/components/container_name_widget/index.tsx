@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import React, { ReactNode, useMemo, useState, useRef, useCallback } from 'react';
-import { EuiBasicTable, EuiTableSortingType, EuiProgress, EuiBasicTableColumn } from '@elastic/eui';
+import type { ReactNode } from 'react';
+import React, { useMemo, useState, useRef, useCallback } from 'react';
+import type { EuiTableSortingType, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiProgress } from '@elastic/eui';
 import { useStyles } from './styles';
 import { ContainerNameRow } from './container_name_row';
 import type { IndexPattern, GlobalFilter } from '../../types';
