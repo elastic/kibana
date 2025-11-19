@@ -9,7 +9,6 @@
 
 import type { Reference } from '@kbn/content-management-utils';
 
-import type { DashboardControlsState } from '../../../../common';
 import type {
   DashboardSavedObjectAttributes,
   StoredControlGroupInput,
