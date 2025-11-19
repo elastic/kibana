@@ -80,7 +80,7 @@ export async function scheduleAgentlessDeploymentSyncTask(
       taskType: TASK_TYPE,
       enabled: config?.agentless?.enabled && config?.agentless?.backgroundSync?.enabled,
       schedule: {
-        interval: config?.agentless?.backgroundSync?.interval ?? '1h', // TODO config
+        interval: config?.agentless?.backgroundSync?.interval ?? '1h',
       },
       state: {},
       params: {},
