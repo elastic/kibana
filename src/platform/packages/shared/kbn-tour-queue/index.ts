@@ -17,13 +17,28 @@ const TOUR_REGISTRY = {
   siemMigrationSetupTour: 2,
 } as const;
 
+/**
+ * Valid tour IDs for registering tours in the queue.
+ * Tours are shown in order based on their registry value.
+ * @public
+ */
 export const TOURS = {
   NAVIGATION: 'solutionNavigationTour',
   SECURITY_SIEM_MIGRATION: 'siemMigrationSetupTour',
 } as const;
 
+/**
+ * Union type of all available tour IDs
+ * @public
+ */
 export type TourId = (typeof TOURS)[keyof typeof TOURS];
 
+/**
+ * Get the display order for a tour. Lower numbers are shown first.
+ * @param tourId - The tour ID
+ * @returns The numeric order value for the tour
+ * @internal
+ */
 export const getOrder = (tourId: TourId): number => {
   return TOUR_REGISTRY[tourId];
 };
