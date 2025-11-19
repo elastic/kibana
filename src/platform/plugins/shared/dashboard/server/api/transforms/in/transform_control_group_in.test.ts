@@ -14,6 +14,12 @@ import { CONTROL_WIDTH_SMALL } from '@kbn/controls-constants';
 jest.mock('uuid', () => ({
   v4: jest.fn(() => 'mock-uuid'),
 }));
+jest.mock('../../../kibana_services', () => ({
+  ...jest.requireActual('../../../kibana_services'),
+  embeddableService: {
+    getTransforms: jest.fn(),
+  },
+}));
 
 describe('transformControlGroupIn', () => {
   const mockControlsGroupState: ControlsGroupState = {
@@ -46,40 +52,24 @@ describe('transformControlGroupIn', () => {
     ],
   };
 
-  it('should return undefined if controlsGroupState is undefined', () => {
+  it('should return empty references if controlsGroupState is undefined', () => {
     const result = transformControlGroupIn(undefined);
-    expect(result).toBeUndefined();
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "references": Array [],
+      }
+    `);
   });
 
   it('should transform controlsGroupState correctly', () => {
     const result = transformControlGroupIn(mockControlsGroupState);
 
-    expect(result).toEqual({
-      controlStyle: 'oneLine',
-      showApplySelections: false,
-      ignoreParentSettingsJSON: JSON.stringify({
-        ignoreFilters: true,
-        ignoreQuery: true,
-        ignoreTimerange: true,
-        ignoreValidations: true,
-      }),
-      panelsJSON: JSON.stringify({
-        control1: {
-          type: 'type1',
-          width: 'small',
-          order: 0,
-          grow: false,
-          explicitInput: { bizz: 'buzz' },
-        },
-        'mock-uuid': {
-          type: 'type2',
-          grow: true,
-          width: 'small',
-          order: 1,
-          explicitInput: { boo: 'bear' },
-        },
-      }),
-    });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "controlsJSON": "{\\"control1\\":{\\"order\\":0,\\"type\\":\\"type1\\",\\"width\\":\\"small\\",\\"grow\\":false,\\"explicitInput\\":{\\"id\\":\\"control1\\",\\"bizz\\":\\"buzz\\",\\"order\\":0}},\\"mock-uuid\\":{\\"order\\":1,\\"type\\":\\"type2\\",\\"width\\":\\"small\\",\\"grow\\":true,\\"explicitInput\\":{\\"id\\":\\"mock-uuid\\",\\"boo\\":\\"bear\\",\\"order\\":1}}}",
+        "references": Array [],
+      }
+    `);
   });
 
   it('should handle empty controls array', () => {
@@ -90,16 +80,11 @@ describe('transformControlGroupIn', () => {
 
     const result = transformControlGroupIn(controlsGroupState);
 
-    expect(result).toEqual({
-      controlStyle: 'oneLine',
-      showApplySelections: false,
-      ignoreParentSettingsJSON: JSON.stringify({
-        ignoreFilters: true,
-        ignoreQuery: true,
-        ignoreTimerange: true,
-        ignoreValidations: true,
-      }),
-      panelsJSON: JSON.stringify({}),
-    });
+    expect(result).toMatchInlineSnapshot(`
+      Object {
+        "controlsJSON": "{}",
+        "references": Array [],
+      }
+    `);
   });
 });
