@@ -6,7 +6,7 @@
  */
 
 import { emptyAssets } from '../../helpers/empty_assets';
-import { ClassicStream } from './classic';
+import { ClassicIngestUpsertRequest, ClassicStream } from './classic';
 
 describe('ClassicStream', () => {
   describe('Definition', () => {
@@ -235,6 +235,50 @@ describe('ClassicStream', () => {
       },
     ])('is not valid', (val) => {
       expect(ClassicStream.UpsertRequest.is(val as any)).toBe(false);
+    });
+  });
+
+  describe('IngestUpsertRequest', () => {
+    it.each([
+      {
+        lifecycle: { inherit: {} },
+        processing: { steps: [] },
+        settings: {},
+        classic: {},
+      },
+    ] satisfies ClassicIngestUpsertRequest[])('is valid', (val) => {
+      expect(ClassicIngestUpsertRequest.is(val)).toBe(true);
+      expect(ClassicIngestUpsertRequest.right.parse(val)).toEqual(val);
+    });
+
+    it.each([
+      // Missing classic
+      {
+        lifecycle: { inherit: {} },
+        processing: { steps: [] },
+        settings: {},
+      },
+      // Missing processing
+      {
+        lifecycle: { inherit: {} },
+        settings: {},
+        classic: {},
+      },
+      // Missing settings
+      {
+        lifecycle: { inherit: {} },
+        processing: { steps: [] },
+        classic: {},
+      },
+      // Processing includes updated_at
+      {
+        lifecycle: { inherit: {} },
+        processing: { steps: [], updated_at: new Date().toISOString() },
+        settings: {},
+        classic: {},
+      },
+    ])('is not valid', (val) => {
+      expect(ClassicIngestUpsertRequest.is(val as any)).toBe(false);
     });
   });
 });

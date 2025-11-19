@@ -6,6 +6,7 @@
  */
 
 import { emptyAssets } from '../../helpers/empty_assets';
+import { WiredIngestUpsertRequest } from './wired';
 import { WiredStream } from './wired';
 
 describe('WiredStream', () => {
@@ -253,6 +254,62 @@ describe('WiredStream', () => {
       },
     ])('is not valid', (val) => {
       expect(WiredStream.UpsertRequest.is(val as any)).toBe(false);
+    });
+  });
+
+  describe('IngestUpsertRequest', () => {
+    it.each([
+      {
+        lifecycle: { inherit: {} },
+        processing: { steps: [] },
+        settings: {},
+        wired: {
+          fields: {},
+          routing: [],
+        },
+      },
+    ] satisfies WiredIngestUpsertRequest[])('is valid', (val) => {
+      expect(WiredIngestUpsertRequest.is(val)).toBe(true);
+      expect(WiredIngestUpsertRequest.right.parse(val)).toEqual(val);
+    });
+
+    it.each([
+      // Missing wired
+      {
+        lifecycle: { inherit: {} },
+        processing: { steps: [] },
+        settings: {},
+      },
+      // Missing processing
+      {
+        lifecycle: { inherit: {} },
+        settings: {},
+        wired: {
+          fields: {},
+          routing: [],
+        },
+      },
+      // Missing settings
+      {
+        lifecycle: { inherit: {} },
+        processing: { steps: [] },
+        wired: {
+          fields: {},
+          routing: [],
+        },
+      },
+      // Processing includes updated_at
+      {
+        lifecycle: { inherit: {} },
+        processing: { steps: [], updated_at: new Date().toISOString() },
+        settings: {},
+        wired: {
+          fields: {},
+          routing: [],
+        },
+      },
+    ])('is not valid', (val) => {
+      expect(WiredIngestUpsertRequest.is(val as any)).toBe(false);
     });
   });
 });
