@@ -89,7 +89,7 @@ export function StreamFeaturesTable({
       }),
       width: '25%',
       render: (feature: Feature) => {
-        if (feature.filter) {
+        if (isFeatureWithFilter(feature)) {
           return <ConditionPanel condition={feature.filter} />;
         }
       },
