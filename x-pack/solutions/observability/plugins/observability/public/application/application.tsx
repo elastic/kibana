@@ -79,6 +79,21 @@ export const renderApp = ({
   const { element, history, theme$ } = appMountParameters;
   const isDarkMode = core.theme.getTheme().darkMode;
 
+  try {
+    plugins.onechat?.setConversationFlyoutActiveConfig({
+      sessionTag: 'observability',
+      attachments: [
+        {
+          id: 'observability-context',
+          type: 'observability.observability_context',
+          getContent: async () => ({}),
+        },
+      ],
+    });
+  } catch {
+    // ignore
+  }
+
   core.chrome.setHelpExtension({
     appName: i18n.translate('xpack.observability.feedbackMenu.appName', {
       defaultMessage: 'Observability',
@@ -147,6 +162,11 @@ export const renderApp = ({
     // as the Overview page renders the UX Section component. That component renders a Lens embeddable
     // via the ExploratoryView app, which uses search sessions. Therefore on unmounting we need to clear
     // these sessions.
+    try {
+      plugins.onechat?.clearConversationFlyoutActiveConfig();
+    } catch {
+      // ignore
+    }
     plugins.data.search.session.clear();
     ReactDOM.unmountComponentAtNode(element);
   };

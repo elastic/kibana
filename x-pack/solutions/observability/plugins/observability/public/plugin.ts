@@ -63,6 +63,7 @@ import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { OnechatPluginStart } from '@kbn/onechat-plugin/public';
 import type {
   ActionTypeRegistryContract,
   RuleTypeRegistryContract,
@@ -137,6 +138,7 @@ export interface ObservabilityPublicPluginsSetup {
   cases?: CasesPublicSetup;
 }
 export interface ObservabilityPublicPluginsStart {
+  onechat?: OnechatPluginStart;
   actionTypeRegistry: ActionTypeRegistryContract;
   cases?: CasesPublicStart;
   charts: ChartsPluginStart;
