@@ -82,15 +82,25 @@ export function StreamFeaturesTable({
       sortable: true,
       truncateText: true,
     },
+    {
+      field: 'type',
+      name: i18n.translate('xpack.streams.streamFeatureTable.columns.type', {
+        defaultMessage: 'Type',
+      }),
+      width: '15%',
+      sortable: true,
+      truncateText: true,
+    },
     descriptionColumn,
     {
-      field: 'filter',
       name: i18n.translate('xpack.streams.streamFeatureTable.columns.filter', {
         defaultMessage: 'Filter',
       }),
       width: '25%',
-      render: (filter: Feature['filter']) => {
-        return <ConditionPanel condition={filter} />;
+      render: (feature: Feature) => {
+        if (feature.type === 'system') {
+          return <ConditionPanel condition={feature.filter} />;
+        }
       },
     },
     {

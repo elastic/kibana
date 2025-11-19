@@ -13,6 +13,8 @@ import {
   FEATURE_FILTER,
   FEATURE_NAME,
   FEATURE_UUID,
+  FEATURE_TYPE,
+  FEATURE_PROVIDER,
 } from './fields';
 
 export const featureStorageSettings = {
@@ -23,8 +25,10 @@ export const featureStorageSettings = {
       [FEATURE_UUID]: types.keyword(),
       [STREAM_NAME]: types.keyword(),
       [FEATURE_NAME]: types.keyword(),
+      [FEATURE_TYPE]: types.keyword(),
       [FEATURE_DESCRIPTION]: types.text(),
       [FEATURE_FILTER]: types.object({ enabled: false }),
+      [FEATURE_PROVIDER]: types.keyword(),
     },
   },
 } satisfies IndexStorageSettings;

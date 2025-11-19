@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { identifyFeatures } from '@kbn/streams-ai';
+import { identifyInfrastructureFeatures, identifySystemFeatures } from '@kbn/streams-ai';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
-import type { Streams, Feature } from '@kbn/streams-schema';
+import type { Feature, Streams, SystemFeature } from '@kbn/streams-schema';
 
-export function runFeatureIdentification({
+export async function runFeatureIdentification({
   start,
   end,
   esClient,
@@ -26,10 +26,10 @@ export function runFeatureIdentification({
   inferenceClient: BoundInferenceClient;
   logger: Logger;
   stream: Streams.all.Definition;
-  features: Feature[];
+  features: SystemFeature[];
   signal: AbortSignal;
-}) {
-  return identifyFeatures({
+}): Promise<{ features: Omit<Feature, 'description'>[] }> {
+  const { features: systemFeatures } = await identifySystemFeatures({
     start,
     end,
     esClient,
@@ -40,4 +40,18 @@ export function runFeatureIdentification({
     signal,
     dropUnmapped: true,
   });
+
+  const { features: infrastructureFeatures } = await identifyInfrastructureFeatures({
+    stream,
+    start,
+    end,
+    esClient,
+    inferenceClient,
+    signal,
+    dropUnmapped: false,
+  });
+
+  return {
+    features: [...systemFeatures, ...infrastructureFeatures],
+  };
 }

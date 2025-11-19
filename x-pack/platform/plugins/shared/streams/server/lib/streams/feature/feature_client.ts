@@ -10,7 +10,7 @@ import type {
   StorageClientDeleteResponse,
   StorageClientIndexResponse,
 } from '@kbn/storage-adapter';
-import type { Feature } from '@kbn/streams-schema';
+import type { Feature, FeatureType, SystemFeature } from '@kbn/streams-schema';
 import objectHash from 'object-hash';
 import { FeatureNotFoundError } from '../errors/feature_not_found_error';
 import {
@@ -19,9 +19,16 @@ import {
   FEATURE_FILTER,
   FEATURE_NAME,
   FEATURE_UUID,
+  FEATURE_TYPE,
+  FEATURE_PROVIDER,
 } from './fields';
 import type { FeatureStorageSettings } from './storage_settings';
-import type { StoredFeature } from './stored_feature';
+import type {
+  InfrastructureStoredFeature,
+  StoredFeature,
+  SystemStoredFeature,
+} from './stored_feature';
+import { InfrastructureFeature } from '@kbn/streams-schema/src/feature';
 
 interface FeatureBulkIndexOperation {
   index: { feature: Feature };
@@ -38,21 +45,69 @@ function getFeatureUuid(streamName: string, featureName: string) {
 }
 
 function fromStorage(link: StoredFeature): Feature {
-  return {
-    name: link[FEATURE_NAME],
-    description: link[FEATURE_DESCRIPTION],
-    filter: link[FEATURE_FILTER],
-  };
+  const featureType: FeatureType = link[FEATURE_TYPE];
+  switch (featureType) {
+    case 'system': {
+      const storedLink = link as SystemStoredFeature;
+      return {
+        type: 'system',
+        name: storedLink[FEATURE_NAME],
+        description: storedLink[FEATURE_DESCRIPTION],
+        filter: storedLink[FEATURE_FILTER]!,
+      };
+    }
+
+    case 'infrastructure': {
+      const storedLink = link as InfrastructureStoredFeature;
+      return {
+        type: 'infrastructure',
+        name: storedLink[FEATURE_NAME],
+        description: storedLink[FEATURE_DESCRIPTION],
+        provider: storedLink[FEATURE_PROVIDER],
+      };
+    }
+
+    default: {
+      // Exhaustive check - will cause compile error if new types are added without handling
+      const _exhaustiveCheck: never = featureType;
+      throw new Error(`Unknown feature type: ${_exhaustiveCheck}`);
+    }
+  }
 }
 
 function toStorage(name: string, feature: Feature): StoredFeature {
-  return {
-    [STREAM_NAME]: name,
-    [FEATURE_UUID]: getFeatureUuid(name, feature.name),
-    [FEATURE_NAME]: feature.name,
-    [FEATURE_DESCRIPTION]: feature.description,
-    [FEATURE_FILTER]: feature.filter,
-  };
+  const featureType: FeatureType = feature.type;
+  switch (featureType) {
+    case 'system': {
+      const systemFeature = feature as SystemFeature;
+      return {
+        [STREAM_NAME]: name,
+        [FEATURE_UUID]: getFeatureUuid(name, systemFeature.name),
+        [FEATURE_NAME]: systemFeature.name,
+        [FEATURE_TYPE]: systemFeature.type,
+        [FEATURE_DESCRIPTION]: systemFeature.description,
+        [FEATURE_FILTER]: systemFeature.filter,
+      };
+    }
+
+    case 'infrastructure': {
+      const infrastructureFeature = feature as InfrastructureFeature;
+      return {
+        [STREAM_NAME]: name,
+        [FEATURE_UUID]: getFeatureUuid(name, infrastructureFeature.name),
+        [FEATURE_NAME]: infrastructureFeature.name,
+        [FEATURE_TYPE]: infrastructureFeature.type,
+        [FEATURE_DESCRIPTION]: infrastructureFeature.description,
+        [FEATURE_PROVIDER]: infrastructureFeature.provider,
+      };
+    }
+
+    default: {
+      // Exhaustive check - will cause compile error if new types are added without handling
+      const _exhaustiveCheck: never = featureType;
+      throw new Error(`Unknown feature type: ${_exhaustiveCheck}`);
+    }
+  }
 }
 
 export type FeatureBulkOperation = FeatureBulkIndexOperation | FeatureBulkDeleteOperation;

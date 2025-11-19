@@ -8,9 +8,9 @@ import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import type { Streams, Feature } from '@kbn/streams-schema';
+import type { Streams, SystemFeature, InfrastructureFeature } from '@kbn/streams-schema';
 import type { Condition } from '@kbn/streamlang';
-import { IdentifySystemsPrompt } from './prompt';
+import { IdentifySystemsPrompt, IdentifyInfrastructurePrompt } from './prompt';
 import { clusterLogs } from '../cluster_logs/cluster_logs';
 import conditionSchemaText from '../shared/condition_schema.text';
 
@@ -21,13 +21,12 @@ import conditionSchemaText from '../shared/condition_schema.text';
  * - asking the LLM to identify features by creating
  * queries and validating the resulting clusters
  */
-export async function identifyFeatures({
+export async function identifySystemFeatures({
   stream,
   features,
   start,
   end,
   esClient,
-  kql,
   inferenceClient,
   logger,
   signal,
@@ -35,24 +34,22 @@ export async function identifyFeatures({
   maxSteps: initialMaxSteps,
 }: {
   stream: Streams.all.Definition;
-  features?: Feature[];
+  features?: SystemFeature[];
   start: number;
   end: number;
   esClient: ElasticsearchClient;
-  kql?: string;
   inferenceClient: BoundInferenceClient;
   logger: Logger;
   signal: AbortSignal;
   dropUnmapped?: boolean;
   maxSteps?: number;
-}): Promise<{ features: Omit<Feature, 'description'>[] }> {
+}): Promise<{ features: Omit<SystemFeature, 'description'>[] }> {
   const [analysis, initialClustering] = await Promise.all([
     describeDataset({
       start,
       end,
       esClient,
       index: stream.name,
-      kql: kql || undefined,
     }),
     clusterLogs({
       start,
@@ -132,6 +129,78 @@ export async function identifyFeatures({
         const feature = {
           ...args,
           filter: args.filter as Condition,
+          type: 'system' as const,
+        };
+        return feature;
+      })
+    ),
+  };
+}
+
+/**
+ * Identifies infrastructure features in a stream, by:
+ * - describing the dataset (via sampled documents)
+ * - asking the LLM to identify infrastructure components
+ * without the need for filtering or clustering
+ */
+export async function identifyInfrastructureFeatures({
+  stream,
+  start,
+  end,
+  esClient,
+  inferenceClient,
+  signal,
+  dropUnmapped = false,
+  maxSteps: initialMaxSteps = 10,
+}: {
+  stream: Streams.all.Definition;
+  start: number;
+  end: number;
+  esClient: ElasticsearchClient;
+  inferenceClient: BoundInferenceClient;
+  signal: AbortSignal;
+  dropUnmapped?: boolean;
+  maxSteps?: number;
+}): Promise<{ features: Omit<InfrastructureFeature, 'description'>[] }> {
+  const analysis = await describeDataset({
+    start,
+    end,
+    esClient,
+    index: stream.name,
+  });
+
+  const response = await executeAsReasoningAgent({
+    maxSteps: initialMaxSteps,
+    input: {
+      stream: {
+        name: stream.name,
+        description: stream.description || 'This stream has no description.',
+      },
+      dataset_analysis: JSON.stringify(
+        formatDocumentAnalysis(analysis, { dropEmpty: true, dropUnmapped })
+      ),
+    },
+    prompt: IdentifyInfrastructurePrompt,
+    inferenceClient,
+    finalToolChoice: {
+      function: 'finalize_infrastructure',
+    },
+    toolCallbacks: {
+      finalize_infrastructure: async (toolCall) => {
+        return {
+          response: {},
+        };
+      },
+    },
+    abortSignal: signal,
+  });
+
+  return {
+    features: response.toolCalls.flatMap((toolCall) =>
+      toolCall.function.arguments.infrastructure.map((args) => {
+        const feature = {
+          ...args,
+          type: 'infrastructure' as const,
         };
         return feature;
       })

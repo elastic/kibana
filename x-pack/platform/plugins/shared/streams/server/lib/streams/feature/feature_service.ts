@@ -25,7 +25,15 @@ export class FeatureService {
     const adapter = new StorageIndexAdapter<FeatureStorageSettings, StoredFeature>(
       coreStart.elasticsearch.client.asInternalUser,
       this.logger.get('features'),
-      featureStorageSettings
+      featureStorageSettings,
+      {
+        migrateSource: (feature: Record<string, unknown>): StoredFeature => {
+          if (!('type' in feature)) {
+            feature.type = 'system' as const;
+          }
+          return feature as unknown as StoredFeature;
+        },
+      }
     );
 
     return new FeatureClient({

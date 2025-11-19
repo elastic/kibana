@@ -6,7 +6,12 @@
  */
 
 import { z } from '@kbn/zod';
-import { streamObjectNameSchema, featureSchema, type Feature } from '@kbn/streams-schema';
+import {
+  streamObjectNameSchema,
+  featureSchema,
+  type Feature,
+  SystemFeature,
+} from '@kbn/streams-schema';
 import type {
   StorageClientBulkResponse,
   StorageClientDeleteResponse,
@@ -24,6 +29,7 @@ import { assertSignificantEventsAccess } from '../../../utils/assert_significant
 import { runFeatureIdentification } from '../../../../lib/streams/feature/run_feature_identification';
 import type { IdentifiedFeaturesEvent, StreamDescriptionEvent } from './types';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
+import { InfrastructureFeature } from '@kbn/streams-schema/src/feature';
 
 const dateFromString = z.string().transform((input) => new Date(input));
 
@@ -148,6 +154,7 @@ export const updateFeatureRoute = createServerRoute({
     }
 
     return await featureClient.updateFeature(name, {
+      type: 'system',
       name: featureName,
       description,
       filter,
@@ -329,7 +336,7 @@ export const identifyFeaturesRoute = createServerRoute({
         inferenceClient: boundInferenceClient,
         logger,
         stream,
-        features: hits,
+        features: hits.filter((feature): feature is SystemFeature => feature.type === 'system'),
         signal,
       })
     ).pipe(
@@ -337,23 +344,35 @@ export const identifyFeaturesRoute = createServerRoute({
         return from(
           Promise.all(
             features.map(async (feature) => {
-              const description = await generateStreamDescription({
-                stream,
-                start: start.getTime(),
-                end: end.getTime(),
-                esClient,
-                inferenceClient: boundInferenceClient,
-                feature: {
-                  ...feature,
-                  description: '',
-                },
-                signal,
-              });
+              switch (feature.type) {
+                case 'system': {
+                  const systemFeature = feature as SystemFeature;
+                  const description = await generateStreamDescription({
+                    stream,
+                    start: start.getTime(),
+                    end: end.getTime(),
+                    esClient,
+                    inferenceClient: boundInferenceClient,
+                    feature: {
+                      ...systemFeature,
+                      description: '',
+                    },
+                    signal,
+                  });
 
-              return {
-                ...feature,
-                description,
-              };
+                  return { ...systemFeature, description };
+                }
+
+                case 'infrastructure': {
+                  const infrastructureFeature = feature as InfrastructureFeature;
+                  return { ...infrastructureFeature, description: '' };
+                }
+
+                default: {
+                  const _exhaustiveCheck: never = feature.type;
+                  throw new Error(`Unknown feature type: ${_exhaustiveCheck}`);
+                }
+              }
             })
           )
         );
