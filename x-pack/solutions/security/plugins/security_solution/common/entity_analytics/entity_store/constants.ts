@@ -13,7 +13,6 @@ export const ENTITY_STORE_URL = '/api/entity_store' as const;
 export const ENTITY_STORE_INTERNAL_PRIVILEGES_URL = `${ENTITY_STORE_URL}/privileges` as const;
 export const ENTITIES_URL = `${ENTITY_STORE_URL}/entities` as const;
 export const LIST_ENTITIES_URL = `${ENTITIES_URL}/list` as const;
-export const GET_ENTITY_URL = `${ENTITIES_URL}/{entityType}/{entityId}` as const;
 
 export const ENTITY_STORE_REQUIRED_ES_CLUSTER_PRIVILEGES = [
   'manage_index_templates',

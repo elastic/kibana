@@ -13,21 +13,23 @@
  *   title: Entity Store - Get Single Entity
  *   version: 2023-10-31
  */
-
-import { z } from '@kbn/zod';
-
 import { EntityType } from '../common.gen';
 import { Entity } from './common.gen';
 
 export type GetEntityRequestParams = z.infer<typeof GetEntityRequestParams>;
 export const GetEntityRequestParams = z.object({
   entityType: EntityType,
+});
+export type GetEntityRequestParamsInput = z.input<typeof GetEntityRequestParams>;
+
+export type GetEntityRequestBody = z.infer<typeof GetEntityRequestBody>;
+export const GetEntityRequestBody = z.object({
   /**
    * The unique identifier of the entity
    */
-  entityId: z.string(),
+  id: z.string(),
 });
-export type GetEntityRequestParamsInput = z.input<typeof GetEntityRequestParams>;
+export type GetEntityRequestBodyInput = z.input<typeof GetEntityRequestBody>;
 
 export type GetEntityResponse = z.infer<typeof GetEntityResponse>;
 export const GetEntityResponse = Entity;
