@@ -29,7 +29,7 @@ export class TextBasedDatasource {
   setup(core: CoreSetup<TextBasedStartPlugins>, { editorFrame }: TextBasedSetupPlugins) {
     editorFrame.registerDatasource(async () => {
       const [{ getTextBasedDatasource }, [coreStart, { data, dataViews, expressions }]] =
-        await Promise.all([import('../../../async_services'), core.getStartServices()]);
+        await Promise.all([import('../../async_services'), core.getStartServices()]);
 
       return getTextBasedDatasource({
         core: coreStart,
