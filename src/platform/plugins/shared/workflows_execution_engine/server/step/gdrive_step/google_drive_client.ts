@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { GoogleAuth } from 'google-auth-library';
 import axios, { type AxiosRequestConfig } from 'axios';
+import { GoogleAuth } from 'google-auth-library';
 
 const DRIVE_API_BASE_URL = 'https://www.googleapis.com/drive/v3';
 const DRIVE_API_TIMEOUT = 60 * 1000; // 1 minute
@@ -19,7 +19,8 @@ const DRIVE_SCOPES = [
 ];
 
 export interface GoogleDriveClientConfig {
-  service_credential: Record<string, any>;
+  service_credential?: Record<string, unknown>; // Service account JSON (optional)
+  accessToken?: string; // OAuth access token (optional, alternative to service_credential)
   subject?: string; // For domain-wide delegation
 }
 
@@ -39,7 +40,7 @@ export interface FileMetadata {
   modifiedTime?: string;
   parents?: string[];
   webViewLink?: string;
-  [key: string]: any;
+  [key: string]: unknown;
 }
 
 export interface ListFilesResponse {
@@ -49,33 +50,56 @@ export interface ListFilesResponse {
 }
 
 export class GoogleDriveClient {
-  private auth: GoogleAuth;
+  private auth: GoogleAuth | null = null;
   private accessToken: string | null = null;
   private tokenExpiry: number = 0;
+  private useOAuthToken: boolean;
 
-  constructor(private config: GoogleDriveClientConfig) {
-    const credentials = { ...config.service_credential };
+  constructor(config: GoogleDriveClientConfig) {
+    // If access_token is provided, use OAuth token directly
+    // Otherwise, use service_credential for service account auth
+    if (config.accessToken) {
+      this.useOAuthToken = true;
+      this.accessToken = config.accessToken;
+      // OAuth tokens typically expire in 1 hour, set expiry to 55 minutes to be safe
+      this.tokenExpiry = Date.now() + 55 * 60 * 1000;
+    } else if (config.service_credential) {
+      this.useOAuthToken = false;
+      const credentials = { ...config.service_credential };
 
-    // Remove universe_domain if present (not needed for auth)
-    if (credentials.universe_domain) {
-      delete credentials.universe_domain;
+      // Remove universe_domain if present (not needed for auth)
+      if (credentials.universe_domain) {
+        delete credentials.universe_domain;
+      }
+
+      // Add subject for domain-wide delegation if provided
+      if (config.subject) {
+        credentials.subject = config.subject;
+      }
+
+      this.auth = new GoogleAuth({
+        credentials,
+        scopes: DRIVE_SCOPES,
+      });
+    } else {
+      throw new Error('Either accessToken or service_credential must be provided');
     }
-
-    // Add subject for domain-wide delegation if provided
-    if (config.subject) {
-      credentials.subject = config.subject;
-    }
-
-    this.auth = new GoogleAuth({
-      credentials,
-      scopes: DRIVE_SCOPES,
-    });
   }
 
   /**
    * Get an access token, refreshing if necessary
    */
   private async getAccessToken(): Promise<string> {
+    // If using OAuth token directly, return it (refresh logic would be handled externally)
+    if (this.useOAuthToken && this.accessToken) {
+      return this.accessToken;
+    }
+
+    // For service account auth, refresh token if expired
+    if (!this.auth) {
+      throw new Error('Google Auth not initialized');
+    }
+
     const now = Date.now();
 
     // Refresh token if expired or about to expire (within 5 minutes)
@@ -100,8 +124,8 @@ export class GoogleDriveClient {
   private async makeRequest<T>(
     method: string,
     endpoint: string,
-    params?: Record<string, any>,
-    data?: any
+    params?: Record<string, unknown>,
+    data?: unknown
   ): Promise<T> {
     const accessToken = await this.getAccessToken();
     const url = `${DRIVE_API_BASE_URL}${endpoint}`;
@@ -121,10 +145,12 @@ export class GoogleDriveClient {
     try {
       const response = await axios(config);
       return response.data;
-    } catch (error: any) {
+    } catch (error) {
       if (error.response) {
         throw new Error(
-          `Google Drive API error: ${error.response.status} ${error.response.statusText} - ${JSON.stringify(error.response.data)}`
+          `Google Drive API error: ${error.response.status} ${
+            error.response.statusText
+          } - ${JSON.stringify(error.response.data)}`
         );
       }
       throw new Error(`Google Drive API request failed: ${error.message}`);
@@ -144,12 +170,7 @@ export class GoogleDriveClient {
    * List files from Google Drive
    */
   async listFiles(options: ListFilesOptions = {}): Promise<ListFilesResponse> {
-    const {
-      folderId,
-      pageSize = 100,
-      pageToken,
-      q: customQuery,
-    } = options;
+    const { folderId, pageSize = 100, pageToken, q: customQuery } = options;
 
     // Build query
     let query = 'trashed=false';
@@ -162,10 +183,11 @@ export class GoogleDriveClient {
       query = customQuery;
     }
 
-    const params: Record<string, any> = {
+    const params: Record<string, unknown> = {
       q: query,
       pageSize,
-      fields: 'nextPageToken,files(id,name,mimeType,size,createdTime,modifiedTime,parents,webViewLink)',
+      fields:
+        'nextPageToken,files(id,name,mimeType,size,createdTime,modifiedTime,parents,webViewLink)',
       corpora: 'allDrives',
       includeItemsFromAllDrives: true,
       supportsAllDrives: true,
@@ -208,9 +230,6 @@ export class GoogleDriveClient {
 
 
     try {
-      console.log('Downloading the file');
-      console.log(`https://www.googleapis.com/drive/v3/files/${fileId}/download`);
-
       const downloadResponse = await axios.post(
         `https://www.googleapis.com/drive/v3/files/${fileId}/download`,
         {},
@@ -230,11 +249,12 @@ export class GoogleDriveClient {
     } catch (error) {
       if (error.response) {
         throw new Error(
-          `Google Drive API error downloading file: ${error.response.status} ${error.response.statusText} - ${JSON.stringify(error.response.data)}`
+          `Google Drive API error downloading file: ${error.response.status} ${
+            error.response.statusText
+          } - ${JSON.stringify(error.response.data)}`
         );
       }
       throw new Error(`Google Drive file download failed: ${error.message}`);
     }
   }
 }
-

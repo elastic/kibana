@@ -8,7 +8,6 @@
 export interface ConnectorConfig {
   name: string;
   description: string;
-  icon: string; // Image URL or path
   defaultFeatures: string[];
   flyoutComponentId?: string; // Identifier for the flyout component
   customFlyoutComponentId?: string; // Identifier for custom flyout component
@@ -31,7 +30,6 @@ export const CONNECTOR_CONFIG: Record<string, ConnectorConfig> = {
   brave_search: {
     name: 'Brave Search',
     description: 'Connect to Brave Search API for web search capabilities.',
-    icon: '/plugins/dataConnectors/assets/brave_logo.png',
     defaultFeatures: ['search_web'],
     flyoutComponentId: 'connector_flyout',
     saveConfig: {
@@ -45,8 +43,7 @@ export const CONNECTOR_CONFIG: Record<string, ConnectorConfig> = {
   google_drive: {
     name: 'Google Drive',
     description: 'Connect to Google Drive to search and access files using OAuth.',
-    icon: '/plugins/dataConnectors/assets/google_drive_logo.png',
-    defaultFeatures: ['search_files'],
+    defaultFeatures: ['search', 'list', 'get', 'download'],
     customFlyoutComponentId: 'google_drive_connector_flyout',
     saveConfig: {
       secretsMapping: {},
@@ -69,7 +66,6 @@ export const CONNECTOR_CONFIG: Record<string, ConnectorConfig> = {
   slack: {
     name: 'Slack',
     description: 'Connect to Slack to search messages, channels, and files.',
-    icon: '/plugins/dataConnectors/assets/slack_logo.png',
     defaultFeatures: ['search_messages', 'search_channels'],
     flyoutComponentId: 'connector_flyout',
     saveConfig: {
@@ -83,13 +79,10 @@ export const CONNECTOR_CONFIG: Record<string, ConnectorConfig> = {
   notion: {
     name: 'Notion',
     description: 'Connect to Notion to search pages and data sources using OAuth.',
-    icon: '/plugins/dataConnectors/assets/notion_logo.png',
     defaultFeatures: ['search_files'],
     customFlyoutComponentId: 'notion_connector_flyout',
     saveConfig: {
-      secretsMapping: {
-        token: 'token',
-      },
+      secretsMapping: { token: 'token' },
       config: {},
       featuresField: 'features',
     },

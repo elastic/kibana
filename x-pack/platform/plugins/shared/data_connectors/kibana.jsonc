@@ -10,7 +10,7 @@
     "browser": true,
     "server": true,
     "configPath": ["xpack", "dataConnectors"],
-    "requiredPlugins": ["encryptedSavedObjects", "workflowsManagement", "onechat"],
+    "requiredPlugins": ["encryptedSavedObjects", "workflowsManagement", "onechat", "actions"],
     "optionalPlugins": [],
     "requiredBundles": ["kibanaReact"],
     "extraPublicDirs": ["common"]

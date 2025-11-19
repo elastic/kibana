@@ -46,5 +46,8 @@ export const workplaceConnectorMappings: SavedObjectsTypeMappingDefinition = {
     toolIds: {
       type: 'keyword',
     },
+    kscIds: {
+      type: 'keyword',
+    },
   },
 };

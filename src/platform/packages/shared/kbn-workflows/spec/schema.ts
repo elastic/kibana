@@ -198,8 +198,10 @@ export type HttpStep = z.infer<typeof HttpStepSchema>;
 export const GDriveStepSchema = BaseStepSchema.extend({
   type: z.literal('gdrive'),
   with: z.object({
-    // Service account credentials (JSON object)
+    // Service account credentials (JSON object) - optional, for backward compatibility
     service_credential: z.record(z.string(), z.any()).optional(),
+    // OAuth access token - preferred method from SavedObject
+    accessToken: z.string().optional(),
     // Operation to perform
     operation: z.enum(['list', 'get', 'download', 'ping', 'search']).optional().default('list'),
     // File operations

@@ -5,28 +5,105 @@
  * 2.0.
  */
 
-/**
- * Creates a workflow template for Notion
- * @param connectorId - The ID of the workplace connector containing the API key
- * @param feature - Optional capability/feature (e.g., 'search_web')
- * @returns Workflow YAML template with secret reference
- */
-export function createNotionSearchWorkflowTemplate(connectorId: string, feature?: string): string {
-  const workflowName = feature ? `notion_search.${feature}` : 'notion_search';
+function generateSearchWorkflow(stackConnectorId: string): string {
   return `version: '1'
-name: '${workflowName}'
-description: 'Search using Notion Search API'
+name: 'Notion search'
+description: 'Search for pages or data sources that contain a given string in the title'
 enabled: true
 triggers:
   - type: 'manual'
 inputs:
-  - name: query
+  - name: query_string
     type: string
-    description: The query to search for
+  - name: query_object
+    type: choice
+    options:
+      - "page"
+      - "data_source"
 steps:
-  - name: search-notion
-    type: console
+  - name: search-page-by-title
+    type: notion.searchPageByTitle
+    connector-id: ${stackConnectorId}
     with:
-      message: Notion API call
+      query: "\${{inputs.query_string}}"
+      queryObjectType: "\${{inputs.query_object}}"
+
 `;
+}
+
+function generateQueryWorkflow(stackConnectorId: string): string {
+  return `version: '1'
+name: 'Notion query data source'
+description: 'Given the ID of a data source, query information about its rows'
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: data_source_id
+    type: string
+steps:
+  - name: query-data-source
+    type: notion.queryDataSource
+    connector-id: ${stackConnectorId}
+    with:
+      dataSourceId: "\${{inputs.data_source_id}}"
+
+`;
+}
+
+function generateGetPageWorkflow(stackConnectorId: string): string {
+  return `version: '1'
+name: 'Notion get page'
+description: 'Given the ID of a Notion page, get metadata related to it'
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: page_id
+    type: string
+steps:
+  - name: get-page
+    type: notion.getPage
+    connector-id: ${stackConnectorId}
+    with:
+      pageId: "\${{inputs.page_id}}"
+
+`;
+}
+
+function generateGetDataSourceWorkflow(stackConnectorId: string): string {
+  return `version: '1'
+name: 'Notion get data source'
+description: 'Given the ID of a data source, get information about its columns'
+enabled: true
+triggers:
+  - type: 'manual'
+inputs:
+  - name: data_source_id
+    type: string
+steps:
+  - name: get-data-source
+    type: notion.getDataSource
+    connector-id: ${stackConnectorId}
+    with:
+      dataSourceId: "\${{inputs.data_source_id}}"
+
+`;
+}
+
+/**
+ * Creates a workflow template for Notion
+ * @param stackConnectorId - The ID of the stack connector connected via OAuth
+ * @param feature - Optional capability/feature (e.g., 'search_web')
+ * @returns Workflow YAML template with secret reference
+ */
+export function createNotionSearchWorkflowTemplates(
+  stackConnectorId: string,
+): string[] {
+  return [
+    generateSearchWorkflow(stackConnectorId),
+    generateQueryWorkflow(stackConnectorId),
+    generateGetPageWorkflow(stackConnectorId),
+    generateGetDataSourceWorkflow(stackConnectorId),
+  ];
 }

@@ -14,6 +14,10 @@ import type {
   WorkflowsServerPluginStart,
 } from '@kbn/workflows-management-plugin/server';
 import type { OnechatPluginStart } from '@kbn/onechat-plugin/server';
+import type {
+  PluginSetupContract as ActionsPluginSetup,
+  PluginStartContract as ActionsPluginStart,
+} from '@kbn/actions-plugin/server';
 import type { SecretResolverService } from './services/secret_resolver';
 
 /* eslint-disable @typescript-eslint/no-empty-interface */
@@ -27,10 +31,12 @@ export interface DataConnectorsServerStart {
 export interface DataConnectorsServerSetupDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginSetup;
   workflowsManagement: WorkflowsServerPluginSetup;
+  actions: ActionsPluginSetup;
 }
 
 export interface DataConnectorsServerStartDependencies {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
   workflowsManagement: WorkflowsServerPluginStart;
   onechat?: OnechatPluginStart;
+  actions: ActionsPluginStart;
 }
