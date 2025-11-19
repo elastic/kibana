@@ -948,6 +948,73 @@ const serviceSlosRoute = createApmServerRoute({
   },
 });
 
+const transactionSlosRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/transactions/{transactionName}/slos_count',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+      transactionName: t.string,
+    }),
+    query: t.type({
+      transactionType: t.string,
+      environment: t.string,
+    }),
+  }),
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<{ slosCount: number }> => {
+    const { params, request, logger, plugins } = resources;
+    const { serviceName, transactionName } = params.path;
+    const { transactionType, environment } = params.query;
+
+    const sloPluginStart = await plugins.slo?.start();
+    const sloClient = sloPluginStart
+      ? await sloPluginStart.getSloClientWithRequest(request)
+      : undefined;
+
+    if (!sloClient) {
+      return { slosCount: 0 };
+    }
+
+    try {
+      // Build KQL query with service name, transaction type, environment, and transaction name
+      const kqlParts: string[] = [
+        `service.name: "${serviceName}"`,
+        `(status:"VIOLATED" OR status:"DEGRADING")`,
+      ];
+
+      // Add transaction type filter if available
+      if (transactionType) {
+        kqlParts.push(`transaction.type: "${transactionType}"`);
+      }
+
+      // Add environment filter if available and not "ENVIRONMENT_ALL"
+      if (environment && environment !== 'ENVIRONMENT_ALL') {
+        kqlParts.push(`service.environment: "${environment}"`);
+      }
+
+      // Add transaction name filter if available
+      if (transactionName) {
+        kqlParts.push(`transaction.name: "${transactionName}"`);
+      }
+
+      const kqlQuery = kqlParts.join(' AND ');
+
+      const result = await sloClient.findSLOs({
+        kqlQuery,
+        page: '1',
+        perPage: '1',
+      });
+
+      return { slosCount: result.total };
+    } catch (error) {
+      logger.debug(
+        `Failed to fetch SLOs for transaction ${serviceName}/${transactionName}: ${error}`
+      );
+      return { slosCount: 0 };
+    }
+  },
+});
+
 export const serviceRouteRepository = {
   ...servicesRoute,
   ...servicesDetailedStatisticsRoute,
@@ -967,4 +1034,5 @@ export const serviceRouteRepository = {
   ...serviceAnomalyChartsRoute,
   ...serviceAlertsRoute,
   ...serviceSlosRoute,
+  ...transactionSlosRoute,
 };

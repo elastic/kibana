@@ -14,6 +14,7 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { sloListLocatorID } from '@kbn/observability-plugin/common';
 import React from 'react';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import type { ValuesType } from 'utility-types';
@@ -54,10 +55,15 @@ export function getColumns({
   comparisonEnabled,
   shouldShowSparkPlots = true,
   showAlertsColumn,
+  showSlosColumn,
   offset,
   transactionOverflowCount,
   link,
   query,
+  environment,
+  transactionType,
+  sloCounts,
+  getSloListLocator,
 }: {
   serviceName: string;
   latencyAggregationType?: LatencyAggregationType;
@@ -66,10 +72,15 @@ export function getColumns({
   comparisonEnabled: boolean;
   shouldShowSparkPlots?: boolean;
   showAlertsColumn: boolean;
+  showSlosColumn: boolean;
   offset?: string;
   transactionOverflowCount: number;
   link: any;
   query: TypeOf<ApmRoutes, '/services/{serviceName}/overview'>['query'];
+  environment: string;
+  transactionType?: string;
+  sloCounts?: Map<string, number>;
+  getSloListLocator?: () => any;
 }): Array<ITableColumn<ServiceTransactionGroupItem>> {
   return [
     ...(showAlertsColumn
@@ -114,6 +125,80 @@ export function getColumns({
                     })}
                   >
                     {alertsCount}
+                  </EuiBadge>
+                </EuiToolTip>
+              );
+            },
+          } as ITableColumn<ServiceTransactionGroupItem>,
+        ]
+      : []),
+    ...(showSlosColumn
+      ? [
+          {
+            field: 'slosCount',
+            sortable: true,
+            name: i18n.translate('xpack.apm.transactionsTableColumnName.slosColumnLabel', {
+              defaultMessage: 'SLOs',
+            }),
+            width: `${unit * 6}px`,
+            render: (_, { name, transactionType: txType }) => {
+              const slosCount = sloCounts?.get(name) ?? 0;
+              if (!slosCount) {
+                return null;
+              }
+
+              const sloListLocator = getSloListLocator?.();
+              const kqlParts: string[] = [
+                `service.name: "${serviceName}"`,
+                `(status:"VIOLATED" OR status:"DEGRADING")`,
+              ];
+
+              if (txType) {
+                kqlParts.push(`transaction.type: "${txType}"`);
+              }
+
+              if (environment && environment !== 'ENVIRONMENT_ALL') {
+                kqlParts.push(`service.environment: "${environment}"`);
+              }
+
+              if (name) {
+                kqlParts.push(`transaction.name: "${name}"`);
+              }
+
+              const kqlQuery = kqlParts.join(' AND ');
+
+              const handleClick = () => {
+                sloListLocator?.navigate({ kqlQuery }, { replace: false });
+              };
+
+              return (
+                <EuiToolTip
+                  position="bottom"
+                  content={i18n.translate(
+                    'xpack.apm.transactionsTableColumnName.tooltip.violatedSlosExplanation',
+                    {
+                      defaultMessage: 'Violated Service Level Objectives',
+                    }
+                  )}
+                >
+                  <EuiBadge
+                    data-test-subj="transactionSlosBadge"
+                    color="danger"
+                    tabIndex={0}
+                    onClick={handleClick}
+                    onClickAriaLabel={i18n.translate(
+                      'xpack.apm.transactionsTableColumnName.slosBadgeAriaLabel',
+                      {
+                        defaultMessage: 'View {count} violated SLOs for {transactionName}',
+                        values: { count: slosCount, transactionName: name },
+                      }
+                    )}
+                    style={{ cursor: sloListLocator ? 'pointer' : 'default' }}
+                  >
+                    {i18n.translate('xpack.apm.transactionsTableColumnName.slosBadgeLabel', {
+                      defaultMessage: '{count} Violated',
+                      values: { count: slosCount },
+                    })}
                   </EuiBadge>
                 </EuiToolTip>
               );

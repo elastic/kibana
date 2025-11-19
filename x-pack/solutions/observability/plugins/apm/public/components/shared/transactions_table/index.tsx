@@ -30,6 +30,7 @@ import { isTimeComparison } from '../time_comparison/get_comparison_options';
 import { getColumns } from './get_columns';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
 import { getComparisonEnabled } from '../time_comparison/get_comparison_enabled';
+import { sloListLocatorID } from '@kbn/observability-plugin/common';
 
 type ApiResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics'>;
@@ -74,7 +75,7 @@ export function TransactionsTable({
   showSparkPlots,
 }: Props) {
   const { link } = useApmRouter();
-  const { core, observabilityAIAssistant } = useApmPluginContext();
+  const { core, observabilityAIAssistant, plugins } = useApmPluginContext();
   const [renderedItems, setRenderedItems] = useState<ApiResponse['transactionGroups']>([]);
 
   const {
@@ -121,6 +122,61 @@ export function TransactionsTable({
     }
   }, [mainStatisticsStatus, detailedStatisticsStatus, onLoadTable, end, start]);
 
+  // Fetch SLO counts for rendered transactions
+  const { data: sloCountsMap } = useFetcher(
+    (callApmApi) => {
+      if (renderedItems.length === 0 || !transactionType) {
+        return Promise.resolve(new Map<string, number>());
+      }
+
+      const sloPromises = renderedItems.map(async (item) => {
+        try {
+          const result = await callApmApi(
+            'GET /internal/apm/services/{serviceName}/transactions/{transactionName}/slos_count',
+            {
+              params: {
+                path: {
+                  serviceName,
+                  transactionName: item.name,
+                },
+                query: {
+                  transactionType,
+                  environment,
+                },
+              },
+            }
+          );
+          return { transactionName: item.name, slosCount: result.slosCount };
+        } catch {
+          return { transactionName: item.name, slosCount: 0 };
+        }
+      });
+
+      return Promise.all(sloPromises).then((results) => {
+        const map = new Map<string, number>();
+        results.forEach(({ transactionName, slosCount }) => {
+          if (slosCount > 0) {
+            map.set(transactionName, slosCount);
+          }
+        });
+        return map;
+      });
+    },
+    [renderedItems, serviceName, transactionType, environment]
+  );
+
+  const showSlosColumn = (sloCountsMap?.size ?? 0) > 0;
+
+  const getSloListLocator = useMemo(() => {
+    return () => {
+      try {
+        return plugins.share?.url.locators.get(sloListLocatorID);
+      } catch {
+        return undefined;
+      }
+    };
+  }, [plugins.share?.url.locators]);
+
   const columns = useMemo(() => {
     return getColumns({
       serviceName,
@@ -132,8 +188,13 @@ export function TransactionsTable({
       offset,
       transactionOverflowCount: mainStatistics.transactionOverflowCount,
       showAlertsColumn: mainStatistics.hasActiveAlerts,
+      showSlosColumn,
       link,
       query,
+      environment,
+      transactionType,
+      sloCounts: sloCountsMap,
+      getSloListLocator,
     });
   }, [
     defaultComparisonEnabled,
@@ -147,6 +208,11 @@ export function TransactionsTable({
     query,
     serviceName,
     shouldShowSparkPlots,
+    showSlosColumn,
+    environment,
+    transactionType,
+    sloCountsMap,
+    getSloListLocator,
   ]);
 
   const setScreenContext = observabilityAIAssistant?.service.setScreenContext;
