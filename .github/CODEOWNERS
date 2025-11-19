@@ -1203,12 +1203,13 @@ x-pack/solutions/security/packages/siem-readiness @elastic/contextual-security-a
 x-pack/solutions/security/packages/storybook/config @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/packages/test-api-clients @elastic/security-detection-rule-management
 x-pack/solutions/security/packages/upselling @elastic/security-threat-hunting-investigations
-x-pack/solutions/security/plugins/cloud_defend @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/plugins/cloud_defend @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/cloud_security_posture @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
 x-pack/solutions/security/plugins/elastic_assistant @elastic/security-generative-ai
 x-pack/solutions/security/plugins/elastic_assistant_shared_state @elastic/security-generative-ai
-x-pack/solutions/security/plugins/kubernetes_security @elastic/kibana-cloud-security-posture
+x-pack/solutions/security/plugins/kubernetes_security @elastic/contextual-security-apps
+x-pack/solutions/security/test/kubernetes_security @elastic/contextual-security-apps
 x-pack/solutions/security/plugins/lists @elastic/security-detection-engine
 x-pack/solutions/security/plugins/security_solution @elastic/security-solution
 x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution
@@ -2896,7 +2897,7 @@ x-pack/platform/test/automatic_import_api_integration @elastic/integration-exper
 ## Packages
 x-pack/packages/kbn-cloud-security-posture @elastic/contextual-security-apps
 ## Plugins
-x-pack/plugins/cloud_defend @elastic/kibana-cloud-security-posture
+x-pack/plugins/cloud_defend @elastic/contextual-security-apps
 x-pack/plugins/cloud_security_posture @elastic/contextual-security-apps
 x-pack/plugins/kubernetes_security @elastic/contextual-security-apps
 ## Security Solution sub teams
