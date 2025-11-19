@@ -19,10 +19,8 @@
   ],
   "exclude": ["target/**/*", "**/cypress/**", "public/management/cypress.config.ts"],
   "kbn_references": [
+    "@kbn/setup-node-env",
     "@kbn/core",
-    {
-      "path": "../../../../../src/setup_node_env/tsconfig.json"
-    },
     "@kbn/data-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/files-plugin",
@@ -137,6 +135,7 @@
     "@kbn/shared-ux-router",
     "@kbn/charts-plugin",
     "@kbn/alerts-as-data-utils",
+    "@kbn/cloud-defend-plugin",
     "@kbn/expandable-flyout",
     "@kbn/grouping",
     "@kbn/securitysolution-data-table",
@@ -175,7 +174,6 @@
     "@kbn/zod-helpers",
     "@kbn/core-http-common",
     "@kbn/search-errors",
-    "@kbn/stack-connectors-plugin",
     "@kbn/elastic-assistant-common",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/lens-embeddable-utils",
@@ -262,6 +260,7 @@
     "@kbn/react-query",
     "@kbn/core-chrome-layout-constants",
     "@kbn/response-ops-rule-form",
-    "@kbn/core-lifecycle-browser-mocks"
+    "@kbn/core-lifecycle-browser-mocks",
+    "@kbn/connector-schemas",
   ]
 }

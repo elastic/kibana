@@ -22,6 +22,7 @@ import nodeCrypto from '@elastic/node-crypto';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { createFieldFormatsStartMock } from '@kbn/field-formats-plugin/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
@@ -84,6 +85,7 @@ beforeAll(async () => {
     uiSettings: mockCoreStart.uiSettings,
     discover: discoverPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
+    licensing: licensingMock.createStart(),
   });
 });
 
