@@ -89,6 +89,7 @@ describe('normalizeErrors', () => {
     it('should normalize a single otel error', () => {
       const otelErrors: UnifiedTraceErrors['unprocessedOtelErrors'] = [
         {
+          eventName: 'error',
           id: 'span-1',
           spanId: 'span-1',
           timestamp: {
@@ -107,6 +108,7 @@ describe('normalizeErrors', () => {
 
       expect(result).toEqual([
         {
+          eventName: 'error',
           error: {
             exception: {
               type: 'OtelError',
@@ -123,6 +125,7 @@ describe('normalizeErrors', () => {
     it('should handle otel error with undefined exception fields', () => {
       const otelErrors: UnifiedTraceErrors['unprocessedOtelErrors'] = [
         {
+          eventName: 'exception',
           id: 'span-2',
           spanId: 'span-2',
           timestamp: undefined,
@@ -139,6 +142,7 @@ describe('normalizeErrors', () => {
 
       expect(result).toEqual([
         {
+          eventName: 'exception',
           error: {
             exception: {
               type: undefined,

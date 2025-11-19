@@ -11,7 +11,7 @@ import {
   geminiSuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/gemini_simulation';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import { DEFAULT_GEMINI_MODEL } from '@kbn/stack-connectors-plugin/common/gemini/constants';
+import { DEFAULT_MODEL } from '@kbn/connector-schemas/gemini/constants';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 const connectorTypeId = '.gemini';
@@ -94,7 +94,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
           is_missing_secrets: false,
           config: {
             ...config,
-            defaultModel: DEFAULT_GEMINI_MODEL,
+            defaultModel: DEFAULT_MODEL,
           },
           is_connector_type_deprecated: false,
         });
@@ -115,7 +115,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"apiUrl\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"gcpRegion\"\n    ],\n    \"message\": \"Required\"\n  },\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"gcpProjectID\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+              message: `error validating connector type config: 3 errors:\n [1]: Field \"apiUrl\": Required;\n [2]: Field \"gcpRegion\": Required;\n [3]: Field \"gcpProjectID\": Required`,
             });
           });
       });
@@ -136,7 +136,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"gcpProjectID\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+              message: `error validating connector type config: Field \"gcpProjectID\": Required`,
             });
           });
       });
@@ -157,7 +157,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating action type config: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"gcpRegion\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+              message: `error validating connector type config: Field \"gcpRegion\": Required`,
             });
           });
       });
@@ -181,7 +181,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: Error configuring Google Gemini action: Error: error validating url: target url "http://gemini.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating connector type config: Error configuring Google Gemini action: Error: error validating url: target url "http://gemini.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -200,7 +200,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
             expect(resp.body).to.eql({
               statusCode: 400,
               error: 'Bad Request',
-              message: `error validating action type secrets: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"credentialsJson\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+              message: `error validating connector type secrets: Field \"credentialsJson\": Required`,
             });
           });
       });
@@ -236,7 +236,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
           expect(body).to.eql({
             status: 'error',
             connector_id: geminiActionId,
-            message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subAction\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+            message: `error validating action params: Field \"subAction\": Required`,
             retry: false,
             errorSource: TaskErrorSource.USER,
           });
@@ -370,7 +370,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
             expect(body).to.eql({
               status: 'error',
               connector_id: geminiActionId,
-              message: `error validating action params: [\n  {\n    \"code\": \"invalid_type\",\n    \"expected\": \"string\",\n    \"received\": \"undefined\",\n    \"path\": [\n      \"subAction\"\n    ],\n    \"message\": \"Required\"\n  }\n]`,
+              message: `error validating action params: Field \"subAction\": Required`,
               retry: false,
               errorSource: TaskErrorSource.USER,
             });

@@ -59,6 +59,7 @@ export interface EditorProps {
   value: string;
   setValue: (value: string) => void;
   customParsedRequestsProvider?: (model: any) => any;
+  enableSuggestWidgetRepositioning: boolean;
 }
 
 export const MonacoEditor = ({
@@ -66,6 +67,7 @@ export const MonacoEditor = ({
   value,
   setValue,
   customParsedRequestsProvider,
+  enableSuggestWidgetRepositioning,
 }: EditorProps) => {
   const context = useServicesContext();
   const {
@@ -74,7 +76,6 @@ export const MonacoEditor = ({
       notifications,
       settings: settingsService,
       autocompleteInfo,
-      dataViews,
       data,
       licensing,
       application,
@@ -184,7 +185,7 @@ export const MonacoEditor = ({
     const callbacks: ESQLCallbacks = {
       getSources: async () => {
         const getLicense = licensing?.getLicense;
-        return await getESQLSources(dataViews, { application, http }, getLicense);
+        return await getESQLSources({ application, http }, getLicense);
       },
       getColumnsFor: async ({ query: queryToExecute }: { query?: string } | undefined = {}) => {
         if (queryToExecute) {
@@ -212,7 +213,7 @@ export const MonacoEditor = ({
       },
     };
     return callbacks;
-  }, [licensing, dataViews, application, http, data?.search?.search]);
+  }, [licensing, application, http, data?.search?.search]);
 
   const suggestionProvider = useMemo(
     () => ConsoleLang.getSuggestionProvider?.(esqlCallbacks, actionsProvider),
@@ -301,6 +302,7 @@ export const MonacoEditor = ({
         accessibilityOverlayEnabled={settings.isAccessibilityOverlayEnabled}
         editorDidMount={editorDidMountCallback}
         editorWillUnmount={editorWillUnmountCallback}
+        links={true}
         options={{
           fontSize: settings.fontSize,
           wordWrap: settings.wrapMode === true ? 'on' : 'off',
@@ -314,6 +316,7 @@ export const MonacoEditor = ({
         suggestionProvider={suggestionProvider}
         enableFindAction={true}
         enableCustomContextMenu={true}
+        enableSuggestWidgetRepositioning={enableSuggestWidgetRepositioning}
       />
     </div>
   );

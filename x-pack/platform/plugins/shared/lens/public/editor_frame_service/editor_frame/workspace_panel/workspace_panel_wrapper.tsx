@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React from 'react';
 import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButton, useEuiTheme } from '@elastic/eui';
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -13,37 +13,23 @@ import type { ChartSizeSpec } from '@kbn/chart-expressions-common';
 import type { ChartSizeUnit } from '@kbn/chart-expressions-common/types';
 import type { Interpolation, Theme } from '@emotion/react';
 import { css } from '@emotion/react';
-import type {
-  FramePublicAPI,
-  UserMessagesGetter,
-  Visualization,
-  DatasourceStates,
-  LensInspector,
-} from '@kbn/lens-common';
+import type { UserMessagesGetter } from '@kbn/lens-common';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 import { MessageList } from './message_list';
 import {
   useLensDispatch,
-  updateVisualizationState,
   useLensSelector,
   selectChangesApplied,
   applyChanges,
   selectAutoApplyEnabled,
-  selectVisualization,
-  selectVisualizationState,
 } from '../../../state_management';
 import { WorkspaceTitle } from './title';
-import { useEditorFrameService } from '../../editor_frame_service_context';
 
 export const AUTO_APPLY_DISABLED_STORAGE_KEY = 'autoApplyDisabled';
 
 export interface WorkspacePanelWrapperProps {
   children: React.ReactNode | React.ReactNode[];
-  framePublicAPI: FramePublicAPI;
-  visualizationId: string | null;
-  datasourceStates: DatasourceStates;
   isFullscreen: boolean;
-  lensInspector: LensInspector;
   getUserMessages: UserMessagesGetter;
   displayOptions: ChartSizeSpec | undefined;
 }
@@ -68,90 +54,19 @@ const getAspectRatioStyles = ({ x, y }: { x: number; y: number }) => {
   };
 };
 
-export function VisualizationToolbarWrapper(props: { framePublicAPI: FramePublicAPI }) {
-  const { visualizationMap } = useEditorFrameService();
-  const { framePublicAPI } = props;
-  const visualization = useLensSelector(selectVisualization);
-
-  const activeVisualization = visualization.activeId
-    ? visualizationMap[visualization.activeId]
-    : null;
-
-  return activeVisualization && visualization.state ? (
-    <VisualizationToolbar
-      framePublicAPI={framePublicAPI}
-      activeVisualization={activeVisualization}
-    />
-  ) : null;
-}
-
-export function VisualizationToolbar(props: {
-  activeVisualization: Visualization | null;
-  framePublicAPI: FramePublicAPI;
-  enableFlyoutToolbar?: boolean;
-}) {
-  const dispatchLens = useLensDispatch();
-  const visualization = useLensSelector(selectVisualizationState);
-  const { activeVisualization, enableFlyoutToolbar = false } = props;
-  const setVisualizationState = useCallback(
-    (newState: unknown) => {
-      if (!activeVisualization) {
-        return;
-      }
-      dispatchLens(
-        updateVisualizationState({
-          visualizationId: activeVisualization.id,
-          newState,
-        })
-      );
-    },
-    [dispatchLens, activeVisualization]
-  );
-
-  const { FlyoutToolbarComponent, ToolbarComponent: RegularToolbarComponent } =
-    activeVisualization || {};
-
-  let ToolbarComponent;
-  if (enableFlyoutToolbar) {
-    ToolbarComponent = FlyoutToolbarComponent || RegularToolbarComponent;
-  } else {
-    ToolbarComponent = RegularToolbarComponent;
-  }
-
-  return (
-    <>
-      {ToolbarComponent && (
-        <EuiFlexItem grow={false}>
-          {ToolbarComponent({
-            frame: props.framePublicAPI,
-            state: visualization.state,
-            setState: setVisualizationState,
-          })}
-        </EuiFlexItem>
-      )}
-    </>
-  );
-}
-
 export function WorkspacePanelWrapper({
   children,
-  framePublicAPI,
-  visualizationId,
   isFullscreen,
   getUserMessages,
   displayOptions,
 }: WorkspacePanelWrapperProps) {
-  const { visualizationMap } = useEditorFrameService();
-
   const dispatchLens = useLensDispatch();
 
-  const euiThemeContext = useEuiTheme();
-  const { euiTheme } = euiThemeContext;
+  const { euiTheme } = useEuiTheme();
 
   const changesApplied = useLensSelector(selectChangesApplied);
   const autoApplyEnabled = useLensSelector(selectAutoApplyEnabled);
 
-  const activeVisualization = visualizationId ? visualizationMap[visualizationId] : null;
   const userMessages = getUserMessages('toolbar');
 
   const aspectRatio = displayOptions?.aspectRatio;
@@ -201,7 +116,7 @@ export function WorkspacePanelWrapper({
             gutterSize="s"
             direction="row"
             css={css`
-              margin-bottom: ${euiTheme.size.xs};
+              margin-bottom: ${euiTheme.size.m};
               ${isFullscreen &&
               `
                 background-color: ${euiTheme.colors.emptyShade};
@@ -212,17 +127,6 @@ export function WorkspacePanelWrapper({
             `}
             responsive={false}
           >
-            {!isFullscreen && (
-              <EuiFlexItem>
-                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap={true}>
-                  <VisualizationToolbar
-                    activeVisualization={activeVisualization}
-                    framePublicAPI={framePublicAPI}
-                  />
-                </EuiFlexGroup>
-              </EuiFlexItem>
-            )}
-
             <EuiFlexItem grow={false}>
               <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
                 {userMessages?.length ? (

@@ -7,86 +7,72 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiThemeComputed } from '@elastic/eui';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, useEuiTheme } from '@elastic/eui';
+import type { EuiThemeComputed, UseEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  euiShadow,
+  transparentize,
+  useEuiTheme,
+} from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { Node } from '@xyflow/react';
 import { Handle, Position } from '@xyflow/react';
 import React from 'react';
+import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { EsWorkflowStepExecution, WorkflowYaml } from '@kbn/workflows';
+import { getExecutionStatusColors } from '../../../shared/ui/status_badge';
+import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import type { NodeType } from '../lib/get_layouted_nodes_and_edges';
 import { flowNodeTypes } from '../lib/get_layouted_nodes_and_edges';
 
 const triggerNodeTypes = ['manual', 'alert', 'scheduled'];
-const actionNodeTypes = ['console', 'slack', 'delay', 'inference.unified_inference'];
-
-function getNodeIcon(nodeType: string, color: string) {
-  switch (nodeType) {
-    case 'if':
-      return <EuiIcon type="logstashIf" color={color} />;
-    case 'merge':
-      return <EuiIcon type="logstashInput" color={color} />;
-    case 'console':
-      return <EuiIcon type="console" color={color} />;
-    case 'slack':
-      return <EuiIcon type="logoSlack" color={color} />;
-    case 'inference.unified_inference':
-      return <EuiIcon type="sparkles" color={color} />;
-    case 'manual':
-      return <EuiIcon type="accessibility" color={color} />;
-    case 'alert':
-      return <EuiIcon type="warning" color={color} />;
-    case 'scheduled':
-      return <EuiIcon type="clock" color={color} />;
-    case 'delay':
-      return <EuiIcon type="clock" color={color} />;
-    default:
-      return <EuiIcon type="info" color={color} />;
-  }
-}
 
 function getIconColors(nodeType: NodeType, euiTheme: EuiThemeComputed) {
   if (flowNodeTypes.includes(nodeType)) {
     return {
-      backgroundColor: euiTheme.colors.backgroundBaseWarning,
+      backgroundColor: transparentize(euiTheme.colors.warning, 0.1),
       color: euiTheme.colors.warning,
-    };
-  }
-  if (actionNodeTypes.includes(nodeType)) {
-    return {
-      backgroundColor: '#F7F8FC',
-      color: euiTheme.colors.textSubdued,
     };
   }
   if (triggerNodeTypes.includes(nodeType)) {
     return {
-      backgroundColor: 'rgba(255, 199, 219, 0.3)',
-      color: '#EE72A6',
+      backgroundColor: transparentize(euiTheme.colors.vis.euiColorVis6, 0.1),
+      color: euiTheme.colors.vis.euiColorVis6,
     };
   }
   return {
-    backgroundColor: euiTheme.colors.backgroundBasePrimary,
-    color: euiTheme.colors.primary,
+    backgroundColor: euiTheme.colors.backgroundBasePlain,
+    color: euiTheme.colors.borderBaseSubdued,
   };
 }
 
 function NodeIcon({ nodeType }: { nodeType: NodeType }) {
   const { euiTheme } = useEuiTheme();
   const { backgroundColor, color } = getIconColors(nodeType, euiTheme);
+  const stepType = nodeType.split('.')[0];
+  const isFlowNode = flowNodeTypes.includes(nodeType);
+  const isTriggerNode = triggerNodeTypes.includes(nodeType);
   return (
     <div
       css={{
         width: '36px',
         height: '36px',
-        borderRadius: flowNodeTypes.includes(nodeType) ? '8px' : '50%',
+        borderRadius: isFlowNode ? '8px' : '50%',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        border: flowNodeTypes.includes(nodeType) ? `1px solid ${color}` : 'none',
+        border: `1px solid ${color}`,
         backgroundColor,
       }}
     >
-      {getNodeIcon(nodeType, color)}
+      <StepIcon
+        stepType={stepType}
+        executionStatus={undefined}
+        color={isTriggerNode || isFlowNode ? color : undefined}
+      />
     </div>
   );
 }
@@ -99,32 +85,18 @@ interface WorkflowNodeData {
 }
 
 const getNodeBorderColor = (status: ExecutionStatus | undefined, euiTheme: EuiThemeComputed) => {
-  if (!status) {
-    return 'transparent';
+  if (status === undefined) {
+    return euiTheme.colors.borderBaseFloating;
   }
-  switch (status) {
-    case ExecutionStatus.FAILED:
-      return euiTheme.colors.danger;
-    case ExecutionStatus.COMPLETED:
-      return '#16C5C0';
-    case ExecutionStatus.PENDING:
-      return euiTheme.colors.borderBaseNeutral;
-    case ExecutionStatus.RUNNING:
-      return euiTheme.colors.borderBaseNeutral;
-    case ExecutionStatus.CANCELLED:
-      return euiTheme.colors.borderBaseNeutral;
-    case ExecutionStatus.SKIPPED:
-      return euiTheme.colors.borderBaseNeutral;
-    case ExecutionStatus.WAITING_FOR_INPUT:
-      return euiTheme.colors.borderBaseNeutral;
-    default:
-      return 'transparent';
-  }
+  return getExecutionStatusColors(euiTheme, status ?? null).color;
 };
 
 // @ts-expect-error - TODO: fix this
 export function WorkflowGraphNode(node: Node<WorkflowNodeData>) {
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
+  const { euiTheme } = euiThemeContext;
+  const styles = useMemoCss(componentStyles);
+  const isTriggerNode = triggerNodeTypes.includes(node.data.stepType);
   return (
     <EuiFlexGroup
       css={{
@@ -132,21 +104,14 @@ export function WorkflowGraphNode(node: Node<WorkflowNodeData>) {
         height: '100%',
       }}
     >
-      <Handle type="target" position={Position.Top} />
+      {!isTriggerNode && <Handle type="target" position={Position.Top} />}
       <EuiFlexItem
-        css={{
-          width: '100%',
-          height: '100%',
-          backgroundColor: euiTheme.colors.backgroundBasePlain,
-          borderRadius: '8px',
-          padding: '8px 12px',
-          boxShadow:
-            '0px 2px 8px 0px rgba(43,57,79,0.05), 0px 1px 4px 0px rgba(43,57,79,0.06), 0px 0px 2px 0px rgba(43,57,79,0.16)',
-          display: 'flex',
-          alignItems: 'center',
-          gap: '12px',
-          border: `1px solid ${getNodeBorderColor(node.data.stepExecution?.status, euiTheme)}`,
-        }}
+        css={[
+          styles.node,
+          {
+            border: `1px solid ${getNodeBorderColor(node.data.stepExecution?.status, euiTheme)}`,
+          },
+        ]}
       >
         <EuiFlexGroup css={{ flex: 1, width: '100%' }} alignItems="center" gutterSize="m">
           <EuiFlexItem grow={false}>
@@ -196,3 +161,17 @@ export function WorkflowGraphNode(node: Node<WorkflowNodeData>) {
     </EuiFlexGroup>
   );
 }
+
+const componentStyles = {
+  node: (euiThemeContext: UseEuiTheme) => css`
+    width: 100%;
+    height: 100%;
+    background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
+    border-radius: 8px;
+    padding: 8px 12px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    ${euiShadow(euiThemeContext, 'xs', { direction: 'down' })}
+  `,
+};

@@ -19,6 +19,7 @@ import { previewSignificantEvents } from '../../../lib/significant_events/previe
 import { readSignificantEventsFromAlertsIndices } from '../../../lib/significant_events/read_significant_events_from_alerts_indices';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
+import { getRequestAbortSignal } from '../../utils/get_request_abort_signal';
 
 // Make sure strings are expected for input, but still converted to a
 // Date, without breaking the OpenAPI generator
@@ -207,6 +208,7 @@ const generateSignificantEventsRoute = createServerRoute({
           inferenceClient,
           esClient: scopedClusterClient.asCurrentUser,
           logger,
+          signal: getRequestAbortSignal(request),
         }
       )
     ).pipe(

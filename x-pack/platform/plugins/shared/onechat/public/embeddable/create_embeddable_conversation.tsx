@@ -7,7 +7,11 @@
 
 import React from 'react';
 import { EmbeddableConversationInternal } from './embeddable_conversation';
-import type { EmbeddableConversationDependencies, EmbeddableConversationProps } from './types';
+import type {
+  EmbeddableConversationDependencies,
+  EmbeddableConversationFlyoutProps,
+  EmbeddableConversationProps,
+} from './types';
 
 /**
  * Factory function that creates an embeddable Conversation component
@@ -20,8 +24,10 @@ import type { EmbeddableConversationDependencies, EmbeddableConversationProps } 
 export const createEmbeddableConversation = ({
   services,
   coreStart,
-}: EmbeddableConversationDependencies): React.FC<EmbeddableConversationProps> => {
-  return (props: EmbeddableConversationProps) => (
+}: EmbeddableConversationDependencies): React.FC<
+  EmbeddableConversationProps & EmbeddableConversationFlyoutProps
+> => {
+  return (props: EmbeddableConversationProps & EmbeddableConversationFlyoutProps) => (
     <EmbeddableConversationInternal {...props} coreStart={coreStart} services={services} />
   );
 };

@@ -17,6 +17,15 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...functionalConfig.getAll(),
 
+    kbnTestServer: {
+      ...functionalConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...functionalConfig.get('kbnTestServer.serverArgs'),
+        '--data.search.sessions.enabled=true',
+        '--xpack.upgrade_assistant.ui.enabled=true',
+      ],
+    },
+
     testFiles: [require.resolve('.')],
 
     pageObjects,

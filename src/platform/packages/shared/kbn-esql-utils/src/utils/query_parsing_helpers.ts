@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import {
-  parse,
   Walker,
   walk,
   Parser,
@@ -33,15 +32,6 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { monaco } from '@kbn/monaco';
 
 const DEFAULT_ESQL_LIMIT = 1000;
-
-// retrieves the index pattern from the aggregate query for ES|QL using ast parsing
-export function getIndexPatternFromESQLQuery(esql?: string) {
-  const { ast } = parse(esql);
-  const sourceCommand = ast.find(({ name }) => ['from', 'ts'].includes(name));
-  const args = (sourceCommand?.args ?? []) as ESQLSource[];
-  const indices = args.filter((arg) => arg.sourceType === 'index');
-  return indices?.map((index) => index.name).join(',');
-}
 
 export function getRemoteClustersFromESQLQuery(esql?: string): string[] | undefined {
   if (!esql) return undefined;
@@ -143,14 +133,14 @@ export function hasTransformationalCommand(esql?: string) {
 }
 
 export function getLimitFromESQLQuery(esql: string): number {
-  const { ast } = parse(esql);
-  const limitCommands = ast.filter(({ name }) => name === 'limit');
+  const { root } = Parser.parse(esql || '');
+  const limitCommands = root.commands.filter(({ name }) => name === 'limit');
   if (!limitCommands || !limitCommands.length) {
     return DEFAULT_ESQL_LIMIT;
   }
   const limits: number[] = [];
 
-  walk(ast, {
+  walk(root.commands, {
     visitLiteral: (node) => {
       if (!isNaN(Number(node.value))) {
         limits.push(Number(node.value));
@@ -205,14 +195,14 @@ export function convertTimeseriesCommandToFrom(esql?: string): string {
  * @returns string
  */
 export const getTimeFieldFromESQLQuery = (esql: string) => {
-  const { ast } = parse(esql);
+  const { root } = Parser.parse(esql);
   const functions: ESQLFunction[] = [];
 
-  walk(ast, {
+  walk(root.commands, {
     visitFunction: (node) => functions.push(node),
   });
 
-  const params = Walker.params(ast);
+  const params = Walker.params(root);
   const timeNamedParam = params.find(
     (param) => param.value === '_tstart' || param.value === '_tend'
   );
@@ -253,10 +243,10 @@ export const getTimeFieldFromESQLQuery = (esql: string) => {
 };
 
 export const getKqlSearchQueries = (esql: string) => {
-  const { ast } = parse(esql);
+  const { root } = Parser.parse(esql);
   const functions: ESQLFunction[] = [];
 
-  walk(ast, {
+  walk(root.commands, {
     visitFunction: (node) => functions.push(node),
   });
 
@@ -272,23 +262,16 @@ export const getKqlSearchQueries = (esql: string) => {
     .filter((query) => query !== '');
 };
 
-export const isQueryWrappedByPipes = (query: string): boolean => {
-  const { ast } = parse(query);
-  const numberOfCommands = ast.length;
-  const pipesWithNewLine = query.split('\n  |');
-  return numberOfCommands === pipesWithNewLine?.length;
-};
-
 export const prettifyQuery = (src: string): string => {
   const { root } = Parser.parse(src, { withFormatting: true });
   return WrappingPrettyPrinter.print(root, { multiline: true });
 };
 
 export const retrieveMetadataColumns = (esql: string): string[] => {
-  const { ast } = parse(esql);
+  const { root } = Parser.parse(esql);
   const options: ESQLCommandOption[] = [];
 
-  walk(ast, {
+  walk(root, {
     visitCommandOption: (node) => options.push(node),
   });
   const metadataOptions = options.find(({ name }) => name === 'metadata');
@@ -296,7 +279,7 @@ export const retrieveMetadataColumns = (esql: string): string[] => {
 };
 
 export const getQueryColumnsFromESQLQuery = (esql: string): string[] => {
-  const { root } = parse(esql);
+  const { root } = Parser.parse(esql);
   const columns: ESQLColumn[] = [];
 
   walk(root, {
@@ -307,7 +290,7 @@ export const getQueryColumnsFromESQLQuery = (esql: string): string[] => {
 };
 
 export const getESQLQueryVariables = (esql: string): string[] => {
-  const { root } = parse(esql);
+  const { root } = Parser.parse(esql);
   const usedVariablesInQuery = Walker.params(root);
   return usedVariablesInQuery.map((v) => v.text.replace(/^\?+/, ''));
 };
@@ -426,7 +409,7 @@ export const getValuesFromQueryField = (queryString: string, cursorPosition?: mo
   }
 
   const validQuery = `${queryInCursorPosition} ""`;
-  const { root } = parse(validQuery);
+  const { root } = Parser.parse(validQuery);
   const lastCommand = root.commands[root.commands.length - 1];
   const columns: ESQLColumn[] = [];
 
@@ -475,7 +458,7 @@ export const fixESQLQueryWithVariables = (
 };
 
 export const getCategorizeColumns = (esql: string): string[] => {
-  const { root } = parse(esql);
+  const { root } = Parser.parse(esql);
   const statsCommand = root.commands.find(({ name }) => name === 'stats');
   if (!statsCommand) {
     return [];
@@ -558,7 +541,7 @@ export const getArgsFromRenameFunction = (
  * @param esql: string - The ESQL query string
  */
 export const getCategorizeField = (esql: string): string[] => {
-  const { root } = parse(esql);
+  const { root } = Parser.parse(esql);
   const columns: string[] = [];
   const functions = Walker.matchAll(root.commands, {
     type: 'function',

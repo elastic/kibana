@@ -14,7 +14,9 @@ import {
 import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
 import { visualizationElement } from '@kbn/onechat-common/tools/tool_result';
 import { ChartType } from '@kbn/visualization-utils';
-import { customInstructionsBlock, formatDate } from '../utils/prompt_helpers';
+import { customInstructionsBlock, formatDate } from './prompts/prompt_helpers';
+import type { ResearchAgentAction, AnswerAgentAction } from './actions';
+import { formatResearcherActionHistory, formatAnswerActionHistory } from './prompts/format_actions';
 
 const tools = {
   indexExplorer: sanitizeToolId(platformCoreTools.indexExplorer),
@@ -25,11 +27,13 @@ const tools = {
 export const getActPrompt = ({
   customInstructions,
   capabilities,
-  messages,
+  initialMessages,
+  actions,
 }: {
   customInstructions?: string;
   capabilities: ResolvedAgentCapabilities;
-  messages: BaseMessageLike[];
+  initialMessages: BaseMessageLike[];
+  actions: ResearchAgentAction[];
 }): BaseMessageLike[] => {
   return [
     [
@@ -130,35 +134,25 @@ ${customInstructionsBlock(customInstructions)}
 - [ ] If I'm calling a tool, Did I use the \`_reasoning\` parameter to clearly explain why I'm taking this next step?
 - [ ] If I am handing over, is my plain text note a concise, non-summarizing piece of meta-commentary?`,
     ],
-    ...messages,
+    ...initialMessages,
+    ...formatResearcherActionHistory({ actions }),
   ];
 };
 
 export const getAnswerPrompt = ({
   customInstructions,
-  discussion,
-  handoverNote,
-  searchInterrupted = false,
+  initialMessages,
+  actions,
+  answerActions,
   capabilities,
 }: {
   customInstructions?: string;
-  discussion: BaseMessageLike[];
-  handoverNote?: string;
-  searchInterrupted?: boolean;
+  initialMessages: BaseMessageLike[];
+  actions: ResearchAgentAction[];
+  answerActions: AnswerAgentAction[];
   capabilities: ResolvedAgentCapabilities;
 }): BaseMessageLike[] => {
   const visEnabled = capabilities.visualizations;
-
-  let searchInterruptedMessages: BaseMessageLike[] = [];
-  if (searchInterrupted) {
-    searchInterruptedMessages = [
-      [
-        'ai',
-        'The research process was interrupted because it exceeded the maximum allowed steps. I cannot perform any more actions. Handing over for a final answer based on the information gathered so far',
-      ],
-      ['user', 'Ack. Proceed to answer as best as you can with the collected information'],
-    ];
-  }
 
   return [
     [
@@ -167,24 +161,12 @@ export const getAnswerPrompt = ({
 
 Your role is to be the **final answering agent** in a multi-agent flow. Your **ONLY** capability is to generate a natural language response to the user.
 
-## IMPORTANT CONTEXT FROM THE PREVIOUS STEP
-The previous agent has completed its research and provided the following handover note:
----
-${
-  handoverNote ??
-  (searchInterrupted
-    ? 'Research was interrupted, please answer to the user as best as you can with the collected information'
-    : 'No handover note was provided.')
-}
----
-Use the context above to inform your final answer.
-
 ## INSTRUCTIONS
 - Carefully read the original discussion and the gathered information.
 - Synthesize an accurate response that directly answers the user's question.
 - Do not hedge. If the information is complete, provide a confident and final answer.
 - If there are still uncertainties or unresolved issues, acknowledge them clearly and state what is known and what is not.
-- You do not have access to any tools. You MUST NOT, under any circumstances, attempt to call or generate syntax for any tool
+- You do not have access to any tools. You MUST NOT, under any circumstances, attempt to call or generate syntax for any tool.
 
 ## GUIDELINES
 - Do not mention the research process or that you are an AI or assistant.
@@ -216,8 +198,9 @@ ${visEnabled ? renderVisualizationPrompt() : 'No custom renderers available'}
 - [ ] I answered every part of the user's request (identified sub-questions/requirements). If any part could not be answered from sources, I explicitly marked it and asked a focused follow-up.
 - [ ] No internal tool process or names revealed (unless user asked).`,
     ],
-    ...discussion,
-    ...searchInterruptedMessages,
+    ...initialMessages,
+    ...formatResearcherActionHistory({ actions }),
+    ...formatAnswerActionHistory({ actions: answerActions }),
   ];
 };
 
