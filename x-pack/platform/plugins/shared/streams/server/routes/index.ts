@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { internalEsqlRoutes } from './internal/esql/route';
 import { dashboardRoutes } from './dashboards/route';
 import { crudRoutes } from './streams/crud/route';
 import { enablementRoutes } from './streams/enablement/route';
@@ -30,7 +29,6 @@ import { connectorRoutes } from './internal/connectors/route';
 
 export const streamsRouteRepository = {
   // internal APIs
-  ...internalEsqlRoutes,
   ...internalDashboardRoutes,
   ...internalCrudRoutes,
   ...internalManagementRoutes,

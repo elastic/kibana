@@ -20,7 +20,6 @@ import { Streams, getAncestors, getParentId } from '@kbn/streams-schema';
 import type { LockManagerService } from '@kbn/lock-manager';
 import type { Condition } from '@kbn/streamlang';
 import type { AssetClient } from './assets/asset_client';
-import { ASSET_ID, ASSET_TYPE } from './assets/fields';
 import type { QueryClient } from './assets/query/query_client';
 import {
   DefinitionNotFoundError,
@@ -34,6 +33,7 @@ import { State } from './state_management/state';
 import { checkAccess, checkAccessBulk } from './stream_crud';
 import { StreamsStatusConflictError } from './errors/streams_status_conflict_error';
 import type { FeatureClient } from './feature/feature_client';
+import type { AttachmentClient } from './attachments/attachment_client';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -68,6 +68,7 @@ export class StreamsClient {
       lockManager: LockManagerService;
       scopedClusterClient: IScopedClusterClient;
       assetClient: AssetClient;
+      attachmentClient: AttachmentClient;
       queryClient: QueryClient;
       storageClient: StreamsStorageClient;
       featureClient: FeatureClient;
@@ -214,8 +215,8 @@ export class StreamsClient {
         }
       );
 
-      const { assetClient, storageClient } = this.dependencies;
-      await Promise.all([assetClient.clean(), storageClient.clean()]);
+      const { assetClient, attachmentClient, storageClient } = this.dependencies;
+      await Promise.all([assetClient.clean(), attachmentClient.clean(), storageClient.clean()]);
     }
 
     if (elasticsearchStreamsEnabled) {
@@ -818,19 +819,19 @@ export class StreamsClient {
     const { dashboards, queries, rules } = request;
 
     await Promise.all([
-      this.dependencies.assetClient.syncAssetList(
+      this.dependencies.attachmentClient.syncAttachmentList(
         name,
         dashboards.map((dashboard) => ({
-          [ASSET_ID]: dashboard,
-          [ASSET_TYPE]: 'dashboard' as const,
+          id: dashboard,
+          type: 'dashboard' as const,
         })),
         'dashboard'
       ),
-      this.dependencies.assetClient.syncAssetList(
+      this.dependencies.attachmentClient.syncAttachmentList(
         name,
         rules.map((rule) => ({
-          [ASSET_ID]: rule,
-          [ASSET_TYPE]: 'rule' as const,
+          id: rule,
+          type: 'rule' as const,
         })),
         'rule'
       ),

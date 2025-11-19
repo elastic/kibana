@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
+import { ControlTriggerSource, ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { withAutoSuggest } from './autocomplete/helpers';
 import type { ISuggestionItem } from '../../commands_registry/types';
@@ -152,6 +152,7 @@ export function getCompatibleLiterals(
       timeLiteralSuggestions.push(
         ...getControlSuggestion(
           ESQLVariableType.TIME_LITERAL,
+          ControlTriggerSource.SMART_SUGGESTION,
           userDefinedColumns.map((v) => `?${v.key}`)
         )
       );
