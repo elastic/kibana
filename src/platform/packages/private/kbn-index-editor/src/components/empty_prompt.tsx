@@ -146,7 +146,7 @@ export const EmptyPrompt: FC = () => {
               }
               confirmButtonText={
                 <FormattedMessage
-                  id="indexEditor.mappingsWarningModal.continue"
+                  id="indexEditor.emptyPrompt.resetIndex"
                   defaultMessage="Reset index"
                 />
               }
