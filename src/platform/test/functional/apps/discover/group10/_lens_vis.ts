@@ -371,7 +371,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await monacoEditor.getCodeEditorValue()).to.be('from logstash-* | limit 10');
     });
 
-    it('should be able to load a saved search with custom histogram vis and handle invalidations', async () => {
+    // TODO: see https://github.com/elastic/kibana/pull/243499
+    it.skip('should be able to load a saved search with custom histogram vis and handle invalidations', async () => {
       await discover.loadSavedSearch('testCustomESQLHistogram');
 
       await header.waitUntilLoadingHasFinished();

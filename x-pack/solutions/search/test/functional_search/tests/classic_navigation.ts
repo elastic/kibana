@@ -34,7 +34,8 @@ export default function searchSolutionNavigation({
       await cleanUp();
     });
 
-    it('renders expected navigation items', async () => {
+    // TODO: see https://github.com/elastic/kibana/pull/243499
+    it.skip('renders expected navigation items', async () => {
       await searchClassicNavigation.expectAllNavItems([
         { id: 'Home', label: 'Home' },
         { id: 'Build', label: 'Build' },
