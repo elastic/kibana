@@ -11,24 +11,48 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
+import type { TopNavMenuPropsBeta } from '../top_nav_menu_beta/top_nav_menu_beta';
+import { TopNavMenuBeta } from '../top_nav_menu_beta/top_nav_menu_beta';
 import type { TopNavMenuProps } from './top_nav_menu';
 import { TopNavMenu } from './top_nav_menu';
-import type { RegisteredTopNavMenuData } from './top_nav_menu_data';
+import type { RegisteredTopNavMenuData, RegisteredTopNavMenuDataBeta } from './top_nav_menu_data';
 
 export function createTopNav(
   unifiedSearch: UnifiedSearchPublicPluginStart,
-  extraConfig: RegisteredTopNavMenuData[]
+  extraConfig: RegisteredTopNavMenuData[] | RegisteredTopNavMenuDataBeta[],
+  isBeta?: boolean
 ) {
-  return <QT extends AggregateQuery | Query = Query>(props: TopNavMenuProps<QT>) => {
+  return <QT extends AggregateQuery | Query = Query>(
+    props: TopNavMenuProps<QT> | TopNavMenuPropsBeta<QT>
+  ) => {
     const relevantConfig = extraConfig.filter(
       (dataItem) => dataItem.appName === undefined || dataItem.appName === props.appName
     );
-    const config = (props.config || []).concat(relevantConfig);
 
-    return (
-      <I18nProvider>
-        <TopNavMenu {...props} unifiedSearch={unifiedSearch} config={config} />
-      </I18nProvider>
+    const TopNavMenuComponent = isBeta ? (
+      <TopNavMenuBeta
+        {...(props as TopNavMenuPropsBeta<QT>)}
+        unifiedSearch={unifiedSearch}
+        config={
+          props.config
+            ? {
+                items: [
+                  ...(props.config as TopNavMenuPropsBeta<QT>['config'])!.items,
+                  ...relevantConfig,
+                ],
+                actionItem: (props.config as TopNavMenuPropsBeta<QT>['config'])!.actionItem,
+              }
+            : { items: relevantConfig }
+        }
+      />
+    ) : (
+      <TopNavMenu
+        {...(props as TopNavMenuProps<QT>)}
+        unifiedSearch={unifiedSearch}
+        config={((props.config as TopNavMenuProps<QT>['config']) || []).concat(relevantConfig)}
+      />
     );
+
+    return <I18nProvider>{TopNavMenuComponent}</I18nProvider>;
   };
 }

@@ -44,6 +44,7 @@ const createStartContract = (): jest.Mocked<Start> => {
     ui: {
       TopNavMenu: jest.fn().mockImplementation(createTopNav(unifiedSearchMock, [])),
       AggregateQueryTopNavMenu: jest.fn().mockImplementation(createTopNav(unifiedSearchMock, [])),
+      TopNavMenuBeta: jest.fn().mockImplementation(createTopNav(unifiedSearchMock, [], true)),
       createTopNavWithCustomContext: jest
         .fn()
         .mockImplementation(createTopNav(unifiedSearchMock, [])),

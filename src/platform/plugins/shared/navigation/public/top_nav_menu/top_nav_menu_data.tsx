@@ -42,3 +42,47 @@ export interface TopNavMenuData {
 export interface RegisteredTopNavMenuData extends TopNavMenuData {
   appName?: string;
 }
+
+export type TopNavMenuSplitButtonProps = Pick<
+  SplitButtonProps,
+  | 'isMainButtonLoading'
+  | 'isMainButtonDisabled'
+  | 'isSecondaryButtonLoading'
+  | 'isSecondaryButtonDisabled'
+  | 'secondaryButtonAriaLabel'
+  | 'secondaryButtonTitle'
+  | 'iconType'
+  | 'iconOnly'
+> & {
+  run: TopNavMenuAction;
+};
+
+export interface TopNavMenuItemCommonBeta {
+  id?: string;
+  htmlId?: string;
+  label: string;
+  run: TopNavMenuAction;
+  testId?: string;
+  disableButton?: boolean | (() => boolean);
+  isLoading?: boolean;
+  target?: string;
+  href?: string;
+}
+
+export interface TopNavMenuItemBeta extends TopNavMenuItemCommonBeta {
+  isExternalLink?: boolean;
+}
+
+export interface TopNavMenuActionItemBeta extends TopNavMenuItemCommonBeta {
+  splitButtonProps?: TopNavMenuSplitButtonProps;
+  iconType?: IconType;
+}
+
+export interface TopNavMenuDataBeta {
+  items: TopNavMenuItemBeta[];
+  actionItem?: TopNavMenuActionItemBeta;
+}
+
+export interface RegisteredTopNavMenuDataBeta extends TopNavMenuItemBeta {
+  appName?: string;
+}

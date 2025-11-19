@@ -143,6 +143,7 @@ export class NavigationPublicPlugin
       ui: {
         TopNavMenu: createTopNav(unifiedSearch, extensions),
         AggregateQueryTopNavMenu: createTopNav(unifiedSearch, extensions),
+        TopNavMenuBeta: createTopNav(unifiedSearch, extensions, true),
         createTopNavWithCustomContext: createCustomTopNav,
       },
       addSolutionNavigation: (solutionNavigation) => {
