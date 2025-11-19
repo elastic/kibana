@@ -41,7 +41,12 @@ import type { RunToolReturn } from '@kbn/onechat-server';
 import { createErrorResult } from '@kbn/onechat-server';
 import type { StateType } from './state';
 import { steps, tags, BROWSER_TOOL_PREFIX } from './constants';
-import { isToolCallAction, isAnswerAction, isExecuteToolAction } from './actions';
+import {
+  isToolCallAction,
+  isAnswerAction,
+  isStructuredAnswerAction,
+  isExecuteToolAction,
+} from './actions';
 import type { ToolCallResult } from './actions';
 
 export type ConvertedEvents =
@@ -152,7 +157,12 @@ export const convertGraphEvents = ({
           const answerActions = (event.data.output as StateType).answerActions;
           const lastAction = answerActions[answerActions.length - 1];
 
-          if (isAnswerAction(lastAction)) {
+          if (isStructuredAnswerAction(lastAction)) {
+            const messageEvent = createMessageEvent(lastAction.data, {
+              messageId,
+            });
+            events.push(messageEvent);
+          } else if (isAnswerAction(lastAction)) {
             const messageEvent = createMessageEvent(lastAction.message, {
               messageId,
             });

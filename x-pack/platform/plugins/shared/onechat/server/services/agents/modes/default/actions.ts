@@ -14,6 +14,7 @@ export enum AgentActionType {
   ExecuteTool = 'execute_tool',
   HandOver = 'hand_over',
   Answer = 'answer',
+  StructuredAnswer = 'structured_answer',
 }
 
 export interface ToolCallResult {
@@ -61,7 +62,12 @@ export interface AnswerAction {
   message: string;
 }
 
-export type AnswerAgentAction = AnswerAction | AgentErrorAction;
+export interface StructuredAnswerAction {
+  type: AgentActionType.StructuredAnswer;
+  data: unknown;
+}
+
+export type AnswerAgentAction = AnswerAction | StructuredAnswerAction | AgentErrorAction;
 
 // all possible actions for the agent flow
 
@@ -87,6 +93,10 @@ export function isHandoverAction(action: AgentAction): action is HandoverAction 
 
 export function isAnswerAction(action: AgentAction): action is AnswerAction {
   return action.type === AgentActionType.Answer;
+}
+
+export function isStructuredAnswerAction(action: AgentAction): action is StructuredAnswerAction {
+  return action.type === AgentActionType.StructuredAnswer;
 }
 
 // creation helpers
@@ -125,5 +135,12 @@ export function answerAction(message: string): AnswerAction {
   return {
     type: AgentActionType.Answer,
     message,
+  };
+}
+
+export function structuredAnswerAction(data: unknown): StructuredAnswerAction {
+  return {
+    type: AgentActionType.StructuredAnswer,
+    data,
   };
 }

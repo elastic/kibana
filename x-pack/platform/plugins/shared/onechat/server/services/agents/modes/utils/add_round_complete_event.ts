@@ -143,6 +143,17 @@ const createRoundFromEvents = ({
     throw new Error(`Unknown event type: ${(event as any).type}`);
   };
 
+  const lastMessage = messages[messages.length - 1];
+
+  if (!lastMessage) {
+    throw new Error('No message complete event found in round events');
+  }
+
+  const responseMessage =
+    typeof lastMessage.message_content === 'object' && lastMessage.message_content !== null
+      ? { message: '', structured_response: lastMessage.message_content }
+      : { message: lastMessage.message_content };
+
   const round: ConversationRound = {
     id: uuidv4(),
     input,
@@ -152,7 +163,7 @@ const createRoundFromEvents = ({
     time_to_first_token: timeToFirstToken,
     time_to_last_token: timeToLastToken,
     model_usage: getModelUsage(modelProvider.getUsageStats()),
-    response: { message: messages[messages.length - 1].message_content },
+    response: responseMessage,
   };
 
   return round;

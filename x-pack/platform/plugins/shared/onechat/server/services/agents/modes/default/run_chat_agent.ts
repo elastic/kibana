@@ -50,6 +50,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     agentId,
     abortSignal,
     browserApiTools,
+    structuredOutput = false,
+    outputSchema,
     startTime = new Date(),
   },
   { logger, request, modelProvider, toolProvider, attachments, events }
@@ -112,6 +114,8 @@ export const runDefaultAgentMode: RunChatAgentFn = async (
     tools: allTools,
     configuration: resolvedConfiguration,
     capabilities: resolvedCapabilities,
+    structuredOutput,
+    outputSchema,
   });
 
   logger.debug(`Running chat agent with graph: ${chatAgentGraphName}, runId: ${runId}`);

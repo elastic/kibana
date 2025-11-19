@@ -16,6 +16,7 @@ import {
   listIndicesTool,
   indexExplorerTool,
   createVisualizationTool,
+  taskTool,
 } from './definitions';
 import type {
   OnechatSetupDependencies,
@@ -42,6 +43,7 @@ export const registerBuiltinTools = ({
     listIndicesTool(),
     indexExplorerTool(),
     createVisualizationTool(),
+    taskTool(),
   ];
 
   tools.forEach((tool) => {
