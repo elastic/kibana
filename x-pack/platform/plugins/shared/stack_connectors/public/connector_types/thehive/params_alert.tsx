@@ -17,7 +17,7 @@ import { EuiFormRow, EuiSelect, EuiComboBox, EuiSwitch } from '@elastic/eui';
 import type {
   ExecutorParams,
   ExecutorSubActionCreateAlertParams,
-} from '../../../common/thehive/types';
+} from '@kbn/connector-schemas/thehive';
 import { severityOptions, tlpOptions } from './constants';
 import * as translations from './translations';
 

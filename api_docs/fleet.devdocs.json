@@ -2629,6 +2629,14 @@
                 "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/sample_data/test_policy.ts"
               },
               {
+                "plugin": "cloudDefend",
+                "path": "x-pack/solutions/security/plugins/cloud_defend/public/test/mocks.ts"
+              },
+              {
+                "plugin": "cloudDefend",
+                "path": "x-pack/solutions/security/plugins/cloud_defend/public/test/mocks.ts"
+              },
+              {
                 "plugin": "@kbn/test-suites-xpack-security",
                 "path": "x-pack/solutions/security/test/fleet_api_integration/apis/package_policy/update.ts"
               },
@@ -27047,6 +27055,14 @@
                 "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/sample_data/test_policy.ts"
               },
               {
+                "plugin": "cloudDefend",
+                "path": "x-pack/solutions/security/plugins/cloud_defend/public/test/mocks.ts"
+              },
+              {
+                "plugin": "cloudDefend",
+                "path": "x-pack/solutions/security/plugins/cloud_defend/public/test/mocks.ts"
+              },
+              {
                 "plugin": "@kbn/test-suites-xpack-security",
                 "path": "x-pack/solutions/security/test/fleet_api_integration/apis/package_policy/update.ts"
               },
@@ -30485,6 +30501,21 @@
         "description": [],
         "signature": [
           "\"apm\""
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/common/constants/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.FLEET_CLOUD_DEFEND_PACKAGE",
+        "type": "string",
+        "tags": [],
+        "label": "FLEET_CLOUD_DEFEND_PACKAGE",
+        "description": [],
+        "signature": [
+          "\"cloud_defend\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/epm.ts",
         "deprecated": false,
