@@ -11,8 +11,13 @@ import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
-import type { AsCodeFilter } from '@kbn/es-query-server';
-import { fromStoredFilter, toStoredFilter } from '@kbn/es-query';
+import {
+  COMPARE_ALL_OPTIONS,
+  compareFilters,
+  fromStoredFilter,
+  isFilterPinned,
+  toStoredFilter,
+} from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import { diffComparators } from '@kbn/presentation-publishing';
@@ -35,6 +40,7 @@ import {
   switchMap,
   tap,
 } from 'rxjs';
+import type { AsCodeFilter } from '@kbn/es-query-server';
 import { dataService } from '../services/kibana_services';
 import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
 import type { DashboardCreationOptions } from './types';
@@ -95,14 +101,18 @@ export function initializeUnifiedSearchManager(
       timefilterService.setTime(timeRangeOrDefault);
     }
   }
+
+  const asCodeFilters$ = new BehaviorSubject<AsCodeFilter[] | undefined>(initialState.filters);
   const timeslice$ = new BehaviorSubject<[number, number] | undefined>(undefined);
-  const unifiedSearchFilters$ = new BehaviorSubject<AsCodeFilter[] | undefined>(
-    initialState.filters
+  const unifiedSearchFilters$ = new BehaviorSubject<Filter[] | undefined>(
+    initialState.filters?.map(toStoredFilter)
   );
+
   // setAndSyncUnifiedSearchFilters method not needed since filters synced with 2-way data binding
-  function setUnifiedSearchFilters(unifiedSearchFilters: AsCodeFilter[] | undefined) {
+  function setUnifiedSearchFilters(unifiedSearchFilters: Filter[] | undefined) {
     if (!fastIsEqual(unifiedSearchFilters, unifiedSearchFilters$.value)) {
       unifiedSearchFilters$.next(unifiedSearchFilters);
+      asCodeFilters$.next(unifiedSearchFilters?.map(fromStoredFilter));
     }
   }
 
@@ -132,10 +142,7 @@ export function initializeUnifiedSearchManager(
   controlGroupSubscriptions.add(
     combineLatest([unifiedSearchFilters$, controlGroupFilters$]).subscribe(
       ([unifiedSearchFilters, controlGroupFilters]) => {
-        filters$.next([
-          ...((unifiedSearchFilters ?? []).map(toStoredFilter) as Filter[]),
-          ...(controlGroupFilters ?? []),
-        ]);
+        filters$.next([...(unifiedSearchFilters ?? []), ...(controlGroupFilters ?? [])]);
       }
     )
   );
@@ -156,7 +163,7 @@ export function initializeUnifiedSearchManager(
     creationOptions?.unifiedSearchSettings?.kbnUrlStateStorage
   ) {
     // apply filters and query to the query service
-    filterManager.setAppFilters(cloneDeep((unifiedSearchFilters$.value ?? []).map(toStoredFilter)));
+    filterManager.setAppFilters(cloneDeep(unifiedSearchFilters$.value ?? []));
     queryString.setQuery(query$.value ?? queryString.getDefaultQuery());
 
     /**
@@ -193,11 +200,11 @@ export function initializeUnifiedSearchManager(
       dataService.query,
       {
         get: () => ({
-          filters: (unifiedSearchFilters$.value ?? []).map(toStoredFilter),
+          filters: unifiedSearchFilters$.value ?? [],
           query: query$.value ?? dataService.query.queryString.getDefaultQuery(),
         }),
         set: ({ filters: newFilters, query: newQuery }) => {
-          setUnifiedSearchFilters(cleanFiltersForSerialize(newFilters)?.map(fromStoredFilter));
+          setUnifiedSearchFilters(cleanFiltersForSerialize(newFilters));
           setQuery(newQuery);
         },
         state$: combineLatest([query$, unifiedSearchFilters$]).pipe(
@@ -205,7 +212,7 @@ export function initializeUnifiedSearchManager(
           map(([query, unifiedSearchFilters]) => {
             return {
               query: query ?? dataService.query.queryString.getDefaultQuery(),
-              filters: (unifiedSearchFilters ?? []).map(toStoredFilter),
+              filters: unifiedSearchFilters ?? [],
             };
           }),
           distinctUntilChanged()
@@ -271,7 +278,12 @@ export function initializeUnifiedSearchManager(
   }
 
   const comparators = {
-    filters: 'deepEquality',
+    filters: (a, b) =>
+      compareFilters(
+        (a ?? []).map(toStoredFilter).filter((f) => !isFilterPinned(f)),
+        (b ?? []).map(toStoredFilter).filter((f) => !isFilterPinned(f)),
+        COMPARE_ALL_OPTIONS
+      ),
     query: 'deepEquality',
     refreshInterval: (a: RefreshInterval | undefined, b: RefreshInterval | undefined) =>
       timeRestore$.value ? fastIsEqual(a, b) : true,
@@ -291,7 +303,7 @@ export function initializeUnifiedSearchManager(
     'filters' | 'query' | 'refreshInterval' | 'timeRange'
   > => {
     // pinned filters are not serialized when saving the dashboard
-    const serializableFilters = unifiedSearchFilters$.value?.filter((f) => f.pinned !== true);
+    const serializableFilters = asCodeFilters$.value?.filter((f) => f.pinned !== true);
 
     const timeRange =
       timeRestore$.value && timeRange$.value
@@ -337,7 +349,7 @@ export function initializeUnifiedSearchManager(
     internalApi: {
       startComparing$: (lastSavedState$: BehaviorSubject<DashboardState>) => {
         return combineLatest([
-          unifiedSearchFilters$,
+          asCodeFilters$,
           query$,
           refreshInterval$,
           timeRange$,
@@ -358,8 +370,8 @@ export function initializeUnifiedSearchManager(
       },
       reset: (lastSavedState: DashboardState) => {
         setUnifiedSearchFilters([
-          ...(unifiedSearchFilters$.value ?? []).filter((f) => f.pinned),
-          ...(lastSavedState.filters ?? []),
+          ...(unifiedSearchFilters$.value ?? []).filter(isFilterPinned),
+          ...(lastSavedState.filters ?? []).map(toStoredFilter),
         ]);
         if (lastSavedState.query) {
           setQuery(lastSavedState.query);
