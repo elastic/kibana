@@ -4887,6 +4887,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/cloud-defend-plugin@link:x-pack/solutions/security/plugins/cloud_defend":
+  version "0.0.0"
+  uid ""
+
 "@kbn/cloud-experiments-plugin@link:x-pack/platform/plugins/private/cloud_integrations/cloud_experiments":
   version "0.0.0"
   uid ""
@@ -6279,6 +6283,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/detections-response-ftr-services@link:x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dev-cli-errors@link:src/platform/packages/shared/kbn-dev-cli-errors":
   version "0.0.0"
   uid ""
@@ -6740,6 +6748,10 @@
   uid ""
 
 "@kbn/find-used-node-modules@link:packages/kbn-find-used-node-modules":
+  version "0.0.0"
+  uid ""
+
+"@kbn/fleet-plugin-cypress@link:x-pack/platform/plugins/shared/fleet/cypress":
   version "0.0.0"
   uid ""
 
@@ -7491,6 +7503,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/moon@link:packages/kbn-moon":
+  version "0.0.0"
+  uid ""
+
 "@kbn/navigation-plugin@link:src/platform/plugins/shared/navigation":
   version "0.0.0"
   uid ""
@@ -7664,6 +7680,10 @@
   uid ""
 
 "@kbn/osquery-io-ts-types@link:src/platform/packages/shared/kbn-osquery-io-ts-types":
+  version "0.0.0"
+  uid ""
+
+"@kbn/osquery-plugin-cypress@link:x-pack/platform/plugins/shared/osquery/cypress":
   version "0.0.0"
   uid ""
 
@@ -8507,6 +8527,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/setup-node-env@link:src/setup_node_env":
+  version "0.0.0"
+  uid ""
+
 "@kbn/share-examples-plugin@link:examples/share_examples":
   version "0.0.0"
   uid ""
@@ -8923,6 +8947,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/test-suites-security-solution-apis@link:x-pack/solutions/security/test/security_solution_api_integration":
+  version "0.0.0"
+  uid ""
+
 "@kbn/test-suites-src@link:src/platform/test":
   version "0.0.0"
   uid ""
@@ -8940,6 +8968,10 @@
   uid ""
 
 "@kbn/test-suites-xpack-search@link:x-pack/solutions/search/test":
+  version "0.0.0"
+  uid ""
+
+"@kbn/test-suites-xpack-security-endpoint@link:x-pack/solutions/security/test/security_solution_endpoint":
   version "0.0.0"
   uid ""
 
@@ -15265,19 +15297,19 @@
   resolved "https://registry.yarnpkg.com/@xtuc/long/-/long-4.2.2.tgz#d291c6a4e97989b5c61d9acf396ae4fe133a718d"
   integrity sha512-NuHqBY1PB/D8xU6s/thBgOAiAP7HOYDQ32+BFZILJ8ivkUkAHQnWfn6WhL79Owj1qmUnoN/YPhktdIoucipkAQ==
 
-"@xyflow/react@^12.8.6":
-  version "12.8.6"
-  resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.8.6.tgz#4cb80abe1bf7123dd989f2c8554bff679980bd8b"
-  integrity sha512-SksAm2m4ySupjChphMmzvm55djtgMDPr+eovPDdTnyGvShf73cvydfoBfWDFllooIQ4IaiUL5yfxHRwU0c37EA==
+"@xyflow/react@^12.9.2":
+  version "12.9.2"
+  resolved "https://registry.yarnpkg.com/@xyflow/react/-/react-12.9.2.tgz#00570f4f96f9892f8b667de7ceb992a9a6e20462"
+  integrity sha512-Xr+LFcysHCCoc5KRHaw+FwbqbWYxp9tWtk1mshNcqy25OAPuaKzXSdqIMNOA82TIXF/gFKo0Wgpa6PU7wUUVqw==
   dependencies:
-    "@xyflow/system" "0.0.70"
+    "@xyflow/system" "0.0.72"
     classcat "^5.0.3"
     zustand "^4.4.0"
 
-"@xyflow/system@0.0.70":
-  version "0.0.70"
-  resolved "https://registry.yarnpkg.com/@xyflow/system/-/system-0.0.70.tgz#c397d2a802e250fe852717dd55b5be5d306d7c1c"
-  integrity sha512-PpC//u9zxdjj0tfTSmZrg3+sRbTz6kop/Amky44U2Dl51sxzDTIUfXMwETOYpmr2dqICWXBIJwXL2a9QWtX2XA==
+"@xyflow/system@0.0.72":
+  version "0.0.72"
+  resolved "https://registry.yarnpkg.com/@xyflow/system/-/system-0.0.72.tgz#862b4475ae2de1e2145c2039a2a6e86f8779f56e"
+  integrity sha512-WBI5Aau0fXTXwxHPzceLNS6QdXggSWnGjDtj/gG669crApN8+SCmEtkBth1m7r6pStNo/5fI9McEi7Dk0ymCLA==
   dependencies:
     "@types/d3-drag" "^3.0.7"
     "@types/d3-interpolate" "^3.0.4"
@@ -24378,7 +24410,7 @@ js-tiktoken@^1.0.12:
   resolved "https://registry.yarnpkg.com/js-tokens/-/js-tokens-4.0.0.tgz#19203fb59991df98e3a287050d4647cdeaf32499"
   integrity sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==
 
-js-yaml@4.1.0, js-yaml@^4.1.0:
+js-yaml@4.1.0:
   version "4.1.0"
   resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-4.1.0.tgz#c1fb65f8f5017901cdd2c951864ba18458a10602"
   integrity sha512-wpxZs9NoxZaJESJGIZTyDEaYpl0FKSA+FB9aJiyemKhMwkxQg63h4T1KJgUGHpTqPDNRcmmYLugrRjJlBtWvRA==
@@ -24392,6 +24424,13 @@ js-yaml@^3.13.1:
   dependencies:
     argparse "^1.0.7"
     esprima "^4.0.0"
+
+js-yaml@^4.1.0, js-yaml@^4.1.1:
+  version "4.1.1"
+  resolved "https://registry.yarnpkg.com/js-yaml/-/js-yaml-4.1.1.tgz#854c292467705b699476e1a2decc0c8a3458806b"
+  integrity sha512-qQKT4zQxXl8lLwBtHMWwaTcGfFOZviOJet3Oy/xmGk2gZH677CJM9EvtfdSkgWcATZhj/55JZ0rmy3myCT5lsA==
+  dependencies:
+    argparse "^2.0.1"
 
 jsbn@1.1.0:
   version "1.1.0"
