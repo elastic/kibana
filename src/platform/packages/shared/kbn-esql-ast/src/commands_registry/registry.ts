@@ -72,6 +72,7 @@ export interface ICommandMethods<TContext = any> {
 
 export interface ICommandMetadata {
   preview?: boolean; // Optional property to indicate if the command is in preview mode
+  subquerySupport?: boolean; // Optional property to indicate if the command supports subqueries (ONLY FROM). This is temporary and we will remove it when subqueries in FROM move to Technical Preview.
   description: string; // Optional property for a brief description of the command
   declaration: string; // The pattern for declaring this command statement. Displayed in the autocomplete.
   examples: string[]; // A list of examples of how to use the command. Displayed in the autocomplete.
@@ -79,6 +80,10 @@ export interface ICommandMetadata {
   types?: Array<{ name: string; description: string }>; // Optional property for command-specific types
   license?: LicenseType; // Optional property indicating the license for the command's availability
   observabilityTier?: string; // Optional property indicating the observability tier availability
+  subqueryRestrictions?: {
+    hideInside: boolean; // Command is hidden inside subqueries
+    hideOutside: boolean; // Command is hidden outside subqueries (at root level)
+  };
 }
 
 /**
@@ -178,14 +183,36 @@ export class CommandRegistry implements ICommandRegistry {
 
   /**
    * Retrieves all registered commands, including their methods and metadata.
+   * Filters commands based on subquery context and restrictions.
    * @returns An array of ICommand objects representing all registered commands.
    */
-  public getAllCommands(): ICommand[] {
-    return Array.from(this.commands.entries()).map(([name, { methods, metadata }]) => ({
+  public getAllCommands(options?: {
+    isCursorInSubquery?: boolean;
+    isStartingSubquery?: boolean;
+    queryContainsSubqueries?: boolean;
+  }): ICommand[] {
+    const allCommands = Array.from(this.commands.entries(), ([name, { methods, metadata }]) => ({
       name,
       methods,
       metadata,
     }));
+
+    const isCursorInSubquery = options?.isCursorInSubquery ?? false;
+    const isStartingSubquery = options?.isStartingSubquery ?? false;
+    const queryContainsSubqueries = options?.queryContainsSubqueries ?? false;
+
+    const filtered = isStartingSubquery
+      ? allCommands.filter(({ name }) => name === 'from')
+      : allCommands;
+
+    // Then apply subquery restrictions
+    return filtered.filter(({ metadata: { subqueryRestrictions: restrictions } }) => {
+      if (!restrictions || !queryContainsSubqueries) {
+        return true;
+      }
+
+      return isCursorInSubquery ? !restrictions.hideInside : !restrictions.hideOutside;
+    });
   }
 
   /**

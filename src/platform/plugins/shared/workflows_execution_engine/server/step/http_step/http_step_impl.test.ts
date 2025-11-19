@@ -280,6 +280,43 @@ describe('HttpStepImpl', () => {
         })
       );
     });
+
+    it('should support body for all HTTP methods', async () => {
+      const testBody = { data: 'test' };
+      const methods: Array<'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH'> = [
+        'GET',
+        'POST',
+        'PUT',
+        'DELETE',
+        'PATCH',
+      ];
+
+      for (const method of methods) {
+        (mockedAxios as any).mockResolvedValueOnce({
+          status: 200,
+          statusText: 'OK',
+          headers: {},
+          data: {},
+        });
+
+        const input = {
+          url: 'https://api.example.com/data',
+          method,
+          headers: { 'Content-Type': 'application/json' },
+          body: testBody,
+        };
+
+        await (httpStep as any)._run(input);
+
+        expect(mockedAxios).toHaveBeenCalledWith(
+          expect.objectContaining({
+            url: 'https://api.example.com/data',
+            method,
+            data: testBody,
+          })
+        );
+      }
+    });
   });
 
   describe('run', () => {

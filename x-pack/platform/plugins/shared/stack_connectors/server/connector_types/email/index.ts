@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod';
 import { curry } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/core/server';
@@ -17,10 +16,24 @@ import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,
 } from '@kbn/actions-plugin/server/types';
+import type {
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
+  ActionParamsType,
+} from '@kbn/connector-schemas/email';
+import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  serviceParamValueToKbnSettingMap as emailKbnSettings,
+  ConfigSchema,
+  SecretsSchema,
+  ParamsSchema,
+} from '@kbn/connector-schemas/email';
 import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { withoutMustacheTemplate } from '@kbn/actions-plugin/common';
 import {
@@ -33,8 +46,6 @@ import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/a
 import { AdditionalEmailServices } from '../../../common';
 import type { SendEmailOptions, Transport } from './send_email';
 import { sendEmail, JSON_TRANSPORT_SERVICE } from './send_email';
-import { portSchema } from '../lib/schemas';
-import { serviceParamValueToKbnSettingMap as emailKbnSettings } from '../../../common/email/constants';
 
 export type EmailConnectorType = ConnectorType<
   ConnectorTypeConfigType,
@@ -48,15 +59,6 @@ export type EmailConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
   ActionParamsType
 >;
 
-// config definition
-// due to https://github.com/colinhacks/zod/issues/2491
-type ConfigSchemaType = z.ZodSchema<
-  z.output<typeof ConfigSchema>,
-  z.ZodTypeDef,
-  z.input<typeof ConfigSchema>
->;
-export type ConnectorTypeConfigType = z.infer<ConfigSchemaType>;
-
 // these values for `service` require users to fill in host/port/secure
 export const CUSTOM_HOST_PORT_SERVICES: string[] = [AdditionalEmailServices.OTHER];
 
@@ -67,20 +69,6 @@ export const ELASTIC_CLOUD_SERVICE: SMTPConnection.Options = {
 };
 
 const EMAIL_FOOTER_DIVIDER = '\n\n---\n\n';
-
-const ConfigSchemaProps = {
-  service: z.string().default('other'),
-  host: z.string().nullable().default(null),
-  port: portSchema().nullable().default(null),
-  secure: z.boolean().nullable().default(null),
-  from: z.string(),
-  hasAuth: z.boolean().default(true),
-  tenantId: z.string().nullable().default(null),
-  clientId: z.string().nullable().default(null),
-  oauthTokenUrl: z.string().nullable().default(null),
-};
-
-const ConfigSchema = z.object(ConfigSchemaProps).strict();
 
 function validateConfig(
   configObject: ConnectorTypeConfigType,
@@ -176,57 +164,6 @@ function validateConfig(
   }
 }
 
-// secrets definition
-export type ConnectorTypeSecretsType = z.infer<typeof SecretsSchema>;
-
-const SecretsSchemaProps = {
-  user: z.string().nullable().default(null),
-  password: z.string().nullable().default(null),
-  clientSecret: z.string().nullable().default(null),
-};
-
-const SecretsSchema = z.object(SecretsSchemaProps).strict();
-
-// params definition
-export type ActionParamsType = z.infer<typeof ParamsSchema>;
-
-const AttachmentSchemaProps = {
-  content: z.string(),
-  contentType: z.string().optional(),
-  filename: z.string(),
-  encoding: z.string().optional(),
-};
-export const AttachmentSchema = z.object(AttachmentSchemaProps).strict();
-export type Attachment = z.infer<typeof AttachmentSchema>;
-
-const defaultFooterText = i18n.translate('xpack.stackConnectors.email.kibanaFooterLinkText', {
-  defaultMessage: 'Go to Elastic',
-});
-
-export const ParamsSchemaProps = {
-  to: z.array(z.string()).default([]),
-  cc: z.array(z.string()).default([]),
-  bcc: z.array(z.string()).default([]),
-  subject: z.string(),
-  message: z.string(),
-  messageHTML: z.string().nullable().default(null),
-  // kibanaFooterLink isn't inteded for users to set, this is here to be able to programatically
-  // provide a more contextual URL in the footer (ex: URL to the alert details page)
-  kibanaFooterLink: z
-    .object({
-      path: z.string().default('/'),
-      text: z.string().default(defaultFooterText),
-    })
-    .strict()
-    .default({
-      path: '/',
-      text: defaultFooterText,
-    }),
-  attachments: z.array(AttachmentSchema).optional(),
-};
-
-export const ParamsSchema = z.object(ParamsSchemaProps).strict();
-
 function validateParams(paramsObject: unknown, validatorServices: ValidatorServices) {
   const { configurationUtilities } = validatorServices;
 
@@ -273,19 +210,17 @@ function validateConnector(
 }
 
 // connector type definition
-export const ConnectorTypeId = '.email';
 export function getConnectorType(params: GetConnectorTypeParams): EmailConnectorType {
   const { publicBaseUrl } = params;
   return {
-    id: ConnectorTypeId,
+    id: CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
-    name: i18n.translate('xpack.stackConnectors.email.title', {
-      defaultMessage: 'Email',
-    }),
+    name: CONNECTOR_NAME,
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
       UptimeConnectorFeatureId,
       SecurityConnectorFeatureId,
+      WorkflowsConnectorFeatureId,
     ],
     validate: {
       config: {

@@ -49,7 +49,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('dashboard with stored timed', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/241757
+    describe.skip('dashboard with stored timed', function () {
       it('is saved with time', async function () {
         await dashboard.switchToEditMode();
         await timePicker.setDefaultAbsoluteRange();

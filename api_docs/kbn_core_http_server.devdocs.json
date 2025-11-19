@@ -4169,6 +4169,14 @@
                 "path": "src/platform/plugins/shared/esql/server/routes/lookup_index.ts"
               },
               {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_all_sources.ts"
+              },
+              {
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/server/routes/get_timefield.ts"
+              },
+              {
                 "plugin": "observability",
                 "path": "x-pack/solutions/observability/plugins/observability/server/lib/annotations/register_annotation_apis.ts"
               },
@@ -6142,7 +6150,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/routes/run_soon.ts"
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/run_soon/run_soon_route.ts"
               },
               {
                 "plugin": "alerting",
@@ -6743,6 +6751,10 @@
               {
                 "plugin": "onechat",
                 "path": "x-pack/platform/plugins/shared/onechat/server/routes/internal/tools.ts"
+              },
+              {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/server/routes/internal/conversations.ts"
               },
               {
                 "plugin": "sampleDataIngest",
@@ -7514,18 +7526,6 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/routes/run_soon.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/routes/run_soon.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/platform/plugins/shared/alerting/server/routes/run_soon.test.ts"
-              },
-              {
-                "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/update_flapping_settings.test.ts"
               },
               {
@@ -7915,6 +7915,22 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/mute_all/mute_all_rule.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/run_soon/run_soon_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/run_soon/run_soon_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/run_soon/run_soon_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/platform/plugins/shared/alerting/server/routes/rule/apis/run_soon/run_soon_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -14535,11 +14551,7 @@
               },
               {
                 "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/api/register_routes.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/api/register_routes.ts"
+                "path": "src/platform/plugins/shared/dashboard/server/api/read/register_read_route.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -15466,6 +15478,14 @@
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/detection_engine/prebuilt_rules/api/get_prebuilt_rule_base_version/get_prebuilt_rule_base_version_route.ts"
               },
               {
+                "plugin": "cloudDefend",
+                "path": "x-pack/solutions/security/plugins/cloud_defend/server/routes/policies/policies.ts"
+              },
+              {
+                "plugin": "cloudDefend",
+                "path": "x-pack/solutions/security/plugins/cloud_defend/server/routes/status/status.ts"
+              },
+              {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/compliance_dashboard/compliance_dashboard.ts"
               },
@@ -15670,6 +15690,14 @@
                 "path": "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/server/__mocks__/server.ts"
               },
               {
+                "plugin": "cloudDefend",
+                "path": "x-pack/solutions/security/plugins/cloud_defend/server/routes/policies/policies.test.ts"
+              },
+              {
+                "plugin": "cloudDefend",
+                "path": "x-pack/solutions/security/plugins/cloud_defend/server/routes/status/status.test.ts"
+              },
+              {
                 "plugin": "cloudSecurityPosture",
                 "path": "x-pack/solutions/security/plugins/cloud_security_posture/server/routes/benchmarks/benchmarks.test.ts"
               },
@@ -15798,7 +15826,7 @@
               },
               {
                 "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/api/register_routes.ts"
+                "path": "src/platform/plugins/shared/dashboard/server/api/update/register_update_route.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -16217,7 +16245,11 @@
               },
               {
                 "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/api/register_routes.ts"
+                "path": "src/platform/plugins/shared/dashboard/server/api/create/register_create_route.ts"
+              },
+              {
+                "plugin": "dashboard",
+                "path": "src/platform/plugins/shared/dashboard/server/api/search/register_search_route.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -16729,6 +16761,10 @@
               },
               {
                 "plugin": "osquery",
+                "path": "x-pack/platform/plugins/shared/osquery/server/routes/fleet_wrapper/get_bulk_agent_details.ts"
+              },
+              {
+                "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/server/routes/pack/create_pack_route.ts"
               },
               {
@@ -17149,6 +17185,10 @@
               },
               {
                 "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/rules/qradar/create.ts"
+              },
+              {
+                "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/siem_migrations/rules/api/update_index_pattern.ts"
               },
               {
@@ -17190,6 +17230,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/orphan_actions_space_handler.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/routes/actions/response_actions.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -17599,7 +17643,7 @@
               },
               {
                 "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/server/api/register_routes.ts"
+                "path": "src/platform/plugins/shared/dashboard/server/api/delete/register_delete_route.ts"
               },
               {
                 "plugin": "@kbn/core",
@@ -17764,6 +17808,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/delete.ts"
+              },
+              {
+                "plugin": "securitySolution",
+                "path": "x-pack/solutions/security/plugins/security_solution/server/lib/entity_analytics/entity_store/routes/delete.ts"
               },
               {
                 "plugin": "securitySolution",

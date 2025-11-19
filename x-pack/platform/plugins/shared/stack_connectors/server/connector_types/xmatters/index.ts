@@ -7,14 +7,29 @@
 
 import { isString } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
   ValidatorServices,
 } from '@kbn/actions-plugin/server/types';
-import { AlertingConnectorFeatureId, SecurityConnectorFeatureId } from '@kbn/actions-plugin/common';
+import {
+  AlertingConnectorFeatureId,
+  SecurityConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
+} from '@kbn/actions-plugin/common';
+import type {
+  ActionParamsType,
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
+} from '@kbn/connector-schemas/xmatters';
+import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  ConfigSchema,
+  ParamsSchema,
+  SecretsSchema,
+} from '@kbn/connector-schemas/xmatters';
 import { postXmatters } from './post_xmatters';
 
 export type XmattersConnectorType = ConnectorType<
@@ -29,46 +44,17 @@ export type XmattersConnectorTypeExecutorOptions = ConnectorTypeExecutorOptions<
   ActionParamsType
 >;
 
-const configSchemaProps = {
-  configUrl: z.string().nullable().default(null),
-  usesBasic: z.boolean().default(true),
-};
-const ConfigSchema = z.object(configSchemaProps).strict();
-export type ConnectorTypeConfigType = z.infer<typeof ConfigSchema>;
-
-// secrets definition
-export type ConnectorTypeSecretsType = z.infer<typeof SecretsSchema>;
-const secretSchemaProps = {
-  user: z.string().nullable().default(null),
-  password: z.string().nullable().default(null),
-  secretsUrl: z.string().nullable().default(null),
-};
-const SecretsSchema = z.object(secretSchemaProps).strict();
-
-// params definition
-export type ActionParamsType = z.infer<typeof ParamsSchema>;
-const ParamsSchema = z
-  .object({
-    alertActionGroupName: z.string().optional(),
-    signalId: z.string().optional(),
-    ruleName: z.string().optional(),
-    date: z.string().optional(),
-    severity: z.string(),
-    spaceId: z.string().optional(),
-    tags: z.string().optional(),
-  })
-  .strict();
-
-export const ConnectorTypeId = '.xmatters';
 // connector type definition
 export function getConnectorType(): XmattersConnectorType {
   return {
-    id: ConnectorTypeId,
+    id: CONNECTOR_ID,
     minimumLicenseRequired: 'gold',
-    name: i18n.translate('xpack.stackConnectors.xmatters.title', {
-      defaultMessage: 'xMatters',
-    }),
-    supportedFeatureIds: [AlertingConnectorFeatureId, SecurityConnectorFeatureId],
+    name: CONNECTOR_NAME,
+    supportedFeatureIds: [
+      AlertingConnectorFeatureId,
+      SecurityConnectorFeatureId,
+      WorkflowsConnectorFeatureId,
+    ],
     validate: {
       config: {
         schema: ConfigSchema,

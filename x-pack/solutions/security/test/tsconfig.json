@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -24,13 +24,11 @@
     "security_solution_api_integration/**/*",
     "security_solution_endpoint/**/*",
     "*/packages/**/*",
-    "*/*/packages/**/*",
+    "*/*/packages/**/*"
   ],
   "kbn_references": [
-    {
-      "path": "security_solution_api_integration/config/services/detections_response/tsconfig.json"
-    },
     "@kbn/security-solution-test-api-clients",
+    "@kbn/detections-response-ftr-services",
     "@kbn/test",
     "@kbn/expect",
     "@kbn/core-http-common",
@@ -50,7 +48,6 @@
     "@kbn/rule-data-utils",
     "@kbn/alerting-api-integration-helpers",
     "@kbn/alerting-plugin",
-    "@kbn/stack-connectors-plugin",
     "@kbn/security-plugin",
     "@kbn/security-plugin-types-common",
     "@kbn/cases-plugin",
@@ -65,5 +62,7 @@
     "@kbn/rison",
     "@kbn/core-chrome-browser",
     "@kbn/management-settings-ids",
+    "@kbn/connector-schemas",
+    "@kbn/cloud-security-posture-graph",
   ]
 }

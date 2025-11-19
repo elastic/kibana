@@ -14,7 +14,10 @@ import type {
   EnhancedInternalConnectorContract,
   InternalConnectorContract,
 } from '@kbn/workflows';
-import { generateYamlSchemaFromConnectors } from '@kbn/workflows';
+import {
+  enhanceKibanaConnectorsWithFetcher,
+  generateYamlSchemaFromConnectors,
+} from '@kbn/workflows';
 import { z } from '@kbn/zod';
 
 // Import connector schemas from the organized structure
@@ -87,13 +90,6 @@ import {
   SwimlaneResponseSchema,
   CasesWebhookCreateCaseParamsSchema,
   CasesWebhookResponseSchema,
-  SentinelOneIsolateHostParamsSchema,
-  SentinelOneReleaseHostParamsSchema,
-  SentinelOneGetAgentsParamsSchema,
-  SentinelOneResponseSchema,
-  CrowdStrikeHostActionsParamsSchema,
-  CrowdStrikeGetAgentOnlineStatusParamsSchema,
-  CrowdStrikeResponseSchema,
   SlackApiPostMessageParamsSchema,
   SlackApiGetChannelsParamsSchema,
   SlackApiGetUsersParamsSchema,
@@ -108,21 +104,6 @@ import {
   JiraServiceManagementCreateAlertParamsSchema,
   JiraServiceManagementCloseAlertParamsSchema,
   JiraServiceManagementResponseSchema,
-  // Updated SentinelOne schemas
-  SentinelOneExecuteScriptParamsSchema,
-  SentinelOneGetRemoteScriptsParamsSchema,
-  SentinelOneGetRemoteScriptStatusParamsSchema,
-  SentinelOneGetRemoteScriptResultsParamsSchema,
-  SentinelOneDownloadRemoteScriptResultsParamsSchema,
-  SentinelOneFetchAgentFilesParamsSchema,
-  SentinelOneDownloadAgentFileParamsSchema,
-  SentinelOneGetActivitiesParamsSchema,
-  // Updated CrowdStrike schemas
-  CrowdStrikeGetAgentDetailsParamsSchema,
-  CrowdStrikeExecuteRTRCommandParamsSchema,
-  CrowdStrikeExecuteActiveResponderRTRParamsSchema,
-  CrowdStrikeExecuteAdminRTRParamsSchema,
-  CrowdStrikeGetRTRCloudScriptsParamsSchema,
   // TheHive connector schemas
   TheHivePushToServiceParamsSchema,
   TheHiveCreateAlertParamsSchema,
@@ -295,54 +276,6 @@ function getSubActionParamsSchema(actionTypeId: string, subActionName: string): 
     switch (subActionName) {
       case 'pushToService':
         return CasesWebhookCreateCaseParamsSchema;
-    }
-  }
-
-  // Handle SentinelOne sub-actions
-  if (actionTypeId === '.sentinelone') {
-    switch (subActionName) {
-      case 'isolateHost':
-        return SentinelOneIsolateHostParamsSchema;
-      case 'releaseHost':
-        return SentinelOneReleaseHostParamsSchema;
-      case 'getAgents':
-        return SentinelOneGetAgentsParamsSchema;
-      case 'executeScript':
-        return SentinelOneExecuteScriptParamsSchema;
-      case 'getRemoteScripts':
-        return SentinelOneGetRemoteScriptsParamsSchema;
-      case 'getRemoteScriptStatus':
-        return SentinelOneGetRemoteScriptStatusParamsSchema;
-      case 'getRemoteScriptResults':
-        return SentinelOneGetRemoteScriptResultsParamsSchema;
-      case 'downloadRemoteScriptResults':
-        return SentinelOneDownloadRemoteScriptResultsParamsSchema;
-      case 'fetchAgentFiles':
-        return SentinelOneFetchAgentFilesParamsSchema;
-      case 'downloadAgentFile':
-        return SentinelOneDownloadAgentFileParamsSchema;
-      case 'getActivities':
-        return SentinelOneGetActivitiesParamsSchema;
-    }
-  }
-
-  // Handle CrowdStrike sub-actions
-  if (actionTypeId === '.crowdstrike') {
-    switch (subActionName) {
-      case 'hostActions':
-        return CrowdStrikeHostActionsParamsSchema;
-      case 'getAgentDetails':
-        return CrowdStrikeGetAgentDetailsParamsSchema;
-      case 'getAgentOnlineStatus':
-        return CrowdStrikeGetAgentOnlineStatusParamsSchema;
-      case 'executeRTRCommand':
-        return CrowdStrikeExecuteRTRCommandParamsSchema;
-      case 'batchActiveResponderExecuteRTR':
-        return CrowdStrikeExecuteActiveResponderRTRParamsSchema;
-      case 'batchAdminExecuteRTR':
-        return CrowdStrikeExecuteAdminRTRParamsSchema;
-      case 'getRTRCloudScripts':
-        return CrowdStrikeGetRTRCloudScriptsParamsSchema;
     }
   }
 
@@ -557,16 +490,6 @@ function getSubActionOutputSchema(actionTypeId: string, subActionName: string): 
     return CasesWebhookResponseSchema;
   }
 
-  // Handle SentinelOne sub-actions
-  if (actionTypeId === '.sentinelone') {
-    return SentinelOneResponseSchema;
-  }
-
-  // Handle CrowdStrike sub-actions
-  if (actionTypeId === '.crowdstrike') {
-    return CrowdStrikeResponseSchema;
-  }
-
   // Handle Slack API sub-actions
   if (actionTypeId === '.slack_api') {
     return SlackApiResponseSchema;
@@ -712,14 +635,13 @@ function generateElasticsearchConnectors(): EnhancedInternalConnectorContract[] 
 
 function generateKibanaConnectors(): InternalConnectorContract[] {
   // Lazy load the generated Kibana connectors
-
   const {
     GENERATED_KIBANA_CONNECTORS,
     // eslint-disable-next-line @typescript-eslint/no-var-requires
   } = require('@kbn/workflows/common/generated/kibana_connectors');
 
-  // Return the pre-generated Kibana connectors (build-time generated, browser-safe)
-  return GENERATED_KIBANA_CONNECTORS;
+  // Enhance connectors with fetcher parameter support
+  return enhanceKibanaConnectorsWithFetcher(GENERATED_KIBANA_CONNECTORS);
 }
 
 /**
@@ -859,6 +781,8 @@ export function addDynamicConnectorsToCache(
 /**
  * Get cached dynamic connector types (with instances)
  * Used by completion provider to access connector instances
+ * TODO: This function is not used anywhere, we should clean it up
+ * @deprecated use the store to get dynamic connectors
  */
 export function getCachedDynamicConnectorTypes(): Record<string, ConnectorTypeInfo> | null {
   return dynamicConnectorTypesCache;
