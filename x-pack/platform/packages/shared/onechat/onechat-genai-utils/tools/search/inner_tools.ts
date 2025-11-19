@@ -95,11 +95,15 @@ export const createNaturalLanguageSearchTool = ({
   esClient,
   events,
   logger,
+  rowLimit,
+  customInstructions,
 }: {
   model: ScopedModel;
   esClient: ElasticsearchClient;
   events: ToolEventEmitter;
   logger: Logger;
+  rowLimit?: number;
+  customInstructions?: string;
 }) => {
   return toTool(
     async ({ query, index }) => {
@@ -115,6 +119,8 @@ export const createNaturalLanguageSearchTool = ({
             esClient,
             events,
             logger,
+            rowLimit,
+            customInstructions,
           });
 
           const results: ToolResult[] = response.esqlData

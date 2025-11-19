@@ -30,10 +30,12 @@ export const getIndexSearchToolType = (): ToolTypeDefinition<
       return {
         getHandler: () => {
           return async ({ nlQuery }, { esClient, modelProvider, logger, events }) => {
-            const { pattern } = config;
+            const { pattern, rowLimit, customInstructions } = config;
             const results = await runSearchTool({
               nlQuery,
               index: pattern,
+              rowLimit,
+              customInstructions,
               esClient: esClient.asCurrentUser,
               model: await modelProvider.getDefaultModel(),
               events,

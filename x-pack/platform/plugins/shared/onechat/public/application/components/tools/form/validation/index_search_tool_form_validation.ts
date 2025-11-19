@@ -23,6 +23,11 @@ const indexSearchI18nMessages = {
       defaultMessage: 'Error loading index patterns.',
     }),
   },
+  defaultRowLimit: {
+    invalidError: i18n.translate('xpack.onechat.tools.indexPattern.defaultRowLimit.invalidError', {
+      defaultMessage: 'Default row limit must be bigger than 0.',
+    }),
+  },
 };
 
 export const createIndexSearchFormValidationSchema = (toolsService: ToolsService) =>
@@ -48,6 +53,13 @@ export const createIndexSearchFormValidationSchema = (toolsService: ToolsService
         },
         { message: indexSearchI18nMessages.pattern.noMatchesError }
       ),
+
+    rowLimit: z
+      .number()
+      .min(1, { message: indexSearchI18nMessages.defaultRowLimit.invalidError })
+      .optional(),
+
+    customInstructions: z.string().optional(),
 
     type: z.literal(ToolType.index_search),
   });

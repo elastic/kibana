@@ -24,6 +24,8 @@ const StateAnnotation = Annotation.Root({
   // inputs
   nlQuery: Annotation<string>(),
   targetPattern: Annotation<string | undefined>(),
+  rowLimit: Annotation<number | undefined>(),
+  customInstructions: Annotation<string | undefined>(),
   // inner
   indexIsValid: Annotation<boolean>(),
   searchTarget: Annotation<SearchTarget>(),
@@ -52,12 +54,7 @@ export const createSearchToolGraph = ({
   logger: Logger;
   events: ToolEventEmitter;
 }) => {
-  const tools = [
-    createRelevanceSearchTool({ model, esClient, events }),
-    createNaturalLanguageSearchTool({ model, esClient, events, logger }),
-  ];
-
-  const toolNode = new ToolNode<typeof StateAnnotation.State.messages>(tools);
+  const relevanceTool = createRelevanceSearchTool({ model, esClient, events });
 
   const selectAndValidateIndex = async (state: StateType) => {
     events?.reportProgress(progressMessages.selectingTarget());
@@ -89,18 +86,32 @@ export const createSearchToolGraph = ({
     return state.indexIsValid ? 'agent' : '__end__';
   };
 
-  const searchModel = model.chatModel.bindTools(tools).withConfig({
-    tags: ['onechat-search-tool'],
-  });
-
   const callSearchAgent = async (state: StateType) => {
     events?.reportProgress(
       progressMessages.resolvingSearchStrategy({
         target: state.searchTarget.name,
       })
     );
+
+    const nlSearchTool = createNaturalLanguageSearchTool({
+      model,
+      esClient,
+      events,
+      logger,
+      rowLimit: state.rowLimit,
+      customInstructions: state.customInstructions,
+    });
+
+    const tools = [relevanceTool, nlSearchTool];
+    const searchModel = model.chatModel.bindTools(tools).withConfig({
+      tags: ['onechat-search-tool'],
+    });
+
     const response = await searchModel.invoke(
-      getSearchPrompt({ nlQuery: state.nlQuery, searchTarget: state.searchTarget })
+      getSearchPrompt({
+        nlQuery: state.nlQuery,
+        searchTarget: state.searchTarget,
+      })
     );
     return {
       messages: [response],
@@ -113,6 +124,18 @@ export const createSearchToolGraph = ({
   };
 
   const executeTool = async (state: StateType) => {
+    const nlSearchTool = createNaturalLanguageSearchTool({
+      model,
+      esClient,
+      events,
+      logger,
+      rowLimit: state.rowLimit,
+      customInstructions: state.customInstructions,
+    });
+
+    const tools = [relevanceTool, nlSearchTool];
+    const toolNode = new ToolNode<typeof StateAnnotation.State.messages>(tools);
+
     const toolNodeResult = await toolNode.invoke(state.messages);
     const toolResults = extractToolResults(toolNodeResult[toolNodeResult.length - 1]);
 

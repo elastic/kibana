@@ -9,8 +9,12 @@ import { schema } from '@kbn/config-schema';
 
 export const configurationSchema = schema.object({
   pattern: schema.string(),
+  rowLimit: schema.maybe(schema.number({ min: 1 })),
+  customInstructions: schema.maybe(schema.string()),
 });
 
 export const configurationUpdateSchema = schema.object({
   pattern: schema.maybe(schema.string()),
+  rowLimit: schema.maybe(schema.number({ min: 1 })),
+  customInstructions: schema.maybe(schema.string()),
 });

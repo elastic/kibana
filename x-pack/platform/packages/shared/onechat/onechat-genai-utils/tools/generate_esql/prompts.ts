@@ -11,6 +11,18 @@ import type { ResolvedResourceWithSampling } from '../utils/resources';
 import { formatResourceWithSampledValues } from '../utils/resources';
 import type { Action } from './actions';
 import { formatAction } from './actions';
+import { getEsqlInstructions } from './prompts/instructions_template';
+
+const getInstructionsWithRowLimit = (rowLimit?: number): string => {
+  if (!rowLimit) {
+    return getEsqlInstructions();
+  }
+
+  const defaultLimit = Math.min(rowLimit, 100);
+  const maxAllLimit = rowLimit;
+
+  return getEsqlInstructions({ defaultLimit, maxAllLimit });
+};
 
 export const createRequestDocumentationPrompt = ({
   nlQuery,
@@ -59,6 +71,7 @@ export const createGenerateEsqlPrompt = ({
   prompts,
   additionalInstructions,
   additionalContext,
+  rowLimit,
 }: {
   nlQuery: string;
   resource: ResolvedResourceWithSampling;
@@ -66,6 +79,7 @@ export const createGenerateEsqlPrompt = ({
   previousActions: Action[];
   additionalInstructions?: string;
   additionalContext?: string;
+  rowLimit?: number;
 }): BaseMessageLike[] => {
   return [
     [
@@ -85,11 +99,11 @@ ${prompts.syntax}
 
 ${prompts.examples}
 
-${prompts.instructions}
+${getInstructionsWithRowLimit(rowLimit)}
 
 ${
   additionalInstructions
-    ? `<additional_instructions>\n${additionalInstructions}\n</<additional_instructions>`
+    ? `<additional_instructions>\n${additionalInstructions}\n</additional_instructions>`
     : ''
 }
 
