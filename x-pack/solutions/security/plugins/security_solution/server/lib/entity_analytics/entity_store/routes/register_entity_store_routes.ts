@@ -21,7 +21,6 @@ import { upsertEntity } from './entity_crud/upsert_entity';
 import { getEntity } from './entity_crud/get_entity';
 import { upsertEntitiesBulk } from './entity_crud/upsert_entities_bulk';
 import { deleteEntity } from './entity_crud/delete_entity';
-import { getEntity } from './entity_crud/get_entity';
 
 export const registerEntityStoreRoutes = ({
   router,
@@ -45,5 +44,4 @@ export const registerEntityStoreRoutes = ({
   getEntity(router, logger);
   upsertEntitiesBulk(router, logger);
   deleteEntity(router, logger);
-  getEntity(router, logger);
 };
