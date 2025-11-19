@@ -23,7 +23,7 @@ export const fromCommand = {
   name: 'from',
   methods: fromCommandMethods,
   metadata: {
-    classification: 'source' as const,
+    type: 'source' as const,
     subquerySupport: process.env.NODE_ENV === 'test' ? true : false, // Temporary until making it Preview
     description: i18n.translate('kbn-esql-ast.esql.definitions.fromDoc', {
       defaultMessage:

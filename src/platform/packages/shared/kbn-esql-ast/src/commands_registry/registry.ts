@@ -80,7 +80,7 @@ export interface ICommandMetadata {
   types?: Array<{ name: string; description: string }>; // Optional property for command-specific types
   license?: LicenseType; // Optional property indicating the license for the command's availability
   observabilityTier?: string; // Optional property indicating the observability tier availability
-  classification?: 'source' | 'special'; // Optional property to classify the command
+  type?: 'source' | 'header' | 'processing'; // Optional property to classify the command type
   subqueryRestrictions?: {
     hideInside: boolean; // Command is hidden inside subqueries
     hideOutside: boolean; // Command is hidden outside subqueries (at root level)
@@ -182,9 +182,9 @@ export class CommandRegistry implements ICommandRegistry {
         metadata: command.metadata,
       });
 
-      if (command.metadata.classification === 'source') {
+      if (command.metadata.type === 'source') {
         this.sourceCommandNames.push(command.name);
-      } else if (!command.metadata.classification) {
+      } else if (!command.metadata.type) {
         this.processingCommandNames.push(command.name);
       }
     }
