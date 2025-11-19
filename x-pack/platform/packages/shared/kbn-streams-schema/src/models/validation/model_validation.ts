@@ -110,7 +110,7 @@ export function modelValidation(...args: [ModelValidation, ModelSchema] | [Model
       left.UpsertRequest,
       z.intersection(
         z.object({
-          // upsert doesn't allow name or updated_at to be set
+          // upsert doesn't allow some properties to be set
           stream: z
             .object({
               name: z.undefined().optional(),
