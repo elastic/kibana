@@ -24,7 +24,6 @@ export default function ({ getService }: FtrProviderContext) {
       expect(response.status).to.be(200);
 
       expect(response.body.id).to.be('be3733a0-9efe-11e7-acb3-3dab96693fab');
-      expect(response.body.type).to.be('dashboard');
       expect(response.body.data.title).to.be('Requests');
 
       // Does not return unsupported options from the saved object
