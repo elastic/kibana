@@ -14,8 +14,6 @@ import '@testing-library/jest-dom';
 // Monaco's Safari workaround cancels internal DeferredPromises, causing unhandled rejections in tests
 Object.defineProperty(navigator, 'clipboard', {
   value: {
-    writeText: jest.fn().mockResolvedValue(undefined),
-    readText: jest.fn().mockResolvedValue(''),
     write: jest.fn((items?: ClipboardItem[]) => {
       // Handle cancelled promises to prevent unhandled rejections
       items?.forEach((item: any) => {
@@ -34,7 +32,6 @@ Object.defineProperty(navigator, 'clipboard', {
       });
       return Promise.resolve();
     }),
-    read: jest.fn().mockResolvedValue([]),
   },
   configurable: true,
 });
