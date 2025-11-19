@@ -45,6 +45,7 @@ import { FIELD_DEFINITION_TYPES } from '@kbn/streams-schema/src/fields';
 import type { RecursiveRecord } from '@kbn/streams-schema/src/shared/record_types';
 import { getProcessingPipelineName } from '../../../../lib/streams/ingest_pipelines/name';
 import type { StreamsClient } from '../../../../lib/streams/client';
+import { generateGeoPointTransformProcessors } from '../../../../lib/streams/ingest_pipelines/generate_ingest_pipeline';
 
 export interface ProcessingSimulationParams {
   path: {
@@ -214,7 +215,7 @@ export const simulateProcessing = async ({
     ]);
 
   /* 1. Prepare data for either simulation types (ingest, pipeline), prepare simulation body for the mandatory pipeline simulation */
-  const simulationData = prepareSimulationData(params, stream);
+  const simulationData = prepareSimulationData(params, stream, params.body.detected_fields);
   const pipelineSimulationBody = preparePipelineSimulationBody(simulationData);
   const ingestSimulationBody = prepareIngestSimulationBody(
     simulationData,
@@ -222,6 +223,7 @@ export const simulateProcessing = async ({
     streamIndexState,
     params
   );
+
   /**
    * 2. Run both pipeline and ingest simulations in parallel.
    * - The pipeline simulation is used to extract the documents reports and the processor metrics. This always runs.
@@ -253,7 +255,7 @@ export const simulateProcessing = async ({
 
   /* 5. Extract valid detected fields with intelligent type suggestions from fieldsMetadataService */
   const detectedFields = await computeDetectedFields(
-    processorsMetrics,
+    docReports,
     params,
     streamFields,
     streamIndexFieldCaps,
@@ -266,16 +268,25 @@ export const simulateProcessing = async ({
 
 const prepareSimulationDocs = (
   documents: FlattenRecord[],
-  streamName: string
+  streamName: string,
+  stream: Streams.all.Definition
 ): IngestDocument[] => {
+  const isWiredStream = Streams.WiredStream.Definition.is(stream);
+
   return documents.map((doc, id) => ({
     _index: streamName,
     _id: id.toString(),
-    _source: regroupGeoPointFields(doc),
+    // For classic streams, use regroupGeoPointFields to transform lat/lon into geo_point objects
+    // For wired streams, keep documents as-is since geo_point transformation happens via processors
+    _source: isWiredStream ? doc : regroupGeoPointFields(doc),
   }));
 };
 
-const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessorContainer[] => {
+const prepareSimulationProcessors = (
+  processing: StreamlangDSL,
+  stream: Streams.all.Definition,
+  additionalFields?: NamedFieldDefinitionConfig[]
+): IngestProcessorContainer[] => {
   //
   /**
    * We want to simulate processors logic and collect data independently from the user config for simulation purposes.
@@ -287,7 +298,7 @@ const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessor
     traceCustomIdentifiers: true,
   }).processors;
 
-  return transpiledIngestPipelineProcessors.map((processor) => {
+  const wrappedProcessors = transpiledIngestPipelineProcessors.map((processor) => {
     const type = Object.keys(processor)[0];
     const processorConfig = (processor as any)[type]; // Safe to use any here due to type structure
 
@@ -310,11 +321,22 @@ const prepareSimulationProcessors = (processing: StreamlangDSL): IngestProcessor
       },
     };
   });
+
+  // For wired streams, always add geo_point transformation processors after the regular processors
+  // Only transform additional fields (e.g., detected_fields), not definition fields
+  const isWiredStream = Streams.WiredStream.Definition.is(stream);
+  if (isWiredStream && additionalFields && additionalFields.length > 0) {
+    const geoPointProcessors = generateGeoPointTransformProcessors(additionalFields);
+    return [...wrappedProcessors, ...geoPointProcessors];
+  }
+
+  return wrappedProcessors;
 };
 
 const prepareSimulationData = (
   params: ProcessingSimulationParams,
-  stream: Streams.all.Definition
+  stream: Streams.all.Definition,
+  additionalFields?: NamedFieldDefinitionConfig[]
 ) => {
   const { body } = params;
   const { processing, documents } = body;
@@ -324,8 +346,9 @@ const prepareSimulationData = (
     : stream.name;
 
   return {
-    docs: prepareSimulationDocs(documents, targetStreamName),
-    processors: prepareSimulationProcessors(processing),
+    docs: prepareSimulationDocs(documents, targetStreamName, stream),
+    processors: prepareSimulationProcessors(processing, stream, additionalFields),
+    stream, // Pass stream for later use in ingest simulation
   };
 };
 
@@ -349,9 +372,13 @@ const prepareIngestSimulationBody = (
   params: ProcessingSimulationParams
 ): SimulateIngestRequest => {
   const { body } = params;
-  const { detected_fields } = body;
+  const { detected_fields, processing } = body;
 
-  const { docs, processors } = simulationData;
+  const { docs } = simulationData;
+
+  // Prepare processors with geo_point transform for wired streams
+  // Pass detected_fields to include any new geo_point fields being added
+  const processorsWithGeoPoint = prepareSimulationProcessors(processing, stream, detected_fields);
 
   const defaultPipelineName = streamIndex.settings?.index?.default_pipeline;
 
@@ -359,7 +386,7 @@ const prepareIngestSimulationBody = (
 
   if (defaultPipelineName) {
     pipelineSubstitutions[defaultPipelineName] = {
-      processors,
+      processors: processorsWithGeoPoint,
       // @ts-expect-error field_access_pattern not supported by typing yet
       field_access_pattern: 'flexible',
     };
@@ -587,9 +614,11 @@ const computePipelineSimulationResult = (
       ingestDocErrors
     );
 
+    // Use ingest simulation result for diff to capture mapping coercion (e.g., geo_point transformation)
     const diff = computeSimulationDocDiff(
       sampleDocs[id]._source,
       pipelineDocResult,
+      ingestDocResult,
       isWiredStream,
       forbiddenFields
     );
@@ -603,6 +632,7 @@ const computePipelineSimulationResult = (
     });
 
     diff.detected_fields.forEach(({ processor_id, name }) => {
+      if (processor_id === '_ingest_mapping') return; // Skip _ingest_mapping as it's not a real processor
       processorsMap[processor_id].detected_fields.push(name);
     });
 
@@ -744,6 +774,7 @@ const getLastDoc = (
 const computeSimulationDocDiff = (
   base: FlattenRecord,
   docResult: SuccessfulPipelineSimulateDocumentResult,
+  ingestDocResult: SimulateIngestSimulateIngestDocumentResult,
   isWiredStream: boolean,
   forbiddenFields: string[]
 ) => {
@@ -759,6 +790,15 @@ const computeSimulationDocDiff = (
       };
     }),
   ];
+
+  // Always add the final ingest result as the last comparison document to capture mapping coercion
+  // (e.g., geo_point transformation from lat/lon fields)
+  if (ingestDocResult.doc?._source) {
+    comparisonDocs.push({
+      processor_id: '_ingest_mapping',
+      value: ingestDocResult.doc._source,
+    });
+  }
 
   const diffResult: Pick<SimulationDocReport, 'detected_fields' | 'errors'> = {
     detected_fields: [],
@@ -939,13 +979,13 @@ const getStreamFields = async (
  * In case new fields have been detected, we want to tell the user which ones are inherited and already mapped.
  */
 const computeDetectedFields = async (
-  processorsMetrics: Record<string, ProcessorMetrics>,
+  docReports: SimulationDocReport[],
   params: ProcessingSimulationParams,
   streamFields: FieldDefinition,
   streamFieldCaps: FieldCapsResponse['fields'],
   fieldsMetadataClient: IFieldsMetadataClient
 ): Promise<DetectedField[]> => {
-  const fields = Object.values(processorsMetrics).flatMap((metrics) => metrics.detected_fields);
+  const fields = docReports.flatMap((doc) => doc.detected_fields.map((field) => field.name));
 
   const uniqueFields = uniq(fields);
 

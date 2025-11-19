@@ -85,7 +85,19 @@ export const unmappedFieldsRoute = createServerRoute({
     }
 
     const unmappedFields = Array.from(sourceFields)
-      .filter((field) => !mappedFields.has(field))
+      .filter((field) => {
+        // Skip if field is already mapped
+        if (mappedFields.has(field)) return false;
+
+        // Skip if field is a subfield of a mapped field (e.g., location.lat when location is mapped)
+        for (const mappedField of mappedFields) {
+          if (field.startsWith(`${mappedField}.`)) {
+            return false;
+          }
+        }
+
+        return true;
+      })
       .sort();
 
     return { unmappedFields };
@@ -139,18 +151,51 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       return [field];
     });
 
-    const propertiesForSample = Object.fromEntries(
-      userFieldDefinitions.map((field) => [field.name, { type: 'keyword' as const }])
-    );
+    // Build runtime mappings: for geo_point fields, also add .lat and .lon as keyword mappings
+    const propertiesForSample: Record<string, { type: 'keyword' }> = {};
+    userFieldDefinitions.forEach((field) => {
+      propertiesForSample[field.name] = { type: 'keyword' as const };
+
+      // For geo_point fields, also add lat/lon runtime mappings
+      if (field.type === 'geo_point') {
+        propertiesForSample[`${field.name}.lat`] = { type: 'keyword' as const };
+        propertiesForSample[`${field.name}.lon`] = { type: 'keyword' as const };
+      }
+    });
+
+    // Build filter conditions: for geo_point fields, check for either the base field OR both .lat and .lon
+    const filterConditions = userFieldDefinitions.map((field) => {
+      if (field.type === 'geo_point') {
+        // For geo_point, accept documents that have either:
+        // 1. The base field (e.g., "location")
+        // 2. Both lat and lon fields (e.g., "location.lat" and "location.lon")
+        return {
+          bool: {
+            should: [
+              { exists: { field: field.name } },
+              {
+                bool: {
+                  filter: [
+                    { exists: { field: `${field.name}.lat` } },
+                    { exists: { field: `${field.name}.lon` } },
+                  ],
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        };
+      }
+      // For other types, just check the field exists
+      return { exists: { field: field.name } };
+    });
 
     const documentSamplesSearchBody = {
       // Add keyword runtime mappings so we can pair with exists, this is to attempt to "miss" less documents for the simulation.
       runtime_mappings: propertiesForSample,
       query: {
         bool: {
-          filter: Object.keys(propertiesForSample).map((field) => ({
-            exists: { field },
-          })),
+          filter: filterConditions,
         },
       },
       size: FIELD_SIMILATION_SAMPLE_SIZE,
@@ -159,10 +204,19 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       timeout: FIELD_SIMULATION_TIMEOUT,
     };
 
+    // eslint-disable-next-line no-console
+    console.log(
+      '[GEO_POINT DEBUG] Sample search body:',
+      JSON.stringify(documentSamplesSearchBody, null, 2)
+    );
+
     const sampleResults = await scopedClusterClient.asCurrentUser.search({
       index: params.path.name,
       ...documentSamplesSearchBody,
     });
+
+    // eslint-disable-next-line no-console
+    console.log('[GEO_POINT DEBUG] Found sample documents:', sampleResults.hits.hits.length);
 
     if (sampleResults.hits.hits.length === 0) {
       return {
@@ -178,18 +232,108 @@ export const schemaFieldsSimulationRoute = createServerRoute({
 
     const fieldDefinitionKeys = Object.keys(propertiesForSimulation);
 
-    const sampleResultsAsSimulationDocs = sampleResults.hits.hits.map((hit) => ({
-      // For wired streams direct writes to child streams are not allowed, we must use the "logs" index.
-      _index: params.path.name.startsWith(`${LOGS_ROOT_STREAM_NAME}.`)
-        ? LOGS_ROOT_STREAM_NAME
-        : params.path.name,
-      _id: hit._id,
-      _source: Object.fromEntries(
-        Object.entries(getFlattenedObject(hit._source as SampleDocument)).filter(
-          ([k]) => fieldDefinitionKeys.includes(k) || k === '@timestamp'
-        )
-      ),
-    }));
+    // Identify geo_point fields for special handling
+    const geoPointFields = new Set(
+      userFieldDefinitions.filter((field) => field.type === 'geo_point').map((field) => field.name)
+    );
+
+    // eslint-disable-next-line no-console
+    console.log('[GEO_POINT DEBUG] Identified geo_point fields:', Array.from(geoPointFields));
+
+    const sampleResultsAsSimulationDocs = sampleResults.hits.hits.map((hit) => {
+      const flattenedSource = getFlattenedObject(hit._source as SampleDocument);
+
+      // eslint-disable-next-line no-console
+      console.log('[GEO_POINT DEBUG] Flattened source keys:', Object.keys(flattenedSource).sort());
+
+      const filteredEntries = Object.entries(flattenedSource).filter(([k]) => {
+        // Always include @timestamp
+        if (k === '@timestamp') return true;
+
+        // Include if it's a defined field
+        if (fieldDefinitionKeys.includes(k)) return true;
+
+        // For geo_point fields, also include .lat and .lon variants
+        const latMatch = k.match(/^(.+)\.lat$/);
+        const lonMatch = k.match(/^(.+)\.lon$/);
+        if (
+          (latMatch && geoPointFields.has(latMatch[1])) ||
+          (lonMatch && geoPointFields.has(lonMatch[1]))
+        ) {
+          return true;
+        }
+
+        return false;
+      });
+
+      // eslint-disable-next-line no-console
+      console.log('[GEO_POINT DEBUG] Filtered entries:', filteredEntries.map(([k]) => k).sort());
+
+      // Handle geo_point fields: convert flattened lat/lon to proper geo_point object format
+      const sourceWithGeoPoints: Record<string, any> = {};
+      const processedGeoFields = new Set<string>();
+
+      for (const [key, value] of filteredEntries) {
+        // Check if this is a lat/lon component of a geo_point field
+        const latMatch = key.match(/^(.+)\.lat$/);
+        const lonMatch = key.match(/^(.+)\.lon$/);
+
+        if (latMatch && geoPointFields.has(latMatch[1])) {
+          const baseField = latMatch[1];
+          if (!processedGeoFields.has(baseField)) {
+            const lonKey = `${baseField}.lon`;
+            const lonValue = flattenedSource[lonKey];
+            // eslint-disable-next-line no-console
+            console.log(
+              '[GEO_POINT DEBUG] Found lat for',
+              baseField,
+              'lat:',
+              value,
+              'lon:',
+              lonValue
+            );
+            if (lonValue !== undefined) {
+              sourceWithGeoPoints[baseField] = { lat: value, lon: lonValue };
+              processedGeoFields.add(baseField);
+              // eslint-disable-next-line no-console
+              console.log(
+                '[GEO_POINT DEBUG] Created geo_point object for',
+                baseField,
+                sourceWithGeoPoints[baseField]
+              );
+            }
+          }
+        } else if (lonMatch && geoPointFields.has(lonMatch[1])) {
+          const baseField = lonMatch[1];
+          if (!processedGeoFields.has(baseField)) {
+            const latKey = `${baseField}.lat`;
+            const latValue = flattenedSource[latKey];
+            if (latValue !== undefined) {
+              sourceWithGeoPoints[baseField] = { lat: latValue, lon: value };
+              processedGeoFields.add(baseField);
+              // eslint-disable-next-line no-console
+              console.log(
+                '[GEO_POINT DEBUG] Created geo_point object for',
+                baseField,
+                sourceWithGeoPoints[baseField]
+              );
+            }
+          }
+        } else {
+          // Not a geo_point component, add as-is
+          sourceWithGeoPoints[key] = value;
+        }
+      }
+
+      return {
+        // For wired streams direct writes to child streams are not allowed, we must use the "logs" index.
+        _index: params.path.name.startsWith(`${LOGS_ROOT_STREAM_NAME}.`)
+          ? LOGS_ROOT_STREAM_NAME
+          : params.path.name,
+        _id: hit._id,
+        _source: sourceWithGeoPoints,
+      };
+    });
 
     const simulation = await simulateIngest(
       sampleResultsAsSimulationDocs,
@@ -216,51 +360,13 @@ export const schemaFieldsSimulationRoute = createServerRoute({
       };
     }
 
-    // Convert the field definitions to a format that can be used in runtime mappings (match_only_text -> keyword)
-    const propertiesCompatibleWithRuntimeMappings = Object.fromEntries(
-      userFieldDefinitions.map((field) => [
-        field.name,
-        {
-          type: field.type === 'match_only_text' ? 'keyword' : field.type,
-          ...(field.format ? { format: field.format } : {}),
-        },
-      ])
-    );
-
-    const runtimeFieldsSearchBody = {
-      runtime_mappings: propertiesCompatibleWithRuntimeMappings,
-      size: FIELD_SIMILATION_SAMPLE_SIZE,
-      fields: params.body.field_definitions.map((field) => field.name),
-      _source: false,
-      track_total_hits: false,
-      terminate_after: FIELD_SIMILATION_SAMPLE_SIZE,
-      timeout: FIELD_SIMULATION_TIMEOUT,
-    };
-
-    // This gives us a "fields" representation rather than _source from the simulation
-    const runtimeFieldsResult = await scopedClusterClient.asCurrentUser.search({
-      index: params.path.name,
-      query: {
-        ids: {
-          values: sampleResults.hits.hits.map((hit) => hit._id) as string[],
-        },
-      },
-      ...runtimeFieldsSearchBody,
-    });
-
     return {
       status: 'success',
       simulationError: null,
-      documentsWithRuntimeFieldsApplied: runtimeFieldsResult.hits.hits.map((hit, index) => {
-        if (!hit.fields) {
-          return { ignored_fields: simulation.docs[index].doc.ignored_fields || [] };
-        }
+      documentsWithRuntimeFieldsApplied: simulation.docs.map((doc: any) => {
         return {
-          values: Object.keys(hit.fields).reduce<SampleDocument>((acc, field) => {
-            acc[field] = hit.fields![field][0];
-            return acc;
-          }, {}),
-          ignored_fields: simulation.docs[index].doc.ignored_fields || [],
+          values: doc.doc._source,
+          ignored_fields: doc.doc.ignored_fields || [],
         };
       }),
     };

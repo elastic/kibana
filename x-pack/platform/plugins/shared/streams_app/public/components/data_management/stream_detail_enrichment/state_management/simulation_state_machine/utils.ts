@@ -299,13 +299,25 @@ export function mapField(
 } {
   const updatedCache = new Map(context.detectedSchemaFieldsCache);
 
-  const updatedFields = context.detectedSchemaFields.map((field) => {
-    if (field.name !== updatedField.name) return field;
+  // Check if field exists
+  const existingFieldIndex = context.detectedSchemaFields.findIndex(
+    (field) => field.name === updatedField.name
+  );
 
-    const schemaField: SchemaField = { ...updatedField, status: 'mapped' };
-    updatedCache.set(schemaField.name, schemaField);
-    return schemaField;
-  });
+  let updatedFields: SchemaField[];
+  const schemaField: SchemaField = { ...updatedField, status: 'mapped' };
+  updatedCache.set(schemaField.name, schemaField);
+
+  if (existingFieldIndex >= 0) {
+    // Update existing field
+    updatedFields = context.detectedSchemaFields.map((field) => {
+      if (field.name !== updatedField.name) return field;
+      return schemaField;
+    });
+  } else {
+    // Add new field
+    updatedFields = [...context.detectedSchemaFields, schemaField];
+  }
 
   return {
     detectedSchemaFields: updatedFields,

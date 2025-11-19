@@ -88,6 +88,10 @@ export const DetectedFieldsEditor = ({ schemaEditorFields }: DetectedFieldsEdito
             unmapField(field.name);
           }
         }}
+        onAddField={(field) => {
+          // Adding a new field is the same as mapping it
+          mapField(field);
+        }}
         onFieldSelection={(names, checked) => {
           setSelectedFields((selection) => {
             if (checked) {

@@ -29,7 +29,7 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
   const [popoverIsOpen, { off: closePopover, toggle }] = useBoolean(false);
 
   const panels = useMemo(() => {
-    const { onFieldUpdate, stream, withFieldSimulation } = schemaEditorContext;
+    const { onFieldUpdate, onAddField, stream, withFieldSimulation, fields } = schemaEditorContext;
 
     let actions = [];
 
@@ -39,8 +39,20 @@ export const FieldActionsCell = ({ field }: { field: SchemaField }) => {
           <StreamsAppContextProvider context={context}>
             <SchemaEditorFlyout
               field={field}
+              fields={fields}
               onClose={() => overlay.close()}
-              onStage={onFieldUpdate}
+              onStage={(stagedField) => {
+                // Check if this is a new field (e.g., from geo_point suggestion)
+                const existingField = fields.find((f) => f.name === stagedField.name);
+                if (existingField) {
+                  onFieldUpdate(stagedField);
+                } else if (onAddField) {
+                  onAddField(stagedField);
+                } else {
+                  // Fallback to update if onAddField not available
+                  onFieldUpdate(stagedField);
+                }
+              }}
               stream={stream}
               withFieldSimulation={withFieldSimulation}
               {...props}
