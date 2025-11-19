@@ -33,6 +33,8 @@ export class SolutionNavigationTourManager {
   async startTour(): Promise<void> {
     // Register and get tour object
     const tour = this.tourQueue.register('solutionNavigationTour');
+    // This will only work as long as solutionNavigationTour is the first tour in the queue
+    // Will be removed as part of tour cleanup https://github.com/elastic/kibana/issues/239313
     if (!tour.isActive()) {
       tour.unregister();
       return;
