@@ -7,7 +7,6 @@
 import '@testing-library/jest-dom';
 import { act, render, screen } from '@testing-library/react';
 import {
-  AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED,
   DefaultAIConnector,
 } from './default_ai_connector';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
@@ -87,14 +86,7 @@ function setupTest({
               }
               docLinks={{} as DocLinksStart}
               featureFlags={
-                {
-                  getBooleanValue: jest.fn().mockImplementation((flag) => {
-                    if (flag === AI_ASSISTANT_DEFAULT_LLM_SETTING_ENABLED && enabled) {
-                      return true;
-                    }
-                    return false;
-                  }),
-                } as unknown as FeatureFlagsStart
+                {} as unknown as FeatureFlagsStart
               }
               toast={{} as IToasts}
             >
