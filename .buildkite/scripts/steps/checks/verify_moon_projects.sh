@@ -11,5 +11,5 @@ if is_pr && ! is_auto_commit_disabled && [[ "$BUILDKITE_PULL_REQUEST_BASE_BRANCH
   check_for_changed_files "node scripts/regenerate_moon_projects.js --update" true
 else
   node scripts/regenerate_moon_projects.js --update
-  exit 0
+  check_for_changed_files "node scripts/regenerate_moon_projects.js --update"
 fi
