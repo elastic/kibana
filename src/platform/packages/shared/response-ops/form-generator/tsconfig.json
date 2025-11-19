@@ -9,5 +9,6 @@
   "kbn_references": [
     "@kbn/zod",
     "@kbn/i18n-react",
+    "@kbn/i18n",
   ]
 }
