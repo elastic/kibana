@@ -15,7 +15,6 @@ import {
   SYMBOLIZER_PACKAGE_POLICY_NAME,
 } from '@kbn/profiling-data-access-plugin/common';
 import supertest from 'supertest';
-import type { AxiosResponse } from 'axios';
 
 const APM_AGENT_POLICY_ID = 'policy-elastic-agent-on-cloud';
 
@@ -95,27 +94,29 @@ export async function setupProfiling(
     log(`APM agent policy '${APM_AGENT_POLICY_ID}' already exists`);
   }
 
-  const res: AxiosResponse = await kbnClient.request({
-    path: '/api/profiling/setup/es_resources',
-    method: 'GET',
-  });
-  // const res = await st
-  //   .get('/api/profiling/setup/es_resources')
-  //   .set({ 'kbn-xsrf': 'foo' })
-  //   .set('x-elastic-internal-origin', 'Kibana');
+  const checkStatus = await (async () => {
+    try {
+      const response = await kbnClient.request({
+        description: 'Check profiling status',
+        path: '/api/profiling/setup/es_resources',
+        method: 'GET',
+      });
+      return response.data as { has_setup: boolean; has_data: boolean };
+    } catch (error: any) {
+      log(`Error checking profiling status: ${error}`);
+      return { has_setup: false, has_data: false };
+    }
+  })();
 
-  if (!res.data.has_setup) {
+  if (!checkStatus.has_setup) {
     log(`Setting up Universal Profiling`);
+
     await kbnClient.request({
+      description: 'Setup profiling resources',
       path: '/api/profiling/setup/es_resources',
       method: 'POST',
-      headers: {
-        'x-elastic-internal-origin': 'Kibana',
-      },
+      body: {},
     });
-    // await st
-    //   .post('/api/profiling/setup/es_resources')
-    //   .set('x-elastic-internal-origin', 'Kibana');
   } else {
     log(`Skipping Universal Profiling set up, already set up`);
   }
