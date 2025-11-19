@@ -9,7 +9,7 @@ import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application
 import { registerConnectorTypes } from '..';
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
-import { SUB_ACTION } from '../../../common/inference/constants';
+import { SUB_ACTION } from '@kbn/connector-schemas/inference/constants';
 import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
 const ACTION_TYPE_ID = '.inference';
