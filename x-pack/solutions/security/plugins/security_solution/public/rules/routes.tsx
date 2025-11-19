@@ -14,12 +14,14 @@ import {
   COVERAGE_OVERVIEW_PATH,
   RULES_LANDING_PATH,
   RULES_PATH,
+  AI_ASSISTED_RULE_CREATE_PATH,
   SECURITY_FEATURE_ID,
   SecurityPageName,
 } from '../../common/constants';
 import { NotFoundPage } from '../app/404';
 import { RulesPage } from '../detection_engine/rule_management_ui/pages/rule_management';
 import { CreateRulePage } from '../detection_engine/rule_creation_ui/pages/rule_creation';
+import { AiAssistedCreateRulePage } from '../detection_engine/rule_creation_ui/pages/ai_assisted_rule_creation';
 import { RuleDetailsPage } from '../detection_engine/rule_details_ui/pages/rule_details';
 import { EditRulePage } from '../detection_engine/rule_creation_ui/pages/rule_editing';
 import { useReadonlyHeader } from '../use_readonly_header';
@@ -67,6 +69,17 @@ const getRulesSubRoutes = (capabilities: Capabilities) => [
     main: withSecurityRoutePageWrapper(CreateRulePage, SecurityPageName.rulesCreate, {
       omitSpyRoute: true,
     }),
+    exact: true,
+  },
+  {
+    path: AI_ASSISTED_RULE_CREATE_PATH,
+    main: withSecurityRoutePageWrapper(
+      AiAssistedCreateRulePage,
+      SecurityPageName.aiAssistedRuleCreate,
+      {
+        omitSpyRoute: true,
+      }
+    ),
     exact: true,
   },
   {

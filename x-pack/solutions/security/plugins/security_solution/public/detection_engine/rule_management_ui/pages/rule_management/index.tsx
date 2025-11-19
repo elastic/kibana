@@ -38,6 +38,7 @@ import {
   CREATE_NEW_RULE_TOUR_ANCHOR,
   RuleFeatureTour,
 } from '../../components/rules_table/feature_tour/rules_feature_tour';
+import { CreateRuleMenu } from '../../components/create_rule_menu';
 
 const RulesPageComponent: React.FC = () => {
   const [isImportModalVisible, showImportModal, hideImportModal] = useBoolState();
@@ -65,6 +66,10 @@ const RulesPageComponent: React.FC = () => {
 
   const isDoesNotMatchForIndicatorMatchRuleEnabled = useIsExperimentalFeatureEnabled(
     'doesNotMatchForIndicatorMatchRuleEnabled'
+  );
+
+  const aiAssistedRuleCreationEnabled = useIsExperimentalFeatureEnabled(
+    'aiAssistedRuleCreationEnabled'
   );
 
   if (
@@ -138,16 +143,33 @@ const RulesPageComponent: React.FC = () => {
                 </EuiButtonEmpty>
               </EuiFlexItem>
               <EuiFlexItem grow={false} id={CREATE_NEW_RULE_TOUR_ANCHOR}>
-                <SecuritySolutionLinkButton
-                  data-test-subj="create-new-rule"
-                  fill
-                  iconType="plusInCircle"
-                  isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
-                  deepLinkId={SecurityPageName.rulesCreate}
-                >
-                  {i18n.ADD_NEW_RULE}
-                </SecuritySolutionLinkButton>
+                {aiAssistedRuleCreationEnabled ? (
+                  <CreateRuleMenu loading={loading} isDisabled={!canUserCRUD || loading} />
+                ) : (
+                  <SecuritySolutionLinkButton
+                    data-test-subj="create-new-rule"
+                    fill
+                    iconType="plusInCircle"
+                    isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
+                    deepLinkId={SecurityPageName.rulesCreate}
+                  >
+                    {i18n.ADD_NEW_RULE}
+                  </SecuritySolutionLinkButton>
+                )}
               </EuiFlexItem>
+              {/* TODO: removed when final UX is ready
+              
+              <EuiFlexItem grow={false}>
+                <SecuritySolutionLinkButton
+                  data-test-subj="create-new-rule-ai-assisted"
+                  fill
+                  iconType="sparkles"
+                  isDisabled={!hasUserCRUDPermission(canUserCRUD) || loading}
+                  deepLinkId={SecurityPageName.aiAssistedRuleCreate}
+                >
+                  {'AI rule creation'}
+                </SecuritySolutionLinkButton>
+              </EuiFlexItem> */}
               {isDoesNotMatchForIndicatorMatchRuleEnabled && <RuleFeatureTour />}
             </EuiFlexGroup>
           </HeaderPage>

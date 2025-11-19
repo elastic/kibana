@@ -23,6 +23,7 @@ import {
 } from '@kbn/core-http-common';
 import { replaceParams } from '@kbn/openapi-common/shared';
 
+import type { AIAssistedCreateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/ai_assisted/index.gen';
 import type { AlertsMigrationCleanupRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/delete_signals_migration/delete_signals_migration.gen';
 import type { CreateAlertsMigrationRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals_migration/create_signals_migration/create_signals_migration.gen';
 import type { CreateRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/create_rule/create_rule_route.gen';
@@ -549,6 +550,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
   };
 }
 
+export interface AIAssistedCreateRuleProps {
+  body: AIAssistedCreateRuleRequestBodyInput;
+}
 export interface AlertsMigrationCleanupProps {
   body: AlertsMigrationCleanupRequestBodyInput;
 }

@@ -257,6 +257,7 @@
     "@kbn/onechat-server",
     "@kbn/core-analytics-server-mocks",
     "@kbn/object-utils",
+    "@kbn/ml-response-stream",
     "@kbn/react-query",
     "@kbn/core-chrome-layout-constants",
     "@kbn/response-ops-rule-form",
