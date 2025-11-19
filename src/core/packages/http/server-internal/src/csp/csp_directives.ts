@@ -45,6 +45,8 @@ export const defaultReportOnlyRules: Partial<Record<CspDirectiveName, string[]>>
   'connect-src': [
     `'report-sample'`,
     `'self'`,
+    // TODO: Ideally, Core would not know about these endpoints, as they are governed by the Telemetry plugin.
+    // This can be improved once https://github.com/elastic/kibana/issues/181812 is implemented.
     'telemetry.elastic.co',
     'telemetry-staging.elastic.co',
   ],
