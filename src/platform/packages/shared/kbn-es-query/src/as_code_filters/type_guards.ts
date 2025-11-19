@@ -171,7 +171,7 @@ export function isFullyCompatible(storedFilter: StoredFilter): boolean {
 /**
  * Check if this is a phrase filter that can be converted to a simple condition
  */
-export function isPhraseFilterWithQuery(storedFilter: StoredFilter): boolean {
+function isPhraseFilter(storedFilter: StoredFilter): boolean {
   // match_phrase queries that can be simplified to phrase conditions
   if (storedFilter.query?.match_phrase) {
     return true;
@@ -214,7 +214,7 @@ export function isEnhancedCompatible(storedFilter: StoredFilter): boolean {
     hasTermsQuery(storedFilter.query) ||
     hasRangeQuery(storedFilter.query) ||
     hasExistsQuery(storedFilter.query) ||
-    isPhraseFilterWithQuery(storedFilter)
+    isPhraseFilter(storedFilter)
   ) {
     return true;
   }
