@@ -8,9 +8,9 @@
 import React from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useConversationContext } from '../../../../context/conversation/conversation_context';
-import { EmbeddedActionsRight } from './embedded_actions_right';
-import { FullScreenActionsRight } from './fullscreen_actions_right';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
+import { MoreActionsButton } from './more_actions_button';
+import { CloseDockedViewButton } from './close_docked_view_button';
 
 export interface ConversationRightActionsProps {
   onClose?: () => void;
@@ -33,7 +33,8 @@ export const ConversationRightActions: React.FC<ConversationRightActionsProps> =
       aria-label={labels.container}
       responsive={false}
     >
-      {isEmbeddedContext ? <EmbeddedActionsRight onClose={onClose} /> : <FullScreenActionsRight />}
+      <MoreActionsButton />
+      {isEmbeddedContext ? <CloseDockedViewButton onClose={onClose} /> : null}
     </EuiFlexGroup>
   );
 };
