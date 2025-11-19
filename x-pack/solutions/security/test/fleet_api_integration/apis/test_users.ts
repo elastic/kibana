@@ -187,6 +187,7 @@ export const testUsers: {
           'blocklist_read',
           'event_filters_read',
           'policy_management_read',
+          'trusted_devices_read',
         ],
         securitySolutionNotes: ['all'],
         securitySolutionTimeline: ['all'],
