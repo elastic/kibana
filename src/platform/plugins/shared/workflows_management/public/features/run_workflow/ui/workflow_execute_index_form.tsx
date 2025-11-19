@@ -34,6 +34,16 @@ import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';
 import { useKibana } from '../../../hooks/use_kibana';
 
+/**
+ * Strips HTML tags from a string to safely render text content.
+ * This removes the need for dangerouslySetInnerHTML while preserving the text content.
+ */
+function stripHtmlTags(html: string): string {
+  // Create a temporary div element to parse HTML
+  const doc = new DOMParser().parseFromString(html, 'text/html');
+  return doc.body.textContent || '';
+}
+
 interface Document {
   '@timestamp': string;
   agent?: string;
@@ -278,9 +288,9 @@ export const WorkflowExecuteIndexForm = ({
                   {formattedPairs.map(([title, description], index) => (
                     <React.Fragment key={index}>
                       <EuiDescriptionListTitle>{title}</EuiDescriptionListTitle>
-                      <EuiDescriptionListDescription
-                        dangerouslySetInnerHTML={{ __html: description || '-' }}
-                      />
+                      <EuiDescriptionListDescription>
+                        {stripHtmlTags(description || '-')}
+                      </EuiDescriptionListDescription>
                     </React.Fragment>
                   ))}
                 </EuiDescriptionList>
