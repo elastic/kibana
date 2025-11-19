@@ -9,7 +9,7 @@
 
 import type { RequestHandlerContext } from '@kbn/core/server';
 import type { ScanDashboardsResult } from './scan_dashboards';
-import type { DashboardState } from './content_management';
+import type { DashboardState } from './api';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DashboardPluginSetup {}
