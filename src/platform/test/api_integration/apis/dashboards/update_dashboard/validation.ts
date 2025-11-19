@@ -20,11 +20,13 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
         .set('elastic-api-version', '1')
-        .send({});
+        .send({
+          data: {},
+        });
       expect(response.status).to.be(400);
       expect(response.body.statusCode).to.be(400);
       expect(response.body.message).to.be(
-        '[request body.title]: expected value of type [string] but got [undefined]'
+        '[request body.data.title]: expected value of type [string] but got [undefined]'
       );
     });
 
@@ -35,13 +37,15 @@ export default function ({ getService }: FtrProviderContext) {
         .set('ELASTIC_HTTP_VERSION_HEADER', '2023-10-31')
         .set('elastic-api-version', '1')
         .send({
-          title: 'foo',
-          panels: {},
+          data: {
+            title: 'foo',
+            panels: {},
+          },
         });
       expect(response.status).to.be(400);
       expect(response.body.statusCode).to.be(400);
       expect(response.body.message).to.be(
-        '[request body.panels]: expected value of type [array] but got [Object]'
+        '[request body.data.panels]: expected value of type [array] but got [Object]'
       );
     });
   });

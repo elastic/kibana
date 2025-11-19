@@ -18,7 +18,7 @@ import {
 
 export interface LogSearchResult {
   total: number;
-  logs: Array<WorkflowLogEvent>;
+  logs: WorkflowLogEvent[];
 }
 
 export class LogsRepository {
@@ -187,3 +187,61 @@ export class LogsRepository {
     };
   }
 }
+
+// const { size = 100, page = 1, sortField = '@timestamp', sortOrder = 'desc' } = params;
+//       const from = (page - 1) * size;
+
+//       // Map API field names to Elasticsearch field names
+//       const fieldMapping: Record<string, string> = {
+//         timestamp: '@timestamp',
+//         '@timestamp': '@timestamp',
+//       };
+//       const mappedSortField = fieldMapping[sortField] || sortField;
+
+//       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//       const mustQueries: any[] = [];
+
+//       if ('executionId' in params) {
+//         mustQueries.push({
+//           term: { 'workflow.execution_id.keyword': params.executionId },
+//         });
+//       }
+
+//       if ('stepExecutionId' in params && params.stepExecutionId) {
+//         mustQueries.push({
+//           term: { 'workflow.step_execution_id.keyword': params.stepExecutionId },
+//         });
+//       }
+
+//       if ('stepId' in params && params.stepId) {
+//         mustQueries.push({
+//           term: { 'workflow.step_id.keyword': params.stepId },
+//         });
+//       }
+
+//       if (spaceId) {
+//         mustQueries.push({
+//           term: { 'spaceId.keyword': spaceId },
+//         });
+//       }
+
+//       const response = await this.esClient.search({
+//         index: this.logsIndex,
+//         size,
+//         from,
+//         query: {
+//           bool: {
+//             must: mustQueries,
+//           },
+//         },
+//         sort: [{ [mappedSortField]: { order: sortOrder } }],
+//       });
+
+//       // eslint-disable-next-line @typescript-eslint/no-explicit-any
+//       const logs = response.hits.hits.map((hit: any) => hit._source);
+//       const total =
+//         typeof response.hits.total === 'number'
+//           ? response.hits.total
+//           : response.hits.total?.value || 0;
+
+//       return { total, logs };

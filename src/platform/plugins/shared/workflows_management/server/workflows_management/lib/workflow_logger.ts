@@ -8,7 +8,7 @@
  */
 
 import type { Logger, LogMeta } from '@kbn/core/server';
-import type { LogsRepository } from '@kbn/workflows-execution-engine/server';
+import type { LogSearchResult, LogsRepository } from '@kbn/workflows-execution-engine/server';
 import type { GetExecutionLogsParams, GetStepLogsParams } from '../workflows_management_api';
 
 // Simple interfaces for workflow logging
@@ -17,24 +17,6 @@ export interface IWorkflowEventLogger {
   logInfo(message: string, meta?: any): void;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   logError(message: string, error?: Error, meta?: any): void;
-}
-
-export interface LogSearchResult {
-  total: number;
-  logs: Array<{
-    '@timestamp': string;
-    message: string;
-    level: string;
-    workflow?: {
-      id?: string;
-      name?: string;
-      execution_id?: string;
-      step_id?: string;
-      step_name?: string;
-    };
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    [key: string]: any;
-  }>;
 }
 
 // Simple logger implementation with console support and log search capabilities
