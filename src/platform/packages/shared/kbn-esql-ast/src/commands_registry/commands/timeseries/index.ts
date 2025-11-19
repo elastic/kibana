@@ -23,6 +23,7 @@ export const timeseriesCommand = {
   name: 'ts',
   methods: timeseriesCommandMethods,
   metadata: {
+    classification: 'source' as const,
     hidden: false,
     preview: true,
     description: i18n.translate('kbn-esql-ast.esql.definitions.metricsDoc', {
