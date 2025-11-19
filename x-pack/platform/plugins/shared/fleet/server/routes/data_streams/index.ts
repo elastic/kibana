@@ -106,7 +106,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
           ],
         },
       },
-      summary: `Check for deprecated ILM policies in use`,
+      summary: `Check if Fleet-managed component templates are using deprecated ILM policies that require manual migration`,
       options: {
         tags: ['oas-tag:Data streams'],
       },
