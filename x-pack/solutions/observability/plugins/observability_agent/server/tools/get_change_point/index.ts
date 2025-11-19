@@ -143,7 +143,7 @@ export async function createObservabilityGetLogChangePointTool({
               type: ToolResultType.other,
               data: {
                 content: {
-                  description: `For each item, the user can see the type of change, the impact, the timestamp, the trend, and the label.
+                  description: `For each item, the user can see the type of change (dip or spike), the impact, the timestamp, the trend, and the label.
                   Do not regurgitate these results back to the user.
                   Instead, focus on the interesting changes, mention possible correlations or root causes, and suggest next steps to the user.
                   "indeterminate" means that the system could not detect any changes.`,
