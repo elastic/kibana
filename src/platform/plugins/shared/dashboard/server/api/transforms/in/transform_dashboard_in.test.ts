@@ -11,6 +11,13 @@ import { DEFAULT_DASHBOARD_OPTIONS } from '../../../../common/constants';
 import type { DashboardState } from '../../types';
 import { transformDashboardIn } from './transform_dashboard_in';
 
+jest.mock('../../../kibana_services', () => ({
+  ...jest.requireActual('../../../kibana_services'),
+  embeddableService: {
+    getTransforms: jest.fn(),
+  },
+}));
+
 describe('transformDashboardIn', () => {
   test('should transform dashboard state to saved object', () => {
     const dashboardState: DashboardState = {
@@ -71,10 +78,7 @@ describe('transformDashboardIn', () => {
       Object {
         "attributes": Object {
           "controlGroupInput": Object {
-            "controlStyle": "twoLine",
-            "ignoreParentSettingsJSON": "{\\"ignoreFilters\\":true,\\"ignoreQuery\\":true,\\"ignoreTimerange\\":true,\\"ignoreValidations\\":true}",
-            "panelsJSON": "{\\"foo\\":{\\"grow\\":false,\\"order\\":0,\\"type\\":\\"type1\\",\\"width\\":\\"small\\",\\"explicitInput\\":{\\"anyKey\\":\\"some value\\"}}}",
-            "showApplySelections": true,
+            "panelsJSON": "{\\"foo\\":{\\"order\\":0,\\"type\\":\\"type1\\",\\"width\\":\\"small\\",\\"grow\\":false,\\"explicitInput\\":{\\"id\\":\\"foo\\",\\"controlConfig\\":{\\"anyKey\\":\\"some value\\"},\\"order\\":0}}}",
           },
           "description": "description",
           "kibanaSavedObjectMeta": Object {
@@ -113,7 +117,7 @@ describe('transformDashboardIn', () => {
           "kibanaSavedObjectMeta": Object {
             "searchSourceJSON": "{}",
           },
-          "optionsJSON": "{\\"hidePanelTitles\\":false,\\"useMargins\\":true,\\"syncColors\\":false,\\"syncCursor\\":true,\\"syncTooltips\\":false}",
+          "optionsJSON": "{\\"hidePanelTitles\\":false,\\"useMargins\\":true,\\"autoApplyFilters\\":true,\\"syncColors\\":true,\\"syncCursor\\":true,\\"syncTooltips\\":true}",
           "panelsJSON": "[]",
           "timeRestore": false,
           "title": "title",
