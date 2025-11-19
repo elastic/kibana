@@ -141,7 +141,7 @@ describe('sendUpgradeAgentsActions (plural)', () => {
 });
 
 describe('getRollingUpgradeOptions', () => {
-  it('should 1m expiration for 1h duration', () => {
+  it('should 1 month expiration for 1h duration', () => {
     const options = getRollingUpgradeOptions('2023-01-06T00:00:00Z', 3600);
     expect(options).toEqual({
       expiration: '2023-02-05T00:00:00.000Z',
