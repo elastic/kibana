@@ -2525,6 +2525,7 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/ent
 /x-pack/platform/plugins/shared/stack_connectors/common/thehive @elastic/security-threat-hunting
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/thehive @elastic/security-threat-hunting
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/thehive @elastic/security-threat-hunting
+src/platform/packages/shared/kbn-connector-schemas/thehive @elastic/security-threat-hunting
 
 /x-pack/solutions/security/plugins/security_solution/common/siem_migrations @elastic/security-threat-hunting
 /x-pack/solutions/security/plugins/security_solution/public/common/components/control_columns @elastic/security-threat-hunting
@@ -2671,21 +2672,25 @@ x-pack/solutions/security/test/security_solution_api_integration/test_suites/inv
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/openai @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/openai @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
 /x-pack/platform/plugins/shared/stack_connectors/common/openai @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
+/src/platform/packages/shared/kbn-connector-schemas/openai @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
 # Bedrock
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/bedrock @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/bedrock @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
 /x-pack/platform/plugins/shared/stack_connectors/common/bedrock @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
+/src/platform/packages/shared/kbn-connector-schemas/bedrock @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
 
 # Gemini
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/gemini @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/gemini @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
 /x-pack/platform/plugins/shared/stack_connectors/common/gemini @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
+/src/platform/packages/shared/kbn-connector-schemas/gemini @elastic/security-generative-ai @elastic/obs-ai-assistant @elastic/appex-ai-infra
 
 # Inference API
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
 /x-pack/platform/plugins/shared/stack_connectors/common/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
 /x-pack/platform/plugins/shared/stack_connectors/server/usage/inference @elastic/appex-ai-infra
+/src/platform/packages/shared/kbn-connector-schemas/inference @elastic/appex-ai-infra @elastic/security-generative-ai @elastic/obs-ai-assistant
 
 # Token tracking
 x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/security-generative-ai
@@ -2694,15 +2699,18 @@ x-pack/platform/plugins/shared/actions/server/lib/token_tracking @elastic/securi
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/sentinelone @elastic/security-defend-workflows
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/sentinelone @elastic/security-defend-workflows
 /x-pack/platform/plugins/shared/stack_connectors/common/sentinelone @elastic/security-defend-workflows
+/src/platform/packages/shared/kbn-connector-schemas/sentinelone @elastic/security-defend-workflows
 /x-pack/solutions/security/test/api_integration_basic @elastic/security-defend-workflows
 /x-pack/solutions/security/test/alerting_api_integration/security_and_spaces @elastic/security-defend-workflows
 /x-pack/solutions/security/test/alerting_api_integration/security_and_spaces/group2/tests/actions/connector_types/sentinelone.ts @elastic/security-defend-workflows
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/crowdstrike @elastic/security-defend-workflows
 /x-pack/platform/plugins/shared/stack_connectors/common/crowdstrike @elastic/security-defend-workflows
+/src/platform/packages/shared/kbn-connector-schemas/crowdstrike @elastic/security-defend-workflows
 /x-pack/solutions/security/test/alerting_api_integration/security_and_spaces/group2/tests/actions/connector_types/crowdstrike.ts @elastic/security-defend-workflows
 /x-pack/platform/plugins/shared/stack_connectors/public/connector_types/microsoft_defender_endpoint @elastic/security-defend-workflows
 /x-pack/platform/plugins/shared/stack_connectors/server/connector_types/microsoft_defender_endpoint @elastic/security-defend-workflows
 /x-pack/platform/plugins/shared/stack_connectors/common/microsoft_defender_endpoint @elastic/security-defend-workflows
+/src/platform/packages/shared/kbn-connector-schemas/microsoft_defender_endpoint @elastic/security-defend-workflows
 /x-pack/solutions/security/test/alerting_api_integration/security_and_spaces/group2/tests/actions/connector_types/microsoft_defender_endpoint.ts @elastic/security-defend-workflows
 
 
