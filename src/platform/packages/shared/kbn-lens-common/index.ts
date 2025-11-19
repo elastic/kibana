@@ -238,12 +238,12 @@ export type {
   ValidXYDataLayerConfig,
   ValidLayer,
   XYState,
-  State,
 } from './visualizations/xy/types';
 export type {
   LensEmbeddableInput,
   TypedLensByValueInput,
   LensSerializedState,
+  LensSerializedSharedState,
   LensByReferenceInput,
   LensSavedObjectAttributes,
   VisualizationContextHelper,
@@ -258,6 +258,7 @@ export type {
   IntegrationCallbacks,
   LensPublicCallbacks,
   LensApiCallbacks,
+  LensRequestHandlersProps,
   LensUnifiedSearchContext,
   LensPanelProps,
   LensSharedProps,
@@ -267,15 +268,12 @@ export type {
   LensRuntimeState,
   LensHasEditPanel,
   LensInspectorAdapters,
-  LensApi,
-  LensParentApi,
   LensInternalApi,
   ExpressionWrapperProps,
   GetStateType,
   StructuredDatasourceStates,
   LensByValueInput,
   TypedLensSerializedState,
-  LensEmbeddableOutput,
   ESQLVariablesCompatibleDashboardApi,
   LensByValueBase,
 } from './embeddable/types';
@@ -296,6 +294,7 @@ export {
   LENS_RANGE_MODES,
 } from './datasources/constants';
 export {
+  LENS_UNKNOWN_VIS,
   LENS_CATEGORY_DISPLAY,
   LENS_NUMBER_DISPLAY,
   LENS_LEGEND_DISPLAY,

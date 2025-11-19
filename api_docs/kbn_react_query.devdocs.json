@@ -12544,6 +12544,10 @@
                 "path": "x-pack/platform/plugins/shared/cases/public/components/connectors/servicenow/use_get_choices.tsx"
               },
               {
+                "plugin": "onechat",
+                "path": "x-pack/platform/plugins/shared/onechat/public/application/hooks/use_conversation.ts"
+              },
+              {
                 "plugin": "osquery",
                 "path": "x-pack/platform/plugins/shared/osquery/public/actions/use_live_query_details.ts"
               },
@@ -12719,11 +12723,39 @@
               },
               {
                 "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/containers/configure/use_get_supported_action_connectors.tsx"
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_tags.tsx"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/use_bulk_get_user_profiles.ts"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/use_suggest_user_profiles.ts"
               },
               {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/containers/configure/use_get_case_configurations_query.tsx"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_categories.tsx"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_cases_metrics.tsx"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/configure/use_get_supported_action_connectors.tsx"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_cases.tsx"
+              },
+              {
+                "plugin": "cases",
+                "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/use_get_current_user_profile.ts"
               },
               {
                 "plugin": "cases",
@@ -12752,34 +12784,6 @@
               {
                 "plugin": "cases",
                 "path": "x-pack/platform/plugins/shared/cases/public/components/connectors/servicenow/use_get_choices.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_tags.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_categories.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/use_suggest_user_profiles.ts"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/use_get_current_user_profile.ts"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/containers/user_profiles/use_bulk_get_user_profiles.ts"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_cases_metrics.tsx"
-              },
-              {
-                "plugin": "cases",
-                "path": "x-pack/platform/plugins/shared/cases/public/containers/use_get_cases.tsx"
               },
               {
                 "plugin": "cases",
