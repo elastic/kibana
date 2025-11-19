@@ -25,6 +25,7 @@ describe('FiltersSection', () => {
       <TestProviders>
         <FiltersSection
           pageFilters={[]}
+          assignees={[]}
           dataView={dataView}
           setPageFilterHandler={jest.fn()}
           setPageFilters={jest.fn()}
@@ -43,6 +44,7 @@ describe('FiltersSection', () => {
       <TestProviders>
         <FiltersSection
           pageFilters={[]}
+          assignees={[]}
           dataView={dataView}
           setPageFilterHandler={jest.fn()}
           setPageFilters={jest.fn()}

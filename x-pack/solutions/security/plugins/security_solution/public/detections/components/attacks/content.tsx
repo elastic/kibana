@@ -150,6 +150,7 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
           <FiltersSection
             dataView={dataView}
             pageFilters={pageFilters}
+            assignees={assignees}
             setStatusFilter={setStatusFilter}
             setPageFilters={setPageFilters}
             setPageFilterHandler={setPageFilterHandler}
