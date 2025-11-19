@@ -56,7 +56,7 @@ MANDATORY WORKFLOW - Complete in order:
 
 2. Query RELATED ALERTS:
    Tool: ${platformCoreTools.search}
-   Parameters: { query: "Find security alerts from last 7 days where host.name is '[host]' OR user.name is '[user]' OR source.ip is '[ip]' OR destination.ip is '[dest_ip]'", index: ".alerts-security.alerts-*" }
+   Parameters: { query: "Find security alerts from last 7 days where host.name is '[host]' OR user.name is '[user]' OR source.ip is '[ip]' OR destination.ip is '[dest_ip]'", index: ".alerts-security.alerts-default" }
 
 3. Query RISK SCORES:
    Tool: ${platformCoreTools.search}
@@ -64,11 +64,11 @@ MANDATORY WORKFLOW - Complete in order:
 
 4. Query ATTACK DISCOVERIES:
    Tool: ${platformCoreTools.search}
-   Parameters: { query: "Find attack discoveries where kibana.alert.attack_discovery.alert_ids contains '[alert ID]'", index: ".alerts-security.alerts-attack.discovery-*,.adhoc.alerts-security.alerts-attack.discovery-*" }
+   Parameters: { query: "Find attack discoveries where kibana.alert.attack_discovery.alert_ids contains '[alert ID]'", index: ".alerts-security.alerts-attack.discovery-default,.adhoc.alerts-security.alerts-attack.discovery-default" }
 
 5. Query SECURITY LABS:
    Tool: ${platformCoreTools.search}
-   Parameters: { query: "Find Security Labs articles about [MITRE technique or rule name]", index: ".kibana-elastic-ai-assistant-knowledge-base-*" }
+   Parameters: { query: "Find Security Labs articles about [MITRE technique or rule name]", index: ".kibana-elastic-ai-assistant-knowledge-base-default" }
 
 CRITICAL: You MUST call all 4 tools (steps 2-5) before responding. Do not skip any step.`;
       return description;
