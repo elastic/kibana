@@ -24,9 +24,8 @@ import { z } from '@kbn/zod';
 import type { Logger } from '@kbn/logging';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { AxiosInstance } from 'axios';
-import { withUIMeta } from './connector_spec_ui';
 
-export { withUIMeta, UISchemas } from './connector_spec_ui';
+export { UISchemas } from './connector_spec_ui';
 
 // ============================================================================
 // INTERNATIONALIZATION
@@ -91,7 +90,7 @@ export const BasicAuthSchema = z.object({
   method: z.literal('basic'),
   credentials: z.object({
     username: z.string().describe('Username'),
-    password: withUIMeta(z.string(), { sensitive: true }).describe('Password'),
+    password: z.string().meta({ sensitive: true }).describe('Password'),
   }),
 });
 
@@ -101,7 +100,7 @@ export const BasicAuthSchema = z.object({
  */
 export const BearerAuthSchema = z.object({
   method: z.literal('bearer'),
-  token: withUIMeta(z.string(), { sensitive: true }).describe('Bearer Token'),
+  token: z.string().meta({ sensitive: true }).describe('Bearer Token'),
 });
 
 // ============================================================================
@@ -111,68 +110,6 @@ export const BearerAuthSchema = z.object({
 // - SSL/mTLS (certificate-based authentication)
 // - AWS SigV4 (AWS service authentication)
 // - Custom (connector-specific auth flows)
-
-// ============================================================================
-// POLICIES
-// ============================================================================
-
-export const RETRY_RATE_LIMIT = [429, 503] as const;
-export const RETRY_SERVER_ERRORS = [500, 502, 503, 504] as const;
-export const RETRY_GATEWAY_ERRORS = [502, 503, 504] as const;
-export const RETRY_TIMEOUT_AND_RATE_LIMIT = [408, 429, 503] as const;
-
-export interface RateLimitPolicy {
-  strategy: 'header' | 'status_code' | 'response_body';
-  codes?: number[];
-  remainingHeader?: string;
-  resetHeader?: string;
-  bodyPath?: string;
-}
-
-export interface PaginationPolicy {
-  strategy: 'cursor' | 'offset' | 'link_header' | 'none';
-  parameterLocation?: 'query_params' | 'headers' | 'body';
-  resultPath?: string;
-  cursorParam?: string;
-  cursorPath?: string;
-  offsetParam?: string;
-  limitParam?: string;
-  linkHeaderName?: string;
-  pageSizeParam?: string;
-  defaultPageSize?: number;
-}
-
-export interface RetryPolicy {
-  retryOnStatusCodes?: number[];
-  customRetryCondition?: (error: {
-    status?: number;
-    message?: string;
-    response?: unknown;
-  }) => boolean;
-  maxRetries?: number;
-  backoffStrategy?: 'exponential' | 'linear' | 'fixed';
-  initialDelay?: number;
-}
-
-export interface ErrorPolicy {
-  classifyError?: (error: { status?: number; message?: string }) => 'user' | 'system' | 'unknown';
-  userErrorCodes?: number[];
-  systemErrorCodes?: number[];
-}
-
-export interface StreamingPolicy {
-  enabled: boolean;
-  mechanism?: 'sse' | 'chunked' | 'websocket';
-  parser?: 'ndjson' | 'json' | 'text' | 'custom';
-}
-
-export interface ConnectorPolicies {
-  rateLimit?: RateLimitPolicy;
-  pagination?: PaginationPolicy;
-  retry?: RetryPolicy;
-  error?: ErrorPolicy;
-  streaming?: StreamingPolicy;
-}
 
 // ============================================================================
 // ACTIONS
@@ -189,11 +126,16 @@ export interface ActionDefinition<TInput = unknown, TOutput = unknown, TError = 
   supportsStreaming?: boolean;
 }
 
+/**
+ * Context provided to action handlers
+ *
+ * Note: The axios client is pre-configured with authentication by the framework.
+ * Actions typically don't need to handle auth manually.
+ */
 export interface ActionContext {
-  auth: { method: string; headers: Record<string, string>; [key: string]: unknown };
   log: Logger;
-  client: AxiosInstance;
-  config?: Record<string, unknown>;
+  client: AxiosInstance; // Pre-configured with auth, baseURL, headers, etc.
+  config?: Record<string, unknown>; // Connector config (non-auth fields)
   connectorUsageCollector?: unknown;
 }
 
@@ -201,20 +143,25 @@ export interface ActionContext {
 // TRANSFORMATIONS
 // ============================================================================
 
+/**
+ * Template rendering for action inputs
+ * WHY: Actions need to render user input with context variables (e.g., {{workflow.data}})
+ */
 export interface TemplateRendering {
   enabled: boolean;
   format?: 'mustache' | 'handlebars' | 'custom';
   escaping?: 'html' | 'json' | 'markdown' | 'none';
 }
 
+/**
+ * Transformations for Phase 1
+ *
+ * WHY: Template rendering is connector-level (same for all actions).
+ * Request/response processing is action-specific and belongs in action handlers.
+ */
 export interface Transformations {
   templates?: TemplateRendering;
-  serializeRequest?: (data: unknown) => unknown;
-  deserializeResponse?: (data: unknown) => unknown;
-  interceptors?: {
-    request?: (config: unknown) => unknown | Promise<unknown>;
-    response?: (response: unknown) => unknown | Promise<unknown>;
-  };
+  // Phase 2: Add interceptors if needed for global request/response transformation
 }
 
 // ============================================================================
@@ -234,18 +181,22 @@ export interface ConnectorTest {
 // MAIN CONNECTOR DEFINITION
 // ============================================================================
 
+/**
+ * Complete connector specification
+ *
+ * URL Validation: Use Zod's .refine() in schema instead of separate validateUrls field
+ * @example
+ * schema: z.object({
+ *   apiUrl: z.string().url()
+ *     .refine((url) => isAllowlisted(url), "URL not in allowlist")
+ * })
+ */
 export interface ConnectorSpec {
   metadata: ConnectorMetadata;
 
   // Single unified schema for all connector fields (config + secrets)
-  // Mark sensitive fields with withUIMeta({ sensitive: true })
+  // Mark sensitive fields with .meta({ sensitive: true })
   schema: z.ZodSchema;
-
-  validateUrls?: {
-    fields?: string[];
-  };
-
-  policies?: ConnectorPolicies;
 
   actions: Record<string, ActionDefinition>;
 
@@ -257,14 +208,6 @@ export interface ConnectorSpec {
 // ============================================================================
 // HELPER UTILITIES
 // ============================================================================
-
-export function requiresCredentials(auth: { method: string }): boolean {
-  return auth.method !== 'none' && auth.method !== 'webhook';
-}
-
-export function supportsStreaming(connector: ConnectorSpec): boolean {
-  return connector.policies?.streaming?.enabled ?? false;
-}
 
 export function getActionNames(connector: ConnectorSpec): string[] {
   return Object.keys(connector.actions);
