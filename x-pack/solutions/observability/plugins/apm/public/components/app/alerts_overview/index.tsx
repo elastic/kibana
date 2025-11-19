@@ -62,8 +62,20 @@ export function AlertsOverview() {
     const filters: Filter[] = [
       {
         query: {
-          match_phrase: {
-            [SERVICE_NAME]: serviceName,
+          bool: {
+            should: [
+              {
+                match_phrase: {
+                  [SERVICE_NAME]: serviceName,
+                },
+              },
+              {
+                match: {
+                  'kibana.alert.rule.entities': serviceName,
+                },
+              },
+            ],
+            minimum_should_match: 1,
           },
         },
         meta: {},
