@@ -188,7 +188,8 @@ export const allowedExperimentalValues = Object.freeze({
    * tools (alerts, security labs, product documentation) and the Security Agent.
    * Enable via: xpack.securitySolution.enableExperimental: ['agentBuilderEnabled']
    */
-  agentBuilderEnabled: false,
+  // TODO IMPORTANT!!! DO NOT MERGE WITH TRUE, FOR CLOUD TESTING ONLY
+  agentBuilderEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
