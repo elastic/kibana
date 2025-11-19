@@ -91,18 +91,12 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
       await http.delete('/internal/cloud_connect/cluster');
 
       notifications.toasts.addSuccess({
-        title: i18n.translate(
-          'xpack.cloudConnect.connectedServices.disconnect.successTitle',
-          {
-            defaultMessage: 'Cluster disconnected successfully'
-          }
-        ),
-        text: i18n.translate(
-          'xpack.cloudConnect.connectedServices.disconnect.successMessage',
-          {
-            defaultMessage: 'Your cluster has been disconnected from Cloud Connect.'
-          }
-        ),
+        title: i18n.translate('xpack.cloudConnect.connectedServices.disconnect.successTitle', {
+          defaultMessage: 'Cluster disconnected successfully',
+        }),
+        text: i18n.translate('xpack.cloudConnect.connectedServices.disconnect.successMessage', {
+          defaultMessage: 'Your cluster has been disconnected from Cloud Connect.',
+        }),
       });
 
       closeDisconnectModal();
@@ -111,12 +105,9 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
       window.location.reload();
     } catch (error) {
       notifications.toasts.addError(error as Error, {
-        title: i18n.translate(
-          'xpack.cloudConnect.connectedServices.disconnect.errorTitle',
-          {
-            defaultMessage: 'Failed to disconnect cluster'
-          }
-        ),
+        title: i18n.translate('xpack.cloudConnect.connectedServices.disconnect.errorTitle', {
+          defaultMessage: 'Failed to disconnect cluster',
+        }),
       });
       setIsDisconnecting(false);
     }

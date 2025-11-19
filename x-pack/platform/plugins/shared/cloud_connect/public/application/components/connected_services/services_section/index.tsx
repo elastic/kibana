@@ -172,9 +172,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onRe
             defaultMessage: 'This service is not supported with the current cluster configuration.',
           })
         : undefined,
-      region: services.auto_ops?.config?.region_id
-        ? services.auto_ops.config.region_id
-        : undefined,
+      region: services.auto_ops?.config?.region_id ? services.auto_ops.config.region_id : undefined,
       description: i18n.translate(SERVICE_CONFIG.auto_ops.descriptionId, {
         defaultMessage: SERVICE_CONFIG.auto_ops.descriptionDefault,
       }),
