@@ -78,8 +78,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await discover.getHitCount()).to.be(totalCount);
   }
 
-  // TODO: see https://github.com/elastic/kibana/pull/243499
-  describe.skip('discover lens vis', function () {
+  describe('discover lens vis', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded(
@@ -398,7 +397,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
 
       await checkESQLHistogramVis(defaultTimespanESQL, '5', true);
-      await discover.chooseLensSuggestion('pie');
+      await discover.chooseLensSuggestion('treemap');
 
       await testSubjects.existOrFail('unsavedChangesBadge');
       expect(await monacoEditor.getCodeEditorValue()).to.contain('averageA');
@@ -451,7 +450,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
 
       await checkESQLHistogramVis(defaultTimespanESQL, '5', true);
-      await discover.chooseLensSuggestion('pie');
+      await discover.chooseLensSuggestion('treemap');
 
       await testSubjects.existOrFail('unsavedChangesBadge');
       expect(await monacoEditor.getCodeEditorValue()).to.contain('averageA');
@@ -495,7 +494,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
 
       await checkESQLHistogramVis(defaultTimespanESQL, '5', true);
-      await discover.chooseLensSuggestion('pie');
+      await discover.chooseLensSuggestion('treemap');
 
       await discover.saveSearch('testCustomESQLVis');
       await discover.saveSearch('testCustomESQLVisPartition', true);
