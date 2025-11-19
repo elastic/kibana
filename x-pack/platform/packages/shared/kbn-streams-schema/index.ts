@@ -158,3 +158,5 @@ export {
   type DocumentsMetrics,
   type ProcessingSimulationResponse,
 } from './src/models/processing_simulation';
+
+export { type IngestStreamProcessing } from './src/models/ingest/processing';
