@@ -10,32 +10,8 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import '@testing-library/jest-dom';
 
-// Monaco Editor 0.45.0+ unconditionally calls navigator.clipboard.write() and new ClipboardItem()
-// These APIs don't exist in JSDOM and need to be mocked
-if (!window.ClipboardItem) {
-  window.ClipboardItem = class ClipboardItem {
-    constructor(public data: Record<string, string | Blob | PromiseLike<string | Blob>>) {}
-
-    public get types(): readonly string[] {
-      return Object.keys(this.data);
-    }
-
-    public async getType(type: string): Promise<Blob> {
-      const data = this.data[type];
-      if (typeof data === 'string') {
-        return new Blob([data]);
-      }
-      if (data instanceof Blob) {
-        return data;
-      }
-      // It's a PromiseLike
-      const resolved = await data;
-      return typeof resolved === 'string' ? new Blob([resolved]) : resolved;
-    }
-  };
-}
-
-// navigator.clipboard mock - handles Monaco's cancelled clipboard promises
+// Mock navigator.clipboard for Monaco Editor 0.45.0+
+// Monaco's clipboard service cancels DeferredPromises which causes unhandled rejections in tests
 Object.defineProperty(navigator, 'clipboard', {
   value: {
     writeText: jest.fn().mockResolvedValue(undefined),
