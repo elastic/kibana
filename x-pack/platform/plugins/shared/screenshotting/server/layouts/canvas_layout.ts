@@ -8,6 +8,7 @@
 import type { LayoutSelectorDictionary, Size } from '../../common/layout';
 import { DEFAULT_SELECTORS } from '.';
 import type { Layout } from '.';
+import type { PdfImageSize } from './base_layout';
 import { BaseLayout } from './base_layout';
 
 // FIXME - should use zoom from capture config
@@ -25,6 +26,7 @@ export class CanvasLayout extends BaseLayout implements Layout {
   public readonly width: number;
   private readonly scaledHeight: number;
   private readonly scaledWidth: number;
+  private imageSize: PdfImageSize = { height: 0, width: 0 };
 
   public hasHeader: boolean = false;
   public hasFooter: boolean = false;
@@ -65,11 +67,12 @@ export class CanvasLayout extends BaseLayout implements Layout {
     };
   }
 
+  public setPdfImageSize({ height, width }: PdfImageSize): void {
+    this.imageSize = { height, width };
+  }
+
   public getPdfImageSize() {
-    return {
-      height: this.height,
-      width: this.width,
-    };
+    return this.imageSize;
   }
 
   public getPdfPageSize(): Size {
