@@ -202,6 +202,12 @@ export interface CodeEditorProps {
    */
   onFocus?: () => void;
   onBlur?: () => void;
+
+  /**
+   * Enables the suggestion widget repositioning. Enabled by default.
+   * Disabled for cases like embedded console.
+   */
+  enableSuggestWidgetRepositioning?: boolean;
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -241,6 +247,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   htmlId,
   onFocus,
   onBlur,
+  enableSuggestWidgetRepositioning = true,
 }) => {
   const { euiTheme } = useEuiTheme();
   const { registerContextMenuActions, unregisterContextMenuActions } = useContextMenuUtils();
@@ -611,7 +618,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           </div>
         ) : null}
         <UseBug177756ReBroadcastMouseDown>
-          <UseBug223981FixRepositionSuggestWidget editor={_editor}>
+          <UseBug223981FixRepositionSuggestWidget
+            editor={_editor}
+            enableSuggestWidgetRepositioning={enableSuggestWidgetRepositioning}
+          >
             {accessibilityOverlayEnabled && isFullScreen && renderPrompt()}
             <MonacoEditor
               theme={theme}
@@ -645,7 +655,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                 fontSize: isFullScreen ? 16 : 12,
                 lineHeight: isFullScreen ? 24 : 21,
                 contextmenu: enableCustomContextMenu,
-                fixedOverflowWidgets: true,
+                fixedOverflowWidgets: enableSuggestWidgetRepositioning,
                 // @ts-expect-error, see https://github.com/microsoft/monaco-editor/issues/3829
                 'bracketPairColorization.enabled': false,
                 ...options,
@@ -842,8 +852,11 @@ const useFitToContent = ({
  * @description See {@link https://github.com/elastic/kibana/issues/223981} for the rationale behind this bug fix implementation
  */
 const UseBug223981FixRepositionSuggestWidget: FC<
-  PropsWithChildren<{ editor: monaco.editor.IStandaloneCodeEditor | null }>
-> = ({ children, editor }) => {
+  PropsWithChildren<{
+    editor: monaco.editor.IStandaloneCodeEditor | null;
+    enableSuggestWidgetRepositioning: boolean;
+  }>
+> = ({ children, editor, enableSuggestWidgetRepositioning }) => {
   const { euiTheme } = useEuiTheme();
   const suggestWidgetModifierClassName = 'kibanaCodeEditor__suggestWidgetModifier';
 
@@ -851,9 +864,13 @@ const UseBug223981FixRepositionSuggestWidget: FC<
     // @ts-expect-errors -- "widget" is not part of the TS interface but does exist
     const suggestionWidget = editor?.getContribution('editor.contrib.suggestController')?.widget
       ?.value;
-
     // The "onDidShow" and "onDidHide" is not documented so we guard from possible changes in the underlying lib
-    if (suggestionWidget && suggestionWidget.onDidShow && suggestionWidget.onDidHide) {
+    if (
+      suggestionWidget &&
+      suggestionWidget.onDidShow &&
+      suggestionWidget.onDidHide &&
+      enableSuggestWidgetRepositioning
+    ) {
       let $suggestWidgetNode: HTMLElement | null = null;
 
       // add a className that hides the suggestion widget by default so we might be to correctly position the suggestion widget,
@@ -879,18 +896,20 @@ const UseBug223981FixRepositionSuggestWidget: FC<
         }
       });
     }
-  }, [editor, euiTheme.size.m]);
+  }, [editor, euiTheme.size.m, enableSuggestWidgetRepositioning]);
 
   return (
     <React.Fragment>
-      <Global
-        // @ts-expect-error -- it's necessary that we apply the important modifier
-        styles={{
-          [`.${suggestWidgetModifierClassName}`]: {
-            visibility: 'hidden !important',
-          },
-        }}
-      />
+      {enableSuggestWidgetRepositioning && (
+        <Global
+          // @ts-expect-error -- it's necessary that we apply the important modifier
+          styles={{
+            [`.${suggestWidgetModifierClassName}`]: {
+              visibility: 'hidden !important',
+            },
+          }}
+        />
+      )}
       <React.Fragment>{children}</React.Fragment>
     </React.Fragment>
   );

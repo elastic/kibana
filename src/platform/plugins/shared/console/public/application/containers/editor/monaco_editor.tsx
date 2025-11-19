@@ -56,9 +56,15 @@ export interface EditorProps {
   localStorageValue: string | undefined;
   value: string;
   setValue: (value: string) => void;
+  enableSuggestWidgetRepositioning: boolean;
 }
 
-export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps) => {
+export const MonacoEditor = ({
+  localStorageValue,
+  value,
+  setValue,
+  enableSuggestWidgetRepositioning,
+}: EditorProps) => {
   const context = useServicesContext();
   const {
     services: {
@@ -294,6 +300,7 @@ export const MonacoEditor = ({ localStorageValue, value, setValue }: EditorProps
         suggestionProvider={suggestionProvider}
         enableFindAction={true}
         enableCustomContextMenu={true}
+        enableSuggestWidgetRepositioning={enableSuggestWidgetRepositioning}
       />
     </div>
   );
