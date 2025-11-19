@@ -32,7 +32,7 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
   let detectionRulesClient: IDetectionRulesClient;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
-  let actionsClient: jest.Mocked<ActionsClient>;
+  const actionsClient: jest.Mocked<ActionsClient> = {} as unknown as jest.Mocked<ActionsClient>;
 
   beforeEach(() => {
     rulesClient = rulesClientMock.create();
@@ -40,7 +40,6 @@ describe('DetectionRulesClient.createPrebuiltRule', () => {
 
     const savedObjectsClient = savedObjectsClientMock.create();
     detectionRulesClient = createDetectionRulesClient({
-      // @ts-expect-error upgrade typescript v5.9.3
       actionsClient,
       rulesClient,
       mlAuthz,

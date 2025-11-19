@@ -24,13 +24,13 @@ export const getEmptyString = () => `(${i18n.EMPTY_STRING})`;
 export const getEmptyTagValue = () => <EmptyWrapper>{getEmptyValue()}</EmptyWrapper>;
 export const getEmptyStringTag = () => <EmptyWrapper>{getEmptyString()}</EmptyWrapper>;
 
-export const defaultToEmptyTag = <T extends unknown>(item: T): JSX.Element => {
+export const defaultToEmptyTag = <T extends ReactNode>(item: T): JSX.Element => {
   if (item == null) {
     return getEmptyTagValue();
   } else if (isString(item) && item === '') {
     return getEmptyStringTag();
   } else {
-    return <>{item as ReactNode}</>;
+    return <>{item}</>;
   }
 };
 

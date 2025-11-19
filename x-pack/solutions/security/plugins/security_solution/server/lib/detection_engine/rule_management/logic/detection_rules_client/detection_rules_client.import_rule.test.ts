@@ -31,7 +31,7 @@ describe('DetectionRulesClient.importRule', () => {
   let detectionRulesClient: IDetectionRulesClient;
 
   const mlAuthz = (buildMlAuthz as jest.Mock)();
-  let actionsClient: jest.Mocked<ActionsClient>;
+  const actionsClient: jest.Mocked<ActionsClient> = {} as unknown as jest.Mocked<ActionsClient>;
 
   const allowMissingConnectorSecrets = true;
   const ruleToImport = {
@@ -49,7 +49,6 @@ describe('DetectionRulesClient.importRule', () => {
     rulesClient.update.mockResolvedValue(getRuleMock(getQueryRuleParams()));
     const savedObjectsClient = savedObjectsClientMock.create();
     detectionRulesClient = createDetectionRulesClient({
-      // @ts-expect-error upgrade typescript v5.9.3
       actionsClient,
       rulesClient,
       mlAuthz,
