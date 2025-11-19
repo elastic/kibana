@@ -14,7 +14,6 @@ const ORCHESTRATOR_NAMESPACE_PROPERTY = 'orchestrator.namespace';
 const CONTAINER_IMAGE_NAME_PROPERTY = 'container.image.name';
 const TIMESTAMP_PROPERTY = '@timestamp';
 
-// eslint-disable-next-line import/no-default-export
 export default function countTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
