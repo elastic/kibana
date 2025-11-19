@@ -127,7 +127,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onRe
   };
 
   // Build service cards array
-  const serviceCards = [
+  const allServiceCards = [
     // EIS Service
     {
       key: 'eis',
@@ -210,6 +210,13 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onRe
       isCardDisabled: true,
     },
   ];
+
+  // Sort service cards: enabled first, then disabled, coming soon always last
+  const enabledCards = allServiceCards.filter((card) => card.enabled && !card.isCardDisabled);
+  const disabledCards = allServiceCards.filter((card) => !card.enabled && !card.isCardDisabled);
+  const comingSoonCards = allServiceCards.filter((card) => card.isCardDisabled);
+
+  const serviceCards = [...enabledCards, ...disabledCards, ...comingSoonCards];
 
   return (
     <>
