@@ -9,6 +9,7 @@
 
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { KQLSyntaxError } from '@kbn/es-query';
 import type { StackFrame, StepContext, WorkflowContext } from '@kbn/workflows';
 import { parseJsPropertyAccess } from '@kbn/workflows/common/utils';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
@@ -19,7 +20,6 @@ import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { RunStepResult } from '../step/node_implementation';
 import type { WorkflowTemplatingEngine } from '../templating_engine';
 import { buildStepExecutionId, evaluateKql } from '../utils';
-import { KQLSyntaxError } from '@kbn/es-query';
 
 export interface ContextManagerInit {
   // New properties for logging
@@ -298,6 +298,19 @@ export class WorkflowContextManager {
               stepContext.foreach = stepExecution.state as StepContext['foreach'];
             }
             break;
+        }
+
+        if (topFrame.scopeId === 'fallback') {
+          // This is not good approach, but we can't do it better right now.
+          // The problem is that Context is dynamic depending on the step scopes (like whether the current step is inside foreach, fallback path, etc)
+          // but here we are trying to mutate the static StepContext object.
+          // Proper solution would be to have dynamic context object that would resolve properties on demand,
+          // but it requires significant changes in the codebase.
+          // So for now, we just set the error on the context when we are in fallback scope.
+          const stepContextGeneric = stepContext as Record<string, unknown>;
+          if (!stepContextGeneric.error) {
+            stepContextGeneric.error = stepExecution.state?.error;
+          }
         }
       }
     }

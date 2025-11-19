@@ -53,13 +53,14 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
       return;
     }
 
-    await this.stepExecutionRuntime.failStep({
-      type: 'MaxRetryAttemptsReached',
-      message: `Retry step "${this.node.stepId}" has exceeded the maximum number of attempts.`,
-      details: {
-        originalError: failedContext.stepExecution?.error,
-      },
-    });
+    if (!failedContext.stepExecution?.error) {
+      // it should not happen that we are in catchError without an error, but just in case
+      await this.stepExecutionRuntime.failStep(new Error('Retry step reached max attempts'));
+      return;
+    }
+
+    // fail retry with last error after exceeding max attemptss
+    await this.stepExecutionRuntime.failStep(failedContext.stepExecution.error);
   }
 
   private async initializeRetry(): Promise<void> {
