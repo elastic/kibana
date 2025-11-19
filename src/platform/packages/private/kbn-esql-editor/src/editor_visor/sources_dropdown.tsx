@@ -80,13 +80,21 @@ export function SourcesDropdown({ currentSources, onChangeSources }: SourcesDrop
           ...sourceNames.map((name) => ({ label: name })),
         ];
 
-        setSourcesOptions(allOptions);
+        // Also include any currently selected sources that are not in the fetched list (e.g. patterns that don't exist at the dashPatterns)
+        const existingLabels = new Set(allOptions.map((option) => option.label));
+        const currentSourcesOptions = currentSources
+          .filter((source) => !existingLabels.has(source))
+          .map((source) => ({ label: source }));
+
+        const combinedOptions = [...allOptions, ...currentSourcesOptions];
+
+        setSourcesOptions(combinedOptions);
       }
     }
     if (sourcesOptions.length === 0) {
       fetchSources();
     }
-  }, [core, getLicense, sourcesOptions.length, isMounted]);
+  }, [core, getLicense, sourcesOptions.length, isMounted, currentSources]);
 
   const createTrigger = function () {
     return (
