@@ -216,6 +216,10 @@ export class StreamsApp {
     await this.page.getByTestId(`routingRuleEditButton-${streamName}`).click();
   }
 
+  async switchToColumnsView() {
+    await this.page.getByTestId('columns').click();
+  }
+
   async saveRoutingRule() {
     await this.page.getByRole('button', { name: 'Save' }).click();
   }

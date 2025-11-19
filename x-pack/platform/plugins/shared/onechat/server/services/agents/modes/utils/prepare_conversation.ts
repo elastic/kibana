@@ -17,6 +17,11 @@ export interface ProcessedAttachment {
   representation: AttachmentRepresentation;
 }
 
+export interface ProcessedAttachmentType {
+  type: string;
+  agentDescription?: string;
+}
+
 export interface ProcessedRoundInput {
   message: string;
   attachments: ProcessedAttachment[];
@@ -29,6 +34,7 @@ export type ProcessedConversationRound = Omit<ConversationRound, 'input'> & {
 export interface ProcessedConversation {
   previousRounds: ProcessedConversationRound[];
   nextInput: ProcessedRoundInput;
+  attachmentTypes: ProcessedAttachmentType[];
 }
 
 export const prepareConversation = async ({
@@ -41,13 +47,37 @@ export const prepareConversation = async ({
   attachmentsService: AttachmentsService;
 }): Promise<ProcessedConversation> => {
   const processedNextInput = await prepareRoundInput({ input: nextInput, attachmentsService });
+  const processedRounds = await Promise.all(
+    previousRounds.map((round) => {
+      return prepareRound({ round, attachmentsService });
+    })
+  );
+
+  const attachmentTypeIds = [
+    ...new Set<string>([
+      ...processedNextInput.attachments.map((attachment) => attachment.attachment.type),
+      ...processedRounds.flatMap((round) =>
+        round.input.attachments.map((attachment) => attachment.attachment.type)
+      ),
+    ]),
+  ];
+
+  const attachmentTypes = await Promise.all(
+    attachmentTypeIds.map<Promise<ProcessedAttachmentType>>(async (type) => {
+      const definition = attachmentsService.getTypeDefinition(type);
+      const description = definition?.getAgentDescription?.() ?? '';
+
+      return {
+        type,
+        description,
+      };
+    })
+  );
+
   return {
     nextInput: processedNextInput,
-    previousRounds: await Promise.all(
-      previousRounds.map((round) => {
-        return prepareRound({ round, attachmentsService });
-      })
-    ),
+    previousRounds: processedRounds,
+    attachmentTypes,
   };
 };
 

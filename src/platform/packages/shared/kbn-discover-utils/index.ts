@@ -44,6 +44,7 @@ export {
   getFlattenedTraceDocumentOverview,
   getIgnoredReason,
   getMessageFieldWithFallbacks,
+  getAvailableResourceFields,
   getLogLevelFieldWithFallback,
   getLogEventTypeFieldWithFallback,
   getShouldShowFieldHandler,
