@@ -83,14 +83,18 @@ apiTest.describe('Profiling is setup', { tag: ['@ess'] }, () => {
       config,
       logger: log,
     });
+    log.debug('Before all clean up completed');
     await setupProfiling(apiServices, kbnClient, log);
+    log.debug('Before all setup completed');
   });
   apiTest.afterAll(async ({ esClient, config, log }) => {
+    log.debug('After all clean up started');
     await cleanUpProfilingData({
       es: esClient,
       config,
       logger: log,
     });
+    log.debug('After all clean up completed');
   });
   apiTest('without data', async ({ roleBasedApiClient }) => {
     const adminRes = await roleBasedApiClient.adminUser({
