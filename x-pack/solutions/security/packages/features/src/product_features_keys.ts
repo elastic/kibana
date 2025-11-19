@@ -117,6 +117,11 @@ export enum ProductFeatureSecurityKey {
    * Enables customization of prebuilt Elastic rules
    */
   prebuiltRuleCustomization = 'prebuilt_rule_customization',
+
+  /**
+   * Enables graph visualization for alerts and events
+   */
+  graphVisualization = 'graph_visualization',
 }
 
 export enum ProductFeatureCasesKey {

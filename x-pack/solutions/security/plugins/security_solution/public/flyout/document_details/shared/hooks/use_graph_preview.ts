@@ -11,6 +11,7 @@ import { get } from 'lodash/fp';
 import type { GetFieldsData } from './use_get_fields_data';
 import { getField, getFieldArray } from '../utils';
 import { useBasicDataFromDetailsData } from './use_basic_data_from_details_data';
+import { useHasGraphVisualizationAccess } from '../../../../common/hooks/use_has_graph_visualization_access';
 
 export interface UseGraphPreviewParams {
   /**
@@ -58,7 +59,7 @@ export interface UseGraphPreviewResult {
   action?: string[];
 
   /**
-   * Boolean indicating if the event is has a graph representation (contains event ids, actor ids and action)
+   * Boolean indicating if the event has a graph representation (contains event ids, actor ids, action, and valid license)
    */
   hasGraphRepresentation: boolean;
 
@@ -84,12 +85,18 @@ export const useGraphPreview = ({
   const actorIds = getFieldArray(getFieldsData('actor.entity.id'));
   const targetIds = getFieldArray(getFieldsData('target.entity.id'));
   const action: string[] | undefined = get(['event', 'action'], ecsData);
+
+  // Check if user license is high enough to access graph visualization
+  const hasRequiredLicense = useHasGraphVisualizationAccess();
+
   const hasGraphRepresentation =
     Boolean(timestamp) &&
     Boolean(action?.length) &&
     actorIds.length > 0 &&
     eventIds.length > 0 &&
-    targetIds.length > 0;
+    targetIds.length > 0 &&
+    hasRequiredLicense;
+
   const { isAlert } = useBasicDataFromDetailsData(dataFormattedForFieldBrowser);
 
   return { timestamp, eventIds, actorIds, action, targetIds, hasGraphRepresentation, isAlert };

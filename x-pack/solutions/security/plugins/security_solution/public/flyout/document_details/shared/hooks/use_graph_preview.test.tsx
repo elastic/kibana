@@ -12,6 +12,10 @@ import { useGraphPreview } from './use_graph_preview';
 import type { GetFieldsData } from './use_get_fields_data';
 import { mockFieldData } from '../mocks/mock_get_fields_data';
 import { mockDataFormattedForFieldBrowser } from '../mocks/mock_data_formatted_for_field_browser';
+import { useHasGraphVisualizationAccess } from '../../../../common/hooks/use_has_graph_visualization_access';
+
+jest.mock('../../../../common/hooks/use_has_graph_visualization_access');
+const mockUseHasGraphVisualizationAccess = useHasGraphVisualizationAccess as jest.Mock;
 
 const alertMockGetFieldsData: GetFieldsData = (field: string) => {
   if (field === 'kibana.alert.uuid') {
@@ -48,6 +52,11 @@ const eventMockGetFieldsData: GetFieldsData = (field: string) => {
 const eventMockDataFormattedForFieldBrowser: TimelineEventsDetailsItem[] = [];
 
 describe('useGraphPreview', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+    // Default mock: graph visualization feature is available
+    mockUseHasGraphVisualizationAccess.mockReturnValue(true);
+  });
   it(`should return false when missing actor`, () => {
     const getFieldsData: GetFieldsData = (field: string) => {
       if (field === 'actor.entity.id') {
@@ -324,6 +333,36 @@ describe('useGraphPreview', () => {
       action: ['action1', 'action2'],
       targetIds: ['targetId1', 'targetId2'],
       isAlert: true,
+    });
+  });
+
+  describe('License checking', () => {
+    it('should return false when all conditions are met but env does not have required license', () => {
+      mockUseHasGraphVisualizationAccess.mockReturnValue(false);
+
+      const hookResult = renderHook((props: UseGraphPreviewParams) => useGraphPreview(props), {
+        initialProps: {
+          getFieldsData: alertMockGetFieldsData,
+          ecsData: {
+            _id: 'id',
+            event: {
+              action: ['action'],
+            },
+          },
+          dataFormattedForFieldBrowser: alertMockDataFormattedForFieldBrowser,
+        },
+      });
+
+      expect(hookResult.result.current.hasGraphRepresentation).toBe(false);
+      expect(hookResult.result.current).toStrictEqual({
+        hasGraphRepresentation: false,
+        timestamp: mockFieldData['@timestamp'][0],
+        eventIds: ['eventId'],
+        actorIds: ['actorId'],
+        action: ['action'],
+        targetIds: ['targetId'],
+        isAlert: true,
+      });
     });
   });
 });
