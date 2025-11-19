@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Feature, FeatureType } from '@kbn/streams-schema';
-import type { Condition } from '@kbn/streamlang';
+import type { FeatureType, SystemFeature } from '@kbn/streams-schema';
 import objectHash from 'object-hash';
 import { FeatureTypeHandler } from '../feature_type_handler';
 import type { StoredFeature } from '../stored_feature';
@@ -19,10 +18,6 @@ import {
   FEATURE_UUID,
 } from '../fields';
 import { IdentifyFeaturesOptions, identifySystemFeatures } from '@kbn/streams-ai';
-
-export type SystemFeature = Feature & {
-  filter: Condition;
-};
 
 export class SystemFeatureHandler extends FeatureTypeHandler<SystemFeature> {
   readonly type = 'system';
@@ -52,7 +47,7 @@ export class SystemFeatureHandler extends FeatureTypeHandler<SystemFeature> {
   }
 
   getFeatureUuid(streamName: string, featureName: string): string {
-    // required for bwc
+    // override required for bwc
     return objectHash({
       [STREAM_NAME]: streamName,
       [FEATURE_NAME]: featureName,
