@@ -61,7 +61,6 @@ export class AlertTriageService {
      * This creates a new AlertTriageJob instance and executes it.
      */
     async processAlertTriageJob({
-        connectorId,
         alertId,
         jobId,
     }: AlertTriageServiceParams): Promise<AlertTriageResult> {
@@ -85,7 +84,6 @@ export class AlertTriageService {
      * Useful for testing or when you want more control over execution.
      */
     createJob({
-        connectorId,
         alertId,
         jobId,
     }: AlertTriageServiceParams): AlertTriageJob {

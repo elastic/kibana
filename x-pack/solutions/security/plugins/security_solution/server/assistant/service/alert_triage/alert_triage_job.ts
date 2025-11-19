@@ -15,7 +15,9 @@ import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import type { AlertTriageResult } from '../../types/alert_triage';
 import { createDeepAgent } from '@kbn/securitysolution-deep-agent';
 import { InferenceChatModel } from '@kbn/inference-langchain';
-import { created_at } from '@kbn/securitysolution-io-ts-list-types';
+import { ALERT_TRIAGE_PROMPT } from './prompt';
+import z from 'zod/v3';
+import { HumanMessage} from '@langchain/core/messages';
 
 export interface AlertTriageJobParams {
   alertId: string;
@@ -79,13 +81,10 @@ export class AlertTriageJob {
 
     try {
 
-      // Step 2: Fetch alert
       const alert = await this.fetchAlert();
 
-      // Step 3: Analyze alert with LLM
       const analysis = await this.analyzeWithLLM(alert);
 
-      // Step 4: Store results
       await this.storeResults(analysis);
 
       this.logger.info(`Alert triage job ${this.jobId} completed successfully`);
@@ -167,14 +166,27 @@ export class AlertTriageJob {
   private async analyzeWithLLM(alert: unknown): Promise<unknown> {
     this.logger.debug(`Analyzing alert ${this.alertId}`);
 
+
     const agent = createDeepAgent({
-      systemPrompt: 'You are a security assistant that helps triage alerts. The alert has been loaded into the file system. Create a todo list of steps to investigate the alert and spawn tasks to perform each step. Provide a final determination of true positive or false positive based on the findings.',
+      systemPrompt: ALERT_TRIAGE_PROMPT,
       model: this.chatModel,
-      
+      responseFormat: z.object({
+        summary: z.string().describe('2-3 sentences: event and rule trigger'),
+        verdict: z.enum(['Malicious', 'Suspicious', 'Benign']).describe('Verdict of the alert'),
+        detailed_justification: z.string().describe('gate applied, evidence summary, assumption notes, MCFs if Suspicious'),
+        evidence: z.array(z.string()).describe('each <=18 words, quoting literal fields'),
+        recommendations: z.string().describe('single string, lines separated by "\n", each starts with "- "'),
+        confidence_score: z.number().describe('float [0,1]'),
+        calculated_score: z.number().describe('int [0,100], within verdict band'),
+        score_rationale: z.string().describe('one line, format specified in scoring_and_confidence'),
+        reasoning_records: z.array(z.string()).describe('factual analysis only: event summary, baseline, anchors, anomalies, MCFs, hypothesis weighing; no meta about scoring mechanics, prompt rules, or formatting')
+      })
     });
 
     const result = await agent.invoke({
-      messages: [{ role: 'user', content: `Triage the alert stored at /alert.json` }],
+      messages: [
+        new HumanMessage("Analyse the alert stored at /alert.json"),
+      ],
       files: {
         "/alert.json": {
           content: [JSON.stringify(alert, null, 2)],
