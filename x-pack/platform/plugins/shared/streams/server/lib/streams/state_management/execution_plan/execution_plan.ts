@@ -405,8 +405,8 @@ export class ExecutionPlan {
         updateDataStreamsFailureStore({
           esClient: this.dependencies.scopedClusterClient.asCurrentUser,
           logger: this.dependencies.logger,
-          name: action.request.name,
           failureStore: action.request.failure_store,
+          stream: action.request.definition,
           isServerless: this.dependencies.isServerless,
         })
       )

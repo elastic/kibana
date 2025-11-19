@@ -11,7 +11,6 @@ import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure
 import {
   isDisabledLifecycleFailureStore,
   isInheritFailureStore,
-  type FailureStoreEnabled,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { useFailureStoreDefaultRetention } from './use_failure_store_default_retention';
 
@@ -60,7 +59,7 @@ export function useFailureStoreConfig(definition: Streams.ingest.all.GetResponse
   const retentionDisabled = isDisabledLifecycleFailureStore(failureStore);
   const customRetentionPeriod =
     failureStoreEnabled && !retentionDisabled
-      ? (failureStore as FailureStoreEnabled).lifecycle.enabled.data_retention
+      ? failureStore.lifecycle.enabled.data_retention
       : undefined;
   const isCurrentlyInherited = isInheritFailureStore(definition.stream.ingest.failure_store);
   const canShowInherit = (isWired && !isRootStream) || isClassicStream;

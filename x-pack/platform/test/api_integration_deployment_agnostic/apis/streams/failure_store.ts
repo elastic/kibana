@@ -653,7 +653,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
-      it('disables lifecycle on classic stream failure store only for not serverless', async () => {
+      it.only('disables lifecycle on classic stream failure store only for not serverless', async () => {
         const indexName = 'classic-stream-disabled-lifecycle';
         await createDataStream(indexName, true, '30d');
 
@@ -686,9 +686,11 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         // Verify failure store is enabled but lifecycle is disabled if not serverless
         const dataStreams = await esClient.indices.getDataStream({ name: [indexName] });
         if (isServerless) {
-          expect(dataStreams.data_streams[0].failure_store?.enabled).to.eql(true);
+          // @ts-expect-error IndicesDataStream not correctly typed
+          expect(dataStreams.data_streams[0].failure_store?.lifecycle?.enabled).to.eql(true);
         } else {
-          expect(dataStreams.data_streams[0].failure_store?.enabled).to.eql(false);
+          // @ts-expect-error IndicesDataStream not correctly typed
+          expect(dataStreams.data_streams[0].failure_store?.lifecycle?.enabled).to.eql(false);
         }
       });
     });

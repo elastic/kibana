@@ -9,11 +9,16 @@ import type {
   IndicesDataStream,
   IngestProcessorContainer,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { IngestStreamLifecycle, IngestStreamSettings } from '@kbn/streams-schema';
+import type {
+  FailureStore,
+  IngestStreamLifecycle,
+  IngestStreamSettings,
+} from '@kbn/streams-schema';
 import { isIlmLifecycle, isInheritLifecycle, Streams } from '@kbn/streams-schema';
 import _, { cloneDeep } from 'lodash';
 import { isNotFoundError } from '@kbn/es-errors';
 import { isMappingProperties } from '@kbn/streams-schema/src/fields';
+import { isDisabledLifecycleFailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { StatusError } from '../../errors/status_error';
 import { generateClassicIngestPipelineBody } from '../../ingest_pipelines/generate_ingest_pipeline';
 import { getProcessingPipelineName } from '../../ingest_pipelines/name';
@@ -131,8 +136,17 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     desiredState: State,
     startingState: State
   ): Promise<ValidationResult> {
-    if (this.dependencies.isServerless && isIlmLifecycle(this.getLifecycle())) {
-      return { isValid: false, errors: [new Error('Using ILM is not supported in Serverless')] };
+    if (this.dependencies.isServerless) {
+      if (isIlmLifecycle(this.getLifecycle())) {
+        return { isValid: false, errors: [new Error('Using ILM is not supported in Serverless')] };
+      }
+
+      if (isDisabledLifecycleFailureStore(this.getFailureStore())) {
+        return {
+          isValid: false,
+          errors: [new Error('Disabling failure store lifecycle is not supported in Serverless')],
+        };
+      }
     }
 
     // Check for conflicts
@@ -266,6 +280,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
         request: {
           name: this._definition.name,
           failure_store: this._definition.ingest.failure_store,
+          definition: this._definition,
         },
       });
     }
@@ -298,6 +313,9 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
     return this._definition.ingest.lifecycle;
   }
 
+  public getFailureStore(): FailureStore {
+    return this._definition.ingest.failure_store;
+  }
   protected async doDetermineUpdateActions(
     desiredState: State,
     startingState: State,
@@ -347,6 +365,7 @@ export class ClassicStream extends StreamActiveRecord<Streams.ClassicStream.Defi
         request: {
           name: this._definition.name,
           failure_store: this._definition.ingest.failure_store,
+          definition: this._definition,
         },
       });
     }

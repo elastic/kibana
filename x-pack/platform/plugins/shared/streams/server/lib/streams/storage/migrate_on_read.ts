@@ -8,6 +8,7 @@
 import { get, isObject } from 'lodash';
 import { Streams } from '@kbn/streams-schema';
 import type { BaseStream } from '@kbn/streams-schema/src/models/base';
+import { isRoot } from '@kbn/streams-schema/src/shared/hierarchy';
 import { set } from '@kbn/safer-lodash-set';
 import type { Condition } from '@kbn/streamlang';
 import { isNeverCondition } from '@kbn/streamlang';
@@ -133,7 +134,20 @@ export function migrateOnRead(definition: Record<string, unknown>): Streams.all.
 
   // Add failure_store to ingest streams if missing
   if (isObject(migratedDefinition.ingest) && !('failure_store' in migratedDefinition.ingest)) {
-    set(migratedDefinition, 'ingest.failure_store', { inherit: {} });
+    const streamName = migratedDefinition.name;
+
+    if (
+      isObject(migratedDefinition.ingest) &&
+      'wired' in migratedDefinition.ingest &&
+      typeof streamName === 'string' &&
+      isRoot(streamName)
+    ) {
+      set(migratedDefinition, 'ingest.failure_store', {
+        lifecycle: { enabled: { data_retention: '30d' } },
+      });
+    } else {
+      set(migratedDefinition, 'ingest.failure_store', { inherit: {} });
+    }
     hasBeenMigrated = true;
   }
 

@@ -131,6 +131,7 @@ export interface UpdateFailureStoreAction {
   request: {
     name: string;
     failure_store: FailureStore;
+    definition: Streams.all.Definition;
   };
 }
 

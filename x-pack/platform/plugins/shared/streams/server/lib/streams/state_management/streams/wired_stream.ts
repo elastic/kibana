@@ -27,7 +27,10 @@ import {
 import _, { cloneDeep } from 'lodash';
 import { findInheritedFailureStore } from '@kbn/streams-schema/src/helpers/lifecycle';
 import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
-import { isInheritFailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import {
+  isDisabledLifecycleFailureStore,
+  isInheritFailureStore,
+} from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { generateLayer } from '../../component_templates/generate_layer';
 import { getComponentTemplateName } from '../../component_templates/name';
 import { isDefinitionNotFoundError } from '../../errors/definition_not_found_error';
@@ -448,8 +451,16 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     validateSystemFields(this._definition);
     validateBracketsInFieldNames(this._definition);
 
-    if (this.dependencies.isServerless && isIlmLifecycle(this.getLifecycle())) {
-      return { isValid: false, errors: [new Error('Using ILM is not supported in Serverless')] };
+    if (this.dependencies.isServerless) {
+      if (isIlmLifecycle(this.getLifecycle())) {
+        return { isValid: false, errors: [new Error('Using ILM is not supported in Serverless')] };
+      }
+      if (isDisabledLifecycleFailureStore(this.getFailureStore())) {
+        return {
+          isValid: false,
+          errors: [new Error('Disabling failure store lifecycle is not supported in Serverless')],
+        };
+      }
     }
 
     validateSettings(this._definition, this.dependencies.isServerless);
@@ -600,6 +611,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         request: {
           name: this._definition.name,
           failure_store: failureStore,
+          definition: this._definition,
         },
       },
       {
@@ -629,7 +641,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     return this._definition.ingest.lifecycle;
   }
 
-  public getFailureStore(): FailureStore | undefined {
+  public getFailureStore(): FailureStore {
     return this._definition.ingest.failure_store;
   }
 
@@ -709,13 +721,14 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
         hasAncestorWithChangedFailureStore = true;
       }
       const ancestorFailureStore = ancestorStream.getFailureStore();
-      if (ancestorFailureStore && !isInheritFailureStore(ancestorFailureStore)) {
+      if (!isInheritFailureStore(ancestorFailureStore)) {
         if (hasAncestorWithChangedFailureStore) {
           actions.push({
             type: 'update_failure_store',
             request: {
               name: this._definition.name,
               failure_store: ancestorFailureStore,
+              definition: this._definition,
             },
           });
         }

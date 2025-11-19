@@ -12,16 +12,14 @@ import type {
   IngestStreamLifecycleDisabled,
   IngestStreamLifecycleILM,
 } from '@kbn/streams-schema';
+import { Streams } from '@kbn/streams-schema';
 import type {
   IndicesDataStreamFailureStore,
   IndicesSimulateTemplateTemplate,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { StreamsMappingProperties } from '@kbn/streams-schema/src/fields';
 import { isDslLifecycle, isIlmLifecycle, isInheritLifecycle } from '@kbn/streams-schema';
-import type {
-  FailureStore,
-  FailureStoreEnabled,
-} from '@kbn/streams-schema/src/models/ingest/failure_store';
+import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import {
   isDisabledLifecycleFailureStore,
   isEnabledLifecycleFailureStore,
@@ -288,14 +286,14 @@ export async function putDataStreamsSettings({
 export async function updateDataStreamsFailureStore({
   esClient,
   logger,
-  name,
   failureStore,
+  stream,
   isServerless,
 }: {
   esClient: ElasticsearchClient;
   logger: Logger;
-  name: string;
   failureStore: FailureStore;
+  stream: Streams.all.Definition;
   isServerless: boolean;
 }) {
   try {
@@ -303,8 +301,13 @@ export async function updateDataStreamsFailureStore({
 
     // Handle { inherit: {} }
     if (isInheritFailureStore(failureStore)) {
+      if (Streams.WiredStream.Definition.is(stream)) {
+        throw new Error(
+          `Inherit failure store configuration is not supported for wired streams. Stream ${stream.name} is a wired stream.`
+        );
+      }
       const response = await retryTransientEsErrors(
-        () => esClient.indices.simulateIndexTemplate({ name }),
+        () => esClient.indices.simulateIndexTemplate({ name: stream.name }),
         { logger }
       );
       // If not template, disable the failure store. Empty object would cause Elasticsearch error.
@@ -314,24 +317,18 @@ export async function updateDataStreamsFailureStore({
       };
     } else if (isEnabledLifecycleFailureStore(failureStore)) {
       // Handle { lifecycle: { enabled: { data_retention?: string } } }
-      const dataRetention = (failureStore as FailureStoreEnabled).lifecycle.enabled?.data_retention;
+      const dataRetention = failureStore.lifecycle.enabled?.data_retention;
       failureStoreConfig = {
         enabled: true,
         ...(dataRetention ? { lifecycle: { data_retention: dataRetention, enabled: true } } : {}),
       };
     } else if (isDisabledLifecycleFailureStore(failureStore)) {
       // Handle { lifecycle: { disabled: {} } }
-      if (!isServerless) {
-        // lifecycle cannot be disabled for serverless
-        failureStoreConfig = {
-          enabled: true,
-          lifecycle: { enabled: false },
-        };
-      } else {
-        failureStoreConfig = {
-          enabled: true,
-        };
-      }
+      // lifecycle cannot be disabled in serverless
+      failureStoreConfig = {
+        enabled: true,
+        ...(isServerless ? {} : { lifecycle: { enabled: false } }),
+      };
     } else {
       // Handle { disabled: {} }
       failureStoreConfig = {
@@ -343,7 +340,7 @@ export async function updateDataStreamsFailureStore({
       () =>
         esClient.indices.putDataStreamOptions(
           {
-            name,
+            name: stream.name,
             failure_store: failureStoreConfig,
           },
           { meta: true }

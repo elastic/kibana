@@ -8,6 +8,31 @@
 import { getTemplateLifecycle, updateDataStreamsFailureStore } from './manage_data_streams';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import type { Streams } from '@kbn/streams-schema';
+
+const createMockWiredStream = (name: string): Streams.WiredStream.Definition => ({
+  name,
+  description: 'Test wired stream',
+  ingest: {
+    lifecycle: { inherit: {} },
+    processing: { steps: [] },
+    settings: {},
+    wired: { fields: {}, routing: [] },
+    failure_store: { inherit: {} },
+  },
+});
+
+const createMockClassicStream = (name: string): Streams.ClassicStream.Definition => ({
+  name,
+  description: 'Test classic stream',
+  ingest: {
+    lifecycle: { inherit: {} },
+    processing: { steps: [] },
+    settings: {},
+    classic: {},
+    failure_store: { inherit: {} },
+  },
+});
 
 describe('getTemplateLifecycle', () => {
   it('returns dsl when only dsl is enabled', () => {
@@ -113,8 +138,8 @@ describe('updateDataStreamsFailureStore', () => {
     await updateDataStreamsFailureStore({
       esClient: mockEsClient,
       logger: mockLogger,
-      name: 'test-stream',
       failureStore,
+      stream: createMockWiredStream('test-stream'),
       isServerless: false,
     });
 
@@ -138,8 +163,8 @@ describe('updateDataStreamsFailureStore', () => {
     await updateDataStreamsFailureStore({
       esClient: mockEsClient,
       logger: mockLogger,
-      name: 'test-stream',
       failureStore,
+      stream: createMockWiredStream('test-stream'),
       isServerless: false,
     });
 
@@ -154,7 +179,7 @@ describe('updateDataStreamsFailureStore', () => {
     );
   });
 
-  it('enables failure store with disabled lifecycle (non-serverless)', async () => {
+  it('disables failure store lifecycle in non-serverless', async () => {
     const failureStore: FailureStore = {
       lifecycle: { disabled: {} },
     };
@@ -162,24 +187,21 @@ describe('updateDataStreamsFailureStore', () => {
     await updateDataStreamsFailureStore({
       esClient: mockEsClient,
       logger: mockLogger,
-      name: 'test-stream',
       failureStore,
+      stream: createMockWiredStream('test-stream'),
       isServerless: false,
     });
 
     expect(mockEsClient.indices.putDataStreamOptions).toHaveBeenCalledWith(
       {
         name: 'test-stream',
-        failure_store: {
-          enabled: true,
-          lifecycle: { enabled: false },
-        },
+        failure_store: { enabled: true, lifecycle: { enabled: false } },
       },
       { meta: true }
     );
   });
 
-  it('enables failure store with disabled lifecycle (serverless)', async () => {
+  it('do not disable failure store lifecycle in serverless', async () => {
     const failureStore: FailureStore = {
       lifecycle: { disabled: {} },
     };
@@ -187,8 +209,8 @@ describe('updateDataStreamsFailureStore', () => {
     await updateDataStreamsFailureStore({
       esClient: mockEsClient,
       logger: mockLogger,
-      name: 'test-stream',
       failureStore,
+      stream: createMockWiredStream('test-stream'),
       isServerless: true,
     });
 
@@ -211,8 +233,8 @@ describe('updateDataStreamsFailureStore', () => {
     await updateDataStreamsFailureStore({
       esClient: mockEsClient,
       logger: mockLogger,
-      name: 'test-stream',
       failureStore,
+      stream: createMockWiredStream('test-stream'),
       isServerless: false,
     });
 
@@ -235,8 +257,8 @@ describe('updateDataStreamsFailureStore', () => {
     await updateDataStreamsFailureStore({
       esClient: mockEsClient,
       logger: mockLogger,
-      name: 'test-stream',
       failureStore,
+      stream: createMockClassicStream('test-stream'),
       isServerless: false,
     });
 
@@ -268,8 +290,8 @@ describe('updateDataStreamsFailureStore', () => {
     await updateDataStreamsFailureStore({
       esClient: mockEsClient,
       logger: mockLogger,
-      name: 'test-stream',
       failureStore,
+      stream: createMockClassicStream('test-stream'),
       isServerless: false,
     });
 
@@ -300,8 +322,8 @@ describe('updateDataStreamsFailureStore', () => {
       updateDataStreamsFailureStore({
         esClient: mockEsClient,
         logger: mockLogger,
-        name: 'test-stream',
         failureStore,
+        stream: createMockWiredStream('test-stream'),
         isServerless: false,
       })
     ).rejects.toThrow('Elasticsearch error');
@@ -319,14 +341,36 @@ describe('updateDataStreamsFailureStore', () => {
       updateDataStreamsFailureStore({
         esClient: mockEsClient,
         logger: mockLogger,
-        name: 'test-stream',
         failureStore: { inherit: {} },
+        stream: createMockClassicStream('test-stream'),
         isServerless: false,
       })
     ).rejects.toThrow('Template simulation error');
 
     expect(mockLogger.error).toHaveBeenCalledWith(
       'Error updating data stream failure store: Template simulation error'
+    );
+  });
+
+  it('throws error when inherit is used for non-classic streams', async () => {
+    const failureStore: FailureStore = {
+      inherit: {},
+    };
+
+    await expect(
+      updateDataStreamsFailureStore({
+        esClient: mockEsClient,
+        logger: mockLogger,
+        failureStore,
+        stream: createMockWiredStream('test-stream'),
+        isServerless: false,
+      })
+    ).rejects.toThrow(
+      'Inherit failure store configuration is not supported for wired streams. Stream test-stream is a wired stream.'
+    );
+
+    expect(mockLogger.error).toHaveBeenCalledWith(
+      'Error updating data stream failure store: Inherit failure store configuration is not supported for wired streams. Stream test-stream is a wired stream.'
     );
   });
 });

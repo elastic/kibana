@@ -229,7 +229,28 @@ describe('migrateOnRead', () => {
       expect(mockStreamsAsserts).toHaveBeenCalled();
     });
 
-    it('should add failure_store to ingest if missing', () => {
+    it('should add failure_store inherit if missing for non root stream', () => {
+      const definition = {
+        name: 'test-stream.child',
+        description: 'Test stream',
+        ingest: {
+          lifecycle: { dsl: {} },
+          processing: { steps: [] },
+          settings: {},
+          wired: {
+            fields: {},
+            routing: [],
+          },
+        },
+      };
+
+      const result = migrateOnRead(definition);
+
+      expect((result as any).ingest.failure_store).toEqual({ inherit: {} });
+      expect(mockStreamsAsserts).toHaveBeenCalled();
+    });
+
+    it('should add failure_store lifecycle if missing for root stream', () => {
       const definition = {
         name: 'test-stream',
         description: 'Test stream',
@@ -246,7 +267,9 @@ describe('migrateOnRead', () => {
 
       const result = migrateOnRead(definition);
 
-      expect((result as any).ingest.failure_store).toEqual({ inherit: {} });
+      expect((result as any).ingest.failure_store).toEqual({
+        lifecycle: { enabled: { data_retention: '30d' } },
+      });
       expect(mockStreamsAsserts).toHaveBeenCalled();
     });
   });
