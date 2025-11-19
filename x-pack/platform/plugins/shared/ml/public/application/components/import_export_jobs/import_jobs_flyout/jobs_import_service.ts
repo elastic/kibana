@@ -43,10 +43,19 @@ export interface JobIdObject {
   datafeedWarningMessage?: string;
 }
 
+type IndexValidationResult =
+  | { valid: true; index: string }
+  | { valid: false; index: string; error: string };
+
+export interface SourceIndexError {
+  index: string | undefined;
+  error: string;
+}
+
 export interface SkippedJobs {
   jobId: string;
   missingFilters?: string[];
-  missingSourceIndex?: boolean;
+  sourceIndicesErrors?: SourceIndexError[];
 }
 
 function isImportedAdJobs(obj: any): obj is ImportedAdJob[] {
@@ -121,6 +130,80 @@ export class JobImportService {
     });
   }
 
+  private async validateJobSourceIndices(
+    jobId: string,
+    indices: string[],
+    esSearch: MlApi['esSearch'],
+    sourceIndicesErrors: Map<string, SourceIndexError[]>
+  ) {
+    if (!indices || indices.length === 0) {
+      sourceIndicesErrors.set(jobId, [
+        {
+          index: undefined,
+          error: i18n.translate(
+            'xpack.ml.importExport.importFlyout.validation.sourceIndicesArrayEmpty',
+            {
+              defaultMessage: 'Source indices array is empty',
+            }
+          ),
+        },
+      ]);
+      return;
+    }
+
+    const indexValidations = await Promise.all(
+      indices.map((index) => this.validateSingleIndex(index, esSearch))
+    );
+
+    const invalidIndices: SourceIndexError[] = [];
+    for (const result of indexValidations) {
+      if (!result.valid) {
+        invalidIndices.push({
+          index: result.index,
+          error: result.error,
+        });
+      }
+    }
+
+    if (invalidIndices.length > 0) {
+      sourceIndicesErrors.set(jobId, invalidIndices);
+    }
+  }
+
+  private async validateSingleIndex(
+    index: string,
+    esSearch: MlApi['esSearch']
+  ): Promise<IndexValidationResult> {
+    try {
+      const resp = await esSearch({
+        index: [index],
+        size: 0,
+        body: {
+          query: { match_all: {} },
+        },
+      });
+
+      // Check if the index pattern matched any indices
+      if (resp._shards?.total === 0) {
+        return {
+          valid: false,
+          index,
+          error: i18n.translate(
+            'xpack.ml.importExport.importFlyout.validation.indexPatternMatchesNoIndices',
+            {
+              defaultMessage: 'Index pattern matches no indices',
+            }
+          ),
+        };
+      }
+
+      return { valid: true, index };
+    } catch (error) {
+      const errorMessage = extractErrorMessage(error);
+      return { valid: false, index, error: errorMessage };
+    }
+  }
+
   public renameDfaJobs(jobIds: JobIdObject[], jobs: DataFrameAnalyticsConfig[]) {
     if (jobs.length !== jobs.length) {
       return jobs;
@@ -164,62 +247,30 @@ export class JobImportService {
             indices: Array.isArray(j.source.index) ? j.source.index : [j.source.index],
           }));
 
-    const missingSourceIndices = new Set<string>();
+    const sourceIndicesErrors = new Map<string, SourceIndexError[]>();
     if (type === 'data-frame-analytics' && esSearch) {
       await Promise.all(
-        commonJobs.map(async ({ jobId, indices }) => {
-          if (!indices || indices.length === 0) {
-            missingSourceIndices.add(jobId);
-            return;
-          }
-
-          try {
-            const resp = await esSearch({
-              index: indices,
-              size: 0,
-              body: {
-                query: { match_all: {} },
-              },
-            });
-
-            if (resp._shards?.total === 0) {
-              missingSourceIndices.add(jobId);
-            }
-          } catch (error) {
-            const errorMessage = extractErrorMessage(error);
-            if (
-              errorMessage.includes('index_not_found_exception') ||
-              errorMessage.includes('no such index')
-            ) {
-              missingSourceIndices.add(jobId);
-            }
-          }
-        })
+        commonJobs.map(({ jobId, indices }) =>
+          this.validateJobSourceIndices(jobId, indices, esSearch, sourceIndicesErrors)
+        )
       );
     }
 
     commonJobs.forEach(({ jobId, filters = [], destIndex }) => {
       const missingFilters = filters.filter((i) => existingFilters.has(i) === false);
-      const hasMissingSourceIndex = missingSourceIndices.has(jobId);
+      const indicesErrors = sourceIndicesErrors.get(jobId);
 
-      if (missingFilters.length === 0 && !hasMissingSourceIndex) {
+      if (missingFilters.length === 0 && !indicesErrors) {
         tempJobs.push({
           jobId,
           ...(type === 'data-frame-analytics' ? { destIndex } : {}),
         });
       } else {
-        if (missingFilters.length > 0) {
-          skippedJobs.push({
-            jobId,
-            missingFilters,
-          });
-        }
-        if (hasMissingSourceIndex) {
-          skippedJobs.push({
-            jobId,
-            missingSourceIndex: true,
-          });
-        }
+        skippedJobs.push({
+          jobId,
+          ...(missingFilters.length > 0 ? { missingFilters } : {}),
+          ...(indicesErrors ? { sourceIndicesErrors: indicesErrors } : {}),
+        });
       }
     });
 

@@ -66,7 +66,7 @@ const SkippedJobList: FC<{ jobs: SkippedJobs[] }> = ({ jobs }) => (
   <>
     {jobs.length > 0 && (
       <>
-        {jobs.map(({ jobId, missingFilters, missingSourceIndex }) => (
+        {jobs.map(({ jobId, missingFilters, sourceIndicesErrors }) => (
           <EuiText size="s" key={jobId}>
             <h5>{jobId}</h5>
             {missingFilters && missingFilters.length > 0 && (
@@ -76,11 +76,17 @@ const SkippedJobList: FC<{ jobs: SkippedJobs[] }> = ({ jobs }) => (
                 values={{ num: missingFilters.length, filters: missingFilters.join(',') }}
               />
             )}
-            {missingSourceIndex && (
-              <FormattedMessage
-                id="xpack.ml.importExport.importFlyout.cannotImportJobCallout.missingSourceIndex"
-                defaultMessage="Source index does not exist"
-              />
+            {sourceIndicesErrors && sourceIndicesErrors.length > 0 && (
+              <>
+                {sourceIndicesErrors.map(({ index, error }, i) => (
+                  <FormattedMessage
+                    key={`${jobId}-${index ?? 'undefined'}-${error}`}
+                    id="xpack.ml.importExport.importFlyout.cannotImportJobCallout.sourceIndexValidationFailed"
+                    defaultMessage="{index, select, undefined {Source indices validation failed} other {Source index validation failed for {index}}}{reason, select, undefined {} other {. Reason: {reason}}}"
+                    values={{ index, reason: error }}
+                  />
+                ))}
+              </>
             )}
           </EuiText>
         ))}
