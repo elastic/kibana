@@ -82,7 +82,7 @@ const SkippedJobList: FC<{ jobs: SkippedJobs[] }> = ({ jobs }) => (
                   <FormattedMessage
                     key={`${jobId}-${index ?? 'undefined'}-${error}`}
                     id="xpack.ml.importExport.importFlyout.cannotImportJobCallout.sourceIndexValidationFailed"
-                    defaultMessage="{index, select, undefined {Source indices validation failed} other {Source index validation failed for {index}}}{reason, select, undefined {} other {. Reason: {reason}}}"
+                    defaultMessage="{index, select, undefined {Source indices validation failed} other {Source index validation failed for {index}}}{reason, select, undefined {} other { Reason: {reason}}}"
                     values={{ index, reason: error }}
                   />
                 ))}

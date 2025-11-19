@@ -67,6 +67,17 @@ function isDataFrameAnalyticsConfigs(obj: any): obj is DataFrameAnalyticsConfig[
 }
 
 export class JobImportService {
+  private esSearch: MlApi['esSearch'];
+  private validateDatafeedPreview: MlApi['validateDatafeedPreview'];
+
+  constructor(
+    esSearch: MlApi['esSearch'],
+    validateDatafeedPreview: MlApi['validateDatafeedPreview']
+  ) {
+    this.esSearch = esSearch;
+    this.validateDatafeedPreview = validateDatafeedPreview;
+  }
+
   private _readFile(file: File) {
     return new Promise((resolve, reject) => {
       if (file && file.size) {
@@ -133,7 +144,6 @@ export class JobImportService {
   private async validateJobSourceIndices(
     jobId: string,
     indices: string[],
-    esSearch: MlApi['esSearch'],
     sourceIndicesErrors: Map<string, SourceIndexError[]>
   ) {
     if (!indices || indices.length === 0) {
@@ -152,7 +162,7 @@ export class JobImportService {
     }
 
     const indexValidations = await Promise.all(
-      indices.map((index) => this.validateSingleIndex(index, esSearch))
+      indices.map((index) => this.validateSingleIndex(index))
     );
 
     const invalidIndices: SourceIndexError[] = [];
@@ -170,12 +180,9 @@ export class JobImportService {
     }
   }
 
-  private async validateSingleIndex(
-    index: string,
-    esSearch: MlApi['esSearch']
-  ): Promise<IndexValidationResult> {
+  private async validateSingleIndex(index: string): Promise<IndexValidationResult> {
     try {
-      const resp = await esSearch({
+      const resp = await this.esSearch({
         index: [index],
         size: 0,
         body: {
@@ -222,8 +229,7 @@ export class JobImportService {
   public async validateJobs(
     jobs: ImportedAdJob[] | DataFrameAnalyticsConfig[],
     type: JobType,
-    getFilters: () => Promise<Filter[]>,
-    esSearch: MlApi['esSearch']
+    getFilters: () => Promise<Filter[]>
   ) {
     const existingFilters = new Set((await getFilters()).map((f) => f.filter_id));
     const tempJobs: Array<{ jobId: string; destIndex?: string }> = [];
@@ -251,7 +257,7 @@ export class JobImportService {
     if (type === 'data-frame-analytics') {
       await Promise.all(
         commonJobs.map(({ jobId, indices }) =>
-          this.validateJobSourceIndices(jobId, indices, esSearch, sourceIndicesErrors)
+          this.validateJobSourceIndices(jobId, indices, sourceIndicesErrors)
         )
       );
     }
@@ -281,8 +287,7 @@ export class JobImportService {
   }
 
   public async validateDatafeeds(
-    jobs: ImportedAdJob[],
-    validateDatafeedPreview: MlApi['validateDatafeedPreview']
+    jobs: ImportedAdJob[]
   ): Promise<{ jobId: string; hasWarning: boolean; warningMessage?: string }[]> {
     const results = await Promise.all(
       jobs.map(async ({ job, datafeed }) => {
@@ -292,7 +297,7 @@ export class JobImportService {
             datafeed_config: datafeed,
           };
 
-          const response: DatafeedValidationResponse = await validateDatafeedPreview({
+          const response: DatafeedValidationResponse = await this.validateDatafeedPreview({
             job: combinedJob,
           });
 

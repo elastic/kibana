@@ -71,7 +71,10 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
     },
   } = useMlKibana();
 
-  const jobImportService = useMemo(() => new JobImportService(), []);
+  const jobImportService = useMemo(
+    () => new JobImportService(esSearch, validateDatafeedPreview),
+    [esSearch, validateDatafeedPreview]
+  );
 
   const [showFlyout, setShowFlyout] = useState(false);
   const [adJobs, setAdJobs] = useState<ImportedAdJob[]>([]);
@@ -149,8 +152,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
       const validatedJobs = await jobImportService.validateJobs(
         loadedFile.jobs,
         loadedFile.jobType,
-        getFilters,
-        esSearch
+        getFilters
       );
 
       const datafeedValidationMap = new Map<string, DatafeedValidationInfo>();
@@ -161,12 +163,9 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
         );
         setAdJobs(tempJobs);
 
-        const validations = await jobImportService.validateDatafeeds(
-          tempJobs,
-          validateDatafeedPreview
-        );
+        const datafeedValidationResults = await jobImportService.validateDatafeeds(tempJobs);
 
-        validations.forEach((validation) => {
+        datafeedValidationResults.forEach((validation) => {
           datafeedValidationMap.set(validation.jobId, {
             hasWarning: validation.hasWarning,
             warningMessage: validation.warningMessage,
