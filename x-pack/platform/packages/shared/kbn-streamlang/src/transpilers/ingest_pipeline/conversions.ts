@@ -18,6 +18,7 @@ import {
 } from './processors/pre_processing';
 import type { ActionToIngestType } from './processors/processor';
 import { processRemoveByPrefixProcessor } from './processors/remove_by_prefix_processor';
+import { processGeoipProcessor } from './processors/geoip_processor';
 
 import type { IngestPipelineTranspilationOptions } from '.';
 
@@ -60,6 +61,12 @@ export function convertStreamlangDSLActionsToIngestPipelineProcessors(
           typeof processManualIngestPipelineProcessors
         >[0],
         transpilationOptions
+      );
+    }
+
+    if (action === 'geoip') {
+      return processGeoipProcessor(
+        processorWithCompiledConditions as Parameters<typeof processGeoipProcessor>[0]
       );
     }
 

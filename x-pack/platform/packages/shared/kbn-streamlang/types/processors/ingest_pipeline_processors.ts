@@ -19,6 +19,7 @@ import type {
   RemoveProcessor,
   DropDocumentProcessor,
   ReplaceProcessor,
+  GeoipProcessor,
 } from '.';
 import type { Condition } from '../conditions';
 
@@ -92,6 +93,12 @@ export type IngestPipelineReplaceProcessor = RenameFieldsAndRemoveAction<
   { from: 'field'; to: 'target_field'; where: 'if' }
 >;
 
+// Geoip
+export type IngestPipelineGeoipProcessor = RenameFieldsAndRemoveAction<
+  GeoipProcessor,
+  { from: 'field'; to: 'target_field'; where: 'if' }
+>;
+
 // Manual Ingest Pipeline (escape hatch)
 export type IngestPipelineManualIngestPipelineProcessor = RenameFieldsAndRemoveAction<
   ManualIngestPipelineProcessor,
@@ -110,4 +117,5 @@ export type IngestPipelineProcessor =
   | IngestPipelineRemoveByPrefixProcessor
   | IngestPipelineRemoveProcessor
   | IngestPipelineReplaceProcessor
+  | IngestPipelineGeoipProcessor
   | IngestPipelineManualIngestPipelineProcessor;

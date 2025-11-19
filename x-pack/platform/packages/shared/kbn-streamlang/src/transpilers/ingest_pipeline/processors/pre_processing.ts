@@ -17,6 +17,7 @@ export const processorFieldRenames: Record<string, Record<string, string>> = {
   dissect: { from: 'field', where: 'if' },
   date: { from: 'field', to: 'target_field', where: 'if' },
   drop_document: { where: 'if' },
+  geoip: { from: 'field', to: 'target_field', where: 'if' },
   rename: { from: 'field', to: 'target_field', where: 'if' },
   set: { to: 'field', where: 'if' },
   append: { to: 'field', where: 'if' },

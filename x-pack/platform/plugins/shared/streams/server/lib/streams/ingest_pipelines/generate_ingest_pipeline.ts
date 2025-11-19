@@ -29,7 +29,10 @@ export function generateGeoPointTransformProcessors(fields: Array<{ name: string
   const processors: Array<Record<string, any>> = [];
 
   geoPointFields.forEach((fieldPath) => {
-    // Script processor to check if .lat and .lon exist and transform them into a geo_point object
+    // Script processor to handle multiple geo_point formats:
+    // 1. Flattened: field.lat and field.lon exist
+    // 2. Object: field is already {lat: ..., lon: ...}
+    // 3. String: field is already a WKT string or other geo_point format
     processors.push({
       script: {
         source: `
@@ -38,24 +41,43 @@ export function generateGeoPointTransformProcessors(fields: Array<{ name: string
           def baseField = "${fieldPath}";
           
           // Use $() to safely fetch values, returns null if field doesn't exist
+          def baseValue = $(baseField, null);
           def latValue = $(latField, null);
           def lonValue = $(lonField, null);
           
-          // Only transform if both lat and lon exist
+          // Case 1: Field is already a string (WKT or other format)
+          if (baseValue instanceof String) {
+            // Move to temp field for subsequent rename step
+            ctx["_tmp_${fieldPath}"] = baseValue;
+            return;
+          }
+          
+          // Case 2: Field is a Map/Object with lat/lon
+          if (baseValue instanceof Map) {
+            def lat = baseValue.get('lat');
+            def lon = baseValue.get('lon');
+            if (lat != null && lon != null) {
+              // Convert to WKT format
+              ctx["_tmp_${fieldPath}"] = "POINT(" + lon + " " + lat + ")";
+              return;
+            }
+          }
+          
+          // Case 3: Flattened format - lat and lon exist as separate fields
           if (latValue != null && lonValue != null) {
             // Create the geo_point object using the WKT notation
             ctx["_tmp_${fieldPath}"] = "POINT(" + lonValue + " " + latValue + ")";
           }
         `,
         lang: 'painless',
-        description: `Transform flattened ${fieldPath}.lat/.lon into geo_point object`,
+        description: `Transform ${fieldPath} into geo_point WKT format`,
       },
     });
 
     // Remove the .lat and .lon fields after transformation
     processors.push({
       remove: {
-        field: [`${fieldPath}.lat`, `${fieldPath}.lon`],
+        field: [`${fieldPath}.lat`, `${fieldPath}.lon`, fieldPath],
         ignore_missing: true,
       },
     });

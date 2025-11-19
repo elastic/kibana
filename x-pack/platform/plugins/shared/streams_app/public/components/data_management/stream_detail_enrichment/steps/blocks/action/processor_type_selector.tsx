@@ -312,6 +312,7 @@ const PROCESSOR_GROUP_MAP: Record<
   convert: 'convert',
   date: 'convert',
   replace: 'convert',
+  geoip: 'other',
   append: 'set',
   set: 'set',
   rename: 'set',

@@ -14,6 +14,7 @@ import type {
   ConvertProcessor,
   DateProcessor,
   DissectProcessor,
+  GeoipProcessor,
   GrokProcessor,
   ProcessorType,
   RemoveByPrefixProcessor,
@@ -131,6 +132,12 @@ const actionStepValidators: {
   remove: (step: RemoveProcessor) => checkFieldName(step.from),
   drop_document: noop, // 'where' condition is already validated in validateSteps function
   replace: (step: ReplaceProcessor) => {
+    checkFieldName(step.from);
+    if ('to' in step && step.to) {
+      checkFieldName(step.to);
+    }
+  },
+  geoip: (step: GeoipProcessor) => {
     checkFieldName(step.from);
     if ('to' in step && step.to) {
       checkFieldName(step.to);

@@ -224,6 +224,8 @@ export const simulateProcessing = async ({
     params
   );
 
+  console.log(JSON.stringify(ingestSimulationBody, null, 2));
+
   /**
    * 2. Run both pipeline and ingest simulations in parallel.
    * - The pipeline simulation is used to extract the documents reports and the processor metrics. This always runs.
