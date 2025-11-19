@@ -9,7 +9,7 @@
 
 import type api from '@elastic/elasticsearch/lib/api/types';
 import type { Required } from 'utility-types';
-import type { UnionKeys, Exact, MissingKeysError } from './types_helpers';
+import type { UnionKeys, Exact, MissingKeysError, PartialWithArrayValues } from './types_helpers';
 
 export type StrictDynamic = false | 'strict';
 
@@ -32,9 +32,12 @@ export type ShortMapping = Strict<api.MappingShortNumberProperty>;
 export type BooleanMapping = Strict<api.MappingBooleanProperty>;
 export type FlattenedMapping = Strict<api.MappingFlattenedProperty>;
 
-export type ObjectMapping = Omit<Strict<api.MappingObjectProperty>, 'properties'> & {
+export type ObjectMapping<T = Record<string, AnyMapping>> = Omit<
+  Strict<api.MappingObjectProperty>,
+  'properties'
+> & {
   type: 'object';
-  properties: Record<string, AnyMapping>;
+  properties: T extends Record<string, AnyMapping> ? T : never;
 };
 
 type AllMappingPropertyType = Required<api.MappingProperty>['type'];
@@ -55,7 +58,7 @@ type SupportedMappingPropertyType = AllMappingPropertyType &
     | 'object'
   );
 
-type MappingPropertyObjectType = Required<api.MappingObjectProperty, 'type'>;
+type MappingPropertyObjectType = Required<ObjectMapping, 'type'>;
 
 export type MappingProperty =
   | Extract<api.MappingProperty, { type: Exclude<SupportedMappingPropertyType, 'object'> }>
@@ -112,12 +115,13 @@ export type MappingsDefinition<S extends MappingProperty = MappingProperty> = Om
   properties: Record<string, S>;
 };
 
-export type GetFieldsOf<Definition extends MappingsDefinition<MappingProperty>> = Partial<
-  ToPrimitives<{
-    type: 'object';
-    properties: Definition['properties'];
-  }>
->;
+export type GetFieldsOf<Definition extends MappingsDefinition<MappingProperty>> =
+  PartialWithArrayValues<
+    ToPrimitives<{
+      type: 'object';
+      properties: Definition['properties'];
+    }>
+  >;
 
 // The schema definition need to support the _source document, it's OK if the
 // _source can hold more fields than the schema.
@@ -127,7 +131,7 @@ export type GetFieldsOf<Definition extends MappingsDefinition<MappingProperty>> 
 export type EnsureSubsetOf<
   SubsetDefinition extends AnyMappingDefinition,
   AllFields extends GetFieldsOf<SubsetDefinition>
-> = Exact<GetFieldsOf<SubsetDefinition>, Partial<AllFields>> extends true
+> = Exact<GetFieldsOf<SubsetDefinition>, PartialWithArrayValues<AllFields>> extends true
   ? true
   : MissingKeysError<
       Exclude<

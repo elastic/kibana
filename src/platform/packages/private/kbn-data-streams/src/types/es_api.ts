@@ -39,17 +39,22 @@ export type ClientIndex<FullDocumentType> = (
   request: ClientIndexRequest<FullDocumentType>
 ) => Promise<ClientIndexResponse>;
 
-export type ClientBulkOperation<TDocument> =
-  | {
-      index: { document: Omit<TDocument, '_id'>; _id?: string };
-    }
-  | { delete: { _id: string } };
+export interface ClientBulkOperation {
+  index?: Omit<api.BulkIndexOperation, '_index'>;
+  create?: Omit<api.BulkCreateOperation, '_index'>;
+  update?: Omit<api.BulkUpdateOperation, '_index'>;
+  delete?: Omit<api.BulkDeleteOperation, '_index'>;
+}
 
 export type ClientBulkRequest<TDocument> = Omit<
   OmitIndexProp<api.BulkRequest<TDocument>>,
   'operations'
 > & {
-  operations: Array<ClientBulkOperation<TDocument>>;
+  operations: (
+    | ClientBulkOperation
+    | api.BulkUpdateAction<TDocument, Partial<TDocument>>
+    | TDocument
+  )[];
 };
 export type ClientBulkResponse = api.BulkResponse;
 export type ClientBulk<TDocumentType> = (
@@ -66,7 +71,7 @@ export interface InternalIDataStreamClient<
   search: <Agg extends Record<string, api.AggregationsAggregate> = {}>(
     req: ClientSearchRequest<SRM>,
     transportOpts?: TransportRequestOptionsWithOutMeta
-  ) => Promise<api.SearchResponse<GetFieldsOf<S>, Agg>>;
+  ) => Promise<api.SearchResponse<FullDocumentType, Agg>>;
 
   bulk: ClientBulk<FullDocumentType>;
   index: ClientIndex<FullDocumentType>;

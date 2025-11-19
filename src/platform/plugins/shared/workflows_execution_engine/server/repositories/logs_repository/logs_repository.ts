@@ -7,57 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
-import type { LogsRepositoryDataStreamClient } from './data_stream';
-import { getDataStreamClient } from './data_stream';
-
-export interface WorkflowLogEvent {
-  '@timestamp'?: string;
-  message?: string;
-  level?: 'trace' | 'debug' | 'info' | 'warn' | 'error';
-  workflow?: {
-    id?: string;
-    name?: string;
-    execution_id?: string;
-    step_id?: string;
-    step_execution_id?: string;
-    step_name?: string;
-    step_type?: string;
-  };
-  event?: {
-    action?: string;
-    category?: string[];
-    type?: string[];
-    provider?: string;
-    outcome?: 'success' | 'failure' | 'unknown';
-    duration?: number;
-    start?: string;
-    end?: string;
-  };
-  error?: {
-    message?: string;
-    type?: string;
-    stack_trace?: string;
-  };
-  tags?: string[];
-  [key: string]: unknown;
-}
+import type { ClientSearchRequest } from '@kbn/data-streams';
+import type {
+  getDataStreamClient,
+  LogsRepositoryDataStreamClient,
+  type WorkflowLogEvent,
+} from './data_stream';
 
 export interface LogSearchResult {
   total: number;
-  logs: Array<{
-    '@timestamp': string;
-    message: string;
-    level: string;
-    workflow?: {
-      id?: string;
-      name?: string;
-      execution_id?: string;
-      step_id?: string;
-      step_name?: string;
-    };
-    [key: string]: unknown;
-  }>;
+  logs: Array<WorkflowLogEvent>;
 }
 
 export class LogsRepository {
@@ -87,8 +48,7 @@ export class LogsRepository {
     };
     const mappedSortField = fieldMapping[sortField] || sortField;
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const mustQueries: any[] = [];
+    const mustQueries: QueryDslQueryContainer[] = [];
 
     if ('executionId' in params) {
       mustQueries.push({
@@ -143,7 +103,7 @@ export class LogsRepository {
   }
 
   public async getLogsByLevel(level: string, executionId?: string): Promise<LogSearchResult> {
-    const mustClauses: unknown[] = [
+    const mustClauses: QueryDslQueryContainer[] = [
       {
         term: {
           level,
@@ -184,8 +144,8 @@ export class LogsRepository {
         typeof response.hits.total === 'number'
           ? response.hits.total
           : response.hits.total?.value || 0,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      logs: response.hits.hits.map((hit: any) => hit._source),
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      logs: response.hits.hits.map((hit) => hit._source!),
     };
   }
 
@@ -210,8 +170,7 @@ export class LogsRepository {
     return this.searchDataStream({ query });
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private async searchDataStream(query: any): Promise<LogSearchResult> {
+  private async searchDataStream(query: ClientSearchRequest): Promise<LogSearchResult> {
     const response = await this.dataStreamClient.search({
       sort: [{ '@timestamp': { order: 'desc' } }],
       size: 1000,
@@ -223,8 +182,8 @@ export class LogsRepository {
         typeof response.hits.total === 'number'
           ? response.hits.total
           : response.hits.total?.value || 0,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      logs: response.hits.hits.map((hit: any) => hit._source),
+      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+      logs: response.hits.hits.map((hit) => hit._source!),
     };
   }
 }

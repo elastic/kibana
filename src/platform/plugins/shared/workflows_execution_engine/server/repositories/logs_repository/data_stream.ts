@@ -9,7 +9,7 @@
 
 import type { DataStreamsSetup, DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { IDataStreamClient } from '@kbn/data-streams';
-import type { MappingsToProperties } from '@kbn/es-mappings';
+import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
 import { WORKFLOWS_EXECUTION_LOGS_DATA_STREAM } from './constants';
 
@@ -22,47 +22,86 @@ const logsRepositoryMappings = {
     level: mappings.keyword(),
     tags: mappings.keyword(),
     workflow: mappings.object({
-      id: mappings.keyword(),
-      name: mappings.text({
-        fields: {
-          keyword: {
-            type: 'keyword',
-            ignore_above: 256,
+      properties: {
+        id: mappings.keyword(),
+        name: mappings.text({
+          fields: {
+            keyword: {
+              type: 'keyword',
+              ignore_above: 256,
+            },
           },
-        },
-      }),
-      execution_id: mappings.keyword(),
-      step_id: mappings.keyword(),
-      step_name: mappings.text({
-        fields: {
-          keyword: {
-            type: 'keyword',
-            ignore_above: 256,
+        }),
+        execution_id: mappings.keyword(),
+        step_id: mappings.keyword(),
+        step_name: mappings.text({
+          fields: {
+            keyword: {
+              type: 'keyword',
+              ignore_above: 256,
+            },
           },
-        },
-      }),
-      step_type: mappings.keyword(),
+        }),
+        step_type: mappings.keyword(),
+      },
     }),
     event: mappings.object({
-      action: mappings.keyword(),
-      category: mappings.keyword(),
-      type: mappings.keyword(),
-      provider: mappings.keyword(),
-      outcome: mappings.keyword(),
-      duration: mappings.long(),
-      start: mappings.date(),
-      end: mappings.date(),
+      properties: {
+        action: mappings.keyword(),
+        category: mappings.keyword(),
+        type: mappings.keyword(),
+        provider: mappings.keyword(),
+        outcome: mappings.keyword(),
+        duration: mappings.long(),
+        start: mappings.date(),
+        end: mappings.date(),
+      },
     }),
     error: mappings.object({
-      message: mappings.text(),
-      type: mappings.keyword(),
-      stack_trace: mappings.text({ fields: undefined }),
+      properties: {
+        message: mappings.text(),
+        type: mappings.keyword(),
+        stack_trace: mappings.text({ fields: undefined }),
+      },
     }),
   },
-};
+} satisfies MappingsDefinition;
 
-export type LogsRepositoryDoc = MappingsToProperties<typeof logsRepositoryMappings>;
-export type LogsRepositoryDataStreamClient = IDataStreamClient<LogsRepositoryDoc, {}>;
+export interface WorkflowLogEvent extends GetFieldsOf<typeof logsRepositoryMappings> {
+  '@timestamp'?: string;
+  message?: string;
+  level?: 'trace' | 'debug' | 'info' | 'warn' | 'error';
+  workflow?: {
+    id?: string;
+    name?: string;
+    execution_id?: string;
+    step_id?: string;
+    step_execution_id?: string;
+    step_name?: string;
+    step_type?: string;
+  };
+  event?: {
+    action?: string;
+    category?: string[];
+    type?: string[];
+    provider?: string;
+    outcome?: 'success' | 'failure' | 'unknown';
+    duration?: number;
+    start?: string;
+    end?: string;
+  };
+  error?: {
+    message?: string;
+    type?: string;
+    stack_trace?: string;
+  };
+  tags?: string[];
+}
+
+export type LogsRepositoryDataStreamClient = IDataStreamClient<
+  typeof logsRepositoryMappings,
+  WorkflowLogEvent
+>;
 
 export const getDataStreamClient = (
   coreDataStreams: DataStreamsStart

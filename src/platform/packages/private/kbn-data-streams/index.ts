@@ -8,8 +8,4 @@
  */
 
 export { DataStreamClient } from './src/client';
-export type {
-  DataStreamDefinition,
-  IDataStreamClient,
-  BaseSearchRuntimeMappings,
-} from './src/types';
+export type * from './src/types';

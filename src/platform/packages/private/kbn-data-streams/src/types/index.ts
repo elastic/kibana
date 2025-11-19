@@ -9,6 +9,6 @@
 
 export type { BaseSearchRuntimeMappings } from './runtime';
 export type { DataStreamDefinition } from './definition';
-export type { InternalIDataStreamClient } from './es_api';
+export type { InternalIDataStreamClient, ClientSearchRequest } from './es_api';
 
 export type { IDataStreamClient } from './client';

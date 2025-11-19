@@ -7,10 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { GetFieldsOf, MappingsDefinition } from '../types';
+import type { GetFieldsOf, IntegerMapping, MappingsDefinition, TextMapping } from '../types';
 import * as mappings from '../mappings';
 
-// Test 1: Create a MappingsDefinition and verify its type
+// Test create a MappingsDefinition and verify its type
 const userMapping = {
   properties: {
     name: mappings.text(),
@@ -21,7 +21,7 @@ const userMapping = {
   },
 } satisfies MappingsDefinition;
 
-// Test 2: DocumentOf should infer the correct document type from the mapping
+// Test DocumentOf should infer the correct document type from the mapping
 type UserDocument = GetFieldsOf<typeof userMapping>;
 
 // Verify successful cases - these should compile without errors
@@ -69,3 +69,22 @@ export const invalidMapping: MappingsDefinition = {
     not_mapped: { type: 'invalid_type' },
   },
 };
+
+// Test objects
+const objectMapping = {
+  properties: {
+    nestedObj: mappings.object({
+      properties: {
+        name: mappings.text(),
+        age: mappings.integer(),
+      },
+    }),
+  },
+} satisfies MappingsDefinition;
+
+export const nameIsTextMapping: TextMapping = objectMapping.properties.nestedObj.properties.name;
+export const ageIsIntegerMapping: IntegerMapping =
+  objectMapping.properties.nestedObj.properties.age;
+
+// @ts-expect-error - Unknown object nested mapping properties are not allowed
+export const unknownMappingErrors = objectMapping.properties.nestedObj.properties.unknown;

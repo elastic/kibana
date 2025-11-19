@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MissingKeysError, UnionKeys, Exact } from '../types_helpers';
+import type { MissingKeysError, UnionKeys, Exact, PartialWithArrayValues } from '../types_helpers';
 import type { GetFieldsOf } from '../types';
 
 // Suite MissingKeysError Helper Type
@@ -60,7 +60,7 @@ type TestExact = Exact<{ a: 1; b: 2 }, { a: 1; b: 2 }>;
 export const testExact: TestExact = true;
 type TestExactSchema = Exact<
   GetFieldsOf<{ properties: { a: { type: 'integer' }; b: { type: 'integer' } } }>,
-  { a?: number; b?: number }
+  PartialWithArrayValues<{ a?: number; b?: number }>
 >;
 export const testExactSchema: TestExactSchema = true;
 
@@ -92,3 +92,43 @@ export const testExcludeNoIntersection: TestExcludeNoIntersection = 'A';
 // Test: Exclude RHS has more keys than LHS (never)
 type TestExcludeNever = Exclude<'A', 'A' | 'B'>;
 export let testExclude2: TestExcludeNever;
+
+// Suite PartialWithArrayValues Helper Type
+// Test allows casting to arrays of field
+export interface DocType extends PartialWithArrayValues<{ a: string; b: number; c: boolean }> {
+  a?: string[];
+  b: number[];
+  c: boolean;
+}
+
+// Test allows casting to arrays of nested fields
+export interface DocTypeObject extends PartialWithArrayValues<{ a: { b: string; c: number } }> {
+  a?: { b: string; c: number }[];
+}
+
+// Test allows casting to arrays of nested fields with optional values
+export interface DocTypeObjectOptional
+  extends PartialWithArrayValues<{ a: { b: string; c: number } }> {
+  a?: { b: string; c?: number }[];
+}
+
+// Test allows casting to arrays of nested fields
+export const a: DocTypeObjectOptional['a'] = [
+  {
+    b: 'test',
+  },
+];
+
+// Test allows casting to objects with nested fields with optional values
+export const b: DocTypeObjectOptional = {
+  a: {
+    // @ts-expect-error - a is casted to an array of objects, not an object
+    b: 'test',
+    c: 1,
+  },
+};
+
+export interface DocType extends PartialWithArrayValues<{ a: string; b: number; c: boolean }> {
+  // @ts-expect-error - a is a string | string[], not a number[]
+  a?: number[];
+}

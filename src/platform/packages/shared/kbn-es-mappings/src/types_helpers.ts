@@ -22,3 +22,9 @@ export type MissingKeysError<T extends string> = Error &
 
 // This is a helper type to omit the type field from a type
 export type WithoutTypeField<T> = Omit<T, 'type'>;
+
+export type PartialWithArrayValues<T> = Partial<{
+  [P in keyof T]?: T[P] extends {}
+    ? PartialWithArrayValues<T[P]> | PartialWithArrayValues<T[P]>[]
+    : T[P] | T[P][];
+}>;
