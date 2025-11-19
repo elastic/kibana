@@ -246,6 +246,46 @@
             "path": "x-pack/solutions/observability/plugins/observability_agent/server/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAgent",
+            "id": "def-server.ObservabilityAgentPluginStartDependencies.ruleRegistry",
+            "type": "Object",
+            "tags": [],
+            "label": "ruleRegistry",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "ruleRegistry",
+                "scope": "server",
+                "docId": "kibRuleRegistryPluginApi",
+                "section": "def-server.RuleRegistryPluginStartContract",
+                "text": "RuleRegistryPluginStartContract"
+              }
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_agent/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "observabilityAgent",
+            "id": "def-server.ObservabilityAgentPluginStartDependencies.dataViews",
+            "type": "Object",
+            "tags": [],
+            "label": "dataViews",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "server",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-server.DataViewsServerPluginStart",
+                "text": "DataViewsServerPluginStart"
+              }
+            ],
+            "path": "x-pack/solutions/observability/plugins/observability_agent/server/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
