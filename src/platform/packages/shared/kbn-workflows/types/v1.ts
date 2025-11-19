@@ -157,16 +157,19 @@ export interface WorkflowExecutionDto {
   spaceId: string;
   id: string;
   status: ExecutionStatus;
+  isTestRun: boolean;
   startedAt: string;
   finishedAt: string;
   workflowId?: string;
   workflowName?: string;
   workflowDefinition: WorkflowYaml;
+  /** If specified, only this step and its children were executed */
   stepId?: string | undefined;
   stepExecutions: WorkflowStepExecutionDto[];
   duration: number | null;
   triggeredBy?: string; // 'manual' or 'scheduled'
   yaml: string;
+  context?: Record<string, unknown>;
 }
 
 export type WorkflowExecutionListItemDto = Omit<
@@ -197,13 +200,18 @@ export const EsWorkflowSchema = z.object({
   createdBy: z.string(),
   lastUpdatedAt: z.date(),
   lastUpdatedBy: z.string(),
-  definition: WorkflowSchema,
+  definition: WorkflowSchema.optional(),
   deleted_at: z.date().nullable().default(null),
   yaml: z.string(),
   valid: z.boolean().readonly(),
 });
 
 export type EsWorkflow = z.infer<typeof EsWorkflowSchema>;
+
+export type EsWorkflowCreate = Omit<
+  EsWorkflow,
+  'id' | 'createdAt' | 'createdBy' | 'lastUpdatedAt' | 'lastUpdatedBy' | 'yaml' | 'deleted_at'
+>;
 
 export const CreateWorkflowCommandSchema = z.object({
   yaml: z.string(),
@@ -424,3 +432,11 @@ export interface EnhancedInternalConnectorContract extends InternalConnectorCont
 }
 
 export type ConnectorContractUnion = DynamicConnectorContract | EnhancedInternalConnectorContract;
+
+export interface WorkflowsSearchParams {
+  limit: number;
+  page: number;
+  query?: string;
+  createdBy?: string[];
+  enabled?: boolean[];
+}

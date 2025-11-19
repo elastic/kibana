@@ -10,13 +10,14 @@ import type { ToolResult, ToolType } from '@kbn/onechat-common';
 import { createBadRequestError } from '@kbn/onechat-common';
 import { withExecuteToolSpan } from '@kbn/inference-tracing';
 import type {
-  ToolHandlerContext,
-  ScopedRunnerRunToolsParams,
-  ToolHandlerReturn,
   RunToolReturn,
+  ScopedRunnerRunToolsParams,
+  ToolHandlerContext,
+  ToolHandlerReturn,
 } from '@kbn/onechat-server';
 import { createErrorResult } from '@kbn/onechat-server';
 import { getToolResultId } from '@kbn/onechat-server/tools';
+import { ToolCallSource } from '../../telemetry';
 import { registryToProvider } from '../tools/utils';
 import { forkContextForToolRun } from './utils/run_context';
 import { createToolEventEmitter } from './utils/events';
@@ -34,7 +35,15 @@ export const runTool = async <TParams = Record<string, unknown>>({
 
   const context = forkContextForToolRun({ parentContext: parentManager.context, toolId });
   const manager = parentManager.createChild(context);
-  const { toolsService, request, resultStore } = manager.deps;
+  const { toolsService, request, resultStore, trackingService } = manager.deps;
+
+  if (trackingService) {
+    try {
+      trackingService.trackToolCall(toolId, ToolCallSource.API);
+    } catch (error) {
+      /* empty */
+    }
+  }
 
   const toolRegistry = await toolsService.getRegistry({ request });
   const tool = (await toolRegistry.get(toolId)) as InternalToolDefinition<
@@ -96,20 +105,12 @@ export const createToolHandlerContext = async <TParams = Record<string, unknown>
   manager: RunnerManager;
 }): Promise<ToolHandlerContext> => {
   const { onEvent } = toolExecutionParams;
-  const {
-    request,
-    defaultConnectorId,
-    elasticsearch,
-    modelProviderFactory,
-    toolsService,
-    resultStore,
-    logger,
-  } = manager.deps;
+  const { request, elasticsearch, modelProvider, toolsService, resultStore, logger } = manager.deps;
   return {
     request,
     logger,
     esClient: elasticsearch.client.asScoped(request),
-    modelProvider: modelProviderFactory({ request, defaultConnectorId }),
+    modelProvider,
     runner: manager.getRunner(),
     toolProvider: registryToProvider({
       registry: await toolsService.getRegistry({ request }),

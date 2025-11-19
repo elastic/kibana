@@ -126,6 +126,7 @@ export {
 } from './src/saved_objects_error_helpers';
 
 export type {
+  ModelVersionIdentifier,
   SavedObjectsModelVersion,
   SavedObjectsModelVersionMap,
   SavedObjectsModelVersionMapProvider,

@@ -11,6 +11,7 @@ import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 
 import type { FilterManager } from '@kbn/data-plugin/public';
+import { PageScope } from '../../../../data_view_manager/constants';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { type TimelineType, TimelineTypeEnum } from '../../../../../common/api/timeline';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -24,7 +25,6 @@ import { Sourcerer } from '../../../../sourcerer/components';
 import { DataViewPicker } from '../../../../data_view_manager/components/data_view_picker';
 
 import { TimelineDatePickerLock } from '../date_picker_lock';
-import { SourcererScopeName } from '../../../../sourcerer/store/model';
 import {
   DATA_PROVIDER_HIDDEN_EMPTY,
   DATA_PROVIDER_HIDDEN_POPULATED,
@@ -116,9 +116,9 @@ export const SearchOrFilter = React.memo<Props>(
           >
             <EuiFlexItem grow={false}>
               {newDataViewPickerEnabled ? (
-                <DataViewPicker scope={SourcererScopeName.timeline} />
+                <DataViewPicker scope={PageScope.timeline} />
               ) : (
-                <Sourcerer scope={SourcererScopeName.timeline} />
+                <Sourcerer scope={PageScope.timeline} />
               )}
             </EuiFlexItem>
             <EuiFlexItem data-test-subj="timeline-search-or-filter-search-container" grow={1}>

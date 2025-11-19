@@ -80,7 +80,6 @@ export interface SearchBarOwnProps<QT extends AggregateQuery | Query = Query> {
   showQueryInput?: boolean;
   showFilterBar?: boolean;
   showDatePicker?: boolean;
-  showProjectPicker?: boolean;
   showAutoRefreshOnly?: boolean;
   filters?: Filter[];
   additionalQueryBarMenuItems?: AdditionalQueryBarMenuItems;
@@ -559,6 +558,7 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
                   this.services.notifications.toasts.remove(toast);
                   this.services.data.search.showSearchSessionsFlyout({
                     appId: this.services.appName,
+                    trackingProps: { openedFrom: 'toast' },
                   });
                 }}
               >
@@ -577,7 +577,9 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
     query?: QT | Query | undefined;
   }) => {
     if (!this.isDirty()) {
-      const searchSession = await this.services.data.search.session.save();
+      const searchSession = await this.services.data.search.session.save({
+        entryPoint: 'main button',
+      });
       this.showBackgroundSearchCreatedToast(searchSession.attributes.name);
       return;
     }
@@ -589,7 +591,9 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
       .subscribe(async (newSessionId) => {
         if (currentSessionId === newSessionId) return;
         subscription.unsubscribe();
-        const searchSession = await this.services.data.search.session.save();
+        const searchSession = await this.services.data.search.session.save({
+          entryPoint: 'main button',
+        });
         this.showBackgroundSearchCreatedToast(searchSession.attributes.name);
       });
 
@@ -787,7 +791,6 @@ export class SearchBarUI<QT extends (Query | AggregateQuery) | Query = Query> ex
           esqlVariablesConfig={this.props.esqlVariablesConfig}
           onOpenQueryInNewTab={this.props.onOpenQueryInNewTab}
           useBackgroundSearchButton={this.props.useBackgroundSearchButton}
-          showProjectPicker={this.props.showProjectPicker}
         />
       </div>
     );
