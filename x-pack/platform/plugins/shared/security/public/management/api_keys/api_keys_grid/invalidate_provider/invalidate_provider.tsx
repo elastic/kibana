@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import { EuiCallOut, EuiConfirmModal, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
+import {
+  EuiBadge,
+  EuiCallOut,
+  EuiConfirmModal,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  useGeneratedHtmlId,
+} from '@elastic/eui';
 import React, { Fragment, useRef, useState } from 'react';
 
 import type { NotificationsStart } from '@kbn/core/public';
@@ -36,7 +45,7 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
 }) => {
   const [apiKeys, setApiKeys] = useState<CategorizedApiKey[]>([]);
   const [isModalOpen, setIsModalOpen] = useState<boolean>(false);
-  const [alertingRuleKeys, setAlertingRuleKeys] = useState<CategorizedApiKey[]>([]);
+  const [managedRuleKeys, setManagedRuleKeys] = useState<CategorizedApiKey[]>([]);
   const onSuccessCallback = useRef<OnSuccessCallback | null>(null);
   const modalTitleId = useGeneratedHtmlId();
 
@@ -46,14 +55,14 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
     }
     setIsModalOpen(true);
     setApiKeys(keys);
-    setAlertingRuleKeys(keys.filter((key) => key.metadata?.kibana?.type === 'alerting_rule'));
+    setManagedRuleKeys(keys.filter((key) => key.metadata?.managed));
     onSuccessCallback.current = onSuccess;
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
     setApiKeys([]);
-    setAlertingRuleKeys([]);
+    setManagedRuleKeys([]);
   };
 
   const invalidateApiKey = async () => {
@@ -173,18 +182,17 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
         buttonColor="danger"
         data-test-subj="invalidateApiKeyConfirmationModal"
       >
-        {alertingRuleKeys.length > 0 && (
+        {managedRuleKeys.length && (
           <>
             <EuiCallOut
               announceOnMount
               title={i18n.translate(
-                'xpack.security.management.apiKeys.deleteApiKey.confirmModal.alertingRuleWarningTitle',
+                'xpack.security.management.apiKeys.deleteApiKey.confirmModal.kibanaManagedWarningTitle',
                 {
                   defaultMessage:
-                    '{count, plural, one {API key {names} is in use by an alerting rule} other {API keys {names} are in use by alerting rules}}',
+                    '{count, plural, one {API key managed by Kibana} other {API keys managed by Kibana}}',
                   values: {
-                    count: alertingRuleKeys.length,
-                    names: alertingRuleKeys.map((key) => key.name).join(', '),
+                    count: managedRuleKeys.length,
                   },
                 }
               )}
@@ -194,11 +202,11 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
             >
               <p>
                 {i18n.translate(
-                  'xpack.security.management.apiKeys.deleteApiKey.confirmModal.alertingRuleWarningDescription',
+                  'xpack.security.management.apiKeys.deleteApiKey.confirmModal.kibanaManagedWarningDescription',
                   {
                     defaultMessage:
-                      '{count, plural, one {Deleting this API key may cause the associated alerting rule to stop working.} other {Deleting these API keys may cause the associated alerting rules to stop working.}}',
-                    values: { count: alertingRuleKeys.length },
+                      '{count, plural, one {Deleting this API key may disrupt some Kibana features or functionality.} other {Deleting these API keys may disrupt some Kibana features or functionality.}}',
+                    values: { count: managedRuleKeys.length },
                   }
                 )}
               </p>
@@ -215,8 +223,38 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
               )}
             </p>
             <ul>
-              {apiKeys.map(({ name, id }) => (
-                <li key={id}>{name}</li>
+              {apiKeys.map(({ name, id, metadata }) => (
+                <li key={id}>
+                  <EuiFlexGroup wrap responsive={false} gutterSize="xs" alignItems="center">
+                    <EuiFlexItem grow={false} key={`name-${id}`}>
+                      <EuiText>{name}</EuiText>
+                    </EuiFlexItem>
+                    {metadata.managed && (
+                      <EuiFlexItem grow={false} key={`managed-${id}`}>
+                        <EuiBadge color="hollow" iconType="gear">
+                          {i18n.translate(
+                            'xpack.security.accountManagement.apiKeyBadge.managedTitle',
+                            {
+                              defaultMessage: 'Managed',
+                            }
+                          )}
+                        </EuiBadge>
+                      </EuiFlexItem>
+                    )}
+                    {metadata?.kibana?.type === 'alerting_rule' && (
+                      <EuiFlexItem grow={false} key={`alerting-${id}`}>
+                        <EuiBadge color="warning" iconType="wrench">
+                          {i18n.translate(
+                            'xpack.security.accountManagement.apiKeyBadge.alertingRuleTitle',
+                            {
+                              defaultMessage: 'Alerting',
+                            }
+                          )}
+                        </EuiBadge>
+                      </EuiFlexItem>
+                    )}
+                  </EuiFlexGroup>
+                </li>
               ))}
             </ul>
           </>
