@@ -17,7 +17,10 @@ describe('normalizeErrors', () => {
           spanId: 'a',
           eventName: undefined,
           error: {
+            grouping_key: 'error-3',
+            id: 'error-3',
             exception: { type: 'Error', message: 'First error' },
+            log: { message: 'Log message' },
           },
           timestamp: {
             us: 1234567890,
@@ -30,7 +33,10 @@ describe('normalizeErrors', () => {
       expect(result).toEqual([
         {
           error: {
+            grouping_key: 'error-3',
+            id: 'error-3',
             exception: { type: 'Error', message: 'First error' },
+            log: { message: 'Log message' },
           },
           timestamp: { us: 1234567890 },
         },
