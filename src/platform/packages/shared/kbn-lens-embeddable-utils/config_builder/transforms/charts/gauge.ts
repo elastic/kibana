@@ -12,6 +12,7 @@ import type {
   GaugeVisualizationState,
   PersistedIndexPatternLayer,
   TextBasedLayer,
+  TypedLensSerializedState,
 } from '@kbn/lens-common';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/types';
@@ -221,7 +222,16 @@ function getValueColumns(layer: GaugeStateESQL) {
   ];
 }
 
-export function fromAPItoLensState(config: GaugeState): LensAttributes {
+type GaugeAttributes = Extract<
+  TypedLensSerializedState['attributes'],
+  { visualizationType: 'lnsGauge' }
+>;
+
+type GaugeAttributesWithoutFiltersAndQuery = Omit<GaugeAttributes, 'state'> & {
+  state: Omit<GaugeAttributes['state'], 'filters' | 'query'>;
+};
+
+export function fromAPItoLensState(config: GaugeState): GaugeAttributesWithoutFiltersAndQuery {
   const _buildDataLayer = (cfg: unknown, i: number) => buildFormBasedLayer(cfg as GaugeStateNoESQL);
 
   const { layers, usedDataviews } = buildDatasourceStates(config, _buildDataLayer, getValueColumns);
@@ -243,8 +253,6 @@ export function fromAPItoLensState(config: GaugeState): LensAttributes {
     state: {
       datasourceStates: layers,
       internalReferences,
-      filters: [],
-      query: { language: 'kuery', query: '' },
       visualization,
       adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
     },

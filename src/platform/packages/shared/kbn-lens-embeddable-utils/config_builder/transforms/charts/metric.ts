@@ -13,6 +13,7 @@ import type {
   MetricVisualizationState,
   PersistedIndexPatternLayer,
   TextBasedLayer,
+  TypedLensSerializedState,
 } from '@kbn/lens-common';
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
@@ -40,6 +41,7 @@ import {
   getSharedChartLensStateToAPI,
   getSharedChartAPIToLensState,
   getMetricAccessor,
+  getDatasourceLayers,
 } from './utils';
 import {
   fromColorByValueAPIToLensState,
@@ -132,10 +134,7 @@ function buildVisualizationState(config: MetricState): MetricVisualizationState 
           maxCols: layer.breakdown_by.columns,
         }
       : {}),
-    collapseFn:
-      layer.breakdown_by && layer.breakdown_by.collapse_by
-        ? layer.breakdown_by.collapse_by
-        : undefined,
+    collapseFn: layer.breakdown_by?.collapse_by,
     ...(layer.metric?.background_chart?.type === 'bar'
       ? {
           maxAccessor: getAccessorName('max'),
@@ -436,7 +435,16 @@ function getValueColumns(layer: MetricStateESQL) {
   ];
 }
 
-export function fromAPItoLensState(config: MetricState): LensAttributes {
+type MetricAttributes = Extract<
+  TypedLensSerializedState['attributes'],
+  { visualizationType: 'lnsMetric' }
+>;
+
+type MetricAttributesWithoutFiltersAndQuery = Omit<MetricAttributes, 'state'> & {
+  state: Omit<MetricAttributes['state'], 'filters' | 'query'>;
+};
+
+export function fromAPItoLensState(config: MetricState): MetricAttributesWithoutFiltersAndQuery {
   const _buildDataLayer = (cfg: unknown, i: number) =>
     buildFormBasedLayer(cfg as MetricStateNoESQL);
 
@@ -459,8 +467,6 @@ export function fromAPItoLensState(config: MetricState): LensAttributes {
     state: {
       datasourceStates: layers,
       internalReferences,
-      filters: [],
-      query: { language: 'kuery', query: '' },
       visualization,
       adHocDataViews: config.dataset.type === 'index' ? adHocDataViews : {},
     },
@@ -470,12 +476,7 @@ export function fromAPItoLensState(config: MetricState): LensAttributes {
 export function fromLensStateToAPI(config: LensAttributes): MetricState {
   const { state } = config;
   const visualization = state.visualization as MetricVisualizationState;
-  const layers =
-    state.datasourceStates.formBased?.layers ??
-    state.datasourceStates.textBased?.layers ??
-    // @ts-expect-error unfortunately due to a migration bug, some existing SO might still have the old indexpattern DS state
-    (state.datasourceStates.indexpattern?.layers as PersistedIndexPatternLayer[]) ??
-    [];
+  const layers = getDatasourceLayers(state);
 
   // Layers can be in any order, so make sure to get the main one
   const [layerId, layer] = Object.entries(layers).find(
