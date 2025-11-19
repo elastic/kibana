@@ -8809,78 +8809,6 @@
             "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/hover/index.ts"
           },
           {
-            "plugin": "@kbn/esql-utils",
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts"
-          },
-          {
-            "plugin": "@kbn/esql-utils",
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts"
-          },
-          {
-            "plugin": "@kbn/esql-utils",
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts"
-          },
-          {
-            "plugin": "@kbn/esql-utils",
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts"
-          },
-          {
-            "plugin": "@kbn/esql-utils",
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts"
-          },
-          {
-            "plugin": "@kbn/esql-utils",
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts"
-          },
-          {
-            "plugin": "@kbn/esql-utils",
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts"
-          },
-          {
-            "plugin": "@kbn/esql-utils",
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts"
-          },
-          {
-            "plugin": "@kbn/esql-utils",
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts"
-          },
-          {
-            "plugin": "@kbn/esql-utils",
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts"
-          },
-          {
-            "plugin": "@kbn/esql-utils",
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts"
-          },
-          {
-            "plugin": "@kbn/esql-utils",
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts"
-          },
-          {
-            "plugin": "@kbn/esql-utils",
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_with_safe_limit.ts"
-          },
-          {
-            "plugin": "@kbn/esql-utils",
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_with_safe_limit.ts"
-          },
-          {
-            "plugin": "@kbn/esql-utils",
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_cannot_be_sampled.ts"
-          },
-          {
-            "plugin": "@kbn/esql-utils",
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_cannot_be_sampled.ts"
-          },
-          {
-            "plugin": "@kbn/esql-utils",
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts"
-          },
-          {
-            "plugin": "@kbn/esql-utils",
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/append_to_query.ts"
-          },
-          {
             "plugin": "@kbn/esql-composer",
             "path": "src/platform/packages/shared/kbn-esql-composer/src/commands/from.ts"
           },
@@ -9023,18 +8951,6 @@
           {
             "plugin": "@kbn/esql-composer",
             "path": "src/platform/packages/shared/kbn-esql-composer/src/pipeline/replace_parameters.test.ts"
-          },
-          {
-            "plugin": "@kbn/esql-utils",
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.test.ts"
-          },
-          {
-            "plugin": "@kbn/esql-utils",
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.test.ts"
-          },
-          {
-            "plugin": "@kbn/esql-utils",
-            "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.test.ts"
           },
           {
             "plugin": "@kbn/esql-validation-autocomplete",
@@ -12075,36 +11991,7 @@
             "path": "src/platform/packages/shared/kbn-esql-ast/src/parser/parser.ts",
             "deprecated": true,
             "trackAdoption": false,
-            "references": [
-              {
-                "plugin": "@kbn/esql-utils",
-                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts"
-              },
-              {
-                "plugin": "@kbn/esql-utils",
-                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts"
-              },
-              {
-                "plugin": "@kbn/esql-utils",
-                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts"
-              },
-              {
-                "plugin": "@kbn/esql-utils",
-                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts"
-              },
-              {
-                "plugin": "@kbn/esql-utils",
-                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts"
-              },
-              {
-                "plugin": "@kbn/esql-utils",
-                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/query_parsing_helpers.ts"
-              },
-              {
-                "plugin": "@kbn/esql-utils",
-                "path": "src/platform/packages/shared/kbn-esql-utils/src/utils/get_esql_with_safe_limit.ts"
-              }
-            ]
+            "references": []
           },
           {
             "parentPluginId": "@kbn/esql-ast",
@@ -12747,6 +12634,34 @@
             "type": "Object",
             "tags": [],
             "label": "forkTooFewBranches",
+            "description": [],
+            "signature": [
+              "{ message: string; type: {}; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ValidationErrors.forkNotAllowedWithSubqueries",
+            "type": "Object",
+            "tags": [],
+            "label": "forkNotAllowedWithSubqueries",
+            "description": [],
+            "signature": [
+              "{ message: string; type: {}; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-ast",
+            "id": "def-common.ValidationErrors.inlineStatsNotAllowedAfterLimit",
+            "type": "Object",
+            "tags": [],
+            "label": "inlineStatsNotAllowedAfterLimit",
             "description": [],
             "signature": [
               "{ message: string; type: {}; }"
@@ -16959,6 +16874,21 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.subqueryCompleteItem",
+        "type": "Object",
+        "tags": [],
+        "label": "subqueryCompleteItem",
+        "description": [],
+        "signature": [
+          "ISuggestionItem"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.userDefinedTypes",
         "type": "Object",
         "tags": [],
@@ -16967,7 +16897,7 @@
           "\nAll supported field types in ES|QL. This is all the types\nthat can come back in the table from a query."
         ],
         "signature": [
-          "readonly [\"boolean\", \"date\", \"double\", \"ip\", \"keyword\", \"integer\", \"long\", \"text\", \"unsigned_long\", \"version\", \"cartesian_point\", \"cartesian_shape\", \"geo_point\", \"geo_shape\", \"counter_integer\", \"counter_long\", \"counter_double\", \"unsupported\", \"date_nanos\", \"function_named_parameters\", \"null\", \"time_duration\", \"date_period\", \"param\"]"
+          "readonly [\"boolean\", \"date\", \"double\", \"ip\", \"keyword\", \"integer\", \"long\", \"text\", \"unsigned_long\", \"version\", \"cartesian_point\", \"cartesian_shape\", \"geo_point\", \"geo_shape\", \"counter_integer\", \"counter_long\", \"counter_double\", \"unsupported\", \"date_nanos\", \"function_named_parameters\", \"null\", \"time_duration\", \"date_period\", \"param\", \"histogram\", \"exponential_histogram\", \"tdigest\"]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
         "deprecated": false,
@@ -16995,6 +16925,21 @@
         "type": "Object",
         "tags": [],
         "label": "withCompleteItem",
+        "description": [],
+        "signature": [
+          "ISuggestionItem"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.withMapCompleteItem",
+        "type": "Object",
+        "tags": [],
+        "label": "withMapCompleteItem",
         "description": [],
         "signature": [
           "ISuggestionItem"

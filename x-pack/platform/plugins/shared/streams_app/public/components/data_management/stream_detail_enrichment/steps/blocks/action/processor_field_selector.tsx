@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
+import { default as React, useCallback, useMemo } from 'react';
 import { useController } from 'react-hook-form';
-import { FieldSelector } from '../../../../shared/field_selector';
 import { useEnrichmentFieldSuggestions } from '../../../../../../hooks/use_field_suggestions';
+import { useStreamDataViewFieldTypes } from '../../../../../../hooks/use_stream_data_view_field_types';
+import { AutocompleteSelector } from '../../../../shared/autocomplete_selector';
+import { useSimulatorSelector } from '../../../state_management/stream_enrichment_state_machine';
 
 export interface ProcessorFieldSelectorProps {
   fieldKey?: string;
@@ -28,7 +30,19 @@ export const ProcessorFieldSelector = ({
   onChange,
   labelAppend,
 }: ProcessorFieldSelectorProps) => {
-  const suggestions = useEnrichmentFieldSuggestions();
+  const fieldSuggestions = useEnrichmentFieldSuggestions();
+  const streamName = useSimulatorSelector((state) => state.context.streamName);
+
+  // Fetch DataView field types with automatic caching via React Query
+  const { fieldTypeMap } = useStreamDataViewFieldTypes(streamName);
+
+  // Enrich field suggestions with types from DataView
+  const suggestions = useMemo(() => {
+    return fieldSuggestions.map((suggestion) => ({
+      ...suggestion,
+      type: fieldTypeMap.get(suggestion.name),
+    }));
+  }, [fieldSuggestions, fieldTypeMap]);
 
   const { field, fieldState } = useController({
     name: fieldKey,
@@ -64,7 +78,7 @@ export const ProcessorFieldSelector = ({
   );
 
   return (
-    <FieldSelector
+    <AutocompleteSelector
       value={field.value}
       onChange={handleChange}
       label={label ?? defaultLabel}
@@ -76,6 +90,7 @@ export const ProcessorFieldSelector = ({
       isInvalid={fieldState.invalid}
       error={fieldState.error?.message}
       labelAppend={labelAppend}
+      showIcon={true}
     />
   );
 };

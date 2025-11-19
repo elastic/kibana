@@ -35,19 +35,20 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { PLUGIN_ID } from '../../../../common';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import { useUpdateWorkflow } from '../../../entities/workflows/model/use_update_workflow';
+import {
+  selectHasChanges,
+  selectIsExecutionsTab,
+  selectIsYamlSyntaxValid,
+  selectWorkflow,
+} from '../../../entities/workflows/store/workflow_detail/selectors';
+import { setIsTestModalOpen } from '../../../entities/workflows/store/workflow_detail/slice';
 import { useCapabilities } from '../../../hooks/use_capabilities';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
   useWorkflowUrlState,
   type WorkflowUrlStateTabType,
 } from '../../../hooks/use_workflow_url_state';
-import { getRunWorkflowTooltipContent } from '../../../shared/ui';
-import {
-  selectHasChanges,
-  selectIsYamlSyntaxValid,
-  selectWorkflow,
-} from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
-import { setIsTestModalOpen } from '../../../widgets/workflow_yaml_editor/lib/store/slice';
+import { getSaveWorkflowTooltipContent, getTestRunTooltipContent } from '../../../shared/ui';
 import { WorkflowUnsavedChangesBadge } from '../../../widgets/workflow_yaml_editor/ui/workflow_unsaved_changes_badge';
 
 const Translations = {
@@ -103,6 +104,7 @@ export const WorkflowDetailHeader = React.memo(
     const workflow = useSelector(selectWorkflow);
     const isSyntaxValid = useSelector(selectIsYamlSyntaxValid);
     const hasUnsavedChanges = useSelector(selectHasChanges);
+    const isExecutionsTab = useSelector(selectIsExecutionsTab);
 
     const { name, isEnabled, lastUpdatedAt } = useMemo(
       () => ({
@@ -113,7 +115,7 @@ export const WorkflowDetailHeader = React.memo(
       [workflow]
     );
 
-    const saveYaml = useSaveYaml();
+    const [saveYaml, { isLoading: isSaving }] = useSaveYaml();
     const handleSaveWorkflow = useCallback(() => {
       saveYaml();
     }, [saveYaml]);
@@ -130,8 +132,25 @@ export const WorkflowDetailHeader = React.memo(
     const [showRunConfirmation, setShowRunConfirmation] = useState(false);
 
     const runWorkflowTooltipContent = useMemo(() => {
-      return getRunWorkflowTooltipContent(isSyntaxValid, canExecuteWorkflow, isEnabled, false);
-    }, [isSyntaxValid, canExecuteWorkflow, isEnabled]);
+      return getTestRunTooltipContent({
+        isExecutionsTab,
+        isValid: isSyntaxValid,
+        canRunWorkflow: canExecuteWorkflow,
+      });
+    }, [isSyntaxValid, canExecuteWorkflow, isExecutionsTab]);
+
+    const saveWorkflowTooltipContent = useMemo(() => {
+      const isCreate = !workflowId;
+      return getSaveWorkflowTooltipContent({
+        isExecutionsTab,
+        canSaveWorkflow: isCreate ? canCreateWorkflow : canUpdateWorkflow,
+        isCreate,
+      });
+    }, [isExecutionsTab, workflowId, canCreateWorkflow, canUpdateWorkflow]);
+
+    const canSaveWorkflow = useMemo(() => {
+      return workflowId ? canUpdateWorkflow : canCreateWorkflow;
+    }, [canUpdateWorkflow, canCreateWorkflow, workflowId]);
 
     const handleRunClickWithUnsavedCheck = useCallback(() => {
       if (hasUnsavedChanges) {
@@ -149,10 +168,6 @@ export const WorkflowDetailHeader = React.memo(
     const handleCancelRun = useCallback(() => {
       setShowRunConfirmation(false);
     }, []);
-
-    const canSaveWorkflow = useMemo(() => {
-      return workflowId ? canUpdateWorkflow : canCreateWorkflow;
-    }, [canUpdateWorkflow, canCreateWorkflow, workflowId]);
 
     return (
       <>
@@ -273,21 +288,27 @@ export const WorkflowDetailHeader = React.memo(
                     iconType="play"
                     size="s"
                     onClick={handleRunClickWithUnsavedCheck}
-                    disabled={!canExecuteWorkflow || isLoading || !isSyntaxValid}
-                    title={runWorkflowTooltipContent ?? undefined}
+                    disabled={isExecutionsTab || !canExecuteWorkflow || isLoading || !isSyntaxValid}
                     aria-label={Translations.runWorkflow}
                     data-test-subj="runWorkflowHeaderButton"
                   />
                 </EuiToolTip>
-                <EuiButton
-                  fill
-                  color="primary"
-                  size="s"
-                  onClick={handleSaveWorkflow}
-                  disabled={!canSaveWorkflow || isLoading}
-                >
-                  <FormattedMessage id="keepWorkflows.buttonText" defaultMessage="Save" ignoreTag />
-                </EuiButton>
+                <EuiToolTip content={saveWorkflowTooltipContent}>
+                  <EuiButton
+                    fill
+                    color="primary"
+                    size="s"
+                    onClick={handleSaveWorkflow}
+                    disabled={isExecutionsTab || !canSaveWorkflow || isLoading || isSaving}
+                    isLoading={isSaving}
+                  >
+                    <FormattedMessage
+                      id="keepWorkflows.buttonText"
+                      defaultMessage="Save"
+                      ignoreTag
+                    />
+                  </EuiButton>
+                </EuiToolTip>
               </EuiFlexGroup>
             </EuiPageHeaderSection>
           </EuiPageTemplate.Header>

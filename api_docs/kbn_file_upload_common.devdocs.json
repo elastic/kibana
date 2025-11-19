@@ -20,6 +20,64 @@
     "classes": [
       {
         "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.AbortError",
+        "type": "Class",
+        "tags": [],
+        "label": "AbortError",
+        "description": [
+          "\nError thrown when a file upload is aborted."
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/file-upload-common",
+            "scope": "common",
+            "docId": "kibKbnFileUploadCommonPluginApi",
+            "section": "def-common.AbortError",
+            "text": "AbortError"
+          },
+          " extends Error"
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/abort_error/abort_error.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.AbortError.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/abort_error/abort_error.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/file-upload-common",
+                "id": "def-common.AbortError.Unnamed.$1",
+                "type": "string",
+                "tags": [],
+                "label": "message",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/packages/shared/file-upload-common/src/abort_error/abort_error.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/file-upload-common",
         "id": "def-common.FileReaderBase",
         "type": "Class",
         "tags": [],
@@ -649,6 +707,39 @@
       }
     ],
     "functions": [
+      {
+        "parentPluginId": "@kbn/file-upload-common",
+        "id": "def-common.isAbortError",
+        "type": "Function",
+        "tags": [],
+        "label": "isAbortError",
+        "description": [],
+        "signature": [
+          "(error: unknown) => boolean"
+        ],
+        "path": "x-pack/platform/packages/shared/file-upload-common/src/abort_error/abort_error.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/file-upload-common",
+            "id": "def-common.isAbortError.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/platform/packages/shared/file-upload-common/src/abort_error/abort_error.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/file-upload-common",
         "id": "def-common.registerFileUploadAnalyticsEvents",
@@ -1394,7 +1485,23 @@
                 "section": "def-common.ES_FIELD_TYPES",
                 "text": "ES_FIELD_TYPES"
               },
-              ".HISTOGRAM; format?: string | undefined; }; }; }"
+              ".HISTOGRAM | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".EXPONENTIAL_HISTOGRAM | ",
+              {
+                "pluginId": "@kbn/field-types",
+                "scope": "common",
+                "docId": "kibKbnFieldTypesPluginApi",
+                "section": "def-common.ES_FIELD_TYPES",
+                "text": "ES_FIELD_TYPES"
+              },
+              ".TDIGEST; format?: string | undefined; }; }; }"
             ],
             "path": "x-pack/platform/packages/shared/file-upload-common/src/types.ts",
             "deprecated": false,

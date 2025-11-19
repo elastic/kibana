@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
+  EuiIconTip,
   EuiPanel,
   EuiText,
   EuiToolTip,
@@ -20,6 +21,7 @@ import {
 import { css } from '@emotion/react';
 import React, { useMemo } from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { ExecutionStatus } from '@kbn/workflows';
 import { formatDuration } from '../../../shared/lib/format_duration';
@@ -38,13 +40,14 @@ export const getExecutionTitleColor = (
 
 interface WorkflowExecutionListItemProps {
   status: ExecutionStatus;
+  isTestRun: boolean;
   startedAt: Date | null;
   duration: number | null;
   selected?: boolean;
   onClick?: () => void;
 }
 export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemProps>(
-  ({ status, startedAt, duration, selected, onClick }) => {
+  ({ status, isTestRun, startedAt, duration, selected, onClick }) => {
     const { euiTheme } = useEuiTheme();
     const styles = useMemoCss(componentStyles);
     const getFormattedDate = useGetFormattedDateTime();
@@ -66,14 +69,12 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
     }, [selected, onClick, styles]);
 
     return (
-      <EuiPanel color="plain" hasShadow={false} paddingSize="m" hasBorder css={panelCss}>
+      <EuiPanel onClick={onClick} hasShadow={false} paddingSize="m" hasBorder css={panelCss}>
         <EuiFlexGroup
           gutterSize="m"
           alignItems="center"
           justifyContent="flexStart"
-          onClick={onClick ?? undefined}
           responsive={false}
-          color="plain"
         >
           <EuiFlexItem grow={false}>{getExecutionStatusIcon(euiTheme, status)}</EuiFlexItem>
           <EuiFlexItem>
@@ -104,18 +105,34 @@ export const WorkflowExecutionListItem = React.memo<WorkflowExecutionListItemPro
               </EuiFlexItem>
             </EuiFlexGroup>
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs" wrap>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type="clock" color="subdued" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {formattedDuration}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
+          {formattedDuration && (
+            <EuiFlexItem grow={false}>
+              <EuiFlexGroup alignItems="center" justifyContent="flexEnd" gutterSize="xs" wrap>
+                {isTestRun && (
+                  <EuiFlexItem>
+                    <EuiIconTip
+                      type="flask"
+                      color={euiTheme.colors.backgroundFilledText}
+                      title={i18n.translate(
+                        'workflows.workflowExecutionListItem.testRunIconTitle',
+                        {
+                          defaultMessage: 'Test Run',
+                        }
+                      )}
+                    />
+                  </EuiFlexItem>
+                )}
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type="clock" color="subdued" />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiText size="xs" color="subdued">
+                    {formattedDuration}
+                  </EuiText>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          )}
         </EuiFlexGroup>
       </EuiPanel>
     );
@@ -130,10 +147,11 @@ const componentStyles = {
     }),
   selectableContainer: ({ euiTheme }: UseEuiTheme) =>
     css({
-      backgroundColor: euiTheme.colors.backgroundBasePlain,
-      cursor: 'pointer',
       '&:hover': {
         backgroundColor: euiTheme.colors.backgroundBaseInteractiveHover,
+        // Prevent hover animation effect from affecting the panel
+        boxShadow: 'none',
+        transform: 'none',
       },
     }),
 };

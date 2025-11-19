@@ -20808,36 +20808,23 @@
         "signature": [
           "ZodTypeDef"
         ],
-        "path": "node_modules/zod/v3/types.d.cts",
+        "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodTypeDef.errorMap",
-            "type": "Function",
+            "id": "def-common.ZodTypeDef.uiMeta",
+            "type": "Object",
             "tags": [],
-            "label": "errorMap",
-            "description": [],
-            "signature": [
-              "ZodErrorMap",
-              " | undefined"
+            "label": "uiMeta",
+            "description": [
+              "\nOptional UI metadata attached to any Zod type\nFields without metadata will use intelligent defaults based on type"
             ],
-            "path": "node_modules/zod/v3/types.d.cts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/zod",
-            "id": "def-common.ZodTypeDef.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
             "signature": [
-              "string | undefined"
+              "{ sensitive?: boolean | undefined; widget?: \"number\" | \"text\" | \"date\" | \"password\" | \"code\" | \"select\" | \"textarea\" | \"document\" | \"json\" | \"dateTime\" | \"toggle\" | \"keyValue\" | \"multiSelect\" | undefined; widgetOptions?: { [key: string]: unknown; language?: \"python\" | \"json\" | \"yaml\" | \"javascript\" | \"typescript\" | undefined; rows?: number | undefined; cols?: number | undefined; } | undefined; label?: string | undefined; placeholder?: string | undefined; section?: string | undefined; order?: number | undefined; when?: { field: string; is: unknown; then?: \"enable\" | \"disable\" | \"hide\" | \"show\" | undefined; } | undefined; optionsFrom?: { action: string; map: (result: unknown) => { value: string | number; label: string; }[]; cacheDuration?: number | undefined; refreshOn?: string[] | undefined; } | undefined; helpText?: string | undefined; docsUrl?: string | undefined; } | undefined"
             ],
-            "path": "node_modules/zod/v3/types.d.cts",
+            "path": "src/platform/packages/shared/kbn-connector-specs/src/connector_spec_ui.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -22653,9 +22640,9 @@
           " | ",
           "ZodUnion",
           "<any> | ",
-          "ZodAny",
-          " | ",
           "ZodUndefined",
+          " | ",
+          "ZodAny",
           " | ",
           "ZodDate",
           " | ",

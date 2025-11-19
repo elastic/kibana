@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('../../src/setup_node_env');
+require('@kbn/setup-node-env');
 const { merge } = require('@kbn/openapi-bundler');
 const { REPO_ROOT } = require('@kbn/repo-info');
 
