@@ -1135,7 +1135,7 @@ describe('#bulkCreate', () => {
           securityExtension.getCurrentUser.mockClear();
         });
 
-        it('applies access control options only to applicable types', async () => {
+        it('applies access control options only to applicable types when using global access control options', async () => {
           const obj1NoAccessControl = {
             type: 'config',
             id: '6.0.0-alpha1',
@@ -1171,6 +1171,48 @@ describe('#bulkCreate', () => {
           );
         });
 
+        it('applies access control options to supporting types when using per object access control options', async () => {
+          const obj1NoAccessControl = {
+            type: 'config',
+            id: '6.0.0-alpha1',
+            attributes: { title: 'Test One' },
+            references: [{ name: 'ref_0', type: 'test', id: '1' }],
+          };
+          const obj2AccessControl = {
+            type: ACCESS_CONTROL_TYPE,
+            id: 'has-read-only-metadata',
+            attributes: { title: 'Test Two' },
+            references: [{ name: 'ref_0', type: 'test', id: '2' }],
+            accessControl: {
+              accessMode: 'write_restricted',
+            } as Pick<SavedObjectAccessControl, 'accessMode'>,
+          };
+          await bulkCreateSuccess(client, repository, [obj1NoAccessControl, obj2AccessControl]);
+
+          expect(securityExtension.authorizeBulkCreate).toHaveBeenCalledWith({
+            objects: [
+              {
+                type: 'config',
+                id: '6.0.0-alpha1',
+                name: 'Test One',
+                existingNamespaces: [],
+                initialNamespaces: undefined,
+              },
+              {
+                type: ACCESS_CONTROL_TYPE,
+                id: 'has-read-only-metadata',
+                name: 'Test Two',
+                existingNamespaces: [],
+                initialNamespaces: undefined,
+                accessControl: {
+                  owner: CURRENT_USER_PROFILE_ID,
+                  accessMode: 'write_restricted',
+                },
+              },
+            ],
+          });
+        });
+
         it('overrides access control options with incoming object property only for applicable types', async () => {
           const obj1NoAccessControl = {
             type: 'config',
@@ -1196,43 +1238,48 @@ describe('#bulkCreate', () => {
             attributes: { title: 'Test Three' },
             references: [{ name: 'ref_0', type: 'test', id: '3' }],
           };
+          const obj4NoAccessControl = {
+            type: 'config',
+            id: '6.0.0-alpha4',
+            attributes: { title: 'Test One' },
+            references: [{ name: 'ref_0', type: 'test', id: '1' }],
+          };
+
           await bulkCreateSuccess(
             client,
             repository,
-            [obj1NoAccessControl, obj2AccessControl, obj3AccessControl],
+            [obj1NoAccessControl, obj2AccessControl, obj3AccessControl, obj4NoAccessControl],
             {
               accessControl: { accessMode: 'write_restricted' },
             }
           );
 
-          expect(securityExtension.authorizeBulkCreate).toHaveBeenCalledWith(
-            expect.objectContaining({
-              objects: expect.arrayContaining([
-                {
-                  type: ACCESS_CONTROL_TYPE,
-                  id: 'has-read-only-metadata',
-                  name: 'Test Two',
-                  existingNamespaces: [],
-                  initialNamespace: undefined,
-                  accessControl: {
-                    owner: CURRENT_USER_PROFILE_ID,
-                    accessMode: 'default', // explicitly confirm the mode is overriden
-                  },
+          expect(securityExtension.authorizeBulkCreate).toHaveBeenCalledWith({
+            objects: [
+              {
+                type: ACCESS_CONTROL_TYPE,
+                id: 'has-read-only-metadata',
+                name: 'Test Two',
+                existingNamespaces: [],
+                initialNamespace: undefined,
+                accessControl: {
+                  owner: CURRENT_USER_PROFILE_ID,
+                  accessMode: 'default', // explicitly confirm the mode is overriden
                 },
-                {
-                  type: ACCESS_CONTROL_TYPE,
-                  id: 'has-read-only-metadata',
-                  name: 'Test Three',
-                  existingNamespaces: [],
-                  initialNamespace: undefined,
-                  accessControl: {
-                    owner: CURRENT_USER_PROFILE_ID,
-                    accessMode: 'write_restricted', // explicitly confirm the mode is NOT overriden
-                  },
+              },
+              {
+                type: ACCESS_CONTROL_TYPE,
+                id: 'has-read-only-metadata',
+                name: 'Test Three',
+                existingNamespaces: [],
+                initialNamespace: undefined,
+                accessControl: {
+                  owner: CURRENT_USER_PROFILE_ID,
+                  accessMode: 'write_restricted', // explicitly confirm the mode is NOT overriden
                 },
-              ]),
-            })
-          );
+              },
+            ],
+          });
         });
 
         it('does not create objects with access control when there is no active user profile', async () => {
@@ -1243,16 +1290,20 @@ describe('#bulkCreate', () => {
             id: '6.0.0-alpha1',
             attributes: { title: 'Test One' },
             references: [{ name: 'ref_0', type: 'test', id: '1' }],
+            accessControl: {
+              accessMode: 'write_restricted',
+            } as Pick<SavedObjectAccessControl, 'accessMode'>,
           };
           const obj2AccessControl = {
             type: ACCESS_CONTROL_TYPE,
             id: 'has-read-only-metadata',
             attributes: { title: 'Test Two' },
             references: [{ name: 'ref_0', type: 'test', id: '2' }],
+            accessControl: {
+              accessMode: 'write_restricted',
+            } as Pick<SavedObjectAccessControl, 'accessMode'>,
           };
-          await bulkCreateSuccess(client, repository, [obj1NoAccessControl, obj2AccessControl], {
-            accessControl: { accessMode: 'write_restricted' },
-          });
+          await bulkCreateSuccess(client, repository, [obj1NoAccessControl, obj2AccessControl]);
 
           expect(securityExtension.authorizeBulkCreate).not.toHaveBeenCalled();
         });
