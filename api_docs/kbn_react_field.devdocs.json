@@ -399,7 +399,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"version\" | \"murmur3\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"scaled_float\" | \"double\" | \"date_range\" | \"ip_range\" | \"rank_feature\" | \"rank_features\" | \"flattened\" | \"shape\" | \"histogram\" | \"dense_vector\" | \"semantic_text\" | \"sparse_vector\" | \"match_only_text\" | \"conflict\" | \"point\" | \"unsigned_long\" | \"_source\" | (string & {}) | \"gauge\" | \"counter\" | \"number_range\""
+              "\"string\" | \"number\" | \"boolean\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"version\" | \"murmur3\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"scaled_float\" | \"double\" | \"date_range\" | \"ip_range\" | \"rank_feature\" | \"rank_features\" | \"flattened\" | \"shape\" | \"histogram\" | \"dense_vector\" | \"semantic_text\" | \"sparse_vector\" | \"match_only_text\" | \"conflict\" | \"point\" | \"unsigned_long\" | \"_source\" | (string & {}) | \"gauge\" | \"counter\" | \"number_range\" | \"exponential_histogram\" | \"tdigest\""
             ],
             "path": "src/platform/packages/shared/kbn-react-field/src/field_icon/field_icon.tsx",
             "deprecated": false,
@@ -466,7 +466,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"version\" | \"murmur3\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"scaled_float\" | \"double\" | \"date_range\" | \"ip_range\" | \"rank_feature\" | \"rank_features\" | \"flattened\" | \"shape\" | \"histogram\" | \"dense_vector\" | \"semantic_text\" | \"sparse_vector\" | \"match_only_text\" | \"conflict\" | \"point\" | \"unsigned_long\" | \"_source\" | (string & {}) | \"gauge\" | \"counter\" | \"number_range\" | undefined"
+              "\"string\" | \"number\" | \"boolean\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"binary\" | \"keyword\" | \"text\" | \"date\" | \"version\" | \"murmur3\" | \"integer\" | \"long\" | \"short\" | \"byte\" | \"float\" | \"half_float\" | \"scaled_float\" | \"double\" | \"date_range\" | \"ip_range\" | \"rank_feature\" | \"rank_features\" | \"flattened\" | \"shape\" | \"histogram\" | \"dense_vector\" | \"semantic_text\" | \"sparse_vector\" | \"match_only_text\" | \"conflict\" | \"point\" | \"unsigned_long\" | \"_source\" | (string & {}) | \"gauge\" | \"counter\" | \"number_range\" | \"exponential_histogram\" | \"tdigest\" | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-react-field/src/field_name_with_icon/field_name_with_icon.tsx",
             "deprecated": false,
