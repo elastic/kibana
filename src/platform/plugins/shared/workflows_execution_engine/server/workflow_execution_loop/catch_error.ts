@@ -86,6 +86,12 @@ export async function catchError(
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       const scopeEntry = workflowScopeStack.getCurrentScope()!;
       const newWorkflowScopeStack = workflowScopeStack.exitScope();
+      const currentNodeId = params.workflowExecutionState.getWorkflowExecution().currentNodeId;
+
+      if (!currentNodeId) {
+        throw new Error('No current node ID in workflow execution state. This should not happen.');
+      }
+
       params.workflowExecutionState.updateWorkflowExecution({
         currentNodeId: scopeEntry.nodeId,
         scopeStack: newWorkflowScopeStack.stackFrames,
@@ -101,9 +107,10 @@ export async function catchError(
       if ((stepImplementation as unknown as NodeWithErrorCatching).catchError) {
         const stepErrorCatcher = stepImplementation as unknown as NodeWithErrorCatching;
         const failedContext = params.stepExecutionRuntimeFactory.createStepExecutionRuntime({
-          nodeId: scopeEntry.nodeId,
+          nodeId: currentNodeId,
           stackFrames: workflowScopeStack.stackFrames,
         });
+
         try {
           await stepErrorCatcher.catchError(failedContext);
         } catch (error) {

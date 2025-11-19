@@ -210,9 +210,16 @@ describe('EnterRetryNodeImpl', () => {
 
       it('should fail the step with appropriate error', async () => {
         await underTest.catchError(fakeFailedContext);
-        expect(stepExecutionRuntime.failStep).toHaveBeenCalledWith(
-          new Error('Retry step "retryStep1" has exceeded the maximum number of attempts.')
-        );
+        expect(stepExecutionRuntime.failStep).toHaveBeenCalledWith({
+          type: 'MaxRetryAttemptsReached',
+          message: `Retry step "retryStep1" has exceeded the maximum number of attempts.`,
+          details: {
+            originalError: {
+              type: 'NetworkError',
+              message: 'Failed to connect to server',
+            },
+          },
+        });
       });
     });
 

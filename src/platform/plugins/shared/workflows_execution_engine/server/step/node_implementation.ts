@@ -37,15 +37,39 @@ export interface BaseStep {
 
 export type StepDefinition = BaseStep;
 
+/**
+ * Interface for node implementations within the workflow execution engine.
+ * These implementations define the behavior of various workflow steps.
+ */
 export interface NodeImplementation {
+  /**
+   * Executes the node's logic.
+   */
   run(): Promise<void>;
 }
 
+/**
+ * Node implementation that can catch errors within its scope.
+ * For example, retry steps or continue steps.
+ */
 export interface NodeWithErrorCatching {
+  /**
+   * Handles errors that occur within the node's execution context.
+   * @param failedContext The context of the failed step execution.
+   */
   catchError(failedContext: StepExecutionRuntime): Promise<void>;
 }
 
+/**
+ * Node implementation monitoring its scope.
+ * For example, timeout zones.
+ * @param monitoredContext The context of the monitored step execution.
+ */
 export interface MonitorableNode {
+  /**
+   * Monitors the execution context of the node.
+   * @param monitoredContext The context of the monitored step execution.
+   */
   monitor(monitoredContext: StepExecutionRuntime): Promise<void>;
 }
 
