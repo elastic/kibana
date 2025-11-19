@@ -111,12 +111,16 @@ export async function setupProfiling(
   if (!checkStatus.has_setup) {
     log(`Setting up Universal Profiling`);
 
-    await kbnClient.request({
-      description: 'Setup profiling resources',
-      path: '/api/profiling/setup/es_resources',
-      method: 'POST',
-      body: {},
-    });
+    try {
+      await kbnClient.request({
+        description: 'Setup profiling resources',
+        path: '/api/profiling/setup/es_resources',
+        method: 'POST',
+        body: {},
+      });
+    } catch (error: any) {
+      log(`Error setting up profiling resources: ${error}`);
+    }
   } else {
     log(`Skipping Universal Profiling set up, already set up`);
   }
