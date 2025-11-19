@@ -11,6 +11,7 @@ import type { StoredFeature } from './stored_feature';
 import { describeDataset } from '@kbn/ai-tools';
 import { IdentifyFeaturesOptions } from '@kbn/streams-ai';
 import { SystemFeatureHandler } from './handlers/system';
+import { FEATURE_TYPE } from './fields';
 
 export class FeatureTypeRegistry {
   private handlers = new Map<string, FeatureTypeHandler>();
@@ -43,7 +44,7 @@ export class FeatureTypeRegistry {
   }
 
   fromStorage(stored: StoredFeature): Feature {
-    const type = stored['system.type'];
+    const type = stored[FEATURE_TYPE];
     const handler = this.getHandler(type);
     return handler.fromStorage(stored);
   }
