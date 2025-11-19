@@ -170,8 +170,6 @@ const createGroupedActorAndTargetNodes = (
     targetHostIps,
   } = record;
 
-  const actorIdsArray = actorIds ? castArray(actorIds) : [];
-  const targetIdsArray = targetIds ? castArray(targetIds) : [];
   const actorHostIpsArray = actorHostIps ? castArray(actorHostIps) : [];
   const targetHostIpsArray = targetHostIps ? castArray(targetHostIps) : [];
 
@@ -209,6 +207,12 @@ const createGroupedActorAndTargetNodes = (
         .map((targetData) => JSON.parse(targetData))
     : [];
 
+  // Target: Use node ID from ES|QL or UUID for unknown
+  const targetId =
+    targetIdsCount === 0
+      ? `unknown-${uuidv4()}` // Multiple unknown target nodes possible - differentiate via UUID
+      : targetNodeId!; // Use node ID from ES|QL (we know it's not null here)
+
   const actorGroup: {
     id: string;
     type: string;
@@ -235,7 +239,7 @@ const createGroupedActorAndTargetNodes = (
   } =
     targetIdsCount > 0 && targetNodeId
       ? {
-          id: targetNodeId,
+          id: targetId,
           type: targetEntityType,
           docData: targetsDocDataArray,
           hostIps: targetHostIpsArray,
@@ -244,7 +248,7 @@ const createGroupedActorAndTargetNodes = (
         }
       : {
           // Unknown target
-          id: `unknown-${uuidv4()}`,
+          id: targetId,
           type: '',
           label: 'Unknown',
           docData: [],

@@ -1171,8 +1171,12 @@ describe('parseRecords', () => {
 
       const result = parseRecords(mockLogger, records);
 
-      const actorNode = result.nodes.find((n) => n.id === 'uuid-1') as EntityNodeDataModel;
-      const targetNode = result.nodes.find((n) => n.id === 'uuid-2') as EntityNodeDataModel;
+      const actorNode = result.nodes.find(
+        (n) => n.id === 'md5hash-user1-user2-user3'
+      ) as EntityNodeDataModel;
+      const targetNode = result.nodes.find(
+        (n) => n.id === 'md5hash-host1-host2'
+      ) as EntityNodeDataModel;
 
       expect(actorNode).toBeDefined();
       expect(actorNode.label).toBe('service_account');
@@ -1193,8 +1197,8 @@ describe('parseRecords', () => {
       const records: GraphEdge[] = [
         {
           action: 'test.action',
-          actorIds: ['user-1', 'user-2', 'user-3'],
-          targetIds: ['host-1', 'host-2'],
+          actorNodeId: 'md5hash-user1-user2-user3',
+          targetNodeId: 'md5hash-host1-host2',
           actorEntityType: 'user',
           targetEntityType: 'host',
           actorIdsCount: 3,
@@ -1221,8 +1225,12 @@ describe('parseRecords', () => {
 
       const result = parseRecords(mockLogger, records);
 
-      const actorNode = result.nodes.find((n) => n.id === 'uuid-1') as EntityNodeDataModel;
-      const targetNode = result.nodes.find((n) => n.id === 'uuid-2') as EntityNodeDataModel;
+      const actorNode = result.nodes.find(
+        (n) => n.id === 'md5hash-user1-user2-user3'
+      ) as EntityNodeDataModel;
+      const targetNode = result.nodes.find(
+        (n) => n.id === 'md5hash-host1-host2'
+      ) as EntityNodeDataModel;
 
       expect(actorNode).toBeDefined();
       expect(actorNode.label).toBeUndefined(); // No label when only type exists
