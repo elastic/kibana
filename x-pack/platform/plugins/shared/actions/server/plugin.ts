@@ -124,7 +124,6 @@ export interface PluginSetupContract {
     connector: SubActionConnectorType<Config, Secrets>
   ): void;
 
-  getSchemaForAuthType: AuthTypeRegistry['getSchemaForAuthType'];
   getAxiosInstanceWithAuth(validatedSecrets: Record<string, unknown>): Promise<AxiosInstance>;
 
   getAxiosInstanceWithAuth(validatedSecrets: Record<string, unknown>): Promise<AxiosInstance>;
@@ -410,7 +409,6 @@ export class ActionsPlugin
       ) => {
         subActionFramework.registerConnector(connector);
       },
-      getSchemaForAuthType: (...args) => this.authTypeRegistry!.getSchemaForAuthType(...args),
       getAxiosInstanceWithAuth: getAxiosInstanceWithAuthHelper,
       isPreconfiguredConnector: (connectorId: string): boolean => {
         return !!this.inMemoryConnectors.find(

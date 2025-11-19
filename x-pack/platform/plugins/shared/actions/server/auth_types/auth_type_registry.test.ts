@@ -7,7 +7,6 @@
 
 import { z } from '@kbn/zod/v4';
 import { AuthTypeRegistry } from './auth_type_registry';
-import { registerAuthTypes } from './register_auth_types';
 import type { NormalizedAuthType } from '@kbn/connector-specs';
 
 const getAuthType = (overrides = {}): NormalizedAuthType => {
@@ -105,36 +104,6 @@ describe('AuthTypeRegistry', () => {
       authTypeRegistry.register(getAuthType({ id: 'another-auth-type' }));
       const result = authTypeRegistry.getAllTypes();
       expect(result).toEqual(['my-auth-type', 'another-auth-type']);
-    });
-  });
-
-  describe('getSchemaForAuthType()', () => {
-    const authTypeRegistry = new AuthTypeRegistry();
-    registerAuthTypes(authTypeRegistry);
-
-    test('correctly returns schema for auth type definition when only type ID is provided', () => {
-      const schema = authTypeRegistry.getSchemaForAuthType('basic');
-      expect(z.toJSONSchema(schema)).toMatchSnapshot();
-    });
-
-    test('correctly returns schema for auth type definition when defaults are provided', () => {
-      const schema = authTypeRegistry.getSchemaForAuthType({
-        type: 'api_key_header',
-        defaults: {
-          headerField: 'custom-api-key-field',
-        },
-      });
-      expect(z.toJSONSchema(schema)).toMatchSnapshot();
-    });
-
-    test('ignores defaults for key that is not in auth type schema', () => {
-      const schema = authTypeRegistry.getSchemaForAuthType({
-        type: 'api_key_header',
-        defaults: {
-          noField: 'custom-api-key-field2',
-        },
-      });
-      expect(z.toJSONSchema(schema)).toMatchSnapshot();
     });
   });
 });

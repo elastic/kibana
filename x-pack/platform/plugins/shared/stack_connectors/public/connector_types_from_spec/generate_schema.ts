@@ -5,15 +5,18 @@
  * 2.0.
  */
 
+import { z as z4 } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '@kbn/connector-specs';
-
 import { generateSecretsSchemaFromSpec } from '@kbn/connector-specs/src/lib';
-import type { ActionTypeSecrets, ValidatorType } from '../../types';
 
-export const generateSecretsSchema = (
-  authTypes: ConnectorSpec['authTypes']
-): ValidatorType<ActionTypeSecrets> => {
-  return {
-    schema: generateSecretsSchemaFromSpec(authTypes),
-  };
+export const generateSchema = (spec: ConnectorSpec) => {
+  const config = spec.schema ?? z4.object({});
+  const secrets = z4.object({
+    secrets: generateSecretsSchemaFromSpec(spec.authTypes),
+  });
+
+  return z4.object({
+    ...config.shape,
+    ...secrets.shape,
+  });
 };

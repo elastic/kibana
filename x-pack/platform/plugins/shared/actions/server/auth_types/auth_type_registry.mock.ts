@@ -14,7 +14,6 @@ const createAuthTypeRegistryMock = () => {
     register: jest.fn(),
     get: jest.fn(),
     getAllTypes: jest.fn(),
-    getSchemaForAuthType: jest.fn(),
   };
   return mocked;
 };

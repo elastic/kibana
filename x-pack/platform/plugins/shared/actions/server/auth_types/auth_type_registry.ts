@@ -7,10 +7,8 @@
 
 import { z } from '@kbn/zod/v4';
 import Boom from '@hapi/boom';
-import type { AuthTypeDef, NormalizedAuthType } from '@kbn/connector-specs';
-import { getSchemaForAuthType } from '@kbn/connector-specs/src/lib';
+import type { NormalizedAuthType } from '@kbn/connector-specs';
 import { i18n } from '@kbn/i18n';
-import { isString } from 'lodash';
 
 export class AuthTypeRegistry {
   private readonly authTypes: Map<string, NormalizedAuthType> = new Map();
@@ -72,26 +70,5 @@ export class AuthTypeRegistry {
 
   public getAllTypes(): string[] {
     return Array.from(this.authTypes).map(([authTypeId]) => authTypeId);
-  }
-
-  public getSchemaForAuthType(authTypeDef: string | AuthTypeDef): z.core.$ZodTypeDiscriminable {
-    let authTypeId: string | undefined;
-    let defaults: Record<string, unknown> | undefined;
-
-    if (isString(authTypeDef)) {
-      authTypeId = authTypeDef as string;
-    } else {
-      const def = authTypeDef as AuthTypeDef;
-      authTypeId = def.type;
-      defaults = def.defaults;
-    }
-
-    if (!authTypeId) {
-      throw new Error('Auth type ID must be provided.');
-    }
-
-    const authType = this.get(authTypeId);
-
-    return getSchemaForAuthType(authTypeId, authType, { defaults });
   }
 }

@@ -226,7 +226,7 @@ export interface ConnectorSpec {
 
   // Single unified schema for all connector fields (config + secrets)
   // Mark sensitive fields with withUIMeta({ sensitive: true })
-  schema?: z.ZodSchema;
+  schema?: z.ZodObject;
 
   validateUrls?: {
     fields?: string[];
