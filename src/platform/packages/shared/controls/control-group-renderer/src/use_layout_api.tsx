@@ -23,7 +23,7 @@ import type { useChildrenApi } from './use_children_api';
 export const useLayoutApi = (
   state: ControlGroupCreationOptions | undefined,
   childrenApi: ReturnType<typeof useChildrenApi>['childrenApi'],
-  lastSavedState$Ref: React.MutableRefObject<BehaviorSubject<{ [id: string]: StickyControlState }>>
+  lastSavedState$Ref: React.MutableRefObject<BehaviorSubject<ControlPanelsState>>
 ) => {
   const layout$Ref = useRef(new BehaviorSubject<ControlsLayout>({ controls: {} }));
 

@@ -26,12 +26,16 @@ import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { Action, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 
-import type { ControlGroupRuntimeState, ControlPanelState } from './types';
+import type {
+  ControlGroupRuntimeState,
+  ControlPanelState,
+  FlattenedStickyControlState,
+} from './types';
 
 export const controlGroupStateBuilder = {
   addDataControlFromField: async (
     controlGroupState: Partial<ControlGroupRuntimeState>,
-    controlState: Omit<DataControlState & StickyControlState, 'type'>,
+    controlState: Omit<DataControlState & FlattenedStickyControlState, 'type'>,
     uiActionsService: UiActionsStart,
     controlId?: string
   ) => {
@@ -58,40 +62,35 @@ export const controlGroupStateBuilder = {
   addOptionsListControl: (
     controlGroupState: Partial<ControlGroupRuntimeState>,
     controlState: Omit<
-      Omit<StickyControlState, 'config' | 'uid'> & OptionsListDSLControlState,
+      Omit<StickyControlState, keyof OptionsListDSLControlState | 'config'> &
+        OptionsListDSLControlState,
       'type'
     >,
     controlId?: string
   ) => {
-    const { grow, width, ...rest } = controlState;
     controlGroupState.initialChildControlState = {
       ...(controlGroupState.initialChildControlState ?? {}),
       [controlId ?? uuidv4()]: {
         type: OPTIONS_LIST_CONTROL,
-        grow,
-        width,
         order: getNextControlOrder(controlGroupState.initialChildControlState),
-        config: rest,
+        ...controlState,
       },
     };
   },
   addRangeSliderControl: (
     controlGroupState: Partial<ControlGroupRuntimeState>,
     controlState: Omit<
-      Omit<StickyControlState, 'config' | 'uid'> & RangeSliderControlState,
+      Omit<StickyControlState, keyof RangeSliderControlState> & RangeSliderControlState,
       'type'
     >,
     controlId?: string
   ) => {
-    const { grow, width, ...rest } = controlState;
     controlGroupState.initialChildControlState = {
       ...(controlGroupState.initialChildControlState ?? {}),
       [controlId ?? uuidv4()]: {
         type: RANGE_SLIDER_CONTROL,
-        grow,
-        width,
         order: getNextControlOrder(controlGroupState.initialChildControlState),
-        config: rest,
+        ...controlState,
       },
     };
   },
@@ -105,7 +104,6 @@ export const controlGroupStateBuilder = {
         type: TIME_SLIDER_CONTROL,
         order: getNextControlOrder(controlGroupState.initialChildControlState),
         width: 'large',
-        config: {},
       },
     };
   },
