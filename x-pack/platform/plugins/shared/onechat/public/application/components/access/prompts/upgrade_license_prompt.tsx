@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { PromptLayout } from './prompt_layout';
 import { useOnechatServices } from '../../../hooks/use_onechat_service';
+import { useAssetBasePath } from '../../../hooks/use_asset_base_path';
 
 const SUBSCRIPTIONS_LINK = 'https://www.elastic.co/subscriptions';
 
 export const UpgradeLicensePrompt: React.FC<{}> = () => {
+  const assetBasePath = useAssetBasePath();
+  const { colorMode } = useEuiTheme();
   const { navigationService } = useOnechatServices();
 
   const primaryButton = (
@@ -40,6 +43,9 @@ export const UpgradeLicensePrompt: React.FC<{}> = () => {
 
   return (
     <PromptLayout
+      imageSrc={
+        colorMode === 'LIGHT' ? `${assetBasePath}/lock_light.svg` : `${assetBasePath}/lock_dark.svg`
+      }
       title={
         <FormattedMessage
           id="xpack.onechat.access.prompt.upgradeLicense.title"

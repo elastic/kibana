@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { docLinks } from '../../../../../common/doc_links';
 import { PromptLayout } from './prompt_layout';
 import { useOnechatServices } from '../../../hooks/use_onechat_service';
+import { useAssetBasePath } from '../../../hooks/use_asset_base_path';
 
 export const AddLlmConnectionPrompt: React.FC<{}> = () => {
   const { navigationService } = useOnechatServices();
+  const { colorMode } = useEuiTheme();
+  const assetBasePath = useAssetBasePath();
   const llmDocsHref = docLinks.models;
 
   const primaryButton = (
@@ -41,6 +44,11 @@ export const AddLlmConnectionPrompt: React.FC<{}> = () => {
 
   return (
     <PromptLayout
+      imageSrc={
+        colorMode === 'LIGHT'
+          ? `${assetBasePath}/brain_light.svg`
+          : `${assetBasePath}/brain_dark.svg`
+      }
       title={
         <FormattedMessage
           id="xpack.onechat.access.prompt.addLlm.title"
