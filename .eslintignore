@@ -35,3 +35,4 @@ snapshots.js
 /src/platform/packages/shared/kbn-flot-charts/lib
 /src/platform/packages/shared/kbn-monaco/src/**/antlr
 /src/platform/packages/shared/kbn-esql-ast/src/**/antlr
+/x-pack/platform/plugins/shared/screenshotting/chromium
