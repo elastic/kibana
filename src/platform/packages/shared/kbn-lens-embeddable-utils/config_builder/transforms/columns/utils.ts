@@ -35,10 +35,11 @@ export function getLensStateMetricSharedProps(
   },
   dataType: DataType = 'number'
 ) {
+  const filter = fromFilterAPIToLensState(options.filter);
   return {
     dataType,
     isBucketed: false,
-    filter: fromFilterAPIToLensState(options.filter),
+    ...(filter ? { filter } : {}),
     ...(options.time_scale ? { timeScale: options.time_scale } : {}),
     ...(options.reduced_time_range ? { reducedTimeRange: options.reduced_time_range } : {}),
     ...(options.time_shift ? { timeShift: options.time_shift } : {}),

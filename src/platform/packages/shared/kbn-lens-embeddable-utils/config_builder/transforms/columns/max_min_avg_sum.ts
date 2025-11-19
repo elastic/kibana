@@ -33,9 +33,7 @@ export function fromBasicMetricAPItoLensState(
     operationType: options.operation,
     sourceField: field,
     ...getLensStateMetricSharedProps(options),
-    params: {
-      ...(format ? { format: fromFormatAPIToLensState(format) } : {}),
-    },
+    ...(format ? { params: { format: fromFormatAPIToLensState(format) } } : {}),
   };
 }
 

@@ -138,7 +138,10 @@ export function fromMetricAPItoLensState(
       return [];
     }
     return [
-      fromCounterRateAPItoLensState(options, { id: uuid(), field: refColumn.sourceField }),
+      fromCounterRateAPItoLensState(options, {
+        id: uuid(),
+        field: refColumn.sourceField,
+      }),
       refColumn,
     ];
   }
