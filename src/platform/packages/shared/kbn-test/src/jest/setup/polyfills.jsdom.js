@@ -90,22 +90,5 @@ if (!Object.hasOwn(global, 'ClipboardItem')) {
     constructor(data) {
       this.data = data;
     }
-
-    get types() {
-      return Object.keys(this.data);
-    }
-
-    async getType(type) {
-      const data = this.data[type];
-      if (typeof data === 'string') {
-        return new Blob([data]);
-      }
-      if (data instanceof Blob) {
-        return data;
-      }
-      // It's a PromiseLike
-      const resolved = await data;
-      return typeof resolved === 'string' ? new Blob([resolved]) : resolved;
-    }
   };
 }
