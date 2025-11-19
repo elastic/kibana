@@ -29,6 +29,7 @@ import { AutomaticImportService } from './services';
 import { TaskManagerService } from './services/task_manager';
 import { AgentService } from './services/agents/agent_service';
 import { AutomaticImportSamplesIndexService } from './services/samples_index/index_service';
+import { TASK_STATUSES } from './services/saved_objects/constants';
 
 export class AutomaticImportV2Plugin
   implements
@@ -132,7 +133,7 @@ export class AutomaticImportV2Plugin
       });
 
     this.taskManagerService.initialize(plugins.taskManager, {
-      invokeDeepAgent: this.createInvokeDeepAgentFactory(core, plugins),
+      invokeDeepAgent: this.createTaskOrchestrationFunctionFactory(core, plugins),
     });
 
     this.logger.info('TaskManagerService initialized successfully');
@@ -184,19 +185,17 @@ export class AutomaticImportV2Plugin
     throw new Error('No AI connectors available for automatic import workflow');
   }
 
-  /**
-   * Creates a factory function for user-scoped deep agent invocation
-   * @param core - Core start contract
-   * @param plugins - Plugin start dependencies
-   * @returns Factory function that creates user-scoped AgentService instances
-   */
-  private createInvokeDeepAgentFactory(
+  private createTaskOrchestrationFunctionFactory(
     core: CoreStart,
     plugins: AutomaticImportV2PluginStartDependencies
   ) {
     return async (integrationId: string, dataStreamId: string, fakeRequest?: KibanaRequest) => {
       if (!fakeRequest) {
         throw new Error('User context required for AI workflow execution');
+      }
+
+      if (!this.automaticImportService) {
+        throw new Error('AutomaticImportService not initialized');
       }
 
       const userEsClient = core.elasticsearch.client.asScoped(fakeRequest);
@@ -229,7 +228,101 @@ export class AutomaticImportV2Plugin
         userModel
       );
 
-      return await agentService.invoke_deep_agent(integrationId, dataStreamId);
+      try {
+        this.logger.info(
+          `Starting AI workflow for integration ${integrationId}, data stream ${dataStreamId}`
+        );
+        const result = await agentService.invoke_deep_agent(integrationId, dataStreamId);
+
+        this.logger.info(`Updating data stream ${dataStreamId} with agent results`);
+        const dataStream = await this.automaticImportService!.getDataStream(dataStreamId);
+        const currentVersion = dataStream.attributes.metadata?.version || '0.0.0';
+
+        await this.automaticImportService.updateDataStream(
+          {
+            ...dataStream.attributes,
+            job_info: {
+              ...dataStream.attributes.job_info,
+              status: TASK_STATUSES.completed,
+            },
+            result: {
+              ingest_pipeline: JSON.stringify(result),
+              field_mapping: {},
+              connector: connectorId,
+            },
+          },
+          currentVersion
+        );
+
+        // Check if all data streams for this integration are complete
+        this.logger.debug(
+          `Checking completion status for all data streams in integration ${integrationId}`
+        );
+        const allDataStreams = await this.automaticImportService!.getAllDataStreams();
+        const integrationDataStreams = allDataStreams.saved_objects.filter(
+          (ds) => ds.attributes.integration_id === integrationId
+        );
+
+        const allComplete = integrationDataStreams.every(
+          (ds) => ds.attributes.job_info.status === TASK_STATUSES.completed
+        );
+
+        if (allComplete) {
+          this.logger.info(
+            `All data streams complete for integration ${integrationId}, updating integration status`
+          );
+          const integration = await this.automaticImportService!.getIntegration(integrationId);
+          await this.automaticImportService!.updateIntegration(
+            {
+              ...integration.attributes,
+              status: TASK_STATUSES.completed,
+            },
+            integration.attributes.metadata?.version || '1.0.0'
+          );
+        } else {
+          this.logger.debug(
+            `Integration ${integrationId} has ${integrationDataStreams.length} data streams, ` +
+              `${
+                integrationDataStreams.filter(
+                  (ds) => ds.attributes.job_info.status === TASK_STATUSES.completed
+                ).length
+              } completed`
+          );
+        }
+
+        this.logger.info(
+          `AI workflow completed successfully for integration ${integrationId}, data stream ${dataStreamId}`
+        );
+        return { success: true, result };
+      } catch (error) {
+        this.logger.error(
+          `AI workflow failed for integration ${integrationId}, data stream ${dataStreamId}:`,
+          error
+        );
+
+        // Update data stream status to failed
+        try {
+          const dataStream = await this.automaticImportService!.getDataStream(dataStreamId);
+          await this.automaticImportService!.updateDataStream(
+            {
+              ...dataStream.attributes,
+              job_info: {
+                ...dataStream.attributes.job_info,
+                status: TASK_STATUSES.failed,
+              },
+            },
+            dataStream.attributes.metadata?.version || '0.0.0'
+          );
+          this.logger.info(`Updated data stream ${dataStreamId} status to failed`);
+        } catch (updateError) {
+          this.logger.error(
+            `Failed to update data stream ${dataStreamId} status after workflow error:`,
+            updateError
+          );
+        }
+
+        throw error;
+      }
     };
   }
 
