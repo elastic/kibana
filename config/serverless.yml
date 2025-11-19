@@ -163,7 +163,6 @@ xpack.cloud_integrations.data_migration.enabled: false
 # Other disabled plugins
 xpack.canvas.enabled: false
 xpack.reindex_service.enabled: false
-data.search.sessions.enabled: true
 advanced_settings.globalSettingsEnabled: false
 
 # Disable the browser-side functionality that depends on SecurityCheckupGetStateRoutes
