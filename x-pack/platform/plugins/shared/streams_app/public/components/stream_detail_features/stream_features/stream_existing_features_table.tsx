@@ -215,11 +215,14 @@ export function StreamExistingFeaturesTable({
             isDisabled={selectedFeatures.length === 0 || isLoading}
             onClick={() => {
               setIsDeleting(true);
-              removeFeaturesFromStream(selectedFeatures).finally(() => {
-                refreshFeatures();
-                setIsDeleting(false);
-                setSelectedFeatures([]);
-              });
+              removeFeaturesFromStream(selectedFeatures)
+                .then(() => {
+                  setSelectedFeatures([]);
+                })
+                .finally(() => {
+                  refreshFeatures();
+                  setIsDeleting(false);
+                });
             }}
           >
             {DELETE_ALL}
