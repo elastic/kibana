@@ -4,15 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useQuery } from '@tanstack/react-query';
-import { CoreStart } from '@kbn/core/public';
+import { useQuery } from '@kbn/react-query';
+import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   QUERY_KEY_PERCENT_WIDGET,
   AGGREGATE_ROUTE,
   CURRENT_API_VERSION,
 } from '../../../common/constants';
-import { AggregateResult } from '../../../common/types';
+import type { AggregateResult } from '../../../common/types';
 
 export const useFetchPercentWidgetData = (
   onReduce: (result: AggregateResult) => Record<string, number>,

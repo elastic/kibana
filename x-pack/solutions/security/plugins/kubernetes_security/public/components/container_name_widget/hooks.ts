@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { useInfiniteQuery } from '@tanstack/react-query';
-import { CoreStart } from '@kbn/core/public';
+import { useInfiniteQuery } from '@kbn/react-query';
+import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import {
   QUERY_KEY_CONTAINER_NAME_WIDGET,
   AGGREGATE_ROUTE,
   CURRENT_API_VERSION,
 } from '../../../common/constants';
-import { AggregateResult } from '../../../common/types';
+import type { AggregateResult } from '../../../common/types';
 
 export const useFetchContainerNameData = (
   filterQuery: string,

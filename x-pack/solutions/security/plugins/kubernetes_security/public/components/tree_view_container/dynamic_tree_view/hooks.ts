@@ -4,10 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useInfiniteQuery } from '@tanstack/react-query';
-import { CoreStart } from '@kbn/core/public';
+import { useInfiniteQuery } from '@kbn/react-query';
+import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { QueryDslQueryContainerBool } from '../../../types';
+import type { QueryDslQueryContainerBool } from '../../../types';
 import {
   QUERY_KEY_PROCESS_EVENTS,
   AGGREGATE_ROUTE,
@@ -15,7 +15,7 @@ import {
   ORCHESTRATOR_CLUSTER_NAME,
   CURRENT_API_VERSION,
 } from '../../../../common/constants';
-import { AggregateBucketPaginationResult, MultiTermsBucket } from '../../../../common/types';
+import type { AggregateBucketPaginationResult, MultiTermsBucket } from '../../../../common/types';
 import { KUBERNETES_COLLECTION_FIELDS } from '../helpers';
 
 export const useFetchDynamicTreeView = (

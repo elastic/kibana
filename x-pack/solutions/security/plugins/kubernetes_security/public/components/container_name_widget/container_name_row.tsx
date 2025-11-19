@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { ReactNode, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useState } from 'react';
 import { EuiFlexItem, EuiText } from '@elastic/eui';
 import { useStyles } from './styles';
 

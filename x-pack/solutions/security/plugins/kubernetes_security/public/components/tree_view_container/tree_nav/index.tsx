@@ -25,7 +25,7 @@ import {
 import { useStyles } from './styles';
 import { DynamicTreeView } from '../dynamic_tree_view';
 import { INFRASTRUCTURE, LOGICAL, TREE_VIEW } from './constants';
-import { TreeViewKind, TreeViewOptionsGroup } from './types';
+import type { TreeViewKind, TreeViewOptionsGroup } from './types';
 import { useTreeViewContext } from '../contexts';
 
 export const TreeNav = () => {

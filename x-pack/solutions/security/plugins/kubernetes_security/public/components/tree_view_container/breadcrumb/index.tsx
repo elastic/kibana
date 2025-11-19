@@ -15,12 +15,12 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { useEuiTheme } from '../../../hooks';
-import {
+import type {
   KubernetesCollectionMap,
   KubernetesCollection,
   TreeViewIconProps,
-  KubernetesTreeViewLevels,
 } from '../../../types';
+import { KubernetesTreeViewLevels } from '../../../types';
 import { useStyles } from './styles';
 import { KUBERNETES_COLLECTION_ICONS_PROPS } from '../helpers';
 import { showBreadcrumbDisplayText } from './helper';

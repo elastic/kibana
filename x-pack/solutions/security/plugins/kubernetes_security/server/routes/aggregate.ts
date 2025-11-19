@@ -8,7 +8,7 @@ import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { schema } from '@kbn/config-schema';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import {
   AGGREGATE_ROUTE,
   AGGREGATE_PAGE_SIZE,
@@ -23,7 +23,7 @@ import {
   ENTRY_LEADER_USER_ID,
   ENTRY_LEADER_INTERACTIVE,
 } from '../../common/constants';
-import { AggregateBucketPaginationResult } from '../../common/types';
+import type { AggregateBucketPaginationResult } from '../../common/types';
 
 // sort by values
 const ASC = 'asc';
