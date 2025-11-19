@@ -101,7 +101,7 @@ export const createTextChunkEvent = (
 };
 
 export const createMessageEvent = (
-  content: string | unknown,
+  content: string | object,
   { messageId = 'unknown' }: { messageId?: string } = {}
 ): MessageCompleteEvent => {
   return {

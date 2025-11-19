@@ -64,7 +64,7 @@ export interface AnswerAction {
 
 export interface StructuredAnswerAction {
   type: AgentActionType.StructuredAnswer;
-  data: unknown;
+  data: object;
 }
 
 export type AnswerAgentAction = AnswerAction | StructuredAnswerAction | AgentErrorAction;
@@ -138,7 +138,7 @@ export function answerAction(message: string): AnswerAction {
   };
 }
 
-export function structuredAnswerAction(data: unknown): StructuredAnswerAction {
+export function structuredAnswerAction(data: object): StructuredAnswerAction {
   return {
     type: AgentActionType.StructuredAnswer,
     data,
