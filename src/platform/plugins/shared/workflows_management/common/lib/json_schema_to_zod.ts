@@ -46,15 +46,65 @@ function convertJsonSchemaToZodRecursive(jsonSchema: JSONSchema7): z.ZodType {
 
   if (jsonSchema.type === 'string') {
     let schema = z.string();
+
+    // Apply minLength constraint
+    if (typeof jsonSchema.minLength === 'number') {
+      schema = schema.min(jsonSchema.minLength);
+    }
+
+    // Apply maxLength constraint
+    if (typeof jsonSchema.maxLength === 'number') {
+      schema = schema.max(jsonSchema.maxLength);
+    }
+
+    // Apply pattern (regex) constraint
+    if (typeof jsonSchema.pattern === 'string') {
+      schema = schema.regex(new RegExp(jsonSchema.pattern));
+    }
+
+    // Apply format validation
+    if (jsonSchema.format === 'email') {
+      schema = schema.email();
+    } else if (jsonSchema.format === 'date-time') {
+      schema = schema.datetime();
+    } else if (jsonSchema.format === 'date') {
+      schema = schema.date();
+    } else if (jsonSchema.format === 'uri' || jsonSchema.format === 'url') {
+      schema = schema.url();
+    }
+
+    // Apply enum if present (enum takes precedence over other validations)
     if (jsonSchema.enum && Array.isArray(jsonSchema.enum) && jsonSchema.enum.length > 0) {
       // z.enum requires at least one element
       schema = z.enum(jsonSchema.enum as [string, ...string[]]);
     }
+
     return schema;
   }
 
   if (jsonSchema.type === 'number' || jsonSchema.type === 'integer') {
-    return z.number();
+    let schema = z.number();
+
+    // Apply minimum constraint
+    if (typeof jsonSchema.minimum === 'number') {
+      schema = jsonSchema.exclusiveMinimum
+        ? schema.gt(jsonSchema.minimum)
+        : schema.gte(jsonSchema.minimum);
+    }
+
+    // Apply maximum constraint
+    if (typeof jsonSchema.maximum === 'number') {
+      schema = jsonSchema.exclusiveMaximum
+        ? schema.lt(jsonSchema.maximum)
+        : schema.lte(jsonSchema.maximum);
+    }
+
+    // Apply integer constraint
+    if (jsonSchema.type === 'integer') {
+      schema = schema.int();
+    }
+
+    return schema;
   }
 
   if (jsonSchema.type === 'boolean') {
@@ -66,6 +116,21 @@ function convertJsonSchemaToZodRecursive(jsonSchema: JSONSchema7): z.ZodType {
 }
 
 /**
+ * Checks if a JSON Schema has validation constraints that need explicit handling
+ */
+function hasValidationConstraints(jsonSchema: JSONSchema7): boolean {
+  return (
+    typeof jsonSchema.minLength === 'number' ||
+    typeof jsonSchema.maxLength === 'number' ||
+    typeof jsonSchema.pattern === 'string' ||
+    typeof jsonSchema.minimum === 'number' ||
+    typeof jsonSchema.maximum === 'number' ||
+    typeof jsonSchema.format === 'string' ||
+    jsonSchema.type === 'integer'
+  );
+}
+
+/**
  * Converts a JSON Schema to a Zod schema
  * @param jsonSchema - The JSON Schema to convert
  * @returns A Zod schema equivalent to the JSON Schema
@@ -74,6 +139,12 @@ export function convertJsonSchemaToZod(jsonSchema: JSONSchema7): z.ZodType {
   // For nested objects, always use our recursive converter to ensure proper structure
   // This is critical for variable validation to work correctly with nested paths
   if (jsonSchema.type === 'object' && jsonSchema.properties) {
+    return convertJsonSchemaToZodRecursive(jsonSchema);
+  }
+
+  // For schemas with validation constraints, use our recursive converter
+  // to ensure all constraints (format, pattern, minLength, etc.) are properly applied
+  if (hasValidationConstraints(jsonSchema)) {
     return convertJsonSchemaToZodRecursive(jsonSchema);
   }
 
