@@ -7,9 +7,7 @@
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: DeploymentAgnosticFtrProviderContext) {
-  describe('Stateful Observability feature flag testing  - Deployment-agnostic API integration tests', function () {
-    loadTestFile(require.resolve('../../apis/alerting/synthetics/synthetics_default_rule'));
-    loadTestFile(require.resolve('../../apis/alerting/synthetics/custom_status_rule'));
-    loadTestFile(require.resolve('../../apis/alerting/synthetics/alert_on_no_data'));
+  describe('Stateful Observability feature flag testing - Deployment-agnostic Observability Agent API integration tests', function () {
+    loadTestFile(require.resolve('../../apis/observability_agent/index.ts'));
   });
 }
