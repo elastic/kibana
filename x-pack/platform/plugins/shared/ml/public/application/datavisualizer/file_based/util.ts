@@ -5,9 +5,12 @@
  * 2.0.
  */
 
+import type { FileUploadStartDependencies } from '@kbn/file-upload/src/file_upload_component/kibana_context';
 import type { StartServices } from '../../contexts/kibana';
 
-export function buildDependencies(services: StartServices) {
+// ML spreads coreStart into its StartServices so we need to reconstruct coreStart here
+// to satisfy the FileUploadStartDependencies type
+export function buildDependencies(services: StartServices): FileUploadStartDependencies {
   return {
     analytics: services.analytics,
     application: services.application,

@@ -14,6 +14,7 @@ import { useTimefilter } from '@kbn/ml-date-picker';
 import { FileDataVisualizerWrapper } from '@kbn/file-upload/src/file_upload_component/wrapper';
 
 import type { GetAdditionalLinks, GetAdditionalLinksParams } from '@kbn/file-upload-common';
+import { getFieldsStatsGrid } from '@kbn/data-visualizer-plugin/public';
 import { HelpMenu } from '../../components/help_menu';
 import {
   useMlApi,
@@ -124,7 +125,7 @@ export const FileDataVisualizerPage: FC = () => {
           getDependencies={getDependencies}
           location={'ml-file-data-visualizer'}
           getAdditionalLinks={getAdditionalLinks}
-          // resultLinks={resultLinks ?? undefined}
+          getFieldsStatsGrid={getFieldsStatsGrid}
         />
       </>
 

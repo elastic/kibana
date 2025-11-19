@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-// move whole component into file upload or file-upload-common
 export type { ResultLink, GetAdditionalLinks, GetAdditionalLinksParams } from './results_links';
 export { ResultsLinks } from './results_links';

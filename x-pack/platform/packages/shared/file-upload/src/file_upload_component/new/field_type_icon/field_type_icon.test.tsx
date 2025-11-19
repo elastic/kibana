@@ -32,7 +32,8 @@ describe('FieldTypeIcon', () => {
     const { container } = render(<FieldTypeIcon type={'keyword'} tooltipEnabled={true} />);
 
     expect(container.querySelector('[data-test-subj="dvFieldTypeIcon-keyword"]')).toBeDefined();
-    // expect(container).toHaveTextContent('keyword'); why is this broken?!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    // @ts-ignore type check incorrect
+    expect(container).toHaveTextContent('keyword');
   });
 
   it('shows tooltip content on mouseover', async () => {
@@ -40,14 +41,16 @@ describe('FieldTypeIcon', () => {
       <FieldTypeIcon type={'keyword'} tooltipEnabled={true} />
     );
     expect(container.querySelector('[data-test-subj="dvFieldTypeIcon-keyword"]')).toBeDefined();
-    // expect(container).toHaveTextContent('keyword');
+    // @ts-ignore type check incorrect
+    expect(container).toHaveTextContent('keyword');
 
     fireEvent.mouseOver(getByText('keyword'));
 
     await waitFor(
       () => {
         const tooltip = document.querySelector('[data-test-subj="dvFieldTypeTooltip"]');
-        // expect(tooltip).toBeVisible();
+        // @ts-ignore type check incorrect
+        expect(tooltip).toBeVisible();
         expect(tooltip?.textContent).toEqual('Keyword');
       },
       { timeout: 1500 } // Account for long delay on tooltips

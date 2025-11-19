@@ -28,10 +28,8 @@ export interface DataVisualizerSetupDependencies {
   share: SharePluginSetup;
   uiActions?: UiActionsSetup;
 }
-// break up into file upload and index data viz versions
-// DataVisualizerStartDependencies could be a mix of the two
 export interface DataVisualizerStartDependencies {
-  analytics: AnalyticsServiceStart; // from core
+  analytics: AnalyticsServiceStart;
   charts: ChartsPluginStart;
   cloud?: CloudStart;
   data: DataPublicPluginStart;
@@ -43,7 +41,7 @@ export interface DataVisualizerStartDependencies {
   maps: MapsStartApi;
   savedSearch: SavedSearchPublicPluginStart;
   share: SharePluginStart;
-  uiActions?: UiActionsStart;
+  uiActions: UiActionsStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   usageCollection?: UsageCollectionStart;
 }

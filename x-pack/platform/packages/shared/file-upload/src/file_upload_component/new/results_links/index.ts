@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-// move whole component into file upload or file-upload-common
 export { ResultsLinks } from './results_links';

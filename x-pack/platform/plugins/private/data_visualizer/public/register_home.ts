@@ -10,7 +10,6 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { ResultLinks } from '@kbn/file-upload-common';
 import type { CoreSetup } from '@kbn/core/public';
 
-import type { FileUploadStartDependencies } from '@kbn/file-upload';
 import { getFileDataVisualizerWrapper } from '@kbn/file-upload/src/file_upload_component/wrapper';
 import {
   featureTitle,
@@ -19,9 +18,10 @@ import {
   featureId,
 } from '../common/constants';
 import { getFieldsStatsGrid } from './application/common/components/fields_stats_grid';
+import type { DataVisualizerStartDependencies } from './application/common/types/data_visualizer_plugin';
 
 export function registerHomeAddData(
-  getStartServices: CoreSetup<FileUploadStartDependencies>['getStartServices'],
+  getStartServices: CoreSetup<DataVisualizerStartDependencies>['getStartServices'],
   home: HomePublicPluginSetup,
   resultsLinks: ResultLinks
 ) {

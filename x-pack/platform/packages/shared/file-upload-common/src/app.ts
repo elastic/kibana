@@ -10,7 +10,7 @@ export interface ResultLinks {
     enabled: boolean;
   };
 }
-// export type ResultLink = keyof ResultLinks;
+export type ResultLink = keyof ResultLinks;
 
 export interface ConfigSchema {
   resultLinks?: ResultLinks;

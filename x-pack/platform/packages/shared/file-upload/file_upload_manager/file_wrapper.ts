@@ -6,7 +6,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
+import type { FileUploadPluginStartApi } from '@kbn/file-upload-plugin/public/api';
 import {
   isAbortError,
   type FileUploadTelemetryService,
@@ -107,7 +107,7 @@ export class FileWrapper {
 
   constructor(
     private file: File,
-    private fileUpload: FileUploadStartApi,
+    private fileUpload: FileUploadPluginStartApi,
     private data: DataPublicPluginStart,
     private fileUploadTelemetryService: FileUploadTelemetryService,
     private uploadSessionId: string

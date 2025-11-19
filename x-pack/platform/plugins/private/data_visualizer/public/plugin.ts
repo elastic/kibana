@@ -59,7 +59,7 @@ export class DataVisualizerPlugin
     }
 
     if (plugins.home) {
-      registerHomeAddData(core.getStartServices as any, plugins.home, this.resultsLinks); // fix any !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      registerHomeAddData(core.getStartServices, plugins.home, this.resultsLinks);
       registerHomeFeatureCatalogue(plugins.home);
     }
 
@@ -70,23 +70,14 @@ export class DataVisualizerPlugin
     setStartServices(core, plugins);
 
     if (plugins.uiActions) {
-      const deps = {
-        ...plugins,
-        http: core.http,
-        application: core.application,
-        uiActions: plugins.uiActions,
-      };
-      registerUiActions(core, deps as any); // fix any !!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+      registerUiActions(core, plugins);
     }
 
-    const {
-      // getFileDataVisualizerComponent,
-      getIndexDataVisualizerComponent,
-      getDataDriftComponent,
-    } = getComponents(this.resultsLinks);
+    const { getIndexDataVisualizerComponent, getDataDriftComponent } = getComponents(
+      this.resultsLinks
+    );
 
     return {
-      // getFileDataVisualizerComponent,
       getIndexDataVisualizerComponent,
       getDataDriftComponent,
       getMaxBytesFormatted,

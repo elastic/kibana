@@ -67,7 +67,7 @@ export const FileStatus: FC<Props> = ({
     fileUploadManager,
     pipelines,
     uploadStarted,
-    // getFieldsStatsGrid,
+    getFieldsStatsGrid,
   } = useFileUploadContext();
 
   const fileStatus = filesStatus[index];
@@ -99,7 +99,7 @@ export const FileStatus: FC<Props> = ({
     fileStatus.analysisError === undefined &&
     fileStatus.fileTooLarge === false;
 
-  // const FieldsStatsGrid = getFieldsStatsGrid?.();
+  const FieldsStatsGrid = getFieldsStatsGrid?.();
 
   return (
     <>
@@ -227,7 +227,7 @@ export const FileStatus: FC<Props> = ({
                       </EuiTab>
                     ) : null}
 
-                    {/* {lite === false && FieldsStatsGrid !== undefined ? (
+                    {lite === false && FieldsStatsGrid !== undefined ? (
                       <EuiTab
                         isSelected={selectedTab === TAB.STATS}
                         onClick={() => setSelectedTab(TAB.STATS)}
@@ -238,7 +238,7 @@ export const FileStatus: FC<Props> = ({
                           defaultMessage="Field statistics"
                         />
                       </EuiTab>
-                    ) : null} */}
+                    ) : null}
 
                     {lite === false ? (
                       <EuiTab
@@ -286,13 +286,13 @@ export const FileStatus: FC<Props> = ({
                     </>
                   ) : null}
 
-                  {/* {selectedTab === TAB.STATS ? (
+                  {selectedTab === TAB.STATS ? (
                     <div data-test-subj={`dataVisualizerFileStatsPanel-${index}`}>
                       {FieldsStatsGrid !== undefined ? (
                         <FieldsStatsGrid results={fileStatus.results!} />
                       ) : null}
                     </div>
-                  ) : null} */}
+                  ) : null}
 
                   {selectedTab === TAB.MAPPINGS ? (
                     <Mappings

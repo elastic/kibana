@@ -20,7 +20,6 @@ import { wrapError } from './utils/error_wrapper';
  */
 export function routes(coreSetup: CoreSetup<StartDeps, unknown>, logger: Logger) {
   const router = coreSetup.http.createRouter();
-  // move all of these routes to file upload plugin!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   router.versioned
     .post({
       path: '/internal/data_visualizer/test_grok_pattern',

@@ -6,7 +6,6 @@
  */
 
 import type { ResultLinks } from '@kbn/file-upload-common';
-// import type { FileDataVisualizerSpec } from '@kbn/file-upload/src/file_upload_component/file_data_visualizer';
 import type { DataDriftSpec, IndexDataVisualizerSpec } from '../application';
 
 let loadModulesPromise: Promise<LazyLoadedModules>;

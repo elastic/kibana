@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
+import type { FileUploadPluginStartApi } from '@kbn/file-upload-plugin/public/api';
 
 import type { Subscription } from 'rxjs';
 import type { Observable } from 'rxjs';
@@ -61,7 +61,7 @@ export enum STATUS {
 export interface Dependencies {
   analytics: AnalyticsServiceStart;
   data: DataPublicPluginStart;
-  fileUpload: FileUploadStartApi;
+  fileUpload: FileUploadPluginStartApi;
   http: HttpSetup;
   notifications: NotificationsStart;
 }
@@ -96,7 +96,7 @@ export class FileUploadManager {
   private uploadSessionId: string;
   private http: HttpSetup;
   private data: DataPublicPluginStart;
-  private fileUpload: FileUploadStartApi;
+  private fileUpload: FileUploadPluginStartApi;
   private notifications: NotificationsStart;
   private readonly files$ = new BehaviorSubject<FileWrapper[]>([]);
   private readonly analysisValid$ = new BehaviorSubject<boolean>(false);

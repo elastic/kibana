@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { withSuspense } from '@kbn/shared-ux-utility';
-// import type { FindFileStructureResponse } from '@kbn/file-upload-common/src/types';
 
 export const FieldsStatsGrid = withSuspense(
   React.lazy(() =>
@@ -18,7 +17,7 @@ export const FieldsStatsGrid = withSuspense(
 );
 
 export function getFieldsStatsGrid() {
-  // pass in services?
+  // TODO this function should take in Kibana services
   // then wrap in <KibanaContextProvider services={{ ...services }}>
   return FieldsStatsGrid;
 }
