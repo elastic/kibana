@@ -927,7 +927,7 @@ export class AlertsClient {
         index,
       });
 
-      return transformUpdateByQueryResponse(bulkUpdateTagsByIdsResponse, alertIds);
+      return transformUpdateByQueryResponse(bulkUpdateTagsByIdsResponse);
     }
 
     if (query) {
@@ -1123,7 +1123,7 @@ export class AlertsClient {
     ruleTypeIdConsumersPairs: Array<{ ruleTypeId: string; consumers: string[] }>
   ) => {
     if (ruleTypeIdConsumersPairs.length === 0) {
-      throw Boom.forbidden('Not authorized to access any of the requested alerts');
+      throw Boom.notFound('No alerts found');
     }
 
     for (const { consumers } of ruleTypeIdConsumersPairs) {

@@ -712,19 +712,12 @@ describe('AlertsClient', () => {
         expect(esClientMock.updateByQuery).toHaveBeenCalledTimes(1);
 
         expect(res).toEqual({
-          results: [
+          failures: [
             {
-              id: 'alert-1',
-              status: 'success',
-            },
-            {
-              error: {
-                code: 'some_error',
-                message: 'Something went wrong',
-              },
               id: 'alert-2',
               index: '.alerts-security.alerts-default',
-              status: 'error',
+              code: 'some_error',
+              message: 'Something went wrong',
             },
           ],
           total: 2,
@@ -776,9 +769,7 @@ describe('AlertsClient', () => {
             add: ['urgent', 'production'],
             remove: ['outdated', 'test'],
           })
-        ).rejects.toMatchInlineSnapshot(
-          `[Error: Not authorized to access any of the requested alerts]`
-        );
+        ).rejects.toMatchInlineSnapshot(`[Error: No alerts found]`);
       });
     });
 
@@ -886,15 +877,12 @@ describe('AlertsClient', () => {
         expect(esClientMock.updateByQuery).toHaveBeenCalledTimes(1);
 
         expect(res).toEqual({
-          results: [
+          failures: [
             {
-              error: {
-                code: 'some_error',
-                message: 'Something went wrong',
-              },
               id: 'alert-2',
               index: '.alerts-security.alerts-default',
-              status: 'error',
+              code: 'some_error',
+              message: 'Something went wrong',
             },
           ],
           total: 2,
