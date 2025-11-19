@@ -45,7 +45,7 @@ export const converseApiSuite = (
 
       it('can execute a tool', async () => {
         const response = await converse({
-          input: 'Please list my indices',
+          input: `Using the "platform_core_list_indices" tool, please list my indices. Only call the tool once.`,
           connector_id: connectorId,
         });
 
@@ -56,6 +56,23 @@ export const converseApiSuite = (
 
         const toolCall = toolCalls[0];
         expect(toolCall.tool_id).to.eql(platformCoreTools.listIndices);
+      });
+
+      it('can continue a text conversation', async () => {
+        const response1 = await converse({
+          input: 'Please say "hello"',
+          connector_id: connectorId,
+        });
+
+        expect(response1.response.message.length).to.be.greaterThan(0);
+
+        const response2 = await converse({
+          conversation_id: response1.conversation_id,
+          input: 'Please say it again.',
+          connector_id: connectorId,
+        });
+
+        expect(response2.response.message.length).to.be.greaterThan(0);
       });
     });
   });
