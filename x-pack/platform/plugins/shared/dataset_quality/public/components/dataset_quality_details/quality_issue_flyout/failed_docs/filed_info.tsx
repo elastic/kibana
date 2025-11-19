@@ -10,18 +10,22 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiIcon,
   EuiSpacer,
   EuiText,
   EuiTitle,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
 import {
   failedDocsErrorsColumnName,
+  failedDocsErrorsColumnNameTooltip,
   overviewDegradedFieldsTableLoadingText,
 } from '../../../../../common/translations';
 import { useQualityIssues } from '../../../../hooks';
+import React from 'react';
+import { css } from '@emotion/css';
 
 const failedDocsErrorsTableNoData = i18n.translate(
   'xpack.datasetQuality.details.qualityIssue.failedDocs.erros.noData',
@@ -49,11 +53,14 @@ export const FailedFieldInfo = () => {
         direction="column"
         gutterSize="xs"
       >
-        <EuiFlexItem grow={1}>
+        <EuiFlexGroup alignItems="center" gutterSize="xs">
           <EuiTitle size="xxs">
             <span>{failedDocsErrorsColumnName}</span>
           </EuiTitle>
-        </EuiFlexItem>
+          <EuiToolTip content={failedDocsErrorsColumnNameTooltip}>
+            <EuiIcon size="s" color="subdued" type="question" className="eui-alignTop" />
+          </EuiToolTip>
+        </EuiFlexGroup>
         <EuiFlexItem
           data-test-subj="datasetQualityDetailsFailedDocsFlyoutFieldsList-cause"
           grow={2}
