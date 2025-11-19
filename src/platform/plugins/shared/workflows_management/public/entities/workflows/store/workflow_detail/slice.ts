@@ -9,10 +9,10 @@
 
 import { createSlice } from '@reduxjs/toolkit';
 import type { EsWorkflow, WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/workflows';
+import { saveYamlThunk } from './thunks/save_yaml_thunk';
 import type { ActiveTab, ComputedData, WorkflowDetailState } from './types';
 import { findStepByLine } from './utils/step_finder';
 import { getWorkflowZodSchema } from '../../../../../common/schema';
-import { saveYamlThunk } from './thunks/save_yaml_thunk';
 
 // Initial state
 const initialState: WorkflowDetailState = {
