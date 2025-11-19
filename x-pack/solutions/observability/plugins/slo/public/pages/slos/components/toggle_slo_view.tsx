@@ -44,6 +44,14 @@ const toggleButtonsIcons = [
       defaultMessage: 'Compact view',
     }),
   },
+  {
+    iconType: 'aggregate',
+    id: 'hierarchyView',
+    label: i18n.translate('xpack.slo.listView.hierarchyViewLabel', {
+      defaultMessage: 'Hierarchy view',
+    }),
+    'data-test-subj': 'sloHierarchyViewButton',
+  },
 ];
 
 export function ToggleSLOView({
@@ -64,7 +72,7 @@ export function ToggleSLOView({
   return (
     <EuiFlexGroup alignItems="center">
       <EuiFlexItem grow={true}>
-        {(!state.groupBy || state.groupBy === 'ungrouped') && (
+        {(!state.groupBy || state.groupBy === 'ungrouped') && view !== 'hierarchyView' && (
           <EuiText size="s">
             <FormattedMessage
               id="xpack.slo.overview.pagination.description"
@@ -82,12 +90,16 @@ export function ToggleSLOView({
           </EuiText>
         )}
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <SLOSortBy state={state} onStateChange={onStateChange} loading={loading} />
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <SloGroupBy state={state} onStateChange={onStateChange} loading={loading} />
-      </EuiFlexItem>
+      {view !== 'hierarchyView' && (
+        <>
+          <EuiFlexItem grow={false}>
+            <SLOSortBy state={state} onStateChange={onStateChange} loading={loading} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <SloGroupBy state={state} onStateChange={onStateChange} loading={loading} />
+          </EuiFlexItem>
+        </>
+      )}
       <EuiFlexItem grow={false}>
         <EuiButtonGroup
           buttonSize="compressed"
