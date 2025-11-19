@@ -18,13 +18,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 import {
   failedDocsErrorsColumnName,
   failedDocsErrorsColumnNameTooltip,
   overviewDegradedFieldsTableLoadingText,
 } from '../../../../../common/translations';
 import { useQualityIssues } from '../../../../hooks';
-import React from 'react';
 
 const failedDocsErrorsTableNoData = i18n.translate(
   'xpack.datasetQuality.details.qualityIssue.failedDocs.erros.noData',

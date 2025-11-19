@@ -756,7 +756,8 @@ export const failedDocsErrorsColumnName = i18n.translate(
 export const failedDocsErrorsColumnNameTooltip = i18n.translate(
   'xpack.datasetQuality.details.failedDocs.errorsTooltip',
   {
-    defaultMessage: 'Sample of error messages for each error type. For more details, open the error type in Discover.',
+    defaultMessage:
+      'Sample of error messages for each error type. For more details, open the error type in Discover.',
   }
 );
 
