@@ -22,7 +22,11 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   'observability.get_downstream_dependencies',
   // Security Solution
   'core.security.alerts',
+  'core.security.alerts-index-search',
   'core.security.evaluate-alert',
+  'core.security.risk-score-search',
+  'core.security.attack-discovery-search',
+  'core.security.security-labs-search',
 ];
 
 /**
