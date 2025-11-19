@@ -129,4 +129,86 @@ describe('PersistedLog', () => {
       expect(items.length).toBe(0);
     });
   });
+
+  describe('browser tab synchronization', () => {
+    let addEventListenerSpy: jest.SpyInstance;
+    let removeEventListenerSpy: jest.SpyInstance;
+
+    beforeEach(() => {
+      addEventListenerSpy = jest.spyOn(window, 'addEventListener');
+      removeEventListenerSpy = jest.spyOn(window, 'removeEventListener');
+    });
+
+    afterEach(() => {
+      addEventListenerSpy.mockRestore();
+      removeEventListenerSpy.mockRestore();
+    });
+
+    test('should not register storage event listener on initialization without subscription', () => {
+      new PersistedLog(historyName, { enableBrowserTabsSync: true }, storage);
+
+      expect(addEventListenerSpy).not.toHaveBeenCalled();
+    });
+
+    test('should automatically register listener when first subscriber subscribes', () => {
+      const log = new PersistedLog(historyName, { enableBrowserTabsSync: true }, storage);
+
+      expect(addEventListenerSpy).not.toHaveBeenCalled();
+
+      const subscription = log.get$().subscribe(() => {});
+
+      expect(addEventListenerSpy).toHaveBeenCalledWith('storage', expect.any(Function));
+
+      subscription.unsubscribe();
+    });
+
+    test('should automatically remove listener when last subscriber unsubscribes', () => {
+      const log = new PersistedLog(historyName, { enableBrowserTabsSync: true }, storage);
+
+      const subscription = log.get$().subscribe(() => {});
+
+      expect(addEventListenerSpy).toHaveBeenCalled();
+
+      subscription.unsubscribe();
+
+      expect(removeEventListenerSpy).toHaveBeenCalledWith('storage', expect.any(Function));
+    });
+    test('should not register storage event listener if enableBrowserTabsSync is false', () => {
+      const log = new PersistedLog(historyName, { enableBrowserTabsSync: false }, storage);
+
+      const subscription = log.get$().subscribe(() => {});
+
+      expect(addEventListenerSpy).not.toHaveBeenCalled();
+
+      subscription.unsubscribe();
+    });
+
+    test('should update items when storage event is received', (done) => {
+      storage.get.mockReturnValue(payload.slice(0));
+      const log = new PersistedLog(historyName, { enableBrowserTabsSync: true }, storage);
+
+      const newItem = { animal: 'capybara' };
+      const updatedPayload = [newItem, ...payload];
+
+      // Subscribe to changes
+      const subscription = log.get$().subscribe((items: any) => {
+        if (items.length === updatedPayload.length) {
+          expect(items).toEqual(updatedPayload);
+          subscription.unsubscribe();
+          done();
+        }
+      });
+
+      // Simulate storage event from another tab
+      const storageEvent = new StorageEvent('storage', {
+        key: historyName,
+        newValue: JSON.stringify(updatedPayload),
+        oldValue: JSON.stringify(payload),
+        storageArea: window.localStorage,
+        url: window.location.href,
+      });
+
+      window.dispatchEvent(storageEvent);
+    });
+  });
 });

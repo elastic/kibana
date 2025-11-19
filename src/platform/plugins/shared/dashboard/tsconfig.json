@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -48,7 +48,6 @@
     "@kbn/saved-objects-management-plugin",
     "@kbn/core-saved-objects-server",
     "@kbn/core-saved-objects-utils-server",
-    "@kbn/object-versioning",
     "@kbn/core-saved-objects-api-server",
     "@kbn/content-management-table-list-view",
     "@kbn/content-management-table-list-view-table",
@@ -92,8 +91,8 @@
     "@kbn/controls-constants",
     "@kbn/presentation-util",
     "@kbn/react-query",
-    "@kbn/core-chrome-layout-utils",
-    "@kbn/core-http-server"
+    "@kbn/core-http-server",
+    "@kbn/core-chrome-layout-utils"
   ],
   "exclude": ["target/**/*"]
 }

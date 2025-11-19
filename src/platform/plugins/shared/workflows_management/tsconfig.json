@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types"
   },
@@ -10,7 +10,8 @@
     "server/**/*",
     "../../../../../typings/**/*",
     ".storybook/**/*.ts",
-    ".storybook/**/*.tsx"
+    ".storybook/**/*.tsx",
+    "server/**/*.json"
   ],
   "kbn_references": [
     "@kbn/core",
@@ -66,9 +67,12 @@
     "@kbn/connector-schemas",
     "@kbn/react-query",
     "@kbn/core-http-server",
+    "@kbn/zod-helpers",
     "@kbn/test-jest-helpers",
     "@kbn/es-errors",
-    "@kbn/core-http-server-mocks"
+    "@kbn/core-http-server-mocks",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/safer-lodash-set"
   ],
   "exclude": ["target/**/*"]
 }
