@@ -5,17 +5,14 @@
  * 2.0.
  */
 
-import type { Feature } from '@kbn/streams-schema';
+import type { Feature, FeatureType } from '@kbn/streams-schema';
 import type { IdentifyFeaturesOptions } from '@kbn/streams-ai';
 import objectHash from 'object-hash';
 import { FEATURE_TYPE, FEATURE_NAME, STREAM_NAME } from './fields';
 import type { StoredFeature } from './stored_feature';
 
-/**
- * Interface for handling encoding/decoding of specific feature types
- */
 export abstract class FeatureTypeHandler<T extends Feature = Feature> {
-  abstract readonly type: string;
+  abstract readonly type: FeatureType;
 
   abstract fromStorage(stored: StoredFeature): T;
   abstract toStorage(streamName: string, feature: T): StoredFeature;
