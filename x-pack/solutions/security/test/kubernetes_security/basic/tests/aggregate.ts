@@ -17,7 +17,6 @@ import type { FtrProviderContext } from '../../common/ftr_provider_context';
 const MOCK_INDEX = 'kubernetes-test-index';
 const TIMESTAMP_PROPERTY = '@timestamp';
 
-// eslint-disable-next-line import/no-default-export
 export default function aggregateTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
