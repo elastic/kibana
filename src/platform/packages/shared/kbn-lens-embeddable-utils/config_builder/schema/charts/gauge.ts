@@ -12,7 +12,7 @@ import { schema } from '@kbn/config-schema';
 import { esqlColumnSchema, metricOperationDefinitionSchema } from '../metric_ops';
 import { colorByValueSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
-import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
+import { dslOnlyPanelInfoSchema, layerSettingsSchemaRaw, sharedPanelInfoSchema } from '../shared';
 import { mergeAllMetricsWithChartDimensionSchema } from './shared';
 
 const gaugeStateSharedOptionsSchema = {
@@ -107,7 +107,7 @@ export const gaugeStateSchemaNoESQL = schema.object({
   type: schema.literal('gauge'),
   ...sharedPanelInfoSchema,
   ...dslOnlyPanelInfoSchema,
-  ...layerSettingsSchema,
+  ...layerSettingsSchemaRaw,
   ...datasetSchema,
   ...gaugeStateSharedOptionsSchema,
   /**
@@ -124,7 +124,7 @@ export const gaugeStateSchemaNoESQL = schema.object({
 const gaugeStateSchemaESQL = schema.object({
   type: schema.literal('gauge'),
   ...sharedPanelInfoSchema,
-  ...layerSettingsSchema,
+  ...layerSettingsSchemaRaw,
   ...datasetEsqlTableSchema,
   ...gaugeStateSharedOptionsSchema,
   /**

@@ -66,6 +66,15 @@ export const formulaOperationDefinitionSchema = schema.object({
    * Reduced time range
    */
   reduced_time_range: schema.maybe(schema.string({ meta: { description: 'Reduced time range' } })),
+  /**
+   * Custom scaling for the entire formula
+   */
+  time_scale: schema.maybe(
+    schema.oneOf(
+      [schema.literal('s'), schema.literal('m'), schema.literal('h'), schema.literal('d')],
+      { meta: { description: 'Time scale' } }
+    )
+  ),
 });
 
 export const esqlColumnSchema = schema.object({
