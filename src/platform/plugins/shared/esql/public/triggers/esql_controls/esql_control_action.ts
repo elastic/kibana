@@ -18,11 +18,13 @@ import {
   type ESQLControlVariable,
   type ESQLControlState,
   ControlTriggerSource,
+  TelemetryControlCancelledReason,
 } from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { dismissAllFlyoutsExceptFor, DiscoverFlyouts } from '@kbn/discover-utils';
 import { openLazyFlyout } from '@kbn/presentation-util';
+import { ESQLEditorTelemetryService } from '@kbn/esql-editor';
 import { ACTION_CREATE_ESQL_CONTROL } from '../constants';
 
 function isESQLVariableType(value: string): value is ESQLVariableType {
@@ -43,7 +45,6 @@ interface Context {
   initialState?: ESQLControlState;
   parentApi?: unknown;
   triggerSource?: ControlTriggerSource;
-  onCloseControlFlyout?: (flyoutRef: OverlayRef) => void;
 }
 
 export class CreateESQLControlAction implements Action<Context> {
@@ -81,7 +82,6 @@ export class CreateESQLControlAction implements Action<Context> {
     initialState,
     parentApi,
     triggerSource = ControlTriggerSource.EDIT_CONTROL,
-    onCloseControlFlyout = () => {},
   }: Context) {
     if (!isActionCompatible(this.core, variableType)) {
       throw new IncompatibleActionError();
@@ -95,6 +95,19 @@ export class CreateESQLControlAction implements Action<Context> {
     } catch (error) {
       // Flyouts don't exist or couldn't be closed, continue with opening the new flyout
     }
+
+    const telemetryService = new ESQLEditorTelemetryService(this.core.analytics);
+
+    const onClose = (flyoutRef: OverlayRef) => {
+      if (onCancelControl) {
+        onCancelControl();
+        flyoutRef.close();
+        telemetryService.trackEsqlControlConfigCancelled(
+          variableType,
+          TelemetryControlCancelledReason.CLOSE_BUTTON
+        );
+      }
+    };
 
     openLazyFlyout({
       core: this.core,
@@ -116,6 +129,7 @@ export class CreateESQLControlAction implements Action<Context> {
           closeFlyout,
           currentApp,
           triggerSource,
+          telemetryService,
         });
       },
       flyoutProps: {
@@ -124,9 +138,9 @@ export class CreateESQLControlAction implements Action<Context> {
         maxWidth: 800,
         triggerId: 'dashboard-controls-menu-button',
         // When queryString is present (i.e. flyout opened from the ES|QL editor),
-        // use onCloseControlFlyout as the onClose handler to ensure proper nested flyout closing behavior.
+        // use the local onClose as the onClose handler to ensure proper nested flyout closing behavior.
         // In other scenarios (opened directly from the dashboard), we keep the default close behavior.
-        ...(queryString && { onClose: onCloseControlFlyout }),
+        ...(queryString && { onClose }),
       },
     });
   }
