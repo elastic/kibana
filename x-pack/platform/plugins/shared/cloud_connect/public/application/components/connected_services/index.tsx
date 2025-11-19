@@ -135,7 +135,6 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
 
   const disconnectModal = isDisconnectModalVisible ? (
     <DisconnectClusterModal
-      clusterId={clusterDetails.id}
       clusterName={clusterDetails.name}
       onClose={closeDisconnectModal}
       onConfirm={handleDisconnectCluster}
@@ -169,26 +168,24 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
         }
         bottomBorder
         description={
-          <EuiText size="s">
-            <FormattedMessage
-              id="xpack.cloudConnect.connectedServices.pageDescription"
-              defaultMessage="This cluster is connected to a Cloud Organization. {learnMore}"
-              values={{
-                learnMore: (
-                  <EuiLink
-                    href="https://www.elastic.co/guide/en/cloud/current/ec-cloud-connect.html"
-                    target="_blank"
-                    external
-                  >
-                    <FormattedMessage
-                      id="xpack.cloudConnect.connectedServices.learnMore"
-                      defaultMessage="Learn more"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          </EuiText>
+          <FormattedMessage
+            id="xpack.cloudConnect.connectedServices.pageDescription"
+            defaultMessage="This cluster is connected to a Cloud Organization. {learnMore}"
+            values={{
+              learnMore: (
+                <EuiLink
+                  href="https://www.elastic.co/guide/en/cloud/current/ec-cloud-connect.html"
+                  target="_blank"
+                  external
+                >
+                  <FormattedMessage
+                    id="xpack.cloudConnect.connectedServices.learnMore"
+                    defaultMessage="Learn more"
+                  />
+                </EuiLink>
+              ),
+            }}
+          />
         }
         rightSideItems={[
           <EuiPopover
