@@ -27,18 +27,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await unifiedFieldList.waitUntilSidebarHasLoaded();
     });
 
-    describe('ESQL view', function () {
-      describe('when in discover', () => {
-        it('renders the save to background button', async () => {
-          await searchSessions.sendToBackgroundButtonExists();
-        });
+    describe('when in discover', () => {
+      it('renders the save to background button', async () => {
+        await searchSessions.sendToBackgroundButtonExists();
       });
+    });
 
-      describe('when clicking the open background search flyout button', () => {
-        it('opens the background search flyout', async () => {
-          await searchSessions.openFlyout();
-          await searchSessions.expectManagementTable();
-        });
+    describe('when clicking the open background search flyout button', () => {
+      it('opens the background search flyout', async () => {
+        await searchSessions.openFlyout();
+        await searchSessions.expectManagementTable();
       });
     });
   });
