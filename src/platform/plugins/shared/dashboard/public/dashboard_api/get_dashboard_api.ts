@@ -12,11 +12,9 @@ import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { v4 } from 'uuid';
 import { CONTROLS_GROUP_TYPE } from '@kbn/controls-constants';
-import { DASHBOARD_APP_ID } from '../../common/constants';
+import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
 import { getReferencesForControls, getReferencesForPanelId } from '../../common';
 import type { DashboardState } from '../../common/types';
-import { getDashboardContentManagementService } from '../services/dashboard_content_management_service';
-import type { LoadDashboardReturn } from '../services/dashboard_content_management_service/types';
 import {
   CONTROL_GROUP_EMBEDDABLE_ID,
   initializeControlGroupManager,
@@ -37,26 +35,32 @@ import { initializeUnifiedSearchManager } from './unified_search_manager';
 import { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 import { initializeViewModeManager } from './view_mode_manager';
 import { mergeControlGroupStates } from './merge_control_group_states';
+import type { DashboardReadResponseBody } from '../../server';
+import { saveDashboard } from './save_modal/save_dashboard';
 
 export function getDashboardApi({
   creationOptions,
   incomingEmbeddables,
   initialState,
-  savedObjectResult,
+  readResult,
   savedObjectId,
 }: {
   creationOptions?: DashboardCreationOptions;
   incomingEmbeddables?: EmbeddablePackageState[] | undefined;
   initialState: DashboardState;
-  savedObjectResult?: LoadDashboardReturn;
+  readResult?: DashboardReadResponseBody;
   savedObjectId?: string;
 }) {
   const fullScreenMode$ = new BehaviorSubject(creationOptions?.fullScreenMode ?? false);
-  const isManaged = savedObjectResult?.managed ?? false;
+  const isManaged = readResult?.meta.managed ?? false;
   const savedObjectId$ = new BehaviorSubject<string | undefined>(savedObjectId);
   const dashboardContainerRef$ = new BehaviorSubject<HTMLElement | null>(null);
 
-  const viewModeManager = initializeViewModeManager(incomingEmbeddables, savedObjectResult);
+  const viewModeManager = initializeViewModeManager({
+    incomingEmbeddables,
+    isManaged,
+    savedObjectId,
+  });
   const trackPanel = initializeTrackPanel(async (id: string) => {
     await layoutManager.api.getChildApi(id);
   }, dashboardContainerRef$);
@@ -87,7 +91,11 @@ export function getDashboardApi({
     incomingControlGroup
   );
 
-  const controlGroupManager = initializeControlGroupManager(mergedControlGroupState, getReferences);
+  const controlGroupManager = initializeControlGroupManager(
+    mergedControlGroupState,
+    getReferences,
+    viewModeManager.api.viewMode$.value
+  );
 
   const dataLoadingManager = initializeDataLoadingManager(layoutManager.api.children$);
   const dataViewsManager = initializeDataViewsManager(
@@ -107,7 +115,7 @@ export function getDashboardApi({
     viewMode$: viewModeManager.api.viewMode$,
     storeUnsavedChanges: creationOptions?.useSessionStorageIntegration,
     controlGroupManager,
-    lastSavedState: savedObjectResult?.dashboardInput ?? DEFAULT_DASHBOARD_STATE,
+    lastSavedState: readResult?.data ?? DEFAULT_DASHBOARD_STATE,
     layoutManager,
     savedObjectId$,
     settingsManager,
@@ -209,7 +217,7 @@ export function getDashboardApi({
     runQuickSave: async () => {
       if (isManaged) return;
       const { dashboardState, references } = getState();
-      const saveResult = await getDashboardContentManagementService().saveDashboardState({
+      const saveResult = await saveDashboard({
         dashboardState,
         references,
         saveOptions: {},

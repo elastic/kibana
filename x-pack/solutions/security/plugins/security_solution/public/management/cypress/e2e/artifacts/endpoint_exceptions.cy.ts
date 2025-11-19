@@ -43,7 +43,7 @@ describe(
         cy.visit(APP_MANAGE_PATH);
         cy.getByTestSubj('pageContainer').contains('Endpoint exceptions').click();
 
-        cy.getByTestSubj('endpointExceptionsPage-container').should('exist');
+        cy.getByTestSubj('endpointExceptionsListPage-container').should('exist');
       });
 
       it('should display Endpoint Exceptions in Manage side panel', () => {
@@ -62,14 +62,13 @@ describe(
         essSecurityHeaders.openNavigationPanelFor(essSecurityHeaders.ENDPOINT_EXCEPTIONS);
         cy.get(essSecurityHeaders.ENDPOINT_EXCEPTIONS).click();
 
-        cy.getByTestSubj('endpointExceptionsPage-container').should('exist');
+        cy.getByTestSubj('endpointExceptionsListPage-container').should('exist');
       });
 
       // todo: add 'should NOT' test case when Endpoint Exceptions sub-feature privilege is separated from Security
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/240814
-    describe.skip('Serverless', { tags: ['@serverless', '@skipInServerlessMKI'] }, () => {
+    describe('Serverless', { tags: ['@serverless', '@skipInServerlessMKI'] }, () => {
       it('should display Endpoint Exceptions in Assets side panel ', () => {
         // testing with t3_analyst with WRITE access, as we don't support custom roles on serverless yet
         login(ROLE.t3_analyst);

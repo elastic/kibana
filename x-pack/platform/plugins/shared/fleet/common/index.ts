@@ -22,6 +22,7 @@ export {
   FLEET_CLOUD_SECURITY_POSTURE_CSPM_POLICY_TEMPLATE,
   FLEET_CLOUD_SECURITY_POSTURE_ASSET_INVENTORY_POLICY_TEMPLATE,
   FLEET_CLOUD_SECURITY_POSTURE_CNVM_POLICY_TEMPLATE,
+  FLEET_CLOUD_DEFEND_PACKAGE,
   FLEET_ENDPOINT_PACKAGE,
   SEARCH_AI_LAKE_PACKAGES,
   SEARCH_AI_LAKE_ALLOWED_INSTALL_PACKAGES,
@@ -36,6 +37,7 @@ export {
   ASSETS_SAVED_OBJECT_TYPE,
   MESSAGE_SIGNING_KEYS_SAVED_OBJECT_TYPE,
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+  CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
   // Fleet server index
   FLEET_SERVER_ARTIFACTS_INDEX,
   AGENTS_INDEX,
@@ -124,6 +126,10 @@ export type {
   BulkGetPackagePoliciesResponse,
   BulkGetAgentPoliciesResponse,
   GetBulkAssetsResponse,
+  CreateAgentlessPolicyRequest,
+  CreateAgentlessPolicyResponse,
+  DeleteAgentlessPolicyRequest,
+  DeleteAgentlessPolicyResponse,
   // Models
   Agent,
   AgentStatus,

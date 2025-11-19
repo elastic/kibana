@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { describeDataset, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
+import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import { type Streams, getIndexPatternsForStream } from '@kbn/streams-schema';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 
@@ -29,7 +29,7 @@ export async function analyzeDataset(params: Params, dependencies: Dependencies)
     index: getIndexPatternsForStream(definition),
   });
 
-  const short = sortAndTruncateAnalyzedFields(analysis);
+  const short = formatDocumentAnalysis(analysis);
 
   const textFields = analysis.fields
     .filter((field) => field.types.includes('text'))
