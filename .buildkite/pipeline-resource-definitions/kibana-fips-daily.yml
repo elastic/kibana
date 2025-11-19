@@ -21,9 +21,6 @@ spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-fips'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
-        DISABLE_CI_STATS_SHIPPING: 'true'
-        TEST_ENABLE_FIPS_AGENT: 'true'
-        TEST_BROWSER_HEADLESS: '1'
       repository: elastic/kibana
       branch_configuration: main 9.1 8.19
       default_branch: main
