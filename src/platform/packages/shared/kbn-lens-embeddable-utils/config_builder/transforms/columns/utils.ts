@@ -66,9 +66,9 @@ export function getLensAPIMetricSharedProps(options: {
   };
 }
 
-export function getLensStateBucketSharedProps(options: { label?: string; field: string }) {
+export function getLensStateBucketSharedProps(options: { label?: string; field?: string }) {
   return {
-    sourceField: options.field,
+    sourceField: options.field ?? '',
     label: options.label ?? LENS_DEFAULT_LABEL,
     customLabel: Boolean(options.label),
     isBucketed: true,

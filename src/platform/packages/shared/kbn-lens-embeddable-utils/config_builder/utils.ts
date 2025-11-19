@@ -35,6 +35,7 @@ import type {
   LensESQLDataset,
 } from './types';
 import type { LensApiState } from './schema';
+import type { DatasetType } from './schema/dataset';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -125,7 +126,8 @@ const getAdhocDataView = (dataView: DataView): Record<string, DataViewSpec> => {
 // Getting the spec from a data view is a heavy operation, that's why the result is cached.
 export const getAdhocDataviews = (dataviews: Record<string, DataView>) => {
   let adHocDataViews = {};
-  [...new Set(Object.values(dataviews))].forEach((d) => {
+
+  [...Array.from(new Set(Object.values(dataviews)))].forEach((d) => {
     adHocDataViews = {
       ...adHocDataViews,
       ...getAdhocDataView(d),
@@ -359,6 +361,6 @@ export function isLensLegacyAttributes(config: unknown): config is LensAttribute
   );
 }
 
-export function isEsqlTableTypeDataset(dataset: LensApiState['dataset']) {
+export function isEsqlTableTypeDataset(dataset: DatasetType) {
   return dataset.type === 'esql' || dataset.type === 'table';
 }

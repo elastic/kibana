@@ -440,7 +440,7 @@ type MetricAttributes = Extract<
   { visualizationType: 'lnsMetric' }
 >;
 
-type MetricAttributesWithoutFiltersAndQuery = Omit<MetricAttributes, 'state'> & {
+export type MetricAttributesWithoutFiltersAndQuery = Omit<MetricAttributes, 'state'> & {
   state: Omit<MetricAttributes['state'], 'filters' | 'query'>;
 };
 

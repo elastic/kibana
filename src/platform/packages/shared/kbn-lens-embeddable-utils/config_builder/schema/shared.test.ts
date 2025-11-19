@@ -8,7 +8,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { sharedPanelInfoSchema, layerSettingsSchema, collapseBySchema } from './shared';
+import { sharedPanelInfoSchema, layerSettingsSchemaRaw, collapseBySchema } from './shared';
 
 describe('Shared Schemas', () => {
   describe('sharedPanelInfoSchema', () => {
@@ -55,14 +55,14 @@ describe('Shared Schemas', () => {
         ignore_global_filters: true,
       };
 
-      const validated = schema.object(layerSettingsSchema).validate(input);
+      const validated = schema.object(layerSettingsSchemaRaw).validate(input);
       expect(validated).toEqual(input);
     });
 
     it('validates layer settings with default values', () => {
       const input = {};
 
-      const validated = schema.object(layerSettingsSchema).validate(input);
+      const validated = schema.object(layerSettingsSchemaRaw).validate(input);
       expect(validated).toEqual({
         sampling: 1,
         ignore_global_filters: false,
@@ -74,7 +74,7 @@ describe('Shared Schemas', () => {
         sampling: -0.1,
       };
 
-      expect(() => schema.object(layerSettingsSchema).validate(input)).toThrow(
+      expect(() => schema.object(layerSettingsSchemaRaw).validate(input)).toThrow(
         /\[sampling\]: Value must be/
       );
     });
@@ -84,7 +84,7 @@ describe('Shared Schemas', () => {
         sampling: 1.1,
       };
 
-      expect(() => schema.object(layerSettingsSchema).validate(input)).toThrow(
+      expect(() => schema.object(layerSettingsSchemaRaw).validate(input)).toThrow(
         /\[sampling\]: Value must be/
       );
     });
@@ -93,7 +93,7 @@ describe('Shared Schemas', () => {
       const inputs = [{ sampling: 0 }, { sampling: 1 }, { sampling: 0.5 }];
 
       inputs.forEach((input) => {
-        const validated = schema.object(layerSettingsSchema).validate(input);
+        const validated = schema.object(layerSettingsSchemaRaw).validate(input);
         expect(validated).toEqual({ ignore_global_filters: false, ...input });
       });
     });
@@ -132,7 +132,7 @@ describe('Shared Schemas', () => {
 
       const validated = {
         panelInfo: schema.object(sharedPanelInfoSchema).validate(input.panelInfo),
-        layerSettings: schema.object(layerSettingsSchema).validate(input.layerSettings),
+        layerSettings: schema.object(layerSettingsSchemaRaw).validate(input.layerSettings),
         collapseBy: collapseBySchema.validate(input.collapseBy),
       };
 
@@ -147,7 +147,7 @@ describe('Shared Schemas', () => {
 
       const validated = {
         panelInfo: schema.object(sharedPanelInfoSchema).validate(input.panelInfo),
-        layerSettings: schema.object(layerSettingsSchema).validate(input.layerSettings),
+        layerSettings: schema.object(layerSettingsSchemaRaw).validate(input.layerSettings),
       };
 
       expect(validated).toEqual({

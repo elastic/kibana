@@ -26,7 +26,7 @@ import type {
   FormBasedLayer,
 } from '@kbn/lens-common';
 import type { TextBasedLayer } from '@kbn/lens-common';
-import type { LensApiState } from '../schema';
+import type { LensApiState, MetricState } from '../schema';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import type { LensAttributes } from '../types';
 import type { LensApiFilterType } from '../schema/filter';
@@ -370,7 +370,7 @@ describe('generateLayer', () => {
       type: 'metric',
       sampling: 0.5,
       ignore_global_filters: true,
-    } as LensApiState;
+    } as MetricState;
 
     const result = generateLayer('layer_1', options);
 
@@ -389,7 +389,7 @@ describe('generateLayer', () => {
   test('generates layer with default values', () => {
     const options = {
       type: 'metric',
-    } as LensApiState;
+    } as MetricState;
 
     const result = generateLayer('layer_0', options);
 

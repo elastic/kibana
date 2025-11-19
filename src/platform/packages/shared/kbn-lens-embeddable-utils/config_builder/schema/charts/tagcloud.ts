@@ -12,7 +12,7 @@ import { schema } from '@kbn/config-schema';
 import { esqlColumnSchema, genericOperationOptionsSchema } from '../metric_ops';
 import { colorMappingSchema } from '../color';
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
-import { dslOnlyPanelInfoSchema, layerSettingsSchema, sharedPanelInfoSchema } from '../shared';
+import { dslOnlyPanelInfoSchema, layerSettingsSchemaRaw, sharedPanelInfoSchema } from '../shared';
 import {
   mergeAllBucketsWithChartDimensionSchema,
   mergeAllMetricsWithChartDimensionSchema,
@@ -65,7 +65,7 @@ export const tagcloudStateSchemaNoESQL = schema.object({
   type: schema.literal('tagcloud'),
   ...sharedPanelInfoSchema,
   ...dslOnlyPanelInfoSchema,
-  ...layerSettingsSchema,
+  ...layerSettingsSchemaRaw,
   ...datasetSchema,
   ...tagcloudStateSharedOptionsSchema,
   /**
@@ -81,7 +81,7 @@ export const tagcloudStateSchemaNoESQL = schema.object({
 const tagcloudStateSchemaESQL = schema.object({
   type: schema.literal('tagcloud'),
   ...sharedPanelInfoSchema,
-  ...layerSettingsSchema,
+  ...layerSettingsSchemaRaw,
   ...datasetEsqlTableSchema,
   ...tagcloudStateSharedOptionsSchema,
   /**

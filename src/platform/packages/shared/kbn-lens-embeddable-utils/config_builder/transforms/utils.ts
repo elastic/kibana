@@ -142,7 +142,7 @@ export const getAdhocDataviews = (
 
   const adHocDataViews: Record<string, DataViewSpec> = {};
   const internalReferences: SavedObjectReference[] = [];
-  for (const [baseSpec, { layerIds, id }] of internalReferencesMap.entries()) {
+  for (const [baseSpec, { layerIds, id }] of Array.from(internalReferencesMap.entries())) {
     adHocDataViews[id] = getAdHocDataViewSpec(baseSpec);
     for (const layerId of layerIds) {
       internalReferences.push(createDataViewReference(id, layerId));
@@ -349,7 +349,7 @@ export const buildDatasourceStates = (
   for (let i = 0; i < configLayers.length; i++) {
     const layer = configLayers[i];
     const layerId = `${layer.type ?? 'layer'}_${i}`;
-    const dataset = layer.dataset ?? mainDataset;
+    const dataset = 'dataset' in layer ? layer.dataset : mainDataset;
 
     if (!dataset) {
       throw Error('dataset must be defined');
@@ -498,7 +498,7 @@ export const filtersToLensState = (
 };
 
 export const queryToLensState = (query: LensApiFilterType): Query => {
-  return query;
+  return { query: query.query, language: query.language as 'kuery' | 'lucene' };
 };
 
 export const filtersAndQueryToApiFormat = (

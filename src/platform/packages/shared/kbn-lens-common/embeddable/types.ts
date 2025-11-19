@@ -7,10 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BehaviorSubject } from 'rxjs';
-
-import type { LensApiSchemaType } from '@kbn/lens-embeddable-utils';
-import type { HasSerializedChildState } from '@kbn/presentation-containers';
 import type {
   AggregateQuery,
   ExecutionContextSearch,
@@ -36,7 +32,6 @@ import type {
   PublishingSubject,
   SerializedTitles,
   ViewMode,
-  useSearchApi,
 } from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import type {
@@ -485,46 +480,3 @@ export interface ESQLVariablesCompatibleDashboardApi {
   controlGroupApi$: PublishingSubject<Partial<CanAddNewPanel> | undefined>;
   children$: PublishingSubject<{ [key: string]: unknown }>;
 }
-
-type SearchApi = ReturnType<typeof useSearchApi>;
-
-interface GeneralLensApi {
-  searchSessionId$: BehaviorSubject<string | undefined>;
-  disabledActionIds$: BehaviorSubject<string[] | undefined>;
-  setDisabledActionIds: (ids: string[] | undefined) => void;
-  viewMode$: BehaviorSubject<ViewMode | undefined>;
-  settings: {
-    syncColors$: BehaviorSubject<boolean>;
-    syncCursor$: BehaviorSubject<boolean>;
-    syncTooltips$: BehaviorSubject<boolean>;
-  };
-  forceDSL?: boolean;
-  esqlVariables$: BehaviorSubject<ESQLControlVariable[] | undefined>;
-  hideTitle$: BehaviorSubject<boolean | undefined>;
-  reload$: BehaviorSubject<void>;
-}
-
-export type LensParentApi = SearchApi &
-  LensRuntimeState &
-  GeneralLensApi &
-  HasSerializedChildState<LensSerializedAPIConfig>;
-
-type LensByValueAPIConfigBase = Omit<LensByValueBase, 'attributes'> & {
-  // Temporarily allow both old and new attributes until all are new types are supported and feature flag removed
-  attributes: LensApiSchemaType | LensByValueBase['attributes'];
-};
-
-export type LensByValueSerializedAPIConfig = Simplify<
-  LensSerializedSharedState & LensByValueAPIConfigBase
->;
-export type LensByRefSerializedAPIConfig = LensByRefSerializedState;
-
-/**
- * Combined properties of API config used in dashboard API for lens panels
- *
- *  Includes:
- * - Lens document state (for by-value)
- * - Panel settings
- * - other props from the embeddable
- */
-export type LensSerializedAPIConfig = LensByRefSerializedAPIConfig | LensByValueSerializedAPIConfig;

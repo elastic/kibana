@@ -30,6 +30,6 @@ export type { LegacyMetricState, legacyMetricStateSchemaNoESQL } from './charts/
 export type { XYState } from './charts/xy';
 export type { GaugeState, gaugeStateSchemaNoESQL } from './charts/gauge';
 
-export type NarrowByType<T, U> = T extends { type: U } ? T : never;
+export type NarrowByType<T, U> = T extends { type?: U } ? T : never;
 
 export type LensApiAllOperations = LensApiAllMetricOperations | LensApiBucketOperations;
