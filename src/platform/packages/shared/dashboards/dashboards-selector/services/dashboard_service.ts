@@ -37,14 +37,23 @@ export function dashboardServiceProvider(contentManagementService: ContentManage
      * @returns - The dashboards that match the query
      */
     async fetchDashboards(query: SearchQuery = {}): Promise<DashboardItem[]> {
-      const response = await contentManagementService.client.search({
-        contentTypeId: 'dashboard',
-        query,
-        options: { fields: ['title', 'description'], includeReferences: ['tag'] },
-      });
-
-      // Assert the type of response to access hits property
-      return (response as { hits: DashboardItem[] }).hits;
+      try {
+        const response = await contentManagementService.client.search({
+          contentTypeId: 'dashboard',
+          query,
+          options: { fields: ['title', 'description'], includeReferences: ['tag'] },
+        });
+        // The response should be SearchResult with { hits: T[], pagination: {...} }
+        if (response && typeof response === 'object' && 'hits' in response) {
+          return (response as { hits: DashboardItem[] }).hits;
+        }
+        // If response structure is different, log it for debugging
+        console.warn('Unexpected response structure from contentManagement.client.search:', response);
+        return [];
+      } catch (error) {
+        console.error('Error fetching dashboards:', error);
+        return [];
+      }
     },
     /**
      * Fetch dashboard by id

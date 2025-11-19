@@ -39,8 +39,18 @@ const addVersion = <I extends { contentTypeId: string; version?: Version }>(
 ): I & { version: Version } => {
   const contentType = contentTypeRegistry.get(input.contentTypeId);
 
+  // If content type is not registered in public registry, it might be server-side only
+  // In that case, use the provided version or default to 1, and let the server handle validation
   if (!contentType) {
-    throw new Error(`Unknown content type [${input.contentTypeId}]`);
+    const version = input.version ?? 1;
+    const { result, value } = validateVersion(version);
+    if (!result) {
+      throw new Error(`Invalid version [${version}]. Must be an integer.`);
+    }
+    return {
+      ...input,
+      version: value,
+    };
   }
 
   const version = input.version ?? contentType.version.latest;
@@ -131,6 +141,8 @@ export class ContentClient {
   }
 
   search<I extends SearchIn, O = unknown>(input: I): Promise<O> {
+    // Direct call to crudClient to ensure fresh data (not cached by QueryClient)
+    // This matches the behavior of create, update, and delete methods
     return this.crudClientProvider(input.contentTypeId).search(
       addVersion(input, this.contentTypeRegistry)
     ) as Promise<O>;

@@ -111,11 +111,14 @@ export function DashboardsSelector({
   });
 
   const loadDashboards = useCallback(async () => {
+    console.log('Loading dashboards with search value:', searchValue);
+    console.log(contentManagement, '!!contentManagement');
     if (contentManagement) {
       setLoading(true);
       const dashboards = await dashboardServiceProvider(contentManagement)
         .fetchDashboards({ limit: 100, text: `${searchValue}*` })
         .catch(() => {});
+      console.log(dashboards, '!!dashboards')
       const dashboardOptions = (dashboards ?? []).map((dashboard: DashboardItem) =>
         getDashboardItem(dashboard)
       );
@@ -125,6 +128,7 @@ export function DashboardsSelector({
   }, [contentManagement, searchValue]);
 
   useEffect(() => {
+    console.log('!!should load dashboards??');
     if (isComboBoxOpen) {
       loadDashboards();
     }

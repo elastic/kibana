@@ -47,6 +47,7 @@ import { registerRoutes } from './api';
 import { DashboardAppLocatorDefinition } from '../common/locator/locator';
 import { setKibanaServices } from './kibana_services';
 import { scanDashboards } from './scan_dashboards';
+import { DashboardStorage } from './content_management/dashboard_storage';
 
 interface SetupDeps {
   embeddable: EmbeddableSetup;
@@ -67,8 +68,10 @@ export class DashboardPlugin
   implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps, StartDeps>
 {
   private readonly logger: Logger;
+  private readonly initializerContext: PluginInitializerContext;
 
   constructor(initializerContext: PluginInitializerContext) {
+    this.initializerContext = initializerContext;
     this.logger = initializerContext.logger.get();
   }
 
@@ -84,6 +87,18 @@ export class DashboardPlugin
     );
 
     plugins.contentManagement.favorites.registerFavoriteType('dashboard');
+
+    // Register dashboard in content management for search functionality
+    plugins.contentManagement.register({
+      id: DASHBOARD_SAVED_OBJECT_TYPE,
+      storage: new DashboardStorage({
+        logger: this.logger,
+        throwOnResultValidationError: this.initializerContext.env.mode.dev,
+      }),
+      version: {
+        latest: 1,
+      },
+    });
 
     if (plugins.taskManager) {
       initializeDashboardTelemetryTask(this.logger, core, plugins.taskManager, plugins.embeddable);
