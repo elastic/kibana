@@ -13,11 +13,20 @@ import { KBN_FIELD_TYPES, esFieldTypeToKibanaFieldType } from '@kbn/field-types'
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
 import { typeToEuiIconMap } from '@kbn/react-field/src/field_icon/field_icon';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 
+const ES_TYPES_DOCS_URL =
+  'https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html';
+const DOCUMENTATION_VALUE = 'documentation';
+
+/**
+ * A ComboBox component for selecting field types.
+ * Renders icons next to field types and groups them into categories.
+ */
 export const FieldTypeSelector = ({
   selectedType,
   onTypeChange,
+  ...restOfProps
 }: {
   selectedType: string | null;
   onTypeChange: (type: string | null) => void;
@@ -36,24 +45,28 @@ export const FieldTypeSelector = ({
     [onTypeChange]
   );
 
-  const selectedOption = OPTIONS.find((option) => option.value === selectedType) || null;
+  const selectedOption = useMemo(() => {
+    const opt = OPTIONS.find((option) => option.value === selectedType);
+    return opt ? [opt] : [];
+  }, [selectedType]);
 
   return (
     <EuiComboBox
       compressed
-      aria-label={i18n.translate('indexEditor.columnHeaderEdit.fieldTypeSelectAriaLabel', {
+      aria-label={i18n.translate('fieldTypeSelect.ariaLabel', {
         defaultMessage: 'Field type select',
       })}
-      placeholder={i18n.translate('indexEditor.columnHeaderEdit.selectATypePlaceholder', {
+      placeholder={i18n.translate('fieldTypeSelect.placeholder', {
         defaultMessage: 'Select option',
       })}
-      data-test-subj="indexEditorindexEditorColumnTypeSelect"
+      data-test-subj="fieldTypeSelect"
       onChange={handleChange}
-      selectedOptions={selectedOption ? [selectedOption] : []}
+      selectedOptions={selectedOption}
       options={OPTIONS}
-      singleSelection
       renderOption={renderOption}
       prepend={selectedType ? <FieldIcon type={selectedType} label={selectedType} /> : undefined}
+      singleSelection
+      {...restOfProps}
     />
   );
 };
@@ -65,11 +78,7 @@ const renderOption = (
 ) => {
   if (option.value === 'documentation') {
     return (
-      <EuiLink
-        href="https://www.elastic.co/guide/en/elasticsearch/reference/current/mapping-types.html"
-        target="_blank"
-        external
-      >
+      <EuiLink href={ES_TYPES_DOCS_URL} target="_blank" external>
         {option.label}
       </EuiLink>
     );
@@ -91,9 +100,9 @@ const renderOption = (
   );
 };
 
-const typeGroups: { label: string; types: string[] }[] = [
+const TYPE_GROUPS: { label: string; types: string[] }[] = [
   {
-    label: i18n.translate('field_select.group.text', {
+    label: i18n.translate('fieldTypeSelect.group.text', {
       defaultMessage: 'Text',
     }),
     types: [
@@ -107,7 +116,7 @@ const typeGroups: { label: string; types: string[] }[] = [
     ],
   },
   {
-    label: i18n.translate('field_select.group.numeric', {
+    label: i18n.translate('fieldTypeSelect.group.numeric', {
       defaultMessage: 'Numeric',
     }),
     types: [
@@ -123,31 +132,31 @@ const typeGroups: { label: string; types: string[] }[] = [
     ],
   },
   {
-    label: i18n.translate('field_select.group.boolean_date', {
+    label: i18n.translate('fieldTypeSelect.group.booleanDate', {
       defaultMessage: 'Boolean & Date',
     }),
     types: ['boolean', 'date', 'date_nanos'],
   },
   {
-    label: i18n.translate('field_select.group.ip_geo', {
+    label: i18n.translate('fieldTypeSelect.group.ipGeo', {
       defaultMessage: 'IP & Geo',
     }),
     types: ['ip', 'geo_point', 'geo_shape'],
   },
   {
-    label: i18n.translate('field_select.group.structured', {
+    label: i18n.translate('fieldTypeSelect.group.structured', {
       defaultMessage: 'Structured',
     }),
     types: ['flattened'],
   },
   {
-    label: i18n.translate('field_select.group.range', {
+    label: i18n.translate('fieldTypeSelect.group.range', {
       defaultMessage: 'Range',
     }),
     types: ['integer_range', 'float_range', 'long_range', 'ip_range', 'double_range', 'date_range'],
   },
   {
-    label: i18n.translate('field_select.group.advanced', {
+    label: i18n.translate('fieldTypeSelect.group.advanced', {
       defaultMessage: 'Advanced',
     }),
     types: [
@@ -160,20 +169,6 @@ const typeGroups: { label: string; types: string[] }[] = [
       'percolator',
     ],
   },
-  {
-    label: i18n.translate('field_select.group.advanced', {
-      defaultMessage: 'Will not work well',
-    }),
-    types: [
-      'scaled_float',
-      'aggregate_metric_double',
-      'object',
-      'nested',
-      'murmur3',
-      'token_count',
-      'join',
-    ],
-  },
 ];
 
 /**
@@ -182,7 +177,7 @@ const typeGroups: { label: string; types: string[] }[] = [
 const snakeCaseToReadableText = (type: string) =>
   type.charAt(0).toUpperCase() + type.slice(1).replace(/_/g, ' ');
 
-const OPTIONS: EuiComboBoxOptionOption[] = typeGroups.flatMap((group) => [
+const OPTIONS: EuiComboBoxOptionOption[] = TYPE_GROUPS.flatMap((group) => [
   {
     isGroupLabelOption: true,
     label: group.label,
@@ -191,12 +186,9 @@ const OPTIONS: EuiComboBoxOptionOption[] = typeGroups.flatMap((group) => [
     value: type,
     label: snakeCaseToReadableText(type),
   })),
-]);
-
-const DOCUMENTATION_VALUE = 'documentation';
-OPTIONS.push({
+]).concat({
   value: DOCUMENTATION_VALUE,
-  label: i18n.translate('indexEditor.columnHeaderEdit.documentationLink', {
+  label: i18n.translate('fieldTypeSelect.documentationLink', {
     defaultMessage: 'Learn about field types',
   }),
 });
