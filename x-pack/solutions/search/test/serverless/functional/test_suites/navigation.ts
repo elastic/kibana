@@ -190,8 +190,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.tour.nextStep();
       await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-manage-data');
       await solutionNavigation.sidenav.tour.nextStep();
-      await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-search-getting-started');
-      await solutionNavigation.sidenav.tour.nextStep();
       await solutionNavigation.sidenav.tour.expectHidden();
       await browser.refresh();
       await solutionNavigation.sidenav.tour.expectHidden();
