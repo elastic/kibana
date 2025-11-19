@@ -14,6 +14,8 @@ import { createAsyncThunk, miniSerializeError } from '@reduxjs/toolkit';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import type { ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
+import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
+import type { FlattenedStickyControlState } from '@kbn/control-group-renderer/src/types';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { DiscoverInternalState, TabState } from './types';
 import type {
@@ -95,7 +97,9 @@ export const parseControlGroupJson = (jsonString?: string | null): ControlPanels
  * If `panels` is null or empty, it returns an empty array.
  * @returns An array of ESQLControlVariable objects.
  */
-export const extractEsqlVariables = (panels: ControlPanelsState | null): ESQLControlVariable[] => {
+export const extractEsqlVariables = (
+  panels: ControlPanelsState<FlattenedStickyControlState & OptionsListESQLControlState> | null
+): ESQLControlVariable[] => {
   if (!panels || Object.keys(panels).length === 0) {
     return [];
   }
