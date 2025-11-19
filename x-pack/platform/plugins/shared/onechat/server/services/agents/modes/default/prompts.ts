@@ -263,7 +263,7 @@ ${agentDescription ?? 'No instructions available.'}
 
   return `## ATTACHMENT TYPES
 
-  The current conversation contains attachments. Here are the list of attachment types and their corresponding instructions:
+  The current conversation contains attachments. Here is the list of attachment types present in the conversation and their corresponding instructions:
 
 ${perTypeInstructions.join('\n\n')}
   `;
