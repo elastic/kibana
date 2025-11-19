@@ -21,7 +21,7 @@ export const getDefaultResizeOptions = (runtimeSettings: RuntimeGridSettings) =>
   minWidth: 1,
   maxWidth: runtimeSettings.columnCount,
   minHeight: 1,
-  maxHeight: Infinity,
+  maxHeight: Number.MAX_VALUE,
 });
 
 const getColumnCountInPixels = ({
