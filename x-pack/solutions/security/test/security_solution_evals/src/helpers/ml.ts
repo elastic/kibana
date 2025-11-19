@@ -5,18 +5,52 @@
  * 2.0.
  */
 
-import { executeSetupModuleRequest } from '@kbn/test-suites-security-solution-apis/test_suites/detections_response/utils/machine_learning/machine_learning_setup';
 import pRetry from 'p-retry';
 import type supertest from 'supertest';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
 import { v4 as uuidv4 } from 'uuid';
+import type SuperTest from 'supertest';
 import {
   fetchPackageInfo,
   installIntegration,
 } from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_services';
 import { getCommonRequestHeader } from '@kbn/test-suites-xpack-platform/functional/services/ml/common_api';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { ML_GROUP_ID } from '@kbn/security-solution-plugin/common/constants';
+
+interface ModuleJob {
+  id: string;
+  success: boolean;
+  error?: {
+    status: number;
+  };
+}
+
+export const executeSetupModuleRequest = async ({
+  module,
+  rspCode,
+  supertest,
+}: {
+  module: string;
+  rspCode: number;
+  supertest: SuperTest.Agent;
+}): Promise<{ jobs: ModuleJob[] }> => {
+  const { body } = await supertest
+    .post(`/internal/ml/modules/setup/${module}`)
+    .set(getCommonRequestHeader('1'))
+    .send({
+      prefix: '',
+      groups: [ML_GROUP_ID],
+      indexPatternName: 'auditbeat-*',
+      startDatafeed: false,
+      useDedicatedIndex: true,
+      applyToAllSpaces: true,
+    })
+    .expect(rspCode);
+
+  return body;
+};
 
 export const setupMlModulesWithRetry = ({
   module,
