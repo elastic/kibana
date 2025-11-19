@@ -99,14 +99,12 @@ export class CreateESQLControlAction implements Action<Context> {
     const telemetryService = new ESQLEditorTelemetryService(this.core.analytics);
 
     const onClose = (flyoutRef: OverlayRef) => {
-      if (onCancelControl) {
-        onCancelControl();
+        onCancelControl?.();
         flyoutRef.close();
         telemetryService.trackEsqlControlConfigCancelled(
           variableType,
           TelemetryControlCancelledReason.CLOSE_BUTTON
         );
-      }
     };
 
     openLazyFlyout({
