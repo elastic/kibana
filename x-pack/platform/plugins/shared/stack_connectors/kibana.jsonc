@@ -18,6 +18,6 @@
       "spaces"
     ],
     "optionalPlugins": ["usageCollection"],
-    "extraPublicDirs": ["public/common", "public/common/logos"]
+    "extraPublicDirs": ["public/common"]
   }
 }
