@@ -259,51 +259,51 @@
             "path": "x-pack/solutions/security/plugins/security_solution/server/lib/telemetry/tasks/security_lists.test.ts"
           },
           {
-            "plugin": "@kbn/test-suites-xpack-security",
+            "plugin": "@kbn/test-suites-security-solution-apis",
             "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "@kbn/test-suites-xpack-security",
+            "plugin": "@kbn/test-suites-security-solution-apis",
             "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "@kbn/test-suites-xpack-security",
+            "plugin": "@kbn/test-suites-security-solution-apis",
             "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "@kbn/test-suites-xpack-security",
+            "plugin": "@kbn/test-suites-security-solution-apis",
             "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "@kbn/test-suites-xpack-security",
+            "plugin": "@kbn/test-suites-security-solution-apis",
             "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "@kbn/test-suites-xpack-security",
+            "plugin": "@kbn/test-suites-security-solution-apis",
             "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "@kbn/test-suites-xpack-security",
+            "plugin": "@kbn/test-suites-security-solution-apis",
             "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "@kbn/test-suites-xpack-security",
+            "plugin": "@kbn/test-suites-security-solution-apis",
             "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "@kbn/test-suites-xpack-security",
+            "plugin": "@kbn/test-suites-security-solution-apis",
             "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "@kbn/test-suites-xpack-security",
+            "plugin": "@kbn/test-suites-security-solution-apis",
             "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "@kbn/test-suites-xpack-security",
+            "plugin": "@kbn/test-suites-security-solution-apis",
             "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "@kbn/test-suites-xpack-security",
+            "plugin": "@kbn/test-suites-security-solution-apis",
             "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           }
         ],
@@ -810,39 +810,39 @@
             "path": "x-pack/solutions/security/plugins/security_solution/server/endpoint/services/artifacts/manifest_manager/manifest_manager.test.ts"
           },
           {
-            "plugin": "@kbn/test-suites-xpack-security",
+            "plugin": "@kbn/test-suites-security-solution-apis",
             "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "@kbn/test-suites-xpack-security",
+            "plugin": "@kbn/test-suites-security-solution-apis",
             "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "@kbn/test-suites-xpack-security",
+            "plugin": "@kbn/test-suites-security-solution-apis",
             "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "@kbn/test-suites-xpack-security",
+            "plugin": "@kbn/test-suites-security-solution-apis",
             "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "@kbn/test-suites-xpack-security",
+            "plugin": "@kbn/test-suites-security-solution-apis",
             "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "@kbn/test-suites-xpack-security",
+            "plugin": "@kbn/test-suites-security-solution-apis",
             "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "@kbn/test-suites-xpack-security",
+            "plugin": "@kbn/test-suites-security-solution-apis",
             "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "@kbn/test-suites-xpack-security",
+            "plugin": "@kbn/test-suites-security-solution-apis",
             "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "@kbn/test-suites-xpack-security",
+            "plugin": "@kbn/test-suites-security-solution-apis",
             "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
@@ -1062,27 +1062,27 @@
             "path": "x-pack/solutions/security/plugins/security_solution/scripts/endpoint/trusted_apps/index.ts"
           },
           {
-            "plugin": "@kbn/test-suites-xpack-security",
+            "plugin": "@kbn/test-suites-security-solution-apis",
             "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "@kbn/test-suites-xpack-security",
+            "plugin": "@kbn/test-suites-security-solution-apis",
             "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "@kbn/test-suites-xpack-security",
+            "plugin": "@kbn/test-suites-security-solution-apis",
             "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "@kbn/test-suites-xpack-security",
+            "plugin": "@kbn/test-suites-security-solution-apis",
             "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "@kbn/test-suites-xpack-security",
+            "plugin": "@kbn/test-suites-security-solution-apis",
             "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           },
           {
-            "plugin": "@kbn/test-suites-xpack-security",
+            "plugin": "@kbn/test-suites-security-solution-apis",
             "path": "x-pack/solutions/security/test/security_solution_api_integration/test_suites/detections_response/telemetry/trial_license_complete_tier/task_based/security_lists.ts"
           }
         ],
