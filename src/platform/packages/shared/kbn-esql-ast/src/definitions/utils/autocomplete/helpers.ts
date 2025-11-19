@@ -6,7 +6,11 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import type { ESQLControlVariable, InferenceEndpointAutocompleteItem } from '@kbn/esql-types';
+import type {
+  ESQLControlVariable,
+  InferenceEndpointAutocompleteItem,
+  ControlTriggerSource,
+} from '@kbn/esql-types';
 import { ESQLVariableType } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
@@ -309,6 +313,7 @@ export const columnExists = (col: string, context?: ICommandContext) =>
 
 export function getControlSuggestion(
   type: ESQLVariableType,
+  triggerSource: ControlTriggerSource,
   variables?: string[],
   suggestCreation = true
 ): ISuggestionItem[] {
@@ -330,6 +335,7 @@ export function getControlSuggestion(
               title: i18n.translate('kbn-esql-ast.esql.autocomplete.createControlDetailLabel', {
                 defaultMessage: 'Click to create',
               }),
+              arguments: [{ triggerSource }],
             },
           } as ISuggestionItem,
         ]
@@ -354,6 +360,7 @@ export const getVariablePrefix = (variableType: ESQLVariableType) =>
 export function getControlSuggestionIfSupported(
   supportsControls: boolean,
   type: ESQLVariableType,
+  triggerSource: ControlTriggerSource,
   variables?: ESQLControlVariable[],
   shouldBePrefixed = true
 ) {
@@ -362,6 +369,7 @@ export function getControlSuggestionIfSupported(
 
   const controlSuggestion = getControlSuggestion(
     type,
+    triggerSource,
     filteredVariables?.map((v) => `${prefix}${v.key}`),
     supportsControls
   );

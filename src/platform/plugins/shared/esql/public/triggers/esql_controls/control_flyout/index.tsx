@@ -7,14 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useCallback, useMemo, useState, useEffect, useRef } from 'react';
 import { EuiFlyoutBody } from '@elastic/eui';
+import { ESQLEditorTelemetryService } from '@kbn/esql-editor';
 import type { TimeRange } from '@kbn/es-query';
-import { ESQLVariableType, type ESQLControlVariable, type ESQLControlState } from '@kbn/esql-types';
+import {
+  ESQLVariableType,
+  EsqlControlType,
+  VariableNamePrefix,
+  TelemetryControlCancelledReason,
+  type ESQLControlVariable,
+  type ESQLControlState,
+  type ControlTriggerSource,
+} from '@kbn/esql-types';
 import { getValuesFromQueryField } from '@kbn/esql-utils';
-import { EsqlControlType, VariableNamePrefix } from '@kbn/esql-types';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { monaco } from '@kbn/monaco';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ValueControlForm } from './value_control_form';
 import { Header, ControlType, VariableName, Footer } from './shared_form_components';
 import { IdentifierControlForm } from './identifier_control_form';
@@ -29,6 +38,7 @@ import {
   getVariableNamePrefix,
   checkVariableExistence,
 } from './helpers';
+import type { ServiceDeps } from '../../../kibana_services';
 
 interface ESQLControlsFlyoutProps {
   search: ISearchGeneric;
@@ -43,6 +53,7 @@ interface ESQLControlsFlyoutProps {
   closeFlyout: () => void;
   ariaLabelledBy: string;
   currentApp?: string;
+  telemetryTriggerSource: ControlTriggerSource;
 }
 
 export function ESQLControlsFlyout({
@@ -58,6 +69,7 @@ export function ESQLControlsFlyout({
   closeFlyout,
   ariaLabelledBy,
   currentApp,
+  telemetryTriggerSource,
 }: ESQLControlsFlyoutProps) {
   // ?? or ?
   const [variableNamePrefix, setVariableNamePrefix] = useState(
@@ -115,6 +127,11 @@ export function ESQLControlsFlyout({
       : true;
   }, [variableType, controlState?.availableOptions]);
 
+  const kibana = useKibana<ServiceDeps>();
+  const { core } = kibana.services;
+
+  const telemetryServiceRef = useRef(new ESQLEditorTelemetryService(core.analytics));
+
   const onVariableNameChange = useCallback(
     (e: { target: { value: React.SetStateAction<string> } }) => {
       const text = validateVariableName(String(e.target.value), variableNamePrefix);
@@ -167,6 +184,7 @@ export function ESQLControlsFlyout({
       } else {
         await onSaveControl?.(controlState, '');
       }
+      telemetryServiceRef.current.trackEsqlControlConfigSaved(variableType, telemetryTriggerSource);
     }
     closeFlyout();
   }, [
@@ -177,7 +195,17 @@ export function ESQLControlsFlyout({
     queryString,
     variableName,
     onSaveControl,
+    variableType,
+    telemetryTriggerSource,
   ]);
+
+  const onCloseFlyout = useCallback(() => {
+    telemetryServiceRef.current.trackEsqlControlConfigCancelled(
+      initialVariableType,
+      TelemetryControlCancelledReason.CANCEL_BUTTON
+    );
+    closeFlyout();
+  }, [closeFlyout, initialVariableType]);
 
   const formBody =
     variableNamePrefix === VariableNamePrefix.VALUE ? (
@@ -229,7 +257,7 @@ export function ESQLControlsFlyout({
       <Footer
         onCancelControl={onCancelControl}
         isSaveDisabled={formIsInvalid}
-        closeFlyout={closeFlyout}
+        closeFlyout={onCloseFlyout}
         onCreateControl={onCreateControl}
       />
     </>
