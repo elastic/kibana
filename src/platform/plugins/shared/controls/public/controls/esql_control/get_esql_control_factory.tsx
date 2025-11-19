@@ -154,6 +154,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
         // Pass no-ops and default values for all of the features of OptionsList that ES|QL controls don't currently use
         ...componentStaticStateManager.api,
         singleSelect$: selections.api.singleSelect$ as PublishingSubject<boolean | undefined>,
+        invalidSelections$: selections.internalApi.invalidSelections$,
         deselectOption: () => {},
         selectAll: (keys: string[]) => {
           selections.internalApi.setSelectedOptions(keys);

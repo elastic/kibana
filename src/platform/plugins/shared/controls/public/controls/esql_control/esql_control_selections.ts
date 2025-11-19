@@ -21,6 +21,7 @@ import type {
 import { dataService } from '../../services/kibana_services';
 import type { ControlGroupApi } from '../../control_group/types';
 import { getESQLSingleColumnValues } from './utils/get_esql_single_column_values';
+import { initializeTemporayStateManager } from '../data_controls/options_list_control/temporay_state_manager';
 
 function selectedOptionsComparatorFunction(a?: OptionsListSelection[], b?: OptionsListSelection[]) {
   return deepEqual(a ?? [], b ?? []);
@@ -80,6 +81,9 @@ export function initializeESQLControlSelections(
   const displayedAvailableOptions$ = new BehaviorSubject<OptionsListSuggestions | undefined>(
     initialState.availableOptions?.map((value) => ({ value })) ?? []
   );
+
+  // Use it for incompatible suggestions
+  const temporaryStateManager = initializeTemporayStateManager();
 
   function setSearchString(next: string) {
     searchString$.next(next);
@@ -154,7 +158,21 @@ export function initializeESQLControlSelections(
     .subscribe((result) => {
       setDataLoading(false);
       if (getESQLSingleColumnValues.isSuccess(result)) {
-        availableOptions$.next(result.values.map((value) => value));
+        const newAvailableOptions = result.values.map((value) => value);
+        availableOptions$.next(newAvailableOptions);
+
+        // Check if current selections are still compatible
+        const currentSelections = selectedOptions$.getValue() ?? [];
+        const incompatibleSelections = new Set<OptionsListSelection>();
+
+        currentSelections.forEach((selection) => {
+          if (!newAvailableOptions.includes(selection)) {
+            incompatibleSelections.add(selection);
+          }
+        });
+
+        // Update incompatible selections
+        temporaryStateManager.api.setInvalidSelections(incompatibleSelections);
       }
     });
 
@@ -236,6 +254,7 @@ export function initializeESQLControlSelections(
       if (lastSaved?.controlType) controlType$.next(lastSaved?.controlType);
       esqlQuery$.next(lastSaved?.esqlQuery ?? '');
       title$.next(lastSaved?.title);
+      temporaryStateManager.api.setInvalidSelections(new Set());
       previousESQLVariables = [];
       hasInitialFetch = false;
     },
@@ -264,6 +283,8 @@ export function initializeESQLControlSelections(
       searchTechnique$: new BehaviorSubject<OptionsListSearchTechnique | undefined>('wildcard'),
       searchString$,
       searchStringValid$: new BehaviorSubject(true),
+      invalidSelections$: temporaryStateManager.api.invalidSelections$,
+      setInvalidSelections: temporaryStateManager.api.setInvalidSelections,
     },
   };
 }
