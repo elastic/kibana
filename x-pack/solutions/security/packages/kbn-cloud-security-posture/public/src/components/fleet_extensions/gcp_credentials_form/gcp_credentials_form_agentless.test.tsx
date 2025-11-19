@@ -294,7 +294,7 @@ describe('GcpCredentialsFormAgentless', () => {
       expect(screen.getByTestId('gcp-credentials-guide')).toBeInTheDocument();
       expect(screen.getByTestId('guide-organization-state')).toHaveTextContent('false');
       expect(screen.getByTestId('guide-command-text')).toHaveTextContent(
-        'gcloud config set project <PROJECT_ID> ./deploy_service_account.sh'
+        'gcloud config set project <PROJECT_ID> && ./deploy_service_account.sh'
       );
     });
   });
@@ -339,7 +339,7 @@ describe('GcpCredentialsFormAgentless', () => {
 
       expect(screen.getByTestId('guide-organization-state')).toHaveTextContent('true');
       expect(screen.getByTestId('guide-command-text')).toHaveTextContent(
-        'gcloud config set project <PROJECT_ID> && ORG_ID=<ORG_ID_VALUE> ./deploy_service_account.sh'
+        'gcloud config set project <PROJECT_ID> && ORG_ID=<ORG_ID_VALUE> && ./deploy_service_account.sh'
       );
     });
   });
