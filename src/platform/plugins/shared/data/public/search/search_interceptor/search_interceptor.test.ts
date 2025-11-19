@@ -482,14 +482,12 @@ describe('SearchInterceptor', () => {
       const firstRequest = (
         mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
       )[1];
-      expect(JSON.parse(firstRequest?.body as string).params.query).toBeDefined();
-      expect(JSON.parse(firstRequest?.body as string).params.filter).toBeDefined();
+      expect(JSON.parse(firstRequest?.body as string).params).toBeDefined();
 
       const secondRequest = (
         mockCoreSetup.http.post.mock.calls[1] as unknown as [string, HttpFetchOptions]
       )[1];
-      expect(JSON.parse(secondRequest?.body as string).params.query).not.toBeDefined();
-      expect(JSON.parse(secondRequest?.body as string).params.filter).not.toBeDefined();
+      expect(JSON.parse(secondRequest?.body as string).params).not.toBeDefined();
     });
 
     test('should make secondary request if first call returns partial result (DSL)', async () => {
@@ -601,12 +599,12 @@ describe('SearchInterceptor', () => {
       const firstRequest = (
         mockCoreSetup.http.post.mock.calls[0] as unknown as [string, HttpFetchOptions]
       )[1];
-      expect(JSON.parse(firstRequest?.body as string).params.body).toBeDefined();
+      expect(JSON.parse(firstRequest?.body as string).params).toBeDefined();
 
       const secondRequest = (
         mockCoreSetup.http.post.mock.calls[1] as unknown as [string, HttpFetchOptions]
       )[1];
-      expect(JSON.parse(secondRequest?.body as string).params.body).not.toBeDefined();
+      expect(JSON.parse(secondRequest?.body as string).params).not.toBeDefined();
     });
 
     test('should abort on user abort', async () => {
