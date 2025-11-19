@@ -36,6 +36,7 @@ import {
   errorAction,
   handoverAction,
 } from './actions';
+import type { ProcessedConversation } from '../utils/prepare_conversation';
 
 // number of successive recoverable errors we try to recover from before throwing
 const MAX_ERROR_COUNT = 2;
@@ -47,6 +48,7 @@ export const createAgentGraph = ({
   capabilities,
   logger,
   events,
+  processedConversation,
 }: {
   chatModel: InferenceChatModel;
   tools: StructuredTool[];
@@ -54,6 +56,7 @@ export const createAgentGraph = ({
   configuration: ResolvedConfiguration;
   logger: Logger;
   events: AgentEventEmitter;
+  processedConversation: ProcessedConversation;
 }) => {
   const toolNode = new ToolNode<BaseMessage[]>(tools);
 
@@ -72,6 +75,7 @@ export const createAgentGraph = ({
           capabilities,
           initialMessages: state.initialMessages,
           actions: state.mainActions,
+          attachmentTypes: processedConversation.attachmentTypes,
         })
       );
 
