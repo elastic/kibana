@@ -29,16 +29,13 @@ export const useWorkflowYamlCompletionProvider = (
   // Create a new completion provider when the computed data changes to ensure we get the latest data
   // Computed data is calculations are debounced so we need to force an update when the computed data changes
   const completionProvider = useMemo(() => {
-    if (!computed) {
-      return undefined; // only happens on the initial state
-    }
     return getCompletionItemProvider(() => editorStateRef.current);
-  }, [computed]);
+  }, []);
 
   // Register/unregister completion provider when completionProvider data changes
   const completionProviderDisposableRef = useRef<monaco.IDisposable | null>(null);
   useEffect(() => {
-    if (!editor || !completionProvider) {
+    if (!editor || !completionProvider || !computed) {
       return;
     }
 
@@ -60,5 +57,5 @@ export const useWorkflowYamlCompletionProvider = (
         completionProviderDisposableRef.current = null;
       }
     };
-  }, [completionProvider, editor]);
+  }, [completionProvider, editor, computed]);
 };
