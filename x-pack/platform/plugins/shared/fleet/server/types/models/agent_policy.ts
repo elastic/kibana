@@ -242,6 +242,7 @@ export const GetAutoUpgradeAgentsStatusResponseSchema = schema.object({
       version: schema.string(),
       agents: schema.number(),
       failedUpgradeAgents: schema.number(),
+      failedUpgradeActionIds: schema.maybe(schema.arrayOf(schema.string())),
     })
   ),
   totalAgents: schema.number(),
