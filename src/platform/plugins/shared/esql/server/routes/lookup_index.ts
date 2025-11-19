@@ -14,6 +14,7 @@ import {
   LOOKUP_INDEX_PRIVILEGES_ROUTE,
   LOOKUP_INDEX_RECREATE_ROUTE,
   LOOKUP_INDEX_UPDATE_ROUTE,
+  LOOKUP_INDEX_UPDATE_MAPPINGS_ROUTE,
 } from '@kbn/esql-types';
 
 export const registerLookupIndexRoutes = (
@@ -196,7 +197,7 @@ export const registerLookupIndexRoutes = (
 
   router.put(
     {
-      path: `/internal/esql/lookup_index/{indexName}/mappings`,
+      path: `${LOOKUP_INDEX_UPDATE_MAPPINGS_ROUTE}/{indexName}`,
       security: {
         authz: {
           enabled: false,

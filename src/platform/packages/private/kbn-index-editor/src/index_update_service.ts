@@ -53,6 +53,7 @@ import {
   LOOKUP_INDEX_CREATE_ROUTE,
   LOOKUP_INDEX_PRIVILEGES_ROUTE,
   LOOKUP_INDEX_RECREATE_ROUTE,
+  LOOKUP_INDEX_UPDATE_MAPPINGS_ROUTE,
   LOOKUP_INDEX_UPDATE_ROUTE,
   type IndicesAutocompleteResult,
 } from '@kbn/esql-types';
@@ -1030,7 +1031,7 @@ export class IndexUpdateService {
 
     try {
       await this.http.put(
-        `/internal/esql/lookup_index/${encodeURIComponent(this.getIndexName()!)}/mappings`,
+        `${LOOKUP_INDEX_UPDATE_MAPPINGS_ROUTE}/${encodeURIComponent(this.getIndexName()!)}`,
         {
           body,
         }
