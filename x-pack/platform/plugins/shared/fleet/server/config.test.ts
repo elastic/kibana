@@ -142,12 +142,12 @@ describe('Config schema', () => {
     }).not.toThrow();
   });
 
-  it('should allow to specify fleetPolicyRevisionCleanup configuration', () => {
+  it('should allow to specify fleetPolicyRevisionsCleanup configuration', () => {
     expect(() => {
       config.schema.validate({
-        fleetPolicyRevisionCleanup: {
+        fleetPolicyRevisionsCleanup: {
           max_revisions: 20,
-          frequency: '2h',
+          interval: '2h',
           max_policies_per_run: 50,
         },
       });
