@@ -20,6 +20,7 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { replace } from '../../../shared/links/url_helpers';
 import { SearchBar } from '../../../shared/search_bar/search_bar';
 import { ServiceIcons } from '../../../shared/service_icons';
+import { ServiceSloBadge } from '../../../shared/service_slo_badge';
 import { ApmMainTemplate } from '../apm_main_template';
 import { AnalyzeDataButton } from './analyze_data_button';
 import type { Tab } from './use_tabs';
@@ -89,6 +90,7 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
                     <h1 data-test-subj="apmMainTemplateHeaderServiceName">{serviceName}</h1>
                   </EuiTitle>
                 </EuiFlexItem>
+
                 <EuiFlexItem grow={false}>
                   <ServiceIcons
                     serviceName={serviceName}
@@ -96,6 +98,9 @@ function TemplateWithContext({ title, children, selectedTab, searchBarOptions }:
                     start={start}
                     end={end}
                   />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <ServiceSloBadge serviceName={serviceName} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

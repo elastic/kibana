@@ -912,6 +912,42 @@ const serviceAlertsRoute = createApmServerRoute({
   },
 });
 
+const serviceSlosRoute = createApmServerRoute({
+  endpoint: 'GET /internal/apm/services/{serviceName}/slos_count',
+  params: t.type({
+    path: t.type({
+      serviceName: t.string,
+    }),
+  }),
+  security: { authz: { requiredPrivileges: ['apm'] } },
+  handler: async (resources): Promise<{ serviceName: string; slosCount: number }> => {
+    const { params, request, logger, plugins } = resources;
+    const { serviceName } = params.path;
+
+    const sloPluginStart = await plugins.slo?.start();
+    const sloClient = sloPluginStart
+      ? await sloPluginStart.getSloClientWithRequest(request)
+      : undefined;
+
+    if (!sloClient) {
+      return { serviceName, slosCount: 0 };
+    }
+
+    try {
+      const result = await sloClient.findSLOs({
+        kqlQuery: `service.name: "${serviceName}" AND (status:"VIOLATED" OR status:"DEGRADING")`,
+        page: '1',
+        perPage: '1',
+      });
+
+      return { serviceName, slosCount: result.total };
+    } catch (error) {
+      logger.debug(`Failed to fetch SLOs for service ${serviceName}: ${error}`);
+      return { serviceName, slosCount: 0 };
+    }
+  },
+});
+
 export const serviceRouteRepository = {
   ...servicesRoute,
   ...servicesDetailedStatisticsRoute,
@@ -930,4 +966,5 @@ export const serviceRouteRepository = {
   ...serviceDependenciesBreakdownRoute,
   ...serviceAnomalyChartsRoute,
   ...serviceAlertsRoute,
+  ...serviceSlosRoute,
 };
