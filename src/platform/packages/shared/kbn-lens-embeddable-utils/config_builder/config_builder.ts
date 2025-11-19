@@ -40,7 +40,7 @@ import { isLensLegacyFormat } from './utils';
 const compatibilityMap: Record<string, string> = {
   lnsMetric: 'metric',
   lnsLegacyMetric: 'legacy_metric',
-  lnsXy: 'xy',
+  lnsXY: 'xy',
   lnsGauge: 'gauge',
 };
 
@@ -53,6 +53,29 @@ type ChartTypeLike =
   | Pick<LensApiState, 'type'>
   | { visualizationType: null | undefined }
   | undefined;
+
+const apiConvertersByChart = {
+  metric: { fromAPItoLensState, fromLensStateToAPI },
+  legacy_metric: {
+    fromAPItoLensState: fromLegacyMetricAPItoLensState,
+    fromLensStateToAPI: fromLegacyMetricLensStateToAPI,
+  },
+  xy: {
+    fromAPItoLensState: fromXYAPIToLensState,
+    fromLensStateToAPI: fromXYLensStateToAPI,
+  },
+  gauge: {
+    fromAPItoLensState: fromGaugeAPItoLensState,
+    fromLensStateToAPI: fromGaugeLensStateToAPI,
+  },
+} as const;
+
+export const isSOChartTYpeSupported = (chartType?: string | null): boolean =>
+  Boolean(
+    chartType &&
+      chartType in compatibilityMap &&
+      compatibilityMap[chartType] in apiConvertersByChart
+  );
 
 export class LensConfigBuilder {
   private charts = {
@@ -69,21 +92,7 @@ export class LensConfigBuilder {
     table: buildTable,
   };
 
-  private apiConvertersByChart = {
-    metric: { fromAPItoLensState, fromLensStateToAPI },
-    legacy_metric: {
-      fromAPItoLensState: fromLegacyMetricAPItoLensState,
-      fromLensStateToAPI: fromLegacyMetricLensStateToAPI,
-    },
-    xy: {
-      fromAPItoLensState: fromXYAPIToLensState,
-      fromLensStateToAPI: fromXYLensStateToAPI,
-    },
-    gauge: {
-      fromAPItoLensState: fromGaugeAPItoLensState,
-      fromLensStateToAPI: fromGaugeLensStateToAPI,
-    },
-  } as const;
+  private apiConvertersByChart = apiConvertersByChart;
   private dataViewsAPI: DataViewsCommon | undefined;
   private enableAPITransforms: boolean;
 
@@ -167,9 +176,12 @@ export class LensConfigBuilder {
     const attributes = converter.fromAPItoLensState(config as any); // handle type mismatches
 
     return {
+      // @TODO investigate why it complains about missing type
+      // type: 'lens',
       ...attributes,
       state: {
         ...attributes.state,
+        query: { language: 'kuery', query: '' },
         ...filtersAndQueryToLensState(config),
       },
     };
@@ -180,7 +192,7 @@ export class LensConfigBuilder {
     const type = compatibilityMap[visType];
 
     if (!type || !(type in this.apiConvertersByChart)) {
-      throw new Error(`No API converter found for chart type: ${visType}`);
+      throw new Error(`No API converter found for chart type: ${visType} as ${type}`);
     }
     const converter = this.apiConvertersByChart[type as keyof typeof this.apiConvertersByChart];
     return {
