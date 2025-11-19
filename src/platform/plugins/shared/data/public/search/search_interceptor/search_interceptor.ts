@@ -445,20 +445,14 @@ export class SearchInterceptor {
    * @throws `AbortError` | `ErrorLike`
    */
   private runSearch(
-    request: IKibanaSearchRequest,
+    { params, ...request }: IKibanaSearchRequest,
     options?: ISearchOptions
   ): Promise<IKibanaSearchResponse> {
     const { abortSignal } = options || {};
 
-    const requestHash = request.params
-      ? createRequestHashForBackgroundSearches(request.params)
-      : undefined;
+    const requestHash = params ? createRequestHashForBackgroundSearches(params) : undefined;
 
     const { executionContext, strategy, ...searchOptions } = this.getSerializableOptions(options);
-
-    if (request.id) {
-      request = optimizeParamsForPoll(request, strategy);
-    }
 
     return this.deps.http
       .post<IKibanaSearchResponse | ErrorResponseBase>(
@@ -468,7 +462,7 @@ export class SearchInterceptor {
           signal: abortSignal,
           context: this.deps.executionContext.withGlobalContext(executionContext),
           body: JSON.stringify({
-            ...request,
+            ...(request.id ? request : { params, ...request }),
             ...searchOptions,
             requestHash,
             stream:
@@ -709,30 +703,5 @@ export class SearchInterceptor {
     }
   }
 }
-
-/**
- * Polling requests do not need to include all the info required for initial search requests.
- */
-const optimizeParamsForPoll = (
-  request: IKibanaSearchRequest,
-  strategy: string | undefined
-): IKibanaSearchRequest => {
-  if (!request.params) return request;
-
-  let optimizedParams = request.params;
-
-  if (strategy === ESQL_ASYNC_SEARCH_STRATEGY) {
-    const { query, filter: _filter, ...paramsWithoutQueryAndFilter } = request.params;
-    optimizedParams = paramsWithoutQueryAndFilter;
-  } else {
-    const { body, ...paramsWithoutBody } = request.params;
-    optimizedParams = paramsWithoutBody;
-  }
-
-  return {
-    ...request,
-    params: optimizedParams,
-  };
-};
 
 export type ISearchInterceptor = PublicMethodsOf<SearchInterceptor>;
