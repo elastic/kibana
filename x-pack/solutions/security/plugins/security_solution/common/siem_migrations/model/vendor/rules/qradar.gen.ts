@@ -47,3 +47,28 @@ export const QRadarMitreMappingRule = z.object({
  */
 export type QRadarMitreMappingsData = z.infer<typeof QRadarMitreMappingsData>;
 export const QRadarMitreMappingsData = z.object({}).catchall(QRadarMitreMappingRule);
+
+/**
+ * Request to enhance rules with QRadar MITRE mappings
+ */
+export type QRadarMitreRequest = z.infer<typeof QRadarMitreRequest>;
+export const QRadarMitreRequest = z.object({
+  /**
+   * The vendor identifier
+   */
+  vendor: z.literal('qradar'),
+  /**
+   * The type of enhancement data
+   */
+  enhancement_type: z.literal('mitre'),
+  /**
+   * QRadar MITRE mappings data keyed by rule name
+   */
+  data: QRadarMitreMappingsData,
+});
+
+/**
+ * Union type for QRadar rule enhancements
+ */
+export type EnhanceQRadarRule = z.infer<typeof EnhanceQRadarRule>;
+export const EnhanceQRadarRule = QRadarMitreRequest;

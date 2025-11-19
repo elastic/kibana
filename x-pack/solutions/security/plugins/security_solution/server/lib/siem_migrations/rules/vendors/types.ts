@@ -20,8 +20,6 @@ export interface VendorProcessorContext {
   logger: Logger;
 }
 
-type GenericGetProcessor<GetProcessorType extends Function> = (type: string) => GetProcessorType;
-
 /**
  * Base interface for vendor-specific processors
  */

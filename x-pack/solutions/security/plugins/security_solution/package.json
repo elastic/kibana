@@ -35,5 +35,8 @@
     "openapi:bundle:timeline": "node scripts/openapi/bundle_timeline",
     "openapi:bundle:entity-analytics": "node scripts/openapi/bundle_entity_analytics",
     "openapi:bundle:endpoint-management": "node scripts/openapi/bundle_endpoint_management"
+  },
+  "devDependencies": {
+    "baseline-browser-mapping": "^2.8.29"
   }
 }

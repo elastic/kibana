@@ -10,12 +10,12 @@ import { getMockQRadarXml } from './mock/data';
 
 const RULE_NAME = 'BB:CategoryDefinition: Authentication Success';
 
-const { mockQradarXml: mockQradarXML, mockRuleDataXml } = getMockQRadarXml(RULE_NAME);
+const { mockQradarXml, mockRuleDataBase64s: _, mockRuleDataXmls } = getMockQRadarXml([RULE_NAME]);
 
 describe('QradarRulesXmlParser', () => {
   describe('getRules', () => {
     it('should correctly parse a valid custom rule from the provided XML', async () => {
-      const parser = new QradarRulesXmlParser(mockQradarXML);
+      const parser = new QradarRulesXmlParser(mockQradarXml);
       const rules = await parser.getRules();
 
       expect(rules).toHaveLength(1);
@@ -24,7 +24,7 @@ describe('QradarRulesXmlParser', () => {
         'Edit this BB to include all events that indicate successful attempts to access the network.'
       );
       expect(rules[0].rule_type).toBe('building_block');
-      expect(rules[0].rule_data).toBe(mockRuleDataXml);
+      expect(rules[0].rule_data).toBe(mockRuleDataXmls[0]);
     });
 
     it('should return an empty array if no custom rules are found', async () => {
@@ -65,7 +65,7 @@ describe('QradarRulesXmlParser', () => {
 
   describe('getResources', () => {
     it('should return an empty array for sensordevicetype when not present', async () => {
-      const parser = new QradarRulesXmlParser(mockQradarXML);
+      const parser = new QradarRulesXmlParser(mockQradarXml);
       const resources = await parser.getResources();
       expect(resources.sensordevicetype).toEqual([]);
     });
@@ -117,7 +117,7 @@ describe('QradarRulesXmlParser', () => {
 
     it('should return undefined if severity is not present', async () => {
       const parser = new QradarRulesXmlParser('');
-      const severity = await parser.parseSeverityFromRuleData(mockRuleDataXml);
+      const severity = await parser.parseSeverityFromRuleData(mockRuleDataXmls[0]);
       expect(severity).toBeUndefined();
     });
   });

@@ -31,6 +31,7 @@ import {
 } from '../../rule_migration.gen';
 import { RelatedIntegration } from '../../../../api/detection_engine/model/rule_schema/common_attributes.gen';
 import { NonEmptyString } from '../../../../api/model/primitives.gen';
+import { EnhanceQRadarRule } from '../../vendor/rules/qradar.gen';
 import {
   LangSmithOptions,
   SiemMigrationResourceData,
@@ -38,54 +39,6 @@ import {
   SiemMigrationResource,
   SiemMigrationResourceBase,
 } from '../../common.gen';
-import { QRadarMitreMappingsData } from '../../vendor/rules/qradar.gen';
-
-/**
- * Request to enhance rules with QRadar MITRE mappings
- */
-export type EnhanceRuleMigrationQRadarMitreRequest = z.infer<
-  typeof EnhanceRuleMigrationQRadarMitreRequest
->;
-export const EnhanceRuleMigrationQRadarMitreRequest = z.object({
-  /**
-   * The vendor identifier
-   */
-  vendor: z.literal('qradar'),
-  /**
-   * The type of enhancement data
-   */
-  enhancement_type: z.literal('mitre'),
-  /**
-   * QRadar MITRE mappings data keyed by rule name
-   */
-  data: QRadarMitreMappingsData,
-});
-
-/**
- * Response from rule enhancement operation
- */
-export type EnhanceRuleMigrationResponse = z.infer<typeof EnhanceRuleMigrationResponse>;
-export const EnhanceRuleMigrationResponse = z.object({
-  /**
-   * Number of rules successfully updated
-   */
-  updated: z.number().int(),
-  /**
-   * Errors encountered during enhancement
-   */
-  errors: z.array(
-    z.object({
-      /**
-       * The rule name that failed to update
-       */
-      rule_name: z.string(),
-      /**
-       * Error message
-       */
-      message: z.string(),
-    })
-  ),
-});
 
 export type CreateQRadarRuleMigrationRulesRequestParams = z.infer<
   typeof CreateQRadarRuleMigrationRulesRequestParams
@@ -152,23 +105,6 @@ export const DeleteRuleMigrationRequestParams = z.object({
 export type DeleteRuleMigrationRequestParamsInput = z.input<
   typeof DeleteRuleMigrationRequestParams
 >;
-
-export type EnhanceRuleMigrationsRequestParams = z.infer<typeof EnhanceRuleMigrationsRequestParams>;
-export const EnhanceRuleMigrationsRequestParams = z.object({
-  migration_id: NonEmptyString,
-});
-export type EnhanceRuleMigrationsRequestParamsInput = z.input<
-  typeof EnhanceRuleMigrationsRequestParams
->;
-
-export type EnhanceRuleMigrationsRequestBody = z.infer<typeof EnhanceRuleMigrationsRequestBody>;
-export const EnhanceRuleMigrationsRequestBody = EnhanceRuleMigrationQRadarMitreRequest;
-export type EnhanceRuleMigrationsRequestBodyInput = z.input<
-  typeof EnhanceRuleMigrationsRequestBody
->;
-
-export type EnhanceRuleMigrationsResponse = z.infer<typeof EnhanceRuleMigrationsResponse>;
-export const EnhanceRuleMigrationsResponse = EnhanceRuleMigrationResponse;
 
 export type GetAllStatsRuleMigrationResponse = z.infer<typeof GetAllStatsRuleMigrationResponse>;
 export const GetAllStatsRuleMigrationResponse = z.array(RuleMigrationTaskStats);
@@ -361,6 +297,35 @@ export const InstallMigrationRulesResponse = z.object({
    * Indicates the number of successfully installed migration rules.
    */
   installed: z.number(),
+});
+
+export type RuleMigrationEnhanceRuleRequestParams = z.infer<
+  typeof RuleMigrationEnhanceRuleRequestParams
+>;
+export const RuleMigrationEnhanceRuleRequestParams = z.object({
+  migration_id: NonEmptyString,
+});
+export type RuleMigrationEnhanceRuleRequestParamsInput = z.input<
+  typeof RuleMigrationEnhanceRuleRequestParams
+>;
+
+export type RuleMigrationEnhanceRuleRequestBody = z.infer<
+  typeof RuleMigrationEnhanceRuleRequestBody
+>;
+export const RuleMigrationEnhanceRuleRequestBody = EnhanceQRadarRule;
+export type RuleMigrationEnhanceRuleRequestBodyInput = z.input<
+  typeof RuleMigrationEnhanceRuleRequestBody
+>;
+
+/**
+ * Response from rule enhancement operation
+ */
+export type RuleMigrationEnhanceRuleResponse = z.infer<typeof RuleMigrationEnhanceRuleResponse>;
+export const RuleMigrationEnhanceRuleResponse = z.object({
+  /**
+   * whether the update was applied successfully
+   */
+  updated: z.boolean(),
 });
 
 export type StartRuleMigrationRequestParams = z.infer<typeof StartRuleMigrationRequestParams>;

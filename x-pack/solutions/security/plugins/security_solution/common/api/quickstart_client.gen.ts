@@ -453,9 +453,6 @@ import type {
   CreateRuleMigrationRulesRequestParamsInput,
   CreateRuleMigrationRulesRequestBodyInput,
   DeleteRuleMigrationRequestParamsInput,
-  EnhanceRuleMigrationsRequestParamsInput,
-  EnhanceRuleMigrationsRequestBodyInput,
-  EnhanceRuleMigrationsResponse,
   GetAllStatsRuleMigrationResponse,
   GetRuleMigrationRequestParamsInput,
   GetRuleMigrationResponse,
@@ -479,6 +476,9 @@ import type {
   InstallMigrationRulesRequestParamsInput,
   InstallMigrationRulesRequestBodyInput,
   InstallMigrationRulesResponse,
+  RuleMigrationEnhanceRuleRequestParamsInput,
+  RuleMigrationEnhanceRuleRequestBodyInput,
+  RuleMigrationEnhanceRuleResponse,
   StartRuleMigrationRequestParamsInput,
   StartRuleMigrationRequestBodyInput,
   StartRuleMigrationResponse,
@@ -1427,25 +1427,6 @@ The entity will be immediately deleted from the latest index.  It will remain av
         },
         method: 'POST',
         body: props.attachment,
-      })
-      .catch(catchAxiosErrorFormatAndThrow);
-  }
-  /**
-   * Enhances existing migration rules with additional vendor-specific data such as MITRE mappings
-   */
-  async enhanceRuleMigrations(props: EnhanceRuleMigrationsProps) {
-    this.log.info(`${new Date().toISOString()} Calling API EnhanceRuleMigrations`);
-    return this.kbnClient
-      .request<EnhanceRuleMigrationsResponse>({
-        path: replaceParams(
-          '/internal/siem_migrations/rules/{migration_id}/rules/enhance',
-          props.params
-        ),
-        headers: {
-          [ELASTIC_HTTP_VERSION_HEADER]: '1',
-        },
-        method: 'POST',
-        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2722,6 +2703,25 @@ The difference between the `id` and `rule_id` is that the `id` is a unique rule 
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
+  /**
+   * Enhances existing migration rules with additional vendor-specific data such as MITRE mappings
+   */
+  async ruleMigrationEnhanceRule(props: RuleMigrationEnhanceRuleProps) {
+    this.log.info(`${new Date().toISOString()} Calling API RuleMigrationEnhanceRule`);
+    return this.kbnClient
+      .request<RuleMigrationEnhanceRuleResponse>({
+        path: replaceParams(
+          '/internal/siem_migrations/rules/{migration_id}/rules/enhance',
+          props.params
+        ),
+        headers: {
+          [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        },
+        method: 'POST',
+        body: props.body,
+      })
+      .catch(catchAxiosErrorFormatAndThrow);
+  }
   async rulePreview(props: RulePreviewProps) {
     this.log.info(`${new Date().toISOString()} Calling API RulePreview`);
     return this.kbnClient
@@ -3364,10 +3364,6 @@ export interface EndpointUnisolateActionProps {
 export interface EndpointUploadActionProps {
   attachment: FormData;
 }
-export interface EnhanceRuleMigrationsProps {
-  params: EnhanceRuleMigrationsRequestParamsInput;
-  body: EnhanceRuleMigrationsRequestBodyInput;
-}
 export interface EntityDetailsHighlightsProps {
   body: EntityDetailsHighlightsRequestBodyInput;
 }
@@ -3549,6 +3545,10 @@ export interface ReadRuleProps {
 }
 export interface ResolveTimelineProps {
   query: ResolveTimelineRequestQueryInput;
+}
+export interface RuleMigrationEnhanceRuleProps {
+  params: RuleMigrationEnhanceRuleRequestParamsInput;
+  body: RuleMigrationEnhanceRuleRequestBodyInput;
 }
 export interface RulePreviewProps {
   query: RulePreviewRequestQueryInput;

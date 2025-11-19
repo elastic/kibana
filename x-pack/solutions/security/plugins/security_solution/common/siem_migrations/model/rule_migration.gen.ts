@@ -132,6 +132,10 @@ export const ElasticRule = z.object({
    * The Elastic rule id installed as a result.
    */
   id: NonEmptyString.optional(),
+  /**
+   * The MITRE ATT&CK threat information for this rule.
+   */
+  threat: z.array(Threat).optional(),
 });
 
 /**

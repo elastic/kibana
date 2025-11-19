@@ -64,3 +64,29 @@ components:
       description: QRadar MITRE mappings data keyed by rule name
       additionalProperties:
         $ref: '#/components/schemas/QRadarMitreMappingRule'
+
+    QRadarMitreRequest:
+      type: object
+      description: Request to enhance rules with QRadar MITRE mappings
+      required:
+        - vendor
+        - enhancement_type
+        - data
+      properties:
+        vendor:
+          type: string
+          enum:
+            - qradar
+          description: The vendor identifier
+        enhancement_type:
+          type: string
+          enum:
+            - mitre
+          description: The type of enhancement data
+        data:
+          $ref: '#/components/schemas/QRadarMitreMappingsData'
+          description: QRadar MITRE mappings data keyed by rule name
+
+    EnhanceQRadarRule:
+      $ref: '#/components/schemas/QRadarMitreRequest'
+      description: Union type for QRadar rule enhancements

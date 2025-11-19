@@ -8,19 +8,16 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import { SIEM_RULE_MIGRATION_RULES_ENHANCE_PATH } from '../../../../../../common/siem_migrations/constants';
-import type {
-  EnhanceRuleMigrationResponse,
-  EnhanceRuleMigrationQRadarMitreRequest,
+import type { RuleMigrationEnhanceRuleResponse } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import {
+  RuleMigrationEnhanceRuleRequestParams,
+  RuleMigrationEnhanceRuleRequestBody,
 } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import { authz } from '../../../common/api/util/authz';
 import { SiemMigrationAuditLogger } from '../../../common/api/util/audit';
 import { withLicense } from '../../../common/api/util/with_license';
 import { withExistingMigration } from '../../../common/api/util/with_existing_migration_id';
-import {
-  EnhanceRuleMigrationsRequestBody,
-  EnhanceRuleMigrationsRequestParams,
-} from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import { getVendorProcessor } from '../../vendors/get_vendor_processor';
 
 export const registerSiemRuleMigrationsEnhanceRoute = (
@@ -38,20 +35,20 @@ export const registerSiemRuleMigrationsEnhanceRoute = (
         version: '1',
         validate: {
           request: {
-            params: buildRouteValidationWithZod(EnhanceRuleMigrationsRequestParams),
-            body: buildRouteValidationWithZod(EnhanceRuleMigrationsRequestBody),
+            params: buildRouteValidationWithZod(RuleMigrationEnhanceRuleRequestParams),
+            body: buildRouteValidationWithZod(RuleMigrationEnhanceRuleRequestBody),
           },
         },
       },
       withLicense(
         withExistingMigration(
-          async (context, req, res): Promise<IKibanaResponse<EnhanceRuleMigrationResponse>> => {
+          async (context, req, res): Promise<IKibanaResponse<RuleMigrationEnhanceRuleResponse>> => {
             const { migration_id: migrationId } = req.params;
             const {
               vendor,
               enhancement_type: enhancementType,
               data,
-            } = req.body as EnhanceRuleMigrationQRadarMitreRequest;
+            } = req.body as RuleMigrationEnhanceRuleRequestBody;
 
             const siemMigrationAuditLogger = new SiemMigrationAuditLogger(
               context.securitySolution,

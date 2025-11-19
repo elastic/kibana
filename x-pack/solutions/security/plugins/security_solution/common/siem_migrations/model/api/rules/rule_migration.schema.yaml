@@ -386,8 +386,8 @@ paths:
 
   /internal/siem_migrations/rules/{migration_id}/rules/enhance:
     post:
-      summary: Enhance rule migrations with vendor-specific data
-      operationId: EnhanceRuleMigrations
+      summary: Enhance Rules in a rule migrations with any additional data.
+      operationId: RuleMigrationEnhanceRule
       x-codegen-enabled: true
       x-internal: true
       description: Enhances existing migration rules with additional vendor-specific data such as MITRE mappings
@@ -405,15 +405,23 @@ paths:
         content:
           application/json:
             schema:
-              oneOf:
-                - $ref: '#/components/schemas/EnhanceRuleMigrationQRadarMitreRequest'
+              ## When more vendors/enhancement types are added, oneOf should be used here
+              ## as we want request to be the union of all possible vendor/enhancement types
+              $ref: '../../vendor/rules/qradar.schema.yaml#/components/schemas/EnhanceQRadarRule'
       responses:
         200:
           description: Indicates rules have been enhanced successfully.
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/EnhanceRuleMigrationResponse'
+                type: object
+                description: Response from rule enhancement operation
+                required:
+                  - updated
+                properties:
+                  updated:
+                    type: boolean
+                    description: whether the update was applied successfully
 
   /internal/siem_migrations/rules/{migration_id}/install:
     post:
@@ -826,54 +834,4 @@ paths:
                       items:
                         type: string
                       description: The index privileges level missing
-
-components:
-  schemas:
-    EnhanceRuleMigrationQRadarMitreRequest:
-      type: object
-      description: Request to enhance rules with QRadar MITRE mappings
-      required:
-        - vendor
-        - enhancement_type
-        - data
-      properties:
-        vendor:
-          type: string
-          enum:
-            - qradar
-          description: The vendor identifier
-        enhancement_type:
-          type: string
-          enum:
-            - mitre
-          description: The type of enhancement data
-        data:
-          $ref: '../../vendor/rules/qradar.schema.yaml#/components/schemas/QRadarMitreMappingsData'
-          description: QRadar MITRE mappings data keyed by rule name
-
-    EnhanceRuleMigrationResponse:
-      type: object
-      description: Response from rule enhancement operation
-      required:
-        - updated
-        - errors
-      properties:
-        updated:
-          type: integer
-          description: Number of rules successfully updated
-        errors:
-          type: array
-          description: Errors encountered during enhancement
-          items:
-            type: object
-            required:
-              - rule_name
-              - message
-            properties:
-              rule_name:
-                type: string
-                description: The rule name that failed to update
-              message:
-                type: string
-                description: Error message
 

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { EnhanceRuleMigrationsRequestBody } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
+import type { RuleMigrationEnhanceRuleRequestBody } from '../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { RuleMigrationRule } from '../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { QRadarMitreMappingsData } from '../../../../../../common/siem_migrations/model/vendor/rules/qradar.gen';
 import type { Threat } from '../../../../../../common/api/detection_engine';
 import type { VendorProcessor, VendorProcessorContext } from '../types';
 
-type QRadarProcessors = 'rules' | EnhanceRuleMigrationsRequestBody['enhancement_type'];
+type QRadarProcessors = 'rules' | RuleMigrationEnhanceRuleRequestBody['enhancement_type'];
 
 type QRadarMitreProcesser = (data: QRadarMitreMappingsData) => Promise<RuleMigrationRule[]>;
 
