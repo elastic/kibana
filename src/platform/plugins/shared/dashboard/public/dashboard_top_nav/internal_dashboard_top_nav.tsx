@@ -30,7 +30,8 @@ import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
 import { MountPointPortal } from '@kbn/react-kibana-mount';
 
-import { DASHBOARD_APP_ID, UI_SETTINGS } from '../../common/constants';
+import { DASHBOARD_APP_ID } from '../../common/page_bundle_constants';
+import { UI_SETTINGS } from '../../common/constants';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import {
   dashboardManagedBadge,

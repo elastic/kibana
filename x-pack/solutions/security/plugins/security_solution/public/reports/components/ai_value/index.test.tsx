@@ -7,6 +7,10 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import {
+  SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES,
+  SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE,
+} from '@kbn/management-settings-ids';
 import { AIValueMetrics } from '.';
 import { useKibana } from '../../../common/lib/kibana';
 import { useValueMetrics } from '../../hooks/use_value_metrics';
@@ -14,10 +18,6 @@ import { ExecutiveSummary } from './executive_summary';
 import { AlertProcessing } from './alert_processing';
 import { CostSavingsTrend } from './cost_savings_trend';
 import { ValueReportSettings } from './value_report_settings';
-import {
-  DEFAULT_VALUE_REPORT_MINUTES,
-  DEFAULT_VALUE_REPORT_RATE,
-} from '../../../../common/constants';
 import type { StartServices } from '../../../types';
 
 // Mock dependencies
@@ -80,8 +80,8 @@ describe('AIValueMetrics', () => {
       services: {
         uiSettings: {
           get: jest.fn((key: string) => {
-            if (key === DEFAULT_VALUE_REPORT_MINUTES) return 10;
-            if (key === DEFAULT_VALUE_REPORT_RATE) return 50;
+            if (key === SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES) return 10;
+            if (key === SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE) return 50;
             return null;
           }),
         },
@@ -202,8 +202,8 @@ describe('AIValueMetrics', () => {
         uiSettings: {
           // @ts-ignore
           get: jest.fn((key: string) => {
-            if (key === DEFAULT_VALUE_REPORT_MINUTES) return 5;
-            if (key === DEFAULT_VALUE_REPORT_RATE) return 75;
+            if (key === SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_MINUTES) return 5;
+            if (key === SECURITY_SOLUTION_DEFAULT_VALUE_REPORT_RATE) return 75;
             return null;
           }),
         },
