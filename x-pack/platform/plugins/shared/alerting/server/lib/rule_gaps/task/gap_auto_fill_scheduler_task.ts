@@ -38,6 +38,9 @@ import {
 } from './utils';
 import { cleanupStuckInProgressGaps } from '../update/cleanup_stuck_in_progress_gaps';
 
+// Circuit breaker to prevent infinite pagination loops when fetching gaps
+const GAP_FETCH_MAX_ITERATIONS = 1000;
+
 function addChunkResultsToAggregation(
   aggregatedByRule: Map<string, AggregatedByRuleEntry>,
   chunkResults: Array<{
@@ -267,8 +270,19 @@ export function registerGapAutoFillSchedulerTask({
                 let pitId: string | undefined;
 
                 const gapsPerPage = DEFAULT_GAPS_PER_PAGE;
+                let gapFetchIterationCount = 0;
 
                 while (true) {
+                  if (gapFetchIterationCount >= GAP_FETCH_MAX_ITERATIONS) {
+                    logger.warn(
+                      loggerMesage(
+                        `Circuit breaker triggered: reached maximum number of gap fetch iterations`
+                      )
+                    );
+                    break;
+                  }
+                  gapFetchIterationCount++;
+
                   if (
                     await handleCancellation({
                       abortController,

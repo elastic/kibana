@@ -187,9 +187,7 @@ export class BackfillClient {
 
     // Bulk create the saved objects in chunks of 10 to manage resource usage
     const chunkSize = 10;
-    const allSavedObjects: Array<SavedObject<AdHocRunSO>> = [];
 
-    const totalStartMs = Date.now();
     const chunks: Array<{
       startIndex: number;
       items: Array<SavedObjectsBulkCreateObject<AdHocRunSO>>;
@@ -198,48 +196,72 @@ export class BackfillClient {
       items,
     }));
 
+    interface BulkCreateError {
+      ruleId: string;
+      ruleName: string;
+      bulkCreateError: Error;
+    }
+
     // Pre-size result array to preserve original order regardless of parallel completion order
-    const orderedResults: Array<SavedObject<AdHocRunSO>> = new Array(adHocSOsToCreate.length);
+    const orderedResults: Array<SavedObject<AdHocRunSO> | BulkCreateError> = new Array(
+      adHocSOsToCreate.length
+    );
 
     const chunkConcurrency = 10;
     await pMap(
       chunks,
       async ({ startIndex, items }, idx) => {
-        const chunkStartMs = Date.now();
-        const response = await unsecuredSavedObjectsClient.bulkCreate<AdHocRunSO>(items);
-        const chunkEndMs = Date.now();
-        const elapsedMs = chunkEndMs - chunkStartMs;
+        try {
+          const response = await unsecuredSavedObjectsClient.bulkCreate<AdHocRunSO>(items);
 
-        // Place results in the correct positions
-        response.saved_objects.forEach((so, j) => {
-          orderedResults[startIndex + j] = so;
-        });
+          // Place results in the correct positions
+          response.saved_objects.forEach((so, j) => {
+            orderedResults[startIndex + j] = so;
+          });
 
-        // Logging per-chunk and per-SO average timings
-        this.logger.info(
-          `backfillClient.bulkQueue: created ${items.length} SOs in ${elapsedMs}ms (chunk ${
-            idx + 1
-          }/${chunks.length}, range ${startIndex}-${startIndex + items.length - 1}, avg ~${(
-            elapsedMs / items.length
-          ).toFixed(2)}ms/SO)`
-        );
+          this.logger.debug(
+            `backfillClient.bulkQueue: created ${items.length} SOs(chunk ${idx + 1}/${
+              chunks.length
+            })`
+          );
+        } catch (error) {
+          items.forEach((item, i) => {
+            const ruleId = item.references?.[0]?.id;
+            if (!ruleId) {
+              return;
+            }
+            orderedResults[startIndex + i] = {
+              ruleId,
+              ruleName: item.attributes.rule.name,
+              bulkCreateError: new Error(error.message),
+            };
+            auditLogger?.log(
+              adHocRunAuditEvent({
+                action: AdHocRunAuditAction.CREATE,
+                error: new Error(error.message),
+              })
+            );
+          });
+        }
       },
       { concurrency: chunkConcurrency }
     );
 
-    const totalElapsedMs = Date.now() - totalStartMs;
     this.logger.info(
-      `backfillClient.bulkQueue: created ${adHocSOsToCreate.length} SOs across ${
-        chunks.length
-      } chunks in ${totalElapsedMs}ms (avg ~${(totalElapsedMs / adHocSOsToCreate.length).toFixed(
-        2
-      )}ms/SO)`
+      `backfillClient.bulkQueue: created ${adHocSOsToCreate.length} SOs across ${chunks.length} chunks `
     );
 
-    allSavedObjects.push(...orderedResults);
+    const isBulkCreateError = (
+      result: SavedObject<AdHocRunSO> | BulkCreateError
+    ): result is BulkCreateError => {
+      return (result as BulkCreateError).bulkCreateError !== undefined;
+    };
 
-    const transformedResponse: ScheduleBackfillResults = allSavedObjects.map(
-      (so: SavedObject<AdHocRunSO>, index: number) => {
+    const transformedResponse: ScheduleBackfillResults = orderedResults.map(
+      (so: SavedObject<AdHocRunSO> | BulkCreateError, index: number) => {
+        if (isBulkCreateError(so)) {
+          return createBackfillError(so.bulkCreateError.message, so.ruleId, so.ruleName);
+        }
         if (so.error) {
           auditLogger?.log(
             adHocRunAuditEvent({

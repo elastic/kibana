@@ -21,7 +21,7 @@ describe('transformRequest v1 - create', () => {
         gap_fill_range: '24h',
         num_retries: 3,
         max_backfills: 100,
-        scope: 'internal',
+        scope: ['internal'],
         rule_types: [
           { type: 'test-rule-type', consumer: 'test-consumer' },
           { type: 'another-rule-type', consumer: 'another-consumer' },
@@ -39,7 +39,7 @@ describe('transformRequest v1 - create', () => {
       gapFillRange: '24h',
       maxBackfills: 100,
       numRetries: 3,
-      scope: 'internal',
+      scope: ['internal'],
       ruleTypes: [
         { type: 'test-rule-type', consumer: 'test-consumer' },
         { type: 'another-rule-type', consumer: 'another-consumer' },

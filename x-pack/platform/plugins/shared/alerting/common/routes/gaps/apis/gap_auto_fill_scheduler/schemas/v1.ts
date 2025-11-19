@@ -6,14 +6,17 @@
  */
 import { schema } from '@kbn/config-schema';
 import dateMath from '@kbn/datemath';
+import { gapAutoFillSchedulerLimits } from '../../../../../constants';
+
+const { maxBackfills, numRetries } = gapAutoFillSchedulerLimits;
 
 export const gapAutoFillSchedulerBodySchema = schema.object(
   {
     id: schema.maybe(schema.string()),
     name: schema.string({ defaultValue: '' }),
     enabled: schema.boolean({ defaultValue: true }),
-    max_backfills: schema.number({ defaultValue: 1000, min: 1, max: 5000 }),
-    num_retries: schema.number({ defaultValue: 3, min: 1 }),
+    max_backfills: schema.number(maxBackfills),
+    num_retries: schema.number(numRetries),
     gap_fill_range: schema.string({ defaultValue: 'now-90d' }),
     schedule: schema.object({
       interval: schema.string(),
