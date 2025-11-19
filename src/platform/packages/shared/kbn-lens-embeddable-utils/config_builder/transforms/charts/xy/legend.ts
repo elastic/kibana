@@ -28,23 +28,48 @@ const StatsAPIToOldState = {
   distinct_count: 'distinctCount',
 } as const;
 
-function isMappedStatistic(stat: StatisticsType): stat is keyof typeof StatsAPIToOldState {
+function isAPIMappedStatistic(stat: StatisticsType): stat is keyof typeof StatsAPIToOldState {
   return stat in StatsAPIToOldState;
 }
 
 function mapStatToCamelCase(stat: StatisticsType): XYLegendValue {
-  if (isMappedStatistic(stat)) {
+  if (isAPIMappedStatistic(stat)) {
     return StatsAPIToOldState[stat];
+  }
+  return stat;
+}
+
+const StatsStateToAPI = {
+  average: 'avg',
+  lastValue: 'last_value',
+  firstValue: 'first_value',
+  lastNonNullValue: 'last_non_null_value',
+  firstNonNullValue: 'first_non_null_value',
+  currentAndLastValue: 'current_and_last_value',
+  differencePercent: 'difference_percentage',
+  stdDeviation: 'standard_deviation',
+  distinctCount: 'distinct_count',
+} as const;
+
+function isStateMappedStatistic(stat: XYLegendValue): stat is keyof typeof StatsStateToAPI {
+  return stat in StatsStateToAPI;
+}
+
+function mapStatToSnakeCase(stat: XYLegendValue): StatisticsType {
+  if (isStateMappedStatistic(stat)) {
+    return StatsStateToAPI[stat];
   }
   return stat;
 }
 
 const DEFAULT_LEGEND_POSITON = 'right';
 
-function extractAlignment(legend: XYState['legend']): {
-  verticalAlignment: 'top' | 'bottom' | undefined;
-  horizontalAlignment: 'left' | 'right' | undefined;
-} {
+function extractAlignment(legend: XYState['legend']):
+  | {
+      verticalAlignment: 'top' | 'bottom' | undefined;
+      horizontalAlignment: 'left' | 'right' | undefined;
+    }
+  | {} {
   if (legend?.inside) {
     const [verticalAlignment, horizontalAlignment] = (legend.alignment?.split('_') ?? [
       'top',
@@ -52,7 +77,7 @@ function extractAlignment(legend: XYState['legend']): {
     ]) as ['top' | 'bottom' | undefined, 'left' | 'right' | undefined];
     return { verticalAlignment, horizontalAlignment };
   }
-  return { verticalAlignment: undefined, horizontalAlignment: undefined };
+  return {};
 }
 
 function getLegendSize(
@@ -68,7 +93,7 @@ function getLegendSize(
     case 'xlarge':
       return LegendSize.EXTRA_LARGE;
     default:
-      return;
+      return LegendSize.AUTO;
   }
 }
 
@@ -78,22 +103,92 @@ export function convertLegendToStateFormat(legend: XYState['legend']): {
   const newStateLegend: XYLensState['legend'] = {
     isVisible: Boolean(legend?.visible),
     shouldTruncate: Boolean(legend?.truncate_after_lines), // 0 will be interpreted as false
-    maxLines: legend?.truncate_after_lines,
-    legendStats: (legend?.statistics ?? []).map(mapStatToCamelCase),
-    layout: legend?.statistics?.length ? LegendLayout.Table : LegendLayout.List,
+    ...(legend?.truncate_after_lines ? { maxLines: legend?.truncate_after_lines } : {}),
+    ...(legend?.statistics
+      ? { legendStats: (legend?.statistics ?? []).map(mapStatToCamelCase) }
+      : {}),
+    ...(legend?.statistics
+      ? { layout: legend?.statistics?.length ? LegendLayout.Table : LegendLayout.List }
+      : {}),
     ...extractAlignment(legend),
     ...(legend?.inside
       ? {
           position: DEFAULT_LEGEND_POSITON,
-          legendSize: undefined,
-          floatingColumns: legend?.columns,
+          ...(legend?.columns ? { floatingColumns: legend?.columns } : {}),
         }
       : {
           position: legend?.position ?? DEFAULT_LEGEND_POSITON,
-          legendSize: getLegendSize(legend?.size),
-          floatingColumns: undefined,
+          legendSize: legend?.size ? getLegendSize(legend.size) : LegendSize.AUTO,
         }),
   };
 
   return { legend: newStateLegend };
+}
+
+function getLegendSizeAPI(
+  size: XYLensState['legend']['legendSize'] | undefined
+): Pick<OutsideLegendType, 'size'> | {} {
+  switch (size) {
+    case LegendSize.SMALL:
+      return { size: 'small' };
+    case LegendSize.MEDIUM:
+      return { size: 'medium' };
+    case LegendSize.LARGE:
+      return { size: 'large' };
+    case LegendSize.EXTRA_LARGE:
+      return { size: 'xlarge' };
+    default:
+      return {};
+  }
+}
+
+// @TODO improve this check
+function isLegendInside(legend: XYLensState['legend']): boolean {
+  return (
+    legend.legendSize == null &&
+    (legend.floatingColumns != null ||
+      legend.verticalAlignment != null ||
+      legend.horizontalAlignment != null)
+  );
+}
+
+function getLegendAlignment(legend: XYLensState['legend']) {
+  if (!legend.verticalAlignment && !legend.horizontalAlignment) {
+    return {};
+  }
+  return {
+    alignment: `${legend.verticalAlignment ?? 'top'}_${legend.horizontalAlignment ?? 'right'}`,
+  };
+}
+
+function getLegendLayout(legend: XYLensState['legend']) {
+  if (isLegendInside(legend)) {
+    return {
+      inside: true,
+      ...(legend.floatingColumns ? { columns: legend.floatingColumns } : {}),
+      ...getLegendAlignment(legend),
+    };
+  }
+  return {
+    inside: false,
+    ...getLegendSizeAPI(legend.legendSize),
+    ...(legend.position ? { position: legend.position } : {}),
+  };
+}
+
+export function convertLegendToAPIFormat(
+  legend: XYLensState['legend']
+): Pick<XYState, 'legend'> | {} {
+  const legendOptions = {
+    visible: legend.isVisible,
+    ...(legend?.maxLines == null ? {} : { truncate_after_lines: legend.maxLines }),
+    ...(legend?.legendStats?.length
+      ? {
+          statistics: legend.legendStats.map(mapStatToSnakeCase),
+        }
+      : {}),
+    ...getLegendLayout(legend),
+  };
+
+  return { legend: legendOptions };
 }

@@ -8,11 +8,19 @@
  */
 
 import type {
+  FormBasedLayer,
+  TextBasedLayer,
+  XYDataLayerConfig,
+  XYLayerConfig,
+} from '@kbn/lens-common';
+import type {
   DataLayerType,
   ReferenceLineLayerType,
   AnnotationLayerType,
   LayerTypeESQL,
+  LayerTypeNoESQL,
 } from '../../../schema/charts/xy';
+import type { DataSourceStateLayer } from '../../utils';
 import {
   XY_ANNOTATION_LAYER_TYPES,
   XY_REFERENCE_LAYER_TYPES,
@@ -20,27 +28,36 @@ import {
   AVAILABLE_XY_LAYER_TYPES,
 } from './constants';
 
-export function isAPIAnnotationLayer(
-  layer: DataLayerType | ReferenceLineLayerType | AnnotationLayerType
-): layer is AnnotationLayerType {
+type XYLayer = DataLayerType | ReferenceLineLayerType | AnnotationLayerType;
+
+export function getAccessorNameForXY(
+  layer: XYLayer,
+  accessorType: 'x' | 'y' | 'y_ref' | 'breakdown' | 'threshold' | 'event',
+  index?: number
+): string {
+  if (index == null) {
+    return `${layer.type}_${accessorType}`;
+  }
+  return `${layer.type}_${accessorType}_${index}`;
+}
+
+export function getIdForLayer(layer: LayerTypeNoESQL | LayerTypeESQL, i: number) {
+  return `${layer.type}_${i}`;
+}
+
+export function isAPIAnnotationLayer(layer: XYLayer): layer is AnnotationLayerType {
   return XY_ANNOTATION_LAYER_TYPES.some((annotationType) => annotationType === layer.type);
 }
 
-export function isAPIReferenceLineLayer(
-  layer: DataLayerType | ReferenceLineLayerType | AnnotationLayerType
-): layer is ReferenceLineLayerType {
+export function isAPIReferenceLineLayer(layer: XYLayer): layer is ReferenceLineLayerType {
   return XY_REFERENCE_LAYER_TYPES.some((type) => type === layer.type);
 }
 
-export function isAPIDataLayer(
-  layer: DataLayerType | ReferenceLineLayerType | AnnotationLayerType
-): layer is DataLayerType {
+export function isAPIDataLayer(layer: XYLayer): layer is DataLayerType {
   return XY_DATA_LAYER_TYPES.some((type) => type === layer.type);
 }
 
-export function isAPIXYLayer(
-  layer: unknown
-): layer is DataLayerType | ReferenceLineLayerType | AnnotationLayerType {
+export function isAPIXYLayer(layer: unknown): layer is XYLayer {
   return (
     typeof layer === 'object' &&
     layer !== null &&
@@ -50,8 +67,20 @@ export function isAPIXYLayer(
   );
 }
 
-export function isAPIesqlXYLayer(
-  layer: DataLayerType | ReferenceLineLayerType | AnnotationLayerType
-): layer is LayerTypeESQL {
+export function isAPIesqlXYLayer(layer: XYLayer): layer is LayerTypeESQL {
   return ['esql', 'table'].includes(layer.dataset.type);
+}
+
+export function isFormBasedLayer(
+  layer: DataSourceStateLayer
+): layer is Omit<FormBasedLayer, 'indexPatternId'> {
+  return 'columnOrder' in layer;
+}
+
+export function isTextBasedLayer(layer: DataSourceStateLayer): layer is TextBasedLayer {
+  return Array.isArray(layer.columns);
+}
+
+export function isLensStateDataLayer(layer: XYLayerConfig): layer is XYDataLayerConfig {
+  return layer.layerType === 'data' || !('layerType' in layer);
 }
