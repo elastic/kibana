@@ -31,7 +31,11 @@ export function nonNullable<T>(v: T): v is NonNullable<T> {
 }
 
 export function isSourceCommandSuggestion({ label }: { label: string }) {
-  return ['FROM', 'ROW', 'SHOW', 'TS'].includes(label);
+  const sourceCommands = esqlCommandRegistry
+    .getSourceCommandNames()
+    .map((cmd) => cmd.toUpperCase());
+
+  return sourceCommands.includes(label);
 }
 
 export function isHeaderCommandSuggestion({ label }: { label: string }) {
