@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getTourOrder, type TourId } from '..';
+import { getOrder, type TourId } from '..';
 
 export interface Tour {
   isActive: () => boolean;
@@ -35,7 +35,7 @@ export class TourQueueStateManager {
 
     if (!exists) {
       this.registeredTourIds = [...this.registeredTourIds, tourId].sort(
-        (a, b) => getTourOrder(a) - getTourOrder(b)
+        (a, b) => getOrder(a) - getOrder(b)
       );
       this.notifySubscribers();
     }

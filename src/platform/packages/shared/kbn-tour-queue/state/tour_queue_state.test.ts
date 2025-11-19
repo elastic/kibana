@@ -13,12 +13,12 @@ import type { TourId } from '..';
 const TOUR_1 = 'tour1' as TourId;
 const TOUR_2 = 'tour2' as TourId;
 
-// Mock getTourOrder to return mocked TOUR_REGISTRY orders
+// Mock getOrder to return mocked TOUR_REGISTRY orders
 jest.mock('..', () => {
   const actual = jest.requireActual('..');
   return {
     ...actual,
-    getTourOrder: jest.fn((tourId: TourId) => {
+    getOrder: jest.fn((tourId: TourId) => {
       const TOUR_REGISTRY = {
         [TOUR_1]: 1,
         [TOUR_2]: 2,
@@ -38,7 +38,7 @@ describe('TourQueueStateManager', () => {
   });
 
   describe('register', () => {
-    it('should register tours with provided ids and in order order', () => {
+    it('should register tours with provided ids and in order', () => {
       tourQueue.register(TOUR_2); // order 2
       tourQueue.register(TOUR_1); // order 1
 
