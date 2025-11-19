@@ -14,6 +14,9 @@
  *   version: Bundle (no version)
  */
 
+import supertest_ from 'supertest';
+import type SuperTest from 'supertest';
+import { format as formatUrl } from 'url';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -54,305 +57,305 @@ import type { RunScriptActionRequestBodyInput } from '@kbn/security-solution-plu
 import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 
-export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-
-  return {
-    createUpdateProtectionUpdatesNote(
-      props: CreateUpdateProtectionUpdatesNoteProps,
-      kibanaSpace: string = 'default'
-    ) {
-      return supertest
-        .post(
-          getRouteUrlForSpace(
-            replaceParams(
-              '/api/endpoint/protection_updates_note/{package_policy_id}',
-              props.params
-            ),
-            kibanaSpace
-          )
+const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
+  createUpdateProtectionUpdatesNote(
+    props: CreateUpdateProtectionUpdatesNoteProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams('/api/endpoint/protection_updates_note/{package_policy_id}', props.params),
+          kibanaSpace
         )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Run a shell command on an endpoint.
-     */
-    endpointExecuteAction(props: EndpointExecuteActionProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/endpoint/action/execute', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Run a shell command on an endpoint.
+   */
+  endpointExecuteAction(props: EndpointExecuteActionProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/endpoint/action/execute', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
       * Download a file from an endpoint. 
 > info
 > To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
 > {`file_id`} = {`action_id`}`.`{`agent_id`}
 
       */
-    endpointFileDownload(props: EndpointFileDownloadProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(
-          getRouteUrlForSpace(
-            replaceParams('/api/endpoint/action/{action_id}/file/{file_id}/download', props.params),
-            kibanaSpace
-          )
+  endpointFileDownload(props: EndpointFileDownloadProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(
+        getRouteUrlForSpace(
+          replaceParams('/api/endpoint/action/{action_id}/file/{file_id}/download', props.params),
+          kibanaSpace
         )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
       * Get information for the specified file using the file ID.
 > info
 > To construct a `file_id`, combine the `action_id` and `agent_id` values using a dot separator:
 > {`file_id`} = {`action_id`}`.`{`agent_id`}
 
       */
-    endpointFileInfo(props: EndpointFileInfoProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(
-          getRouteUrlForSpace(
-            replaceParams('/api/endpoint/action/{action_id}/file/{file_id}', props.params),
-            kibanaSpace
-          )
+  endpointFileInfo(props: EndpointFileInfoProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(
+        getRouteUrlForSpace(
+          replaceParams('/api/endpoint/action/{action_id}/file/{file_id}', props.params),
+          kibanaSpace
         )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
-     * Get the details of a response action using the action ID.
-     */
-    endpointGetActionsDetails(
-      props: EndpointGetActionsDetailsProps,
-      kibanaSpace: string = 'default'
-    ) {
-      return supertest
-        .get(
-          getRouteUrlForSpace(
-            replaceParams('/api/endpoint/action/{action_id}', props.params),
-            kibanaSpace
-          )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+   * Get the details of a response action using the action ID.
+   */
+  endpointGetActionsDetails(
+    props: EndpointGetActionsDetailsProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .get(
+        getRouteUrlForSpace(
+          replaceParams('/api/endpoint/action/{action_id}', props.params),
+          kibanaSpace
         )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
-     * Get a list of all response actions.
-     */
-    endpointGetActionsList(props: EndpointGetActionsListProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/endpoint/action', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
-     * Get a response actions state, which reports whether encryption is enabled.
-     */
-    endpointGetActionsState(kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/endpoint/action/state', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
-     * Get the status of response actions for the specified agent IDs.
-     */
-    endpointGetActionsStatus(
-      props: EndpointGetActionsStatusProps,
-      kibanaSpace: string = 'default'
-    ) {
-      return supertest
-        .get(getRouteUrlForSpace('/api/endpoint/action_status', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
-     * Get a file from an endpoint.
-     */
-    endpointGetFileAction(props: EndpointGetFileActionProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/endpoint/action/get_file', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Get a list of all processes running on an endpoint.
-     */
-    endpointGetProcessesAction(
-      props: EndpointGetProcessesActionProps,
-      kibanaSpace: string = 'default'
-    ) {
-      return supertest
-        .post(getRouteUrlForSpace('/api/endpoint/action/running_procs', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Isolate an endpoint from the network. The endpoint remains isolated until it's released.
-     */
-    endpointIsolateAction(props: EndpointIsolateActionProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/endpoint/action/isolate', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Terminate a running process on an endpoint.
-     */
-    endpointKillProcessAction(
-      props: EndpointKillProcessActionProps,
-      kibanaSpace: string = 'default'
-    ) {
-      return supertest
-        .post(getRouteUrlForSpace('/api/endpoint/action/kill_process', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Scan a specific file or directory on an endpoint for malware.
-     */
-    endpointScanAction(props: EndpointScanActionProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/endpoint/action/scan', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Suspend a running process on an endpoint.
-     */
-    endpointSuspendProcessAction(
-      props: EndpointSuspendProcessActionProps,
-      kibanaSpace: string = 'default'
-    ) {
-      return supertest
-        .post(getRouteUrlForSpace('/api/endpoint/action/suspend_process', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Release an isolated endpoint, allowing it to rejoin a network.
-     */
-    endpointUnisolateAction(props: EndpointUnisolateActionProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/endpoint/action/unisolate', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Upload a file to an endpoint.
-     */
-    endpointUploadAction(kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/endpoint/action/upload', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    getEndpointMetadataList(props: GetEndpointMetadataListProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/endpoint/metadata', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    getEndpointSuggestions(props: GetEndpointSuggestionsProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(
-          getRouteUrlForSpace(
-            replaceParams('/internal/api/endpoint/suggestions/{suggestion_type}', props.params),
-            kibanaSpace
-          )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+   * Get a list of all response actions.
+   */
+  endpointGetActionsList(props: EndpointGetActionsListProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/endpoint/action', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Get a response actions state, which reports whether encryption is enabled.
+   */
+  endpointGetActionsState(kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/endpoint/action/state', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+   * Get the status of response actions for the specified agent IDs.
+   */
+  endpointGetActionsStatus(props: EndpointGetActionsStatusProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/endpoint/action_status', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Get a file from an endpoint.
+   */
+  endpointGetFileAction(props: EndpointGetFileActionProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/endpoint/action/get_file', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Get a list of all processes running on an endpoint.
+   */
+  endpointGetProcessesAction(
+    props: EndpointGetProcessesActionProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .post(getRouteUrlForSpace('/api/endpoint/action/running_procs', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Isolate an endpoint from the network. The endpoint remains isolated until it's released.
+   */
+  endpointIsolateAction(props: EndpointIsolateActionProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/endpoint/action/isolate', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Terminate a running process on an endpoint.
+   */
+  endpointKillProcessAction(
+    props: EndpointKillProcessActionProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .post(getRouteUrlForSpace('/api/endpoint/action/kill_process', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Scan a specific file or directory on an endpoint for malware.
+   */
+  endpointScanAction(props: EndpointScanActionProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/endpoint/action/scan', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Suspend a running process on an endpoint.
+   */
+  endpointSuspendProcessAction(
+    props: EndpointSuspendProcessActionProps,
+    kibanaSpace: string = 'default'
+  ) {
+    return supertest
+      .post(getRouteUrlForSpace('/api/endpoint/action/suspend_process', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Release an isolated endpoint, allowing it to rejoin a network.
+   */
+  endpointUnisolateAction(props: EndpointUnisolateActionProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/endpoint/action/unisolate', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Upload a file to an endpoint.
+   */
+  endpointUploadAction(kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/endpoint/action/upload', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  getEndpointMetadataList(props: GetEndpointMetadataListProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/endpoint/metadata', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  getEndpointSuggestions(props: GetEndpointSuggestionsProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(
+        getRouteUrlForSpace(
+          replaceParams('/internal/api/endpoint/suggestions/{suggestion_type}', props.params),
+          kibanaSpace
         )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    getPolicyResponse(props: GetPolicyResponseProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/endpoint/policy_response', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    getProtectionUpdatesNote(
-      props: GetProtectionUpdatesNoteProps,
-      kibanaSpace: string = 'default'
-    ) {
-      return supertest
-        .get(
-          getRouteUrlForSpace(
-            replaceParams(
-              '/api/endpoint/protection_updates_note/{package_policy_id}',
-              props.params
-            ),
-            kibanaSpace
-          )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  getPolicyResponse(props: GetPolicyResponseProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/endpoint/policy_response', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  getProtectionUpdatesNote(props: GetProtectionUpdatesNoteProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(
+        getRouteUrlForSpace(
+          replaceParams('/api/endpoint/protection_updates_note/{package_policy_id}', props.params),
+          kibanaSpace
         )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    getWorkflowInsights(props: GetWorkflowInsightsProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/internal/api/endpoint/workflow_insights', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
-     * Run a shell command on an endpoint.
-     */
-    runScriptAction(props: RunScriptActionProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/endpoint/action/runscript', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    updateWorkflowInsight(props: UpdateWorkflowInsightProps, kibanaSpace: string = 'default') {
-      return supertest
-        .put(
-          getRouteUrlForSpace(
-            replaceParams('/internal/api/endpoint/workflow_insights/{insightId}', props.params),
-            kibanaSpace
-          )
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  getWorkflowInsights(props: GetWorkflowInsightsProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/internal/api/endpoint/workflow_insights', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Run a shell command on an endpoint.
+   */
+  runScriptAction(props: RunScriptActionProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/endpoint/action/runscript', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  updateWorkflowInsight(props: UpdateWorkflowInsightProps, kibanaSpace: string = 'default') {
+    return supertest
+      .put(
+        getRouteUrlForSpace(
+          replaceParams('/internal/api/endpoint/workflow_insights/{insightId}', props.params),
+          kibanaSpace
         )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
+      )
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+});
+
+export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
+  const supertestService = getService('supertest');
+  const config = getService('config');
+
+  return {
+    ...securitySolutionApiServiceFactory(supertestService),
+    withUser: (user: { username: string; password: string }) => {
+      const kbnUrl = formatUrl({ ...config.get('servers.kibana'), auth: false });
+
+      return securitySolutionApiServiceFactory(
+        supertest_.agent(kbnUrl).auth(user.username, user.password)
+      );
     },
   };
 }
