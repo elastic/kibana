@@ -62,7 +62,10 @@ export const ActionBlockEditor = forwardRef<HTMLDivElement, ActionBlockProps>((p
 
   const [defaultValues] = useState(() =>
     getFormStateFromActionStep(
-      selectPreviewRecords(getEnrichmentState().context.simulatorRef.getSnapshot().context),
+      selectPreviewRecords(
+        getEnrichmentState().context.simulatorRef.getSnapshot().context,
+        getEnrichmentState().context
+      ),
       { grokCollection },
       step as StreamlangProcessorDefinitionWithUIAttributes
     )

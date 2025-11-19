@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import type { FieldDefinition } from '@kbn/streams-schema';
+import type { FieldDefinition, FlattenRecord } from '@kbn/streams-schema';
 import { Streams } from '@kbn/streams-schema';
 import type { AssignArgs } from 'xstate5';
 import { isActionBlock, isWhereBlock } from '@kbn/streamlang/types/streamlang';
 import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import { v4 as uuidv4 } from 'uuid';
+import { flattenObjectNestedLast } from '@kbn/object-utils';
 import { CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX } from '../../../../../../common/url_schema/common';
 import type { StreamEnrichmentContextType } from './types';
 import type { SampleDocumentWithUIAttributes } from '../simulation_state_machine';
+import { regroupGeoPointFieldsForDisplay } from '../../../utils/geo_point_utils';
 import {
   convertToFieldDefinition,
   getMappedSchemaFields,
@@ -90,10 +92,25 @@ export function getActiveDataSourceSamples(
 
   if (!dataSourceSnapshot) return [];
 
-  return dataSourceSnapshot.context.data.map((doc) => ({
-    dataSourceId: dataSourceSnapshot.context.dataSource.id,
-    document: doc,
+  // Get field definitions to identify geo_point fields
+  const fieldDefinitions = Streams.WiredStream.GetResponse.is(context.definition)
+    ? context.definition.stream.ingest.wired.fields
+    : context.definition.stream.ingest.classic.field_overrides || {};
+  const fields = Object.entries(fieldDefinitions).map(([name, field]) => ({
+    name,
+    ...field,
   }));
+
+  return dataSourceSnapshot.context.data.map((doc) => {
+    // Flatten the document and apply geo_point regrouping
+    const flattened = flattenObjectNestedLast(doc) as FlattenRecord;
+    const regrouped = regroupGeoPointFieldsForDisplay(flattened, fields);
+
+    return {
+      dataSourceId: dataSourceSnapshot.context.dataSource.id,
+      document: regrouped,
+    };
+  });
 }
 
 /**

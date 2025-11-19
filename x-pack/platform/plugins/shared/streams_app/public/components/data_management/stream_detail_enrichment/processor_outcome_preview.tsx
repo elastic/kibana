@@ -41,6 +41,7 @@ import {
   useSimulatorSelector,
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
+  useGetStreamEnrichmentState,
 } from './state_management/stream_enrichment_state_machine';
 import { isStepUnderEdit } from './state_management/steps_state_machine';
 import { selectDraftProcessor } from './state_management/stream_enrichment_state_machine/selectors';
@@ -57,8 +58,9 @@ import { useDataSourceSelector } from './state_management/data_source_state_mach
 
 export const ProcessorOutcomePreview = () => {
   const samples = useSimulatorSelector((snapshot) => snapshot.context.samples);
+  const getEnrichmentState = useGetStreamEnrichmentState();
   const previewDocuments = useSimulatorSelector((snapshot) =>
-    selectPreviewRecords(snapshot.context)
+    selectPreviewRecords(snapshot.context, getEnrichmentState().context)
   );
 
   const activeDataSourceRef = useStreamEnrichmentSelector((snapshot) =>

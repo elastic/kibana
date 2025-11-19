@@ -30,6 +30,7 @@ import {
   useSimulatorSelector,
   useStreamEnrichmentEvents,
   useStreamEnrichmentSelector,
+  useGetStreamEnrichmentState,
 } from './state_management/stream_enrichment_state_machine';
 import { NoStepsEmptyPrompt } from './empty_prompts';
 import { RootSteps } from './steps/root_steps';
@@ -88,7 +89,10 @@ export function StreamDetailEnrichmentContentImpl() {
   const detectedFields = useSimulatorSelector((state) => state.context.detectedSchemaFields);
   const isSimulating = useSimulatorSelector((state) => state.matches('runningSimulation'));
   const definitionFields = React.useMemo(() => getDefinitionFields(definition), [definition]);
-  const fieldsInSamples = useSimulatorSelector((state) => selectFieldsInSamples(state.context));
+  const getEnrichmentState = useGetStreamEnrichmentState();
+  const fieldsInSamples = useSimulatorSelector((state) =>
+    selectFieldsInSamples(state.context, getEnrichmentState().context)
+  );
 
   // Calculate schemaEditorFields with result property
   const schemaEditorFields = React.useMemo(() => {
