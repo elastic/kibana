@@ -183,7 +183,6 @@ describe('DiscriminatedUnionField', () => {
   });
 
   it('calls onChange when option field changes', async () => {
-    const user = userEvent.setup();
     const option1 = z.object({
       type: z.literal('basic'),
       username: z.string().meta({ widget: 'text', label: 'Username' }),
