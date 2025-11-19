@@ -21,7 +21,7 @@ interface StreamQueryBase {
 export interface StreamQueryKql extends StreamQueryBase {
   feature?: {
     name: string;
-    filter: Condition;
+    filter?: Condition;
   };
   kql: {
     query: string;

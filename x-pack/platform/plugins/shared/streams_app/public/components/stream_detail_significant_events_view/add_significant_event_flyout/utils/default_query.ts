@@ -19,4 +19,4 @@ export function defaultQuery(): StreamQueryKql {
   };
 }
 
-export const NO_FEATURE = { filter: { always: {} }, name: '_NO_FEATURE' };
+export const NO_FEATURE = { type: 'system' as const, filter: { always: {} }, name: '_NO_FEATURE' };
