@@ -48,6 +48,7 @@ disabled:
 
   # Gen AI suites, running with their own pipeline
   - x-pack/platform/test/functional_gen_ai/inference/config.ts
+  - x-pack/platform/test/onechat/smoke_tests/config.stateful.ts
 
   # Temporary skip while investigating failures
   - x-pack/performance/journeys_e2e/aiops_log_rate_analysis.ts
