@@ -24,6 +24,7 @@ import { useRefreshCaseViewPage } from './use_on_refresh_case_view_page';
 import { useOnUpdateField } from './use_on_update_field';
 import { CaseViewSimilarCases } from './components/case_view_similar_cases';
 import { CaseViewEvents } from './components/case_view_events';
+import { CaseViewAttachments } from './components/case_view_attachments';
 
 const getActiveTabId = (tabId?: string) => {
   if (tabId && Object.values(CASE_VIEW_PAGE_TABS).includes(tabId as CASE_VIEW_PAGE_TABS)) {
@@ -124,24 +125,27 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
               useFetchAlertData={useFetchAlertData}
             />
           )}
-          {activeTabId === CASE_VIEW_PAGE_TABS.ALERTS && features.alerts.enabled && (
-            <CaseViewAlerts
-              caseData={caseData}
-              renderAlertsTable={renderAlertsTable}
-              onAlertsTableLoaded={onAlertsTableLoaded}
-            />
+          {activeTabId === CASE_VIEW_PAGE_TABS.ATTACHMENTS && (
+            <CaseViewAttachments caseData={caseData} />
           )}
-          {activeTabId === CASE_VIEW_PAGE_TABS.EVENTS && features.events.enabled && (
-            <CaseViewEvents caseData={caseData} renderEventsTable={renderEventsTable} />
-          )}
-          {activeTabId === CASE_VIEW_PAGE_TABS.FILES && <CaseViewFiles caseData={caseData} />}
-          {activeTabId === CASE_VIEW_PAGE_TABS.OBSERVABLES && (
-            <CaseViewObservables
-              isLoading={false}
-              caseData={caseData}
-              onUpdateField={onUpdateField}
-            />
-          )}
+          {/* {activeTabId === CASE_VIEW_PAGE_TABS.ALERTS && features.alerts.enabled && ( */}
+          {/*   <CaseViewAlerts */}
+          {/*     caseData={caseData} */}
+          {/*     renderAlertsTable={renderAlertsTable} */}
+          {/*     onAlertsTableLoaded={onAlertsTableLoaded} */}
+          {/*   /> */}
+          {/* )} */}
+          {/* {activeTabId === CASE_VIEW_PAGE_TABS.EVENTS && features.events.enabled && ( */}
+          {/*   <CaseViewEvents caseData={caseData} renderEventsTable={renderEventsTable} /> */}
+          {/* )} */}
+          {/* {activeTabId === CASE_VIEW_PAGE_TABS.FILES && <CaseViewFiles caseData={caseData} />} */}
+          {/* {activeTabId === CASE_VIEW_PAGE_TABS.OBSERVABLES && ( */}
+          {/*   <CaseViewObservables */}
+          {/*     isLoading={false} */}
+          {/*     caseData={caseData} */}
+          {/*     onUpdateField={onUpdateField} */}
+          {/*   /> */}
+          {/* )} */}
           {activeTabId === CASE_VIEW_PAGE_TABS.SIMILAR_CASES && (
             <CaseViewSimilarCases caseData={caseData} />
           )}

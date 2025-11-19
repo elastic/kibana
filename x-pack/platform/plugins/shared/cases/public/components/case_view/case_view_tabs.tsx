@@ -15,6 +15,7 @@ import { useCasesContext } from '../cases_context/use_cases_context';
 import {
   ACTIVITY_TAB,
   ALERTS_TAB,
+  ATTACHMENTS_TAB,
   EVENTS_TAB,
   FILES_TAB,
   OBSERVABLES_TAB,
@@ -184,12 +185,8 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
     enabled: canShowObservableTabs && isObservablesFeatureEnabled,
   });
 
-  const tabs = useMemo(
+  const oldTabSetup = useMemo(
     () => [
-      {
-        id: CASE_VIEW_PAGE_TABS.ACTIVITY,
-        name: ACTIVITY_TAB,
-      },
       ...(features.alerts.enabled
         ? [
             {
@@ -262,21 +259,39 @@ export const CaseViewTabs = React.memo<CaseViewTabsProps>(({ caseData, activeTab
         : []),
     ],
     [
+      activeTab,
+      canShowObservableTabs,
+      caseData.totalAlerts,
+      caseData.totalEvents,
+      euiTheme,
       features.alerts.enabled,
       features.alerts.isExperimental,
       features.events.enabled,
-      caseData.totalAlerts,
-      caseData.totalEvents,
-      activeTab,
-      euiTheme,
-      isLoadingFiles,
       fileStatsData,
-      canShowObservableTabs,
-      isObservablesFeatureEnabled,
+      isLoadingFiles,
       isLoadingObservables,
+      isObservablesFeatureEnabled,
       observables.length,
       similarCasesData?.total,
     ]
+  );
+
+  const tabs = useMemo(
+    () => [
+      {
+        id: CASE_VIEW_PAGE_TABS.ACTIVITY,
+        name: ACTIVITY_TAB,
+      },
+      ...(true
+        ? [
+            {
+              id: CASE_VIEW_PAGE_TABS.ATTACHMENTS,
+              name: ATTACHMENTS_TAB,
+            },
+          ]
+        : oldTabSetup),
+    ],
+    [oldTabSetup]
   );
 
   const renderTabs = useCallback(() => {
