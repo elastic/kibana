@@ -29,7 +29,7 @@ export const saveDashboard = async ({
       ? await dashboardClient.update(idToSaveTo, dashboardState, references)
       : await dashboardClient.create(dashboardState, references);
 
-    const newId = result.item.id;
+    const newId = result.id;
 
     if (newId) {
       coreServices.notifications.toasts.addSuccess({

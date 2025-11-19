@@ -271,10 +271,17 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
     ]
   );
 
+  const [selectedTabId, setSelectedTabId] = useState(tabs[0].id);
+
+  const onTabClick = (tab: EuiTabbedContentTab) => {
+    setSelectedTabId(tab.id);
+  };
+
   const renderSaveButton = useCallback(
     ({ size = 's' }: Pick<EuiButtonProps, 'size'> = {}) => {
       const saveButton = (
         <EuiButton
+          data-test-subj="agentFormSaveButton"
           form={agentFormId}
           size={size}
           type="submit"
@@ -412,7 +419,9 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
                 />
               </EuiFlexItem>
             )}
-            <EuiFlexItem>{isCreateMode ? labels.agents.newAgent : agentName}</EuiFlexItem>
+            <EuiFlexItem data-test-subj="agentFormPageTitle">
+              {isCreateMode ? labels.agents.newAgent : agentName}
+            </EuiFlexItem>
           </EuiFlexGroup>
         }
         description={
@@ -557,10 +566,20 @@ export const AgentForm: React.FC<AgentFormProps> = ({ editingAgentId, onDelete }
           <EuiForm
             id={agentFormId}
             component="form"
-            onSubmit={handleSubmit((data) => handleSave(data))}
+            onSubmit={handleSubmit(
+              (data) => handleSave(data),
+              () => {
+                // Switch to first tab (settings) when validation fails
+                setSelectedTabId('settings');
+              }
+            )}
             fullWidth
           >
-            <EuiTabbedContent tabs={tabs} initialSelectedTab={tabs[0]} />
+            <EuiTabbedContent
+              tabs={tabs}
+              selectedTab={tabs.find((tab) => tab.id === selectedTabId)}
+              onTabClick={onTabClick}
+            />
           </EuiForm>
         </FormProvider>
         <EuiSpacer
