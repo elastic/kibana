@@ -6,13 +6,16 @@
  */
 
 import { GeminiConnector } from './gemini';
-import type { RunActionParams } from '../../../common/gemini/types';
+import type { RunActionParams } from '@kbn/connector-schemas/gemini';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
-import { RunApiResponseSchema, StreamingResponseSchema } from '../../../common/gemini/schema';
-import { DEFAULT_GEMINI_MODEL } from '../../../common/gemini/constants';
+import {
+  DEFAULT_MODEL,
+  RunApiResponseSchema,
+  StreamingResponseSchema,
+} from '@kbn/connector-schemas/gemini';
 import type { AxiosError } from 'axios';
 import { Transform } from 'stream';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
@@ -68,7 +71,7 @@ describe('GeminiConnector', () => {
     configurationUtilities: actionsConfigMock.create(),
     config: {
       apiUrl: 'https://api.gemini.com',
-      defaultModel: DEFAULT_GEMINI_MODEL,
+      defaultModel: DEFAULT_MODEL,
       gcpRegion: 'us-central1',
       gcpProjectID: 'my-project-12345',
     },
@@ -106,7 +109,7 @@ describe('GeminiConnector', () => {
       it('should send a formatted request to the API and return the response', async () => {
         const runActionParams: RunActionParams = {
           body: JSON.stringify(sampleGeminiBody),
-          model: DEFAULT_GEMINI_MODEL,
+          model: DEFAULT_MODEL,
         };
 
         const response = await connector.runApi(runActionParams, connectorUsageCollector);
@@ -115,7 +118,7 @@ describe('GeminiConnector', () => {
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
-            url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_GEMINI_MODEL}:generateContent`,
+            url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_MODEL}:generateContent`,
             method: 'post',
             data: JSON.stringify({
               messages: [
@@ -193,7 +196,7 @@ describe('GeminiConnector', () => {
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
-            url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_GEMINI_MODEL}:generateContent`,
+            url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_MODEL}:generateContent`,
             method: 'post',
             responseSchema: RunApiResponseSchema,
             data: JSON.stringify({
@@ -226,7 +229,7 @@ describe('GeminiConnector', () => {
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
-            url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_GEMINI_MODEL}:generateContent`,
+            url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_MODEL}:generateContent`,
             method: 'post',
             responseSchema: RunApiResponseSchema,
             data: JSON.stringify({
@@ -261,7 +264,7 @@ describe('GeminiConnector', () => {
         await connector.invokeAI({ ...aiAssistantBody, timeout, signal }, connectorUsageCollector);
         expect(mockRequest).toHaveBeenCalledWith(
           {
-            url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_GEMINI_MODEL}:generateContent`,
+            url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_MODEL}:generateContent`,
             method: 'post',
             responseSchema: RunApiResponseSchema,
             data: JSON.stringify({
@@ -298,7 +301,7 @@ describe('GeminiConnector', () => {
         );
         expect(mockRequest).toHaveBeenCalledWith(
           {
-            url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_GEMINI_MODEL}:generateContent`,
+            url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_MODEL}:generateContent`,
             method: 'post',
             responseSchema: RunApiResponseSchema,
             data: JSON.stringify({
@@ -360,7 +363,7 @@ describe('GeminiConnector', () => {
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
-            url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_GEMINI_MODEL}:streamGenerateContent?alt=sse`,
+            url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_MODEL}:streamGenerateContent?alt=sse`,
             method: 'post',
             responseSchema: StreamingResponseSchema,
             data: JSON.stringify({
@@ -400,7 +403,7 @@ describe('GeminiConnector', () => {
         expect(mockRequest).toBeCalledTimes(1);
         expect(mockRequest).toHaveBeenCalledWith(
           {
-            url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_GEMINI_MODEL}:streamGenerateContent?alt=sse`,
+            url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_MODEL}:streamGenerateContent?alt=sse`,
             method: 'post',
             responseSchema: StreamingResponseSchema,
             data: JSON.stringify({
@@ -445,7 +448,7 @@ describe('GeminiConnector', () => {
         );
         expect(mockRequest).toHaveBeenCalledWith(
           {
-            url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_GEMINI_MODEL}:streamGenerateContent?alt=sse`,
+            url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_MODEL}:streamGenerateContent?alt=sse`,
             method: 'post',
             responseSchema: StreamingResponseSchema,
             data: JSON.stringify({
@@ -489,7 +492,7 @@ describe('GeminiConnector', () => {
         );
         expect(mockRequest).toHaveBeenCalledWith(
           {
-            url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_GEMINI_MODEL}:streamGenerateContent?alt=sse`,
+            url: `https://api.gemini.com/v1/projects/my-project-12345/locations/us-central1/publishers/google/models/${DEFAULT_MODEL}:streamGenerateContent?alt=sse`,
             method: 'post',
             responseSchema: StreamingResponseSchema,
             data: JSON.stringify({
