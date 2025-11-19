@@ -41,7 +41,7 @@ export const streamQueryKqlSchema: z.Schema<StreamQueryKql> = z.intersection(
     feature: z
       .object({
         name: NonEmptyString,
-        filter: conditionSchema,
+        filter: z.optional(conditionSchema),
       })
       .optional(),
     kql: z.object({
@@ -61,7 +61,7 @@ export const upsertStreamQueryRequestSchema = z.object({
   feature: z
     .object({
       name: NonEmptyString,
-      filter: conditionSchema,
+      filter: z.optional(conditionSchema),
     })
     .optional(),
   kql: z.object({
