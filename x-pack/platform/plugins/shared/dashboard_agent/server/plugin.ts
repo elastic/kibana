@@ -39,14 +39,7 @@ export class DashboardAgentPlugin
 
     // Register dashboard-specific tools during start lifecycle when dashboard plugin is available
     void coreSetup.getStartServices().then(([coreStart, startDeps]) => {
-      // @TODO: remove
-      console.log(`--@@coreStart.share`, coreStart.share);
-      console.log(`--@@coreStart.uiSettings`, coreStart.uiSettings);
-
-      console.log(`--@@startDeps.share`, startDeps.share);
       const dashboardLocator = startDeps.share?.url?.locators?.get('DASHBOARD_APP_LOCATOR');
-      // @TODO: remove
-      console.log(`--@@dashboardLocator`, dashboardLocator);
       setupDeps.onechat.tools.register(
         createDashboardTool(startDeps.dashboard, coreStart.savedObjects, { dashboardLocator })
       );

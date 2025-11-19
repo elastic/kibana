@@ -7,6 +7,7 @@
 
 import type { OnechatPluginSetup } from '@kbn/onechat-plugin/server';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
+import type { SharePluginStart } from '@kbn/share-plugin/server';
 
 export interface DashboardAgentSetupDependencies {
   onechat: OnechatPluginSetup;
@@ -14,6 +15,7 @@ export interface DashboardAgentSetupDependencies {
 
 export interface DashboardAgentStartDependencies {
   dashboard: DashboardPluginStart;
+  share: SharePluginStart;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
