@@ -99,7 +99,7 @@ export const FlyoutWrapper = ({
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="xs" />
           {/* Header row 2: Edit in Lens and button groups */}
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
             {navigateToLensEditor && !isReadOnly && (
@@ -115,11 +115,7 @@ export const FlyoutWrapper = ({
             )}
             <EuiFlexItem grow={true} />
             {toolbar && (
-              <EuiFlexItem
-                css={css({ zIndex: euiTheme.levels.menu })}
-                grow={false}
-                data-test-subj="lnsVisualizationToolbar"
-              >
+              <EuiFlexItem grow={false} data-test-subj="lnsVisualizationToolbar">
                 {toolbar}
               </EuiFlexItem>
             )}
