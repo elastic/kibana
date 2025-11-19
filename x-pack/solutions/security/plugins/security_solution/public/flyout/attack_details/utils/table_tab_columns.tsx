@@ -51,7 +51,7 @@ export const getTableTabColumns: ColumnsProvider = () => [
       </EuiText>
     ),
     render: (values, data) => {
-      return <div>{values}</div>;
+      return <EuiText size="xs">{values}</EuiText>;
     },
   },
 ];
