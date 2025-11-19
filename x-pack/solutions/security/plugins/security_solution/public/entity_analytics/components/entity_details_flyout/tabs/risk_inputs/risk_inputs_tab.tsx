@@ -286,10 +286,16 @@ const ContextsSection = <T extends EntityType>({
       field: (
         <FormattedMessage
           id="xpack.securitySolution.flyout.entityDetails.riskInputs.privmonField"
-          defaultMessage="Privileged user status"
+          defaultMessage="Privileged user"
         />
       ),
-      value: <span>{String(privmon.isPrivileged ?? false)}</span>,
+      value: (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.entityDetails.riskInputs.privmonValue"
+          defaultMessage="{value}"
+          values={{ value: privmon.isPrivileged ? 'Yes' : 'No' }}
+        />
+      ),
       contribution: formatContribution(privmon.contribution || 0),
     });
   }
