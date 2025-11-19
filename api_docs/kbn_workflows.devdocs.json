@@ -4770,6 +4770,17 @@
           },
           {
             "parentPluginId": "@kbn/workflows",
+            "id": "def-common.WorkflowExecutionDto.isTestRun",
+            "type": "boolean",
+            "tags": [],
+            "label": "isTestRun",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
             "id": "def-common.WorkflowExecutionDto.startedAt",
             "type": "string",
             "tags": [],
@@ -4904,6 +4915,20 @@
             "tags": [],
             "label": "yaml",
             "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.WorkflowExecutionDto.context",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "Record<string, unknown> | undefined"
+            ],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5106,14 +5131,33 @@
           },
           {
             "parentPluginId": "@kbn/workflows",
-            "id": "def-common.WorkflowExecutionListDto._pagination",
-            "type": "Object",
+            "id": "def-common.WorkflowExecutionListDto.page",
+            "type": "number",
             "tags": [],
-            "label": "_pagination",
+            "label": "page",
             "description": [],
-            "signature": [
-              "{ page: number; limit: number; total: number; next?: string | undefined; prev?: string | undefined; }"
-            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.WorkflowExecutionListDto.size",
+            "type": "number",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.WorkflowExecutionListDto.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5192,14 +5236,33 @@
         "children": [
           {
             "parentPluginId": "@kbn/workflows",
-            "id": "def-common.WorkflowListDto._pagination",
-            "type": "Object",
+            "id": "def-common.WorkflowListDto.page",
+            "type": "number",
             "tags": [],
-            "label": "_pagination",
+            "label": "page",
             "description": [],
-            "signature": [
-              "{ page: number; limit: number; total: number; next?: string | undefined; prev?: string | undefined; }"
-            ],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.WorkflowListDto.size",
+            "type": "number",
+            "tags": [],
+            "label": "size",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/workflows",
+            "id": "def-common.WorkflowListDto.total",
+            "type": "number",
+            "tags": [],
+            "label": "total",
+            "description": [],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -6547,10 +6610,10 @@
         "children": [
           {
             "parentPluginId": "@kbn/workflows",
-            "id": "def-common.WorkflowsSearchParams.limit",
+            "id": "def-common.WorkflowsSearchParams.size",
             "type": "number",
             "tags": [],
-            "label": "limit",
+            "label": "size",
             "description": [],
             "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
             "deprecated": false,
@@ -6792,21 +6855,6 @@
           "{ type: string; name: string; timeout?: string | undefined; 'on-failure'?: { retry?: { 'max-attempts': number; delay?: string | undefined; } | undefined; continue?: boolean | undefined; fallback?: { type: string; name: string; }[] | undefined; } | undefined; with?: Record<string, any> | undefined; foreach?: string | undefined; if?: string | undefined; 'connector-id'?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/spec/schema.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/workflows",
-        "id": "def-common.ConnectorTypeInfoMinimal",
-        "type": "Type",
-        "tags": [],
-        "label": "ConnectorTypeInfoMinimal",
-        "description": [],
-        "signature": [
-          "{ actionTypeId: string; displayName: string; }"
-        ],
-        "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -7406,7 +7454,7 @@
         "label": "WorkflowExecutionListItemDto",
         "description": [],
         "signature": [
-          "{ id: string; spaceId: string; duration: number | null; status: ",
+          "{ id: string; spaceId: string; context?: Record<string, unknown> | undefined; duration: number | null; status: ",
           {
             "pluginId": "@kbn/workflows",
             "scope": "common",
@@ -7414,7 +7462,7 @@
             "section": "def-common.ExecutionStatus",
             "text": "ExecutionStatus"
           },
-          "; startedAt: string; stepId?: string | undefined; workflowId?: string | undefined; finishedAt: string; workflowName?: string | undefined; triggeredBy?: string | undefined; }"
+          "; startedAt: string; isTestRun: boolean; stepId?: string | undefined; workflowId?: string | undefined; finishedAt: string; workflowName?: string | undefined; triggeredBy?: string | undefined; }"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "deprecated": false,
@@ -8834,7 +8882,7 @@
           "ZodOptional",
           "<",
           "ZodString",
-          ">; limit: ",
+          ">; size: ",
           "ZodDefault",
           "<",
           "ZodNumber",
@@ -8870,7 +8918,7 @@
           "ZodBoolean",
           ">; }, \"strip\", ",
           "ZodTypeAny",
-          ", { page: number; limit: number; _full: boolean; enabled?: boolean[] | undefined; createdBy?: string[] | undefined; query?: string | undefined; triggerType?: string | undefined; }, { page?: number | undefined; enabled?: (number | boolean)[] | undefined; createdBy?: string[] | undefined; query?: string | undefined; limit?: number | undefined; triggerType?: string | undefined; _full?: boolean | undefined; }>"
+          ", { page: number; size: number; _full: boolean; enabled?: boolean[] | undefined; createdBy?: string[] | undefined; query?: string | undefined; triggerType?: string | undefined; }, { page?: number | undefined; enabled?: (number | boolean)[] | undefined; size?: number | undefined; createdBy?: string[] | undefined; query?: string | undefined; triggerType?: string | undefined; _full?: boolean | undefined; }>"
         ],
         "path": "src/platform/packages/shared/kbn-workflows/types/v1.ts",
         "deprecated": false,

@@ -99,7 +99,7 @@ export function CellActionsPopover({
         responsive={false}
         data-test-subj="dataTableCellActionPopoverTitle"
       >
-        <EuiFlexItem style={{ maxWidth: '200px' }}>
+        <EuiFlexItem style={{ maxWidth: '400px' }}>
           <EuiText
             size="s"
             className="eui-textBreakWord"

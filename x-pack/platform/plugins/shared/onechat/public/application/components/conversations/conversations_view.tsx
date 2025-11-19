@@ -28,7 +28,7 @@ export const OnechatConversationsView: React.FC<{}> = () => {
   const headerStyles = css`
     ${backgroundStyles}
     justify-content: center;
-    block-size: ${headerHeight};
+    height: ${headerHeight};
   `;
   const contentStyles = css`
     ${backgroundStyles}
@@ -38,6 +38,7 @@ export const OnechatConversationsView: React.FC<{}> = () => {
     display: flex;
     justify-content: center;
     align-items: center;
+    padding: 0 ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.base};
   `;
 
   const labels = {
@@ -68,6 +69,7 @@ export const OnechatConversationsView: React.FC<{}> = () => {
             bottomBorder={false}
             aria-label={labels.header}
             paddingSize="m"
+            responsive={false}
           >
             <ConversationHeader />
           </KibanaPageTemplate.Header>

@@ -83,6 +83,7 @@ describe('prepareConversation', () => {
       });
 
       expect(result).toEqual({
+        attachmentTypes: [],
         nextInput: {
           message: 'Hello',
           attachments: [],
@@ -145,7 +146,7 @@ describe('prepareConversation', () => {
       });
 
       expect(mockGetToolResultId).toHaveBeenCalledTimes(1);
-      expect(mockAttachmentsService.getTypeDefinition).toHaveBeenCalledTimes(1);
+      expect(mockAttachmentsService.getTypeDefinition).toHaveBeenCalledTimes(2);
     });
 
     it('should preserve existing ID for attachment with ID', async () => {
@@ -182,7 +183,7 @@ describe('prepareConversation', () => {
       });
 
       expect(mockGetToolResultId).not.toHaveBeenCalled();
-      expect(mockAttachmentsService.getTypeDefinition).toHaveBeenCalledTimes(1);
+      expect(mockAttachmentsService.getTypeDefinition).toHaveBeenCalledTimes(2);
     });
 
     it('should process multiple attachments', async () => {
@@ -371,7 +372,7 @@ describe('prepareConversation', () => {
         representation: mockRepresentation,
       });
 
-      expect(mockAttachmentsService.getTypeDefinition).toHaveBeenCalledTimes(1);
+      expect(mockAttachmentsService.getTypeDefinition).toHaveBeenCalledTimes(2);
     });
 
     it('should process multiple previous rounds', async () => {
