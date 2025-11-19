@@ -33,13 +33,16 @@ const getColumnCountInPixels = ({
 }) =>
   columnCount * runtimeSettings.columnPixelWidth + (columnCount - 1) * runtimeSettings.gutterSize;
 
-const getRowCountInPixels = ({
+export const getRowCountInPixels = ({
   rowCount,
   runtimeSettings,
 }: {
   rowCount: number;
   runtimeSettings: RuntimeGridSettings;
-}) => rowCount * runtimeSettings.rowHeight + (rowCount - 1) * runtimeSettings.gutterSize;
+}) => {
+  const safeRowCount = Math.min(rowCount, Number.MAX_VALUE); // Infinity * 0 = Nan which can cause problems.
+  return safeRowCount * runtimeSettings.rowHeight + (safeRowCount - 1) * runtimeSettings.gutterSize;
+};
 
 // Calculates the preview rect coordinates for a resized panel
 export const getResizePreviewRect = ({
