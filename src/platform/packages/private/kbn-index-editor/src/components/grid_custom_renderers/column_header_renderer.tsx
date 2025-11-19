@@ -20,6 +20,7 @@ export const getColumnHeaderRenderer = (
   columnName: string,
   columnType: string | undefined,
   columnIndex: number,
+  isSavedColumn: boolean,
   isColumnInEditMode: boolean,
   setEditingColumnIndex: (columnIndex: number | null) => void,
   indexUpdateService: IndexUpdateService,
@@ -31,6 +32,7 @@ export const getColumnHeaderRenderer = (
       <ColumnHeaderPopover
         isColumnInEditMode={isColumnInEditMode}
         setEditingColumnIndex={setEditingColumnIndex}
+        isSavedColumn={isSavedColumn}
         initialColumnName={columnName}
         initialColumnType={columnType}
         columnIndex={columnIndex}
@@ -45,36 +47,38 @@ export const getColumnHeaderRenderer = (
       showSortDesc: false,
       showMoveLeft: false,
       showMoveRight: false,
-      additional: [
-        {
-          'data-test-subj': 'indexEditorindexEditorEditColumnButton',
-          label: (
-            <FormattedMessage
-              id="indexEditor.flyout.grid.columnHeader.editAction"
-              defaultMessage="Edit column"
-            />
-          ),
-          size: 'xs',
-          iconType: 'pencil',
-          onClick: () => {
-            setEditingColumnIndex(columnIndex);
-          },
-        },
-        {
-          'data-test-subj': 'indexEditorindexEditorDeleteColumnButton',
-          label: (
-            <FormattedMessage
-              id="indexEditor.flyout.grid.columnHeader.deleteAction"
-              defaultMessage="Delete column and values"
-            />
-          ),
-          size: 'xs',
-          iconType: 'trash',
-          onClick: () => {
-            indexUpdateService.deleteColumn(columnName);
-          },
-        },
-      ],
+      additional: !isSavedColumn
+        ? [
+            {
+              'data-test-subj': 'indexEditorindexEditorEditColumnButton',
+              label: (
+                <FormattedMessage
+                  id="indexEditor.flyout.grid.columnHeader.editAction"
+                  defaultMessage="Edit column"
+                />
+              ),
+              size: 'xs',
+              iconType: 'pencil',
+              onClick: () => {
+                setEditingColumnIndex(columnIndex);
+              },
+            },
+            {
+              'data-test-subj': 'indexEditorindexEditorDeleteColumnButton',
+              label: (
+                <FormattedMessage
+                  id="indexEditor.flyout.grid.columnHeader.deleteAction"
+                  defaultMessage="Delete column and values"
+                />
+              ),
+              size: 'xs',
+              iconType: 'trash',
+              onClick: () => {
+                indexUpdateService.deleteColumn(columnName);
+              },
+            },
+          ]
+        : [],
     },
   });
 };

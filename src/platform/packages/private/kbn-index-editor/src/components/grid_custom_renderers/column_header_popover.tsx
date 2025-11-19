@@ -19,11 +19,13 @@ import {
   EuiFlexGroup,
   EuiButton,
   EuiText,
+  EuiIconTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { useAddColumnName, errorMessages } from '../../hooks/use_add_column_name';
 import type { IndexEditorTelemetryService } from '../../telemetry/telemetry_service';
 import { isPlaceholderColumn } from '../../utils';
@@ -32,6 +34,7 @@ import { FieldTypeSelector } from './field_type_selector';
 interface ColumnHeaderPopoverProps {
   isColumnInEditMode: boolean;
   setEditingColumnIndex: (columnIndex: number | null) => void;
+  isSavedColumn: boolean;
   initialColumnName: string;
   initialColumnType: string | undefined;
   columnIndex: number;
@@ -44,6 +47,7 @@ export const COLUMN_INDEX_PROP = 'data-column-index';
 export const ColumnHeaderPopover = ({
   isColumnInEditMode,
   setEditingColumnIndex,
+  isSavedColumn,
   initialColumnName,
   initialColumnType,
   columnIndex,
@@ -82,7 +86,20 @@ export const ColumnHeaderPopover = ({
     />
   ) : (
     // The default column header display comming from UnifiedDataTable, the type icon + column name
-    originalColumnDisplay
+    <EuiFlexGroup alignItems="center" gutterSize="s" wrap={false} css={{ cursor: 'pointer' }}>
+      {initialColumnType === KBN_FIELD_TYPES.UNKNOWN && (
+        <EuiIconTip
+          type="warning"
+          color="warning"
+          size="m"
+          content={i18n.translate('indexEditor.columnHeader.unsupportedWarning', {
+            defaultMessage:
+              'This type has partial suport, editions you do will be saved but will not be visible in this editor after closing it.',
+          })}
+        />
+      )}
+      {originalColumnDisplay}
+    </EuiFlexGroup>
   );
 
   const errorMessage = useMemo(() => {
@@ -104,13 +121,17 @@ export const ColumnHeaderPopover = ({
     return false;
   }, [columnIndex]);
 
+  if (isSavedColumn) {
+    return columnLabel;
+  }
+
   const triggerButton = (
     // This button is keyboard accesible via the column actions menu.
     // eslint-disable-next-line @elastic/eui/accessible-interactive-element
     <EuiButtonEmpty
       data-test-subj="indexEditorindexEditorColumnNameButton"
       aria-label={i18n.translate('indexEditor.columnHeaderEdit.aria', {
-        defaultMessage: 'Edit column name',
+        defaultMessage: 'Edit column',
       })}
       css={{
         color: euiTheme.colors.textSubdued,

@@ -12,11 +12,7 @@ import type { DataTableColumnsMeta, DataTableRecord } from '@kbn/discover-utils/
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { css } from '@emotion/react';
-import type {
-  CustomCellRenderer,
-  CustomGridColumnProps,
-  CustomGridColumnsConfiguration,
-} from '@kbn/unified-data-table';
+import type { CustomCellRenderer, CustomGridColumnsConfiguration } from '@kbn/unified-data-table';
 import {
   DataLoadingState,
   UnifiedDataTable,
@@ -169,26 +165,22 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   const customGridColumnsConfiguration = useMemo<CustomGridColumnsConfiguration>(() => {
     return renderedColumns.reduce<CustomGridColumnsConfiguration>(
       (acc, columnName, columnIndex) => {
-        if (!props.dataView.fields.getByName(columnName)) {
-          const editMode = editingColumnIndex === columnIndex;
-          const columnType = columnsMeta[columnName]?.type;
-          acc[columnName] = memoize(
-            getColumnHeaderRenderer(
-              columnName,
-              columnType,
-              columnIndex,
-              editMode,
-              setEditingColumnIndex,
-              indexUpdateService,
-              indexEditorTelemetryService
-            )
-          );
-        } else {
-          acc[columnName] = (customGridColumnProps: CustomGridColumnProps) => ({
-            ...customGridColumnProps.column,
-            actions: { showHide: false, showSortAsc: false, showSortDesc: false },
-          });
-        }
+        const isSavedColumn = !!props.dataView.fields.getByName(columnName);
+        const editMode = editingColumnIndex === columnIndex;
+        const columnType = columnsMeta[columnName]?.type;
+        acc[columnName] = memoize(
+          getColumnHeaderRenderer(
+            columnName,
+            columnType,
+            columnIndex,
+            isSavedColumn,
+            editMode,
+            setEditingColumnIndex,
+            indexUpdateService,
+            indexEditorTelemetryService
+          )
+        );
+
         return acc;
       },
       {} as CustomGridColumnsConfiguration
