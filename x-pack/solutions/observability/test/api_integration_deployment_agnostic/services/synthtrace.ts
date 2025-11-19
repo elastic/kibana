@@ -38,6 +38,13 @@ export function SynthtraceProvider({ getService }: DeploymentAgnosticFtrProvider
 
       return syntheticsEsClient;
     },
+    createInfraSynthtraceEsClient() {
+      const { infraEsClient } = clientManager.getClients({
+        clients: ['infraEsClient'],
+      });
+
+      return infraEsClient;
+    },
     async createApmSynthtraceEsClient() {
       const { apmEsClient } = clientManager.getClients({
         clients: ['apmEsClient'],
