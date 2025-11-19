@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { GENERATED_KIBANA_CONNECTORS, KIBANA_CONNECTOR_COUNT } from './kibana_connectors';
 import type { InternalConnectorContract } from '../../types/v1';
 import { generateYamlSchemaFromConnectors } from '../../spec/lib/generate_yaml_schema_from_connectors';

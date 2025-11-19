@@ -59,7 +59,7 @@ export const generateAndSaveEsConnectors = () => {
  */
 
 import type { InternalConnectorContract } from '../../types/latest';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { ${endpoints
         .map((endpoint) => [getRequestSchemaName(endpoint), getResponseSchemaName(endpoint)])
         .flat()
@@ -113,14 +113,13 @@ function generateZodSchemas() {
     execSync(command, { stdio: 'inherit' });
     console.log('✅ Zod schemas generated successfully');
 
+    const zodPath = Path.resolve(OPENAPI_TS_OUTPUT_FOLDER_PATH, 'zod.gen.ts');
+
     // replace zod imports with @kbn/zod
-    const zodSchemas = fs.readFileSync(
-      Path.resolve(OPENAPI_TS_OUTPUT_FOLDER_PATH, 'zod.gen.ts'),
-      'utf8'
-    );
+    const zodSchemas = fs.readFileSync(zodPath, 'utf8');
     fs.writeFileSync(
-      OPENAPI_TS_OUTPUT_FOLDER_PATH,
-      zodSchemas.replace(/import { z } from 'zod';/, "import { z } from '@kbn/zod';"),
+      zodPath,
+      zodSchemas.replace(/import { z } from 'zod';/, "import { z } from '@kbn/zod/v4';"),
       'utf8'
     );
 

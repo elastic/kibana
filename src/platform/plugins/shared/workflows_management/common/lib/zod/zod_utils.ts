@@ -8,8 +8,8 @@
  */
 
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import type { ZodFirstPartySchemaTypes } from '@kbn/zod';
-import { z } from '@kbn/zod';
+import type { ZodFirstPartySchemaTypes } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 import type { WorkflowZodSchemaLooseType } from '../../schema';
 
 export function parsePath(path: string) {

@@ -12,7 +12,7 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 // TheHive severity levels
 export enum TheHiveSeverity {

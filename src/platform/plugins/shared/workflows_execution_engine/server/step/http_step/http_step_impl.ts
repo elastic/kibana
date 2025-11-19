@@ -14,7 +14,7 @@ import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios';
 import https from 'https';
 import type { FetcherConfigSchema } from '@kbn/workflows';
 import type { HttpGraphNode } from '@kbn/workflows/graph';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import type { UrlValidator } from '../../lib/url_validator';
 import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';

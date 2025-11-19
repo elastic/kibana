@@ -8,7 +8,7 @@
  */
 
 import moment from 'moment-timezone';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export const DurationSchema = z.string().regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format');
 
@@ -118,9 +118,9 @@ export const TriggerSchema = z.discriminatedUnion('type', [
 ]);
 
 export const TriggerTypes = [
-  AlertRuleTriggerSchema.shape.type._def.value,
-  ScheduledTriggerSchema.shape.type._def.value,
-  ManualTriggerSchema.shape.type._def.value,
+  AlertRuleTriggerSchema.shape.type.value,
+  ScheduledTriggerSchema.shape.type.value,
+  ManualTriggerSchema.shape.type.value,
 ];
 export type TriggerType = (typeof TriggerTypes)[number];
 
@@ -445,12 +445,12 @@ const StepSchema = z.lazy(() =>
 export type Step = z.infer<typeof StepSchema>;
 
 export const BuiltInStepTypes = [
-  ForEachStepSchema.shape.type._def.value,
-  IfStepSchema.shape.type._def.value,
-  ParallelStepSchema.shape.type._def.value,
-  MergeStepSchema.shape.type._def.value,
-  WaitStepSchema.shape.type._def.value,
-  HttpStepSchema.shape.type._def.value,
+  ForEachStepSchema.shape.type.value,
+  IfStepSchema.shape.type.value,
+  ParallelStepSchema.shape.type.value,
+  MergeStepSchema.shape.type.value,
+  WaitStepSchema.shape.type.value,
+  HttpStepSchema.shape.type.value,
 ];
 export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 
@@ -541,6 +541,7 @@ export const WorkflowContextSchema = z.object({
   kibanaUrl: z.string(),
   inputs: z
     .record(
+      z.string(),
       z.union([
         z.string(),
         z.number(),

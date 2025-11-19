@@ -9,31 +9,24 @@
 
 import type { JsonSchema7Type } from 'zod-to-json-schema';
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import type { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { FetcherConfigSchema } from '../schema';
 
-type WorkflowJsonSchema = JsonSchema7Type & {
-  $ref: '#/definitions/WorkflowSchema';
-  $schema: 'http://json-schema.org/draft-07/schema#';
-  definitions: {
-    WorkflowSchema: JsonSchema7Type;
-  };
-};
+// type WorkflowJsonSchema = JsonSchema7Type & {
+//   $ref: '#/definitions/WorkflowSchema';
+//   $schema: 'http://json-schema.org/draft-07/schema#';
+//   definitions: {
+//     WorkflowSchema: JsonSchema7Type;
+//   };
+// };
 
-export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType): WorkflowJsonSchema {
-  // Generate the json schema from zod schema
-  const jsonSchema = zodToJsonSchema(yamlSchema, {
-    name: 'WorkflowSchema',
-    target: 'jsonSchema7',
-  });
-
-  // Apply targeted fixes to make it valid for JSON Schema validators
-  const fixedSchema = fixBrokenSchemaReferencesAndEnforceStrictValidation(jsonSchema);
-
-  // Add fetcher parameter to all Kibana connector steps
-  addFetcherToKibanaConnectors(fixedSchema);
-
-  return fixedSchema;
+export function getJsonSchemaFromYamlSchema(yamlSchema: z.ZodType): JsonSchema7Type | null {
+  try {
+    return z.toJSONSchema(yamlSchema);
+  } catch (error) {
+    // console.error('Error generating JSON schema from YAML schema:', error);
+    return null;
+  }
 }
 
 /**

@@ -9,8 +9,8 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { Document } from 'yaml';
-import type { ZodError } from '@kbn/zod';
-import { z } from '@kbn/zod';
+import type { ZodError } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 import { getCompactTypeDescription, getDetailedTypeDescription } from './zod_type_description';
 import { getSchemaAtPath } from './zod_utils';
 import { getAllConnectors } from '../../schema';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { FetcherConfigSchema } from '../spec/schema';
 import type { InternalConnectorContract } from '../types/v1';
 

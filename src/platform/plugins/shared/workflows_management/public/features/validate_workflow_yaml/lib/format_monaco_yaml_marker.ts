@@ -11,7 +11,7 @@
 
 import type YAML from 'yaml';
 import { monaco } from '@kbn/monaco';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import { getPathAtOffset } from '../../../../common/lib/yaml';
 import { formatZodError } from '../../../../common/lib/zod';
 

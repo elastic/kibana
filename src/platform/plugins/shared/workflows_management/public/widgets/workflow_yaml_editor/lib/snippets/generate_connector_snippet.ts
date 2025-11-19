@@ -9,7 +9,7 @@
 
 import { stringify, type ToStringOptions } from 'yaml';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { getZodTypeName } from '../../../../../common/lib/zod';
 import { isMac } from '../../../../shared/utils/is_mac';
 import { getConnectorInstancesForType } from '../autocomplete/suggestions/connector_id/get_connector_id_suggestions_items';

@@ -8,7 +8,7 @@
  */
 
 import type { EnhancedInternalConnectorContract, InternalConnectorContract } from '@kbn/workflows';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 /**
  * Enhanced connector definition that extends auto-generated connectors

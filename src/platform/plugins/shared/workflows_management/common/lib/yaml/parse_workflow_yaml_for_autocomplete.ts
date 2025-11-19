@@ -8,7 +8,7 @@
  */
 
 import { WorkflowSchemaForAutocomplete } from '@kbn/workflows';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import { parseYamlToJSONWithoutValidation } from './parse_workflow_yaml_to_json_without_validation';
 import { InvalidYamlSchemaError } from '../errors';
 import { formatZodError } from '../zod/format_zod_error';

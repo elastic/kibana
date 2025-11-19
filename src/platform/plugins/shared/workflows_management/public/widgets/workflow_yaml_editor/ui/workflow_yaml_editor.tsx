@@ -20,7 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
 import { isTriggerType } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 import { ActionsMenuButton } from './actions_menu_button';
 import {
   useAlertTriggerDecorations,
@@ -64,10 +64,7 @@ import {
   GenericMonacoConnectorHandler,
   KibanaMonacoConnectorHandler,
 } from '../lib/monaco_connectors';
-import {
-  registerMonacoConnectorHandler,
-  registerUnifiedHoverProvider,
-} from '../lib/monaco_providers';
+import { registerMonacoConnectorHandler } from '../lib/monaco_providers';
 import { insertStepSnippet } from '../lib/snippets/insert_step_snippet';
 import { insertTriggerSnippet } from '../lib/snippets/insert_trigger_snippet';
 import { useRegisterKeyboardCommands } from '../lib/use_register_keyboard_commands';
@@ -305,21 +302,6 @@ export const WorkflowYAMLEditor = ({
 
         const genericHandler = new GenericMonacoConnectorHandler();
         registerMonacoConnectorHandler(genericHandler);
-
-        // Create unified providers
-        const providerConfig = {
-          getYamlDocument: () => yamlDocumentRef.current || null,
-          options: {
-            http,
-            notifications,
-            esHost: 'http://localhost:9200',
-            kibanaHost: window.location.origin,
-          },
-        };
-
-        // Register the unified hover provider for API documentation and other content
-        const hoverDisposable = registerUnifiedHoverProvider(providerConfig);
-        disposablesRef.current.push(hoverDisposable);
       }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -505,11 +487,12 @@ export const WorkflowYAMLEditor = ({
             <EuiFlexItem grow={false}>
               <EuiButtonEmpty
                 css={styles.downloadSchemaButton}
-                iconType="download"
+                iconType={workflowJsonSchemaStrict === null ? 'warning' : 'download'}
                 size="xs"
                 aria-label="Download JSON schema for debugging"
                 onClick={downloadSchema}
                 tabIndex={0}
+                disabled={workflowJsonSchemaStrict === null}
                 onKeyDown={(e: React.KeyboardEvent<HTMLButtonElement>) => {
                   if (e.key === 'Enter' || e.key === ' ') {
                     e.currentTarget.click();

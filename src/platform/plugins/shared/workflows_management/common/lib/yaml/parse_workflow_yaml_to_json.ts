@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { z } from '@kbn/zod';
-import { ZodError } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
+import { ZodError } from '@kbn/zod/v4';
 import { parseYamlToJSONWithoutValidation } from './parse_workflow_yaml_to_json_without_validation';
 import { getYamlDocumentErrors } from './validate_yaml_document';
 import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from '../errors';

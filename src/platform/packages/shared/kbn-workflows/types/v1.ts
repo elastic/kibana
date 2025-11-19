@@ -8,7 +8,7 @@
  */
 
 import type { JsonValue } from '@kbn/utility-types';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { WorkflowYaml } from '../spec/schema';
 import { WorkflowSchema } from '../spec/schema';
 
@@ -234,20 +234,20 @@ export const SearchWorkflowCommandSchema = z.object({
 });
 
 export const RunWorkflowCommandSchema = z.object({
-  inputs: z.record(z.unknown()),
+  inputs: z.record(z.string(), z.unknown()),
 });
 export type RunWorkflowCommand = z.infer<typeof RunWorkflowCommandSchema>;
 
 export const RunStepCommandSchema = z.object({
   workflowYaml: z.string(),
   stepId: z.string(),
-  contextOverride: z.record(z.unknown()).optional(),
+  contextOverride: z.record(z.string(), z.unknown()).optional(),
 });
 export type RunStepCommand = z.infer<typeof RunStepCommandSchema>;
 
 export const TestWorkflowCommandSchema = z.object({
   workflowYaml: z.string(),
-  inputs: z.record(z.unknown()),
+  inputs: z.record(z.string(), z.unknown()),
 });
 export type TestWorkflowCommand = z.infer<typeof TestWorkflowCommandSchema>;
 

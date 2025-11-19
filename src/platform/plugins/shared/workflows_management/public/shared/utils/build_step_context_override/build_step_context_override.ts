@@ -17,7 +17,7 @@ import {
   parseJsPropertyAccess,
 } from '@kbn/workflows/common/utils';
 import type { WorkflowGraph } from '@kbn/workflows/graph';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 export interface ContextOverrideData {
   stepContext: Partial<StepContext>;

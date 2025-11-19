@@ -7,7 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ZodFirstPartyTypeKind } from '@kbn/zod';
+type ZodFirstPartyTypeKind =
+  | 'ZodString'
+  | 'ZodNumber'
+  | 'ZodBoolean'
+  | 'ZodArray'
+  | 'ZodObject'
+  | 'ZodRecord'
+  | 'ZodOptional'
+  | 'ZodNullable'
+  | 'ZodUnknown';
 
 export interface ExtractedSchemaPropertyPath {
   path: string;
@@ -17,7 +26,7 @@ export interface ExtractedSchemaPropertyPath {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function getSchemaType(schema: any): ZodFirstPartyTypeKind {
   if (!schema || !schema._def) {
-    return ZodFirstPartyTypeKind.ZodUnknown;
+    return 'ZodUnknown';
   }
 
   return schema._def.typeName;
@@ -35,7 +44,7 @@ function extractSchemaPropertyPathsRecursive(
   }
 
   // Handle ZodObject
-  if (zodSchema._def && zodSchema._def.typeName === ZodFirstPartyTypeKind.ZodObject) {
+  if (zodSchema._def && zodSchema._def.typeName === 'ZodObject') {
     const shape = zodSchema._def.shape();
     for (const [key, value] of Object.entries(shape)) {
       const currentPath = prefix ? `${prefix}.${key}` : key;
@@ -53,7 +62,7 @@ function extractSchemaPropertyPathsRecursive(
   }
 
   // Handle ZodRecord (for dynamic keys like steps)
-  else if (zodSchema._def && zodSchema._def.typeName === ZodFirstPartyTypeKind.ZodRecord) {
+  else if (zodSchema._def && zodSchema._def.typeName === 'ZodRecord') {
     const valueType = zodSchema._def.valueType;
     if (valueType) {
       // For records, we can't know the exact keys, but we can extract the value structure
@@ -65,8 +74,7 @@ function extractSchemaPropertyPathsRecursive(
   // Handle ZodOptional and ZodNullable
   else if (
     zodSchema._def &&
-    (zodSchema._def.typeName === ZodFirstPartyTypeKind.ZodOptional ||
-      zodSchema._def.typeName === ZodFirstPartyTypeKind.ZodNullable)
+    (zodSchema._def.typeName === 'ZodOptional' || zodSchema._def.typeName === 'ZodNullable')
   ) {
     const innerType = zodSchema._def.innerType;
     const nestedPaths = extractSchemaPropertyPathsRecursive(innerType, prefix);
@@ -74,7 +82,7 @@ function extractSchemaPropertyPathsRecursive(
   }
 
   // Handle ZodArray
-  else if (zodSchema._def && zodSchema._def.typeName === ZodFirstPartyTypeKind.ZodArray) {
+  else if (zodSchema._def && zodSchema._def.typeName === 'ZodArray') {
     // Arrays don't add to property paths in our context
     return paths;
   }

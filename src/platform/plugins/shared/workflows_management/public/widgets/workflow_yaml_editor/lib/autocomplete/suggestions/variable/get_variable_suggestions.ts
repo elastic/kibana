@@ -8,7 +8,7 @@
  */
 
 import type { monaco } from '@kbn/monaco';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { wrapAsMonacoSuggestion } from './wrap_as_monaco_suggestion';
 import { getDetailedTypeDescription } from '../../../../../../../common/lib/zod';
 import type { AutocompleteContext } from '../../context/autocomplete.types';

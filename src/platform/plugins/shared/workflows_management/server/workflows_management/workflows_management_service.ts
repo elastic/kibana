@@ -45,7 +45,7 @@ import type {
   WorkflowYaml,
 } from '@kbn/workflows';
 import { ExecutionType, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
-import type { z } from '@kbn/zod';
+import type { z } from '@kbn/zod/v4';
 
 import { getWorkflowExecution } from './lib/get_workflow_execution';
 import { searchStepExecutions } from './lib/search_step_executions';

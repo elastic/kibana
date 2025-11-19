@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import { getJsonSchemaFromYamlSchema } from './get_json_schema_from_yaml_schema';
 import { WorkflowSchema } from '../schema';
 
@@ -25,14 +25,11 @@ describe('getJsonSchemaFromYamlSchema', () => {
     });
     const jsonSchema = getJsonSchemaFromYamlSchema(mockWithSchema);
     expect(jsonSchema).toBeDefined();
-    expect((jsonSchema as any).definitions.WorkflowSchema.additionalProperties).toBe(false);
+    expect(jsonSchema?.additionalProperties).toBe(false);
+    expect(jsonSchema?.properties.steps.items.properties.with.additionalProperties).toBe(false);
     expect(
-      (jsonSchema as any).definitions.WorkflowSchema.properties.steps.items.properties.with
+      jsonSchema?.properties.steps.items.properties.with.properties.operations.items
         .additionalProperties
-    ).toBe(false);
-    expect(
-      (jsonSchema as any).definitions.WorkflowSchema.properties.steps.items.properties.with
-        .properties.operations.items.additionalProperties
     ).toBe(true);
   });
 });

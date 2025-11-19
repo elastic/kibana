@@ -18,7 +18,7 @@ import {
   enhanceKibanaConnectorsWithFetcher,
   generateYamlSchemaFromConnectors,
 } from '@kbn/workflows';
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 // Import connector schemas from the organized structure
 // import { mergeEnhancedConnectors } from './enhanced_es_connectors';
@@ -635,7 +635,9 @@ function generateElasticsearchConnectors(): EnhancedInternalConnectorContract[] 
 }
 
 function generateKibanaConnectors(): InternalConnectorContract[] {
+  return [];
   // Lazy load the generated Kibana connectors
+  // eslint-disable-next-line no-unreachable
   const {
     GENERATED_KIBANA_CONNECTORS,
     // eslint-disable-next-line @typescript-eslint/no-var-requires
@@ -653,6 +655,9 @@ export function convertDynamicConnectorsToContracts(
 ): ConnectorContractUnion[] {
   const connectorContracts: ConnectorContractUnion[] = [];
 
+  return [];
+
+  // eslint-disable-next-line no-unreachable
   Object.values(connectorTypes).forEach((connectorType) => {
     try {
       // Create connector ID schema with available instances
@@ -715,6 +720,7 @@ export function convertDynamicConnectorsToContracts(
     }
   });
 
+  // eslint-disable-next-line no-unreachable
   return connectorContracts;
 }
 

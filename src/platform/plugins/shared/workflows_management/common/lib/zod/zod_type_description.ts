@@ -8,8 +8,8 @@
  */
 
 import { zodToJsonSchema } from 'zod-to-json-schema';
-import type { ZodFirstPartySchemaTypes } from '@kbn/zod';
-import { z } from '@kbn/zod';
+import type { ZodFirstPartySchemaTypes } from '@kbn/zod/v4';
+import { z } from '@kbn/zod/v4';
 
 export interface TypeDescriptionOptions {
   /** Maximum depth for nested objects */

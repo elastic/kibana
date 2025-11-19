@@ -11,7 +11,7 @@ import type { Meta, StoryObj } from '@storybook/react';
 import React from 'react';
 import type { WorkflowYaml } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
-import type { SafeParseReturnType } from '@kbn/zod';
+import type { SafeParseReturnType } from '@kbn/zod/v4';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 import { kibanaReactDecorator } from '../../../../.storybook/decorators';
 import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml';

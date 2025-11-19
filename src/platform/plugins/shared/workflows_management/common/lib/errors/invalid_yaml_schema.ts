@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ZodIssue } from '@kbn/zod';
+import type { ZodIssue } from '@kbn/zod/v4';
 
 export interface MockZodIssue {
   code: 'invalid_literal' | 'unknown';

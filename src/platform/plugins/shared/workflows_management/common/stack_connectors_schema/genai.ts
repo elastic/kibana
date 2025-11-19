@@ -12,7 +12,7 @@
  * and will be deprecated once connectors will expose their schemas
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 
 // Gen AI connector parameter schema for run action
 export const GenAIRunParamsSchema = z.object({
