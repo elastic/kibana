@@ -28,4 +28,16 @@ describe('AttacksPageContent', () => {
       expect(screen.getByTestId('header-page-title')).toHaveTextContent('Attacks');
     });
   });
+
+  it('should render `Schedule` button', async () => {
+    render(
+      <TestProviders>
+        <AttacksPageContent dataView={dataView} />
+      </TestProviders>
+    );
+
+    await waitFor(() => {
+      expect(screen.getByTestId('schedule')).toBeInTheDocument();
+    });
+  });
 });
