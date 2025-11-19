@@ -10,6 +10,7 @@
 export { useTourQueue } from './hooks/use_tour_queue';
 export { getTourQueue } from './state/registry';
 export type { TourQueueResult } from './hooks/use_tour_queue';
+export type { Tour } from './state/tour_queue_state';
 
 const TOUR_REGISTRY = {
   solutionNavigationTour: 1,
