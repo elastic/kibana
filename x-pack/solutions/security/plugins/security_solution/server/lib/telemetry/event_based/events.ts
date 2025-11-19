@@ -432,7 +432,19 @@ export const ENTITY_STORE_USAGE_EVENT: EventTypeOpts<{
     storeSize: {
       type: 'long',
       _meta: {
-        description: 'Number of entities stored in the entity store',
+        description: 'Number of entities stored in the entity store by type and namespace',
+      },
+    },
+    entityType: {
+      type: 'keyword',
+      _meta: {
+        description: 'Type of entities stored (e.g. "host")',
+      },
+    },
+    namespace: {
+      type: 'keyword',
+      _meta: {
+        description: 'Namespace where the entities are stored (e.g. "default")',
       },
     },
   },
