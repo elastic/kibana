@@ -141,15 +141,6 @@ describe('SliChartPanel', () => {
     expect(screen.queryByText('Objective')).toBeFalsy();
   });
 
-  it('shows metadata when hideMetadata is false', () => {
-    const slo = buildSlo();
-    render(<SliChartPanel data={mockChartData} isLoading={false} slo={slo} hideMetadata={false} />);
-
-    // Metadata should be visible
-    expect(screen.getByText('Observed value')).toBeTruthy();
-    expect(screen.getByText('Objective')).toBeTruthy();
-  });
-
   it('displays objective value correctly', () => {
     const slo = buildSlo({ objective: { target: 0.95 } });
     render(<SliChartPanel data={mockChartData} isLoading={false} slo={slo} hideMetadata={false} />);

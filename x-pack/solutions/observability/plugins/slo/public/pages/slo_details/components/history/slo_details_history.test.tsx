@@ -215,13 +215,4 @@ describe('SloDetailsHistory', () => {
     expect(screen.getByText('Observed value')).toBeTruthy();
     expect(screen.getByText('Objective')).toBeTruthy();
   });
-
-  it('shows metadata when hideMetadata is false', () => {
-    const slo = buildSlo();
-    render(<SloDetailsHistory slo={slo} isAutoRefreshing={false} />);
-
-    // Metadata should be visible (HistoricalDataCharts always shows metadata)
-    expect(screen.getByText('Observed value')).toBeTruthy();
-    expect(screen.getByText('Objective')).toBeTruthy();
-  });
 });

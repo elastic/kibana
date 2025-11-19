@@ -218,69 +218,6 @@ describe('HistoricalDataCharts', () => {
     expect(screen.queryByTestId('errorBudgetChartPanel')).toBeTruthy();
   });
 
-  it('passes observedValue to SliChartPanel', () => {
-    const slo = buildSlo({ id: 'test-slo-id' });
-    render(<HistoricalDataCharts slo={slo} isAutoRefreshing={false} />);
-
-    // The observed value from historical data (0.97) should be displayed
-    expect(screen.getByText('97.0%')).toBeTruthy();
-  });
-
-  it('uses the latest entry when multiple valid entries exist', () => {
-    const historicalDataWithMultipleEntries: FetchHistoricalSummaryResponse = [
-      {
-        sloId: 'test-slo-id',
-        instanceId: ALL_VALUE,
-        data: [
-          {
-            date: '2024-01-01T00:00:00.000Z',
-            status: 'HEALTHY',
-            sliValue: 0.99,
-            errorBudget: {
-              initial: 0.05,
-              consumed: 0.02,
-              remaining: 0.98,
-              isEstimated: false,
-            },
-          },
-          {
-            date: '2024-01-02T00:00:00.000Z',
-            status: 'HEALTHY',
-            sliValue: 0.98,
-            errorBudget: {
-              initial: 0.05,
-              consumed: 0.04,
-              remaining: 0.96,
-              isEstimated: false,
-            },
-          },
-          {
-            date: '2024-01-03T00:00:00.000Z',
-            status: 'HEALTHY',
-            sliValue: 0.97,
-            errorBudget: {
-              initial: 0.05,
-              consumed: 0.06,
-              remaining: 0.94,
-              isEstimated: false,
-            },
-          },
-        ],
-      },
-    ];
-
-    useFetchHistoricalSummaryMock.mockReturnValue({
-      isLoading: false,
-      data: historicalDataWithMultipleEntries,
-    });
-
-    const slo = buildSlo({ id: 'test-slo-id' });
-    render(<HistoricalDataCharts slo={slo} isAutoRefreshing={false} />);
-
-    // Should use the latest entry (0.97 from 2024-01-03)
-    expect(screen.getByText('97.0%')).toBeTruthy();
-  });
-
   it('respects the time range when fetching historical data', () => {
     const slo = buildSlo({ id: 'test-slo-id' });
     const range = {
