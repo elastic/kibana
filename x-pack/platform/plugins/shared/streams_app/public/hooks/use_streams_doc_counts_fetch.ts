@@ -34,7 +34,8 @@ export function useStreamDocCountsFetch({
 } {
   const { timeState, timeState$ } = useTimefilter();
   const { streamsRepositoryClient } = useKibana().dependencies.start.streams;
-  const promiseCache = useRef<StreamDocCountsFetch | null>(null);
+  const docCountsPromiseCache = useRef<StreamDocCountsFetch | null>(null);
+  const histogramPromiseCache = useRef<Promise<UnparsedEsqlResponse> | null>(null);
   const abortControllerRef = useRef<AbortController>();
 
   if (!abortControllerRef.current) {
@@ -42,7 +43,8 @@ export function useStreamDocCountsFetch({
   }
 
   useUpdateEffect(() => {
-    promiseCache.current = null;
+    docCountsPromiseCache.current = null;
+    histogramPromiseCache.current = null;
     abortControllerRef.current?.abort();
     abortControllerRef.current = new AbortController();
   }, [canReadFailureStore]);
@@ -59,7 +61,8 @@ export function useStreamDocCountsFetch({
         const shouldRefresh = kind !== 'initial';
 
         if (shouldRefresh) {
-          promiseCache.current = null;
+          docCountsPromiseCache.current = null;
+          histogramPromiseCache.current = null;
           abortControllerRef.current?.abort();
           abortControllerRef.current = new AbortController();
         }
@@ -72,8 +75,8 @@ export function useStreamDocCountsFetch({
 
   return {
     getStreamDocCounts() {
-      if (promiseCache.current) {
-        return promiseCache.current;
+      if (docCountsPromiseCache.current) {
+        return docCountsPromiseCache.current;
       }
 
       const abortController = abortControllerRef.current;
@@ -122,17 +125,21 @@ export function useStreamDocCountsFetch({
         }
       );
 
-      const histogramFetch: StreamDocCountsFetch = {
+      const docCountsFetch: StreamDocCountsFetch = {
         docCount: countPromise,
         failedDocCount: failedCountPromise,
         degradedDocCount: degradedCountPromise,
       };
 
-      promiseCache.current = histogramFetch;
+      docCountsPromiseCache.current = docCountsFetch;
 
-      return histogramFetch;
+      return docCountsFetch;
     },
     getStreamHistogram(streamName: string): Promise<UnparsedEsqlResponse> {
+      if (histogramPromiseCache.current) {
+        return histogramPromiseCache.current;
+      }
+
       const abortController = abortControllerRef.current;
       if (!abortController) {
         throw new Error('Abort controller not set');
@@ -142,7 +149,7 @@ export function useStreamDocCountsFetch({
 
       const source = canReadFailureStore ? `${streamName},${streamName}::failures` : streamName;
 
-      return streamsRepositoryClient.fetch('POST /internal/streams/esql', {
+      const histogramPromise = streamsRepositoryClient.fetch('POST /internal/streams/esql', {
         params: {
           body: {
             operationName: 'get_doc_count_for_stream',
@@ -153,6 +160,10 @@ export function useStreamDocCountsFetch({
         },
         signal: abortController.signal,
       }) as Promise<UnparsedEsqlResponse>;
+
+      histogramPromiseCache.current = histogramPromise;
+
+      return histogramPromise;
     },
   };
 }
