@@ -1,7 +1,0 @@
-{
-  "type": "functional-tests",
-  "id": "@kbn/evals-suite-siem-entity-analytics",
-  "owner": "@elastic/security-entity-analytics",
-  "group": "security",
-  "visibility": "private"
-}

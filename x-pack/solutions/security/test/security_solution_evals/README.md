@@ -1,10 +1,10 @@
-# @kbn/evals-suite-siem-entity-analytics
+# Security Solution Evals
 
 Evaluation test suites for the SIEM Entity Analytics agent, built on top of [`@kbn/evals`](../../../../platform/packages/shared/kbn-evals/README.md).
 
 ## Overview
 
-This package contains evaluation tests specifically for the SIEM Entity Analytics agent (`siem-entity-analytics`), which provides security analysis capabilities through the Agent Builder API.
+This test suite contains evaluation tests specifically for the SIEM Entity Analytics agent (`siem-entity-analytics`), which provides security analysis capabilities through the Agent Builder API.
 
 For general information about writing evaluation tests, configuration, and usage, see the main [`@kbn/evals` documentation](../../../../platform/packages/shared/kbn-evals/README.md).
 
@@ -66,16 +66,16 @@ Run the evaluations:
 
 ```bash
 # Run all SIEM Entity Analytics evaluations
-node scripts/playwright test --config x-pack/solutions/security/packages/kbn-evals-suite-siem-entity-analytics/playwright.config.ts
+node scripts/playwright test --config x-pack/solutions/security/test/security_solution_evals/playwright.config.ts
 
 # Run specific test file
-node scripts/playwright test --config x-pack/solutions/security/packages/kbn-evals-suite-siem-entity-analytics/playwright.config.ts evals/basic/basic.spec.ts
+node scripts/playwright test --config x-pack/solutions/security/test/security_solution_evals/playwright.config.ts evals/basic/basic.spec.ts
 
 # Run with specific connector
-node scripts/playwright test --config x-pack/solutions/security/packages/kbn-evals-suite-siem-entity-analytics/playwright.config.ts --project="my-connector"
+node scripts/playwright test --config x-pack/solutions/security/test/security_solution_evals/playwright.config.ts --project="my-connector"
 
 # Run with LLM-as-a-judge for consistent evaluation results
-EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/solutions/security/packages/kbn-evals-suite-siem-entity-analytics/playwright.config.ts
+EVALUATION_CONNECTOR_ID=llm-judge-connector-id node scripts/playwright test --config x-pack/solutions/security/test/security_solution_evals/playwright.config.ts
 ```
 
 ## Adding New Tests
@@ -134,3 +134,4 @@ evaluate.describe('My Test Suite', { tag: '@svlSecurity' }, () => {
   });
 });
 ```
+

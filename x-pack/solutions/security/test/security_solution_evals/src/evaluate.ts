@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// eslint-disable-next-line import/no-nodejs-modules
 import { format as formatUrl } from 'url';
 import supertest from 'supertest';
 import { evaluate as base, createDefaultTerminalReporter } from '@kbn/evals';
@@ -67,7 +66,7 @@ export const evaluate = base.extend<
     },
   ],
   reportModelScore: [
-    async (_, use) => {
+    async ({}, use) => {
       await use(createDefaultTerminalReporter());
     },
     { scope: 'worker' },

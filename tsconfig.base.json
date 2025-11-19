@@ -1038,8 +1038,6 @@
       "@kbn/evals-suite-obs-ai-assistant/*": ["x-pack/solutions/observability/packages/kbn-evals-suite-obs-ai-assistant/*"],
       "@kbn/evals-suite-onechat": ["x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat"],
       "@kbn/evals-suite-onechat/*": ["x-pack/platform/packages/shared/onechat/kbn-evals-suite-onechat/*"],
-      "@kbn/evals-suite-siem-entity-analytics": ["x-pack/solutions/security/packages/kbn-evals-suite-siem-entity-analytics"],
-      "@kbn/evals-suite-siem-entity-analytics/*": ["x-pack/solutions/security/packages/kbn-evals-suite-siem-entity-analytics/*"],
       "@kbn/evals-suite-streams": ["x-pack/platform/packages/shared/kbn-evals-suite-streams"],
       "@kbn/evals-suite-streams/*": ["x-pack/platform/packages/shared/kbn-evals-suite-streams/*"],
       "@kbn/event-annotation-common": ["src/platform/packages/shared/kbn-event-annotation-common"],
