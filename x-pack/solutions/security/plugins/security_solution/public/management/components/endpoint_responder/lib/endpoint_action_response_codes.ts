@@ -352,7 +352,7 @@ const CODES = Object.freeze({
   // DEV: process with pid or entity_id not foud
   'ra_memory-dump_error_not-found': i18n.translate(
     'xpack.securitySolution.endpointActionResponseCodes.memoryDump.notFound',
-    { defaultMessage: 'The process to dump was not found' }
+    { defaultMessage: 'The process for memory dump was not found' }
   ),
 
   // DEV: not permitted to dump protected process memory. Endpoint honors the OS system protection model
