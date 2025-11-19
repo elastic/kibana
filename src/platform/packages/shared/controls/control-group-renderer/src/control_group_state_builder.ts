@@ -58,34 +58,40 @@ export const controlGroupStateBuilder = {
   addOptionsListControl: (
     controlGroupState: Partial<ControlGroupRuntimeState>,
     controlState: Omit<
-      Omit<StickyControlState, keyof OptionsListDSLControlState> & OptionsListDSLControlState,
+      Omit<StickyControlState, 'config' | 'uid'> & OptionsListDSLControlState,
       'type'
     >,
     controlId?: string
   ) => {
+    const { grow, width, ...rest } = controlState;
     controlGroupState.initialChildControlState = {
       ...(controlGroupState.initialChildControlState ?? {}),
       [controlId ?? uuidv4()]: {
         type: OPTIONS_LIST_CONTROL,
+        grow,
+        width,
         order: getNextControlOrder(controlGroupState.initialChildControlState),
-        ...controlState,
+        config: rest,
       },
     };
   },
   addRangeSliderControl: (
     controlGroupState: Partial<ControlGroupRuntimeState>,
     controlState: Omit<
-      Omit<StickyControlState, keyof RangeSliderControlState> & RangeSliderControlState,
+      Omit<StickyControlState, 'config' | 'uid'> & RangeSliderControlState,
       'type'
     >,
     controlId?: string
   ) => {
+    const { grow, width, ...rest } = controlState;
     controlGroupState.initialChildControlState = {
       ...(controlGroupState.initialChildControlState ?? {}),
       [controlId ?? uuidv4()]: {
         type: RANGE_SLIDER_CONTROL,
+        grow,
+        width,
         order: getNextControlOrder(controlGroupState.initialChildControlState),
-        ...controlState,
+        config: rest,
       },
     };
   },
@@ -99,6 +105,7 @@ export const controlGroupStateBuilder = {
         type: TIME_SLIDER_CONTROL,
         order: getNextControlOrder(controlGroupState.initialChildControlState),
         width: 'large',
+        config: {},
       },
     };
   },
