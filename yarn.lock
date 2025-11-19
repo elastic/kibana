@@ -48,6 +48,13 @@
     "@ai-sdk/provider-utils" "3.0.17"
     "@vercel/oidc" "3.0.3"
 
+"@ai-sdk/langchain@^1.0.94":
+  version "1.0.94"
+  resolved "https://registry.yarnpkg.com/@ai-sdk/langchain/-/langchain-1.0.94.tgz#97a4c00959999bc0baadd6913d708487443aaf6e"
+  integrity sha512-nl3oUU+BpaYtBOOFadt1XyXTz0JqsHreEfSZHPqV0ChPOEKxYSw0aketq8+2VLAQ79976k0Ck6rUb17k8aRtBw==
+  dependencies:
+    ai "5.0.94"
+
 "@ai-sdk/provider-utils@3.0.17":
   version "3.0.17"
   resolved "https://registry.yarnpkg.com/@ai-sdk/provider-utils/-/provider-utils-3.0.17.tgz#2f3d0be398d3f165efe8dd252b63aea6ac3896d1"
@@ -15439,7 +15446,7 @@ aggregate-error@^3.0.0, aggregate-error@^3.1.0:
     clean-stack "^2.0.0"
     indent-string "^4.0.0"
 
-ai@^5.0.38, ai@^5.0.87:
+ai@5.0.94, ai@^5.0.38, ai@^5.0.87:
   version "5.0.94"
   resolved "https://registry.yarnpkg.com/ai/-/ai-5.0.94.tgz#3f4f9d1e48d19334113fcae7b07a286833d5b015"
   integrity sha512-PQs3H8xDhORG/L6eyR+SxAKUsa0ORO4ENvRovzGgPmPGCIlwle6UD5VIMQFtj1gvZk+BKBUVEFFwtkTeJTAURw==

@@ -111,6 +111,7 @@
   },
   "dependencies": {
     "@a2a-js/sdk": "^0.3.4",
+    "@ai-sdk/langchain": "^1.0.94",
     "@apidevtools/json-schema-ref-parser": "^14.1.1",
     "@appland/sql-parser": "^1.5.1",
     "@arizeai/openinference-semantic-conventions": "^1.1.0",

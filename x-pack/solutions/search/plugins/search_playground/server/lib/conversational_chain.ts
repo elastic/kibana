@@ -15,9 +15,9 @@ import {
 import type { Runnable } from '@langchain/core/runnables';
 import { RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
 import { StringOutputParser } from '@langchain/core/output_parsers';
-import { createDataStream, LangChainAdapter } from 'ai';
-import type { DataStreamWriter } from 'ai';
-import type { DataStreamString } from '@ai-sdk/ui-utils';
+import { createUIMessageStream } from 'ai';
+import type { UIMessageStreamWriter, UIMessage, UIMessageChunk } from 'ai';
+import { toUIMessageStream } from '@ai-sdk/langchain';
 import type { BaseLanguageModel } from '@langchain/core/language_models/base';
 import type { BaseMessage } from '@langchain/core/messages';
 import { HumanMessage, AIMessage } from '@langchain/core/messages';
@@ -53,6 +53,17 @@ interface ContextInputs {
   chat_history: string;
   question: string;
 }
+
+// Custom data types for UI message stream annotations
+interface PlaygroundDataTypes extends Record<string, unknown> {
+  search_query: { question: string };
+  context_token_count: { count: number };
+  prompt_token_count: { count: number };
+  retrieved_docs: { documents: Document[] };
+  citations: { documents: Document[] };
+}
+
+type PlaygroundUIMessage = UIMessage<unknown, PlaygroundDataTypes>;
 
 const getSerialisedMessages = (chatHistory: BaseMessage[]) => {
   const formattedDialogueTurns = chatHistory.map((message) => {
@@ -112,11 +123,11 @@ export function contextLimitCheck(
   };
 }
 
-export function registerContextTokenCounts(data: DataStreamWriter) {
+export function registerContextTokenCounts(writer: UIMessageStreamWriter<PlaygroundUIMessage>) {
   return (input: ContextInputs) => {
-    data.writeMessageAnnotation({
-      type: 'context_token_count',
-      count: getTokenEstimate(input.context),
+    writer.write({
+      type: 'data-context_token_count',
+      data: { count: getTokenEstimate(input.context) },
     });
 
     return input;
@@ -130,12 +141,9 @@ class ConversationalChainFn {
     this.options = options;
   }
 
-  async stream(
-    client: AssistClient,
-    msgs: ChatMessage[]
-  ): Promise<ReadableStream<DataStreamString>> {
-    return createDataStream({
-      execute: async (dataStream) => {
+  async stream(client: AssistClient, msgs: ChatMessage[]): Promise<ReadableStream<UIMessageChunk>> {
+    return createUIMessageStream<PlaygroundUIMessage>({
+      execute: async ({ writer }) => {
         const messages = msgs ?? [];
         const lcMessages = getMessages(messages);
         const previousMessages = lcMessages.slice(0, -1);
@@ -192,14 +200,14 @@ class ConversationalChainFn {
             question: (input) => input.question,
           },
           RunnableLambda.from((inputs) => {
-            dataStream.writeMessageAnnotation({
-              type: 'search_query',
-              question: inputs.question,
+            writer.write({
+              type: 'data-search_query',
+              data: { question: inputs.question },
             });
             return inputs;
           }),
           RunnableLambda.from(contextLimitCheck(this.options?.rag?.inputTokensLimit, prompt)),
-          RunnableLambda.from(registerContextTokenCounts(dataStream)),
+          RunnableLambda.from(registerContextTokenCounts(writer)),
           prompt,
           this.options.model.withConfig({ metadata: { type: 'question_answer_qa' } }),
         ]);
@@ -231,41 +239,43 @@ class ConversationalChainFn {
                   metadata: Record<string, string>
                 ) {
                   if (metadata?.type === 'question_answer_qa') {
-                    dataStream.writeMessageAnnotation({
-                      type: 'prompt_token_count',
-                      count: getTokenEstimateFromMessages(msg),
+                    writer.write({
+                      type: 'data-prompt_token_count',
+                      data: { count: getTokenEstimateFromMessages(msg) },
                     });
-                    dataStream.writeMessageAnnotation({
-                      type: 'search_query',
-                      question,
+                    writer.write({
+                      type: 'data-search_query',
+                      data: { question },
                     });
                   }
                 },
                 // callback for prompt based models (Bedrock uses ActionsClientLlm)
                 handleLLMStart(llm, input, runId, parentRunId, extraParams, tags, metadata) {
                   if (metadata?.type === 'question_answer_qa') {
-                    dataStream.writeMessageAnnotation({
-                      type: 'prompt_token_count',
-                      count: getTokenEstimate(input[0]),
+                    writer.write({
+                      type: 'data-prompt_token_count',
+                      data: { count: getTokenEstimate(input[0]) },
                     });
                   }
                 },
                 handleRetrieverEnd(documents) {
                   retrievedDocs.push(...documents);
-                  dataStream.writeMessageAnnotation({
-                    type: 'retrieved_docs',
-                    documents: documents as any,
+                  writer.write({
+                    type: 'data-retrieved_docs',
+                    data: { documents: documents as any },
                   });
                 },
                 handleChainEnd(outputs, runId, parentRunId) {
                   if (outputs?.constructor?.name === 'AIMessageChunk') {
-                    dataStream.writeMessageAnnotation({
-                      type: 'citations',
-                      documents: getCitations(
-                        outputs.content as string,
-                        'inline',
-                        retrievedDocs
-                      ) as any,
+                    writer.write({
+                      type: 'data-citations',
+                      data: {
+                        documents: getCitations(
+                          outputs.content as string,
+                          'inline',
+                          retrievedDocs
+                        ) as any,
+                      },
                     });
                   }
                 },
@@ -274,7 +284,7 @@ class ConversationalChainFn {
           }
         );
 
-        return LangChainAdapter.mergeIntoDataStream(lcStream, { dataStream });
+        writer.merge(toUIMessageStream(lcStream));
       },
       onError: (error: unknown) => {
         if (error instanceof Error) {
