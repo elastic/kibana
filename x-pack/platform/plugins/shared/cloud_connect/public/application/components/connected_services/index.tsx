@@ -60,9 +60,13 @@ interface ClusterDetails {
 
 export interface ConnectedServicesPageProps {
   clusterDetails: ClusterDetails;
+  onRefetch: () => Promise<void>;
 }
 
-export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({ clusterDetails }) => {
+export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({
+  clusterDetails,
+  onRefetch,
+}) => {
   const { euiTheme } = useEuiTheme();
   const { http, notifications } = useCloudConnectedAppContext();
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
@@ -131,6 +135,7 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({ cl
 
   const disconnectModal = isDisconnectModalVisible ? (
     <DisconnectClusterModal
+      clusterId={clusterDetails.id}
       clusterName={clusterDetails.name}
       onClose={closeDisconnectModal}
       onConfirm={handleDisconnectCluster}
@@ -208,7 +213,7 @@ export const ConnectedServicesPage: React.FC<ConnectedServicesPageProps> = ({ cl
 
         <EuiSpacer size="xxl" />
 
-        <ServicesSection services={clusterDetails.services} />
+        <ServicesSection services={clusterDetails.services} onRefetch={onRefetch} />
 
         <MigrationSection />
       </EuiPageBody>

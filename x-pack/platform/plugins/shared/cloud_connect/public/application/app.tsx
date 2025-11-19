@@ -63,11 +63,27 @@ export const CloudConnectedAppMain: React.FC = () => {
     );
   }
 
+  const handleRefetch = async () => {
+    try {
+      const data = await http.get<ClusterDetails>('/internal/cloud_connect/cluster_details');
+      setClusterDetails(data);
+    } catch (error) {
+      // Only show toast for non-503 errors
+      if (error?.body?.statusCode !== 503) {
+        notifications.toasts.addError(error as Error, {
+          title: 'Failed to load cluster details',
+        });
+      }
+      // On any error, show onboarding (clusterDetails remains null)
+      setClusterDetails(null);
+    }
+  };
+
   return (
     <EuiPage>
       <EuiPageBody panelled={true}>
         {clusterDetails ? (
-          <ConnectedServicesPage clusterDetails={clusterDetails} />
+          <ConnectedServicesPage clusterDetails={clusterDetails} onRefetch={handleRefetch} />
         ) : (
           <OnboardingPage onConnect={handleConnect} />
         )}

@@ -193,4 +193,35 @@ export class CloudConnectClient {
       throw error;
     }
   }
+
+  /**
+   * Updates cluster services configuration
+   * Used to enable or disable services for a cluster
+   */
+  async updateClusterServices(
+    apiKey: string,
+    clusterId: string,
+    services: Record<string, { enabled: boolean }>
+  ): Promise<OnboardClusterResponse> {
+    try {
+      this.logger.debug(`Updating services for cluster ID: ${clusterId}`);
+
+      const response = await this.axiosInstance.patch<OnboardClusterResponse>(
+        `/cloud-connected/clusters/${clusterId}`,
+        { services },
+        {
+          headers: {
+            Authorization: `apiKey ${apiKey}`,
+          },
+        }
+      );
+
+      this.logger.debug(`Successfully updated services for cluster: ${response.data.id}`);
+
+      return response.data;
+    } catch (error) {
+      this.logger.error(`Failed to update services for cluster ID: ${clusterId}`, { error });
+      throw error;
+    }
+  }
 }
