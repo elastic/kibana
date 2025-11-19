@@ -67,6 +67,7 @@ export function TextBasedDataPanel({
           dataViews,
           data,
           expressions,
+          core.http,
           frameDataViews
         );
         setDataHasLoaded(true);
@@ -74,7 +75,7 @@ export function TextBasedDataPanel({
       }
     }
     fetchData();
-  }, [data, dataViews, expressions, prevQuery, query, setState, state, frame.dataViews]);
+  }, [data, dataViews, expressions, prevQuery, query, setState, state, frame.dataViews, core.http]);
   const fieldList = isOfAggregateQueryType(query) ? getColumnsFromCache(query) : [];
 
   const onSelectedFieldFilter = useCallback(

@@ -704,6 +704,10 @@ export const getXyVisualization = ({
       (!isHorizontalSeries(subtype1 as SeriesType) && !isHorizontalSeries(subtype2 as SeriesType))
     );
   },
+
+  isSubtypeSupported(subtype) {
+    return visualizationSubtypes.some(({ id }) => id === subtype);
+  },
   getSubtypeSwitch({ state, setState, layerId }) {
     const index = state.layers.findIndex((l) => l.layerId === layerId);
     const layer = state.layers[index];
