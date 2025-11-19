@@ -161,7 +161,6 @@ export function getAssistantToolParams({
     connectorId: apiConfig.connectorId,
     llmType: getLlmType(apiConfig.actionTypeId),
     logger,
-    temperature: 0, // zero temperature because we want structured JSON output
     timeout: connectorTimeout,
     traceOptions,
     telemetryMetadata: {
@@ -481,7 +480,6 @@ export const invokeDefendInsightsGraph = async ({
     connectorId: apiConfig.connectorId,
     llmType,
     logger,
-    temperature: 0,
     timeout: connectorTimeout,
     traceOptions,
     telemetryMetadata: {

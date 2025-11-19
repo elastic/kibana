@@ -114,7 +114,6 @@ describe('evaluateDefendInsights', () => {
       connectorId: '1',
       llmType: 'mock-llm-type',
       logger: mockLogger,
-      temperature: 0,
       timeout: 1000,
       traceOptions: {
         projectName: 'project-name',
@@ -162,5 +161,77 @@ describe('evaluateDefendInsights', () => {
       langSmithApiKey: 'api-key',
       logger: mockLogger,
     });
+  });
+
+  it('creates ActionsClientLlm without temperature parameter (allows connector config to be used)', async () => {
+    const mockGraph = { mock: 'graph' };
+    const mockGetDefaultDefendInsightsGraph = jest.fn().mockReturnValue(mockGraph);
+
+    const mockGraphMetadata = [
+      {
+        getDefaultDefendInsightsGraph: mockGetDefaultDefendInsightsGraph,
+        graphType: 'defend-insights' as const,
+        insightType: DefendInsightType.Enum.incompatible_antivirus,
+      },
+    ];
+
+    const mockConnectors = [
+      createMockConnector({
+        id: '1',
+        name: 'Test Connector',
+        actionTypeId: '.test',
+        prompts: {
+          default: 'default',
+          refine: 'refine',
+          continue: 'continue',
+          group: 'group',
+          events: 'events',
+          eventsId: 'eventsId',
+          eventsEndpointId: 'eventsEndpointId',
+          eventsValue: 'eventsValue',
+        },
+      } as unknown as Connector),
+    ];
+
+    const mockActionsClient = {} as unknown as PublicMethodsOf<ActionsClient>;
+    const mockEsClient = {} as unknown as ElasticsearchClient;
+    const mockSoClient = savedObjectsClientMock.create();
+    const mockEsClientInternalUser = {} as unknown as ElasticsearchClient;
+
+    await evaluateDefendInsights({
+      actionsClient: mockActionsClient,
+      defendInsightsGraphs: mockGraphMetadata,
+      anonymizationFields: [],
+      connectors: mockConnectors,
+      connectorTimeout: 1000,
+      datasetName: 'test-dataset',
+      esClient: mockEsClient,
+      soClient: mockSoClient,
+      esClientInternalUser: mockEsClientInternalUser,
+      evaluationId: 'eval-1',
+      evaluatorConnectorId: 'eval-connector',
+      langSmithApiKey: 'api-key',
+      langSmithProject: 'project-name',
+      logger: mockLogger as unknown as Logger,
+      runName: 'test-run',
+      size: 10,
+    });
+
+    // Verify ActionsClientLlm was called
+    expect(ActionsClientLlm).toHaveBeenCalled();
+
+    // Get all calls to ActionsClientLlm
+    const actionsClientLlmCalls = (ActionsClientLlm as jest.Mock).mock.calls;
+
+    // Find the call for the experiment connector (not the evaluator)
+    // The evaluator LLM is created separately via getEvaluatorLlm
+    // We're looking for the LLM created for the defend insights graph
+    const experimentConnectorLlmCall = actionsClientLlmCalls.find(
+      (call) => call[0]?.connectorId === mockConnectors[0].id
+    );
+
+    expect(experimentConnectorLlmCall).toBeDefined();
+    // Verify temperature is not in the constructor arguments
+    expect(experimentConnectorLlmCall[0]).not.toHaveProperty('temperature');
   });
 });
