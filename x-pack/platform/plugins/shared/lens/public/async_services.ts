@@ -36,11 +36,11 @@ export * from './visualizations/tagcloud';
 export { getEditLensConfiguration } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 
 export * from './datasources/form_based/form_based';
-export { getTextBasedDatasource } from './datasources/form_based/esql_layer/text_based_languages';
+export { getTextBasedDatasource } from './datasources/text_based/text_based_languages';
 export { createFormulaPublicApi } from './datasources/form_based/operations/definitions/formula/formula_public_api';
 export * from './lens_suggestions_api';
 
-export * from './datasources/form_based/esql_layer';
+export * from './datasources/text_based';
 export * from './datasources/form_based';
 export * from './lens_ui_telemetry';
 export * from './lens_ui_errors';
