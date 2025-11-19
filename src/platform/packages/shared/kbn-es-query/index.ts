@@ -63,7 +63,7 @@ export {
   getLanguageDisplayName,
 } from './src/es_query';
 
-export { kqlQuery, dateRangeQuery, termQuery } from './src/es_query/helpers';
+export { kqlQuery, dateRangeQuery, termQuery, termsQuery } from './src/es_query/helpers';
 
 export { FilterStateStore } from '@kbn/es-query-constants';
 

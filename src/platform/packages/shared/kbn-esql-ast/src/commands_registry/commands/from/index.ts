@@ -23,6 +23,7 @@ export const fromCommand = {
   name: 'from',
   methods: fromCommandMethods,
   metadata: {
+    subquerySupport: process.env.NODE_ENV === 'test' ? true : false, // Temporary until making it Preview
     description: i18n.translate('kbn-esql-ast.esql.definitions.fromDoc', {
       defaultMessage:
         'Retrieves data from one or more data streams, indices, or aliases. In a query or subquery, you must use the from command first and it does not need a leading pipe. For example, to retrieve data from an index:',

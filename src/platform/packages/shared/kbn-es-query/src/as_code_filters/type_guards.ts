@@ -48,13 +48,6 @@ export function isLegacyFilter(value: unknown): value is LegacyFilter {
 }
 
 /**
- * Type guard to check if value has the minimal structure of a StoredFilter
- */
-function isStoredFilter(storedFilter: unknown): storedFilter is StoredFilter {
-  return typeof storedFilter === 'object' && storedFilter !== null;
-}
-
-/**
  * Type guard for query objects with term property
  */
 export function hasTermQuery(query: unknown): query is { term: Record<string, unknown> } {
@@ -116,11 +109,7 @@ export function isAsCodeConditionFilter(
 /**
  * Type guard for query objects with bool.should structure
  */
-export function isPhrasesFilter(storedFilter: unknown): boolean {
-  if (!isStoredFilter(storedFilter)) {
-    return false;
-  }
-
+export function isPhrasesFilter(storedFilter: StoredFilter): boolean {
   const query = storedFilter.query;
   return (
     storedFilter.meta?.type === 'phrases' &&
@@ -137,10 +126,7 @@ export function isPhrasesFilter(storedFilter: unknown): boolean {
 /**
  * Type guard for combined filter format
  */
-export function isCombinedFilter(storedFilter: unknown): boolean {
-  if (!isStoredFilter(storedFilter)) {
-    return false;
-  }
+export function isCombinedFilter(storedFilter: StoredFilter): boolean {
   return (
     storedFilter.meta?.type === 'combined' &&
     Array.isArray(storedFilter.meta.params) &&
@@ -151,9 +137,10 @@ export function isCombinedFilter(storedFilter: unknown): boolean {
 /**
  * TIER 1: Full Compatibility - Can be directly converted to SimpleFilter
  */
-export function isFullyCompatible(storedFilter: unknown): boolean {
-  if (!isStoredFilter(storedFilter)) {
-    return false;
+export function isFullyCompatible(storedFilter: StoredFilter): boolean {
+  // Combined filter format
+  if (isCombinedFilter(storedFilter)) {
+    return true;
   }
 
   // Combined filter format
@@ -189,11 +176,7 @@ export function isFullyCompatible(storedFilter: unknown): boolean {
 /**
  * Check if this is a phrase filter that can be converted to a simple condition
  */
-export function isPhraseFilterWithQuery(storedFilter: unknown): boolean {
-  if (!isStoredFilter(storedFilter)) {
-    return false;
-  }
-
+function isPhraseFilter(storedFilter: StoredFilter): boolean {
   // match_phrase queries that can be simplified to phrase conditions
   if (storedFilter.query?.match_phrase) {
     return true;
@@ -228,11 +211,7 @@ export function isPhraseFilterWithQuery(storedFilter: unknown): boolean {
 /**
  * TIER 2: Enhanced Compatibility - Can be parsed and simplified
  */
-export function isEnhancedCompatible(storedFilter: unknown): boolean {
-  if (!isStoredFilter(storedFilter)) {
-    return false;
-  }
-
+export function isEnhancedCompatible(storedFilter: StoredFilter): boolean {
   // Query-based filters that can be parsed into conditions
   // Simple checks first for performance (most common cases)
   if (
@@ -240,7 +219,7 @@ export function isEnhancedCompatible(storedFilter: unknown): boolean {
     hasTermsQuery(storedFilter.query) ||
     hasRangeQuery(storedFilter.query) ||
     hasExistsQuery(storedFilter.query) ||
-    isPhraseFilterWithQuery(storedFilter)
+    isPhraseFilter(storedFilter)
   ) {
     return true;
   }
@@ -264,11 +243,7 @@ export function isEnhancedCompatible(storedFilter: unknown): boolean {
 /**
  * Detect if this represents a grouped filter with multiple conditions
  */
-export function isStoredGroupFilter(storedFilter: unknown): boolean {
-  if (!isStoredFilter(storedFilter)) {
-    return false;
-  }
-
+export function isStoredGroupFilter(storedFilter: StoredFilter): boolean {
   // Combined filter format (legacy): meta.type === 'combined' with params array
   if (isCombinedFilter(storedFilter)) {
     return true;

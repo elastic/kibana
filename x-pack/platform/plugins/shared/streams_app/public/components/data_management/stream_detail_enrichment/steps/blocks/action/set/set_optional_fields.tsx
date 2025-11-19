@@ -69,7 +69,7 @@ export const MediaTypeField = () => {
       }
       fullWidth
     >
-      <EuiFieldText {...inputProps} inputRef={ref} />
+      <EuiFieldText {...inputProps} inputRef={ref} compressed={true} />
     </EuiFormRow>
   );
 };
