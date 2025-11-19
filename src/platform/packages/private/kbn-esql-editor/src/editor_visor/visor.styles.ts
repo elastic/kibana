@@ -9,10 +9,13 @@
 import type { EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/react';
 
+export const visorWidthPercentage = 0.5;
+export const dropdownWidthPercentage = 0.35;
 const visorPadding = '1px';
 
 export const visorStyles = (
   euiTheme: EuiThemeComputed,
+  comboBoxWidth: number,
   isSpaceReduced: boolean,
   isVisible: boolean,
   isDarkMode: boolean
@@ -31,7 +34,7 @@ export const visorStyles = (
       background:
         'linear-gradient(104.14deg, rgb(97, 162, 255) 18.35%, rgb(138, 130, 232) 51.95%, rgb(216, 70, 187) 88.68%, rgb(255, 39, 165) 112.9%);',
       padding: visorPadding,
-      width: isSpaceReduced ? '98%' : '50%',
+      width: isSpaceReduced ? '98%' : `calc(${visorWidthPercentage * 100}% )`,
       height: isVisible ? `${totalHeight}` : '0',
       margin: isVisible ? `0 auto ${euiTheme.size.base}` : '0 auto 0',
       borderRadius: `calc(${euiTheme.size.s} + 1px)`,
@@ -48,7 +51,9 @@ export const visorStyles = (
       borderTopLeftRadius: euiTheme.size.s,
       paddingLeft: '2px',
       flexGrow: 1,
-      maxWidth: `35%`,
+      maxWidth: `${
+        isSpaceReduced ? `calc(${visorWidthPercentage * 100}% )` : `${comboBoxWidth}px`
+      }`,
       overflow: 'hidden',
     },
     separator: {

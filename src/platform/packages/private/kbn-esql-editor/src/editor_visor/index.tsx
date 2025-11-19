@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import React, { useCallback, useEffect, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useState, useRef, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiButtonIcon,
@@ -19,9 +19,10 @@ import {
 } from '@elastic/eui';
 import { useKibanaIsDarkMode } from '@kbn/react-kibana-context-theme';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
+import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
 import { isEqual } from 'lodash';
 import { SourcesDropdown } from './sources_dropdown';
-import { visorStyles } from './visor.styles';
+import { visorStyles, visorWidthPercentage, dropdownWidthPercentage } from './visor.styles';
 
 export interface QuickSearchVisorProps {
   // Current ESQL query
@@ -124,7 +125,19 @@ export function QuickSearchVisor({
     }
   }, [isVisible]);
 
-  const styles = visorStyles(euiTheme, Boolean(isSpaceReduced), isVisible, isDarkMode);
+  const comboBoxWidth = useMemo(() => {
+    const labelLength = selectedSources.map((s) => s.label).join(', ').length || 0;
+    const maxComboBoxWidth = window.innerWidth * visorWidthPercentage * dropdownWidthPercentage;
+    return calculateWidthFromCharCount(labelLength, { maxWidth: maxComboBoxWidth });
+  }, [selectedSources]);
+
+  const styles = visorStyles(
+    euiTheme,
+    comboBoxWidth,
+    Boolean(isSpaceReduced),
+    isVisible,
+    isDarkMode
+  );
 
   return (
     <div css={styles.visorContainer} data-test-subj="ESQLEditor-quick-search-visor">
