@@ -19,13 +19,6 @@ describe('telemetry task state', () => {
         Object {
           "runs": 0,
           "telemetry": Object {
-            "controls": Object {
-              "by_type": Object {},
-              "chaining_system": Object {},
-              "ignore_settings": Object {},
-              "label_position": Object {},
-              "total": 0,
-            },
             "panels": Object {
               "by_reference": 0,
               "by_type": Object {},
@@ -49,13 +42,6 @@ describe('telemetry task state', () => {
               foo: 5,
             },
           },
-          controls: {
-            total: 6,
-            chaining_system: { foo: 7 },
-            label_position: { foo: 8 },
-            ignore_settings: { foo: 9 },
-            by_type: { foo: 10 },
-          },
         },
       };
       const result = v1.up(cloneDeep(state));
@@ -68,13 +54,6 @@ describe('telemetry task state', () => {
         Object {
           "runs": 0,
           "telemetry": Object {
-            "controls": Object {
-              "by_type": Object {},
-              "chaining_system": Object {},
-              "ignore_settings": Object {},
-              "label_position": Object {},
-              "total": 0,
-            },
             "panels": Object {
               "by_reference": 0,
               "by_type": Object {},
