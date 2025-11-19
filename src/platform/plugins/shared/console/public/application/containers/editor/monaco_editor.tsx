@@ -321,10 +321,8 @@ export const MonacoEditor = ({
             })}
           >
             <EuiButtonIcon
-              display="empty"
               color="text"
               iconType="copyClipboard"
-              iconSize="m"
               onClick={onCopyToLanguageSubmit}
               onMouseEnter={checkIsKbnRequestSelected}
               onFocus={checkIsKbnRequestSelected}
