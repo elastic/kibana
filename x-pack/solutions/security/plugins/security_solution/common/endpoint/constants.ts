@@ -112,6 +112,9 @@ export const ACTION_STATE_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/state`;
 // Route that allows read/update the space id that should be used to display orphaned action
 export const ORPHAN_ACTIONS_SPACE_ROUTE = `${BASE_INTERNAL_ENDPOINT_ROUTE}/action/_orphan_actions_space`;
 
+/** Scripts Library */
+export const SCRIPTS_LIBRARY_ROUTE = `${BASE_ENDPOINT_ACTION_ROUTE}/scripts_library`;
+
 /** Endpoint Agent Routes */
 export const AGENT_STATUS_ROUTE = `/internal${BASE_ENDPOINT_ROUTE}/agent_status`;
 
