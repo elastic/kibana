@@ -115,7 +115,7 @@ export function ChangePointDetectionPageProvider(
       const changePointCharts = await testSubjects.findAll(testSubj);
       expect(changePointCharts.length >= expectedChartCount).to.eql(
         true,
-        `Expected more than ${expectedChartCount} charts in the flyout (got '${changePointCharts.length}')`
+        `Expected equal or more than ${expectedChartCount} charts in the flyout (got '${changePointCharts.length}')`
       );
     },
 
