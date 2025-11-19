@@ -10,6 +10,7 @@
 import { getTourOrder, type TourId } from '..';
 
 export interface Tour {
+  isActive: () => boolean;
   skip: () => void;
   complete: () => void;
   unregister: () => void;
@@ -34,6 +35,7 @@ export class TourQueueStateManager {
     if (exists) {
       // Return no-op if already exists
       return {
+        isActive: () => false,
         skip: () => {},
         complete: () => {},
         unregister: () => {},
@@ -47,6 +49,7 @@ export class TourQueueStateManager {
     this.notifySubscribers();
 
     return {
+      isActive: () => this.isActive(tourId),
       skip: () => {
         this.skipAll();
       },
@@ -64,7 +67,7 @@ export class TourQueueStateManager {
       return null;
     }
 
-    // Find the first tour (order-based) that hasn't been completed
+    // Find the first tour that hasn't been completed
     const activeTour = this.registeredTourIds.find(
       (registeredTourId) => !this.completedTourIds.has(registeredTourId)
     );

@@ -100,31 +100,30 @@ describe('TourQueueStateManager', () => {
     });
   });
 
-  describe('isActive', () => {
-    it('should return true for the active tour and false for a waiting tour', () => {
-      tourQueue.register(TOUR_1);
-      tourQueue.register(TOUR_2);
-
-      expect(tourQueue.isActive(TOUR_1)).toBe(true);
-      expect(tourQueue.isActive(TOUR_2)).toBe(false);
-    });
-
-    it('should return false for a completed tour', () => {
-      const tour = tourQueue.register(TOUR_1);
-      tour.complete();
-
-      expect(tourQueue.isActive(TOUR_1)).toBe(false);
-    });
-
-    it('should return false when queue is skipped', () => {
-      const tour = tourQueue.register(TOUR_1);
-      tour.skip();
-
-      expect(tourQueue.isActive(TOUR_1)).toBe(false);
-    });
-  });
-
   describe('Tour object', () => {
+    describe('isActive', () => {
+      it('should return true for the active tour and false for a waiting tour', () => {
+        const tour1 = tourQueue.register(TOUR_1);
+        const tour2 = tourQueue.register(TOUR_2);
+
+        expect(tour1.isActive()).toBe(true);
+        expect(tour2.isActive()).toBe(false);
+      });
+
+      it('should return false for a completed tour', () => {
+        const tour = tourQueue.register(TOUR_1);
+        tour.complete();
+
+        expect(tour.isActive()).toBe(false);
+      });
+
+      it('should return false when queue is skipped', () => {
+        const tour = tourQueue.register(TOUR_1);
+        tour.skip();
+
+        expect(tour.isActive()).toBe(false);
+      });
+    });
     describe('complete', () => {
       it('should mark the tour as completed', () => {
         const tour = tourQueue.register(TOUR_1);

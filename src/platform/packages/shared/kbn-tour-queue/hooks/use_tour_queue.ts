@@ -30,10 +30,10 @@ export const useTourQueue = (tourId: TourId): TourQueueResult => {
     const tour = tourQueue.register(tourId);
     tourRef.current = tour;
     // Set initial isActive state
-    setIsActive(tourQueue.isActive(tourId));
+    setIsActive(tour.isActive());
     // Subscribe to state changes and get cleanup function
     const stopListening = tourQueue.subscribe(() => {
-      setIsActive(tourQueue.isActive(tourId));
+      setIsActive(tour.isActive());
     });
     return () => {
       tourRef.current?.unregister();

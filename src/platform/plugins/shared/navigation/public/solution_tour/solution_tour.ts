@@ -32,11 +32,9 @@ export class SolutionNavigationTourManager {
 
   async startTour(): Promise<void> {
     // Register and get tour object
-    const navTourId = 'solutionNavigationTour';
-    const tour = this.tourQueue.register(navTourId);
-    const isActive = this.tourQueue.isActive(navTourId);
-    if (!isActive) {
-      tour.complete();
+    const tour = this.tourQueue.register('solutionNavigationTour');
+    if (!tour.isActive()) {
+      tour.unregister();
       return;
     }
 
