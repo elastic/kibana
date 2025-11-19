@@ -50,16 +50,14 @@ describe('searchWorkflowExecutions', () => {
         workflowExecutionIndex: '.workflows-executions',
         query: { term: { workflowId: 'workflow-1' } },
         page: 1,
-        perPage: 20,
+        size: 20,
       });
 
       expect(result).toEqual({
         results: [],
-        _pagination: {
-          limit: 20,
-          page: 1,
-          total: 0,
-        },
+        size: 20,
+        page: 1,
+        total: 0,
       });
 
       expect(mockLogger.error).not.toHaveBeenCalled();
