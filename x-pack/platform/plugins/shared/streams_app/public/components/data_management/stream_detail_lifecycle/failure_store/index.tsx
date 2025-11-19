@@ -55,8 +55,13 @@ export const StreamDetailFailureStore = ({
   } = definition;
 
   const failureStoreConfig = useFailureStoreConfig(definition);
-  const { failureStoreEnabled, defaultRetentionPeriod, customRetentionPeriod, inheritOptions } =
-    failureStoreConfig;
+  const {
+    failureStoreEnabled,
+    defaultRetentionPeriod,
+    customRetentionPeriod,
+    inheritOptions,
+    refreshDefaultRetention,
+  } = failureStoreConfig;
 
   const closeModal = () => {
     setIsFailureStoreModalOpen(false);
@@ -66,12 +71,13 @@ export const StreamDetailFailureStore = ({
     failureStoreEnabled?: boolean;
     customRetentionPeriod?: string;
     inherit?: boolean;
-    lifecycleEnabled?: boolean;
+    retentionDisabled?: boolean;
   }) => {
     try {
       await updateFailureStore(definition.stream.name, transformFailureStoreConfig(update));
 
       refreshDefinition();
+      refreshDefaultRetention();
 
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.streams.streamDetailFailureStore.updateFailureStoreSuccess', {

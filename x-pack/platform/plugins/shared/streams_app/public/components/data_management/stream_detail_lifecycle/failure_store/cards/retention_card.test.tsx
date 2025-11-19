@@ -26,6 +26,8 @@ const mockUseFailureStoreConfig = useFailureStoreConfig as jest.MockedFunction<
 
 const renderI18n = (ui: React.ReactElement) => render(<I18nProvider>{ui}</I18nProvider>);
 
+const mockRefresh = jest.fn();
+
 const createMockConfig = (
   config: Partial<ReturnType<typeof useFailureStoreConfig>>
 ): ReturnType<typeof useFailureStoreConfig> => {
@@ -33,12 +35,13 @@ const createMockConfig = (
     failureStoreEnabled: true,
     customRetentionPeriod: undefined,
     defaultRetentionPeriod: '30d',
-    isDisabledLifecycle: false,
+    retentionDisabled: false,
     inheritOptions: {
       canShowInherit: false,
       isWired: false,
       isCurrentlyInherited: false,
     },
+    refreshDefaultRetention: mockRefresh,
     ...config,
   };
   mockUseFailureStoreConfig.mockReturnValue(fullConfig);
@@ -49,60 +52,65 @@ const mockClassicInheritConfig: ReturnType<typeof useFailureStoreConfig> = {
   failureStoreEnabled: true,
   customRetentionPeriod: undefined,
   defaultRetentionPeriod: '30d',
-  isDisabledLifecycle: false,
+  retentionDisabled: false,
   inheritOptions: {
     canShowInherit: true,
     isWired: false,
     isCurrentlyInherited: true,
   },
+  refreshDefaultRetention: mockRefresh,
 };
 
 const mockClassicOverrideConfig: ReturnType<typeof useFailureStoreConfig> = {
   failureStoreEnabled: true,
   customRetentionPeriod: '14d',
   defaultRetentionPeriod: '30d',
-  isDisabledLifecycle: false,
+  retentionDisabled: false,
   inheritOptions: {
     canShowInherit: true,
     isWired: false,
     isCurrentlyInherited: false,
   },
+  refreshDefaultRetention: mockRefresh,
 };
 
 const mockWiredInheritConfig: ReturnType<typeof useFailureStoreConfig> = {
   failureStoreEnabled: true,
   customRetentionPeriod: undefined,
   defaultRetentionPeriod: '30d',
-  isDisabledLifecycle: false,
+  retentionDisabled: false,
   inheritOptions: {
     canShowInherit: true,
     isWired: true,
     isCurrentlyInherited: true,
   },
+  refreshDefaultRetention: mockRefresh,
 };
 
 const mockWiredOverrideConfig: ReturnType<typeof useFailureStoreConfig> = {
   failureStoreEnabled: true,
   customRetentionPeriod: '7d',
   defaultRetentionPeriod: '30d',
-  isDisabledLifecycle: false,
+  retentionDisabled: false,
   inheritOptions: {
     canShowInherit: true,
     isWired: true,
     isCurrentlyInherited: false,
   },
+  refreshDefaultRetention: mockRefresh,
 };
 
 const mockWiredRootConfig: ReturnType<typeof useFailureStoreConfig> = {
   failureStoreEnabled: true,
   customRetentionPeriod: '30d',
   defaultRetentionPeriod: '30d',
-  isDisabledLifecycle: false,
+  retentionDisabled: false,
   inheritOptions: {
     canShowInherit: false,
     isWired: true,
     isCurrentlyInherited: false,
   },
+  refreshDefaultRetention: mockRefresh,
 };
 
 describe('RetentionCard', () => {
@@ -188,7 +196,7 @@ describe('RetentionCard', () => {
   });
 
   it('renders infinite retention when lifecycle is disabled', () => {
-    const mockConfig = createMockConfig({ isDisabledLifecycle: true });
+    const mockConfig = createMockConfig({ retentionDisabled: true });
     renderI18n(
       <RetentionCard
         openModal={jest.fn()}

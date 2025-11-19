@@ -45,6 +45,7 @@ function createCompleteWiredStreamDefinition(overrides: any = {}) {
         routing: [],
         ...overrides,
       },
+      failure_store: { inherit: {} },
     },
   };
 }
@@ -177,6 +178,7 @@ describe('migrateOnRead', () => {
           settings: {},
           processing: { steps: [] },
           classic: { someConfig: 'value' },
+          failure_store: { inherit: {} },
         },
       };
 
@@ -197,6 +199,7 @@ describe('migrateOnRead', () => {
             fields: {},
             routing: [createRoutingRule()],
           },
+          failure_store: { inherit: {} },
         },
       };
 
@@ -217,11 +220,33 @@ describe('migrateOnRead', () => {
             fields: {},
             routing: [createRoutingRule()],
           },
+          failure_store: { inherit: {} },
         },
       };
 
       const result = migrateOnRead(definition);
       expect((result as any).ingest.settings).toEqual({});
+      expect(mockStreamsAsserts).toHaveBeenCalled();
+    });
+
+    it('should add failure_store to ingest if missing', () => {
+      const definition = {
+        name: 'test-stream',
+        description: 'Test stream',
+        ingest: {
+          lifecycle: { dsl: {} },
+          processing: { steps: [] },
+          settings: {},
+          wired: {
+            fields: {},
+            routing: [],
+          },
+        },
+      };
+
+      const result = migrateOnRead(definition);
+
+      expect((result as any).ingest.failure_store).toEqual({ inherit: {} });
       expect(mockStreamsAsserts).toHaveBeenCalled();
     });
   });
@@ -235,6 +260,7 @@ describe('migrateOnRead', () => {
           lifecycle: { dsl: {} },
           processing: { steps: [] },
           unwired: { someConfig: 'value' },
+          failure_store: { inherit: {} },
         },
       };
 

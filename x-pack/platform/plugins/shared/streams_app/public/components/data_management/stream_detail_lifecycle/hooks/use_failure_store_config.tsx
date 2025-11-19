@@ -7,36 +7,48 @@
 
 import { Streams } from '@kbn/streams-schema';
 import { isEnabledFailureStore, isRoot } from '@kbn/streams-schema';
+import type {
+  FailureStoreDisabled,
+  FailureStoreDisabledLifecycle,
+  FailureStoreInherit,
+} from '@kbn/streams-schema/src/models/ingest/failure_store';
 import {
   isDisabledLifecycleFailureStore,
   isInheritFailureStore,
-  type FailureStoreDisabled,
-  type FailureStoreDisabledLifecycle,
   type FailureStoreEnabled,
-  type FailureStoreInherit,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import { useFailureStoreDefaultRetention } from './use_failure_store_default_retention';
 
 export function transformFailureStoreConfig(update: {
   failureStoreEnabled?: boolean;
   customRetentionPeriod?: string;
-  lifecycleEnabled?: boolean;
+  retentionDisabled?: boolean;
   inherit?: boolean;
 }) {
   const failureStoreEnabled = update.failureStoreEnabled ?? false;
-  if (update.inherit) {
+
+  // Inherit
+  if ('inherit' in update && update.inherit) {
     return { inherit: {} } as FailureStoreInherit;
-  } else if (!failureStoreEnabled) {
-    return { disabled: {} } as FailureStoreDisabled;
-  } else {
-    if (update.lifecycleEnabled === false) {
-      return { lifecycle: { disabled: {} } } as FailureStoreDisabledLifecycle;
-    } else {
-      return {
-        lifecycle: { enabled: { data_retention: update.customRetentionPeriod } },
-      } as FailureStoreEnabled;
-    }
   }
+
+  // Disabled
+  if (!failureStoreEnabled) {
+    return { disabled: {} } as FailureStoreDisabled;
+  }
+
+  // Disabled lifecycle
+  if ('retentionDisabled' in update && update.retentionDisabled) {
+    return { lifecycle: { disabled: {} } } as FailureStoreDisabledLifecycle;
+  }
+
+  // Enabled
+  const customRetentionPeriod =
+    'customRetentionPeriod' in update ? update.customRetentionPeriod : undefined;
+
+  return {
+    lifecycle: { enabled: { data_retention: customRetentionPeriod } },
+  } as FailureStoreEnabled;
 }
 
 export function useFailureStoreConfig(definition: Streams.ingest.all.GetResponse) {
@@ -47,10 +59,11 @@ export function useFailureStoreConfig(definition: Streams.ingest.all.GetResponse
   const isRootStream = isRoot(definition.stream.name);
 
   const failureStoreEnabled = isEnabledFailureStore(failureStore);
-  const defaultRetentionPeriod = useFailureStoreDefaultRetention(definition.stream.name);
-  const isDisabledLifecycle = isDisabledLifecycleFailureStore(failureStore);
+  const { value: defaultRetentionPeriod, refresh: refreshDefaultRetention } =
+    useFailureStoreDefaultRetention(definition.stream.name);
+  const retentionDisabled = isDisabledLifecycleFailureStore(failureStore);
   const customRetentionPeriod =
-    failureStoreEnabled && !isDisabledLifecycle
+    failureStoreEnabled && !retentionDisabled
       ? (failureStore as FailureStoreEnabled).lifecycle.enabled.data_retention
       : undefined;
   const isCurrentlyInherited = isInheritFailureStore(definition.stream.ingest.failure_store);
@@ -65,6 +78,7 @@ export function useFailureStoreConfig(definition: Streams.ingest.all.GetResponse
       isWired,
       isCurrentlyInherited,
     },
-    isDisabledLifecycle,
+    retentionDisabled,
+    refreshDefaultRetention,
   };
 }

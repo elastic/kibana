@@ -102,9 +102,14 @@ const createWiredDefinition = (
 });
 
 describe('useFailureStoreConfig', () => {
+  const mockRefresh = jest.fn();
+
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseFailureStoreDefaultRetention.mockReturnValue('30d');
+    mockUseFailureStoreDefaultRetention.mockReturnValue({
+      value: '30d',
+      refresh: mockRefresh,
+    });
   });
 
   describe('Classic Stream', () => {
@@ -123,12 +128,13 @@ describe('useFailureStoreConfig', () => {
         failureStoreEnabled: true,
         customRetentionPeriod: '7d',
         defaultRetentionPeriod: '30d',
-        isDisabledLifecycle: false,
+        retentionDisabled: false,
         inheritOptions: {
           canShowInherit: true,
           isWired: false,
           isCurrentlyInherited: true,
         },
+        refreshDefaultRetention: mockRefresh,
       });
     });
 
@@ -145,12 +151,13 @@ describe('useFailureStoreConfig', () => {
         failureStoreEnabled: true,
         customRetentionPeriod: undefined,
         defaultRetentionPeriod: '30d',
-        isDisabledLifecycle: false,
+        retentionDisabled: false,
         inheritOptions: {
           canShowInherit: true,
           isWired: false,
           isCurrentlyInherited: true,
         },
+        refreshDefaultRetention: mockRefresh,
       });
     });
 
@@ -165,12 +172,13 @@ describe('useFailureStoreConfig', () => {
         failureStoreEnabled: false,
         customRetentionPeriod: undefined,
         defaultRetentionPeriod: '30d',
-        isDisabledLifecycle: false,
+        retentionDisabled: false,
         inheritOptions: {
           canShowInherit: true,
           isWired: false,
           isCurrentlyInherited: true,
         },
+        refreshDefaultRetention: mockRefresh,
       });
     });
 
@@ -187,12 +195,13 @@ describe('useFailureStoreConfig', () => {
         failureStoreEnabled: true,
         customRetentionPeriod: undefined,
         defaultRetentionPeriod: '30d',
-        isDisabledLifecycle: true,
+        retentionDisabled: true,
         inheritOptions: {
           canShowInherit: true,
           isWired: false,
           isCurrentlyInherited: true,
         },
+        refreshDefaultRetention: mockRefresh,
       });
     });
 
@@ -230,12 +239,13 @@ describe('useFailureStoreConfig', () => {
         failureStoreEnabled: true,
         customRetentionPeriod: '5d',
         defaultRetentionPeriod: '30d',
-        isDisabledLifecycle: false,
+        retentionDisabled: false,
         inheritOptions: {
           canShowInherit: true,
           isWired: true,
           isCurrentlyInherited: true,
         },
+        refreshDefaultRetention: mockRefresh,
       });
     });
 
@@ -296,12 +306,13 @@ describe('useFailureStoreConfig', () => {
         failureStoreEnabled: true,
         customRetentionPeriod: '30d',
         defaultRetentionPeriod: '30d',
-        isDisabledLifecycle: false,
+        retentionDisabled: false,
         inheritOptions: {
           canShowInherit: false,
           isWired: true,
           isCurrentlyInherited: false,
         },
+        refreshDefaultRetention: mockRefresh,
       });
     });
 
@@ -330,7 +341,10 @@ describe('useFailureStoreConfig', () => {
 
   describe('Default retention period', () => {
     it('should use the default retention period from the hook', () => {
-      mockUseFailureStoreDefaultRetention.mockReturnValue('90d');
+      mockUseFailureStoreDefaultRetention.mockReturnValue({
+        value: '90d',
+        refresh: mockRefresh,
+      });
       const definition = createClassicDefinition('logs-test', {
         lifecycle: {
           enabled: {},
@@ -344,7 +358,10 @@ describe('useFailureStoreConfig', () => {
     });
 
     it('should handle undefined default retention', () => {
-      mockUseFailureStoreDefaultRetention.mockReturnValue(undefined);
+      mockUseFailureStoreDefaultRetention.mockReturnValue({
+        value: undefined,
+        refresh: mockRefresh,
+      });
       const definition = createClassicDefinition('logs-test', {
         lifecycle: {
           enabled: {},
@@ -379,7 +396,7 @@ describe('transformFailureStoreConfig', () => {
   it('should transform to disabled lifecycle config', () => {
     const result = transformFailureStoreConfig({
       failureStoreEnabled: true,
-      lifecycleEnabled: false,
+      retentionDisabled: true,
     });
 
     expect(result).toEqual({ lifecycle: { disabled: {} } });

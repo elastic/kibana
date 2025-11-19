@@ -41,5 +41,5 @@ export function useFailureStoreDefaultRetention(streamName: string) {
     { disableToastOnError: true }
   );
 
-  return result.value;
+  return { value: result.value, refresh: result.refresh };
 }

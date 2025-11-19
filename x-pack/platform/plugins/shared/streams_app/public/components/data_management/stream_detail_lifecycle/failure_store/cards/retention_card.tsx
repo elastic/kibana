@@ -28,7 +28,7 @@ export const RetentionCard = ({
     customRetentionPeriod,
     defaultRetentionPeriod,
     inheritOptions,
-    isDisabledLifecycle,
+    retentionDisabled,
   } = failureStoreConfig;
 
   if (!failureStoreEnabled) {
@@ -76,7 +76,7 @@ export const RetentionCard = ({
 
   const retentionOrigin = getRetentionOrigin();
 
-  const retentionTypeApplied = isDisabledLifecycle
+  const retentionTypeApplied = retentionDisabled
     ? i18n.translate(
         'xpack.streams.streamDetailView.failureStoreEnabled.failureRetentionCard.infinite',
         {
@@ -97,7 +97,7 @@ export const RetentionCard = ({
         }
       );
 
-  const failureRetentionPeriod = isDisabledLifecycle
+  const failureRetentionPeriod = retentionDisabled
     ? '∞'
     : customRetentionPeriod
     ? getTimeSizeAndUnitLabel(customRetentionPeriod)
