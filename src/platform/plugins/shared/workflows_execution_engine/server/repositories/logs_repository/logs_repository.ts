@@ -10,9 +10,9 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { ClientSearchRequest } from '@kbn/data-streams';
-import type {
+import {
   getDataStreamClient,
-  LogsRepositoryDataStreamClient,
+  type LogsRepositoryDataStreamClient,
   type WorkflowLogEvent,
 } from './data_stream';
 
