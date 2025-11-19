@@ -8,22 +8,12 @@
 import type { FieldMap, SchemaFieldMapKeys } from '@kbn/data-stream-adapter';
 import type { SiemMigrationResource } from '../../../../../common/siem_migrations/model/common.gen';
 import type {
-  ElasticRule,
-  OriginalRule,
   RuleMigration,
   RuleMigrationRule,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { RuleMigrationIntegration, RuleMigrationPrebuiltRule } from '../types';
 
-type RuleMigrationRuleFieldMap = Omit<
-  RuleMigrationRule,
-  'id' | 'original_rule' | 'elastic_rule'
-> & {
-  original_rule: Omit<OriginalRule, 'threat'>;
-  elastic_rule: Omit<ElasticRule, 'threat'>;
-};
-
-export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<RuleMigrationRuleFieldMap>> = {
+export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<Omit<RuleMigrationRule, 'id'>>> = {
   '@timestamp': { type: 'date', required: false },
   migration_id: { type: 'keyword', required: true },
   created_by: { type: 'keyword', required: true },
@@ -38,6 +28,20 @@ export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<RuleMigrationRu
   'original_rule.annotations': { type: 'object', required: false },
   'original_rule.annotations.mitre_attack': { type: 'keyword', array: true, required: false },
   'original_rule.severity': { type: 'keyword', required: false },
+  'original_rule.threat': { type: 'object', required: false },
+  'original_rule.threat.framework': { type: 'keyword', required: false },
+  'original_rule.threat.tactic': { type: 'object', required: false },
+  'original_rule.threat.tactic.id': { type: 'keyword', required: false },
+  'original_rule.threat.tactic.name': { type: 'keyword', required: false },
+  'original_rule.threat.tactic.reference': { type: 'keyword', required: false },
+  'original_rule.threat.technique': { type: 'object', array: true, required: false },
+  'original_rule.threat.technique.id': { type: 'keyword', required: false },
+  'original_rule.threat.technique.name': { type: 'keyword', required: false },
+  'original_rule.threat.technique.reference': { type: 'keyword', required: false },
+  'original_rule.threat.technique.subtechnique': { type: 'object', array: true, required: false },
+  'original_rule.threat.technique.subtechnique.id': { type: 'keyword', required: false },
+  'original_rule.threat.technique.subtechnique.name': { type: 'keyword', required: false },
+  'original_rule.threat.technique.subtechnique.reference': { type: 'keyword', required: false },
   elastic_rule: { type: 'object', required: false },
   'elastic_rule.title': { type: 'text', required: true, fields: { keyword: { type: 'keyword' } } },
   'elastic_rule.integration_ids': { type: 'keyword', required: false, array: true },
@@ -48,6 +52,20 @@ export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<RuleMigrationRu
   'elastic_rule.severity': { type: 'keyword', required: false },
   'elastic_rule.prebuilt_rule_id': { type: 'keyword', required: false },
   'elastic_rule.id': { type: 'keyword', required: false },
+  'elastic_rule.threat': { type: 'object', required: false },
+  'elastic_rule.threat.framework': { type: 'keyword', required: false },
+  'elastic_rule.threat.tactic': { type: 'object', required: false },
+  'elastic_rule.threat.tactic.id': { type: 'keyword', required: false },
+  'elastic_rule.threat.tactic.name': { type: 'keyword', required: false },
+  'elastic_rule.threat.tactic.reference': { type: 'keyword', required: false },
+  'elastic_rule.threat.technique': { type: 'object', array: true, required: false },
+  'elastic_rule.threat.technique.id': { type: 'keyword', required: false },
+  'elastic_rule.threat.technique.name': { type: 'keyword', required: false },
+  'elastic_rule.threat.technique.reference': { type: 'keyword', required: false },
+  'elastic_rule.threat.technique.subtechnique': { type: 'object', array: true, required: false },
+  'elastic_rule.threat.technique.subtechnique.id': { type: 'keyword', required: false },
+  'elastic_rule.threat.technique.subtechnique.name': { type: 'keyword', required: false },
+  'elastic_rule.threat.technique.subtechnique.reference': { type: 'keyword', required: false },
   translation_result: { type: 'keyword', required: false },
   comments: { type: 'object', array: true, required: false },
   'comments.message': { type: 'keyword', required: true },
