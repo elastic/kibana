@@ -9980,7 +9980,7 @@
             "label": "updateOverrides",
             "description": [],
             "signature": [
-              "(newOverrides: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
+              "(newOverrides: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
               "MakeOverridesSerializable",
               "<",
               "RecursivePartial",
@@ -10002,7 +10002,7 @@
               "MakeOverridesSerializable",
               "<",
               "ExternalPointerEventsSettings",
-              " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
+              " | undefined>; pointBuffer?: ",
               "MarkBuffer",
               " | undefined; pointerUpdateTrigger?: ",
               "PointerUpdateTrigger",
@@ -10104,7 +10104,7 @@
                 "label": "newOverrides",
                 "description": [],
                 "signature": [
-                  "Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
+                  "Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
                   "MakeOverridesSerializable",
                   "<",
                   "RecursivePartial",
@@ -10126,7 +10126,7 @@
                   "MakeOverridesSerializable",
                   "<",
                   "ExternalPointerEventsSettings",
-                  " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
+                  " | undefined>; pointBuffer?: ",
                   "MarkBuffer",
                   " | undefined; pointerUpdateTrigger?: ",
                   "PointerUpdateTrigger",
@@ -13450,7 +13450,7 @@
               "\nOverrides can tweak the style of the final embeddable and are executed at the end of the Lens rendering pipeline.\nEach visualization type offers various type of overrides, per component (i.e. 'setting', 'axisX', 'partition', etc...)\n\nWhile it is not possible to pass function/callback/handlers to the renderer, it is possible to overwrite\nthe current behaviour by passing the \"ignore\" string to the override prop (i.e. onBrushEnd: \"ignore\" to stop brushing)"
             ],
             "signature": [
-              "Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
+              "Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
               "MakeOverridesSerializable",
               "<",
               "RecursivePartial",
@@ -13472,7 +13472,7 @@
               "MakeOverridesSerializable",
               "<",
               "ExternalPointerEventsSettings",
-              " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
+              " | undefined>; pointBuffer?: ",
               "MarkBuffer",
               " | undefined; pointerUpdateTrigger?: ",
               "PointerUpdateTrigger",
@@ -20859,6 +20859,38 @@
           },
           {
             "parentPluginId": "@kbn/lens-common",
+            "id": "def-common.Visualization.isSubtypeSupported",
+            "type": "Function",
+            "tags": [],
+            "label": "isSubtypeSupported",
+            "description": [],
+            "signature": [
+              "((subtype: string) => boolean) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-lens-common/visualizations/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/lens-common",
+                "id": "def-common.Visualization.isSubtypeSupported.$1",
+                "type": "string",
+                "tags": [],
+                "label": "subtype",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-lens-common/visualizations/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/lens-common",
             "id": "def-common.Visualization.getCustomLayerHeader",
             "type": "Function",
             "tags": [],
@@ -21020,69 +21052,12 @@
           },
           {
             "parentPluginId": "@kbn/lens-common",
-            "id": "def-common.Visualization.ToolbarComponent",
-            "type": "Function",
-            "tags": [],
-            "label": "ToolbarComponent",
-            "description": [
-              "\nToolbar rendered above the visualization. This is meant to be used to provide chart-level\nsettings for the visualization."
-            ],
-            "signature": [
-              "((props: ",
-              {
-                "pluginId": "@kbn/lens-common",
-                "scope": "common",
-                "docId": "kibKbnLensCommonPluginApi",
-                "section": "def-common.VisualizationToolbarProps",
-                "text": "VisualizationToolbarProps"
-              },
-              "<T>) => React.ReactElement<",
-              {
-                "pluginId": "@kbn/lens-common",
-                "scope": "common",
-                "docId": "kibKbnLensCommonPluginApi",
-                "section": "def-common.VisualizationToolbarProps",
-                "text": "VisualizationToolbarProps"
-              },
-              "<T>, string | React.JSXElementConstructor<any>> | null) | undefined"
-            ],
-            "path": "src/platform/packages/shared/kbn-lens-common/visualizations/types.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/lens-common",
-                "id": "def-common.Visualization.ToolbarComponent.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "props",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/lens-common",
-                    "scope": "common",
-                    "docId": "kibKbnLensCommonPluginApi",
-                    "section": "def-common.VisualizationToolbarProps",
-                    "text": "VisualizationToolbarProps"
-                  },
-                  "<T>"
-                ],
-                "path": "src/platform/packages/shared/kbn-lens-common/visualizations/types.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "@kbn/lens-common",
             "id": "def-common.Visualization.FlyoutToolbarComponent",
             "type": "Function",
             "tags": [],
             "label": "FlyoutToolbarComponent",
             "description": [
-              "\nOptional flyout toolbar component that renders visualization-specific controls\nin a flyout panel. Provides configuration options for style, legend and filters."
+              "\nFlyout toolbar component that renders visualization-specific controls\nin a flyout panel. Provides configuration options for style, legend and filters."
             ],
             "signature": [
               "((props: ",
@@ -24368,23 +24343,23 @@
               },
               {
                 "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/to_expression.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/to_expression.ts"
+              },
+              {
+                "plugin": "lens",
+                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/to_expression.ts"
+              },
+              {
+                "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/xy_config_panel/dimension_editor.tsx"
               },
               {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/xy_config_panel/dimension_editor.tsx"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/to_expression.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/to_expression.ts"
-              },
-              {
-                "plugin": "lens",
-                "path": "x-pack/platform/plugins/shared/lens/public/visualizations/xy/to_expression.ts"
               },
               {
                 "plugin": "lens",
@@ -26477,7 +26452,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
+          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -26499,7 +26474,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
+          " | undefined>; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -27352,7 +27327,7 @@
             "section": "def-common.LensSavedObjectAttributes",
             "text": "LensSavedObjectAttributes"
           },
-          ") => void; updateSavedObjectId: (newSavedObjectId: string | undefined) => void; updateOverrides: (newOverrides: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
+          ") => void; updateSavedObjectId: (newSavedObjectId: string | undefined) => void; updateOverrides: (newOverrides: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -27374,7 +27349,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
+          " | undefined>; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -27571,7 +27546,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
+          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -27593,7 +27568,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
+          " | undefined>; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -27802,7 +27777,7 @@
         "label": "LensByRefSerializedState",
         "description": [],
         "signature": [
-          "{ overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
+          "{ overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -27824,7 +27799,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
+          " | undefined>; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -28067,7 +28042,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
+          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -28089,7 +28064,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
+          " | undefined>; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -28908,7 +28883,7 @@
         "label": "LensByValueSerializedState",
         "description": [],
         "signature": [
-          "{ overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
+          "{ overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -28930,7 +28905,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
+          " | undefined>; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -29268,7 +29243,7 @@
             "section": "def-common.LensSavedObjectAttributes",
             "text": "LensSavedObjectAttributes"
           },
-          ") => void; updateOverrides: (newOverrides: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
+          ") => void; updateOverrides: (newOverrides: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -29290,7 +29265,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
+          " | undefined>; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -29450,7 +29425,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
+          "<Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -29472,7 +29447,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
+          " | undefined>; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -29826,7 +29801,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
+          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -29848,7 +29823,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
+          " | undefined>; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -30700,7 +30675,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
+          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -30722,7 +30697,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
+          " | undefined>; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -30940,7 +30915,7 @@
           "\nCompose together all the props and make them inspectable via Simplify\n\nThe LensSerializedState is the state stored for a dashboard panel\nthat contains:\n* Lens document state\n* Panel settings\n* other props from the embeddable"
         ],
         "signature": [
-          "{ overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
+          "{ overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -30962,7 +30937,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
+          " | undefined>; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -31149,7 +31124,7 @@
           "\nCombined properties of serialized state stored on dashboard panel\n\n Includes:\n- Lens document state (for by-value)\n- Panel settings\n- other props from the embeddable"
         ],
         "signature": [
-          "{ overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
+          "{ overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -31171,7 +31146,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
+          " | undefined>; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -31341,7 +31316,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; isNewPanel?: boolean | undefined; savedObjectId?: string | undefined; attributes?: undefined; } | { overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
+          "; } | undefined; isNewPanel?: boolean | undefined; savedObjectId?: string | undefined; attributes?: undefined; } | { overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -31363,7 +31338,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
+          " | undefined>; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -32746,7 +32721,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
+          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -32768,7 +32743,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
+          " | undefined>; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",
@@ -33629,7 +33604,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
+          "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; debug?: boolean | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -33651,7 +33626,7 @@
           "MakeOverridesSerializable",
           "<",
           "ExternalPointerEventsSettings",
-          " | undefined>; debug?: boolean | undefined; pointBuffer?: ",
+          " | undefined>; pointBuffer?: ",
           "MarkBuffer",
           " | undefined; pointerUpdateTrigger?: ",
           "PointerUpdateTrigger",

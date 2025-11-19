@@ -83,7 +83,7 @@ import type {
   FormBasedDatasource as FormBasedDatasourceType,
   FormBasedDatasourceSetupPlugins,
 } from './datasources/form_based';
-import type { TextBasedDatasource as TextBasedDatasourceType } from './datasources/form_based/esql_layer';
+import type { TextBasedDatasource as TextBasedDatasourceType } from './datasources/text_based';
 
 import type {
   XyVisualization as XyVisualizationType,

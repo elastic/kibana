@@ -8,7 +8,7 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import ParamsFields from './params';
-import { SUB_ACTION } from '../../../common/inference/constants';
+import { SUB_ACTION } from '@kbn/connector-schemas/inference/constants';
 import { isInferenceEndpointExists } from '@kbn/inference-endpoint-ui-common';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
 
