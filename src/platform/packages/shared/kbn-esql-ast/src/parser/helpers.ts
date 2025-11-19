@@ -10,3 +10,17 @@
 export const nonNullable = <T>(v: T): v is NonNullable<T> => {
   return v != null;
 };
+
+/**
+ * Removes backtick quotes from around a field name and un-escapes any
+ * backticks (double ``) within the field name.
+ *
+ * @param field A potentially escaped field (column).
+ */
+export const unescapeColumn = (field: string) => {
+  if (!field) {
+    return '';
+  }
+
+  return field.replace(/^`{1}|`{1}$/g, '').replace(/``/g, '`');
+};

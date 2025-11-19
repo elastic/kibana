@@ -242,7 +242,8 @@ export interface ESQLFunctionCallExpression extends ESQLFunction<'variadic-call'
   args: ESQLAstItem[];
 }
 
-export interface ESQLUnaryExpression extends ESQLFunction<'unary-expression'> {
+export interface ESQLUnaryExpression<Name extends string = string>
+  extends ESQLFunction<'unary-expression', Name> {
   subtype: 'unary-expression';
   args: [ESQLAstItem];
 }
