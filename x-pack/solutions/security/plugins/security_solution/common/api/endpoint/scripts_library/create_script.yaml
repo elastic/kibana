@@ -1,0 +1,55 @@
+openapi: 3.0.0
+info:
+  title: Create script schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/action/scripts_library:
+    post:
+      summary: Create a new script entry by uploading a script file
+      operationId: EndpointScriptLibraryCreateScript
+      description: Create a new script entry by uploading a script file
+      x-codegen-enabled: false
+#      TODO: When feature flag is enable, remove empty `x-labels` and un-comment the line below.
+#      x-labels: [ ess, serverless ]
+      x-labels: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CreateScriptRouteRequestBody'
+
+      responses:
+        '200':
+          description: Action request was successfully created
+          content:
+            application/json:
+              schema:
+                $ref: './common.yaml#/components/schemas/ScriptsApiResponse'
+
+components:
+  x-codegen-enabled: false
+  schemas:
+    CreateScriptRouteRequestBody:
+      type: object
+      required:
+        - name
+        - platform
+        - file
+      properties:
+        name:
+          type: string
+          description: Name of the script
+        platform:
+          type: array
+          items:
+            type: string
+          description: Platforms supported by the the script
+        file:
+          type: object
+          format: binary
+
+
+
+
+
