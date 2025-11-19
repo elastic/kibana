@@ -148,6 +148,8 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
       : [];
   }, [selectedRuleType]);
 
+  const connectorConfig = connector && 'config' in connector ? connector.config : undefined;
+
   const showActionGroupErrorIcon = (): boolean => {
     return !isOpen && some(actionParamsError, (error) => !isEmpty(error));
   };
@@ -174,7 +176,7 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
     async (params: RuleActionParam) => {
       const res: { errors: RuleFormParamsErrors } = await actionTypeRegistry
         .get(action.actionTypeId)
-        ?.validateParams(params);
+        ?.validateParams(params, connectorConfig);
 
       dispatch({
         type: 'setActionParamsError',
@@ -184,7 +186,7 @@ export const RuleActionsSystemActionsItem = (props: RuleActionsSystemActionsItem
         },
       });
     },
-    [actionTypeRegistry, action, dispatch]
+    [actionTypeRegistry, action, connectorConfig, dispatch]
   );
 
   const onParamsChange = useCallback(

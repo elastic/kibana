@@ -5,3 +5,5 @@ fileGroups:
     - "/tsconfig.json"
     - "/tsconfig.base.json"
     - "/tsconfig.browser.json"
+
+tasks: {}

@@ -2629,6 +2629,14 @@
                 "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/sample_data/test_policy.ts"
               },
               {
+                "plugin": "cloudDefend",
+                "path": "x-pack/solutions/security/plugins/cloud_defend/public/test/mocks.ts"
+              },
+              {
+                "plugin": "cloudDefend",
+                "path": "x-pack/solutions/security/plugins/cloud_defend/public/test/mocks.ts"
+              },
+              {
                 "plugin": "@kbn/test-suites-xpack-security",
                 "path": "x-pack/solutions/security/test/fleet_api_integration/apis/package_policy/update.ts"
               },
@@ -23316,7 +23324,7 @@
             "label": "body",
             "description": [],
             "signature": [
-              "{ readonly id?: string | undefined; readonly namespace?: string | undefined; readonly description?: string | undefined; readonly inputs?: Record<string, Readonly<{ enabled?: boolean | undefined; streams?: Record<string, Readonly<{ enabled?: boolean | undefined; vars?: Record<string, string | number | boolean | string[] | number[] | Readonly<{} & { id: string; isSecretRef: boolean; }> | null> | undefined; } & {}>> | undefined; vars?: Record<string, string | number | boolean | string[] | number[] | Readonly<{} & { id: string; isSecretRef: boolean; }> | null> | undefined; } & {}>> | undefined; readonly vars?: Record<string, string | number | boolean | string[] | number[] | Readonly<{} & { id: string; isSecretRef: boolean; }> | null> | undefined; readonly additional_datastreams_permissions?: string[] | null | undefined; readonly force?: boolean | undefined; readonly name: string; readonly package: Readonly<{ title?: string | undefined; experimental_data_stream_features?: Readonly<{} & { features: Readonly<{ synthetic_source?: boolean | undefined; tsdb?: boolean | undefined; doc_value_only_numeric?: boolean | undefined; doc_value_only_other?: boolean | undefined; } & {}>; data_stream: string; }>[] | undefined; requires_root?: boolean | undefined; fips_compatible?: boolean | undefined; } & { version: string; name: string; }>; }"
+              "{ readonly id?: string | undefined; readonly namespace?: string | undefined; readonly description?: string | undefined; readonly force?: boolean | undefined; readonly inputs?: Record<string, Readonly<{ enabled?: boolean | undefined; streams?: Record<string, Readonly<{ enabled?: boolean | undefined; vars?: Record<string, string | number | boolean | string[] | number[] | Readonly<{} & { id: string; isSecretRef: boolean; }> | null> | undefined; } & {}>> | undefined; vars?: Record<string, string | number | boolean | string[] | number[] | Readonly<{} & { id: string; isSecretRef: boolean; }> | null> | undefined; } & {}>> | undefined; readonly vars?: Record<string, string | number | boolean | string[] | number[] | Readonly<{} & { id: string; isSecretRef: boolean; }> | null> | undefined; readonly additional_datastreams_permissions?: string[] | null | undefined; readonly name: string; readonly package: Readonly<{ title?: string | undefined; experimental_data_stream_features?: Readonly<{} & { features: Readonly<{ synthetic_source?: boolean | undefined; tsdb?: boolean | undefined; doc_value_only_numeric?: boolean | undefined; doc_value_only_other?: boolean | undefined; } & {}>; data_stream: string; }>[] | undefined; requires_root?: boolean | undefined; fips_compatible?: boolean | undefined; } & { version: string; name: string; }>; }"
             ],
             "path": "x-pack/platform/plugins/shared/fleet/common/types/rest_spec/agentless_policy.ts",
             "deprecated": false,
@@ -27047,6 +27055,14 @@
                 "path": "x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/synthetics/sample_data/test_policy.ts"
               },
               {
+                "plugin": "cloudDefend",
+                "path": "x-pack/solutions/security/plugins/cloud_defend/public/test/mocks.ts"
+              },
+              {
+                "plugin": "cloudDefend",
+                "path": "x-pack/solutions/security/plugins/cloud_defend/public/test/mocks.ts"
+              },
+              {
                 "plugin": "@kbn/test-suites-xpack-security",
                 "path": "x-pack/solutions/security/test/fleet_api_integration/apis/package_policy/update.ts"
               },
@@ -30485,6 +30501,21 @@
         "description": [],
         "signature": [
           "\"apm\""
+        ],
+        "path": "x-pack/platform/plugins/shared/fleet/common/constants/epm.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fleet",
+        "id": "def-common.FLEET_CLOUD_DEFEND_PACKAGE",
+        "type": "string",
+        "tags": [],
+        "label": "FLEET_CLOUD_DEFEND_PACKAGE",
+        "description": [],
+        "signature": [
+          "\"cloud_defend\""
         ],
         "path": "x-pack/platform/plugins/shared/fleet/common/constants/epm.ts",
         "deprecated": false,

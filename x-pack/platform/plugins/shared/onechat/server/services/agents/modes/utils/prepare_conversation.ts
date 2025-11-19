@@ -6,6 +6,7 @@
  */
 
 import type { ConversationRound, RawRoundInput, RoundInput } from '@kbn/onechat-common';
+import { createInternalError } from '@kbn/onechat-common';
 import type { Attachment, AttachmentInput } from '@kbn/onechat-common/attachments';
 import type { AttachmentsService } from '@kbn/onechat-server/runner';
 import { getToolResultId } from '@kbn/onechat-server/tools';
@@ -14,6 +15,11 @@ import type { AttachmentRepresentation } from '@kbn/onechat-server/attachments';
 export interface ProcessedAttachment {
   attachment: Attachment;
   representation: AttachmentRepresentation;
+}
+
+export interface ProcessedAttachmentType {
+  type: string;
+  agentDescription?: string;
 }
 
 export interface ProcessedRoundInput {
@@ -28,6 +34,7 @@ export type ProcessedConversationRound = Omit<ConversationRound, 'input'> & {
 export interface ProcessedConversation {
   previousRounds: ProcessedConversationRound[];
   nextInput: ProcessedRoundInput;
+  attachmentTypes: ProcessedAttachmentType[];
 }
 
 export const prepareConversation = async ({
@@ -40,13 +47,37 @@ export const prepareConversation = async ({
   attachmentsService: AttachmentsService;
 }): Promise<ProcessedConversation> => {
   const processedNextInput = await prepareRoundInput({ input: nextInput, attachmentsService });
+  const processedRounds = await Promise.all(
+    previousRounds.map((round) => {
+      return prepareRound({ round, attachmentsService });
+    })
+  );
+
+  const attachmentTypeIds = [
+    ...new Set<string>([
+      ...processedNextInput.attachments.map((attachment) => attachment.attachment.type),
+      ...processedRounds.flatMap((round) =>
+        round.input.attachments.map((attachment) => attachment.attachment.type)
+      ),
+    ]),
+  ];
+
+  const attachmentTypes = await Promise.all(
+    attachmentTypeIds.map<Promise<ProcessedAttachmentType>>(async (type) => {
+      const definition = attachmentsService.getTypeDefinition(type);
+      const description = definition?.getAgentDescription?.() ?? '';
+
+      return {
+        type,
+        description,
+      };
+    })
+  );
+
   return {
     nextInput: processedNextInput,
-    previousRounds: await Promise.all(
-      previousRounds.map((round) => {
-        return prepareRound({ round, attachmentsService });
-      })
-    ),
+    previousRounds: processedRounds,
+    attachmentTypes,
   };
 };
 
@@ -85,16 +116,23 @@ const prepareRoundInput = async ({
 };
 
 const prepareAttachment = async ({
-  attachment,
+  attachment: input,
   attachmentsService,
 }: {
   attachment: AttachmentInput;
   attachmentsService: AttachmentsService;
 }): Promise<ProcessedAttachment> => {
-  const representation = await attachmentsService.format(attachment);
+  const definition = attachmentsService.getTypeDefinition(input.type);
+  if (!definition) {
+    throw createInternalError(`Found attachment with unknown type: "${input.type}"`);
+  }
+
+  const attachment = inputToFinal(input);
+  const formatted = await definition.format(attachment);
+
   return {
-    attachment: inputToFinal(attachment),
-    representation,
+    attachment,
+    representation: await formatted.getRepresentation(),
   };
 };
 
