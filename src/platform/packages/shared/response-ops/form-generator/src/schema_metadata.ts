@@ -7,28 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z } from '@kbn/zod/v4';
-import type { WidgetType } from './widgets';
-
 // Utility type to strip form-specific props (value, onChange, onBlur) from EUI component props
 export type StripFormProps<T> = Partial<Omit<T, 'value' | 'onChange' | 'onBlur'>>;
 
-export interface BaseMetadata {
-  widget?: WidgetType | string;
-  label?: string;
-  placeholder?: string;
-  default?: unknown;
-  helpText?: string;
-  isDisabled?: boolean;
-  sensitive?: boolean;
-}
-
-declare module '@kbn/zod/v4' {
-  interface GlobalMeta extends BaseMetadata {
-    [key: string]: unknown;
-  }
-}
-
-export function getMeta(schema: z.ZodTypeAny): BaseMetadata {
-  return z.globalRegistry.get(schema) ?? {};
-}
+// In the long-term, we'll want to remove the connector_spec dependency from this package
+// Packages using this shared package should be able to define their own metadata
+import type { BaseMetadata } from '@kbn/connector-specs/src/connector_spec_ui';
+export type { BaseMetadata };
+export { getMeta } from '@kbn/connector-specs/src/connector_spec_ui';

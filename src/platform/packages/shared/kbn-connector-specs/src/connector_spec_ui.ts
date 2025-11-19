@@ -43,8 +43,8 @@ export interface BaseMetadata {
   order?: number;
 }
 
-export function getMeta(schema: z.ZodTypeAny): BaseMetadata | undefined {
-  return z.globalRegistry.get(schema) as BaseMetadata | undefined;
+export function getMeta(schema: z.ZodTypeAny): BaseMetadata {
+  return z.globalRegistry.get(schema) || {};
 }
 
 /**
