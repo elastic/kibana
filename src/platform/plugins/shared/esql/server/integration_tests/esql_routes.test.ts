@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { LOOKUP_INDEX_RECREATE_ROUTE } from '@kbn/esql-types';
 import { EsqlServiceTestbed } from './testbed';
 
-describe('EsqlService', () => {
+describe('ESQL routes', () => {
   const testbed = new EsqlServiceTestbed();
 
   beforeAll(async () => {
@@ -204,6 +205,53 @@ describe('EsqlService', () => {
       // Cleanup
       await client.indices.delete({ index: index1 });
       await client.indices.delete({ index: index2 });
+    });
+  });
+
+  describe('POST /internal/esql/lookup_index/{indexName}/recreate', () => {
+    it('can recreate a lookup index', async () => {
+      const indexName = 'test_lookup_index_recreate';
+      const client = testbed.esClient();
+
+      // Create an index with some data
+      await client.indices.create({
+        index: indexName,
+        settings: {
+          mode: 'lookup',
+        },
+      });
+
+      await client.index({
+        index: indexName,
+        id: '1',
+        document: { name: 'test' },
+        refresh: 'wait_for',
+      });
+
+      // Verify the document exists
+      let searchResult = await client.search({ index: indexName });
+      expect(searchResult.hits.total).toMatchObject({ value: 1 });
+
+      // Recreate the index
+      const url = `${LOOKUP_INDEX_RECREATE_ROUTE}/${indexName}`;
+      const result = await testbed.POST(url).send().expect(200);
+
+      expect(result.body).toMatchObject({
+        acknowledged: true,
+        index: indexName,
+      });
+
+      // Verify the index was recreated and is empty
+      await client.indices.refresh({ index: indexName });
+      searchResult = await client.search({ index: indexName });
+      expect(searchResult.hits.total).toMatchObject({ value: 0 });
+
+      // Verify it still has lookup mode
+      const indexSettings = await client.indices.getSettings({ index: indexName });
+      expect(indexSettings[indexName].settings?.index?.mode).toBe('lookup');
+
+      // Cleanup
+      await client.indices.delete({ index: indexName });
     });
   });
 });
