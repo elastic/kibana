@@ -409,9 +409,6 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
         errorMetadata,
         traceId
       );
-      throw new Error('Unhandled Agentless API list deployments Agentless API', {
-        cause: error,
-      });
     });
 
     return response.data;
@@ -556,7 +553,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     requestConfigDebugStatus: string,
     errorMetadata: LogMeta,
     traceId?: string
-  ) {
+  ): never {
     const errorMetadataWithRequestConfig: LogMeta = {
       ...errorMetadata,
       http: {
@@ -648,7 +645,7 @@ class AgentlessAgentServiceImpl implements AgentlessAgentService {
     logMessage: string,
     userMessage: string,
     traceId?: string
-  ) {
+  ): never {
     logger.error(
       `${logMessage} ${JSON.stringify(response.status)} ${JSON.stringify(
         pick(response.data ?? {}, 'code', 'error')
