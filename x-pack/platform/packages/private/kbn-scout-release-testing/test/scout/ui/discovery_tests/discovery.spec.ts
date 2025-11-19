@@ -186,4 +186,18 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
     // Verify we're now on the Lens page
     expect(page.url()).toContain('/app/lens');
   });
+
+  test('drag and drop field to grid', async ({ page, pageObjects }) => {
+    // Verify chart is initially visible
+    await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+
+    // Drag the @message field to the data grid
+    const sourceLocator = page.testSubj.locator('field-@message');
+    const targetLocator = page.testSubj.locator('euiDataGridBody');
+    await sourceLocator.dragTo(targetLocator);
+
+    // Verify the field was added to the grid
+    const columnText = await pageObjects.discover.getTheColumnFromGrid();
+    expect(columnText).toContain('@message');
+  });
 });

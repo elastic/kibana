@@ -168,4 +168,8 @@ export class DiscoverApp {
   async navigateToLensEditor() {
     await this.page.testSubj.click('unifiedHistogramEditVisualization');
   }
+
+  async getTheColumnFromGrid(): Promise<string> {
+    return await this.page.testSubj.locator('unifiedDataTableColumnTitle').innerText();
+  }
 }
