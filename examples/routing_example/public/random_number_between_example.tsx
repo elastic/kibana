@@ -72,7 +72,7 @@ export function RandomNumberBetweenRouteExample({ fetchRandomNumberBetween }: Pr
         </EuiFormRow>
 
         {error !== undefined ? (
-          <EuiCallOut color="danger" iconType="warning">
+          <EuiCallOut announceOnMount color="danger" iconType="warning">
             {error.message}
           </EuiCallOut>
         ) : null}

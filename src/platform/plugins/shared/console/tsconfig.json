@@ -1,10 +1,11 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
   },
-  "include": ["common/**/*", "public/**/*", "server/**/*", "packaging/**/*"],
+  "include": ["common/**/*", "public/**/*", "server/**/*", "packaging/**/*", "test/**/*"],
   "kbn_references": [
+    "@kbn/scout",
     "@kbn/core",
     "@kbn/dev-tools-plugin",
     "@kbn/es-ui-shared-plugin",
@@ -32,7 +33,6 @@
     "@kbn/core-doc-links-browser",
     "@kbn/shared-ux-router",
     "@kbn/esql-editor",
-    "@kbn/data-views-plugin",
     "@kbn/licensing-plugin",
     "@kbn/esql-utils",
     "@kbn/field-types",

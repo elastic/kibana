@@ -16,11 +16,8 @@ import { z } from '@kbn/zod';
 
 // Gemini connector parameter schema
 export const GeminiParamsSchema = z.object({
-  subAction: z.enum(['run', 'test', 'dashboard']),
-  subActionParams: z.object({
-    body: z.string(),
-    model: z.string().optional(),
-  }),
+  body: z.string(),
+  model: z.string().optional(),
 });
 
 // Gemini connector response schema

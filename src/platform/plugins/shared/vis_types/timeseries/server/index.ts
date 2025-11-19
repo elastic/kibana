@@ -29,3 +29,4 @@ export async function plugin(initializerContext: PluginInitializerContext) {
 
 export type { TimeseriesVisData } from '../common/types';
 export { isVisSeriesData, isVisTableData } from '../common/vis_data_utils';
+export { createRequestHash } from './create_request_hash';

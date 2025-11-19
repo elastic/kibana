@@ -27,7 +27,7 @@ consts:
   outerForeachArray: '${JSON.stringify(outerArray)}'
 steps:
   - name: outerForeachStep
-    foreach: consts.outerForeachArray
+    foreach: '{{consts.outerForeachArray}}'
     type: foreach
     steps:
       - name: outerForeachChildConnectorStep

@@ -20,13 +20,11 @@ import type {
   ActionTypeExecutorResult as ConnectorTypeExecutorResult,
 } from '@kbn/actions-plugin/server/types';
 import type { ConnectorAdapter } from '@kbn/alerting-plugin/server';
-import {
-  EmailParamsSchema,
-  JiraParamsSchema,
-  PagerdutyParamsSchema,
-  SlackApiParamsSchema,
-  WebhookParamsSchema,
-} from '@kbn/stack-connectors-plugin/server';
+import { ParamsSchema as EmailParamsSchema } from '@kbn/connector-schemas/email';
+import { ExecutorParamsSchema as JiraParamsSchema } from '@kbn/connector-schemas/jira';
+import { ParamsSchema as PagerdutyParamsSchema } from '@kbn/connector-schemas/pagerduty';
+import { SlackApiParamsSchema } from '@kbn/connector-schemas/slack_api';
+import { ParamsSchema as WebhookParamsSchema } from '@kbn/connector-schemas/webhook';
 import type { ObservabilityAIAssistantRouteHandlerResources } from '@kbn/observability-ai-assistant-plugin/server/routes/types';
 import type { ChatCompletionChunkEvent } from '@kbn/observability-ai-assistant-plugin/common';
 import {
@@ -312,66 +310,67 @@ If available, include the link of the conversation at the end of your answer.`
     }
   );
 
-  client
-    .complete({
-      functionClient,
-      persist: true,
-      isPublic: true,
-      connectorId: params.connector,
-      signal: new AbortController().signal,
-      kibanaPublicUrl: (await resources.plugins.core.start()).http.basePath.publicBaseUrl,
-      messages: [
-        {
-          '@timestamp': new Date().toISOString(),
-          message: {
-            role: MessageRole.User,
-            content: prompt.message,
-          },
+  const { response$ } = client.complete({
+    functionClient,
+    persist: true,
+    isPublic: true,
+    connectorId: params.connector,
+    signal: new AbortController().signal,
+    kibanaPublicUrl: (await resources.plugins.core.start()).http.basePath.publicBaseUrl,
+    messages: [
+      {
+        '@timestamp': new Date().toISOString(),
+        message: {
+          role: MessageRole.User,
+          content: prompt.message,
         },
-        {
-          '@timestamp': new Date().toISOString(),
-          message: {
-            role: MessageRole.Assistant,
-            content: '',
-            function_call: {
-              name: 'get_alerts_context',
-              arguments: JSON.stringify({}),
-              trigger: MessageRole.Assistant as const,
-            },
-          },
-        },
-        {
-          '@timestamp': new Date().toISOString(),
-          message: {
-            role: MessageRole.User,
+      },
+      {
+        '@timestamp': new Date().toISOString(),
+        message: {
+          role: MessageRole.Assistant,
+          content: '',
+          function_call: {
             name: 'get_alerts_context',
-            content: JSON.stringify({ context: alertsContext }),
+            arguments: JSON.stringify({}),
+            trigger: MessageRole.Assistant as const,
           },
         },
-        {
-          '@timestamp': new Date().toISOString(),
-          message: {
-            role: MessageRole.Assistant,
-            content: '',
-            function_call: {
-              name: 'get_connectors',
-              arguments: JSON.stringify({}),
-              trigger: MessageRole.Assistant as const,
-            },
-          },
+      },
+      {
+        '@timestamp': new Date().toISOString(),
+        message: {
+          role: MessageRole.User,
+          name: 'get_alerts_context',
+          content: JSON.stringify({ context: alertsContext }),
         },
-        {
-          '@timestamp': new Date().toISOString(),
-          message: {
-            role: MessageRole.User,
+      },
+      {
+        '@timestamp': new Date().toISOString(),
+        message: {
+          role: MessageRole.Assistant,
+          content: '',
+          function_call: {
             name: 'get_connectors',
-            content: JSON.stringify({
-              connectors: connectorsList,
-            }),
+            arguments: JSON.stringify({}),
+            trigger: MessageRole.Assistant as const,
           },
         },
-      ],
-    })
+      },
+      {
+        '@timestamp': new Date().toISOString(),
+        message: {
+          role: MessageRole.User,
+          name: 'get_connectors',
+          content: JSON.stringify({
+            connectors: connectorsList,
+          }),
+        },
+      },
+    ],
+  });
+
+  response$
     .pipe(
       filter(
         (event): event is ChatCompletionChunkEvent =>

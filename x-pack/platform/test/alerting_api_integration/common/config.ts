@@ -13,9 +13,9 @@ import { findTestPluginPaths } from '@kbn/test';
 import { ScoutTestRunConfigCategory } from '@kbn/scout-info';
 import { getAllExternalServiceSimulatorPaths } from '@kbn/actions-simulators-plugin/server/plugin';
 import type { ExperimentalConfigKeys } from '@kbn/stack-connectors-plugin/common/experimental_features';
-import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
-import { CROWDSTRIKE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/crowdstrike/constants';
-import { MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
+import { CONNECTOR_ID as SENTINELONE_CONNECTOR_ID } from '@kbn/connector-schemas/sentinelone/constants';
+import { CONNECTOR_ID as CROWDSTRIKE_CONNECTOR_ID } from '@kbn/connector-schemas/crowdstrike/constants';
+import { CONNECTOR_ID as MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID } from '@kbn/connector-schemas/microsoft_defender_endpoint/constants';
 import { services } from './services';
 import { getTlsWebhookServerUrls } from './lib/get_tls_webhook_servers';
 
@@ -40,6 +40,7 @@ interface CreateTestConfigOptions {
   disabledRuleTypes?: string[];
   enabledRuleTypes?: string[];
   maxAlerts?: number;
+  emailMaximumBodyLength?: number;
   indexRefreshInterval?: string | false;
 }
 
@@ -320,6 +321,11 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
         ? []
         : [`--xpack.alerting.enabledRuleTypes=${JSON.stringify(options.enabledRuleTypes)}`];
 
+    const emailMaximumBodyLengthSetting =
+      options.emailMaximumBodyLength == null
+        ? []
+        : [`--xpack.actions.email.maximum_body_length=${options.emailMaximumBodyLength}`];
+
     return {
       testConfigCategory: ScoutTestRunConfigCategory.API_TEST,
       testFiles: testFiles ? testFiles : [require.resolve(`../${name}/tests/`)],
@@ -371,6 +377,7 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
           ...maxScheduledPerMinuteSettings,
           ...disabledRuleTypesSetting,
           ...enabledRuleTypesSetting,
+          ...emailMaximumBodyLengthSetting,
           '--xpack.eventLog.logEntries=true',
           `--xpack.task_manager.unsafe.exclude_task_types=${JSON.stringify([
             'actions:test.excluded',

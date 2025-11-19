@@ -5,17 +5,18 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useEffect, useCallback } from 'react';
+import React, { useMemo, useEffect, useCallback, useRef } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
+import type { Conversation } from '@kbn/onechat-common';
 import type { EmbeddableConversationInternalProps } from '../../../embeddable/types';
 import { ConversationContext } from './conversation_context';
 import { OnechatServicesContext } from '../onechat_services_context';
 import { SendMessageProvider } from '../send_message/send_message_context';
-import { queryKeys } from '../../query_keys';
-import { newConversationId } from '../../utils/new_conversation';
 import { useConversationActions } from './use_conversation_actions';
+import { usePersistedConversationId } from '../../hooks/use_persisted_conversation_id';
+import { getProcessedAttachments } from './get_processed_attachments';
 
 interface EmbeddableConversationsProviderProps extends EmbeddableConversationInternalProps {
   children: React.ReactNode;
@@ -33,58 +34,127 @@ export const EmbeddableConversationsProvider: React.FC<EmbeddableConversationsPr
   const kibanaServices = useMemo(
     () => ({
       ...coreStart,
-      plugins: services.startDependencies,
+      plugins: {
+        ...services.startDependencies,
+      },
     }),
     [coreStart, services.startDependencies]
   );
 
-  const [conversationId, setConversationId] = useState<string | undefined>(undefined);
+  const { persistedConversationId, updatePersistedConversationId } = usePersistedConversationId({
+    sessionTag: contextProps.sessionTag,
+    agentId: contextProps.agentId,
+  });
 
-  useEffect(() => {
-    // React to conversationId changing through the flyout API
-    setConversationId(contextProps.conversationId);
-  }, [contextProps.conversationId]);
+  const hasInitializedConversationIdRef = useRef(false);
 
-  const queryKey = queryKeys.conversations.byId(conversationId ?? newConversationId);
-
-  const onConversationCreated = useCallback(
-    ({ conversationId: id }: { conversationId: string }) => {
-      // Update conversationId to show the newly created conversation in the UI
-      setConversationId(id);
+  const setConversationId = useCallback(
+    (id?: string) => {
+      if (id !== persistedConversationId) {
+        updatePersistedConversationId(id);
+      }
     },
-    []
+    [persistedConversationId, updatePersistedConversationId]
   );
 
-  const onDeleteConversation = useCallback(
-    ({ isCurrentConversation }: { isCurrentConversation: boolean }) => {
-      if (isCurrentConversation) {
-        // For embeddable context, we can't navigate, just reset the conversation ID
+  const validateAndSetConversationId = useCallback(
+    async (id: string) => {
+      try {
+        const conversation = await services.conversationsService.get({ conversationId: id });
+        setConversationId(conversation.id ?? undefined);
+      } catch {
         setConversationId(undefined);
       }
     },
-    []
+    [services.conversationsService, setConversationId]
   );
 
+  // One-time initialization per provider instance:
+  // - If newConversation flag is set, clears the conversation ID to start fresh.
+  // - Otherwise, if there's a persisted conversation ID, validates and restores it.
+  // - Otherwise, clears the conversation ID.
+  // Guarded by hasInitializedConversationIdRef to prevent re-running on subsequent renders.
+  useEffect(() => {
+    if (hasInitializedConversationIdRef.current) return;
+
+    if (contextProps.newConversation) {
+      setConversationId(undefined);
+    } else if (persistedConversationId) {
+      validateAndSetConversationId(persistedConversationId);
+    } else {
+      setConversationId(undefined);
+    }
+    hasInitializedConversationIdRef.current = true;
+  }, [
+    contextProps.newConversation,
+    persistedConversationId,
+    setConversationId,
+    validateAndSetConversationId,
+  ]);
+
+  const onConversationCreated = useCallback(
+    ({ conversationId: id }: { conversationId: string }) => {
+      setConversationId(id);
+    },
+    [setConversationId]
+  );
+
+  const onDeleteConversation = useCallback(() => {
+    setConversationId(undefined);
+  }, [setConversationId]);
+
   const conversationActions = useConversationActions({
-    conversationId,
-    queryKey,
+    conversationId: persistedConversationId,
     queryClient,
     conversationsService: services.conversationsService,
     onConversationCreated,
     onDeleteConversation,
   });
 
+  const attachmentMapRef = useRef<Map<string, Record<string, unknown>>>(new Map());
+
+  const setAttachmentMap = useCallback((attachments: Map<string, Record<string, unknown>>) => {
+    attachmentMapRef.current = attachments;
+  }, []);
+
+  const handleGetProcessedAttachments = useCallback(
+    (_conversation?: Conversation) => {
+      return getProcessedAttachments({
+        attachments: contextProps.attachments ?? [],
+        getAttachment: (id) => attachmentMapRef.current.get(id),
+        setAttachment: (id, content) => attachmentMapRef.current.set(id, content),
+      });
+    },
+    [contextProps.attachments]
+  );
+
   const conversationContextValue = useMemo(
     () => ({
-      conversationId,
+      conversationId: persistedConversationId,
       shouldStickToBottom: true,
       isEmbeddedContext: true,
-      setConversationId: (id: string) => {
-        setConversationId(id);
-      },
+      sessionTag: contextProps.sessionTag,
+      agentId: contextProps.agentId,
+      initialMessage: contextProps.initialMessage,
+      browserApiTools: contextProps.browserApiTools,
+      setConversationId,
+      attachments: contextProps.attachments,
       conversationActions,
+      getProcessedAttachments: handleGetProcessedAttachments,
+      setAttachmentMap,
     }),
-    [conversationId, conversationActions]
+    [
+      persistedConversationId,
+      contextProps.sessionTag,
+      contextProps.agentId,
+      contextProps.initialMessage,
+      contextProps.attachments,
+      contextProps.browserApiTools,
+      conversationActions,
+      handleGetProcessedAttachments,
+      setConversationId,
+      setAttachmentMap,
+    ]
   );
 
   return (

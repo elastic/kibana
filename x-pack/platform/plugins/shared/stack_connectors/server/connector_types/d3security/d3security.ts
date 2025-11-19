@@ -9,18 +9,19 @@ import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { addSeverityAndEventTypeInBody } from './helpers';
 import {
+  SUB_ACTION,
+  D3SecuritySeverity,
   D3SecurityRunActionParamsSchema,
   D3SecurityRunActionResponseSchema,
-} from '../../../common/d3security/schema';
+} from '@kbn/connector-schemas/d3security';
 import type {
   D3SecurityConfig,
   D3SecuritySecrets,
   D3SecurityRunActionParams,
   D3SecurityRunActionResponse,
-} from '../../../common/d3security/types';
-import { D3SecuritySeverity, SUB_ACTION } from '../../../common/d3security/constants';
+} from '@kbn/connector-schemas/d3security';
+import { addSeverityAndEventTypeInBody } from './helpers';
 
 export class D3SecurityConnector extends SubActionConnector<D3SecurityConfig, D3SecuritySecrets> {
   private url;

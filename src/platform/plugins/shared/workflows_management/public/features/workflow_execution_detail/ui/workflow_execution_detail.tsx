@@ -10,15 +10,17 @@
 import { EuiPanel } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+
 import {
   ResizableLayout,
   ResizableLayoutDirection,
   ResizableLayoutMode,
   ResizableLayoutOrder,
 } from '@kbn/resizable-layout';
-import { useWorkflowExecutionPolling } from './hooks/use_workflow_execution_polling';
-import { WorkflowStepExecutionList } from './workflow_execution_list';
+import { WorkflowExecutionPanel } from './workflow_execution_panel';
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
+import { buildTriggerStepExecutionFromContext } from './workflow_trigger_context';
+import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 
 const WidthStorageKey = 'WORKFLOWS_EXECUTION_DETAILS_WIDTH';
@@ -40,14 +42,18 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
     const showBackButton = activeTab === 'executions';
 
     useEffect(() => {
-      if (workflowExecution && !selectedStepExecutionId) {
-        // Auto-select the first step execution if none is selected
-        const firstStepExecutionId = workflowExecution.stepExecutions?.[0]?.id;
+      if (
+        !selectedStepExecutionId && // no step execution selected
+        executionId === workflowExecution?.id && // execution id matches (not stale execution used)
+        workflowExecution?.stepExecutions?.length // step executions are loaded
+      ) {
+        // Auto-select the first step execution
+        const firstStepExecutionId = workflowExecution.stepExecutions[0]?.id;
         if (firstStepExecutionId) {
           setSelectedStepExecution(firstStepExecutionId);
         }
       }
-    }, [workflowExecution, selectedStepExecutionId, setSelectedStepExecution]);
+    }, [workflowExecution, selectedStepExecutionId, setSelectedStepExecution, executionId]);
 
     const setSelectedStepExecutionId = useCallback(
       (stepExecutionId: string | null) => {
@@ -64,21 +70,28 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
     }, [workflowExecution]);
 
     const selectedStepExecution = useMemo(() => {
-      if (!workflowExecution?.stepExecutions?.length || !selectedStepExecutionId) {
+      if (!selectedStepExecutionId) {
+        return undefined;
+      }
+
+      if (selectedStepExecutionId === 'trigger' && workflowExecution?.context) {
+        return buildTriggerStepExecutionFromContext(workflowExecution) ?? undefined;
+      }
+
+      if (!workflowExecution?.stepExecutions?.length) {
         return undefined;
       }
       return workflowExecution.stepExecutions.find((step) => step.id === selectedStepExecutionId);
-    }, [workflowExecution?.stepExecutions, selectedStepExecutionId]);
+    }, [workflowExecution, selectedStepExecutionId]);
 
     return (
       <EuiPanel paddingSize="none" color="plain" hasShadow={false} style={{ height: '100%' }}>
         <ResizableLayout
           fixedPanel={
-            <WorkflowStepExecutionList
+            <WorkflowExecutionPanel
               definition={workflowDefinition}
               execution={workflowExecution ?? null}
               showBackButton={showBackButton}
-              isLoading={isLoading}
               error={error}
               onClose={onClose}
               onStepExecutionClick={setSelectedStepExecutionId}

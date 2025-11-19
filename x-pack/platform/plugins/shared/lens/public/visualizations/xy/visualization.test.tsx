@@ -17,7 +17,6 @@ import type {
   DataViewsState,
 } from '@kbn/lens-common';
 import type {
-  State,
   XYState,
   XYLayerConfig,
   XYDataLayerConfig,
@@ -656,7 +655,7 @@ describe('xy_visualization', () => {
 
   describe('#removeLayer', () => {
     it('removes the specified layer', () => {
-      const prevState: State = {
+      const prevState: XYState = {
         ...exampleState(),
         layers: [
           ...exampleState().layers,
@@ -1907,7 +1906,7 @@ describe('xy_visualization', () => {
             },
           ],
         ],
-      ] as Array<[string, State['layers']]>)(
+      ] as Array<[string, XYState['layers']]>)(
         'should not require break down group for %s',
         (_, layers) => {
           const [, , splitGroup] = xyVisualization.getConfiguration({
@@ -2056,7 +2055,7 @@ describe('xy_visualization', () => {
             },
           ],
         ],
-      ] as Array<[string, State['layers']]>)(
+      ] as Array<[string, XYState['layers']]>)(
         'should require break down group for %s',
         (_, layers) => {
           const [, , splitGroup] = xyVisualization.getConfiguration({
@@ -2077,7 +2076,7 @@ describe('xy_visualization', () => {
         };
       });
 
-      function getStateWithBaseReferenceLine(): State {
+      function getStateWithBaseReferenceLine(): XYState {
         return {
           ...exampleState(),
           layers: [
@@ -2433,7 +2432,7 @@ describe('xy_visualization', () => {
         };
       });
 
-      function getStateWithAnnotationLayer(): State {
+      function getStateWithAnnotationLayer(): XYState {
         return {
           ...exampleState(),
           layers: [
@@ -2465,7 +2464,7 @@ describe('xy_visualization', () => {
         });
         expect(config.groups[0].accessors).toEqual([
           {
-            color: '#f04e98',
+            color: '#BC1E70',
             columnId: 'an1',
             customIcon: IconCircle,
             triggerIconType: 'custom',
@@ -3110,7 +3109,7 @@ describe('xy_visualization', () => {
           });
         }
         test('When data layer is empty, should return error on dimension', () => {
-          const state: State = {
+          const state: XYState = {
             ...exampleState(),
             layers: [
               {
@@ -3369,7 +3368,7 @@ describe('xy_visualization', () => {
 
       it('should not return an info message if annotation layer is ignoring the global filters but contains only manual annotations', () => {
         const initialState = createStateWithAnnotationProps({});
-        const state: State = {
+        const state: XYState = {
           ...initialState,
           layers: [
             // replace the existing annotation layers with a new one

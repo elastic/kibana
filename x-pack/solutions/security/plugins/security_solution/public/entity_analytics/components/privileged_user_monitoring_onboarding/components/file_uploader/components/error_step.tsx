@@ -35,6 +35,7 @@ export const PrivilegedUserMonitoringErrorStep: React.FC<{
     return (
       <>
         <EuiCallOut
+          announceOnMount
           color="danger"
           iconType="cross"
           title={

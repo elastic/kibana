@@ -99,7 +99,7 @@ export const FlyoutWrapper = ({
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiSpacer size="m" />
+          <EuiSpacer size="xs" />
           {/* Header row 2: Edit in Lens and button groups */}
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
             {navigateToLensEditor && !isReadOnly && (
@@ -113,13 +113,18 @@ export const FlyoutWrapper = ({
                 </EuiText>
               </EuiFlexItem>
             )}
-            {toolbar && <EuiFlexItem grow={false}>{toolbar}</EuiFlexItem>}
+            <EuiFlexItem grow={true} />
+            {toolbar && (
+              <EuiFlexItem grow={false} data-test-subj="lnsVisualizationToolbar">
+                {toolbar}
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlyoutHeader>
       )}
       {isInlineFlyoutVisible && isReadOnly ? (
         <EuiCallOut
-          announceOnMount
+          announceOnMount={false}
           title={i18n.translate('xpack.lens.config.readOnly', {
             defaultMessage: 'Read-only: Changes will be reverted on close',
           })}
