@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
 import type { BaseMetadata } from '../../../schema_metadata';
 import { getMeta } from '../../../schema_metadata';
 import { SingleOptionUnionField } from './single_option_field';
@@ -29,7 +29,7 @@ export interface UnionOption {
   schema: z.ZodObject<z.ZodRawShape>;
 }
 
-export type FormFieldsetWidgetMeta = BaseMetadata & {
+type FormFieldsetWidgetMeta = BaseMetadata & {
   widget: WidgetType.FormFieldset;
 };
 
@@ -37,8 +37,8 @@ export type DiscriminatedUnionWidgetProps = Omit<
   BaseWidgetProps<Record<string, unknown>, FormFieldsetWidgetMeta>,
   'schema'
 > & {
-  schema?: z.ZodDiscriminatedUnion;
-  unionOptions?: { discriminatorKey: string; options: UnionOption[] };
+  schema: z.ZodDiscriminatedUnion;
+  unionOptions: { discriminatorKey: string; options: UnionOption[] };
 };
 
 export const getDiscriminatorKey = (
@@ -57,10 +57,6 @@ export const getDiscriminatorFieldValue = (
 export const getUnionOptions = (
   schema: z.ZodTypeAny
 ): { discriminatorKey: string; options: UnionOption[] } | undefined => {
-  if (!(schema instanceof z.ZodDiscriminatedUnion)) {
-    return undefined;
-  }
-
   const discriminatedSchema = schema as z.ZodDiscriminatedUnion<z.ZodObject<z.ZodRawShape>[]>;
   const discriminatorKey = getDiscriminatorKey(discriminatedSchema);
 
@@ -98,17 +94,18 @@ export const normalizeDiscriminatedUnionDefault = (
   schema: z.ZodTypeAny,
   defaultValue: unknown
 ): unknown | undefined => {
-  if (!(schema instanceof z.ZodDiscriminatedUnion)) {
-    return undefined;
-  }
+  const unionOptions = getUnionOptions(schema);
+  if (unionOptions) {
+    if (unionOptions.options.length === 1) {
+      return getDefaultValuesFromSchema(
+        unionOptions.options[0].schema,
+        unionOptions.discriminatorKey
+      );
+    }
 
-  if (typeof defaultValue === 'string') {
-    const unionOptions = getUnionOptions(schema);
-    if (unionOptions) {
-      const matchingOption = unionOptions.options.find((opt) => opt.value === defaultValue);
-      if (matchingOption) {
-        return getDefaultValuesFromSchema(matchingOption.schema, unionOptions.discriminatorKey);
-      }
+    const matchingOption = unionOptions.options.find((opt) => opt.value === defaultValue);
+    if (matchingOption) {
+      return getDefaultValuesFromSchema(matchingOption.schema, unionOptions.discriminatorKey);
     }
   }
 
@@ -116,7 +113,7 @@ export const normalizeDiscriminatedUnionDefault = (
 };
 
 export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = (props) => {
-  const { schema, value } = props;
+  const { schema } = props;
 
   const unionOptions = schema ? getUnionOptions(schema) : undefined;
 
@@ -124,28 +121,12 @@ export const DiscriminatedUnionField: React.FC<DiscriminatedUnionWidgetProps> = 
     throw new Error('DiscriminatedUnionField requires a discriminated union schema');
   }
 
-  const { discriminatorKey, options } = unionOptions;
-
-  let currentValue: Record<string, unknown>;
-
-  if (value && typeof value === 'object' && Object.keys(value).length > 0) {
-    currentValue = value as Record<string, unknown>;
-  } else if (typeof value === 'string') {
-    const matchingOption = options.find((opt) => opt.value === value);
-    if (matchingOption) {
-      currentValue = getDefaultValuesFromSchema(matchingOption.schema, discriminatorKey);
-    } else {
-      currentValue = getDefaultValuesFromSchema(options[0].schema, discriminatorKey);
-    }
-  } else {
-    currentValue = getDefaultValuesFromSchema(options[0].schema, discriminatorKey);
-  }
-
+  const { options } = unionOptions;
   const isSingleOption = options.length === 1;
 
   return isSingleOption ? (
-    <SingleOptionUnionField {...props} value={currentValue} unionOptions={unionOptions} />
+    <SingleOptionUnionField {...props} unionOptions={unionOptions} />
   ) : (
-    <MultiOptionUnionField {...props} value={currentValue} unionOptions={unionOptions} />
+    <MultiOptionUnionField {...props} unionOptions={unionOptions} />
   );
 };

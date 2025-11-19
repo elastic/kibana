@@ -12,34 +12,11 @@ import { render, screen, waitFor, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { z } from '@kbn/zod/v4';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { DiscriminatedUnionField, getUnionOptions } from './discriminated_union_field';
-import { getDefaultValuesFromSchema } from './get_default_values';
-import { getMeta } from '../../../schema_metadata';
+import { DiscriminatedUnionField } from './discriminated_union_field';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
 );
-
-const getDiscriminatedUnionInitialValue = (schema: z.ZodTypeAny, defaultValue?: unknown) => {
-  const unionOpts = getUnionOptions(schema);
-  if (!unionOpts) {
-    throw new Error('Schema is not a discriminated union');
-  }
-
-  const { discriminatorKey, options } = unionOpts;
-  const metaInfo = getMeta(schema);
-  const metadataDefault = metaInfo?.default;
-  const valueToUse = metadataDefault ?? defaultValue;
-
-  if (valueToUse) {
-    const matchingOption = options.find((opt) => opt.value === valueToUse);
-    if (matchingOption) {
-      return getDefaultValuesFromSchema(matchingOption.schema, discriminatorKey);
-    }
-  }
-
-  return getDefaultValuesFromSchema(options[0].schema, discriminatorKey);
-};
 
 const renderDiscriminatedUnionField = (props: any) => {
   return render(<DiscriminatedUnionField {...props} />, {
@@ -328,7 +305,10 @@ describe('DiscriminatedUnionField', () => {
       option3.meta({ label: 'API Key Auth' }),
     ]);
 
-    const initialValue = getDiscriminatedUnionInitialValue(schema);
+    const initialValue = {
+      type: 'basic',
+      username: '',
+    };
 
     renderDiscriminatedUnionField({
       fieldId: 'auth',
@@ -380,7 +360,10 @@ describe('DiscriminatedUnionField', () => {
       ])
       .meta({ default: 'oauth' });
 
-    const initialValue = getDiscriminatedUnionInitialValue(schema);
+    const initialValue = {
+      type: 'oauth',
+      token: '',
+    };
 
     renderDiscriminatedUnionField({
       fieldId: 'auth',

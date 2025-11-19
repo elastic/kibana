@@ -278,7 +278,6 @@ export const useFormState = <TSchema extends Record<string, unknown>>(
             Object.entries(validationResult).forEach(([path, error]) => {
               const errorKey = path ? `${field.id}.${path}` : field.id;
               errors[errorKey] = error;
-              allTouched[errorKey] = true;
             });
             hasErrors = true;
           }

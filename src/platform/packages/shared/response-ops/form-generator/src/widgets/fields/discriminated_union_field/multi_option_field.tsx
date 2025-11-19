@@ -28,18 +28,13 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
   meta,
   validateField,
 }) => {
-  if (!unionOptions) {
-    throw new Error('MultiOptionUnionField requires unionOptions prop');
-  }
-
   const { discriminatorKey, options: unionOptionsList } = unionOptions;
 
+  const selectedType = value[discriminatorKey];
   const options = useMemo(() => {
     return unionOptionsList.map((option, index: number) => {
       const { value: discriminatorValue, label: cardLabel, fields, schema: optionSchema } = option;
-      const currentType =
-        typeof value === 'object' && value !== null ? value[discriminatorKey] : value;
-      const isChecked = currentType === discriminatorValue;
+      const isChecked = selectedType === discriminatorValue;
       const checkableCardId = `${fieldId}-option-${discriminatorValue}`;
 
       const handleCardChange = () => {
@@ -60,9 +55,7 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
           <>
             {fields.map((field) => {
               const { id: fieldKey, schema: fieldSchema, meta: fieldMeta } = field;
-              const valueObj =
-                typeof value === 'object' && value !== null ? value : { [discriminatorKey]: value };
-              const optionValue = valueObj[fieldKey];
+              const optionValue = value[fieldKey];
 
               const OptionWidgetComponent = getWidgetComponent(fieldSchema);
 
@@ -72,13 +65,8 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
               const optionFieldIsInvalid = Boolean(optionFieldTouched && optionFieldError);
 
               const handleOptionChange = (_optionFieldIdArg: string, newValue: unknown) => {
-                const currentValueObj =
-                  typeof value === 'object' && value !== null
-                    ? value
-                    : { [discriminatorKey]: discriminatorValue };
-
                 const updatedValue = {
-                  ...currentValueObj,
+                  ...value,
                   [fieldKey]: newValue,
                 };
 
@@ -146,16 +134,17 @@ export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
     });
   }, [
     unionOptionsList,
-    value,
+    selectedType,
     fieldId,
+    discriminatorKey,
     onChange,
+    setFieldError,
+    value,
+    touched,
+    errors,
+    setFieldTouched,
     validateField,
     onBlur,
-    errors,
-    setFieldError,
-    setFieldTouched,
-    discriminatorKey,
-    touched,
   ]);
 
   return (

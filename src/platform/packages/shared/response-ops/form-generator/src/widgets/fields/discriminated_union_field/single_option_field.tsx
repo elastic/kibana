@@ -8,11 +8,9 @@
  */
 
 import React, { useMemo } from 'react';
-import type { z } from '@kbn/zod/v4';
 import { EuiFormFieldset, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import type { BaseMetadata } from '../../../schema_metadata';
 import { getWidgetComponent } from '../../registry';
-import type { DiscriminatedUnionWidgetProps } from './discriminated_union_field';
+import type { DiscriminatedUnionWidgetProps, UnionOptionField } from './discriminated_union_field';
 
 export const SingleOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
   fieldId,
@@ -29,42 +27,24 @@ export const SingleOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = (
   meta,
   validateField,
 }) => {
-  if (!unionOptions) {
-    throw new Error('SingleOptionUnionField requires unionOptions prop');
-  }
-
-  const { discriminatorKey, options } = unionOptions;
+  const { options } = unionOptions;
   const singleOption = options[0];
-
-  const valueObj = useMemo(() => {
-    return typeof value === 'object' && value !== null
-      ? value
-      : { [discriminatorKey]: singleOption.value };
-  }, [value, discriminatorKey, singleOption.value]);
 
   const fields = useMemo(() => {
     return singleOption.fields.map((field, index: number) => {
-      const {
-        id: fieldKey,
-        schema: fieldSchema,
-        meta: fieldMeta,
-      }: {
-        id: string;
-        schema: z.ZodTypeAny;
-        meta: BaseMetadata;
-      } = field;
-      const fieldValue = valueObj[fieldKey] ?? '';
+      const { id: fieldKey, schema: fieldSchema, meta: fieldMeta }: UnionOptionField = field;
+      const fieldValue = value[fieldKey] ?? '';
 
       const WidgetComponent = getWidgetComponent(fieldSchema);
 
       const subFieldId = `${fieldId}.${fieldKey}`;
       const isTouched = touched[subFieldId] || touched[fieldId];
       const error = errors[subFieldId];
-      const isInvalid = !!(isTouched && error);
+      const isInvalid = Boolean(isTouched && error);
 
       const handleChange = (_: string, newValue: unknown) => {
         const updatedValue = {
-          ...valueObj,
+          ...value,
           [fieldKey]: newValue,
         };
 
@@ -84,7 +64,7 @@ export const SingleOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = (
         const wasTouched = touched[subFieldId];
 
         if (wasTouched && validateField && setFieldError) {
-          const validationError = validateField(fieldId, valueObj, []);
+          const validationError = validateField(fieldId, value, []);
           setFieldError(subFieldId, validationError);
         }
 
@@ -113,7 +93,6 @@ export const SingleOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = (
     singleOption.fields,
     fieldId,
     value,
-    valueObj,
     touched,
     errors,
     onChange,

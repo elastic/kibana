@@ -15,13 +15,13 @@ import type { BaseMetadata, StripFormProps } from '../../schema_metadata';
 import type { BaseWidgetProps } from '../types';
 import type { WidgetType } from '../types';
 
-export type SelectWidgetMeta = BaseMetadata & {
+type SelectWidgetMeta = BaseMetadata & {
   widget: WidgetType.Select;
 } & StripFormProps<EuiSelectProps>;
 
-export type SelectWidgetProps = BaseWidgetProps<string, SelectWidgetMeta>;
+type SelectWidgetProps = BaseWidgetProps<string, SelectWidgetMeta>;
 
-export const getSelectOptions = (schema: z.ZodTypeAny): EuiSelectOption[] | undefined => {
+const getSelectOptions = (schema: z.ZodTypeAny): EuiSelectOption[] | undefined => {
   if (schema instanceof z.ZodEnum) {
     return schema.options.map((option) => ({
       value: String(option),

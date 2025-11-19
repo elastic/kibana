@@ -19,12 +19,9 @@ import {
   normalizeDiscriminatedUnionDefault,
 } from './fields/discriminated_union_field';
 
-export type DefaultValueNormalizer = (
-  schema: z.ZodTypeAny,
-  defaultValue: unknown
-) => unknown | undefined;
+type DefaultValueNormalizer = (schema: z.ZodTypeAny, defaultValue: unknown) => unknown | undefined;
 
-export const WIDGET_REGISTRY: Record<WidgetType, React.ComponentType<BaseWidgetProps>> = {
+const WIDGET_REGISTRY: Record<WidgetType, React.ComponentType<BaseWidgetProps>> = {
   [WidgetType.Text]: TextField as React.ComponentType<BaseWidgetProps>,
   [WidgetType.Password]: PasswordField as React.ComponentType<BaseWidgetProps>,
   [WidgetType.Select]: SelectField as React.ComponentType<BaseWidgetProps>,

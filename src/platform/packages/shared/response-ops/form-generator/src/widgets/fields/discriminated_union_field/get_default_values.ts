@@ -13,13 +13,12 @@ export const getDefaultValuesFromSchema = (
   schema: z.ZodObject<z.ZodRawShape>,
   discriminatorKey?: string
 ) => {
-  const defaultValues: Record<string, any> = {};
-  const discriminator = discriminatorKey || 'type';
+  const defaultValues: Record<string, unknown> = {};
 
   Object.entries(schema.shape).forEach(([fieldKey, fieldSchema]) => {
     const zodFieldSchema = fieldSchema as z.ZodTypeAny;
 
-    if (fieldKey === discriminator && zodFieldSchema instanceof z.ZodLiteral) {
+    if (fieldKey === discriminatorKey && zodFieldSchema instanceof z.ZodLiteral) {
       defaultValues[fieldKey] = zodFieldSchema.value;
     } else {
       defaultValues[fieldKey] = '';

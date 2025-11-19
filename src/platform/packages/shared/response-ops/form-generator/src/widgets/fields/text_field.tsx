@@ -14,11 +14,11 @@ import type { BaseMetadata, StripFormProps } from '../../schema_metadata';
 import type { BaseWidgetProps } from '../types';
 import type { WidgetType } from '../types';
 
-export type TextWidgetMeta = BaseMetadata & {
+type TextWidgetMeta = BaseMetadata & {
   widget: WidgetType.Text;
 } & StripFormProps<EuiFieldTextProps>;
 
-export type TextWidgetProps = BaseWidgetProps<string, TextWidgetMeta>;
+type TextWidgetProps = BaseWidgetProps<string, TextWidgetMeta>;
 
 export const TextField: React.FC<TextWidgetProps> = ({
   fieldId,

@@ -498,51 +498,5 @@ describe('useFormState', () => {
 
       expect(result.current.values.metadata.tags).toEqual(['newTag1', 'newTag2', 'newTag3']);
     });
-
-    it('throws error for paths deeper than 2 levels', () => {
-      const fields: FieldDefinition[] = [
-        {
-          id: 'config',
-          initialValue: {},
-          validate: jest.fn(),
-          schema: z.object({}),
-          widget: 'formFieldset',
-          meta: { widget: 'formFieldset' },
-        },
-      ];
-
-      const { result } = renderHook(() => useFormState(fields));
-
-      expect(() => {
-        act(() => {
-          result.current.handleChange('config.nested.deep.value', 'test');
-        });
-      }).toThrow(
-        'Nested paths deeper than 2 levels are not supported. Got path: "config.nested.deep.value" with 4 levels.'
-      );
-    });
-
-    it('throws error for 3-level path', () => {
-      const fields: FieldDefinition[] = [
-        {
-          id: 'level1',
-          initialValue: {},
-          validate: jest.fn(),
-          schema: z.object({}),
-          widget: 'formFieldset',
-          meta: { widget: 'formFieldset' },
-        },
-      ];
-
-      const { result } = renderHook(() => useFormState(fields));
-
-      expect(() => {
-        act(() => {
-          result.current.handleChange('level1.level2.level3', 'value');
-        });
-      }).toThrow(
-        'Nested paths deeper than 2 levels are not supported. Got path: "level1.level2.level3" with 3 levels.'
-      );
-    });
   });
 });

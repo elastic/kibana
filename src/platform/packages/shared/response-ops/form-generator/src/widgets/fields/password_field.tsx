@@ -14,11 +14,11 @@ import type { BaseMetadata, StripFormProps } from '../../schema_metadata';
 import type { BaseWidgetProps } from '../types';
 import type { WidgetType } from '../types';
 
-export type PasswordWidgetMeta = BaseMetadata & {
+type PasswordWidgetMeta = BaseMetadata & {
   widget: WidgetType.Password;
 } & StripFormProps<EuiFieldPasswordProps>;
 
-export type PasswordWidgetProps = BaseWidgetProps<string, PasswordWidgetMeta>;
+type PasswordWidgetProps = BaseWidgetProps<string, PasswordWidgetMeta>;
 
 export const PasswordField: React.FC<PasswordWidgetProps> = ({
   fieldId,
