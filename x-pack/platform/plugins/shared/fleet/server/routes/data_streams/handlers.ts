@@ -265,11 +265,20 @@ export const getDeprecatedILMCheckHandler: RequestHandler = async (context, requ
 
     const DEPRECATED_ILM_POLICIES = ['logs', 'metrics', 'synthetics'];
 
-    // Fetch ILM policies and component templates in parallel
-    const [ilmResponse, componentTemplatesResponse] = await Promise.all([
+    // Fetch ILM policies and Fleet-managed component templates in parallel
+    const [ilmResponse, ...componentTemplateResponses] = await Promise.all([
       esClient.ilm.getLifecycle(),
-      esClient.cluster.getComponentTemplate(),
+      ...DEPRECATED_ILM_POLICIES.map((dataStreamType) =>
+        esClient.cluster.getComponentTemplate({
+          name: `${dataStreamType}-*@package`,
+        })
+      ),
     ]);
+
+    // Combine all component templates from the responses
+    const allComponentTemplates = componentTemplateResponses.flatMap(
+      (resp) => resp.component_templates
+    );
 
     // Find deprecated policies that have been modified (version > 1)
     const modifiedDeprecatedPolicies = DEPRECATED_ILM_POLICIES.filter((policyName) => {
@@ -291,7 +300,7 @@ export const getDeprecatedILMCheckHandler: RequestHandler = async (context, requ
     // Check which component templates use these deprecated ILM policies
     const componentTemplatesUsingDeprecatedILM: Record<string, string[]> = {};
 
-    componentTemplatesResponse.component_templates.forEach((template) => {
+    allComponentTemplates.forEach((template) => {
       const ilmPolicyName = template.component_template?.template?.settings?.index?.lifecycle?.name;
 
       if (ilmPolicyName && DEPRECATED_ILM_POLICIES.includes(ilmPolicyName)) {
