@@ -12,7 +12,7 @@ import { FeatureClient } from './feature_client';
 import type { StoredFeature } from './stored_feature';
 import type { FeatureStorageSettings } from './storage_settings';
 import { featureStorageSettings } from './storage_settings';
-import { FeatureTypeRegistry } from './feature_type_registry';
+import type { FeatureTypeRegistry } from './feature_type_registry';
 import { FEATURE_TYPE } from './fields';
 
 export class FeatureService {

@@ -21,7 +21,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { type Streams, type Feature, isFeatureWithFilter } from '@kbn/streams-schema';
-import { Condition } from '@kbn/streamlang';
+import type { Condition } from '@kbn/streamlang';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';

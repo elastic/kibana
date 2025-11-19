@@ -12,4 +12,3 @@ export type { FeatureTypeHandler } from './feature_type_handler';
 export { SystemFeatureHandler } from './handlers/system';
 export type { StoredFeature } from './stored_feature';
 export { storedFeatureSchema } from './stored_feature';
-

@@ -6,10 +6,10 @@
  */
 
 import type { Feature } from '@kbn/streams-schema';
+import { describeDataset } from '@kbn/ai-tools';
+import type { IdentifyFeaturesOptions } from '@kbn/streams-ai';
 import type { FeatureTypeHandler } from './feature_type_handler';
 import type { StoredFeature } from './stored_feature';
-import { describeDataset } from '@kbn/ai-tools';
-import { IdentifyFeaturesOptions } from '@kbn/streams-ai';
 import { SystemFeatureHandler } from './handlers/system';
 import { FEATURE_TYPE } from './fields';
 

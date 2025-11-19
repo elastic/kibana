@@ -8,6 +8,7 @@
 import { z } from '@kbn/zod';
 import type { Condition } from '@kbn/streamlang';
 import { conditionSchema } from '@kbn/streamlang';
+import { type FeatureType, featureTypeSchema } from '@kbn/streams-schema';
 import {
   STREAM_NAME,
   FEATURE_UUID,
@@ -16,7 +17,6 @@ import {
   FEATURE_NAME,
   FEATURE_TYPE,
 } from './fields';
-import { type FeatureType, featureTypeSchema } from '@kbn/streams-schema';
 
 export interface StoredFeature {
   [FEATURE_TYPE]: FeatureType;

@@ -7,6 +7,8 @@
 
 import type { FeatureType, SystemFeature } from '@kbn/streams-schema';
 import objectHash from 'object-hash';
+import type { IdentifyFeaturesOptions } from '@kbn/streams-ai';
+import { identifySystemFeatures } from '@kbn/streams-ai';
 import { FeatureTypeHandler } from '../feature_type_handler';
 import type { StoredFeature } from '../stored_feature';
 import {
@@ -17,7 +19,6 @@ import {
   FEATURE_TYPE,
   FEATURE_UUID,
 } from '../fields';
-import { IdentifyFeaturesOptions, identifySystemFeatures } from '@kbn/streams-ai';
 
 export class SystemFeatureHandler extends FeatureTypeHandler<SystemFeature> {
   readonly type = 'system';
