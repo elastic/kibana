@@ -79,7 +79,7 @@ export const OptionsListControl = ({
   disableMultiValueEmptySelection?: boolean;
 }) => {
   const popoverId = useMemo(() => htmlIdGenerator()(), []);
-  const { componentApi, displaySettings } = useOptionsListContext();
+  const { componentApi, displaySettings, customStrings } = useOptionsListContext();
 
   const [isPopoverOpen, setPopoverOpen] = useState<boolean>(false);
   const [
@@ -152,9 +152,10 @@ export const OptionsListControl = ({
             <EuiFlexItem grow={false}>
               <EuiToolTip
                 position="top"
-                content={OptionsListStrings.control.getInvalidSelectionWarningLabel(
-                  invalidSelections.size
-                )}
+                content={
+                  customStrings?.getCustomWarningLabel?.(invalidSelections.size) ??
+                  OptionsListStrings.control.getInvalidSelectionWarningLabel(invalidSelections.size)
+                }
                 delay="long"
               >
                 <EuiToken
@@ -164,9 +165,12 @@ export const OptionsListControl = ({
                   color="euiColorVis9"
                   shape="square"
                   fill="dark"
-                  title={OptionsListStrings.control.getInvalidSelectionWarningLabel(
-                    invalidSelections.size
-                  )}
+                  title={
+                    customStrings?.getCustomWarningLabel?.(invalidSelections.size) ??
+                    OptionsListStrings.control.getInvalidSelectionWarningLabel(
+                      invalidSelections.size
+                    )
+                  }
                   data-test-subj={`optionsList__invalidSelectionsToken-${componentApi.uuid}`}
                   css={styles.invalidSelectionsToken} // Align with the notification badge
                 />
@@ -185,6 +189,7 @@ export const OptionsListControl = ({
     invalidSelections,
     componentApi.uuid,
     styles,
+    customStrings,
   ]);
 
   const button = (

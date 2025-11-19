@@ -178,6 +178,17 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
                 hideExists: true,
                 hideSort: true,
               },
+              customStrings: {
+                getCustomWarningLabel: (incompatibleSelectionCount: number) =>
+                  i18n.translate(
+                    'controls.optionsList.popover.incompatibleSelectionsSectionTitle',
+                    {
+                      defaultMessage:
+                        'Incompatible {incompatibleSelectionCount, plural, one {selection} other {selections}} ({incompatibleSelectionCount})',
+                      values: { incompatibleSelectionCount },
+                    }
+                  ),
+              },
             }}
           >
             <OptionsListControl
