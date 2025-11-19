@@ -21,12 +21,13 @@ import sparkles from './sparkles.svg';
 import user from './user.svg';
 import warning from './warning.svg';
 
-export const HARDCODED_ICONS = {
+export const HARDCODED_ICONS: Record<string, string> = {
+  '.slack': slackLogoSvg,
+  '.slack_api': slackLogoSvg,
+  '.email': email,
+  '.inference': sparkles,
   elasticsearch: elasticsearchLogoSvg,
   kibana: kibanaLogoSvg,
-  slack: slackLogoSvg,
-  email,
-  inference: sparkles,
   console,
   http: globe,
   foreach: refresh,

@@ -19,26 +19,6 @@ import type { ICommandCallbacks } from '../../types';
 import { type ISuggestionItem, type ICommandContext } from '../../types';
 import { esqlCommandRegistry } from '../..';
 
-// ToDo: this is hardcoded, we should find a better way to take care of the fork commands
-const FORK_AVAILABLE_COMMANDS = [
-  'limit',
-  'sort',
-  'where',
-  'dissect',
-  'stats',
-  'eval',
-  'completion',
-  'grok',
-  'change_point',
-  'mv_expand',
-  'keep',
-  'drop',
-  'rename',
-  'sample',
-  'join',
-  'enrich',
-];
-
 export async function autocomplete(
   query: string,
   command: ESQLAstAllCommands,
@@ -67,8 +47,13 @@ export async function autocomplete(
     return suggestions;
   }
 
-  if (!activeBranch || activeBranch.commands.length === 0 || pipePrecedesCurrentWord(innerText)) {
-    return getCommandAutocompleteDefinitions(FORK_AVAILABLE_COMMANDS);
+  // within a branch
+  if (activeBranch?.commands.length === 0 || pipePrecedesCurrentWord(innerText)) {
+    const forkCommands = esqlCommandRegistry
+      .getProcessingCommandNames()
+      .filter((cmd) => cmd !== 'fork');
+
+    return getCommandAutocompleteDefinitions(forkCommands);
   }
 
   const subCommand = activeBranch?.commands[activeBranch.commands.length - 1];

@@ -1,0 +1,56 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: bk-kibana-agent-builder-smoke-tests-daily
+  description: Runs the Agent Builder smoke tests daily
+  links:
+    - url: 'https://buildkite.com/elastic/kibana-agent-builder-smoke-tests-daily'
+      title: Pipeline link
+spec:
+  type: buildkite-pipeline
+  owner: 'group:workchat-eng'
+  system: buildkite
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / agent-builder / smoke tests / daily
+      description: Runs the Agent Builder smoke tests daily
+    spec:
+      env:
+        SLACK_NOTIFICATIONS_CHANNEL: '#agent-builder-eng'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+      allow_rebuilds: true
+      branch_configuration: main
+      cancel_intermediate_builds: true
+      default_branch: main
+      repository: elastic/kibana
+      pipeline_file: .buildkite/pipelines/agent_builder/smoke_tests.yml
+      provider_settings:
+        build_branches: false
+        build_pull_requests: false
+        publish_commit_status: false
+        trigger_mode: none
+        prefix_pull_request_fork_branch_names: false
+        skip_pull_request_builds_for_existing_commits: false
+      teams:
+        everyone:
+          access_level: BUILD_AND_READ
+        workchat-eng:
+          access_level: MANAGE_BUILD_AND_READ
+        appex-ai-infra:
+          access_level: MANAGE_BUILD_AND_READ
+        kibana-operations:
+          access_level: MANAGE_BUILD_AND_READ
+        appex-qa:
+          access_level: MANAGE_BUILD_AND_READ
+        kibana-tech-leads:
+          access_level: MANAGE_BUILD_AND_READ
+      schedules:
+        Daily build:
+          cronline: 0 0 * * * America/New_York
+          message: Daily build
+          branch: main
+      tags:
+        - kibana
