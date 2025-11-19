@@ -6,10 +6,9 @@
  */
 
 import { useKibana } from './use_kibana';
-
-const PLUGIN_ID = 'onechat';
+import { ONECHAT_PLUGIN_ID } from '../../../common/constants';
 
 export const useAssetBasePath = () => {
   const { http } = useKibana().services;
-  return http.basePath.prepend(`/plugins/${PLUGIN_ID}/assets`);
+  return http.basePath.prepend(`/plugins/${ONECHAT_PLUGIN_ID}/assets`);
 };
