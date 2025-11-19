@@ -44,7 +44,6 @@ export const ConversationHistoryList: React.FC<ConversationHistoryListProps> = (
   const currentConversationId = useConversationId();
   const { navigateToOnechatUrl } = useNavigation();
   const { isEmbeddedContext, setConversationId } = useConversationContext();
-  const { euiTheme } = useEuiTheme();
 
   const timeSections = useMemo(() => {
     if (!conversations || conversations.length === 0) {
@@ -59,7 +58,7 @@ export const ConversationHistoryList: React.FC<ConversationHistoryListProps> = (
     timeSections.forEach(({ label, conversations: sectionConversations }) => {
       // Add group label
       options.push({
-        label,
+        label: label.toLocaleUpperCase(),
         isGroupLabel: true,
       });
 
@@ -96,12 +95,6 @@ export const ConversationHistoryList: React.FC<ConversationHistoryListProps> = (
     [isEmbeddedContext, onClose, setConversationId, navigateToOnechatUrl]
   );
 
-  const selectableStyles = css`
-    .euiSelectableList__groupLabel {
-      background-color: ${euiTheme.colors.backgroundBaseSubdued};
-    }
-  `;
-
   if (isLoading) {
     return (
       <EuiFlexItem css={emptyContainerStyles}>
@@ -120,7 +113,6 @@ export const ConversationHistoryList: React.FC<ConversationHistoryListProps> = (
 
   return (
     <EuiSelectable
-      css={selectableStyles}
       searchable
       searchProps={{
         placeholder: i18n.translate('xpack.onechat.conversationsHistory.searchPlaceholder', {

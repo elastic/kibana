@@ -210,6 +210,7 @@ export interface ElasticsearchSettingsDefinition {
   preview: boolean;
   snapshotOnly: boolean;
   description: string;
+  ignoreAsSuggestion?: boolean;
 }
 
 /**
