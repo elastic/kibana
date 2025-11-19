@@ -30,6 +30,8 @@ export type PageFiltersProps = Pick<
   dataView: DataView | DataViewSpec;
 };
 
+const FILTER_CONTROLS_STORAGE_KEY = 'attacks-page-filters';
+
 export const PageFilters = memo(({ dataView, ...props }: PageFiltersProps) => {
   const { http, notifications, dataViews } = useKibana().services;
   const services = useMemo(
@@ -103,6 +105,7 @@ export const PageFilters = memo(({ dataView, ...props }: PageFiltersProps) => {
       services={services}
       setControlsUrlState={setFilterControlsUrlState}
       spaceId={spaceId}
+      storageKey={FILTER_CONTROLS_STORAGE_KEY}
       {...props}
     />
   );
