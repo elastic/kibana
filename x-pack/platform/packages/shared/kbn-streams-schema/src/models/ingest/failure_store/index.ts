@@ -59,16 +59,15 @@ export const effectiveFailureStoreSchema: z.Schema<EffectiveFailureStore> = z.un
   enabledWithoutLifecycleFailureStoreSchema,
 ]);
 
-export const failureStoreSchema: z.Schema<FailureStore> = z.union([
-  inheritFailureStoreSchema,
-  enabledWithLifecycleFailureStoreSchema,
-  disabledFailureStoreSchema,
-  enabledWithoutLifecycleFailureStoreSchema,
-]);
-
 export const enabledFailureStoreSchema: z.Schema<FailureStoreEnabled> = z.union([
   enabledWithLifecycleFailureStoreSchema,
   enabledWithoutLifecycleFailureStoreSchema,
+]);
+
+export const failureStoreSchema: z.Schema<FailureStore> = z.union([
+  inheritFailureStoreSchema,
+  disabledFailureStoreSchema,
+  enabledFailureStoreSchema,
 ]);
 
 export const failureStoreStatsSchema: z.Schema<FailureStoreStatsResponse> = z.object({
@@ -79,11 +78,7 @@ export const failureStoreStatsSchema: z.Schema<FailureStoreStatsResponse> = z.ob
 
 export const wiredIngestStreamEffectiveFailureStoreSchema: z.Schema<WiredIngestStreamEffectiveFailureStore> =
   z
-    .union([
-      enabledFailureStoreSchema,
-      disabledFailureStoreSchema,
-      enabledWithoutLifecycleFailureStoreSchema,
-    ])
+    .union([enabledFailureStoreSchema, disabledFailureStoreSchema])
     .and(z.object({ from: NonEmptyString }));
 
 export const isEnabledLifecycleFailureStore = (
