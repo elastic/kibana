@@ -78,7 +78,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await discover.getHitCount()).to.be(totalCount);
   }
 
-  describe('discover lens vis', function () {
+  // TODO: see https://github.com/elastic/kibana/pull/243499
+  describe.skip('discover lens vis', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded(
@@ -371,8 +372,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await monacoEditor.getCodeEditorValue()).to.be('from logstash-* | limit 10');
     });
 
-    // TODO: see https://github.com/elastic/kibana/pull/243499
-    it.skip('should be able to load a saved search with custom histogram vis and handle invalidations', async () => {
+    it('should be able to load a saved search with custom histogram vis and handle invalidations', async () => {
       await discover.loadSavedSearch('testCustomESQLHistogram');
 
       await header.waitUntilLoadingHasFinished();
