@@ -123,6 +123,7 @@ enabled:
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/role_migrations/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/role_migrations/trial_license_complete_tier/configs/serverless.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/spaces/trial_license_complete_tier/configs/ess.config.ts
+  - x-pack/solutions/security/test/security_solution_api_integration/test_suites/edr_workflows/spaces/trial_license_complete_tier/configs/endpoint_exceptions_moved_ff.ess.config.ts
   - x-pack/solutions/security/test/security_solution_api_integration/test_suites/siem_migrations/rules/trial_license_complete_tier/configs/ess.config.ts
   - x-pack/solutions/security/test/security_solution_endpoint/configs/endpoint.config.ts
   - x-pack/solutions/security/test/security_solution_endpoint/configs/integrations.config.ts
