@@ -24,7 +24,7 @@ import type {
   MicrosoftDefenderGetLibraryFilesResponse,
 } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
 import { groupBy } from 'lodash';
-import type { Readable } from 'stream';
+import { Writable, type Readable } from 'stream';
 import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import pRetry from 'p-retry';
 import { v4 as uuidv4 } from 'uuid';
@@ -1322,21 +1322,21 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     machineActionId: string
   ): Promise<ResponseActionRunScriptOutputContent | null> {
     try {
-      const { data: downloadStream } = await this.sendAction<Readable>(
+      const { data: readableStream } = await this.sendAction<Readable>(
         MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS,
         { id: machineActionId }
       );
 
-      if (!downloadStream) {
+      if (!readableStream) {
         this.log.debug(`No download stream available for machine action ${machineActionId}`);
         return null;
       }
 
-      if (downloadStream.readableLength > RUNSCRIPT_OUTPUT_FILE_MAX_SIZE_BYTES) {
+      if (readableStream.readableLength > RUNSCRIPT_OUTPUT_FILE_MAX_SIZE_BYTES) {
         this.log.debug(
           `Download stream for machine action ${machineActionId} exceeds max size of ${RUNSCRIPT_OUTPUT_FILE_MAX_SIZE_BYTES} bytes`
         );
-        downloadStream.destroy();
+        readableStream.destroy();
         return {
           stdout: '',
           stderr: 'The output file is too large to download and display.',
@@ -1344,7 +1344,7 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
         };
       }
 
-      return this.getFormattedOutput(downloadStream);
+      return this.processStreamOutput(readableStream);
     } catch ({ message, statusCode }) {
       this.log.error(
         `Failed to fetch runscript output for machine action ${machineActionId}: ${message}`
@@ -1358,22 +1358,40 @@ export class MicrosoftDefenderEndpointActionsClient extends ResponseActionsClien
     }
   }
 
-  private async getFormattedOutput(
+  private async processStreamOutput(
     stream: Readable
   ): Promise<ResponseActionRunScriptOutputContent> {
     try {
-      const buffer: Buffer[] = [];
-      const stderr = '';
+      let jsonStr = '';
+      const writable = new Writable({
+        write(chunk, _, callback) {
+          jsonStr += chunk.toString('utf8');
+          callback();
+        },
+      });
 
-      for await (const chunk of stream) {
-        buffer.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-      }
-      const output = JSON.parse(Buffer.concat(buffer).toString('utf8'));
+      const output = await new Promise<{
+        script_output: string;
+        script_errors: string;
+        exit_code: string;
+      }>((resolve, reject) => {
+        writable
+          .on('finish', () => {
+            try {
+              resolve(JSON.parse(jsonStr));
+            } catch (parseError) {
+              this.log.error(`Failed to parse runscript output file JSON: ${parseError.message}`);
+              reject(parseError);
+            }
+          })
+          .on('error', reject);
+        stream.pipe(writable);
+      });
 
       return {
         stdout: output.script_output ?? '',
-        stderr: (output.script_errors ?? '') + (stderr ? `\n${stderr}` : ''),
-        code: output.exit_code ?? 0,
+        stderr: output.script_errors ?? '',
+        code: output.exit_code ?? '0',
       };
     } catch (_error) {
       const error = `Failed to process runscript output file: ${_error.message}`;
