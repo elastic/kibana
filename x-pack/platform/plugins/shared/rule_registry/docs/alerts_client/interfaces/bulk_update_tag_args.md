@@ -1,6 +1,6 @@
 [Alerts as data client API Interface](../alerts_client_api.md) / PatchTagOptions
 
-# Interface: PatchTagOptions<Params\>
+# Interface: BulkUpdateTagArgs<Params\>
 
 ## Type parameters
 
@@ -12,11 +12,11 @@
 
 ### Properties
 
-- [addTags](patchtagoptions.md#addtags)
+- [add](patchtagoptions.md#add)
 - [alertIds](patchtagoptions.md#alertids)
 - [index](patchtagoptions.md#index)
 - [query](patchtagoptions.md#query)
-- [removeTags](patchtagoptions.md#removetags)
+- [remove](patchtagoptions.md#remove)
 
 ## Properties
 
