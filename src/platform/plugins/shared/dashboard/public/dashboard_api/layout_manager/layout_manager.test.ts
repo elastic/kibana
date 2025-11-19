@@ -380,8 +380,8 @@ describe('layout manager', () => {
         },
         ['control3']: {
           type: 'optionsListControl',
-          grow: undefined,
-          width: undefined,
+          grow: false,
+          width: 'medium',
           order: 2,
         },
       });
