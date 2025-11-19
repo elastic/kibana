@@ -14,6 +14,7 @@ import {
   EuiFlexItem,
   EuiPageSection,
   EuiImage,
+  EuiLink,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -27,7 +28,7 @@ interface OnboardingPageProps {
 }
 
 export const OnboardingPage: React.FC<OnboardingPageProps> = ({ onConnect }) => {
-  const { http, application } = useCloudConnectedAppContext();
+  const { http, application, docLinks } = useCloudConnectedAppContext();
   const hasPermissions =
     application.capabilities.cloudConnect?.configure === true &&
     application.capabilities.cloudConnect?.connect === true;
@@ -46,11 +47,27 @@ export const OnboardingPage: React.FC<OnboardingPageProps> = ({ onConnect }) => 
             </h1>
           </EuiTitle>
           <EuiSpacer size="m" />
-          <EuiText size="s">
+          <EuiText size="m">
             <p>
               <FormattedMessage
                 id="xpack.cloudConnect.onboarding.pageDescription"
-                defaultMessage="Cloud Connect allows customers running self-managed Elastic Software to access Elastic capabilities as a Cloud service without the operational overhead of managing the infrastructure required to run."
+                defaultMessage="With Cloud Connect, you can use Elastic Cloud services in your self-managed cluster without having to install and maintain their infrastructure yourself. Get faster access to new features with none of the operational overhead. {learnMoreLink}"
+                values={{
+                  learnMoreLink: (
+                    <EuiLink
+                      href={docLinks.links.cloud.cloudConnect}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      {i18n.translate(
+                        'xpack.cloudConnect.onboarding.pageDescription.learnMoreLinkText',
+                        {
+                          defaultMessage: 'Learn more.',
+                        }
+                      )}
+                    </EuiLink>
+                  ),
+                }}
               />
             </p>
           </EuiText>

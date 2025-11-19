@@ -51,7 +51,7 @@ export const MigrationSection: React.FC = () => {
       title: (
         <FormattedMessage
           id="xpack.cloudConnect.connectedServices.migration.accessInnovation.title"
-          defaultMessage="Access to innovation"
+          defaultMessage="Access innovation"
         />
       ),
       description: (
@@ -81,7 +81,7 @@ export const MigrationSection: React.FC = () => {
             <p>
               <FormattedMessage
                 id="xpack.cloudConnect.connectedServices.migration.description"
-                defaultMessage="Spin up a deployment, and leave managing the underlying infrastructure to Elastic."
+                defaultMessage="Spin up a deployment and leave managing the infrastructure to us."
               />
             </p>
           </EuiText>

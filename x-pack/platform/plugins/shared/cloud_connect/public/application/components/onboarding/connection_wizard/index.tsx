@@ -15,13 +15,13 @@ import {
   EuiFlexItem,
   EuiButton,
   EuiFieldText,
-  EuiBadge,
   EuiCallOut,
 } from '@elastic/eui';
 import { useCloudConnectedAppContext } from '../../../app_context';
 import {
   STEP_1_TITLE,
-  STEP_1_DESCRIPTION,
+  STEP_1_DESCRIPTION_1,
+  STEP_1_DESCRIPTION_2,
   STEP_2_TITLE,
   STEP_3_TITLE,
   STEP_3_DESCRIPTION,
@@ -29,7 +29,6 @@ import {
   LOGIN_BUTTON,
   CONNECT_BUTTON,
   API_KEY_PLACEHOLDER,
-  OPTIONAL_STEP,
   getStep2Description,
 } from './translations';
 
@@ -81,7 +80,8 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
       children: (
         <>
           <EuiText size="s">
-            <p>{STEP_1_DESCRIPTION}</p>
+            <p>{STEP_1_DESCRIPTION_1}</p>
+            <p>{STEP_1_DESCRIPTION_2}</p>
           </EuiText>
           <EuiSpacer size="m" />
           <EuiFlexGroup gutterSize="s" responsive={false}>
@@ -113,12 +113,9 @@ export const ConnectionWizard: React.FC<ConnectionWizardProps> = ({ onConnect })
     {
       // @ts-expect-error - title can also be a ReactNode but types don't reflect this
       title: (
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>{STEP_2_TITLE}</EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiBadge color="hollow">{OPTIONAL_STEP}</EuiBadge>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <>
+          {STEP_2_TITLE}
+        </>
       ),
       titleSize: 'xs',
       status: 'incomplete',

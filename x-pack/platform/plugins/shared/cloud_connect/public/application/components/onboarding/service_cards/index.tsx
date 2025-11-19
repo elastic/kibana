@@ -11,11 +11,9 @@ import {
   EuiTitle,
   EuiSpacer,
   EuiCard,
-  EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { useCloudConnectedAppContext } from '../../../app_context';
 import { COLUMN_SIZE } from '../constants';
 
 interface ServiceCardsProps {
@@ -23,8 +21,6 @@ interface ServiceCardsProps {
 }
 
 export const ServiceCards: React.FC<ServiceCardsProps> = ({ hasPermissions }) => {
-  const { docLinks } = useCloudConnectedAppContext();
-
   return (
     <EuiFlexItem
       grow={!hasPermissions}
@@ -89,23 +85,6 @@ export const ServiceCards: React.FC<ServiceCardsProps> = ({ hasPermissions }) =>
               }),
             }}
           />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="m" />
-
-      <EuiFlexGroup justifyContent="flexEnd">
-        <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            iconType="popout"
-            iconSide="right"
-            href={docLinks.links.cloud.cloudConnect}
-            target="_blank"
-          >
-            {i18n.translate('xpack.cloudConnect.serviceCards.learnMore', {
-              defaultMessage: 'Learn more',
-            })}
-          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
     </EuiFlexItem>

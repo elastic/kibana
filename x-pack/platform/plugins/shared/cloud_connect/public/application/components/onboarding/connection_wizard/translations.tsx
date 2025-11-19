@@ -11,30 +11,47 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink } from '@elastic/eui';
 
 export const STEP_1_TITLE = i18n.translate('xpack.cloudConnect.wizard.step1.title', {
-  defaultMessage: 'Sign up/login to Elastic Cloud and get the API key',
+  defaultMessage: 'Sign up or log in to Elastic Cloud and get the Cloud Connect API key',
 });
 
-export const STEP_1_DESCRIPTION = i18n.translate('xpack.cloudConnect.wizard.step1.description', {
+export const STEP_1_DESCRIPTION_1 = i18n.translate('xpack.cloudConnect.wizard.step1.description', {
   defaultMessage:
-    "To get started, you need to have an account on Elastic Cloud with Admin priviledges and generate an API key. If you don't have one, follow the link below to sign up and generate the Cloud API key. Existing Cloud users can navigate to Connected clusters section on homepage to get started.",
+    "If you have an existing Elastic Cloud account with Admin privileges, log in below to generate the Cloud Connect API key.",
+});
+
+export const STEP_1_DESCRIPTION_2 = i18n.translate('xpack.cloudConnect.wizard.step1.description', {
+  defaultMessage:
+    "Otherwise, sign up for an account below and follow the prompts to create your account and generate the Cloud Connect API key.",
 });
 
 export const STEP_2_TITLE = i18n.translate('xpack.cloudConnect.wizard.step2.title', {
-  defaultMessage: 'Configure an encryption key in Kibana',
+  defaultMessage: 'Configure an encryption key',
 });
 
-export const STEP_2_DESCRIPTION = i18n.translate('xpack.cloudConnect.wizard.step2.description', {
-  defaultMessage:
-    'You should configure an encryption key in Kibana before pasting the Cloud API key and establishing connection.',
-});
+export const getStep2Description = (docLinksSecureSavedObject: string) => (
+  <FormattedMessage
+    id="xpack.cloudConnect.wizard.step2.description"
+    defaultMessage="Configure {encryptionKeyLink} in Kibana before moving to the next step."
+    values={{
+      encryptionKeyLink: (
+        <EuiLink href={docLinksSecureSavedObject} target="_blank">
+          <FormattedMessage
+            id="xpack.cloudConnect.wizard.step2.encryptionKeyLink"
+            defaultMessage="an encryption key"
+          />
+        </EuiLink>
+      ),
+    }}
+  />
+);
 
 export const STEP_3_TITLE = i18n.translate('xpack.cloudConnect.wizard.step3.title', {
-  defaultMessage: 'Paste your Cloud API key in Kibana and establish the connection',
+  defaultMessage: 'Paste your Cloud Connect API key and connect',
 });
 
 export const STEP_3_DESCRIPTION = i18n.translate('xpack.cloudConnect.wizard.step3.description', {
   defaultMessage:
-    "Once you've configured the encryption key in Kibana, paste the Cloud connected API key you've generated below to establish the connection.",
+    "Paste your generated Cloud Connect API key in the field below and click Connect.",
 });
 
 export const SIGN_UP_BUTTON = i18n.translate('xpack.cloudConnect.wizard.signUpButton', {
@@ -53,23 +70,3 @@ export const API_KEY_PLACEHOLDER = i18n.translate('xpack.cloudConnect.wizard.api
   defaultMessage: 'Paste your cloud connected API key',
 });
 
-export const OPTIONAL_STEP = i18n.translate('xpack.cloudConnect.wizard.optionalStep', {
-  defaultMessage: 'Optional step',
-});
-
-export const getStep2Description = (docLinksSecureSavedObject: string) => (
-  <FormattedMessage
-    id="xpack.cloudConnect.wizard.step2.description"
-    defaultMessage="You should configure {encryptionKeyLink} in Kibana before pasting the Cloud API key and establishing connection."
-    values={{
-      encryptionKeyLink: (
-        <EuiLink href={docLinksSecureSavedObject} target="_blank">
-          <FormattedMessage
-            id="xpack.cloudConnect.wizard.step2.encryptionKeyLink"
-            defaultMessage="an encryption key"
-          />
-        </EuiLink>
-      ),
-    }}
-  />
-);
