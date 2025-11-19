@@ -50,6 +50,7 @@ export interface SimilarErrorsProps {
 }
 
 export function SimilarErrors({ hit, formattedDoc }: SimilarErrorsProps) {
+  const serviceNameValue = formattedDoc[fieldConstants.SERVICE_NAME_FIELD];
   const culpritValue = formattedDoc[fieldConstants.ERROR_CULPRIT_FIELD];
   const { field: messageField, value: messageValue } = getMessageFieldWithFallbacks(formattedDoc, {
     includeFormattedValue: true,
@@ -57,7 +58,7 @@ export function SimilarErrors({ hit, formattedDoc }: SimilarErrorsProps) {
   const { field: typeField, value: typeValue } = getLogExceptionTypeFieldWithFallback(formattedDoc);
 
   const sectionDescription = useMemo(() => {
-    const fieldsWithValues: string[] = [];
+    const fieldsWithValues: string[] = [fieldConstants.SERVICE_NAME_FIELD];
 
     if (culpritValue) {
       fieldsWithValues.push(fieldConstants.ERROR_CULPRIT_FIELD);
@@ -118,6 +119,11 @@ export function SimilarErrors({ hit, formattedDoc }: SimilarErrorsProps) {
         : [],
     [discoverUrl]
   );
+
+  // TODO check if there's at least one of the other fields with value
+  if (serviceNameValue) {
+    return undefined;
+  }
 
   return (
     <ContentFrameworkSection
