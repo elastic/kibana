@@ -11,7 +11,6 @@ import * as redux from 'react-redux';
 import * as experimentalFeatures from '../use_experimental_features';
 import * as globalQueryString from '../../utils/global_query_string';
 import { TestProviders } from '../../mock';
-import { useKibana } from '../../lib/kibana';
 
 jest.mock('react-redux', () => ({
   ...jest.requireActual('react-redux'),
@@ -27,12 +26,6 @@ describe('useInitTimerangeFromUrlParam', () => {
     jest.clearAllMocks();
     (redux.useDispatch as jest.Mock).mockReturnValue(dispatch);
     (experimentalFeatures.useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(false);
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {
-        serverless: {},
-      },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
   });
 
   it('should call useInitializeUrlParam with correct params', () => {
@@ -45,20 +38,7 @@ describe('useInitTimerangeFromUrlParam', () => {
     );
   });
 
-  it('should call dispatch 2 times on init url params when not serverless', () => {
-    (useKibana as jest.Mock).mockReturnValue({
-      services: {},
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
-    renderHook(() => useInitTimerangeFromUrlParam(), {
-      wrapper: TestProviders,
-    });
-    const callback = (globalQueryString.useInitializeUrlParam as jest.Mock).mock.calls[0][1];
-    callback({ valueReport: { timerange: { kind: 'absolute' } } });
-    expect(dispatch).toHaveBeenCalledTimes(2);
-  });
-
-  it('should call dispatch 3 times on init url params when serverless and valueReport exists', () => {
+  it('should call dispatch 3 times on init url params when valueReport exists', () => {
     renderHook(() => useInitTimerangeFromUrlParam(), {
       wrapper: TestProviders,
     });
@@ -67,7 +47,7 @@ describe('useInitTimerangeFromUrlParam', () => {
     expect(dispatch).toHaveBeenCalledTimes(3);
   });
 
-  it('should call dispatch 6 times on init url params when serverless, valueReport exists, and isSocTrendsEnabled=true', () => {
+  it('should call dispatch 6 times on init url params when valueReport exists, and isSocTrendsEnabled=true', () => {
     (experimentalFeatures.useIsExperimentalFeatureEnabled as jest.Mock).mockReturnValue(true);
     renderHook(() => useInitTimerangeFromUrlParam(), {
       wrapper: TestProviders,

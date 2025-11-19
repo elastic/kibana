@@ -6,7 +6,6 @@
  */
 import { useEffect, useMemo } from 'react';
 import { useSelector } from 'react-redux';
-import { useKibana } from '../../lib/kibana';
 import { useIsExperimentalFeatureEnabled } from '../use_experimental_features';
 import type { UrlInputsModel } from '../../store/inputs/model';
 import { inputsSelectors } from '../../store/inputs';
@@ -18,9 +17,6 @@ export const useSyncTimerangeUrlParam = () => {
   const getInputSelector = useMemo(() => inputsSelectors.inputsSelector(), []);
   const inputState = useSelector(getInputSelector);
   const isSocTrendsEnabled = useIsExperimentalFeatureEnabled('socTrendsEnabled');
-  const { serverless } = useKibana().services;
-  // only on serverless
-  const isValueReportEnabled = !!serverless;
 
   const { linkTo: globalLinkTo, timerange: globalTimerange } = inputState.global;
   const { linkTo: timelineLinkTo, timerange: timelineTimerange } = inputState.timeline;
@@ -39,7 +35,7 @@ export const useSyncTimerangeUrlParam = () => {
   }, [inputState.socTrends, isSocTrendsEnabled]);
 
   const valueReportUrlParams = useMemo(() => {
-    if (isValueReportEnabled && inputState.valueReport) {
+    if (inputState.valueReport) {
       const { linkTo: valueReportLinkTo, timerange: valueReportTimerange } = inputState.valueReport;
       return {
         valueReport: {
@@ -49,7 +45,7 @@ export const useSyncTimerangeUrlParam = () => {
       };
     }
     return {};
-  }, [inputState.valueReport, isValueReportEnabled]);
+  }, [inputState.valueReport]);
 
   useEffect(() => {
     updateTimerangeUrlParam({

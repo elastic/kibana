@@ -113,6 +113,16 @@ describe('createScheduledReportShareIntegration', () => {
         })
       ).toBe(false);
     });
+
+    it('should return false for unsupported object types', () => {
+      expect(
+        integration.prerequisiteCheck!({
+          license: { type: SCHEDULED_REPORT_VALID_LICENSES[0] } as ILicense,
+          capabilities,
+          objectType: 'ai_value_report',
+        })
+      ).toBe(false);
+    });
   });
 
   describe('config.shouldRender', () => {

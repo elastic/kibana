@@ -19,6 +19,7 @@ import { VisualizationEmbeddable } from '../../../common/components/visualizatio
 import { getCostSavingsMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/cost_savings_metric';
 import { useMetricAnimation } from '../../hooks/use_metric_animation';
 import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_default';
+import { useAIValueExportContext } from '../../providers/ai_value/export_provider';
 
 interface Props {
   from: string;
@@ -27,6 +28,16 @@ interface Props {
   analystHourlyRate: number;
 }
 const ID = 'CostSavingsMetricQuery';
+
+const WithMetricAnimation = ({ children }: { children: React.ReactNode }) => {
+  // Apply animation to the metric value
+  useMetricAnimation({
+    animationDurationMs: 1500,
+    selector: '.echMetricText__value',
+  });
+
+  return <>{children}</>;
+};
 
 /**
  * Renders a Lens embeddable metric visualization showing estimated cost savings
@@ -44,11 +55,9 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
     euiTheme: { colors },
   } = useEuiTheme();
 
-  // Apply animation to the metric value
-  useMetricAnimation({
-    animationDurationMs: 1500,
-    selector: '.echMetricText__value',
-  });
+  const exportContext = useAIValueExportContext();
+  const isExportMode = exportContext?.forwardedState !== undefined;
+
   const signalIndexName = useSignalIndexWithDefault();
   const timerange = useMemo(() => ({ from, to }), [from, to]);
   const getLensAttributes = useCallback<GetLensAttributes>(
@@ -63,7 +72,7 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
     [analystHourlyRate, colors.backgroundBaseSuccess, minutesPerAlert, signalIndexName]
   );
 
-  return (
+  const Visualization = (
     <div
       css={css`
         height: 100%;
@@ -105,6 +114,12 @@ const CostSavingsMetricComponent: React.FC<Props> = ({
       />
     </div>
   );
+
+  if (isExportMode) {
+    return Visualization;
+  }
+
+  return <WithMetricAnimation>{Visualization}</WithMetricAnimation>;
 };
 
 export const CostSavingsMetric = React.memo(CostSavingsMetricComponent);
