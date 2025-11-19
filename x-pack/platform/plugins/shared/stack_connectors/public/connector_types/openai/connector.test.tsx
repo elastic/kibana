@@ -10,7 +10,7 @@ import ConnectorFields from './connector';
 import { ConnectorFormTestProvider } from '../lib/test_utils';
 import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai/constants';
+import { DEFAULT_MODEL, OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
 import { useGetDashboard } from '../lib/gen_ai/use_get_dashboard';
 import { createStartServicesMock } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react.mock';
@@ -33,7 +33,7 @@ const openAiConnector = {
   config: {
     apiUrl: 'https://openaiurl.com',
     apiProvider: OpenAiProviderType.OpenAi,
-    defaultModel: DEFAULT_OPENAI_MODEL,
+    defaultModel: DEFAULT_MODEL,
   },
   secrets: {
     apiKey: 'thats-a-nice-looking-key',
@@ -204,7 +204,7 @@ describe('ConnectorFields renders', () => {
         config: {
           apiUrl: 'https://openaiurl.com',
           apiProvider: OpenAiProviderType.OpenAi,
-          defaultModel: DEFAULT_OPENAI_MODEL,
+          defaultModel: DEFAULT_MODEL,
         },
         secrets: {
           apiKey: 'thats-a-nice-looking-key',
@@ -239,7 +239,7 @@ describe('ConnectorFields renders', () => {
         config: {
           apiUrl: 'https://openaiurl.com',
           apiProvider: OpenAiProviderType.OpenAi,
-          defaultModel: DEFAULT_OPENAI_MODEL,
+          defaultModel: DEFAULT_MODEL,
         },
         secrets: {
           apiKey: 'thats-a-nice-looking-key',
@@ -267,7 +267,7 @@ describe('ConnectorFields renders', () => {
             config: {
               apiUrl: 'https://openaiurl.com',
               apiProvider: OpenAiProviderType.OpenAi,
-              defaultModel: DEFAULT_OPENAI_MODEL,
+              defaultModel: DEFAULT_MODEL,
             },
             secrets: {
               apiKey: 'thats-a-nice-looking-key',
@@ -288,7 +288,7 @@ describe('ConnectorFields renders', () => {
         config: {
           apiUrl: 'https://openaiurl.com',
           apiProvider: OpenAiProviderType.OpenAi,
-          defaultModel: DEFAULT_OPENAI_MODEL,
+          defaultModel: DEFAULT_MODEL,
         },
         secrets: {
           apiKey: 'thats-a-nice-looking-key',
@@ -321,7 +321,7 @@ describe('ConnectorFields renders', () => {
             config: {
               apiUrl: 'https://openaiurl.com',
               apiProvider: OpenAiProviderType.OpenAi,
-              defaultModel: DEFAULT_OPENAI_MODEL,
+              defaultModel: DEFAULT_MODEL,
               headers: [{ key: 'hello', value: 'world' }],
             },
             secrets: {
