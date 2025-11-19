@@ -37,15 +37,12 @@ export const transformDashboardIn = ({
     const { controlGroupInput, options, filters, panels, query, tags, timeRange, ...rest } =
       dashboardState;
 
-    const tagReferences = transformTagsIn({
-      tags,
-      references: incomingReferences,
-    });
+    const hasTagReference = incomingReferences.some(({ type }) => type === tagSavedObjectTypeName);
+    if (hasTagReference) {
+      throw new Error(`Tag references are not supported. Pass tags in with 'data.tags'`);
+    }
 
-    // TODO - remove once all references are provided server side
-    const nonTagIncomingReferences = incomingReferences.filter(
-      ({ type }) => type !== tagSavedObjectTypeName
-    );
+    const tagReferences = transformTagsIn(tags);
 
     const { panelsJSON, sections, references: panelReferences } = transformPanelsIn(panels);
 
@@ -74,7 +71,7 @@ export const transformDashboardIn = ({
       attributes,
       references: [
         ...tagReferences,
-        ...nonTagIncomingReferences,
+        ...incomingReferences,
         ...panelReferences,
         ...searchSourceReferences,
       ],

@@ -124,4 +124,29 @@ describe('transformDashboardIn', () => {
       }
     `);
   });
+
+  it('should return error when passed tag references', () => {
+    const dashboardState: DashboardState = {
+      title: 'title',
+      panels: [],
+    };
+
+    const output = transformDashboardIn({
+      dashboardState,
+      incomingReferences: [
+        {
+          name: 'someTagRef',
+          type: 'tag',
+          id: '1',
+        },
+      ],
+    });
+    expect(output).toMatchInlineSnapshot(`
+      Object {
+        "attributes": null,
+        "error": [Error: Tag references are not supported. Pass tags in with 'data.tags'],
+        "references": null,
+      }
+    `);
+  });
 });

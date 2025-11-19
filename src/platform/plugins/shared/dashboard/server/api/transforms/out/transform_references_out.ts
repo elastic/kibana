@@ -8,6 +8,7 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
+import { tagSavedObjectTypeName } from '@kbn/saved-objects-tagging-plugin/common';
 import type { DashboardState, DashboardPanel } from '../../types';
 import { isDashboardSection } from '../../../../common';
 import { embeddableService } from '../../../kibana_services';
@@ -40,6 +41,10 @@ export function transformReferencesOut(
       return isLegacySavedObjectRef(ref) ? transformLegacySavedObjectRef(ref) : ref;
     })
     .filter((ref) => {
+      // drop tag references
+      // tags are returned in "data.tags"
+      if (ref.type === tagSavedObjectTypeName) return false;
+
       const panelId = getPanelIdFromReference(ref);
       return panelId && dropRefsForPanel[panelId]
         ? // drop references for panels that inject references on server
