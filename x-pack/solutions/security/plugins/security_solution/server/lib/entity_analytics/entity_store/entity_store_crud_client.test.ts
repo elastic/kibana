@@ -18,6 +18,7 @@ import {
 import type { Entity } from '../../../../common/api/entity_analytics/entity_store/entities';
 import * as uuid from 'uuid';
 import { EntityStoreCapability } from '@kbn/entities-schema';
+import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 
 describe('EntityStoreCrudClient', () => {
   const clusterClientMock = elasticsearchServiceMock.createScopedClusterClient();
@@ -499,7 +500,7 @@ describe('EntityStoreCrudClient', () => {
       dataClientMock.isCapabilityEnabled.mockReturnValueOnce(Promise.resolve(false));
 
       await expect(async () => client.getEntity('host', 'host-id')).rejects.toThrow(
-        new CapabilityNotEnabledError('host', EntityStoreCapability.CRUD)
+        new CapabilityNotEnabledError(EntityStoreCapability.CRUD_API)
       );
     });
 
@@ -518,7 +519,7 @@ describe('EntityStoreCrudClient', () => {
           total: { value: 1, relation: 'eq' },
           hits: [{ _source: mockEntity }],
         },
-      } as any);
+      } as SearchResponse<Entity>);
 
       const result = await client.getEntity('host', 'host-id');
 
@@ -543,7 +544,7 @@ describe('EntityStoreCrudClient', () => {
           total: { value: 0, relation: 'eq' },
           hits: [],
         },
-      } as any);
+      } as SearchResponse<Entity>);
 
       await expect(async () => client.getEntity('host', 'host-id')).rejects.toThrow(
         "Entity with id 'host-id' not found"

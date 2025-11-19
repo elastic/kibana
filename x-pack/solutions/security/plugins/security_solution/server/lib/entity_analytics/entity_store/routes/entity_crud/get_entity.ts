@@ -8,7 +8,10 @@
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import type { GetEntityResponse } from '../../../../../../common/api/entity_analytics/entity_store/entities/get_entity.gen';
-import { GetEntityRequestParams } from '../../../../../../common/api/entity_analytics/entity_store/entities/get_entity.gen';
+import {
+  GetEntityRequestParams,
+  GetEntityRequestBody,
+} from '../../../../../../common/api/entity_analytics/entity_store/entities/get_entity.gen';
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { API_VERSIONS, APP_ID } from '../../../../../../common/constants';
 import { BadCRUDRequestError, EngineNotRunningError } from '../../errors';
@@ -16,9 +19,9 @@ import { CapabilityNotEnabledError } from '../../errors/capability_not_enabled_e
 
 export const getEntity = (router: EntityAnalyticsRoutesDeps['router'], logger: Logger) => {
   router.versioned
-    .get({
+    .post({
       access: 'public',
-      path: '/api/entity_store/entities/{entityType}/{entityId}',
+      path: '/api/entity_store/entities/{entityType}',
       options: {
         availability: {
           stability: 'beta',
@@ -36,6 +39,7 @@ export const getEntity = (router: EntityAnalyticsRoutesDeps['router'], logger: L
         validate: {
           request: {
             params: buildRouteValidationWithZod(GetEntityRequestParams),
+            body: buildRouteValidationWithZod(GetEntityRequestBody),
           },
         },
       },
@@ -45,7 +49,7 @@ export const getEntity = (router: EntityAnalyticsRoutesDeps['router'], logger: L
         try {
           const entity = await secSol
             .getEntityStoreCrudClient()
-            .getEntity(request.params.entityType, request.params.entityId);
+            .getEntity(request.params.entityType, request.body.id);
 
           return response.ok({ body: entity });
         } catch (error) {

@@ -5,30 +5,33 @@
  * 2.0.
  */
 
-import { httpServerMock } from '@kbn/core-http-server-mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { getEntity } from './get_entity';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import { GetEntityRequestParams } from '../../../../../../common/api/entity_analytics/entity_store/entities/get_entity.gen';
+import {
+  GetEntityRequestParams,
+  GetEntityRequestBody,
+} from '../../../../../../common/api/entity_analytics/entity_store/entities/get_entity.gen';
 
 jest.mock('@kbn/zod-helpers');
 
 describe('getEntity route', () => {
-  let router: any;
-  let logger: any;
+  let router: ReturnType<typeof httpServiceMock.createRouter>;
+  let logger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   beforeEach(() => {
-    router = httpServerMock.createRouter();
+    router = httpServiceMock.createRouter();
     logger = loggingSystemMock.createLogger();
     (buildRouteValidationWithZod as jest.Mock).mockReturnValue(jest.fn());
   });
 
-  it('should register a GET route with correct path and security', () => {
+  it('should register a POST route with correct path and security', () => {
     getEntity(router, logger);
 
-    expect(router.versioned.get).toHaveBeenCalledWith({
+    expect(router.versioned.post).toHaveBeenCalledWith({
       access: 'public',
-      path: '/api/entity_store/entities/{entityType}/{entityId}',
+      path: '/api/entity_store/entities/{entityType}',
       options: {
         availability: {
           stability: 'beta',
@@ -42,17 +45,18 @@ describe('getEntity route', () => {
     });
   });
 
-  it('should validate request params using GetEntityRequestParams schema', () => {
+  it('should validate request params and body using GetEntityRequestParams and GetEntityRequestBody schemas', () => {
     getEntity(router, logger);
 
     expect(buildRouteValidationWithZod).toHaveBeenCalledWith(GetEntityRequestParams);
+    expect(buildRouteValidationWithZod).toHaveBeenCalledWith(GetEntityRequestBody);
   });
 
   it('should call addVersion on the router', () => {
     const mockVersionedRoute = {
       addVersion: jest.fn(),
     };
-    router.versioned.get.mockReturnValue(mockVersionedRoute);
+    router.versioned.post.mockReturnValue(mockVersionedRoute);
 
     getEntity(router, logger);
 
