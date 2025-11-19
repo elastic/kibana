@@ -9,7 +9,7 @@ import React from 'react';
 import type { ConfigFieldSchema, SecretsFieldSchema } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiText } from '@elastic/eui';
-import { DEFAULT_OPENAI_MODEL, OpenAiProviderType } from '../../../common/openai/constants';
+import { DEFAULT_MODEL, OpenAiProviderType } from '@kbn/connector-schemas/openai/constants';
 import { contextWindowLengthField, temperatureField } from '../../common/genai_connectors';
 import * as commonI18n from '../../common/genai_connectors/translations';
 import * as i18n from './translations';
@@ -90,7 +90,7 @@ export const openAiConfig: ConfigFieldSchema[] = [
         id="xpack.stackConnectors.components.genAi.openAiDocumentationModel"
       />
     ),
-    defaultValue: DEFAULT_OPENAI_MODEL,
+    defaultValue: DEFAULT_MODEL,
   },
   contextWindowLengthField,
   temperatureField,
