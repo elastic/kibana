@@ -6,7 +6,6 @@
  */
 import {
   featureSchema,
-  featureTypeSchema,
   type SignificantEventsGenerateResponse,
   type SignificantEventsGetResponse,
   type SignificantEventsPreviewResponse,
