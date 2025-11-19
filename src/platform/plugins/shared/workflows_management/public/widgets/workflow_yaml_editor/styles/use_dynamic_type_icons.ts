@@ -7,17 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { IconType } from '@elastic/eui';
 import { useEffect } from 'react';
-import type { ConnectorTypeInfoMinimal } from '@kbn/workflows';
 import type { ConnectorsResponse } from '../../../entities/connectors/model/types';
-import { getStepIconCssProperties } from '../../../shared/ui/step_icons/get_step_icon_css_properties';
+import { useKibana } from '../../../hooks/use_kibana';
+import { getStepIconBase64 } from '../../../shared/ui/step_icons/get_step_icon_base64';
+
+export interface ConnectorTypeInfoMinimal {
+  actionTypeId: string;
+  displayName: string;
+  icon?: IconType;
+}
 
 export const predefinedStepTypes = [
   {
     actionTypeId: 'console',
     displayName: 'Console',
   },
-
   {
     actionTypeId: 'elasticsearch',
     displayName: 'Elasticsearch',
@@ -25,14 +31,6 @@ export const predefinedStepTypes = [
   {
     actionTypeId: 'kibana',
     displayName: 'Kibana',
-  },
-  {
-    actionTypeId: 'slack',
-    displayName: 'Slack',
-  },
-  {
-    actionTypeId: 'inference',
-    displayName: 'Inference',
   },
   {
     actionTypeId: 'if',
@@ -73,14 +71,19 @@ export const predefinedStepTypes = [
 ];
 
 export function useDynamicTypeIcons(connectorsData: ConnectorsResponse | undefined) {
+  const { actionTypeRegistry } = useKibana().services.triggersActionsUi;
   useEffect(() => {
     if (!connectorsData?.connectorTypes) {
       return;
     }
-    const connectorTypes = Object.values(connectorsData.connectorTypes).map((connector) => ({
-      actionTypeId: connector.actionTypeId.slice(1), // remove the leading dot
-      displayName: connector.displayName,
-    }));
+    const connectorTypes = Object.values(connectorsData.connectorTypes).map((connector) => {
+      const actionType = actionTypeRegistry.get(connector.actionTypeId);
+      return {
+        actionTypeId: connector.actionTypeId,
+        displayName: connector.displayName,
+        icon: actionType.iconClass,
+      };
+    });
 
     // Run async functions
     (async () => {
@@ -89,7 +92,7 @@ export function useDynamicTypeIcons(connectorsData: ConnectorsResponse | undefin
         injectDynamicShadowIcons([...predefinedStepTypes, ...connectorTypes]),
       ]);
     })();
-  }, [connectorsData?.connectorTypes]);
+  }, [connectorsData?.connectorTypes, actionTypeRegistry]);
 }
 
 /**
@@ -109,15 +112,18 @@ async function injectDynamicConnectorIcons(connectorTypes: ConnectorTypeInfoMini
   let cssToInject = '';
 
   for (const connector of Object.values(connectorTypes)) {
-    const connectorType = connector.actionTypeId;
+    const connectorType = connector.actionTypeId.startsWith('.')
+      ? connector.actionTypeId.slice(1)
+      : connector.actionTypeId;
+
     const displayName = connector.displayName;
 
     try {
       // Generate CSS rule for this connector
-      const cssProperties = await getStepIconCssProperties(connectorType);
+      const iconBase64 = await getStepIconBase64(connector);
 
       // Only inject CSS if we successfully generated an icon
-      if (cssProperties) {
+      if (iconBase64) {
         let selector = `.monaco-list .monaco-list-row[aria-label^="${connectorType},"] .suggest-icon:before,
           .monaco-list .monaco-list-row[aria-label$=", ${connectorType}"] .suggest-icon:before,
           .monaco-list .monaco-list-row[aria-label*=", ${connectorType},"] .suggest-icon:before,
@@ -130,18 +136,17 @@ async function injectDynamicConnectorIcons(connectorTypes: ConnectorTypeInfoMini
         } else if (connectorType === 'console') {
           selector = '.codicon-symbol-variable:before';
         }
-        // background-color is set in get_monaco_workflow_overrides_styles.tsx
         cssToInject += `
           /* Target by aria-label content */
-          ${selector} { 
+          ${selector} {
+            background-image: url("${iconBase64}") !important;
+            background-size: 12px 12px !important;
+            background-repeat: no-repeat !important;
+            background-position: center !important;
             content: " " !important;
             width: 16px !important;
             height: 16px !important;
             display: block !important;
-            ${cssProperties}
-            background-size: 12px 12px !important;
-            background-repeat: no-repeat !important;
-            background-position: center !important;
           }
         `;
       }
@@ -179,11 +184,10 @@ async function injectDynamicShadowIcons(connectorTypes: ConnectorTypeInfoMinimal
     const connectorType = connector.actionTypeId;
     try {
       // Generate CSS rule for this connector shadow icon
-      // const iconBase64 = await getStepIconBase64(connectorType);
+      const iconBase64 = await getStepIconBase64(connector);
 
-      const cssProperties = await getStepIconCssProperties(connectorType);
       // Only inject CSS if we successfully generated an icon
-      if (cssProperties) {
+      if (iconBase64) {
         // Get the class name for this connector
         let className = connectorType;
         if (connectorType.startsWith('elasticsearch.')) {
@@ -204,10 +208,9 @@ async function injectDynamicShadowIcons(connectorTypes: ConnectorTypeInfoMinimal
           }
         }
 
-        // background-color is set in get_base_type_icons_styles.tsx
         cssToInject += `
           .type-inline-highlight.type-${className}::after {
-            ${cssProperties}
+            background-image: url("${iconBase64}");
             background-size: contain;
             background-repeat: no-repeat;
           }

@@ -8,9 +8,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import {
-  SENTINELONE_CONNECTOR_ID,
+  CONNECTOR_ID as SENTINELONE_CONNECTOR_ID,
   SUB_ACTION,
-} from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
+} from '@kbn/connector-schemas/sentinelone/constants';
 import { groupBy } from 'lodash';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import type {
@@ -28,7 +28,7 @@ import type {
   SentinelOneIsolateHostParams,
   SentinelOneFetchAgentFilesParams,
   SentinelOneExecuteScriptParams,
-} from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+} from '@kbn/connector-schemas/sentinelone';
 import type {
   QueryDslQueryContainer,
   SearchHit,

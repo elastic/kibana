@@ -7,31 +7,107 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { type IconType } from '@elastic/eui';
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { getStackConnectorLogo } from '@kbn/stack-connectors-plugin/public/common/logos';
+import { ElasticsearchLogo } from './icons/elasticsearch.svg';
+import { HARDCODED_ICONS } from './icons/hardcoded_icons';
+import { KibanaLogo } from './icons/kibana.svg';
+
+export interface GetStepIconBase64Params {
+  actionTypeId: string;
+  icon?: IconType;
+}
 
 /**
- * Get base64 encoded SVG icon for a connector type
+ * Default fallback SVG for unknown connectors
  */
-export async function getStepIconBase64(connectorType: string): Promise<string | null> {
+const DEFAULT_CONNECTOR_SVG = `<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16">
+    <circle cx="8" cy="8" r="6" fill="none" stroke="currentColor" stroke-width="2"/>
+    <circle cx="8" cy="8" r="2" fill="currentColor"/>
+  </svg>`;
+const DEFAULT_CONNECTOR_DATA_URL = `data:image/svg+xml;base64,${btoa(DEFAULT_CONNECTOR_SVG)}`;
+
+type LazyImageComponent = React.LazyExoticComponent<
+  React.ComponentType<{ width: number; height: number }>
+> & {
+  _payload: {
+    _result: () => Promise<{ default: React.ComponentType<{ width: number; height: number }> }>;
+  };
+};
+
+/**
+ * Type guard to check if a component is a LazyExoticComponent
+ * LazyExoticComponent has an internal _payload property with a _load function
+ */
+function isLazyExoticComponent(component: unknown): component is LazyImageComponent {
+  const comp = component as unknown as LazyImageComponent;
+  return typeof comp?._payload?._result === 'function';
+}
+
+/**
+ * Resolve a LazyExoticComponent to its actual component
+ * Accesses React's internal _payload._result API to resolve the lazy component
+ */
+async function resolveLazyComponent(
+  lazyComponent: LazyImageComponent
+): Promise<React.ComponentType<{ width: number; height: number }>> {
+  // Access React's internal payload to get the loader function
+  const module = await lazyComponent._payload._result();
+  // Return the default export (the actual component)
+  return module.default;
+}
+
+/**
+ * Get data URL for a connector icon (supports SVG, PNG, and other image formats)
+ * Returns a full data URL (e.g., "data:image/svg+xml;base64,..." or "data:image/png;base64,...")
+ */
+export async function getStepIconBase64(connector: GetStepIconBase64Params): Promise<string> {
   try {
-    const dotConnectorType = `.${connectorType}`;
-    // First, try to get the logo directly from stack connectors
-    const LogoComponent = await getStackConnectorLogo(dotConnectorType);
-    if (LogoComponent) {
-      return getBase64FromReactComponent(LogoComponent);
+    // The icon from action registry,
+    if (connector.icon) {
+      // data URL strings or lazy components supported.
+      // built-in EUI icons are not supported (e.g. 'logoSlack', 'inference') use hardcoded icons for them instead.
+      if (typeof connector.icon === 'string' && connector.icon.startsWith('data:')) {
+        return connector.icon;
+      }
+      if (isLazyExoticComponent(connector.icon)) {
+        const IconComponent = await resolveLazyComponent(connector.icon);
+        return getDataUrlFromReactComponent(IconComponent);
+      }
     }
 
-    return null;
+    if (connector.actionTypeId === 'elasticsearch') {
+      return getDataUrlFromReactComponent(ElasticsearchLogo);
+    }
+
+    if (connector.actionTypeId === 'kibana') {
+      return getDataUrlFromReactComponent(KibanaLogo);
+    }
+
+    const hardcodedIcon = HARDCODED_ICONS[connector.actionTypeId];
+    if (hardcodedIcon) {
+      if (hardcodedIcon.startsWith('data:')) {
+        return hardcodedIcon;
+      }
+      return `data:image/svg+xml;base64,${hardcodedIcon}`;
+    }
+
+    // Fallback to default icon for other connector types
+    return DEFAULT_CONNECTOR_DATA_URL;
   } catch (error) {
-    return null;
+    // Fallback to default static icon
+    return DEFAULT_CONNECTOR_DATA_URL;
   }
 }
 
-function getBase64FromReactComponent(
+/**
+ * Convert a React component to a data URL
+ * This is a separate function for React components that aren't IconType
+ */
+function getDataUrlFromReactComponent(
   component: React.ComponentType<{ width: number; height: number }>
-): string | null {
+): string {
   try {
     const logoElement = React.createElement(component, { width: 16, height: 16 });
     let htmlString = renderToStaticMarkup(logoElement);
@@ -45,20 +121,14 @@ function getBase64FromReactComponent(
       if (srcMatch && srcMatch[1]) {
         const srcValue = srcMatch[1];
 
-        // If it's already a data URL, extract the base64 part
-        if (srcValue.startsWith('data:image/svg+xml;base64,')) {
-          const base64 = srcValue.replace('data:image/svg+xml;base64,', '');
-          return base64;
-        }
-
-        // If it's a different data URL format, return it as is
+        // If it's already a data URL, return it as-is
         if (srcValue.startsWith('data:')) {
-          // Convert to base64 if needed
-          const base64 = btoa(srcValue);
-          return base64;
+          return srcValue;
         }
 
         // If it's a regular URL/path, we can't easily convert it here
+        // Fallback to default
+        return `data:image/svg+xml;base64,${btoa(DEFAULT_CONNECTOR_SVG)}`;
       }
     } else {
       // It's a direct SVG - handle as before
@@ -67,14 +137,15 @@ function getBase64FromReactComponent(
       if (hasFillNone) {
         // Remove fill="none" and add currentColor fill
         htmlString = htmlString
-          .replace(/fill="none"/gi, '')
-          .replace(/fill='none'/gi, '')
+          .replaceAll(/fill="none"/gi, '')
           .replace(/<svg([^>]*?)>/, '<svg$1 fill="currentColor">');
       }
     }
 
-    return btoa(htmlString);
+    const base64 = btoa(htmlString);
+    return `data:image/svg+xml;base64,${base64}`;
   } catch (error) {
-    return null;
+    // Fallback to default SVG on any error
+    return `data:image/svg+xml;base64,${btoa(DEFAULT_CONNECTOR_SVG)}`;
   }
 }
