@@ -7,19 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useMemo } from 'react';
-import { useStore } from 'react-redux';
+import { useMemo, useRef } from 'react';
+import { useSelector } from 'react-redux';
 import type { monaco } from '@kbn/monaco';
+import type { WorkflowDetailState } from '../../../../entities/workflows/store';
 import { selectDetail } from '../../../../entities/workflows/store/workflow_detail/selectors';
 import { getCompletionItemProvider } from '../../lib/autocomplete/get_completion_item_provider';
 
 export const useWorkflowYamlCompletionProvider = (): monaco.languages.CompletionItemProvider => {
-  const store = useStore();
+  const editorState = useSelector(selectDetail);
+  const editorStateRef = useRef<WorkflowDetailState>(editorState);
+  editorStateRef.current = editorState;
 
   const completionProvider = useMemo(() => {
-    // Read state directly from store to ensure we always get fresh state
-    return getCompletionItemProvider(() => selectDetail(store.getState()));
-  }, [store]);
+    return getCompletionItemProvider(() => editorStateRef.current);
+  }, []);
 
   return completionProvider;
 };
