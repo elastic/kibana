@@ -9,8 +9,10 @@
 
 import type { QueryFunctionContext } from '@kbn/react-query';
 import { useInfiniteQuery } from '@kbn/react-query';
-import { useEffect, useMemo } from 'react';
+import { useEffect, useState } from 'react';
 import type { MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import { useStableCallback } from '@kbn/unified-histogram/hooks/use_stable_callback';
+import usePrevious from 'react-use/lib/usePrevious';
 import { PAGE_SIZE } from '../common/constants';
 
 export function filterFieldsWithData(fields: MetricField[]) {
@@ -34,7 +36,7 @@ export const usePaginatedMetricFieldsQuery = <TQueryKey extends readonly unknown
   ) => Promise<PaginatedResponse | undefined>;
   enabled?: boolean;
 }) => {
-  const { hasNextPage, data, status, fetchNextPage, isFetchingNextPage, isFetching } =
+  const { hasNextPage, data, status, fetchNextPage, isFetchingNextPage, isFetching, isRefetching } =
     useInfiniteQuery({
       queryKey,
       queryFn,
@@ -55,15 +57,21 @@ export const usePaginatedMetricFieldsQuery = <TQueryKey extends readonly unknown
     }
   }, [hasNextPage, fetchNextPage, isFetchingNextPage]);
 
-  const metricFieldsData = useMemo(() => {
-    return filterFieldsWithData(
-      data?.pages?.filter(Boolean).flatMap((page) => page?.fields ?? []) ?? []
-    );
-  }, [data]);
+  const [response, setResponse] = useState<MetricField[]>();
+  const updateResponse = useStableCallback(() => {
+    setResponse(data?.pages?.filter(Boolean).flatMap((page) => page?.fields ?? []) ?? []);
+  });
+  const previousResponse = usePrevious(response);
+
+  useEffect(() => {
+    if ((!hasNextPage && !isFetchingNextPage) || !previousResponse?.length) {
+      updateResponse();
+    }
+  }, [hasNextPage, isFetchingNextPage, previousResponse, updateResponse]);
 
   return {
-    data: metricFieldsData,
+    data: response,
     status,
-    isFetching,
+    isFetching: hasNextPage || isFetching || isFetchingNextPage || isRefetching,
   };
 };

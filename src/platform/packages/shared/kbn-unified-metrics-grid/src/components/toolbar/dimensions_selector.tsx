@@ -9,7 +9,7 @@
 
 import React, { useMemo, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { ToolbarSelector, type SelectableEntry } from '@kbn/shared-ux-toolbar-selector';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
 import { css } from '@emotion/react';
@@ -28,6 +28,7 @@ interface DimensionsFilterProps {
   fullWidth?: boolean;
   onChange: (dimensions: Dimension[]) => void;
   singleSelection?: boolean;
+  isLoading?: boolean;
 }
 
 export const DimensionsSelector = ({
@@ -36,6 +37,7 @@ export const DimensionsSelector = ({
   onChange,
   fullWidth = false,
   singleSelection = false,
+  isLoading = false,
 }: DimensionsFilterProps) => {
   const selectedDimensionNames = useMemo(
     () => selectedDimensions.map((d) => d.name),
@@ -131,32 +133,37 @@ export const DimensionsSelector = ({
   const buttonLabel = useMemo(() => {
     const count = selectedDimensions.length;
     const dimensionLabel = selectedDimensions[0]?.name;
-    if (count === 0) {
-      return (
-        <FormattedMessage
-          id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabel"
-          defaultMessage="No {maxDimensions, plural, one {dimension} other {dimensions}} selected"
-          values={{ maxDimensions: MAX_DIMENSIONS_SELECTIONS }}
-        />
-      );
-    }
+
     return (
-      <EuiFlexGroup alignItems="center">
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
         <EuiFlexItem
           grow={false}
           css={css`
             align-items: flex-start;
           `}
         >
-          <FormattedMessage
-            id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabelWithSelection"
-            defaultMessage="Breakdown by {dimensionLabel}"
-            values={{ dimensionLabel }}
-          />
+          {count === 0 ? (
+            <FormattedMessage
+              id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabel"
+              defaultMessage="No {maxDimensions, plural, one {dimension} other {dimensions}} selected"
+              values={{ maxDimensions: MAX_DIMENSIONS_SELECTIONS }}
+            />
+          ) : (
+            <FormattedMessage
+              id="metricsExperience.dimensionsSelector.breakdownFieldButtonLabelWithSelection"
+              defaultMessage="Breakdown by {dimensionLabel}"
+              values={{ dimensionLabel }}
+            />
+          )}
         </EuiFlexItem>
+        {isLoading && (
+          <EuiFlexItem grow={false}>
+            <EuiLoadingSpinner size="m" />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
-  }, [selectedDimensions]);
+  }, [selectedDimensions, isLoading]);
 
   return (
     <ToolbarSelector
@@ -169,6 +176,7 @@ export const DimensionsSelector = ({
       singleSelection={singleSelection}
       onChange={handleChange}
       fullWidth={fullWidth}
+      hasArrow={!isLoading}
     />
   );
 };

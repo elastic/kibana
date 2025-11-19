@@ -8,7 +8,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
-import React from 'react';
+import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 
 interface PaginationProps {
@@ -18,6 +18,12 @@ interface PaginationProps {
 }
 
 export const Pagination = ({ totalPages, currentPage, onPageChange }: PaginationProps) => {
+  useEffect(() => {
+    if (currentPage >= totalPages) {
+      onPageChange(totalPages - 1);
+    }
+  }, [currentPage, totalPages, onPageChange]);
+
   if (totalPages <= 1) {
     return null;
   }
