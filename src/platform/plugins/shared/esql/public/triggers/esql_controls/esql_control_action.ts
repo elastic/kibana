@@ -17,7 +17,7 @@ import {
   ESQLVariableType,
   type ESQLControlVariable,
   type ESQLControlState,
-  type ControlTriggerSource,
+  ControlTriggerSource,
 } from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
@@ -42,7 +42,7 @@ interface Context {
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
   parentApi?: unknown;
-  triggerSource: ControlTriggerSource;
+  triggerSource?: ControlTriggerSource;
   onCloseControlFlyout?: (flyoutRef: OverlayRef) => void;
 }
 
@@ -80,7 +80,7 @@ export class CreateESQLControlAction implements Action<Context> {
     cursorPosition,
     initialState,
     parentApi,
-    triggerSource,
+    triggerSource = ControlTriggerSource.EDIT_CONTROL,
     onCloseControlFlyout = () => {},
   }: Context) {
     if (!isActionCompatible(this.core, variableType)) {
