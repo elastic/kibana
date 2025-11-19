@@ -56,7 +56,6 @@ export function PreviewDataSparkPlot({
 
   const previewFetch = useSignificantEventPreviewFetch({
     name: definition.name,
-    feature: query.feature,
     kqlQuery: query.kql.query,
     timeState,
     isQueryValid,

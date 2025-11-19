@@ -11,14 +11,11 @@ import type { TimeState } from '@kbn/es-query';
 import type { AbortableAsyncState } from '@kbn/react-hooks';
 import type { SignificantEventsPreviewResponse } from '@kbn/streams-schema';
 import moment from 'moment';
-import type { Condition } from '@kbn/streamlang';
 import { useKibana } from '../../../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../../../hooks/use_streams_app_fetch';
-import { NO_FEATURE } from '../utils/default_query';
 
 export function useSignificantEventPreviewFetch({
   name,
-  feature,
   kqlQuery,
   timeState,
   isQueryValid,
@@ -26,10 +23,6 @@ export function useSignificantEventPreviewFetch({
 }: {
   noOfBuckets?: number;
   name: string;
-  feature?: {
-    name: string;
-    filter: Condition;
-  };
   kqlQuery: string;
   timeState: TimeState;
   isQueryValid: boolean;
@@ -52,8 +45,6 @@ export function useSignificantEventPreviewFetch({
         .near(noOfBuckets, moment.duration(moment(to).diff(from)))
         ?.asSeconds()!;
 
-      const effectiveFeature = feature && feature.name === NO_FEATURE.name ? undefined : feature;
-
       return streams.streamsRepositoryClient.fetch(
         `POST /api/streams/{name}/significant_events/_preview 2023-10-31`,
         {
@@ -70,7 +61,6 @@ export function useSignificantEventPreviewFetch({
             body: {
               query: {
                 kql: { query: kqlQuery },
-                feature: effectiveFeature,
               },
             },
           },
@@ -81,7 +71,6 @@ export function useSignificantEventPreviewFetch({
       isQueryValid,
       timeState.timeRange,
       noOfBuckets,
-      feature,
       streams.streamsRepositoryClient,
       name,
       kqlQuery,
