@@ -29,7 +29,7 @@ export enum OpenAiProviderType {
   Other = 'Other',
 }
 
-export const DEFAULT_TIMEOUT_MS = 120000;
+export const DEFAULT_TIMEOUT_MS = 200000;
 
 export const DEFAULT_MODEL = 'gpt-4.1';
 
