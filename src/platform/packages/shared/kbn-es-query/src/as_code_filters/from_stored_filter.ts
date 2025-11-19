@@ -71,16 +71,19 @@ function validateHomogeneousArray(values: Array<string | number | boolean>, cont
  *
  * @param storedFilter The filter to convert (typically from saved object or URL state)
  * @returns AsCodeFilter with condition, group, or dsl format
- * @throws FilterConversionError if filter is null/undefined or critically malformed
+ * @throws FilterConversionError if filter is null/undefined or non-object
  */
 export function fromStoredFilter(storedFilter: unknown): AsCodeFilter {
   try {
-    // Handle null/undefined input
-    if (!storedFilter) {
-      throw new FilterConversionError('Cannot convert null or undefined filter');
+    // Validate input is a non-null object
+    if (!storedFilter || typeof storedFilter !== 'object') {
+      throw new FilterConversionError(
+        'Failed to convert stored filter: filter is null, undefined, or not an object',
+        storedFilter
+      );
     }
 
-    // Cast to StoredFilter for type-safe access (we validate shape through type guards below)
+    // Cast to StoredFilter for type-safe access
     const filter = storedFilter as StoredFilter;
 
     // Migrate legacy filter formats to modern format only if needed
