@@ -13,6 +13,7 @@ pageLoadAssetSize:
   charts: 40269
   cloud: 10648
   cloudDataMigration: 5687
+  cloudDefend: 18697
   cloudExperiments: 103984
   cloudFullStory: 4752
   cloudLinks: 36333
@@ -50,7 +51,7 @@ pageLoadAssetSize:
   embeddableAlertsTable: 6524
   embeddableEnhanced: 8448
   enterpriseSearch: 38000
-  esql: 16500
+  esql: 20000
   esqlDataGrid: 10209
   esUiShared: 101220
   eventAnnotation: 22361
