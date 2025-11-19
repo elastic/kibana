@@ -12,6 +12,8 @@ src/platform/packages/shared/kbn-actions-types @elastic/response-ops
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-kibana
 x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
+x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action @elastic/appex-sharedux
+x-pack/platform/packages/shared/ai-assistant-default-llm-setting @elastic/security-generative-ai
 x-pack/platform/packages/shared/ai-assistant/icon @elastic/appex-sharedux
 src/platform/plugins/shared/ai_assistant_management/selection @elastic/obs-ai-assistant
 x-pack/solutions/security/packages/ai-security-labs-content @elastic/security-generative-ai
@@ -442,7 +444,7 @@ x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin @elastic
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
 examples/error_boundary @elastic/appex-sharedux
 src/platform/packages/shared/kbn-es @elastic/kibana-operations
-src/platform/packages/shared/kbn-es-archiver @elastic/kibana-operations @elastic/appex-qa
+src/platform/packages/shared/kbn-es-archiver @elastic/appex-qa
 src/platform/packages/shared/kbn-es-errors @elastic/kibana-core
 src/platform/packages/shared/kbn-es-query @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-es-types @elastic/kibana-core @elastic/obs-knowledge-team
@@ -679,6 +681,7 @@ src/platform/packages/private/kbn-mock-idp-utils @elastic/kibana-security
 src/platform/packages/shared/kbn-monaco @elastic/appex-sharedux
 x-pack/platform/plugins/private/monitoring_collection @elastic/stack-monitoring
 x-pack/platform/plugins/private/monitoring @elastic/stack-monitoring
+packages/kbn-moon @elastic/kibana-operations
 src/platform/plugins/shared/navigation @elastic/appex-sharedux
 src/platform/plugins/shared/newsfeed @elastic/kibana-core
 src/platform/test/common/plugins/newsfeed @elastic/kibana-core
@@ -745,7 +748,6 @@ src/platform/packages/shared/kbn-profiling-utils @elastic/obs-ux-infra_services-
 x-pack/platform/packages/private/kbn-random-sampling @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-react-field @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-react-hooks @elastic/obs-ux-onboarding-team
-src/platform/packages/shared/kbn-react-query @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/common @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/render @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/root @elastic/appex-sharedux
@@ -753,6 +755,7 @@ src/platform/packages/shared/react/kibana_context/styled @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/theme @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_mount @elastic/appex-sharedux
 src/platform/packages/private/kbn-react-mute-legacy-root-warning @elastic/appex-sharedux
+src/platform/packages/shared/kbn-react-query @elastic/appex-sharedux
 src/platform/packages/shared/kbn-recently-accessed @elastic/appex-sharedux
 packages/kbn-relocate @elastic/kibana-core
 x-pack/platform/plugins/private/remote_clusters @elastic/kibana-management
@@ -776,6 +779,7 @@ src/platform/packages/private/kbn-reporting/mocks_server @elastic/appex-sharedux
 x-pack/platform/plugins/private/reporting @elastic/appex-sharedux
 src/platform/packages/private/kbn-reporting/public @elastic/appex-sharedux
 src/platform/packages/private/kbn-reporting/server @elastic/appex-sharedux
+x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes @elastic/response-ops
 src/platform/packages/shared/kbn-resizable-layout @elastic/kibana-data-discovery
 examples/resizable_layout_examples @elastic/kibana-data-discovery
 x-pack/solutions/security/test/plugin_functional/plugins/resolver_test @elastic/security-solution
@@ -820,6 +824,7 @@ src/platform/plugins/shared/saved_search @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-scout @elastic/appex-qa
 src/platform/packages/private/kbn-scout-info @elastic/appex-qa
 x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
+x-pack/platform/packages/private/kbn-scout-release-testing @elastic/appex-qa
 src/platform/packages/private/kbn-scout-reporting @elastic/appex-qa
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa
 examples/screenshot_mode_example @elastic/appex-sharedux
@@ -1013,7 +1018,6 @@ src/platform/packages/private/kbn-test-eui-helpers @elastic/kibana-visualization
 x-pack/platform/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
 src/platform/packages/shared/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
-x-pack/test_serverless
 src/platform/test
 x-pack/solutions/observability/test
 x-pack/performance @elastic/appex-qa
@@ -1095,7 +1099,6 @@ src/platform/plugins/private/vis_types/xy @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-visualization-ui-components @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-visualization-utils @elastic/kibana-visualizations
 src/platform/plugins/shared/visualizations @elastic/kibana-visualizations
-x-pack/platform/packages/private/kbn-scout-release-testing @elastic/appex-qa
 x-pack/platform/plugins/private/watcher @elastic/kibana-management
 packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations
@@ -2857,6 +2860,10 @@ x-pack/plugins/observability_solution/synthetics/server/saved_objects/synthetics
 /.github/workflows/deploy-my-kibana.yml   @elastic/observablt-robots @elastic/kibana-operations
 /.github/workflows/oblt-github-commands   @elastic/observablt-robots @elastic/kibana-operations
 /.github/workflows/undeploy-my-kibana.yml @elastic/observablt-robots @elastic/kibana-operations
+
+# Moon related configs
+.moon         @elastic/kibana-operations
+/**/moon.yml  @elastic/kibana-operations
 
 ####
 ## These rules are always last so they take ultimate priority over everything else
