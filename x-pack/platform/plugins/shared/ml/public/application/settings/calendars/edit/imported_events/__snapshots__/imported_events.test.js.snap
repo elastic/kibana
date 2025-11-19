@@ -45,6 +45,7 @@ exports[`ImportedEvents Renders imported events 1`] = `
             >
               <span
                 class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                id="generated-id-wrapper"
               >
                 <button
                   class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
@@ -78,6 +79,7 @@ exports[`ImportedEvents Renders imported events 1`] = `
             >
               <span
                 class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                id="generated-id-wrapper"
               >
                 <button
                   class="euiTableHeaderButton euiTableHeaderButton-isSorted emotion-euiTableHeaderCell__button"
@@ -112,6 +114,7 @@ exports[`ImportedEvents Renders imported events 1`] = `
             >
               <span
                 class="euiToolTipAnchor emotion-euiToolTipAnchor-block"
+                id="generated-id-wrapper"
               >
                 <button
                   class="euiTableHeaderButton emotion-euiTableHeaderCell__button"
