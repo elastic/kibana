@@ -305,7 +305,7 @@ export const CommandList = memo<CommandListProps>(({ commands, display = 'defaul
     const calloutItems = [
       <FormattedMessage
         id="xpack.securitySolution.console.commandList.callout.escapeDoubleDashes"
-        defaultMessage="Double consecutive dashes (--) for anything other than to reference a command argument must be escaped as \-\-. Without escaping them, the console will interpret it as an argument and attempt to process it as such."
+        defaultMessage="Escape values with double dashes (--) as \-\-, unless they are command arguments; otherwise the console interprets them as arguments."
       />,
       <FormattedMessage
         id="xpack.securitySolution.console.commandList.callout.multipleResponses"
