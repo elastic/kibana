@@ -11,7 +11,7 @@ import {
   geminiSuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/gemini_simulation';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
-import { DEFAULT_GEMINI_MODEL } from '@kbn/stack-connectors-plugin/common/gemini/constants';
+import { DEFAULT_MODEL } from '@kbn/connector-schemas/gemini/constants';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 const connectorTypeId = '.gemini';
@@ -94,7 +94,7 @@ export default function geminiTest({ getService }: FtrProviderContext) {
           is_missing_secrets: false,
           config: {
             ...config,
-            defaultModel: DEFAULT_GEMINI_MODEL,
+            defaultModel: DEFAULT_MODEL,
           },
           is_connector_type_deprecated: false,
         });
