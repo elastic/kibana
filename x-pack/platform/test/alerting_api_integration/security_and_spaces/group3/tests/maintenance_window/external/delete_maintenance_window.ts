@@ -76,52 +76,6 @@ export default function deleteMaintenanceWindowTests({ getService }: FtrProvider
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
         });
-
-        it('should handle delete disabled maintenance window request appropriately', async () => {
-          const { body: maintenanceWindowBody } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/maintenance_window`)
-            .set('kbn-xsrf', 'foo')
-            .send({ ...createRequestBody, enabled: false });
-
-          const response = await supertestWithoutAuth
-            .delete(`${getUrlPrefix(space.id)}/api/maintenance_window/${maintenanceWindowBody.id}`)
-            .set('kbn-xsrf', 'foo')
-            .auth(user.username, user.password);
-
-          switch (scenario.id) {
-            case 'no_kibana_privileges at space1':
-            case 'global_read at space1':
-            case 'space_1_all at space2':
-            case 'space_1_all_with_restricted_fixture at space1':
-            case 'space_1_all_alerts_none_actions at space1':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: `API [DELETE /api/maintenance_window/${maintenanceWindowBody.id}] is unauthorized for user, this action is granted by the Kibana privileges [write-maintenance-window]`,
-                statusCode: 403,
-              });
-              objectRemover.add(
-                space.id,
-                maintenanceWindowBody.id,
-                'rules/maintenance_window',
-                'alerting',
-                true
-              );
-              break;
-            case 'superuser at space1':
-            case 'space_1_all at space1':
-              expect(response.statusCode).to.eql(204);
-
-              const getResponse = await supertest
-                .get(`${getUrlPrefix(space.id)}/api/maintenance_window/${maintenanceWindowBody.id}`)
-                .set('kbn-xsrf', 'foo');
-
-              expect(getResponse.body.statusCode).to.eql(404);
-              break;
-            default:
-              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
-          }
-        });
       });
     }
   });

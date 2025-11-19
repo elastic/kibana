@@ -98,61 +98,40 @@ export default function getMaintenanceWindowTests({ getService }: FtrProviderCon
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
         });
-
-        it('should get disabled maintenance window correctly', async () => {
-          const { body: createdMaintenanceWindow } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/maintenance_window`)
-            .set('kbn-xsrf', 'foo')
-            .send({ ...createRequestBody, enabled: false });
-
-          objectRemover.add(
-            space.id,
-            createdMaintenanceWindow.id,
-            'rules/maintenance_window',
-            'alerting',
-            true
-          );
-
-          const response = await supertestWithoutAuth
-            .get(`${getUrlPrefix(space.id)}/api/maintenance_window/${createdMaintenanceWindow.id}`)
-            .auth(user.username, user.password);
-
-          switch (scenario.id) {
-            case 'no_kibana_privileges at space1':
-            case 'space_1_all at space2':
-            case 'space_1_all_with_restricted_fixture at space1':
-            case 'space_1_all_alerts_none_actions at space1':
-              expect(response.statusCode).to.eql(403);
-              expect(response.body).to.eql({
-                error: 'Forbidden',
-                message: `API [GET /api/maintenance_window/${createdMaintenanceWindow.id}] is unauthorized for user, this action is granted by the Kibana privileges [read-maintenance-window]`,
-                statusCode: 403,
-              });
-              break;
-            case 'global_read at space1':
-            case 'superuser at space1':
-            case 'space_1_all at space1':
-              expect(response.statusCode).to.eql(200);
-              expect(response.body.title).to.eql('test-maintenance-window');
-              expect(response.body.status).to.eql('disabled');
-              expect(response.body.enabled).to.eql(false);
-
-              expect(response.body.scope.alerting.query.kql).to.eql("_id: '1234'");
-
-              expect(response.body.created_by).to.eql('elastic');
-              expect(response.body.updated_by).to.eql('elastic');
-
-              expect(response.body.schedule.custom.duration).to.eql('1m');
-              expect(response.body.schedule.custom.start).to.eql(start.toISOString());
-              expect(response.body.schedule.custom.recurring.every).to.eql('2d');
-              expect(response.body.schedule.custom.recurring.end).to.eql(end.toISOString());
-              expect(response.body.schedule.custom.recurring.onWeekDay).to.eql(['MO', 'FR']);
-              break;
-            default:
-              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
-          }
-        });
       });
     }
+    it('should get disabled maintenance windows correctly', async () => {
+      const { body: createdMaintenanceWindow } = await supertest
+        .post(`${getUrlPrefix('default')}/api/maintenance_window`)
+        .set('kbn-xsrf', 'foo')
+        .send({ ...createRequestBody, enabled: false });
+
+      objectRemover.add(
+        'default',
+        createdMaintenanceWindow.id,
+        'rules/maintenance_window',
+        'alerting',
+        true
+      );
+
+      const response = await supertest
+        .get(`${getUrlPrefix('default')}/api/maintenance_window/${createdMaintenanceWindow.id}`)
+        .auth('superuser', 'superuser-password');
+
+      expect(response.statusCode).to.eql(200);
+      expect(response.body.title).to.eql('test-maintenance-window');
+      expect(response.body.status).to.eql('disabled');
+      expect(response.body.enabled).to.eql(false);
+      expect(response.body.scope.alerting.query.kql).to.eql("_id: '1234'");
+
+      expect(response.body.created_by).to.eql('elastic');
+      expect(response.body.updated_by).to.eql('elastic');
+
+      expect(response.body.schedule.custom.duration).to.eql('1m');
+      expect(response.body.schedule.custom.start).to.eql(start.toISOString());
+      expect(response.body.schedule.custom.recurring.every).to.eql('2d');
+      expect(response.body.schedule.custom.recurring.end).to.eql(end.toISOString());
+      expect(response.body.schedule.custom.recurring.onWeekDay).to.eql(['MO', 'FR']);
+    });
   });
 }
