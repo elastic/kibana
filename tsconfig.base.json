@@ -2224,6 +2224,8 @@
       "@kbn/test-subj-selector/*": ["src/platform/packages/shared/kbn-test-subj-selector/*"],
       "@kbn/test-suites-security-solution-apis": ["x-pack/solutions/security/test/security_solution_api_integration"],
       "@kbn/test-suites-security-solution-apis/*": ["x-pack/solutions/security/test/security_solution_api_integration/*"],
+      "@kbn/test-suites-security-solution-evals": ["x-pack/solutions/security/test/security_solution_evals"],
+      "@kbn/test-suites-security-solution-evals/*": ["x-pack/solutions/security/test/security_solution_evals/*"],
       "@kbn/test-suites-src": ["src/platform/test"],
       "@kbn/test-suites-src/*": ["src/platform/test/*"],
       "@kbn/test-suites-xpack-observability": ["x-pack/solutions/observability/test"],

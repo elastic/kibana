@@ -1697,6 +1697,7 @@
     "@kbn/test-jest-helpers": "link:src/platform/packages/shared/kbn-test-jest-helpers",
     "@kbn/test-subj-selector": "link:src/platform/packages/shared/kbn-test-subj-selector",
     "@kbn/test-suites-security-solution-apis": "link:x-pack/solutions/security/test/security_solution_api_integration",
+    "@kbn/test-suites-security-solution-evals": "link:x-pack/solutions/security/test/security_solution_evals",
     "@kbn/test-suites-src": "link:src/platform/test",
     "@kbn/test-suites-xpack-observability": "link:x-pack/solutions/observability/test",
     "@kbn/test-suites-xpack-performance": "link:x-pack/performance",
