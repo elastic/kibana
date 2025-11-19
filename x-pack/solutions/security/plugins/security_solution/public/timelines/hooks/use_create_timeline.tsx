@@ -20,9 +20,8 @@ import { useDiscoverInTimelineContext } from '../../common/components/discover_i
 import { defaultUdtHeaders } from '../components/timeline/body/column_headers/default_headers';
 import { timelineDefaults } from '../store/defaults';
 import { useSelectDataView } from '../../data_view_manager/hooks/use_select_data_view';
-import { DataViewManagerScopeName } from '../../data_view_manager/constants';
+import { PageScope } from '../../data_view_manager/constants';
 import { sourcererActions, sourcererSelectors } from '../../sourcerer/store';
-import { SourcererScopeName } from '../../sourcerer/store/model';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
 import { useSecurityDefaultPatterns } from '../../data_view_manager/hooks/use_security_default_patterns';
 
@@ -100,12 +99,12 @@ export const useCreateTimeline = ({
       setSelectedDataView({
         id: dataViewId,
         fallbackPatterns: selectedPatterns,
-        scope: DataViewManagerScopeName.timeline,
+        scope: PageScope.timeline,
       });
 
       dispatch(
         sourcererActions.setSelectedDataView({
-          id: SourcererScopeName.timeline,
+          id: PageScope.timeline,
           selectedDataViewId: dataViewId,
           selectedPatterns,
         })

@@ -9,16 +9,12 @@
 
 import Boom from '@hapi/boom';
 import type { RequestHandlerContext } from '@kbn/core/server';
-import type { Reference } from '@kbn/content-management-utils';
 import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_object';
-import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../dashboard_saved_object';
-import type { DashboardCreateRequestBody, DashboardCreateResponseBody } from './types';
-import {
-  transformDashboardIn,
-  transformDashboardOut,
-  transformReferencesOut,
-} from '../../content_management/v1/transforms';
-import type { DashboardState } from '../../content_management';
+import { DASHBOARD_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import type { DashboardCreateRequestBody } from './types';
+import { transformDashboardIn } from '../transforms';
+import { getDashboardCRUResponseBody } from '../saved_object_utils';
+import type { DashboardCreateResponseBody } from './types';
 
 export async function create(
   requestCtx: RequestHandlerContext,
@@ -49,33 +45,5 @@ export async function create(
     }
   );
 
-  let dashboardState: DashboardState;
-  let references: Reference[];
-  try {
-    dashboardState = transformDashboardOut(
-      savedObject.attributes,
-      savedObject.references
-    ) as DashboardState;
-    references = transformReferencesOut(savedObject.references, dashboardState.panels);
-  } catch (transformOutError) {
-    throw Boom.badRequest(`Invalid response. ${transformOutError.message}`);
-  }
-
-  return {
-    id: savedObject.id,
-    data: {
-      ...dashboardState,
-      references,
-    },
-    meta: {
-      createdAt: savedObject.created_at,
-      createdBy: savedObject.created_by,
-      error: savedObject.error,
-      managed: savedObject.managed,
-      updatedAt: savedObject.updated_at,
-      updatedBy: savedObject.updated_by,
-      version: savedObject.version ?? '',
-    },
-    spaces: savedObject.namespaces,
-  };
+  return getDashboardCRUResponseBody(savedObject, 'create');
 }

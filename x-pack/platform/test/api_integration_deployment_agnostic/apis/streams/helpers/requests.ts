@@ -200,6 +200,41 @@ export async function unlinkRule(
   expect(response.status).to.be(200);
 }
 
+export async function getRules(apiClient: StreamsSupertestRepositoryClient, stream: string) {
+  const response = await apiClient.fetch('GET /api/streams/{name}/rules 2023-10-31', {
+    params: { path: { name: stream } },
+  });
+
+  expect(response.status).to.be(200);
+
+  return response.body;
+}
+
+export async function getDashboards(apiClient: StreamsSupertestRepositoryClient, stream: string) {
+  const response = await apiClient.fetch('GET /api/streams/{name}/dashboards 2023-10-31', {
+    params: { path: { name: stream } },
+  });
+
+  expect(response.status).to.be(200);
+
+  return response.body;
+}
+
+export async function getDashboardSuggestions(options: {
+  apiClient: StreamsSupertestRepositoryClient;
+  stream: string;
+  tags: string[];
+  query?: string;
+}) {
+  const { apiClient, stream, tags, query = '' } = options;
+  const response = await apiClient.fetch('POST /internal/streams/{name}/dashboards/_suggestions', {
+    params: { path: { name: stream }, body: { tags }, query: { query } },
+  });
+  expect(response.status).to.be(200);
+
+  return response.body;
+}
+
 export async function exportContent(
   apiClient: StreamsSupertestRepositoryClient,
   name: string,

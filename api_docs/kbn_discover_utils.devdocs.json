@@ -5215,7 +5215,9 @@
             "label": "getMetricsExperienceClient",
             "description": [],
             "signature": [
-              "() => { getDimensions: (params: { dimensions: string; indices?: string | string[] | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ values: { value: string; field: string; }[]; }>; getFields: (params: { page?: number | undefined; index?: string | undefined; size?: number | undefined; fields?: string | string[] | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ fields: ",
+              "() => { getDimensions: (params: { dimensions: string; indices?: string | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ values: { value: string; field: string; }[]; }>; getFields: (params: { page?: number | undefined; index?: string | undefined; size?: number | undefined; fields?: string | string[] | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ fields: ",
+              "MetricField",
+              "[]; total: number; page: number; }>; searchFields: (params: { page?: number | undefined; index?: string | undefined; size?: number | undefined; fields?: string | string[] | undefined; filters?: Record<string, string[]> | undefined; from?: string | undefined; to?: string | undefined; }, signal?: AbortSignal | null | undefined) => Promise<{ fields: ",
               "MetricField",
               "[]; total: number; page: number; }>; } | undefined"
             ],

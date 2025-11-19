@@ -2624,16 +2624,16 @@
             "pluginId": "@kbn/traced-es-client",
             "scope": "server",
             "docId": "kibKbnTracedEsClientPluginApi",
-            "section": "def-server.UnparsedEsqlResponse",
-            "text": "UnparsedEsqlResponse"
+            "section": "def-server.ParsedEsqlResponse",
+            "text": "ParsedEsqlResponse"
           },
           " | ",
           {
             "pluginId": "@kbn/traced-es-client",
             "scope": "server",
             "docId": "kibKbnTracedEsClientPluginApi",
-            "section": "def-server.ParsedEsqlResponse",
-            "text": "ParsedEsqlResponse"
+            "section": "def-server.UnparsedEsqlResponse",
+            "text": "UnparsedEsqlResponse"
           }
         ],
         "path": "src/platform/packages/shared/kbn-traced-es-client/src/create_traced_es_client.ts",

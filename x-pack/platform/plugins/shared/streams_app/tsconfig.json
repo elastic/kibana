@@ -30,7 +30,6 @@
     "@kbn/es-query",
     "@kbn/zod",
     "@kbn/share-plugin",
-    "@kbn/shared-ux-link-redirect-app",
     "@kbn/typed-react-router-config",
     "@kbn/i18n",
     "@kbn/code-editor",
@@ -91,6 +90,7 @@
     "@kbn/spaces-plugin",
     "@kbn/unified-data-table",
     "@kbn/console-plugin",
+    "@kbn/discover-contextual-components",
     "@kbn/es-types",
     "@kbn/esql-utils",
   ]
