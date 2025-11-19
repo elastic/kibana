@@ -7,7 +7,7 @@
 
 import { EuiInlineEditText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { convertGetRequestIntoUpsertRequest, type Streams } from '@kbn/streams-schema';
+import { convertGetResponseIntoUpsertRequest, type Streams } from '@kbn/streams-schema';
 import type { ChangeEvent } from 'react';
 import React, { useEffect, useState } from 'react';
 import { css } from '@emotion/react';
@@ -80,7 +80,7 @@ export function StreamDescription({ definition }: Props) {
           const sanitized = value.trim();
           setDescription(sanitized);
 
-          const request = convertGetRequestIntoUpsertRequest(definition);
+          const request = convertGetResponseIntoUpsertRequest(definition);
           request.stream.description = sanitized;
 
           await updateStream(request);

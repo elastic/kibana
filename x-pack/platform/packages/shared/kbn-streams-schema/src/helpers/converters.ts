@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
 import { Streams } from '../models/streams';
 
 export const convertUpsertRequestIntoDefinition = (
@@ -36,5 +37,37 @@ export const convertUpsertRequestIntoDefinition = (
 
   throw new Error(
     "Couldn't parse stream upsert request. Please ensure you're passing a valid request."
+  );
+};
+
+export const convertGetResponseIntoUpsertRequest = (
+  getResponse: Streams.all.GetResponse
+): Streams.all.UpsertRequest => {
+  if (Streams.GroupStream.GetResponse.is(getResponse)) {
+    return {
+      dashboards: getResponse.dashboards,
+      queries: getResponse.queries,
+      rules: getResponse.rules,
+      stream: omit(getResponse.stream, ['name', 'updated_at']),
+    } as Streams.GroupStream.UpsertRequest;
+  }
+
+  if (Streams.ingest.all.GetResponse.is(getResponse)) {
+    return {
+      dashboards: getResponse.dashboards,
+      queries: getResponse.queries,
+      rules: getResponse.rules,
+      stream: {
+        ...omit(getResponse.stream, ['name', 'updated_at']),
+        ingest: {
+          ...getResponse.stream.ingest,
+          processing: omit(getResponse.stream.ingest.processing, ['updated_at']),
+        },
+      },
+    } as Streams.ingest.all.UpsertRequest;
+  }
+
+  throw new Error(
+    "Couldn't parse stream get request. Please ensure you're passing a valid request."
   );
 };
