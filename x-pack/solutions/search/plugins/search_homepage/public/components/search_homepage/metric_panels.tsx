@@ -20,9 +20,6 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { useIndicesStats } from '../../hooks/api/use_indices_stats';
-import { useDashboardsStats } from '../../hooks/api/use_dashboards_stats';
-import { useDataViewsStats } from '../../hooks/api/use_data_views_stats';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 
 interface MetricPanelProps {
@@ -140,7 +137,7 @@ const MetricPanelEmpty = ({ type }: { type: MetricPanelType }) => {
   );
 };
 
-const MetricPanel = ({
+export const MetricPanel = ({
   title,
   onClick,
   metric,
@@ -201,10 +198,6 @@ const MetricPanel = ({
 };
 
 export const MetricPanels = () => {
-  const { data: indexStats } = useIndicesStats();
-  const { data: dataViewStats } = useDataViewsStats();
-  const { data: dashboardStats } = useDashboardsStats();
-
   const panels: Array<{ id: string; type: MetricPanelType }> = [
     {
       id: 'indices',
@@ -225,13 +218,6 @@ export const MetricPanels = () => {
       {panels.map((panel) => (
         <EuiFlexItem key={panel.id}>
           <MetricPanelEmpty type={panel.type} />
-          {/* <MetricPanel
-            title={panel.title}
-            onClick={panel?.onClick}
-            metric={panel.metric}
-            addButtonAriaLabel={panel.addButtonAriaLabel}
-            dataTestSubj={panel.dataTestSubj}
-          /> */}
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>
