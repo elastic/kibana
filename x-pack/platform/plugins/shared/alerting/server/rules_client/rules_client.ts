@@ -190,6 +190,11 @@ export class RulesClient {
     bulkDeleteRules(this.context, options);
   public bulkEdit = <Params extends RuleTypeParams>(options: BulkEditOptions<Params>) =>
     bulkEditRules<Params>(this.context, options);
+  /**
+   * For use by the security solution
+   * @param options
+   * @returns
+   */
   public bulkEditRuleParamsWithReadAuth = <Params extends RuleTypeParams>(
     options: BulkEditRuleParamsOptions<Params>
   ) => bulkEditRuleParamsWithReadAuth<Params>(this.context, options);

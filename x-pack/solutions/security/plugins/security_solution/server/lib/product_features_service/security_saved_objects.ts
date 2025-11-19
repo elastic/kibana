@@ -71,10 +71,7 @@ export const securityTimelineSavedObjects = timelineSavedObjectTypes;
 
 export const securityNotesSavedObjects = notesSavedObjectTypes;
 
-export const rulesSavedObjects = [
-  'exception-list',
-  EXCEPTION_LIST_NAMESPACE_AGNOSTIC,
-  prebuiltRuleAssetType.name,
-];
+export const rulesSavedObjects = ['exception-list', prebuiltRuleAssetType.name];
+export const rulesV2SavedObjects = [prebuiltRuleAssetType.name];
 
 export const securityExceptionsSavedObjects = exceptionsSavedObjectTypes;
