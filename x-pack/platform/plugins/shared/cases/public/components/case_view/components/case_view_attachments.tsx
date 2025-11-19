@@ -11,8 +11,11 @@ import React from 'react';
 import type { CaseUI } from '../../../../common';
 import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import { CaseViewTabs } from '../case_view_tabs';
+import { useCaseViewTabs } from '../use_case_view_tabs';
 
 export const CaseViewAttachments = ({ caseData }: { caseData: CaseUI }) => {
+  const caseViewTabs = useCaseViewTabs({ caseData, activeTab: CASE_VIEW_PAGE_TABS.ALERTS });
+
   return (
     <>
       <EuiFlexItem
