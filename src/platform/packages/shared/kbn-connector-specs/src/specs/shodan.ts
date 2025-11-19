@@ -19,7 +19,7 @@
  * MVP implementation focusing on core asset discovery actions.
  */
 
-import { z } from '@kbn/zod';
+import { z } from '@kbn/zod/v4';
 import type { ConnectorSpec } from '../connector_spec';
 import { UISchemas } from '../connector_spec_ui';
 
@@ -29,7 +29,7 @@ export const ShodanConnector: ConnectorSpec = {
     displayName: 'Shodan',
     description: 'Internet-wide asset discovery and vulnerability scanning',
     minimumLicense: 'gold',
-    supportedFeatureIds: ['alerting', 'siem'],
+    supportedFeatureIds: ['workflows'],
   },
 
   schema: z.discriminatedUnion('method', [
@@ -69,7 +69,7 @@ export const ShodanConnector: ConnectorSpec = {
     getHostInfo: {
       isTool: true,
       input: z.object({
-        ip: z.string().ip().describe('IP address'),
+        ip: z.ipv4().describe('IP address'),
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { ip: string };
