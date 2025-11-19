@@ -10,7 +10,6 @@
 /* eslint-disable @kbn/eslint/module_migration */
 import * as monaco from 'monaco-editor/esm/vs/editor/editor.api';
 
-// Monaco 0.54.0+ renamed these files
 import 'monaco-editor/esm/vs/base/common/worker/webWorker';
 import 'monaco-editor/esm/vs/base/browser/webWorkerFactory';
 

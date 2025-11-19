@@ -1068,7 +1068,7 @@ const ESQLEditorInternal = function ESQLEditor({
   onLayoutChangeRef.current = onLayoutChange;
 
   const codeEditorOptions = useMemo(
-    (): NonNullable<CodeEditorProps['options']> => ({
+    (): CodeEditorProps['options'] => ({
       hover: {
         above: false,
       },
