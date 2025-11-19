@@ -280,6 +280,7 @@ export type {
   TypedLensSerializedState,
   ESQLVariablesCompatibleDashboardApi,
   LensByValueBase,
+  LensRequestHandlersProps,
 } from './embeddable/types';
 export type {
   LensAppLocatorParams,
