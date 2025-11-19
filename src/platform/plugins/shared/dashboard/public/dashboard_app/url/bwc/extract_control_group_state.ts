@@ -15,55 +15,52 @@ import {
 } from '@kbn/controls-constants';
 import type { DashboardState } from '../../../../common';
 
+// >9.3 the `autoApplySelections` control group setting became the `autoApplyFilters` dashboard setting
+const getAutoApplySelections = (state: object) => {
+  let autoApplySelections: boolean = DEFAULT_AUTO_APPLY_SELECTIONS;
+  if ('autoApplySelections' in state && typeof state.autoApplySelections === 'boolean') {
+    autoApplySelections = state.autoApplySelections;
+  } else if ('showApplySelections' in state && typeof state.showApplySelections === 'boolean') {
+    // <8.16 autoApplySelections exported as !showApplySelections
+    autoApplySelections = !state.showApplySelections;
+  }
+  return autoApplySelections;
+};
+
 export function extractControlGroupState(state: { [key: string]: unknown }): {
   controlGroupState?: DashboardState['controlGroupInput'];
   autoApplyFilters?: boolean;
 } {
-  // >9.3 the `autoApplySelections` control group setting became the `autoApplyFilters` dashboard setting
-  let autoApplySelections: boolean = DEFAULT_AUTO_APPLY_SELECTIONS;
-  if (typeof state.autoApplySelections === 'boolean') {
-    autoApplySelections = state.autoApplySelections;
-  } else if (typeof state.showApplySelections === 'boolean') {
-    // <8.16 autoApplySelections exported as !showApplySelections
-    autoApplySelections = !state.showApplySelections;
-  }
-
-  if (
-    state.controlGroupState &&
-    typeof state.controlGroupState === 'object' &&
-    'initialChildControlState' in state.controlGroupState &&
-    typeof state.controlGroupState.initialChildControlState === 'object'
-  ) {
+  if (state.controlGroupState && typeof state.controlGroupState === 'object') {
     // URL state created in 8.16 through 8.18 passed control group runtime state in with controlGroupState key
-    const {
-      controlGroupState: { initialChildControlState },
-    } = state;
     return {
-      autoApplyFilters: autoApplySelections,
-      controlGroupState: {
-        controls:
-          typeof initialChildControlState === 'object'
-            ? Object.entries(initialChildControlState ?? {})
-                .sort(([, value1], [, value2]) => {
-                  return value1.order - value2.order;
-                })
-                .map(([controlId, value]) => {
-                  const { grow, order, type, width, ...config } = value; // drop order
-                  return {
-                    uid: controlId,
-                    type,
-                    ...(grow !== undefined && { grow }),
-                    ...(width !== undefined && { width }),
-                    config,
-                  };
-                })
-            : [],
-      },
+      autoApplyFilters: getAutoApplySelections(state.controlGroupState),
+      ...('initialChildControlState' in state.controlGroupState && {
+        controlGroupState: {
+          controls:
+            typeof state.controlGroupState.initialChildControlState === 'object'
+              ? Object.entries(state.controlGroupState.initialChildControlState ?? {})
+                  .sort(([, value1], [, value2]) => {
+                    return value1.order - value2.order;
+                  })
+                  .map(([controlId, value]) => {
+                    const { grow, order, type, width, ...config } = value; // drop order
+                    return {
+                      uid: controlId,
+                      type,
+                      ...(grow !== undefined && { grow }),
+                      ...(width !== undefined && { width }),
+                      config,
+                    };
+                  })
+              : [],
+        },
+      }),
     };
   }
 
   if (!state.controlGroupInput || typeof state.controlGroupInput !== 'object') {
-    return { autoApplyFilters: autoApplySelections };
+    return {};
   }
 
   const controlGroupInput = state.controlGroupInput as { [key: string]: unknown };
@@ -112,7 +109,7 @@ export function extractControlGroupState(state: { [key: string]: unknown }): {
   }
 
   return {
-    autoApplyFilters: autoApplySelections,
+    autoApplyFilters: getAutoApplySelections(controlGroupInput),
     controlGroupState: {
       controls: standardizedControls,
     },
