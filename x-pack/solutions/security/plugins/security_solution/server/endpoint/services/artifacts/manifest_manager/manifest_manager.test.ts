@@ -48,6 +48,8 @@ import type { ExperimentalFeatures } from '../../../../../common';
 import { allowedExperimentalValues } from '../../../../../common';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { createLicenseServiceMock } from '../../../../../common/license/mocks';
+import { GLOBAL_ARTIFACT_TAG } from '../../../../../common/endpoint/service/artifacts';
+import { buildPerPolicyTag } from '../../../../../common/endpoint/service/artifacts/utils';
 
 const getArtifactObject = (artifact: InternalArtifactSchema) =>
   JSON.parse(Buffer.from(artifact.body!, 'base64').toString());
@@ -442,19 +444,19 @@ describe('ManifestManager', () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const trustedAppListItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const eventFiltersListItem = getExceptionListItemSchemaMock({
         os_types: ['windows'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const blocklistsListItem = getExceptionListItemSchemaMock({
         os_types: ['macos'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
@@ -526,19 +528,19 @@ describe('ManifestManager', () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const trustedAppListItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const eventFiltersListItem = getExceptionListItemSchemaMock({
         os_types: ['windows'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const blocklistsListItem = getExceptionListItemSchemaMock({
         os_types: ['macos'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
@@ -613,26 +615,26 @@ describe('ManifestManager', () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const trustedAppListItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const eventFiltersListItem = getExceptionListItemSchemaMock({
         os_types: ['windows'],
-        tags: [`policy:${TEST_POLICY_ID_1}`],
+        tags: [buildPerPolicyTag(TEST_POLICY_ID_1)],
       });
       const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const blocklistsListItem = getExceptionListItemSchemaMock({
         os_types: ['macos'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
 
       const duplicatedEventFilterInDifferentPolicy = {
         ...eventFiltersListItem,
-        tags: [`policy:${TEST_POLICY_ID_2}`],
+        tags: [buildPerPolicyTag(TEST_POLICY_ID_2)],
       };
       const duplicatedEndpointExceptionInDifferentOS: ExceptionListItemSchema = {
         ...exceptionListItem,
@@ -652,7 +654,7 @@ describe('ManifestManager', () => {
         [ENDPOINT_ARTIFACT_LISTS.hostIsolationExceptions.id]: {
           linux: [
             hostIsolationExceptionsItem,
-            { ...hostIsolationExceptionsItem, tags: [`policy:${TEST_POLICY_ID_2}`] },
+            { ...hostIsolationExceptionsItem, tags: [buildPerPolicyTag(TEST_POLICY_ID_2)] },
           ],
         },
         [ENDPOINT_ARTIFACT_LISTS.blocklists.id]: {
@@ -754,14 +756,14 @@ describe('ManifestManager', () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const trustedAppListItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const trustedAppListItemPolicy2 = getExceptionListItemSchemaMock({
         os_types: ['linux'],
         entries: [
           { field: 'other.field', operator: 'included', type: 'match', value: 'other value' },
         ],
-        tags: [`policy:${TEST_POLICY_ID_2}`],
+        tags: [buildPerPolicyTag(TEST_POLICY_ID_2)],
       });
       const context = buildManifestManagerContextMock({});
       const manifestManager = new ManifestManager(context);
@@ -852,19 +854,19 @@ describe('ManifestManager', () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const trustedAppListItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const eventFiltersListItem = getExceptionListItemSchemaMock({
         os_types: ['windows'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const blocklistsListItem = getExceptionListItemSchemaMock({
         os_types: ['macos'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const context = buildManifestManagerContextMock({}, [
         ProductFeatureKey.endpointArtifactManagement,
@@ -932,19 +934,19 @@ describe('ManifestManager', () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const trustedAppListItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const eventFiltersListItem = getExceptionListItemSchemaMock({
         os_types: ['windows'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const blocklistsListItem = getExceptionListItemSchemaMock({
         os_types: ['macos'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const context = buildManifestManagerContextMock({}, [
         ProductFeatureKey.endpointArtifactManagement,
@@ -1019,19 +1021,19 @@ describe('ManifestManager', () => {
       const exceptionListItem = getExceptionListItemSchemaMock({ os_types: ['macos'] });
       const trustedAppListItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const eventFiltersListItem = getExceptionListItemSchemaMock({
         os_types: ['windows'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const hostIsolationExceptionsItem = getExceptionListItemSchemaMock({
         os_types: ['linux'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const blocklistsListItem = getExceptionListItemSchemaMock({
         os_types: ['macos'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
       const context = buildManifestManagerContextMock({}, []);
       const manifestManager = new ManifestManager(context);
@@ -1159,7 +1161,7 @@ describe('ManifestManager', () => {
     test('builds manifest with trusted devices entries when trusted devices data present', async () => {
       const trustedDeviceListItem = getExceptionListItemSchemaMock({
         os_types: ['windows'],
-        tags: ['policy:all'],
+        tags: [GLOBAL_ARTIFACT_TAG],
       });
 
       const context = buildManifestManagerContextMock({});
