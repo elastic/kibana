@@ -12,11 +12,14 @@ import { FeatureClient } from './feature_client';
 import type { StoredFeature } from './stored_feature';
 import type { FeatureStorageSettings } from './storage_settings';
 import { featureStorageSettings } from './storage_settings';
+import { FeatureTypeRegistry } from './feature_type_registry';
+import { FEATURE_TYPE } from './fields';
 
 export class FeatureService {
   constructor(
     private readonly coreSetup: CoreSetup<StreamsPluginStartDependencies>,
-    private readonly logger: Logger
+    private readonly logger: Logger,
+    private readonly featureRegistry: FeatureTypeRegistry
   ) {}
 
   async getClientWithRequest({ request }: { request: KibanaRequest }): Promise<FeatureClient> {
@@ -25,11 +28,26 @@ export class FeatureService {
     const adapter = new StorageIndexAdapter<FeatureStorageSettings, StoredFeature>(
       coreStart.elasticsearch.client.asInternalUser,
       this.logger.get('features'),
-      featureStorageSettings
+      featureStorageSettings,
+      {
+        migrateSource: (feature: Record<string, unknown>) => {
+          if (!(FEATURE_TYPE in feature)) {
+            return {
+              ...feature,
+              [FEATURE_TYPE]: 'system',
+            } as StoredFeature;
+          }
+
+          return feature as unknown as StoredFeature;
+        },
+      }
     );
 
-    return new FeatureClient({
-      storageClient: adapter.getClient(),
-    });
+    return new FeatureClient(
+      {
+        storageClient: adapter.getClient(),
+      },
+      this.featureRegistry
+    );
   }
 }

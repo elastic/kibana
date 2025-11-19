@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { Streams, Feature } from '@kbn/streams-schema';
-
+import type { Streams, FeatureWithFilter } from '@kbn/streams-schema';
 import React, { useMemo } from 'react';
 import { PreviewDataSparkPlot } from '../../stream_detail_significant_events_view/add_significant_event_flyout/common/preview_data_spark_plot';
 
@@ -14,7 +13,7 @@ export const FeatureEventsSparkline = ({
   feature,
   definition,
 }: {
-  feature: Feature;
+  feature: FeatureWithFilter;
   definition: Streams.all.Definition;
 }) => {
   const query = useMemo(
@@ -29,6 +28,7 @@ export const FeatureEventsSparkline = ({
     }),
     [feature.name, feature.filter]
   );
+
   return (
     <PreviewDataSparkPlot
       showTitle={false}

@@ -14,20 +14,30 @@ import {
   FEATURE_DESCRIPTION,
   FEATURE_FILTER,
   FEATURE_NAME,
+  FEATURE_TYPE,
+  FEATURE_META,
+  FEATURE_EVIDENCE,
 } from './fields';
+import { type FeatureType, featureTypeSchema } from '@kbn/streams-schema';
 
 export interface StoredFeature {
+  [FEATURE_TYPE]: FeatureType;
   [FEATURE_UUID]: string;
   [FEATURE_NAME]: string;
   [FEATURE_DESCRIPTION]: string;
-  [FEATURE_FILTER]: Condition;
   [STREAM_NAME]: string;
+  [FEATURE_FILTER]?: Condition;
+  [FEATURE_META]?: Record<string, unknown>;
+  [FEATURE_EVIDENCE]: string[];
 }
 
 export const storedFeatureSchema: z.Schema<StoredFeature> = z.object({
+  [FEATURE_TYPE]: featureTypeSchema,
   [FEATURE_UUID]: z.string(),
   [FEATURE_NAME]: z.string(),
   [FEATURE_DESCRIPTION]: z.string(),
-  [FEATURE_FILTER]: conditionSchema,
   [STREAM_NAME]: z.string(),
+  [FEATURE_FILTER]: z.optional(conditionSchema),
+  [FEATURE_META]: z.optional(z.record(z.string(), z.unknown())),
+  [FEATURE_EVIDENCE]: z.array(z.string()),
 });

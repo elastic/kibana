@@ -118,4 +118,12 @@ export type {
 
 export { emptyAssets } from './src/helpers/empty_assets';
 
-export { type Feature, featureSchema } from './src/feature';
+export {
+  type Feature,
+  type SystemFeature,
+  type FeatureWithFilter,
+  type FeatureType,
+  featureSchema,
+  featureTypeSchema,
+  isFeatureWithFilter,
+} from './src/feature';

@@ -4,10 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  SignificantEventsGenerateResponse,
-  SignificantEventsGetResponse,
-  SignificantEventsPreviewResponse,
+import {
+  featureSchema,
+  featureTypeSchema,
+  type SignificantEventsGenerateResponse,
+  type SignificantEventsGetResponse,
+  type SignificantEventsPreviewResponse,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { from as fromRxjs, map, mergeMap } from 'rxjs';
@@ -157,13 +159,7 @@ const generateSignificantEventsRoute = createServerRoute({
       to: dateFromString,
     }),
     body: z.object({
-      feature: z
-        .object({
-          name: NonEmptyString,
-          filter: conditionSchema,
-          description: z.string(),
-        })
-        .optional(),
+      feature: featureSchema.optional(),
     }),
   }),
   options: {

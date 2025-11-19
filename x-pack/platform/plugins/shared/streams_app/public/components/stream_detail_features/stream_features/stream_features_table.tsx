@@ -12,7 +12,7 @@ import {
   EuiScreenReaderOnly,
   type EuiBasicTableColumn,
 } from '@elastic/eui';
-import { type Streams, type Feature } from '@kbn/streams-schema';
+import { type Streams, type Feature, isFeatureWithFilter } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { ConditionPanel } from '../../data_management/shared';
 import { FeatureEventsSparkline } from './feature_events_sparkline';
@@ -84,13 +84,14 @@ export function StreamFeaturesTable({
     },
     descriptionColumn,
     {
-      field: 'filter',
       name: i18n.translate('xpack.streams.streamFeatureTable.columns.filter', {
         defaultMessage: 'Filter',
       }),
       width: '25%',
-      render: (filter: Feature['filter']) => {
-        return <ConditionPanel condition={filter} />;
+      render: (feature: Feature) => {
+        if (feature.filter) {
+          return <ConditionPanel condition={feature.filter} />;
+        }
       },
     },
     {
@@ -99,7 +100,9 @@ export function StreamFeaturesTable({
       }),
       width: '20%',
       render: (feature: Feature) => {
-        return <FeatureEventsSparkline feature={feature} definition={definition} />;
+        if (isFeatureWithFilter(feature)) {
+          return <FeatureEventsSparkline feature={feature} definition={definition} />;
+        }
       },
     },
     {

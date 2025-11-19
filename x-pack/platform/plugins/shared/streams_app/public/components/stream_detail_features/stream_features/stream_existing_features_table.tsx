@@ -17,7 +17,7 @@ import {
   EuiInMemoryTable,
 } from '@elastic/eui';
 import { EuiButtonIcon, EuiScreenReaderOnly } from '@elastic/eui';
-import { type Streams, type Feature } from '@kbn/streams-schema';
+import { type Streams, isFeatureWithFilter, type Feature } from '@kbn/streams-schema';
 import { i18n } from '@kbn/i18n';
 import { useAIFeatures } from '../../stream_detail_significant_events_view/add_significant_event_flyout/generated_flow_form/use_ai_features';
 import { ConditionPanel } from '../../data_management/shared';
@@ -74,18 +74,21 @@ export function StreamExistingFeaturesTable({
     },
     descriptionColumn,
     {
-      field: 'filter',
       name: FILTER_LABEL,
       width: '30%',
-      render: (filter: Feature['filter']) => {
-        return <ConditionPanel condition={filter} />;
+      render: (feature: Feature) => {
+        if (isFeatureWithFilter(feature)) {
+          return <ConditionPanel condition={feature.filter} />;
+        }
       },
     },
     {
       name: EVENTS_LAST_24_HOURS_LABEL,
       width: '15%',
       render: (feature: Feature) => {
-        return <FeatureEventsSparkline feature={feature} definition={definition} />;
+        if (isFeatureWithFilter(feature)) {
+          return <FeatureEventsSparkline feature={feature} definition={definition} />;
+        }
       },
     },
     {
@@ -117,9 +120,9 @@ export function StreamExistingFeaturesTable({
           type: 'icon',
           icon: 'trash',
           color: 'danger',
-          onClick: (feature) => {
+          onClick: (feature: Feature) => {
             setIsDeleting(true);
-            removeFeaturesFromStream([feature.name])
+            removeFeaturesFromStream([feature])
               .then(() => {
                 refreshFeatures();
               })
@@ -212,16 +215,11 @@ export function StreamExistingFeaturesTable({
             isDisabled={selectedFeatures.length === 0 || isLoading}
             onClick={() => {
               setIsDeleting(true);
-              removeFeaturesFromStream(selectedFeatures.map((s) => s.name))
-                .then(() => {
-                  removeFeaturesFromStream(selectedFeatures.map((s) => s.name)).finally(() => {
-                    setSelectedFeatures([]);
-                  });
-                })
-                .finally(() => {
-                  refreshFeatures();
-                  setIsDeleting(false);
-                });
+              removeFeaturesFromStream(selectedFeatures).finally(() => {
+                refreshFeatures();
+                setIsDeleting(false);
+                setSelectedFeatures([]);
+              });
             }}
           >
             {DELETE_ALL}

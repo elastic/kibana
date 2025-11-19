@@ -14,7 +14,7 @@ import { useKibana } from './use_kibana';
 
 interface StreamFeaturesApi {
   upsertQuery: (
-    featureName: string,
+    feature: Pick<Feature, 'type' | 'name'>,
     request: Pick<Feature, 'filter' | 'description'>
   ) => Promise<void>;
   identifyFeatures: (
@@ -23,7 +23,9 @@ interface StreamFeaturesApi {
     from: string
   ) => Promise<IdentifiedFeaturesEvent>;
   addFeaturesToStream: (features: Feature[]) => Promise<StorageClientBulkResponse>;
-  removeFeaturesFromStream: (featureNames: string[]) => Promise<StorageClientBulkResponse>;
+  removeFeaturesFromStream: (
+    features: Pick<Feature, 'type' | 'name'>[]
+  ) => Promise<StorageClientBulkResponse>;
   abort: () => void;
 }
 
@@ -74,7 +76,7 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
         },
       });
     },
-    removeFeaturesFromStream: async (featureNames: string[]) => {
+    removeFeaturesFromStream: async (features: Pick<Feature, 'type' | 'name'>[]) => {
       return await streamsRepositoryClient.fetch('POST /internal/streams/{name}/features/_bulk', {
         signal,
         params: {
@@ -82,10 +84,11 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
             name: definition.name,
           },
           body: {
-            operations: featureNames.map((feature) => ({
+            operations: features.map((feature) => ({
               delete: {
                 feature: {
-                  name: feature,
+                  type: feature.type,
+                  name: feature.name,
                 },
               },
             })),
@@ -93,17 +96,21 @@ export function useStreamFeaturesApi(definition: Streams.all.Definition): Stream
         },
       });
     },
-    upsertQuery: async (featureName, request) => {
-      await streamsRepositoryClient.fetch('PUT /internal/streams/{name}/features/{featureName}', {
-        signal,
-        params: {
-          path: {
-            name: definition.name,
-            featureName,
+    upsertQuery: async (feature, request) => {
+      await streamsRepositoryClient.fetch(
+        'PUT /internal/streams/{name}/features/{featureType}/{featureName}',
+        {
+          signal,
+          params: {
+            path: {
+              name: definition.name,
+              featureType: feature.type,
+              featureName: feature.name,
+            },
+            body: request,
           },
-          body: request,
-        },
-      });
+        }
+      );
     },
     abort: () => {
       abort();

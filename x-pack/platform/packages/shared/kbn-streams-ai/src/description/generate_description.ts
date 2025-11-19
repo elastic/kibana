@@ -8,7 +8,7 @@ import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { type BoundInferenceClient } from '@kbn/inference-common';
 import { conditionToQueryDsl } from '@kbn/streamlang';
-import type { Feature, Streams } from '@kbn/streams-schema';
+import type { Streams, SystemFeature } from '@kbn/streams-schema';
 import { GenerateStreamDescriptionPrompt } from './prompt';
 
 /**
@@ -24,7 +24,7 @@ export async function generateStreamDescription({
   signal,
 }: {
   stream: Streams.all.Definition;
-  feature?: Feature;
+  feature?: SystemFeature;
   start: number;
   end: number;
   esClient: ElasticsearchClient;

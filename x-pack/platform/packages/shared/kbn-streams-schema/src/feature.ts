@@ -5,18 +5,35 @@
  * 2.0.
  */
 
-import { conditionSchema, type Condition } from '@kbn/streamlang';
+import { conditionSchema, isCondition, type Condition } from '@kbn/streamlang';
 import { z } from '@kbn/zod';
 import { streamObjectNameSchema } from './shared/stream_object_name';
 
+const featureTypes = ['system'] as const;
+export type FeatureType = (typeof featureTypes)[number];
+
+export const featureTypeSchema = z.enum(featureTypes);
+
 export interface Feature {
+  type: FeatureType;
   name: string;
   description: string;
-  filter: Condition;
+  evidence: string[];
+  filter?: Condition;
 }
 
 export const featureSchema: z.Schema<Feature> = z.object({
+  type: featureTypeSchema,
   name: streamObjectNameSchema,
   description: z.string(),
-  filter: conditionSchema,
+  evidence: z.array(z.string()),
+  filter: z.optional(conditionSchema),
 });
+
+export type FeatureWithFilter = Feature & { filter: Condition };
+
+export type SystemFeature = FeatureWithFilter;
+
+export function isFeatureWithFilter(feature: Feature): feature is FeatureWithFilter {
+  return Boolean(feature.filter && isCondition(feature.filter));
+}
