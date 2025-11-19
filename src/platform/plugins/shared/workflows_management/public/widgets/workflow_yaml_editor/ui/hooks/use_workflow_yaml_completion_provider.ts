@@ -8,18 +8,18 @@
  */
 
 import { useMemo } from 'react';
-import { useStore } from 'react-redux';
+import { useSelector } from 'react-redux';
 import type { monaco } from '@kbn/monaco';
 import { selectDetail } from '../../../../entities/workflows/store/workflow_detail/selectors';
 import { getCompletionItemProvider } from '../../lib/autocomplete/get_completion_item_provider';
 
 export const useWorkflowYamlCompletionProvider = (): monaco.languages.CompletionItemProvider => {
-  const store = useStore();
+  const state = useSelector(selectDetail);
 
   const completionProvider = useMemo(() => {
     // Read state directly from store to ensure we always get fresh state
-    return getCompletionItemProvider(() => selectDetail(store.getState()));
-  }, [store]);
+    return getCompletionItemProvider(() => state);
+  }, [state]);
 
   return completionProvider;
 };

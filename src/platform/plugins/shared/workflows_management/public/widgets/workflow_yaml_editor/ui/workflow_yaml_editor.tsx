@@ -37,7 +37,6 @@ import { useAvailableConnectors } from '../../../entities/connectors/model/use_a
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import type { StepInfo } from '../../../entities/workflows/store';
 import {
-  selectEditorComputed,
   selectEditorFocusedStepInfo,
   selectEditorYamlDocument,
   selectSchema,
@@ -170,10 +169,6 @@ export const WorkflowYAMLEditor = ({
   const yamlDocumentRef = useRef<YAML.Document | null>(yamlDocument ?? null);
   yamlDocumentRef.current = yamlDocument || null;
 
-  // Watch for debounced computation completion to re-open suggestions if visible
-  const computed = useSelector(selectEditorComputed);
-  const areSuggestionsVisibleRef = useRef<boolean>(false);
-
   const focusedStepInfo = useSelector(selectEditorFocusedStepInfo);
   const focusedStepInfoRef = useRef<StepInfo | undefined>(focusedStepInfo);
   focusedStepInfoRef.current = focusedStepInfo;
@@ -276,27 +271,6 @@ export const WorkflowYAMLEditor = ({
           completionProvider
         );
         disposablesRef.current.push(disposable);
-      }
-
-      // Track suggestions widget visibility to know when to re-open completions
-      // @ts-expect-error - widget is not part of the TS interface but does exist
-      const suggestionWidget = editor.getContribution('editor.contrib.suggestController')?.widget
-        ?.value;
-
-      if (suggestionWidget?.onDidShow && suggestionWidget?.onDidHide) {
-        const showDisposable = suggestionWidget.onDidShow(() => {
-          areSuggestionsVisibleRef.current = true;
-        });
-        const hideDisposable = suggestionWidget.onDidHide(() => {
-          areSuggestionsVisibleRef.current = false;
-        });
-        // Add disposables if they exist (onDidShow/onDidHide may return IDisposable)
-        if (showDisposable) {
-          disposablesRef.current.push(showDisposable);
-        }
-        if (hideDisposable) {
-          disposablesRef.current.push(hideDisposable);
-        }
       }
 
       // Listen to content changes to detect typing
@@ -428,65 +402,6 @@ export const WorkflowYAMLEditor = ({
 
     return () => disposable.dispose();
   }, [isEditorMounted, dispatch]);
-
-  // Subscribe to computed changes and refresh suggestions if visible
-  // Track computedFromYamlString to detect when debounced computation completes
-  const computedFromYamlString = computed?.computedFromYamlString;
-  const computedFromYamlStringRef = useRef<string | undefined>(computedFromYamlString);
-
-  useEffect(() => {
-    if (!isEditorMounted || !editorRef.current) {
-      return;
-    }
-
-    // Only refresh if computedFromYamlString actually changed (computation completed)
-    const hasComputationCompleted =
-      computedFromYamlString !== undefined &&
-      computedFromYamlString !== computedFromYamlStringRef.current;
-
-    // When computation completes and suggestions are visible, refresh them
-    if (hasComputationCompleted && areSuggestionsVisibleRef.current && computed) {
-      // Use multiple setTimeout calls to ensure:
-      // 1. Redux state has fully propagated
-      // 2. React has re-rendered with new state
-      // 3. The completion provider's getState() closure has access to updated store
-      // 4. DOM has updated
-      setTimeout(() => {
-        requestAnimationFrame(() => {
-          setTimeout(() => {
-            if (editorRef.current) {
-              // Close the suggestions widget first to clear any cached state
-              const suggestController = editorRef.current.getContribution(
-                'editor.contrib.suggestController'
-              );
-              // @ts-expect-error - widget is not part of the TS interface but does exist
-              const suggestionWidget = suggestController?.widget?.value;
-
-              if (suggestionWidget?.hide) {
-                suggestionWidget.hide();
-              }
-
-              // Small delay after hiding to ensure widget is fully closed and state is fresh
-              setTimeout(() => {
-                if (editorRef.current) {
-                  // Trigger refresh of suggestions - this will call provideCompletionItems with fresh state
-                  // The getState() function reads directly from store, so it will get the latest state
-                  editorRef.current.trigger(
-                    'editor.action.triggerSuggest',
-                    'editor.action.triggerSuggest',
-                    {}
-                  );
-                }
-              }, 10);
-            }
-          }, 0);
-        });
-      }, 0);
-    }
-
-    // Update ref to track current computedFromYamlString
-    computedFromYamlStringRef.current = computedFromYamlString;
-  }, [isEditorMounted, computed, computedFromYamlString]);
 
   // Actions
   const [actionsPopoverOpen, setActionsPopoverOpen] = useState(false);

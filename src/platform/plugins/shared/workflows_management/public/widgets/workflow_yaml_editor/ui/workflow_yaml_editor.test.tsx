@@ -29,15 +29,6 @@ jest.mock('../../../shared/ui/yaml_editor', () => ({
           const editorMock = {
             getModel: jest.fn(),
             dispose: jest.fn(),
-            getContribution: jest.fn(() => ({
-              widget: {
-                value: {
-                  onDidShow: jest.fn(() => ({ dispose: jest.fn() })),
-                  onDidHide: jest.fn(() => ({ dispose: jest.fn() })),
-                },
-              },
-            })),
-            trigger: jest.fn(),
           } as unknown as monaco.editor.IStandaloneCodeEditor;
           if (el) {
             editorDidMount?.(editorMock);

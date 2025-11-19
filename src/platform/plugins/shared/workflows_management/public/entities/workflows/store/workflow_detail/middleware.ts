@@ -13,7 +13,7 @@ import { _clearComputedData, _setComputedDataInternal, setYamlString } from './s
 import { performComputation } from './utils/computation';
 import type { RootState } from '../types';
 
-const COMPUTATION_DEBOUNCE_MS = 500;
+const COMPUTATION_DEBOUNCE_MS = 1000;
 
 const compute = (yamlString: string, store: MiddlewareAPI<Dispatch<AnyAction>, RootState>) => {
   try {

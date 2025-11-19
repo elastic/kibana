@@ -28,7 +28,6 @@ export const performComputation = (
       workflowLookup: undefined,
       workflowGraph: undefined,
       workflowDefinition: undefined,
-      computedFromYamlString: undefined,
     };
   }
 
@@ -63,6 +62,5 @@ export const performComputation = (
     workflowLookup: lookup,
     workflowGraph: graph,
     workflowDefinition,
-    computedFromYamlString: yamlString, // Track which yamlString was used for this computation
   };
 };

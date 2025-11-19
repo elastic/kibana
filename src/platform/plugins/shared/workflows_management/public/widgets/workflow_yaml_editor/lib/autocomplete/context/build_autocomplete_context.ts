@@ -52,23 +52,14 @@ export function buildAutocompleteContext({
   const word = model.getWordAtPosition(position) || model.getWordUntilPosition(position);
   const { startColumn, endColumn } = word;
 
-  // Get current model text - this is always up-to-date
-  const currentModelText = model.getValue();
-  const computedFromYamlString = editorState?.computed?.computedFromYamlString;
-
-  // CRITICAL: The yamlDocument must match the current model text for offset calculations to work
-  // If computedFromYamlString doesn't match currentModelText, the offsets in yamlDocument
-  // won't align with the model, and getPathAtOffset will return the wrong path
-  if (!yamlDocument || computedFromYamlString !== currentModelText) {
-    // Return null to avoid showing suggestions based on stale data
-    // The debounced computation will complete soon and trigger a refresh
-    return null;
-  }
-
   const focusedStepInfo: StepInfo | null = focusedStepId
     ? workflowLookup?.steps[focusedStepId] ?? null
     : null;
   const focusedYamlPair = getFocusedYamlPair(workflowLookup, focusedStepId, absoluteOffset);
+
+  if (!yamlDocument) {
+    return null;
+  }
 
   let range: monaco.IRange;
   if (completionContext.triggerCharacter === ' ') {
@@ -90,8 +81,6 @@ export function buildAutocompleteContext({
     };
   }
 
-  // Use currentModelText for liquid block detection (always up-to-date and matches yamlDocument)
-  const yamlString = currentModelText;
   const path = getPathAtOffset(yamlDocument, absoluteOffset);
   const yamlNode = yamlDocument.getIn(path, true);
   const scalarType = isScalar(yamlNode) ? yamlNode.type ?? null : null;
@@ -118,7 +107,7 @@ export function buildAutocompleteContext({
   }
 
   // Check if we're actually inside a liquid block
-  const isInLiquidBlock = isInsideLiquidBlock(yamlString, position);
+  const isInLiquidBlock = isInsideLiquidBlock(model.getValue(), position);
   const _isInScheduledTriggerWithBlock = isInScheduledTriggerWithBlock(
     yamlDocument,
     absoluteOffset
