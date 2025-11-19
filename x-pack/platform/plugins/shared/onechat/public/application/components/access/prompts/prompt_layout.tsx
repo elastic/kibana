@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiImage, EuiText } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 
-const panelStyles = css`
+const emptyPromptStyles = css`
+  .euiEmptyPrompt__main {
   width: 740px;
 `;
 
@@ -27,30 +28,22 @@ export const PromptLayout: React.FC<PromptLayoutProps> = ({
   subtitle,
   primaryButton,
   secondaryButton,
-}) => (
-  <EuiFlexGroup direction="column" justifyContent="center" alignItems="center">
-    <EuiPanel css={panelStyles} hasShadow={true} paddingSize="l" grow={false}>
-      <EuiFlexGroup direction="column" alignItems="center" justifyContent="center" gutterSize="l">
-        <EuiFlexItem grow={false}>
-          <EuiImage src={imageSrc} alt="" size="s" />
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiTitle>
-            <h2>{title}</h2>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText color="subdued" textAlign="center">
-            {subtitle}
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="m" justifyContent="center" direction="column">
-            <EuiFlexItem grow={false}>{primaryButton}</EuiFlexItem>
-            {secondaryButton && <EuiFlexItem grow={false}>{secondaryButton}</EuiFlexItem>}
-          </EuiFlexGroup>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
-  </EuiFlexGroup>
-);
+}) => {
+  const actions = [primaryButton, ...(secondaryButton ? [secondaryButton] : [])];
+
+  return (
+    <EuiEmptyPrompt
+      css={emptyPromptStyles}
+      hasShadow={true}
+      color="plain"
+      icon={<EuiImage src={imageSrc} alt="" size="s" />}
+      title={<h2>{title}</h2>}
+      body={
+        <EuiText color="subdued" textAlign="center">
+          {subtitle}
+        </EuiText>
+      }
+      actions={actions}
+    />
+  );
+};
