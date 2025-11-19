@@ -67,10 +67,8 @@ export class DashboardPlugin
   implements Plugin<DashboardPluginSetup, DashboardPluginStart, SetupDeps, StartDeps>
 {
   private readonly logger: Logger;
-  private readonly initializerContext: PluginInitializerContext;
 
   constructor(initializerContext: PluginInitializerContext) {
-    this.initializerContext = initializerContext;
     this.logger = initializerContext.logger.get();
   }
 
