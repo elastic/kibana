@@ -88,7 +88,7 @@ if (!Object.hasOwn(global, 'MessagePort')) {
 import 'reflect-metadata/lite';
 
 // ClipboardItem polyfill for Monaco Editor 0.45.0+
-// Monaco unconditionally uses ClipboardItem which doesn't exist in JSDOM
+// Monaco uses ClipboardItem which doesn't exist in JSDOM
 if (!Object.hasOwn(global, 'ClipboardItem')) {
   global.ClipboardItem = class ClipboardItem {
     constructor(data) {
