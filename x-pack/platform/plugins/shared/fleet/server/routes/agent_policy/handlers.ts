@@ -910,11 +910,24 @@ export const RunAgentPolicyRevisionsCleanupTaskHandler: FleetRequestHandler<
   const coreContext = await context.core;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const logger = appContextService.getLogger().get('httpRunAgentPolicyRevisionsCleanupTaskHandler');
-  const { maxRevisions, maxPolicies } = request.body;
+  const kbnConfig = appContextService.getConfig()?.fleetPolicyRevisionsCleanup;
+
+  if (!appContextService.getExperimentalFeatures().fleetPolicyRevisionsCleanupTask) {
+    logger.debug(
+      '[FleetPolicyRevisionsCleanupTask] Aborting request: fleet policy revision cleanup task feature is disabled'
+    );
+    throw new FleetError('Fleet policy revision cleanup task feature is disabled');
+  }
+
+  const config = {
+    maxRevisions: kbnConfig?.maxRevisions,
+    maxPolicies: kbnConfig?.maxPoliciesPerRun,
+    ...request.body,
+  };
 
   const result = await cleanupPolicyRevisions(esClient, {
     logger,
-    config: { maxRevisions, maxPolicies, timeout: '5m' },
+    config: { ...config, timeout: '5m' },
   });
 
   const body: TypeOf<typeof RunAgentPolicyRevisionsCleanupTaskResponseSchema> = {
