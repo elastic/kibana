@@ -14,15 +14,15 @@ const RESPONSE_FORMATTING_GUIDELINES = `
 * When providing code blocks, always use triple backticks (\`\`\`) before and after the code block.
 * Always specify the language for syntax highlighting right after the opening triple backticks. For ES|QL use \`\`\`esql.
 * Always provide explanations and context outside of code blocks.
-* When referencing fields, indices, or job ids, always format them using backticks (\`field_name\`, \`index_name\`, \`job_id\`).
-* When the users doesn't have a engine, solution or job installed, please inform them that they need to enable it so you can answer related questions.
+* When referencing fields, indices, or job IDs, always format them using backticks (\`field_name\`, \`index_name\`, \`job_id\`).
+* When some engine, solution or job is not installed, please inform the user that they need to enable it so you can answer related questions.
 `;
 
 const RESEARCH_PROMPT = `
-* Always call the 'entity-analytics-tool' first to get information about security solution and entity analytics indices and data.
-* After calling the 'entity-analytics-tool', you must call the 'execute_esql' tool to generate a ES|QL query and answer the question if a query was provided.
+* Always call the 'entity-analytics-tool' first to get information about the security solution, entity analytics indices, and data.
+* After calling the 'entity-analytics-tool', if it returns a query, you must call the 'execute_esql' tool to generate an ES|QL.
 
-**DOT NOT GENERATE EVENT/LOGS QUERY IF THERE IS A JOB OR DOMAIN INDEX THAT CAN BE USED TO ANSWER THE QUESTION**
+**Do not generate event/logs query if there is a domain index or anomaly job that could answer the question**
 `;
 
 /**
