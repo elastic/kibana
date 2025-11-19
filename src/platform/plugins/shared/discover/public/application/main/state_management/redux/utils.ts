@@ -15,7 +15,6 @@ import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
 import type { ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import { ESQL_CONTROL } from '@kbn/controls-constants';
 import type { OptionsListESQLControlState } from '@kbn/controls-schemas';
-import type { FlattenedStickyControlState } from '@kbn/control-group-renderer/src/types';
 import type { ControlPanelsState } from '@kbn/control-group-renderer';
 import type { DiscoverInternalState, TabState } from './types';
 import type {
@@ -97,16 +96,15 @@ export const parseControlGroupJson = (jsonString?: string | null): ControlPanels
  * If `panels` is null or empty, it returns an empty array.
  * @returns An array of ESQLControlVariable objects.
  */
-export const extractEsqlVariables = (
-  panels: ControlPanelsState<FlattenedStickyControlState & OptionsListESQLControlState> | null
-): ESQLControlVariable[] => {
+export const extractEsqlVariables = (panels: ControlPanelsState | null): ESQLControlVariable[] => {
   if (!panels || Object.keys(panels).length === 0) {
     return [];
   }
   const variables = Object.values(panels).reduce((acc: ESQLControlVariable[], panel) => {
     if (panel.type === ESQL_CONTROL) {
-      const isSingleSelect = panel.singleSelect ?? true;
-      const selectedValues = panel.selectedOptions || [];
+      const typedPanel = panel as OptionsListESQLControlState;
+      const isSingleSelect = typedPanel.singleSelect ?? true;
+      const selectedValues = typedPanel.selectedOptions || [];
 
       let value: string | number | (string | number)[];
 
@@ -120,8 +118,8 @@ export const extractEsqlVariables = (
       }
 
       acc.push({
-        key: panel.variableName,
-        type: panel.variableType as ESQLVariableType,
+        key: typedPanel.variableName,
+        type: typedPanel.variableType as ESQLVariableType,
         value,
       });
     }
