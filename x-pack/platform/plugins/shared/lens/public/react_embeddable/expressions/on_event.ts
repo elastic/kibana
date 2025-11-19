@@ -87,7 +87,7 @@ export const prepareEventHandler =
             ...event.data,
             timeFieldName:
               event.data.timeFieldName || inferTimeField(data.datatableUtilities, event),
-            query: esqlQuery,
+            query: data.query.queryString.getQuery(),
           },
           embeddable: api,
         });

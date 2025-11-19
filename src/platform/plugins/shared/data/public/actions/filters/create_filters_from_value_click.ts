@@ -8,8 +8,9 @@
  */
 
 import _ from 'lodash';
-import type { Datatable } from '@kbn/expressions-plugin/public';
+import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/public';
 import { isSourceParamsESQL } from '@kbn/expressions-plugin/public';
+import { getESQLAdHocDataview } from '@kbn/esql-utils';
 import type { Filter } from '@kbn/es-query';
 import {
   compareFilters,
@@ -21,8 +22,10 @@ import { appendWhereClauseToESQLQuery } from '@kbn/esql-utils';
 import {
   buildSimpleExistFilter,
   buildSimpleNumberRangeFilter,
+  buildPhraseFilter,
 } from '@kbn/es-query/src/filters/build_filters';
 import { MISSING_TOKEN } from '@kbn/field-formats-common';
+import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { getIndexPatterns, getSearchService } from '../../services';
 import type { AggConfigSerialized } from '../../../common/search/aggs';
 import { mapAndFlattenFilters } from '../../query';
@@ -135,6 +138,31 @@ export const createFilter = async (
   return filter;
 };
 
+export const createFilterFromRawColumnsESQL = async (
+  column: DatatableColumn,
+  value: string | number | boolean
+) => {
+  const indexPattern = column?.meta?.sourceParams?.indexPattern as string | undefined;
+  if (!indexPattern) {
+    return [];
+  }
+
+  const dataView = await getESQLAdHocDataview({
+    query: 'FROM ' + indexPattern,
+    dataViewsService: getIndexPatterns() as DataViewsPublicPluginStart,
+  });
+
+  // Field should be present in the data view
+  if (dataView.fields.getByName(column.name) == null) {
+    return [];
+  }
+
+  const filters: Filter[] = [];
+  filters.push(buildPhraseFilter({ name: column.name, type: column.meta?.type }, value, dataView));
+
+  return filters;
+};
+
 export const createFilterESQL = async (
   table: Pick<Datatable, 'rows' | 'columns'>,
   columnIndex: number,
@@ -174,6 +202,8 @@ export const createFilterESQL = async (
         indexPattern
       )
     );
+  } else if (!operationType) {
+    filters.push(...(await createFilterFromRawColumnsESQL(column, value)));
   } else {
     filters.push(buildSimpleExistFilter(sourceField, indexPattern));
   }
@@ -187,7 +217,6 @@ export const createFiltersFromValueClickAction = async ({
   negate,
 }: ValueClickDataContext) => {
   const filters: Filter[] = [];
-
   for (const value of data) {
     if (!value) {
       continue;
