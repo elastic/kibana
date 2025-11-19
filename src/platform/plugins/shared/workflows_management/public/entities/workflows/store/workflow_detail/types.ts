@@ -15,6 +15,11 @@ import type { WorkflowLookup } from './utils/build_workflow_lookup';
 import type { WorkflowZodSchemaType } from '../../../../../common/schema';
 import type { ConnectorsResponse } from '../../../connectors/model/types';
 
+export interface LoadingState {
+  /** Whether the workflow YAML is currently being saved */
+  isSavingYaml: boolean;
+}
+
 export interface WorkflowDetailState {
   /** The yaml string used by the workflow yaml editor */
   yamlString: string;
@@ -38,6 +43,8 @@ export interface WorkflowDetailState {
   connectors?: ConnectorsResponse;
   /** The schema for the workflow, depends on the connectors available */
   schema: WorkflowZodSchemaType;
+  /** Loading states for async operations */
+  loading: LoadingState;
 }
 
 export type ActiveTab = 'workflow' | 'executions';

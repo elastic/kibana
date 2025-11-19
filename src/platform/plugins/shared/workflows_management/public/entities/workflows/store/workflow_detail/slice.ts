@@ -12,6 +12,7 @@ import type { EsWorkflow, WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/w
 import type { ActiveTab, ComputedData, WorkflowDetailState } from './types';
 import { findStepByLine } from './utils/step_finder';
 import { getWorkflowZodSchema } from '../../../../../common/schema';
+import { saveYamlThunk } from './thunks/save_yaml_thunk';
 
 // Initial state
 const initialState: WorkflowDetailState = {
@@ -26,6 +27,9 @@ const initialState: WorkflowDetailState = {
   focusedStepId: undefined,
   highlightedStepId: undefined,
   isTestModalOpen: false,
+  loading: {
+    isSavingYaml: false,
+  },
 };
 
 // Slice
@@ -87,6 +91,18 @@ const workflowDetailSlice = createSlice({
     _setComputedExecution: (state, action: { payload: ComputedData }) => {
       state.computedExecution = action.payload;
     },
+  },
+  extraReducers: (builder) => {
+    builder
+      .addCase(saveYamlThunk.pending, (state) => {
+        state.loading.isSavingYaml = true;
+      })
+      .addCase(saveYamlThunk.fulfilled, (state) => {
+        state.loading.isSavingYaml = false;
+      })
+      .addCase(saveYamlThunk.rejected, (state) => {
+        state.loading.isSavingYaml = false;
+      });
   },
 });
 

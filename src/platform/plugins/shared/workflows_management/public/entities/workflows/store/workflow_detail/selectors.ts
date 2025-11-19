@@ -66,6 +66,11 @@ export const selectIsTestModalOpen = createSelector(
   (detail) => detail.isTestModalOpen
 );
 
+export const selectIsSavingYaml = createSelector(
+  selectDetail,
+  (detail) => detail.loading.isSavingYaml
+);
+
 export const selectConnectors = createSelector(selectDetail, (detail) => detail.connectors);
 export const selectSchema = createSelector(selectDetail, (detail) => detail.schema);
 
