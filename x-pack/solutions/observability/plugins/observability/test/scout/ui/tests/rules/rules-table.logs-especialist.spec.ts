@@ -5,35 +5,41 @@
  * 2.0.
  */
 
-
 import { test, expect } from '@kbn/scout-oblt';
-import { getDisposableRule, LogsEspecialist } from './helpers';
-
+import { createRule, LogsEspecialist } from './helpers';
+import type { CreateRuleResponse } from './types';
 
 test.describe('Rules - Rules Table - Logs Especialist', { tag: ['@ess', '@svlOblt'] }, () => {
-    test.beforeAll(async ({ samlAuth }) => {
-        await LogsEspecialist.setUp(samlAuth);
-    });
-    test.beforeEach(async ({ browserAuth, samlAuth }) => {
-        await browserAuth.loginAs(samlAuth.customRoleName);
-    });
+  let rule: CreateRuleResponse;
+  test.beforeAll(async ({ samlAuth, apiServices }) => {
+    await LogsEspecialist.setUp(samlAuth);
+    rule = await createRule(apiServices);
+  });
 
-    test('shows the rules table', async ({ page, kbnUrl, apiServices }) => {
-        // ToDo: fix eslint error or move to beforeEach/afterEach
-        await using disposableRule = await getDisposableRule(apiServices);
-        const ruleName = disposableRule.instance.data.name;
+  test.beforeEach(async ({ browserAuth, samlAuth }) => {
+    await browserAuth.loginAs(samlAuth.customRoleName);
+  });
 
-        await page.goto(kbnUrl.get('/app/observability/alerts/rules'));
-        await expect(page.getByTestId('rulesList')).toBeVisible();
-        await expect(page.getByText(ruleName)).toBeVisible();
-    });
+  test.afterAll(async ({ apiServices }) => {
+    await apiServices.alerting.rules.delete(rule.data.id);
+  });
 
-    test('rules are editable', async ({ page, kbnUrl, apiServices }) => {
-        await using disposableRule = await getDisposableRule(apiServices);
-        const ruleName = disposableRule.instance.data.name;
+  test('shows the rules table', async ({ page, kbnUrl }) => {
+    // ToDo: fix eslint error or move to beforeEach/afterEach
+    // await using disposableRule = await getDisposableRule(apiServices);
+    const ruleName = rule.data.name;
 
-        await page.goto(kbnUrl.get('/app/observability/alerts/rules'));
-        const ruleRow = page.getByTestId(`rule-row`).filter({ hasText: ruleName });
-        await expect(ruleRow).toBeVisible();
-    });
+    await page.goto(kbnUrl.get('/app/observability/alerts/rules'));
+    await expect(page.getByTestId('rulesList')).toBeVisible();
+    await expect(page.getByText(ruleName)).toBeVisible();
+  });
+
+  test('rules are editable', async ({ page, kbnUrl }) => {
+    // await using disposableRule = await getDisposableRule(apiServices);
+    const ruleName = rule.data.name;
+
+    await page.goto(kbnUrl.get('/app/observability/alerts/rules'));
+    const ruleRow = page.getByTestId(`rule-row`).filter({ hasText: ruleName });
+    await expect(ruleRow).toBeVisible();
+  });
 });
