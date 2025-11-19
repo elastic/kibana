@@ -12,11 +12,12 @@ export default createServerlessFeatureFlagTestConfig<typeof services>({
   services,
   serverlessProject: 'oblt',
   kbnServerArgs: [
-    '--xpack.actions.preconfigured',
-    '--xpack.alerting.rules.minimumScheduleInterval.value="1s"',
+    '--uiSettings.overrides.agentBuilder:enabled=true',
+    '--feature_flags.overrides.observabilityAgent.enabled=true',
   ],
-  testFiles: [require.resolve('./oblt.index.ts')],
+  testFiles: [require.resolve('./oblt.ai_agent.index.ts')],
   junit: {
-    reportName: 'Serverless Observability - Deployment-agnostic Feature Flag API Integration Tests',
+    reportName:
+      'Serverless Observability - Deployment-agnostic Feature Flag Observability Agent API Integration Tests',
   },
 });
