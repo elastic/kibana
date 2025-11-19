@@ -176,7 +176,7 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
     end: 'now',
   });
   const { timelines } = useKibana().services;
-  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const [refreshInterval, setRefreshInterval] = useState(1000);
   const [isPaused, setIsPaused] = useState(true);
   const [selectedStatuses, setSelectedStatuses] = useState<GapStatus[]>([]);

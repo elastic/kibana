@@ -74,7 +74,7 @@ const NO_ITEMS_MESSAGE = (
 export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
   const modalTitleId = useGeneratedHtmlId();
 
-  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const isUpgradingSecurityPackages = useIsUpgradingSecurityPackages();
 
   const rulesTableContext = useRulesTableContext();

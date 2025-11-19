@@ -81,7 +81,7 @@ const RuleActionsOverflowComponent = ({
   const { bulkExport } = useBulkExport();
   const downloadExportedRules = useDownloadExportedRules();
   const { scheduleRuleRun } = useScheduleRuleRun();
-  const { edit: canEditRules, read: canReadRules } = useUserPrivileges().rulesPrivileges;
+  const { edit: canEditRules, read: canReadRules } = useUserPrivileges().rulesPrivileges.rules;
 
   const onRuleDeletedCallback = useCallback(() => {
     navigateToApp(APP_UI_ID, {

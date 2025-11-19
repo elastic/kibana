@@ -23,7 +23,7 @@ export const useAlertExceptionActions = ({
   isEndpointAlert,
   onAddExceptionTypeClick,
 }: UseExceptionActionProps) => {
-  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+  const canCrudExceptions = useUserPrivileges().rulesPrivileges.exceptions.crud;
   const [{ hasIndexWrite }] = useUserData();
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
 
@@ -36,7 +36,7 @@ export const useAlertExceptionActions = ({
   }, [onAddExceptionTypeClick]);
 
   const disabledAddEndpointException = !canWriteEndpointExceptions || !isEndpointAlert;
-  const disabledAddException = !canEditRules || !hasIndexWrite;
+  const disabledAddException = !canCrudExceptions || !hasIndexWrite;
 
   const exceptionActionItems: AlertTableContextMenuItem[] = useMemo(
     () =>

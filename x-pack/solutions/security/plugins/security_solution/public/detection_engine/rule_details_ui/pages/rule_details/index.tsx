@@ -264,7 +264,7 @@ export const RuleDetailsPage = connector(
         hasIndexMaintenance,
       },
     ] = useUserData();
-    const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+    const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
     const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
       useListsConfig();
 

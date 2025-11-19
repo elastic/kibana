@@ -65,7 +65,7 @@ export const useMissingPrivileges = (): MissingPrivileges => {
       };
     }
 
-    if (rulesPrivileges.edit === false) {
+    if (rulesPrivileges.rules.edit === false) {
       featurePrivileges.push([RULES_FEATURE_ID_V2, ['all']]);
     }
 
@@ -90,5 +90,5 @@ export const useMissingPrivileges = (): MissingPrivileges => {
       featurePrivileges,
       indexPrivileges,
     };
-  }, [listPrivileges.result, detectionEnginePrivileges.result, rulesPrivileges.edit]);
+  }, [listPrivileges.result, detectionEnginePrivileges.result, rulesPrivileges.rules.edit]);
 };

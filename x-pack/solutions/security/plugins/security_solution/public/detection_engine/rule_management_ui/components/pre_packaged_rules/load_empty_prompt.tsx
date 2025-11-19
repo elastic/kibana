@@ -19,7 +19,7 @@ const EmptyPrompt = styled(EuiEmptyPrompt)`
 EmptyPrompt.displayName = 'EmptyPrompt';
 
 const PrePackagedRulesPromptComponent = () => {
-  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   return (
     <EmptyPrompt
       data-test-subj="rulesEmptyPrompt"

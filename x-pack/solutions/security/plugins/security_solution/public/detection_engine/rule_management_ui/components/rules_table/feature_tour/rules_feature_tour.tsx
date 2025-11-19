@@ -77,7 +77,7 @@ export const RuleFeatureTour: FC = () => {
   }, [tourState, storage]);
 
   const isTourAnchorMounted = useIsElementMounted(CREATE_NEW_RULE_TOUR_ANCHOR);
-  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   // Display the tour only if the user has permissions to create/edit rules,
   // otherwise they could not follow the tour steps
   const shouldShowRuleUpgradeTour = isTourAnchorMounted && canEditRules;
