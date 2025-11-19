@@ -18,7 +18,8 @@ import type { WorkflowExecutionState } from './workflow_execution_state';
 import { WorkflowScopeStack } from './workflow_scope_stack';
 import type { RunStepResult } from '../step/node_implementation';
 import type { WorkflowTemplatingEngine } from '../templating_engine';
-import { buildStepExecutionId } from '../utils';
+import { buildStepExecutionId, evaluateKql } from '../utils';
+import { KQLSyntaxError } from '@kbn/es-query';
 
 export interface ContextManagerInit {
   // New properties for logging
@@ -138,6 +139,43 @@ export class WorkflowContextManager {
   public evaluateExpressionInContext(template: string): unknown {
     const context = this.getContext();
     return this.templateEngine.evaluateExpression(template, context);
+  }
+
+  public evaluateBooleanExpressionInContext(
+    condition: string | boolean | undefined,
+    additionalContext?: Record<string, unknown>
+  ): boolean {
+    const renderedCondition = this.renderValueAccordingToContext(condition, additionalContext);
+
+    if (typeof renderedCondition === 'boolean') {
+      return renderedCondition;
+    }
+    if (typeof renderedCondition === 'undefined') {
+      return false;
+    }
+
+    if (typeof renderedCondition === 'string') {
+      try {
+        return evaluateKql(renderedCondition, this.getContext());
+      } catch (error) {
+        if (error instanceof KQLSyntaxError) {
+          throw new Error(
+            `Syntax error in condition "${condition}" for step ${this.node.stepId}: ${String(
+              error
+            )}`
+          );
+        }
+        throw error;
+      }
+    }
+
+    throw new Error(
+      `Invalid condition.` +
+        `Got ${JSON.stringify(
+          condition
+        )} (type: ${typeof condition}), but expected boolean or string. ` +
+        `When using templating syntax, the expression must evaluate to a boolean or string (KQL expression).`
+    );
   }
 
   public readContextPath(propertyPath: string): { pathExists: boolean; value: unknown } {

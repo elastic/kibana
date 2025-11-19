@@ -60,9 +60,9 @@ describe('EnterRetryNodeImpl', () => {
     };
 
     fakeFailedContextManager = jest.mocked({
-      renderValueAccordingToContext: jest.fn(),
+      evaluateBooleanExpressionInContext: jest.fn(),
     } as unknown as StepExecutionRuntime['contextManager']);
-    fakeFailedContextManager.renderValueAccordingToContext.mockReturnValue(true);
+    fakeFailedContextManager.evaluateBooleanExpressionInContext.mockReturnValue(true);
     fakeFailedContext = {
       stepExecution: fakeStepExecutionDoc,
       contextManager: fakeFailedContextManager,
@@ -266,17 +266,17 @@ describe('EnterRetryNodeImpl', () => {
 
       describe('when condition are not met', () => {
         beforeEach(() => {
-          fakeFailedContextManager.renderValueAccordingToContext.mockReturnValue(false);
+          fakeFailedContextManager.evaluateBooleanExpressionInContext.mockReturnValue(false);
         });
 
-        it('should call renderValueAccordingToContext with correct parameters', async () => {
+        it('should call evaluateBooleanExpressionInContext with correct parameters', async () => {
           await underTest.catchError(fakeFailedContext);
           const fakeError: ExecutionError = {
             type: 'NetworkError',
             message: 'Failed to connect to server',
           };
           fakeStepExecutionDoc.error = fakeError;
-          expect(fakeFailedContextManager.renderValueAccordingToContext).toHaveBeenCalledWith(
+          expect(fakeFailedContextManager.evaluateBooleanExpressionInContext).toHaveBeenCalledWith(
             node.configuration.condition,
             {
               error: fakeError,

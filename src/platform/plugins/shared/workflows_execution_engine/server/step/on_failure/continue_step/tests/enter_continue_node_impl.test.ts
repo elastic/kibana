@@ -49,9 +49,9 @@ describe('EnterContinueNodeImpl', () => {
     };
 
     fakeFailedContextManager = jest.mocked({
-      renderValueAccordingToContext: jest.fn(),
+      evaluateBooleanExpressionInContext: jest.fn(),
     } as unknown as StepExecutionRuntime['contextManager']);
-    fakeFailedContextManager.renderValueAccordingToContext.mockReturnValue(true);
+    fakeFailedContextManager.evaluateBooleanExpressionInContext.mockReturnValue(true);
     fakeFailedContext = {
       stepExecution: fakeStepExecutionDoc,
       contextManager: fakeFailedContextManager,
@@ -77,12 +77,12 @@ describe('EnterContinueNodeImpl', () => {
 
     describe('when condition is not met', () => {
       beforeEach(() => {
-        fakeFailedContextManager.renderValueAccordingToContext.mockReturnValue(false);
+        fakeFailedContextManager.evaluateBooleanExpressionInContext.mockReturnValue(false);
       });
 
-      it('should call renderValueAccordingToContext with correct parameters', async () => {
+      it('should call evaluateBooleanExpressionInContext with correct parameters', async () => {
         await underTest.catchError(fakeFailedContext);
-        expect(fakeFailedContextManager.renderValueAccordingToContext).toHaveBeenCalledWith(
+        expect(fakeFailedContextManager.evaluateBooleanExpressionInContext).toHaveBeenCalledWith(
           node.configuration.condition,
           {
             error: fakeFailedContext.stepExecution?.error,
@@ -110,7 +110,7 @@ describe('EnterContinueNodeImpl', () => {
 
     describe('when condition is met', () => {
       beforeEach(() => {
-        fakeFailedContextManager.renderValueAccordingToContext.mockReturnValue(true);
+        fakeFailedContextManager.evaluateBooleanExpressionInContext.mockReturnValue(true);
       });
 
       it('should log debug message about error caught', async () => {

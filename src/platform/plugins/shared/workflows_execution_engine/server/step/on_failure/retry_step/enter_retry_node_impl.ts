@@ -31,7 +31,7 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
   }
 
   public async catchError(failedContext: StepExecutionRuntime): Promise<void> {
-    const shouldRetry = failedContext.contextManager.renderValueAccordingToContext(
+    const shouldRetry = failedContext.contextManager.evaluateBooleanExpressionInContext(
       this.node.configuration.condition || true,
       {
         error: failedContext.stepExecution?.error,
