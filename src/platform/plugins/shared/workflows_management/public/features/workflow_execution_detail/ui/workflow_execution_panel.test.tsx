@@ -78,6 +78,7 @@ jest.mock('../../workflow_execution_list/ui/workflow_execution_list_item', () =>
 describe('WorkflowExecutionPanel', () => {
   const mockExecution: WorkflowExecutionDto = {
     id: 'exec-123',
+    isTestRun: false,
     spaceId: 'default',
     status: ExecutionStatus.RUNNING,
     startedAt: '2024-01-01T10:00:00Z',
