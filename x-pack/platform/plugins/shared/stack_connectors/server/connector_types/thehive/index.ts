@@ -15,23 +15,24 @@ import {
   WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
-import { TheHiveConnector } from './thehive';
 import {
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  PushToServiceIncidentSchema,
   TheHiveConfigSchema,
   TheHiveSecretsSchema,
-  PushToServiceIncidentSchema,
-} from '../../../common/thehive/schema';
-import { THEHIVE_CONNECTOR_ID, THEHIVE_TITLE } from '../../../common/thehive/constants';
-import type { TheHiveConfig, TheHiveSecrets } from '../../../common/thehive/types';
+} from '@kbn/connector-schemas/thehive';
+import type { TheHiveConfig, TheHiveSecrets } from '@kbn/connector-schemas/thehive';
+import { TheHiveConnector } from './thehive';
 import { renderParameterTemplates } from './render';
 
 export type TheHiveConnectorType = SubActionConnectorType<TheHiveConfig, TheHiveSecrets>;
 
 export function getConnectorType(): TheHiveConnectorType {
   return {
-    id: THEHIVE_CONNECTOR_ID,
+    id: CONNECTOR_ID,
     minimumLicenseRequired: 'platinum',
-    name: THEHIVE_TITLE,
+    name: CONNECTOR_NAME,
     getService: (params) => new TheHiveConnector(params, PushToServiceIncidentSchema),
     supportedFeatureIds: [
       AlertingConnectorFeatureId,
