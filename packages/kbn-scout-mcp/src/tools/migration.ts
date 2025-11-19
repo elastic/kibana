@@ -127,7 +127,11 @@ export async function scoutAnalyzeCypressPatterns(params: {
 
     // Add warning if test might not be suitable for E2E
     let warning;
-    if (suitabilityAnalysis.success && suitabilityAnalysis.data.recommendedType !== 'e2e') {
+    if (
+      suitabilityAnalysis.success &&
+      suitabilityAnalysis.data &&
+      suitabilityAnalysis.data.recommendedType !== 'e2e'
+    ) {
       const confidence = suitabilityAnalysis.data.confidence;
       const recommendedType = suitabilityAnalysis.data.recommendedType;
 
