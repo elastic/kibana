@@ -8,7 +8,12 @@ import { DocumentAnalysis, formatDocumentAnalysis } from '@kbn/ai-tools';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
-import type { Feature, Streams, SystemFeature } from '@kbn/streams-schema';
+import {
+  isFeatureWithFilter,
+  type Feature,
+  type Streams,
+  type SystemFeature,
+} from '@kbn/streams-schema';
 import type { Condition } from '@kbn/streamlang';
 import { IdentifySystemsPrompt } from './prompt';
 import { clusterLogs } from '../cluster_logs/cluster_logs';
@@ -56,14 +61,12 @@ export async function identifySystemFeatures({
     esClient,
     index: stream.name,
     partitions:
-      features
-        ?.filter((feature) => feature.filter)
-        .map((feature) => {
-          return {
-            name: feature.name,
-            condition: feature.filter!,
-          };
-        }) ?? [],
+      features?.filter(isFeatureWithFilter).map((feature) => {
+        return {
+          name: feature.name,
+          condition: feature.filter,
+        };
+      }) ?? [],
     logger,
     dropUnmapped,
   });
