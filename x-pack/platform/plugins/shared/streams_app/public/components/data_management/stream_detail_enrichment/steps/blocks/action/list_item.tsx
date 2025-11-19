@@ -64,7 +64,7 @@ export const ActionBlockListItem = ({
   const dropProcessorDescription = i18n.translate(
     'xpack.streams.streamDetailView.managementTab.enrichment.dropProcessorDescription',
     {
-      defaultMessage: 'Drops documents ',
+      defaultMessage: 'Drops documents',
     }
   );
 
