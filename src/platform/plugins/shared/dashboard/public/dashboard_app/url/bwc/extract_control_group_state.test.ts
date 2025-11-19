@@ -155,6 +155,7 @@ describe('extractDashboardState', () => {
             fieldName: 'machine.os.keyword',
             selectedOptions: ['win 7'],
           },
+          uid: '8311639d-92e5-4aa5-99a4-9502b10eead5',
           grow: true,
           type: 'optionsListControl',
           width: 'small',

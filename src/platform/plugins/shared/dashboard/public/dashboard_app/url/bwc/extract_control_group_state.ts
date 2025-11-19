@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { get } from 'lodash';
 import type { ControlsGroupState } from '@kbn/controls-schemas';
 import {
   DEFAULT_AUTO_APPLY_SELECTIONS,
@@ -15,103 +16,115 @@ import {
 } from '@kbn/controls-constants';
 import type { DashboardState } from '../../../../common';
 
-// >9.3 the `autoApplySelections` control group setting became the `autoApplyFilters` dashboard setting
-const getAutoApplySelections = (state: object) => {
-  let autoApplySelections: boolean = DEFAULT_AUTO_APPLY_SELECTIONS;
-  if ('autoApplySelections' in state && typeof state.autoApplySelections === 'boolean') {
-    autoApplySelections = state.autoApplySelections;
-  } else if ('showApplySelections' in state && typeof state.showApplySelections === 'boolean') {
-    // <8.16 autoApplySelections exported as !showApplySelections
-    autoApplySelections = !state.showApplySelections;
-  }
-  return autoApplySelections;
-};
-
 export function extractControlGroupState(state: { [key: string]: unknown }): {
   controlGroupState?: DashboardState['controlGroupInput'];
   autoApplyFilters?: boolean;
 } {
+  let pathToState = 'controlGroupInput';
+  let pathToControls: string | undefined;
   if (state.controlGroupState && typeof state.controlGroupState === 'object') {
-    // URL state created in 8.16 through 8.18 passed control group runtime state in with controlGroupState key
-    return {
-      autoApplyFilters: getAutoApplySelections(state.controlGroupState),
-      ...('initialChildControlState' in state.controlGroupState && {
-        controlGroupState: {
-          controls:
-            typeof state.controlGroupState.initialChildControlState === 'object'
-              ? Object.entries(state.controlGroupState.initialChildControlState ?? {})
-                  .sort(([, value1], [, value2]) => {
-                    return value1.order - value2.order;
-                  })
-                  .map(([controlId, value]) => {
-                    const { grow, order, type, width, ...config } = value; // drop order
-                    return {
-                      uid: controlId,
-                      type,
-                      ...(grow !== undefined && { grow }),
-                      ...(width !== undefined && { width }),
-                      config,
-                    };
-                  })
-              : [],
-        },
-      }),
-    };
+    // >8.16 to <=8.18 passed control group runtime state in with controlGroupState key
+    pathToState = 'controlGroupState';
+    pathToControls = 'controlGroupState.initialChildControlState';
+  } else if (state.controlGroupInput && typeof state.controlGroupInput === 'object') {
+    if ('panels' in state.controlGroupInput) {
+      // <8.16 controls exported as panels
+      pathToControls = 'controlGroupInput.panels';
+    } else if ('controls' in state.controlGroupInput) {
+      // >8.18 controls exported as controls
+      pathToControls = 'controlGroupInput.controls';
+    }
   }
 
-  if (!state.controlGroupInput || typeof state.controlGroupInput !== 'object') {
-    return {};
-  }
-
-  const controlGroupInput = state.controlGroupInput as { [key: string]: unknown };
+  const controls = pathToControls ? get(state, pathToControls) : undefined;
   let standardizedControls: ControlsGroupState['controls'] = [];
-  if (controlGroupInput.panels && typeof controlGroupInput.panels === 'object') {
-    // <8.16 controls exported as panels
-    standardizedControls = Object.values(controlGroupInput.panels)
-      .sort((controlA, controlB) => {
-        return controlA.order - controlB.order;
-      })
-      .map((control) => {
-        const { explicitInput, order, ...restOfControlState } = control ?? {};
-        return {
-          ...restOfControlState,
-          config: explicitInput,
-        };
-      }) as ControlsGroupState['controls'];
-  } else if (Array.isArray(controlGroupInput.controls)) {
-    standardizedControls = controlGroupInput.controls.map((control) => {
+  if (Array.isArray(controls)) {
+    // >8.18 controls are exported as an array without order
+    standardizedControls = controls.map((control) => {
       if ('controlConfig' in control) {
-        // URL state created in 8.19 up to 9.4 had `config` stored under `controlConfig`
+        // >8.18 to <9.3 controls had `config` stored under `controlConfig`
         const { controlConfig, ...rest } = control;
         return { ...rest, config: controlConfig };
       }
-      return control;
+      return control; // otherwise, we are dealing with state >=9.3
     });
+  } else if (controls !== null && typeof controls === 'object') {
+    // <=8.18 controls were exported as an object with order
+    standardizedControls = Object.entries(controls)
+      .sort(([, controlA], [, controlB]) => {
+        return controlA.order - controlB.order;
+      })
+      .map(([controlId, control]) => {
+        // <8.16 controls were exported with `explicitInput` instead of `config`
+        if ('explicitInput' in control) {
+          const { explicitInput, order, ...restOfControlState } = control;
+          return {
+            uid: controlId,
+            ...restOfControlState,
+            config: explicitInput,
+          };
+        } else {
+          // >=8.16 to <=8.18 controls were exported as flat objects for all configs
+          const { grow, order, type, width, ...config } = control;
+          return {
+            uid: controlId,
+            type,
+            ...(grow !== undefined && { grow }),
+            ...(width !== undefined && { width }),
+            config,
+          };
+        }
+      }) as ControlsGroupState['controls'];
   }
 
-  if (typeof controlGroupInput.ignoreParentSettings === 'object') {
-    // >9.3 control group `ignoreParentSettings` gets translated to individual control settings and/or dashboard settings
-    const ignoreParentSettings = controlGroupInput.ignoreParentSettings ?? {};
-    const legacyUseGlobalFilters = Boolean(
-      ('ignoreFilters' in ignoreParentSettings && ignoreParentSettings.ignoreFilters) ||
-        ('ignoreQuery' in ignoreParentSettings && ignoreParentSettings.ignoreQuery)
-    );
-    standardizedControls.map((control) => ({
-      ...control,
-      useGlobalFilters: !('useGlobalFilters' in control)
-        ? legacyUseGlobalFilters
-        : DEFAULT_USE_GLOBAL_FILTERS,
-      ignoreValidations:
-        'ignoreValidations' in ignoreParentSettings
-          ? ignoreParentSettings.ignoreValidations
-          : DEFAULT_IGNORE_VALIDATIONS,
-    }));
+  const controlState = get(state, pathToState);
+  let autoApplySelections: boolean | undefined;
+  if (controlState !== null && typeof controlState === 'object') {
+    if (
+      'ignoreParentSettings' in controlState &&
+      typeof controlState.ignoreParentSettings === 'object'
+    ) {
+      // >9.3 control group `ignoreParentSettings` gets translated to individual control settings and/or dashboard settings
+      const ignoreParentSettings = controlState.ignoreParentSettings ?? {};
+      const legacyUseGlobalFilters = Boolean(
+        ('ignoreFilters' in ignoreParentSettings && ignoreParentSettings.ignoreFilters) ||
+          ('ignoreQuery' in ignoreParentSettings && ignoreParentSettings.ignoreQuery)
+        // controlGroupInput.chainingSystem === 'NONE' // if
+      );
+      standardizedControls.map((control) => ({
+        ...control,
+        useGlobalFilters: !('useGlobalFilters' in control)
+          ? legacyUseGlobalFilters
+          : DEFAULT_USE_GLOBAL_FILTERS,
+        ignoreValidations:
+          'ignoreValidations' in ignoreParentSettings
+            ? ignoreParentSettings.ignoreValidations
+            : DEFAULT_IGNORE_VALIDATIONS,
+      }));
+    }
+
+    // >9.3 the `autoApplySelections` control group setting became the `autoApplyFilters` dashboard setting
+    if (
+      'autoApplySelections' in controlState &&
+      typeof controlState.autoApplySelections === 'boolean'
+    ) {
+      autoApplySelections = controlState.autoApplySelections;
+    } else if (
+      'showApplySelections' in controlState &&
+      typeof controlState.showApplySelections === 'boolean'
+    ) {
+      // <8.16 autoApplySelections exported as !showApplySelections
+      autoApplySelections = !controlState.showApplySelections;
+    }
   }
 
   return {
-    autoApplyFilters: getAutoApplySelections(controlGroupInput),
-    controlGroupState: {
-      controls: standardizedControls,
-    },
+    autoApplyFilters:
+      autoApplySelections !== DEFAULT_AUTO_APPLY_SELECTIONS ? autoApplySelections : undefined,
+    controlGroupState: standardizedControls.length
+      ? {
+          controls: standardizedControls,
+        }
+      : undefined,
   };
 }

@@ -22,6 +22,7 @@ export function extractDashboardState(
     const stateAsObject = state as { [key: string]: unknown };
 
     const { controlGroupState, autoApplyFilters } = extractControlGroupState(stateAsObject);
+
     if (controlGroupState) dashboardState.controlGroupInput = controlGroupState;
     if (
       dashboardState.options?.autoApplyFilters === undefined &&
