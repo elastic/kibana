@@ -184,7 +184,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await solutionNavigation.sidenav.feedbackCallout.expectMissing();
     });
 
-    it.only('renders tour', async () => {
+    it('renders tour', async () => {
       await solutionNavigation.sidenav.tour.reset();
       await solutionNavigation.sidenav.tour.expectTourStepVisible('sidenav-home');
       await solutionNavigation.sidenav.tour.nextStep();
