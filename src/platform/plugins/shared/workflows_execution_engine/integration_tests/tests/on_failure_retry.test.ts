@@ -50,6 +50,7 @@ settings:
   on-failure:
     retry:
       max-attempts: 2
+      ${retryCondition !== undefined ? `condition: ${retryCondition}` : ''}
       delay: ${delay}
 steps:
   - name: constantlyFailingStep
@@ -67,56 +68,7 @@ steps:
 `;
     }
 
-    beforeAll(() => {
-      if (testCase === 'step level') {
-        buildYaml = () => {
-          return `
-steps:
-  - name: constantlyFailingStep
-    type: ${FakeConnectors.constantlyFailing.actionTypeId}
-    connector-id: ${FakeConnectors.constantlyFailing.name}
-    on-failure:
-      retry:
-        max-attempts: 2
-        delay: ${delay}
-        ${retryCondition !== undefined ? `condition: ${retryCondition}` : ''}
-    with:
-      message: 'Hi there! Are you alive?'
-
-  - name: finalStep
-    type: slack
-    connector-id: ${FakeConnectors.slack2.name}
-    with:
-      message: 'Final message!'
-`;
-        };
-      } else if (testCase === 'workflow level') {
-        buildYaml = () => {
-          return `
-settings:
-  on-failure:
-    retry:
-      max-attempts: 2
-      delay: ${delay}
-steps:
-  - name: constantlyFailingStep
-    type: ${FakeConnectors.constantlyFailing.actionTypeId}
-    connector-id: ${FakeConnectors.constantlyFailing.name}
-
-    with:
-      message: 'Hi there! Are you alive?'
-
-  - name: finalStep
-    type: slack
-    connector-id: ${FakeConnectors.slack2.name}
-    with:
-      message: 'Final message!'
-`;
-        };
-      }
-    });
-
-    describe.each([true, '${{error.type == "Error"}}'])(
+    describe.each([undefined, true, '${{error.type == "Error"}}'])(
       'performs retries when condition is %s',
       (conditionTestCase) => {
         beforeAll(async () => {
@@ -276,7 +228,7 @@ steps:
       }
     );
 
-    describe.each([false, '${{error.type == "SomeOtherError"}}'])(
+    describe.each(['${{error.type == "SomeOtherError"}}', '${{false}}'])(
       'does not perform retries when condition is %s',
       (conditionTestCase) => {
         beforeAll(async () => {
@@ -309,9 +261,8 @@ steps:
               'fake_workflow_execution_id'
             );
           // Duration should be at least 2s (2 retries with 1s delay each)
-          expect(workflowExecutionDoc?.duration).toBeGreaterThanOrEqual(900);
           // But less than 10s to avoid test timeout
-          expect(workflowExecutionDoc?.duration).toBeLessThan(1100);
+          expect(workflowExecutionDoc?.duration).toBeLessThan(10);
         });
 
         it('should have 1 executions of constantlyFailingStep', async () => {
