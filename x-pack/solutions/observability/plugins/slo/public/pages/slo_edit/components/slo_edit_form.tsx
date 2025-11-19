@@ -94,7 +94,9 @@ export function SloEditForm({ slo, initialValues, onSave }: Props) {
               title: i18n.translate('xpack.slo.sloEdit.description.title', {
                 defaultMessage: 'Describe SLO',
               }),
-              children: showDescriptionSection ? <SloEditFormDescriptionSection /> : null,
+              children: showDescriptionSection ? (
+                <SloEditFormDescriptionSection isEditMode={isEditMode} />
+              ) : null,
               status:
                 showDescriptionSection && isDescriptionSectionValid ? 'complete' : 'incomplete',
             },

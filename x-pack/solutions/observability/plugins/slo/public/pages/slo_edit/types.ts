@@ -31,5 +31,6 @@ export interface CreateSLOForm<IndicatorType = Indicator> {
   };
   artifacts?: {
     dashboards?: { id: string }[];
+    autoCreateDashboard?: boolean;
   };
 }

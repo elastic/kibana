@@ -98,6 +98,7 @@ export function transformCreateSLOFormToCreateSLOInput(values: CreateSLOForm): C
     },
     artifacts: {
       dashboards: values.artifacts?.dashboards || [],
+      autoCreateDashboard: values.artifacts?.autoCreateDashboard,
     },
   };
 }

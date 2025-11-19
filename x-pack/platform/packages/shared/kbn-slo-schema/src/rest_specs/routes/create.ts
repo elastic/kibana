@@ -33,6 +33,7 @@ const createSLOParamsSchema = t.type({
       revision: t.number,
       artifacts: t.partial({
         dashboards: t.array(t.type({ id: t.string })),
+        autoCreateDashboard: t.boolean,
       }),
     }),
   ]),

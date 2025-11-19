@@ -7,6 +7,7 @@
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
+  EuiCheckbox,
   EuiComboBox,
   EuiFieldText,
   EuiFormRow,
@@ -24,7 +25,13 @@ import type { CreateSLOForm } from '../types';
 import { OptionalText } from './common/optional_text';
 import { MAX_WIDTH } from '../constants';
 
-export function SloEditFormDescriptionSection() {
+export interface SloEditFormDescriptionSectionProps {
+  isEditMode?: boolean;
+}
+
+export function SloEditFormDescriptionSection({
+  isEditMode = false,
+}: SloEditFormDescriptionSectionProps) {
   const { control, getFieldState } = useFormContext<CreateSLOForm>();
   const sloNameId = useGeneratedHtmlId({ prefix: 'sloName' });
   const descriptionId = useGeneratedHtmlId({ prefix: 'sloDescription' });
@@ -171,6 +178,26 @@ export function SloEditFormDescriptionSection() {
           )}
         />
       </EuiFormRow>
+      {!isEditMode && (
+        <EuiFormRow fullWidth>
+          <Controller
+            name="artifacts.autoCreateDashboard"
+            control={control}
+            defaultValue={false}
+            render={({ field }) => (
+              <EuiCheckbox
+                id="autoCreateDashboardCheckbox"
+                label={i18n.translate('xpack.slo.sloEdit.autoCreateDashboard.label', {
+                  defaultMessage: 'Create and link transforms SLO dashboard',
+                })}
+                checked={field.value ?? false}
+                onChange={(e) => field.onChange(e.target.checked)}
+                data-test-subj="sloFormAutoCreateDashboardCheckbox"
+              />
+            )}
+          />
+        </EuiFormRow>
+      )}
     </EuiPanel>
   );
 }
