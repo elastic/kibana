@@ -94,9 +94,10 @@ steps:
       );
       failingStepByTimeoutExecutions.forEach((se) => {
         expect(se.status).toBe(ExecutionStatus.FAILED);
-        expect(se.error).toBe(
-          'Error: TimeoutError: Step execution exceeded the configured timeout of 2s.'
-        );
+        expect(se.error).toEqual({
+          type: 'Error',
+          message: 'TimeoutError: Step execution exceeded the configured timeout of 2s.',
+        });
       });
     });
 
@@ -124,9 +125,16 @@ steps:
           'fake_workflow_execution_id'
         );
       expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.FAILED);
-      expect(workflowExecutionDoc?.error).toBe(
-        'Error: Retry step "failingStepByTimeout" has exceeded the maximum number of attempts.'
-      );
+      expect(workflowExecutionDoc?.error).toEqual({
+        type: 'MaxRetryAttemptsReached',
+        message: 'Retry step "failingStepByTimeout" has exceeded the maximum number of attempts.',
+        details: {
+          originalError: {
+            type: 'Error',
+            message: 'TimeoutError: Step execution exceeded the configured timeout of 2s.',
+          },
+        },
+      });
       expect(workflowExecutionDoc?.scopeStack).toEqual([]);
     });
 
