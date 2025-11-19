@@ -79,7 +79,7 @@ export function useDynamicTypeIcons(connectorsData: ConnectorsResponse | undefin
     const connectorTypes = Object.values(connectorsData.connectorTypes).map((connector) => {
       const actionType = actionTypeRegistry.get(connector.actionTypeId);
       return {
-        actionTypeId: connector.actionTypeId, // remove the leading dot
+        actionTypeId: connector.actionTypeId,
         displayName: connector.displayName,
         icon: actionType.iconClass,
       };
