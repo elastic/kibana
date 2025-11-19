@@ -406,6 +406,16 @@ describe('XY', () => {
   });
 
   describe('invalid xy charts', () => {
+    it('should throw for no layers', () => {
+      expect(() =>
+        xyStateSchema.validate({
+          type: 'xy',
+          title: `Faulty Chart`,
+          layers: [],
+        })
+      ).toThrow();
+    });
+
     it('should not let mix esql dataset with dsl operations', () => {
       expect(() =>
         xyStateSchema.validate({
