@@ -26,6 +26,7 @@ export interface StreamNameFormRowProps {
   error?: string;
   isInvalid?: boolean;
   parentStreamName?: string;
+  nestedStreamNameAllowed?: boolean;
 }
 
 const MAX_NAME_LENGTH = 200;
@@ -38,6 +39,7 @@ export function StreamNameFormRow({
   autoFocus = false,
   error,
   isInvalid = false,
+  nestedStreamNameAllowed = false,
   parentStreamName,
 }: StreamNameFormRowProps) {
   const descriptionId = useGeneratedHtmlId();
@@ -64,7 +66,7 @@ export function StreamNameFormRow({
         })
       : undefined;
 
-  const isDotPresent = !readOnly && partitionName.includes('.');
+  const isDotPresent = !nestedStreamNameAllowed && !readOnly && partitionName.includes('.');
   const dotErrorMessage = isDotPresent
     ? i18n.translate('xpack.streams.streamDetailRouting.nameContainsDotErrorMessage', {
         defaultMessage: `Stream name cannot contain the "." character.`,

@@ -14,11 +14,12 @@ import { buildEsqlFilter } from '@kbn/streams-plugin/public';
 interface ExecuteEsqlParams {
   query: string;
   search: ISearchGeneric;
-  signal: AbortSignal;
+  signal?: AbortSignal;
   filter?: estypes.QueryDslQueryContainer;
   kuery?: string;
   start?: number;
   end?: number;
+  dropNullColumns?: boolean;
 }
 
 /**
@@ -32,6 +33,7 @@ export async function executeEsqlQuery({
   query,
   search,
   signal,
+  dropNullColumns,
   filter,
   kuery,
   start,
@@ -40,6 +42,7 @@ export async function executeEsqlQuery({
   const combinedFilter = buildEsqlFilter({ filter, kuery, start, end });
 
   const { response } = await getESQLResults({
+    dropNullColumns,
     esqlQuery: query,
     search,
     signal,

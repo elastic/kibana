@@ -22,9 +22,10 @@ QueryStreamForm.ESQLEditor = ({
   query,
   onTextLangQueryChange,
   onTextLangQuerySubmit,
+  isLoading,
 }: Pick<
   ESQLEditorProps,
-  'errors' | 'query' | 'onTextLangQueryChange' | 'onTextLangQuerySubmit'
+  'errors' | 'query' | 'onTextLangQueryChange' | 'onTextLangQuerySubmit' | 'isLoading'
 >) => (
   <EuiFormRow
     label={i18n.translate('xpack.streams.queryStreamForm.esqlEditorLabel', {
@@ -40,6 +41,7 @@ QueryStreamForm.ESQLEditor = ({
       expandToFitQueryOnMount
       hasOutline
       hideRunQueryButton
+      isLoading={isLoading}
       mergeExternalMessages
       onTextLangQueryChange={onTextLangQueryChange}
       onTextLangQuerySubmit={onTextLangQuerySubmit}
