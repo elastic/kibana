@@ -13,7 +13,10 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowYaml } from '@kbn/workflows';
-import { normalizeInputsToJsonSchema } from '@kbn/workflows/spec/lib/input_conversion';
+import {
+  applyInputDefaults,
+  normalizeInputsToJsonSchema,
+} from '@kbn/workflows/spec/lib/input_conversion';
 import { z } from '@kbn/zod';
 import { convertJsonSchemaToZod } from '../../../../common/lib/json_schema_to_zod';
 
@@ -105,19 +108,24 @@ const getDefaultWorkflowInput = (definition: WorkflowYaml): string => {
   // Normalize inputs to the new JSON Schema format (handles backward compatibility)
   const normalizedInputs = normalizeInputsToJsonSchema(definition.inputs);
 
+  if (!normalizedInputs?.properties) {
+    return '{}';
+  }
+
+  // Use applyInputDefaults to get defaults with $ref resolution and nested object support
+  // This ensures the same behavior as legacy format and handles all JSON Schema features
+  const defaults = applyInputDefaults(undefined, normalizedInputs);
+
+  // If defaults were applied and not empty, use them; otherwise generate samples
+  if (defaults && typeof defaults === 'object' && Object.keys(defaults).length > 0) {
+    return JSON.stringify(defaults, null, 2);
+  }
+
+  // Fallback to generating samples if no defaults are available
   const inputPlaceholder: Record<string, unknown> = {};
-
-  if (normalizedInputs?.properties) {
-    for (const [propertyName, propertySchema] of Object.entries(normalizedInputs.properties)) {
-      const jsonSchema = propertySchema as JSONSchema7;
-
-      // Use default value if present, otherwise generate a sample
-      if (jsonSchema.default !== undefined) {
-        inputPlaceholder[propertyName] = jsonSchema.default;
-      } else {
-        inputPlaceholder[propertyName] = generateSampleFromJsonSchema(jsonSchema);
-      }
-    }
+  for (const [propertyName, propertySchema] of Object.entries(normalizedInputs.properties)) {
+    const jsonSchema = propertySchema as JSONSchema7;
+    inputPlaceholder[propertyName] = generateSampleFromJsonSchema(jsonSchema);
   }
 
   return JSON.stringify(inputPlaceholder, null, 2);
@@ -166,8 +174,12 @@ export const WorkflowExecuteManualForm = ({
   );
 
   useEffect(() => {
-    if (!value && definition) {
-      handleChange(getDefaultWorkflowInput(definition));
+    // Set defaults if value is empty or only contains empty object
+    if (definition) {
+      const isEmpty = !value || value.trim() === '' || value.trim() === '{}';
+      if (isEmpty) {
+        handleChange(getDefaultWorkflowInput(definition));
+      }
     }
   }, [definition, value, handleChange]);
 

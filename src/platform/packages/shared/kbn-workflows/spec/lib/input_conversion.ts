@@ -186,10 +186,44 @@ function applyDefaultsToObjectProperties(
 }
 
 /**
- * Creates an object with defaults for required properties
- * @param schema - The object schema
- * @returns An object with defaults applied, or undefined if no defaults
+ * Recursively checks if a schema has any defaults (direct or nested)
  */
+function hasDefaultsRecursive(
+  schema: JSONSchema7,
+  inputsSchema?: ReturnType<typeof normalizeInputsToJsonSchema>
+): boolean {
+  // Resolve $ref if present
+  if (schema.$ref && inputsSchema) {
+    const resolvedSchema = resolveRef(schema.$ref, inputsSchema);
+    if (resolvedSchema) {
+      return hasDefaultsRecursive(resolvedSchema, inputsSchema);
+    }
+  }
+
+  // Direct default
+  if (schema.default !== undefined) {
+    return true;
+  }
+
+  // Check nested properties for defaults
+  if (schema.type === 'object' && schema.properties) {
+    for (const propSchema of Object.values(schema.properties)) {
+      const prop = propSchema as JSONSchema7;
+      if (hasDefaultsRecursive(prop, inputsSchema)) {
+        return true;
+      }
+    }
+  }
+
+  // Check array items for defaults
+  if (schema.type === 'array' && schema.items) {
+    const itemsSchema = schema.items as JSONSchema7;
+    return hasDefaultsRecursive(itemsSchema, inputsSchema);
+  }
+
+  return false;
+}
+
 function createObjectWithDefaults(
   schema: JSONSchema7,
   inputsSchema?: ReturnType<typeof normalizeInputsToJsonSchema>
@@ -198,7 +232,11 @@ function createObjectWithDefaults(
   for (const [key, propSchema] of Object.entries(schema.properties || {})) {
     const prop = propSchema as JSONSchema7;
     const isRequired = schema.required?.includes(key) ?? false;
-    if (isRequired || prop.default !== undefined) {
+
+    // Include property if:
+    // 1. It's required, OR
+    // 2. It has defaults (direct or nested)
+    if (isRequired || hasDefaultsRecursive(prop, inputsSchema)) {
       const defaultValue = applyDefaultFromSchema(prop, undefined, inputsSchema);
       if (defaultValue !== undefined) {
         result[key] = defaultValue;
@@ -281,9 +319,12 @@ function applyDefaultFromSchema(
     return schema.default;
   }
 
-  // For objects, create object with defaults for required properties
+  // For objects, create object with defaults for required properties or properties with defaults
   if (schema.type === 'object' && schema.properties) {
-    return createObjectWithDefaults(schema, inputsSchema);
+    const objectWithDefaults = createObjectWithDefaults(schema, inputsSchema);
+    // If we created an object with defaults, return it; otherwise return undefined
+    // This ensures nested objects with defaults are created even if not required
+    return objectWithDefaults;
   }
 
   // For arrays, return empty array if no default
@@ -309,6 +350,7 @@ export function applyInputDefaults(
   }
 
   const result: Record<string, unknown> = { ...(inputs || {}) };
+  let hasAnyDefaults = false;
 
   for (const [propertyName, propertySchema] of Object.entries(inputsSchema.properties)) {
     const jsonSchema = propertySchema as JSONSchema7;
@@ -319,6 +361,7 @@ export function applyInputDefaults(
       const defaultValue = applyDefaultFromSchema(jsonSchema, undefined, inputsSchema);
       if (defaultValue !== undefined) {
         result[propertyName] = defaultValue;
+        hasAnyDefaults = true;
       }
     } else if (
       jsonSchema.type === 'object' &&
@@ -327,14 +370,25 @@ export function applyInputDefaults(
       !Array.isArray(currentValue)
     ) {
       // Recursively apply defaults to nested objects
-      result[propertyName] = applyDefaultFromSchema(jsonSchema, currentValue, inputsSchema);
+      const updatedValue = applyDefaultFromSchema(jsonSchema, currentValue, inputsSchema);
+      if (updatedValue !== undefined) {
+        result[propertyName] = updatedValue;
+        hasAnyDefaults = true;
+      }
     } else if (jsonSchema.$ref) {
       // Handle $ref: resolve and apply defaults
       const defaultValue = applyDefaultFromSchema(jsonSchema, currentValue, inputsSchema);
       if (defaultValue !== undefined) {
         result[propertyName] = defaultValue;
+        hasAnyDefaults = true;
       }
     }
+  }
+
+  // Return undefined if no defaults were applied and inputs was undefined
+  // This allows the caller to distinguish between "no defaults" and "empty object with defaults"
+  if (!hasAnyDefaults && inputs === undefined && Object.keys(result).length === 0) {
+    return undefined;
   }
 
   return result;

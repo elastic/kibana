@@ -347,6 +347,181 @@ describe('applyInputDefaults', () => {
     });
   });
 
+  it('should pre-fill Threat Intelligence Enrichment workflow with all defaults', () => {
+    const inputsSchema = normalizeInputsToJsonSchema({
+      properties: {
+        analyst: {
+          type: 'object',
+          description: 'Security analyst handling the incident',
+          properties: {
+            email: {
+              type: 'string',
+              format: 'email',
+              description: 'Analyst email address',
+              default: 'analyst@security.com',
+            },
+            name: {
+              type: 'string',
+              minLength: 2,
+              maxLength: 100,
+              description: 'Analyst full name',
+              default: 'Security Analyst',
+            },
+            team: {
+              type: 'string',
+              enum: ['SOC', 'Threat Intelligence', 'Incident Response', 'Forensics'],
+              description: 'Security team',
+              default: 'SOC',
+            },
+          },
+          required: ['email', 'name', 'team'],
+          additionalProperties: false,
+        },
+        threatIndicator: {
+          type: 'object',
+          description: 'Threat indicator to investigate',
+          properties: {
+            type: {
+              type: 'string',
+              enum: ['ip', 'domain', 'hash', 'url', 'email'],
+              description: 'Type of threat indicator',
+              default: 'ip',
+            },
+            value: {
+              type: 'string',
+              description: 'The indicator value',
+              default: '8.8.8.8',
+            },
+            severity: {
+              type: 'string',
+              enum: ['low', 'medium', 'high', 'critical'],
+              default: 'medium',
+              description: 'Threat severity level',
+            },
+          },
+          required: ['type', 'value', 'severity'],
+          additionalProperties: false,
+        },
+        incidentMetadata: {
+          type: 'object',
+          description: 'Incident response metadata',
+          properties: {
+            incidentId: {
+              type: 'string',
+              pattern: '^INC-\\d{8}-\\d{4}$',
+              description: 'Incident ID (format: INC-YYYYMMDD-####)',
+              default: 'INC-20241118-0001',
+            },
+            source: {
+              type: 'string',
+              enum: ['SIEM Alert', 'Threat Intelligence Feed', 'Manual Report', 'EDR Detection'],
+              description: 'Source of the incident',
+              default: 'SIEM Alert',
+            },
+            enrichment: {
+              type: 'object',
+              description: 'Threat intelligence enrichment data',
+              properties: {
+                reputation: {
+                  type: 'string',
+                  enum: ['unknown', 'clean', 'suspicious', 'malicious'],
+                  default: 'unknown',
+                },
+              },
+              additionalProperties: false,
+            },
+          },
+          required: ['incidentId', 'source'],
+          additionalProperties: false,
+        },
+        responseActions: {
+          type: 'object',
+          description: 'Automated response actions to take',
+          properties: {
+            blockIndicator: {
+              type: 'boolean',
+              default: false,
+              description: 'Block the threat indicator in firewall/IDS',
+            },
+            quarantineHosts: {
+              type: 'boolean',
+              default: false,
+              description: 'Quarantine affected hosts',
+            },
+            createTicket: {
+              type: 'boolean',
+              default: true,
+              description: 'Create incident response ticket',
+            },
+            notifyTeams: {
+              type: 'array',
+              items: {
+                type: 'string',
+                enum: ['SOC', 'Management', 'Legal', 'Compliance'],
+              },
+              description: 'Teams to notify',
+              default: ['SOC', 'Management'],
+            },
+          },
+          required: ['createTicket'],
+          additionalProperties: false,
+        },
+        priority: {
+          type: 'string',
+          enum: ['P1', 'P2', 'P3', 'P4'],
+          default: 'P2',
+          description: 'Incident priority (P1=Critical, P4=Low)',
+        },
+      },
+      required: ['analyst', 'threatIndicator', 'incidentMetadata'],
+      additionalProperties: false,
+    });
+
+    const result = applyInputDefaults(undefined, inputsSchema);
+
+    // Verify all required fields with defaults are present
+    expect(result).toBeDefined();
+    expect(result).toHaveProperty('analyst');
+    expect(result).toHaveProperty('threatIndicator');
+    expect(result).toHaveProperty('incidentMetadata');
+    expect(result).toHaveProperty('responseActions');
+    expect(result).toHaveProperty('priority');
+
+    // Verify analyst defaults
+    expect(result?.analyst).toEqual({
+      email: 'analyst@security.com',
+      name: 'Security Analyst',
+      team: 'SOC',
+    });
+
+    // Verify threatIndicator defaults
+    expect(result?.threatIndicator).toEqual({
+      type: 'ip',
+      value: '8.8.8.8',
+      severity: 'medium',
+    });
+
+    // Verify incidentMetadata defaults
+    expect(result?.incidentMetadata).toEqual({
+      incidentId: 'INC-20241118-0001',
+      source: 'SIEM Alert',
+      enrichment: {
+        reputation: 'unknown',
+      },
+    });
+
+    // Verify responseActions defaults
+    expect(result?.responseActions).toEqual({
+      blockIndicator: false,
+      quarantineHosts: false,
+      createTicket: true,
+      notifyTeams: ['SOC', 'Management'],
+    });
+
+    // Verify priority default
+    expect(result?.priority).toBe('P2');
+  });
+
   it('should handle the security workflow example with all defaults', () => {
     const inputsSchema = normalizeInputsToJsonSchema({
       properties: {
