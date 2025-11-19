@@ -7,12 +7,7 @@
 
 import { Streams } from '@kbn/streams-schema';
 import { isEnabledFailureStore, isRoot } from '@kbn/streams-schema';
-import type {
-  FailureStore,
-  FailureStoreDisabled,
-  FailureStoreDisabledLifecycle,
-  FailureStoreInherit,
-} from '@kbn/streams-schema/src/models/ingest/failure_store';
+import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import {
   isDisabledLifecycleFailureStore,
   isInheritFailureStore,
