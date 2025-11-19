@@ -47,12 +47,14 @@ describe('TourQueueStateManager', () => {
       expect(state.registeredTourIds[1]).toBe(TOUR_2);
     });
 
-    it('should not register the same tour twice', () => {
-      tourQueue.register(TOUR_1);
-      tourQueue.register(TOUR_1);
+    it('should not register the same tour twice and return relevant tour object', () => {
+      const tour = tourQueue.register(TOUR_1);
+      const duplicatedTour = tourQueue.register(TOUR_1);
 
       const state = tourQueue.getState();
       expect(state.registeredTourIds.filter((id) => id === TOUR_1)).toHaveLength(1);
+      expect(tour.isActive()).toBe(true);
+      expect(duplicatedTour.isActive()).toBe(true);
     });
 
     it('should notify subscribers when a tour is registered', () => {

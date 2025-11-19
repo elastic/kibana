@@ -32,21 +32,13 @@ export class TourQueueStateManager {
 
   register(tourId: TourId): Tour {
     const exists = this.registeredTourIds.includes(tourId);
-    if (exists) {
-      // Return no-op if already exists
-      return {
-        isActive: () => false,
-        skip: () => {},
-        complete: () => {},
-        unregister: () => {},
-      };
-    }
 
-    // Sort by order (lower number = shown first)
-    this.registeredTourIds = [...this.registeredTourIds, tourId].sort(
-      (a, b) => getTourOrder(a) - getTourOrder(b)
-    );
-    this.notifySubscribers();
+    if (!exists) {
+      this.registeredTourIds = [...this.registeredTourIds, tourId].sort(
+        (a, b) => getTourOrder(a) - getTourOrder(b)
+      );
+      this.notifySubscribers();
+    }
 
     return {
       isActive: () => this.isActive(tourId),
