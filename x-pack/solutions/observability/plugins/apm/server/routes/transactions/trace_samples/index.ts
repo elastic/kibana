@@ -7,7 +7,7 @@
 import type { Sort, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { accessKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import {
   AT_TIMESTAMP,
@@ -114,12 +114,13 @@ export async function getTraceSamples({
     });
 
     const traceSamples = response.hits.hits.map((hit) => {
-      const event = unflattenKnownApmEventFields(hit.fields, requiredFields);
+      const event = accessKnownApmEventFields(hit.fields).requireFields(requiredFields);
+
       return {
         score: hit._score,
         timestamp: event[AT_TIMESTAMP],
-        transactionId: event.transaction.id,
-        traceId: event.trace.id,
+        transactionId: event[TRANSACTION_ID],
+        traceId: event[TRACE_ID],
       };
     });
 
