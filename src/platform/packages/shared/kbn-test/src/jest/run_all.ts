@@ -45,6 +45,11 @@ interface FailedTest {
 // Flags:
 //   --configs       Comma-separated list of jest config file paths (optional, if not passed, all configs in the repo will be run)
 //   --maxParallel   Maximum concurrent Jest config processes (optional, defaults to env JEST_MAX_PARALLEL or 3)
+//
+// Environment Variables:
+//   JEST_ALL_CHECKPOINT_PATH       Path to checkpoint file for tracking completed configs (optional, enables resume functionality)
+//   JEST_ALL_FAILED_CONFIGS_PATH   Path to save list of failed configs (optional)
+//   JEST_MAX_PARALLEL              Default max parallel processes if --maxParallel not specified (optional, defaults to 3)
 export async function runJestAll() {
   const argv = getopts(process.argv.slice(2), {
     string: ['configs', 'maxParallel'],
@@ -90,6 +95,39 @@ export async function runJestAll() {
     );
   }
 
+  // Load checkpoint to skip already-successful configs from previous runs
+  const checkpointPath = process.env.JEST_ALL_CHECKPOINT_PATH;
+  const completedConfigs = new Set<string>();
+
+  if (checkpointPath) {
+    try {
+      const checkpointData = await fs.readFile(checkpointPath, 'utf8');
+      const checkpoint = JSON.parse(checkpointData);
+
+      if (checkpoint.completedConfigs && Array.isArray(checkpoint.completedConfigs)) {
+        checkpoint.completedConfigs.forEach((c: string) => completedConfigs.add(c));
+
+        const beforeFilter = configs.length;
+        configs = configs.filter((c) => !completedConfigs.has(c));
+
+        if (completedConfigs.size > 0) {
+          log.info(
+            `Checkpoint: Loaded ${completedConfigs.size} already-completed configs from ${checkpointPath}`
+          );
+          log.info(
+            `Checkpoint: Filtered ${beforeFilter - configs.length} configs (${
+              configs.length
+            } remaining)`
+          );
+        }
+      }
+    } catch (err) {
+      if ((err as NodeJS.ErrnoException).code !== 'ENOENT') {
+        log.warning(`Unable to read checkpoint file: ${(err as Error).message}`);
+      }
+    }
+  }
+
   log.info(
     `Launching up to ${maxParallel} parallel Jest config processes (forcing --runInBand per process).`
   );
@@ -100,7 +138,9 @@ export async function runJestAll() {
   }
 
   // First pass
-  const firstPass = configs.length ? await runConfigs(configs, maxParallel, log) : [];
+  const firstPass = configs.length
+    ? await runConfigs(configs, maxParallel, log, checkpointPath, completedConfigs)
+    : [];
 
   let failing = firstPass.filter((r) => r.code !== 0).map((r) => r.config);
 
@@ -108,7 +148,7 @@ export async function runJestAll() {
 
   if (failing.length > 0) {
     log.info('--- Detected failing configs, starting retry pass (maxParallel=1)');
-    retryResults = await runConfigs(failing, 1, log);
+    retryResults = await runConfigs(failing, 1, log, checkpointPath, completedConfigs);
 
     const fixed = retryResults.filter((r) => r.code === 0).map((r) => r.config);
 
@@ -176,7 +216,9 @@ export async function runJestAll() {
 async function runConfigs(
   configs: string[],
   maxParallel: number,
-  log: ToolingLog
+  log: ToolingLog,
+  checkpointPath?: string,
+  completedConfigs?: Set<string>
 ): Promise<JestConfigResult[]> {
   const results: JestConfigResult[] = [];
   let active = 0;
@@ -224,7 +266,7 @@ async function runConfigs(
           buffer += output;
         });
 
-        proc.on('exit', (c) => {
+        proc.on('exit', async (c) => {
           const code = c == null ? 1 : c;
           const durationMs = Date.now() - start;
 
@@ -247,6 +289,23 @@ async function runConfigs(
           // Log how many configs are left to complete
           const remaining = configs.length - results.length;
           log.info(`Configs left: ${remaining}`);
+
+          // Save checkpoint when a config succeeds
+          if (code === 0 && checkpointPath && completedConfigs) {
+            completedConfigs.add(config);
+
+            try {
+              await fs.mkdir(dirname(checkpointPath), { recursive: true });
+              await fs.writeFile(
+                checkpointPath,
+                JSON.stringify({ completedConfigs: Array.from(completedConfigs) }, null, 2),
+                'utf8'
+              );
+              log.debug(`Checkpoint: Saved progress (${completedConfigs.size} completed configs)`);
+            } catch (err) {
+              log.warning(`Checkpoint: Unable to write checkpoint file: ${(err as Error).message}`);
+            }
+          }
 
           active -= 1;
           if (index < configs.length) {

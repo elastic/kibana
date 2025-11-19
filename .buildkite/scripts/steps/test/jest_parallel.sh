@@ -70,6 +70,26 @@ echo "--- Running combined jest_all for configs ($TEST_TYPE)"
 echo "$configs"
 echo "JEST_MAX_PARALLEL is set to: $JEST_MAX_PARALLEL"
 
+# Set up checkpoint file for tracking completed configs (resume on agent failure)
+CHECKPOINT_FILE="target/jest_checkpoint_${TEST_TYPE}_${JOB}.json"
+export JEST_ALL_CHECKPOINT_PATH="$CHECKPOINT_FILE"
+
+# Try to download existing checkpoint from previous run (if job was restarted)
+if [[ "${BUILDKITE_RETRY_COUNT:-0}" != "0" ]]; then
+  echo "--- Downloading checkpoint from previous run attempt"
+  set +e
+  buildkite-agent artifact download "$CHECKPOINT_FILE" . --step "${BUILDKITE_STEP_ID}"
+  checkpoint_download_code=$?
+  set -e
+  
+  if [ $checkpoint_download_code -eq 0 ] && [ -f "$CHECKPOINT_FILE" ]; then
+    completed_count=$(jq -r '.completedConfigs | length' "$CHECKPOINT_FILE" 2>/dev/null || echo "0")
+    echo "Checkpoint: Found ${completed_count} already-completed configs from previous attempt"
+  else
+    echo "Checkpoint: No previous checkpoint found, starting fresh"
+  fi
+fi
+
 node_opts="--max-old-space-size=${JEST_MAX_OLD_SPACE_MB} --trace-warnings --no-experimental-require-module"
 if [ "${KBN_ENABLE_FIPS:-}" == "true" ]; then
   node_opts="$node_opts --enable-fips --openssl-config=$HOME/nodejs.cnf"
@@ -85,6 +105,12 @@ set +e
 eval "$full_command"
 code=$?
 set -e
+
+# Upload checkpoint file as artifact (even if tests failed, so we can resume)
+if [ -f "$CHECKPOINT_FILE" ]; then
+  echo "--- Uploading checkpoint file"
+  buildkite-agent artifact upload "$CHECKPOINT_FILE"
+fi
 
 if [ $code -ne 0 ]; then
   exitCode=10
