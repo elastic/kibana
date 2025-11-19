@@ -9,6 +9,7 @@ import { z } from '@kbn/zod';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition, ToolHandlerResult } from '@kbn/onechat-server';
 import { ToolType } from '@kbn/onechat-common';
+import { DEFAULT_ALERTS_INDEX, DEFAULT_DATA_VIEW_ID } from '../../../../common/constants';
 import { EntityTypeToIdentifierField } from '../../../../common/entity_analytics/types';
 import type { EntityAnalyticsRoutesDeps } from '../../../lib/entity_analytics/types';
 import type { EntityType } from '../../../../common/search_strategy';
@@ -116,15 +117,13 @@ export const entityAnalyticsToolInternal = (
           esClient.asCurrentUser
         );
 
-        // TODO: Get the security-solution-explore data view.
-        // But how to do it in the server side?
-        const securityDataViewId = `security-solution-${spaceId}`;
+        const securityDataViewId = `${DEFAULT_DATA_VIEW_ID}-${spaceId}`;
         const dataView = await dataViewsService.get(securityDataViewId);
         const indexPattern = dataView.getIndexPattern();
         // remove alert indices from the pattern
         const indexPatterns = indexPattern
           .split(',')
-          .filter((pattern) => !pattern.includes('alerts-'))
+          .filter((pattern) => !pattern.includes(DEFAULT_ALERTS_INDEX)) // Filter out alerts index. The explore dataview isn't available in the server side.
           .join(',');
 
         const specificEntityAnalyticsResponse = domain
