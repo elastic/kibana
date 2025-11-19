@@ -5,18 +5,68 @@
  * 2.0.
  */
 
-import { useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiImage, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
 
-export const PromptLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { euiTheme } = useEuiTheme();
-  const promptLayoutStyles = css`
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    flex-grow: 1;
-    background-color: ${euiTheme.colors.backgroundBasePlain};
-  `;
-  return <div css={promptLayoutStyles}>{children}</div>;
+const panelStyles = css`
+  width: 740px;
+`;
+
+const imagePlaceholderStyles = css`
+  width: 75px;
+  height: 110px;
+  border: 1px solid red;
+`;
+
+export interface PromptLayoutProps {
+  imageSrc?: string;
+  title: React.ReactNode;
+  subtitle: React.ReactNode;
+  primaryButton: React.ReactNode;
+  secondaryButton?: React.ReactNode;
+}
+
+export const PromptLayout: React.FC<PromptLayoutProps> = ({
+  imageSrc,
+  title,
+  subtitle,
+  primaryButton,
+  secondaryButton,
+}) => {
+  return (
+    <EuiFlexGroup direction="column" justifyContent="center" alignItems="center">
+      <EuiPanel css={panelStyles} hasShadow={true} paddingSize="l" grow={false}>
+        <EuiFlexGroup direction="column" alignItems="center" justifyContent="center" gutterSize="l">
+          <EuiFlexItem grow={false}>
+            {imageSrc ? (
+              <EuiImage src={imageSrc} alt="" size="xl" />
+            ) : (
+              <div css={imagePlaceholderStyles}>
+                <EuiText size="s" color="subdued">
+                  Image placeholder
+                </EuiText>
+              </div>
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiTitle>
+              <h2>{title}</h2>
+            </EuiTitle>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText color="subdued" textAlign="center">
+              {subtitle}
+            </EuiText>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="m" justifyContent="center" direction="column">
+              <EuiFlexItem grow={false}>{primaryButton}</EuiFlexItem>
+              {secondaryButton && <EuiFlexItem grow={false}>{secondaryButton}</EuiFlexItem>}
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+    </EuiFlexGroup>
+  );
 };
