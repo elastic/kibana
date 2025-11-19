@@ -40,11 +40,12 @@ import type {
   WorkflowYaml,
 } from '@kbn/workflows';
 import { ExecutionType, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import type { LogSearchResult } from '@kbn/workflows-execution-engine/server';
 import type { z } from '@kbn/zod';
 import { getWorkflowExecution } from './lib/get_workflow_execution';
 import { searchStepExecutions } from './lib/search_step_executions';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
-import type { IWorkflowEventLogger, LogSearchResult } from './lib/workflow_logger';
+import type { IWorkflowEventLogger } from './lib/workflow_logger';
 import { SimpleWorkflowLogger } from './lib/workflow_logger';
 import type {
   GetAvailableConnectorsResponse,
