@@ -19,6 +19,8 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { isEqual } from 'lodash';
 import { useAssistantContext, useLoadConnectors } from '@kbn/elastic-assistant';
+import type { Filter } from '@kbn/es-query';
+import type { FilterGroupHandler } from '@kbn/alerts-ui-shared';
 import { useFindAttackDiscoveries } from '../../../attack_discovery/pages/use_find_attack_discoveries';
 import { useKibana } from '../../../common/lib/kibana';
 import { Schedule } from '../../../attack_discovery/pages/header/schedule';
@@ -33,6 +35,9 @@ import { SchedulesFlyout } from './schedule_flyout';
 import { TableSection } from './table/table_section';
 import type { AssigneesIdsSelection } from '../../../common/components/assignees/types';
 import { ConnectorFilter } from '../../../attack_discovery/pages/results/history/search_and_filter/connector_filter';
+
+import type { Status } from '../../../../common/api/detection_engine';
+import { FiltersSection } from './filters/filters_section';
 
 export const CONTENT_TEST_ID = 'attacks-page-content';
 export const SECURITY_SOLUTION_PAGE_WRAPPER_TEST_ID = 'attacks-page-security-solution-page-wrapper';
@@ -91,6 +96,9 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
     },
     [assignees]
   );
+  const [statusFilter, setStatusFilter] = useState<Status[]>([]);
+  const [pageFilters, setPageFilters] = useState<Filter[]>();
+  const [pageFilterHandler, setPageFilterHandler] = useState<FilterGroupHandler | undefined>();
 
   return (
     <StyledFullHeightContainer data-test-subj={CONTENT_TEST_ID} ref={containerElement}>
@@ -124,6 +132,13 @@ export const AttacksPageContent = React.memo(({ dataView }: AttacksPageContentPr
           </HeaderPage>
           <EuiHorizontalRule margin="none" />
           <EuiSpacer size="l" />
+          <FiltersSection
+            assignees={assignees}
+            dataView={dataView}
+            setStatusFilter={setStatusFilter}
+            setPageFilters={setPageFilters}
+            setPageFilterHandler={setPageFilterHandler}
+          />
         </Display>
 
         <TableSection dataView={dataView} />
