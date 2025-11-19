@@ -18,7 +18,6 @@ import type {
 } from '@kbn/lens-common';
 import { LENS_LAYER_TYPES as layerTypes } from '@kbn/lens-common';
 import type {
-  State,
   XYState,
   XYAnnotationLayerConfig,
   XYLayerConfig,
@@ -191,7 +190,7 @@ export const getLayerTypeOptions = (layer: XYLayerConfig, options: LayerTypeToLa
   return options[layerTypes.ANNOTATIONS](layer);
 };
 
-export function getVisualizationSubtypeId(state: State) {
+export function getVisualizationSubtypeId(state: XYState) {
   if (!state.layers.length) {
     return (
       visualizationSubtypes.find((t) => t.id === state.preferredSeriesType) ??
@@ -207,7 +206,10 @@ export function getVisualizationSubtypeId(state: State) {
   return subtype && seriesTypes.length === 1 ? subtype : 'mixed';
 }
 
-export function getVisualizationType(state: State, layerId?: string): VisualizationType | 'mixed' {
+export function getVisualizationType(
+  state: XYState,
+  layerId?: string
+): VisualizationType | 'mixed' {
   if (!state.layers.length) {
     return (
       visualizationTypes.find((t) => t.subtypes?.includes(state.preferredSeriesType)) ??
@@ -232,7 +234,7 @@ export function getVisualizationType(state: State, layerId?: string): Visualizat
   return visualizationType && seriesTypes.length === 1 ? visualizationType : 'mixed';
 }
 
-export function getDescription(state?: State, layerId?: string) {
+export function getDescription(state?: XYState, layerId?: string) {
   if (!state) {
     return {
       icon: defaultIcon,
@@ -391,7 +393,7 @@ export function newLayerState({
   return newLayerFn[layerType]({ layerId, seriesType, indexPatternId, extraArg });
 }
 
-export function getLayersByType(state: State, byType?: string) {
+export function getLayersByType(state: XYState, byType?: string) {
   return state.layers.filter(({ layerType = layerTypes.DATA }) =>
     byType ? layerType === byType : true
   );

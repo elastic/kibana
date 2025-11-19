@@ -23,7 +23,10 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
     background-color: ${euiTheme.colors.backgroundBasePlain};
   `;
 
+  const headerHeight = `calc(${euiTheme.size.xl} * 2)`;
   const headerStyles = css`
+    display: flex;
+    height: ${headerHeight};
     ${backgroundStyles}
     &.euiFlyoutHeader {
       padding-inline: 0;
@@ -34,6 +37,7 @@ export const EmbeddableConversationInternal: React.FC<EmbeddableConversationInte
   const bodyStyles = css`
     ${backgroundStyles}
     flex: 1;
+    padding: 0 ${euiTheme.size.base} ${euiTheme.size.base} ${euiTheme.size.base};
 
     .euiFlyoutBody__overflow {
       overflow: hidden;
