@@ -635,6 +635,7 @@ function generateElasticsearchConnectors() {
         const content = JSON.parse(fs.readFileSync(filePath, 'utf8'));
 
         for (const [endpointName, definition] of Object.entries(content)) {
+          console.log(`Processing ${endpointName} from ${filePath}`);
           const connectorDef = generateConnectorDefinition(endpointName, definition);
           connectorDefinitions.push(connectorDef);
           successCount++;

@@ -21,7 +21,7 @@ import {
 import { z } from '@kbn/zod';
 
 // Import connector schemas from the organized structure
-import { mergeEnhancedConnectors } from './enhanced_es_connectors';
+// import { mergeEnhancedConnectors } from './enhanced_es_connectors';
 /* eslint-disable sort-imports */
 import {
   // Inference connector schemas
@@ -619,18 +619,19 @@ function generateElasticsearchConnectors(): EnhancedInternalConnectorContract[] 
   const {
     GENERATED_ELASTICSEARCH_CONNECTORS,
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-  } = require('@kbn/workflows/common/generated/elasticsearch_connectors');
+  } = require('@kbn/workflows/common/generated/elasticsearch_connectors_v2.gen');
 
-  const {
-    ENHANCED_ELASTICSEARCH_CONNECTORS,
-    // eslint-disable-next-line @typescript-eslint/no-var-requires
-  } = require('./enhanced_es_connectors');
+  return GENERATED_ELASTICSEARCH_CONNECTORS;
+  // const {
+  //   ENHANCED_ELASTICSEARCH_CONNECTORS,
+  //   // eslint-disable-next-line @typescript-eslint/no-var-requires
+  // } = require('./enhanced_es_connectors');
 
-  // Return enhanced connectors (merge generated with enhanced definitions)
-  return mergeEnhancedConnectors(
-    GENERATED_ELASTICSEARCH_CONNECTORS,
-    ENHANCED_ELASTICSEARCH_CONNECTORS
-  );
+  // // Return enhanced connectors (merge generated with enhanced definitions)
+  // return mergeEnhancedConnectors(
+  //   GENERATED_ELASTICSEARCH_CONNECTORS,
+  //   ENHANCED_ELASTICSEARCH_CONNECTORS
+  // );
 }
 
 function generateKibanaConnectors(): InternalConnectorContract[] {

@@ -393,9 +393,11 @@ export interface DynamicConnectorContract extends ConnectorContract {
   isSystemActionType?: boolean;
 }
 
+export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH' | 'HEAD' | 'OPTIONS';
+
 export interface InternalConnectorContract extends ConnectorContract {
   /** HTTP method(s) for this API endpoint */
-  methods?: string[];
+  methods?: HttpMethod[];
   /** Summary for this API endpoint */
   summary?: string;
   /** URL pattern(s) for this API endpoint */

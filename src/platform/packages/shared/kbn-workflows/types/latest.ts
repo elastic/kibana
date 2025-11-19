@@ -52,6 +52,7 @@ export type {
   EnhancedInternalConnectorContract,
   InternalConnectorContract,
   DynamicConnectorContract,
+  HttpMethod,
 } from './v1';
 
 // exported full to use enum as values
