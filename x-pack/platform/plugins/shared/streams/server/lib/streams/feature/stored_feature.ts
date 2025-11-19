@@ -15,8 +15,6 @@ import {
   FEATURE_FILTER,
   FEATURE_NAME,
   FEATURE_TYPE,
-  FEATURE_META,
-  FEATURE_EVIDENCE,
 } from './fields';
 import { type FeatureType, featureTypeSchema } from '@kbn/streams-schema';
 
@@ -27,8 +25,6 @@ export interface StoredFeature {
   [FEATURE_DESCRIPTION]: string;
   [STREAM_NAME]: string;
   [FEATURE_FILTER]?: Condition;
-  [FEATURE_META]?: Record<string, unknown>;
-  [FEATURE_EVIDENCE]: string[];
 }
 
 export const storedFeatureSchema: z.Schema<StoredFeature> = z.object({
@@ -38,6 +34,4 @@ export const storedFeatureSchema: z.Schema<StoredFeature> = z.object({
   [FEATURE_DESCRIPTION]: z.string(),
   [STREAM_NAME]: z.string(),
   [FEATURE_FILTER]: z.optional(conditionSchema),
-  [FEATURE_META]: z.optional(z.record(z.string(), z.unknown())),
-  [FEATURE_EVIDENCE]: z.array(z.string()),
 });

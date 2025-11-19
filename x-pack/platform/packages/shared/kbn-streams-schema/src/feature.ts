@@ -18,7 +18,6 @@ export interface Feature {
   type: FeatureType;
   name: string;
   description: string;
-  evidence: string[];
   filter?: Condition;
 }
 
@@ -26,7 +25,6 @@ export const featureSchema: z.Schema<Feature> = z.object({
   type: featureTypeSchema,
   name: streamObjectNameSchema,
   description: z.string(),
-  evidence: z.array(z.string()),
   filter: z.optional(conditionSchema),
 });
 

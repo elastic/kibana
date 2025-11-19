@@ -26,7 +26,6 @@ for (let i = 0; i < 5; i++) {
     filter: {
       field: faker.database.column(),
     },
-    evidence: [],
   });
 }
 

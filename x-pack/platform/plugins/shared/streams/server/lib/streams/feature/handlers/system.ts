@@ -17,7 +17,6 @@ import {
   FEATURE_NAME,
   FEATURE_TYPE,
   FEATURE_UUID,
-  FEATURE_EVIDENCE,
 } from '../fields';
 import { IdentifyFeaturesOptions, identifySystemFeatures } from '@kbn/streams-ai';
 
@@ -34,7 +33,6 @@ export class SystemFeatureHandler extends FeatureTypeHandler<SystemFeature> {
       name: stored[FEATURE_NAME],
       description: stored[FEATURE_DESCRIPTION],
       filter: stored[FEATURE_FILTER]!,
-      evidence: stored[FEATURE_EVIDENCE],
     };
   }
 
@@ -46,7 +44,6 @@ export class SystemFeatureHandler extends FeatureTypeHandler<SystemFeature> {
       [FEATURE_NAME]: feature.name,
       [FEATURE_DESCRIPTION]: feature.description,
       [FEATURE_FILTER]: feature.filter,
-      [FEATURE_EVIDENCE]: feature.evidence,
     };
   }
 
