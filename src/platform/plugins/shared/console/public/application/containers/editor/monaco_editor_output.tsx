@@ -48,11 +48,6 @@ const useStyles = () => {
     outputActions: css`
       ${actions}
 
-      button {
-        height: calc(${euiTheme.size.base} * 1.1);
-        width: calc(${euiTheme.size.base} * 1.1);
-      }
-
       // For IE11
       min-width: ${euiTheme.size.l};
     `,
@@ -239,7 +234,7 @@ export const MonacoEditorOutput: FunctionComponent = () => {
               aria-label={i18n.translate('console.outputPanel.copyOutputButtonTooltipAriaLabel', {
                 defaultMessage: 'Click to copy to clipboard',
               })}
-              iconSize={'s'}
+              iconSize={'m'}
             />
           </EuiToolTip>
         </EuiFlexItem>
