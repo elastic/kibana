@@ -7,10 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ContentListServices } from '@kbn/content-list-provider';
-import type { Tag } from '@kbn/content-management-tags';
+import type { Tag, ContentManagementTagsServices } from '@kbn/content-management-tags';
 import type { FavoritesClientPublic } from '@kbn/content-management-favorites-public';
+import type { UserProfilesServices } from '@kbn/content-management-user-profiles';
 import { mockUserProfileServices } from './user_profiles';
+
+/**
+ * Mock services interface compatible with `ContentListServices` from `@kbn/content-list-provider`.
+ * Defined locally to avoid circular dependency between mock-data and provider packages.
+ */
+export interface MockContentListServices {
+  /** Favorites service for favorite items functionality. */
+  favorites?: { favoritesClient: FavoritesClientPublic };
+  /** Tags service for tag filtering and management. */
+  tags?: ContentManagementTagsServices;
+  /** User profile service for user filtering and display. */
+  userProfile?: UserProfilesServices;
+}
 
 export interface MockServicesOptions {
   /** Enable user profile services. Default: true */
@@ -90,10 +103,11 @@ export const mockFavoritesClient: FavoritesClientPublic = {
 };
 
 /**
- * Creates a mock ContentListServices object for Storybook stories.
+ * Creates a mock services object for Storybook stories.
+ * Compatible with `ContentListServices` from `@kbn/content-list-provider`.
  * By default, enables user profiles, tags, and favorites services.
  */
-export function createMockServices(options: MockServicesOptions = {}): ContentListServices {
+export function createMockServices(options: MockServicesOptions = {}): MockContentListServices {
   const { userProfiles = false, tags = false, tagList = [], favorites = false } = options;
 
   return {

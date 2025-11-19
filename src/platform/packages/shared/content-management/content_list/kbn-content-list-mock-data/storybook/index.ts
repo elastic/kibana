@@ -66,5 +66,6 @@ export {
   createMockServices,
   resetMockFavorites,
   mockFavoritesClient,
+  type MockContentListServices,
   type MockServicesOptions,
 } from './services';

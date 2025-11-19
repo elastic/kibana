@@ -5030,6 +5030,18 @@
   version "0.0.0"
   uid ""
 
+"@kbn/content-list-provider-client@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-client":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-list-provider-server@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-provider-server":
+  version "0.0.0"
+  uid ""
+
+"@kbn/content-list-provider@link:src/platform/packages/shared/content-management/content_list/kbn-content-list-provider":
+  version "0.0.0"
+  uid ""
+
 "@kbn/content-management-access-control-public@link:src/platform/packages/shared/content-management/access_control/access_control_public":
   version "0.0.0"
   uid ""
