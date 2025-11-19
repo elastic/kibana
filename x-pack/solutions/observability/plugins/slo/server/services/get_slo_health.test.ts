@@ -182,7 +182,7 @@ describe('GetSLOHealth', () => {
       `);
     });
 
-    it('returns unhealthy whenever one of the transform is unhealthy', async () => {
+    it("returns overall 'unhealthy' whenever one of the transform is unhealthy", async () => {
       const slo = createSLO({ id: '95ffb9af-1384-4d24-8e3f-345a03d7a439' });
       mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
       mockScopedClusterClient.asCurrentUser.search.mockResolvedValue({
@@ -236,6 +236,72 @@ describe('GetSLOHealth', () => {
               "summary": Object {
                 "status": "healthy",
                 "transformState": "started",
+              },
+            },
+            "sloId": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
+            "sloInstanceId": "*",
+            "sloName": "irrelevant",
+            "sloRevision": 1,
+            "state": "no_data",
+          },
+        ]
+      `);
+    });
+
+    it("returns overall 'unhealthy' whenever one of the transform is not started", async () => {
+      const slo = createSLO({ id: '95ffb9af-1384-4d24-8e3f-345a03d7a439' });
+      mockRepository.findAllByIds.mockResolvedValueOnce([slo]);
+      mockScopedClusterClient.asCurrentUser.search.mockResolvedValue({
+        took: 0,
+        timed_out: false,
+        _shards: {
+          total: 2,
+          successful: 2,
+          skipped: 0,
+          failed: 0,
+        },
+        hits: {
+          total: {
+            value: 1,
+            relation: 'eq',
+          },
+          max_score: 1,
+          hits: [aHitFromSummaryIndex(aSummaryDocument(slo))],
+        },
+      });
+
+      // @ts-ignore
+      mockScopedClusterClient.asSecondaryAuthUser.transform.getTransformStats.mockResolvedValue({
+        transforms: [
+          {
+            id: getSLOTransformId(slo.id, slo.revision),
+            health: { status: 'green' },
+            state: 'started',
+          } as TransformGetTransformStatsTransformStats,
+          {
+            id: getSLOSummaryTransformId(slo.id, slo.revision),
+            health: { status: 'green' },
+            state: 'stopped',
+          } as TransformGetTransformStatsTransformStats,
+        ],
+      });
+
+      const result = await getSLOHealth.execute({
+        list: [{ sloId: slo.id, sloInstanceId: ALL_VALUE }],
+      });
+
+      expect(result).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "health": Object {
+              "overall": "unhealthy",
+              "rollup": Object {
+                "status": "healthy",
+                "transformState": "started",
+              },
+              "summary": Object {
+                "status": "healthy",
+                "transformState": "stopped",
               },
             },
             "sloId": "95ffb9af-1384-4d24-8e3f-345a03d7a439",
