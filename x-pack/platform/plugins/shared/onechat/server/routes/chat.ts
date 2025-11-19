@@ -279,16 +279,6 @@ export function registerChatRoutes({
         '}\n' +
         '```\n\n' +
         '---\n\n' +
-        '`thinking_complete`\n\n' +
-        'Marks the end of the thinking/reasoning phase.\n\n' +
-        'Schema:\n' +
-        '```json\n' +
-        '{\n' +
-        '  "time_to_first_token": 0\n' +
-        '}\n' +
-        '```\n\n' +
-        '**Note:** `time_to_first_token` is in milliseconds.\n\n' +
-        '---\n\n' +
         '`round_complete`\n\n' +
         'Marks end of one conversation round.\n\n' +
         'Schema:\n' +
@@ -305,10 +295,9 @@ export function registerChatRoutes({
         '2. `tool_call` (if tools are used)\n' +
         '3. `tool_progress` (zero or more progress updates)\n' +
         '4. `tool_result` (when tool completes)\n' +
-        '5. `thinking_complete`\n' +
-        '6. `message_chunk` (multiple, as text streams)\n' +
-        '7. `message_complete`\n' +
-        '8. `round_complete`',
+        '5. `message_chunk` (multiple, as text streams)\n' +
+        '6. `message_complete`\n' +
+        '7. `round_complete`',
       options: {
         tags: ['oas-tag:agent builder'],
         availability: {
