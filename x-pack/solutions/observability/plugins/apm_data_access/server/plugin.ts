@@ -56,6 +56,11 @@ export class ApmDataAccessPlugin
   }
 
   public start(_core: CoreStart): ApmDataAccessPluginStart {
+    migrateLegacyAPMIndicesToSpaceAware({ coreStart: core, logger: this.logger }).catch((e) => {
+      this.logger.error('Failed to run migration making APM indices space aware');
+      this.logger.error(e);
+    });
+
     return {};
   }
 
