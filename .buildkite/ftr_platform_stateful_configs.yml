@@ -332,6 +332,7 @@ enabled:
   - x-pack/platform/test/security_functional/user_profiles.config.ts
   - x-pack/platform/test/security_functional/expired_session.config.ts
   - x-pack/solutions/security/test/session_view/basic/config.ts
+  - x-pack/solutions/security/test/kubernetes_security/basic/config.ts
   - x-pack/platform/test/spaces_api_integration/security_and_spaces/config_basic.ts
   - x-pack/platform/test/spaces_api_integration/security_and_spaces/config_trial.ts
   - x-pack/platform/test/spaces_api_integration/spaces_only/config.ts
@@ -415,4 +416,3 @@ enabled:
   - x-pack/platform/test/saved_object_api_integration/user_profiles/config.ts
     # stateful config files that run deployment-agnostic tests
   - x-pack/platform/test/api_integration_deployment_agnostic/configs/stateful/platform.stateful.config.ts
-  - x-pack/test/kubernetes_security/basic/config.ts
