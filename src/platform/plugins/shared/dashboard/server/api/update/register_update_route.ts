@@ -11,7 +11,7 @@ import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { INTERNAL_API_VERSION, PUBLIC_API_PATH, commonRouteConfig } from '../constants';
-import { getUpdateRequestBodySchema, updateResponseBodySchema } from './schemas';
+import { getUpdateRequestBodySchema, getUpdateResponseBodySchema } from './schemas';
 import { update } from './update';
 
 export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContext>) {
@@ -35,7 +35,7 @@ export function registerUpdateRoute(router: VersionedRouter<RequestHandlerContex
         },
         response: {
           200: {
-            body: () => updateResponseBodySchema,
+            body: getUpdateResponseBodySchema,
           },
         },
       }),
