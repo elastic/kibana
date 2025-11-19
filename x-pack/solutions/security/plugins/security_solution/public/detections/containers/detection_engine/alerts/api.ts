@@ -58,6 +58,14 @@ export const fetchQueryAlerts = async <Hit, Aggregations>({
             'unique-query-id': uniqueQueryId,
           }
         : undefined,
+      context: uniqueQueryId
+        ? {
+            type: 'security_solution',
+            name: 'detection_engine_fetch_query_alerts',
+            description: 'Fetch detection engine alerts by query',
+            id: `testme-secengprod-${uniqueQueryId}`,
+          }
+        : undefined,
     }
   );
 };
