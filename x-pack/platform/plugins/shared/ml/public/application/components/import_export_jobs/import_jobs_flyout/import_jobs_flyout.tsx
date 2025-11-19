@@ -179,6 +179,8 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
         setDfaJobs(tempJobs);
       }
 
+      setJobType(loadedFile.jobType);
+
       setJobIdObjects(
         validatedJobs.jobs.map(({ jobId, destIndex }) => {
           const datafeedValidation = datafeedValidationMap.get(jobId);
@@ -198,8 +200,6 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
           };
         })
       );
-
-      setJobType(loadedFile.jobType);
 
       const ids = createIdsMash(validatedJobs.jobs as JobIdObject[], loadedFile.jobType);
       setIdsMash(ids);

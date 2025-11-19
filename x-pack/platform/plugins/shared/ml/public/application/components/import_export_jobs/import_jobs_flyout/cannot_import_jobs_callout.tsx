@@ -67,7 +67,7 @@ const SkippedJobList: FC<{ jobs: SkippedJobs[] }> = ({ jobs }) => (
     {jobs.length > 0 && (
       <>
         {jobs.map(({ jobId, missingFilters, sourceIndicesErrors }) => (
-          <EuiText size="s" key={jobId}>
+          <EuiText size="xs" key={jobId}>
             <h5>{jobId}</h5>
             {missingFilters && missingFilters.length > 0 && (
               <FormattedMessage

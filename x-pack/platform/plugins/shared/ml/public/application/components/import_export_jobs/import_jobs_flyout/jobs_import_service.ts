@@ -223,7 +223,7 @@ export class JobImportService {
     jobs: ImportedAdJob[] | DataFrameAnalyticsConfig[],
     type: JobType,
     getFilters: () => Promise<Filter[]>,
-    esSearch?: MlApi['esSearch']
+    esSearch: MlApi['esSearch']
   ) {
     const existingFilters = new Set((await getFilters()).map((f) => f.filter_id));
     const tempJobs: Array<{ jobId: string; destIndex?: string }> = [];
@@ -248,7 +248,7 @@ export class JobImportService {
           }));
 
     const sourceIndicesErrors = new Map<string, SourceIndexError[]>();
-    if (type === 'data-frame-analytics' && esSearch) {
+    if (type === 'data-frame-analytics') {
       await Promise.all(
         commonJobs.map(({ jobId, indices }) =>
           this.validateJobSourceIndices(jobId, indices, esSearch, sourceIndicesErrors)
