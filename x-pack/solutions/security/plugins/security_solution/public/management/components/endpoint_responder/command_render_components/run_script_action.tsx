@@ -137,7 +137,6 @@ export const RunScriptActionResult = memo<
     >
       <RunscriptActionResult
         action={completedActionDetails}
-        agentId={command.commandDefinition?.meta?.endpointId}
         data-test-subj="runscriptResult"
         textSize="s"
       />

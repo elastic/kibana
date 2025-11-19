@@ -18,8 +18,13 @@ import { i18n } from '@kbn/i18n';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useTestIdGenerator } from '../../hooks/use_test_id_generator';
-import type { ResponseActionRunScriptOutputContent } from '../../../../common/endpoint/types';
+import type {
+  ActionDetails,
+  MaybeImmutable,
+  ResponseActionRunScriptOutputContent,
+} from '../../../../common/endpoint/types';
 import { getEmptyValue } from '../../../common/components/empty_value';
+import { RunscriptActionNoOutput } from './runscript_action_no_output';
 
 const emptyValue = getEmptyValue();
 
@@ -96,17 +101,28 @@ const RunscriptOutputAccordion = memo<RunscriptActionOutputProps>(
 RunscriptOutputAccordion.displayName = 'RunscriptOutputAccordion';
 
 export interface RunscriptOutputProps {
-  outputContent: ResponseActionRunScriptOutputContent;
+  action: MaybeImmutable<ActionDetails<ResponseActionRunScriptOutputContent>>;
+  agentId: string;
   'data-test-subj'?: string;
   textSize?: Exclude<EuiTextProps['size'], 'm' | 'relative'>;
 }
 
 export const RunscriptOutput = memo<RunscriptOutputProps>(
-  ({
-    outputContent: { code, stderr, stdout },
-    'data-test-subj': dataTestSubj,
-    textSize = 'xs',
-  }) => {
+  ({ action, agentId, 'data-test-subj': dataTestSubj, textSize = 'xs' }) => {
+    const outputContent = useMemo(
+      () => action.outputs && action.outputs[agentId] && action.outputs[agentId].content,
+      [action.outputs, agentId]
+    );
+
+    if (!outputContent) {
+      return (
+        <EuiFlexItem>
+          <RunscriptActionNoOutput textSize={textSize} data-test-subj={dataTestSubj} />
+        </EuiFlexItem>
+      );
+    }
+
+    const { code, stderr, stdout } = outputContent;
     const isFileTooLargeError = Number(code) === 413;
 
     if (isFileTooLargeError) {

@@ -16,15 +16,9 @@ import type {
   ResponseActionRunScriptOutputContent,
 } from '../../../../common/endpoint/types';
 import { RunscriptOutput } from './runscript_action_output';
-import { RunscriptActionNoOutput } from './runscript_action_no_output';
 
 export interface RunscriptActionResultProps {
   action: MaybeImmutable<ActionDetails<ResponseActionRunScriptOutputContent>>;
-  /**
-   * If defined, the results will only be displayed for the given agent id.
-   * If undefined, then responses for all agents are displayed
-   */
-  agentId?: string;
   agentType?: ResponseActionAgentType;
   'data-test-subj'?: string;
   textSize?: Exclude<EuiTextProps['size'], 'm' | 'relative'>;
@@ -45,18 +39,14 @@ export interface RunscriptActionResultProps {
  * @returns {React.Element} A React component that renders a text block with a file download link.
  */
 export const RunscriptActionResult = memo<RunscriptActionResultProps>(
-  ({ action, agentId = action.agents[0], 'data-test-subj': dataTestSubj, textSize = 's' }) => {
+  ({ action, 'data-test-subj': dataTestSubj, textSize = 's' }) => {
     const { canWriteExecuteOperations } = useUserPrivileges().endpointPrivileges;
 
+    const agentId = action.agents[0];
     const showFile = useMemo(() => action.agentType !== 'crowdstrike', [action.agentType]);
     const shouldShowOutput = useMemo(
       () => action.agentType === 'microsoft_defender_endpoint',
       [action.agentType]
-    );
-
-    const outputContent = useMemo(
-      () => action.outputs && action.outputs[agentId] && action.outputs[agentId].content,
-      [action.outputs, agentId]
     );
 
     return (
@@ -77,19 +67,13 @@ export const RunscriptActionResult = memo<RunscriptActionResultProps>(
             />
           </EuiFlexItem>
         )}
-        {shouldShowOutput && !outputContent && (
-          <>
-            <EuiSpacer size="l" />
-            <EuiFlexItem>
-              <RunscriptActionNoOutput textSize={textSize} data-test-subj={dataTestSubj} />
-            </EuiFlexItem>
-          </>
-        )}
-        {shouldShowOutput && outputContent && (
+        {shouldShowOutput && (
           <>
             <EuiSpacer size="l" />
             <RunscriptOutput
-              outputContent={outputContent}
+              action={action}
+              agentId={agentId}
+              // outputContent={outputContent}
               data-test-subj={dataTestSubj}
               textSize={textSize}
             />

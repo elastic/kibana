@@ -128,7 +128,6 @@ export const ActionResponseOutputs = memo<ActionResponseOutputsProps>(
                 hostOutput = (
                   <RunscriptActionResult
                     action={action}
-                    agentId={agentId}
                     data-test-subj={getTestId('actionsLogTray')}
                     textSize="xs"
                   />
