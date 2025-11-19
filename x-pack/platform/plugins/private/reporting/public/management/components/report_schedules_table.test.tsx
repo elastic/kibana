@@ -398,6 +398,7 @@ describe('ReportSchedulesTable', () => {
     expect(
       await screen.findByTestId(`reportViewConfig-${mockScheduledReports[0].id}`)
     ).toHaveTextContent('View schedule config');
+    expect(screen.queryByText('Edit schedule config')).not.toBeInTheDocument();
   });
 
   it('shows edit schedule config when manageReporting is true', async () => {
@@ -433,6 +434,7 @@ describe('ReportSchedulesTable', () => {
     expect(
       await screen.findByTestId(`reportEditConfig-${mockScheduledReports[0].id}`)
     ).toHaveTextContent('Edit schedule config');
+    expect(screen.queryByText('View schedule config')).not.toBeInTheDocument();
   });
 
   it('should show edit flyout correctly', async () => {

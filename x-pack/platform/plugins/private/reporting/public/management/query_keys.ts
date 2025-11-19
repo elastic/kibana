@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-export const root = 'reporting';
+const root = 'reporting';
 export const queryKeys = {
   getScheduledList: (params: unknown) => [root, 'scheduledList', params] as const,
   getHealth: () => [root, 'health'] as const,
   getUserProfile: () => [root, 'userProfile'] as const,
+  allSchedules: () => [root, 'scheduledList'] as const,
 };
