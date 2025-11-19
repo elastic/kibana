@@ -162,9 +162,7 @@ export function fromStoredFilter(storedFilter: unknown): AsCodeFilter {
  * Extracts field, operator, and value from filter metadata and query structures
  * Used by both Strategy 1 (direct conversion) and Strategy 3 (group conversion helper)
  */
-export function convertToSimpleCondition(
-  storedFilter: StoredFilter
-): AsCodeConditionFilter['condition'] {
+function convertToSimpleCondition(storedFilter: StoredFilter): AsCodeConditionFilter['condition'] {
   const meta = storedFilter.meta || {};
   const query = storedFilter.query || {};
 
@@ -274,7 +272,7 @@ export function convertToSimpleCondition(
  * Handles combined filters (legacy meta.type='combined') and bool queries (modern)
  * Recursively converts nested filters to preserve group structure
  */
-export function convertToFilterGroup(storedFilter: StoredFilter): AsCodeGroupFilter['group'] {
+function convertToFilterGroup(storedFilter: StoredFilter): AsCodeGroupFilter['group'] {
   // Handle combined filter format (legacy): meta.type === 'combined' with params array
   if (isCombinedFilter(storedFilter)) {
     // ExtendedFilter type includes optional 'relation' property
@@ -360,9 +358,7 @@ export function convertToFilterGroup(storedFilter: StoredFilter): AsCodeGroupFil
  * Handles query-based filters by extracting field/operator/value from query structure
  * Supports: match_phrase, match, range, term, terms, exists queries
  */
-export function convertWithEnhancement(
-  storedFilter: StoredFilter
-): AsCodeConditionFilter['condition'] {
+function convertWithEnhancement(storedFilter: StoredFilter): AsCodeConditionFilter['condition'] {
   const query = storedFilter.query;
   if (!query) {
     throw new FilterConversionError('Filter query is undefined');
@@ -441,7 +437,7 @@ export function convertWithEnhancement(
  * Used when filter cannot be converted to condition or group format
  * Preserves original query structure to prevent data loss
  */
-export function convertToRawDSL(storedFilter: StoredFilter): AsCodeDSLFilter['dsl'] {
+function convertToRawDSL(storedFilter: StoredFilter): AsCodeDSLFilter['dsl'] {
   return {
     query: storedFilter.query || storedFilter,
   };
@@ -450,7 +446,7 @@ export function convertToRawDSL(storedFilter: StoredFilter): AsCodeDSLFilter['ds
 /**
  * Extract field name from query object (for filters without meta.key)
  */
-export function extractFieldFromQuery(query: unknown): string | null {
+function extractFieldFromQuery(query: unknown): string | null {
   if (!query || typeof query !== 'object') return null;
 
   if (hasTermQuery(query)) {

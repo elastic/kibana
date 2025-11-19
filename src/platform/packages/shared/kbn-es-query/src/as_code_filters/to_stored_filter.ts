@@ -93,7 +93,7 @@ export function toStoredFilter(simplified: AsCodeFilter): StoredFilter {
 /**
  * Convert simple condition to stored filter
  */
-export function convertFromSimpleCondition(
+function convertFromSimpleCondition(
   condition: AsCodeConditionFilter['condition'],
   baseStored: StoredFilter
 ): StoredFilter {
@@ -210,7 +210,7 @@ export function convertFromSimpleCondition(
 /**
  * Convert filter group to stored filter
  */
-export function convertFromFilterGroup(
+function convertFromFilterGroup(
   group: AsCodeGroupFilter['group'],
   baseStored: StoredFilter
 ): StoredFilter {
@@ -307,7 +307,7 @@ export function convertFromFilterGroup(
 /**
  * Convert DSL filter to stored filter with smart type detection
  */
-export function convertFromDSLFilter(
+function convertFromDSLFilter(
   asCodeFilter: AsCodeDSLFilter,
   baseStored: StoredFilter
 ): StoredFilter {
