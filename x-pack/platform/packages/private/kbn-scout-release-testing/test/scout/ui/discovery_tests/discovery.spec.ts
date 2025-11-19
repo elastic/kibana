@@ -205,4 +205,11 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
     pageObjects.discover.writeSearchQuery('response:200');
     await expect.poll(async () => await pageObjects.discover.getHitCountInt()).toBe(12891);
   });
+
+  test('click Field Stats button and validate Stats Content is present', async ({ page }) => {
+    page.testSubj.locator('dscViewModeFieldStatsButton').click();
+    await expect(page.testSubj.locator('dataVisualizerTable-loaded')).toBeVisible();
+    page.testSubj.locator('dataVisualizerDetailsToggle-@message.raw-arrowRight').click();
+    await expect(page.testSubj.locator('dataVisualizerDocumentStatsContent')).toBeVisible();
+  });
 });
