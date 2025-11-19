@@ -10,13 +10,46 @@ import React from 'react';
 
 import { PageTitle } from '.';
 import { ATTACK_DISCOVERY_PAGE_TITLE } from './translations';
+import { useKibana } from '../../../common/lib/kibana';
+
+jest.mock('../../../common/lib/kibana');
 
 describe('PageTitle', () => {
+  const mockGetBooleanValue = jest.fn();
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        featureFlags: { getBooleanValue: mockGetBooleanValue },
+      },
+    });
+    mockGetBooleanValue.mockReturnValue(false);
+  });
+
   it('renders the expected title', () => {
     render(<PageTitle />);
 
     const attackDiscoveryPageTitle = screen.getByTestId('attackDiscoveryPageTitle');
 
     expect(attackDiscoveryPageTitle).toHaveTextContent(ATTACK_DISCOVERY_PAGE_TITLE);
+  });
+
+  describe('Attacks page announcement', () => {
+    it('renders the Attacks page announcement when `attacksAlertsAlignmentEnabled` feature flag is enabled', () => {
+      mockGetBooleanValue.mockReturnValue(true);
+
+      render(<PageTitle />);
+
+      expect(screen.getByTestId('attackDiscoveryAnnouncementBadge')).toBeInTheDocument();
+    });
+
+    it('does not render the Attacks page announcement when `attacksAlertsAlignmentEnabled` feature flag is disabled', () => {
+      mockGetBooleanValue.mockReturnValue(false);
+
+      render(<PageTitle />);
+
+      expect(screen.queryByTestId('attackDiscoveryAnnouncementBadge')).not.toBeInTheDocument();
+    });
   });
 });
