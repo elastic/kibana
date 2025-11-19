@@ -9,5 +9,3 @@ export interface StreamDocsStat {
   dataset: string;
   count: number;
 }
-
-

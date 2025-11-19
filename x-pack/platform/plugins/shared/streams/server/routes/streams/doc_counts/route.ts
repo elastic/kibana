@@ -39,9 +39,7 @@ const degradedDocCountsRoute = createServerRoute({
 
     const { start, end, types, datasetQuery } = params.query;
 
-    const indexPatterns = datasetQuery
-      ? [datasetQuery]
-      : types.map((type) => `${type}-*-*`);
+    const indexPatterns = datasetQuery ? [datasetQuery] : types.map((type) => `${type}-*-*`);
 
     return await getAggregatedDatasetPaginatedResults({
       esClient,
@@ -106,9 +104,7 @@ const totalDocCountsRoute = createServerRoute({
 
     const { start, end, types, datasetQuery } = params.query;
 
-    const indexPatterns = datasetQuery
-      ? [datasetQuery]
-      : types.map((type) => `${type}-*-*`);
+    const indexPatterns = datasetQuery ? [datasetQuery] : types.map((type) => `${type}-*-*`);
 
     return await getAggregatedDatasetPaginatedResults({
       esClient,
@@ -124,5 +120,3 @@ export const docCountsRoutes = {
   ...failedDocCountsRoute,
   ...totalDocCountsRoute,
 };
-
-

@@ -54,11 +54,7 @@ export async function getAggregatedDatasetPaginatedResults(options: {
   const bool: QueryDslBoolQuery = {
     ...query,
     filter: [
-      ...(query?.filter
-        ? Array.isArray(query.filter)
-          ? query.filter
-          : [query.filter]
-        : []),
+      ...(query?.filter ? (Array.isArray(query.filter) ? query.filter : [query.filter]) : []),
       ...rangeFilter,
     ],
   };
@@ -98,14 +94,11 @@ export async function getAggregatedDatasetPaginatedResults(options: {
     });
   }
 
-  const aggregatedResults: Record<string, number> = results.reduce(
-    (acc, curr) => {
-      const dataset = extractIndexNameFromBackingIndex(curr.dataset);
-      acc[dataset] = (acc[dataset] ?? 0) + curr.count;
-      return acc;
-    },
-    {} as Record<string, number>
-  );
+  const aggregatedResults: Record<string, number> = results.reduce((acc, curr) => {
+    const dataset = extractIndexNameFromBackingIndex(curr.dataset);
+    acc[dataset] = (acc[dataset] ?? 0) + curr.count;
+    return acc;
+  }, {} as Record<string, number>);
 
   return Object.entries(aggregatedResults).map(([dataset, count]) => ({
     dataset,
@@ -119,5 +112,3 @@ function extractIndexNameFromBackingIndex(indexString: string): string {
   const match = indexString.match(backingIndexPattern);
   return match ? match[1] : indexString;
 }
-
-
