@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { memo } from 'react';
+import React, { memo, useCallback } from 'react';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { AttackDetailsProps } from './types';
 import { FlyoutNavigation } from '../shared/components/flyout_navigation';
@@ -33,15 +33,18 @@ export const AttackDetailsPanel: React.FC<Partial<AttackDetailsProps>> = memo(({
 
   const { tabsDisplayed, selectedTabId } = useTabs({ path });
 
-  const setSelectedTabId = (tabId: AttackDetailsPanelTabType['id']) => {
-    openRightPanel({
-      id: AttackDetailsRightPanelKey,
-      path: { tab: tabId },
-      params: { attackId },
-    });
-    // saving which tab is currently selected in the right panel in local storage
-    storage.set(FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS, tabId);
-  };
+  const setSelectedTabId = useCallback(
+    (tabId: AttackDetailsPanelTabType['id']) => {
+      openRightPanel({
+        id: AttackDetailsRightPanelKey,
+        path: { tab: tabId },
+        params: { attackId },
+      });
+      // saving which tab is currently selected in the right panel in local storage
+      storage.set(FLYOUT_STORAGE_KEYS.RIGHT_PANEL_SELECTED_TABS, tabId);
+    },
+    [attackId, openRightPanel, storage]
+  );
 
   return (
     <>

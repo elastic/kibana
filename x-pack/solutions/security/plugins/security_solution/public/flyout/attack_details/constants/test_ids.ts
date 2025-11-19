@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-export const ATTACK_DETAILS_FLYOUT_PREFIX = 'attack-details-flyout-body';
+export const ATTACK_DETAILS_FLYOUT_PREFIX = 'attack-details-flyout';
 
 export const FLYOUT_BODY_TEST_ID = `${ATTACK_DETAILS_FLYOUT_PREFIX}-body` as const;
 export const FLYOUT_FOOTER_TEST_ID = `${ATTACK_DETAILS_FLYOUT_PREFIX}-footer` as const;

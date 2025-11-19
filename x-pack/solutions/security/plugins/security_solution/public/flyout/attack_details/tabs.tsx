@@ -9,7 +9,8 @@ import type { ReactElement } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AttackDetailsPanelPaths } from '.';
-import { OVERVIEW_TAB_TEST_ID, TABLE_TAB_TEST_ID, JSON_TAB_TEST_ID } from './constants/test_id';
+import { OVERVIEW_TAB_TEST_ID, TABLE_TAB_TEST_ID, JSON_TAB_TEST_ID } from './constants/test_ids';
+import { TableTab } from './tabs/table_tab';
 
 export interface AttackDetailsPanelTabType {
   id: AttackDetailsPanelPaths;
@@ -39,7 +40,7 @@ export const tableTab: AttackDetailsPanelTabType = {
       defaultMessage="Table"
     />
   ),
-  content: <div>{`${TABLE_TAB_TEST_ID}`}</div>,
+  content: <TableTab />,
 };
 
 export const jsonTab: AttackDetailsPanelTabType = {
