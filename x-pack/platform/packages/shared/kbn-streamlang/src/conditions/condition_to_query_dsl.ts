@@ -51,6 +51,25 @@ function conditionToClause(condition: FilterCondition) {
       return { prefix: { [condition.field]: `${value}*` } };
     case 'endsWith':
       return { wildcard: { [condition.field]: `*${value}` } };
+    case 'range': {
+      const rangeValue = value as any;
+      const rangeQuery: any = {};
+
+      if (rangeValue.gte !== undefined) {
+        rangeQuery.gte = rangeValue.gte;
+      }
+      if (rangeValue.gt !== undefined) {
+        rangeQuery.gt = rangeValue.gt;
+      }
+      if (rangeValue.lte !== undefined) {
+        rangeQuery.lte = rangeValue.lte;
+      }
+      if (rangeValue.lt !== undefined) {
+        rangeQuery.lt = rangeValue.lt;
+      }
+
+      return { range: { [condition.field]: rangeQuery } };
+    }
     default:
       return { match_none: {} };
   }
