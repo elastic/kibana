@@ -22,7 +22,6 @@ describe('getContextSchemaForPath', () => {
     triggers: [
       {
         type: 'manual' as const,
-        enabled: true,
       },
     ],
     steps: [
@@ -125,7 +124,6 @@ describe('getContextSchemaForPath', () => {
       triggers: [
         {
           type: 'manual' as const,
-          enabled: true,
         },
       ],
       consts: {
@@ -144,7 +142,7 @@ describe('getContextSchemaForPath', () => {
         {
           name: 'foreach-step',
           type: 'foreach',
-          foreach: 'consts.items',
+          foreach: '{{consts.items}}',
           steps: [
             {
               name: 'foreach-step-1',

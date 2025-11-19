@@ -11,7 +11,10 @@ import { getActionDetailsById as _getActionDetailsById } from '../../action_deta
 import { EndpointActionsClient } from '../../..';
 import { endpointActionClientMock } from './mocks';
 import { responseActionsClientMock } from '../mocks';
-import { ENDPOINT_ACTIONS_INDEX } from '../../../../../../common/endpoint/constants';
+import {
+  ENDPOINT_ACTIONS_INDEX,
+  metadataCurrentIndexPattern,
+} from '../../../../../../common/endpoint/constants';
 
 import { DEFAULT_EXECUTE_ACTION_TIMEOUT } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { applyEsClientSearchMock } from '../../../../mocks/utils.mock';
@@ -22,6 +25,7 @@ import { EndpointActionGenerator } from '../../../../../../common/endpoint/data_
 import type { ResponseActionsRequestBody } from '../../../../../../common/api/endpoint';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import { ALLOWED_ACTION_REQUEST_TAGS } from '../../constants';
+import { EndpointMetadataGenerator } from '../../../../../../common/endpoint/data_generators/endpoint_metadata_generator';
 
 jest.mock('../../action_details_by_id', () => {
   const originalMod = jest.requireActual('../../action_details_by_id');
@@ -55,6 +59,10 @@ describe('EndpointActionsClient', () => {
       classConstructorOptions.endpointService.getInternalFleetServices()
         .ensureInCurrentSpace as jest.Mock
     ).mockResolvedValue(undefined);
+
+    // @ts-expect-error mocking this for testing purposes
+    classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDump =
+      true;
   });
 
   it('should validate endpoint ids and log those that are invalid', async () => {
@@ -429,6 +437,10 @@ describe('EndpointActionsClient', () => {
 
     scan: responseActionsClientMock.createScanOptions(getCommonResponseActionOptions()),
 
+    memoryDump: responseActionsClientMock.createMemoryDumpActionOption(
+      getCommonResponseActionOptions()
+    ),
+
     // TODO: not yet implemented
     // runscript: responseActionsClientMock.createRunScriptOptions(getCommonResponseActionOptions()),
   };
@@ -579,12 +591,49 @@ describe('EndpointActionsClient', () => {
     });
   });
 
+  describe('#memoryDump()', () => {
+    it('should error when feature flag is false', async () => {
+      // @ts-expect-error mocking this for testing purposes
+      classConstructorOptions.endpointService.experimentalFeatures.responseActionsEndpointMemoryDump =
+        false;
+
+      await expect(
+        endpointActionsClient.memoryDump(
+          responseActionsClientMock.createMemoryDumpActionOption(getCommonResponseActionOptions())
+        )
+      ).rejects.toThrow('Memory dump operation is not enabled');
+    });
+
+    it.each`
+      title        | params
+      ${'kernel'}  | ${{ type: 'kernel' }}
+      ${'process'} | ${{ type: 'process', pid: '123' }}
+    `(
+      'should validate that agent supports memory dump of $title',
+      async ({ params: ResponseActionMemoryDumpParameters }) => {
+        const generator = new EndpointMetadataGenerator('seed');
+
+        applyEsClientSearchMock({
+          esClientMock: classConstructorOptions.esClient as ElasticsearchClientMock,
+          index: metadataCurrentIndexPattern,
+          response: generator.toEsSearchResponse([
+            generator.toEsSearchHit(generator.generate({ Endpoint: { capabilities: [] } })),
+          ]),
+        });
+
+        await expect(
+          endpointActionsClient.memoryDump(
+            responseActionsClientMock.createMemoryDumpActionOption(getCommonResponseActionOptions())
+          )
+        ).rejects.toThrow(
+          'The following agent IDs do not support memory dump: 0dc3661d-6e67-46b0-af39-6f12b025fcb0 (agent v.7.0.13)'
+        );
+      }
+    );
+  });
+
   describe('and Space Awareness is enabled', () => {
     beforeEach(() => {
-      // @ts-expect-error assign to readonly property
-      classConstructorOptions.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-        true;
-
       getActionDetailsByIdMock.mockResolvedValue({});
     });
 

@@ -8,7 +8,7 @@
 import type http from 'http';
 import type https from 'https';
 import type { Plugin, CoreSetup } from '@kbn/core/server';
-import { schema } from '@kbn/config-schema';
+import { z } from '@kbn/zod';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type {
@@ -114,9 +114,9 @@ export class FixturePlugin implements Plugin<void, void, FixtureSetupDeps, Fixtu
       minimumLicenseRequired: 'gold',
       supportedFeatureIds: ['alerting'],
       validate: {
-        config: { schema: schema.object({}, { defaultValue: {} }) },
-        secrets: { schema: schema.object({}, { defaultValue: {} }) },
-        params: { schema: schema.object({}, { defaultValue: {} }) },
+        config: { schema: z.object({}).strict().default({}) },
+        secrets: { schema: z.object({}).strict().default({}) },
+        params: { schema: z.object({}).strict().default({}) },
       },
       async executor() {
         return { status: 'ok', actionId: '' };

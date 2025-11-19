@@ -28,7 +28,7 @@ import {
   StepExecutionRepositoryMock,
   WorkflowExecutionRepositoryMock,
 } from './mocks';
-import { UnsecuredActionsClientMock } from './mocks/actions_plugin.mock';
+import { ScopedActionsClientMock, UnsecuredActionsClientMock } from './mocks/actions_plugin.mock';
 import { TaskManagerMock } from './mocks/task_manager.mock';
 import type { WorkflowsExecutionEngineConfig } from '../server/config';
 import { resumeWorkflow } from '../server/execution_functions';
@@ -57,10 +57,29 @@ export class WorkflowRunFixture {
     debug: jest.fn(),
     trace: jest.fn(),
   } as unknown as Logger;
+  // Create shared execute mock so tests can verify calls regardless of which client is used
+  private readonly sharedExecuteMock = jest.fn();
   public readonly unsecuredActionsClientMock = new UnsecuredActionsClientMock();
+  public readonly scopedActionsClientMock = new ScopedActionsClientMock();
   public readonly actionsClientMock = {
     getUnsecuredActionsClient: jest.fn().mockReturnValue(this.unsecuredActionsClientMock),
+    getActionsClientWithRequest: jest.fn().mockResolvedValue(this.scopedActionsClientMock),
   } as unknown as ActionsPluginStartContract;
+
+  constructor() {
+    // Wire both clients to use the same shared execute mock with normalized parameters
+    this.unsecuredActionsClientMock.execute = this.sharedExecuteMock.mockImplementation((options) =>
+      this.unsecuredActionsClientMock.returnMockedConnectorResult(options)
+    );
+    this.scopedActionsClientMock.execute = this.sharedExecuteMock.mockImplementation((options) => {
+      // Normalize scoped client parameters to match unsecured client for test assertions
+      // Convert actionId -> id so tests can check using 'id' parameter
+      const normalizedOptions = { ...options, id: options.actionId };
+      this.sharedExecuteMock.mock.calls[this.sharedExecuteMock.mock.calls.length - 1][0] =
+        normalizedOptions;
+      return this.scopedActionsClientMock.returnMockedConnectorResult(options);
+    });
+  }
   public readonly configMock = {
     logging: {
       console: true,
@@ -114,7 +133,7 @@ export class WorkflowRunFixture {
       taskAbortController: this.taskAbortController,
       coreStart: this.coreStartMock,
       dependencies: this.dependencies,
-      esClient: this.esClientMock,
+      unscopedEsClient: this.esClientMock,
       actions: this.actionsClientMock,
       taskManager: this.taskManagerMock,
       logger: this.loggerMock,
@@ -132,7 +151,6 @@ export class WorkflowRunFixture {
       logsRepository: this.logsRepositoryMock as any,
       taskAbortController: this.taskAbortController,
       coreStart: this.coreStartMock,
-      esClient: this.esClientMock,
       actions: this.actionsClientMock,
       taskManager: this.taskManagerMock,
       logger: this.loggerMock,
@@ -182,7 +200,7 @@ export class WorkflowRunFixture {
       taskAbortController: this.taskAbortController,
       coreStart: this.coreStartMock,
       dependencies: this.dependencies,
-      esClient: this.esClientMock,
+      unscopedEsClient: this.esClientMock,
       actions: this.actionsClientMock,
       taskManager: this.taskManagerMock,
       logger: this.loggerMock,

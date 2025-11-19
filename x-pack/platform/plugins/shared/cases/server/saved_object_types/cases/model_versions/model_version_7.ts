@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
-import { casesSchemaV6 } from '../schemas';
+import { casesSchemaV7 } from '../schemas';
 
 export const modelVersion7: SavedObjectsModelVersion = {
   changes: [
@@ -24,6 +24,6 @@ export const modelVersion7: SavedObjectsModelVersion = {
     },
   ],
   schemas: {
-    forwardCompatibility: casesSchemaV6.extends({}, { unknowns: 'ignore' }),
+    forwardCompatibility: casesSchemaV7.extends({}, { unknowns: 'ignore' }),
   },
 };

@@ -20,10 +20,15 @@ import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { createMockReportingCore } from '../../test_helpers';
 import type { ReportingCore } from '../..';
 import type { ScheduledReportType } from '../../types';
-import { TaskStatus, type TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import {
+  Frequency,
+  TaskStatus,
+  type TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import type { BulkGetResult } from '@kbn/task-manager-plugin/server/task_store';
 import type { CreatedAtSearchResponse } from './scheduled_reports_service';
 import { ScheduledReportsService } from './scheduled_reports_service';
+import type { UpdateScheduledReportParams } from './types/update';
 
 const fakeRawRequest = {
   headers: {
@@ -237,6 +242,8 @@ describe('ScheduledReportsService', () => {
       return soResponse;
     });
     soClient.bulkGet = jest.fn().mockImplementation(async () => ({ saved_objects: savedObjects }));
+    soClient.update = jest.fn();
+    soClient.get = jest.fn().mockResolvedValue(savedObjects[0]);
     soClient.bulkUpdate = jest.fn().mockImplementation(async () => ({
       saved_objects: savedObjects.map((so) => ({
         id: so.id,
@@ -263,6 +270,7 @@ describe('ScheduledReportsService', () => {
       statuses: savedObjects.map((so) => ({ id: so.id, success: true })),
     }));
     taskManager.bulkGet = jest.fn().mockResolvedValue(nextRunResponse);
+    taskManager.bulkUpdateSchedules = jest.fn();
     mockResponseFactory = getMockResponseFactory();
     jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValue(true);
     scheduledReportsService = await ScheduledReportsService.build({
@@ -1717,6 +1725,202 @@ describe('ScheduledReportsService', () => {
       ).rejects.toMatchInlineSnapshot(`
         Object {
           "body": "Error deleting scheduled reports: Some error",
+          "statusCode": 500,
+        }
+      `);
+    });
+  });
+
+  describe('update', () => {
+    const mockSchedule = {
+      rrule: {
+        freq: Frequency.MONTHLY,
+        interval: 1,
+        tzid: 'UTC',
+        byweekday: ['MO'],
+        byhour: [20],
+        byminute: [30],
+        bymonthday: [3],
+      },
+    };
+
+    const defaultUpdateParams = {
+      user: { username: 'somebody' },
+      id: savedObjects[0].id,
+      updateParams: {
+        title: 'foobar',
+        schedule: mockSchedule,
+      } as UpdateScheduledReportParams,
+    };
+
+    it('should pass parameters to SOclient and task manager', async () => {
+      await scheduledReportsService.update(defaultUpdateParams);
+
+      expect(soClient.update).toHaveBeenCalledTimes(1);
+      expect(soClient.update).toHaveBeenCalledWith('scheduled_report', savedObjects[0].id, {
+        schedule: mockSchedule,
+        title: 'foobar',
+      });
+
+      expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(
+        [savedObjects[0].id],
+        mockSchedule
+      );
+
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+        event: {
+          action: 'scheduled_report_update',
+          category: ['database'],
+          outcome: 'success',
+          type: ['update'],
+        },
+        kibana: {
+          saved_object: {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            name: '[Logs] Web Traffic',
+            type: 'scheduled_report',
+          },
+        },
+        message:
+          'User has updated scheduled report [id=aa8b6fb3-cf61-4903-bce3-eec9ddc823ca] [name=[Logs] Web Traffic]',
+      });
+    });
+
+    it('should not call task manager if update only contains title', async () => {
+      await scheduledReportsService.update({
+        ...defaultUpdateParams,
+        updateParams: {
+          title: 'foobar',
+        } as UpdateScheduledReportParams,
+      });
+
+      expect(soClient.update).toHaveBeenCalledTimes(1);
+      expect(soClient.update).toHaveBeenCalledWith('scheduled_report', savedObjects[0].id, {
+        title: 'foobar',
+      });
+
+      expect(taskManager.bulkUpdateSchedules).not.toHaveBeenCalled();
+
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenNthCalledWith(1, {
+        event: {
+          action: 'scheduled_report_update',
+          category: ['database'],
+          outcome: 'success',
+          type: ['update'],
+        },
+        kibana: {
+          saved_object: {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            name: '[Logs] Web Traffic',
+            type: 'scheduled_report',
+          },
+        },
+        message:
+          'User has updated scheduled report [id=aa8b6fb3-cf61-4903-bce3-eec9ddc823ca] [name=[Logs] Web Traffic]',
+      });
+    });
+
+    it('should update scheduled report when user does not have permissions but is the creator', async () => {
+      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      scheduledReportsService = await ScheduledReportsService.build({
+        logger: mockLogger,
+        reportingCore: core,
+        responseFactory: mockResponseFactory,
+        request: fakeRawRequest,
+      });
+
+      await scheduledReportsService.update({
+        ...defaultUpdateParams,
+        user: { username: 'elastic' },
+      });
+
+      expect(soClient.update).toHaveBeenCalledTimes(1);
+      expect(soClient.update).toHaveBeenCalledWith('scheduled_report', savedObjects[0].id, {
+        schedule: mockSchedule,
+        title: 'foobar',
+      });
+
+      expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledTimes(1);
+      expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(
+        [savedObjects[0].id],
+        mockSchedule
+      );
+
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledWith({
+        event: {
+          action: 'scheduled_report_update',
+          category: ['database'],
+          outcome: 'success',
+          type: ['update'],
+        },
+        kibana: {
+          saved_object: {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            name: '[Logs] Web Traffic',
+            type: 'scheduled_report',
+          },
+        },
+        message:
+          'User has updated scheduled report [id=aa8b6fb3-cf61-4903-bce3-eec9ddc823ca] [name=[Logs] Web Traffic]',
+      });
+    });
+
+    it('should not update scheduled report when user does not have permissions and is not the creator', async () => {
+      jest.spyOn(core, 'canManageReportingForSpace').mockResolvedValueOnce(false);
+      scheduledReportsService = await ScheduledReportsService.build({
+        logger: mockLogger,
+        reportingCore: core,
+        responseFactory: mockResponseFactory,
+        request: fakeRawRequest,
+      });
+
+      await expect(scheduledReportsService.update(defaultUpdateParams)).rejects.toMatchObject({
+        body: 'Not found.',
+        statusCode: 404,
+      });
+
+      expect(soClient.update).not.toHaveBeenCalled();
+      expect(taskManager.bulkUpdateSchedules).not.toHaveBeenCalled();
+
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        'User "somebody" attempted to update scheduled report "aa8b6fb3-cf61-4903-bce3-eec9ddc823ca" without sufficient privileges.'
+      );
+      expect(auditLogger.log).toHaveBeenCalledTimes(1);
+      expect(auditLogger.log).toHaveBeenCalledWith({
+        error: {
+          code: 'Error',
+          message: 'Not found.',
+        },
+        event: {
+          action: 'scheduled_report_update',
+          category: ['database'],
+          outcome: 'failure',
+          type: ['update'],
+        },
+        kibana: {
+          saved_object: {
+            id: 'aa8b6fb3-cf61-4903-bce3-eec9ddc823ca',
+            type: 'scheduled_report',
+          },
+        },
+        message:
+          'Failed attempt to update scheduled report [id=aa8b6fb3-cf61-4903-bce3-eec9ddc823ca]',
+      });
+    });
+
+    it('should reject if the soClient throws an error', async () => {
+      soClient.get = jest.fn().mockImplementationOnce(async () => {
+        throw new Error('Some error');
+      });
+
+      await expect(scheduledReportsService.update(defaultUpdateParams)).rejects
+        .toMatchInlineSnapshot(`
+        Object {
+          "body": "Error updating scheduled reports: Some error",
           "statusCode": 500,
         }
       `);

@@ -41,6 +41,7 @@ export const FileUploadView: FC<Props> = ({ reset, getAdditionalLinks }) => {
     canImport,
     importResults,
     indexName,
+    abortImport,
   } = useFileUploadContext();
 
   const showImportControls =
@@ -112,6 +113,19 @@ export const FileUploadView: FC<Props> = ({ reset, getAdditionalLinks }) => {
             <OverallUploadStatus />
 
             {uploadStatus.overallImportStatus === STATUS.FAILED ? <ImportErrors /> : null}
+
+            {uploadStatus.overallImportStatus === STATUS.STARTED ? (
+              <>
+                <EuiSpacer />
+
+                <EuiButton onClick={() => abortImport()}>
+                  <FormattedMessage
+                    id="xpack.dataVisualizer.file.uploadView.cancelButton"
+                    defaultMessage="Cancel"
+                  />
+                </EuiButton>
+              </>
+            ) : null}
           </>
         ) : null}
       </>
@@ -169,6 +183,19 @@ export const FileUploadView: FC<Props> = ({ reset, getAdditionalLinks }) => {
             resultLinks={undefined}
           />
         </>
+      ) : null}
+
+      {uploadStatus.overallImportStatus === STATUS.ABORTED ? (
+        <EuiFlexGroup>
+          <EuiFlexItem grow={false}>
+            <EuiButton onClick={() => resetForm()}>
+              <FormattedMessage
+                id="xpack.dataVisualizer.file.uploadView.importAnotherButton"
+                defaultMessage="Upload another file"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ) : null}
     </div>
   );

@@ -27,8 +27,8 @@ import {
 import type {
   MicrosoftDefenderEndpointGetActionsResponse,
   MicrosoftDefenderEndpointMachineAction,
-} from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/types';
-import { MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from '@kbn/stack-connectors-plugin/common/microsoft_defender_endpoint/constants';
+} from '@kbn/connector-schemas/microsoft_defender_endpoint';
+import { SUB_ACTION as MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION } from '@kbn/connector-schemas/microsoft_defender_endpoint';
 import { MICROSOFT_DEFENDER_ENDPOINT_LOG_INDEX_PATTERN } from '../../../../../../../../common/endpoint/service/response_actions/microsoft_defender';
 import { MicrosoftDefenderDataGenerator } from '../../../../../../../../common/endpoint/data_generators/microsoft_defender_data_generator';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
@@ -86,6 +86,7 @@ describe('MS Defender response actions client', () => {
     processPendingActions: true,
     getCustomScripts: true,
     cancel: true,
+    memoryDump: false,
   };
 
   it.each(
@@ -850,7 +851,6 @@ describe('MS Defender response actions client', () => {
       // @ts-expect-error assign to readonly property
       clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled =
         false;
-
       await expect(msClientMock.getFileInfo('abc', '123')).rejects.toThrow(
         'File downloads are not supported for microsoft_defender_endpoint agent type. Feature disabled'
       );
@@ -1015,7 +1015,6 @@ describe('MS Defender response actions client', () => {
       // @ts-expect-error assign to readonly property
       clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointRunScriptEnabled =
         false;
-
       await expect(msClientMock.getFileDownload('abc', '123')).rejects.toThrow(
         'File downloads are not supported for microsoft_defender_endpoint agent type. Feature disabled'
       );
@@ -2532,9 +2531,6 @@ describe('MS Defender response actions client', () => {
 
   describe('and space awareness is enabled', () => {
     beforeEach(() => {
-      // @ts-expect-error assign to readonly property
-      clientConstructorOptionsMock.endpointService.experimentalFeatures.endpointManagementSpaceAwarenessEnabled =
-        true;
       // @ts-expect-error assign to readonly property
       clientConstructorOptionsMock.endpointService.experimentalFeatures.microsoftDefenderEndpointCancelEnabled =
         true;

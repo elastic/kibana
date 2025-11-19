@@ -25,6 +25,7 @@ import {
   fileOperationsSubFeature,
   executeActionSubFeature,
   scanActionSubFeature,
+  socManagementSubFeature,
 } from '../kibana_sub_features';
 
 const replacements: Partial<Record<SecuritySubFeatureId, SubFeatureReplacements>> = {
@@ -66,6 +67,7 @@ const replacements: Partial<Record<SecuritySubFeatureId, SubFeatureReplacements>
   [SecuritySubFeatureId.fileOperations]: [{ feature: SECURITY_FEATURE_ID_V4 }],
   [SecuritySubFeatureId.executeAction]: [{ feature: SECURITY_FEATURE_ID_V4 }],
   [SecuritySubFeatureId.scanAction]: [{ feature: SECURITY_FEATURE_ID_V4 }],
+  [SecuritySubFeatureId.socManagement]: [{ feature: SECURITY_FEATURE_ID_V4 }],
 };
 
 /**
@@ -92,6 +94,7 @@ export const getSecuritySubFeaturesMap = ({
     [SecuritySubFeatureId.endpointExceptions, endpointExceptionsSubFeature()],
     [SecuritySubFeatureId.policyManagement, policyManagementSubFeature()],
     [SecuritySubFeatureId.responseActionsHistory, responseActionsHistorySubFeature()],
+    [SecuritySubFeatureId.socManagement, socManagementSubFeature()],
     [SecuritySubFeatureId.hostIsolation, hostIsolationSubFeature()],
     [SecuritySubFeatureId.processOperations, processOperationsSubFeature()],
     [SecuritySubFeatureId.fileOperations, fileOperationsSubFeature()],
@@ -108,10 +111,8 @@ export const getSecuritySubFeaturesMap = ({
         subFeature = addSubFeatureReplacements(subFeature, featureReplacements);
       }
 
-      // If the feature is space-aware, we need to set false to the requireAllSpaces flag and remove the privilegesTooltip
-      if (experimentalFeatures.endpointManagementSpaceAwarenessEnabled) {
-        subFeature = { ...subFeature, requireAllSpaces: false, privilegesTooltip: undefined };
-      }
+      // Space awareness is now always enabled - set requireAllSpaces to false and remove privilegesTooltip
+      subFeature = { ...subFeature, requireAllSpaces: false, privilegesTooltip: undefined };
 
       return [id, subFeature];
     })

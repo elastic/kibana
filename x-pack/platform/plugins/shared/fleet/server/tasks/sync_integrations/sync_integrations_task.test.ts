@@ -73,11 +73,29 @@ jest.mock('../../services/epm/packages/get', () => ({
       },
       {
         attributes: {
-          name: 'custom-package',
+          name: 'bundled-package',
+          version: '0.1.0',
+          updated_at: new Date().toISOString(),
+          install_status: 'installed',
+          install_source: 'bundled',
+        },
+      },
+      {
+        attributes: {
+          name: 'custom-package-1',
           version: '0.1.0',
           updated_at: new Date().toISOString(),
           install_status: 'installed',
           install_source: 'upload',
+        },
+      },
+      {
+        attributes: {
+          name: 'custom-package-2',
+          version: '0.1.0',
+          updated_at: new Date().toISOString(),
+          install_status: 'installed',
+          install_source: 'custom',
         },
       },
     ],
@@ -207,7 +225,7 @@ describe('SyncIntegrationsTask', () => {
         expect(result).toEqual(getDeleteTaskRunResult());
       });
 
-      it('Should create fleet-synced-integrations doc for packages installed from registry', async () => {
+      it('Should create fleet-synced-integrations doc for bundled packages and packages installed from registry', async () => {
         mockOutputService.list.mockResolvedValue({
           items: [
             {
@@ -268,6 +286,13 @@ describe('SyncIntegrationsTask', () => {
                   updated_at: expect.any(String),
                   install_status: 'installed',
                   install_source: 'registry',
+                },
+                {
+                  package_name: 'bundled-package',
+                  package_version: '0.1.0',
+                  updated_at: expect.any(String),
+                  install_status: 'installed',
+                  install_source: 'bundled',
                 },
               ],
               remote_es_hosts: [
@@ -353,6 +378,13 @@ describe('SyncIntegrationsTask', () => {
                   updated_at: expect.any(String),
                   install_status: 'installed',
                   install_source: 'registry',
+                },
+                {
+                  package_name: 'bundled-package',
+                  package_version: '0.1.0',
+                  updated_at: expect.any(String),
+                  install_status: 'installed',
+                  install_source: 'bundled',
                 },
               ],
               remote_es_hosts: [
@@ -526,6 +558,13 @@ describe('SyncIntegrationsTask', () => {
                   updated_at: expect.any(String),
                   install_status: 'installed',
                   install_source: 'registry',
+                },
+                {
+                  package_name: 'bundled-package',
+                  package_version: '0.1.0',
+                  updated_at: expect.any(String),
+                  install_status: 'installed',
+                  install_source: 'bundled',
                 },
                 {
                   package_name: 'package-3',

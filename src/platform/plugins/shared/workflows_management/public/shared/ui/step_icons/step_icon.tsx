@@ -7,64 +7,80 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EuiIconProps } from '@elastic/eui';
 import { EuiBeacon, EuiIcon, EuiLoadingSpinner, EuiToken, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
-import { getStackConnectorLogoLazy } from '@kbn/stack-connectors-plugin/public/common/logos';
 import { ExecutionStatus } from '@kbn/workflows';
 import { getStepIconType } from './get_step_icon_type';
+import { useKibana } from '../../../hooks/use_kibana';
 import { getExecutionStatusColors } from '../status_badge';
 
-export function StepIcon({
-  stepType,
-  executionStatus,
-}: {
+interface StepIconProps extends Omit<EuiIconProps, 'type'> {
   stepType: string;
-  executionStatus: ExecutionStatus | null;
-}) {
-  const { euiTheme } = useEuiTheme();
-  if (executionStatus === ExecutionStatus.RUNNING) {
-    return <EuiLoadingSpinner size="m" />;
-  }
-  if (executionStatus === ExecutionStatus.WAITING_FOR_INPUT) {
-    return <EuiBeacon size={14} color="warning" />;
-  }
-  const stackConnectorIconComponent = getStackConnectorIcon(stepType);
-  if (stackConnectorIconComponent) {
-    return <EuiIcon type={stackConnectorIconComponent} size="m" />;
-  }
-  const iconType = getStepIconType(stepType);
-  if (iconType.startsWith('token')) {
+  executionStatus: ExecutionStatus | null | undefined;
+  onClick?: React.MouseEventHandler;
+}
+
+export const StepIcon = React.memo(
+  ({ stepType, executionStatus, onClick, ...rest }: StepIconProps) => {
+    const { euiTheme } = useEuiTheme();
+    const { actionTypeRegistry } = useKibana().services.triggersActionsUi;
+
+    const shouldApplyColorToIcon = executionStatus !== undefined;
+    if (executionStatus === ExecutionStatus.RUNNING) {
+      return <EuiLoadingSpinner size="m" />;
+    }
+    if (executionStatus === ExecutionStatus.WAITING_FOR_INPUT) {
+      return <EuiBeacon size={14} color="warning" />;
+    }
+
+    const actionTypeId = stepType.startsWith('.') ? stepType : `.${stepType}`;
+    if (actionTypeRegistry.has(actionTypeId)) {
+      const actionType = actionTypeRegistry.get(actionTypeId);
+      return <EuiIcon type={actionType.iconClass} size="m" />;
+    }
+
+    const iconType = getStepIconType(stepType);
+    if (iconType.startsWith('token')) {
+      return (
+        <EuiToken
+          iconType={iconType}
+          size="s"
+          color={
+            shouldApplyColorToIcon
+              ? getExecutionStatusColors(euiTheme, executionStatus).tokenColor
+              : undefined
+          }
+          fill="light"
+          onClick={onClick}
+        />
+      );
+    }
     return (
-      <EuiToken
-        iconType={iconType}
-        size="s"
-        color={getExecutionStatusColors(euiTheme, executionStatus).tokenColor}
-        fill="light"
+      <EuiIcon
+        type={iconType}
+        size="m"
+        color={
+          shouldApplyColorToIcon
+            ? getExecutionStatusColors(euiTheme, executionStatus).color
+            : undefined
+        }
+        css={
+          // change fill and color of the icon for non-completed statuses, for multi-color logos
+          shouldApplyColorToIcon &&
+          executionStatus !== ExecutionStatus.COMPLETED &&
+          css`
+            & * {
+              fill: ${getExecutionStatusColors(euiTheme, executionStatus).color};
+              color: ${getExecutionStatusColors(euiTheme, executionStatus).color};
+            }
+          `
+        }
+        onClick={onClick}
+        {...rest}
       />
     );
   }
-  return (
-    <EuiIcon
-      type={iconType}
-      size="m"
-      color={getExecutionStatusColors(euiTheme, executionStatus).color}
-      css={
-        // change fill and color of the icon for non-completed statuses, for multi-color logos
-        executionStatus !== ExecutionStatus.COMPLETED &&
-        css`
-          & * {
-            fill: ${getExecutionStatusColors(euiTheme, executionStatus).color};
-            color: ${getExecutionStatusColors(euiTheme, executionStatus).color};
-          }
-        `
-      }
-    />
-  );
-}
-
-function getStackConnectorIcon(connectorType: string) {
-  const dotConnectorType = `.${connectorType}`;
-
-  return getStackConnectorLogoLazy(dotConnectorType);
-}
+);
+StepIcon.displayName = 'StepIcon';

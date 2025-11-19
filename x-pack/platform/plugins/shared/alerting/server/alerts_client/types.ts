@@ -64,6 +64,16 @@ export interface AlertRule {
   [SPACE_IDS]: string[];
 }
 
+export interface AlertsToUpdateWithLastScheduledActions {
+  [alertId: string]: {
+    group: string;
+    date: string;
+    throttling?: { [key: string]: { date: string } };
+  };
+}
+
+export type AlertsToUpdateWithMaintenanceWindows = Record<string, string[]>;
+
 export interface IAlertsClient<
   AlertData extends RuleAlertData,
   State extends AlertInstanceState,
@@ -84,10 +94,15 @@ export interface IAlertsClient<
     type: 'recovered' | 'trackedRecoveredAlerts'
   ): Record<string, LegacyAlert<State, Context, RecoveryActionGroupId>> | {};
   persistAlerts(): Promise<void>;
-  updatePersistedAlertsWithMaintenanceWindowIds(): Promise<{
-    alertIds: string[];
-    maintenanceWindowIds: string[];
-  } | null>;
+  getAlertsToUpdateWithMaintenanceWindows(): Promise<AlertsToUpdateWithMaintenanceWindows>;
+  getAlertsToUpdateWithLastScheduledActions(): AlertsToUpdateWithLastScheduledActions;
+  updatePersistedAlerts({
+    alertsToUpdateWithMaintenanceWindows,
+    alertsToUpdateWithLastScheduledActions,
+  }: {
+    alertsToUpdateWithMaintenanceWindows: AlertsToUpdateWithMaintenanceWindows;
+    alertsToUpdateWithLastScheduledActions: AlertsToUpdateWithLastScheduledActions;
+  }): Promise<void>;
   isTrackedAlert(id: string): boolean;
   getSummarizedAlerts?(params: GetSummarizedAlertsParams): Promise<SummarizedAlerts>;
   getRawAlertInstancesForState(shouldOptimizeTaskState?: boolean): {

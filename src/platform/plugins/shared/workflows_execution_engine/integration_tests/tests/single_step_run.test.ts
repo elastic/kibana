@@ -37,11 +37,11 @@ steps:
       message: '${JSON.stringify(inferenceResponse)}'
 
   - name: outerForeachStep
-    foreach: steps.step1.output[0].result
+    foreach: '{{steps.step1.output[0].result}}'
     type: foreach
     steps:
       - name: innerForeachStep
-        foreach: foreach.item
+        foreach: '{{foreach.item}}'
         type: foreach
         steps:
           - name: innerForeachChildConnectorStep

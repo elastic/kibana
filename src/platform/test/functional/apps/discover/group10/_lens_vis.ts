@@ -17,6 +17,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const monacoEditor = getService('monacoEditor');
   const browser = getService('browser');
   const dataViews = getService('dataViews');
+  const filterBar = getService('filterBar');
+  const retry = getService('retry');
   const { common, discover, header, timePicker } = getPageObjects([
     'common',
     'discover',
@@ -226,6 +228,40 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await discover.getVisContextSuggestionType()).to.be('histogramForESQL');
     });
 
+    it('should be able to customize ESQL histogram and then choose a breakdown field', async () => {
+      await discover.selectTextBaseLang();
+
+      await monacoEditor.setCodeEditorValue('from logstash-* | sort @timestamp desc | limit 100');
+      await testSubjects.click('querySubmitButton');
+      await discover.waitUntilTabIsLoaded();
+
+      await discover.changeVisShape('Line');
+
+      await checkESQLHistogramVis(
+        'Sep 19, 2015 @ 06:31:44.000 - Sep 23, 2015 @ 18:31:44.000',
+        '100'
+      );
+
+      expect(await discover.getCurrentVisTitle()).to.be('Line');
+      expect(await discover.getVisContextSuggestionType()).to.be('histogramForESQL');
+
+      await discover.chooseBreakdownField('extension');
+      await discover.waitUntilTabIsLoaded();
+
+      await retry.try(async () => {
+        expect(await discover.getCurrentVisTitle()).to.be('Bar');
+      });
+
+      expect(await discover.getVisContextSuggestionType()).to.be('histogramForESQL');
+      const list = await discover.getHistogramLegendList();
+      expect(list).to.eql(['css', 'gif', 'jpg', 'php', 'png']);
+
+      await checkESQLHistogramVis(
+        'Sep 19, 2015 @ 06:31:44.000 - Sep 23, 2015 @ 18:31:44.000',
+        '100'
+      );
+    });
+
     it('should be able to load a saved search with custom histogram vis, edit vis and revert changes', async () => {
       await discover.loadSavedSearch('testCustomESQLHistogram');
 
@@ -312,12 +348,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
 
       await checkESQLHistogramVis(defaultTimespanESQL, '5', true);
-      await discover.chooseLensSuggestion('pie');
+      await discover.chooseLensSuggestion('treemap');
 
       await testSubjects.existOrFail('unsavedChangesBadge');
       expect(await monacoEditor.getCodeEditorValue()).to.contain('averageA');
 
-      expect(await discover.getCurrentVisTitle()).to.be('Pie');
+      expect(await discover.getCurrentVisTitle()).to.be('Treemap');
       await testSubjects.existOrFail('partitionVisChart');
       expect(await discover.getVisContextSuggestionType()).to.be('lensSuggestion');
 
@@ -665,6 +701,56 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(await discover.getCurrentVisTitle()).to.be('Treemap');
       await testSubjects.existOrFail('partitionVisChart');
       expect(await discover.getVisContextSuggestionType()).to.be('lensSuggestion');
+    });
+
+    it('should be able to recover after an aborted request', async () => {
+      const reducedTimeRange = {
+        from: 'Sep 20, 2015 @ 00:00:00.000',
+        to: 'Sep 20, 2015 @ 23:50:13.253',
+      };
+      const reducedTimeSpan = `${reducedTimeRange.from} - ${reducedTimeRange.to} (interval: Auto - 30 minutes)`;
+      const reducedTotalCount = '4,756';
+
+      // add a shorter time range to the recently used list in the time picker
+      await timePicker.setAbsoluteRange(reducedTimeRange.from, reducedTimeRange.to);
+      await discover.waitUntilTabIsLoaded();
+
+      // go back to default time range
+      await timePicker.setDefaultAbsoluteRange();
+      await checkHistogramVis(defaultTimespan, defaultTotalCount);
+
+      // trigger the first request
+      await filterBar.addDslFilter(
+        JSON.stringify({
+          error_query: {
+            indices: [
+              {
+                error_type: 'warning',
+                message: "'Fake slow request'",
+                name: '*',
+                stall_time_seconds: 15,
+              },
+            ],
+          },
+        }),
+        false
+      );
+
+      // wait a moment to ensure the request is in flight
+      await retry.waitFor('loading state', async () => {
+        return (
+          (await header.isGlobalLoadingIndicatorVisible()) && (await discover.isDataGridUpdating())
+        );
+      });
+
+      // by changing the time range it should abort the previous request, fire a new one and recover from the aborted state
+      await timePicker.setRecentlyUsedTime(`${reducedTimeRange.from} to ${reducedTimeRange.to}`);
+
+      await retry.try(async () => {
+        // check that the histogram is showing data for the new time range
+        // and the reported total hits count got updated too
+        await checkHistogramVis(reducedTimeSpan, reducedTotalCount);
+      });
     });
   });
 }

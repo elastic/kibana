@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": ["jest", "node"]
@@ -9,17 +9,15 @@
   "kbn_references": [
     "@kbn/core",
     "@kbn/data-views-plugin",
-    "@kbn/lens-plugin",
-    "@kbn/maps-plugin",
     "@kbn/event-annotation-common",
     "@kbn/es-query",
     "@kbn/expressions-plugin",
-    "@kbn/visualizations-plugin",
     "@kbn/core-saved-objects-common",
     "@kbn/esql-utils",
     "@kbn/config-schema",
     "@kbn/coloring",
     "@kbn/content-management-utils",
+    "@kbn/lens-common",
     "@kbn/chart-expressions-common",
   ]
 }

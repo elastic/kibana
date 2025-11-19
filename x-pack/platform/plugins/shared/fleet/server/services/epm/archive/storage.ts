@@ -200,8 +200,8 @@ export const getEsPackage = async (
       so.error
         ? { type: so.type, id: so.id, error: so.error }
         : !so.attributes
-        ? { type: so.type, id: so.id, error: { error: `No attributes retrieved` } }
-        : { type: so.type, id: so.id, error: { error: `Unknown` } }
+        ? { type: so.type, id: so.id, error: `No attributes retrieved` }
+        : { type: so.type, id: so.id, error: `Unknown` }
     );
 
     logger.warn(

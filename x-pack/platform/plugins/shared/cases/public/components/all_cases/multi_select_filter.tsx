@@ -163,6 +163,7 @@ export const MultiSelectFilter = <T extends string, K extends string = string>({
           <>
             <EuiHorizontalRule margin="none" />
             <EuiCallOut
+              announceOnMount
               title={limitReachedMessage}
               color="warning"
               size="s"

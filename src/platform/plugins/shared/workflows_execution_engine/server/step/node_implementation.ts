@@ -108,10 +108,19 @@ export abstract class BaseAtomicNodeImplementation<TStep extends BaseStep>
   // Helper for handling on-failure, retries, etc.
   protected async handleFailure(input: any, error: any): Promise<RunStepResult> {
     // Implement retry logic based on step['on-failure']
+    // Build comprehensive error message including cause chain (messages only)
+    const getErrorMessage = (err: any): string => {
+      if (!(err instanceof Error)) return String(err);
+      let msg = err.message;
+      if (err.cause) {
+        msg += `\nCaused by: ${getErrorMessage(err.cause)}`;
+      }
+      return msg;
+    };
     return {
       input,
       output: undefined,
-      error: error instanceof Error ? error.message : String(error),
+      error: getErrorMessage(error),
     };
   }
 }

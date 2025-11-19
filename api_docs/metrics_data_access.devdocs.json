@@ -692,36 +692,41 @@
     "setup": {
       "parentPluginId": "metricsDataAccess",
       "id": "def-server.MetricsDataPluginSetup",
-      "type": "Interface",
+      "type": "Type",
       "tags": [],
       "label": "MetricsDataPluginSetup",
       "description": [],
-      "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/types.ts",
+      "signature": [
+        "{ client: ",
+        {
+          "pluginId": "metricsDataAccess",
+          "scope": "server",
+          "docId": "kibMetricsDataAccessPluginApi",
+          "section": "def-server.MetricsDataClient",
+          "text": "MetricsDataClient"
+        },
+        "; }"
+      ],
+      "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
-      "children": [
-        {
-          "parentPluginId": "metricsDataAccess",
-          "id": "def-server.MetricsDataPluginSetup.client",
-          "type": "Object",
-          "tags": [],
-          "label": "client",
-          "description": [],
-          "signature": [
-            {
-              "pluginId": "metricsDataAccess",
-              "scope": "server",
-              "docId": "kibMetricsDataAccessPluginApi",
-              "section": "def-server.MetricsDataClient",
-              "text": "MetricsDataClient"
-            }
-          ],
-          "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/types.ts",
-          "deprecated": false,
-          "trackAdoption": false
-        }
-      ],
       "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "metricsDataAccess",
+      "id": "def-server.MetricsDataPluginStart",
+      "type": "Type",
+      "tags": [],
+      "label": "MetricsDataPluginStart",
+      "description": [],
+      "signature": [
+        "{}"
+      ],
+      "path": "x-pack/solutions/observability/plugins/metrics_data_access/server/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "lifecycle": "start",
       "initialIsOpen": true
     }
   },
@@ -953,9 +958,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -1027,9 +1032,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -1101,9 +1106,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -1175,9 +1180,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -1249,9 +1254,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -1323,9 +1328,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -1397,9 +1402,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -1471,9 +1476,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -1577,9 +1582,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -1651,9 +1656,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -1725,9 +1730,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -1799,9 +1804,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -1873,9 +1878,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -1947,9 +1952,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -2021,9 +2026,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -2095,9 +2100,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -2185,9 +2190,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -2259,9 +2264,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -2333,9 +2338,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -2423,9 +2428,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -2497,9 +2502,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -2571,9 +2576,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -2645,9 +2650,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -2851,9 +2856,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -2925,9 +2930,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -3031,9 +3036,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -3105,9 +3110,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -3211,9 +3216,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -3285,9 +3290,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -4115,9 +4120,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -4189,9 +4194,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -4263,9 +4268,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -4337,9 +4342,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -4411,9 +4416,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -4485,9 +4490,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -4559,9 +4564,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -4633,9 +4638,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -4739,9 +4744,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -4813,9 +4818,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -4887,9 +4892,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -4961,9 +4966,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -5035,9 +5040,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -5109,9 +5114,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -5183,9 +5188,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -5257,9 +5262,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -5347,9 +5352,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -5421,9 +5426,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -5495,9 +5500,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -5585,9 +5590,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -5659,9 +5664,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -5733,9 +5738,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -5807,9 +5812,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -6013,9 +6018,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -6087,9 +6092,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -6193,9 +6198,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -6267,9 +6272,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -6373,9 +6378,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -6447,9 +6452,9 @@
           },
           ")[]; legend?: { show?: boolean | undefined; position?: \"right\" | \"top\" | \"bottom\" | \"left\" | undefined; legendStats?: ",
           {
-            "pluginId": "visualizations",
+            "pluginId": "@kbn/chart-expressions-common",
             "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
+            "docId": "kibKbnChartExpressionsCommonPluginApi",
             "section": "def-common.XYLegendValue",
             "text": "XYLegendValue"
           },
@@ -6950,7 +6955,7 @@
         "label": "TSVBMetricModel",
         "description": [],
         "signature": [
-          "{ id: \"custom\" | \"podOverview\" | \"podCpuUsage\" | \"podMemoryUsage\" | \"podLogUsage\" | \"podNetworkTraffic\" | \"nginxHits\" | \"nginxRequestRate\" | \"nginxActiveConnections\" | \"nginxRequestsPerConnection\" | \"awsOverview\" | \"awsCpuUtilization\" | \"awsNetworkBytes\" | \"awsNetworkPackets\" | \"awsDiskioBytes\" | \"awsDiskioOps\" | \"awsEC2CpuUtilization\" | \"awsEC2NetworkTraffic\" | \"awsEC2DiskIOBytes\" | \"awsS3TotalRequests\" | \"awsS3NumberOfObjects\" | \"awsS3BucketSize\" | \"awsS3DownloadBytes\" | \"awsS3UploadBytes\" | \"awsRDSCpuTotal\" | \"awsRDSConnections\" | \"awsRDSQueriesExecuted\" | \"awsRDSActiveTransactions\" | \"awsRDSLatency\" | \"awsSQSMessagesVisible\" | \"awsSQSMessagesDelayed\" | \"awsSQSMessagesSent\" | \"awsSQSMessagesEmpty\" | \"awsSQSOldestMessage\"; requires: string[]; index_pattern: string | string[]; interval: string; time_field: string; type: string; series: ({ id: string; metrics: ({ id: string; type: \"count\"; } | ({ id: string; type: \"min\" | \"max\" | \"sum\" | \"avg\" | \"count\" | \"cardinality\" | \"cumulative_sum\" | \"derivative\" | \"calculation\" | \"series_agg\" | \"positive_only\"; } & { field?: string | undefined; }) | { id: string; script: string; type: \"calculation\"; variables: { field: string; id: string; name: string; }[]; } | { id: string; field: string; unit: string; type: \"derivative\"; } | ({ id: string; type: \"percentile\"; percentiles: { id: string; value: number; }[]; } & { field?: string | undefined; }) | { id: string; function: string; type: \"series_agg\"; })[]; split_mode: string; } & { terms_field?: string | undefined; terms_size?: number | undefined; terms_order_by?: string | undefined; filter?: { query: string; language: \"kuery\" | \"lucene\"; } | undefined; })[]; } & { filter?: string | undefined; map_field_to?: string | undefined; id_type?: \"cloud\" | \"node\" | undefined; drop_last_bucket?: boolean | undefined; }"
+          "{ id: \"custom\" | \"podOverview\" | \"podCpuUsage\" | \"podMemoryUsage\" | \"podLogUsage\" | \"podNetworkTraffic\" | \"nginxHits\" | \"nginxRequestRate\" | \"nginxActiveConnections\" | \"nginxRequestsPerConnection\" | \"awsOverview\" | \"awsCpuUtilization\" | \"awsNetworkBytes\" | \"awsNetworkPackets\" | \"awsDiskioBytes\" | \"awsDiskioOps\" | \"awsEC2CpuUtilization\" | \"awsEC2NetworkTraffic\" | \"awsEC2DiskIOBytes\" | \"awsS3TotalRequests\" | \"awsS3NumberOfObjects\" | \"awsS3BucketSize\" | \"awsS3DownloadBytes\" | \"awsS3UploadBytes\" | \"awsRDSCpuTotal\" | \"awsRDSConnections\" | \"awsRDSQueriesExecuted\" | \"awsRDSActiveTransactions\" | \"awsRDSLatency\" | \"awsSQSMessagesVisible\" | \"awsSQSMessagesDelayed\" | \"awsSQSMessagesSent\" | \"awsSQSMessagesEmpty\" | \"awsSQSOldestMessage\"; requires: string[]; index_pattern: string | string[]; interval: string; time_field: string; type: string; series: ({ id: string; metrics: ({ id: string; type: \"count\"; } | ({ id: string; type: \"min\" | \"max\" | \"sum\" | \"avg\" | \"count\" | \"cardinality\" | \"cumulative_sum\" | \"derivative\" | \"calculation\" | \"series_agg\" | \"positive_only\"; } & { field?: string | undefined; }) | ({ id: string; script: string; type: \"calculation\"; variables: { field: string; id: string; name: string; }[]; } & { gap_policy?: \"insert_zeros\" | \"skip\" | \"keep_values\" | undefined; }) | { id: string; field: string; unit: string; type: \"derivative\"; } | ({ id: string; type: \"percentile\"; percentiles: { id: string; value: number; }[]; } & { field?: string | undefined; }) | { id: string; function: string; type: \"series_agg\"; })[]; split_mode: string; } & { terms_field?: string | undefined; terms_size?: number | undefined; terms_order_by?: string | undefined; filter?: { query: string; language: \"kuery\" | \"lucene\"; } | undefined; })[]; } & { filter?: string | undefined; map_field_to?: string | undefined; id_type?: \"cloud\" | \"node\" | undefined; drop_last_bucket?: boolean | undefined; }"
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,
@@ -6965,7 +6970,7 @@
         "label": "TSVBMetricModelCreator",
         "description": [],
         "signature": [
-          "(timeField: string, indexPattern: string | string[], interval: string) => { id: \"custom\" | \"podOverview\" | \"podCpuUsage\" | \"podMemoryUsage\" | \"podLogUsage\" | \"podNetworkTraffic\" | \"nginxHits\" | \"nginxRequestRate\" | \"nginxActiveConnections\" | \"nginxRequestsPerConnection\" | \"awsOverview\" | \"awsCpuUtilization\" | \"awsNetworkBytes\" | \"awsNetworkPackets\" | \"awsDiskioBytes\" | \"awsDiskioOps\" | \"awsEC2CpuUtilization\" | \"awsEC2NetworkTraffic\" | \"awsEC2DiskIOBytes\" | \"awsS3TotalRequests\" | \"awsS3NumberOfObjects\" | \"awsS3BucketSize\" | \"awsS3DownloadBytes\" | \"awsS3UploadBytes\" | \"awsRDSCpuTotal\" | \"awsRDSConnections\" | \"awsRDSQueriesExecuted\" | \"awsRDSActiveTransactions\" | \"awsRDSLatency\" | \"awsSQSMessagesVisible\" | \"awsSQSMessagesDelayed\" | \"awsSQSMessagesSent\" | \"awsSQSMessagesEmpty\" | \"awsSQSOldestMessage\"; requires: string[]; index_pattern: string | string[]; interval: string; time_field: string; type: string; series: ({ id: string; metrics: ({ id: string; type: \"count\"; } | ({ id: string; type: \"min\" | \"max\" | \"sum\" | \"avg\" | \"count\" | \"cardinality\" | \"cumulative_sum\" | \"derivative\" | \"calculation\" | \"series_agg\" | \"positive_only\"; } & { field?: string | undefined; }) | { id: string; script: string; type: \"calculation\"; variables: { field: string; id: string; name: string; }[]; } | { id: string; field: string; unit: string; type: \"derivative\"; } | ({ id: string; type: \"percentile\"; percentiles: { id: string; value: number; }[]; } & { field?: string | undefined; }) | { id: string; function: string; type: \"series_agg\"; })[]; split_mode: string; } & { terms_field?: string | undefined; terms_size?: number | undefined; terms_order_by?: string | undefined; filter?: { query: string; language: \"kuery\" | \"lucene\"; } | undefined; })[]; } & { filter?: string | undefined; map_field_to?: string | undefined; id_type?: \"cloud\" | \"node\" | undefined; drop_last_bucket?: boolean | undefined; }"
+          "(timeField: string, indexPattern: string | string[], interval: string) => { id: \"custom\" | \"podOverview\" | \"podCpuUsage\" | \"podMemoryUsage\" | \"podLogUsage\" | \"podNetworkTraffic\" | \"nginxHits\" | \"nginxRequestRate\" | \"nginxActiveConnections\" | \"nginxRequestsPerConnection\" | \"awsOverview\" | \"awsCpuUtilization\" | \"awsNetworkBytes\" | \"awsNetworkPackets\" | \"awsDiskioBytes\" | \"awsDiskioOps\" | \"awsEC2CpuUtilization\" | \"awsEC2NetworkTraffic\" | \"awsEC2DiskIOBytes\" | \"awsS3TotalRequests\" | \"awsS3NumberOfObjects\" | \"awsS3BucketSize\" | \"awsS3DownloadBytes\" | \"awsS3UploadBytes\" | \"awsRDSCpuTotal\" | \"awsRDSConnections\" | \"awsRDSQueriesExecuted\" | \"awsRDSActiveTransactions\" | \"awsRDSLatency\" | \"awsSQSMessagesVisible\" | \"awsSQSMessagesDelayed\" | \"awsSQSMessagesSent\" | \"awsSQSMessagesEmpty\" | \"awsSQSOldestMessage\"; requires: string[]; index_pattern: string | string[]; interval: string; time_field: string; type: string; series: ({ id: string; metrics: ({ id: string; type: \"count\"; } | ({ id: string; type: \"min\" | \"max\" | \"sum\" | \"avg\" | \"count\" | \"cardinality\" | \"cumulative_sum\" | \"derivative\" | \"calculation\" | \"series_agg\" | \"positive_only\"; } & { field?: string | undefined; }) | ({ id: string; script: string; type: \"calculation\"; variables: { field: string; id: string; name: string; }[]; } & { gap_policy?: \"insert_zeros\" | \"skip\" | \"keep_values\" | undefined; }) | { id: string; field: string; unit: string; type: \"derivative\"; } | ({ id: string; type: \"percentile\"; percentiles: { id: string; value: number; }[]; } & { field?: string | undefined; }) | { id: string; function: string; type: \"series_agg\"; })[]; split_mode: string; } & { terms_field?: string | undefined; terms_size?: number | undefined; terms_order_by?: string | undefined; filter?: { query: string; language: \"kuery\" | \"lucene\"; } | undefined; })[]; } & { filter?: string | undefined; map_field_to?: string | undefined; id_type?: \"cloud\" | \"node\" | undefined; drop_last_bucket?: boolean | undefined; }"
         ],
         "path": "x-pack/solutions/observability/plugins/metrics_data_access/common/inventory_models/types.ts",
         "deprecated": false,

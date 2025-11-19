@@ -7,8 +7,9 @@
 
 import { intersection } from 'lodash';
 import type { Observable } from 'rxjs';
-import { from, of, concatMap, delay, map, toArray, forkJoin } from 'rxjs';
+import { from, of, concatMap, delay, map, toArray, forkJoin, catchError } from 'rxjs';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { Logger } from '@kbn/core/server';
 import type {
   IndicesGetMappingResponse,
   MappingPropertyBase,
@@ -30,6 +31,22 @@ import {
 import { processAsyncInChunks } from '../../utils/process_async_in_chunks';
 
 /**
+ * Checks if an error is a timeout error (request took too long)
+ */
+function isTimeoutError(error: any): boolean {
+  const errorType = error?.constructor?.name;
+  const errorName = error?.name;
+  const errorMessage = error?.message?.toLowerCase() || '';
+
+  return (
+    errorType === 'TimeoutError' ||
+    errorName === 'TimeoutError' ||
+    errorMessage.includes('timeout') ||
+    errorMessage.includes('timed out')
+  );
+}
+
+/**
  * Retrieves all indices and data streams for each stream of logs.
  */
 export function getAllIndices({
@@ -37,11 +54,13 @@ export function getAllIndices({
   logsIndexPatterns,
   excludeStreamsStartingWith,
   breatheDelay,
+  logger,
 }: {
   esClient: ElasticsearchClient;
   logsIndexPatterns: DatasetIndexPattern[];
   excludeStreamsStartingWith: string[];
   breatheDelay: number; // Breathing time between each request to prioritize other cluster operations
+  logger: Logger;
 }): Observable<IndexBasicInfo[]> {
   const uniqueIndices = new Set<string>();
   const indicesInfo: IndexBasicInfo[] = [];
@@ -52,8 +71,30 @@ export function getAllIndices({
         delay(breatheDelay),
         concatMap(() => {
           return forkJoin([
-            from(getDataStreamsInfoForPattern({ esClient, pattern })),
-            from(getIndicesInfoForPattern({ esClient, pattern })),
+            from(getDataStreamsInfoForPattern({ esClient, pattern })).pipe(
+              catchError((error) => {
+                // Handle timeouts gracefully in telemetry - skip this pattern and continue
+                if (isTimeoutError(error)) {
+                  logger.warn(
+                    `[Logs Data Telemetry] Timeout while fetching data streams for pattern "${pattern.pattern}". Skipping this pattern and continuing with others. Error: ${error.message}`
+                  );
+                  return of([]); // Return empty array to continue processing other patterns
+                }
+                throw error; // Re-throw non-timeout errors
+              })
+            ),
+            from(getIndicesInfoForPattern({ esClient, pattern })).pipe(
+              catchError((error) => {
+                // Handle timeouts gracefully in telemetry - skip this pattern and continue
+                if (isTimeoutError(error)) {
+                  logger.warn(
+                    `[Logs Data Telemetry] Timeout while fetching indices for pattern "${pattern.pattern}". Skipping this pattern and continuing with others. Error: ${error.message}`
+                  );
+                  return of([]); // Return empty array to continue processing other patterns
+                }
+                throw error; // Re-throw non-timeout errors
+              })
+            ),
           ]);
         }),
         map(([patternDataStreamsInfo, patternIndicesInfo]) => {
@@ -333,10 +374,17 @@ async function getDataStreamsInfoForPattern({
   esClient: ElasticsearchClient;
   pattern: DatasetIndexPattern;
 }): Promise<IndexBasicInfo[]> {
-  const resp = await esClient.indices.getDataStream({
-    name: pattern.pattern,
-    expand_wildcards: 'all',
-  });
+  const resp = await safeEsCall(() =>
+    esClient.indices.getDataStream({
+      name: pattern.pattern,
+      expand_wildcards: 'all',
+    })
+  );
+
+  // If safeEsCall returned empty object due to error, return empty array
+  if (!resp || !resp.data_streams) {
+    return [];
+  }
 
   return resp.data_streams.map((dataStream) => ({
     patternName: pattern.patternName,
@@ -623,6 +671,25 @@ async function safeEsCall<T>(fn: () => Promise<T>): Promise<T> {
   try {
     return await fn();
   } catch (error) {
+    // Handle transient errors during telemetry collection:
+    // - 404: index/resource not found
+    // - Custom ES errors: deleted or unavailable resources
+    // - Cluster state errors: master not discovered, cluster blocks
+    const is404 = error.meta?.statusCode === 404 || error.meta?.body?.status === 404;
+    const isCustomError = error.meta?.body?.ok === false;
+    const errorMessage = error.meta?.body?.message?.toLowerCase() || '';
+    const errorType = error.meta?.body?.error?.type || '';
+    const isTransientResourceError =
+      errorMessage.includes('deleted') || errorMessage.includes('unavailable');
+    const isClusterStateError =
+      errorType === 'master_not_discovered_exception' ||
+      errorType === 'cluster_block_exception' ||
+      errorType === 'no_master_block_exception';
+
+    if (is404 || (isCustomError && isTransientResourceError) || isClusterStateError) {
+      return {} as T;
+    }
+
     throw error;
   }
 }

@@ -13,7 +13,7 @@ import { resolve } from 'path';
 import url from 'url';
 
 import { isKibanaDistributable } from '@kbn/repo-info';
-import { readKeystore } from '../keystore/read_keystore';
+import { readKeystore } from '../keystore/lib/read_keystore';
 import { compileConfigStack } from './compile_config_stack';
 import { getConfigFromFiles } from '@kbn/config';
 
@@ -247,7 +247,7 @@ export default function (program) {
         'Adds plugin paths for all the Kibana example plugins and runs with no base path'
       )
       .option(
-        '--serverless [oblt|security|es|workplace_ai]',
+        '--serverless [oblt|security|es|workplaceai]',
         'Start Kibana in a specific serverless project mode. ' +
           'If no mode is provided, it starts Kibana in the most recent serverless project mode (default is es)'
       );

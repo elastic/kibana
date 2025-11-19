@@ -13,8 +13,8 @@ import type { Logger } from '@kbn/core/server';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
+import type { Attachment } from '@kbn/connector-schemas/email';
 import type { SendEmailOptions } from './send_email';
-import type { Attachment } from '.';
 
 const SMALL_ATTACHMENT_LIMIT = 3 * 1024 * 1024; // 3mb
 const ATTACHMENT_CHUNK_SIZE = 2 * 1024 * 1024; // 2mb

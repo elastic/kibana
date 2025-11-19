@@ -59,7 +59,8 @@ export interface IModalTabDeclaration<S = {}> extends EuiTabProps, ITabDeclarati
   modalActionBtn?: IModalTabActionBtn<S>;
 }
 
-export interface ITabbedModalInner extends Pick<ComponentProps<typeof EuiModal>, 'onClose'> {
+export interface ITabbedModalInner
+  extends Pick<ComponentProps<typeof EuiModal>, 'onClose' | 'outsideClickCloses'> {
   modalWidth?: number;
   modalTitle?: string;
   anchorElement?: HTMLElement;
@@ -71,6 +72,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
   modalTitle,
   modalWidth,
   anchorElement,
+  outsideClickCloses,
   ...props
 }) => {
   const { tabs, state, dispatch } =
@@ -134,6 +136,7 @@ const TabbedModalInner: FC<ITabbedModalInner> = ({
         ...(modalWidth ? { width: modalWidth } : {}),
       }}
       aria-labelledby={tabbedModalHeadingHTMLId}
+      outsideClickCloses={outsideClickCloses}
     >
       <Global
         styles={{

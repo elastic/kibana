@@ -111,6 +111,7 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
               })}
               {ruleCriteria.length > 1 && (
                 <EuiCallOut
+                  announceOnMount
                   size="s"
                   title={i18n.translate(
                     'xpack.observability.columns.euiCallOut.multipleConditionsLabel',

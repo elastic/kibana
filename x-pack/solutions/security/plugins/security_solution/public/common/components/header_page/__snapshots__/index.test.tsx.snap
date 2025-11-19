@@ -2,7 +2,7 @@
 
 exports[`HeaderPage it renders 1`] = `
 .c1 .siemSubtitle__item {
-  color: #7a7f89;
+  color: #98A8C3;
   font-size: 12px;
   line-height: 1.5;
 }
@@ -66,6 +66,7 @@ exports[`HeaderPage it renders 1`] = `
               <span
                 class="euiBetaBadge emotion-euiBetaBadge-hollow-m-baseline"
                 data-test-subj="header-page-title-beta-badge"
+                role="button"
                 tabindex="0"
               >
                 Beta

@@ -69,6 +69,7 @@ import { TaskValidator } from '../task_validator';
 import { getRetryAt, getRetryDate, getTimeout } from '../lib/get_retry_at';
 import { getNextRunAt } from '../lib/get_next_run_at';
 import { TaskErrorSource } from '../../common/constants';
+import { getExecutionId } from '../lib/get_execution_id';
 
 export const EMPTY_RUN_RESULT: SuccessfulRunResult = { state: {} };
 
@@ -250,8 +251,7 @@ export class TaskManagerRunner implements TaskRunner {
    * @param id
    */
   public isSameTask(executionId: string) {
-    const executionIdParts = executionId.split('::');
-    const executionIdCompare = executionIdParts.length > 0 ? executionIdParts[0] : executionId;
+    const executionIdCompare = getExecutionId(executionId);
     return executionIdCompare === this.id;
   }
 

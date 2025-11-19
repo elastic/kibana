@@ -17,13 +17,11 @@ import { useOnechatAgents } from '../../../hooks/agents/use_agents';
 import { useValidateAgentId } from '../../../hooks/agents/use_validate_agent_id';
 import { ConversationInputActions } from './conversation_input_actions';
 
+const MIN_HEIGHT = 150;
+
 interface ConversationInputFormProps {
   onSubmit?: () => void;
 }
-
-const fullHeightStyles = css`
-  height: 100%;
-`;
 
 export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ onSubmit }) => {
   const isSendingMessage = useIsSendingMessage();
@@ -49,12 +47,14 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
   };
 
   const formContainerStyles = css`
-    ${fullHeightStyles}
+    width: 100%;
+    min-height: ${MIN_HEIGHT}px;
     padding: ${euiTheme.size.base};
     box-shadow: none;
     border: ${euiTheme.border.thin};
     border-color: ${euiTheme.colors.borderBasePlain};
     border-radius: ${euiTheme.border.radius.medium};
+    flex-grow: 0;
     &:focus-within {
       border-bottom-color: ${euiTheme.colors.primary};
     }

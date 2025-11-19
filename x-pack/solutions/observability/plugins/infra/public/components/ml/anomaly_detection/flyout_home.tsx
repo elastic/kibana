@@ -36,7 +36,7 @@ import {
 import { useMetricHostsModuleContext } from '../../../containers/ml/modules/metrics_hosts/module';
 import { useMetricK8sModuleContext } from '../../../containers/ml/modules/metrics_k8s/module';
 import { LoadingPrompt } from '../../loading_page';
-import { AnomaliesTable } from './anomalies_table/anomalies_table';
+import { AnomaliesTable, JOB_OPTIONS } from './anomalies_table/anomalies_table';
 import { SubscriptionSplashPrompt } from '../../subscription_splash_content';
 import { useInfraMLCapabilitiesContext } from '../../../containers/ml/infra_ml_capabilities';
 import { KibanaEnvironmentContext } from '../../../hooks/use_kibana';
@@ -51,11 +51,13 @@ interface Props {
 
 type Tab = 'jobs' | 'anomalies';
 
-export const INFRA_ML_FLYOUT_FEEDBACK_LINK =
-  'https://docs.google.com/forms/d/e/1FAIpQLSfBixH_1HTuqeMCy38iK9w1mB8vl_eVvcLUlSPAPiWKBHeHiQ/viewform';
+export const INFRA_ML_FLYOUT_FEEDBACK_LINK = 'https://ela.st/infra-anomaly-feedback';
 
 export const FlyoutHome = (props: Props) => {
   const [tab, setTab] = useState<Tab>('jobs');
+  const [selectedJobType, setSelectedJobType] = useState<'host' | 'pod'>(
+    JOB_OPTIONS[0].id === 'hosts' ? 'host' : 'pod'
+  );
   const { goToSetup, closeFlyout } = props;
   const {
     fetchJobStatus: fetchHostJobStatus,
@@ -80,6 +82,10 @@ export const FlyoutHome = (props: Props) => {
     goToSetup('kubernetes');
   }, [goToSetup]);
 
+  const onJobTypeChange = useCallback((jobType: 'host' | 'pod') => {
+    setSelectedJobType(jobType);
+  }, []);
+
   const jobIds = [
     ...(k8sJobSummaries || []).map((k) => k.id),
     ...(hostJobSummaries || []).map((h) => h.id),
@@ -100,11 +106,14 @@ export const FlyoutHome = (props: Props) => {
 
   // Used for prefilling the feedback form (if both types are enabled do not prefill)
   // In case the host type is the only option (if props.hideJobType is true) - prefill 'host'
+  // If we are in the anomalies tab, use the selected job type
   const mlJobTypeByNode =
     props.hideJobType || (hostJobSummaries.length > 0 && k8sJobSummaries.length === 0)
       ? 'host'
       : hostJobSummaries.length === 0 && k8sJobSummaries.length > 0
       ? 'pod'
+      : tab === 'anomalies'
+      ? selectedJobType
       : undefined;
 
   if (!hasInfraMLCapabilities) {
@@ -149,6 +158,7 @@ export const FlyoutHome = (props: Props) => {
                     : 'infraMLFlyoutFeedbackLink'
                 }
                 formUrl={INFRA_ML_FLYOUT_FEEDBACK_LINK}
+                sanitizedPath={document.location.pathname}
                 kibanaVersion={kibanaVersion}
                 isCloudEnv={isCloudEnv}
                 isServerlessEnv={isServerlessEnv}
@@ -245,7 +255,11 @@ export const FlyoutHome = (props: Props) => {
           )}
 
           {tab === 'anomalies' && (
-            <AnomaliesTable closeFlyout={closeFlyout} hideSelectGroup={props.hideSelectGroup} />
+            <AnomaliesTable
+              closeFlyout={closeFlyout}
+              hideSelectGroup={props.hideSelectGroup}
+              onJobTypeChange={onJobTypeChange}
+            />
           )}
         </EuiFlyoutBody>
       </>

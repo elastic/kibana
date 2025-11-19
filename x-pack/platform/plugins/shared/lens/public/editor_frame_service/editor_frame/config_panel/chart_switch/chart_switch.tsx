@@ -7,19 +7,20 @@
 
 import React, { useState, useMemo, memo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { ExperimentalBadge } from '../../../../shared_components';
 import type {
-  Visualization,
-  FramePublicAPI,
-  VisualizationType,
-  VisualizationMap,
   DatasourceMap,
-  Suggestion,
   DatasourcePublicAPI,
-} from '../../../../types';
+  FramePublicAPI,
+  Visualization,
+  VisualizationMap,
+  VisualizationState,
+  VisualizationType,
+  DatasourceStates,
+  Suggestion,
+} from '@kbn/lens-common';
+import { ExperimentalBadge } from '../../../../shared_components';
 import { getSuggestions, switchToSuggestion } from '../../suggestion_helpers';
 import { showMemoizedErrorNotification } from '../../../../lens_ui_errors';
-import type { VisualizationState, DatasourceStates } from '../../../../state_management';
 import {
   insertLayer,
   removeLayers,

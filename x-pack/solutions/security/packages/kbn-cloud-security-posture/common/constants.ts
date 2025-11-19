@@ -117,3 +117,5 @@ export const FINDINGS_INDEX_PATTERN = 'logs-cloud_security_posture.findings-defa
 // space plachoder - to be replaced by the specific kibana space
 export const GENERIC_ENTITY_INDEX_ENRICH_POLICY =
   'entity_store_field_retention_generic_<space>_v1.0.0';
+
+export const CLOUD_SECURITY_PLUGIN_VERSION = '1.9.0';

@@ -28,6 +28,14 @@ export default function (providerContext: FtrProviderContext) {
       .expect(200);
   };
 
+  const installEndpointPackage = async () => {
+    await supertest
+      .post(`/api/fleet/epm/packages/endpoint/8.6.1`)
+      .set('kbn-xsrf', 'xxxx')
+      .send({ force: true })
+      .expect(200);
+  };
+
   describe('Package Policy APIs', () => {
     skipIfNoDockerRegistry(providerContext);
 
@@ -50,6 +58,8 @@ export default function (providerContext: FtrProviderContext) {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
           return;
         }
+
+        await installEndpointPackage();
 
         const { body: agentPolicyResponse } = await supertest
           .post(`/api/fleet/agent_policies`)
@@ -162,6 +172,8 @@ export default function (providerContext: FtrProviderContext) {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
           return;
         }
+
+        await installEndpointPackage();
 
         const { body: agentPolicyResponse } = await supertest
           .post(`/api/fleet/agent_policies`)
@@ -311,9 +323,10 @@ export default function (providerContext: FtrProviderContext) {
           .post(`/api/fleet/agent_policies`)
           .set('kbn-xsrf', 'xxxx')
           .send({
-            name: 'Test policy',
+            name: 'Test policy 2',
             namespace: 'default',
-          });
+          })
+          .expect(200);
 
         agentPolicyId = agentPolicyResponse.item.id;
 
@@ -340,7 +353,7 @@ export default function (providerContext: FtrProviderContext) {
         const esClient = getService('es');
         await esClient.delete({
           index: INGEST_SAVED_OBJECT_INDEX,
-          id: `ingest-agent-policies:${agentPolicyId}`,
+          id: `fleet-agent-policies:${agentPolicyId}`,
           refresh: 'wait_for',
         });
       });
@@ -375,6 +388,8 @@ export default function (providerContext: FtrProviderContext) {
         if (!isDockerRegistryEnabledOrSkipped(providerContext)) {
           return;
         }
+
+        await installEndpointPackage();
 
         const { body: agentPolicyResponse } = await supertest
           .post(`/api/fleet/agent_policies`)

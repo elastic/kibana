@@ -7,9 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-this-alias, @typescript-eslint/no-non-null-assertion */
-
-import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
 import type {
   CoreSetup,
   CoreStart,
@@ -27,8 +24,7 @@ import {
   getWorkflowsConnectorAdapter,
   getConnectorType as getWorkflowsConnectorType,
 } from './connectors/workflows';
-import { registerFeatures } from './features';
-import { createWorkflowTaskRunner } from './tasks/workflow_task_runner';
+import { WorkflowsManagementFeatureConfig } from './features';
 import { WorkflowTaskScheduler } from './tasks/workflow_task_scheduler';
 import type {
   WorkflowsServerPluginSetup,
@@ -55,7 +51,6 @@ export class WorkflowsPlugin
   private readonly config: WorkflowsManagementConfig;
   private workflowsService: WorkflowsService | null = null;
   private workflowTaskScheduler: WorkflowTaskScheduler | null = null;
-  private unsecureActionsClient: IUnsecuredActionsClient | null = null;
   private api: WorkflowsManagementApi | null = null;
   private spaces?: SpacesServiceStart | null = null;
 
@@ -118,45 +113,8 @@ export class WorkflowsPlugin
       }
     }
 
-    // Register workflow task definition
-    if (plugins.taskManager) {
-      plugins.taskManager.registerTaskDefinitions({
-        'workflow:scheduled': {
-          title: 'Scheduled Workflow Execution',
-          description: 'Executes workflows on a scheduled basis',
-          timeout: '5m',
-          maxAttempts: 3,
-          createTaskRunner: ({ taskInstance, fakeRequest }) => {
-            // Capture the plugin instance in a closure
-            const pluginInstance = this;
-            // Use a factory pattern to get dependencies when the task runs
-            return {
-              async run() {
-                // Get dependencies when the task actually runs
-                const [, pluginsStart] = await core.getStartServices();
-
-                // Create the actual task runner with dependencies
-                const taskRunner = createWorkflowTaskRunner({
-                  logger: pluginInstance.logger,
-                  workflowsService: pluginInstance.workflowsService!,
-                  workflowsExecutionEngine: pluginsStart.workflowsExecutionEngine,
-                  actionsClient: pluginInstance.unsecureActionsClient!,
-                })({ taskInstance, fakeRequest });
-
-                return taskRunner.run();
-              },
-              async cancel() {
-                // Cancel function for the task
-              },
-            };
-          },
-        },
-      });
-    }
-
-    // Register saved object types
-
-    registerFeatures(plugins);
+    // Register the workflows management feature and its privileges
+    plugins.features?.registerKibanaFeature(WorkflowsManagementFeatureConfig);
 
     this.logger.debug('Workflows Management: Creating router');
     const router = core.http.createRouter();
@@ -184,8 +142,12 @@ export class WorkflowsPlugin
     this.api = new WorkflowsManagementApi(this.workflowsService, getWorkflowExecutionEngine);
     this.spaces = plugins.spaces?.spacesService;
 
+    if (!this.spaces) {
+      throw new Error('Spaces service not initialized');
+    }
+
     // Register server side APIs
-    defineRoutes(router, this.api, this.logger, this.spaces!);
+    defineRoutes(router, this.api, this.logger, this.spaces);
 
     return {
       management: this.api,
@@ -194,8 +156,6 @@ export class WorkflowsPlugin
 
   public start(core: CoreStart, plugins: WorkflowsServerPluginStartDeps) {
     this.logger.info('Workflows Management: Start');
-
-    this.unsecureActionsClient = plugins.actions.getUnsecuredActionsClient();
 
     // Initialize workflow task scheduler with the start contract
     this.workflowTaskScheduler = new WorkflowTaskScheduler(this.logger, plugins.taskManager);

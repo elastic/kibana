@@ -123,14 +123,14 @@ export const StreamDetailGeneralData = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <StorageSizeCard
-            definition={definition}
+            hasMonitorPrivileges={definition.privileges?.monitor}
             stats={data.stats?.ds.stats}
             statsError={data.error}
           />
         </EuiFlexItem>
         <EuiFlexItem>
           <IngestionCard
-            definition={definition}
+            hasMonitorPrivileges={definition.privileges?.monitor}
             stats={data.stats?.ds.stats}
             statsError={data.error}
           />

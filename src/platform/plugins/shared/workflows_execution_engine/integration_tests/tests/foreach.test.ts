@@ -29,7 +29,7 @@ consts:
   outerForeachArray: '${JSON.stringify(outerArray)}'
 steps:
   - name: outerForeachStep
-    foreach: consts.outerForeachArray
+    foreach: '{{consts.outerForeachArray}}'
     type: foreach
     steps:
       - name: outerForeachChildConnectorStep
@@ -38,7 +38,7 @@ steps:
         with:
           message: 'Foreach item: {{foreach.item}}; Foreach index: {{foreach.index}}; Foreach total: {{foreach.total}}'
       - name: innerForeachStep
-        foreach: inputs.innerArray
+        foreach: '{{inputs.innerArray}}'
         type: foreach
         steps:
           - name: innerForeachChildConnectorStep

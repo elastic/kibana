@@ -7,12 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ExecutionStatus } from '@kbn/workflows';
 import { StepExecutionRepository } from './step_execution_repository';
-import { WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
 
 describe('StepExecutionRepository', () => {
-  let repository: StepExecutionRepository;
+  let underTest: StepExecutionRepository;
   let esClient: {
     index: jest.Mock;
     update: jest.Mock;
@@ -30,68 +28,248 @@ describe('StepExecutionRepository', () => {
         create: jest.fn().mockResolvedValue({}),
       },
     };
-    repository = new StepExecutionRepository(esClient as any);
+    underTest = new StepExecutionRepository(esClient as any);
   });
 
-  describe('createStepExecution', () => {
-    it('should create a step execution', async () => {
-      const stepExecution = { id: '1', stepId: 'test-step' };
-      await repository.createStepExecution(stepExecution);
-      expect(esClient.index).toHaveBeenCalledWith({
-        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
-        id: '1',
-        refresh: true,
-        document: stepExecution,
-      });
-    });
-
-    it('should throw an error if ID is missing during create', async () => {
-      await expect(repository.createStepExecution({})).rejects.toThrow(
-        'Step execution ID is required for creation'
-      );
-    });
-  });
-
-  describe('updateStepExecution', () => {
-    it('should update a step execution', async () => {
-      const stepExecution = { id: '1', status: ExecutionStatus.RUNNING };
-      await repository.updateStepExecution(stepExecution);
-      expect(esClient.bulk).toHaveBeenCalledWith({
-        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
-        refresh: true,
-        body: [{ update: { _id: '1' } }, { doc: { id: '1', status: ExecutionStatus.RUNNING } }],
-      });
-    });
-
-    it('should throw an error if ID is missing during update', async () => {
-      await expect(repository.updateStepExecution({})).rejects.toThrow(
-        'Step execution ID is required for update'
-      );
-    });
-  });
-
-  describe('updateStepExecutions', () => {
-    it('should update multiple step executions', async () => {
+  describe('bulkUpsert', () => {
+    it('should successfully upsert multiple step executions', async () => {
       const stepExecutions = [
-        { id: '1', status: ExecutionStatus.COMPLETED },
-        { id: '2', status: ExecutionStatus.FAILED },
+        { id: 'step-1', stepId: 'test-step-1', status: 'completed' },
+        { id: 'step-2', stepId: 'test-step-2', status: 'running' },
+        { id: 'step-3', stepId: 'test-step-3', status: 'pending' },
       ];
-      await repository.updateStepExecutions(stepExecutions);
+
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [
+          { update: { _id: 'step-1', status: 200 } },
+          { update: { _id: 'step-2', status: 200 } },
+          { update: { _id: 'step-3', status: 200 } },
+        ],
+      });
+
+      await underTest.bulkUpsert(stepExecutions as any);
+
       expect(esClient.bulk).toHaveBeenCalledWith({
-        index: WORKFLOWS_STEP_EXECUTIONS_INDEX,
         refresh: true,
+        index: expect.any(String),
         body: [
-          { update: { _id: '1' } },
-          { doc: { id: '1', status: ExecutionStatus.COMPLETED } },
-          { update: { _id: '2' } },
-          { doc: { id: '2', status: ExecutionStatus.FAILED } },
+          { update: { _id: 'step-1' } },
+          { doc: stepExecutions[0], doc_as_upsert: true },
+          { update: { _id: 'step-2' } },
+          { doc: stepExecutions[1], doc_as_upsert: true },
+          { update: { _id: 'step-3' } },
+          { doc: stepExecutions[2], doc_as_upsert: true },
         ],
       });
     });
 
-    it('should throw an error if ID is missing during bulk update', async () => {
-      await expect(repository.updateStepExecutions([{}])).rejects.toThrow(
-        'Step execution ID is required for update'
+    it('should handle empty array without making ES call', async () => {
+      await underTest.bulkUpsert([]);
+
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('should throw error if step execution does not have an id', async () => {
+      const stepExecutions = [
+        { id: 'step-1', stepId: 'test-step-1' },
+        { stepId: 'test-step-2' }, // Missing id
+      ];
+
+      await expect(underTest.bulkUpsert(stepExecutions as any)).rejects.toThrow(
+        'Step execution ID is required for upsert'
+      );
+
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+
+    it('should throw error with details when bulk operation has errors', async () => {
+      const stepExecutions = [
+        { id: 'step-1', stepId: 'test-step-1', status: 'completed' },
+        { id: 'step-2', stepId: 'test-step-2', status: 'running' },
+        { id: 'step-3', stepId: 'test-step-3', status: 'pending' },
+      ];
+
+      esClient.bulk.mockResolvedValue({
+        errors: true,
+        items: [
+          { update: { _id: 'step-1', status: 200 } },
+          {
+            update: {
+              _id: 'step-2',
+              status: 409,
+              error: {
+                type: 'version_conflict_engine_exception',
+                reason: 'version conflict',
+              },
+            },
+          },
+          {
+            update: {
+              _id: 'step-3',
+              status: 400,
+              error: {
+                type: 'mapper_parsing_exception',
+                reason: 'failed to parse field [status]',
+              },
+            },
+          },
+        ],
+      });
+
+      await expect(underTest.bulkUpsert(stepExecutions as any)).rejects.toThrow(
+        'Failed to upsert 2 step executions'
+      );
+
+      expect(esClient.bulk).toHaveBeenCalled();
+    });
+
+    it('should include error details in exception message', async () => {
+      const stepExecutions = [{ id: 'step-1', stepId: 'test-step-1' }];
+
+      const errorDetails = {
+        type: 'mapper_parsing_exception',
+        reason: 'failed to parse field [executionTimeMs]',
+      };
+
+      esClient.bulk.mockResolvedValue({
+        errors: true,
+        items: [
+          {
+            update: {
+              _id: 'step-1',
+              status: 400,
+              error: errorDetails,
+            },
+          },
+        ],
+      });
+
+      try {
+        await underTest.bulkUpsert(stepExecutions as any);
+        fail('Should have thrown an error');
+      } catch (error: any) {
+        expect(error.message).toContain('Failed to upsert 1 step executions');
+        expect(error.message).toContain('step-1');
+        expect(error.message).toContain('mapper_parsing_exception');
+      }
+    });
+
+    it('should handle partial success by only throwing errors for failed items', async () => {
+      const stepExecutions = [
+        { id: 'step-1', stepId: 'test-step-1' },
+        { id: 'step-2', stepId: 'test-step-2' },
+        { id: 'step-3', stepId: 'test-step-3' },
+      ];
+
+      esClient.bulk.mockResolvedValue({
+        errors: true,
+        items: [
+          { update: { _id: 'step-1', status: 200 } }, // Success
+          {
+            update: {
+              _id: 'step-2',
+              status: 409,
+              error: { type: 'version_conflict_engine_exception' },
+            },
+          }, // Error
+          { update: { _id: 'step-3', status: 201 } }, // Success
+        ],
+      });
+
+      try {
+        await underTest.bulkUpsert(stepExecutions as any);
+        fail('Should have thrown an error');
+      } catch (error: any) {
+        expect(error.message).toContain('Failed to upsert 1 step executions');
+        expect(error.message).toContain('step-2');
+        expect(error.message).not.toContain('step-1');
+        expect(error.message).not.toContain('step-3');
+      }
+    });
+
+    it('should use doc_as_upsert flag for each document', async () => {
+      const stepExecutions = [{ id: 'step-1', stepId: 'test-step-1', status: 'completed' }];
+
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ update: { _id: 'step-1', status: 200 } }],
+      });
+
+      await underTest.bulkUpsert(stepExecutions as any);
+
+      const bulkCall = esClient.bulk.mock.calls[0][0];
+      expect(bulkCall.body[1]).toEqual({
+        doc: stepExecutions[0],
+        doc_as_upsert: true,
+      });
+    });
+
+    it('should handle single step execution', async () => {
+      const stepExecutions = [{ id: 'step-1', stepId: 'test-step-1', status: 'completed' }];
+
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ update: { _id: 'step-1', status: 200 } }],
+      });
+
+      await underTest.bulkUpsert(stepExecutions as any);
+
+      expect(esClient.bulk).toHaveBeenCalledWith({
+        refresh: true,
+        index: expect.any(String),
+        body: [{ update: { _id: 'step-1' } }, { doc: stepExecutions[0], doc_as_upsert: true }],
+      });
+    });
+
+    it('should preserve all fields in partial updates', async () => {
+      const stepExecutions = [
+        {
+          id: 'step-1',
+          stepId: 'test-step-1',
+          status: 'completed',
+          completedAt: '2025-10-28T10:00:00Z',
+          executionTimeMs: 5000,
+          output: { result: 'success' },
+        },
+      ];
+
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ update: { _id: 'step-1', status: 200 } }],
+      });
+
+      await underTest.bulkUpsert(stepExecutions as any);
+
+      const bulkCall = esClient.bulk.mock.calls[0][0];
+      expect(bulkCall.body[1].doc).toEqual(stepExecutions[0]);
+    });
+
+    it('should handle multiple validation errors', async () => {
+      const stepExecutions = [
+        { stepId: 'test-step-1' }, // Missing id
+        { stepId: 'test-step-2' }, // Missing id
+      ];
+
+      await expect(underTest.bulkUpsert(stepExecutions as any)).rejects.toThrow(
+        'Step execution ID is required for upsert'
+      );
+    });
+
+    it('should use refresh: true for immediate visibility', async () => {
+      const stepExecutions = [{ id: 'step-1', stepId: 'test-step-1' }];
+
+      esClient.bulk.mockResolvedValue({
+        errors: false,
+        items: [{ update: { _id: 'step-1', status: 200 } }],
+      });
+
+      await underTest.bulkUpsert(stepExecutions as any);
+
+      expect(esClient.bulk).toHaveBeenCalledWith(
+        expect.objectContaining({
+          refresh: true,
+        })
       );
     });
   });

@@ -2103,7 +2103,7 @@
             "label": "validateParams",
             "description": [],
             "signature": [
-              "(actionParams: ActionParams) => Promise<",
+              "(actionParams: ActionParams, connectorConfig: ActionConfig | null) => Promise<",
               {
                 "pluginId": "@kbn/alerts-ui-shared",
                 "scope": "public",
@@ -2131,6 +2131,21 @@
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/alerts-ui-shared",
+                "id": "def-public.ActionTypeModel.validateParams.$2",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "connectorConfig",
+                "description": [],
+                "signature": [
+                  "ActionConfig | null"
+                ],
+                "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
               }
             ],
             "returnComment": []
@@ -2413,6 +2428,58 @@
             "description": [],
             "signature": [
               "\"endpointSecurity\" | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/alerts-ui-shared",
+            "id": "def-public.ActionTypeModel.connectorForm",
+            "type": "Object",
+            "tags": [],
+            "label": "connectorForm",
+            "description": [
+              "\nConnector form config"
+            ],
+            "signature": [
+              "{ deserializer?: ",
+              "SerializerFunc",
+              "<",
+              {
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "public",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-public.InternalConnectorForm",
+                "text": "InternalConnectorForm"
+              },
+              ", ",
+              {
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "public",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-public.ConnectorFormSchema",
+                "text": "ConnectorFormSchema"
+              },
+              "<Record<string, unknown>, Record<string, unknown>>> | undefined; serializer?: ",
+              "SerializerFunc",
+              "<",
+              {
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "public",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-public.ConnectorFormSchema",
+                "text": "ConnectorFormSchema"
+              },
+              "<Record<string, unknown>, Record<string, unknown>>, ",
+              {
+                "pluginId": "@kbn/alerts-ui-shared",
+                "scope": "public",
+                "docId": "kibKbnAlertsUiSharedPluginApi",
+                "section": "def-public.InternalConnectorForm",
+                "text": "InternalConnectorForm"
+              },
+              "> | undefined; hideSettingsTitle?: boolean | undefined; } | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
             "deprecated": false,
@@ -5630,6 +5697,37 @@
       },
       {
         "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-public.ConnectorFormSchema",
+        "type": "Type",
+        "tags": [],
+        "label": "ConnectorFormSchema",
+        "description": [],
+        "signature": [
+          "Pick<",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.UserConfiguredActionConnector",
+            "text": "UserConfiguredActionConnector"
+          },
+          "<Config, Secrets>, \"config\" | \"secrets\" | \"actionTypeId\" | \"isDeprecated\"> & Partial<Pick<",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.UserConfiguredActionConnector",
+            "text": "UserConfiguredActionConnector"
+          },
+          "<Config, Secrets>, \"id\" | \"name\">>"
+        ],
+        "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
         "id": "def-public.ConnectorValidationFunc",
         "type": "Type",
         "tags": [],
@@ -5935,6 +6033,37 @@
           ", \"title\" | \"fieldName\" | \"exclude\" | \"selectedOptions\" | \"existsSelected\">; }"
         ],
         "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/alert_filter_controls/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/alerts-ui-shared",
+        "id": "def-public.InternalConnectorForm",
+        "type": "Type",
+        "tags": [],
+        "label": "InternalConnectorForm",
+        "description": [],
+        "signature": [
+          "Pick<",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.UserConfiguredActionConnector",
+            "text": "UserConfiguredActionConnector"
+          },
+          "<Record<string, unknown>, Record<string, unknown>>, \"config\" | \"secrets\" | \"actionTypeId\" | \"isDeprecated\"> & Partial<Pick<",
+          {
+            "pluginId": "@kbn/alerts-ui-shared",
+            "scope": "public",
+            "docId": "kibKbnAlertsUiSharedPluginApi",
+            "section": "def-public.UserConfiguredActionConnector",
+            "text": "UserConfiguredActionConnector"
+          },
+          "<Record<string, unknown>, Record<string, unknown>>, \"id\" | \"name\">> & { __internal__?: { headers?: { key: string; value: string; type: string; }[] | undefined; } | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/kbn-alerts-ui-shared/src/common/types/action_types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

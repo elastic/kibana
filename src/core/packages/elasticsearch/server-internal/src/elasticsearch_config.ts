@@ -291,6 +291,33 @@ const deprecations: ConfigDeprecationProvider = () => [
         },
       });
     }
+
+    if (es.pingTimeout !== undefined) {
+      addDeprecation({
+        configPath: `${fromPath}.pingTimeout`,
+        title: i18n.translate('core.deprecations.elasticsearchPingTimeout.title', {
+          defaultMessage: 'Setting "{pingTimeoutSetting}" is deprecated',
+          values: { pingTimeoutSetting: `${fromPath}.pingTimeout` },
+        }),
+        level: 'warning',
+        message: i18n.translate('core.deprecations.elasticsearchPingTimeout.message', {
+          defaultMessage:
+            'Setting "{pingTimeoutSetting}" is deprecated and no longer used. Use "{requestTimeoutSetting}" instead.',
+          values: {
+            pingTimeoutSetting: `${fromPath}.pingTimeout`,
+            requestTimeoutSetting: `${fromPath}.requestTimeout`,
+          },
+        }),
+        correctiveActions: {
+          manualSteps: [
+            i18n.translate('core.deprecations.elasticsearchPingTimeout.manualSteps1', {
+              defaultMessage: 'Remove Setting [{pingTimeoutSetting}] from your kibana configs.',
+              values: { pingTimeoutSetting: `${fromPath}.pingTimeout` },
+            }),
+          ],
+        },
+      });
+    }
     return;
   },
 ];
@@ -386,11 +413,6 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
   public readonly requestHeadersWhitelist: string[];
 
   /**
-   * Timeout after which PING HTTP request will be aborted and retried.
-   */
-  public readonly pingTimeout: Duration;
-
-  /**
    * Timeout after which HTTP request will be aborted and retried.
    */
   public readonly requestTimeout: Duration;
@@ -471,7 +493,6 @@ export class ElasticsearchConfig implements IElasticsearchConfig {
     this.requestHeadersWhitelist = Array.isArray(rawConfig.requestHeadersWhitelist)
       ? rawConfig.requestHeadersWhitelist
       : [rawConfig.requestHeadersWhitelist];
-    this.pingTimeout = rawConfig.pingTimeout;
     this.requestTimeout = rawConfig.requestTimeout;
     this.shardTimeout = rawConfig.shardTimeout;
     this.sniffOnStart = rawConfig.sniffOnStart;

@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useVulnerabilitiesPreview } from '@kbn/cloud-security-posture/src/hooks/use_vulnerabilities_preview';
@@ -67,13 +67,11 @@ export const VulnerabilitiesPreview = ({
   value,
   field,
   isPreviewMode,
-  isLinkEnabled,
   openDetailsPanel,
 }: {
   value: string;
   field: CloudPostureEntityIdentifier;
-  isPreviewMode?: boolean;
-  isLinkEnabled: boolean;
+  isPreviewMode: boolean;
   openDetailsPanel: (path: EntityDetailsPath) => void;
 }) => {
   useEffect(() => {
@@ -102,27 +100,26 @@ export const VulnerabilitiesPreview = ({
   const { euiTheme } = useEuiTheme();
   const { getSeverityStatusColor } = useGetSeverityStatusColor();
 
-  const goToEntityInsightTab = useCallback(() => {
-    openDetailsPanel({
-      tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
-      subTab: CspInsightLeftPanelSubTab.VULNERABILITIES,
-    });
-  }, [openDetailsPanel]);
+  const goToEntityInsightTab = useCallback(
+    () =>
+      openDetailsPanel({
+        tab: EntityDetailsLeftPanelTab.CSP_INSIGHTS,
+        subTab: CspInsightLeftPanelSubTab.VULNERABILITIES,
+      }),
+    [openDetailsPanel]
+  );
 
   const link = useMemo(
-    () =>
-      isLinkEnabled
-        ? {
-            callback: goToEntityInsightTab,
-            tooltip: (
-              <FormattedMessage
-                id="xpack.securitySolution.flyout.right.insights.vulnerabilities.vulnerabilitiesTooltip"
-                defaultMessage="Show all vulnerabilities findings"
-              />
-            ),
-          }
-        : undefined,
-    [isLinkEnabled, goToEntityInsightTab]
+    () => ({
+      callback: goToEntityInsightTab,
+      tooltip: (
+        <FormattedMessage
+          id="xpack.securitySolution.flyout.right.insights.vulnerabilities.vulnerabilitiesTooltip"
+          defaultMessage="Show all vulnerabilities findings"
+        />
+      ),
+    }),
+    [goToEntityInsightTab]
   );
 
   const vulnerabilityStats = getVulnerabilityStats(

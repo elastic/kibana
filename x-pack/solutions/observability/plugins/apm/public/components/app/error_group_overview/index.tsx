@@ -30,6 +30,11 @@ export function ErrorGroupOverview() {
     kuery,
   });
 
+  const headerTitle = i18n.translate(
+    'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.title',
+    { defaultMessage: 'Error occurrences' }
+  );
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
       <EuiFlexItem>
@@ -40,10 +45,7 @@ export function ErrorGroupOverview() {
                 <ErrorDistribution
                   fetchStatus={errorDistributionStatus}
                   distribution={errorDistributionData}
-                  title={i18n.translate(
-                    'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.title',
-                    { defaultMessage: 'Error occurrences' }
-                  )}
+                  title={headerTitle}
                 />
               </EuiPanel>
             </EuiFlexItem>
@@ -69,6 +71,7 @@ export function ErrorGroupOverview() {
             serviceName={serviceName}
             comparisonEnabled={comparisonEnabled}
             initialPageSize={10}
+            tableCaption={headerTitle}
           />
         </EuiPanel>
       </EuiFlexItem>

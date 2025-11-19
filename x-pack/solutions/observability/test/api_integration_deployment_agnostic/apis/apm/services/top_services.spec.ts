@@ -42,7 +42,6 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
         expect(response.status).to.be(200);
         expect(response.body.items.length).to.be(0);
-        expect(response.body.maxCountExceeded).to.be(false);
         expect(response.body.serviceOverflowCount).to.be(0);
       });
     });
@@ -191,12 +190,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           checkStats();
         });
 
-        it('returns services without transaction data', () => {
+        it('does not return services without transaction data', () => {
           const serviceNames = response.body.items.map((item) => item.serviceName);
 
-          expect(serviceNames).to.contain('metric-only-service');
+          expect(serviceNames).not.to.contain('metric-only-service');
 
-          expect(serviceNames).to.contain('error-only-service');
+          expect(serviceNames).not.to.contain('error-only-service');
         });
       });
 
@@ -323,12 +322,12 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           });
         });
 
-        it('returns services without transaction data', () => {
+        it('does not return services without transaction data', () => {
           const serviceNames = response.body.items.map((item) => item.serviceName);
 
-          expect(serviceNames).to.contain('metric-only-service');
+          expect(serviceNames).not.to.contain('metric-only-service');
 
-          expect(serviceNames).to.contain('error-only-service');
+          expect(serviceNames).not.to.contain('error-only-service');
         });
 
         it('returns the correct statistics', () => {

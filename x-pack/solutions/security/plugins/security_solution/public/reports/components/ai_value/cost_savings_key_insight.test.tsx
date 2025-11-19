@@ -20,7 +20,7 @@ import { useAIConnectors } from '../../../common/hooks/use_ai_connectors';
 import { MessageRole } from '@kbn/inference-common';
 import type { VisualizationTablesWithMeta } from '../../../common/components/visualization_actions/types';
 import type { StartServices } from '../../../types';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 jest.mock('../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),

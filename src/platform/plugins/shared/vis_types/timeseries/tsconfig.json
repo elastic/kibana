@@ -1,5 +1,5 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "allowJs": true
@@ -50,6 +50,9 @@
     "@kbn/react-kibana-context-render",
     "@kbn/palettes",
     "@kbn/visualizations-common",
+    "@kbn/lens-common",
+    "@kbn/expression-xy-plugin",
+    "@kbn/event-annotation-common",
   ],
   "exclude": [
     "target/**/*",

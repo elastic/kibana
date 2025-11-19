@@ -150,7 +150,7 @@ export const SecretFormRow: React.FC<{
     if (disabled) return null;
     if (isConvertedToSecret)
       return (
-        <EuiCallOut size="s" color="warning">
+        <EuiCallOut announceOnMount size="s" color="warning">
           <FormattedMessage
             id="xpack.fleet.settings.editOutputFlyout.sslKeySecretInputConvertedCalloutTitle"
             defaultMessage="This field will be re-saved using secret storage from plain text storage. Secrets storage requires Fleet Server v8.12.0 and above."

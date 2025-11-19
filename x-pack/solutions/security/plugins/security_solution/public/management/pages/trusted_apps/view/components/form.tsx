@@ -110,7 +110,7 @@ import { TrustedAppsApiClient } from '../../service';
 import { TRUSTED_APPS_LIST_TYPE } from '../../constants';
 import { Loader } from '../../../../../common/components/loader';
 import { computeHasDuplicateFields, getAddedFieldsCounts } from '../../../../common/utils';
-import type { EventFilterItemAndAdvancedTrustedAppsEntries } from '../../../../../../common/endpoint/types/exception_list_items';
+import type { ExceptionEntries } from '../../../../../../common/endpoint/types/exception_list_items';
 
 interface FieldValidationState {
   /** If this fields state is invalid. Drives display of errors on the UI */
@@ -158,7 +158,7 @@ const addResultToValidation = (
   validation.result[field]!.isInvalid = true;
 };
 
-const validateValues = (values: ArtifactFormComponentProps['item']): ValidationResult => {
+export const validateValues = (values: ArtifactFormComponentProps['item']): ValidationResult => {
   let isValid: ValidationResult['isValid'] = true;
   const validation: ValidationResult = {
     isValid,
@@ -181,8 +181,8 @@ const validateValues = (values: ArtifactFormComponentProps['item']): ValidationR
 
   if (
     isAdvancedModeEnabled(values) &&
-    (values.entries as EventFilterItemAndAdvancedTrustedAppsEntries).some(
-      (e) => e.value === '' || !e.value.length
+    (values.entries as ExceptionEntries).some(
+      (e) => e.type !== 'nested' && (e.value === '' || !e.value.length)
     )
   ) {
     isValid = false;
@@ -930,6 +930,8 @@ export const TrustedAppsForm = memo<ArtifactFormComponentProps>(
             <>
               {exceptionBuilderComponentMemo}
               {conditionsState.hasWildcardWithWrongOperator && <WildCardWithWrongOperatorCallout />}
+              {conditionsState.hasWildcardWithWrongOperator &&
+                conditionsState.hasPartialCodeSignatureWarning && <EuiSpacer size="xs" />}
               {conditionsState.hasPartialCodeSignatureWarning && <PartialCodeSignatureCallout />}
             </>
           ) : (
