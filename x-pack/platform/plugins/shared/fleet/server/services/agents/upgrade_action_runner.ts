@@ -142,8 +142,7 @@ export async function upgradeBatch(
 
   const rollingUpgradeOptions = getRollingUpgradeOptions(
     options?.startTime,
-    options.upgradeDurationSeconds,
-    options.isAutomatic
+    options.upgradeDurationSeconds
   );
 
   if (options.actionId && (await isActionIdCancelled(esClient, options.actionId))) {
@@ -213,46 +212,30 @@ export async function upgradeBatch(
 export const MINIMUM_EXECUTION_DURATION_SECONDS = 60 * 60 * 2; // 2h
 export const EXPIRATION_DURATION_SECONDS = 60 * 60 * 24 * 30; // 1 month
 
-export const getRollingUpgradeOptions = (
-  startTime?: string,
-  upgradeDurationSeconds?: number,
-  isAutomatic?: boolean
-) => {
+export const getRollingUpgradeOptions = (startTime?: string, upgradeDurationSeconds?: number) => {
   const now = new Date().toISOString();
-  const longExpiration = moment(startTime)
-    .add(EXPIRATION_DURATION_SECONDS, 'seconds')
-    .toISOString();
+  // Expiration time is set to a very long value (1 month) to allow upgrading agents staying offline for long time
+  const expiration = moment(startTime).add(EXPIRATION_DURATION_SECONDS, 'seconds').toISOString();
   // Perform a rolling upgrade
   if (upgradeDurationSeconds) {
     const minExecutionDuration = Math.min(
       MINIMUM_EXECUTION_DURATION_SECONDS,
       upgradeDurationSeconds
     );
-    // expiration will not be taken into account with Fleet Server version >=8.7, it is kept for BWC
-    // in the next major, expiration and minimum_execution_duration should be removed
-    const doubleDurationExpiration = moment(startTime ?? now)
-      .add(
-        upgradeDurationSeconds <= MINIMUM_EXECUTION_DURATION_SECONDS
-          ? minExecutionDuration * 2
-          : upgradeDurationSeconds,
-        'seconds'
-      )
-      .toISOString();
 
     return {
       start_time: startTime ?? now,
       rollout_duration_seconds: upgradeDurationSeconds,
       minimum_execution_duration: minExecutionDuration,
-      expiration: isAutomatic ? longExpiration : doubleDurationExpiration,
+      expiration,
     };
   }
   // Schedule without rolling upgrade (Immediately after start_time)
-  // Expiration time is set to a very long value (1 month) to allow upgrading agents staying offline for long time
   if (startTime && !upgradeDurationSeconds) {
     return {
       start_time: startTime ?? now,
       minimum_execution_duration: MINIMUM_EXECUTION_DURATION_SECONDS,
-      expiration: longExpiration,
+      expiration,
     };
   } else {
     // Regular bulk upgrade (non scheduled, non rolling)

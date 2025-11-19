@@ -141,31 +141,12 @@ describe('sendUpgradeAgentsActions (plural)', () => {
 });
 
 describe('getRollingUpgradeOptions', () => {
-  it('should set longer expiration for 1h duration', () => {
+  it('should 1m expiration for 1h duration', () => {
     const options = getRollingUpgradeOptions('2023-01-06T00:00:00Z', 3600);
     expect(options).toEqual({
-      expiration: '2023-01-06T02:00:00.000Z',
+      expiration: '2023-02-05T00:00:00.000Z',
       minimum_execution_duration: 3600,
       rollout_duration_seconds: 3600,
-      start_time: '2023-01-06T00:00:00Z',
-    });
-  });
-  it('should set longer expiration for 2h duration', () => {
-    const options = getRollingUpgradeOptions('2023-01-06T00:00:00Z', 7200);
-    expect(options).toEqual({
-      expiration: '2023-01-06T04:00:00.000Z',
-      minimum_execution_duration: 7200,
-      rollout_duration_seconds: 7200,
-      start_time: '2023-01-06T00:00:00Z',
-    });
-  });
-
-  it('should set normal expiration for longer duration', () => {
-    const options = getRollingUpgradeOptions('2023-01-06T00:00:00Z', 36000);
-    expect(options).toEqual({
-      expiration: '2023-01-06T10:00:00.000Z',
-      minimum_execution_duration: 7200,
-      rollout_duration_seconds: 36000,
       start_time: '2023-01-06T00:00:00Z',
     });
   });
