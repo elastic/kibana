@@ -57,13 +57,18 @@ const {
 // Modules that should never be lazy-loaded
 // Supports exact matches ('react') and trailing wildcards ('@testing-library/*')
 const EXCLUDED_MODULES = [
-  'react',
-  'React',
-  '@jest/globals',
-  '@testing-library/*',
   '@elastic/eui/lib/test/*',
   '@elastic/eui/test-env/test/*',
   '@emotion/*',
+  '@jest/globals',
+  '@storybook/test',
+  '@testing-library/dom',
+  '@testing-library/jest-dom',
+  '@testing-library/react-hooks',
+  '@testing-library/react',
+  '@testing-library/user-event',
+  'react',
+  'React',
 ];
 
 // Test file detection patterns
