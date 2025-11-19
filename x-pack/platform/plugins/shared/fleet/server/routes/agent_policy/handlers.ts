@@ -374,6 +374,15 @@ export const createAgentPolicyHandler: FleetRequestHandler<
       }
     }
 
+    if (
+      appContextService.getExperimentalFeatures().disableAgentlessLegacyAPI &&
+      request.body.supports_agentless
+    ) {
+      throw new FleetError(
+        'Creating agentless agent policies should be done through the agentless policies API.'
+      );
+    }
+
     const agentPolicy = await createAgentPolicyWithPackages({
       soClient,
       esClient,

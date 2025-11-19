@@ -705,6 +705,22 @@ describe('When calling package policy', () => {
   });
 
   describe('create api handler', () => {
+    it('should not allow to create agentless policies if disableAgentlessLegacyAPI is enabled', async () => {
+      appContextService.start(
+        createAppContextStartContractMock({}, false, undefined, {
+          disableAgentlessLegacyAPI: true,
+        })
+      );
+
+      const request = httpServerMock.createKibanaRequest({
+        body: { ...testPackagePolicy, supports_agentless: true },
+      });
+
+      await expect(createPackagePolicyHandler(context, request, response)).rejects.toThrow(
+        /Creating agentless package policies should be done through the agentless policies API./
+      );
+    });
+
     it('should return valid response', async () => {
       packagePolicyServiceMock.get.mockResolvedValue(testPackagePolicy);
       (
