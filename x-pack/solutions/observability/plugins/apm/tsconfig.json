@@ -147,7 +147,11 @@
     "@kbn/discover-shared-plugin",
     "@kbn/core-chrome-browser",
     "@kbn/react-query",
-    "@kbn/core-chrome-layout-constants"
+    "@kbn/core-chrome-layout-constants",
+    "@kbn/zod",
+    "@kbn/onechat-server",
+    "@kbn/onechat-common",
+    "@kbn/onechat-plugin"
   ],
   "exclude": ["target/**/*"]
 }
