@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { act, renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook } from '@testing-library/react';
 import React from 'react';
 import { Provider } from 'react-redux';
 import { monaco, YAML_LANG_ID } from '@kbn/monaco';
@@ -162,4 +162,3 @@ describe('useWorkflowYamlCompletionProvider', () => {
     expect(disposable?.dispose).toHaveBeenCalledTimes(1);
   });
 });
-
