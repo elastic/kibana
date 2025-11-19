@@ -10,8 +10,8 @@ import type {
   TextBasedLayerColumn,
   TextBasedPrivateState,
 } from '@kbn/lens-common';
-import { isOperation } from '../../../../types_guards';
-import { reorderElements } from '../../../../utils';
+import { isOperation } from '../../../types_guards';
+import { reorderElements } from '../../../utils';
 import { removeColumn } from '../remove_column';
 import { retrieveLayerColumnsFromCache } from '../fieldlist_cache';
 

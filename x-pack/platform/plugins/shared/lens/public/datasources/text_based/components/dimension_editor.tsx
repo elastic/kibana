@@ -18,8 +18,8 @@ import type {
   DataType,
 } from '@kbn/lens-common';
 import { mergeLayer, updateColumnFormat, updateColumnLabel } from '../utils';
-import type { FormatSelectorProps } from '../../dimension_panel/format_selector';
-import { FormatSelector } from '../../dimension_panel/format_selector';
+import type { FormatSelectorProps } from '../../form_based/dimension_panel/format_selector';
+import { FormatSelector } from '../../form_based/dimension_panel/format_selector';
 import { FieldSelect, type FieldOptionCompatible } from './field_select';
 import { isNotNumeric, isNumeric } from '../utils';
 import { fetchFieldsFromESQLExpression } from './fetch_fields_from_esql_expression';
