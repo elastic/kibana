@@ -20,6 +20,13 @@ import type { StoredFilter } from './types';
 import { spatialFilterFixture } from '../__fixtures__/spatial_filter';
 
 describe('fromStoredFilter', () => {
+  describe('Input validation', () => {
+    it('should throw for null/undefined input', () => {
+      expect(() => fromStoredFilter(null)).toThrow(FilterConversionError);
+      expect(() => fromStoredFilter(undefined)).toThrow(FilterConversionError);
+    });
+  });
+
   describe('Legacy filter migration', () => {
     it('should migrate legacy range filter with top-level range property', () => {
       // Legacy Kibana filter format: top-level range property
@@ -122,8 +129,8 @@ describe('fromStoredFilter', () => {
     });
   });
 
-  describe('main conversion function', () => {
-    it('should convert simple phrase filters', () => {
+  describe('Strategy 1: Simple Conditions (metadata-only)', () => {
+    it('should convert phrase filters from meta.params', () => {
       const storedFilter = {
         meta: {
           type: 'phrase',
@@ -144,7 +151,23 @@ describe('fromStoredFilter', () => {
       }
     });
 
-    it('should convert match_phrase query filters', () => {
+    it('should handle negated filters', () => {
+      const storedFilter = {
+        meta: { key: 'status', negate: true },
+        query: { term: { status: 'inactive' } },
+      };
+
+      const result = fromStoredFilter(storedFilter);
+
+      expect(isConditionFilter(result)).toBe(true);
+      if (isConditionFilter(result)) {
+        expect(result.condition.operator).toBe('is_not');
+      }
+    });
+  });
+
+  describe('Strategy 2: Query Parsing (enhanced compatibility)', () => {
+    it('should parse match_phrase query when meta is incomplete', () => {
       const storedFilter = {
         meta: { key: 'message' },
         query: {
@@ -166,7 +189,23 @@ describe('fromStoredFilter', () => {
       }
     });
 
-    it('should convert boolean group filters', () => {
+    it('should extract field from query when missing from meta', () => {
+      const storedFilter = {
+        meta: {},
+        query: { term: { username: 'john' } },
+      };
+
+      const result = fromStoredFilter(storedFilter);
+
+      expect(isConditionFilter(result)).toBe(true);
+      if (isConditionFilter(result)) {
+        expect(result.condition.field).toBe('username');
+      }
+    });
+  });
+
+  describe('Strategy 3: Filter Groups (combined/bool filters)', () => {
+    it('should convert boolean group filters with must clauses', () => {
       const storedFilter = {
         meta: {},
         query: {
@@ -190,7 +229,140 @@ describe('fromStoredFilter', () => {
       }
     });
 
-    it('should preserve complex filters as DSL', () => {
+    it('should convert combined filters with nested groups', () => {
+      const storedFilter = {
+        $state: {
+          store: 'appState',
+        },
+        meta: {
+          type: 'combined',
+          relation: 'AND',
+          params: [
+            {
+              query: {
+                match_phrase: {
+                  'machine.os.keyword': 'win 7',
+                },
+              },
+              meta: {
+                negate: true,
+                index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                key: 'machine.os.keyword',
+                field: 'machine.os.keyword',
+                params: {
+                  query: 'win 7',
+                },
+                type: 'phrase',
+                disabled: false,
+              },
+            },
+            {
+              $state: {
+                store: 'appState',
+              },
+              meta: {
+                type: 'combined',
+                relation: 'OR',
+                params: [
+                  {
+                    query: {
+                      bool: {
+                        minimum_should_match: 1,
+                        should: [
+                          {
+                            match_phrase: {
+                              'geo.src': 'US',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                    meta: {
+                      negate: false,
+                      index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                      key: 'geo.src',
+                      field: 'geo.src',
+                      params: ['US'],
+                      value: ['US'],
+                      type: 'phrases',
+                      disabled: false,
+                    },
+                  },
+                  {
+                    meta: {
+                      negate: false,
+                      index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                      key: 'host.keyword',
+                      field: 'host.keyword',
+                      params: {
+                        query: 'www.elastic.co',
+                      },
+                      type: 'phrase',
+                      disabled: false,
+                    },
+                    query: {
+                      match_phrase: {
+                        'host.keyword': 'www.elastic.co',
+                      },
+                    },
+                  },
+                ],
+                index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+                disabled: false,
+                negate: false,
+              },
+            },
+          ],
+          index: '90943e30-9a47-11e8-b64d-95841ca0b247',
+          disabled: false,
+          negate: false,
+          alias: null,
+        },
+        query: {},
+      };
+
+      const result = fromStoredFilter(storedFilter);
+
+      expect(isGroupFilter(result)).toBe(true);
+      if (isGroupFilter(result)) {
+        expect(result.group).toMatchInlineSnapshot(`
+          Object {
+            "conditions": Array [
+              Object {
+                "field": "machine.os.keyword",
+                "operator": "is_not",
+                "value": "win 7",
+              },
+              Object {
+                "conditions": Array [
+                  Object {
+                    "conditions": Array [
+                      Object {
+                        "field": "geo.src",
+                        "operator": "is",
+                        "value": "US",
+                      },
+                    ],
+                    "type": "or",
+                  },
+                  Object {
+                    "field": "host.keyword",
+                    "operator": "is",
+                    "value": "www.elastic.co",
+                  },
+                ],
+                "type": "or",
+              },
+            ],
+            "type": "and",
+          }
+        `);
+      }
+    });
+  });
+
+  describe('Strategy 4: DSL Fallback (preserve complex filters)', () => {
+    it('should preserve script queries as DSL', () => {
       const storedFilter = {
         meta: {},
         query: {
@@ -211,31 +383,6 @@ describe('fromStoredFilter', () => {
           query: storedFilter.query,
         });
       }
-    });
-
-    it('should extract base properties', () => {
-      const storedFilter = {
-        $state: { store: 'globalState' },
-        meta: {
-          key: 'status',
-          disabled: true,
-          alias: 'Status Filter',
-          negate: true,
-        },
-        query: { term: { status: 'active' } },
-      };
-
-      const result = fromStoredFilter(storedFilter);
-
-      expect(result.pinned).toBe(true);
-      expect(result.disabled).toBe(true);
-      expect(result.label).toBe('Status Filter');
-      expect(result.negate).toBe(true);
-    });
-
-    it('should throw for null/undefined input', () => {
-      expect(() => fromStoredFilter(null)).toThrow(FilterConversionError);
-      expect(() => fromStoredFilter(undefined)).toThrow(FilterConversionError);
     });
 
     it('should preserve spatial filters with geo_shape queries as DSL', () => {
@@ -265,12 +412,34 @@ describe('fromStoredFilter', () => {
     });
   });
 
-  describe('convertToSimpleCondition', () => {
+  describe('Base properties extraction', () => {
+    it('should extract pinned, disabled, label, and negate properties', () => {
+      const storedFilter = {
+        $state: { store: 'globalState' },
+        meta: {
+          key: 'status',
+          disabled: true,
+          alias: 'Status Filter',
+          negate: true,
+        },
+        query: { term: { status: 'active' } },
+      };
+
+      const result = fromStoredFilter(storedFilter);
+
+      expect(result.pinned).toBe(true);
+      expect(result.disabled).toBe(true);
+      expect(result.label).toBe('Status Filter');
+      expect(result.negate).toBe(true);
+    });
+  });
+
+  describe('Helper: convertToSimpleCondition', () => {
     it('should convert exists queries', () => {
       const storedFilter = {
         meta: { key: 'field' },
         query: { exists: { field: 'test_field' } },
-      } as StoredFilter;
+      };
 
       const result = convertToSimpleCondition(storedFilter);
 
@@ -288,7 +457,7 @@ describe('fromStoredFilter', () => {
             age: { gte: 18, lte: 65 },
           },
         },
-      } as StoredFilter;
+      };
 
       const result = convertToSimpleCondition(storedFilter);
 
@@ -299,7 +468,80 @@ describe('fromStoredFilter', () => {
       });
     });
 
-    it('should convert combined queries', () => {
+    it('should throw for unsupported query structures', () => {
+      const storedFilter = {
+        meta: { key: 'field' },
+        query: { unsupported_query: { field: 'value' } },
+      };
+
+      expect(() => convertToSimpleCondition(storedFilter)).toThrow(FilterConversionError);
+    });
+  });
+
+  describe('Helper: convertWithEnhancement', () => {
+    it('should parse match_phrase queries', () => {
+      const storedFilter = {
+        meta: {},
+        query: {
+          match_phrase: {
+            message: 'error occurred',
+          },
+        },
+      };
+
+      const result = convertWithEnhancement(storedFilter);
+
+      expect(result).toEqual({
+        field: 'message',
+        operator: 'is',
+        value: 'error occurred',
+      });
+    });
+
+    it('should parse match_phrase queries with object values', () => {
+      const storedFilter = {
+        meta: {},
+        query: {
+          match_phrase: {
+            message: { query: 'error occurred' },
+          },
+        },
+      };
+
+      const result = convertWithEnhancement(storedFilter);
+
+      expect(result).toEqual({
+        field: 'message',
+        operator: 'is',
+        value: 'error occurred',
+      });
+    });
+
+    it('should parse match queries with phrase type', () => {
+      const storedFilter = {
+        meta: {},
+        query: {
+          match: {
+            message: {
+              type: 'phrase',
+              query: 'test message',
+            },
+          },
+        },
+      };
+
+      const result = convertWithEnhancement(storedFilter);
+
+      expect(result).toEqual({
+        field: 'message',
+        operator: 'is',
+        value: 'test message',
+      });
+    });
+  });
+
+  describe('Helper: convertToFilterGroup', () => {
+    it('should convert combined filters with nested groups', () => {
       const storedFilter = {
         $state: {
           store: 'appState',
@@ -426,106 +668,9 @@ describe('fromStoredFilter', () => {
         }
       `);
     });
-
-    it('should handle negated filters', () => {
-      const storedFilter = {
-        meta: { key: 'status', negate: true },
-        query: { term: { status: 'inactive' } },
-      } as StoredFilter;
-
-      const result = convertToSimpleCondition(storedFilter);
-
-      expect(result).toEqual({
-        field: 'status',
-        operator: 'is_not',
-        value: 'inactive',
-      });
-    });
-
-    it('should extract field from query when missing from meta', () => {
-      const storedFilter = {
-        meta: {},
-        query: { term: { username: 'john' } },
-      } as StoredFilter;
-
-      const result = convertToSimpleCondition(storedFilter);
-
-      expect(result.field).toBe('username');
-    });
-
-    it('should throw for unsupported query structures', () => {
-      const storedFilter = {
-        meta: { key: 'field' },
-        query: { unsupported_query: { field: 'value' } },
-      } as StoredFilter;
-
-      expect(() => convertToSimpleCondition(storedFilter)).toThrow(FilterConversionError);
-    });
   });
 
-  describe('convertWithEnhancement', () => {
-    it('should parse match_phrase queries', () => {
-      const storedFilter = {
-        meta: {},
-        query: {
-          match_phrase: {
-            message: 'error occurred',
-          },
-        },
-      } as StoredFilter;
-
-      const result = convertWithEnhancement(storedFilter);
-
-      expect(result).toEqual({
-        field: 'message',
-        operator: 'is',
-        value: 'error occurred',
-      });
-    });
-
-    it('should parse match_phrase queries with object values', () => {
-      const storedFilter = {
-        meta: {},
-        query: {
-          match_phrase: {
-            message: { query: 'error occurred' },
-          },
-        },
-      } as StoredFilter;
-
-      const result = convertWithEnhancement(storedFilter);
-
-      expect(result).toEqual({
-        field: 'message',
-        operator: 'is',
-        value: 'error occurred',
-      });
-    });
-
-    it('should parse match queries with phrase type', () => {
-      const storedFilter = {
-        meta: {},
-        query: {
-          match: {
-            message: {
-              type: 'phrase',
-              query: 'test message',
-            },
-          },
-        },
-      } as StoredFilter;
-
-      const result = convertWithEnhancement(storedFilter);
-
-      expect(result).toEqual({
-        field: 'message',
-        operator: 'is',
-        value: 'test message',
-      });
-    });
-  });
-
-  describe('extractFieldFromQuery', () => {
+  describe('Helper: extractFieldFromQuery', () => {
     it('should extract field from term queries', () => {
       const query = { term: { status: 'active' } };
       expect(extractFieldFromQuery(query)).toBe('status');
