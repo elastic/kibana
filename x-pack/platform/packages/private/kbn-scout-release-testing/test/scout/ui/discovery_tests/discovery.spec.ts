@@ -162,4 +162,28 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
     await expect(page.testSubj.locator('discoverNoResultsTimefilter')).toBeHidden();
     await expect.poll(async () => await pageObjects.discover.getHitCountInt()).toBeGreaterThan(0);
   });
+
+  test('should hide and show the histogram chart when toggle is clicked', async ({
+    page,
+    pageObjects,
+  }) => {
+    // Verify chart is initially visible
+    await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+    // Hide the chart
+    await pageObjects.discover.hideChart();
+    // Verify chart is now hidden
+    await expect(page.testSubj.locator('xyVisChart')).toBeHidden();
+    // Show the chart again for other tests
+    await pageObjects.discover.showChart();
+    await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
+  });
+
+  test('should navigate to Lens editor when edit visualization is clicked', async ({
+    page,
+    pageObjects,
+  }) => {
+    await pageObjects.discover.navigateToLensEditor();
+    // Verify we're now on the Lens page
+    expect(page.url()).toContain('/app/lens');
+  });
 });

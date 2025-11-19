@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { ExplainCommandContext } from '@kbn/esql-ast/src/antlr/esql_parser';
 import type { ScoutPage } from '..';
 import { expect } from '..';
 
@@ -154,5 +155,17 @@ export class DiscoverApp {
     const description = (await element.getAttribute('data-description')) || '';
 
     return { title, description };
+  }
+
+  async showChart() {
+    await this.page.testSubj.click('dscShowHistogramButton');
+  }
+
+  async hideChart() {
+    await this.page.testSubj.click('dscHideHistogramButton');
+  }
+
+  async navigateToLensEditor() {
+    await this.page.testSubj.click('unifiedHistogramEditVisualization');
   }
 }
