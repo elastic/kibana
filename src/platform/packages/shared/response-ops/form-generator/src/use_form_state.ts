@@ -36,23 +36,22 @@ type FormAction<T> =
  * This recursively traverses the type structure to infer the correct type at any depth:
  * - For path "name": returns T['name']
  * - For path "authType.username": returns T['authType']['username']
- * - For path "config.option.deep.value": recursively extracts the type at each level
  *
  * @example
  * type Form = { user: { profile: { name: string } } }
- * PathValue<Form, "user.profile.name"> // → string
  * PathValue<Form, "user.profile"> // → { name: string }
  * PathValue<Form, "user"> // → { profile: { name: string } }
+ * PathValue<Form, "user.profile.name"> // → never (we do not support deeper than 2 levels)
  */
-type PathValue<T, P extends string> = P extends `${infer K}.${infer Rest}`
-  ? K extends keyof T
-    ? T[K] extends object
-      ? PathValue<T[K], Rest>
-      : unknown
-    : unknown
+type PathValue<T, P extends string> = P extends `${infer Root}.${infer Child}`
+  ? Root extends keyof T
+    ? T[Root] extends object
+      ? PathValue<T[Root], Child>
+      : never
+    : never
   : P extends keyof T
   ? T[P]
-  : unknown;
+  : never;
 
 const getOptionValue = <T, P extends string>(obj: T, path: P): PathValue<T, P> => {
   const [first, second] = path.split('.');
@@ -72,12 +71,6 @@ const getOptionValue = <T, P extends string>(obj: T, path: P): PathValue<T, P> =
 
 const setOptionValue = <T, P extends string>(obj: T, path: P, value: PathValue<T, P>): T => {
   const keys = path.split('.');
-
-  if (keys.length > 2) {
-    throw new Error(
-      `Nested paths deeper than 2 levels are not supported. Got path: "${path}" with ${keys.length} levels.`
-    );
-  }
 
   if (keys.length === 1) {
     return { ...obj, [keys[0]]: value } as T;
@@ -207,12 +200,14 @@ const formReducer = <T>(state: FormState<T>, action: FormAction<T>): FormState<T
   }
 };
 
-export const useFormState = <T extends Record<string, unknown>>(fields: FieldDefinition[]) => {
+export const useFormState = <TSchema extends Record<string, unknown>>(
+  fields: FieldDefinition[]
+) => {
   const initialValues = Object.fromEntries(
-    fields.map((field) => [field.id, field.initialValue ?? field.value ?? ''])
-  ) as T;
+    fields.map((field) => [field.id, field.initialValue ?? ''])
+  ) as TSchema;
 
-  const [formState, dispatch] = useReducer(formReducer<T>, {
+  const [formState, dispatch] = useReducer(formReducer<TSchema>, {
     values: initialValues,
     errors: {},
     touched: {},
@@ -244,7 +239,7 @@ export const useFormState = <T extends Record<string, unknown>>(fields: FieldDef
       if (fieldId.includes('.')) {
         return getOptionValue(formState.values, fieldId);
       }
-      return formState.values[fieldId as keyof T];
+      return formState.values[fieldId as keyof TSchema];
     },
     [formState.values]
   );
@@ -264,7 +259,7 @@ export const useFormState = <T extends Record<string, unknown>>(fields: FieldDef
   );
 
   const handleSubmit = useCallback(
-    (onSuccess: ({ data }: { data: T }) => void) => {
+    (onSuccess: ({ data }: { data: TSchema }) => void) => {
       return (e: React.FormEvent) => {
         e.preventDefault();
 
@@ -273,7 +268,7 @@ export const useFormState = <T extends Record<string, unknown>>(fields: FieldDef
         let hasErrors = false;
 
         fields.forEach((field) => {
-          const fieldKey = field.id as keyof T;
+          const fieldKey = field.id as keyof TSchema;
           const value = formState.values[fieldKey];
 
           allTouched[field.id] = true;

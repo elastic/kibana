@@ -8,13 +8,13 @@
  */
 
 import React, { useMemo } from 'react';
-import { z } from '@kbn/zod/v4';
+import type { z } from '@kbn/zod/v4';
+import { ZodError } from '@kbn/zod/v4';
 import { EuiButton, EuiForm, EuiSpacer } from '@elastic/eui';
 import { getMeta } from './schema_metadata';
 import type { BaseMetadata } from './schema_metadata';
 import { useFormState } from './use_form_state';
 import type { WidgetType } from './widgets';
-import { INVALID_VALUE_ERROR } from './translations';
 import { getWidgetComponent, getDefaultValueNormalizer } from './widgets/registry';
 
 /**
@@ -59,25 +59,18 @@ const getFieldsFromSchema = <T extends z.ZodRawShape>(schema: z.ZodObject<T>) =>
           schemaAny.parse(value);
           return undefined;
         } catch (error) {
-          if (error instanceof z.ZodError) {
-            const errors: Record<string, string | string[]> = {};
-
-            error.issues.forEach((issue) => {
-              const path = issue.path.join('.');
-              const existingError = errors[path];
-
-              if (existingError) {
-                errors[path] = Array.isArray(existingError)
-                  ? [...existingError, issue.message]
-                  : [existingError, issue.message];
-              } else {
-                errors[path] = issue.message;
-              }
-            });
-
-            return Object.keys(errors).length > 0 ? errors : undefined;
+          if (!(error instanceof ZodError)) {
+            throw new Error(`Unexpected validation error: ${error}`);
           }
-          return { [ROOT_ERROR_KEY]: INVALID_VALUE_ERROR };
+
+          const errors: Record<string, string | string[]> = {};
+
+          error.issues.forEach((issue) => {
+            const path = (issue.path[0] as string) || ROOT_ERROR_KEY;
+            errors[path] = issue.message;
+          });
+
+          return Object.keys(errors).length > 0 ? errors : undefined;
         }
       },
     });
@@ -109,6 +102,10 @@ export const Form = <TSchema extends z.ZodObject<z.ZodRawShape>>({
 
         const WidgetComponent = getWidgetComponent(fieldSchema);
 
+        const validateField = (fieldId: string, value: unknown) => {
+          return form.validateField(fieldId, value, fields);
+        };
+
         return (
           <WidgetComponent
             key={id}
@@ -126,9 +123,7 @@ export const Form = <TSchema extends z.ZodObject<z.ZodRawShape>>({
             setFieldError={form.setFieldError}
             setFieldTouched={form.setFieldTouched}
             getFieldValue={form.getFieldValue}
-            validateField={(fieldId: string, value: unknown) =>
-              form.validateField(fieldId, value, fields)
-            }
+            validateField={validateField}
             errors={form.errors}
             touched={form.touched}
           />
