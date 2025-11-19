@@ -14,7 +14,7 @@
 import type { LogDocument } from '@kbn/synthtrace-client';
 import { Serializable } from '@kbn/synthtrace-client';
 import { SampleParserClient } from '@kbn/sample-log-parser';
-import type { WiredIngest, WiredStream } from '@kbn/streams-schema/src/models/ingest/wired';
+import type { WiredIngestUpsertRequest } from '@kbn/streams-schema/src/models/ingest/wired';
 import { castArray } from 'lodash';
 import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
@@ -80,7 +80,6 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
             lifecycle: { inherit: {} },
             settings: {},
             processing: {
-              updated_at: new Date().toISOString(),
               steps: [
                 // Set up some failed documents
                 {
@@ -137,8 +136,8 @@ const scenario: Scenario<LogDocument> = async (runOptions) => {
               routing: [],
             },
             failure_store: { inherit: {} },
-          } as WiredIngest,
-        } as WiredStream.Definition);
+          } as WiredIngestUpsertRequest,
+        });
       } catch (error) {
         logger.error(new Error(`Error occurred while forking streams`, { cause: error }));
       }

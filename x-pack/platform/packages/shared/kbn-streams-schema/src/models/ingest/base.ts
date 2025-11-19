@@ -87,6 +87,7 @@ export const IngestBaseUpsertRequest: Validation<unknown, IngestBaseUpsertReques
       })
     ),
     settings: ingestStreamSettingsSchema,
+    failure_store: failureStoreSchema,
   })
 );
 
