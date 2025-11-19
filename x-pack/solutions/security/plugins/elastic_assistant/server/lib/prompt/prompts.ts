@@ -333,7 +333,7 @@ export const starterPromptPrompt4 =
   'Can you provide examples of questions I can ask about Elastic Security, such as investigating alerts, running ES|QL queries, incident response, or threat intelligence?';
 
 export const costSavingsInsightPart1 = `You are given Elasticsearch Lens aggregation results showing cost savings over time:`;
-export const costSavingsInsightPart2 = `Generate a concise bulleted summary in mdx markdown. Follow the style and tone of the example below, highlighting key trends, averages, peaks, and projections:
+export const costSavingsInsightPart2 = `Generate a concise bulleted summary in mdx markdown, no more than 500 characters. Follow the style and tone of the example below, highlighting key trends, averages, peaks, and projections:
 
 \`\`\`
 - Between July 18 and August 18, daily cost savings **averaged around $135K**
