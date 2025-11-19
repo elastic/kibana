@@ -230,10 +230,17 @@ export class ManifestManager {
         ? exception.tags.includes('policy:all') || exception.tags.includes(`policy:${policyId}`)
         : exception.tags.includes('policy:all');
 
-    const exceptions: ExceptionListItemSchema[] =
-      listId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
-        ? allExceptionsByListId
-        : allExceptionsByListId.filter(filter);
+    let exceptions: ExceptionListItemSchema[];
+
+    if (this.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
+      // with the feature enabled, we do not make an 'exception' with endpoint exceptions - it's filtered per-policy
+      exceptions = allExceptionsByListId.filter(filter);
+    } else {
+      exceptions =
+        listId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
+          ? allExceptionsByListId
+          : allExceptionsByListId.filter(filter);
+    }
 
     return convertExceptionsToEndpointFormat(exceptions, schemaVersion, this.experimentalFeatures);
   }
@@ -301,7 +308,6 @@ export class ManifestManager {
     allPolicyIds: string[]
   ): Promise<ArtifactsBuildResult> {
     const defaultArtifacts: InternalArtifactCompleteSchema[] = [];
-    const policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
 
     const decorateWildcardOnlyExceptionItem = (item: ExceptionListItemSchema) => {
       const isWildcardOnly = item.entries.every(({ type }) => type === 'wildcard');
@@ -329,9 +335,19 @@ export class ManifestManager {
       defaultArtifacts.push(await this.buildArtifactsForOs({ os, ...buildArtifactsForOsOptions }));
     }
 
-    allPolicyIds.forEach((policyId) => {
-      policySpecificArtifacts[policyId] = defaultArtifacts;
-    });
+    let policySpecificArtifacts: Record<string, InternalArtifactCompleteSchema[]> = {};
+
+    if (this.experimentalFeatures.endpointExceptionsMovedUnderManagement) {
+      policySpecificArtifacts = await this.buildArtifactsByPolicy(
+        allPolicyIds,
+        ArtifactConstants.SUPPORTED_ENDPOINT_EXCEPTIONS_OPERATING_SYSTEMS,
+        buildArtifactsForOsOptions
+      );
+    } else {
+      allPolicyIds.forEach((policyId) => {
+        policySpecificArtifacts[policyId] = defaultArtifacts;
+      });
+    }
 
     return { defaultArtifacts, policySpecificArtifacts };
   }
