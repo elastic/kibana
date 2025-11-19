@@ -10,12 +10,8 @@ At a high-level, the module works by modeling APM events/metricsets with [a flue
   - [Using the Node.js module](#using-the-nodejs-module)
   - [CLI](#cli)
 - [Scenarios](#scenarios)
-  - [APM Scenarios](#apm-scenarios)
-  - [Log Scenarios](#log-scenarios)
-  - [Infrastructure Scenarios](#infrastructure-scenarios)
-  - [Combined Scenarios](#combined-scenarios)
-  - [Specialized Scenarios](#specialized-scenarios)
 - [Advanced Usage](#advanced-usage)
+- [Examples](#examples)
 - [Testing](#testing)
 - [TypeScript](#typescript)
 
@@ -108,6 +104,8 @@ const esEvents = toElasticsearchOutput([
 ]);
 ```
 
+For more examples, see [Examples](./EXAMPLES.md#nodejs-module-examples).
+
 ### CLI
 
 Via the CLI, you can run scenarios, either using a fixed time range or continuously generating data. Scenarios are available in [`src/platform/packages/shared/kbn-apm-synthtrace/src/scenarios/`](https://github.com/elastic/kibana/blob/main/src/platform/packages/shared/kbn-apm-synthtrace/src/scenarios/).
@@ -165,6 +163,8 @@ You can use a Kibana API key for authentication by passing the `--apiKey` option
 ```sh
 node scripts/synthtrace simple_trace.ts --target=https://my-deployment.es.us-central1.gcp.elastic.cloud --apiKey="your-api-key"
 ```
+
+For more CLI examples, see [Examples](./EXAMPLES.md#cli-examples).
 
 ### Understanding Scenario Files
 
@@ -226,700 +226,43 @@ Note:
 
 Synthtrace includes a wide variety of scenarios for generating different types of synthetic data. Each scenario is designed to test specific features or use cases in Kibana.
 
-### APM Scenarios
-
-#### `simple_trace`
-
-Generates basic APM trace data with transactions and spans.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace simple_trace --live
-node scripts/synthtrace simple_trace --from=now-24h --to=now
-```
-
-**Options:**
-
-- `numServices` (number, default: 3): Number of services to generate
-- `pipeline` (string): APM pipeline to use
-
-**Example:**
-
-```sh
-node scripts/synthtrace simple_trace --scenarioOpts.numServices=5 --live
-```
-
-#### `distributed_trace`
-
-Generates distributed traces across multiple services with parent-child relationships.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace distributed_trace --live
-```
-
-#### `distributed_trace_long`
-
-Generates long-running distributed traces with deep call stacks.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace distributed_trace_long --live
-```
-
-#### `many_services`
-
-Generates data for a large number of services.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace many_services --live
-```
-
-#### `many_instances`
-
-Generates data for multiple instances of the same service.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace many_instances --live
-```
-
-#### `many_transactions`
-
-Generates a high volume of transactions.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace many_transactions --live
-```
-
-#### `many_errors`
-
-Generates a high volume of APM error documents with varied messages and types.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace many_errors --live
-```
-
-#### `many_dependencies`
-
-Generates traces with many service dependencies.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace many_dependencies --live
-```
-
-#### `service_map`
-
-Generates data for testing the service map visualization with predefined service relationships.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace service_map --live
-```
-
-#### `service_map_oom`
-
-Generates data designed to test service map with out-of-memory scenarios.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace service_map_oom --live
-```
-
-#### `diagnostic_service_map`
-
-Generates diagnostic data for service map testing.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace diagnostic_service_map --live
-```
-
-#### `high_throughput`
-
-Generates high-throughput APM data for performance testing.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace high_throughput --live
-```
-
-#### `low_throughput`
-
-Generates low-throughput APM data.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace low_throughput --live
-```
-
-#### `variance`
-
-Generates data with high variance in metrics and durations.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace variance --live
-```
-
-#### `mobile`
-
-Generates mobile APM data (iOS/Android).
-
-**Usage:**
-
-```sh
-node scripts/synthtrace mobile --live
-```
-
-#### `trace_with_orphan_items`
-
-Generates traces with orphan spans/transactions.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace trace_with_orphan_items --live
-```
-
-#### `trace_with_service_names_with_slashes`
-
-Generates traces with service names containing slashes.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace trace_with_service_names_with_slashes --live
-```
-
-#### `span_links`
-
-Generates traces with span links.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace span_links --live
-```
-
-#### `services_without_transactions`
-
-Generates services that have metrics but no transactions.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace services_without_transactions --live
-```
-
-#### `other_bucket_group`
-
-Generates data for testing "other" bucket grouping.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace other_bucket_group --live
-```
-
-#### `service_summary_field_version_dependent`
-
-Generates data for testing service summary field version dependencies.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace service_summary_field_version_dependent --live
-```
-
-#### `apm_ml_anomalies`
-
-Generates data designed to trigger ML anomaly detection.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace apm_ml_anomalies --live
-```
-
-### Log Scenarios
-
-#### `simple_logs`
-
-Generates simple, structured log documents with varying log levels.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace simple_logs --type=log --live
-node scripts/synthtrace simple_logs --type=log --from=now-24h --to=now
-```
-
-#### `sample_logs`
-
-Generates sample logs from various systems (Linux, Windows, Android).
-
-**Usage:**
-
-```sh
-node scripts/synthtrace sample_logs --type=log --live
-```
-
-**Options:**
-
-- `rpm` (number): Requests per minute
-- `systems` (string|string[]): Systems to generate logs for
-- `streamType` ('classic'|'wired'): Stream type
-
-**Example:**
-
-```sh
-node scripts/synthtrace sample_logs --type=log --scenarioOpts.rpm=100 --live
-```
-
-#### `logs_and_metrics`
-
-Generates a combination of log documents and APM metrics for several services with a fixed 50% error rate.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace logs_and_metrics --type=log --live
-```
-
-#### `logs_and_metrics_custom_error_rate`
-
-Generates a combination of log documents and APM metrics with configurable error and debug rates.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace logs_and_metrics_custom_error_rate --live --scenarioOpts.errorRate=0.1
-node scripts/synthtrace.js logs_and_metrics_custom_error_rate --live --scenarioOpts='{"errorRate":0.2,"debugRate":0.1}'
-```
-
-**Options:**
-
-- `errorRate` (number, default: 0.5): Error rate between 0 and 1 (minimum 1% if provided)
-  - `0.0` = 0% errors (all successful)
-  - `0.1` = 10% errors
-  - `0.5` = 50% errors
-  - `1.0` = 100% errors (all failures)
-- `debugRate` (number, default: 0): Debug log rate between 0 and 1 (minimum 1% if provided)
-- `numServices` (number, default: 3): Number of services to generate
-- `transactionsPerMinute` (number, default: 360): Total transactions per minute
-- `logsPerMinute` (number): Override calculated logs per minute
-- `interval` (string, default: '1m'): Time interval for rate calculation
-  - `'1s'` = per second (better for live mode)
-  - `'1m'` = per minute (default)
-  - `'5m'` = per 5 minutes
-- `isLogsDb` (boolean, default: false): Use LogsDB format
-
-**Accuracy Notes:**
-
-The scenario uses advanced algorithms to generate accurate log distributions:
-
-- Automatically calculates optimal log volume based on time range to balance accuracy with performance
-- Targets ~10,000 total logs to align with Kibana's default sampling behavior
-- Uses the Largest Remainder Method (Hamilton method) for proportional allocation, minimizing rounding errors
-- Displayed percentages may vary by ±0.1-0.5% due to Kibana's sampling when viewing large datasets, rounding during integer allocation, or statistical variance
-- For custom volume requirements, override `logsPerMinute` manually
-
-**Example:**
-
-```sh
-# Generate with 10% error rate and 5% debug rate
-node scripts/synthtrace logs_and_metrics_custom_error_rate --type=log --live --scenarioOpts='{"errorRate":0.1,"debugRate":0.05}'
-
-# Generate with custom service count and transaction rate
-node scripts/synthtrace logs_and_metrics_custom_error_rate --type=log --live --scenarioOpts='{"errorRate":0.2,"numServices":10,"transactionsPerMinute":72}'
-```
-
-#### `apache_logs`
-
-Generates Apache access and error logs.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace apache_logs --type=log --live
-```
-
-#### `kubernetes_logs`
-
-Generates Kubernetes container and audit logs.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace kubernetes_logs --type=log --live
-```
-
-#### `unstructured_logs`
-
-Generates unstructured log documents.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace unstructured_logs --type=log --live
-```
-
-#### `distributed_unstructured_logs`
-
-Generates distributed unstructured logs across multiple services.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace distributed_unstructured_logs --live --scenarioOpts.distribution=uniform
-```
-
-#### `failed_logs`
-
-Generates logs that represent failed operations.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace failed_logs --type=log --live
-```
-
-#### `degraded_logs`
-
-Generates degraded or malformed logs.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace degraded_logs --type=log --live
-```
-
-#### `slash_logs`
-
-Generates logs with slashes in field values.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace slash_logs --type=log --live
-```
-
-#### `simple_non_ecs_logs`
-
-Generates simple logs that don't follow ECS (Elastic Common Schema).
-
-**Usage:**
-
-```sh
-node scripts/synthtrace simple_non_ecs_logs --type=log --live
-```
-
-#### `simple_otel_logs`
-
-Generates OpenTelemetry format logs.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace simple_otel_logs --type=log --live
-```
-
-#### `otel_logs_and_metrics_only`
-
-Generates OpenTelemetry logs and metrics only.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace otel_logs_and_metrics_only --type=log --live
-```
-
-### Infrastructure Scenarios
-
-#### `infra_hosts_with_apm_hosts`
-
-Generates infrastructure host metrics along with APM host data.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace infra_hosts_with_apm_hosts --live
-```
-
-#### `infra_docker_containers`
-
-Generates Docker container metrics.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace infra_docker_containers --live
-```
-
-#### `infra_k8s_containers`
-
-Generates Kubernetes container metrics.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace infra_k8s_containers --live
-```
-
-#### `infra_aws_rds`
-
-Generates AWS RDS infrastructure metrics.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace infra_aws_rds --live
-```
-
-### Combined Scenarios
-
-#### `logs_traces_hosts`
-
-Generates a comprehensive set of correlated logs, APM traces, and host metrics.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace logs_traces_hosts --type=log --live
-```
-
-**Options:**
-
-- `numSpaces` (number, default: 1): Number of spaces
-- `numServices` (number, default: 10): Number of services
-- `numHosts` (number, default: 10): Number of hosts
-- `numAgents` (number, default: 5): Number of agents
-- `numDatasets` (number, default: 6): Number of datasets
-- `datasets` (string[]): Custom list of datasets
-- `degradedRatio` (number, default: 0.25): Percentage of malformed logs
-- `numCustomFields` (number, default: 50): Number of custom fields per document
-- `customFieldPrefix` (string, default: 'field'): Prefix for custom fields
-- `logsInterval` (string, default: '1m'): Log generation interval
-- `logsRate` (number, default: 1): Log generation rate
-- `ingestHosts` (boolean, default: true): Whether to ingest host metrics
-- `ingestTraces` (boolean, default: true): Whether to ingest traces
-- `logsdb` (boolean, default: false): Use LogsDB format
-
-**Example:**
-
-```sh
-node scripts/synthtrace logs_traces_hosts --type=log --scenarioOpts='{"numServices":20,"numHosts":50}' --live
-```
-
-### Specialized Scenarios
-
-#### `aws_lambda`
-
-Generates AWS Lambda function traces and metrics.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace aws_lambda --live
-```
-
-#### `azure_functions`
-
-Generates Azure Functions traces and metrics.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace azure_functions --live
-```
-
-#### `many_otel_services`
-
-Generates data for many OpenTelemetry services.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace many_otel_services --live
-```
-
-#### `otel_simple_trace`
-
-Generates simple OpenTelemetry traces.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace otel_simple_trace --live
-```
-
-#### `degraded_synthetics_monitors`
-
-Generates degraded synthetic monitor data.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace degraded_synthetics_monitors --live
-```
-
-#### `cloud_services_icons`
-
-Generates data for testing cloud service icons.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace cloud_services_icons --live
-```
-
-#### `agent_config`
-
-Generates data for testing agent configuration.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace agent_config --live
-```
-
-### SRE Incident Scenarios
-
-Located in `sre_incidents/` directory:
-
-#### `spiked_latency`
-
-Generates data simulating a latency spike incident.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace sre_incidents/spiked_latency --live
-```
-
-#### `bad_feature_flag`
-
-Generates data simulating a bad feature flag deployment.
-
-**Usage:**
-
-```sh
-node scripts/synthtrace sre_incidents/bad_feature_flag --live
-```
+For detailed information about all available scenarios, their options, and usage examples, see [Examples](./EXAMPLES.md#scenario-examples).
 
 ## Advanced Usage
 
+For advanced usage examples including custom scenario options, combining options, backfilling data, performance tuning, cleaning data, date math, and log levels, see [Examples](./EXAMPLES.md#advanced-usage-examples).
+
 ### Custom Scenario Options
 
-Many scenarios accept custom options via `--scenarioOpts`. Options can be passed in two formats:
-
-**JSON format:**
-
-```sh
-node scripts/synthtrace logs_and_metrics_custom_error_rate --scenarioOpts='{"errorRate":0.1,"debugRate":0.05,"numServices":5}'
-```
-
-**Key-value format:**
-
-```sh
-node scripts/synthtrace logs_and_metrics_custom_error_rate --scenarioOpts=errorRate=0.1,debugRate=0.05,numServices=5
-```
+Many scenarios accept custom options via `--scenarioOpts`. Options can be passed in two formats: JSON format and key-value format.
 
 **Note:** When using the key-value format, use `--scenarioOpts=` (with equals sign) not `--scenarioOpts.` (with dot). The dot notation (`--scenarioOpts.key=value`) only works for single options and cannot be combined with comma-separated values.
 
 ### Combining Options
 
-You can combine multiple options:
-
-```sh
-node scripts/synthtrace simple_trace --live --clean --scenarioOpts.numServices=10 --logLevel=debug
-```
+You can combine multiple options together.
 
 ### Backfilling Data
 
-You can backfill historical data and then continue with live generation:
-
-```sh
-# First, backfill 24 hours of data
-node scripts/synthtrace simple_trace --from=now-24h --to=now
-
-# Then start live generation
-node scripts/synthtrace simple_trace --from=now-24h --to=now --live
-```
+You can backfill historical data and then continue with live generation.
 
 ### Performance Tuning
 
-For high-volume scenarios, you can tune performance:
-
-```sh
-# Use multiple workers for parallel processing
-node scripts/synthtrace high_throughput --workers=4 --live
-
-# Increase concurrency for bulk indexing
-node scripts/synthtrace high_throughput --concurrency=5 --live
-
-# Adjust live bucket size
-node scripts/synthtrace high_throughput --liveBucketSize=500 --live
-```
+For high-volume scenarios, you can tune performance using `--workers`, `--concurrency`, and `--liveBucketSize` options.
 
 ### Cleaning Data
 
-To clean existing data before generating new data:
-
-```sh
-node scripts/synthtrace simple_trace --clean --live
-```
+To clean existing data before generating new data, use the `--clean` option.
 
 **Note:** The `--clean` option only cleans APM indices tracked by the client. For custom indices (like heartbeat), scenarios may implement their own cleanup logic.
 
 ### Date Math
 
-You can use date math expressions for time ranges:
-
-```sh
-# Last 24 hours
-node scripts/synthtrace simple_trace --from=now-24h --to=now
-
-# Last week
-node scripts/synthtrace simple_trace --from=now-7d --to=now
-
-# Specific date range
-node scripts/synthtrace simple_trace --from=2024-01-01T00:00:00Z --to=2024-01-02T00:00:00Z
-```
+You can use date math expressions for time ranges (e.g., `now-24h`, `now-7d`).
 
 ### Log Levels
 
-Control verbosity with log levels:
-
-```sh
-# Verbose output
-node scripts/synthtrace simple_trace --logLevel=verbose --live
-
-# Debug output
-node scripts/synthtrace simple_trace --logLevel=debug --live
-
-# Quiet mode
-node scripts/synthtrace simple_trace --logLevel=error --live
-```
+Control verbosity with log levels: `verbose`, `debug`, `info`, `error`.
 
 ## Testing
 
@@ -976,3 +319,13 @@ For more information:
 - Check scenario source files in `src/platform/packages/shared/kbn-apm-synthtrace/src/scenarios/`
 - Review test files in `src/platform/packages/shared/kbn-apm-synthtrace/src/test/`
 - Check Kibana APM documentation
+- See [Examples](./EXAMPLES.md) for usage examples
+
+## Examples
+
+For comprehensive usage examples, see [EXAMPLES.md](./EXAMPLES.md). This includes:
+
+- Node.js module code examples
+- CLI usage examples
+- Scenario-specific examples
+- Advanced usage examples
