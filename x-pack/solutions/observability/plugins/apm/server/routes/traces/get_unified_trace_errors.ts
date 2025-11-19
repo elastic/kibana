@@ -24,6 +24,7 @@ import {
   ERROR_EXC_HANDLED,
   ERROR_GROUP_ID,
   ERROR_CULPRIT,
+  ERROR_ID,
 } from '../../../common/es_fields/apm';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import type { LogsClient } from '../../lib/helpers/create_es_client/create_logs_client';
@@ -84,6 +85,7 @@ export interface UnifiedError {
   timestamp?: TimestampUs;
   eventName?: string;
   error: {
+    id?: string;
     exception?: Exception;
     grouping_key?: string;
     culprit?: string;
@@ -119,6 +121,7 @@ async function getUnifiedApmTraceError(params: {
       spanId,
       timestamp: { us: event[TIMESTAMP_US] },
       error: {
+        id: event[ERROR_ID],
         grouping_key: event[ERROR_GROUP_ID],
         log: errorSource?.error.log,
         culprit: event[ERROR_CULPRIT],
