@@ -15,7 +15,7 @@ import { SavedObjectsUtils } from '@kbn/core/server';
 import type { IKibanaResponse } from '@kbn/core/server';
 import { ScheduleType } from '@kbn/reporting-server';
 import type { RawNotification } from '../../../saved_objects/scheduled_report/schemas/latest';
-import { rawNotificationSchema } from '../../../saved_objects/scheduled_report/schemas/v4';
+import { rawNotificationSchema } from '../../../saved_objects/scheduled_report/schemas/latest';
 import type {
   ScheduledReportApiJSON,
   ScheduledReportType,

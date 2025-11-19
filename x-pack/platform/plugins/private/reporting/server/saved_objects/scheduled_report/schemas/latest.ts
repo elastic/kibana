@@ -6,7 +6,9 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type { rawNotificationSchema, rawScheduledReportSchema } from './v4';
+import { rawNotificationSchema, rawScheduledReportSchema } from './v4';
 
 export type RawNotification = TypeOf<typeof rawNotificationSchema>;
 export type RawScheduledReport = TypeOf<typeof rawScheduledReportSchema>;
+
+export { rawNotificationSchema, rawScheduledReportSchema };
