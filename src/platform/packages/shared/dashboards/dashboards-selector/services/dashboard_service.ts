@@ -7,108 +7,92 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SearchQuery } from '@kbn/content-management-plugin/common';
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import type { Reference, ContentManagementCrudTypes } from '@kbn/content-management-utils';
-import type { SavedObjectError } from '@kbn/core/public';
-import type { GetIn } from '@kbn/content-management-plugin/common';
-
-const DASHBOARD_CONTENT_TYPE_ID = 'dashboard';
-export type DashboardGetIn = GetIn<typeof DASHBOARD_CONTENT_TYPE_ID>;
-
-export type FindDashboardsByIdResponse = { id: string } & (
-  | { status: 'success'; attributes: any; references: Reference[] }
-  | { status: 'error'; error: SavedObjectError }
-);
+import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 
 export interface DashboardItem {
   id: string;
-  attributes: any; // DashboardAttributes is exported in the Dashboard plugin and this causes a cycle dependency. Get feedback on the best approach here
+  attributes: {
+    title: string;
+    description?: string;
+  };
+}
+
+interface DashboardSearchResult {
+  id: string;
+  isManaged: boolean;
+  title: string;
 }
 
 export type DashboardService = ReturnType<typeof dashboardServiceProvider>;
 export type DashboardItems = Awaited<ReturnType<DashboardService['fetchDashboards']>>;
 
-export function dashboardServiceProvider(contentManagementService: ContentManagementPublicStart) {
+export function dashboardServiceProvider(uiActions: UiActionsPublicStart) {
   return {
     /**
-     * Fetch dashboards
-     * @param query - The query to search for dashboards
+     * Fetch dashboards using the searchDashboardAction UI action
+     * @param search - Optional search string to filter dashboards
+     * @param limit - Maximum number of dashboards to return
      * @returns - The dashboards that match the query
      */
-    async fetchDashboards(query: SearchQuery = {}): Promise<DashboardItem[]> {
+    async fetchDashboards({
+      search,
+      limit = 100,
+    }: { search?: string; limit?: number } = {}): Promise<DashboardItem[]> {
       try {
-        const response = await contentManagementService.client.search({
-          contentTypeId: 'dashboard',
-          query,
-          options: { fields: ['title', 'description'], includeReferences: ['tag'] },
+        const searchAction = await uiActions.getAction('searchDashboardAction');
+        return new Promise<DashboardItem[]>((resolve, reject) => {
+          searchAction.execute({
+            onResults(dashboards: DashboardSearchResult[]) {
+              // Transform the dashboard search results to DashboardItem format
+              const items: DashboardItem[] = dashboards.map((dashboard) => ({
+                id: dashboard.id,
+                attributes: {
+                  title: dashboard.title,
+                },
+              }));
+              resolve(items);
+            },
+            search: {
+              search,
+              per_page: limit,
+            },
+            trigger: { id: 'searchDashboards' },
+          } as ActionExecutionContext);
         });
-        // The response should be SearchResult with { hits: T[], pagination: {...} }
-        if (response && typeof response === 'object' && 'hits' in response) {
-          return (response as { hits: DashboardItem[] }).hits;
-        }
-        // If response structure is different, log it for debugging
-        console.warn('Unexpected response structure from contentManagement.client.search:', response);
-        return [];
       } catch (error) {
         console.error('Error fetching dashboards:', error);
         return [];
       }
     },
     /**
-     * Fetch dashboard by id
+     * Fetch dashboard by id using the searchDashboardAction
      * @param id - The id of the dashboard to fetch
      * @returns - The dashboard with the given id
-     * @throws - An error if the dashboard does not exist
      */
-    async fetchDashboard(id: string): Promise<FindDashboardsByIdResponse> {
+    async fetchDashboard(id: string): Promise<DashboardItem | null> {
       try {
-        const response = await contentManagementService.client.get<
-          DashboardGetIn,
-          ContentManagementCrudTypes<
-            typeof DASHBOARD_CONTENT_TYPE_ID,
-            any,
-            object,
-            object,
-            object
-          >['GetOut']
-        >({
-          contentTypeId: 'dashboard',
-          id,
-        });
-        if (response.item.error) {
-          throw response.item.error;
-        }
-
-        return {
-          id,
-          status: 'success',
-          attributes: response.item.attributes,
-          references: response.item.references,
-        };
+        // Search for dashboards and find the one with matching id
+        const dashboards = await this.fetchDashboards({ limit: 1000 });
+        const dashboard = dashboards.find((d) => d.id === id);
+        return dashboard || null;
       } catch (error) {
-        return {
-          status: 'error',
-          error: error.body || error.message,
-          id,
-        };
+        console.error('Error fetching dashboard:', error);
+        return null;
       }
     },
 
-    async fetchDashboardsByIds(ids: string[]) {
-      const findPromises = ids.map((id) => this.fetchDashboard(id));
-      const results = await Promise.all(findPromises);
-      return results as FindDashboardsByIdResponse[];
+    async fetchDashboardsByIds(ids: string[]): Promise<DashboardItem[]> {
+      const dashboards = await this.fetchDashboards({ limit: 1000 });
+      return dashboards.filter((dashboard) => ids.includes(dashboard.id));
     },
     /**
      * Fetch only the dashboards that still exist
      * @param ids - The ids of the dashboards to fetch
      * @returns - The dashboards that exist
      */
-    async fetchValidDashboards(ids: string[]) {
-      const responses = await this.fetchDashboardsByIds(ids);
-      const existingDashboards = responses.filter(({ status }) => status === 'success');
-      return existingDashboards;
+    async fetchValidDashboards(ids: string[]): Promise<DashboardItem[]> {
+      return this.fetchDashboardsByIds(ids);
     },
   };
 }

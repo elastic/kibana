@@ -8,76 +8,88 @@
  */
 
 import { dashboardServiceProvider } from './dashboard_service';
-import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
+import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 
 describe('DashboardService', () => {
-  const contentManagement = contentManagementMock.createStartContract();
-  const dashboardService = dashboardServiceProvider(contentManagement);
+  const mockSearchAction = {
+    execute: jest.fn((context: ActionExecutionContext) => {
+      if (context.onResults) {
+        context.onResults([
+          { id: '1', isManaged: false, title: 'Dashboard 1' },
+          { id: '2', isManaged: false, title: 'Dashboard 2' },
+        ]);
+      }
+    }),
+  };
+
+  const mockUiActions = {
+    getAction: jest.fn().mockResolvedValue(mockSearchAction),
+  } as unknown as UiActionsPublicStart;
+
+  const dashboardService = dashboardServiceProvider(mockUiActions);
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
 
   test('should fetch dashboards', async () => {
-    // arrange
-    const searchMock = jest.spyOn(contentManagement.client, 'search').mockResolvedValue({
-      total: 0,
-      hits: [],
-    });
+    const resp = await dashboardService.fetchDashboards({ search: 'test', limit: 100 });
 
-    const resp = await dashboardService.fetchDashboards({ text: 'test*' });
+    expect(mockUiActions.getAction).toHaveBeenCalledWith('searchDashboardAction');
+    expect(mockSearchAction.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        search: {
+          search: 'test',
+          per_page: 100,
+        },
+        trigger: { id: 'searchDashboards' },
+      })
+    );
+    expect(resp).toEqual([
+      { id: '1', attributes: { title: 'Dashboard 1' } },
+      { id: '2', attributes: { title: 'Dashboard 2' } },
+    ]);
+  });
 
-    expect(searchMock).toHaveBeenCalledWith({
-      contentTypeId: 'dashboard',
-      query: {
-        text: 'test*',
-      },
-      options: {
-        fields: ['title', 'description'],
-        includeReferences: ['tag'],
-      },
-    });
-    expect(resp).toEqual([]);
+  test('should fetch dashboards without search term', async () => {
+    const resp = await dashboardService.fetchDashboards({ limit: 50 });
 
-    searchMock.mockRestore();
+    expect(mockSearchAction.execute).toHaveBeenCalledWith(
+      expect.objectContaining({
+        search: {
+          search: undefined,
+          per_page: 50,
+        },
+      })
+    );
+    expect(resp).toHaveLength(2);
   });
 
   test('should fetch dashboard by id', async () => {
-    // mock get to resolve with a dashboard
-    const getMock = jest.spyOn(contentManagement.client, 'get').mockResolvedValue({
-      item: {
-        error: null,
-        attributes: {
-          title: 'Dashboard 1',
-        },
-        references: [],
-      },
-    });
-
-    // act
+    // First fetch all dashboards, then find by id
     const resp = await dashboardService.fetchDashboard('1');
 
-    // assert
-    expect(getMock).toHaveBeenCalledWith({ contentTypeId: 'dashboard', id: '1' });
     expect(resp).toEqual({
-      status: 'success',
       id: '1',
-      attributes: {
-        title: 'Dashboard 1',
-      },
-      references: [],
+      attributes: { title: 'Dashboard 1' },
     });
-
-    getMock.mockRestore();
   });
 
-  test('should return an error if dashboard id is not found', async () => {
-    const getMock = jest.spyOn(contentManagement.client, 'get').mockRejectedValue({
-      message: 'Dashboard not found',
-    });
+  test('should return null if dashboard id is not found', async () => {
+    const resp = await dashboardService.fetchDashboard('999');
 
-    const resp = await dashboardService.fetchDashboard('2');
-    expect(getMock).toHaveBeenCalledWith({ contentTypeId: 'dashboard', id: '2' });
-    expect(resp).toEqual({
-      status: 'error',
-      id: '2',
-      error: 'Dashboard not found',
-    });
+    expect(resp).toBeNull();
+  });
+
+  test('should handle errors gracefully', async () => {
+    const errorUiActions = {
+      getAction: jest.fn().mockRejectedValue(new Error('Action not found')),
+    } as unknown as UiActionsPublicStart;
+
+    const errorService = dashboardServiceProvider(errorUiActions);
+    const resp = await errorService.fetchDashboards();
+
+    expect(resp).toEqual([]);
   });
 });

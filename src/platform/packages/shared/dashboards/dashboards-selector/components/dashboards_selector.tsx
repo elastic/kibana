@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { i18n } from '@kbn/i18n';
-import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -20,12 +20,12 @@ interface DashboardOption {
 }
 
 export function DashboardsSelector({
-  contentManagement,
+  uiActions,
   dashboardsFormData,
   onChange,
   placeholder,
 }: {
-  contentManagement: ContentManagementPublicStart;
+  uiActions: UiActionsPublicStart;
   dashboardsFormData: { id: string }[];
   onChange: (selectedOptions: Array<EuiComboBoxOptionOption<string>>) => void;
   placeholder?: string;
@@ -41,23 +41,18 @@ export function DashboardsSelector({
   const [isComboBoxOpen, setIsComboBoxOpen] = useState(false);
 
   const fetchDashboardTitles = useCallback(async () => {
-    if (!dashboardsFormData?.length || !contentManagement) {
+    if (!dashboardsFormData?.length || !uiActions) {
       return;
     }
 
     try {
+      const dashboardService = dashboardServiceProvider(uiActions);
       const dashboardPromises = dashboardsFormData.map(async (dashboard) => {
         try {
-          const fetchedDashboard = await dashboardServiceProvider(contentManagement).fetchDashboard(
-            dashboard.id
-          );
+          const fetchedDashboard = await dashboardService.fetchDashboard(dashboard.id);
 
-          // Only return the dashboard if it exists, fetch was successful, and has a title
-          if (
-            fetchedDashboard &&
-            fetchedDashboard.status === 'success' &&
-            fetchedDashboard.attributes?.title
-          ) {
+          // Only return the dashboard if it exists and has a title
+          if (fetchedDashboard && fetchedDashboard.attributes?.title) {
             return {
               label: fetchedDashboard.attributes.title,
               value: dashboard.id,
@@ -84,7 +79,7 @@ export function DashboardsSelector({
       // Set empty array or handle the error appropriately
       setSelectedDashboards([]);
     }
-  }, [dashboardsFormData, contentManagement]);
+  }, [dashboardsFormData, uiActions]);
 
   useEffect(() => {
     fetchDashboardTitles();
@@ -111,24 +106,28 @@ export function DashboardsSelector({
   });
 
   const loadDashboards = useCallback(async () => {
-    console.log('Loading dashboards with search value:', searchValue);
-    console.log(contentManagement, '!!contentManagement');
-    if (contentManagement) {
+    if (uiActions) {
       setLoading(true);
-      const dashboards = await dashboardServiceProvider(contentManagement)
-        .fetchDashboards({ limit: 100, text: `${searchValue}*` })
-        .catch(() => {});
-      console.log(dashboards, '!!dashboards')
-      const dashboardOptions = (dashboards ?? []).map((dashboard: DashboardItem) =>
-        getDashboardItem(dashboard)
-      );
-      setDashboardList(dashboardOptions);
-      setLoading(false);
+      try {
+        const dashboardService = dashboardServiceProvider(uiActions);
+        const dashboards = await dashboardService.fetchDashboards({
+          search: searchValue.trim() || undefined,
+          limit: 100,
+        });
+        const dashboardOptions = dashboards.map((dashboard: DashboardItem) =>
+          getDashboardItem(dashboard)
+        );
+        setDashboardList(dashboardOptions);
+      } catch (error) {
+        console.error('Error loading dashboards:', error);
+        setDashboardList([]);
+      } finally {
+        setLoading(false);
+      }
     }
-  }, [contentManagement, searchValue]);
+  }, [uiActions, searchValue]);
 
   useEffect(() => {
-    console.log('!!should load dashboards??');
     if (isComboBoxOpen) {
       loadDashboards();
     }

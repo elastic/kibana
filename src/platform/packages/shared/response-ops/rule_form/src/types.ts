@@ -25,6 +25,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { ActionConnector, ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public';
 import type {
   MinimumScheduleInterval,
   Rule,
@@ -73,6 +74,7 @@ export interface RuleFormPlugins {
   actionTypeRegistry: ActionTypeRegistryContract;
   fieldsMetadata: FieldsMetadataPublicStart;
   contentManagement?: ContentManagementPublicStart;
+  uiActions?: UiActionsPublicStart;
 }
 
 export interface RuleFormState<
@@ -111,4 +113,4 @@ export interface ValidationResult {
   errors: Record<string, any>;
 }
 
-export type RuleDashboardsPlugins = Pick<RuleFormPlugins, 'contentManagement'>;
+export type RuleDashboardsPlugins = Pick<RuleFormPlugins, 'uiActions'>;

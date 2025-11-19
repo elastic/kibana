@@ -10,7 +10,7 @@
 import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { DashboardsSelector } from './dashboards_selector';
-import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
+import type { UiActionsPublicStart } from '@kbn/ui-actions-plugin/public';
 import userEvent from '@testing-library/user-event';
 
 const MOCK_FIRST_DASHBOARD_ID = 'dashboard-1';
@@ -20,17 +20,13 @@ const MOCK_SECOND_DASHBOARD_TITLE = 'Second Dashboard';
 const MOCK_PLACEHOLDER = 'Select a dashboard';
 
 const MOCK_FIRST_DASHBOARD = {
-  status: 'success',
   id: MOCK_FIRST_DASHBOARD_ID,
   attributes: { title: MOCK_FIRST_DASHBOARD_TITLE },
-  references: [],
 };
 
 const MOCK_SECOND_DASHBOARD = {
-  status: 'success',
   id: MOCK_SECOND_DASHBOARD_ID,
   attributes: { title: MOCK_SECOND_DASHBOARD_TITLE },
-  references: [],
 };
 
 const mockFetchDashboard = jest.fn();
@@ -41,7 +37,7 @@ const mockFetchDashboards = jest
 // Mock the dashboard service
 jest.mock('../services/dashboard_service', () => ({
   dashboardServiceProvider: jest.fn(() => ({
-    fetchDashboards: (options: { limit: number; text: string }) => mockFetchDashboards(options),
+    fetchDashboards: (options: { search?: string; limit?: number }) => mockFetchDashboards(options),
     fetchDashboard: (id: string) => mockFetchDashboard(id),
   })),
 }));
@@ -58,12 +54,14 @@ describe('DashboardsSelector', () => {
     jest.clearAllMocks();
   });
 
-  const contentManagement = contentManagementMock.createStartContract();
+  const mockUiActions = {
+    getAction: jest.fn(),
+  } as unknown as UiActionsPublicStart;
 
   it('renders the component', () => {
     render(
       <DashboardsSelector
-        contentManagement={contentManagement}
+        uiActions={mockUiActions}
         dashboardsFormData={[]}
         onChange={mockOnChange}
         placeholder={MOCK_PLACEHOLDER}
@@ -78,7 +76,7 @@ describe('DashboardsSelector', () => {
   it('displays selected dashboard titles from dashboardsFormData', async () => {
     render(
       <DashboardsSelector
-        contentManagement={contentManagement}
+        uiActions={mockUiActions}
         dashboardsFormData={[{ id: MOCK_FIRST_DASHBOARD_ID }, { id: MOCK_SECOND_DASHBOARD_ID }]}
         onChange={mockOnChange}
         placeholder={MOCK_PLACEHOLDER}
@@ -99,7 +97,7 @@ describe('DashboardsSelector', () => {
   it('debounces and triggers dashboard search with user input in the ComboBox', async () => {
     render(
       <DashboardsSelector
-        contentManagement={contentManagement}
+        uiActions={mockUiActions}
         dashboardsFormData={[]}
         onChange={mockOnChange}
         placeholder={MOCK_PLACEHOLDER}
@@ -115,7 +113,7 @@ describe('DashboardsSelector', () => {
       expect(searchInput).toHaveValue(MOCK_FIRST_DASHBOARD_TITLE);
 
       expect(mockFetchDashboards).toHaveBeenCalledWith(
-        expect.objectContaining({ limit: 100, text: `${MOCK_FIRST_DASHBOARD_TITLE}*` })
+        expect.objectContaining({ search: MOCK_FIRST_DASHBOARD_TITLE, limit: 100 })
       );
 
       expect(screen.getByText(MOCK_FIRST_DASHBOARD_TITLE)).toBeInTheDocument();
@@ -125,7 +123,7 @@ describe('DashboardsSelector', () => {
   it('fetches dashboard list when combobox is focused', async () => {
     render(
       <DashboardsSelector
-        contentManagement={contentManagement}
+        uiActions={mockUiActions}
         dashboardsFormData={[]}
         onChange={mockOnChange}
         placeholder={MOCK_PLACEHOLDER}
@@ -142,7 +140,7 @@ describe('DashboardsSelector', () => {
   it('does not fetch dashboard list when combobox is not focused', async () => {
     render(
       <DashboardsSelector
-        contentManagement={contentManagement}
+        uiActions={mockUiActions}
         dashboardsFormData={[]}
         onChange={mockOnChange}
         placeholder={MOCK_PLACEHOLDER}
@@ -155,7 +153,7 @@ describe('DashboardsSelector', () => {
   it('dispatches selected dashboards on change', async () => {
     render(
       <DashboardsSelector
-        contentManagement={contentManagement}
+        uiActions={mockUiActions}
         dashboardsFormData={[{ id: MOCK_FIRST_DASHBOARD_ID }]}
         onChange={mockOnChange}
         placeholder={MOCK_PLACEHOLDER}
@@ -168,9 +166,11 @@ describe('DashboardsSelector', () => {
 
     // Wait for the dropdown to open and options to load
     await waitFor(() => {
-      expect(mockFetchDashboards).toHaveBeenCalledWith(
-        expect.objectContaining({ limit: 100, text: '*' })
-      );
+      expect(mockFetchDashboards).toHaveBeenCalled();
+      // When search value is empty, search should be undefined
+      const lastCall = mockFetchDashboards.mock.calls[mockFetchDashboards.mock.calls.length - 1];
+      expect(lastCall[0]).toEqual(expect.objectContaining({ limit: 100 }));
+      expect(lastCall[0].search).toBeUndefined();
     });
 
     // Wait for the second dashboard option to appear in the dropdown

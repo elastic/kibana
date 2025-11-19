@@ -31,6 +31,7 @@ export const RuleFormRoute = () => {
     ruleTypeRegistry,
     actionTypeRegistry,
     contentManagement,
+    uiActions,
     chrome,
     setBreadcrumbs,
     ...startServices
@@ -104,6 +105,7 @@ export const RuleFormRoute = () => {
           ruleTypeRegistry,
           actionTypeRegistry,
           contentManagement,
+          uiActions,
           ...startServices,
         }}
         initialValues={ruleTemplate}
