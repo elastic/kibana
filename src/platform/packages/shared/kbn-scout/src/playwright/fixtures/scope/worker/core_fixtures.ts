@@ -155,8 +155,6 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
       };
 
       const setCustomRole = async (role: KibanaRole | ElasticsearchRoleDescriptor) => {
-        isCustomRoleCreated = true;
-
         const newRoleHash = JSON.stringify(role);
 
         if (isCustomRoleSet(newRoleHash)) {
@@ -164,7 +162,13 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
           return;
         }
 
-        log.debug(`Creating custom role '${customRoleName}'`);
+        log.debug(
+          isCustomRoleCreated
+            ? `Overriding existing custom role '${customRoleName}'`
+            : `Creating custom role '${customRoleName}'`
+        );
+
+        isCustomRoleCreated = true;
 
         if (isElasticsearchRole(role)) {
           await createElasticsearchCustomRole(esClient, customRoleName, role);
