@@ -200,4 +200,9 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
     const columnText = await pageObjects.discover.getTheColumnFromGrid();
     expect(columnText).toContain('@message');
   });
+
+  test('type a search query and execute a search', async ({ pageObjects }) => {
+    pageObjects.discover.writeSearchQuery('response:200');
+    await expect.poll(async () => await pageObjects.discover.getHitCountInt()).toBe(12891);
+  });
 });

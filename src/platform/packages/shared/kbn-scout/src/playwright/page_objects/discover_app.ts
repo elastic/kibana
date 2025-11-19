@@ -172,4 +172,10 @@ export class DiscoverApp {
   async getTheColumnFromGrid(): Promise<string> {
     return await this.page.testSubj.locator('unifiedDataTableColumnTitle').innerText();
   }
+
+  async writeSearchQuery(query: string) {
+    await this.page.testSubj.typeWithDelay('queryInput', query);
+    await this.page.testSubj.click('querySubmitButton');
+    await this.waitUntilSearchingHasFinished();
+  }
 }
