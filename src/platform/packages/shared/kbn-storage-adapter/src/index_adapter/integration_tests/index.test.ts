@@ -389,45 +389,13 @@ describe('StorageIndexAdapter', () => {
     });
   });
 
-  describe('when writing/bootstrapping with an legacy index', () => {
+  describe('when bulk operation encounters errors', () => {
     beforeAll(async () => {
       await createServers();
-
-      await client.index({ id: 'foo', document: { foo: 'bar' } });
-
-      jest.spyOn(getSchemaVersionModule, 'getSchemaVersion').mockReturnValue('next_version');
-
-      await client.index({ id: 'foo', document: { foo: 'bar' } });
     });
 
     afterAll(async () => {
       await stopServers();
-    });
-
-    it('updates the existing write index in place', async () => {
-      await verifyIndex({ version: 'next_version' });
-
-      const getIndicesResponse = await esClient.indices.get({
-        index: TEST_INDEX_NAME,
-      });
-
-      const indices = Object.keys(getIndicesResponse);
-
-      const writeIndexName = `${TEST_INDEX_NAME}-000001`;
-
-      expect(indices).toEqual([writeIndexName]);
-
-      expect(getIndicesResponse[writeIndexName].mappings?._meta?.version).toEqual('next_version');
-    });
-
-    it('deletes the documents', async () => {
-      await verifyClean();
-    });
-  });
-
-  describe('when bulk operation encounters errors', () => {
-    afterAll(async () => {
-      await client?.clean();
     });
 
     it('throws BulkOperationError when bulk operation contains document-level errors', async () => {
@@ -515,6 +483,42 @@ describe('StorageIndexAdapter', () => {
       }
 
       await strictClient.clean();
+    });
+  });
+
+  describe('when writing/bootstrapping with an legacy index', () => {
+    beforeAll(async () => {
+      await createServers();
+
+      await client.index({ id: 'foo', document: { foo: 'bar' } });
+
+      jest.spyOn(getSchemaVersionModule, 'getSchemaVersion').mockReturnValue('next_version');
+
+      await client.index({ id: 'foo', document: { foo: 'bar' } });
+    });
+
+    afterAll(async () => {
+      await stopServers();
+    });
+
+    it('updates the existing write index in place', async () => {
+      await verifyIndex({ version: 'next_version' });
+
+      const getIndicesResponse = await esClient.indices.get({
+        index: TEST_INDEX_NAME,
+      });
+
+      const indices = Object.keys(getIndicesResponse);
+
+      const writeIndexName = `${TEST_INDEX_NAME}-000001`;
+
+      expect(indices).toEqual([writeIndexName]);
+
+      expect(getIndicesResponse[writeIndexName].mappings?._meta?.version).toEqual('next_version');
+    });
+
+    it('deletes the documents', async () => {
+      await verifyClean();
     });
   });
 
