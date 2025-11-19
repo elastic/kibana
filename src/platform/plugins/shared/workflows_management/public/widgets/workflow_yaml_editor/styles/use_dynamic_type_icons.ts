@@ -33,14 +33,6 @@ export const predefinedStepTypes = [
     displayName: 'Kibana',
   },
   {
-    actionTypeId: 'slack',
-    displayName: 'Slack',
-  },
-  {
-    actionTypeId: 'inference',
-    displayName: 'Inference',
-  },
-  {
     actionTypeId: 'if',
     displayName: 'If',
   },
@@ -87,7 +79,7 @@ export function useDynamicTypeIcons(connectorsData: ConnectorsResponse | undefin
     const connectorTypes = Object.values(connectorsData.connectorTypes).map((connector) => {
       const actionType = actionTypeRegistry.get(connector.actionTypeId);
       return {
-        actionTypeId: connector.actionTypeId.slice(1), // remove the leading dot
+        actionTypeId: connector.actionTypeId,
         displayName: connector.displayName,
         icon: actionType.iconClass,
       };
@@ -120,7 +112,10 @@ async function injectDynamicConnectorIcons(connectorTypes: ConnectorTypeInfoMini
   let cssToInject = '';
 
   for (const connector of Object.values(connectorTypes)) {
-    const connectorType = connector.actionTypeId;
+    const connectorType = connector.actionTypeId.startsWith('.')
+      ? connector.actionTypeId.slice(1)
+      : connector.actionTypeId;
+
     const displayName = connector.displayName;
 
     try {

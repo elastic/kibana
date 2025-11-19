@@ -8,8 +8,7 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { SUB_ACTION } from '../../../common/bedrock/constants';
-import { BEDROCK_CONNECTOR_ID, BEDROCK_TITLE } from '../../../common/bedrock/constants';
+import { CONNECTOR_ID, CONNECTOR_NAME, SUB_ACTION } from '@kbn/connector-schemas/bedrock/constants';
 import type { BedrockActionParams, BedrockConnector } from './types';
 
 interface ValidationErrors {
@@ -18,12 +17,12 @@ interface ValidationErrors {
 }
 export function getConnectorType(): BedrockConnector {
   return {
-    id: BEDROCK_CONNECTOR_ID,
+    id: CONNECTOR_ID,
     iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.translate('xpack.stackConnectors.components.bedrock.selectMessageText', {
       defaultMessage: 'Send a request to Amazon Bedrock.',
     }),
-    actionTypeTitle: BEDROCK_TITLE,
+    actionTypeTitle: CONNECTOR_NAME,
     validateParams: async (
       actionParams: BedrockActionParams
     ): Promise<GenericValidationResult<ValidationErrors>> => {
