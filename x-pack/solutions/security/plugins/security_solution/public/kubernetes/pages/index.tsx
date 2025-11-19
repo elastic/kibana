@@ -15,9 +15,8 @@ import { SecurityPageName } from '../../../common/constants';
 import { SpyRoute } from '../../common/utils/route/spy_routes';
 import { FiltersGlobal } from '../../common/components/filters_global';
 import { SiemSearchBar } from '../../common/components/search_bar';
-import { showGlobalFilters } from '../../timelines/components/timeline/helpers';
 import { inputsSelectors } from '../../common/store';
-import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
+// import { useGlobalFullScreen } from '../../common/containers/use_full_screen';
 import { useSourcererDataView } from '../../sourcerer/containers';
 import { useGlobalTime } from '../../common/containers/use_global_time';
 import { useDeepEqualSelector } from '../../common/hooks/use_selector';
@@ -26,13 +25,15 @@ import { useInvalidFilterQuery } from '../../common/hooks/use_invalid_filter_que
 import { SessionsView } from '../../common/components/sessions_viewer';
 import { kubernetesSessionsHeaders } from './constants';
 import { dataViewSpecToIndexPattern } from './utils/data_view_spec_to_index_pattern';
+import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 
 export const KubernetesContainer = React.memo(() => {
   const { kubernetesSecurity, uiSettings } = useKibana().services;
 
-  const { globalFullScreen } = useGlobalFullScreen();
+  // const { globalFullScreen } = useGlobalFullScreen();
   const { sourcererDataView, dataViewId } = useSourcererDataView();
   const { from, to } = useGlobalTime();
+  const { dataView: experimentalDataView } = useDataView();
 
   const getGlobalFiltersQuerySelector = useMemo(
     () => inputsSelectors.globalFiltersQuerySelector(),
@@ -49,8 +50,9 @@ export const KubernetesContainer = React.memo(() => {
         dataViewSpec: sourcererDataView,
         queries: [query],
         filters,
+        dataView: experimentalDataView,
       }),
-    [filters, sourcererDataView, uiSettings, query]
+    [filters, sourcererDataView, uiSettings, query, experimentalDataView]
   );
 
   useInvalidFilterQuery({
@@ -81,8 +83,13 @@ export const KubernetesContainer = React.memo(() => {
     <SecuritySolutionPageWrapper noPadding>
       {kubernetesSecurity.getKubernetesPage({
         filter: (
-          <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId: undefined })}>
-            <SiemSearchBar id={InputsModelId.global} sourcererDataView={sourcererDataView} />
+          // <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId: undefined })}>
+          <FiltersGlobal>
+            <SiemSearchBar
+              id={InputsModelId.global}
+              sourcererDataViewSpec={sourcererDataView}
+              dataView={experimentalDataView}
+            />
           </FiltersGlobal>
         ),
         indexPattern: dataViewSpecToIndexPattern(sourcererDataView),
