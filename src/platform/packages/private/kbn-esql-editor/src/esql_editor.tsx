@@ -26,13 +26,14 @@ import { Global, css } from '@emotion/react';
 import { getESQLQueryColumns } from '@kbn/esql-utils';
 import type { CodeEditorProps } from '@kbn/code-editor';
 import { CodeEditor } from '@kbn/code-editor';
-import type { CoreStart } from '@kbn/core/public';
+import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import type { AggregateQuery, TimeRange } from '@kbn/es-query';
 import type { FieldType } from '@kbn/esql-ast';
 import type { ESQLFieldWithMetadata } from '@kbn/esql-ast/src/commands_registry/types';
 import type { ESQLTelemetryCallbacks } from '@kbn/esql-types';
 import {
   ESQLVariableType,
+  TelemetryControlCancelledReason,
   type ESQLControlVariable,
   type IndicesAutocompleteResult,
 } from '@kbn/esql-types';
@@ -94,7 +95,8 @@ const triggerControl = async (
   triggerSource: ControlTriggerSource,
   esqlVariables?: ESQLControlVariable[],
   onSaveControl?: ControlsContext['onSaveControl'],
-  onCancelControl?: ControlsContext['onCancelControl']
+  onCancelControl?: ControlsContext['onCancelControl'],
+  onCloseControlFlyout?: (flyoutRef: OverlayRef) => void
 ) => {
   await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
     queryString,
@@ -104,6 +106,7 @@ const triggerControl = async (
     esqlVariables,
     onSaveControl,
     onCancelControl,
+    onCloseControlFlyout,
   });
 };
 
@@ -368,6 +371,14 @@ const ESQLEditorInternal = function ESQLEditor({
         fixedQuery
       );
       const position = editor1.current?.getPosition();
+      const onCloseControlFlyout = (flyoutRef: OverlayRef) => {
+        controlsContext?.onCancelControl?.();
+        flyoutRef.close();
+        telemetryService.trackEsqlControlConfigCancelled(
+          variableType,
+          TelemetryControlCancelledReason.CLOSE_BUTTON
+        );
+      };
       await triggerControl(
         fixedQuery,
         variableType,
@@ -376,7 +387,8 @@ const ESQLEditorInternal = function ESQLEditor({
         triggerSource,
         esqlVariables,
         controlsContext?.onSaveControl,
-        controlsContext?.onCancelControl
+        controlsContext?.onCancelControl,
+        onCloseControlFlyout
       );
     });
   });

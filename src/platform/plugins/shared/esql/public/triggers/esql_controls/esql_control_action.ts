@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/public';
 import { firstValueFrom, of } from 'rxjs';
-import type { CoreStart } from '@kbn/core/public';
+import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { ISearchGeneric } from '@kbn/search-types';
 import {
@@ -43,6 +43,7 @@ interface Context {
   initialState?: ESQLControlState;
   parentApi?: unknown;
   triggerSource: ControlTriggerSource;
+  onCloseControlFlyout?: (flyoutRef: OverlayRef) => void;
 }
 
 export class CreateESQLControlAction implements Action<Context> {
@@ -80,6 +81,7 @@ export class CreateESQLControlAction implements Action<Context> {
     initialState,
     parentApi,
     triggerSource,
+    onCloseControlFlyout = () => {},
   }: Context) {
     if (!isActionCompatible(this.core, variableType)) {
       throw new IncompatibleActionError();
@@ -122,9 +124,9 @@ export class CreateESQLControlAction implements Action<Context> {
         maxWidth: 800,
         triggerId: 'dashboard-controls-menu-button',
         // When queryString is present (i.e. flyout opened from the ES|QL editor),
-        // use onCancelControl as the onClose handler to ensure proper nested flyout closing behavior.
+        // use onCloseControlFlyout as the onClose handler to ensure proper nested flyout closing behavior.
         // In other scenarios (opened directly from the dashboard), we keep the default close behavior.
-        ...(queryString && { onClose: onCancelControl }),
+        ...(queryString && { onClose: onCloseControlFlyout }),
       },
     });
   }
