@@ -142,7 +142,7 @@ describe('getContextSchemaForPath', () => {
         {
           name: 'foreach-step',
           type: 'foreach',
-          foreach: 'consts.items',
+          foreach: '{{consts.items}}',
           steps: [
             {
               name: 'foreach-step-1',
