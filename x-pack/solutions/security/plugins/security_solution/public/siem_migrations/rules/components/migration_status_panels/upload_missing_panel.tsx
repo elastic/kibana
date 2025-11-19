@@ -108,7 +108,7 @@ const RuleMigrationsUploadMissingPanelContent =
                   <EuiLoadingSpinner size="s" />
                 ) : (
                   <PanelText data-test-subj="uploadMissingPanelDescription" size="s" subdued>
-                    {i18n.RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_DESCRIPTION(totalRulesToRetry)}
+                    {i18n.RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_DESCRIPTION}
                   </PanelText>
                 )}
               </EuiFlexItem>

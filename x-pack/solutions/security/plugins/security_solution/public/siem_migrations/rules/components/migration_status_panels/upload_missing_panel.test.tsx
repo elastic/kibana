@@ -116,7 +116,7 @@ describe('RuleMigrationsUploadMissingPanel', () => {
     // Description
     expect(getByTestId('uploadMissingPanelDescription')).toBeInTheDocument();
     expect(getByTestId('uploadMissingPanelDescription')).toHaveTextContent(
-      'Click Upload to continue translating 3 rules'
+      'Click Upload to continue translating rules'
     );
     // Upload button
     expect(getByTestId('uploadMissingPanelButton')).toBeInTheDocument();

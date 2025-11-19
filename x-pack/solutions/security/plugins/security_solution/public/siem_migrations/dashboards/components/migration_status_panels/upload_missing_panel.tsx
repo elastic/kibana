@@ -111,9 +111,7 @@ const DashboardMigrationsUploadMissingPanelContent =
                   <EuiLoadingSpinner size="s" />
                 ) : (
                   <PanelText data-test-subj="uploadMissingPanelDescription" size="s" subdued>
-                    {i18n.DASHBOARD_MIGRATION_UPLOAD_MISSING_RESOURCES_DESCRIPTION(
-                      totalDashboardsToRetry
-                    )}
+                    {i18n.DASHBOARD_MIGRATION_UPLOAD_MISSING_RESOURCES_DESCRIPTION}
                   </PanelText>
                 )}
               </EuiFlexItem>
