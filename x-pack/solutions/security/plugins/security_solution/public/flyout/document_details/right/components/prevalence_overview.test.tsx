@@ -16,6 +16,7 @@ import {
 import React from 'react';
 import { PrevalenceOverview } from './prevalence_overview';
 import {
+  EXPANDABLE_PANEL_HEADER_RIGHT_SECTION_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID,
   EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID,
@@ -25,8 +26,10 @@ import {
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
+import { useKibana } from '../../../../common/lib/kibana';
 
 jest.mock('../../shared/hooks/use_prevalence');
+jest.mock('../../../../common/lib/kibana');
 
 const mockNavigateToLeftPanel = jest.fn();
 jest.mock('../../shared/hooks/use_navigate_to_left_panel');
@@ -35,6 +38,8 @@ const TOGGLE_ICON_TEST_ID = EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID(PREVALENCE_TEST
 const TITLE_LINK_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_LINK_TEST_ID(PREVALENCE_TEST_ID);
 const TITLE_ICON_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_ICON_TEST_ID(PREVALENCE_TEST_ID);
 const TITLE_TEXT_TEST_ID = EXPANDABLE_PANEL_HEADER_TITLE_TEXT_TEST_ID(PREVALENCE_TEST_ID);
+const RIGHT_SECTION_TEXT_TEST_ID =
+  EXPANDABLE_PANEL_HEADER_RIGHT_SECTION_TEST_ID(PREVALENCE_TEST_ID);
 
 const NO_DATA_MESSAGE = 'No prevalence data available.';
 
@@ -49,6 +54,7 @@ const renderPrevalenceOverview = (contextValue: DocumentDetailsContext = mockCon
 
 describe('<PrevalenceOverview />', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     (usePrevalence as jest.Mock).mockReturnValue({
       loading: false,
       error: false,
@@ -64,6 +70,7 @@ describe('<PrevalenceOverview />', () => {
     expect(getByTestId(TITLE_LINK_TEST_ID)).toHaveTextContent('Prevalence');
     expect(getByTestId(TITLE_ICON_TEST_ID)).toBeInTheDocument();
     expect(queryByTestId(TITLE_TEXT_TEST_ID)).not.toBeInTheDocument();
+    expect(queryByTestId(RIGHT_SECTION_TEXT_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render link without icon if isPreviewMode is true', () => {
@@ -176,5 +183,33 @@ describe('<PrevalenceOverview />', () => {
 
     getByTestId(TITLE_LINK_TEST_ID).click();
     expect(mockNavigateToLeftPanel).toHaveBeenCalled();
+  });
+
+  it('should use default interval values to fetch prevalence data', () => {
+    renderPrevalenceOverview();
+
+    expect(usePrevalence).toHaveBeenCalledWith(
+      expect.objectContaining({
+        interval: { from: 'now-30d', to: 'now' },
+      })
+    );
+  });
+
+  it('should use values from local storage to fetch prevalence data', () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        storage: {
+          get: () => ({ start: 'now-7d', end: 'now-3d' }),
+        },
+      },
+    });
+
+    renderPrevalenceOverview();
+
+    expect(usePrevalence).toHaveBeenCalledWith(
+      expect.objectContaining({
+        interval: { from: 'now-7d', to: 'now-3d' },
+      })
+    );
   });
 });

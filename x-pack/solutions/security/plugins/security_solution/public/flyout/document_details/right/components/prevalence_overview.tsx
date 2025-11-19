@@ -7,8 +7,9 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { EuiBadge, EuiFlexGroup } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useKibana } from '../../../../common/lib/kibana';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { usePrevalence } from '../../shared/hooks/use_prevalence';
 import { PREVALENCE_TEST_ID } from './test_ids';
@@ -17,6 +18,7 @@ import { LeftPanelInsightsTab } from '../../left';
 import { PREVALENCE_TAB_ID } from '../../left/components/prevalence_details';
 import { InsightsSummaryRow } from './insights_summary_row';
 import { useNavigateToLeftPanel } from '../../shared/hooks/use_navigate_to_left_panel';
+import { FLYOUT_STORAGE_KEYS } from '../../shared/constants/local_storage';
 
 const UNCOMMON = (
   <FormattedMessage
@@ -34,6 +36,9 @@ const DEFAULT_TO = 'now';
  * The component fetches the necessary data at once. The loading and error states are handled by the ExpandablePanel component.
  */
 export const PrevalenceOverview: FC = () => {
+  const { storage } = useKibana().services;
+  const timeSavedInLocalStorage = storage.get(FLYOUT_STORAGE_KEYS.PREVALENCE_INTERVAL);
+
   const { dataFormattedForFieldBrowser, investigationFields, isPreviewMode } =
     useDocumentDetailsContext();
 
@@ -46,8 +51,8 @@ export const PrevalenceOverview: FC = () => {
     dataFormattedForFieldBrowser,
     investigationFields,
     interval: {
-      from: DEFAULT_FROM,
-      to: DEFAULT_TO,
+      from: timeSavedInLocalStorage?.start || DEFAULT_FROM,
+      to: timeSavedInLocalStorage?.end || DEFAULT_TO,
     },
   });
 
@@ -62,6 +67,7 @@ export const PrevalenceOverview: FC = () => {
       ),
     [data]
   );
+
   const link = useMemo(
     () => ({
       callback: goToPrevalenceTab,
@@ -86,6 +92,17 @@ export const PrevalenceOverview: FC = () => {
         ),
         link,
         iconType: !isPreviewMode ? 'arrowStart' : undefined,
+        headerContent: (
+          <EuiIconTip
+            content={
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.prevalence.timeT"
+                defaultMessage="The prevalence is calculated from a specific time interval. To change that interval, go to the Prevalence tab in the flyout expanded view and use the date picker."
+              />
+            }
+            type="info"
+          />
+        ),
       }}
       content={{ loading, error }}
       data-test-subj={PREVALENCE_TEST_ID}
