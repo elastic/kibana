@@ -617,27 +617,32 @@ export class Plugin implements ISecuritySolutionPlugin {
     // Note: The alert attachment type may already be registered by onechat's built-in types.
     // If so, we'll skip registration and use the built-in version.
     if (plugins.onechat) {
-      if (plugins.onechat.attachments) {
-        try {
-          plugins.onechat.attachments.registerType(createAlertAttachmentType());
-        } catch (error) {
-          // Alert attachment type may already be registered by onechat's built-in types
-          if (error instanceof Error && error.message.includes('already registered')) {
-            this.logger.debug(
-              'Alert attachment type already registered by onechat plugin, using built-in version'
-            );
-          } else {
-            throw error;
-          }
+      try {
+        // Register attachment type
+        plugins.onechat.attachments.registerType(createAlertAttachmentType());
+      } catch (error) {
+        // Alert attachment type may already be registered by onechat's built-in types
+        if (error instanceof Error && error.message.includes('already registered')) {
+          this.logger.debug(
+            'Alert attachment type already registered by onechat plugin, using built-in version'
+          );
+        } else {
+          this.logger.warn(`Failed to register alert attachment type: ${error}`);
+          // Don't throw - allow plugin to continue loading even if attachment registration fails
         }
       }
-      if (plugins.onechat.tools) {
+
+      // Register tools
+      try {
         plugins.onechat.tools.register(alertsTool());
         plugins.onechat.tools.register(alertsIndexSearchTool());
         plugins.onechat.tools.register(evaluateAlertTool());
         plugins.onechat.tools.register(riskScoreSearchTool());
         plugins.onechat.tools.register(attackDiscoverySearchTool());
         plugins.onechat.tools.register(securityLabsSearchTool());
+      } catch (error) {
+        this.logger.warn(`Failed to register onechat tools: ${error}`);
+        // Don't throw - allow plugin to continue loading even if tool registration fails
       }
     }
 
