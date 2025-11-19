@@ -23,7 +23,7 @@ export enum SUB_ACTION {
 }
 
 export const DEFAULT_TOKEN_LIMIT = 8192;
-export const DEFAULT_TIMEOUT_MS = 60000;
+export const DEFAULT_TIMEOUT_MS = 180000;
 export const DEFAULT_GCP_REGION = 'us-central1';
 export const DEFAULT_MODEL = 'gemini-2.5-pro';
 export const DEFAULT_URL = `https://us-central1-aiplatform.googleapis.com` as const;
