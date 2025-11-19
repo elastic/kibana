@@ -263,7 +263,7 @@ export const getDeprecatedILMCheckHandler: RequestHandler = async (context, requ
     const { elasticsearch } = await context.core;
     const esClient = elasticsearch.client.asCurrentUser;
 
-    const DEPRECATED_ILM_POLICIES = ['logs', 'logs@lifecycle'];
+    const DEPRECATED_ILM_POLICIES = ['logs', 'metrics', 'synthetics'];
 
     // Fetch ILM policies and component templates in parallel
     const [ilmResponse, componentTemplatesResponse] = await Promise.all([
@@ -283,7 +283,7 @@ export const getDeprecatedILMCheckHandler: RequestHandler = async (context, requ
     if (modifiedDeprecatedPolicies.length === 0) {
       return response.ok({
         body: {
-          deprecatedPolicies: [],
+          deprecatedILMPolicies: [],
         },
       });
     }
@@ -313,7 +313,7 @@ export const getDeprecatedILMCheckHandler: RequestHandler = async (context, requ
 
     return response.ok({
       body: {
-        deprecatedPolicies,
+        deprecatedILMPolicies: deprecatedPolicies,
       },
     });
   } catch (err) {

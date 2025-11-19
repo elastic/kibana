@@ -12,7 +12,7 @@ export interface GetDataStreamsResponse {
 }
 
 export interface DeprecatedILMPolicyCheckResponse {
-  deprecatedPolicies: Array<{
+  deprecatedILMPolicies: Array<{
     policyName: string;
     version: number;
     componentTemplates: string[];

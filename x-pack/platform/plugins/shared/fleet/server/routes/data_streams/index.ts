@@ -45,7 +45,7 @@ export const ListDataStreamsResponseSchema = schema.object({
 });
 
 export const DeprecatedILMCheckResponseSchema = schema.object({
-  deprecatedPolicies: schema.arrayOf(
+  deprecatedILMPolicies: schema.arrayOf(
     schema.object({
       policyName: schema.string(),
       version: schema.number(),

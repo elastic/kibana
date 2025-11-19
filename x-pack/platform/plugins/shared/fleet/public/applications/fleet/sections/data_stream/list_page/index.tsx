@@ -199,8 +199,8 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
 
   return (
     <>
-      {deprecatedILMCheck?.deprecatedPolicies &&
-        deprecatedILMCheck.deprecatedPolicies.length > 0 && (
+      {deprecatedILMCheck?.deprecatedILMPolicies &&
+        deprecatedILMCheck.deprecatedILMPolicies.length > 0 && (
           <>
             <EuiCallOut
               title={
@@ -219,7 +219,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
                   id="xpack.fleet.dataStreamList.deprecatedILMCalloutDescription"
                   defaultMessage="You are using modified deprecated ILM policies ({policies}). These policies are deprecated and should be migrated to the new lifecycle management approach. {learnMoreLink}"
                   values={{
-                    policies: deprecatedILMCheck.deprecatedPolicies
+                    policies: deprecatedILMCheck.deprecatedILMPolicies
                       .map(
                         (p: {
                           policyName: string;
