@@ -8,7 +8,7 @@
 import { last, lastValueFrom, map, merge, Observable, scan, share } from 'rxjs';
 import type { Readable } from 'node:stream';
 import { createParser } from 'eventsource-parser';
-import type { UnifiedChatCompleteResponse } from '../../../common/inference/types';
+import type { UnifiedChatCompleteResponse } from '@kbn/connector-schemas/inference';
 
 // TODO: Extract to the common package with appex-ai
 export function eventSourceStreamIntoObservable(readable: Readable) {

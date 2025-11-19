@@ -19,9 +19,9 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { docLinks } from '../../../../../common/doc_links';
-import { WelcomeText } from '../../common/welcome_text';
 import { PromptLayout } from './prompt_layout';
 import { useOnechatServices } from '../../../hooks/use_onechat_service';
+import { TechPreviewBadge } from '../../common/tech_preview';
 
 const AddLlmConnectionActions: React.FC<{}> = () => {
   const { navigationService } = useOnechatServices();
@@ -106,7 +106,7 @@ export const AddLlmConnectionPrompt: React.FC<{}> = () => {
         alignItems="center"
       >
         <EuiFlexItem grow={false}>
-          <WelcomeText />
+          <TechPreviewBadge />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <AddLlmConnectionPanel />
