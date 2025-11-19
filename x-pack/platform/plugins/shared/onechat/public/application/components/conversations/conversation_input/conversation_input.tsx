@@ -19,11 +19,11 @@ import { ConversationInputActions } from './conversation_input_actions';
 
 const MIN_HEIGHT = 150;
 
-interface ConversationInputFormProps {
+interface ConversationInputProps {
   onSubmit?: () => void;
 }
 
-export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ onSubmit }) => {
+export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }) => {
   const isSendingMessage = useIsSendingMessage();
   const [input, setInput] = useState('');
   const { sendMessage, pendingMessage } = useSendMessage();
@@ -73,7 +73,7 @@ export const ConversationInputForm: React.FC<ConversationInputFormProps> = ({ on
       alignItems="stretch"
       justifyContent="center"
       data-test-subj="agentBuilderConversationInputForm"
-      aria-label={i18n.translate('xpack.onechat.conversationInputForm', {
+      aria-label={i18n.translate('xpack.onechat.conversationInput.container.label', {
         defaultMessage: 'Message input form',
       })}
       aria-disabled={shouldDisableTextArea}

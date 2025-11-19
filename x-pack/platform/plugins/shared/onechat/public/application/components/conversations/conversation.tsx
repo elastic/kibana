@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, useEuiScrollBar } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useEffect, useRef } from 'react';
 import { useHasActiveConversation } from '../../hooks/use_conversation';
-import { ConversationInputForm } from './conversation_input/conversation_input_form';
+import { ConversationInput } from './conversation_input/conversation_input';
 import { ConversationRounds } from './conversation_rounds/conversation_rounds';
 import { NewConversationPrompt } from './new_conversation_prompt';
 import { useConversationId } from '../../context/conversation/use_conversation_id';
@@ -89,7 +89,7 @@ export const Conversation: React.FC<{}> = () => {
         {showScrollButton && <ScrollButton onClick={scrollToMostRecentRoundBottom} />}
       </EuiFlexItem>
       <EuiFlexItem css={conversationElementWidthStyles} grow={false}>
-        <ConversationInputForm onSubmit={scrollToMostRecentRoundTop} />
+        <ConversationInput onSubmit={scrollToMostRecentRoundTop} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

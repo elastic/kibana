@@ -31,6 +31,20 @@ const textareaStyles = css`
   padding: 0;
 `;
 
+const disabledPlaceholder = (agentId?: string) =>
+  i18n.translate('xpack.onechat.conversationInput.textArea.disabledPlaceholder', {
+    defaultMessage: 'Agent "{agentId}" has been deleted. Please start a new conversation.',
+    values: {
+      agentId,
+    },
+  });
+const enabledPlaceholder = i18n.translate(
+  'xpack.onechat.conversationInput.textArea.enabledPlaceholder',
+  {
+    defaultMessage: 'Ask anything',
+  }
+);
+
 interface ConversationInputTextAreaProps {
   input: string;
   setInput: (input: string) => void;
@@ -56,25 +70,17 @@ export const ConversationInputTextArea: React.FC<ConversationInputTextAreaProps>
     }, 200);
   }, [conversationId]);
 
-  const disabledPlaceholder = i18n.translate(
-    'xpack.onechat.conversationInputForm.disabledPlaceholder',
-    {
-      defaultMessage: 'Agent "{agentId}" has been deleted. Please start a new conversation.',
-      values: {
-        agentId,
-      },
-    }
-  );
+  const placeholder = disabled ? disabledPlaceholder(agentId) : enabledPlaceholder;
 
   return (
     <EuiFlexItem css={inputContainerStyles}>
       <EuiTextArea
         id="conversationInput"
-        name={i18n.translate('xpack.onechat.conversationInputForm.textArea.name', {
+        name={i18n.translate('xpack.onechat.conversationInput.textArea.name', {
           defaultMessage: 'Conversation input',
         })}
         css={textareaStyles}
-        data-test-subj="onechatAppConversationInputFormTextArea"
+        data-test-subj="onechatAppConversationInputTextArea"
         value={input}
         onChange={(event) => {
           setInput(event.currentTarget.value);
@@ -85,13 +91,7 @@ export const ConversationInputTextArea: React.FC<ConversationInputTextAreaProps>
             onSubmit();
           }
         }}
-        placeholder={
-          disabled
-            ? disabledPlaceholder
-            : i18n.translate('xpack.onechat.conversationInputForm.placeholder', {
-                defaultMessage: 'Ask anything',
-              })
-        }
+        placeholder={placeholder}
         rows={1}
         inputRef={textAreaRef}
         fullWidth

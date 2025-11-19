@@ -18,10 +18,10 @@ interface ConversationActionButtonProps {
 }
 
 const labels = {
-  cancel: i18n.translate('xpack.onechat.conversationInputForm.cancel', {
+  cancel: i18n.translate('xpack.onechat.conversationInput.actionButton.cancel', {
     defaultMessage: 'Cancel',
   }),
-  submit: i18n.translate('xpack.onechat.conversationInputForm.submit', {
+  submit: i18n.translate('xpack.onechat.conversationInput.actionButton.submit', {
     defaultMessage: 'Submit',
   }),
 };
@@ -41,7 +41,7 @@ export const ConversationActionButton: React.FC<ConversationActionButtonProps> =
   return canCancel ? (
     <EuiButtonIcon
       aria-label={labels.cancel}
-      data-test-subj="onechatAppConversationInputFormCancelButton"
+      data-test-subj="onechatAppConversationInputCancelButton"
       iconType="stopFilled"
       size="m"
       color="text"
@@ -56,7 +56,7 @@ export const ConversationActionButton: React.FC<ConversationActionButtonProps> =
   ) : (
     <EuiButtonIcon
       aria-label={labels.submit}
-      data-test-subj="onechatAppConversationInputFormSubmitButton"
+      data-test-subj="onechatAppConversationInputSubmitButton"
       iconType="sortUp"
       display="fill"
       size="m"
