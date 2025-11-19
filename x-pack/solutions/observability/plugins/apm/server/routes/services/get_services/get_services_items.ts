@@ -6,6 +6,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import type { SloClient } from '@kbn/slo-plugin/server';
 import type { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
 import type { RollupInterval } from '../../../../common/rollup';
 import type { ServiceGroup } from '../../../../common/service_groups';
@@ -17,6 +18,7 @@ import { withApmSpan } from '../../../utils/with_apm_span';
 import { getHealthStatuses } from './get_health_statuses';
 import { getServicesAlerts } from './get_service_alerts';
 import { getServiceTransactionStats } from './get_service_transaction_stats';
+import { getServicesSLOs } from './get_service_slos';
 import type { MergedServiceStat } from './merge_service_stats';
 import { mergeServiceStats } from './merge_service_stats';
 
@@ -43,6 +45,7 @@ export async function getServicesItems({
   rollupInterval,
   useDurationSummary,
   searchQuery,
+  sloClient,
 }: {
   environment: string;
   kuery: string;
@@ -58,6 +61,7 @@ export async function getServicesItems({
   rollupInterval: RollupInterval;
   useDurationSummary: boolean;
   searchQuery?: string;
+  sloClient?: SloClient;
 }): Promise<ServicesItemsResponse> {
   return withApmSpan('get_services_items', async () => {
     const commonParams = {
@@ -90,12 +94,26 @@ export async function getServicesItems({
         }),
       ]);
 
+    // Get SLO counts for all services
+    const serviceNames = serviceStats.map((stat) => stat.serviceName);
+    const sloCounts = sloClient
+      ? await getServicesSLOs({
+          serviceNames,
+          sloClient,
+          logger,
+        }).catch((err) => {
+          logger.debug(`Failed to fetch SLOs: ${err}`);
+          return [];
+        })
+      : [];
+
     return {
       items:
         mergeServiceStats({
           serviceStats,
           healthStatuses,
           alertCounts,
+          sloCounts,
         }) ?? [],
       maxCountExceeded,
       serviceOverflowCount,

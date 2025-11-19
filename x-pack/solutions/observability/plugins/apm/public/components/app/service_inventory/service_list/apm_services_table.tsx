@@ -15,7 +15,10 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { apmEnableServiceInventoryTableSearchBar } from '@kbn/observability-plugin/common';
+import {
+  apmEnableServiceInventoryTableSearchBar,
+  sloListLocatorID,
+} from '@kbn/observability-plugin/common';
 import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import { omit } from 'lodash';
@@ -66,18 +69,22 @@ export function getServiceColumns({
   breakpoints,
   showHealthStatusColumn,
   showAlertsColumn,
+  showSlosColumn,
   link,
   serviceOverflowCount,
+  getSloListLocator,
 }: {
   query: TypeOf<ApmRoutes, '/services'>['query'];
   showTransactionTypeColumn: boolean;
   showHealthStatusColumn: boolean;
   showAlertsColumn: boolean;
+  showSlosColumn: boolean;
   comparisonDataLoading: boolean;
   breakpoints: Breakpoints;
   comparisonData?: ServicesDetailedStatisticsAPIResponse;
   link: any;
   serviceOverflowCount: number;
+  getSloListLocator?: () => any;
 }): Array<ITableColumn<ServiceListItem>> {
   const { isSmall, isLarge, isXl } = breakpoints;
   const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
@@ -128,6 +135,66 @@ export function getServiceColumns({
                     })}
                   >
                     {alertsCount}
+                  </EuiBadge>
+                </EuiToolTip>
+              );
+            },
+          } as ITableColumn<ServiceListItem>,
+        ]
+      : []),
+    ...(showSlosColumn
+      ? [
+          {
+            field: ServiceInventoryFieldName.SlosCount,
+            name: (
+              <ColumnHeaderWithTooltip
+                tooltipContent={i18n.translate('xpack.apm.servicesTable.tooltip.slosCount', {
+                  defaultMessage: 'The count of violated SLOs associated with this service',
+                })}
+                label={i18n.translate('xpack.apm.servicesTable.slosColumnLabel', {
+                  defaultMessage: 'SLOs',
+                })}
+              />
+            ),
+            width: `${unit * 6}px`,
+            sortable: true,
+            render: (_, { serviceName, slosCount }) => {
+              if (!slosCount) {
+                return null;
+              }
+
+              const sloListLocator = getSloListLocator?.();
+              const kqlQuery = `service.name: "${serviceName}" AND (status:"VIOLATED" OR status:"DEGRADING")`;
+
+              const handleClick = () => {
+                sloListLocator?.navigate({ kqlQuery }, { replace: false });
+              };
+
+              return (
+                <EuiToolTip
+                  position="bottom"
+                  content={i18n.translate(
+                    'xpack.apm.home.servicesTable.tooltip.violatedSlosExplanation',
+                    {
+                      defaultMessage: 'Violated Service Level Objectives',
+                    }
+                  )}
+                >
+                  <EuiBadge
+                    data-test-subj="serviceInventorySlosBadge"
+                    color="danger"
+                    tabIndex={0}
+                    onClick={handleClick}
+                    onClickAriaLabel={i18n.translate('xpack.apm.servicesTable.slosBadgeAriaLabel', {
+                      defaultMessage: 'View {count} violated SLOs for {serviceName}',
+                      values: { count: slosCount, serviceName },
+                    })}
+                    style={{ cursor: sloListLocator ? 'pointer' : 'default' }}
+                  >
+                    {i18n.translate('xpack.apm.servicesTable.slosBadgeLabel', {
+                      defaultMessage: '{count} Violated',
+                      values: { count: slosCount },
+                    })}
                   </EuiBadge>
                 </EuiToolTip>
               );
@@ -293,6 +360,7 @@ interface Props {
   noItemsMessage?: React.ReactNode;
   displayHealthStatus: boolean;
   displayAlerts: boolean;
+  displaySlos: boolean;
   initialSortField: ServiceInventoryFieldName;
   initialPageSize: number;
   initialSortDirection: 'asc' | 'desc';
@@ -311,6 +379,7 @@ export function ApmServicesTable({
   comparisonData,
   displayHealthStatus,
   displayAlerts,
+  displaySlos,
   initialSortField,
   initialSortDirection,
   initialPageSize,
@@ -322,7 +391,7 @@ export function ApmServicesTable({
   onChangeItemIndices,
 }: Props) {
   const breakpoints = useBreakpoints();
-  const { core } = useApmPluginContext();
+  const { core, plugins } = useApmPluginContext();
   const { link } = useApmRouter();
   const showTransactionTypeColumn = items.some(
     ({ transactionType }) => transactionType && !isDefaultTransactionType(transactionType)
@@ -332,6 +401,16 @@ export function ApmServicesTable({
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
   });
+
+  const getSloListLocator = useMemo(() => {
+    return () => {
+      try {
+        return plugins.share?.url.locators.get(sloListLocatorID);
+      } catch {
+        return undefined;
+      }
+    };
+  }, [plugins.share?.url.locators]);
 
   const serviceColumns = useMemo(() => {
     return getServiceColumns({
@@ -343,8 +422,10 @@ export function ApmServicesTable({
       breakpoints,
       showHealthStatusColumn: displayHealthStatus,
       showAlertsColumn: displayAlerts,
+      showSlosColumn: displaySlos,
       link,
       serviceOverflowCount,
+      getSloListLocator,
     });
   }, [
     query,
@@ -354,8 +435,10 @@ export function ApmServicesTable({
     breakpoints,
     displayHealthStatus,
     displayAlerts,
+    displaySlos,
     link,
     serviceOverflowCount,
+    getSloListLocator,
   ]);
 
   const isTableSearchBarEnabled = core.uiSettings.get<boolean>(

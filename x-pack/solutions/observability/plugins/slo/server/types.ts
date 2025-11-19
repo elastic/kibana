@@ -31,7 +31,7 @@ export type { SLOConfig } from '../common/config';
 export interface SLOServerSetup {}
 
 export interface SLOServerStart {
-  getSloClientWithRequest: (request: KibanaRequest) => SloClient;
+  getSloClientWithRequest: (request: KibanaRequest) => Promise<SloClient>;
 }
 
 export interface SLOPluginSetupDependencies {

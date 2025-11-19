@@ -57,6 +57,7 @@ import type {
   ProfilingDataAccessPluginSetup,
   ProfilingDataAccessPluginStart,
 } from '@kbn/profiling-data-access-plugin/server';
+import type { SLOServerSetup, SLOServerStart } from '@kbn/slo-plugin/server';
 import type { APMConfig } from '.';
 
 export interface APMPluginSetup {
@@ -90,6 +91,7 @@ export interface APMPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
   customIntegrations?: CustomIntegrationsPluginSetup;
   profilingDataAccess?: ProfilingDataAccessPluginSetup;
+  slo?: SLOServerSetup;
 }
 export interface APMPluginStartDependencies {
   // required dependencies
@@ -118,4 +120,5 @@ export interface APMPluginStartDependencies {
   usageCollection?: undefined;
   customIntegrations?: CustomIntegrationsPluginStart;
   profilingDataAccess?: ProfilingDataAccessPluginStart;
+  slo?: SLOServerStart;
 }

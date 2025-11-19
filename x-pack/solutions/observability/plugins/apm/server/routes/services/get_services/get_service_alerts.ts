@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { kqlQuery, termQuery, rangeQuery, wildcardQuery } from '@kbn/observability-plugin/server';
+import { kqlQuery, termQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE, ALERT_UUID } from '@kbn/rule-data-utils';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import type { ServiceGroup } from '../../../../common/service_groups';
@@ -57,7 +57,7 @@ export async function getServicesAlerts({
           ? {
               should: [
                 ...termQuery(SERVICE_NAME, serviceName),
-                ...termQuery('kibana.alert.rule.entities', serviceName),
+                ...termQuery('tags', `service.name:${serviceName}`),
               ],
               minimum_should_match: 1,
             }
@@ -67,7 +67,21 @@ export async function getServicesAlerts({
     aggs: {
       services: {
         terms: {
-          field: 'kibana.alert.rule.entities',
+          field: SERVICE_NAME,
+          size: maxNumServices,
+        },
+        aggs: {
+          alerts_count: {
+            cardinality: {
+              field: ALERT_UUID,
+            },
+          },
+        },
+      },
+      services_from_tags: {
+        terms: {
+          field: 'tags',
+          include: 'service.name:.*|service:.*',
           size: maxNumServices,
         },
         aggs: {
@@ -83,17 +97,41 @@ export async function getServicesAlerts({
 
   const result = await apmAlertsClient.search(params);
 
-  console.log('params', JSON.stringify(params, null, 2));
+  const servicesBuckets = result.aggregations?.services.buckets ?? [];
+  const tagsBuckets = result.aggregations?.services_from_tags.buckets ?? [];
 
-  const filterAggBuckets = result.aggregations?.services.buckets ?? [];
+  // Map service names from SERVICE_NAME field
+  const servicesMap = new Map<string, number>();
+  servicesBuckets.forEach((bucket) => {
+    const name = bucket.key as string;
+    const count = (bucket.alerts_count as { value: number }).value;
+    servicesMap.set(name, count);
+  });
 
+  // Extract service names from tags with service.name: or service: prefix
+  tagsBuckets.forEach((bucket) => {
+    const tag = String(bucket.key);
+    const [key, ...valueParts] = tag.split(':');
+    const value = valueParts.join(':'); // Rejoin in case service name contains colons
+
+    if ((key === 'service.name' || key === 'service') && value) {
+      const count = (bucket.alerts_count as { value: number }).value;
+      const existingCount = servicesMap.get(value) ?? 0;
+      // Take the maximum since the same alert might appear in both aggregations
+      servicesMap.set(value, Math.max(existingCount, count));
+    }
+  });
+
+  // Convert map to array and sort by service name
   const servicesAlertsCount: Array<{
     serviceName: string;
     alertsCount: number;
-  }> = filterAggBuckets.map((bucket) => ({
-    serviceName: bucket.key as string,
-    alertsCount: bucket.alerts_count.value,
-  }));
+  }> = Array.from(servicesMap.entries())
+    .map(([name, count]) => ({
+      serviceName: name,
+      alertsCount: count,
+    }))
+    .slice(0, maxNumServices);
 
   return servicesAlertsCount;
 }

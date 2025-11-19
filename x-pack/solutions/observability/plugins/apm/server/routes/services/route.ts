@@ -98,7 +98,7 @@ const servicesRoute = createApmServerRoute({
   }),
   security: { authz: { requiredPrivileges: ['apm'] } },
   async handler(resources): Promise<ServicesItemsResponse> {
-    const { context, params, logger, request, core } = resources;
+    const { context, params, logger, request, core, plugins } = resources;
 
     const {
       searchQuery,
@@ -126,6 +126,11 @@ const servicesRoute = createApmServerRoute({
         getRandomSampler({ coreStart, request, probability }),
       ]);
 
+    const sloPluginStart = await plugins.slo?.start();
+    const sloClient = sloPluginStart
+      ? await sloPluginStart.getSloClientWithRequest(request)
+      : undefined;
+
     return getServicesItems({
       environment,
       kuery,
@@ -141,6 +146,7 @@ const servicesRoute = createApmServerRoute({
       rollupInterval,
       useDurationSummary,
       searchQuery,
+      sloClient,
     });
   },
 });
