@@ -150,12 +150,17 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
             const newSelection = isSelected ? current.filter((k) => k !== key) : [...current, key];
             selections.internalApi.setSelectedOptions(newSelection);
           }
+          // clear the incompatible selections upon any new selection
+          selections.internalApi.setInvalidSelections(new Set<OptionsListSelection>());
         },
         // Pass no-ops and default values for all of the features of OptionsList that ES|QL controls don't currently use
         ...componentStaticStateManager.api,
         singleSelect$: selections.api.singleSelect$ as PublishingSubject<boolean | undefined>,
         invalidSelections$: selections.internalApi.invalidSelections$,
-        deselectOption: () => {},
+        deselectOption: () => {
+          // clear the incompatible selections upon any deselection
+          selections.internalApi.setInvalidSelections(new Set<OptionsListSelection>());
+        },
         selectAll: (keys: string[]) => {
           selections.internalApi.setSelectedOptions(keys);
         },
