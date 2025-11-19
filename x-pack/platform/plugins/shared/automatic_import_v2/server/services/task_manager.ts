@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { Logger, KibanaRequest } from '@kbn/core/server';
 import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
@@ -20,13 +20,21 @@ const TASK_TYPE = 'autoImport-task';
 export class TaskManagerService {
   private logger: Logger;
   private taskManager: TaskManagerStartContract | null = null;
-  private invokeDeepAgent?: (integrationId: string, dataStreamId: string) => Promise<any>;
+  private invokeDeepAgent?: (
+    integrationId: string,
+    dataStreamId: string,
+    fakeRequest?: KibanaRequest
+  ) => Promise<any>;
 
   constructor(
     logger: Logger,
     taskManagerSetup: TaskManagerSetupContract,
     options?: {
-      invokeDeepAgent?: (integrationId: string, dataStreamId: string) => Promise<any>;
+      invokeDeepAgent?: (
+        integrationId: string,
+        dataStreamId: string,
+        fakeRequest?: KibanaRequest
+      ) => Promise<any>;
     }
   ) {
     this.logger = logger.get('taskManagerService');
@@ -41,8 +49,8 @@ export class TaskManagerService {
         maxAttempts: MAX_ATTEMPTS_AI_WORKFLOWS,
         cost: TaskCost.Normal,
         priority: TaskPriority.Normal,
-        createTaskRunner: ({ taskInstance }) => ({
-          run: async () => this.runTask(taskInstance),
+        createTaskRunner: ({ taskInstance, fakeRequest }) => ({
+          run: async () => this.runTask(taskInstance, fakeRequest),
           cancel: async () => this.cancelTask(taskInstance),
         }),
       },
@@ -52,16 +60,33 @@ export class TaskManagerService {
   }
 
   // for lifecycle start phase
-  public initialize(taskManager: TaskManagerStartContract): void {
+  public initialize(
+    taskManager: TaskManagerStartContract,
+    options?: {
+      invokeDeepAgent?: (
+        integrationId: string,
+        dataStreamId: string,
+        fakeRequest?: KibanaRequest
+      ) => Promise<any>;
+    }
+  ): void {
     this.taskManager = taskManager;
+
+    if (options?.invokeDeepAgent) {
+      this.invokeDeepAgent = options.invokeDeepAgent;
+    }
+
     this.logger.debug('TaskManagerService initialized');
   }
 
-  public async scheduleAIWorkflowTask(params: {
-    integrationId: string;
-    dataStreamId: string;
-    [key: string]: any;
-  }): Promise<{ taskId: string }> {
+  public async scheduleAIWorkflowTask(
+    params: {
+      integrationId: string;
+      dataStreamId: string;
+      [key: string]: any;
+    },
+    request?: KibanaRequest
+  ): Promise<{ taskId: string }> {
     if (!this.taskManager) {
       throw new Error('TaskManager not initialized');
     }
@@ -71,15 +96,22 @@ export class TaskManagerService {
     // Pattern: ai-task-{integrationId}-{dataStreamId}
     const taskId = `ai-task-${params.integrationId}-${params.dataStreamId}`;
 
-    const taskInstance = await this.taskManager.ensureScheduled({
-      id: taskId,
-      taskType: TASK_TYPE,
-      params,
-      state: { task_status: TASK_STATUSES.pending },
-      scope: ['automaticImport'],
-    });
+    const taskInstance = await this.taskManager.schedule(
+      {
+        id: taskId,
+        taskType: TASK_TYPE,
+        params,
+        state: { task_status: TASK_STATUSES.pending },
+        scope: ['automaticImport'],
+      },
+      request ? { request } : undefined
+    );
 
-    this.logger.info(`Task scheduled: ${taskInstance.id}`);
+    if (request) {
+      this.logger.info(`Task scheduled with user context: ${taskInstance.id}`);
+    } else {
+      this.logger.info(`Task scheduled without user context: ${taskInstance.id}`);
+    }
 
     return { taskId: taskInstance.id };
   }
@@ -103,15 +135,15 @@ export class TaskManagerService {
     }
   }
 
-  private async runTask(taskInstance: ConcreteTaskInstance) {
+  private async runTask(taskInstance: ConcreteTaskInstance, fakeRequest?: KibanaRequest) {
     const { id: taskId, params } = taskInstance;
 
     this.logger.info(`Running task ${taskId}`, params);
 
     try {
       if (this.invokeDeepAgent) {
-        // Instantiate the AgentService from API in the future and use in the the runTask function
-        await this.invokeDeepAgent(params.integrationId, params.dataStreamId);
+        // Pass fakeRequest to enable user-scoped execution
+        await this.invokeDeepAgent(params.integrationId, params.dataStreamId, fakeRequest);
         this.logger.debug(`Task ${taskId}: Deep agent invocation completed`);
       } else {
         this.logger.warn(`Task ${taskId}: No invokeDeepAgent function provided, using mock delay`);

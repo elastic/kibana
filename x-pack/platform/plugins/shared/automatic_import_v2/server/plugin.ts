@@ -11,7 +11,9 @@ import type {
   Plugin,
   Logger,
   ElasticsearchClient,
+  KibanaRequest,
 } from '@kbn/core/server';
+import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 
 import { ReplaySubject, type Subject } from 'rxjs';
 import type {
@@ -25,6 +27,8 @@ import type {
 import { RequestContextFactory } from './request_context_factory';
 import { AutomaticImportService } from './services';
 import { TaskManagerService } from './services/task_manager';
+import { AgentService } from './services/agents/agent_service';
+import { AutomaticImportSamplesIndexService } from './services/samples_index/index_service';
 
 export class AutomaticImportV2Plugin
   implements
@@ -127,7 +131,10 @@ export class AutomaticImportV2Plugin
         this.logger.error('Failed to initialize AutomaticImportService', error);
       });
 
-    this.taskManagerService.initialize(plugins.taskManager);
+    this.taskManagerService.initialize(plugins.taskManager, {
+      invokeDeepAgent: this.createInvokeDeepAgentFactory(core, plugins),
+    });
+
     this.logger.info('TaskManagerService initialized successfully');
 
     return {
@@ -135,6 +142,94 @@ export class AutomaticImportV2Plugin
       inference: plugins.inference,
       licensing: plugins.licensing,
       security: plugins.security,
+    };
+  }
+
+  /**
+   * Get the connector ID to use for AI workflows for use in the AgentService factory
+   * @param core - Core start contract
+   * @param fakeRequest - User-scoped request
+   * @param connectorId - Optional explicitly provided connector ID
+   * @returns The resolved connector ID
+   */
+  private async getConnectorId(
+    core: CoreStart,
+    fakeRequest: KibanaRequest,
+    connectorId?: string
+  ): Promise<string> {
+    if (connectorId) {
+      this.logger.debug(`Using connector ID: ${connectorId}`);
+      return connectorId;
+    }
+
+    // Else get user's default connector from settings
+    try {
+      const soClient = core.savedObjects.getScopedClient(fakeRequest);
+      const uiSettingsClient = core.uiSettings.asScopedToClient(soClient);
+
+      const defaultConnectorSetting = await uiSettingsClient.get<string>(
+        GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR
+      );
+
+      if (defaultConnectorSetting && defaultConnectorSetting !== 'NO_DEFAULT_CONNECTOR') {
+        this.logger.debug(
+          `Using user's default connector from UI settings: ${defaultConnectorSetting}`
+        );
+        return defaultConnectorSetting;
+      }
+    } catch (error) {
+      this.logger.warn('Failed to get default connector from UI settings', error);
+    }
+
+    throw new Error('No AI connectors available for automatic import workflow');
+  }
+
+  /**
+   * Creates a factory function for user-scoped deep agent invocation
+   * @param core - Core start contract
+   * @param plugins - Plugin start dependencies
+   * @returns Factory function that creates user-scoped AgentService instances
+   */
+  private createInvokeDeepAgentFactory(
+    core: CoreStart,
+    plugins: AutomaticImportV2PluginStartDependencies
+  ) {
+    return async (integrationId: string, dataStreamId: string, fakeRequest?: KibanaRequest) => {
+      if (!fakeRequest) {
+        throw new Error('User context required for AI workflow execution');
+      }
+
+      const userEsClient = core.elasticsearch.client.asScoped(fakeRequest);
+
+      let connectorId: string;
+      try {
+        const task = await plugins.taskManager.get(`ai-task-${integrationId}-${dataStreamId}`);
+        connectorId = await this.getConnectorId(core, fakeRequest, task.params.connectorId);
+      } catch (error) {
+        this.logger.warn(
+          `Failed to retrieve task for connector ID, resolving from settings: ${error}`
+        );
+        connectorId = await this.getConnectorId(core, fakeRequest);
+      }
+
+      const userModel = await plugins.inference.getChatModel({
+        connectorId,
+        request: fakeRequest,
+        chatModelOptions: {},
+      });
+
+      const samplesIndexService = new AutomaticImportSamplesIndexService(
+        this.logger,
+        Promise.resolve(userEsClient.asCurrentUser)
+      );
+
+      const agentService = new AgentService(
+        userEsClient.asCurrentUser,
+        samplesIndexService,
+        userModel
+      );
+
+      return await agentService.invoke_deep_agent(integrationId, dataStreamId);
     };
   }
 

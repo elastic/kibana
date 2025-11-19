@@ -81,7 +81,7 @@ describe('TaskManagerService Integration Tests', () => {
 
       // Initialize TaskManagerService
       taskManagerService = new TaskManagerService(kbnRoot.logger.get(), taskManagerSetup, {
-        invokeDeepAgent: async (integrationId: string, dataStreamId: string) => {
+        invokeDeepAgent: async (integrationId: string, dataStreamId: string, fakeRequest?: any) => {
           // Simulate AI workflow processing (long-running task)
           await new Promise((resolve) => setTimeout(resolve, 8000)); // 8 seconds processing
 
