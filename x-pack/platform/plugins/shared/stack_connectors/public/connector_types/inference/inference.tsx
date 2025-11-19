@@ -8,13 +8,13 @@
 import { lazy } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { GenericValidationResult } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { formDeserializer, formSerializer } from './form_serialization';
-import type { RerankParams, TextEmbeddingParams } from '../../../common/inference/types';
-import { SUB_ACTION } from '../../../common/inference/constants';
+import type { RerankParams, TextEmbeddingParams } from '@kbn/connector-schemas/inference';
 import {
-  INFERENCE_CONNECTOR_ID,
-  INFERENCE_CONNECTOR_TITLE,
-} from '../../../common/inference/constants';
+  CONNECTOR_ID,
+  CONNECTOR_NAME,
+  SUB_ACTION,
+} from '@kbn/connector-schemas/inference/constants';
+import { formDeserializer, formSerializer } from './form_serialization';
 import type { InferenceActionParams, InferenceConnector } from './types';
 
 interface ValidationErrors {
@@ -28,7 +28,7 @@ interface ValidationErrors {
 }
 export function getConnectorType(): InferenceConnector {
   return {
-    id: INFERENCE_CONNECTOR_ID,
+    id: CONNECTOR_ID,
     iconClass: 'sparkles',
     isExperimental: true,
     selectMessage: i18n.translate('xpack.stackConnectors.components.inference.selectMessageText', {
@@ -40,7 +40,7 @@ export function getConnectorType(): InferenceConnector {
         defaultMessage: 'Use the Elastic Managed LLM for your chat and RAG use cases.',
       }
     ),
-    actionTypeTitle: INFERENCE_CONNECTOR_TITLE,
+    actionTypeTitle: CONNECTOR_NAME,
     validateParams: async (
       actionParams: InferenceActionParams
     ): Promise<GenericValidationResult<ValidationErrors>> => {
