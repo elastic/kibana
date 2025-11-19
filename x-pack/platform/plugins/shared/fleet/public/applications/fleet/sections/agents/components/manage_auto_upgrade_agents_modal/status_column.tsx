@@ -22,14 +22,23 @@ export const StatusColumn: React.FunctionComponent<{
 
   const getAgentsHref = useCallback(
     (failed?: boolean): string => {
+      const currentVersionAgentStatus = autoUpgradeAgentsStatus?.currentVersions.find(
+        (value) => value.version === version
+      );
       const kuery = failed
-        ? `policy_id:"${agentPolicyId}" AND upgrade_details.state:"UPG_FAILED" AND upgrade_details.target_version:"${version}"`
+        ? `policy_id:"${agentPolicyId}" AND upgrade_details.state:"UPG_FAILED" AND upgrade_details.target_version:"${version}"${
+            currentVersionAgentStatus && currentVersionAgentStatus.failedUpgradeActionIds?.length
+              ? ` AND (${currentVersionAgentStatus.failedUpgradeActionIds
+                  .map((id) => `upgrade_details.action_id:"${id}"`)
+                  .join(' OR ')})`
+              : ''
+          }`
         : `policy_id:"${agentPolicyId}" AND agent.version:"${version}"`;
       return getHref('agent_list', {
         kuery,
       });
     },
-    [getHref, agentPolicyId, version]
+    [getHref, agentPolicyId, version, autoUpgradeAgentsStatus]
   );
 
   const calcPercentage = useCallback(
