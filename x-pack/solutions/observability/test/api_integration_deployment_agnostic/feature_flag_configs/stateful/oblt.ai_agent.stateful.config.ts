@@ -10,7 +10,7 @@ import { services } from '../../services';
 
 export default createStatefulFeatureFlagTestConfig<typeof services>({
   services,
-  testFiles: [require.resolve('./oblt.agent.index.ts')],
+  testFiles: [require.resolve('./oblt.ai_agent.index.ts')],
   kbnServerArgs: [
     '--uiSettings.overrides.agentBuilder:enabled=true',
     '--feature_flags.overrides.observabilityAgent.enabled=true',

@@ -15,7 +15,7 @@ export default createServerlessFeatureFlagTestConfig<typeof services>({
     '--uiSettings.overrides.agentBuilder:enabled=true',
     '--feature_flags.overrides.observabilityAgent.enabled=true',
   ],
-  testFiles: [require.resolve('./oblt.agent.index.ts')],
+  testFiles: [require.resolve('./oblt.ai_agent.index.ts')],
   junit: {
     reportName:
       'Serverless Observability - Deployment-agnostic Feature Flag Observability Agent API Integration Tests',
