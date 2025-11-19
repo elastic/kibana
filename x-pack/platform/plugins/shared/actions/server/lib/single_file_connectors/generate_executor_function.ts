@@ -29,7 +29,7 @@ export const generateExecutorFunction = ({
     const { subAction, subActionParams } = params as ExecutorParams;
     let data = null;
 
-    const axiosInstance = await getAxiosInstanceWithAuth({ secrets });
+    const axiosInstance = await getAxiosInstanceWithAuth({ ...secrets });
 
     if (!actions[subAction]) {
       const errorMessage = `[Action][ExternalService] Unsupported subAction type ${subAction}.`;

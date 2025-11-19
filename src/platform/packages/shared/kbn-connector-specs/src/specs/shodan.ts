@@ -49,6 +49,7 @@ export const ShodanConnector: ConnectorSpec = {
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { query: string; page?: number };
+        // const apiKey = ctx.secrets['X-Api-Key'] || '';
         const apiKey = ctx.auth.method === 'headers' ? ctx.auth.headers['X-Api-Key'] : '';
         const response = await ctx.client.get('https://api.shodan.io/shodan/host/search', {
           params: {

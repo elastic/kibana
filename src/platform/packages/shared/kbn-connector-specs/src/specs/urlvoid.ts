@@ -49,6 +49,7 @@ export const URLVoidConnector: ConnectorSpec = {
       }),
       handler: async (ctx, input) => {
         const typedInput = input as { domain: string };
+        // const apiKey = ctx.secrets['X-Api-Key'] || '';
         const apiKey = ctx.auth.method === 'headers' ? ctx.auth.headers['X-Api-Key'] : '';
         const response = await ctx.client.get(
           `https://api.urlvoid.com/api1000/${apiKey}/host/${typedInput.domain}`
