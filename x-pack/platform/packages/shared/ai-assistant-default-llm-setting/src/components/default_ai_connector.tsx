@@ -139,7 +139,7 @@ const getOptionsByValues = (
 };
 
 export const DefaultAIConnector: React.FC<Props> = ({ connectors, settings }) => {
-  const { toast, application, docLinks, featureFlags } = useDefaultAiConnectorSettingContext();
+  const { toast, application, docLinks } = useDefaultAiConnectorSettingContext();
   const options = useMemo(() => getOptions(connectors), [connectors]);
   const { handleFieldChange, fields, unsavedChanges } = settings;
 
