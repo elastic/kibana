@@ -18,7 +18,7 @@ describe('<IndicatorsFlyout />', () => {
   it('should render expand button', () => {
     const { getByTestId } = render(
       <TestProvidersComponent>
-        <OpenIndicatorFlyoutButton indicator={mockIndicator} onOpen={jest.fn()} />
+        <OpenIndicatorFlyoutButton indicator={mockIndicator} />
       </TestProvidersComponent>
     );
 
