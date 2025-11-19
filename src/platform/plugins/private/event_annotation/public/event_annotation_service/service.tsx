@@ -312,6 +312,7 @@ export function getEventAnnotationService(
                 function: 'indexPatternLoad',
                 arguments: {
                   id: [indexPatternId],
+                  includeFields: [false],
                 },
               },
             ],

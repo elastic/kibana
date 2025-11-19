@@ -39,7 +39,7 @@ export function getFunctionDefinition({
 
       const indexPattern = await indexPatterns.get(args.id);
 
-      return { type: 'index_pattern', value: indexPattern.toSpec() };
+      return { type: 'index_pattern', value: indexPattern.toSpec(args.includeFields) };
     },
   });
 }

@@ -24,10 +24,10 @@ import type { SchemaEditorProps, SchemaField } from './types';
 import { SchemaEditorContextProvider } from './schema_editor_context';
 import { Controls } from './schema_editor_controls';
 import { FieldsTable } from './schema_editor_table';
-import { FIELD_TYPE_MAP, SUPPORTED_TABLE_COLUMN_NAMES } from './constants';
+import { DEFAULT_TABLE_COLUMN_NAMES, FIELD_TYPE_MAP } from './constants';
 
 export function SchemaEditor({
-  defaultColumns = SUPPORTED_TABLE_COLUMN_NAMES,
+  defaultColumns = DEFAULT_TABLE_COLUMN_NAMES,
   fields,
   isLoading,
   onFieldUpdate,

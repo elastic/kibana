@@ -14,7 +14,7 @@ import {
 import { EXISTING_HOSTS_TAB } from '../screens/fleet';
 import { CONFIRM_MODAL } from '../screens/navigation';
 
-import { API_VERSIONS } from '../../common';
+import { API_VERSIONS } from '@kbn/fleet-plugin/common';
 import { cleanupAgentPolicies } from '../tasks/cleanup';
 import { login } from '../tasks/login';
 import { request } from '../tasks/common';
@@ -131,7 +131,7 @@ describe('OTel input package with custom data stream type', () => {
   const agentPolicyId = 'test-otel-input-package-policy';
   const agentPolicyName = 'Test input package policy';
   const packagePolicyName = 'input-package-policy';
-  const datasetName = 'check'; // Default from the package.
+  const datasetName = 'httpcheckreceiver'; // Default from the package.
   const dataStreamType = 'logs';
 
   before(() => {

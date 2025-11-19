@@ -6,8 +6,8 @@
  */
 
 import { entries, findLastIndex, isNil } from 'lodash';
-import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { ParseAggregationResultsOpts } from '@kbn/triggers-actions-ui-plugin/common';
+import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { ESQLCommandOption } from '@kbn/esql-ast';
 import {
   type ESQLAstCommand,
@@ -208,12 +208,12 @@ export const toGroupedEsqlQueryHits = async (
   };
 };
 
-export const transformDatatableToEsqlTable = (datatable: Datatable): EsqlTable => {
-  const columns: EsqlResultColumn[] = datatable.columns.map((c) => ({
-    name: c.id,
-    type: c.meta.type,
-  }));
-  const values: EsqlResultRow[] = datatable.rows.map((r) => Object.values(r));
+export const transformToEsqlTable = (datatable: ESQLSearchResponse): EsqlTable => {
+  const columns: EsqlResultColumn[] = datatable.columns;
+  // Convert each value to string or null to match EsqlResultRow type
+  const values: EsqlResultRow[] = datatable.values.map(
+    (row) => row.map((v) => (v === null || typeof v === 'string' ? v : String(v))) as EsqlResultRow
+  );
   return { columns, values };
 };
 

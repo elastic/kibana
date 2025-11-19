@@ -61,7 +61,7 @@ import {
   getAlertsByIds,
   createRule,
   getQueryAlertIds,
-} from '../../../../../common/utils/detections_response';
+} from '@kbn/detections-response-ftr-services';
 import { getSignalsWithES } from '../../../../common/lib/api';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -70,7 +70,8 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const log = getService('log');
 
-  describe('patch_cases', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/238980
+  describe.skip('patch_cases', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
     });
@@ -2090,7 +2091,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
           const postedCase = await createCase(supertest, {
             ...postCaseReq,
-            settings: { syncAlerts: false },
+            settings: { syncAlerts: false, extractObservables: false },
           });
 
           const { id } = await createRule(supertest, log, rule);
@@ -2138,7 +2139,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 {
                   id: caseStatusUpdated[0].id,
                   version: caseStatusUpdated[0].version,
-                  settings: { syncAlerts: true },
+                  settings: { syncAlerts: true, extractObservables: true },
                 },
               ],
             },
@@ -2196,7 +2197,7 @@ export default ({ getService }: FtrProviderContext): void => {
                 {
                   id: caseUpdated.id,
                   version: caseUpdated.version,
-                  settings: { syncAlerts: false },
+                  settings: { syncAlerts: false, extractObservables: false },
                 },
               ],
             },

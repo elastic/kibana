@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { EnhancedInternalConnectorContract, InternalConnectorContract } from '@kbn/workflows';
 import { z } from '@kbn/zod';
-import type { InternalConnectorContract } from '@kbn/workflows';
 
 /**
  * Enhanced connector definition that extends auto-generated connectors
@@ -27,7 +27,7 @@ export interface EnhancedConnectorDefinition {
   /** Example usage snippets for autocomplete */
   examples?: {
     /** Example parameter values for autocomplete */
-    params?: Record<string, any>;
+    params?: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
     /** Full example workflow step */
     snippet?: string;
   };
@@ -35,11 +35,7 @@ export interface EnhancedConnectorDefinition {
   /** Override specific parameters with better schemas/examples */
   parameterEnhancements?: Record<
     string,
-    {
-      schema?: z.ZodType;
-      example?: any;
-      description?: string;
-    }
+    { schema?: z.ZodType; example?: unknown; description?: string }
   >;
 }
 
@@ -139,7 +135,7 @@ export const ENHANCED_ELASTICSEARCH_CONNECTORS: EnhancedConnectorDefinition[] = 
 export function mergeEnhancedConnectors(
   generatedConnectors: InternalConnectorContract[],
   enhancedConnectors: EnhancedConnectorDefinition[]
-): InternalConnectorContract[] {
+): EnhancedInternalConnectorContract[] {
   const enhancedMap = new Map(enhancedConnectors.map((e) => [e.type, e]));
 
   return generatedConnectors.map((connector) => {
@@ -151,7 +147,7 @@ export function mergeEnhancedConnectors(
     // Debug logging removed for performance
 
     // Create enhanced connector
-    const enhanced: InternalConnectorContract & { examples?: any } = {
+    const enhanced: EnhancedInternalConnectorContract = {
       ...connector,
       description: enhancement.enhancedDescription || connector.description,
       ...(enhancement.examples && { examples: enhancement.examples }),
@@ -180,7 +176,7 @@ export function mergeEnhancedConnectors(
  */
 function enhanceParameterSchema(
   originalSchema: z.ZodType,
-  enhancements: Record<string, { schema?: z.ZodType; example?: any; description?: string }>
+  enhancements: Record<string, { schema?: z.ZodType; example?: unknown; description?: string }>
 ): z.ZodType {
   // Enhanced parameter schema processing
 

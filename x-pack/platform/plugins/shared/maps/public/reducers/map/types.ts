@@ -64,4 +64,5 @@ export type MapState = {
   waitingForMapReadyLayerList: LayerDescriptor[];
   settings: MapSettings;
   __rollbackSettings: MapSettings | null;
+  __pauseSyncData: boolean;
 };

@@ -5,31 +5,31 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { isWhereBlock } from '@kbn/streamlang';
 import React from 'react';
 import { useSelector } from '@xstate5/react';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { CreateStepButton } from '../../../create_step_button';
-import type { StreamEnrichmentContextType } from '../../../state_management/stream_enrichment_state_machine';
 import { StepContextMenu } from '../context_menu';
-import type { RootLevelMap } from '../../../state_management/stream_enrichment_state_machine/utils';
 import { BlockDisableOverlay } from '../block_disable_overlay';
 import { ConditionDisplay } from '../../../../shared';
+import type { StepConfigurationProps } from '../../steps_list';
 
 export const WhereBlockSummary = ({
   stepRef,
   rootLevelMap,
   stepUnderEdit,
   level,
-}: {
-  stepRef: StreamEnrichmentContextType['stepRefs'][number];
-  rootLevelMap: RootLevelMap;
-  stepUnderEdit?: StreamlangStepWithUIAttributes;
-  level: number;
-}) => {
+  isFirstStepInLevel,
+  isLastStepInLevel,
+}: StepConfigurationProps) => {
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
+
+  const handleTitleClick = () => {
+    stepRef.send({ type: 'step.edit' });
+  };
 
   if (!isWhereBlock(step)) return null;
 
@@ -52,7 +52,37 @@ export const WhereBlockSummary = ({
           overflow: hidden;
         `}
       >
-        <ConditionDisplay condition={step.where} showKeyword={true} keyword="WHERE" />
+        <ConditionDisplay
+          condition={step.where}
+          showKeyword={true}
+          keyword="WHERE"
+          keywordWrapper={(children) => (
+            <EuiToolTip
+              position="top"
+              content={i18n.translate(
+                'xpack.streams.streamDetailEnrichment.whereBlockSummary.editConditionTooltip',
+                {
+                  defaultMessage: 'Edit condition',
+                }
+              )}
+            >
+              <EuiButtonEmpty
+                onClick={handleTitleClick}
+                color="text"
+                size="xs"
+                aria-label={i18n.translate(
+                  'xpack.streams.streamDetailEnrichment.whereBlockSummary.editConditionLabel',
+                  {
+                    defaultMessage: 'Edit condition',
+                  }
+                )}
+                data-test-subj="streamsAppDetailEnrichmentConditionTitleEditButton"
+              >
+                {children}
+              </EuiButtonEmpty>
+            </EuiToolTip>
+          )}
+        />
       </EuiFlexItem>
 
       <EuiFlexItem
@@ -64,7 +94,12 @@ export const WhereBlockSummary = ({
       >
         <EuiFlexGroup gutterSize="none">
           <CreateStepButton parentId={stepRef.id} mode="inline" nestingDisabled={level >= 2} />
-          <StepContextMenu stepRef={stepRef} stepUnderEdit={stepUnderEdit} />
+          <StepContextMenu
+            stepRef={stepRef}
+            stepUnderEdit={stepUnderEdit}
+            isFirstStepInLevel={isFirstStepInLevel}
+            isLastStepInLevel={isLastStepInLevel}
+          />
         </EuiFlexGroup>
       </EuiFlexItem>
     </EuiFlexGroup>

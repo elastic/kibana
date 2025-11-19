@@ -18,10 +18,8 @@ export interface MetricField {
   type: string;
   instrument?: MappingTimeSeriesMetricType;
   unit?: MetricUnit;
-  description?: string;
-  source?: 'otel' | 'ecs' | 'custom';
-  stability?: 'stable' | 'beta' | 'experimental';
   display?: string;
+  scope?: string;
   noData?: boolean;
 }
 

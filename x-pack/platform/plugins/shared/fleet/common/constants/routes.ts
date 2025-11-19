@@ -188,6 +188,12 @@ export const AGENT_API_ROUTES = {
   GET_UPLOAD_FILE_PATTERN: `${API_ROOT}/agents/files/{fileId}/{fileName}`,
   DELETE_UPLOAD_FILE_PATTERN: `${API_ROOT}/agents/files/{fileId}`,
   PRIVILEGE_LEVEL_CHANGE_PATTERN: `${API_ROOT}/agents/{agentId}/privilege_level_change`,
+  BULK_PRIVILEGE_LEVEL_CHANGE_PATTERN: `${API_ROOT}/agents/bulk_privilege_level_change`,
+};
+
+export const AGENTLESS_POLICIES_ROUTES = {
+  CREATE_PATTERN: `${API_ROOT}/agentless_policies`,
+  DELETE_PATTERN: `${API_ROOT}/agentless_policies/{policyId}`,
 };
 
 export const ENROLLMENT_API_KEY_ROUTES = {

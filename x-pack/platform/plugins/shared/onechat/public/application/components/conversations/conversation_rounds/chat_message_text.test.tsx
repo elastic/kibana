@@ -18,6 +18,7 @@ import { createVisualizationRenderer, visualizationTagParser } from './markdown_
 import { ChatMessageText } from './chat_message_text';
 import { useOnechatServices } from '../../../hooks/use_onechat_service';
 import { useStepsFromPrevRounds } from '../../../hooks/use_conversation';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
 import { VisualizeESQL } from '../../tools/esql/visualize_esql';
 import type { OnechatStartDependencies } from '../../../../types';
 import { setWith } from '@kbn/safer-lodash-set';
@@ -41,10 +42,17 @@ jest.mock('../../../hooks/use_conversation', () => ({
   useStepsFromPrevRounds: jest.fn(),
 }));
 
+jest.mock('../../../context/conversation/conversation_context', () => ({
+  useConversationContext: jest.fn(),
+}));
+
 const mockVisualizeESQL = VisualizeESQL as jest.MockedFunction<any>;
 const useOnechatServicesMock = useOnechatServices as jest.MockedFunction<typeof useOnechatServices>;
 const useStepsFromPrevRoundsMock = useStepsFromPrevRounds as jest.MockedFunction<
   typeof useStepsFromPrevRounds
+>;
+const useConversationContextMock = useConversationContext as jest.MockedFunction<
+  typeof useConversationContext
 >;
 
 const toolResult: TabularDataResult = {
@@ -75,6 +83,7 @@ function createStartDependencies() {
     dataViews: {},
     cloud: {},
     share: {},
+    uiActions: {},
   } as OnechatStartDependencies;
 }
 
@@ -95,6 +104,27 @@ describe('chat_message_text', () => {
       startDependencies: createStartDependencies(),
     } as ReturnType<typeof useOnechatServices>);
     useStepsFromPrevRoundsMock.mockReturnValue([]);
+    useConversationContextMock.mockReturnValue({
+      isEmbeddedContext: false,
+      browserApiTools: undefined,
+      conversationActions: {
+        removeNewConversationQuery: jest.fn(),
+        invalidateConversation: jest.fn(),
+        addOptimisticRound: jest.fn(),
+        removeOptimisticRound: jest.fn(),
+        setAgentId: jest.fn(),
+        addReasoningStep: jest.fn(),
+        addToolCall: jest.fn(),
+        setToolCallProgress: jest.fn(),
+        setToolCallResult: jest.fn(),
+        setAssistantMessage: jest.fn(),
+        addAssistantMessageChunk: jest.fn(),
+        onConversationCreated: jest.fn(),
+        deleteConversation: jest.fn(),
+        renameConversation: jest.fn(),
+        setTimeToFirstToken: jest.fn(),
+      },
+    });
   });
 
   describe('visualizationTagParser', () => {
@@ -198,6 +228,7 @@ describe('chat_message_text', () => {
         esqlQuery: toolResult.data.query,
         lens: startDependencies.lens,
         dataViews: startDependencies.dataViews,
+        uiActions: startDependencies.uiActions,
       });
     });
 

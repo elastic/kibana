@@ -36,7 +36,8 @@ export const enhancedEsSearchStrategyProvider = (
   searchConfig: SearchConfigSchema,
   logger: Logger,
   usage?: SearchUsage,
-  useInternalUser: boolean = false
+  useInternalUser: boolean = false,
+  isServerless: boolean = false
 ): ISearchStrategy<IEsSearchRequest<IAsyncSearchRequestParams>> => {
   function cancelAsyncSearch(id: string, { esClient }: SearchStrategyDependencies) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
@@ -100,7 +101,7 @@ export const enhancedEsSearchStrategyProvider = (
   ) {
     const client = useInternalUser ? esClient.asInternalUser : esClient.asCurrentUser;
     const params = {
-      ...(await getDefaultAsyncSubmitParams(uiSettingsClient, searchConfig, options)),
+      ...(await getDefaultAsyncSubmitParams(uiSettingsClient, searchConfig, options, isServerless)),
       ...request.params,
     };
     const { body, headers, meta } = await client.asyncSearch.submit(params, {

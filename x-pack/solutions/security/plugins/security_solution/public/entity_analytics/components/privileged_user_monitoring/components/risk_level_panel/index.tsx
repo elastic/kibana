@@ -99,6 +99,7 @@ export const RiskLevelsPrivilegedUsersPanel: React.FC<{ spaceId: string }> = ({ 
           (isError ? (
             <div>
               <EuiCallOut
+                announceOnMount
                 title={i18n.translate(
                   'xpack.securitySolution.entityAnalytics.privilegedUserMonitoring.riskLevels.errorLoadingData',
                   {

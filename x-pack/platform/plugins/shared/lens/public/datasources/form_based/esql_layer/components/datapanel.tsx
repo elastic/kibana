@@ -25,8 +25,7 @@ import {
 } from '@kbn/unified-field-list';
 import type { OverrideFieldGroupDetails } from '@kbn/unified-field-list/src/types';
 import { useEuiTheme } from '@elastic/eui';
-import type { DatasourceDataPanelProps } from '../../../../types';
-import type { TextBasedPrivateState } from '../types';
+import type { DatasourceDataPanelProps, TextBasedPrivateState } from '@kbn/lens-common';
 import { getStateFromAggregateQuery } from '../utils';
 import { FieldItem } from '../../../common/field_item';
 import { getColumnsFromCache } from '../fieldlist_cache';
@@ -68,6 +67,7 @@ export function TextBasedDataPanel({
           dataViews,
           data,
           expressions,
+          core.http,
           frameDataViews
         );
         setDataHasLoaded(true);
@@ -75,7 +75,7 @@ export function TextBasedDataPanel({
       }
     }
     fetchData();
-  }, [data, dataViews, expressions, prevQuery, query, setState, state, frame.dataViews]);
+  }, [data, dataViews, expressions, prevQuery, query, setState, state, frame.dataViews, core.http]);
   const fieldList = isOfAggregateQueryType(query) ? getColumnsFromCache(query) : [];
 
   const onSelectedFieldFilter = useCallback(

@@ -20,6 +20,7 @@
     "xpack.canvas": "platform/plugins/private/canvas",
     "xpack.cases": "platform/plugins/shared/cases",
     "xpack.cloud": "platform/plugins/shared/cloud",
+    "xpack.cloudDefend": "solutions/security/plugins/cloud_defend",
     "xpack.cloudLinks": "platform/plugins/private/cloud_integrations/cloud_links",
     "xpack.cloudDataMigration": "platform/plugins/private/cloud_integrations/cloud_data_migration",
     "xpack.contentConnectors": "solutions/search/plugins/content_connectors",
@@ -151,7 +152,6 @@
     "xpack.securitySolutionServerless": "solutions/security/plugins/security_solution_serverless",
     "xpack.sessionView": "solutions/security/plugins/session_view",
     "xpack.streams": [
-      "solutions/observability/plugins/observability_streams_wrapper",
       "platform/plugins/shared/streams_app"
     ],
     "xpack.slo": "solutions/observability/plugins/slo",

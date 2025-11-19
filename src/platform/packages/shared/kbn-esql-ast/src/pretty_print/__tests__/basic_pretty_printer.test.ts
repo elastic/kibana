@@ -10,12 +10,15 @@
 import { parse } from '../../parser';
 import type { ESQLFunction, ESQLMap } from '../../types';
 import { Walker } from '../../walker';
-import type { BasicPrettyPrinterMultilineOptions } from '../basic_pretty_printer';
+import type {
+  BasicPrettyPrinterMultilineOptions,
+  BasicPrettyPrinterOptions,
+} from '../basic_pretty_printer';
 import { BasicPrettyPrinter } from '../basic_pretty_printer';
 
-const reprint = (src: string) => {
+const reprint = (src: string, opts?: BasicPrettyPrinterOptions) => {
   const { root } = parse(src);
-  const text = BasicPrettyPrinter.print(root);
+  const text = BasicPrettyPrinter.print(root, opts);
 
   // console.log(JSON.stringify(root, null, 2));
 
@@ -29,6 +32,53 @@ const assertReprint = (src: string, expected: string = src) => {
 };
 
 describe('single line query', () => {
+  describe('header commands', () => {
+    describe('SET', () => {
+      test('single SET command (with keyword "KEY")', () => {
+        const { text } = reprint('SET key = "value"; FROM index');
+
+        expect(text).toBe('SET `key` = "value"; FROM index');
+      });
+
+      test('multiple SET commands', () => {
+        const { text } = reprint(
+          'SET key1 = "value1"; SET key2 = "value2"; FROM index | LIMIT 123'
+        );
+
+        expect(text).toBe('SET key1 = "value1"; SET key2 = "value2"; FROM index | LIMIT 123');
+      });
+
+      test('SET with numeric value', () => {
+        const { text } = reprint('SET timeout = 30; FROM index');
+
+        expect(text).toBe('SET timeout = 30; FROM index');
+      });
+
+      test('SET with boolean value', () => {
+        const { text } = reprint('SET flag = true; FROM index');
+
+        expect(text).toBe('SET flag = TRUE; FROM index');
+      });
+
+      test('can skip printing header commands', () => {
+        const { text } = reprint('SET flag = true; FROM index', { skipHeader: true });
+
+        expect(text).toBe('FROM index');
+      });
+
+      test('can sckip multiple SET commands', () => {
+        const { text } = reprint(
+          'SET key1 = "value1"; SET key2 = "value2"; FROM index | LIMIT 123',
+          {
+            skipHeader: true,
+          }
+        );
+
+        expect(text).toBe('FROM index | LIMIT 123');
+      });
+    });
+  });
+
   describe('commands', () => {
     describe('FROM', () => {
       test('FROM command with a single source', () => {
@@ -127,6 +177,16 @@ describe('single line query', () => {
 
         expect(text).toBe('FROM search-movies | GROK Awards "text"');
       });
+
+      test('multiple patterns', () => {
+        const { text } = reprint(
+          'FROM logs | GROK message "%{IP:client}", "%{WORD:method}", "%{NUMBER:status}"'
+        );
+
+        expect(text).toBe(
+          'FROM logs | GROK message "%{IP:client}", "%{WORD:method}", "%{NUMBER:status}"'
+        );
+      });
     });
 
     describe('DISSECT', () => {
@@ -167,6 +227,10 @@ describe('single line query', () => {
           FROM employees | LEFT JOIN a ON b, c, d.e.f`);
 
         expect(text).toBe('FROM employees | LEFT JOIN a ON b, c, d.e.f');
+      });
+
+      test('supports binary expressions', () => {
+        reprint('FROM employees | LEFT JOIN a ON b, c > d, d.e.f == 42 AND NOT MATCH(g, "hallo")');
       });
     });
 
@@ -316,6 +380,16 @@ describe('single line query', () => {
         );
       });
 
+      test('from singlelinewith with options', () => {
+        const { text } =
+          reprint(`FROM search-movies | FUSE linear SCORE BY s1 KEY BY k1, k2 GROUP BY g WITH { "normalizer": "minmax" }
+        `);
+
+        expect(text).toBe(
+          'FROM search-movies | FUSE linear SCORE BY s1 KEY BY k1, k2 GROUP BY g WITH {"normalizer": "minmax"}'
+        );
+      });
+
       test('from multiline', () => {
         const { text } = reprint(`FROM search-movies METADATA _score, _id, _index
   | FORK
@@ -327,6 +401,20 @@ describe('single line query', () => {
 
         expect(text).toBe(
           'FROM search-movies METADATA _score, _id, _index | FORK (WHERE semantic_title : "Shakespeare" | SORT _score) (WHERE title : "Shakespeare" | SORT _score) | FUSE | KEEP title, _score'
+        );
+      });
+
+      test('from multiline with options', () => {
+        const { text } = reprint(`FROM search-movies
+  | FUSE linear
+        SCORE BY s1
+        KEY BY k1, k2
+        GROUP BY g
+        WITH {"normalizer": "minmax"}
+        `);
+
+        expect(text).toBe(
+          'FROM search-movies | FUSE linear SCORE BY s1 KEY BY k1, k2 GROUP BY g WITH {"normalizer": "minmax"}'
         );
       });
     });
@@ -1008,5 +1096,16 @@ describe('unary operator precedence and grouping', () => {
 
   test('should parenthesize multiplication of addition', () => {
     assertReprint('ROW (a + b) * (c + d)');
+  });
+});
+
+describe('subqueries (parens)', () => {
+  test('can print complex subqueries with processing', () => {
+    const src =
+      'FROM index1, (FROM index2 | WHERE a > 10 | EVAL b = a * 2 | STATS cnt = COUNT(*) BY c | SORT cnt DESC | LIMIT 10), index3, (FROM index4 | STATS count(*)) | WHERE d > 10 | STATS max = max(*) BY e | SORT max DESC';
+    const expected =
+      'FROM index1, (FROM index2 | WHERE a > 10 | EVAL b = a * 2 | STATS cnt = COUNT(*) BY c | SORT cnt DESC | LIMIT 10), index3, (FROM index4 | STATS COUNT(*)) | WHERE d > 10 | STATS max = MAX(*) BY e | SORT max DESC';
+
+    assertReprint(src, expected);
   });
 });

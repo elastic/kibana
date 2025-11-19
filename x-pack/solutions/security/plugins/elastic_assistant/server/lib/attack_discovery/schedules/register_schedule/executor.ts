@@ -116,7 +116,9 @@ export const attackDiscoveryScheduleExecutor = async ({
       anonymizedAlerts,
       apiConfig: params.apiConfig,
       connectorName: params.apiConfig.name,
+      enableFieldRendering: true, // Always enable field rendering for scheduled discoveries. It's still possible for clients who read the generated discoveries to specify false when retrieving them.
       replacements,
+      withReplacements: false, // Never apply replacements to the results. It's still possible for clients who read the generated discoveries to specify true when retrieving them.
     };
 
     // Deduplicate attackDiscoveries before creating alerts

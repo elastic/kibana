@@ -12,6 +12,7 @@ import {
   OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS,
   OBSERVABILITY_STREAMS_ENABLE_GROUP_STREAMS,
   OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS,
+  OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS,
 } from '@kbn/management-settings-ids';
 import type { StreamsPluginStartDependencies } from './types';
 import { STREAMS_TIERED_SIGNIFICANT_EVENT_FEATURE } from '../common';
@@ -62,6 +63,8 @@ export function registerFeatureFlags(
       requiresPageReload: true,
       solutionViews: ['classic', 'oblt'],
       technicalPreview: true,
+      readonly: true,
+      readonlyMode: 'ui',
     },
   });
 
@@ -80,6 +83,23 @@ export function registerFeatureFlags(
       requiresPageReload: true,
       solutionViews: ['classic', 'oblt'],
       technicalPreview: true,
+    },
+    [OBSERVABILITY_STREAMS_ENABLE_ATTACHMENTS]: {
+      category: ['observability'],
+      name: i18n.translate('xpack.streams.streamsAttachmentsSettingsName', {
+        defaultMessage: 'Streams attachments',
+      }),
+      value: false,
+      description: i18n.translate('xpack.streams.streamsAttachmentsSettingsDescription', {
+        defaultMessage: 'Enable Streams attachments tab.',
+      }),
+      type: 'boolean',
+      schema: schema.boolean(),
+      requiresPageReload: true,
+      solutionViews: ['classic', 'oblt'],
+      technicalPreview: true,
+      readonly: true,
+      readonlyMode: 'ui',
     },
   });
 }

@@ -18,7 +18,6 @@ import { ANALYTICS_SYNCHRONIZATION_TASK_TYPE } from '../../../../common/constant
 import type { Owner } from '../../../../common/constants/types';
 import type { CasesServerStartDependencies } from '../../../types';
 import { AnalyticsIndexSynchronizationTaskFactory } from './synchronization_task_factory';
-import type { CAISyncType } from '../../constants';
 
 const SCHEDULE: IntervalSchedule = { interval: '5m' };
 
@@ -52,30 +51,27 @@ export function registerCAISynchronizationTask({
   });
 }
 
+export function getSynchronizationTaskId(spaceId: string, owner: Owner): string {
+  return `cai_cases_analytics_sync_${spaceId}_${owner}`;
+}
+
 export async function scheduleCAISynchronizationTask({
-  taskId,
-  sourceIndex,
-  destIndex,
   taskManager,
   logger,
   spaceId,
   owner,
-  syncType,
 }: {
-  taskId: string;
-  sourceIndex: string;
-  destIndex: string;
   taskManager: TaskManagerStartContract;
   logger: Logger;
   spaceId: string;
   owner: Owner;
-  syncType: CAISyncType;
 }) {
+  const taskId = getSynchronizationTaskId(spaceId, owner);
   try {
     await taskManager.ensureScheduled({
       id: taskId,
       taskType: ANALYTICS_SYNCHRONIZATION_TASK_TYPE,
-      params: { sourceIndex, destIndex, owner, spaceId, syncType },
+      params: { owner, spaceId },
       schedule: SCHEDULE, // every 5 minutes
       state: {},
     });

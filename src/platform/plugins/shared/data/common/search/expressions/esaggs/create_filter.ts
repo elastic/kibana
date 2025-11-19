@@ -9,6 +9,7 @@
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { Filter } from '@kbn/es-query';
+import { MISSING_TOKEN } from '@kbn/field-formats-common';
 import type { IAggConfig } from '../../aggs';
 
 const getOtherBucketFilterTerms = (table: Datatable, columnIndex: number, rowIndex: number) => {
@@ -28,7 +29,7 @@ const getOtherBucketFilterTerms = (table: Datatable, columnIndex: number, rowInd
     ...new Set(
       terms.filter((term) => {
         const notOther = term !== '__other__';
-        const notMissing = term !== '__missing__';
+        const notMissing = term !== MISSING_TOKEN;
         return notOther && notMissing;
       })
     ),

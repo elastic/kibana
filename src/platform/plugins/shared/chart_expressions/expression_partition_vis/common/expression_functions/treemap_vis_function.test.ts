@@ -10,7 +10,7 @@
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 import type { TreemapVisConfig } from '../types/expression_renderers';
 import { LabelPositions, ValueFormats, LegendDisplay } from '../types/expression_renderers';
-import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import type { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { treemapVisFunction } from './treemap_vis_function';
 import { PARTITION_LABELS_VALUE, PARTITION_VIS_RENDERER_NAME } from '../constants';

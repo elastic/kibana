@@ -10,8 +10,8 @@
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type {
   NavigateToLensContext,
-  MetricVisConfiguration,
-} from '@kbn/visualizations-plugin/common';
+  MetricVisualizationState as MetricVisConfiguration,
+} from '@kbn/lens-common';
 import type { Vis } from '@kbn/visualizations-plugin/public';
 import type { VisParams } from '../types';
 

@@ -7,15 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { zodToJsonSchema } from 'zod-to-json-schema';
 import type { ZodFirstPartySchemaTypes } from '@kbn/zod';
 import { z } from '@kbn/zod';
-import { zodToJsonSchema } from 'zod-to-json-schema';
+import type { WorkflowZodSchemaLooseType } from '../../schema';
 
 export function parsePath(path: string) {
   const segments = path
     .replace(/\[(['"]?)([^\]]+)\1\]/g, '.$2') // Convert [key] to .key
     .split('.');
   return segments.some((s) => s === '') ? null : segments;
+}
+
+interface GetSchemaAtPathResult {
+  schema: z.ZodType | null;
+  scopedToPath: string | null;
 }
 
 /**
@@ -26,27 +32,33 @@ export function parsePath(path: string) {
  * @param options.partial - If true, return the schema for the last valid path segment.
  * @returns The schema at the given path or null if the path is invalid.
  */
+// eslint-disable-next-line complexity
 export function getSchemaAtPath(
-  schema: z.ZodType,
+  schema: WorkflowZodSchemaLooseType,
   path: string,
   { partial = false }: { partial?: boolean } = {}
-): z.ZodType | null {
+): GetSchemaAtPathResult {
   try {
     const segments = parsePath(path);
     if (!segments) {
-      return null;
+      return { schema: null, scopedToPath: null };
     }
 
     let current = schema;
 
-    for (const segment of segments) {
+    for (const [index, segment] of segments.entries()) {
       if (current instanceof z.ZodOptional) {
         current = current.unwrap();
+      }
+      if (current instanceof z.ZodDefault) {
+        current = current.removeDefault();
       }
       if (current instanceof z.ZodObject) {
         const shape = current.shape;
         if (!(segment in shape)) {
-          return partial ? current : null;
+          return partial
+            ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
+            : { schema: null, scopedToPath: null };
         }
         current = shape[segment];
       } else if (current instanceof z.ZodUnion) {
@@ -55,45 +67,55 @@ export function getSchemaAtPath(
           isValidSchemaPath(branch, segment)
         );
         if (!validBranch) {
-          return partial ? current : null;
+          return partial
+            ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
+            : { schema: null, scopedToPath: null };
         }
         current = validBranch;
       } else if (current instanceof z.ZodArray) {
         if (!/^\d+$/.test(segment)) {
-          return partial ? current : null;
+          return partial
+            ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
+            : { schema: null, scopedToPath: null };
         }
-        const index = parseInt(segment, 10);
+        const arrayIndex = parseInt(segment, 10);
 
         // Reject negative indices
-        if (index < 0) {
-          return partial ? current : null;
+        if (arrayIndex < 0) {
+          return partial
+            ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
+            : { schema: null, scopedToPath: null };
         }
 
         // Only enforce bounds checking for arrays with explicit length constraints
         const maxLength = current._def.maxLength?.value ?? current._def.exactLength?.value;
-        if (maxLength !== undefined && index >= maxLength) {
-          return partial ? current : null;
+        if (maxLength !== undefined && arrayIndex >= maxLength) {
+          return partial
+            ? { schema: current, scopedToPath: segments.slice(0, index).join('.') }
+            : { schema: null, scopedToPath: null };
         }
 
         // For unconstrained arrays, we allow any non-negative index for schema introspection
         // This is because we're validating schema paths, not runtime data
         current = current.element;
       } else if (current instanceof z.ZodAny) {
-        return z.any();
+        // pass through any to preserve the description
+        return { schema: current, scopedToPath: segments.slice(0, index).join('.') };
       } else if (current instanceof z.ZodUnknown) {
-        return z.unknown();
+        // pass through unknown to preserve the description
+        return { schema: current, scopedToPath: segments.slice(0, index).join('.') };
       } else {
-        return null;
+        return { schema: null, scopedToPath: null };
       }
     }
 
     if (current instanceof z.ZodOptional) {
-      return current.unwrap();
+      return { schema: current.unwrap(), scopedToPath: segments.join('.') };
     }
 
-    return current;
+    return { schema: current as z.ZodType, scopedToPath: segments.join('.') };
   } catch {
-    return null;
+    return { schema: null, scopedToPath: null };
   }
 }
 
@@ -104,33 +126,53 @@ export function getSchemaAtPath(
  * @returns True if the path is valid, false otherwise.
  */
 export function isValidSchemaPath(schema: z.ZodType, path: string) {
-  return getSchemaAtPath(schema, path) !== null;
+  return getSchemaAtPath(schema, path).schema !== null;
 }
 
 /**
  * Infer a zod schema from an object.
  * @param obj - The object to infer the schema from.
+ * @param isConst - If true, the schema will use a literal instead of the inferred type.
  * @returns The inferred zod schema.
  */
-export function inferZodType(obj: any): z.ZodType {
+export function inferZodType(
+  obj: unknown,
+  { isConst = false }: { isConst?: boolean } = {}
+): z.ZodType {
   if (obj === null) return z.null();
   if (obj === undefined) return z.undefined();
 
   const type = typeof obj;
 
-  if (type === 'string') return z.string();
-  if (type === 'number') return z.number();
-  if (type === 'boolean') return z.boolean();
+  if (type === 'string') {
+    if (isConst) {
+      return z.literal(obj as string);
+    }
+    return z.string();
+  }
+  if (type === 'number') {
+    if (isConst) {
+      return z.literal(obj as number);
+    }
+    return z.number();
+  }
+  if (type === 'boolean') {
+    if (isConst) {
+      return z.literal(obj as boolean);
+    }
+    return z.boolean();
+  }
 
   if (Array.isArray(obj)) {
     if (obj.length === 0) return z.array(z.unknown());
-    return z.array(inferZodType(obj[0])).length(obj.length);
+    const first = obj[0] as unknown;
+    return z.array(inferZodType(first, { isConst })).length(obj.length);
   }
 
   if (type === 'object') {
     const shape: Record<string, z.ZodSchema> = {};
-    for (const [key, value] of Object.entries(obj)) {
-      shape[key] = inferZodType(value);
+    for (const [key, value] of Object.entries(obj as Record<string, unknown>)) {
+      shape[key] = inferZodType(value, { isConst });
     }
     return z.object(shape);
   }
@@ -143,7 +185,16 @@ export function expectZodSchemaEqual(a: z.ZodType, b: z.ZodType) {
 }
 
 export function getZodTypeName(schema: z.ZodType) {
-  const typedSchema = schema as ZodFirstPartySchemaTypes;
+  // Unwrap ZodOptional and ZodDefault to get the actual schema type
+  let unwrappedSchema = schema;
+  if (unwrappedSchema instanceof z.ZodOptional) {
+    unwrappedSchema = unwrappedSchema.unwrap();
+  }
+  if (unwrappedSchema instanceof z.ZodDefault) {
+    unwrappedSchema = unwrappedSchema.removeDefault();
+  }
+
+  const typedSchema = unwrappedSchema as ZodFirstPartySchemaTypes;
   const def = typedSchema._def;
   switch (def.typeName) {
     case 'ZodString':
@@ -164,6 +215,19 @@ export function getZodTypeName(schema: z.ZodType) {
       return 'null';
     case 'ZodUnknown':
       return 'unknown';
+    case 'ZodLiteral':
+      return 'literal';
+    case 'ZodUnion': {
+      // Check if all union members are arrays - if so, treat as array type
+      const unionSchema = unwrappedSchema as z.ZodUnion<[z.ZodType, ...z.ZodType[]]>;
+      const allMembersAreArrays = unionSchema.options.every(
+        (option: z.ZodType) => option instanceof z.ZodArray
+      );
+      if (allMembersAreArrays) {
+        return 'array';
+      }
+      return 'union';
+    }
     default:
       return 'unknown';
   }

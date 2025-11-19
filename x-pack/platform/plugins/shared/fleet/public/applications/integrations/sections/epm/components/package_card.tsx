@@ -117,8 +117,13 @@ export function PackageCard({
             display="inlineBlock"
             content={DEFERRED_ASSETS_WARNING_MSG}
             title={DEFERRED_ASSETS_WARNING_LABEL}
+            css={css`
+              width: 100%;
+            `}
           >
-            <EuiBadge color="warning">{DEFERRED_ASSETS_WARNING_LABEL} </EuiBadge>
+            <EuiBadge color="warning" tabIndex={0}>
+              {DEFERRED_ASSETS_WARNING_LABEL}{' '}
+            </EuiBadge>
           </EuiToolTip>
         </span>
       </EuiFlexItem>
@@ -192,6 +197,12 @@ export function PackageCard({
     }
   };
 
+  const installationStatusVisible = shouldShowInstallationStatus({
+    installStatus,
+    showInstallationStatus,
+    isActive: hasDataStreams,
+  });
+
   const testid = `integration-card:${id}`;
   return (
     <TrackApplicationView viewId={testid}>
@@ -205,23 +216,22 @@ export function PackageCard({
             display: flex;
             flex-direction: column;
             block-size: 100%;
+            overflow: hidden;
           }
 
           [class*='euiCard__description'] {
             flex-grow: 1;
             ${descriptionLineClamp
-              ? shouldShowInstallationStatus({
-                  installStatus,
-                  showInstallationStatus,
-                  isActive: hasDataStreams,
-                })
+              ? installationStatusVisible
                 ? getLineClampStyles(1) // Show only one line of description if installation status is shown
                 : getLineClampStyles(descriptionLineClamp)
               : ''}
           }
 
           [class*='euiCard__titleButton'] {
-            width: 100%;
+            width: ${installationStatusVisible
+              ? `calc(100% - ${theme.euiTheme.base * 4}px)`
+              : '100%'};
             ${getLineClampStyles(titleLineClamp)}
           }
 
@@ -248,7 +258,27 @@ export function PackageCard({
         }
         onClick={onClickProp ?? onCardClick}
       >
-        <EuiFlexGroup gutterSize="xs" wrap={true}>
+        <EuiFlexGroup
+          gutterSize="xs"
+          wrap={true}
+          css={css`
+            width: ${installationStatusVisible
+              ? `calc(100% - ${theme.euiTheme.base * 4}px)`
+              : '100%'};
+            overflow-x: hidden;
+            text-overflow: ellipsis;
+
+            & > .euiFlexItem {
+              min-width: 0;
+            }
+
+            ${isCollectionCard
+              ? `& > .euiFlexItem:last-child {
+              min-width: auto;
+            }`
+              : ''}
+          `}
+        >
           {showLabels && extraLabelsBadges ? extraLabelsBadges : null}
           {verifiedBadge}
           {updateAvailableBadge}

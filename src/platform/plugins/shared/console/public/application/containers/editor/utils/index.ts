@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  AutocompleteType,
-  SELECTED_REQUESTS_CLASSNAME,
-  STATUS_CODE_LINE_CLASSNAME,
-} from './constants';
+export { AutocompleteType } from './constants';
 export {
   getRequestStartLineNumber,
   getRequestEndLineNumber,

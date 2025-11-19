@@ -10,12 +10,26 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
-      diskSizeGb: 85
+      diskSizeGb: 115
     retry:
       automatic:
         - exit_status: '*'
           limit: 1
   - wait
+
+  - command: .buildkite/scripts/steps/store_cache.sh
+    label: Store Cache for build
+    timeout_in_minutes: 10
+    id: store_cache
+    soft_fail: true
+    depends_on:
+      - terrazzo-initial-pipeline-upload
+    agents:
+      image: family/kibana-ubuntu-2404
+      imageProject: elastic-images-prod
+      provider: gcp
+      machineType: n2-standard-2
+      diskSizeGb: 95
 
   - command: .buildkite/scripts/steps/on_merge_build_and_metrics.sh
     label: Build Kibana Distribution
@@ -40,7 +54,7 @@ steps:
       provider: gcp
       machineType: n2-highcpu-8
       preemptible: true
-      diskSizeGb: 85
+      diskSizeGb: 115
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -55,7 +69,7 @@ steps:
       provider: gcp
       machineType: n2-standard-2
       preemptible: true
-      diskSizeGb: 85
+      diskSizeGb: 115
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -70,7 +84,7 @@ steps:
       provider: gcp
       machineType: n2-standard-16
       preemptible: true
-      diskSizeGb: 85
+      diskSizeGb: 115
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -85,14 +99,14 @@ steps:
       provider: gcp
       machineType: n2-standard-32
       preemptible: true
-      diskSizeGb: 85
+      diskSizeGb: 115
     timeout_in_minutes: 60
     retry:
       automatic:
         - exit_status: '-1'
           limit: 3
 
-  - command: .buildkite/scripts/steps/check_types.sh
+  - command: .buildkite/scripts/steps/typecheck/check_types.sh
     label: 'Check Types'
     agents:
       image: family/kibana-ubuntu-2404
@@ -102,7 +116,7 @@ steps:
       diskType: 'hyperdisk-balanced'
       preemptible: true
       spotZones: us-central1-a,us-central1-b,us-central1-c
-      diskSizeGb: 85
+      diskSizeGb: 115
     timeout_in_minutes: 60
     retry:
       automatic:
@@ -134,7 +148,7 @@ steps:
       provider: gcp
       machineType: n2-highmem-4
       preemptible: true
-      diskSizeGb: 85
+      diskSizeGb: 115
     timeout_in_minutes: 80
     retry:
       automatic:
@@ -150,7 +164,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
-      diskSizeGb: 85
+      diskSizeGb: 115
     timeout_in_minutes: 10
     depends_on:
       - build
@@ -167,7 +181,7 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
-      diskSizeGb: 85
+      diskSizeGb: 115
     timeout_in_minutes: 10
     env:
       JEST_UNIT_SCRIPT: '.buildkite/scripts/steps/test/jest.sh'
@@ -185,9 +199,9 @@ steps:
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-4
-      diskSizeGb: 85
+      diskSizeGb: 115
     key: build_scout_tests
-    timeout_in_minutes: 10
+    timeout_in_minutes: 15
     depends_on:
       - build
     env:
@@ -565,7 +579,7 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
-    timeout_in_minutes: 60
+    timeout_in_minutes: 75
     parallelism: 20
     retry:
       automatic:
@@ -580,23 +594,8 @@ steps:
       provider: gcp
       enableNestedVirtualization: true
       machineType: n2-standard-4
-    timeout_in_minutes: 60
+    timeout_in_minutes: 75
     parallelism: 14
-    retry:
-      automatic:
-        - exit_status: '-1'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/profiling_cypress.sh
-    label: 'Profiling Cypress Tests'
-    agents:
-      image: family/kibana-ubuntu-2404
-      imageProject: elastic-images-prod
-      provider: gcp
-      machineType: n2-standard-4
-      preemptible: true
-    timeout_in_minutes: 120
-    parallelism: 3
     retry:
       automatic:
         - exit_status: '-1'

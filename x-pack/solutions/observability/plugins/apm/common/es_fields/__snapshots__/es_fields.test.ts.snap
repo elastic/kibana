@@ -152,6 +152,8 @@ exports[`Error HTTP_REQUEST_METHOD 1`] = `undefined`;
 
 exports[`Error HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
 
+exports[`Error ID 1`] = `undefined`;
+
 exports[`Error INDEX 1`] = `undefined`;
 
 exports[`Error KIND 1`] = `undefined`;
@@ -554,6 +556,8 @@ exports[`Span HOST_OS_VERSION 1`] = `undefined`;
 exports[`Span HTTP_REQUEST_METHOD 1`] = `undefined`;
 
 exports[`Span HTTP_RESPONSE_STATUS_CODE 1`] = `undefined`;
+
+exports[`Span ID 1`] = `undefined`;
 
 exports[`Span INDEX 1`] = `undefined`;
 
@@ -961,6 +965,8 @@ exports[`Transaction HOST_OS_VERSION 1`] = `undefined`;
 exports[`Transaction HTTP_REQUEST_METHOD 1`] = `"GET"`;
 
 exports[`Transaction HTTP_RESPONSE_STATUS_CODE 1`] = `200`;
+
+exports[`Transaction ID 1`] = `undefined`;
 
 exports[`Transaction INDEX 1`] = `undefined`;
 

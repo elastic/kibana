@@ -24,13 +24,14 @@ import {
   EuiLoadingSpinner,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState, useCallback, useMemo, lazy, Suspense } from 'react';
+import { defaultInferenceEndpoints } from '@kbn/inference-common';
+import React, { useState, useCallback, useMemo, lazy, Suspense, useEffect } from 'react';
 
 import { getFieldConfig } from '../../../lib';
 import { useAppContext } from '../../../../../app_context';
 import { useLoadInferenceEndpoints } from '../../../../../services/api';
 import { UseField } from '../../../shared_imports';
-
+import { MlVcuUsageCostTour } from './ml_vcu_usage_cost_tour';
 const InferenceFlyoutWrapper = lazy(() => import('@kbn/inference-endpoint-ui-common'));
 export interface SelectInferenceIdProps {
   'data-test-subj'?: string;
@@ -39,6 +40,17 @@ export interface SelectInferenceIdProps {
 type SelectInferenceIdContentProps = SelectInferenceIdProps & {
   setValue: (value: string) => void;
   value: string;
+};
+
+// Task types that are compatible with semantic_text field type
+const COMPATIBLE_TASK_TYPES = ['text_embedding', 'sparse_embedding'] as const;
+type CompatibleTaskType = (typeof COMPATIBLE_TASK_TYPES)[number];
+
+/**
+ * Type guard to check if a task type is compatible with semantic_text fields
+ */
+const isCompatibleTaskType = (taskType: string): taskType is CompatibleTaskType => {
+  return COMPATIBLE_TASK_TYPES.includes(taskType as CompatibleTaskType);
 };
 
 export const SelectInferenceId: React.FC<SelectInferenceIdProps> = ({
@@ -72,20 +84,24 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
       notificationService: { toasts },
     },
     docLinks,
-    plugins: { share },
+    plugins: { cloud, share },
   } = useAppContext();
-  const config = getFieldConfig('inference_id');
+  const { isLoading, data: endpoints, resendRequest } = useLoadInferenceEndpoints();
+  const [isInferenceFlyoutVisible, setIsInferenceFlyoutVisible] = useState<boolean>(false);
+  const [isInferencePopoverVisible, setIsInferencePopoverVisible] = useState<boolean>(false);
 
+  const config = getFieldConfig('inference_id');
   const inferenceEndpointsPageLink = share?.url.locators
     .get('SEARCH_INFERENCE_ENDPOINTS')
     ?.useUrl({});
 
-  const [isInferenceFlyoutVisible, setIsInferenceFlyoutVisible] = useState<boolean>(false);
   const onFlyoutClose = useCallback(() => {
-    setIsInferenceFlyoutVisible(!isInferenceFlyoutVisible);
-  }, [isInferenceFlyoutVisible]);
+    setIsInferenceFlyoutVisible(false);
+  }, []);
 
-  const { isLoading, data: endpoints, resendRequest } = useLoadInferenceEndpoints();
+  const closePopover = useCallback(() => {
+    setIsInferencePopoverVisible(false);
+  }, []);
 
   const onSubmitSuccess = useCallback(
     (newEndpointId: string) => {
@@ -95,38 +111,61 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
     [resendRequest, setValue]
   );
 
-  const options: EuiSelectableOption[] = useMemo(() => {
-    const filteredEndpoints = endpoints?.filter(
-      (endpoint) =>
-        endpoint.task_type === 'text_embedding' || endpoint.task_type === 'sparse_embedding'
+  /**
+   * Determines the default inference endpoint ID to select.
+   * Prioritizes .elser-2-elastic (ELSER in EIS), falls back to the first available compatible endpoint.
+   * Only considers endpoints compatible with semantic_text field type.
+   */
+  const getDefaultInferenceId = useCallback((endpointsList: typeof endpoints) => {
+    if (!endpointsList?.length) {
+      return undefined;
+    }
+
+    // Filter to only compatible endpoints first
+    const compatibleEndpoints = endpointsList.filter((endpoint) =>
+      isCompatibleTaskType(endpoint.task_type)
     );
 
-    const newOptions: EuiSelectableOption[] = [...(filteredEndpoints || [])].map((endpoint) => ({
+    if (!compatibleEndpoints.length) {
+      return undefined;
+    }
+
+    const elserInEis = compatibleEndpoints.find(
+      (endpoint) => endpoint.inference_id === defaultInferenceEndpoints.ELSER_IN_EIS_INFERENCE_ID
+    );
+
+    return elserInEis?.inference_id ?? compatibleEndpoints[0].inference_id;
+  }, []);
+
+  /**
+   * Computes the selectable options for the inference endpoint dropdown.
+   * Only includes endpoints compatible with semantic_text (text_embedding and sparse_embedding).
+   * Includes optimistic updates for newly created endpoints that may not be in the list yet.
+   */
+  const options: EuiSelectableOption[] = useMemo(() => {
+    // Filter to only text and sparse embedding endpoints (compatible with semantic_text)
+    const compatibleEndpoints =
+      endpoints?.filter((endpoint) => isCompatibleTaskType(endpoint.task_type)) ?? [];
+
+    const selectableOptions: EuiSelectableOption[] = compatibleEndpoints.map((endpoint) => ({
       label: endpoint.inference_id,
       'data-test-subj': `custom-inference_${endpoint.inference_id}`,
       checked: value === endpoint.inference_id ? 'on' : undefined,
     }));
-    /**
-     * Adding this check to ensure we have the preconfigured elser endpoint selected by default.
-     */
-    const hasInferenceSelected = newOptions.some((option) => option.checked === 'on');
-    if (!hasInferenceSelected && newOptions.length > 0) {
-      newOptions[0].checked = 'on';
-    }
 
-    if (value && !newOptions.find((option) => option.label === value)) {
-      // Sometimes we create a new endpoint but the backend is slow in updating so we need to optimistically update
-      const newOption: EuiSelectableOption = {
+    // Optimistic update: if a value is set but not in the list, add it
+    // (handles race condition where backend hasn't updated yet after creating a new endpoint)
+    const isValueInOptions = selectableOptions.some((option) => option.label === value);
+    if (value && !isValueInOptions) {
+      selectableOptions.push({
         label: value,
         checked: 'on',
         'data-test-subj': `custom-inference_${value}`,
-      };
-      return [...newOptions, newOption];
+      });
     }
-    return newOptions;
-  }, [endpoints, value]);
 
-  const [isInferencePopoverVisible, setIsInferencePopoverVisible] = useState<boolean>(false);
+    return selectableOptions;
+  }, [endpoints, value]);
 
   const selectedOptionLabel = options.find((option) => option.checked)?.label;
 
@@ -146,7 +185,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
             color="text"
             data-test-subj="inferenceIdButton"
             onClick={() => {
-              setIsInferencePopoverVisible(!isInferencePopoverVisible);
+              setIsInferencePopoverVisible((prev) => !prev);
             }}
           >
             {selectedOptionLabel ||
@@ -161,7 +200,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
       }
       isOpen={isInferencePopoverVisible}
       panelPaddingSize="none"
-      closePopover={() => setIsInferencePopoverVisible(!isInferencePopoverVisible)}
+      closePopover={closePopover}
     >
       <EuiContextMenuPanel>
         <EuiContextMenuItem
@@ -172,7 +211,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
           onClick={(e) => {
             e.preventDefault();
             setIsInferenceFlyoutVisible(true);
-            setIsInferencePopoverVisible(!isInferencePopoverVisible);
+            setIsInferencePopoverVisible(false);
           }}
         >
           {i18n.translate(
@@ -268,13 +307,37 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
       </EuiContextMenuItem>
     </EuiPopover>
   );
+
+  /**
+   * Auto-select default inference endpoint when:
+   * - No endpoint is currently selected (!value)
+   * - Endpoints have been loaded (endpoints?.length)
+   * This ensures a good default UX without requiring manual selection.
+   */
+  useEffect(() => {
+    const shouldSetDefault = !value && endpoints?.length;
+    if (!shouldSetDefault) {
+      return;
+    }
+
+    const defaultId = getDefaultInferenceId(endpoints);
+    if (defaultId) {
+      setValue(defaultId);
+    }
+  }, [endpoints, value, setValue, getDefaultInferenceId]);
+
   return (
     <>
       <EuiSpacer />
       <EuiFlexGroup data-test-subj="selectInferenceId" alignItems="flexEnd">
         <EuiFlexItem grow={false}>
-          {inferencePopover()}
-          {isInferenceFlyoutVisible ? (
+          {cloud?.isServerlessEnabled ? (
+            <MlVcuUsageCostTour children={inferencePopover()} />
+          ) : (
+            inferencePopover()
+          )}
+
+          {isInferenceFlyoutVisible && (
             <Suspense fallback={<EuiLoadingSpinner size="l" />}>
               <InferenceFlyoutWrapper
                 onFlyoutClose={onFlyoutClose}
@@ -285,7 +348,7 @@ const SelectInferenceIdContent: React.FC<SelectInferenceIdContentProps> = ({
                 enforceAdaptiveAllocations={enforceAdaptiveAllocations}
               />
             </Suspense>
-          ) : null}
+          )}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiPanel color="transparent" paddingSize="s">

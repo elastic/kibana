@@ -8,8 +8,8 @@
  */
 
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
-import type { PercentageModeConfig } from '../../..';
-import type { AggBasedColumn, ExtendedColumnConverterArgs } from '../convert';
+import type { PercentageModeConfig, AnyMetricColumnAndMeta } from '../../types';
+import type { ExtendedColumnConverterArgs } from '../convert';
 import {
   convertMetricAggregationColumnWithoutSpecialParams,
   convertToOtherParentPipelineAggColumns,
@@ -27,7 +27,7 @@ import { getValidColumns } from '../utils';
 export const convertMetricToColumns = (
   { agg, dataView, aggs, visType }: ExtendedColumnConverterArgs<METRIC_TYPES>,
   percentageModeConfig: PercentageModeConfig = { isPercentageMode: false }
-): AggBasedColumn[] | null => {
+): AnyMetricColumnAndMeta[] | null => {
   const supportedAgg = SUPPORTED_METRICS[agg.aggType];
   if (!supportedAgg) {
     return null;

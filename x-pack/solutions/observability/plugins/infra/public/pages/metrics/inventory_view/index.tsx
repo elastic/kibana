@@ -41,6 +41,7 @@ export const SnapshotPage = () => {
               <div className={APP_WRAPPER_CLASS}>
                 <InfraPageTemplate
                   onboardingFlow={OnboardingFlow.Infra}
+                  dataSourceAvailability="all"
                   pageHeader={{
                     pageTitle: inventoryTitle,
                     rightSideItems: [<SavedViews />],

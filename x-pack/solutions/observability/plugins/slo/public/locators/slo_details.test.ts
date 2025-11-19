@@ -10,6 +10,12 @@ import { SloDetailsLocatorDefinition } from './slo_details';
 describe('SloDetailsLocator', () => {
   const locator = new SloDetailsLocatorDefinition();
 
+  it('returns correct url when empty params are provided', async () => {
+    const location = await locator.getLocation({});
+    expect(location.app).toEqual('slo');
+    expect(location.path).toEqual('/');
+  });
+
   it('returns correct url when sloId is provided', async () => {
     const location = await locator.getLocation({ sloId: 'foo' });
     expect(location.path).toEqual('/foo');
@@ -29,22 +35,5 @@ describe('SloDetailsLocator', () => {
       instanceId: '*',
     });
     expect(location.path).toEqual('/some-slo_id');
-  });
-
-  it('returns correct url when instanceId and tabId are specified', async () => {
-    const location = await locator.getLocation({
-      sloId: 'slo_id',
-      instanceId: 'instance_id',
-      tabId: 'history',
-    });
-    expect(location.path).toEqual('/slo_id/history?instanceId=instance_id');
-  });
-
-  it('returns correct url when tabId is specified', async () => {
-    const location = await locator.getLocation({
-      sloId: 'slo_id',
-      tabId: 'history',
-    });
-    expect(location.path).toEqual('/slo_id/history');
   });
 });

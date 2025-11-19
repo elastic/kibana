@@ -27,11 +27,10 @@ import { presentationUtilPluginMock } from '@kbn/presentation-util-plugin/public
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 
-import type { LensAppServices } from '../app_plugin/types';
+import type { LensDocument, LensAppServices, LensAttributesService } from '@kbn/lens-common';
 import { mockDataPlugin } from './data_plugin_mock';
 import { getLensInspectorService } from '../lens_inspector_service';
-import type { LensDocument, LensDocumentService } from '../persistence';
-import type { LensAttributesService } from '../lens_attribute_service';
+import type { LensDocumentService } from '../persistence';
 import { mockDatasourceStates } from './store_mocks';
 import { LENS_ITEM_LATEST_VERSION } from '../../common/constants';
 
@@ -65,17 +64,6 @@ export function makeAttributeService(doc: LensDocument): jest.Mocked<LensAttribu
     loadFromLibrary: jest.fn().mockResolvedValue(exactMatchDoc),
     saveToLibrary: jest.fn().mockResolvedValue(doc.savedObjectId),
     checkForDuplicateTitle: jest.fn().mockResolvedValue(false),
-    injectReferences: jest.fn((_runtimeState, references) => ({
-      ..._runtimeState,
-      attributes: {
-        ..._runtimeState.attributes,
-        references: references?.length ? references : _runtimeState.attributes.references,
-      },
-    })),
-    extractReferences: jest.fn((_runtimeState) => ({
-      rawState: _runtimeState,
-      references: _runtimeState.attributes.references || [],
-    })),
   };
 
   return attributeServiceMock;

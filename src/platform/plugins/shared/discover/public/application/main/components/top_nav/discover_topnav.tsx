@@ -8,12 +8,15 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { DataViewType } from '@kbn/data-views-plugin/public';
+import { type DataView, DataViewType } from '@kbn/data-views-plugin/public';
 import type { ESQLEditorRestorableState } from '@kbn/esql-editor';
 import type { DataViewPickerProps, UnifiedSearchDraft } from '@kbn/unified-search-plugin/public';
 import { ControlGroupRenderer, type ControlGroupRendererApi } from '@kbn/controls-plugin/public';
-import { DiscoverFlyouts, dismissAllFlyoutsExceptFor } from '@kbn/discover-utils';
-import type { EuiHeaderLinksProps } from '@elastic/eui';
+import {
+  DiscoverFlyouts,
+  dismissAllFlyoutsExceptFor,
+  prepareDataViewForEditing,
+} from '@kbn/discover-utils';
 import { css } from '@emotion/react';
 import { ESQL_TRANSITION_MODAL_KEY } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -33,15 +36,18 @@ import {
   useInternalStateDispatch,
   useInternalStateSelector,
 } from '../../state_management/redux';
-import { TABS_ENABLED_FEATURE_FLAG_KEY } from '../../../../constants';
 import { onSaveDiscoverSession } from './save_discover_session';
+import { DiscoverTopNavMenu } from './discover_topnav_menu';
 
 export interface DiscoverTopNavProps {
   savedQuery?: string;
   stateContainer: DiscoverStateContainer;
   esqlModeErrors?: Error;
   esqlModeWarning?: string;
-  onFieldEdited: () => Promise<void>;
+  onFieldEdited: (options: {
+    editedDataView: DataView;
+    removedFieldName?: string;
+  }) => Promise<void>;
   isLoading?: boolean;
   onCancelClick?: () => void;
 }
@@ -57,7 +63,7 @@ export const DiscoverTopNav = ({
 }: DiscoverTopNavProps) => {
   const dispatch = useInternalStateDispatch();
   const services = useDiscoverServices();
-  const { dataViewEditor, navigation, dataViewFieldEditor, data, setHeaderActionMenu } = services;
+  const { dataViewEditor, navigation, dataViewFieldEditor, data } = services;
   const [controlGroupApi, setControlGroupApi] = useState<ControlGroupRendererApi | undefined>();
 
   const query = useAppStateSelector((state) => state.query);
@@ -70,12 +76,9 @@ export const DiscoverTopNav = ({
   const isESQLToDataViewTransitionModalVisible = useInternalStateSelector(
     (state) => state.isESQLToDataViewTransitionModalVisible
   );
-  const tabsEnabled = services.core.featureFlags.getBooleanValue(
-    TABS_ENABLED_FEATURE_FLAG_KEY,
-    false
-  );
-  const discoverSessionTitle = useInternalStateSelector(
-    (state) => state.persistedDiscoverSession?.title
+  const tabsEnabled = services.discoverFeatureFlags.getTabsEnabled();
+  const persistedDiscoverSession = useInternalStateSelector(
+    (state) => state.persistedDiscoverSession
   );
   const isEsqlMode = useIsEsqlMode();
   const showDatePicker = useMemo(() => {
@@ -96,6 +99,18 @@ export const DiscoverTopNav = ({
     onUpdateESQLQuery: stateContainer.actions.updateESQLQuery,
   });
 
+  const onOpenQueryInNewTab = useCallback(
+    async (tabName: string, esqlQuery: string) => {
+      dispatch(
+        internalStateActions.openInNewTab({
+          tabLabel: tabName,
+          appState: { query: { esql: esqlQuery } },
+        })
+      );
+    },
+    [dispatch]
+  );
+
   useEffect(() => {
     return () => {
       // Make sure to close the editors when unmounting
@@ -114,13 +129,18 @@ export const DiscoverTopNav = ({
         ? async (fieldName?: string) => {
             if (dataView?.id) {
               const dataViewInstance = await data.dataViews.get(dataView.id);
+              const editedDataView = await prepareDataViewForEditing(
+                dataViewInstance,
+                data.dataViews
+              );
+
               closeFieldEditor.current = await dataViewFieldEditor.openEditor({
                 ctx: {
-                  dataView: dataViewInstance,
+                  dataView: editedDataView,
                 },
                 fieldName,
                 onSave: async () => {
-                  await onFieldEdited();
+                  await onFieldEdited({ editedDataView });
                 },
               });
             }
@@ -141,7 +161,7 @@ export const DiscoverTopNav = ({
     } else {
       // remove savedQueryId from state
       const newState = {
-        ...appState.getState(),
+        ...appState.get(),
       };
       delete newState.savedQuery;
       appState.set(newState);
@@ -175,16 +195,10 @@ export const DiscoverTopNav = ({
     [dataView.id, dispatch, services, stateContainer]
   );
 
-  const { topNavBadges, topNavMenu } = useDiscoverTopNav({ stateContainer });
-  const topNavProps = useMemo(
-    () => ({
-      badges: topNavBadges,
-      config: topNavMenu,
-      setMenuMountPoint: setHeaderActionMenu,
-      gutterSize: 'xxs' as EuiHeaderLinksProps['gutterSize'],
-    }),
-    [setHeaderActionMenu, topNavBadges, topNavMenu]
-  );
+  const { topNavBadges, topNavMenu } = useDiscoverTopNav({
+    stateContainer,
+    persistedDiscoverSession,
+  });
 
   const dataViewPickerProps: DataViewPickerProps = useMemo(() => {
     return {
@@ -248,9 +262,10 @@ export const DiscoverTopNav = ({
 
   return (
     <span css={floatingActionStyles}>
+      <DiscoverTopNavMenu topNavBadges={topNavBadges} topNavMenu={topNavMenu} />
       <SearchBar
-        {...topNavProps}
         useBackgroundSearchButton={
+          stateContainer.customizationContext.displayMode !== 'embedded' &&
           services.data.search.isBackgroundSearchEnabled &&
           !!services.capabilities.discover_v2.storeSearchSession
         }
@@ -262,7 +277,7 @@ export const DiscoverTopNav = ({
         onSavedQueryIdChange={updateSavedQueryId}
         query={query}
         savedQueryId={savedQuery}
-        screenTitle={discoverSessionTitle}
+        screenTitle={persistedDiscoverSession?.title}
         showDatePicker={showDatePicker}
         allowSavingQueries
         showSearchBar={true}
@@ -313,6 +328,7 @@ export const DiscoverTopNav = ({
               }
             : undefined
         }
+        onOpenQueryInNewTab={tabsEnabled ? onOpenQueryInNewTab : undefined}
       />
       {isESQLToDataViewTransitionModalVisible && (
         <ESQLToDataViewTransitionModal onClose={onESQLToDataViewTransitionModalClose} />

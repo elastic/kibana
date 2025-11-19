@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
-import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../common/lib';
+import { getEventLog, getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   createRule,
@@ -230,13 +230,20 @@ export default function maintenanceWindowScopedQueryTests({ getService }: FtrPro
       objectRemover.add(Spaces.default.id, rule.id, 'rule', 'alerting');
 
       // should generate 10 alerts when run
-      await getRuleEvents({
-        id: rule.id,
-        activeInstance: 10,
-        retry,
-        getService,
-        spaceId: 'default',
+      const executeEvent = await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: 'default',
+          type: 'alert',
+          id: rule.id,
+          provider: 'alerting',
+          actions: new Map([['execute', { equal: 1 }]]),
+        });
       });
+
+      expect(executeEvent[0]?.kibana?.alert?.rule?.execution?.metrics?.alert_counts?.active).to.be(
+        10
+      );
 
       await expectNoActionsFired({ id: rule.id, supertest, retry, spaceId: 'default' });
 
@@ -390,15 +397,21 @@ export default function maintenanceWindowScopedQueryTests({ getService }: FtrPro
         .expect(200);
       objectRemover.add(Spaces.default.id, rule.id, 'rule', 'alerting');
 
-      // should generate 10 alerts and 10 actions when run
-      await getRuleEvents({
-        id: rule.id,
-        action: 10,
-        activeInstance: 10,
-        retry,
-        getService,
-        spaceId: 'default',
+      // should generate 10 alerts when run
+      const executeEvent = await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: 'default',
+          type: 'alert',
+          id: rule.id,
+          provider: 'alerting',
+          actions: new Map([['execute', { equal: 1 }]]),
+        });
       });
+
+      expect(executeEvent[0]?.kibana?.alert?.rule?.execution?.metrics?.alert_counts?.active).to.be(
+        10
+      );
 
       // Ensure no maintenance window ID in the alert doc
       await retry.try(async () => {
@@ -628,13 +641,20 @@ export default function maintenanceWindowScopedQueryTests({ getService }: FtrPro
       objectRemover.add(Spaces.default.id, rule.id, 'rule', 'alerting');
 
       // should generate 10 alerts when run
-      await getRuleEvents({
-        id: rule.id,
-        activeInstance: 10,
-        retry,
-        getService,
-        spaceId: 'default',
+      const executeEvent = await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: 'default',
+          type: 'alert',
+          id: rule.id,
+          provider: 'alerting',
+          actions: new Map([['execute', { equal: 1 }]]),
+        });
       });
+
+      expect(executeEvent[0]?.kibana?.alert?.rule?.execution?.metrics?.alert_counts?.active).to.be(
+        10
+      );
 
       await expectNoActionsFired({ id: rule.id, supertest, retry, spaceId: 'default' });
 

@@ -96,3 +96,16 @@ export const replaceRefreshableAlertFields = <AlertData extends RuleAlertData>(
     {}
   );
 };
+
+export const replaceEmptyAlertFields = (
+  alert: Record<string, unknown>,
+  payload: RuleAlertData = {}
+) => {
+  Object.keys(alert).forEach((key: string) => {
+    const value = get(payload, key, null);
+    if (isNull(value) && Array.isArray(alert[key])) {
+      payload[key] = [];
+    }
+  });
+  return payload;
+};

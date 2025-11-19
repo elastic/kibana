@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useIsMutating } from '@tanstack/react-query';
+import { useIsMutating } from '@kbn/react-query';
 import { mutationKeys } from '../mutation_keys';
 
 export const useIsSendingMessage = () => {

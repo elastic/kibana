@@ -5,10 +5,13 @@
  * 2.0.
  */
 import { isEmpty, omit } from 'lodash';
-import type { IContentClient } from '@kbn/content-management-plugin/server/types';
-import type { Logger, SavedObjectsFindResult } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { isDashboardPanel } from '@kbn/dashboard-plugin/common';
-import type { DashboardAttributes, DashboardPanel } from '@kbn/dashboard-plugin/server';
+import type {
+  DashboardState,
+  DashboardPanel,
+  ScanDashboardsResult,
+} from '@kbn/dashboard-plugin/server';
 import type {
   FieldBasedIndexPatternColumn,
   GenericIndexPatternColumn,
@@ -28,15 +31,19 @@ import {
 } from './helpers';
 import type { ReferencedPanelManager } from './referenced_panel_manager';
 
-type Dashboard = SavedObjectsFindResult<DashboardAttributes>;
-
 export class RelatedDashboardsClient {
-  public dashboardsById = new Map<string, Dashboard>();
+  public dashboardsById = new Map<
+    string,
+    Pick<DashboardState, 'description' | 'panels' | 'tags' | 'title'>
+  >();
   private alert: AlertData | null = null;
 
   constructor(
     private logger: Logger,
-    private dashboardClient: IContentClient<Dashboard>,
+    private getDashboard: (
+      id: string
+    ) => Promise<Pick<DashboardState, 'description' | 'tags' | 'title'> & { id: string }>,
+    private scanDashboards: (page: number, perPage: number) => Promise<ScanDashboardsResult>,
     private alertsClient: InvestigateAlertsClient,
     private alertId: string,
     private referencedPanelManager: ReferencedPanelManager
@@ -69,11 +76,11 @@ export class RelatedDashboardsClient {
     (panel: DashboardPanel) => Set<string> | undefined
   > = {
     lens: (panel: DashboardPanel) => {
-      let references = this.isLensVizAttributes(panel.panelConfig.attributes)
-        ? panel.panelConfig.attributes.references
+      let references = this.isLensVizAttributes(panel.config)
+        ? panel.config.attributes.references
         : undefined;
-      if (!references && panel.panelIndex) {
-        references = this.referencedPanelManager.getByIndex(panel.panelIndex)?.references;
+      if (!references && panel.uid) {
+        references = this.referencedPanelManager.getByUid(panel.uid)?.references;
       }
       if (references?.length) {
         return new Set(
@@ -88,11 +95,11 @@ export class RelatedDashboardsClient {
     (panel: DashboardPanel) => Set<string> | undefined
   > = {
     lens: (panel: DashboardPanel) => {
-      let state: unknown = this.isLensVizAttributes(panel.panelConfig.attributes)
-        ? panel.panelConfig.attributes.state
+      let state: unknown = this.isLensVizAttributes(panel.config)
+        ? panel.config.attributes.state
         : undefined;
-      if (!state && panel.panelIndex) {
-        state = this.referencedPanelManager.getByIndex(panel.panelIndex)?.state;
+      if (!state && panel.uid) {
+        state = this.referencedPanelManager.getByUid(panel.uid)?.state;
       }
       if (this.isLensAttributesState(state)) {
         const fields = new Set<string>();
@@ -172,18 +179,19 @@ export class RelatedDashboardsClient {
     perPage?: number;
     limit?: number;
   }) {
-    const dashboards = await this.dashboardClient.search({ limit: perPage, cursor: `${page}` });
-    const {
-      result: { hits },
-    } = dashboards;
-    for (const dashboard of hits) {
-      for (const panel of dashboard.attributes.panels) {
+    const results = await this.scanDashboards(page, perPage);
+    for (const dashboard of results.dashboards) {
+      for (const panel of dashboard.panels) {
         if (
           isDashboardPanel(panel) &&
           isSuggestedDashboardsValidPanelType(panel.type) &&
-          (isEmpty(panel.panelConfig) || !panel.panelConfig.attributes)
+          (isEmpty(panel.config) || !(panel.config as Record<string, unknown>).attributes)
         ) {
-          this.referencedPanelManager.addReferencedPanel({ dashboard, panel });
+          this.referencedPanelManager.addReferencedPanel({
+            dashboardId: dashboard.id,
+            references: dashboard.references,
+            panel,
+          });
         }
       }
       this.dashboardsById.set(dashboard.id, dashboard);
@@ -191,9 +199,9 @@ export class RelatedDashboardsClient {
 
     await this.referencedPanelManager.fetchReferencedPanels();
 
-    const fetchedUntil = (page - 1) * perPage + dashboards.result.hits.length;
+    const fetchedUntil = (page - 1) * perPage + results.dashboards.length;
 
-    if (dashboards.result.pagination.total <= fetchedUntil) {
+    if (results.total <= fetchedUntil) {
       return;
     }
     if (limit && fetchedUntil >= limit) {
@@ -210,18 +218,18 @@ export class RelatedDashboardsClient {
     dashboards: SuggestedDashboard[];
   } {
     const relevantDashboards: SuggestedDashboard[] = [];
-    this.dashboardsById.forEach((d) => {
-      const panels = d.attributes.panels.filter(isDashboardPanel);
+    this.dashboardsById.forEach((d, id) => {
+      const panels = d.panels.filter(isDashboardPanel);
       const matchingPanels = this.getPanelsByIndex(index, panels);
       if (matchingPanels.length > 0) {
         this.logger.debug(
-          () => `Found ${matchingPanels.length} panel(s) in dashboard ${d.id} using index ${index}`
+          () => `Found ${matchingPanels.length} panel(s) in dashboard ${id} using index ${index}`
         );
         relevantDashboards.push({
-          id: d.id,
-          title: d.attributes.title,
-          description: d.attributes.description,
-          tags: d.attributes.tags,
+          id,
+          title: d.title,
+          description: d.description,
+          tags: d.tags,
           matchedBy: { index: [index] },
           score: 0, // scores are computed when dashboards are deduplicated
         });
@@ -234,8 +242,8 @@ export class RelatedDashboardsClient {
     dashboards: SuggestedDashboard[];
   } {
     const relevantDashboards: SuggestedDashboard[] = [];
-    this.dashboardsById.forEach((d) => {
-      const panels = d.attributes.panels.filter(isDashboardPanel);
+    this.dashboardsById.forEach((d, id) => {
+      const panels = d.panels.filter(isDashboardPanel);
       const matchingPanels = this.getPanelsByField(fields, panels);
       const allMatchingFields = new Set(
         matchingPanels.map((p) => Array.from(p.matchingFields)).flat()
@@ -243,15 +251,15 @@ export class RelatedDashboardsClient {
       if (matchingPanels.length > 0) {
         this.logger.debug(
           () =>
-            `Found ${matchingPanels.length} panel(s) in dashboard ${
-              d.id
-            } using field(s) ${Array.from(allMatchingFields).toString()}`
+            `Found ${matchingPanels.length} panel(s) in dashboard ${id} using field(s) ${Array.from(
+              allMatchingFields
+            ).toString()}`
         );
         relevantDashboards.push({
-          id: d.id,
-          title: d.attributes.title,
-          description: d.attributes.description,
-          tags: d.attributes.tags,
+          id,
+          title: d.title,
+          description: d.description,
+          tags: d.tags,
           matchedBy: { fields: Array.from(allMatchingFields) },
           score: 0, // scores are computed when dashboards are deduplicated
         });
@@ -293,7 +301,8 @@ export class RelatedDashboardsClient {
     return fields ?? new Set<string>();
   }
 
-  private isLensVizAttributes(attributes: unknown): attributes is LensAttributes {
+  private isLensVizAttributes(config: object): config is { attributes: LensAttributes } {
+    const { attributes } = (config ?? {}) as Record<string, unknown>;
     if (!attributes) {
       return false;
     }
@@ -343,13 +352,10 @@ export class RelatedDashboardsClient {
 
   private async getLinkedDashboardById(id: string): Promise<LinkedDashboard | null> {
     try {
-      const dashboardResponse = await this.dashboardClient.get(id);
+      const dashboard = await this.getDashboard(id);
       return {
-        id: dashboardResponse.result.item.id,
-        title: dashboardResponse.result.item.attributes.title,
+        ...dashboard,
         matchedBy: { linked: true },
-        description: dashboardResponse.result.item.attributes.description,
-        tags: dashboardResponse.result.item.attributes.tags,
       };
     } catch (error) {
       if (error.output.statusCode === 404) {

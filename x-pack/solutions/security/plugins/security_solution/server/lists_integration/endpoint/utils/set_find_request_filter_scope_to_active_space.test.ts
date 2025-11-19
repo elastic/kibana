@@ -44,21 +44,6 @@ describe('Artifacts: setFindRequestFilterScopeToActiveSpace()', () => {
       sortField: undefined,
       sortOrder: undefined,
     };
-
-    // @ts-expect-error updating a readonly field
-    endpointAppContextServices.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = true;
-  });
-
-  it('should nothing if feature flag is disabled', async () => {
-    // @ts-expect-error updating a readonly field
-    endpointAppContextServices.experimentalFeatures.endpointManagementSpaceAwarenessEnabled = false;
-    await setFindRequestFilterScopeToActiveSpace(
-      endpointAppContextServices,
-      kibanaRequest,
-      findOptionsMock
-    );
-
-    expect(findOptionsMock.filter).toBeUndefined();
   });
 
   it('should inject additional filtering into find request', async () => {

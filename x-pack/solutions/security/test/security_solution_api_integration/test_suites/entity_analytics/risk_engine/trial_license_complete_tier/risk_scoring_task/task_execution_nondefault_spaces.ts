@@ -7,11 +7,8 @@
 
 import expect from '@kbn/expect';
 import { v4 as uuidv4 } from 'uuid';
+import { deleteAllRules, deleteAllAlerts } from '@kbn/detections-response-ftr-services';
 import { dataGeneratorFactory } from '../../../../detections_response/utils';
-import {
-  deleteAllRules,
-  deleteAllAlerts,
-} from '../../../../../config/services/detections_response';
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,
@@ -20,7 +17,6 @@ import {
   normalizeScores,
   riskEngineRouteHelpersFactory,
 } from '../../../utils';
-
 import type { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';
 
 export default ({ getService }: FtrProviderContextWithSpaces): void => {
@@ -28,8 +24,9 @@ export default ({ getService }: FtrProviderContextWithSpaces): void => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
+  const kibanaServer = getService('kibanaServer');
 
-  describe('@ess Risk Scoring Task in non-default space', () => {
+  const doTests = () => {
     describe('with alerts in a non-default space', () => {
       const { indexListOfDocuments } = dataGeneratorFactory({
         es,
@@ -105,12 +102,38 @@ export default ({ getService }: FtrProviderContextWithSpaces): void => {
         });
 
         const scores = await readRiskScores(es, index);
-        expect(normalizeScores(scores).map(({ id_value: idValue }) => idValue)).to.eql(
+        expect(
+          normalizeScores(scores)
+            .map(({ id_value: idValue }) => idValue)
+            .sort()
+        ).to.eql(
           Array(10)
             .fill(0)
             .map((_, _index) => `host-${_index}`)
+            .sort()
         );
       });
+    });
+  };
+
+  describe('@ess Risk Scoring Task in non-default space', () => {
+    describe('ESQL', () => {
+      doTests();
+    });
+
+    describe('Scripted metric', () => {
+      before(async () => {
+        await kibanaServer.uiSettings.update({
+          ['securitySolution:enableEsqlRiskScoring']: false,
+        });
+      });
+
+      after(async () => {
+        await kibanaServer.uiSettings.update({
+          ['securitySolution:enableEsqlRiskScoring']: true,
+        });
+      });
+      doTests();
     });
   });
 };

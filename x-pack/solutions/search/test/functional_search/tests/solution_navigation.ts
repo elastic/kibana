@@ -20,7 +20,7 @@ export default function searchSolutionNavigation({
   const testSubjects = getService('testSubjects');
   const esArchiver = getService('esArchiver');
 
-  describe('Search Solution Navigation', () => {
+  describe('Elasticsearch Solution Navigation', () => {
     let cleanUp: () => Promise<unknown>;
     let spaceCreated: { id: string } = { id: '' };
 
@@ -43,7 +43,7 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Developer Tools' });
       // await solutionNavigation.sidenav.expectLinkExists({ text: 'Agents' }); enable when available
       await solutionNavigation.sidenav.expectLinkExists({ text: 'Machine Learning' });
-      await solutionNavigation.sidenav.expectLinkExists({ text: 'Ingest and manage data' });
+      await solutionNavigation.sidenav.expectLinkExists({ text: 'Data management' });
     });
 
     it('has expected navigation', async () => {
@@ -59,12 +59,11 @@ export default function searchSolutionNavigation({
         breadcrumbs: string[];
         pageTestSubject: string;
       }> = [
-        // TODO: enable when available
-        // {
-        //   link: { navId: 'agent_builder' },
-        //   breadcrumbs: ['Agent Chat'],
-        //   pageTestSubject: 'onechatPageConversations',
-        // },
+        {
+          link: { navId: 'agent_builder' },
+          breadcrumbs: [],
+          pageTestSubject: 'agentBuilderWrapper',
+        },
         {
           link: { deepLinkId: 'discover' },
           breadcrumbs: ['Discover'],
@@ -105,13 +104,13 @@ export default function searchSolutionNavigation({
       await solutionNavigation.sidenav.expectOnlyDefinedLinks(
         [
           'searchHomepage',
-          // 'agent_builder', enabled when available
+          'agent_builder',
           'discover',
           'dashboards',
           'searchPlayground',
           'machine_learning',
           'dev_tools',
-          'ingest_and_data',
+          'data_management',
           'stack_management',
         ],
         { checkOrder: false }

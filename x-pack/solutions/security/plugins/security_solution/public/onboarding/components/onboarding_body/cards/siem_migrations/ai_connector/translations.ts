@@ -19,14 +19,6 @@ export const AI_CONNECTOR_CARD_DESCRIPTION_START = i18n.translate(
   { defaultMessage: 'This feature relies on an AI connector for rule translation. ' }
 );
 
-export const AI_CONNECTOR_CARD_DESCRIPTION_INFERENCE_CONNECTOR = i18n.translate(
-  'xpack.securitySolution.onboarding.aiConnector.descriptionInferenceConnector',
-  {
-    defaultMessage:
-      'The Elastic-provided connector is selected by default. You can configure another connector and model if you prefer. ',
-  }
-);
-
 export const LLM_MATRIX_LINK = i18n.translate(
   'xpack.securitySolution.onboarding.aiConnector.llmMatrixLink',
   { defaultMessage: 'model performance' }

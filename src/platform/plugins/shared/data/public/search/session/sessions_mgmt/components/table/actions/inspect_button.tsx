@@ -18,17 +18,12 @@ import { CodeEditor } from '@kbn/code-editor';
 import type { UISession } from '../../../types';
 import type { IClickActionDescriptor } from './types';
 import type { SearchSessionsMgmtAPI } from '../../../lib/api';
-import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY } from '../../../../constants';
 
 interface InspectFlyoutProps {
   searchSession: UISession;
-  hasBackgroundSearchEnabled: boolean;
 }
 
-const InspectFlyout: React.FC<InspectFlyoutProps> = ({
-  searchSession,
-  hasBackgroundSearchEnabled,
-}) => {
+const InspectFlyout: React.FC<InspectFlyoutProps> = ({ searchSession }) => {
   const renderInfo = () => {
     return (
       <Fragment>
@@ -57,17 +52,10 @@ const InspectFlyout: React.FC<InspectFlyoutProps> = ({
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
           <h2 id="flyoutTitle">
-            {hasBackgroundSearchEnabled ? (
-              <FormattedMessage
-                id="data.sessions.management.backgroundSearchFlyoutTitle"
-                defaultMessage="Inspect background search"
-              />
-            ) : (
-              <FormattedMessage
-                id="data.sessions.management.flyoutTitle"
-                defaultMessage="Inspect search session"
-              />
-            )}
+            <FormattedMessage
+              id="data.sessions.management.backgroundSearchFlyoutTitle"
+              defaultMessage="Inspect background search"
+            />
           </h2>
         </EuiTitle>
       </EuiFlyoutHeader>
@@ -75,17 +63,10 @@ const InspectFlyout: React.FC<InspectFlyoutProps> = ({
         <EuiText>
           <EuiText size="xs">
             <p>
-              {hasBackgroundSearchEnabled ? (
-                <FormattedMessage
-                  id="data.sessions.management.backgroundSearchFlyoutText"
-                  defaultMessage="Configuration for this background search"
-                />
-              ) : (
-                <FormattedMessage
-                  id="data.sessions.management.flyoutText"
-                  defaultMessage="Configuration for this search session"
-                />
-              )}
+              <FormattedMessage
+                id="data.sessions.management.backgroundSearchFlyoutText"
+                defaultMessage="Configuration for this background search"
+              />
             </p>
           </EuiText>
           <EuiSpacer />
@@ -101,7 +82,6 @@ interface InspectFlyoutWrapperProps {
   uiSettings: CoreStart['uiSettings'];
   settings: CoreStart['settings'];
   theme: CoreStart['theme'];
-  hasBackgroundSearchEnabled: boolean;
 }
 
 const InspectFlyoutWrapper: React.FC<InspectFlyoutWrapperProps> = ({
@@ -109,7 +89,6 @@ const InspectFlyoutWrapper: React.FC<InspectFlyoutWrapperProps> = ({
   uiSettings,
   settings,
   theme,
-  hasBackgroundSearchEnabled,
 }) => {
   const { Provider: KibanaReactContextProvider } = createKibanaReactContext({
     uiSettings,
@@ -119,10 +98,7 @@ const InspectFlyoutWrapper: React.FC<InspectFlyoutWrapperProps> = ({
 
   return (
     <KibanaReactContextProvider>
-      <InspectFlyout
-        searchSession={searchSession}
-        hasBackgroundSearchEnabled={hasBackgroundSearchEnabled}
-      />
+      <InspectFlyout searchSession={searchSession} />
     </KibanaReactContextProvider>
   );
 };
@@ -143,10 +119,6 @@ export const createInspectActionDescriptor = (
   onClick: async () => {
     const flyoutWrapper = (
       <InspectFlyoutWrapper
-        hasBackgroundSearchEnabled={core.featureFlags.getBooleanValue(
-          BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
-          false
-        )}
         uiSettings={core.uiSettings}
         settings={core.settings}
         theme={core.theme}

@@ -6,15 +6,17 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { isArray } from 'lodash';
 import type { StreamEvent as LangchainStreamEvent } from '@langchain/core/tracers/log_stream';
-import type { AIMessageChunk, BaseMessage } from '@langchain/core/messages';
-import { isToolMessage } from '@langchain/core/messages';
+import type { AIMessageChunk } from '@langchain/core/messages';
 import type { OperatorFunction } from 'rxjs';
 import { EMPTY, mergeMap, of } from 'rxjs';
 import type {
   MessageChunkEvent,
   MessageCompleteEvent,
+  ThinkingCompleteEvent,
   ToolCallEvent,
+  BrowserToolCallEvent,
   ToolResultEvent,
   ReasoningEvent,
 } from '@kbn/onechat-common';
@@ -23,23 +25,31 @@ import {
   matchGraphName,
   matchEvent,
   matchName,
+  hasTag,
   createTextChunkEvent,
   createMessageEvent,
   createToolCallEvent,
+  createBrowserToolCallEvent,
   createToolResultEvent,
   createReasoningEvent,
+  createThinkingCompleteEvent,
   extractTextContent,
-  extractToolCalls,
-  extractToolReturn,
   toolIdentifierFromToolCall,
 } from '@kbn/onechat-genai-utils/langchain';
 import type { Logger } from '@kbn/logging';
-import type { StateType } from './graph';
+import type { RunToolReturn } from '@kbn/onechat-server';
+import { createErrorResult } from '@kbn/onechat-server';
+import type { StateType } from './state';
+import { steps, tags, BROWSER_TOOL_PREFIX } from './constants';
+import { isToolCallAction, isAnswerAction, isExecuteToolAction } from './actions';
+import type { ToolCallResult } from './actions';
 
 export type ConvertedEvents =
   | MessageChunkEvent
   | MessageCompleteEvent
+  | ThinkingCompleteEvent
   | ToolCallEvent
+  | BrowserToolCallEvent
   | ToolResultEvent
   | ReasoningEvent;
 
@@ -47,14 +57,18 @@ export const convertGraphEvents = ({
   graphName,
   toolIdMapping,
   logger,
+  startTime,
 }: {
   graphName: string;
   toolIdMapping: ToolIdMapping;
   logger: Logger;
+  startTime: Date;
 }): OperatorFunction<LangchainStreamEvent, ConvertedEvents> => {
   return (streamEvents$) => {
     const toolCallIdToIdMap = new Map<string, string>();
     const messageId = uuidv4();
+
+    let isThinkingComplete = false;
 
     return streamEvents$.pipe(
       mergeMap((event) => {
@@ -62,49 +76,84 @@ export const convertGraphEvents = ({
           return EMPTY;
         }
 
-        // stream text chunks for the UI
-        if (matchEvent(event, 'on_chat_model_stream')) {
+        // stream answering text chunks for the UI
+        if (matchEvent(event, 'on_chat_model_stream') && hasTag(event, tags.answerAgent)) {
           const chunk: AIMessageChunk = event.data.chunk;
           const textContent = extractTextContent(chunk);
           if (textContent) {
-            return of(createTextChunkEvent(textContent, { messageId }));
+            const events: ConvertedEvents[] = [];
+            if (!isThinkingComplete) {
+              // Emit thinking complete event when first chunk arrives
+              events.push(createThinkingCompleteEvent(Date.now() - startTime.getTime()));
+              isThinkingComplete = true;
+            }
+            events.push(createTextChunkEvent(textContent, { messageId }));
+            return of(...events);
           }
         }
 
-        // emit tool calls or full message on each agent step
-        if (matchEvent(event, 'on_chain_end') && matchName(event, 'agent')) {
+        // emit tool calls for research agent steps
+        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.researchAgent)) {
+          const events: ConvertedEvents[] = [];
+          const addedActions = (event.data.output as StateType).mainActions;
+          const nextAction = addedActions[addedActions.length - 1];
+
+          if (isToolCallAction(nextAction)) {
+            const { tool_calls: toolCalls, message: messageText } = nextAction;
+            if (toolCalls.length > 0) {
+              let hasReasoningEvent = false;
+
+              for (const toolCall of toolCalls) {
+                const toolId = toolIdentifierFromToolCall(toolCall, toolIdMapping);
+                const { toolCallId, args } = toolCall;
+
+                const { _reasoning, ...toolCallArgs } = args;
+                if (_reasoning) {
+                  events.push(createReasoningEvent(_reasoning));
+                  hasReasoningEvent = true;
+                }
+
+                toolCallIdToIdMap.set(toolCall.toolCallId, toolId);
+
+                const isBrowserTool = toolId.startsWith(BROWSER_TOOL_PREFIX);
+
+                if (isBrowserTool) {
+                  events.push(
+                    createBrowserToolCallEvent({
+                      toolId: toolId.replace(BROWSER_TOOL_PREFIX, ''),
+                      toolCallId,
+                      params: toolCallArgs,
+                    })
+                  );
+                } else {
+                  events.push(
+                    createToolCallEvent({
+                      toolId,
+                      toolCallId,
+                      params: toolCallArgs,
+                    })
+                  );
+                }
+              }
+              if (messageText && !hasReasoningEvent) {
+                events.push(createReasoningEvent(messageText));
+              }
+            }
+          }
+
+          return of(...events);
+        }
+
+        // emit messages for answering step
+        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.answerAgent)) {
           const events: ConvertedEvents[] = [];
 
           // process last emitted message
-          const addedMessages: BaseMessage[] = event.data.output.addedMessages ?? [];
-          const lastMessage = addedMessages[addedMessages.length - 1];
+          const answerActions = (event.data.output as StateType).answerActions;
+          const lastAction = answerActions[answerActions.length - 1];
 
-          const toolCalls = extractToolCalls(lastMessage);
-          if (toolCalls.length > 0) {
-            const toolCallEvents: ToolCallEvent[] = [];
-            const reasoningEvents: ReasoningEvent[] = [];
-
-            for (const toolCall of toolCalls) {
-              const toolId = toolIdentifierFromToolCall(toolCall, toolIdMapping);
-              const { toolCallId, args } = toolCall;
-
-              const { _reasoning, ...toolCallArgs } = args;
-              if (_reasoning) {
-                reasoningEvents.push(createReasoningEvent(_reasoning));
-              }
-
-              toolCallIdToIdMap.set(toolCall.toolCallId, toolId);
-              toolCallEvents.push(
-                createToolCallEvent({
-                  toolId,
-                  toolCallId,
-                  params: toolCallArgs,
-                })
-              );
-            }
-            events.push(...reasoningEvents, ...toolCallEvents);
-          } else {
-            const messageEvent = createMessageEvent(extractTextContent(lastMessage), {
+          if (isAnswerAction(lastAction)) {
+            const messageEvent = createMessageEvent(lastAction.message, {
               messageId,
             });
             events.push(messageEvent);
@@ -114,29 +163,53 @@ export const convertGraphEvents = ({
         }
 
         // emit tool result events
-        if (matchEvent(event, 'on_chain_end') && matchName(event, 'tools')) {
-          const toolMessages = ((event.data.output as StateType).addedMessages ?? []).filter(
-            isToolMessage
-          );
+        if (matchEvent(event, 'on_chain_end') && matchName(event, steps.executeTool)) {
+          const addedActions = (event.data.output as StateType).mainActions;
+          const nextAction = addedActions[addedActions.length - 1];
 
-          const toolResultEvents: ToolResultEvent[] = [];
-          for (const toolMessage of toolMessages) {
-            const toolId = toolCallIdToIdMap.get(toolMessage.tool_call_id);
-            const toolReturn = extractToolReturn(toolMessage);
-            toolResultEvents.push(
-              createToolResultEvent({
-                toolCallId: toolMessage.tool_call_id,
-                toolId: toolId ?? 'unknown',
-                results: toolReturn.results,
-              })
-            );
+          if (isExecuteToolAction(nextAction)) {
+            const toolResultEvents: ToolResultEvent[] = [];
+            for (const toolResult of nextAction.tool_results) {
+              const toolId = toolCallIdToIdMap.get(toolResult.toolCallId);
+              const toolReturn = extractToolReturn(toolResult);
+              toolResultEvents.push(
+                createToolResultEvent({
+                  toolCallId: toolResult.toolCallId,
+                  toolId: toolId ?? 'unknown',
+                  results: toolReturn.results,
+                })
+              );
+            }
+
+            return of(...toolResultEvents);
           }
-
-          return of(...toolResultEvents);
         }
 
         return EMPTY;
       })
     );
   };
+};
+
+export const extractToolReturn = (message: ToolCallResult): RunToolReturn => {
+  if (message.artifact) {
+    if (!isArray(message.artifact.results)) {
+      throw new Error(
+        `Artifact is not a structured tool artifact. Received artifact=${JSON.stringify(
+          message.artifact
+        )}`
+      );
+    }
+
+    return message.artifact as RunToolReturn;
+  } else {
+    // langchain tool validation error (such as schema errors) are out of our control and don't emit artifacts...
+    if (message.content.startsWith('Error:')) {
+      return {
+        results: [createErrorResult(message.content)],
+      };
+    } else {
+      throw new Error(`No artifact attached to tool message: ${JSON.stringify(message)}`);
+    }
+  }
 };

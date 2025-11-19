@@ -8,9 +8,13 @@
  */
 
 import { stringify, type ToStringOptions } from 'yaml';
+import type { ConnectorTypeInfo } from '@kbn/workflows';
+import { z } from '@kbn/zod';
+import { getZodTypeName } from '../../../../../common/lib/zod';
 import { isMac } from '../../../../shared/utils/is_mac';
-import { getRequiredParamsForConnector } from '../get_required_params_for_connector';
+import { getConnectorInstancesForType } from '../autocomplete/suggestions/connector_id/get_connector_id_suggestions_items';
 import { getCachedAllConnectors } from '../connectors_cache';
+import { getRequiredParamsForConnector } from '../get_required_params_for_connector';
 
 interface GenerateConnectorSnippetOptions {
   full?: boolean;
@@ -27,34 +31,48 @@ interface GenerateConnectorSnippetOptions {
  */
 export function generateConnectorSnippet(
   connectorType: string,
-  { full, withStepsSection }: GenerateConnectorSnippetOptions = {}
+  { full, withStepsSection }: GenerateConnectorSnippetOptions = {},
+  dynamicConnectorTypes?: Record<string, ConnectorTypeInfo>
 ): string {
   const stringifyOptions: ToStringOptions = { indent: 2 };
-  let parameters: Record<string, any>;
+  let parameters: Record<string, unknown>;
 
   const isConnectorIdRequired = getCachedAllConnectors().find(
     (c) => c.type === connectorType
   )?.connectorIdRequired;
+
+  // Generate smart connector-id value based on available instances
+  let connectorIdValue: string | undefined;
+  if (isConnectorIdRequired) {
+    const instances = getConnectorInstancesForType(connectorType, dynamicConnectorTypes);
+    if (instances.length > 0) {
+      // Use the first non-deprecated instance as default, or first instance if all are deprecated
+      const defaultInstance = instances.find((i) => !i.isDeprecated) || instances[0];
+      connectorIdValue = defaultInstance.name;
+    } else {
+      // No instances configured, add placeholder comment
+      connectorIdValue = '# Enter connector ID here';
+    }
+  }
+
   // Get required parameters for this connector type
-  const requiredParams = getRequiredParamsForConnector(connectorType);
+  const requiredParams = getRequiredParamsForConnector(connectorType, dynamicConnectorTypes);
 
   if (requiredParams.length === 0) {
-    // No required params, just add empty with block with a placeholder
-    const shortcut = isMac() ? '⌘+I' : 'Ctrl+Space';
+    // No required params, just add empty with block with a placeholder comment
     parameters = {
-      with: {
-        '': `# Add parameters here. Press ${shortcut} to see all available options`,
-      },
-    };
-  } else {
-    // Create with block with required parameters as placeholders
-    parameters = {
+      'connector-id': connectorIdValue,
       with: {},
     };
+    // We'll add the comment manually after YAML serialization
+  } else {
+    // Create with block with required parameters as placeholders
+    const withParams: Record<string, unknown> = {};
     requiredParams.forEach((param) => {
       const placeholder = param.example || param.defaultValue || '';
-      parameters.with[param.name] = placeholder;
+      withParams[param.name] = placeholder;
     });
+    parameters = { 'connector-id': connectorIdValue, with: withParams };
   }
 
   if (full) {
@@ -62,22 +80,126 @@ export function generateConnectorSnippet(
     // - name: ${stepType}_step
     //   type: ${stepType}
     //   ...parameters
+
     const step = [
       {
         name: `${connectorType.replaceAll('.', '_')}_step`,
         type: connectorType,
-        'connector-id': isConnectorIdRequired ? '# A Kibana connector name' : undefined,
+        'connector-id': connectorIdValue,
         ...parameters,
       },
     ];
+
+    let result: string;
     if (withStepsSection) {
-      return stringify({ steps: step }, stringifyOptions);
+      result = stringify({ steps: step }, stringifyOptions);
+    } else {
+      result = stringify(step, stringifyOptions);
     }
-    return stringify(step, stringifyOptions);
+
+    // If there are no required params, add a comment inside the empty with block
+    if (requiredParams.length === 0) {
+      const shortcut = isMac() ? '⌘+I' : 'Ctrl+Space';
+      const comment = `# Add parameters here. Press ${shortcut} to see all available options`;
+      // Replace the empty with block with comment and cursor positioned for parameters (2 spaces for step context)
+      result = result.replace('with: {}', `with:\n  ${comment}\n  $0`);
+    }
+
+    return result;
   }
 
   // otherwise, the "type:" is already present, so we just return the type value and parameters
   // (type:)${stepType}
   // ...parameters
-  return `${connectorType}\n${stringify(parameters, stringifyOptions)}`;
+  const yamlString = stringify(parameters, stringifyOptions);
+
+  // If there are no required params, add a comment inside the empty with block
+  if (requiredParams.length === 0) {
+    const shortcut = isMac() ? '⌘+I' : 'Ctrl+Space';
+    const comment = `# Add parameters here. Press ${shortcut} to see all available options`;
+    // Replace the empty with block with one that has a comment (2 spaces for proper indentation)
+    const withComment = yamlString.replace('with: {}', `with:\n  ${comment}\n  $0`);
+    return `${connectorType}\n${withComment}`;
+  }
+
+  return `${connectorType}\n${yamlString}`;
+}
+
+/**
+ * Check if a connector type requires a connector-id field
+ */
+export function connectorTypeRequiresConnectorId(
+  connectorType: string,
+  dynamicConnectorTypes?: Record<string, unknown>
+): boolean {
+  // Built-in step types don't need connector-id
+  const builtInStepTypes = ['foreach', 'if', 'parallel', 'merge', 'http', 'wait'];
+  if (builtInStepTypes.includes(connectorType)) {
+    return false;
+  }
+
+  // elasticsearch.request and kibana.request don't need connector-id
+  if (connectorType === 'elasticsearch.request' || connectorType === 'kibana.request') {
+    return false;
+  }
+
+  // All other connector types require connector-id
+  return true;
+}
+
+/**
+ * Get enhanced type information for better completion suggestions
+ */
+export function getEnhancedTypeInfo(schema: z.ZodType): {
+  type: string;
+  isRequired: boolean;
+  isOptional: boolean;
+  description?: string;
+  example?: string;
+} {
+  let currentSchema = schema;
+  let isOptional = false;
+
+  // Unwrap ZodOptional
+  if (currentSchema instanceof z.ZodOptional) {
+    isOptional = true;
+    currentSchema = currentSchema._def.innerType;
+  }
+
+  const baseType = getZodTypeName(currentSchema);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const description = (currentSchema as any)?._def?.description || '';
+
+  // Extract example from description if available
+  let example = '';
+  const exampleMatch = description.match(
+    /e\.g\.,?\s*['"]*([^'"]+)['"]*|example[:\s]+['"]*([^'"]+)['"]*/i
+  );
+  if (exampleMatch) {
+    example = exampleMatch[1] || exampleMatch[2] || '';
+  }
+
+  // Enhanced type information based on schema type
+  let enhancedType = baseType;
+  if (currentSchema instanceof z.ZodArray) {
+    const elementType = getZodTypeName(currentSchema._def.type);
+    enhancedType = `${elementType}[]`;
+  } else if (currentSchema instanceof z.ZodUnion) {
+    const options = currentSchema._def.options;
+    const unionTypes = options.map((opt: z.ZodType) => getZodTypeName(opt)).join(' | ');
+    enhancedType = unionTypes;
+  } else if (currentSchema instanceof z.ZodEnum) {
+    const values = currentSchema._def.values;
+    enhancedType = `enum: ${values.slice(0, 3).join(' | ')}${values.length > 3 ? '...' : ''}`;
+  } else if (currentSchema instanceof z.ZodLiteral) {
+    enhancedType = `"${currentSchema._def.value}"`;
+  }
+
+  return {
+    type: enhancedType,
+    isRequired: !isOptional,
+    isOptional,
+    description: description || undefined,
+    example: example || undefined,
+  };
 }

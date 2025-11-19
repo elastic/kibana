@@ -12,7 +12,7 @@ import type { HttpStart, NotificationsStart } from '@kbn/core/public';
 import { type DataPublicPluginStart, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { DatatableColumn } from '@kbn/expressions-plugin/common';
+import type { DatatableColumn, DatatableColumnType } from '@kbn/expressions-plugin/common';
 import { groupBy, times, zipObject } from 'lodash';
 import {
   BehaviorSubject,
@@ -125,10 +125,15 @@ export class IndexUpdateService {
     this.listenForUpdates();
   }
 
+  private indexHasNewFields: boolean = false;
+
   /** Indicates the service has been completed */
   private readonly _completed$ = new Subject<{
     indexName: string | null;
     isIndexCreated: boolean;
+
+    // Indicates if new fields have been saved during the session
+    indexHasNewFields: boolean;
   }>();
   public readonly completed$ = this._completed$.asObservable();
 
@@ -184,7 +189,11 @@ export class IndexUpdateService {
   private readonly _error$ = new BehaviorSubject<IndexEditorError | null>(null);
   public readonly error$: Observable<IndexEditorError | null> = this._error$.asObservable();
 
-  private readonly _exitAttemptWithUnsavedChanges$ = new BehaviorSubject<boolean>(false);
+  private readonly _exitAttemptWithUnsavedChanges$ = new BehaviorSubject<{
+    isActive: boolean;
+    onExitCallback?: () => void;
+  }>({ isActive: false });
+
   public readonly exitAttemptWithUnsavedChanges$ =
     this._exitAttemptWithUnsavedChanges$.asObservable();
 
@@ -405,32 +414,24 @@ export class IndexUpdateService {
           });
         });
 
-      return (
-        dataView.fields
-          .concat(unsavedFields)
-          // Exclude metadata fields. TODO check if this is the right way to do it
-          // @ts-ignore
-          .filter((field) => field.spec.metadata_field !== true && !field.spec.subType)
-          .map((field) => {
-            return {
-              name: field.name,
-              id: field.name,
-              isNull: field.isNull,
-              meta: {
-                type: field.type,
-                params: {
-                  id: field.name,
-                  sourceParams: {
-                    fieldName: field.name,
-                  },
-                },
-                aggregatable: field.aggregatable,
-                searchable: field.searchable,
-                esTypes: field.esTypes,
+      return dataView.fields
+        .concat(unsavedFields)
+        .filter((field) => field.spec.metadata_field !== true && !field.spec.subType)
+        .map((field) => {
+          const datatableColumn: DatatableColumn = {
+            name: field.name,
+            id: field.name,
+            isNull: field.isNull,
+            meta: {
+              type: field.type as DatatableColumnType,
+              params: {
+                id: field.name,
               },
-            } as DatatableColumn;
-          })
-      );
+              esType: field.esTypes?.at(0),
+            },
+          };
+          return datatableColumn;
+        });
     }),
     shareReplay({ bufferSize: 1, refCount: true })
   );
@@ -446,10 +447,13 @@ export class IndexUpdateService {
 
     const esqlQuery = esql`FROM ${indexName}`.print();
 
-    const newDataView = await getESQLAdHocDataview(esqlQuery, this.data.dataViews, {
-      allowNoIndex: true,
+    const newDataView = await getESQLAdHocDataview({
+      dataViewsService: this.data.dataViews,
+      query: esqlQuery,
+      options: {
+        allowNoIndex: true,
+      },
     });
-
     // If at some point the index existed, the dataView fields are present in the browser cache, we need to force refresh it.
     await this.data.dataViews.refreshFields(newDataView, false, true);
 
@@ -575,11 +579,16 @@ export class IndexUpdateService {
           }) => {
             this._isSaving$.next(false);
 
-            // Send telemetry about the save event
             const { newRowsCount, newColumnsCount, cellsEditedCount } = this.summarizeSavingUpdates(
               savingDocs,
               updates
             );
+
+            if (newColumnsCount > 0) {
+              this.indexHasNewFields = true;
+            }
+
+            // Send telemetry about the save event
             this.telemetry.trackSaveSubmitted({
               pendingRowsAdded: newRowsCount,
               pendingColsAdded: newColumnsCount,
@@ -848,6 +857,8 @@ export class IndexUpdateService {
   public addEmptyRow() {
     const newDocId = `${ROW_PLACEHOLDER_PREFIX}${uuidv4()}`;
     this.addAction('add-doc', { id: newDocId, value: {} });
+
+    this.telemetry.trackEditInteraction({ actionType: 'add_row' });
   }
 
   /* Partial doc update */
@@ -860,11 +871,15 @@ export class IndexUpdateService {
       {}
     );
     this.addAction('add-doc', { id, value: parsedUpdate });
+
+    this.telemetry.trackEditInteraction({ actionType: 'edit_cell' });
   }
 
   /** Schedules documents for deletion */
   public deleteDoc(ids: string[]) {
     this.addAction('delete-doc', { ids });
+
+    this.telemetry.trackEditInteraction({ actionType: 'delete_row' });
   }
 
   /**
@@ -941,18 +956,24 @@ export class IndexUpdateService {
 
   public addNewColumn() {
     this.addAction('add-column');
+
+    this.telemetry.trackEditInteraction({ actionType: 'add_column' });
   }
 
   public editColumn(name: string, previousName: string) {
     this.addAction('edit-column', { name, previousName });
+
+    this.telemetry.trackEditInteraction({ actionType: 'edit_column' });
   }
 
   public deleteColumn(name: string) {
     this.addAction('delete-column', { name });
+
+    this.telemetry.trackEditInteraction({ actionType: 'delete_column' });
   }
 
-  public setExitAttemptWithUnsavedChanges(value: boolean) {
-    this._exitAttemptWithUnsavedChanges$.next(value);
+  public setExitAttemptWithUnsavedChanges(isActive: boolean, onExitCallback?: () => void) {
+    this._exitAttemptWithUnsavedChanges$.next({ isActive, onExitCallback });
   }
 
   public discardUnsavedChanges() {
@@ -974,6 +995,7 @@ export class IndexUpdateService {
     this._completed$.next({
       indexName: this.getIndexName(),
       isIndexCreated: this.isIndexCreated(),
+      indexHasNewFields: this.indexHasNewFields,
     });
     this._completed$.complete();
 
@@ -1044,16 +1066,17 @@ export class IndexUpdateService {
     return lookupIndexesResult.indices.some((index) => index.name === indexName);
   }
 
-  public exit() {
+  public exit(onExitCallback?: () => void) {
     const hasUnsavedChanges = this._hasUnsavedChanges$.getValue();
     const unsavedColumns = this._pendingColumnsToBeSaved$
       .getValue()
       .filter((col) => !isPlaceholderColumn(col.name));
 
     if (hasUnsavedChanges || unsavedColumns.length > 0) {
-      this.setExitAttemptWithUnsavedChanges(true);
+      this.setExitAttemptWithUnsavedChanges(true, onExitCallback);
     } else {
       this.destroy();
+      onExitCallback?.();
     }
   }
 }

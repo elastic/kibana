@@ -9,13 +9,20 @@ import { useEffect, useState } from 'react';
 import { combineLatest } from 'rxjs';
 import { DEFAULT_APP_CATEGORIES, type PublicAppInfo } from '@kbn/core/public';
 import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
+import type { Space } from '@kbn/spaces-plugin/common';
 import { useKibana } from '../../context/typed_kibana_context/typed_kibana_context';
 
 function getVisibility(
   appId: string | undefined,
   applications: ReadonlyMap<string, PublicAppInfo>,
-  preferredAssistantType: AIAssistantType
+  preferredAssistantType: AIAssistantType,
+  space: Space,
+  isServerless?: boolean
 ) {
+  // If the app itself is enabled, always show the control in the solution view or serverless.
+  if (space.solution === 'security' || isServerless) {
+    return true;
+  }
   if (preferredAssistantType === AIAssistantType.Never) {
     return false;
   }
@@ -33,26 +40,38 @@ function getVisibility(
   return DEFAULT_APP_CATEGORIES.security.id === categoryId;
 }
 
-export function useIsNavControlVisible() {
+export function useIsNavControlVisible(isServerless?: boolean) {
   const {
     application: { currentAppId$, applications$ },
     aiAssistantManagementSelection,
+    spaces,
   } = useKibana().services;
   const [isVisible, setIsVisible] = useState(false);
+
+  const space$ = spaces.getActiveSpace$();
 
   useEffect(() => {
     const appSubscription = combineLatest([
       currentAppId$,
       applications$,
       aiAssistantManagementSelection.aiAssistantType$,
+      space$,
     ]).subscribe({
-      next: ([appId, applications, preferredAssistantType]) => {
-        setIsVisible(getVisibility(appId, applications, preferredAssistantType));
+      next: ([appId, applications, preferredAssistantType, space]) => {
+        setIsVisible(
+          getVisibility(appId, applications, preferredAssistantType, space, isServerless)
+        );
       },
     });
 
     return () => appSubscription.unsubscribe();
-  }, [currentAppId$, applications$, aiAssistantManagementSelection.aiAssistantType$]);
+  }, [
+    currentAppId$,
+    applications$,
+    aiAssistantManagementSelection.aiAssistantType$,
+    space$,
+    isServerless,
+  ]);
 
   return {
     isVisible,

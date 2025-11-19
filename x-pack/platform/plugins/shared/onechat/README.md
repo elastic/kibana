@@ -1,19 +1,22 @@
 # Onechat plugin
 
-Home of the workchat framework.
+Home of the **Agent Builder** framework.
 
 Note: as many other platform features, onechat isolates its public types and static utils, exposed from packages,
 from its APIs, exposed from the plugin.
 
-The onechat plugin has 3 main packages:
+The onechat plugin has 4 main packages:
 
 - `@kbn/onechat-common`: types and utilities which are shared between browser and server
 - `@kbn/onechat-server`: server-specific types and utilities
 - `@kbn/onechat-browser`: browser-specific types and utilities.
+- `@kbn/onechat-genai-utils`: server-side utilities for our built-in tools and agents.
 
 ## Enable all feature flags
 
-All features in the Onechat plugin are developed behind UI settings (feature flags). By default, in-progress or experimental features are disabled. To enable all features for development or testing, add the following to your `kibana.dev.yml`:
+All features in the Onechat plugin are developed behind UI settings (feature flags). 
+By default, in-progress or experimental features are disabled. 
+To enable all features for development or testing, add the following to your `kibana.dev.yml`:
 
 ```yml
 uiSettings.overrides:
@@ -77,83 +80,24 @@ Additionally, the plugin implements [MCP server](#mcp-server) that exposes onech
 
 ## Tools
 
-A tool can be thought of as a LLM-friendly function, with the metadata required for the LLM to understand its purpose
-and how to call it attached to it.
+A tool can be thought of as an agent-friendly function, with the metadata required for the agent to understand its purpose
+and how to call it.
 
-Tool can come from multiple sources: built-in from Kibana, from MCP servers, and so on. At the moment,
-only built-in tools are implemented
+Tools can come from multiple sources:
+- built-in from Kibana
+- created by users
+- from MCP servers (not implemented yet)
 
-### Registering a built-in tool
+### Type of tools
 
-#### Basic example
+- builtin: "Code" tools, which expose a handler that executes an arbitrary function.
+- esql: ES|QL tools, which are defined by a templated ES|QL query and its corresponding parameters.
+- index_search: An agentic search tool that can be scoped to an index pattern.
+- workflow: A tool that executes a workflow.
 
-```ts
-class MyPlugin {
-  setup(core: CoreSetup, { onechat }: { onechat: OnechatPluginSetup }) {
-    onechat.tools.register({
-      id: 'my_tool',
-      description: 'My very first tool',
-      tags: ['foo', 'bar'],
-      schema: z.object({
-        someNumber: z.number().describe('Some random number'),
-      }),
-      handler: async ({ someNumber }, context) => {
-        return {
-          results: [
-            {
-              type: ToolResultType.other,
-              data: { value: 42 + someNumber },
-            },
-          ],
-        };
-      },
-    });
-  }
-}
-```
+### Registering a tool
 
-#### using the handler context to use scoped services
-
-```ts
-onechat.tools.register({
-  id: 'my_es_tool',
-  name: 'My Tool',
-  description: 'Some example',
-  schema: z.object({
-    indexPattern: z.string().describe('Index pattern to filter on'),
-  }),
-  handler: async ({ indexPattern }, { modelProvider, esClient }) => {
-    const indices = await esClient.asCurrentUser.cat.indices({ index: indexPattern });
-
-    const model = await modelProvider.getDefaultModel();
-    const response = await model.inferenceClient.chatComplete(somethingWith(indices));
-
-    return response;
-  },
-});
-```
-
-#### reporting tool progress
-
-```ts
-onechat.tools.register({
-  id: 'my_es_tool',
-  name: 'My Tool',
-  description: 'Some example',
-  schema: z.object({}),
-  handler: async ({}, { events }) => {
-    events.reportProgress('Doing something');
-
-    const response = doSomething();
-
-    events.reportProgress('Doing something else');
-
-    return doSomethingElse(response);
-
-    return response;
-  },
-});
-```
+Please refer to the [Contributor guide](./CONTRIBUTOR_GUIDE.md) for info and examples details.
 
 ### Executing a tool
 
@@ -203,39 +147,11 @@ Agents can be either built-in or user-defined.
 
 ### Registering a built-in agent
 
-Registering a built-in agent is done using the `agents.register` API of the onechat setup contract:
-
-#### Basic example
-
-```ts
-class MyPlugin {
-  setup(core: CoreSetup, { onechat }: { onechat: OnechatPluginSetup }) {
-    onechat.agents.register({
-      id: 'platform.core.dashboard',
-      name: 'Dashboard agent',
-      description: 'Agent specialized in dashboard related tasks',
-      avatar_icon: 'dashboardApp',
-      configuration: {
-        instructions: 'You are a dashboard specialist [...]',
-        tools: [
-          {
-            tool_ids: [
-              'platform.dashboard.create_dashboard',
-              'platform.dashboard.edit_dashboard',
-              '[...]',
-            ],
-          },
-        ],
-      },
-    });
-  }
-}
-```
+Please refer to the [Contributor guide](./CONTRIBUTOR_GUIDE.md) for info and examples details.
 
 ## MCP Server
 
 The MCP server provides a standardized interface for external MCP clients to access onechat tools. It's available on `/api/agent_builder/mcp` endpoint.
-
 
 ### Running with Claude Desktop
 
@@ -287,7 +203,6 @@ POST kbn://api/agent_builder/tools
   "tags": ["salesforce"]
 }
 ```
-
 
 ## Use custom LLM connector
 

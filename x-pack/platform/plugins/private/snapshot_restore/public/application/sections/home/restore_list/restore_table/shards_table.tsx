@@ -82,7 +82,7 @@ export const ShardsTable: React.FunctionComponent<Props> = ({ shards }) => {
         },
       })}
     >
-      <EuiText size="xs" textAlign="center" style={{ width: '100%' }}>
+      <EuiText tabIndex={0} size="xs" textAlign="center" style={{ width: '100%' }}>
         <EuiProgress value={total === 0 ? 1 : restored} max={total === 0 ? 1 : total} size="xs" />
         <EuiSpacer size="xs" />
         {percent}
@@ -111,7 +111,7 @@ export const ShardsTable: React.FunctionComponent<Props> = ({ shards }) => {
                   />
                 }
               >
-                <strong>
+                <strong tabIndex={0}>
                   <FormattedMessage
                     id="xpack.snapshotRestore.restoreList.shardTable.primaryAbbreviationText"
                     defaultMessage="P"

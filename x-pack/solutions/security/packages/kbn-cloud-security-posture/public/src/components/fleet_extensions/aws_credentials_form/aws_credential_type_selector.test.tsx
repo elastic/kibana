@@ -11,118 +11,95 @@ import { AwsCredentialTypeSelector } from './aws_credential_type_selector';
 import { AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ } from '@kbn/cloud-security-posture-common';
 import {
   getAwsCredentialsCloudConnectorsFormAgentlessOptions,
-  getAwsCredentialsFormAgentlessOptions,
   getAwsCredentialsFormManualOptions,
 } from './get_aws_credentials_form_options';
 
-const formOptions = getAwsCredentialsFormManualOptions();
-const formAgentlessOptions = getAwsCredentialsFormAgentlessOptions();
-
 describe('AwsCredentialTypeSelector', () => {
-  const label = 'AWS Credential Type';
-  const onChange = jest.fn();
+  const mockOnChange = jest.fn();
 
-  it('renders with given props', () => {
-    render(
-      <AwsCredentialTypeSelector
-        type={'direct_access_keys'}
-        onChange={onChange}
-        label={label}
-        options={formOptions}
-        disabled={false}
-      />
-    );
-    expect(screen.getByLabelText(label)).toBeInTheDocument();
-    expect(screen.getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ)).toBeInTheDocument();
+  beforeEach(() => {
+    mockOnChange.mockClear();
   });
 
-  it('renders all options', () => {
-    render(
-      <AwsCredentialTypeSelector
-        type={'direct_access_keys'}
-        onChange={onChange}
-        label={label}
-        options={formOptions}
-        disabled={false}
-      />
-    );
-    formOptions.forEach((option) => {
-      expect(screen.getByRole('option', { name: option.text })).toBeInTheDocument();
+  describe('Manual credentials options', () => {
+    const manualOptions = getAwsCredentialsFormManualOptions();
+
+    it('renders all manual options, displays selected value, and handles selection changes', () => {
+      render(
+        <AwsCredentialTypeSelector
+          type="direct_access_keys"
+          onChange={mockOnChange}
+          label="AWS Credential Type"
+          options={manualOptions}
+          disabled={false}
+        />
+      );
+
+      // Verify all options are rendered
+      manualOptions.forEach((option) => {
+        expect(screen.getByRole('option', { name: option.text })).toBeInTheDocument();
+      });
+
+      const select = screen.getByTestId(
+        AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ
+      ) as HTMLSelectElement;
+      expect(select.value).toBe('direct_access_keys');
+
+      // Test selection change
+      fireEvent.change(screen.getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ), {
+        target: { value: 'assume_role' },
+      });
+      expect(mockOnChange).toHaveBeenCalledWith('assume_role');
+    });
+
+    it('displays correct selected value and disabled state', () => {
+      render(
+        <AwsCredentialTypeSelector
+          type="assume_role"
+          onChange={mockOnChange}
+          label="AWS Credential Type"
+          options={manualOptions}
+          disabled={true}
+        />
+      );
+
+      const select = screen.getByTestId(
+        AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ
+      ) as HTMLSelectElement;
+      expect(select.value).toBe('assume_role');
+      expect(select).toBeDisabled();
     });
   });
 
-  it('calls onChange with correct value when selection changes', () => {
-    render(
-      <AwsCredentialTypeSelector
-        type={'direct_access_keys'}
-        onChange={onChange}
-        label={label}
-        options={formOptions}
-        disabled={false}
-      />
-    );
-    fireEvent.change(screen.getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ), {
-      target: { value: 'assume_role' },
+  describe('Agentless credentials options', () => {
+    const agentlessOptions = getAwsCredentialsCloudConnectorsFormAgentlessOptions();
+
+    it('renders agentless options, displays selected value, and handles selection changes', () => {
+      render(
+        <AwsCredentialTypeSelector
+          type="direct_access_keys"
+          onChange={mockOnChange}
+          label="AWS Credential Type"
+          options={agentlessOptions}
+          disabled={false}
+        />
+      );
+
+      // Verify all agentless options are rendered
+      agentlessOptions.forEach((option) => {
+        expect(screen.getByRole('option', { name: option.text })).toBeInTheDocument();
+      });
+
+      const select = screen.getByTestId(
+        AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ
+      ) as HTMLSelectElement;
+      expect(select.value).toBe('direct_access_keys');
+
+      // Test selection change for agentless options
+      fireEvent.change(screen.getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ), {
+        target: { value: 'cloud_connectors' },
+      });
+      expect(mockOnChange).toHaveBeenCalledWith('cloud_connectors');
     });
-    expect(onChange).toHaveBeenCalledWith('assume_role');
-  });
-
-  it('is disabled when disabled prop is true', () => {
-    render(
-      <AwsCredentialTypeSelector
-        type={'direct_access_keys'}
-        onChange={onChange}
-        label={label}
-        options={formOptions}
-        disabled={true}
-      />
-    );
-    expect(screen.getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ)).toBeDisabled();
-  });
-
-  it('shows the correct selected value', () => {
-    render(
-      <AwsCredentialTypeSelector
-        type={'assume_role'}
-        onChange={onChange}
-        label={label}
-        options={formOptions}
-        disabled={false}
-      />
-    );
-    const select = screen.getByTestId(AWS_CREDENTIALS_TYPE_SELECTOR_TEST_SUBJ) as HTMLSelectElement;
-    expect(select.value).toBe('assume_role');
-  });
-
-  it('renders agentless options when provided', () => {
-    render(
-      <AwsCredentialTypeSelector
-        type={'cloud_connectors'}
-        onChange={onChange}
-        label={label}
-        options={formAgentlessOptions}
-        disabled={false}
-      />
-    );
-    formAgentlessOptions.forEach((option) => {
-      expect(screen.getByRole('option', { name: option.text })).toBeInTheDocument();
-    });
-  });
-  it('shows the cloud connectors option when type is cloud_connectors', () => {
-    const cloudConnectorAwsOptions = getAwsCredentialsCloudConnectorsFormAgentlessOptions();
-    render(
-      <AwsCredentialTypeSelector
-        type={'cloud_connectors'}
-        onChange={onChange}
-        label={label}
-        options={cloudConnectorAwsOptions}
-        disabled={false}
-      />
-    );
-    expect(
-      screen
-        .getAllByRole('option')
-        .some((option) => /cloud connectors/i.test(option.textContent || ''))
-    ).toBe(true);
   });
 });

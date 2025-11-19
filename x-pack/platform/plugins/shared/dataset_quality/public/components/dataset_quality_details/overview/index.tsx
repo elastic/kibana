@@ -7,7 +7,7 @@
 
 import React, { useCallback, useState } from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
-import type { OnRefreshProps } from '@elastic/eui';
+import type { TimeRange } from '@kbn/es-query';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -70,9 +70,9 @@ export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
   const [selectedQualityCard, setSelectedQualityCard] =
     React.useState<QualityIssueType>('degraded');
 
-  const handleRefresh = useCallback(
-    (refreshProps: OnRefreshProps) => {
-      updateTimeRange(refreshProps);
+  const handleTimeChange = useCallback(
+    (refreshProps: TimeRange) => {
+      updateTimeRange({ start: refreshProps.from, end: refreshProps.to });
       setLastReloadTime(Date.now());
     },
     [updateTimeRange]
@@ -80,7 +80,7 @@ export function Overview({ openAlertFlyout }: { openAlertFlyout: () => void }) {
   return (
     <>
       {isNonAggregatable && <AggregationNotSupported dataStream={dataStream} />}
-      <OverviewHeader handleRefresh={handleRefresh} />
+      <OverviewHeader handleTimeChange={handleTimeChange} />
       <EuiSpacer size="m" />
 
       {!dataStreamSettingsLoading && !canUserReadFailureStore && (

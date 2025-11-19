@@ -7,6 +7,7 @@
 
 export * from './common.gen';
 export * from './get_entity.gen';
+export * from './delete_entity.gen';
 export * from './list_entities.gen';
 export * from './upsert_entity.gen';
 

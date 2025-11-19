@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { KibanaRequest, Logger } from '@kbn/core/server';
-import { cloneDeep, keys } from 'lodash';
+import { cloneDeep, clone, keys } from 'lodash';
 import { Alert } from '../alert/alert';
 import type { AlertFactory } from '../alert/create_alert_factory';
 import { createAlertFactory, getPublicAlertFactory } from '../alert/create_alert_factory';
@@ -19,6 +19,7 @@ import type {
 } from '../types';
 import type { RulesSettingsFlappingProperties } from '../../common/rules_settings';
 import { DEFAULT_FLAPPING_SETTINGS } from '../../common/rules_settings';
+import { getMaxAlertLimit } from '../../common';
 import type {
   IAlertsClient,
   InitializeExecutionOpts,
@@ -96,7 +97,7 @@ export class LegacyAlertsClient<
     activeAlertsFromState,
     recoveredAlertsFromState,
   }: InitializeExecutionOpts) {
-    this.maxAlerts = maxAlerts;
+    this.maxAlerts = getMaxAlertLimit(maxAlerts);
     this.flappingSettings = flappingSettings;
     this.ruleLogPrefix = ruleLabel;
     this.startedAtString = startedAt ? startedAt.toISOString() : null;
@@ -124,7 +125,7 @@ export class LegacyAlertsClient<
     >({
       alerts: this.reportedAlerts,
       logger: this.options.logger,
-      maxAlerts: this.maxAlerts,
+      configuredMaxAlerts: maxAlerts, // Pass in the configured max alerts value, so we can determine if alert limit is set above the allowed threshold
       autoRecoverAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
     });
@@ -185,9 +186,9 @@ export class LegacyAlertsClient<
 
     this.processedAlerts.new = processedAlertsNew;
     this.processedAlerts.active = processedAlertsActive;
-    this.processedAlerts.trackedActiveAlerts = processedAlertsActive;
+    this.processedAlerts.trackedActiveAlerts = clone(processedAlertsActive);
     this.processedAlerts.recovered = processedAlertsRecovered;
-    this.processedAlerts.trackedRecoveredAlerts = processedAlertsRecovered;
+    this.processedAlerts.trackedRecoveredAlerts = clone(processedAlertsRecovered);
   }
 
   public logAlerts({ ruleRunMetricsStore, shouldLogAlerts }: LogAlertsOpts) {
@@ -199,6 +200,8 @@ export class LegacyAlertsClient<
       recoveredAlerts: this.processedAlerts.recovered,
       ruleLogPrefix: this.ruleLogPrefix,
       ruleRunMetricsStore,
+      // don't log alert instance docs to event log if rule type is persistent
+      shouldLogAlerts: this.options.ruleType.autoRecoverAlerts ?? true,
       canSetRecoveryContext: this.options.ruleType.doesSetRecoveryContext ?? false,
       shouldPersistAlerts: shouldLogAlerts,
     });
@@ -286,9 +289,15 @@ export class LegacyAlertsClient<
     return;
   }
 
-  public async updatePersistedAlertsWithMaintenanceWindowIds() {
-    return null;
+  public async getAlertsToUpdateWithMaintenanceWindows() {
+    return {};
   }
+
+  public getAlertsToUpdateWithLastScheduledActions() {
+    return {};
+  }
+
+  public async updatePersistedAlerts() {}
 
   public async setAlertStatusToUntracked() {
     return;

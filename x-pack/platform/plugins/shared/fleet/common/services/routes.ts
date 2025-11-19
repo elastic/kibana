@@ -26,6 +26,7 @@ import {
   UNINSTALL_TOKEN_ROUTES,
   FLEET_DEBUG_ROUTES,
   REMOTE_SYNCED_INTEGRATIONS_API_ROUTES,
+  AGENTLESS_POLICIES_ROUTES,
 } from '../constants';
 
 export const epmRouteService = {
@@ -205,6 +206,15 @@ export const packagePolicyRouteService = {
   },
 };
 
+export const agentlessPolicyRouteService = {
+  getCreatePath: () => {
+    return AGENTLESS_POLICIES_ROUTES.CREATE_PATTERN;
+  },
+  getDeletePath: (policyId: string) => {
+    return AGENTLESS_POLICIES_ROUTES.DELETE_PATTERN.replace('{policyId}', policyId);
+  },
+};
+
 export const agentPolicyRouteService = {
   getListPath: () => {
     return AGENT_POLICY_API_ROUTES.LIST_PATTERN;
@@ -327,6 +337,9 @@ export const agentRouteService = {
   postMigrateSingleAgent: (agentId: string) =>
     AGENT_API_ROUTES.MIGRATE_PATTERN.replace('{agentId}', agentId),
   postBulkMigrateAgents: () => AGENT_API_ROUTES.BULK_MIGRATE_PATTERN,
+  postChangeAgentPrivilegeLevel: (agentId: string) =>
+    AGENT_API_ROUTES.PRIVILEGE_LEVEL_CHANGE_PATTERN.replace('{agentId}', agentId),
+  postBulkChangeAgentPrivilegeLevel: () => AGENT_API_ROUTES.BULK_PRIVILEGE_LEVEL_CHANGE_PATTERN,
 };
 
 export const outputRoutesService = {

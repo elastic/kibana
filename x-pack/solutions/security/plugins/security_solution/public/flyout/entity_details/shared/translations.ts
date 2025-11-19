@@ -18,20 +18,6 @@ export const FAIL_MANAGED_USER = i18n.translate(
   }
 );
 
-export const RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.host.riskScoreLabel',
-  {
-    defaultMessage: 'Risk score',
-  }
-);
-
-export const CLOSE_BUTTON = i18n.translate(
-  'xpack.securitySolution.flyout.entityDetails.host.closeButton',
-  {
-    defaultMessage: 'close',
-  }
-);
-
 export const ASK_AI_ASSISTANT = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAssistant.askAIAssistant',
   {
@@ -83,7 +69,7 @@ export const ENTITY_CONTEXT_TOOLTIP = i18n.translate(
 export const ASSET_INVENTORY_ENTITY_PROMPT = i18n.translate(
   'xpack.securitySolution.flyout.entityDetails.aiAssistant.entityPrompt',
   {
-    defaultMessage: `Your primary function is to analyze asset and entity data to provide security insights. You will be provided with a JSON object containing the context of a specific asset (e.g., a host, user, service or cloud resource). Your response must be structured, contextual, and directly address the user's query if one is provided. If no specific query is given, provide a general analysis based on the structure below.
+    defaultMessage: `Analyze asset data described above to provide security insights. The data contains the context of a specific asset (e.g., a host, user, service or cloud resource). Your response must be structured, contextual, and provide a general analysis based on the structure below.
 Your response must be in markdown format and include the following sections:
 **1. 🔍 Asset Overview**
    - Begin by acknowledging the asset you are analyzing using its primary identifiers (e.g., "Analyzing host \`[host.name]\` with IP \`[host.ip]\`").
@@ -91,14 +77,10 @@ Your response must be in markdown format and include the following sections:
    - Describe its key relationships and dependencies (e.g., "This asset is part of the \`[cloud.project.name]\` project and is located in the \`[cloud.availability_zone]\` zone.").
 **2. 💡 Investigation & Analytics**
    - Based on the asset's type and attributes, suggest potential investigation paths or common attack vectors.
-   - **Generate contextual ES|QL queries** to help the user investigate further. Format all queries as code blocks. Your generated queries should address common analytical questions, such as:
-     - Finding related security events (e.g., login attempts, network traffic, process executions).
-     - Identifying other assets with similar attributes.
-     - Searching for Indicators of Compromise (IoCs) relevant to the asset type.
-   - If the user asks a question that can be answered with a query, provide the query as the primary answer.
+   - **Generate one contextual ES|QL query** to help the user investigate further. Your generated query should address a common analytical question related to the asset type and sub type. Suggest other possible queries and ask if the user wants to generate more queries.
 **General Instructions:**
-- **Context Awareness:** Your entire analysis must be derived from the provided asset context. If a piece of information is not available in the context (or appears to be anonymized), state that and proceed with the available data.
-- **Query Generation:** When asked to "write a query" or a similar request, your primary output for that section should be a valid, ready-to-use ES|QL query based on the entity's schema.
+- **Context Awareness:** Your entire analysis must be derived from the provided asset context. If a piece of information is not available in the context state that and proceed with the available data.
+- **Query Generation:** When generating a query, your primary output for that section should be a valid, ready-to-use ES|QL query based on the asset's schema. Use ES|QL tool for query generation. Format all queries as code blocks.
 - **Formatting:** Use markdown headers, tables, code blocks, and bullet points to ensure the output is clear, organized, and easily readable. Use concise, actionable language.`,
   }
 );

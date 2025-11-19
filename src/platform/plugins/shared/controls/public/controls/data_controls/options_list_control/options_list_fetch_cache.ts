@@ -101,7 +101,7 @@ export class OptionsListFetchCache {
         filters: esFilters,
         fieldName: field.name,
         fieldSpec: field,
-        runtimeFieldMap: dataView.toSpec?.().runtimeFieldMap,
+        runtimeFieldMap: dataView.toSpec?.(false).runtimeFieldMap,
       };
 
       const result = await coreServices.http.fetch<OptionsListResponse>(

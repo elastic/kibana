@@ -230,7 +230,7 @@ export default ({ getService }: FtrProviderContext) => {
         const apiUserAfter = listed.find((u) => u.user?.name === 'api_user_1');
         log.info(`User after upload: ${JSON.stringify(apiUserAfter)}`);
         expect(apiUserAfter).to.not.be(undefined);
-        expect(apiUserAfter?.user?.is_privileged).to.be(true);
+        privmonUtils.assertIsPrivileged(apiUserAfter!, true);
         expect(apiUserAfter?.labels?.sources).to.contain('api');
         expect(apiUserAfter?.labels?.sources).to.contain('csv');
         privmonUtils.expectTimestampsHaveBeenUpdated(apiUserBefore, apiUserAfter);
@@ -318,13 +318,13 @@ export default ({ getService }: FtrProviderContext) => {
         }
 
         const listed = listRes.body as ListPrivMonUsersResponse;
-        listed.forEach(({ user, labels }) => {
-          expect(user?.is_privileged).to.be(true);
-          if (user?.name === 'test_user_3') {
-            expect(labels?.sources?.length).to.be(1);
-            expect(labels?.sources).to.contain('api');
+        listed.forEach((user) => {
+          privmonUtils.assertIsPrivileged(user, true);
+          if (user.user?.name === 'test_user_3') {
+            expect(user.labels?.sources?.length).to.be(1);
+            expect(user.labels?.sources).to.contain('api');
           } else {
-            expect(labels?.sources).to.contain('csv');
+            expect(user.labels?.sources).to.contain('csv');
           }
         });
       });
@@ -448,8 +448,7 @@ export default ({ getService }: FtrProviderContext) => {
           });
 
           const listed = listRes.body as ListPrivMonUsersResponse;
-          expect(listed[0].user?.is_privileged).to.eql(false);
-          expect(getEaLabelValues(listed[0])).to.eql([]);
+          privmonUtils.assertIsPrivileged(listed[0], false);
         });
       });
     });

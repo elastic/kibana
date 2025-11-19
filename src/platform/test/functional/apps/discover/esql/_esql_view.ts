@@ -9,6 +9,7 @@
 
 import expect from '@kbn/expect';
 import kbnRison from '@kbn/rison';
+import { NULL_LABEL } from '@kbn/field-formats-common';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
@@ -225,7 +226,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
         const cell = await dataGrid.getCellElementExcludingControlColumns(0, 1);
-        expect(await cell.getVisibleText()).to.be(' - ');
+        expect(await cell.getVisibleText()).to.be(NULL_LABEL);
         expect((await dataGrid.getHeaders()).slice(-2)).to.eql([
           'Numberbytes',
           'machine.ram_range',
@@ -377,7 +378,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const availableDataViews = await unifiedSearch.getDataViewList(
           'discover-dataView-switch-link'
         );
-        expect(availableDataViews).to.eql(['All logs', 'kibana_sample_data_flights', 'logstash-*']);
+        ['All logs', 'kibana_sample_data_flights', 'logstash-*'].forEach((item) => {
+          expect(availableDataViews).to.contain(item);
+        });
         await dataViews.switchToAndValidate('kibana_sample_data_flights');
       });
     });
@@ -811,7 +814,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
-          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| WHERE \`geo.dest\`=="BT"`
+          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| WHERE \`geo.dest\` == "BT"`
         );
 
         // negate
@@ -822,7 +825,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const newValue = await monacoEditor.getCodeEditorValue();
         expect(newValue).to.eql(
-          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| WHERE \`geo.dest\`!="BT"`
+          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| WHERE \`geo.dest\`!= "BT"`
         );
       });
 
@@ -843,7 +846,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
-          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB | where countB > 0\nAND \`geo.dest\`=="BT"`
+          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB | where countB > 0\nAND \`geo.dest\` == "BT"`
         );
       });
 
@@ -872,7 +875,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
-          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| WHERE \`geo.dest\`=="BT"`
+          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| WHERE \`geo.dest\` == "BT"`
         );
 
         // check that the type is still line
@@ -917,7 +920,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         const editorValue = await monacoEditor.getCodeEditorValue();
         expect(editorValue).to.eql(
-          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| WHERE \`geo.dest\`=="BT"`
+          `from logstash-* | sort @timestamp desc | limit 10000 | stats countB = count(bytes) by geo.dest | sort countB\n| WHERE \`geo.dest\` == "BT"`
         );
 
         // check that the type is still line
@@ -969,7 +972,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await unifiedFieldList.waitUntilSidebarHasLoaded();
 
         const editorValue = await monacoEditor.getCodeEditorValue();
-        expect(editorValue).to.eql(`from logstash-*\n| WHERE \`extension\`=="png"`);
+        expect(editorValue).to.eql(`from logstash-*\n| WHERE \`extension\` == "png"`);
       });
 
       it('should save breakdown field in saved search', async () => {

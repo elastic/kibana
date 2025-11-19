@@ -153,6 +153,7 @@ export function initRoutes(
           task: schema.object({
             id: schema.string({}),
           }),
+          force: schema.maybe(schema.boolean({ defaultValue: false })),
         }),
       },
     },
@@ -163,10 +164,11 @@ export function initRoutes(
     ): Promise<IKibanaResponse<any>> {
       const {
         task: { id },
+        force,
       } = req.body;
       try {
         const taskManager = await taskManagerStart;
-        return res.ok({ body: await taskManager.runSoon(id) });
+        return res.ok({ body: await taskManager.runSoon(id, force) });
       } catch (err) {
         return res.ok({ body: { id, error: `${err}` } });
       }
@@ -280,7 +282,20 @@ export function initRoutes(
       validate: {
         body: schema.object({
           taskIds: schema.arrayOf(schema.string()),
-          schedule: schema.object({ interval: schema.string() }),
+          schedule: schema.oneOf([
+            schema.object({ interval: schema.maybe(schema.string()) }),
+            schema.object({
+              rrule: schema.object({
+                freq: schema.number(),
+                interval: schema.number(),
+                tzid: schema.string(),
+                byhour: schema.maybe(schema.arrayOf(schema.number({ min: 0, max: 23 }))),
+                byminute: schema.maybe(schema.arrayOf(schema.number({ min: 0, max: 59 }))),
+                byweekday: schema.maybe(schema.arrayOf(schema.string())),
+                bymonthday: schema.maybe(schema.arrayOf(schema.number({ min: 1, max: 31 }))),
+              }),
+            }),
+          ]),
         }),
       },
     },
@@ -315,12 +330,13 @@ export function initRoutes(
             params: schema.object({}),
             state: schema.maybe(schema.object({})),
             id: schema.maybe(schema.string()),
+            schedule: schema.maybe(schema.object({ interval: schema.string() })),
           }),
         }),
       },
     },
     async function (
-      context: RequestHandlerContext,
+      _: RequestHandlerContext,
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
     ): Promise<IKibanaResponse<any>> {

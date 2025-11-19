@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import './login_form.scss';
-
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -15,6 +13,7 @@ import {
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
+  euiFocusRing,
   EuiFormRow,
   EuiHorizontalRule,
   EuiIcon,
@@ -24,7 +23,9 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  type UseEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { ChangeEvent, FormEvent, MouseEvent } from 'react';
 import React, { Component, Fragment } from 'react';
 import ReactMarkdown from 'react-markdown';
@@ -79,8 +80,68 @@ export enum PageMode {
   LoginHelp,
 }
 
+const cardCss = (theme: UseEuiTheme, isLoading: boolean) => css`
+  display: block;
+  box-shadow: none;
+  padding: ${theme.euiTheme.size.base};
+  text-align: left;
+  width: 100%;
+  &:hover p[data-title] {
+    text-decoration: underline;
+  }
+  &:disabled {
+    pointer-events: none;
+  }
+  /* disabled + not‐loading → fade title & hint */
+  ${!isLoading &&
+  css`
+    &:disabled p[data-title],
+    &:disabled p[data-hint] {
+      color: ${theme.euiTheme.colors.mediumShade};
+    }
+  `}
+  &:focus {
+    border-color: transparent;
+    border-radius: ${theme.euiTheme.border.radius.medium};
+    ${euiFocusRing(theme)}
+    p[data-title] {
+      text-decoration: underline;
+    }
+    + button {
+      border-color: transparent;
+    }
+  }
+  & + button {
+    border-top: ${theme.euiTheme.border.thin};
+  }
+`;
+
+const hintCss = (theme: UseEuiTheme) => css`
+  font-size: ${theme.euiTheme.size.m};
+  color: ${theme.euiTheme.colors.darkShade};
+  margin-top: ${theme.euiTheme.size.xs};
+`;
+
+const assistanceCss = (theme: UseEuiTheme) => css`
+  margin-top: -${theme.euiTheme.size.xl};
+  padding: 0 ${theme.euiTheme.size.base};
+  img {
+    max-width: 100%;
+  }
+`;
+
 export class LoginForm extends Component<LoginFormProps, State> {
+  private readonly noProvidersMessage = i18n.translate('xpack.security.noAuthProvidersForDomain', {
+    defaultMessage: 'No authentication providers have been configured for this origin ({origin}).',
+    values: { origin: window.location.origin },
+  });
+
   private readonly validator: LoginValidator;
+
+  /**
+   * Available providers that match the current origin.
+   */
+  private readonly availableProviders: LoginSelectorProvider[];
 
   /**
    * Optional provider that was suggested by the `auth_provider_hint={providerName}` query string parameter. If provider
@@ -91,10 +152,15 @@ export class LoginForm extends Component<LoginFormProps, State> {
 
   constructor(props: LoginFormProps) {
     super(props);
+
+    this.availableProviders = this.props.selector.providers.filter((provider) =>
+      this.providerMatchesOrigin(provider)
+    );
+
     this.validator = new LoginValidator({ shouldValidate: false });
 
     this.suggestedProvider = this.props.authProviderHint
-      ? this.props.selector.providers.find(({ name }) => name === this.props.authProviderHint)
+      ? this.availableProviders.find(({ name }) => name === this.props.authProviderHint)
       : undefined;
 
     // Switch to the Form mode right away if provider from the hint requires it.
@@ -107,7 +173,14 @@ export class LoginForm extends Component<LoginFormProps, State> {
       loadingState: { type: LoadingStateType.None },
       username: '',
       password: '',
-      message: this.props.message || { type: MessageType.None },
+      message:
+        this.props.message ??
+        (this.availableProviders.length === 0
+          ? {
+              type: MessageType.Danger,
+              content: this.noProvidersMessage,
+            }
+          : { type: MessageType.None }),
       mode,
       previousMode: mode,
     };
@@ -140,7 +213,7 @@ export class LoginForm extends Component<LoginFormProps, State> {
     }
 
     return (
-      <div data-test-subj="loginAssistanceMessage" className="secLoginAssistanceMessage">
+      <div data-test-subj="loginAssistanceMessage" css={(theme) => assistanceCss(theme)}>
         <EuiHorizontalRule size="half" />
         <EuiText size="xs">
           <ReactMarkdown>{this.props.loginAssistanceMessage}</ReactMarkdown>
@@ -155,6 +228,7 @@ export class LoginForm extends Component<LoginFormProps, State> {
       return (
         <Fragment>
           <EuiCallOut
+            announceOnMount
             size="s"
             color="danger"
             data-test-subj="loginErrorMessage"
@@ -170,6 +244,7 @@ export class LoginForm extends Component<LoginFormProps, State> {
       return (
         <Fragment>
           <EuiCallOut
+            announceOnMount
             size="s"
             color="primary"
             data-test-subj="loginInfoMessage"
@@ -185,6 +260,10 @@ export class LoginForm extends Component<LoginFormProps, State> {
   };
 
   public renderContent() {
+    if (this.availableProviders.length === 0) {
+      return;
+    }
+
     switch (this.state.mode) {
       case PageMode.Form:
         return this.renderLoginForm();
@@ -288,54 +367,59 @@ export class LoginForm extends Component<LoginFormProps, State> {
   };
 
   private renderSelector = () => {
-    const providers = this.props.selector.providers.filter((provider) => provider.showInSelector);
+    const providers = this.availableProviders.filter((p) => p.showInSelector);
+
     return (
       <EuiPanel data-test-subj="loginSelector" paddingSize="none">
-        {providers.map((provider) => (
-          <button
-            key={provider.name}
-            data-test-subj={`loginCard-${provider.type}/${provider.name}`}
-            disabled={!this.isLoadingState(LoadingStateType.None)}
-            onClick={() =>
-              provider.usesLoginForm
-                ? this.onPageModeChange(PageMode.Form)
-                : this.loginWithSelector({ provider })
-            }
-            className={`secLoginCard ${
-              this.isLoadingState(LoadingStateType.Selector, provider.name)
-                ? 'secLoginCard-isLoading'
-                : ''
-            }`}
-          >
-            <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon size="xl" type={provider.icon ? provider.icon : 'empty'} />
-              </EuiFlexItem>
-              <EuiFlexItem>
-                <EuiTitle size="xs" className="secLoginCard__title">
-                  <p>
-                    {provider.description ?? (
-                      <FormattedMessage
-                        id="xpack.security.loginPage.loginProviderDescription"
-                        defaultMessage="Log in with {providerType}/{providerName}"
-                        values={{
-                          providerType: provider.type,
-                          providerName: provider.name,
-                        }}
-                      />
-                    )}
-                  </p>
-                </EuiTitle>
-                {provider.hint ? <p className="secLoginCard__hint">{provider.hint}</p> : null}
-              </EuiFlexItem>
-              {this.isLoadingState(LoadingStateType.Selector, provider.name) ? (
+        {providers.map((provider) => {
+          const loading = this.isLoadingState(LoadingStateType.Selector, provider.name);
+
+          return (
+            <button
+              key={provider.name}
+              data-test-subj={`loginCard-${provider.type}/${provider.name}`}
+              disabled={!this.isLoadingState(LoadingStateType.None)}
+              onClick={() =>
+                provider.usesLoginForm
+                  ? this.onPageModeChange(PageMode.Form)
+                  : this.loginWithSelector({ provider })
+              }
+              css={(theme) => cardCss(theme, loading)}
+            >
+              <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
                 <EuiFlexItem grow={false}>
-                  <EuiLoadingSpinner size="m" />
+                  <EuiIcon size="xl" type={provider.icon ?? 'empty'} />
                 </EuiFlexItem>
-              ) : null}
-            </EuiFlexGroup>
-          </button>
-        ))}
+                <EuiFlexItem>
+                  <EuiTitle size="xs">
+                    <p data-title data-test-subj="card-title">
+                      {provider.description ?? (
+                        <FormattedMessage
+                          id="xpack.security.loginPage.loginProviderDescription"
+                          defaultMessage="Log in with {providerType}/{providerName}"
+                          values={{
+                            providerType: provider.type,
+                            providerName: provider.name,
+                          }}
+                        />
+                      )}
+                    </p>
+                  </EuiTitle>
+                  {provider.hint && (
+                    <p data-hint data-test-subj="card-hint" css={(theme) => hintCss(theme)}>
+                      {provider.hint}
+                    </p>
+                  )}
+                </EuiFlexItem>
+                {loading && (
+                  <EuiFlexItem grow={false}>
+                    <EuiLoadingSpinner size="m" />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            </button>
+          );
+        })}
       </EuiPanel>
     );
   };
@@ -458,9 +542,7 @@ export class LoginForm extends Component<LoginFormProps, State> {
     });
 
     // We try to log in with the provider that uses login form and has the lowest order.
-    const providerToLoginWith = this.props.selector.providers.find(
-      (provider) => provider.usesLoginForm
-    )!;
+    const providerToLoginWith = this.availableProviders.find((provider) => provider.usesLoginForm)!;
 
     try {
       const { location } = await this.props.http.post<{ location: string }>(
@@ -548,9 +630,17 @@ export class LoginForm extends Component<LoginFormProps, State> {
   private showLoginSelector() {
     return (
       this.props.selector.enabled &&
-      this.props.selector.providers.some(
-        (provider) => !provider.usesLoginForm && provider.showInSelector
-      )
+      this.availableProviders.some((provider) => !provider.usesLoginForm && provider.showInSelector)
+    );
+  }
+
+  private providerMatchesOrigin(provider: LoginSelectorProvider): boolean {
+    const { origin } = window.location;
+    return (
+      !provider.origin ||
+      (Array.isArray(provider.origin)
+        ? provider.origin.includes(origin)
+        : provider.origin === origin)
     );
   }
 }

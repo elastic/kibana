@@ -12,5 +12,6 @@ export const ASSET_TYPE = 'asset.type';
 
 export const QUERY_TITLE = 'query.title';
 export const QUERY_KQL_BODY = 'query.kql.query';
-export const QUERY_SYSTEM_NAME = 'experimental.query.system.name';
-export const QUERY_SYSTEM_FILTER = 'experimental.query.system.filter';
+// Initially features were called systems, for backward compatibility we need to keep the same field names
+export const QUERY_FEATURE_NAME = 'experimental.query.system.name';
+export const QUERY_FEATURE_FILTER = 'experimental.query.system.filter';

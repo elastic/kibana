@@ -3,7 +3,7 @@ FROM ubuntu:latest
 ENV DEBIAN_FRONTEND=noninteractive
 
 ARG USERNAME=codeql
-ARG CODEQL_VERSION="v2.19.0"
+ARG CODEQL_VERSION="v2.23.2"
 ENV CODEQL_HOME /usr/local/codeql-home
 
 RUN apt-get update && \

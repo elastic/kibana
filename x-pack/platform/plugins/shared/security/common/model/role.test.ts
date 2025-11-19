@@ -124,7 +124,7 @@ describe('role', () => {
 
     test('returns true for roles with transform errors', () => {
       const testRole = {
-        _transform_error: ['kibana'],
+        _transform_error: [{ reason: 'kibana:reserved_privileges_mixed', state: [] }],
       };
       expect(isRoleReadOnly(testRole)).toBe(true);
     });

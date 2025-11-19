@@ -118,7 +118,7 @@ export class Shard extends React.Component {
     if (this.state.tooltipVisible) {
       shardUi = (
         <EuiToolTip content={tooltipContent} position="bottom" data-test-subj="shardTooltip">
-          <p>{shardUi}</p>
+          <p tabIndex={0}>{shardUi}</p>
         </EuiToolTip>
       );
     }

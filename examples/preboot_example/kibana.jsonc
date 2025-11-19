@@ -6,6 +6,8 @@
     "@elastic/kibana-core"
   ],
   "description": "The example of the `preboot` plugin.",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "prebootExample",
     "type": "preboot",

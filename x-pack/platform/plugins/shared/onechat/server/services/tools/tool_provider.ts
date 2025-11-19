@@ -8,26 +8,40 @@
 import type { z, ZodObject } from '@kbn/zod';
 import type { MaybePromise } from '@kbn/utility-types';
 import type { ToolDefinition, ToolType } from '@kbn/onechat-common';
-import type { ToolHandlerFn, LlmDescriptionHandler } from '@kbn/onechat-server';
+import type {
+  ToolHandlerFn,
+  LlmDescriptionHandler,
+  ToolAvailabilityContext,
+  ToolAvailabilityResult,
+} from '@kbn/onechat-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 
+type InternalToolAvailabilityHandler = (
+  context: ToolAvailabilityContext
+) => MaybePromise<ToolAvailabilityResult>;
+
 export interface InternalToolDefinition<
+  TType extends ToolType = ToolType,
   TConfig extends object = {},
   TSchema extends ZodObject<any> = ZodObject<any>
-> extends ToolDefinition<TConfig> {
+> extends ToolDefinition<TType, TConfig> {
   /**
-   * The zod schema attached to this tool.
+   * Check if the tool is available for the current context.
    */
-  schema: TSchema | (() => MaybePromise<TSchema>);
+  isAvailable: InternalToolAvailabilityHandler;
   /**
-   * Run handler that can be used to execute the tool.
+   * Generates the schema attached to this tool.
    */
-  handler: ToolHandlerFn<z.infer<TSchema>>;
+  getSchema: () => MaybePromise<TSchema>;
+  /**
+   * Get the handler which can be used to execute the tool.
+   */
+  getHandler: () => MaybePromise<ToolHandlerFn<z.infer<TSchema>>>;
   /**
    * Optional handled to add additional instructions to the LLM
    * when specified, this will fully replace the description when converting to LLM tools.
    */
-  llmDescription?: LlmDescriptionHandler<TConfig>;
+  getLlmDescription?: LlmDescriptionHandler<TConfig>;
 }
 
 export interface ToolCreateParams<TConfig extends object = {}> {
@@ -47,67 +61,36 @@ export interface ToolUpdateParams<TConfig extends object = {}> {
 export type ToolTypeCreateParams<TConfig extends object = {}> = ToolCreateParams<TConfig>;
 export type ToolTypeUpdateParams<TConfig extends object = {}> = ToolUpdateParams<TConfig>;
 
-export interface ToolSourceGetClientArgs {
-  request: KibanaRequest;
-  space: string;
+export interface ReadonlyToolProvider {
+  id: string;
+  readonly: true;
+  has(toolId: string): MaybePromise<boolean>;
+  get(toolId: string): MaybePromise<InternalToolDefinition>;
+  list(): MaybePromise<Array<InternalToolDefinition>>;
 }
 
-/**
- * Defines a provider for a given tool type
- */
-export type ToolSource<T extends ToolType = ToolType> = {
-  /**
-   * Unique identifier for this source
-   */
-  id: string;
-  /**
-   * List of tool types provided by this source
-   */
-  toolTypes: T[];
-} & (
-  | {
-      readonly?: false | undefined;
-      getClient(opts: ToolSourceGetClientArgs): MaybePromise<ToolTypeClient>;
-    }
-  | {
-      readonly: true;
-      getClient(opts: ToolSourceGetClientArgs): MaybePromise<ReadonlyToolTypeClient>;
-    }
-);
-
-export interface ToolTypeClient<TConfig extends object = {}>
-  extends ReadonlyToolTypeClient<TConfig> {
-  /**
-   * Create a new tool
-   */
-  create(params: ToolTypeCreateParams<TConfig>): MaybePromise<InternalToolDefinition<TConfig>>;
-  /**
-   * Update an existing tool
-   */
-  update(
-    toolId: string,
-    update: ToolTypeUpdateParams<TConfig>
-  ): MaybePromise<InternalToolDefinition<TConfig>>;
-
-  /**
-   * Delete a tool
-   */
+export interface WritableToolProvider extends Omit<ReadonlyToolProvider, 'readonly'> {
+  readonly: false;
+  create(params: ToolTypeCreateParams): MaybePromise<InternalToolDefinition>;
+  update(toolId: string, update: ToolTypeUpdateParams): MaybePromise<InternalToolDefinition>;
   delete(toolId: string): MaybePromise<boolean>;
 }
 
-export interface ReadonlyToolTypeClient<TConfig extends object = {}> {
-  /**
-   * Check if a tool is present in the provider
-   */
-  has(toolId: string): MaybePromise<boolean>;
-  /**
-   * Retrieve a tool by its ID.
-   *
-   * Should throw a toolNotFoundException is tool is not found.
-   */
-  get(toolId: string): MaybePromise<InternalToolDefinition<TConfig>>;
-  /**
-   * List all tools for this type.
-   */
-  list(): MaybePromise<Array<InternalToolDefinition<TConfig>>>;
-}
+export type ToolProviderFn<Readonly extends boolean> = (opts: {
+  request: KibanaRequest;
+  space: string;
+}) => MaybePromise<Readonly extends true ? ReadonlyToolProvider : WritableToolProvider>;
+
+export type ToolProvider = ReadonlyToolProvider | WritableToolProvider;
+
+export const isReadonlyToolProvider = (
+  provider: ToolProvider
+): provider is ReadonlyToolProvider => {
+  return provider.readonly;
+};
+
+export const isWritableToolProvider = (
+  provider: ToolProvider
+): provider is WritableToolProvider => {
+  return !provider.readonly;
+};

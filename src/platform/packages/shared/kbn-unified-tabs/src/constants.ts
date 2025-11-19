@@ -15,3 +15,5 @@ export const MIN_TAB_WIDTH = 112;
 export const PREVIEW_WIDTH = 280;
 
 export const MAX_ITEMS_COUNT = 25;
+
+export const TAB_SWITCH_DEBOUNCE_MS = 500;

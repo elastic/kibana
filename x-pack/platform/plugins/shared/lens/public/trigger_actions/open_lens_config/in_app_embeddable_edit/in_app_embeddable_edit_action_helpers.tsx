@@ -10,12 +10,16 @@ import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import type { PublishingSubject } from '@kbn/presentation-publishing';
+import type {
+  DatasourceMap,
+  VisualizationMap,
+  TypedLensByValueInput,
+  LensRuntimeState,
+} from '@kbn/lens-common';
 import type { LensPluginStartDependencies } from '../../../plugin';
-import type { DatasourceMap, VisualizationMap } from '../../../types';
 import { generateId } from '../../../id_generator';
 import { setupPanelManagement } from '../../../react_embeddable/inline_editing/panel_management';
 import { prepareInlineEditPanel } from '../../../react_embeddable/inline_editing/setup_inline_editing';
-import type { TypedLensByValueInput, LensRuntimeState } from '../../../react_embeddable/types';
 import type { LensChartLoadEvent } from './types';
 
 const asyncNoop = async () => {};
@@ -39,6 +43,7 @@ export async function getEditEmbeddableFlyout({
   onApply,
   onCancel,
   closeFlyout,
+  applyButtonLabel,
 }: {
   core: CoreStart;
   deps: LensPluginStartDependencies & {
@@ -52,6 +57,7 @@ export async function getEditEmbeddableFlyout({
   onApply?: (newAttributes: TypedLensByValueInput['attributes']) => void;
   onCancel?: () => void;
   closeFlyout: () => void;
+  applyButtonLabel?: string;
 }) {
   const isCompatibleAction = isEmbeddableEditActionCompatible(core, attributes);
   if (!isCompatibleAction) {
@@ -92,6 +98,7 @@ export async function getEditEmbeddableFlyout({
     onApply,
     onCancel,
     closeFlyout,
+    applyButtonLabel,
   });
   return ConfigPanel;
 }

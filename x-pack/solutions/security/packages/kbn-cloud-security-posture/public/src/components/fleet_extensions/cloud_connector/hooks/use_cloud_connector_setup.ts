@@ -8,17 +8,17 @@
 import { useState, useCallback } from 'react';
 import type { NewPackagePolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import type {
-  CloudConnectorSecretReference,
   PackagePolicyConfigRecord,
+  PackagePolicyConfigRecordEntry,
 } from '@kbn/fleet-plugin/public/types';
 import type { UpdatePolicy } from '../../types';
-import { updateInputVarsWithCredentials, updatePolicyInputs } from '../utils';
-
-export interface CloudConnectorCredentials {
-  roleArn?: string;
-  externalId?: string | CloudConnectorSecretReference;
-  cloudConnectorId?: string;
-}
+import type { CloudConnectorCredentials, AwsCloudConnectorCredentials } from '../types';
+import {
+  isAzureCloudConnectorVars,
+  updateInputVarsWithCredentials,
+  updatePolicyInputs,
+} from '../utils';
+import { AWS_CLOUD_CONNECTOR_FIELD_NAMES, AZURE_CLOUD_CONNECTOR_FIELD_NAMES } from '../constants';
 
 export interface UseCloudConnectorSetupReturn {
   // State for new connection form
@@ -34,6 +34,56 @@ export interface UseCloudConnectorSetupReturn {
   updatePolicyWithExistingCredentials: (credentials: CloudConnectorCredentials) => void;
 }
 
+// Helper function to extract value from var entry (handles both string and secret reference)
+const extractVarValue = (
+  varEntry: PackagePolicyConfigRecordEntry | undefined
+): string | undefined => {
+  if (!varEntry?.value) {
+    return undefined;
+  }
+
+  // Handle string values directly
+  if (typeof varEntry.value === 'string') {
+    return varEntry.value;
+  }
+
+  // Handle secret reference objects
+  if (typeof varEntry.value === 'object' && 'id' in varEntry.value) {
+    return varEntry.value.id;
+  }
+
+  return undefined;
+};
+
+// Helper function to create initial credentials based on existing vars
+const createInitialCredentials = (vars: PackagePolicyConfigRecord): CloudConnectorCredentials => {
+  if (isAzureCloudConnectorVars(vars, 'azure')) {
+    const azureCredentialsId =
+      extractVarValue(vars.azure_credentials_cloud_connector_id) ||
+      extractVarValue(vars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CREDENTIALS_CLOUD_CONNECTOR_ID]);
+
+    return {
+      tenantId:
+        extractVarValue(vars.tenant_id) ||
+        extractVarValue(vars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_TENANT_ID]),
+      clientId:
+        extractVarValue(vars.client_id) ||
+        extractVarValue(vars[AZURE_CLOUD_CONNECTOR_FIELD_NAMES.AZURE_CLIENT_ID]),
+      azure_credentials_cloud_connector_id: azureCredentialsId,
+    };
+  }
+
+  // Default to AWS credentials (role_arn is a text var, external_id could be secret or text)
+  return {
+    roleArn:
+      extractVarValue(vars.role_arn) ||
+      extractVarValue(vars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.ROLE_ARN]),
+    externalId:
+      extractVarValue(vars.external_id) ||
+      extractVarValue(vars[AWS_CLOUD_CONNECTOR_FIELD_NAMES.EXTERNAL_ID]),
+  } as AwsCloudConnectorCredentials;
+};
+
 export const useCloudConnectorSetup = (
   input: NewPackagePolicyInput,
   newPolicy: NewPackagePolicy,
@@ -41,31 +91,29 @@ export const useCloudConnectorSetup = (
 ): UseCloudConnectorSetupReturn => {
   // State for new connection form
   const [newConnectionCredentials, setNewConnectionCredentials] =
-    useState<CloudConnectorCredentials>({ roleArn: undefined, externalId: undefined });
+    useState<CloudConnectorCredentials>(() => {
+      // Safely access vars from the first enabled stream or fallback to empty object
+      const vars = input.streams?.find((stream) => stream.enabled)?.vars ?? {};
+      return createInitialCredentials(vars);
+    });
 
   // State for existing connection form
   const [existingConnectionCredentials, setExistingConnectionCredentials] =
-    useState<CloudConnectorCredentials>({
-      roleArn: undefined,
-      externalId: undefined,
-      cloudConnectorId: undefined,
-    });
+    useState<CloudConnectorCredentials>({});
 
   // Update policy with new connection credentials
   const updatePolicyWithNewCredentials = useCallback(
     (credentials: CloudConnectorCredentials) => {
       const updatedPolicy = { ...newPolicy };
-      const inputVars = input.streams.find((i) => i.enabled)?.vars;
+      const inputVars = input.streams?.find((i) => i.enabled)?.vars;
 
       // Handle undefined cases safely
-      const updatedInputVars = updateInputVarsWithCredentials(
-        inputVars as PackagePolicyConfigRecord,
-        credentials
-      );
-      setNewConnectionCredentials(credentials);
-
-      // Apply updatedVars to the policy using utility function
       if (inputVars) {
+        const updatedInputVars = updateInputVarsWithCredentials(
+          inputVars as PackagePolicyConfigRecord,
+          credentials
+        );
+
         const updatedPolicyWithInputs = updatePolicyInputs(
           updatedPolicy,
           updatedInputVars as PackagePolicyConfigRecord
@@ -74,6 +122,8 @@ export const useCloudConnectorSetup = (
           updatedPolicy: { ...updatedPolicyWithInputs, cloud_connector_id: undefined },
         });
       }
+
+      setNewConnectionCredentials(credentials);
     },
     [input.streams, newPolicy, updatePolicy]
   );
@@ -82,25 +132,29 @@ export const useCloudConnectorSetup = (
   const updatePolicyWithExistingCredentials = useCallback(
     (credentials: CloudConnectorCredentials) => {
       const updatedPolicy = { ...newPolicy };
-      const inputVars = input.streams.find((i) => i.enabled)?.vars;
+      const inputVars = input.streams?.find((i) => i.enabled)?.vars;
 
       // Handle undefined cases safely
-      const updatedInputVars = updateInputVarsWithCredentials(
-        inputVars as PackagePolicyConfigRecord,
-        credentials
-      );
+      if (inputVars) {
+        const updatedInputVars = updateInputVarsWithCredentials(
+          inputVars as PackagePolicyConfigRecord,
+          credentials
+        );
+
+        if (updatedInputVars) {
+          const updatedPolicyWithInputs = updatePolicyInputs(updatedPolicy, updatedInputVars);
+          // Create a clean copy to avoid circular references
+          updatedPolicy.inputs = [...(updatedPolicyWithInputs.inputs || [])];
+        }
+      }
+
       // Update existing connection credentials state
       setExistingConnectionCredentials(credentials);
 
-      // Apply updatedVars to the policy
-      if (inputVars) {
-        const updatedPolicyWithInputs = updatePolicyInputs(
-          updatedPolicy,
-          updatedInputVars as PackagePolicyConfigRecord
-        );
-        updatedPolicy.inputs = updatedPolicyWithInputs.inputs;
+      // Set cloud connector ID if provided
+      if (credentials.cloudConnectorId) {
+        updatedPolicy.cloud_connector_id = credentials.cloudConnectorId;
       }
-      updatedPolicy.cloud_connector_id = credentials.cloudConnectorId;
 
       updatePolicy({ updatedPolicy });
     },

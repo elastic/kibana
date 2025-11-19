@@ -302,7 +302,7 @@ const TargetVersionsRow: React.FunctionComponent<{
               onPercentageChange(newValue);
               onUpdate(version, newValue);
             }}
-            min={0}
+            min={1}
             step={1}
             max={100}
             required

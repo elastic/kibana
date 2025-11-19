@@ -4,11 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Streams, System } from '@kbn/streams-schema';
-import { describeDataset, sortAndTruncateAnalyzedFields } from '@kbn/ai-tools';
+import { describeDataset, formatDocumentAnalysis } from '@kbn/ai-tools';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { type BoundInferenceClient } from '@kbn/inference-common';
 import { conditionToQueryDsl } from '@kbn/streamlang';
+import type { Feature, Streams } from '@kbn/streams-schema';
 import { GenerateStreamDescriptionPrompt } from './prompt';
 
 /**
@@ -16,35 +16,38 @@ import { GenerateStreamDescriptionPrompt } from './prompt';
  */
 export async function generateStreamDescription({
   stream,
-  system,
+  feature,
   start,
   end,
   esClient,
   inferenceClient,
+  signal,
 }: {
   stream: Streams.all.Definition;
-  system?: System;
+  feature?: Feature;
   start: number;
   end: number;
   esClient: ElasticsearchClient;
   inferenceClient: BoundInferenceClient;
+  signal: AbortSignal;
 }): Promise<string> {
   const analysis = await describeDataset({
     start,
     end,
     esClient,
     index: stream.name,
-    filter: system ? conditionToQueryDsl(system.filter) : undefined,
+    filter: feature ? conditionToQueryDsl(feature.filter) : undefined,
   });
 
   const response = await inferenceClient.prompt({
     input: {
-      name: system?.name || stream.name,
+      name: feature?.name || stream.name,
       dataset_analysis: JSON.stringify(
-        sortAndTruncateAnalyzedFields(analysis, { dropEmpty: true })
+        formatDocumentAnalysis(analysis, { dropEmpty: true, dropUnmapped: false })
       ),
     },
     prompt: GenerateStreamDescriptionPrompt,
+    abortSignal: signal,
   });
 
   return response.content;

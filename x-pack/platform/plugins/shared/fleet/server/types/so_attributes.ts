@@ -118,6 +118,7 @@ export interface FleetServerHostSOAttributes {
     ssl?: {
       key?: { id: string };
       es_key?: { id: string };
+      agent_key?: { id: string };
     };
   };
   ssl?: string | null;
@@ -267,6 +268,11 @@ export interface SettingsSOAttributes {
   delete_unenrolled_agents?: {
     enabled: boolean;
     is_preconfigured: boolean;
+  };
+  ilm_migration_status?: {
+    logs?: 'success' | null;
+    metrics?: 'success' | null;
+    synthetics?: 'success' | null;
   };
 }
 

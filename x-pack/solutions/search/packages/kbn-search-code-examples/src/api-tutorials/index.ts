@@ -13,6 +13,7 @@ import { semanticTutorialCommands } from './semantic_tutorial';
 import { esqlTutorialCommands } from './esql_tutorial';
 
 import type { ConsoleTutorial } from './types';
+import { timeSeriesDataStreamTutorialCommands } from './time_series_data_stream_tutorial';
 
 export const consoleTutorials: ConsoleTutorial = {
   basics: basicsTutorialCommands,
@@ -20,6 +21,7 @@ export const consoleTutorials: ConsoleTutorial = {
   esql: esqlTutorialCommands,
   aggregations: `# Aggregations Tutorial`,
   semanticSearch: semanticTutorialCommands,
+  timeSeriesDataStreams: timeSeriesDataStreamTutorialCommands,
   hybridSearch: `# Hybrid Search Tutorial`,
   vectorSearch: `# Vector Search Tutorial`,
 };

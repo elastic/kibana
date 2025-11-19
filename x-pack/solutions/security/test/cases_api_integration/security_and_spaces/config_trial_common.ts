@@ -12,4 +12,5 @@ export default createTestConfig('security_and_spaces', {
   ssl: true,
   testFiles: [require.resolve('./tests/common/index_common_trial')],
   publicBaseUrl: true,
+  indexRefreshInterval: '1s',
 });

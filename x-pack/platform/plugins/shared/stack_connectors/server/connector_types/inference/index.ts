@@ -10,6 +10,7 @@ import { ValidatorType } from '@kbn/actions-plugin/server/sub_action_framework/t
 import {
   GenerativeAIForSearchPlaygroundConnectorFeatureId,
   GenerativeAIForSecurityConnectorFeatureId,
+  WorkflowsConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { GenerativeAIForObservabilityConnectorFeatureId } from '@kbn/actions-plugin/common';
@@ -61,18 +62,35 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
     GenerativeAIForSecurityConnectorFeatureId,
     GenerativeAIForSearchPlaygroundConnectorFeatureId,
     GenerativeAIForObservabilityConnectorFeatureId,
+    WorkflowsConnectorFeatureId,
   ],
   minimumLicenseRequired: 'enterprise' as const,
   preSaveHook: async ({ config, secrets, logger, services, isUpdate }) => {
     const esClient = services.scopedClusterClient.asInternalUser;
+
     try {
-      const taskSettings = config?.taskTypeConfig
-        ? {
-            ...unflattenObject(config?.taskTypeConfig),
-          }
-        : {};
+      const { provider, providerConfig, headers } = config ?? {};
+
+      // NOTE: This is a temporary workaround for anthropic max_tokens handling until the services endpoint is updated to reflect the correct structure.
+      // Anthropic is unique in that it requires max_tokens to be sent as part of the task_settings instead of the usual service_settings.
+      // Until the services endpoint is updated to reflect that, there is no way for the form UI to know where to put max_tokens. This can be removed once that update is made.
+      if (provider === ServiceProviderKeys.anthropic && providerConfig?.max_tokens) {
+        config.taskTypeConfig = {
+          ...(config.taskTypeConfig ?? {}),
+          max_tokens: providerConfig.max_tokens,
+        };
+        // This field is unknown to the anthropic service config, so we remove it
+        delete providerConfig.max_tokens;
+      }
+
+      const taskSettings = {
+        ...(config.taskTypeConfig ? unflattenObject(config.taskTypeConfig) : {}),
+        ...(headers ? { headers } : {}),
+      };
+
       const serviceSettings = {
-        ...unflattenObject(config?.providerConfig ?? {}),
+        ...(isUpdate === false ? unflattenObject(providerConfig ?? {}) : {}),
+        // Update accepts only secrets in service_settings
         ...unflattenObject(secrets?.providerSecrets ?? {}),
       };
 
@@ -93,24 +111,27 @@ export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => (
       }
 
       if (isUpdate && inferenceExists && config && config.provider) {
-        // TODO: replace, when update API for inference endpoint exists
-        await deleteInferenceEndpoint(
-          config.inferenceId,
-          config.taskType as InferenceTaskType,
-          logger,
-          esClient
-        );
+        // test num_allocations
+        await esClient?.inference.update({
+          inference_id: config?.inferenceId,
+          task_type: config?.taskType as InferenceTaskType,
+          // @ts-ignore The InferenceInferenceEndpoint type is out of date and has 'service' as a required property but this call will error if service is included
+          inference_config: {
+            service_settings: serviceSettings,
+            task_settings: taskSettings,
+          },
+        });
+      } else {
+        await esClient?.inference.put({
+          inference_id: config?.inferenceId ?? '',
+          task_type: config?.taskType as InferenceTaskType,
+          inference_config: {
+            service: config!.provider,
+            service_settings: serviceSettings,
+            task_settings: taskSettings,
+          },
+        });
       }
-
-      await esClient?.inference.put({
-        inference_id: config?.inferenceId ?? '',
-        task_type: config?.taskType as InferenceTaskType,
-        inference_config: {
-          service: config!.provider,
-          service_settings: serviceSettings,
-          task_settings: taskSettings,
-        },
-      });
       logger.debug(
         `Inference endpoint for task type "${config?.taskType}" and inference id ${
           config?.inferenceId

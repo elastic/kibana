@@ -205,6 +205,7 @@ describe('When using get-file action from response actions console', () => {
     'ra_get-file_error_upload-api-unreachable',
     'ra_get-file_error_upload-timeout',
     'ra_get-file_error_queue-timeout',
+    'ra_get-file_error_not-enough-free-space',
   ])('should show detailed error if get-file failure returned code: %s', async (outputCode) => {
     const pendingDetailResponse = apiMocks.responseProvider.actionDetails({
       path: '/api/endpoint/action/a.b.c',
@@ -244,21 +245,6 @@ describe('When using get-file action from response actions console', () => {
   describe('And agent type is SentinelOne', () => {
     beforeEach(() => {
       getConsoleCommandsOptions.agentType = 'sentinel_one';
-      mockedContext.setExperimentalFlag({
-        responseActionsSentinelOneGetFileEnabled: true,
-      });
-    });
-
-    it('should display error if feature flag is not enabled', async () => {
-      mockedContext.setExperimentalFlag({
-        responseActionsSentinelOneGetFileEnabled: false,
-      });
-      await render();
-      await enterConsoleCommand(renderResult, user, 'get-file --path="one/two"');
-
-      expect(renderResult.getByTestId('test-validationError-message').textContent).toEqual(
-        UPGRADE_AGENT_FOR_RESPONDER('sentinel_one', 'get-file')
-      );
     });
 
     it('should call API with `agent_type` set to `sentinel_one`', async () => {

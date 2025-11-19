@@ -21,13 +21,8 @@ import { getStepPanelColour } from '../../../utils';
 export type ActionBlockProps = StepConfigurationProps & {
   processorMetrics?: ProcessorMetrics;
 };
-export function ActionBlock({
-  stepRef,
-  level,
-  stepUnderEdit,
-  rootLevelMap,
-  stepsProcessingSummaryMap,
-}: StepConfigurationProps) {
+export function ActionBlock(props: StepConfigurationProps) {
+  const { stepRef, level } = props;
   const { euiTheme } = useEuiTheme();
   const isUnderEdit = useSelector(stepRef, (snapshot) => isStepUnderEdit(snapshot));
   const isRootStepValue = useSelector(stepRef, (snapshot) => isRootStep(snapshot));
@@ -71,23 +66,9 @@ export function ActionBlock({
       }
     >
       {isUnderEdit ? (
-        <ActionBlockEditor
-          processorMetrics={processorMetrics}
-          stepRef={stepRef}
-          level={level}
-          ref={freshBlockRef}
-          rootLevelMap={rootLevelMap}
-          stepsProcessingSummaryMap={stepsProcessingSummaryMap}
-        />
+        <ActionBlockEditor {...props} ref={freshBlockRef} processorMetrics={processorMetrics} />
       ) : (
-        <ActionBlockListItem
-          processorMetrics={processorMetrics}
-          stepRef={stepRef}
-          level={level}
-          stepUnderEdit={stepUnderEdit}
-          rootLevelMap={rootLevelMap}
-          stepsProcessingSummaryMap={stepsProcessingSummaryMap}
-        />
+        <ActionBlockListItem {...props} processorMetrics={processorMetrics} />
       )}
     </EuiPanel>
   );

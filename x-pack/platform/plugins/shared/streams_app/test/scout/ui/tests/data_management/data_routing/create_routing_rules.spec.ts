@@ -28,9 +28,10 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
     // Verify we're in the creating new rule state
     await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
     await expect(page.getByText('Stream name')).toBeVisible();
+    await expect(page.getByText('logs.')).toBeVisible();
 
     // Fill in the stream name
-    await page.getByTestId('streamsAppRoutingStreamEntryNameField').fill('logs.nginx');
+    await page.getByTestId('streamsAppRoutingStreamEntryNameField').fill('nginx');
 
     // Set up routing condition
     await pageObjects.streams.fillConditionEditor({
@@ -53,7 +54,7 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
     await pageObjects.streams.clickCreateRoutingRule();
 
     // Fill in some data
-    await pageObjects.streams.fillRoutingRuleName('logs.test');
+    await pageObjects.streams.fillRoutingRuleName('test');
 
     // Cancel the operation
     await pageObjects.streams.cancelRoutingRule();
@@ -88,7 +89,7 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
       await pageObjects.streams.saveRoutingRule();
 
       // Wait for the error toast to appear
-      await pageObjects.streams.expectToastVisible();
+      await pageObjects.toasts.waitFor();
 
       // Should stay in creating state due to validation error
       await expect(page.getByTestId('streamsAppRoutingStreamEntryNameField')).toBeVisible();
@@ -107,5 +108,18 @@ test.describe('Stream data routing - creating routing rules', { tag: ['@ess', '@
     // Create button should be disabled or show tooltip
     const createButton = page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton');
     await expect(createButton).toBeHidden();
+  });
+
+  test('should not allow creating a routing rule that is not a child of the current stream', async ({
+    page,
+    pageObjects,
+  }) => {
+    await pageObjects.streams.clickCreateRoutingRule();
+
+    // Input invalid partition name that is not a direct child of the current stream
+    await pageObjects.streams.fillRoutingRuleName('nginx.access_logs');
+
+    const createButton = page.getByTestId('streamsAppStreamDetailRoutingAddRuleButton');
+    await expect(createButton).toBeDisabled();
   });
 });

@@ -140,7 +140,7 @@ xpack.actions.preconfigured:
     actionTypeId: .bedrock
     config:
       apiUrl: https://bedrock-runtime.us-east-1.amazonaws.com <1>
-      defaultModel: anthropic.claude-3-5-sonnet-20240620-v1:0 <2>
+      defaultModel: us.anthropic.claude-sonnet-4-5-20250929-v1:0 <2>
     secrets:
       accessKey: key-value <3>
       secret: secret-value <4>

@@ -24,19 +24,28 @@ export const createAgentHandlerContext = async <TParams = Record<string, unknown
   manager: RunnerManager;
 }): Promise<AgentHandlerContext> => {
   const { onEvent } = agentExecutionParams;
-  const { request, defaultConnectorId, elasticsearch, modelProviderFactory, toolsService, logger } =
-    manager.deps;
+  const {
+    request,
+    elasticsearch,
+    modelProvider,
+    toolsService,
+    attachmentsService,
+    resultStore,
+    logger,
+  } = manager.deps;
   return {
     request,
     logger,
+    modelProvider,
     esClient: elasticsearch.client.asScoped(request),
-    modelProvider: modelProviderFactory({ request, defaultConnectorId }),
     runner: manager.getRunner(),
     toolProvider: registryToProvider({
       registry: await toolsService.getRegistry({ request }),
       getRunner: manager.getRunner,
       request,
     }),
+    resultStore,
+    attachments: attachmentsService,
     events: createAgentEventEmitter({ eventHandler: onEvent, context: manager.context }),
   };
 };

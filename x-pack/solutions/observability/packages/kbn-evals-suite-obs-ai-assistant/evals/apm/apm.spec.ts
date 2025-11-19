@@ -6,9 +6,7 @@
  */
 
 import type { RuleResponse } from '@kbn/alerting-plugin/common/routes/rule/response/types/v1';
-import { evaluate as base } from '../../src/evaluate';
-import type { EvaluateApmDataset } from './evaluate_apm_dataset';
-import { createEvaluateApmDataset } from './evaluate_apm_dataset';
+import { evaluate } from '../../src/evaluate';
 import { generateAIAssistantApmScenario } from '../../src/data_generators/apm';
 import { apmErrorCountAIAssistant } from '../../src/alert_templates/apm';
 
@@ -17,23 +15,6 @@ import { apmErrorCountAIAssistant } from '../../src/alert_templates/apm';
  * - x-pack/solutions/observability/plugins/observability_ai_assistant_app/scripts/evaluation/scenarios/apm/index.spec.ts
  * Any changes should be made in both places until the legacy evaluation framework is removed.
  */
-
-const evaluate = base.extend<{
-  evaluateApmDataset: EvaluateApmDataset;
-}>({
-  evaluateApmDataset: [
-    ({ chatClient, evaluators, phoenixClient }, use) => {
-      use(
-        createEvaluateApmDataset({
-          chatClient,
-          evaluators,
-          phoenixClient,
-        })
-      );
-    },
-    { scope: 'test' },
-  ],
-});
 
 evaluate.describe('APM functionality', { tag: '@svlOblt' }, () => {
   const ruleIds: string[] = [];
@@ -57,8 +38,8 @@ evaluate.describe('APM functionality', { tag: '@svlOblt' }, () => {
     }
   });
 
-  evaluate('service throughput', async ({ evaluateApmDataset }) => {
-    await evaluateApmDataset({
+  evaluate('service throughput', async ({ evaluateDataset }) => {
+    await evaluateDataset({
       dataset: {
         name: 'apm: service throughput',
         description:
@@ -66,7 +47,7 @@ evaluate.describe('APM functionality', { tag: '@svlOblt' }, () => {
         examples: [
           {
             input: {
-              prompt:
+              question:
                 'What is the average throughput per minute for the ai-assistant-service service over the past 4 hours?',
             },
             output: {
@@ -86,15 +67,15 @@ evaluate.describe('APM functionality', { tag: '@svlOblt' }, () => {
     });
   });
 
-  evaluate('service dependencies', async ({ evaluateApmDataset }) => {
-    await evaluateApmDataset({
+  evaluate('service dependencies', async ({ evaluateDataset }) => {
+    await evaluateDataset({
       dataset: {
         name: 'apm: service dependencies',
         description: 'Validates use of get_apm_downstream_dependencies.',
         examples: [
           {
             input: {
-              prompt:
+              question:
                 'What are the downstream dependencies of the ai-assistant-service-front service?',
             },
             output: {
@@ -110,15 +91,15 @@ evaluate.describe('APM functionality', { tag: '@svlOblt' }, () => {
     });
   });
 
-  evaluate('services in environment', async ({ evaluateApmDataset }) => {
-    await evaluateApmDataset({
+  evaluate('services in environment', async ({ evaluateDataset }) => {
+    await evaluateDataset({
       dataset: {
         name: 'apm: services in environment',
         description: 'Lists active services in the environment test.',
         examples: [
           {
             input: {
-              prompt: 'What are the active services in the environment "test"?',
+              question: 'What are the active services in the environment "test"?',
             },
             output: {
               criteria: [
@@ -134,15 +115,15 @@ evaluate.describe('APM functionality', { tag: '@svlOblt' }, () => {
     });
   });
 
-  evaluate('error rate per service', async ({ evaluateApmDataset }) => {
-    await evaluateApmDataset({
+  evaluate('error rate per service', async ({ evaluateDataset }) => {
+    await evaluateDataset({
       dataset: {
         name: 'apm: error rate per service',
         description: 'Returns average error rate per service over the last 4 hours.',
         examples: [
           {
             input: {
-              prompt: 'What is the average error rate per service over the past 4 hours?',
+              question: 'What is the average error rate per service over the past 4 hours?',
             },
             output: {
               criteria: [
@@ -156,8 +137,8 @@ evaluate.describe('APM functionality', { tag: '@svlOblt' }, () => {
     });
   });
 
-  evaluate('top 2 frequent errors', async ({ evaluateApmDataset }) => {
-    await evaluateApmDataset({
+  evaluate('top 2 frequent errors', async ({ evaluateDataset }) => {
+    await evaluateDataset({
       dataset: {
         name: 'apm: top 2 frequent errors',
         description:
@@ -165,7 +146,7 @@ evaluate.describe('APM functionality', { tag: '@svlOblt' }, () => {
         examples: [
           {
             input: {
-              prompt:
+              question:
                 'What are the top 2 most frequent errors in the services in the test environment in the last hour?',
             },
             output: {
@@ -180,14 +161,14 @@ evaluate.describe('APM functionality', { tag: '@svlOblt' }, () => {
     });
   });
 
-  evaluate('current alerts for services', async ({ evaluateApmDataset }) => {
-    await evaluateApmDataset({
+  evaluate('current alerts for services', async ({ evaluateDataset }) => {
+    await evaluateDataset({
       dataset: {
         name: 'apm: current alerts for services',
         description: 'Returns current alerts for services in the test environment.',
         examples: [
           {
-            input: { prompt: 'Are there any alert for those services?' },
+            input: { question: 'Are there any alert for those services?' },
             output: {
               criteria: [
                 'Returns the current alerts for the services, for the specified services in test environment',

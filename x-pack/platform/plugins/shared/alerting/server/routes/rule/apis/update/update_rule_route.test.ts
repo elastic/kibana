@@ -357,14 +357,9 @@ describe('updateRuleRoute', () => {
         ['ok']
       );
 
-      await handler(context, req, res);
-
-      expect(res.badRequest).toHaveBeenCalledWith({
-        body: {
-          message:
-            'Cannot update rule of type "test.internal-rule-type" because it is internally managed.',
-        },
-      });
+      await expect(handler(context, req, res)).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Cannot update rule of type \\"test.internal-rule-type\\" because it is internally managed."`
+      );
     });
   });
 });

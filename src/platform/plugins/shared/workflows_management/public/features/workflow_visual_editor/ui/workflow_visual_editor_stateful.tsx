@@ -7,38 +7,56 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { EuiEmptyPrompt } from '@elastic/eui';
-import type { WorkflowYaml } from '@kbn/workflows';
+import { useSelector } from 'react-redux';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { WorkflowYaml } from '@kbn/workflows';
 import { WorkflowVisualEditor } from './workflow_visual_editor';
+import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml';
 import { getWorkflowZodSchemaLoose } from '../../../../common/schema';
-import { parseWorkflowYamlToJSON } from '../../../../common/lib/yaml_utils';
-import { useWorkflowExecution } from '../../../entities/workflows/model/use_workflow_execution';
+import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
+import {
+  selectEditorYaml,
+  selectStepExecutions,
+} from '../../../entities/workflows/store/workflow_detail/selectors';
 
-interface WorkflowVisualEditorStatefulProps {
-  workflowYaml: string;
-  workflowExecutionId?: string;
-}
-
-export function WorkflowVisualEditorStateful({
-  workflowYaml,
-  workflowExecutionId,
-}: WorkflowVisualEditorStatefulProps) {
-  const { data: workflowExecution } = useWorkflowExecution(workflowExecutionId ?? null);
+export const WorkflowVisualEditorStateful = () => {
+  const stepExecutions = useSelector(selectStepExecutions);
+  const workflowYaml = useSelector(selectEditorYaml) ?? '';
+  const connectorsData = useAvailableConnectors();
 
   const workflowYamlObject = useMemo(() => {
-    if (!workflowYaml) {
-      return null;
+    if (!workflowYaml || !connectorsData) {
+      return undefined;
     }
-    const result = parseWorkflowYamlToJSON(workflowYaml, getWorkflowZodSchemaLoose());
+    const result = parseWorkflowYamlToJSON(
+      workflowYaml,
+      getWorkflowZodSchemaLoose(connectorsData.connectorTypes)
+    );
     if (result.error) {
       return null;
     }
     return result.data;
-  }, [workflowYaml]);
+  }, [workflowYaml, connectorsData]);
 
-  if (!workflowYamlObject) {
+  if (workflowYamlObject === undefined) {
+    return (
+      <EuiEmptyPrompt
+        icon={<EuiLoadingSpinner size="l" />}
+        title={
+          <h2>
+            <FormattedMessage
+              id="workflows.visualEditor.loadingWorkflowGraph"
+              defaultMessage="Loading workflow graph..."
+            />
+          </h2>
+        }
+      />
+    );
+  }
+
+  if (workflowYamlObject === null) {
     return (
       <EuiEmptyPrompt
         title={
@@ -62,7 +80,7 @@ export function WorkflowVisualEditorStateful({
   return (
     <WorkflowVisualEditor
       workflow={workflowYamlObject as WorkflowYaml}
-      stepExecutions={workflowExecution?.stepExecutions}
+      stepExecutions={stepExecutions}
     />
   );
-}
+};

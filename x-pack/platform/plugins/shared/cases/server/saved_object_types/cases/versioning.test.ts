@@ -111,8 +111,6 @@ describe('caseSavedObjectType model version transformations', () => {
           },
           overrides: {
             severity: 10, // Severity value that matches v1 schema (10, 20, 30, 40)
-            // @ts-expect-error: total_events is not defined in the attributes
-            total_events: 1,
           },
         }),
         fromVersion: 5,
@@ -120,6 +118,46 @@ describe('caseSavedObjectType model version transformations', () => {
       });
 
       expect(migrated.attributes).not.toHaveProperty('settings.extractObservables');
+    });
+  });
+
+  describe('Model version 5 to 6', () => {
+    it('properly backfill the total_events field when converting from v5 to v6', () => {
+      const migrated = migrator.migrate({
+        document: createCaseSavedObjectResponse(),
+        fromVersion: 5,
+        toVersion: 6,
+      });
+
+      expect(migrated.attributes).toHaveProperty('total_events');
+    });
+  });
+
+  describe('Model version 6 to 7', () => {
+    const version7Fields = ['observables.description'];
+
+    it('by default does not add the new fields to the object', () => {
+      const migrated = migrator.migrate({
+        document: createCaseSavedObjectResponse(),
+        fromVersion: 6,
+        toVersion: 7,
+      });
+
+      version7Fields.forEach((field) => {
+        expect(migrated.attributes).not.toHaveProperty(field);
+      });
+    });
+  });
+
+  describe('Model version 7 to 8', () => {
+    it('properly backfill the total_observables field when converting from v7 to v8', () => {
+      const migrated = migrator.migrate({
+        document: createCaseSavedObjectResponse(),
+        fromVersion: 7,
+        toVersion: 8,
+      });
+
+      expect(migrated.attributes).toHaveProperty('total_observables');
     });
   });
 });

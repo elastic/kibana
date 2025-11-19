@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
-import type { ESQLCommand, ESQLAstRerankCommand, ESQLSingleAstItem } from '../../../types';
+import type { ESQLAstRerankCommand, ESQLSingleAstItem, ESQLAstAllCommands } from '../../../types';
 import type { ICommandCallbacks, ISuggestionItem, ICommandContext } from '../../types';
 import { Location } from '../../types';
 import { getPosition, CaretPosition } from './utils';
@@ -15,17 +15,18 @@ import {
   getNewUserDefinedColumnSuggestion,
   onCompleteItem,
   assignCompletionItem,
+  withMapCompleteItem,
 } from '../../complete_items';
 import {
-  suggestForExpression,
   withinQuotes,
   createInferenceEndpointToCompletionItem,
   handleFragment,
   columnExists,
 } from '../../../definitions/utils/autocomplete/helpers';
+import { suggestForExpression } from '../../../definitions/utils';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
+import type { MapParameters } from '../../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
-import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 import { pipeCompleteItem, commaCompleteItem, withCompleteItem } from '../../complete_items';
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
 
@@ -36,10 +37,10 @@ const FIELD_LIST_TYPES = ['keyword', 'text', 'boolean', 'integer', 'double', 'lo
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
-  cursorPosition?: number
+  cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
   const rerankCommand = command as ESQLAstRerankCommand;
   const innerText = query.substring(0, cursorPosition);
@@ -48,18 +49,7 @@ export async function autocomplete(
     return [];
   }
 
-  const { position, context: positionContext } = getPosition(innerText, command);
-
-  const insideFunctionSuggestions = await getInsideFunctionsSuggestions(
-    innerText,
-    cursorPosition,
-    callbacks,
-    context
-  );
-
-  if (insideFunctionSuggestions?.length) {
-    return insideFunctionSuggestions;
-  }
+  const { position, context: positionContext } = getPosition(innerText, command, cursorPosition);
 
   switch (position) {
     case CaretPosition.RERANK_KEYWORD: {
@@ -117,17 +107,26 @@ export async function autocomplete(
 
     case CaretPosition.ON_EXPRESSION: {
       return handleOnExpression({
-        innerText,
+        query,
+        command,
+        cursorPosition,
         callbacks,
         context,
         expressionRoot: positionContext?.expressionRoot,
+        insideFunction: positionContext?.insideFunction,
       });
     }
 
+    case CaretPosition.AFTER_WITH_KEYWORD:
+      return [withMapCompleteItem];
+
     case CaretPosition.WITHIN_MAP_EXPRESSION: {
       const endpoints = context?.inferenceEndpoints;
-      const availableParameters = {
-        inference_id: endpoints?.map(createInferenceEndpointToCompletionItem) || [],
+      const availableParameters: MapParameters = {
+        inference_id: {
+          type: 'string',
+          suggestions: endpoints?.map(createInferenceEndpointToCompletionItem) || [],
+        },
       };
 
       return getCommandMapExpressionSuggestions(innerText, availableParameters);
@@ -192,31 +191,44 @@ async function handleOnFieldList({
 }
 
 async function handleOnExpression({
-  innerText,
+  query,
+  command,
+  cursorPosition,
   callbacks,
   context,
   expressionRoot,
+  insideFunction,
 }: {
-  innerText: string;
+  query: string;
+  command: ESQLAstAllCommands;
+  cursorPosition: number;
   callbacks: ICommandCallbacks;
   context: ICommandContext | undefined;
   expressionRoot: ESQLSingleAstItem | undefined;
+  insideFunction?: boolean;
 }): Promise<ISuggestionItem[]> {
+  const innerText = query.substring(0, cursorPosition);
   const suggestions = await suggestForExpression({
-    innerText,
-    getColumnsByType: callbacks.getByType,
+    query,
     expressionRoot,
+    command,
+    cursorPosition,
     location: Location.RERANK,
-    preferredExpressionType: 'boolean',
     context,
-    hasMinimumLicenseRequired: callbacks.hasMinimumLicenseRequired,
-    activeProduct: context?.activeProduct,
+    callbacks,
+    options: {
+      preferredExpressionType: 'boolean',
+    },
   });
 
   if (expressionRoot) {
     const expressionType = getExpressionType(expressionRoot, context?.columns);
 
-    if (expressionType === 'boolean' && isExpressionComplete(expressionType, innerText)) {
+    if (
+      expressionType === 'boolean' &&
+      isExpressionComplete(expressionType, innerText) &&
+      !insideFunction
+    ) {
       suggestions.push(...buildNextActions());
     }
   }

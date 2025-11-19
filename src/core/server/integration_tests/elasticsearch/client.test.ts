@@ -9,7 +9,7 @@
 
 import { esTestConfig } from '@kbn/test';
 import * as http from 'http';
-import { firstValueFrom, ReplaySubject } from 'rxjs';
+import { ReplaySubject, firstValueFrom } from 'rxjs';
 
 import type { Root } from '@kbn/core-root-server-internal';
 import {
@@ -77,7 +77,12 @@ describe('fake elasticsearch', () => {
   let esStatus$: ReplaySubject<ServiceStatus<ElasticsearchStatusMeta>>;
 
   beforeAll(async () => {
-    kibanaServer = createRootWithCorePlugins({ status: { allowAnonymous: true } });
+    kibanaServer = createRootWithCorePlugins({
+      elasticsearch: {
+        healthCheck: { retry: 1 },
+      },
+      status: { allowAnonymous: true },
+    });
     esServer = createFakeElasticsearchServer();
 
     await kibanaServer.preboot();
@@ -87,8 +92,9 @@ describe('fake elasticsearch', () => {
 
     // give kibanaServer's status Observables enough time to bootstrap
     // and emit a status after the initial "unavailable: Waiting for Elasticsearch"
+    // set healthCheckRetry to 1, for faster testing
     // see https://github.com/elastic/kibana/issues/129754
-    await new Promise((resolve) => setTimeout(resolve, 500));
+    await new Promise((resolve) => setTimeout(resolve, 1500));
   });
 
   afterAll(async () => {

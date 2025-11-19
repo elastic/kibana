@@ -155,23 +155,23 @@ Object {
         "params": Object {
           "colorStops": Array [
             Object {
-              "color": "#D3DAE6",
+              "color": "#E3E8F2",
               "stop": 0,
             },
             Object {
-              "color": "#BECFE3",
+              "color": "#B5E5F2",
               "stop": 20,
             },
             Object {
-              "color": "#D6BF57",
+              "color": "#FCD883",
               "stop": 40,
             },
             Object {
-              "color": "#DA8B45",
+              "color": "#FF995E",
               "stop": 70,
             },
             Object {
-              "color": "#E7664C",
+              "color": "#EE4C48",
               "stop": 90,
             },
           ],
@@ -186,23 +186,23 @@ Object {
           "steps": 3,
           "stops": Array [
             Object {
-              "color": "#D3DAE6",
+              "color": "#E3E8F2",
               "stop": 20,
             },
             Object {
-              "color": "#BECFE3",
+              "color": "#B5E5F2",
               "stop": 40,
             },
             Object {
-              "color": "#D6BF57",
+              "color": "#FCD883",
               "stop": 70,
             },
             Object {
-              "color": "#DA8B45",
+              "color": "#FF995E",
               "stop": 90,
             },
             Object {
-              "color": "#E7664C",
+              "color": "#EE4C48",
               "stop": 100,
             },
           ],

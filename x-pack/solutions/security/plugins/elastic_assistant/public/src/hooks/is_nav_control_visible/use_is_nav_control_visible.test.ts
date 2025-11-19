@@ -9,6 +9,7 @@ import { renderHook } from '@testing-library/react';
 import { useIsNavControlVisible } from './use_is_nav_control_visible';
 import { of } from 'rxjs';
 import { AIAssistantType } from '@kbn/ai-assistant-management-plugin/public';
+import type { Space } from '@kbn/spaces-plugin/common';
 import { useKibana } from '../../context/typed_kibana_context/typed_kibana_context';
 
 jest.mock('../../context/typed_kibana_context/typed_kibana_context', () => {
@@ -33,6 +34,9 @@ describe('isNavControlVisible', () => {
         aiAssistantManagementSelection: {
           aiAssistantType$: of(AIAssistantType.Default),
         },
+        spaces: {
+          getActiveSpace$: () => of({} as unknown as Space),
+        },
       },
     });
 
@@ -51,6 +55,9 @@ describe('isNavControlVisible', () => {
         },
         aiAssistantManagementSelection: {
           aiAssistantType$: of(AIAssistantType.Default),
+        },
+        spaces: {
+          getActiveSpace$: () => of({} as unknown as Space),
         },
       },
     });
@@ -71,6 +78,9 @@ describe('isNavControlVisible', () => {
         aiAssistantManagementSelection: {
           aiAssistantType$: of(AIAssistantType.Security),
         },
+        spaces: {
+          getActiveSpace$: () => of({} as unknown as Space),
+        },
       },
     });
 
@@ -89,6 +99,9 @@ describe('isNavControlVisible', () => {
         },
         aiAssistantManagementSelection: {
           aiAssistantType$: of(AIAssistantType.Security),
+        },
+        spaces: {
+          getActiveSpace$: () => of({} as unknown as Space),
         },
       },
     });
@@ -109,10 +122,57 @@ describe('isNavControlVisible', () => {
         aiAssistantManagementSelection: {
           aiAssistantType$: of(AIAssistantType.Observability),
         },
+        spaces: {
+          getActiveSpace$: () => of({} as unknown as Space),
+        },
       },
     });
 
     const { result } = renderHook(() => useIsNavControlVisible());
     expect(result.current.isVisible).toEqual(false);
+  });
+
+  it('returns true when isServerless is true regardless of app and preference', () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        application: {
+          currentAppId$: of('observability'),
+          applications$: of(
+            new Map([['observability', { id: 'observability', category: { id: 'observability' } }]])
+          ),
+        },
+        aiAssistantManagementSelection: {
+          aiAssistantType$: of(AIAssistantType.Never),
+        },
+        spaces: {
+          getActiveSpace$: () => of({} as unknown as Space),
+        },
+      },
+    });
+
+    const { result } = renderHook(() => useIsNavControlVisible(true));
+    expect(result.current.isVisible).toEqual(true);
+  });
+
+  it("returns true when space.solution is 'security' regardless of app and preference", () => {
+    (useKibana as jest.Mock).mockReturnValue({
+      services: {
+        application: {
+          currentAppId$: of('observability'),
+          applications$: of(
+            new Map([['observability', { id: 'observability', category: { id: 'observability' } }]])
+          ),
+        },
+        aiAssistantManagementSelection: {
+          aiAssistantType$: of(AIAssistantType.Never),
+        },
+        spaces: {
+          getActiveSpace$: () => of({ solution: 'security' } as unknown as Space),
+        },
+      },
+    });
+
+    const { result } = renderHook(() => useIsNavControlVisible(false));
+    expect(result.current.isVisible).toEqual(true);
   });
 });

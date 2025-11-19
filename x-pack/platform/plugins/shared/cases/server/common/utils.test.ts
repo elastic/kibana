@@ -154,6 +154,7 @@ describe('common utils', () => {
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
+            "extractObservables": true,
             "syncAlerts": true,
           },
           "severity": "low",
@@ -163,6 +164,7 @@ describe('common utils', () => {
             "case",
           ],
           "title": "My new case",
+          "total_observables": 0,
           "updated_at": null,
           "updated_by": null,
         }
@@ -211,6 +213,7 @@ describe('common utils', () => {
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
+            "extractObservables": true,
             "syncAlerts": true,
           },
           "severity": "medium",
@@ -220,6 +223,7 @@ describe('common utils', () => {
             "case",
           ],
           "title": "My new case",
+          "total_observables": 0,
           "updated_at": null,
           "updated_by": null,
         }
@@ -272,6 +276,7 @@ describe('common utils', () => {
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
+            "extractObservables": true,
             "syncAlerts": true,
           },
           "severity": "low",
@@ -281,6 +286,7 @@ describe('common utils', () => {
             "case",
           ],
           "title": "My new case",
+          "total_observables": 0,
           "updated_at": null,
           "updated_by": null,
         }
@@ -339,6 +345,7 @@ describe('common utils', () => {
           "observables": Array [],
           "owner": "securitySolution",
           "settings": Object {
+            "extractObservables": true,
             "syncAlerts": true,
           },
           "severity": "low",
@@ -348,6 +355,7 @@ describe('common utils', () => {
             "case",
           ],
           "title": "My new case",
+          "total_observables": 0,
           "updated_at": null,
           "updated_by": null,
         }
@@ -413,6 +421,7 @@ describe('common utils', () => {
               "totalAlerts": 0,
               "totalComment": 2,
               "totalEvents": 0,
+              "total_observables": 0,
               "updated_at": "2019-11-25T21:54:48.952Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -460,6 +469,7 @@ describe('common utils', () => {
               "totalAlerts": 0,
               "totalComment": 2,
               "totalEvents": 0,
+              "total_observables": 0,
               "updated_at": "2019-11-25T22:32:00.900Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -511,6 +521,7 @@ describe('common utils', () => {
               "totalAlerts": 0,
               "totalComment": 2,
               "totalEvents": 0,
+              "total_observables": 0,
               "updated_at": "2019-11-25T22:32:17.947Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -566,6 +577,7 @@ describe('common utils', () => {
               "totalAlerts": 0,
               "totalComment": 2,
               "totalEvents": 0,
+              "total_observables": 0,
               "updated_at": "2019-11-25T22:32:17.947Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -650,6 +662,7 @@ describe('common utils', () => {
               "totalAlerts": 0,
               "totalComment": 0,
               "totalEvents": 0,
+              "total_observables": 0,
               "updated_at": "2019-11-25T21:54:48.952Z",
               "updated_by": Object {
                 "email": "testemail@elastic.co",
@@ -722,6 +735,7 @@ describe('common utils', () => {
           "totalAlerts": 0,
           "totalComment": 2,
           "totalEvents": 0,
+          "total_observables": 0,
           "updated_at": "2019-11-25T22:32:17.947Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",
@@ -785,6 +799,7 @@ describe('common utils', () => {
           "totalAlerts": 0,
           "totalComment": 2,
           "totalEvents": 0,
+          "total_observables": 0,
           "updated_at": "2019-11-25T22:32:17.947Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",
@@ -871,6 +886,7 @@ describe('common utils', () => {
           "totalAlerts": 0,
           "totalComment": 2,
           "totalEvents": 0,
+          "total_observables": 0,
           "updated_at": "2019-11-25T22:32:17.947Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",
@@ -932,6 +948,7 @@ describe('common utils', () => {
           "totalAlerts": 0,
           "totalComment": 2,
           "totalEvents": 0,
+          "total_observables": 0,
           "updated_at": "2019-11-25T21:54:48.952Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",
@@ -998,6 +1015,7 @@ describe('common utils', () => {
           "totalAlerts": 0,
           "totalComment": 2,
           "totalEvents": 0,
+          "total_observables": 0,
           "updated_at": "2019-11-25T21:54:48.952Z",
           "updated_by": Object {
             "email": "testemail@elastic.co",

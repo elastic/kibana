@@ -8,3 +8,14 @@
  */
 
 export const REGISTRY_EXTENSIONS_ROUTE = '/internal/esql_registry/extensions/';
+export const SOURCES_AUTOCOMPLETE_ROUTE = '/internal/esql/autocomplete/sources/';
+export const TIMEFIELD_ROUTE = '/internal/esql/get_timefield/';
+
+export enum SOURCES_TYPES {
+  INDEX = 'Index',
+  TIMESERIES = 'Timeseries',
+  INTEGRATION = 'Integration',
+  ALIAS = 'Alias',
+  DATA_STREAM = 'Data Stream',
+  LOOKUP = 'Lookup',
+}

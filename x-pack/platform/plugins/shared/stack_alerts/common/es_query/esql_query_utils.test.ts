@@ -8,7 +8,7 @@
 import {
   rowToDocument,
   toEsqlQueryHits,
-  transformDatatableToEsqlTable,
+  transformToEsqlTable,
   toGroupedEsqlQueryHits,
   getAlertIdFields,
 } from './esql_query_utils';
@@ -640,23 +640,16 @@ describe('ESQL query utils', () => {
     });
   });
 
-  describe('transformDatatableToEsqlTable', () => {
+  describe('transformToEsqlTable', () => {
     it('correctly converts data table to ESQL table', () => {
       expect(
-        transformDatatableToEsqlTable({
-          type: 'datatable',
+        transformToEsqlTable({
           columns: [
-            { id: '@timestamp', name: '@timestamp', meta: { type: 'date' } },
-            { id: 'ecs.version', name: 'ecs.version', meta: { type: 'string' } },
-            { id: 'error.code', name: 'error.code', meta: { type: 'string' } },
+            { name: '@timestamp', type: 'date' },
+            { name: 'ecs.version', type: 'string' },
+            { name: 'error.code', type: 'string' },
           ],
-          rows: [
-            {
-              '@timestamp': '2023-07-12T13:32:04.174Z',
-              'ecs.version': '1.8.0',
-              'error.code': null,
-            },
-          ],
+          values: [['2023-07-12T13:32:04.174Z', '1.8.0', null]],
         })
       ).toEqual({
         columns: [

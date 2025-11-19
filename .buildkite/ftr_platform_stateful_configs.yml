@@ -65,7 +65,6 @@ enabled:
   - src/platform/test/functional/apps/dashboard_elements/input_control_vis/config.ts
   - src/platform/test/functional/apps/dashboard_elements/links/config.ts
   - src/platform/test/functional/apps/dashboard_elements/markdown/config.ts
-  - src/platform/test/functional/apps/dashboard/background_search/config.ts
   - src/platform/test/functional/apps/dashboard/group1/config.ts
   - src/platform/test/functional/apps/dashboard/group2/config.ts
   - src/platform/test/functional/apps/dashboard/group3/config.ts
@@ -76,7 +75,6 @@ enabled:
   - src/platform/test/functional/apps/discover/ccs_compatibility/config.ts
   - src/platform/test/functional/apps/discover/embeddable/config.ts
   - src/platform/test/functional/apps/discover/esql/config.ts
-  - src/platform/test/functional/apps/discover/background_search/config.ts
   - src/platform/test/functional/apps/discover/group1/config.ts
   - src/platform/test/functional/apps/discover/group2_data_grid1/config.ts
   - src/platform/test/functional/apps/discover/group2_data_grid2/config.ts
@@ -93,6 +91,7 @@ enabled:
   - src/platform/test/functional/apps/discover/observability/config.ts
   - src/platform/test/functional/apps/discover/tabs/config.ts
   - src/platform/test/functional/apps/discover/tabs2/config.ts
+  - src/platform/test/functional/apps/discover/tabs3/config.ts
   - src/platform/test/functional/apps/discover/tabs_disabled/config.ts
   - src/platform/test/functional/apps/getting_started/config.ts
   - src/platform/test/functional/apps/home/config.ts
@@ -170,6 +169,7 @@ enabled:
   - x-pack/platform/test/disable_ems/config.ts
   - x-pack/platform/test/examples/config.ts
   - x-pack/platform/test/fleet_api_integration/config.agent.ts
+  - x-pack/platform/test/fleet_api_integration/config.agentless.ts
   - x-pack/platform/test/fleet_api_integration/config.agent_policy.ts
   - x-pack/platform/test/fleet_api_integration/config.epm.ts
   - x-pack/platform/test/fleet_api_integration/config.event_ingested.ts
@@ -199,6 +199,7 @@ enabled:
   - x-pack/platform/test/functional_with_es_ssl/apps/discover_ml/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/embeddable_alerts_table/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/config.ts
+  - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/config.rules.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/with_email_aws_ses_kbn_config/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/connectors/with_email_services_enabled_kbn_config/config.ts
   - x-pack/platform/test/functional_with_es_ssl/apps/triggers_actions_ui/shared/config.ts
@@ -405,6 +406,7 @@ enabled:
   - x-pack/platform/test/encrypted_saved_objects_api_integration/config.ts
   - x-pack/platform/test/fleet_multi_cluster/config.ts
   - x-pack/platform/test/monitoring_api_integration/config.ts
+  - x-pack/platform/test/onechat_functional/config.ts
   - x-pack/platform/test/plugin_api_integration/config.ts
   - x-pack/platform/test/saved_object_api_integration/security_and_spaces/config_basic.ts
   - x-pack/platform/test/saved_object_api_integration/security_and_spaces/config_trial.ts

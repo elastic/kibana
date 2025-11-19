@@ -229,6 +229,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
       let inferenceToModelIdMap = state.inferenceToModelIdMap;
       setIsUpdatingMappings(true);
       try {
+        await ml?.mlApi?.savedObjects.syncSavedObjects();
         if (isSemanticTextEnabled && hasMLPermissions && hasSemanticText && !forceSaveMappings) {
           inferenceToModelIdMap = await fetchInferenceToModelIdMap();
         }
@@ -388,6 +389,7 @@ export const DetailsPageMappingsContent: FunctionComponent<{
   const errorSavingMappings = saveMappingError && (
     <EuiFlexItem grow={false}>
       <EuiCallOut
+        announceOnMount
         color="danger"
         data-test-subj="indexDetailsSaveMappingsError"
         iconType="error"

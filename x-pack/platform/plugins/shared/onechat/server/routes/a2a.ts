@@ -6,16 +6,14 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { KibanaRequest } from '@kbn/core/server';
 import path from 'node:path';
 import { apiPrivileges } from '../../common/features';
 import { publicApiPath } from '../../common/constants';
 import type { RouteDependencies } from './types';
 import { getHandlerWrapper } from './wrap_handler';
-import { getTechnicalPreviewWarning } from './utils';
 import { KibanaA2AAdapter } from '../utils/a2a/kibana_a2a_adapter';
 import { getKibanaUrl } from '../utils/get_kibana_url';
-
-const TECHNICAL_PREVIEW_WARNING = getTechnicalPreviewWarning('Elastic A2A Server');
 
 export const A2A_SERVER_PATH = `${publicApiPath}/a2a`;
 
@@ -28,8 +26,9 @@ export function registerA2ARoutes({
 }: RouteDependencies) {
   const wrapHandler = getHandlerWrapper({ logger });
 
-  const getBaseUrl = () => {
-    return getKibanaUrl(coreSetup, pluginsSetup.cloud);
+  const getBaseUrl = async (request: KibanaRequest) => {
+    const [, startDeps] = await coreSetup.getStartServices();
+    return getKibanaUrl(coreSetup, pluginsSetup.cloud, request, startDeps.spaces);
   };
 
   const a2aAdapter = new KibanaA2AAdapter(logger, getInternalServices, getBaseUrl);
@@ -41,10 +40,11 @@ export function registerA2ARoutes({
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
-      summary: 'A2A Agent Card',
-      description: 'Provides agent discovery metadata for A2A protocol',
+      summary: 'Get A2A agent card',
+      description:
+        'Get agent discovery metadata in JSON format. Use this endpoint to provide agent information for A2A protocol integration and discovery.',
       options: {
-        tags: ['a2a', 'oas-tag:elastic agent builder'],
+        tags: ['a2a', 'oas-tag:agent builder'],
         availability: {
           stability: 'experimental',
           since: '9.2.0',
@@ -81,10 +81,11 @@ export function registerA2ARoutes({
         authz: { requiredPrivileges: [apiPrivileges.readOnechat] },
       },
       access: 'public',
-      summary: 'A2A Task Endpoint',
-      description: TECHNICAL_PREVIEW_WARNING,
+      summary: 'Send A2A task',
+      description:
+        'WARNING: This endpoint is designed for A2A protocol clients and should not be used directly via REST APIs. Use an A2A SDK or A2A Inspector instead.',
       options: {
-        tags: ['a2a', 'oas-tag:elastic agent builder'],
+        tags: ['a2a', 'oas-tag:agent builder'],
         xsrfRequired: false,
         availability: {
           stability: 'experimental',

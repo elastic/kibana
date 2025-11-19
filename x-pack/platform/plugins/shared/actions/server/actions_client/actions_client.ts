@@ -80,6 +80,7 @@ import type { ConnectorCreateParams } from '../application/connector/methods/cre
 import { isPreconfigured } from '../lib/is_preconfigured';
 import { isSystemAction } from '../lib/is_system_action';
 import type { ConnectorExecuteParams } from '../application/connector/methods/execute/types';
+import { connectorFromInMemoryConnector } from '../application/connector/lib/connector_from_in_memory_connector';
 
 export interface ConstructorOptions {
   logger: Logger;
@@ -210,7 +211,7 @@ export class ActionsClient {
   }: {
     ids: string[];
     throwIfSystemAction?: boolean;
-  }): Promise<ActionResult[]> {
+  }): Promise<(ActionResult | InMemoryConnector)[]> {
     try {
       await this.context.authorization.ensureAuthorized({ operation: 'get' });
     } catch (error) {
@@ -228,22 +229,28 @@ export class ActionsClient {
 
     const actionResults = new Array<ActionResult>();
 
-    for (const actionId of ids) {
-      const action = this.context.inMemoryConnectors.find(
-        (inMemoryConnector) => inMemoryConnector.id === actionId
+    for (const connectorId of ids) {
+      const inMemoryConnector = this.context.inMemoryConnectors.find(
+        (connector) => connector.id === connectorId
       );
 
-      /**
-       * Getting system connector is not allowed
-       * if throwIfSystemAction is set to true.
-       * Default behavior is to throw
-       */
-      if (action !== undefined && action.isSystemAction && throwIfSystemAction) {
-        throw Boom.notFound(`Connector ${action.id} not found`);
-      }
+      if (inMemoryConnector !== undefined) {
+        const connector = connectorFromInMemoryConnector({
+          inMemoryConnector,
+          id: connectorId,
+          actionTypeRegistry: this.context.actionTypeRegistry,
+        });
 
-      if (action !== undefined) {
-        actionResults.push(action);
+        /**
+         * Getting system connector is not allowed
+         * if throwIfSystemAction is set to true.
+         * Default behavior is to throw
+         */
+        if (connector.isSystemAction && throwIfSystemAction) {
+          throw Boom.notFound(`Connector ${connector.id} not found`);
+        }
+
+        actionResults.push(connector);
       }
     }
 
@@ -280,7 +287,11 @@ export class ActionsClient {
         );
       }
       actionResults.push(
-        connectorFromSavedObject(action, isConnectorDeprecated(action.attributes))
+        connectorFromSavedObject(
+          action,
+          isConnectorDeprecated(action.attributes),
+          this.context.actionTypeRegistry.isDeprecated(action.attributes.actionTypeId)
+        )
       );
     }
 

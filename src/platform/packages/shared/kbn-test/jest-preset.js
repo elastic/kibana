@@ -24,6 +24,8 @@ const scoutReporter = [
 
 /** @type {import("@jest/types").Config.InitialOptions} */
 module.exports = {
+  retryTimes: process.env.CI ? 3 : 0,
+
   // The directory where Jest should output its coverage files
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest',
 
@@ -48,6 +50,13 @@ module.exports = {
   // Use this configuration option to add custom reporters to Jest
   reporters: [
     'default',
+    [
+      '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/slow_test_reporter.js',
+      {
+        warnOnSlowerThan: 300,
+        color: true,
+      },
+    ],
     [
       '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/junit_reporter',
       {
@@ -117,10 +126,10 @@ module.exports = {
   transformIgnorePatterns: [
     // ignore all node_modules except monaco-editor, monaco-yaml which requires babel transforms to handle dynamic import()
     // since ESM modules are not natively supported in Jest yet (https://github.com/facebook/jest/issues/4842)
-    '[/\\\\]node_modules(?![\\/\\\\](byte-size|monaco-editor|monaco-yaml|monaco-languageserver-types|monaco-marker-data-provider|monaco-worker-manager|vscode-languageserver-types|d3-interpolate|d3-color|langchain|langsmith|@cfworker|gpt-tokenizer|flat|@langchain|eventsource-parser|fast-check|@fast-check/jest|@assemblyscript|quickselect|rbush))[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](byte-size|monaco-editor|monaco-yaml|monaco-languageserver-types|monaco-marker-data-provider|monaco-worker-manager|vscode-languageserver-types|d3-interpolate|d3-color|langchain|langsmith|@cfworker|gpt-tokenizer|flat|@langchain|eventsource-parser|fast-check|@fast-check/jest|@assemblyscript|quickselect|rbush|zod/v4))[/\\\\].+\\.js$',
     'packages/kbn-pm/dist/index.js',
-    '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain))/dist/[/\\\\].+\\.js$',
-    '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain))/dist/util/[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain|zod/v4))/dist/[/\\\\].+\\.js$',
+    '[/\\\\]node_modules(?![\\/\\\\](langchain|langsmith|@langchain|zod/v4))/dist/util/[/\\\\].+\\.js$',
   ],
 
   // An array of regexp pattern strings that are matched against all source file paths, matched files to include/exclude for code coverage
@@ -136,12 +145,6 @@ module.exports = {
   watchPathIgnorePatterns: ['.*/__tmp__/.*'],
 
   resolver: '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/resolver.js',
-
-  // Workaround to "TypeError: Cannot assign to read only property 'structuredClone' of object '[object global]'"
-  // This happens when we run jest tests with --watch after node20+
-  globals: {
-    structuredClone: {},
-  },
 
   testResultsProcessor:
     '<rootDir>/src/platform/packages/shared/kbn-test/src/jest/result_processors/logging_result_processor.js',

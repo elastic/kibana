@@ -8,12 +8,10 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import type { EuiAccordionProps, IconType } from '@elastic/eui';
+import type { EuiAccordionProps } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiBetaBadge,
-  EuiButtonEmpty,
-  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -22,17 +20,8 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-
-interface BaseAction {
-  icon: IconType;
-  ariaLabel: string;
-  dataTestSubj?: string;
-  label?: string;
-}
-
-type Action =
-  | (BaseAction & { onClick: () => void; href?: never })
-  | (BaseAction & { href: string; onClick?: never });
+import type { Action } from './section_actions';
+import { SectionActions } from './section_actions';
 
 export interface ContentFrameworkSectionProps {
   id: string;
@@ -62,39 +51,6 @@ export function ContentFrameworkSection({
   hasPadding = true,
 }: ContentFrameworkSectionProps) {
   const [accordionState, setAccordionState] = useState<EuiAccordionProps['forceState']>(forceState);
-
-  const renderActions = () => (
-    <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
-      {actions?.map((action, idx) => {
-        const { icon, onClick, ariaLabel, label, dataTestSubj, href } = action;
-        const size = 'xs';
-        const buttonProps = onClick ? { onClick } : { href };
-        return (
-          <EuiFlexItem grow={false} key={idx}>
-            {label ? (
-              <EuiButtonEmpty
-                size={size}
-                iconType={icon}
-                aria-label={ariaLabel}
-                data-test-subj={dataTestSubj}
-                {...buttonProps}
-              >
-                {label}
-              </EuiButtonEmpty>
-            ) : (
-              <EuiButtonIcon
-                size={size}
-                iconType={icon}
-                aria-label={ariaLabel}
-                data-test-subj={dataTestSubj}
-                {...buttonProps}
-              />
-            )}
-          </EuiFlexItem>
-        );
-      })}
-    </EuiFlexGroup>
-  );
 
   useEffect(() => {
     setAccordionState(forceState);
@@ -147,17 +103,17 @@ export function ContentFrameworkSection({
         extraAction={
           actions?.length && (
             <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-              <EuiFlexItem grow={false}>{renderActions()}</EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <SectionActions actions={actions} />
+              </EuiFlexItem>
             </EuiFlexGroup>
           )
         }
       >
-        <>
-          <EuiSpacer size="s" />
-          <EuiPanel hasBorder={hasBorder} hasShadow={false} paddingSize={hasPadding ? 's' : 'none'}>
-            {children}
-          </EuiPanel>
-        </>
+        <EuiSpacer size="s" />
+        <EuiPanel hasBorder={hasBorder} hasShadow={false} paddingSize={hasPadding ? 's' : 'none'}>
+          {children}
+        </EuiPanel>
       </EuiAccordion>
       {accordionState === 'closed' ? <EuiHorizontalRule margin="xs" /> : <EuiSpacer size="m" />}
     </>

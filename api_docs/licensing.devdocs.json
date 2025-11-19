@@ -67,6 +67,10 @@
               "path": "x-pack/platform/plugins/private/logstash/public/plugin.ts"
             },
             {
+              "plugin": "monitoring",
+              "path": "x-pack/platform/plugins/private/monitoring/public/plugin.ts"
+            },
+            {
               "plugin": "painlessLab",
               "path": "x-pack/platform/plugins/private/painless_lab/public/plugin.tsx"
             },
@@ -396,7 +400,7 @@
               "\nRegister a feature to be able to notify of it's usages using the {@link FeatureUsageServiceStart | service start contract}."
             ],
             "signature": [
-              "(featureName: string, licenseType: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => void"
+              "(featureId: string, licenseType: \"basic\" | \"standard\" | \"gold\" | \"platinum\" | \"enterprise\" | \"trial\") => void"
             ],
             "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
             "deprecated": false,
@@ -407,7 +411,7 @@
                 "id": "def-server.FeatureUsageServiceSetup.register.$1",
                 "type": "string",
                 "tags": [],
-                "label": "featureName",
+                "label": "featureId",
                 "description": [],
                 "signature": [
                   "string"
@@ -459,7 +463,7 @@
               "\nNotify of a registered feature usage at given time.\n"
             ],
             "signature": [
-              "(featureName: string, usedAt?: number | Date | undefined) => void"
+              "(featureId: string, usedAt?: number | Date | undefined) => void"
             ],
             "path": "x-pack/platform/plugins/shared/licensing/server/services/feature_usage_service.ts",
             "deprecated": false,
@@ -470,9 +474,9 @@
                 "id": "def-server.FeatureUsageServiceStart.notifyUsage.$1",
                 "type": "string",
                 "tags": [],
-                "label": "featureName",
+                "label": "featureId",
                 "description": [
-                  "- the name of the feature to notify usage of"
+                  "- the identifer of the feature to notify usage of"
                 ],
                 "signature": [
                   "string"

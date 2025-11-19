@@ -12,6 +12,15 @@ import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mo
 
 import { registerPrivilegesWithCluster } from './register_privileges_with_cluster';
 import type { RawKibanaPrivileges } from '../../common';
+import type { SecurityTelemetryAttributes } from '../otel/instrumentation';
+import { securityTelemetry } from '../otel/instrumentation';
+
+// Mock the telemetry module
+jest.mock('../otel/instrumentation', () => ({
+  securityTelemetry: {
+    recordPrivilegeRegistrationDuration: jest.fn(),
+  },
+}));
 
 const application = 'default-application';
 const registerPrivilegesWithClusterTest = (
@@ -31,6 +40,7 @@ const registerPrivilegesWithClusterTest = (
       expectUpdatedPrivileges: (postPrivilegesBody: any, deletedPrivileges?: string[]) => void;
       expectDidntUpdatePrivileges: () => void;
       expectErrorThrown: (expectedErrorMessage: string) => void;
+      expectTelemetryRecorded: (attributes: SecurityTelemetryAttributes) => void;
     }) => void;
   }
 ) => {
@@ -106,6 +116,16 @@ const registerPrivilegesWithClusterTest = (
     };
   };
 
+  const createExpectTelemetryRecorded = () => {
+    return (attributes: SecurityTelemetryAttributes) => {
+      expect(securityTelemetry.recordPrivilegeRegistrationDuration).toHaveBeenCalled();
+      expect(securityTelemetry.recordPrivilegeRegistrationDuration).toHaveBeenLastCalledWith(
+        expect.any(Number),
+        attributes
+      );
+    };
+  };
+
   test(description, async () => {
     const mockClusterClient = elasticsearchServiceMock.createClusterClient();
     mockClusterClient.asInternalUser.security.getPrivileges.mockImplementation((async () => {
@@ -148,6 +168,7 @@ const registerPrivilegesWithClusterTest = (
         error
       ),
       expectErrorThrown: createExpectErrorThrown(mockLogger, error),
+      expectTelemetryRecorded: createExpectTelemetryRecorded(),
     });
   });
 };
@@ -173,7 +194,7 @@ registerPrivilegesWithClusterTest(`inserts privileges when we don't have any exi
     },
   },
   existingPrivileges: null,
-  assert: ({ expectUpdatedPrivileges }) => {
+  assert: ({ expectUpdatedPrivileges, expectTelemetryRecorded }) => {
     expectUpdatedPrivileges({
       [application]: {
         all: {
@@ -207,6 +228,12 @@ registerPrivilegesWithClusterTest(`inserts privileges when we don't have any exi
           metadata: {},
         },
       },
+    });
+
+    expectTelemetryRecorded({
+      application,
+      outcome: 'success',
+      deletedPrivileges: 0,
     });
   },
 });
@@ -256,7 +283,7 @@ registerPrivilegesWithClusterTest(`deletes no-longer specified privileges`, {
       },
     },
   },
-  assert: ({ expectUpdatedPrivileges }) => {
+  assert: ({ expectUpdatedPrivileges, expectTelemetryRecorded }) => {
     expectUpdatedPrivileges(
       {
         [application]: {
@@ -276,6 +303,12 @@ registerPrivilegesWithClusterTest(`deletes no-longer specified privileges`, {
       },
       ['read', 'space_baz', 'reserved_customApplication']
     );
+
+    expectTelemetryRecorded({
+      application,
+      outcome: 'success',
+      deletedPrivileges: 3,
+    });
   },
 });
 
@@ -331,7 +364,7 @@ registerPrivilegesWithClusterTest(`updates privileges when global actions don't 
       },
     },
   },
-  assert: ({ expectUpdatedPrivileges }) => {
+  assert: ({ expectUpdatedPrivileges, expectTelemetryRecorded }) => {
     expectUpdatedPrivileges({
       [application]: {
         all: {
@@ -365,6 +398,12 @@ registerPrivilegesWithClusterTest(`updates privileges when global actions don't 
           metadata: {},
         },
       },
+    });
+
+    expectTelemetryRecorded({
+      application,
+      outcome: 'success',
+      deletedPrivileges: 0,
     });
   },
 });
@@ -421,7 +460,7 @@ registerPrivilegesWithClusterTest(`updates privileges when space actions don't m
       },
     },
   },
-  assert: ({ expectUpdatedPrivileges }) => {
+  assert: ({ expectUpdatedPrivileges, expectTelemetryRecorded }) => {
     expectUpdatedPrivileges({
       [application]: {
         all: {
@@ -455,6 +494,12 @@ registerPrivilegesWithClusterTest(`updates privileges when space actions don't m
           metadata: {},
         },
       },
+    });
+
+    expectTelemetryRecorded({
+      application,
+      outcome: 'success',
+      deletedPrivileges: 0,
     });
   },
 });
@@ -1019,8 +1064,13 @@ registerPrivilegesWithClusterTest(`throws and logs error when errors getting pri
     reserved: {},
   },
   throwErrorWhenGettingPrivileges: new Error('Error getting privileges'),
-  assert: ({ expectErrorThrown }) => {
+  assert: ({ expectErrorThrown, expectTelemetryRecorded }) => {
     expectErrorThrown('Error getting privileges');
+
+    expectTelemetryRecorded({
+      application,
+      outcome: 'failure',
+    });
   },
 });
 
@@ -1037,7 +1087,12 @@ registerPrivilegesWithClusterTest(`throws and logs error when errors putting pri
   },
   existingPrivileges: null,
   throwErrorWhenPuttingPrivileges: new Error('Error putting privileges'),
-  assert: ({ expectErrorThrown }) => {
+  assert: ({ expectErrorThrown, expectTelemetryRecorded }) => {
     expectErrorThrown('Error putting privileges');
+
+    expectTelemetryRecorded({
+      application,
+      outcome: 'failure',
+    });
   },
 });

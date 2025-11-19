@@ -92,13 +92,14 @@ const RuleMigrationsUploadMissingPanelContent =
             hasBorder
             paddingSize="s"
             css={{ backgroundColor: euiTheme.colors.backgroundBasePrimary }}
+            data-test-subj="uploadMissingPanel"
           >
             <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
               <EuiFlexItem grow={false}>
                 <AssistantIcon />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
-                <PanelText size="s" semiBold>
+                <PanelText data-test-subj="uploadMissingPanelTitle" size="s" semiBold>
                   {i18n.RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_TITLE}
                 </PanelText>
               </EuiFlexItem>
@@ -106,7 +107,7 @@ const RuleMigrationsUploadMissingPanelContent =
                 {isLoadingTranslationStats ? (
                   <EuiLoadingSpinner size="s" />
                 ) : (
-                  <PanelText size="s" subdued>
+                  <PanelText data-test-subj="uploadMissingPanelDescription" size="s" subdued>
                     {i18n.RULE_MIGRATION_UPLOAD_MISSING_RESOURCES_DESCRIPTION(totalRulesToRetry)}
                   </PanelText>
                 )}
@@ -119,6 +120,7 @@ const RuleMigrationsUploadMissingPanelContent =
                   iconType="download"
                   iconSide="right"
                   size="s"
+                  data-test-subj="uploadMissingPanelButton"
                 >
                   {i18n.RULE_MIGRATION_UPLOAD_BUTTON}
                 </EuiButton>

@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import type { EuiEmptyPromptProps } from '@elastic/eui';
 import { EuiEmptyPrompt, EuiIcon, EuiLoadingSpinner, EuiText, useEuiTheme } from '@elastic/eui';
+import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useWorkflowExecutionLogs } from '../../../entities/workflows/api/use_workflow_execution_logs';
 import { StepExecutionTimeline } from './step_execution_timeline';
+import { useWorkflowExecutionLogs } from '../../../entities/workflows/api/use_workflow_execution_logs';
 
 export const StepExecutionTimelineStateful = ({
   executionId,
@@ -28,8 +28,8 @@ export const StepExecutionTimelineStateful = ({
   } = useWorkflowExecutionLogs({
     executionId,
     stepExecutionId,
-    limit: 100, // Get more logs without pagination
-    offset: 0,
+    size: 100, // Get more logs without pagination
+    page: 1,
     enabled: true,
     sortOrder: 'asc',
   });
@@ -75,7 +75,7 @@ export const StepExecutionTimelineStateful = ({
           error instanceof Error ? (
             <EuiText>{error.message}</EuiText>
           ) : (
-            <EuiText>Unknown error</EuiText>
+            <EuiText>{'Unknown error'}</EuiText>
           )
         }
       />

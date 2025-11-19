@@ -6,19 +6,17 @@
  */
 
 import React from 'react';
+import { IconIntegrations } from '../../../../../../common/icons/integrations';
 import type { IntegrationCardMetadata } from '../../../../../../common/lib/integrations/types';
 import type { OnboardingCardConfig } from '../../../../../types';
 import { OnboardingCardId } from '../../../../../constants';
 import { START_MIGRATION_INTEGRATIONS_CARD_TITLE } from './translations';
-import integrationsIcon from '../../common/integrations/images/integrations_icon.png';
-import integrationsDarkIcon from '../../common/integrations/images/integrations_icon_dark.png';
 import { checkIntegrationsCardComplete } from './integrations_check_complete';
 
 export const siemMigrationIntegrationsCardConfig: OnboardingCardConfig<IntegrationCardMetadata> = {
   id: OnboardingCardId.siemMigrationIntegrations,
   title: START_MIGRATION_INTEGRATIONS_CARD_TITLE,
-  icon: integrationsIcon,
-  iconDark: integrationsDarkIcon,
+  icon: IconIntegrations,
   Component: React.lazy(
     () =>
       import(

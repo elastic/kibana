@@ -132,11 +132,11 @@ const searchCommand: SearchCodeSnippetFunction = (
 ${createClientSnippet(args)}
 
 const index = '${args.indexName}';
-const query = ${JSON.stringify(args.queryObject, null, 2)};
+const body = ${JSON.stringify(args.queryObject, null, 2)};
 
 const result = await client.search({
   index,
-  query,
+  body,
 });
 
 console.log(result.hits.hits);`;

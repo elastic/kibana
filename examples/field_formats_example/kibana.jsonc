@@ -3,6 +3,8 @@
   "id": "@kbn/field-formats-example-plugin",
   "owner": "@elastic/kibana-data-discovery",
   "description": "A plugin that demonstrates field formats usage",
+  "group": "platform",
+  "visibility": "private",
   "plugin": {
     "id": "fieldFormatsExample",
     "server": true,

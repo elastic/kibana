@@ -7,6 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+/* eslint-disable no-console */
+
+/* eslint-disable no-var */
+
 import type {
   ActorRefLike,
   AnyActorRef,
@@ -17,13 +21,47 @@ import type {
 } from 'xstate5';
 import { isDevMode } from './dev_tools';
 
+declare global {
+  var __XSTATE_LOGGER_ENABLED__: boolean;
+  var toggleXstateInspector: () => void;
+}
+
+let isHelpMessageLogged = false;
+const setupDevToolsInspector = () => {
+  if (!isHelpMessageLogged) {
+    console.info(
+      `ℹ️ To toggle the XState inspector, for advanced debugging, run toggleXstateInspector() on your browser console.`
+    );
+    isHelpMessageLogged = true;
+
+    const isEnabled = localStorage.getItem('__XSTATE_LOGGER_ENABLED__') === 'true';
+
+    globalThis.__XSTATE_LOGGER_ENABLED__ = isEnabled;
+    globalThis.toggleXstateInspector = toggleXstateInspector;
+  }
+};
+
+const toggleXstateInspector = () => {
+  globalThis.__XSTATE_LOGGER_ENABLED__ = !globalThis.__XSTATE_LOGGER_ENABLED__;
+  localStorage.setItem(
+    '__XSTATE_LOGGER_ENABLED__',
+    globalThis.__XSTATE_LOGGER_ENABLED__.toString()
+  );
+
+  console.info(
+    `ℹ️ XState inspector ${globalThis.__XSTATE_LOGGER_ENABLED__ ? 'enabled' : 'disabled'}`
+  );
+};
+
 export const createConsoleInspector = () => {
   if (!isDevMode()) {
     return () => {};
   }
 
-  // eslint-disable-next-line no-console
-  const log = console.info.bind(console);
+  setupDevToolsInspector();
+
+  const log = (...args: Parameters<typeof console.info>) =>
+    globalThis.__XSTATE_LOGGER_ENABLED__ ? console.info(...args) : undefined;
 
   const logActorEvent = (actorEvent: InspectedActorEvent) => {
     if (isActorRef(actorEvent.actorRef)) {

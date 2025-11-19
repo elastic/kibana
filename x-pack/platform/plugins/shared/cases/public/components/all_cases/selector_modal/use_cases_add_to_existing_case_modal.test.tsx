@@ -16,16 +16,20 @@ import { allCasesPermissions, renderWithTestingProviders } from '../../../common
 import { useCasesToast } from '../../../common/use_cases_toast';
 import { alertComment } from '../../../containers/mock';
 import { useCreateAttachments } from '../../../containers/use_create_attachments';
+import { useBulkPostObservables } from '../../../containers/use_bulk_post_observables';
 import { CasesContext } from '../../cases_context';
 import { CasesContextStoreActionsList } from '../../cases_context/state/cases_context_reducer';
 import { ExternalReferenceAttachmentTypeRegistry } from '../../../client/attachment_framework/external_reference_registry';
 import type { AddToExistingCaseModalProps } from './use_cases_add_to_existing_case_modal';
 import { useCasesAddToExistingCaseModal } from './use_cases_add_to_existing_case_modal';
 import { PersistableStateAttachmentTypeRegistry } from '../../../client/attachment_framework/persistable_state_registry';
+import { useAttachEventsEBT } from '../../../analytics/use_attach_events_ebt';
 
+jest.mock('../../../analytics/use_attach_events_ebt');
 jest.mock('../../../common/use_cases_toast');
 jest.mock('../../../common/lib/kibana/use_application');
 jest.mock('../../../containers/use_create_attachments');
+jest.mock('../../../containers/use_bulk_post_observables');
 // dummy mock, will call onRowclick when rendering
 jest.mock('./all_cases_selector_modal', () => {
   return {
@@ -52,12 +56,17 @@ const TestComponent: React.FC<AddToExistingCaseModalProps> = (
 };
 
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
+const useBulkPostObservablesMock = useBulkPostObservables as jest.Mock;
 
 const externalReferenceAttachmentTypeRegistry = new ExternalReferenceAttachmentTypeRegistry();
 const persistableStateAttachmentTypeRegistry = new PersistableStateAttachmentTypeRegistry();
 
 describe('use cases add to existing case modal hook', () => {
   useCreateAttachmentsMock.mockReturnValue({
+    mutateAsync: jest.fn(),
+  });
+
+  useBulkPostObservablesMock.mockReturnValue({
     mutateAsync: jest.fn(),
   });
 
@@ -76,7 +85,7 @@ describe('use cases add to existing case modal hook', () => {
           features: {
             alerts: { sync: true, enabled: true, isExperimental: false },
             metrics: [],
-            observables: { enabled: true },
+            observables: { enabled: true, autoExtract: true },
             events: { enabled: true },
           },
           releasePhase: 'ga',
@@ -232,6 +241,8 @@ describe('use cases add to existing case modal hook', () => {
       attachments: [alertComment],
     });
     expect(mockedToastSuccess).toHaveBeenCalled();
+
+    expect(jest.mocked(useAttachEventsEBT())).toHaveBeenCalled();
   });
 
   it('should call onSuccess when defined', async () => {

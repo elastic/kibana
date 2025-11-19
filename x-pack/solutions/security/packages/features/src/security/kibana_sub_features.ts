@@ -142,8 +142,7 @@ export const trustedDevicesSubFeature = (): SubFeatureConfig => ({
   description: i18n.translate(
     'securitySolutionPackages.features.featureRegistry.subFeatures.trustedDevices.description',
     {
-      defaultMessage:
-        'Allows management of trusted USB and external devices that bypass device control protections.',
+      defaultMessage: 'Manage security exceptions for USB and external devices.',
     }
   ),
   privilegeGroups: [
@@ -725,19 +724,10 @@ export const globalArtifactManagementSubFeature = (
     { defaultMessage: 'Global Artifact Management' }
   );
 
-  const COMING_SOON = i18n.translate(
-    'securitySolutionPackages.features.featureRegistry.subFeatures.globalArtifactManagement.comingSoon',
-    { defaultMessage: '(coming soon)' }
-  );
-
-  const name = experimentalFeatures.endpointManagementSpaceAwarenessEnabled
-    ? GLOBAL_ARTIFACT_MANAGEMENT
-    : `${GLOBAL_ARTIFACT_MANAGEMENT} ${COMING_SOON}`;
-
   return {
     requireAllSpaces: false,
     privilegesTooltip: undefined,
-    name,
+    name: GLOBAL_ARTIFACT_MANAGEMENT,
     description: i18n.translate(
       'securitySolutionPackages.features.featureRegistry.subFeatures.globalArtifactManagement.description',
       {
@@ -767,3 +757,37 @@ export const globalArtifactManagementSubFeature = (
     ],
   };
 };
+
+export const socManagementSubFeature = (): SubFeatureConfig => ({
+  requireAllSpaces: false,
+  privilegesTooltip: undefined,
+  name: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.socManagement',
+    { defaultMessage: 'SOC Management' }
+  ),
+  description: i18n.translate(
+    'securitySolutionPackages.features.featureRegistry.subFeatures.socManagement.description',
+    {
+      defaultMessage:
+        'Access to SOC management capabilities including AI value reporting and analytics.',
+    }
+  ),
+  privilegeGroups: [
+    {
+      groupType: 'mutually_exclusive',
+      privileges: [
+        {
+          api: [`${APP_ID}-socManagement`],
+          id: 'soc_management_all',
+          includeIn: 'none',
+          name: TRANSLATIONS.all,
+          savedObject: {
+            all: [],
+            read: [],
+          },
+          ui: ['socManagement'],
+        },
+      ],
+    },
+  ],
+});

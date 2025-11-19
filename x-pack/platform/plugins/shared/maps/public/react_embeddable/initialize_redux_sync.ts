@@ -149,26 +149,19 @@ export function initializeReduxSync({
 
   const filters$ = new BehaviorSubject<Filter[] | undefined>(undefined);
   const query$ = new BehaviorSubject<AggregateQuery | Query | undefined>(undefined);
-  const mapStateJSON = savedMap.getAttributes().mapStateJSON;
-  if (mapStateJSON) {
-    try {
-      const mapState = JSON.parse(mapStateJSON);
-      if (mapState.filters) {
-        filters$.next(mapState.filters);
-      }
-      if (mapState.query) {
-        query$.next(mapState.query);
-      }
-      store.dispatch(
-        setEmbeddableSearchContext({
-          filters: mapState.filters,
-          query: mapState.query,
-        })
-      );
-    } catch (e) {
-      // ignore malformed mapStateJSON, not a critical error for viewing map - map will just use defaults
-    }
+  const { filters, query } = savedMap.getAttributes();
+  if (filters) {
+    filters$.next(filters);
   }
+  if (query) {
+    query$.next(query);
+  }
+  store.dispatch(
+    setEmbeddableSearchContext({
+      filters: filters ?? [],
+      query,
+    })
+  );
 
   let syncColorsSubscription: Subscription | undefined;
   let syncColorsSymbol: symbol | undefined;

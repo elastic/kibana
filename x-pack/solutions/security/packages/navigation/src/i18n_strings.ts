@@ -8,6 +8,16 @@
 import { i18n } from '@kbn/i18n';
 
 export const i18nStrings = {
+  alertDetections: {
+    title: i18n.translate('securitySolutionPackages.navLinks.alertDetections', {
+      defaultMessage: 'Detections',
+    }),
+    views: {
+      title: i18n.translate('securitySolutionPackages.navLinks.rules.views', {
+        defaultMessage: 'Views',
+      }),
+    },
+  },
   rules: {
     title: i18n.translate('securitySolutionPackages.navLinks.rules', {
       defaultMessage: 'Rules',
@@ -35,11 +45,6 @@ export const i18nStrings = {
     badgeTooltip: i18n.translate('securitySolutionPackages.navLinks.workflows.badgeTooltip', {
       defaultMessage:
         'This functionality is experimental and not supported. It may change or be removed at any time.',
-    }),
-  },
-  launchpad: {
-    title: i18n.translate('securitySolutionPackages.navLinks.launchpad', {
-      defaultMessage: 'Security launchpad',
     }),
   },
   assets: {
@@ -196,9 +201,6 @@ export const i18nStrings = {
       title: i18n.translate('securitySolutionPackages.navLinks.mngt.access', {
         defaultMessage: 'Access',
       }),
-      usersAndRoles: i18n.translate('securitySolutionPackages.navLinks.mngt.usersAndRoles', {
-        defaultMessage: 'Manage organization members',
-      }),
     },
     alertsAndInsights: {
       title: i18n.translate('securitySolutionPackages.navLinks.mngt.alertsAndInsights', {
@@ -249,8 +251,8 @@ export const i18nStrings = {
   // also used in sidenav v2
   // for serverless tiers (EASE (search_ai_lake|ai_soc_engine) | essential | complete)
   ingestAndManageData: {
-    title: i18n.translate('securitySolutionPackages.navLinks.ingestAndManageData', {
-      defaultMessage: 'Ingest and Manage Data',
+    title: i18n.translate('securitySolutionPackages.navLinks.dataManagement', {
+      defaultMessage: 'Data management',
     }),
     ingestAndIntegrations: {
       title: i18n.translate(
@@ -260,11 +262,11 @@ export const i18nStrings = {
         }
       ),
     },
-    indicesDsAndRollups: {
+    indicesAndDataStreams: {
       title: i18n.translate(
-        'securitySolutionPackages.navLinks.ingestAndManageData.indicesDsAndRollups',
+        'securitySolutionPackages.navLinks.ingestAndManageData.indicesAndDataStreams',
         {
-          defaultMessage: 'Indices, Data Streams, and roll ups',
+          defaultMessage: 'Indices and data streams',
         }
       ),
     },
@@ -276,6 +278,11 @@ export const i18nStrings = {
     title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.title', {
       defaultMessage: 'Stack Management',
     }),
+    home: {
+      title: i18n.translate('securitySolutionPackages.navLinks.stackManagement_v2.home', {
+        defaultMessage: 'Home',
+      }),
+    },
     serverlessTitle: i18n.translate(
       'securitySolutionPackages.navLinks.stackManagement_v2.serverlessTitle',
       { defaultMessage: 'Admin and Settings' }

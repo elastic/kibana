@@ -7,4 +7,4 @@
 
 export { createBuiltinToolRegistry, type BuiltinToolRegistry } from './builtin_registry';
 export { registerBuiltinTools } from './register_tools';
-export { createBuiltInToolSource } from './builtin_provider';
+export { createBuiltinProviderFn } from './builtin_provider';

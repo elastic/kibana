@@ -23,21 +23,18 @@ import {
 import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, EMPTY, from, merge, of, Subscription, timer } from 'rxjs';
 import type {
-  FeatureFlagsStart,
   PluginInitializerContext,
   StartServicesAccessor,
   ToastsStart as ToastService,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import type { ISearchOptions } from '@kbn/search-types';
+import type { IKibanaSearchResponse, ISearchOptions } from '@kbn/search-types';
+import { LRUCache } from 'lru-cache';
+import type { Logger } from '@kbn/logging';
 import type { SearchUsageCollector } from '../..';
 import type { ConfigSchema } from '../../../server/config';
-import type {
-  SessionMeta,
-  SessionStateContainer,
-  SessionStateInternal,
-} from './search_session_state';
+import type { SessionMeta, SessionStateContainer } from './search_session_state';
 import {
   createSessionStateContainer,
   SearchSessionState,
@@ -45,14 +42,25 @@ import {
 } from './search_session_state';
 import type { ISessionsClient } from './sessions_client';
 import type { NowProviderInternalContract } from '../../now_provider';
-import { BACKGROUND_SEARCH_FEATURE_FLAG_KEY, SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
+import { SEARCH_SESSIONS_MANAGEMENT_ID } from './constants';
 import { formatSessionName } from './lib/session_name_formatter';
+import type { ISearchSessionEBTManager } from './ebt_manager';
 
 /**
  * Polling interval for keeping completed searches alive
  * until the user saves the session
  */
 const KEEP_ALIVE_COMPLETED_SEARCHES_INTERVAL = 30000;
+
+/**
+ * To prevent the session ids map from growing indefinitely we can use an LRU cache - we will limit it to 30 sessions for
+ * now given that there can be 25 tabs opened at the same time (see src/platform/packages/shared/kbn-unified-tabs/src/constants.ts)
+ * and we want to make room for the other apps that may use background search.
+ */
+const LRU_OPTIONS = {
+  max: 30,
+  ttl: 1000 * 60 * 60, // 1 hour TTL
+};
 
 export type ISessionService = PublicContract<SessionService>;
 
@@ -63,9 +71,11 @@ interface TrackSearchDescriptor {
   abort: () => void;
 
   /**
-   * Keep polling the search to keep it alive
+   * Used for polling after running in background (to ensure the search makes it into the background search saved
+   * object) and also to keep the search alive while other search requests in the session are still in progress
+   * @param abortSignal - signal that can be used to cancel the polling - otherwise the `searchAbortController.getSignal()` is used
    */
-  poll: () => Promise<void>;
+  poll: (abortSignal?: AbortSignal) => Promise<void>;
 
   /**
    * Notify search that session is being saved, could be used to restart the search with different params
@@ -95,12 +105,12 @@ interface TrackSearchHandler {
   /**
    * Transition search into "complete" status
    */
-  complete(): void;
+  complete(response?: IKibanaSearchResponse): void;
 
   /**
    * Transition search into "error" status
    */
-  error(): void;
+  error(error?: Error): void;
 
   /**
    * Call to notify when search is about to be polled to get current search state to build `searchOptions` from (mainly isSearchStored),
@@ -115,7 +125,7 @@ interface TrackSearchHandler {
 /**
  * Represents a search session state in {@link SessionService} in any given moment of time
  */
-export type SessionSnapshot = SessionStateInternal<TrackSearchDescriptor>;
+export type SessionSnapshot = SessionStateContainer<TrackSearchDescriptor, TrackSearchMeta>;
 
 /**
  * Provide info about current search session to be stored in the Search Session saved object
@@ -141,7 +151,7 @@ export interface SearchSessionInfoProvider<P extends SerializableRecord = Serial
 }
 
 /**
- * Configure a "Search session indicator" UI
+ * Configure a "Background search indicator" UI
  */
 interface SearchSessionIndicatorUiConfig {
   /**
@@ -184,20 +194,17 @@ export class SessionService {
   private subscription = new Subscription();
   private currentApp?: string;
   private hasAccessToSearchSessions: boolean = false;
-  private featureFlags?: FeatureFlagsStart;
 
   private toastService?: ToastService;
+  private searchSessionEBTManager?: ISearchSessionEBTManager;
 
-  /**
-   * Holds snapshot of last cleared session so that it can be continued
-   * Can be used to re-use a session between apps
-   * @internal
-   */
-  private lastSessionSnapshot?: SessionSnapshot;
+  private sessionSnapshots: LRUCache<string, SessionSnapshot>;
+  private logger: Logger;
 
   constructor(
     initializerContext: PluginInitializerContext<ConfigSchema>,
     getStartServices: StartServicesAccessor,
+    searchSessionEBTManager: ISearchSessionEBTManager,
     private readonly sessionsClient: ISessionsClient,
     private readonly nowProvider: NowProviderInternalContract,
     private readonly usageCollector?: SearchUsageCollector,
@@ -212,6 +219,10 @@ export class SessionService {
     this.state$ = sessionState$;
     this.state = stateContainer;
     this.sessionMeta$ = sessionMeta$;
+    this.searchSessionEBTManager = searchSessionEBTManager;
+
+    this.sessionSnapshots = new LRUCache<string, SessionSnapshot>(LRU_OPTIONS);
+    this.logger = initializerContext.logger.get();
 
     this.disableSaveAfterSearchesExpire$ = combineLatest([
       this._disableSaveAfterSearchesExpire$,
@@ -257,8 +268,6 @@ export class SessionService {
     );
 
     getStartServices().then(([coreStart]) => {
-      this.featureFlags = coreStart.featureFlags;
-
       // using management?.kibana? we infer if any of the apps allows current user to store sessions
       this.hasAccessToSearchSessions =
         coreStart.application.capabilities.management?.kibana?.[SEARCH_SESSIONS_MANAGEMENT_ID];
@@ -352,6 +361,8 @@ export class SessionService {
    * @returns {@link TrackSearchHandler}
    */
   public trackSearch(searchDescriptor: TrackSearchDescriptor): TrackSearchHandler {
+    const sessionId = this.getSessionId();
+
     this.state.transitions.trackSearch(searchDescriptor, {
       lastPollingTime: new Date(),
       isStored: false,
@@ -359,12 +370,22 @@ export class SessionService {
 
     return {
       complete: () => {
-        this.state.transitions.completeSearch(searchDescriptor);
+        const state = this.isCurrentSession(sessionId)
+          ? this.state
+          : this.sessionSnapshots.get(sessionId!);
+        if (!state) {
+          this.logger.error(
+            `SearchSessionService trackSearch complete: sessionId not found: "${sessionId}"`
+          );
+          return;
+        }
+
+        state.transitions.completeSearch(searchDescriptor);
 
         // when search completes and session has just been saved,
         // trigger polling once again to save search into a session and extend its keep_alive
-        if (this.isStored()) {
-          const search = this.state.selectors.getSearch(searchDescriptor);
+        if (this.isStored(state)) {
+          const search = state.selectors.getSearch(searchDescriptor);
           if (search && !search.searchMeta.isStored) {
             search.searchDescriptor.poll().catch((e) => {
               // eslint-disable-next-line no-console
@@ -374,18 +395,32 @@ export class SessionService {
         }
       },
       error: () => {
-        this.state.transitions.errorSearch(searchDescriptor);
+        const state = this.isCurrentSession(sessionId)
+          ? this.state
+          : this.sessionSnapshots.get(sessionId!);
+        if (!state) {
+          this.logger.error(
+            `SearchSessionService trackSearch error: sessionId not found: "${sessionId}"`
+          );
+          return;
+        }
+
+        state.transitions.errorSearch(searchDescriptor);
       },
       beforePoll: () => {
-        const search = this.state.selectors.getSearch(searchDescriptor);
-        this.state.transitions.updateSearchMeta(searchDescriptor, {
+        const state = this.isCurrentSession(sessionId)
+          ? this.state
+          : this.sessionSnapshots.get(sessionId!);
+
+        const search = state?.selectors.getSearch(searchDescriptor);
+        state?.transitions.updateSearchMeta(searchDescriptor, {
           lastPollingTime: new Date(),
         });
 
         return [
           { isSearchStored: search?.searchMeta?.isStored ?? false },
           ({ isSearchStored }) => {
-            this.state.transitions.updateSearchMeta(searchDescriptor, {
+            state?.transitions.updateSearchMeta(searchDescriptor, {
               isStored: isSearchStored,
             });
           },
@@ -397,7 +432,7 @@ export class SessionService {
   public destroy() {
     this.subscription.unsubscribe();
     this.clear();
-    this.lastSessionSnapshot = undefined;
+    this.sessionSnapshots = new LRUCache<string, SessionSnapshot>(LRU_OPTIONS);
   }
 
   /**
@@ -419,17 +454,30 @@ export class SessionService {
   }
 
   /**
+   * Is current session in process of saving
+   */
+  public isSaving(
+    state: SessionStateContainer<TrackSearchDescriptor, TrackSearchMeta> = this.state
+  ) {
+    return state.get().isSaving;
+  }
+
+  /**
    * Is current session already saved as SO (send to background)
    */
-  public isStored() {
-    return this.state.get().isStored;
+  public isStored(
+    state: SessionStateContainer<TrackSearchDescriptor, TrackSearchMeta> = this.state
+  ) {
+    return state.get().isStored;
   }
 
   /**
    * Is restoring the older saved searches
    */
-  public isRestore() {
-    return this.state.get().isRestore;
+  public isRestore(
+    state: SessionStateContainer<TrackSearchDescriptor, TrackSearchMeta> = this.state
+  ) {
+    return state.get().isRestore;
   }
 
   /**
@@ -438,6 +486,8 @@ export class SessionService {
    */
   public start() {
     if (!this.currentApp) throw new Error('this.currentApp is missing');
+
+    this.storeSessionSnapshot();
 
     this.state.transitions.start({ appName: this.currentApp });
 
@@ -448,43 +498,60 @@ export class SessionService {
    * Restore previously saved search session
    * @param sessionId
    */
-  public restore(sessionId: string) {
+  public async restore(sessionId: string) {
+    this.storeSessionSnapshot();
     this.state.transitions.restore(sessionId);
-    this.refreshSearchSessionSavedObject();
+    await this.refreshSearchSessionSavedObject();
   }
 
   /**
    * Continue previous search session
-   * Can be used to share a running search session between different apps, so they can reuse search cache
+   * Can be used to restore all the information of a previous search session after a new one has been started. It is useful
+   * to continue a session in different apps or across different discover tabs.
    *
    * This is different from {@link restore} as it reuses search session state and search results held in client memory instead of restoring search results from elasticsearch
    * @param sessionId
-   *
-   * TODO: remove this functionality in favor of separate architecture for client side search cache
-   * that won't interfere with saving search sessions
-   * https://github.com/elastic/kibana/issues/121543
-   *
-   * @deprecated
+   * @param keepSearches indicates if restoring the session also restores the tracked searches or starts with an empty tracking list
    */
-  public continue(sessionId: string) {
-    if (this.lastSessionSnapshot?.sessionId === sessionId) {
+  public continue(sessionId: string, keepSearches = false) {
+    const sessionSnapshot = this.sessionSnapshots.get(sessionId);
+    if (sessionSnapshot) {
+      this.storeSessionSnapshot();
       this.state.set({
-        ...this.lastSessionSnapshot,
+        ...sessionSnapshot.get(),
         // have to change a name, so that current app can cancel a session that it continues
         appName: this.currentApp,
         // also have to drop all pending searches which are used to derive client side state of search session indicator,
         // if we weren't dropping this searches, then we would get into "infinite loading" state when continuing a session that was cleared with pending searches
         // possible solution to this problem is to refactor session service to support multiple sessions
-        trackedSearches: [],
+        trackedSearches: keepSearches ? sessionSnapshot.get().trackedSearches : [],
         isContinued: true,
       });
-      this.lastSessionSnapshot = undefined;
+      this.sessionSnapshots.delete(sessionId);
     } else {
       // eslint-disable-next-line no-console
-      console.warn(
-        `Continue search session: last known search session id: "${this.lastSessionSnapshot?.sessionId}", but received ${sessionId}`
-      );
+      console.warn(`Unknown ${sessionId} search session id recevied`);
     }
+  }
+
+  /**
+   * Resets the current search session state.
+   * Can be used to reset to a default state without clearing initialization info, such as when switching between discover tabs.
+   *
+   * This is different from {@link clear} as it does not reset initialization info set through {@link enableStorage}.
+   */
+  public reset() {
+    this.storeSessionSnapshot();
+    this.state.transitions.clear();
+  }
+
+  private storeSessionSnapshot() {
+    if (!this.getSessionId()) return;
+    const currentState = createSessionStateContainer<TrackSearchDescriptor, TrackSearchMeta>({
+      freeze: false,
+    });
+    currentState.stateContainer.set(this.state.get());
+    this.sessionSnapshots.set(this.getSessionId()!, currentState.stateContainer);
   }
 
   /**
@@ -503,9 +570,7 @@ export class SessionService {
       return;
     }
 
-    if (this.getSessionId()) {
-      this.lastSessionSnapshot = this.state.get();
-    }
+    this.storeSessionSnapshot();
     this.state.transitions.clear();
     this.searchSessionInfoProvider = undefined;
     this.searchSessionIndicatorUiConfig = undefined;
@@ -514,16 +579,23 @@ export class SessionService {
   /**
    * Request a cancellation of on-going search requests within current session
    */
-  public async cancel(): Promise<void> {
+  public async cancel({ source }: { source: string }): Promise<void> {
     const isStoredSession = this.isStored();
-    this.state
-      .get()
-      .trackedSearches.filter((s) => s.state === TrackedSearchState.InProgress)
+    const state = this.state.get();
+    state.trackedSearches
+      .filter((s) => s.state === TrackedSearchState.InProgress)
       .forEach((s) => {
         s.searchDescriptor.abort();
       });
     this.state.transitions.cancel();
     if (isStoredSession) {
+      const searchSessionSavedObject = state.searchSessionSavedObject;
+      if (searchSessionSavedObject) {
+        this.searchSessionEBTManager?.trackBgsCancelled({
+          session: searchSessionSavedObject,
+          cancelSource: source,
+        });
+      }
       await this.sessionsClient.delete(this.state.get().sessionId!);
     }
   }
@@ -532,7 +604,7 @@ export class SessionService {
    * Save current session as SO to get back to results later
    * (Send to background)
    */
-  public async save() {
+  public async save(trackingProps: { entryPoint: string }) {
     const sessionId = this.getSessionId();
     if (!sessionId) throw new Error('No current session');
     const currentSessionApp = this.state.get().appName;
@@ -540,6 +612,7 @@ export class SessionService {
     if (!this.hasAccess()) throw new Error('No access to search sessions');
     const currentSessionInfoProvider = this.searchSessionInfoProvider;
     if (!currentSessionInfoProvider) throw new Error('No info provider for current session');
+
     const [name, { initialState, restoreState, id: locatorId }] = await Promise.all([
       currentSessionInfoProvider.getName(),
       currentSessionInfoProvider.getLocatorData(),
@@ -550,6 +623,8 @@ export class SessionService {
       appendStartTime: currentSessionInfoProvider.appendSessionStartTimeToName,
     });
 
+    this.state.transitions.save();
+
     const searchSessionSavedObject = await this.sessionsClient.create({
       name: formattedName,
       appId: currentSessionApp,
@@ -557,6 +632,11 @@ export class SessionService {
       restoreState,
       initialState,
       sessionId,
+    });
+
+    this.searchSessionEBTManager?.trackBgsStarted({
+      session: searchSessionSavedObject,
+      ...trackingProps,
     });
 
     // if we are still interested in this result
@@ -572,7 +652,7 @@ export class SessionService {
 
       const extendSearchesPromise = Promise.all(
         searchesToExtend.map((s) =>
-          s.searchDescriptor.poll().catch((e) => {
+          s.searchDescriptor.poll(new AbortController().signal).catch((e) => {
             // eslint-disable-next-line no-console
             console.warn('Failed to extend search after session was saved', e);
           })
@@ -614,19 +694,13 @@ export class SessionService {
         await this.sessionsClient.rename(sessionId, newName);
         renamed = true;
       } catch (e) {
-        const hasBackgroundSearchEnabled = this.featureFlags?.getBooleanValue(
-          BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
-          false
-        );
-
         this.toastService?.addError(e, {
-          title: hasBackgroundSearchEnabled
-            ? i18n.translate('data.searchSessions.sessionService.backgroundSearchEditNameError', {
-                defaultMessage: 'Failed to edit name of the background search',
-              })
-            : i18n.translate('data.searchSessions.sessionService.sessionEditNameError', {
-                defaultMessage: 'Failed to edit name of the search session',
-              }),
+          title: i18n.translate(
+            'data.searchSessions.sessionService.backgroundSearchEditNameError',
+            {
+              defaultMessage: 'Failed to edit name of the background search',
+            }
+          ),
         });
       }
 
@@ -665,11 +739,14 @@ export class SessionService {
       return null;
     }
 
-    const isCurrentSession = this.isCurrentSession(sessionId);
+    const state = this.isCurrentSession(sessionId)
+      ? this.state
+      : this.sessionSnapshots.get(sessionId);
+
     return {
       sessionId,
-      isRestore: isCurrentSession ? this.isRestore() : false,
-      isStored: isCurrentSession ? this.isStored() : false,
+      isRestore: state ? this.isRestore(state) : false,
+      isStored: state ? this.isStored(state) : false,
     };
   }
 
@@ -715,23 +792,15 @@ export class SessionService {
           // still interested in this result
           this.state.transitions.setSearchSessionSavedObject(savedObject);
         }
+        return savedObject;
       } catch (e) {
-        const hasBackgroundSearchEnabled = this.featureFlags?.getBooleanValue(
-          BACKGROUND_SEARCH_FEATURE_FLAG_KEY,
-          false
-        );
-
         this.toastService?.addError(e, {
-          title: hasBackgroundSearchEnabled
-            ? i18n.translate(
-                'data.searchSessions.sessionService.backgroundSearchObjectFetchError',
-                {
-                  defaultMessage: 'Failed to fetch background search info',
-                }
-              )
-            : i18n.translate('data.searchSessions.sessionService.sessionObjectFetchError', {
-                defaultMessage: 'Failed to fetch search session info',
-              }),
+          title: i18n.translate(
+            'data.searchSessions.sessionService.backgroundSearchObjectFetchError',
+            {
+              defaultMessage: 'Failed to fetch background search info',
+            }
+          ),
         });
       }
     }

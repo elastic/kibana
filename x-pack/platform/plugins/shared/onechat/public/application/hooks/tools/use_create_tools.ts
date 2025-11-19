@@ -6,8 +6,8 @@
  */
 
 import { formatOnechatErrorMessage } from '@kbn/onechat-browser';
-import type { UseMutationOptions } from '@tanstack/react-query';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import type { UseMutationOptions } from '@kbn/react-query';
+import { useMutation, useQueryClient } from '@kbn/react-query';
 import { produce } from 'immer';
 import { useCallback, useMemo } from 'react';
 import type { CreateToolPayload, CreateToolResponse } from '../../../../common/http_api/tools';

@@ -19,6 +19,7 @@ export interface UseCasesFeatures {
   pushToServiceAuthorized: boolean;
   metricsFeatures: SingleCaseMetricsFeature[];
   isObservablesFeatureEnabled: boolean;
+  isExtractObservablesEnabled: boolean;
 }
 
 export const useCasesFeatures = (): UseCasesFeatures => {
@@ -47,7 +48,9 @@ export const useCasesFeatures = (): UseCasesFeatures => {
       pushToServiceAuthorized: hasLicenseGreaterThanPlatinum,
       observablesAuthorized: hasLicenseGreaterThanPlatinum,
       connectorsAuthorized: hasLicenseWithAtLeastGold,
-      isObservablesFeatureEnabled: features.observables.enabled,
+      isObservablesFeatureEnabled: !!features.observables.enabled,
+      isExtractObservablesEnabled:
+        !!features.observables.enabled && !!features.observables.autoExtract,
     }),
     [
       features.alerts.enabled,
@@ -56,6 +59,7 @@ export const useCasesFeatures = (): UseCasesFeatures => {
       hasLicenseGreaterThanPlatinum,
       assign,
       features.observables?.enabled,
+      features.observables?.autoExtract,
       hasLicenseWithAtLeastGold,
     ]
   );

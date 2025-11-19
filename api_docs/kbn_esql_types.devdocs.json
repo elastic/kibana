@@ -98,6 +98,45 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.controlHasVariableName",
+        "type": "Function",
+        "tags": [],
+        "label": "controlHasVariableName",
+        "description": [
+          "\nType guard to check if a control state object has a variable name property."
+        ],
+        "signature": [
+          "(controlState: unknown) => controlState is HasVariableName"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.controlHasVariableName.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "controlState",
+            "description": [
+              "- The control state object to check"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "True if the control state has a defined variableName property"
+        ],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [
@@ -142,6 +181,20 @@
                 "text": "ControlWidthOptions"
               },
               " | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.ESQLControlState.singleSelect",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "singleSelect",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
             "deprecated": false,
@@ -281,7 +334,7 @@
             "label": "value",
             "description": [],
             "signature": [
-              "string | number"
+              "string | number | (string | number)[]"
             ],
             "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
             "deprecated": false,
@@ -384,6 +437,84 @@
             "path": "src/platform/packages/shared/kbn-esql-types/src/sources_autocomplete_types.ts",
             "deprecated": false,
             "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.ESQLTelemetryCallbacks",
+        "type": "Interface",
+        "tags": [],
+        "label": "ESQLTelemetryCallbacks",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/esql_telemetry_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.ESQLTelemetryCallbacks.onDecorationHoverShown",
+            "type": "Function",
+            "tags": [],
+            "label": "onDecorationHoverShown",
+            "description": [],
+            "signature": [
+              "((hoverMessage: string) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/esql_telemetry_types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-types",
+                "id": "def-common.ESQLTelemetryCallbacks.onDecorationHoverShown.$1",
+                "type": "string",
+                "tags": [],
+                "label": "hoverMessage",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-types/src/esql_telemetry_types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.ESQLTelemetryCallbacks.onSuggestionsWithCustomCommandShown",
+            "type": "Function",
+            "tags": [],
+            "label": "onSuggestionsWithCustomCommandShown",
+            "description": [],
+            "signature": [
+              "((commandNames: string[]) => void) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/esql_telemetry_types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/esql-types",
+                "id": "def-common.ESQLTelemetryCallbacks.onSuggestionsWithCustomCommandShown.$1",
+                "type": "Array",
+                "tags": [],
+                "label": "commandNames",
+                "description": [],
+                "signature": [
+                  "string[]"
+                ],
+                "path": "src/platform/packages/shared/kbn-esql-types/src/esql_telemetry_types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -1444,9 +1575,66 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.TelemetryQuerySubmittedProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "TelemetryQuerySubmittedProps",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/esql_telemetry_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.TelemetryQuerySubmittedProps.source",
+            "type": "Enum",
+            "tags": [],
+            "label": "source",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-types",
+                "scope": "common",
+                "docId": "kibKbnEsqlTypesPluginApi",
+                "section": "def-common.QuerySource",
+                "text": "QuerySource"
+              }
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/esql_telemetry_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-types",
+            "id": "def-common.TelemetryQuerySubmittedProps.query",
+            "type": "string",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "path": "src/platform/packages/shared/kbn-esql-types/src/esql_telemetry_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [
+      {
+        "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.ControlTriggerSource",
+        "type": "Enum",
+        "tags": [],
+        "label": "ControlTriggerSource",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/esql_telemetry_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/esql-types",
         "id": "def-common.EsqlControlType",
@@ -1469,6 +1657,30 @@
         "label": "ESQLVariableType",
         "description": [],
         "path": "src/platform/packages/shared/kbn-esql-types/src/variables_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.QuerySource",
+        "type": "Enum",
+        "tags": [],
+        "label": "QuerySource",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/esql_telemetry_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.SOURCES_TYPES",
+        "type": "Enum",
+        "tags": [],
+        "label": "SOURCES_TYPES",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1511,6 +1723,48 @@
         "description": [],
         "signature": [
           "\"/internal/esql_registry/extensions/\""
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.SOURCES_AUTOCOMPLETE_ROUTE",
+        "type": "string",
+        "tags": [],
+        "label": "SOURCES_AUTOCOMPLETE_ROUTE",
+        "description": [],
+        "signature": [
+          "\"/internal/esql/autocomplete/sources/\""
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.TelemetryControlCancelledReason",
+        "type": "string",
+        "tags": [],
+        "label": "TelemetryControlCancelledReason",
+        "description": [],
+        "path": "src/platform/packages/shared/kbn-esql-types/src/esql_telemetry_types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-types",
+        "id": "def-common.TIMEFIELD_ROUTE",
+        "type": "string",
+        "tags": [],
+        "label": "TIMEFIELD_ROUTE",
+        "description": [],
+        "signature": [
+          "\"/internal/esql/get_timefield/\""
         ],
         "path": "src/platform/packages/shared/kbn-esql-types/src/constants.ts",
         "deprecated": false,

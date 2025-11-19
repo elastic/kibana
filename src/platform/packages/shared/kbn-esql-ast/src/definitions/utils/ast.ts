@@ -10,13 +10,12 @@
 import { EDITOR_MARKER } from '../constants';
 import { isColumn, isIdentifier, isList, isOptionNode, isSource } from '../../ast/is';
 import type {
-  ESQLAst,
   ESQLFunction,
   ESQLSingleAstItem,
   ESQLAstExpression,
-  ESQLCommand,
   ESQLAstItem,
   ESQLCommandOption,
+  ESQLAstAllCommands,
 } from '../../types';
 import { Walker } from '../../..';
 
@@ -32,7 +31,7 @@ export function isMarkerNode(node: ESQLAstItem | undefined): boolean {
   );
 }
 
-function findCommand(ast: ESQLAst, offset: number) {
+function findCommand(ast: ESQLAstAllCommands[], offset: number) {
   const commandIndex = ast.findIndex(
     ({ location }) => location.min <= offset && location.max >= offset
   );
@@ -58,7 +57,7 @@ const removeMarkerNode = (node: ESQLAstExpression) => {
   });
 };
 
-export function removeMarkerArgFromArgsList<T extends ESQLSingleAstItem | ESQLCommand>(
+export function removeMarkerArgFromArgsList<T extends ESQLSingleAstItem | ESQLAstAllCommands>(
   node: T | undefined
 ) {
   if (!node) {
@@ -102,7 +101,7 @@ function findCommandSubType<T extends ESQLCommandOption>(
   }
 }
 
-export function findAstPosition(ast: ESQLAst, offset: number) {
+export function findAstPosition(ast: ESQLAstAllCommands[], offset: number) {
   const command = findCommand(ast, offset);
   if (!command) {
     return { command: undefined, node: undefined };

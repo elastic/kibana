@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { ChatCompletionMessage } from 'openai/resources/chat/completions';
 
-export function toolCallMock(
+export function createToolCallMessage(
   toolName: string,
   toolArg: Record<string, any>
 ): Omit<ChatCompletionMessage, 'refusal'> {

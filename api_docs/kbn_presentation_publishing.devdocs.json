@@ -792,6 +792,46 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.apiPublishesPauseFetch",
+        "type": "Function",
+        "tags": [],
+        "label": "apiPublishesPauseFetch",
+        "description": [],
+        "signature": [
+          "(unknownApi: unknown) => unknownApi is ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.PublishesPauseFetch",
+            "text": "PublishesPauseFetch"
+          }
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_pause_fetch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.apiPublishesPauseFetch.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "unknownApi",
+            "description": [],
+            "signature": [
+              "unknown"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_pause_fetch.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-public.apiPublishesPhaseEvents",
         "type": "Function",
         "tags": [],
@@ -1557,7 +1597,7 @@
             "section": "def-public.StateComparators",
             "text": "StateComparators"
           },
-          "<StateType>, lastSavedState?: StateType | undefined, latestState?: StateType | undefined) => Partial<StateType>"
+          "<StateType>, lastSavedState?: Partial<StateType> | undefined, latestState?: Partial<StateType> | undefined, defaultState?: Partial<StateType> | undefined) => Partial<StateType>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
         "deprecated": false,
@@ -1588,12 +1628,12 @@
           {
             "parentPluginId": "@kbn/presentation-publishing",
             "id": "def-public.diffComparators.$2",
-            "type": "Uncategorized",
+            "type": "Object",
             "tags": [],
             "label": "lastSavedState",
             "description": [],
             "signature": [
-              "StateType | undefined"
+              "Partial<StateType> | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
             "deprecated": false,
@@ -1603,12 +1643,27 @@
           {
             "parentPluginId": "@kbn/presentation-publishing",
             "id": "def-public.diffComparators.$3",
-            "type": "Uncategorized",
+            "type": "Object",
             "tags": [],
             "label": "latestState",
             "description": [],
             "signature": [
-              "StateType | undefined"
+              "Partial<StateType> | undefined"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.diffComparators.$4",
+            "type": "Object",
+            "tags": [],
+            "label": "defaultState",
+            "description": [],
+            "signature": [
+              "Partial<StateType> | undefined"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_comparators.ts",
             "deprecated": false,
@@ -2050,7 +2105,7 @@
           "\nInitializes a composable state manager instance for a given state type."
         ],
         "signature": [
-          "<StateType extends object>(initialState: StateType, defaultState: ",
+          "<StateType extends object>(initialState: Partial<StateType>, defaultState: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -2077,14 +2132,14 @@
           {
             "parentPluginId": "@kbn/presentation-publishing",
             "id": "def-public.initializeStateManager.$1",
-            "type": "Uncategorized",
+            "type": "Object",
             "tags": [],
             "label": "initialState",
             "description": [
               "- The initial state of the state manager."
             ],
             "signature": [
-              "StateType"
+              "Partial<StateType>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/state_manager/state_manager.ts",
             "deprecated": false,
@@ -2210,23 +2265,23 @@
         "signature": [
           "(initialTitlesState: ",
           {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedTitles",
-            "text": "SerializedTitles"
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
           },
-          ") => ",
+          "<Readonly<{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; } & {}>>) => ",
           "StateManager",
           "<",
           {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedTitles",
-            "text": "SerializedTitles"
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
           },
-          "> & { api: { hideTitle$: ",
+          "<Readonly<{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; } & {}>>> & { api: { hideTitle$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -2249,12 +2304,13 @@
             "description": [],
             "signature": [
               {
-                "pluginId": "@kbn/presentation-publishing",
-                "scope": "public",
-                "docId": "kibKbnPresentationPublishingPluginApi",
-                "section": "def-public.SerializedTitles",
-                "text": "SerializedTitles"
-              }
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.Writable",
+                "text": "Writable"
+              },
+              "<Readonly<{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; } & {}>>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
             "deprecated": false,
@@ -2505,12 +2561,13 @@
         "signature": [
           "(state: unknown) => state is ",
           {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.SerializedTitles",
-            "text": "SerializedTitles"
-          }
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.Writable",
+            "text": "Writable"
+          },
+          "<Readonly<{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; } & {}>>"
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
         "deprecated": false,
@@ -3451,7 +3508,7 @@
         "tags": [],
         "label": "FetchContext",
         "description": [],
-        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch_context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3462,7 +3519,7 @@
             "tags": [],
             "label": "isReload",
             "description": [],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3483,7 +3540,7 @@
               },
               "[] | undefined"
             ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3512,7 +3569,7 @@
               },
               " | undefined"
             ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3526,7 +3583,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3547,7 +3604,7 @@
               },
               " | undefined"
             ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch_context.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3561,7 +3618,7 @@
             "signature": [
               "[number, number] | undefined"
             ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch.ts",
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/fetch_context.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4731,7 +4788,7 @@
         "tags": [],
         "label": "PublishesDataViews",
         "description": [
-          "\nThis API publishes a list of data views that it uses. Note that this should not contain any\nad-hoc data views."
+          "\nThis API publishes a list of data views that it uses."
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/publishes_data_views.ts",
         "deprecated": false,
@@ -5909,6 +5966,35 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.PublishesPauseFetch",
+        "type": "Interface",
+        "tags": [],
+        "label": "PublishesPauseFetch",
+        "description": [],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_pause_fetch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/presentation-publishing",
+            "id": "def-public.PublishesPauseFetch.isFetchPaused$",
+            "type": "Object",
+            "tags": [],
+            "label": "isFetchPaused$",
+            "description": [],
+            "signature": [
+              "Observable",
+              "<boolean>"
+            ],
+            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_pause_fetch.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-public.PublishesPhaseEvents",
         "type": "Interface",
         "tags": [],
@@ -6304,153 +6390,8 @@
             "label": "reload$",
             "description": [],
             "signature": [
-              "{ source: ",
               "Observable",
-              "<any> | undefined; forEach: { (next: (value: void) => void): Promise<void>; (next: (value: void) => void, promiseCtor: PromiseConstructorLike): Promise<void>; }; pipe: { (): ",
-              "Observable",
-              "<void>; <A>(op1: ",
-              "OperatorFunction",
-              "<void, A>): ",
-              "Observable",
-              "<A>; <A, B>(op1: ",
-              "OperatorFunction",
-              "<void, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>): ",
-              "Observable",
-              "<B>; <A, B, C>(op1: ",
-              "OperatorFunction",
-              "<void, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>): ",
-              "Observable",
-              "<C>; <A, B, C, D>(op1: ",
-              "OperatorFunction",
-              "<void, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>): ",
-              "Observable",
-              "<D>; <A, B, C, D, E>(op1: ",
-              "OperatorFunction",
-              "<void, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>): ",
-              "Observable",
-              "<E>; <A, B, C, D, E, F>(op1: ",
-              "OperatorFunction",
-              "<void, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>): ",
-              "Observable",
-              "<F>; <A, B, C, D, E, F, G>(op1: ",
-              "OperatorFunction",
-              "<void, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>, op7: ",
-              "OperatorFunction",
-              "<F, G>): ",
-              "Observable",
-              "<G>; <A, B, C, D, E, F, G, H>(op1: ",
-              "OperatorFunction",
-              "<void, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>, op7: ",
-              "OperatorFunction",
-              "<F, G>, op8: ",
-              "OperatorFunction",
-              "<G, H>): ",
-              "Observable",
-              "<H>; <A, B, C, D, E, F, G, H, I>(op1: ",
-              "OperatorFunction",
-              "<void, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>, op7: ",
-              "OperatorFunction",
-              "<F, G>, op8: ",
-              "OperatorFunction",
-              "<G, H>, op9: ",
-              "OperatorFunction",
-              "<H, I>): ",
-              "Observable",
-              "<I>; <A, B, C, D, E, F, G, H, I>(op1: ",
-              "OperatorFunction",
-              "<void, A>, op2: ",
-              "OperatorFunction",
-              "<A, B>, op3: ",
-              "OperatorFunction",
-              "<B, C>, op4: ",
-              "OperatorFunction",
-              "<C, D>, op5: ",
-              "OperatorFunction",
-              "<D, E>, op6: ",
-              "OperatorFunction",
-              "<E, F>, op7: ",
-              "OperatorFunction",
-              "<F, G>, op8: ",
-              "OperatorFunction",
-              "<G, H>, op9: ",
-              "OperatorFunction",
-              "<H, I>, ...operations: ",
-              "OperatorFunction",
-              "<any, any>[]): ",
-              "Observable",
-              "<unknown>; }; lift: <R>(operator?: ",
-              "Operator",
-              "<void, R> | undefined) => ",
-              "Observable",
-              "<R>; operator: ",
-              "Operator",
-              "<any, void> | undefined; subscribe: { (observerOrNext?: Partial<",
-              "Observer",
-              "<void>> | ((value: void) => void) | undefined): ",
-              "Subscription",
-              "; (next?: ((value: void) => void) | null | undefined, error?: ((error: any) => void) | null | undefined, complete?: (() => void) | null | undefined): ",
-              "Subscription",
-              "; }; toPromise: { (): Promise<void | undefined>; (PromiseCtor: PromiseConstructor): Promise<void | undefined>; (PromiseCtor: PromiseConstructorLike): Promise<void | undefined>; }; }"
+              "<void>"
             ],
             "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/fetch/publishes_reload.ts",
             "deprecated": false,
@@ -8306,62 +8247,6 @@
       },
       {
         "parentPluginId": "@kbn/presentation-publishing",
-        "id": "def-public.SerializedTitles",
-        "type": "Interface",
-        "tags": [],
-        "label": "SerializedTitles",
-        "description": [],
-        "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-public.SerializedTitles.title",
-            "type": "string",
-            "tags": [],
-            "label": "title",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-public.SerializedTitles.description",
-            "type": "string",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "signature": [
-              "string | undefined"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/presentation-publishing",
-            "id": "def-public.SerializedTitles.hidePanelTitles",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hidePanelTitles",
-            "description": [],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/platform/packages/shared/presentation/presentation_publishing/interfaces/titles/title_manager.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/presentation-publishing",
         "id": "def-public.TitlesApi",
         "type": "Interface",
         "tags": [],
@@ -8949,6 +8834,21 @@
           "\"savedObjectRef\""
         ],
         "path": "src/platform/packages/shared/presentation/presentation_publishing/saved_object_ref.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/presentation-publishing",
+        "id": "def-public.SerializedTitles",
+        "type": "Type",
+        "tags": [],
+        "label": "SerializedTitles",
+        "description": [],
+        "signature": [
+          "{ title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; }"
+        ],
+        "path": "src/platform/packages/shared/presentation/presentation_publishing_schemas/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

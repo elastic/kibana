@@ -29,6 +29,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { difference, intersection, isEqual } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { memoize } from 'lodash';
 import { RowColumnCreator } from './row_column_creator';
 import { getColumnInputRenderer } from './grid_custom_renderers/column_input_renderer';
 import { type KibanaContextExtra } from '../types';
@@ -62,9 +63,12 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       notifications,
       dataViewFieldEditor,
       indexUpdateService,
+      indexEditorTelemetryService,
       storage,
     },
   } = useKibana<KibanaContextExtra>();
+
+  const [editingColumnIndex, setEditingColumnIndex] = useState<number | null>(null);
 
   const isFetching = useObservable(indexUpdateService.isFetching$, false);
   const sortOrder = useObservable(indexUpdateService.sortOrder$, []);
@@ -146,8 +150,9 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         columns: props.columns,
         onValueChange,
         dataTableRef,
+        telemetryService: indexEditorTelemetryService,
       }),
-    [rows, props.columns, onValueChange, dataTableRef]
+    [rows, props.columns, onValueChange, dataTableRef, indexEditorTelemetryService]
   );
   const CellValueRenderer = useMemo(() => {
     return getCellValueRenderer(rows, dataTableRef, indexUpdateService.canEditIndex);
@@ -161,19 +166,38 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
   }, [CellValueRenderer, renderedColumns]);
 
   // We render an editable header for columns that are not saved in the index.
-  const customGridColumnsConfiguration = useMemo(() => {
-    return renderedColumns.reduce((acc, columnName) => {
-      if (!props.dataView.fields.getByName(columnName)) {
-        acc[columnName] = getColumnInputRenderer(columnName, indexUpdateService);
-      } else {
-        acc[columnName] = (customGridColumnProps: CustomGridColumnProps) => ({
-          ...customGridColumnProps.column,
-          actions: { showHide: false },
-        });
-      }
-      return acc;
-    }, {} as CustomGridColumnsConfiguration);
-  }, [renderedColumns, props.dataView, indexUpdateService]);
+  const customGridColumnsConfiguration = useMemo<CustomGridColumnsConfiguration>(() => {
+    return renderedColumns.reduce<CustomGridColumnsConfiguration>(
+      (acc, columnName, columnIndex) => {
+        if (!props.dataView.fields.getByName(columnName)) {
+          const editMode = editingColumnIndex === columnIndex;
+          acc[columnName] = memoize(
+            getColumnInputRenderer(
+              columnName,
+              columnIndex,
+              editMode,
+              setEditingColumnIndex,
+              indexUpdateService,
+              indexEditorTelemetryService
+            )
+          );
+        } else {
+          acc[columnName] = (customGridColumnProps: CustomGridColumnProps) => ({
+            ...customGridColumnProps.column,
+            actions: { showHide: false, showSortAsc: false, showSortDesc: false },
+          });
+        }
+        return acc;
+      },
+      {} as CustomGridColumnsConfiguration
+    );
+  }, [
+    renderedColumns,
+    props.dataView.fields,
+    editingColumnIndex,
+    indexUpdateService,
+    indexEditorTelemetryService,
+  ]);
 
   const bulkActions = useMemo<
     React.ComponentProps<typeof UnifiedDataTable>['customBulkActions']
@@ -250,6 +274,9 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
               height: 100%;
               width: 100%;
               display: block;
+            }
+            .unifiedDataTable__headerCell {
+              align-items: center !important;
             }
             .euiDataGridHeaderCell {
               align-items: center;

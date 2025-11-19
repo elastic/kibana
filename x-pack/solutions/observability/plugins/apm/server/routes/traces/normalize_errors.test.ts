@@ -13,6 +13,7 @@ describe('normalizeErrors', () => {
     it('should normalize a single apm error with exception array', () => {
       const apmErrors: UnifiedTraceErrors['apmErrors'] = [
         {
+          id: 'error-1',
           error: {
             grouping_key: 'error-1',
             exception: [{ type: 'Error', message: 'First error' }],
@@ -44,6 +45,7 @@ describe('normalizeErrors', () => {
     it('should handle apm error with no exception', () => {
       const apmErrors: UnifiedTraceErrors['apmErrors'] = [
         {
+          id: 'error-3',
           error: {
             grouping_key: 'error-3',
             exception: undefined,
@@ -87,7 +89,9 @@ describe('normalizeErrors', () => {
     it('should normalize a single otel error', () => {
       const otelErrors: UnifiedTraceErrors['unprocessedOtelErrors'] = [
         {
+          eventName: 'error',
           id: 'span-1',
+          spanId: 'span-1',
           timestamp: {
             us: 5555555555,
           },
@@ -104,6 +108,7 @@ describe('normalizeErrors', () => {
 
       expect(result).toEqual([
         {
+          eventName: 'error',
           error: {
             exception: {
               type: 'OtelError',
@@ -120,7 +125,9 @@ describe('normalizeErrors', () => {
     it('should handle otel error with undefined exception fields', () => {
       const otelErrors: UnifiedTraceErrors['unprocessedOtelErrors'] = [
         {
+          eventName: 'exception',
           id: 'span-2',
+          spanId: 'span-2',
           timestamp: undefined,
           error: {
             exception: {
@@ -135,6 +142,7 @@ describe('normalizeErrors', () => {
 
       expect(result).toEqual([
         {
+          eventName: 'exception',
           error: {
             exception: {
               type: undefined,

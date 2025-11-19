@@ -18,8 +18,8 @@ import type { GridLayoutData, GridPanelData } from '@kbn/grid-layout';
 import { GridLayout } from '@kbn/grid-layout';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/content_management/constants';
-import type { GridData } from '../../../server/content_management';
+import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../common/page_bundle_constants';
+import type { GridData } from '../../../server';
 import { areLayoutsEqual, type DashboardLayout } from '../../dashboard_api/layout_manager';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
@@ -71,15 +71,14 @@ export const DashboardGrid = () => {
           updatedLayout.sections[widget.id] = {
             collapsed: widget.isCollapsed,
             title: widget.title,
-            gridData: {
-              i: widget.id,
+            grid: {
               y: widget.row,
             },
           };
           Object.values(widget.panels).forEach((panel) => {
             updatedLayout.panels[panel.id] = {
               ...currLayout.panels[panel.id],
-              gridData: {
+              grid: {
                 ...convertGridPanelToDashboardGridData(panel),
                 sectionId: widget.id,
               },
@@ -89,7 +88,7 @@ export const DashboardGrid = () => {
           // widget is a panel
           updatedLayout.panels[widget.id] = {
             ...currLayout.panels[widget.id],
-            gridData: convertGridPanelToDashboardGridData(widget),
+            grid: convertGridPanelToDashboardGridData(widget),
           };
         }
       });
@@ -118,7 +117,7 @@ export const DashboardGrid = () => {
           type={type}
           setDragHandles={setDragHandles}
           appFixedViewport={appFixedViewport}
-          data-grid-row={panels[id].gridData.y} // initialize data-grid-row
+          data-grid-row={panels[id].grid.y} // initialize data-grid-row
         />
       );
     },
@@ -217,7 +216,6 @@ export const DashboardGrid = () => {
 
 const convertGridPanelToDashboardGridData = (panel: GridPanelData): GridData => {
   return {
-    i: panel.id,
     y: panel.row,
     x: panel.column,
     w: panel.width,

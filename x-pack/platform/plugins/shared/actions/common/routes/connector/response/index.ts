@@ -14,7 +14,7 @@ export type {
 export {
   connectorResponseSchema,
   allConnectorsResponseSchema,
-  connectorTypesResponseSchema,
+  connectorTypeResponseSchema,
   connectorExecuteResponseSchema,
 } from './schemas/latest';
 
@@ -28,6 +28,20 @@ export type {
 export {
   connectorResponseSchema as connectorResponseSchemaV1,
   allConnectorsResponseSchema as connectorWithExtraFindDataSchemaV1,
-  connectorTypesResponseSchema as connectorTypesResponseSchemaV1,
+  connectorTypeResponseSchema as connectorTypeResponseSchemaV1,
   connectorExecuteResponseSchema as connectorExecuteResponseSchemaV1,
 } from './schemas/v1';
+
+// v2
+export type {
+  ConnectorResponse as ConnectorResponseV2,
+  AllConnectorsResponse as AllConnectorsResponseV2,
+  ConnectorTypesResponse as ConnectorTypesResponseV2,
+  ConnectorExecuteResponse as ConnectorExecuteResponseV2,
+} from './types/v2';
+export {
+  connectorResponseSchema as connectorResponseSchemaV2,
+  allConnectorsResponseSchema as connectorWithExtraFindDataSchemaV2,
+  connectorTypeResponseSchema as connectorTypeResponseSchemaV2,
+  connectorExecuteResponseSchema as connectorExecuteResponseSchemaV2,
+} from './schemas/v2';

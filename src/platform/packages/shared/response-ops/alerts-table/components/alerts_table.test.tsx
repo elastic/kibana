@@ -12,7 +12,6 @@ import type { ReactElement } from 'react';
 import { act, render as rtlRender, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { BehaviorSubject } from 'rxjs';
-import { get } from 'lodash';
 import {
   ALERT_CASE_IDS,
   ALERT_MAINTENANCE_WINDOW_IDS,
@@ -21,7 +20,7 @@ import {
 } from '@kbn/rule-data-utils';
 import type { Alert, LegacyField } from '@kbn/alerting-types';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { fetchAlertsFields } from '@kbn/alerts-ui-shared/src/common/apis/fetch_alerts_fields';
 import { searchAlerts } from '@kbn/alerts-ui-shared/src/common/apis/search_alerts/search_alerts';
 import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
@@ -284,26 +283,7 @@ describe('AlertsTable', () => {
     ruleTypeIds: ['logs'],
     query: {},
     columns,
-    initialPageSize: 10,
-    renderActionsCell: ({ openAlertInFlyout }) => {
-      return (
-        <button
-          data-test-subj="expandColumnCellOpenFlyoutButton-0"
-          onClick={() => {
-            openAlertInFlyout('alert-id-1');
-          }}
-        />
-      );
-    },
-    renderFlyoutBody: ({ alert }) => (
-      <ul>
-        {columns.map((column) => (
-          <li data-test-subj={`alertsFlyout${column.displayAsText}`} key={column.id}>
-            {get(alert as any, column.id, [])[0]}
-          </li>
-        ))}
-      </ul>
-    ),
+    pageSize: 10,
     configurationStorage: mockStorageWrapper,
     services: {
       http: httpServiceMock.createStartContract(),
@@ -333,17 +313,19 @@ describe('AlertsTable', () => {
     },
   };
 
-  let onChangePageIndex: AlertsDataGridProps['onChangePageIndex'];
+  let onPageIndexChange: RenderContext<AdditionalContext>['onPageIndexChange'];
   let onToggleColumn: AlertsDataGridProps['onToggleColumn'];
   let onResetColumns: AlertsDataGridProps['onResetColumns'];
   let refresh: RenderContext<AdditionalContext>['refresh'];
+  let refreshSpy: jest.SpyInstance<void, []>;
 
   mockAlertsDataGrid.mockImplementation((props) => {
     const { AlertsDataGrid: ActualAlertsDataGrid } = jest.requireActual('./alerts_data_grid');
-    onChangePageIndex = props.onChangePageIndex;
+    onPageIndexChange = props.renderContext.onPageIndexChange;
     onToggleColumn = props.onToggleColumn;
     onResetColumns = props.onResetColumns;
     refresh = props.renderContext.refresh;
+    refreshSpy = jest.spyOn(props.renderContext, 'refresh');
     return <ActualAlertsDataGrid {...props} />;
   });
 
@@ -596,7 +578,10 @@ describe('AlertsTable', () => {
           children: expect.anything(),
           owner: ['cases'],
           permissions: { create: true, read: true },
-          features: { alerts: { sync: false } },
+          features: {
+            alerts: { sync: false },
+            observables: { enabled: true, autoExtract: false },
+          },
         },
         {}
       );
@@ -612,7 +597,10 @@ describe('AlertsTable', () => {
           children: expect.anything(),
           owner: [],
           permissions: { create: true, read: true },
-          features: { alerts: { sync: false } },
+          features: {
+            alerts: { sync: false },
+            observables: { enabled: true, autoExtract: false },
+          },
         },
         {}
       );
@@ -631,7 +619,10 @@ describe('AlertsTable', () => {
           children: expect.anything(),
           owner: [],
           permissions: { create: false, read: false },
-          features: { alerts: { sync: false } },
+          features: {
+            alerts: { sync: false },
+            observables: { enabled: true, autoExtract: false },
+          },
         },
         {}
       );
@@ -656,7 +647,7 @@ describe('AlertsTable', () => {
           children: expect.anything(),
           owner: ['cases'],
           permissions: { create: true, read: true },
-          features: { alerts: { sync: true } },
+          features: { alerts: { sync: true }, observables: { enabled: true, autoExtract: false } },
         },
         {}
       );
@@ -780,86 +771,6 @@ describe('AlertsTable', () => {
     });
   });
 
-  describe('Flyout', () => {
-    it('should show a flyout when selecting an alert', async () => {
-      const wrapper = render(<AlertsTable {...tableProps} />);
-      await userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
-
-      const result = await wrapper.findAllByTestId('alertsFlyout');
-      expect(result.length).toBe(1);
-
-      expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('one');
-      expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('two');
-
-      // Should paginate too
-      await userEvent.click(wrapper.queryAllByTestId('pagination-button-next')[0]);
-      expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('three');
-      expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('four');
-
-      await userEvent.click(wrapper.queryAllByTestId('pagination-button-previous')[0]);
-      expect(wrapper.queryByTestId('alertsFlyoutName')?.textContent).toBe('one');
-      expect(wrapper.queryByTestId('alertsFlyoutReason')?.textContent).toBe('two');
-    });
-
-    it('should refetch data if flyout pagination exceeds the current page', async () => {
-      render(<AlertsTable {...tableProps} initialPageSize={1} />);
-
-      await userEvent.click(await screen.findByTestId('expandColumnCellOpenFlyoutButton-0'));
-      const result = await screen.findAllByTestId('alertsFlyout');
-      expect(result.length).toBe(1);
-
-      mockSearchAlerts.mockClear();
-
-      await userEvent.click(await screen.findByTestId('pagination-button-next'));
-      expect(mockSearchAlerts).toHaveBeenCalledWith(
-        expect.objectContaining({
-          pageIndex: 1,
-          pageSize: 1,
-        })
-      );
-
-      mockSearchAlerts.mockClear();
-      await userEvent.click(await screen.findByTestId('pagination-button-previous'));
-      expect(mockSearchAlerts).toHaveBeenCalledWith(
-        expect.objectContaining({
-          pageIndex: 0,
-          pageSize: 1,
-        })
-      );
-    });
-
-    it('Should be able to go back from last page to n - 1', async () => {
-      render(<AlertsTable {...tableProps} initialPageSize={2} />);
-
-      await userEvent.click(
-        (
-          await screen.findAllByTestId('expandColumnCellOpenFlyoutButton-0')
-        )[0]
-      );
-      const result = await screen.findAllByTestId('alertsFlyout');
-      expect(result.length).toBe(1);
-
-      mockSearchAlerts.mockClear();
-
-      await userEvent.click(await screen.findByTestId('pagination-button-last'));
-      expect(mockSearchAlerts).toHaveBeenCalledWith(
-        expect.objectContaining({
-          pageIndex: 1,
-          pageSize: 2,
-        })
-      );
-
-      mockSearchAlerts.mockClear();
-      await userEvent.click(await screen.findByTestId('pagination-button-previous'));
-      expect(mockSearchAlerts).toHaveBeenCalledWith(
-        expect.objectContaining({
-          pageIndex: 0,
-          pageSize: 2,
-        })
-      );
-    });
-  });
-
   describe('Field browser', () => {
     beforeEach(() => {
       jest.clearAllMocks();
@@ -939,9 +850,7 @@ describe('AlertsTable', () => {
     });
 
     it('should remove a field from the sort configuration too', async () => {
-      render(
-        <AlertsTable {...tableProps} initialSort={[{ [AlertsField.name]: { order: 'asc' } }]} />
-      );
+      render(<AlertsTable {...tableProps} sort={[{ [AlertsField.name]: { order: 'asc' } }]} />);
 
       expect(
         await screen.findByTestId(`dataGridHeaderCellSortingIcon-${AlertsField.name}`)
@@ -1035,7 +944,7 @@ describe('AlertsTable', () => {
       render(
         <AlertsTable
           {...tableProps}
-          initialSort={[
+          sort={[
             {
               [ALERT_TIME_RANGE]: { order: 'asc' },
             },
@@ -1089,7 +998,7 @@ describe('AlertsTable', () => {
       render(
         <AlertsTable
           {...tableProps}
-          initialSort={[
+          sort={[
             {
               [ALERT_TIME_RANGE]: { order: 'asc' },
             },
@@ -1181,7 +1090,7 @@ describe('AlertsTable', () => {
       });
       const { rerender } = render(<AlertsTable {...tableProps} />);
       act(() => {
-        onChangePageIndex(1);
+        onPageIndexChange(1);
       });
       rerender(
         <AlertsTable
@@ -1203,12 +1112,46 @@ describe('AlertsTable', () => {
       });
       render(<AlertsTable {...tableProps} />);
       act(() => {
-        onChangePageIndex(1);
+        onPageIndexChange(1);
       });
       act(() => {
         refresh();
       });
       expect(mockSearchAlerts).toHaveBeenLastCalledWith(expect.objectContaining({ pageIndex: 0 }));
+    });
+
+    it('should fetch a new page if the expanded alert index is in the next page', async () => {
+      render(<AlertsTable {...tableProps} pageSize={1} expandedAlertIndex={1} />);
+
+      expect(mockSearchAlerts).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          pageIndex: 1,
+          pageSize: 1,
+        })
+      );
+    });
+
+    it('should go back to a previous page if the expanded alert index is in the previous page', async () => {
+      render(<AlertsTable {...tableProps} pageSize={1} pageIndex={1} expandedAlertIndex={0} />);
+
+      expect(mockSearchAlerts).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          pageIndex: 0,
+          pageSize: 1,
+        })
+      );
+    });
+
+    it("doesn't call `refresh` when paginating and using `lastReloadRequestTime`", async () => {
+      render(<AlertsTable {...tableProps} lastReloadRequestTime={Date.now()} pageSize={1} />);
+
+      await waitFor(() => expect(onPageIndexChange).not.toBeUndefined());
+
+      act(() => {
+        onPageIndexChange(1);
+      });
+
+      expect(refreshSpy).not.toHaveBeenCalled();
     });
   });
 });

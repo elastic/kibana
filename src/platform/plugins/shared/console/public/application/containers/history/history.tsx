@@ -28,6 +28,7 @@ import {
   EuiResizableContainer,
   useIsWithinBreakpoints,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { SHELL_TAB_ID } from '../main';
@@ -39,8 +40,40 @@ import { useEditorReadContext } from '../../contexts/editor_context';
 import { getFormattedRequest } from '../../lib';
 import type { ESRequest } from '../../../types';
 import { RestoreMethod } from '../../../types';
+import { consoleEditorPanelStyles, useResizerButtonStyles } from '../styles';
 
 const CHILD_ELEMENT_PREFIX = 'historyReq';
+
+const staticStyles = {
+  fullHeight: css`
+    height: 100%;
+  `,
+  // Sticky positioned element
+  stickyTopElement: css`
+    top: 0;
+  `,
+};
+
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    ...staticStyles,
+    resizerButton: useResizerButtonStyles(),
+    consoleEditorPanel: consoleEditorPanelStyles,
+
+    // Panel with padding and full height
+    paddedFullHeightPanel: css`
+      height: 100%;
+      padding-right: ${euiTheme.size.s};
+    `,
+
+    // Content area with top padding
+    paddedTopContainer: css`
+      padding-top: ${euiTheme.size.l};
+    `,
+  };
+};
 
 interface HistoryProps {
   data: string;
@@ -82,7 +115,7 @@ const CheckeableCardLabel = ({ historyItem }: { historyItem: HistoryProps }) => 
 };
 
 export function History() {
-  const { euiTheme } = useEuiTheme();
+  const styles = useStyles();
   const {
     services: { history, routeHistory },
   } = useServicesContext();
@@ -157,11 +190,11 @@ export function History() {
       paddingSize="none"
       hasShadow={false}
       borderRadius="none"
-      css={{ height: '100%' }}
+      css={styles.fullHeight}
       data-test-subj="consoleHistoryPanel"
     >
       <EuiResizableContainer
-        css={{ height: '100%' }}
+        css={styles.fullHeight}
         direction={isVerticalLayout ? 'vertical' : 'horizontal'}
       >
         {(EuiResizablePanel, EuiResizableButton) => (
@@ -174,16 +207,14 @@ export function History() {
               hasShadow={false}
               paddingSize="none"
             >
-              <EuiSplitPanel.Outer
-                grow
-                color="subdued"
-                css={{
-                  height: '100%',
-                  paddingRight: euiTheme.size.s,
-                }}
-              >
+              <EuiSplitPanel.Outer grow color="subdued" css={styles.paddedFullHeightPanel}>
                 <EuiSplitPanel.Inner paddingSize="m">
-                  <EuiFlexGroup direction="column" gutterSize="none" css={{ height: '100%' }}>
+                  <EuiFlexGroup
+                    direction="column"
+                    gutterSize="none"
+                    // column layout with full height
+                    css={styles.fullHeight}
+                  >
                     <EuiFlexItem grow={false}>
                       <EuiSpacer size="s" />
                       <EuiTitle>
@@ -206,7 +237,7 @@ export function History() {
                       <EuiSpacer size="l" />
                     </EuiFlexItem>
 
-                    <EuiFlexItem grow={true} css={{ height: '100%' }}>
+                    <EuiFlexItem grow={true} css={styles.fullHeight}>
                       {requests.length === 0 && <HistoryEmptyPrompt />}
 
                       {requests.length > 0 && (
@@ -231,7 +262,7 @@ export function History() {
                   grow={false}
                   color="subdued"
                   paddingSize="s"
-                  css={{ paddingTop: euiTheme.size.l }}
+                  css={styles.paddedTopContainer}
                 >
                   <EuiText>
                     <EuiButtonEmpty
@@ -250,23 +281,22 @@ export function History() {
               </EuiSplitPanel.Outer>
             </EuiResizablePanel>
 
-            <EuiResizableButton className="conApp__resizerButton" />
+            <EuiResizableButton css={styles.resizerButton} />
 
             <EuiResizablePanel initialSize={50} minSize="15%" tabIndex={0} paddingSize="none">
               <EuiSplitPanel.Outer
                 color="subdued"
-                css={{ height: '100%' }}
+                css={styles.fullHeight}
                 borderRadius="none"
                 hasShadow={false}
               >
                 <EuiSplitPanel.Inner
                   paddingSize="none"
-                  css={{ top: 0 }}
-                  className="consoleEditorPanel"
+                  css={[styles.consoleEditorPanel, styles.stickyTopElement]}
                 >
                   <HistoryViewer settings={readOnlySettings} req={viewingReq} />
                 </EuiSplitPanel.Inner>
-                <EuiSplitPanel.Inner grow={false} className="consoleEditorPanel">
+                <EuiSplitPanel.Inner grow={false} css={styles.consoleEditorPanel}>
                   <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
                     <EuiFlexItem grow={false}>
                       <EuiButton

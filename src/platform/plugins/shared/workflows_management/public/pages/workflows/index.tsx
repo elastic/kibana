@@ -13,52 +13,41 @@ import {
   EuiFilterGroup,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiHorizontalRule,
   EuiPageHeader,
   EuiPageTemplate,
-  EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React, { useState } from 'react';
+import type { WorkflowsSearchParams } from '@kbn/workflows';
 import { WORKFLOW_EXECUTION_STATS_BAR_SETTING_ID } from '@kbn/workflows/common/constants';
-import { useWorkflowActions } from '../../entities/workflows/model/use_workflow_actions';
+import { useWorkflows } from '@kbn/workflows-ui';
+import { PLUGIN_ID } from '../../../common';
 import { useWorkflowFiltersOptions } from '../../entities/workflows/model/use_workflow_stats';
-import { useWorkflows } from '../../entities/workflows/model/use_workflows';
 import { WorkflowExecutionStatsBar } from '../../features/workflow_executions_stats/ui';
 import { WorkflowList } from '../../features/workflow_list';
 import { WORKFLOWS_TABLE_INITIAL_PAGE_SIZE } from '../../features/workflow_list/constants';
+import { useKibana } from '../../hooks/use_kibana';
+import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
 import { shouldShowWorkflowsEmptyState } from '../../shared/utils/workflow_utils';
-import type { WorkflowsSearchParams } from '../../types';
 import { WorkflowsFilterPopover } from '../../widgets/workflow_filter_popover/workflow_filter_popover';
 import { WorkflowSearchField } from '../../widgets/workflow_search_field/ui/workflow_search_field';
-import { useWorkflowsBreadcrumbs } from '../../hooks/use_workflow_breadcrumbs/use_workflow_breadcrumbs';
-
-const workflowTemplateYaml = `name: New workflow
-enabled: false
-triggers:
-  - type: manual
-steps:
-  - name: first-step
-    type: console
-    with:
-      message: First step executed
-`;
 
 export function WorkflowsPage() {
-  const { application, notifications, featureFlags } = useKibana().services;
+  const { application, featureFlags } = useKibana().services;
   const { data: filtersData } = useWorkflowFiltersOptions(['enabled', 'createdBy']);
   const { euiTheme } = useEuiTheme();
-  const { createWorkflow } = useWorkflowActions();
   const [search, setSearch] = useState<WorkflowsSearchParams>({
-    limit: WORKFLOWS_TABLE_INITIAL_PAGE_SIZE,
+    size: WORKFLOWS_TABLE_INITIAL_PAGE_SIZE,
     page: 1,
     query: '',
   });
 
-  const { data: workflows, refetch } = useWorkflows(search);
+  const navigateToCreateWorkflow = useCallback(() => {
+    application.navigateToApp(PLUGIN_ID, { path: '/create' });
+  }, [application]);
+
+  const { data: workflows } = useWorkflows(search);
   useWorkflowsBreadcrumbs();
 
   const canCreateWorkflow = application?.capabilities.workflowsManagement.createWorkflow;
@@ -69,40 +58,6 @@ export function WorkflowsPage() {
 
   // Check if we should show empty state
   const shouldShowEmptyState = shouldShowWorkflowsEmptyState(workflows, search);
-
-  const handleCreateWorkflow = () => {
-    createWorkflow.mutate(
-      { yaml: workflowTemplateYaml },
-      {
-        onSuccess: (data) => {
-          application!.navigateToUrl(
-            application!.getUrlForApp('workflows', { path: `/${data.id}` })
-          );
-          refetch();
-        },
-        onError: (error) => {
-          // Extract message from HTTP error body and update the error message
-          if (
-            error &&
-            typeof error === 'object' &&
-            'body' in error &&
-            error.body &&
-            typeof error.body === 'object' &&
-            'message' in error.body &&
-            typeof error.body.message === 'string'
-          ) {
-            (error as any).message = error.body.message;
-          }
-
-          notifications!.toasts.addError(error, {
-            title: i18n.translate('workflows.createWorkflowError', {
-              defaultMessage: 'Error creating workflow',
-            }),
-          });
-        },
-      }
-    );
-  };
 
   return (
     <EuiPageTemplate offset={0} css={{ backgroundColor: euiTheme.colors.backgroundBasePlain }}>
@@ -119,7 +74,7 @@ export function WorkflowsPage() {
                 <EuiFlexGroup
                   alignItems="center"
                   justifyContent="flexStart"
-                  gutterSize="s"
+                  gutterSize="m"
                   responsive={false}
                   wrap={false}
                 >
@@ -152,8 +107,9 @@ export function WorkflowsPage() {
                 <EuiButton
                   iconType="plusInCircle"
                   color="primary"
-                  size="s"
-                  onClick={handleCreateWorkflow}
+                  size="m"
+                  fill
+                  onClick={navigateToCreateWorkflow}
                 >
                   <FormattedMessage
                     id="workflows.createWorkflowButton"
@@ -211,17 +167,14 @@ export function WorkflowsPage() {
                 </EuiFilterGroup>
               </EuiFlexItem>
             </EuiFlexGroup>
-
-            <EuiSpacer size="l" />
             {isExecutionStatsBarEnabled && <WorkflowExecutionStatsBar height={140} />}
-            <EuiHorizontalRule />
           </>
         )}
 
         <WorkflowList
           search={search}
           setSearch={setSearch}
-          onCreateWorkflow={handleCreateWorkflow}
+          onCreateWorkflow={navigateToCreateWorkflow}
         />
       </EuiPageTemplate.Section>
     </EuiPageTemplate>

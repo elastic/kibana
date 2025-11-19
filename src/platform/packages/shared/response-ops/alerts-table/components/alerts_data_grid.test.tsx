@@ -35,7 +35,7 @@ import {
   FIELD_BROWSER_CUSTOM_CREATE_BTN_TEST_ID,
   FIELD_BROWSER_TEST_ID,
 } from '../constants';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { testQueryClientConfig } from '@kbn/alerts-ui-shared/src/common/test_utils/test_query_client_config';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';
@@ -77,8 +77,6 @@ export const mockDataGridProps: Partial<BaseAlertsDataGridProps> = {
   sort: [],
   alertsQuerySnapshot: { request: [], response: [] },
   onSortChange: jest.fn(),
-  onChangePageIndex: jest.fn(),
-  onChangePageSize: jest.fn(),
   additionalBulkActions: [
     {
       id: 0,
@@ -113,7 +111,7 @@ describe('AlertsDataGrid', () => {
       bulkActionsReducer,
       props.initialBulkActionsState || createMockBulkActionsState()
     );
-    const renderContext = useMemo(
+    const renderContext: RenderContext<AdditionalContext> = useMemo(
       () => ({
         ...mockRenderContext,
         bulkActionsStore,
@@ -168,7 +166,7 @@ describe('AlertsDataGrid', () => {
         pointerEventsCheck: 0,
       });
 
-      expect(mockDataGridProps.onChangePageIndex).toHaveBeenCalledWith(1);
+      expect(mockRenderContext.onPageIndexChange).toHaveBeenCalledWith(1);
     });
 
     it('should show when it was updated', () => {
@@ -203,7 +201,7 @@ describe('AlertsDataGrid', () => {
       );
     });
 
-    describe('leading control columns', () => {
+    describe('Leading control columns', () => {
       it('should render other leading controls', () => {
         const props: TestAlertsDataGridProps = {
           ...mockDataGridProps,
@@ -222,7 +220,7 @@ describe('AlertsDataGrid', () => {
       });
     });
 
-    describe('actions column', () => {
+    describe('Actions column', () => {
       it('should render custom actions cells', () => {
         render(
           <TestComponent
@@ -331,7 +329,7 @@ describe('AlertsDataGrid', () => {
       });
     });
 
-    describe('cell Actions', () => {
+    describe('Cell Actions', () => {
       const mockGetCellActionsForColumn = jest.fn(
         (columnId: string): EuiDataGridColumnCellAction[] => [
           ({ rowIndex, Component }) => {
@@ -472,7 +470,65 @@ describe('AlertsDataGrid', () => {
       });
     });
 
-    describe('cases column', () => {
+    describe('Expanded alert view', () => {
+      it('should render the default alert flyout when `renderExpandedAlertView` is undefined', async () => {
+        render(
+          <TestComponent
+            {...mockDataGridProps}
+            renderContext={{
+              expandedAlertIndex: 0,
+            }}
+          />
+        );
+
+        expect(await screen.findByTestId('alertFlyout')).toBeInTheDocument();
+      });
+
+      it('should render the expanded alert view when `expandedAlertIndex` is defined', async () => {
+        render(
+          <TestComponent
+            {...mockDataGridProps}
+            renderContext={{
+              expandedAlertIndex: 0,
+              renderExpandedAlertView: () => <div data-test-subj="expandedAlertView" />,
+            }}
+          />
+        );
+
+        expect(screen.getByTestId('expandedAlertView')).toBeInTheDocument();
+      });
+
+      it('should not render the expanded alert view when `expandedAlertIndex` is nullish', async () => {
+        render(
+          <TestComponent
+            {...mockDataGridProps}
+            renderContext={{
+              expandedAlertIndex: null,
+              renderExpandedAlertView: () => <div data-test-subj="expandedAlertView" />,
+            }}
+          />
+        );
+
+        expect(screen.queryByTestId('expandedAlertView')).not.toBeInTheDocument();
+      });
+
+      it('should not render any expanded alert view when `renderExpandedAlertView` is null', async () => {
+        render(
+          <TestComponent
+            {...mockDataGridProps}
+            renderContext={{
+              expandedAlertIndex: 0,
+              renderExpandedAlertView: null,
+            }}
+          />
+        );
+
+        await expect(screen.findByTestId('alertFlyout')).rejects.toThrow();
+        expect(screen.queryByTestId('expandedAlertView')).not.toBeInTheDocument();
+      });
+    });
+
+    describe('Cases column', () => {
       const props: TestAlertsDataGridProps = {
         ...mockDataGridProps,
         renderContext: {
@@ -516,7 +572,7 @@ describe('AlertsDataGrid', () => {
       });
     });
 
-    describe('dynamic row height mode', () => {
+    describe('Dynamic row height mode', () => {
       it('should render a non-virtualized grid body when the dynamicRowHeight option is on', async () => {
         const { container } = render(<TestComponent {...mockDataGridProps} dynamicRowHeight />);
 

@@ -77,6 +77,7 @@ const createCasesSubClientMock = (): CasesSubClientMock => {
     addObservable: jest.fn(),
     updateObservable: jest.fn(),
     deleteObservable: jest.fn(),
+    bulkAddObservables: jest.fn(),
   });
 };
 
@@ -261,7 +262,7 @@ export const createCasesClientMockSearchRequest = (
   overwrites?: CasesSearchRequest
 ): CasesSearchRequest => ({
   search: '',
-  searchFields: ['title', 'description'],
+  searchFields: ['title', 'description', 'incremental_id.text'],
   severity: CaseSeverity.LOW,
   assignees: [],
   reporters: [],

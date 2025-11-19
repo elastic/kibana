@@ -266,6 +266,43 @@ describe('Security Solution - Health Diagnostic Queries - HealthDiagnosticServic
         expect(result[0].passed).toBe(true);
         expect(mockLogger.warn).toHaveBeenCalledWith('Error sending EBT', expect.any(Object));
       });
+
+      test('should send EBT events even when query returns no results', async () => {
+        const lastExecutionByQuery = { 'test-query': 1640995200000 };
+        mockQueryExecutor.search.mockReturnValue(from([]));
+
+        const result = await service.runHealthDiagnosticQueries(lastExecutionByQuery);
+
+        expect(result).toHaveLength(1);
+        expect(result[0]).toMatchObject({
+          name: 'test-query',
+          passed: true,
+          numDocs: 0,
+        });
+
+        expect(mockAnalytics.reportEvent).toHaveBeenCalledTimes(2);
+
+        expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
+          'telemetry_health_diagnostic_query_result_event',
+          expect.objectContaining({
+            name: 'test-query',
+            queryId: 'test-query-1',
+            page: 0,
+            data: [],
+            traceId: expect.any(String),
+          })
+        );
+
+        expect(mockAnalytics.reportEvent).toHaveBeenCalledWith(
+          'telemetry_health_diagnostic_query_stats_event',
+          expect.objectContaining({
+            name: 'test-query',
+            passed: true,
+            numDocs: 0,
+            traceId: expect.any(String),
+          })
+        );
+      });
     });
   });
 });

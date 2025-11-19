@@ -25,6 +25,7 @@ import {
 import type { EntityAnalyticsRoutesDeps } from '../../../types';
 import { assertAdvancedSettingsEnabled } from '../../../utils/assert_advanced_setting_enabled';
 import { createPrivilegedUsersCsvService } from '../../users/csv_upload';
+import { checkAndInitPrivilegeMonitoringResources } from '../../check_and_init_privmon_resources';
 
 export const uploadUsersCSVRoute = (
   router: EntityAnalyticsRoutesDeps['router'],
@@ -80,7 +81,7 @@ export const uploadUsersCSVRoute = (
 
           const dataClient = secSol.getPrivilegeMonitoringDataClient();
           const csvService = createPrivilegedUsersCsvService(dataClient);
-
+          await checkAndInitPrivilegeMonitoringResources(context, logger);
           const body = await csvService.bulkUpload(fileStream, {
             retries: errorRetries,
             flushBytes: maxBulkRequestBodySizeBytes,

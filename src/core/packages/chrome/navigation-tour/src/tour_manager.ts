@@ -25,11 +25,23 @@ export class TourManager {
     return this._state$.value;
   }
 
-  startTour(enabledSteps: TourStepId[]): void {
+  startTour(): void {
     this._state$.next({
       ...this.state,
-      steps: tourSteps.filter((step) => enabledSteps.includes(step.id)),
       currentStepIndex: 0,
+      status: 'waiting',
+    });
+  }
+
+  activateTour(visibleStepIds: TourStepId[]): void {
+    const currentState = this._state$.value;
+    if (currentState.status !== 'waiting') return;
+
+    const visibleSteps = currentState.steps.filter((step) => visibleStepIds.includes(step.id));
+
+    this._state$.next({
+      ...currentState,
+      steps: visibleSteps,
       status: 'active',
     });
   }
@@ -80,10 +92,5 @@ export class TourManager {
 
   reset(): void {
     this._state$.next(initialState);
-  }
-
-  isLastStep(): boolean {
-    const currentState = this._state$.value;
-    return currentState.currentStepIndex === currentState.steps.length - 1;
   }
 }

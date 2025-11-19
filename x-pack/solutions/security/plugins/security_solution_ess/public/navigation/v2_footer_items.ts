@@ -8,11 +8,11 @@
 import { i18nStrings, securityLink } from '@kbn/security-solution-navigation/links';
 import type { AppDeepLinkId, NodeDefinition } from '@kbn/core-chrome-browser';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
-import { STACK_MANAGEMENT_NAV_ID, INGEST_AND_MANAGE_DATA_NAV_ID } from '@kbn/deeplinks-management';
+import { STACK_MANAGEMENT_NAV_ID, DATA_MANAGEMENT_NAV_ID } from '@kbn/deeplinks-management';
 
 export const v2FooterItems: NodeDefinition<AppDeepLinkId, string, string>[] = [
   {
-    id: INGEST_AND_MANAGE_DATA_NAV_ID,
+    id: DATA_MANAGEMENT_NAV_ID,
     title: i18nStrings.ingestAndManageData.title,
     iconV2: 'database',
     breadcrumbStatus: 'hidden',
@@ -33,9 +33,9 @@ export const v2FooterItems: NodeDefinition<AppDeepLinkId, string, string>[] = [
         ],
       },
       {
-        title: i18nStrings.ingestAndManageData.indicesDsAndRollups.title,
+        title: i18nStrings.ingestAndManageData.indicesAndDataStreams.title,
         children: [
-          { link: 'streams:overview' }, // TODO : update Steams link
+          { link: 'streams' },
           { link: 'management:index_management' },
           { link: 'management:index_lifecycle_management' },
           { link: 'management:snapshot_restore' },
@@ -56,8 +56,20 @@ export const v2FooterItems: NodeDefinition<AppDeepLinkId, string, string>[] = [
     sideNavVersion: 'v2',
     children: [
       {
+        id: 'stack_management_home',
         breadcrumbStatus: 'hidden',
-        children: [{ link: 'monitoring' }],
+        children: [
+          {
+            // We include this link here to ensure that the settings icon does not land on Stack Monitoring by default
+            // https://github.com/elastic/kibana/issues/241518
+            // And that the sidenav panel opens when user lands to legacy management landing page
+            // https://github.com/elastic/kibana/issues/240275
+            link: 'management',
+            title: i18nStrings.stackManagementV2.home.title,
+            breadcrumbStatus: 'hidden',
+          },
+          { link: 'monitoring' },
+        ],
       },
       {
         title: i18nStrings.stackManagementV2.alertsAndInsights.title,

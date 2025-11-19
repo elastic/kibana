@@ -12,7 +12,7 @@ import { usePostCase } from '../../containers/use_post_case';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 
 import type { CasesConfigurationUI, CaseUI } from '../../containers/types';
-import type { CasePostRequest } from '../../../common/types/api';
+import type { CasePostRequest, ObservablePost } from '../../../common/types/api';
 import type { UseCreateAttachments } from '../../containers/use_create_attachments';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import type { CaseAttachmentsWithoutOwner } from '../../types';
@@ -21,6 +21,8 @@ import { useCreateCaseWithAttachmentsTransaction } from '../../common/apm/use_ca
 import { useApplication } from '../../common/lib/kibana/use_application';
 import { createFormSerializer, createFormDeserializer, getInitialCaseValue } from './utils';
 import type { CaseFormFieldsSchemaProps } from '../case_form_fields/schema';
+import { useBulkPostObservables } from '../../containers/use_bulk_post_observables';
+import { useAttachEventsEBT } from '../../analytics/use_attach_events_ebt';
 
 interface Props {
   afterCaseCreated?: (
@@ -33,6 +35,7 @@ interface Props {
   initialValue?: Pick<CasePostRequest, 'title' | 'description'>;
   currentConfiguration: CasesConfigurationUI;
   selectedOwner: string;
+  observables?: ObservablePost[];
 }
 
 export const FormContext: React.FC<Props> = ({
@@ -43,13 +46,17 @@ export const FormContext: React.FC<Props> = ({
   initialValue,
   currentConfiguration,
   selectedOwner,
+  observables,
 }) => {
   const { appId } = useApplication();
   const { data: connectors = [] } = useGetSupportedActionConnectors();
   const { mutateAsync: postCase } = usePostCase();
   const { mutateAsync: createAttachments } = useCreateAttachments();
+  const { mutateAsync: bulkPostObservables } = useBulkPostObservables();
   const { mutateAsync: pushCaseToExternalService } = usePostPushToService();
   const { startTransaction } = useCreateCaseWithAttachmentsTransaction();
+
+  const trackAttachEvents = useAttachEventsEBT();
 
   const submitCase = useCallback(
     async (data: CasePostRequest, isValid: boolean) => {
@@ -61,12 +68,21 @@ export const FormContext: React.FC<Props> = ({
         });
 
         // add attachments to the case
+        // NOTE: this is where we add client side telemetry
         if (theCase && Array.isArray(attachments) && attachments.length > 0) {
           await createAttachments({
             caseId: theCase.id,
             caseOwner: theCase.owner,
             attachments,
           });
+
+          trackAttachEvents(window.location.pathname, attachments);
+        }
+
+        if (theCase && Array.isArray(observables) && observables.length > 0) {
+          if (data.settings.extractObservables) {
+            await bulkPostObservables({ caseId: theCase.id, observables });
+          }
         }
 
         if (afterCaseCreated && theCase) {
@@ -90,9 +106,12 @@ export const FormContext: React.FC<Props> = ({
       appId,
       attachments,
       postCase,
+      observables,
       afterCaseCreated,
       onSuccess,
       createAttachments,
+      trackAttachEvents,
+      bulkPostObservables,
       pushCaseToExternalService,
     ]
   );

@@ -75,10 +75,23 @@ import {
   updateCustomIntegration,
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
-import { fleetErrorToResponseOptions, FleetError, FleetTooManyRequestsError } from '../../errors';
-import { appContextService, checkAllowedPackages, packagePolicyService } from '../../services';
+import {
+  fleetErrorToResponseOptions,
+  FleetError,
+  FleetTooManyRequestsError,
+  FleetUnauthorizedError,
+} from '../../errors';
+import {
+  appContextService,
+  checkAllowedPackages,
+  licenseService,
+  packagePolicyService,
+} from '../../services';
 import { getPackageUsageStats } from '../../services/epm/packages/get';
-import { rollbackInstallation } from '../../services/epm/packages/rollback';
+import {
+  isIntegrationRollbackTTLExpired,
+  rollbackInstallation,
+} from '../../services/epm/packages/rollback';
 import { updatePackage } from '../../services/epm/packages/update';
 import { getGpgKeyIdOrUndefined } from '../../services/epm/packages/package_verification';
 import type {
@@ -693,6 +706,8 @@ const soToInstallationInfo = (pkg: PackageListItem | PackageInfo) => {
       latest_install_failed_attempts: attributes.latest_install_failed_attempts,
       latest_executed_state: attributes.latest_executed_state,
       previous_version: attributes.previous_version,
+      rolled_back: attributes.rolled_back,
+      is_rollback_ttl_expired: isIntegrationRollbackTTLExpired(attributes.install_started_at),
     };
 
     return {
@@ -711,6 +726,11 @@ export const rollbackPackageHandler: FleetRequestHandler<
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   const fleetContext = await context.fleet;
   const spaceId = fleetContext.spaceId;
+
+  if (!licenseService.isEnterprise()) {
+    throw new FleetUnauthorizedError('Rollback integration requires an enterprise license.');
+  }
+
   const packagePolicyIdsForCurrentUser = await getPackagePolicyIdsForCurrentUser(request, [
     { name: pkgName },
   ]);

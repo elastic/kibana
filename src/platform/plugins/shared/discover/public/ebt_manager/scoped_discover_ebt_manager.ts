@@ -16,6 +16,7 @@ import {
   getIsKqlFreeTextExpression,
 } from '@kbn/es-query';
 import { getQueryColumnsFromESQLQuery, getKqlSearchQueries } from '@kbn/esql-utils';
+import { TabsEventDataKeys, type TabsEBTEvent, type TabsEventName } from '@kbn/unified-tabs';
 import {
   CONTEXTUAL_PROFILE_ID,
   CONTEXTUAL_PROFILE_LEVEL,
@@ -25,6 +26,7 @@ import {
   QUERY_FIELDS_USAGE_EVENT_TYPE,
   FIELD_USAGE_FIELD_NAME,
   FIELD_USAGE_FILTER_OPERATION,
+  TABS_EVENT_TYPE,
   QUERY_FIELDS_USAGE_FIELD_NAMES,
 } from './discover_ebt_manager_registrations';
 import { ContextualProfileLevel } from '../context_awareness';
@@ -50,6 +52,7 @@ enum QueryFieldsUsageEventName {
   kqlQuery = 'kqlQuery',
   esqlQuery = 'esqlQuery',
 }
+
 interface FieldUsageEventData {
   [FIELD_USAGE_EVENT_NAME]: FieldUsageEventName;
   [FIELD_USAGE_FIELD_NAME]?: string;
@@ -59,6 +62,10 @@ interface FieldUsageEventData {
 interface QueryFieldsUsageEventData {
   [FIELD_USAGE_EVENT_NAME]: QueryFieldsUsageEventName;
   [QUERY_FIELDS_USAGE_FIELD_NAMES]?: string[];
+}
+
+interface TabsEventData {
+  [TabsEventDataKeys.TABS_EVENT_NAME]: TabsEventName;
 }
 
 interface ContextualProfileResolvedEventData {
@@ -332,5 +339,17 @@ export class ScopedDiscoverEBTManager {
         });
       },
     };
+  }
+
+  public trackTabsEvent({ eventName, ...payload }: TabsEBTEvent) {
+    if (!this.reportEvent) {
+      return;
+    }
+    const eventData: TabsEventData = {
+      [TabsEventDataKeys.TABS_EVENT_NAME]: eventName,
+      ...payload,
+    };
+
+    this.reportEvent(TABS_EVENT_TYPE, eventData);
   }
 }

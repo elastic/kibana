@@ -17,10 +17,9 @@
   ],
   "baseBranches": [
     "main",
+    "9.2",
     "9.1",
-    "9.0",
     "8.19",
-    "8.18",
     "7.17"
   ],
   "prConcurrentLimit": 0,
@@ -213,7 +212,6 @@
         "@types/pixelmatch",
         "@types/pngjs",
         "@types/supertest",
-        "@types/react-test-renderer",
         "babel-plugin-istanbul",
         "lighthouse",
         "nyc",
@@ -223,7 +221,6 @@
         "playwright",
         "pngjs",
         "qs",
-        "react-test-renderer",
         "rxjs-marbles",
         "sharp",
         "superagent",
@@ -514,9 +511,11 @@
         "prop-types",
         "react",
         "react-dom",
+        "react-test-renderer",
         "@types/prop-types",
         "@types/react",
         "@types/react-dom",
+        "@types/react-test-renderer",
         "csstype"
       ],
       "reviewers": [
@@ -726,6 +725,26 @@
       "minimumReleaseAge": "14 days"
     },
     {
+      "groupName": "virtualized",
+      "matchDepNames": [
+        "@tanstack/react-table",
+        "@tanstack/react-virtual"
+      ],
+      "reviewers": [
+        "team:appex-sharedux"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:SharedUX",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "14 days"
+    },
+    {
       "groupName": "@reduxjs/toolkit",
       "matchDepNames": [
         "@reduxjs/toolkit",
@@ -857,7 +876,7 @@
       "minimumReleaseAge": "14 days"
     },
     {
-      "groupName": "@elastic/kibana-cloud-security-posture dependencies",
+      "groupName": "@elastic/contextual-security-apps dependencies",
       "matchDepNames": [
         "@mswjs/http-middleware",
         "@types/byte-size",
@@ -866,7 +885,7 @@
         "xterm"
       ],
       "reviewers": [
-        "team:kibana-cloud-security-posture"
+        "team:contextual-security-apps"
       ],
       "matchBaseBranches": [
         "main"
@@ -1199,7 +1218,7 @@
         "@elastic/ecs"
       ],
       "reviewers": [
-        "team:obs-ux-logs-team"
+        "team:obs-onboarding-team"
       ],
       "matchBaseBranches": [
         "main"
@@ -1207,7 +1226,7 @@
       "labels": [
         "release_note:skip",
         "backport:all-open",
-        "Team:obs-ux-logs"
+        "Team:obs-onboarding"
       ],
       "enabled": true,
       "minimumReleaseAge": "14 days"
@@ -1481,7 +1500,8 @@
         "@apidevtools/swagger-parser",
         "@redocly/cli",
         "openapi-types",
-        "@seriousme/openapi-schema-validator"
+        "ajv-draft-04",
+        "ajv-formats"
       ],
       "reviewers": [
         "team:kibana-core"
@@ -1525,6 +1545,25 @@
       "enabled": true
     },
     {
+      "groupName": "undici",
+      "description": "This library powers native Node.js fetch, and we want to use the exact same version as Node.js to avoid potential issues. Instead of relying on Renovate to update this dependency, we bump it when we bump the Node.js version (enforced by a unit test).",
+      "matchDepNames": [
+        "undici"
+      ],
+      "reviewers": [
+        "team:kibana-security"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Security"
+      ],
+      "minimumReleaseAge": "14 days",
+      "enabled": false
+    },
+    {
       "groupName": "babel",
       "matchDepNames": [
         "@emotion/babel-preset-css-prop",
@@ -1543,7 +1582,8 @@
       "labels": [
         "Team:Operations",
         "release_note:skip",
-        "backport:all-open"
+        "backport:all-open",
+        "ci:bench-jest"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -1896,6 +1936,25 @@
       ],
       "labels": [
         "Team:Operations",
+        "backport:all-open",
+        "release_note:skip"
+      ],
+      "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "liquidjs",
+      "matchDepNames": [
+        "liquidjs"
+      ],
+      "reviewers": [
+        "team:workflows-eng"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:One Workflow",
         "backport:all-open",
         "release_note:skip"
       ],
@@ -2368,7 +2427,7 @@
       "enabled": true
     },
     {
-      "groupName": "workchat gen-ai dependencies",
+      "groupName": "workplace_ai gen-ai dependencies",
       "matchDepNames": [
         "@a2a-js/sdk",
         "@modelcontextprotocol/sdk",
@@ -2748,12 +2807,8 @@
     {
       "groupName": "kibana-presentation misc canvas dependencies",
       "matchDepNames": [
-        "expose-loader",
-        "html-loader",
         "object-path-immutable",
-        "postcss-prefix-selector",
-        "safe-squel",
-        "string-replace-loader"
+        "safe-squel"
       ],
       "reviewers": [
         "team:kibana-presentation"
@@ -2778,7 +2833,6 @@
         "pdfmake"
       ],
       "reviewers": [
-        "team:kibana-presentation",
         "team:response-ops"
       ],
       "matchBaseBranches": [
@@ -3387,24 +3441,6 @@
       "enabled": true
     },
     {
-      "groupName": "p-timeout",
-      "matchDepNames": [
-        "p-timeout"
-      ],
-      "reviewers": [
-        "team:obs-ai-assistant"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "backport:all-open",
-        "release_note:skip"
-      ],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "redux-actions",
       "matchDepNames": [
         "redux-actions",
@@ -3497,7 +3533,6 @@
         "require-in-the-middle",
         "tape",
         "tough-cookie",
-        "uuid",
         "xml-crypto",
         "@elastic/node-crypto",
         "@types/js-yaml",
@@ -3505,8 +3540,7 @@
         "@types/minimist",
         "@types/node-forge",
         "@types/object-hash",
-        "@types/tough-cookie",
-        "@types/uuid"
+        "@types/tough-cookie"
       ],
       "reviewers": [
         "team:kibana-security"
@@ -3525,7 +3559,9 @@
     {
       "groupName": "platform security modules - ESM required",
       "matchDepNames": [
-        "@kayahr/text-encoding"
+        "@kayahr/text-encoding",
+        "uuid",
+        "@types/uuid"
       ],
       "reviewers": [
         "team:kibana-security"
@@ -3568,6 +3604,14 @@
     {
       "matchDepNames": [
         "chromedriver"
+      ],
+      "reviewers": [
+        "team:kibana-operations"
+      ],
+      "labels": [
+        "Team:Operations",
+        "release_note:skip",
+        "backport:skip"
       ],
       "enabled": true
     },
@@ -3700,7 +3744,8 @@
       "labels": [
         "Team:Operations",
         "release_note:skip",
-        "backport:all-open"
+        "backport:all-open",
+        "ci:bench-jest"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -3739,7 +3784,8 @@
       "labels": [
         "Team:Operations",
         "release_note:skip",
-        "backport:all-open"
+        "backport:all-open",
+        "ci:bench-jest"
       ],
       "minimumReleaseAge": "14 days",
       "enabled": true
@@ -3779,7 +3825,7 @@
       ],
       "reviewers": [
         "team:response-ops",
-        "team:kibana-cloud-security-posture",
+        "team:contextual-security-apps",
         "team:security-asset-management",
         "team:fleet",
         "team:awp-platform",
@@ -4153,25 +4199,6 @@
       "enabled": true
     },
     {
-      "groupName": "Cloud Defend",
-      "matchDepNames": [
-        "monaco-yaml"
-      ],
-      "reviewers": [
-        "team:sec-cloudnative-integrations"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team: Cloud Native Integrations",
-        "release_note:skip",
-        "backport:skip"
-      ],
-      "minimumReleaseAge": "14 days",
-      "enabled": true
-    },
-    {
       "groupName": "JSON Web Token",
       "matchDepNames": [
         "jsonwebtoken",
@@ -4289,13 +4316,13 @@
         "@xstate/react"
       ],
       "reviewers": [
-        "team:obs-ux-logs-team"
+        "team:obs-onboarding-team"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-ux-logs",
+        "Team:obs-onboarding",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4311,13 +4338,13 @@
         "@xstate5/react"
       ],
       "reviewers": [
-        "team:obs-ux-logs-team"
+        "team:obs-onboarding-team"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-ux-logs",
+        "Team:obs-onboarding",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4331,13 +4358,13 @@
         "constate"
       ],
       "reviewers": [
-        "team:obs-ux-logs-team"
+        "team:obs-onboarding-team"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-ux-logs",
+        "Team:obs-onboarding",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4350,13 +4377,13 @@
         "oniguruma-to-es"
       ],
       "reviewers": [
-        "team:obs-ux-logs-team"
+        "team:obs-onboarding-team"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
-        "Team:obs-ux-logs",
+        "Team:obs-onboarding",
         "release_note:skip",
         "backport:all-open"
       ],
@@ -4610,7 +4637,7 @@
         "@xyflow/react"
       ],
       "reviewers": [
-        "team:kibana-cloud-security-posture"
+        "team:contextual-security-apps"
       ],
       "matchBaseBranches": [
         "main"
@@ -4629,7 +4656,7 @@
         "@dagrejs/dagre"
       ],
       "reviewers": [
-        "team:kibana-cloud-security-posture"
+        "team:contextual-security-apps"
       ],
       "matchBaseBranches": [
         "main"
@@ -4735,9 +4762,28 @@
       "labels": [
         "Team:SharedUX",
         "release_note:skip",
-        "backport:current-major"
+        "backport:previous-minor"
       ],
       "minimumReleaseAge": "14 days",
+      "enabled": true
+    },
+    {
+      "groupName": "xml Format Util",
+      "matchDepNames": [
+        "xml-formatter"
+      ],
+      "reviewers": [
+        "team:security-threat-hunting"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Threat Hunting",
+        "release_note:skip",
+        "backport:skip"
+      ],
+      "minimumReleaseAge": "60 days",
       "enabled": true
     }
   ],

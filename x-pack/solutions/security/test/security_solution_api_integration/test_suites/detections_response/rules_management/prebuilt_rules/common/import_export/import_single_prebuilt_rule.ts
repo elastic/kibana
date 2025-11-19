@@ -6,6 +6,7 @@
  */
 
 import expect from 'expect';
+import { deleteAllRules } from '@kbn/detections-response-ftr-services';
 import {
   createHistoricalPrebuiltRuleAssetSavedObjects,
   createRuleAssetSavedObject,
@@ -17,7 +18,6 @@ import {
   importRulesWithSuccess,
   assertImportedRule,
 } from '../../../../utils';
-import { deleteAllRules } from '../../../../../../config/services/detections_response';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
@@ -48,6 +48,8 @@ export default ({ getService }: FtrProviderContext): void => {
         rule_source: {
           type: 'external',
           is_customized: false,
+          customized_fields: [],
+          has_base_version: true,
         },
       };
 
@@ -67,6 +69,8 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_source: {
                 type: 'external',
                 is_customized: false,
+                customized_fields: [],
+                has_base_version: true,
               },
             },
           });
@@ -91,6 +95,8 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_source: {
                 type: 'external',
                 is_customized: false,
+                customized_fields: [],
+                has_base_version: true,
               },
             },
           });
@@ -120,6 +126,8 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_source: {
                 type: 'external',
                 is_customized: false,
+                customized_fields: [],
+                has_base_version: true,
               },
             },
           });
@@ -135,6 +143,8 @@ export default ({ getService }: FtrProviderContext): void => {
         rule_source: {
           type: 'external',
           is_customized: true,
+          customized_fields: [{ field_name: 'name' }],
+          has_base_version: true,
         },
       };
 
@@ -154,6 +164,8 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_source: {
                 type: 'external',
                 is_customized: true,
+                customized_fields: [{ field_name: 'name' }],
+                has_base_version: true,
               },
             },
           });
@@ -178,6 +190,8 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_source: {
                 type: 'external',
                 is_customized: true,
+                customized_fields: [{ field_name: 'name' }],
+                has_base_version: true,
               },
             },
           });
@@ -207,6 +221,8 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_source: {
                 type: 'external',
                 is_customized: true,
+                customized_fields: [{ field_name: 'name' }],
+                has_base_version: true,
               },
             },
           });
@@ -238,6 +254,8 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_source: {
                 type: 'external',
                 is_customized: true,
+                customized_fields: [{ field_name: 'name' }],
+                has_base_version: true,
               },
             },
           });
@@ -353,6 +371,8 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: false,
+              customized_fields: [],
+              has_base_version: true,
             },
           },
         });
@@ -367,6 +387,8 @@ export default ({ getService }: FtrProviderContext): void => {
           rule_source: {
             type: 'external',
             is_customized: false,
+            customized_fields: [],
+            has_base_version: true,
           },
         };
 
@@ -438,6 +460,8 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: false,
+              customized_fields: [],
+              has_base_version: true,
             },
           },
         });
@@ -461,6 +485,8 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: false,
+              customized_fields: [],
+              has_base_version: true,
             },
           };
 
@@ -478,6 +504,8 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_source: {
                 type: 'external',
                 is_customized: false,
+                customized_fields: [],
+                has_base_version: true,
               },
             },
           });
@@ -499,6 +527,8 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: true,
+              customized_fields: [{ field_name: 'name' }],
+              has_base_version: true,
             },
           };
 
@@ -516,6 +546,8 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_source: {
                 type: 'external',
                 is_customized: true,
+                customized_fields: [{ field_name: 'name' }],
+                has_base_version: true,
               },
             },
           });
@@ -540,6 +572,8 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: false,
+              customized_fields: [],
+              has_base_version: true,
             },
           };
 
@@ -557,6 +591,8 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_source: {
                 type: 'external',
                 is_customized: false,
+                customized_fields: [],
+                has_base_version: true,
               },
             },
           });
@@ -580,6 +616,8 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: false,
+              customized_fields: [],
+              has_base_version: true,
             },
           };
 
@@ -597,6 +635,8 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_source: {
                 type: 'external',
                 is_customized: true,
+                customized_fields: [{ field_name: 'name' }],
+                has_base_version: true,
               },
             },
           });
@@ -628,6 +668,8 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: false,
+              customized_fields: [],
+              has_base_version: true,
             },
           };
 
@@ -645,6 +687,8 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_source: {
                 type: 'external',
                 is_customized: false,
+                customized_fields: [],
+                has_base_version: true,
               },
             },
           });
@@ -675,6 +719,8 @@ export default ({ getService }: FtrProviderContext): void => {
             rule_source: {
               type: 'external',
               is_customized: false,
+              customized_fields: [],
+              has_base_version: true,
             },
           };
 
@@ -692,6 +738,8 @@ export default ({ getService }: FtrProviderContext): void => {
               rule_source: {
                 type: 'external',
                 is_customized: true,
+                customized_fields: [{ field_name: 'name' }],
+                has_base_version: true,
               },
             },
           });

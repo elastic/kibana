@@ -208,7 +208,7 @@ export function getAlertPanelsByCategory(
                     Legacy.shims.uiSettings.get('dateFormat:tz')
                   )}
                 >
-                  <EuiText size="s">
+                  <EuiText size="s" tabIndex={0}>
                     {getDateFromNow(
                       alertState.state.ui.triggeredMS,
                       Legacy.shims.uiSettings.get('dateFormat:tz')

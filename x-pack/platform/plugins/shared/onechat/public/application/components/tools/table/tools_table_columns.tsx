@@ -15,7 +15,11 @@ import { ToolContextMenu } from './tools_table_context_menu';
 import { ToolIdWithDescription } from './tools_table_id';
 import { ToolQuickActions } from './tools_table_quick_actions';
 
-export const getToolsTableColumns = (): Array<EuiBasicTableColumn<ToolDefinition>> => {
+export const getToolsTableColumns = ({
+  canManageTools,
+}: {
+  canManageTools: boolean;
+}): Array<EuiBasicTableColumn<ToolDefinition>> => {
   return [
     // Readonly indicator
     {
@@ -40,7 +44,7 @@ export const getToolsTableColumns = (): Array<EuiBasicTableColumn<ToolDefinition
       align: 'right',
       render: (tool: ToolDefinition) => (
         <EuiFlexGroup gutterSize="s" justifyContent="flexEnd" alignItems="center">
-          {!tool.readonly && <ToolQuickActions tool={tool} />}
+          {!tool.readonly && canManageTools && <ToolQuickActions tool={tool} />}
           <ToolContextMenu tool={tool} />
         </EuiFlexGroup>
       ),

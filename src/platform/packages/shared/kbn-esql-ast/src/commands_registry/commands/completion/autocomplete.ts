@@ -8,23 +8,32 @@
  */
 import { i18n } from '@kbn/i18n';
 import { uniqBy } from 'lodash';
-import { withAutoSuggest } from '../../../definitions/utils/autocomplete/helpers';
+import { suggestForExpression } from '../../../definitions/utils';
 import type * as ast from '../../../types';
+import type { MapParameters } from '../../../definitions/utils/autocomplete/map_expression';
 import { getCommandMapExpressionSuggestions } from '../../../definitions/utils/autocomplete/map_expression';
 import { EDITOR_MARKER } from '../../../definitions/constants';
-import type { ESQLCommand, ESQLAstCompletionCommand } from '../../../types';
+import type { ESQLAstCompletionCommand, ESQLAstAllCommands } from '../../../types';
+import { isFunctionExpression } from '../../../ast/is';
+import { within } from '../../../ast/location';
 import {
   pipeCompleteItem,
   assignCompletionItem,
   getNewUserDefinedColumnSuggestion,
   withCompleteItem,
+  withMapCompleteItem,
 } from '../../complete_items';
 import {
-  getFieldsOrFunctionsSuggestions,
+  getFieldsSuggestions,
+  getFunctionsSuggestions,
+  getLiteralsSuggestions,
+} from '../../../definitions/utils';
+import {
   findFinalWord,
   handleFragment,
   columnExists,
   createInferenceEndpointToCompletionItem,
+  withAutoSuggest,
 } from '../../../definitions/utils/autocomplete/helpers';
 import { buildConstantsDefinitions } from '../../../definitions/utils/literals';
 import {
@@ -36,25 +45,35 @@ import {
 import { ESQL_VARIABLES_PREFIX } from '../../constants';
 import { getExpressionType, isExpressionComplete } from '../../../definitions/utils/expressions';
 import { getFunctionDefinition } from '../../../definitions/utils/functions';
-import { getInsideFunctionsSuggestions } from '../../../definitions/utils/autocomplete/functions';
 
 export enum CompletionPosition {
   AFTER_COMPLETION = 'after_completion',
   AFTER_TARGET_ID = 'after_target_id',
   AFTER_PROMPT_OR_TARGET = 'after_prompt_or_target',
   AFTER_PROMPT = 'after_prompt',
+  AFTER_WITH_KEYWORD = 'after_with_keyword',
   WITHIN_MAP_EXPRESSION = 'within_map_expression',
   AFTER_COMMAND = 'after_command',
 }
 
 function getPosition(
   query: string,
-  command: ESQLCommand,
-  context?: ICommandContext
+  command: ESQLAstAllCommands,
+  context?: ICommandContext,
+  cursorPosition?: number
 ): CompletionPosition | undefined {
   const { prompt, targetField } = command as ESQLAstCompletionCommand;
 
-  const paramsMap = command.args[1] as ast.ESQLMap | undefined;
+  const arg1 = command.args[1];
+  let paramsMap: ast.ESQLMap | undefined;
+
+  if (arg1 && 'type' in arg1 && arg1.type === 'option') {
+    paramsMap = (arg1 as ast.ESQLCommandOption).args[0] as ast.ESQLMap;
+
+    if (paramsMap && paramsMap.incomplete && !paramsMap.text) {
+      return CompletionPosition.AFTER_WITH_KEYWORD;
+    }
+  }
 
   if (paramsMap?.text && paramsMap.incomplete) {
     return CompletionPosition.WITHIN_MAP_EXPRESSION;
@@ -66,8 +85,13 @@ function getPosition(
 
   const expressionRoot = prompt?.text !== EDITOR_MARKER ? prompt : undefined;
   const expressionType = getExpressionType(expressionRoot, context?.columns);
+  const insideFunction =
+    expressionRoot &&
+    isFunctionExpression(expressionRoot) &&
+    cursorPosition !== undefined &&
+    within(cursorPosition, expressionRoot);
 
-  if (isExpressionComplete(expressionType, query)) {
+  if (isExpressionComplete(expressionType, query) && !insideFunction) {
     return CompletionPosition.AFTER_PROMPT;
   }
 
@@ -92,10 +116,10 @@ const promptSnippetText = `"$\{0:${promptText}}"`;
 
 export async function autocomplete(
   query: string,
-  command: ESQLCommand,
+  command: ESQLAstAllCommands,
   callbacks?: ICommandCallbacks,
   context?: ICommandContext,
-  cursorPosition?: number
+  cursorPosition: number = query.length
 ): Promise<ISuggestionItem[]> {
   if (!callbacks?.getByType) {
     return [];
@@ -103,39 +127,66 @@ export async function autocomplete(
 
   const innerText = query.substring(0, cursorPosition);
   const { prompt } = command as ESQLAstCompletionCommand;
-  const position = getPosition(innerText, command, context);
+  const position = getPosition(innerText, command, context, cursorPosition);
 
   const endpoints = context?.inferenceEndpoints;
 
-  const functionsSpecificSuggestions = await getInsideFunctionsSuggestions(
-    innerText,
-    cursorPosition,
-    callbacks,
-    context
-  );
+  // Only call suggestForExpression if cursor is inside the prompt expression
+  if (prompt && cursorPosition <= prompt.location.max) {
+    const functionsSpecificSuggestions = await suggestForExpression({
+      query,
+      expressionRoot: prompt,
+      command,
+      cursorPosition,
+      location: Location.COMPLETION,
+      context,
+      callbacks,
+    });
 
-  if (functionsSpecificSuggestions?.length) {
-    return functionsSpecificSuggestions;
+    if (functionsSpecificSuggestions.length > 0) {
+      return functionsSpecificSuggestions;
+    }
   }
 
   switch (position) {
     case CompletionPosition.AFTER_COMPLETION:
     case CompletionPosition.AFTER_TARGET_ID: {
-      const fieldsAndFunctionsSuggestions = uniqBy(
-        await getFieldsOrFunctionsSuggestions(
-          ['text', 'keyword', 'unknown'],
-          Location.COMPLETION,
-          callbacks?.getByType,
-          {
-            functions: true,
-            columns: true,
-          },
-          {},
-          callbacks?.hasMinimumLicenseRequired,
-          context?.activeProduct
-        ),
-        'label'
+      const types = ['text', 'keyword', 'unknown'];
+      const allSuggestions: ISuggestionItem[] = [];
+
+      // Fields
+      allSuggestions.push(
+        ...(await getFieldsSuggestions(types, callbacks?.getByType, {
+          ignoreColumns: [],
+          values: false,
+          addSpaceAfterField: false,
+          openSuggestions: false,
+          promoteToTop: true,
+        }))
       );
+
+      // Date literals (policy-gated in helpers) with explicit UI options
+      allSuggestions.push(
+        ...getLiteralsSuggestions(types, Location.COMPLETION, {
+          includeDateLiterals: true,
+          includeCompatibleLiterals: false,
+          addComma: false,
+          advanceCursorAndOpenSuggestions: false,
+        })
+      );
+
+      // Functions
+      allSuggestions.push(
+        ...getFunctionsSuggestions({
+          location: Location.COMPLETION,
+          types,
+          options: { ignored: [] },
+          context,
+          callbacks,
+        })
+      );
+
+      const fieldsAndFunctionsSuggestions = uniqBy(allSuggestions, 'label');
 
       const suggestions = await handleFragment(
         innerText,
@@ -202,9 +253,15 @@ export async function autocomplete(
       ];
     }
 
+    case CompletionPosition.AFTER_WITH_KEYWORD:
+      return [withMapCompleteItem];
+
     case CompletionPosition.WITHIN_MAP_EXPRESSION:
-      const availableParameters = {
-        inference_id: endpoints?.map(createInferenceEndpointToCompletionItem) || [],
+      const availableParameters: MapParameters = {
+        inference_id: {
+          type: 'string',
+          suggestions: endpoints?.map(createInferenceEndpointToCompletionItem) || [],
+        },
       };
 
       return getCommandMapExpressionSuggestions(innerText, availableParameters);

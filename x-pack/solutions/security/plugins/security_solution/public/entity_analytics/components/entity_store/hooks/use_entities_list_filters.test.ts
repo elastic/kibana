@@ -12,12 +12,6 @@ import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/type
 import { CriticalityLevels } from '../../../../../common/constants';
 import { RiskSeverity } from '../../../../../common/search_strategy';
 import { EntitySourceTag } from '../types';
-import { mockGlobalState } from '../../../../common/mock';
-
-const mockedExperimentalFeatures = mockGlobalState.app.enableExperimental;
-jest.mock('../../../../common/hooks/use_experimental_features', () => ({
-  useEnableExperimental: () => ({ ...mockedExperimentalFeatures }),
-}));
 
 const mockUseUiSettings = jest.fn().mockReturnValue([true]);
 jest.mock('@kbn/kibana-react-plugin/public', () => {

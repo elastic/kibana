@@ -18,37 +18,21 @@ import { useSelector } from '@xstate5/react';
 import { useFirstMountState } from 'react-use/lib/useFirstMountState';
 import { css } from '@emotion/react';
 import useToggle from 'react-use/lib/useToggle';
-import type { StreamlangStepWithUIAttributes } from '@kbn/streamlang';
 import { i18n } from '@kbn/i18n';
-import type { StreamEnrichmentContextType } from '../../../state_management/stream_enrichment_state_machine';
 import { useStreamEnrichmentSelector } from '../../../state_management/stream_enrichment_state_machine';
 import { getStepPanelColour } from '../../../utils';
+import type { StepConfigurationProps } from '../../steps_list';
 import { StepsListItem } from '../../steps_list';
 import { WhereBlockConfiguration } from './configuration';
 import { WhereBlockSummary } from './summary';
 import { ConnectedNodesList } from './connected_nodes_list';
 import { isRootStep, isStepUnderEdit } from '../../../state_management/steps_state_machine';
-import {
-  collectDescendantIds,
-  type RootLevelMap,
-} from '../../../state_management/stream_enrichment_state_machine/utils';
+import { collectDescendantIds } from '../../../state_management/stream_enrichment_state_machine/utils';
 import { BlockDisableOverlay } from '../block_disable_overlay';
-import type { StepsProcessingSummaryMap } from '../../../state_management/use_steps_processing_summary';
 import { NestedChildrenProcessingSummary } from './nested_children_processing_summary';
 
-export const WhereBlock = ({
-  stepRef,
-  level,
-  stepUnderEdit,
-  rootLevelMap,
-  stepsProcessingSummaryMap,
-}: {
-  stepRef: StreamEnrichmentContextType['stepRefs'][number];
-  level: number;
-  rootLevelMap: RootLevelMap;
-  stepUnderEdit?: StreamlangStepWithUIAttributes;
-  stepsProcessingSummaryMap?: StepsProcessingSummaryMap;
-}) => {
+export const WhereBlock = (props: StepConfigurationProps) => {
+  const { stepRef, stepUnderEdit, rootLevelMap, stepsProcessingSummaryMap, level } = props;
   const { euiTheme } = useEuiTheme();
   const stepRefs = useStreamEnrichmentSelector((state) => state.context.stepRefs);
   const isFirstMount = useFirstMountState();
@@ -95,8 +79,7 @@ export const WhereBlock = ({
         color={isUnderEdit && isRootStepValue ? undefined : panelColour}
         css={
           isUnderEdit
-            ? // eslint-disable-next-line @elastic/eui/no-css-color
-              css`
+            ? css`
                 border: 1px solid ${euiTheme.colors.borderStrongPrimary};
                 box-sizing: border-box;
               `
@@ -143,12 +126,7 @@ export const WhereBlock = ({
                     overflow: hidden;
                   `}
                 >
-                  <WhereBlockSummary
-                    stepRef={stepRef}
-                    stepUnderEdit={stepUnderEdit}
-                    rootLevelMap={rootLevelMap}
-                    level={level}
-                  />
+                  <WhereBlockSummary {...props} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
@@ -168,7 +146,7 @@ export const WhereBlock = ({
           <>
             <EuiSpacer size="s" />
             <ConnectedNodesList>
-              {childSteps.map((childStep) => (
+              {childSteps.map((childStep, index) => (
                 <li key={childStep.id}>
                   <StepsListItem
                     stepRef={childStep}
@@ -176,6 +154,8 @@ export const WhereBlock = ({
                     stepUnderEdit={stepUnderEdit}
                     rootLevelMap={rootLevelMap}
                     stepsProcessingSummaryMap={stepsProcessingSummaryMap}
+                    isFirstStepInLevel={index === 0}
+                    isLastStepInLevel={index === childSteps.length - 1}
                   />
                 </li>
               ))}

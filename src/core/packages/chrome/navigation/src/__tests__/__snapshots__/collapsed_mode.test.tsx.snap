@@ -3,28 +3,31 @@
 exports[`Collapsed mode should render the side navigation 1`] = `
 <div>
   <div
-    class="css-6vezlj-Navigation"
-    data-test-subj="navigation-root"
+    class="css-y5yq76-navigationWrapperStyles"
+    data-test-subj="kbnChromeNav-root"
+    id="kbnChromeNav-root"
   >
     <div
-      class="side-nav css-atvxkx-SideNav"
+      class="kbnChromeNav-root css-8ys6by-getWrapperStyles"
     >
       <span
         class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
       >
         <div
-          class="css-18bgeak-wrapperStyles"
+          class="css-uf4ax2-wrapperStyles"
+          data-test-subj="kbnChromeNav-logoWrapper"
         >
           <a
             aria-label="Solution homepage"
-            class="css-z664ou-buttonStyles"
+            class="css-12vu9wt-buttonStyles"
             data-highlighted="false"
             data-menu-item="true"
-            data-test-subj="sideNavLogo"
+            data-test-subj="kbnChromeNav-logo"
             href="/"
+            id="home"
           >
             <div
-              class="iconWrapper"
+              class="kbnChromeNav-iconWrapper"
             >
               <span
                 aria-hidden="true"
@@ -41,12 +44,12 @@ exports[`Collapsed mode should render the side navigation 1`] = `
         </div>
       </span>
       <nav
-        aria-label="Main navigation"
-        class="css-1saqly-SideNavPrimaryMenu"
-        id="primary-navigation"
+        aria-label="Main"
+        class="css-1d7jr1a-getPrimaryMenuStyles"
+        id="kbnChromeNav-primaryNavigation"
       >
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -56,15 +59,17 @@ exports[`Collapsed mode should render the side navigation 1`] = `
             >
               <a
                 aria-haspopup="false"
-                class="css-z664ou-buttonStyles"
+                class="css-12vu9wt-buttonStyles"
                 data-highlighted="false"
                 data-menu-item="true"
-                data-test-subj="sideNavPrimaryMenuItem-dashboards"
+                data-test-subj="kbnChromeNav-primaryItem-dashboards"
                 href="/dashboards"
+                id="dashboards"
                 label="Dashboards"
+                tabindex="0"
               >
                 <div
-                  class="iconWrapper"
+                  class="kbnChromeNav-iconWrapper"
                 >
                   <span
                     aria-hidden="true"
@@ -82,7 +87,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -92,15 +97,17 @@ exports[`Collapsed mode should render the side navigation 1`] = `
             >
               <a
                 aria-haspopup="false"
-                class="css-z664ou-buttonStyles"
+                class="css-12vu9wt-buttonStyles"
                 data-highlighted="false"
                 data-menu-item="true"
-                data-test-subj="sideNavPrimaryMenuItem-discover"
+                data-test-subj="kbnChromeNav-primaryItem-discover"
                 href="/discover"
+                id="discover"
                 label="Discover"
+                tabindex="-1"
               >
                 <div
-                  class="iconWrapper"
+                  class="kbnChromeNav-iconWrapper"
                 >
                   <span
                     aria-hidden="true"
@@ -118,7 +125,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -126,15 +133,17 @@ exports[`Collapsed mode should render the side navigation 1`] = `
             <a
               aria-expanded="false"
               aria-haspopup="true"
-              class="css-z664ou-buttonStyles"
+              class="css-12vu9wt-buttonStyles"
               data-highlighted="false"
               data-menu-item="true"
-              data-test-subj="sideNavPrimaryMenuItem-apps_overview"
+              data-test-subj="kbnChromeNav-primaryItem-apps_overview"
               href="/apps_overview"
+              id="apps_overview"
               label="Apps"
+              tabindex="-1"
             >
               <div
-                class="iconWrapper"
+                class="kbnChromeNav-iconWrapper"
               >
                 <span
                   aria-hidden="true"
@@ -152,11 +161,11 @@ exports[`Collapsed mode should render the side navigation 1`] = `
         </div>
       </nav>
       <footer
-        aria-label="Side navigation footer"
-        class="css-5bzxab-SideNavFooter"
+        aria-label="Side navigation"
+        class="css-1q4tj4c-getWrapperStyles"
       >
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -167,9 +176,10 @@ exports[`Collapsed mode should render the side navigation 1`] = `
               <a
                 aria-haspopup="false"
                 aria-label="Getting started"
-                class="euiButtonIcon emotion-euiButtonIcon-s-empty-text"
+                class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-buttonStyles"
                 data-highlighted="false"
-                data-test-subj="footerMenuItem-getting_started"
+                data-menu-item="true"
+                data-test-subj="kbnChromeNav-footerItem-getting_started"
                 href="/getting-started"
                 rel="noreferrer"
                 tabindex="0"
@@ -185,7 +195,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -196,9 +206,10 @@ exports[`Collapsed mode should render the side navigation 1`] = `
               <a
                 aria-haspopup="false"
                 aria-label="Developer tools"
-                class="euiButtonIcon emotion-euiButtonIcon-s-empty-text"
+                class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-buttonStyles"
                 data-highlighted="false"
-                data-test-subj="footerMenuItem-developer_tools"
+                data-menu-item="true"
+                data-test-subj="kbnChromeNav-footerItem-developer_tools"
                 href="/developer-tools"
                 rel="noreferrer"
                 tabindex="-1"
@@ -214,7 +225,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -226,9 +237,10 @@ exports[`Collapsed mode should render the side navigation 1`] = `
                 aria-expanded="false"
                 aria-haspopup="true"
                 aria-label="Settings"
-                class="euiButtonIcon emotion-euiButtonIcon-s-empty-text"
+                class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-buttonStyles"
                 data-highlighted="false"
-                data-test-subj="footerMenuItem-integrations"
+                data-menu-item="true"
+                data-test-subj="kbnChromeNav-footerItem-integrations"
                 href="/integrations"
                 rel="noreferrer"
                 tabindex="-1"
@@ -244,7 +256,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -255,9 +267,10 @@ exports[`Collapsed mode should render the side navigation 1`] = `
               <a
                 aria-haspopup="false"
                 aria-label="Fourth item"
-                class="euiButtonIcon emotion-euiButtonIcon-s-empty-text"
+                class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-buttonStyles"
                 data-highlighted="false"
-                data-test-subj="footerMenuItem-fourth_item"
+                data-menu-item="true"
+                data-test-subj="kbnChromeNav-footerItem-fourth_item"
                 href="/fourth-item"
                 rel="noreferrer"
                 tabindex="-1"
@@ -273,7 +286,7 @@ exports[`Collapsed mode should render the side navigation 1`] = `
           </div>
         </div>
         <div
-          class="css-mtld32-SideNavPopover"
+          class="css-1y7bpvk-wrapperStyles"
         >
           <div
             class="euiPopover emotion-euiPopover-block"
@@ -284,9 +297,10 @@ exports[`Collapsed mode should render the side navigation 1`] = `
               <a
                 aria-haspopup="false"
                 aria-label="Fifth item"
-                class="euiButtonIcon emotion-euiButtonIcon-s-empty-text"
+                class="euiButtonIcon emotion-euiButtonIcon-s-empty-text-buttonStyles"
                 data-highlighted="false"
-                data-test-subj="footerMenuItem-fifth_item"
+                data-menu-item="true"
+                data-test-subj="kbnChromeNav-footerItem-fifth_item"
                 href="/fourth-item"
                 rel="noreferrer"
                 tabindex="-1"

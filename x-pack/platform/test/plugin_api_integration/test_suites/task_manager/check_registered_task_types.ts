@@ -58,6 +58,7 @@ export default function ({ getService }: FtrProviderContext) {
         'ProductDocBase:InstallAll',
         'ProductDocBase:UninstallAll',
         'SLO:ORPHAN_SUMMARIES-CLEANUP-TASK',
+        'SampleDataIngest:InstallSampleData',
         'Synthetics:Clean-Up-Package-Policies',
         'Synthetics:Sync-Private-Location-Monitors',
         'UPTIME:SyntheticsService:Sync-Saved-Monitor-Objects',
@@ -91,6 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
         'actions:.tines',
         'actions:.torq',
         'actions:.webhook',
+        'actions:.workflows',
         'actions:.xmatters',
         'actions:.xsoar',
         'actions:connector_usage_reporting',
@@ -153,6 +155,7 @@ export default function ({ getService }: FtrProviderContext) {
         'cai:cases_analytics_index_scheduler',
         'cai:cases_analytics_index_synchronization',
         'cases-telemetry-task',
+        'cases_incremental_id_assignment',
         'cloud_security_posture-stats_task',
         'dashboard_telemetry',
         'endpoint:complete-external-response-actions',
@@ -171,6 +174,7 @@ export default function ({ getService }: FtrProviderContext) {
         'fleet:deploy_agent_policies',
         'fleet:migrate_action:retry',
         'fleet:packages-bulk-operations',
+        'fleet:privilege_level_change:retry',
         'fleet:reassign_action:retry',
         'fleet:request_diagnostics:retry',
         'fleet:setup',
@@ -211,6 +215,9 @@ export default function ({ getService }: FtrProviderContext) {
         'task_manager:delete_inactive_background_task_nodes',
         'task_manager:mark_removed_tasks_as_unrecognized',
         'unusedUrlsCleanupTask',
+        'workflow:resume',
+        'workflow:run',
+        'workflow:scheduled',
       ]);
     });
   });

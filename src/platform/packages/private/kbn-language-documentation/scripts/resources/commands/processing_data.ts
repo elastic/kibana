@@ -93,6 +93,17 @@ COMPLETION [column =] prompt WITH inference_id
 * \`prompt\`: The input text or expression that will be used as the prompt for the completion. This can be a string literal or a reference to a column containing text.
 * \`inference_id\`: The ID of the inference endpoint to use for text completion. The inference endpoint must be configured with the \`completion\` task type.
 
+**Best practices**
+
+Every row processed by the COMPLETION command generates a separate API call to the LLM endpoint.
+
+Be careful to test with small datasets first before running on production data or in automated workflows, to avoid unexpected costs.
+
+1. **Start with dry runs**: Validate your query logic and row counts by running without \`COMPLETION\` initially. Use \`| STATS count = COUNT(*)\` to check result size.
+2. **Filter first**: Use \`WHERE\` clauses to limit rows before applying \`COMPLETION\`.
+3. **Test with \`LIMIT\`**: Always start with a low \`LIMIT\` and gradually increase.
+4. **Monitor usage**: Track your LLM API consumption and costs.
+
 **Examples**
 
 The following is a basic example with an inline prompt:
@@ -347,6 +358,80 @@ FROM books METADATA _score
     preview: true,
   },
   {
+    name: 'fuse',
+    labelDefaultMessage: 'FUSE',
+    descriptionDefaultMessage: `### FUSE
+
+The \`FUSE\` [processing command](https://www.elastic.co/docs/reference/query-languages/esql/commands/processing-commands) merges rows from multiple result sets and assigns new relevance scores. \`FUSE\` is for search use cases. Learn more about [how search works in ES|QL](https://www.elastic.co/docs/solutions/search/esql-for-search#how-search-works-in-esql).
+
+Together with \`FORK\`, \`FUSE\` enables [hybrid search](https://www.elastic.co/docs/reference/query-languages/esql/esql-search-tutorial#perform-hybrid-search) to combine and score results from multiple queries.
+
+\`FUSE\` works by:
+
+1. Merging rows with matching \`<key_columns>\` values
+2. Assigning new relevance scores using the specified \`<fuse_method>\` algorithm and the values from the \`<group_column>\` and \`<score_column>\`
+#### Syntax
+
+Use default parameters:
+
+\`\`\` esql
+FUSE
+\`\`\`
+
+Specify custom parameters:
+
+\`\`\` esql
+FUSE <fuse_method> SCORE BY <score_column> GROUP BY <group_column> KEY BY <key_columns> WITH <options>
+\`\`\`
+
+#### Parameters
+
+\`fuse_method\`
+:   Defaults to \`RRF\`. Can be one of \`RRF\` (for [Reciprocal Rank Fusion](https://cormack.uwaterloo.ca/cormacksigir09-rrf.pdf)) or \`LINEAR\` (for linear combination of scores). Designates which method to use to assign new relevance scores.
+
+\`score_column\`
+:   Defaults to \`_score\`. Designates which column to use to retrieve the relevance scores of the input row and where to output the new relevance scores of the merged rows.
+
+\`group_column\`
+:   Defaults to \`_fork\`. Designates which column represents the result set.
+
+\`key_columns\`
+:   Defaults to \`_id, _index\`. Rows with matching values for these columns are merged.
+
+\`options\`
+:   Options for the \`fuse_method\`.
+
+\`rank_constant\`
+:   Defaults to \`60\`. Represents the \`rank_constant\` used in the RRF formula.
+
+\`weights\`
+:   Defaults to \'\{\}\' (empty object). Allows you to set different weights based on \`group_column\` values.
+
+\`normalizer\`
+:   Defaults to \`none\`. Can be one of \`none\` or \`minmax\`. Specifies which score normalization method to apply.
+
+#### Examples
+
+- Use RRF to merge two ranked result sets.
+
+\`\`\` esql
+FROM books METADATA _id, _index, _score
+| FORK (WHERE title:"Shakespeare" | SORT _score DESC)
+       (WHERE semantic_title:"Shakespeare" | SORT _score DESC)
+| FUSE
+\`\`\`
+
+Refer to the [reference documentation](https://www.elastic.co/docs/reference/query-languages/esql/commands/fuse) for more information, including additional examples and limitations.
+            `,
+    descriptionOptions: {
+      description:
+        'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+      ignoreTag: true,
+    },
+    openLinksInNewTab: true,
+    preview: true,
+  },
+  {
     name: 'grok',
     labelDefaultMessage: 'GROK',
     descriptionDefaultMessage: `### GROK
@@ -364,6 +449,154 @@ ROW a = "12 15.5 15.6 true"
         'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
     },
     openLinksInNewTab: true,
+  },
+  {
+    name: 'inline_stats',
+    labelDefaultMessage: 'INLINE STATS',
+    descriptionDefaultMessage: `### INLINE STATS
+\`INLINE STATS\` groups rows according to a common value
+and calculates one or more aggregated values over the grouped rows. The results
+are appended as new columns to the input rows.
+
+The command is identical to [\`STATS\`](https://www.elastic.co/docs/reference/query-languages/esql/commands/stats-by) except that it preserves all the columns from the input table.
+
+\`\`\` esql
+INLINE STATS [column1 =] expression1 [WHERE boolean_expression1][,
+      ...,
+      [columnN =] expressionN [WHERE boolean_expressionN]]
+      [BY [grouping_name1 =] grouping_expression1[,
+          ...,
+          [grouping_nameN = ] grouping_expressionN]]
+\`\`\`
+
+**Parameters**
+
+\`columnX\`
+:   The name by which the aggregated value is returned. If omitted, the name is
+    equal to the corresponding expression (\`expressionX\`).
+    If multiple columns have the same name, all but the rightmost column with this
+    name will be ignored.
+
+\`expressionX\`
+:   An expression that computes an aggregated value.
+
+\`grouping_expressionX\`
+:   An expression that outputs the values to group by.
+    If its name coincides with one of the existing or computed columns, that column will be overridden by this one.
+
+\`boolean_expressionX\`
+:   The condition that determines which rows are included when evaluating \`expressionX\`.
+
+NOTE: Individual \`null\` values are skipped when computing aggregations.
+
+**Description**
+
+The \`INLINE STATS\` processing command groups rows according to a common value
+(also known as the grouping key), specified after \`BY\`, and calculates one or more
+aggregated values over the grouped rows. The output table contains the same
+number of rows as the input table. The command only adds new columns or overrides
+existing columns with the same name as the result.
+
+If column names overlap, existing column values may be overridden and column order
+may change. The new columns are added/moved so that they appear in the order
+they are defined in the \`INLINE STATS\` command.
+
+For the calculation of each aggregated value, the rows in a group can be filtered with
+\`WHERE\`. If \`BY\` is omitted the aggregations are applied over the entire dataset.
+
+Refer to the [documentation](https://www.elastic.co/docs/reference/query-languages/esql/commands/inlinestats-by) for the list of supported aggregation and grouping functions.
+
+**Limitations**
+
+- The [\`CATEGORIZE\`](/reference/query-languages/esql/functions-operators/grouping-functions.md#esql-categorize) grouping function is not currently supported.
+- \`INLINE STATS\` cannot yet have an unbounded [\`SORT\`](/reference/query-languages/esql/commands/sort.md) before it.
+You must either move the SORT after it, or add a [\`LIMIT\`](/reference/query-languages/esql/commands/limit.md) before the [\`SORT\`](/reference/query-languages/esql/commands/sort.md).
+
+**Examples**
+
+The following example shows how to calculate a statistic on one column and group
+by the values of another column.
+
+NOTE:
+The \`languages\` column moves to the last position in the output table because it is
+a column overridden by the \`INLINE STATS\` command (it's the grouping key) and it is the last column defined by it.
+
+\`\`\`esql
+FROM employees
+| KEEP emp_no, languages, salary
+| INLINE STATS max_salary = MAX(salary) BY languages
+\`\`\`
+
+| emp_no:integer | salary:integer | max_salary:integer | languages:integer |
+| --- | --- | --- | --- |
+| 10001 | 57305 | 73578 | 2 |
+| 10002 | 56371 | 66817 | 5 |
+| 10003 | 61805 | 74572 | 4 |
+| 10004 | 36174 | 66817 | 5 |
+| 10005 | 63528 | 73717 | 1 |
+
+The following example shows how to calculate an aggregation over the entire dataset
+by omitting \`BY\`. The order of the existing columns is preserved and a new column
+with the calculated maximum salary value is added as the last column:
+
+\`\`\`esql
+FROM employees
+| KEEP emp_no, languages, salary
+| INLINE STATS max_salary = MAX(salary)
+\`\`\`
+
+| emp_no:integer | languages:integer | salary:integer | max_salary:integer |
+| --- | --- | --- | --- |
+| 10001 | 2 | 57305 | 74999 |
+| 10002 | 5 | 56371 | 74999 |
+| 10003 | 4 | 61805 | 74999 |
+| 10004 | 5 | 36174 | 74999 |
+| 10005 | 1 | 63528 | 74999 |
+
+The following example shows how to calculate multiple aggregations with multiple grouping keys:
+
+\`\`\`esql
+FROM employees
+| WHERE still_hired
+| KEEP emp_no, languages, salary, hire_date
+| EVAL tenure = DATE_DIFF("year", hire_date, "2025-09-18T00:00:00")
+| DROP hire_date
+| INLINE STATS avg_salary = AVG(salary), count = count(*) BY languages, tenure
+\`\`\`
+
+| emp_no:integer | salary:integer | avg_salary:double | count:long | languages:integer | tenure:integer |
+| --- | --- | --- | --- | --- | --- |
+| 10001 | 57305 | 51130.5 | 2 | 2 | 39 |
+| 10002 | 56371 | 40180.0 | 3 | 5 | 39 |
+| 10004 | 36174 | 30749.0 | 2 | 5 | 38 |
+| 10005 | 63528 | 63528.0 | 1 | 1 | 36 |
+| 10007 | 74572 | 58644.0 | 2 | 4 | 36 |
+
+The following example shows how to filter which rows are used for each aggregation, using the \`WHERE\ clause:
+
+\`\`\`esql
+FROM employees
+| KEEP emp_no, salary
+| INLINE STATS avg_lt_50 = ROUND(AVG(salary)) WHERE salary < 50000,
+               avg_lt_60 = ROUND(AVG(salary)) WHERE salary >=50000 AND salary < 60000,
+               avg_gt_60 = ROUND(AVG(salary)) WHERE salary >= 60000
+\`\`\`
+
+| emp_no:integer | salary:integer | avg_lt_50:double | avg_lt_60:double | avg_gt_60:double |
+| --- | --- | --- | --- | --- |
+| 10001 | 57305 | 38292.0 | 54221.0 | 67286.0 |
+| 10002 | 56371 | 38292.0 | 54221.0 | 67286.0 |
+| 10003 | 61805 | 38292.0 | 54221.0 | 67286.0 |
+| 10004 | 36174 | 38292.0 | 54221.0 | 67286.0 |
+| 10005 | 63528 | 38292.0 | 54221.0 | 67286.0 |
+            `,
+    descriptionOptions: {
+      description:
+        'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+      ignoreTag: true,
+    },
+    openLinksInNewTab: true,
+    preview: true,
   },
   {
     name: 'keep',

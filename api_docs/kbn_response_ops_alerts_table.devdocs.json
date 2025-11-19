@@ -10,7 +10,7 @@
         "tags": [],
         "label": "AlertsTable",
         "description": [
-          "\nAn `EuiDataGrid` abstraction to render alert documents\n\nIt manages the paginated and cached fetching of alerts based on the\nprovided `ruleTypeIds` and `consumers` (the final query can be refined\nthrough the `query` and `initialSort` props). The `id` prop is required in order\nto persist the table state in `localStorage`\n"
+          "\nAn `EuiDataGrid` abstraction to render alert documents\n\nIt manages the paginated and cached fetching of alerts based on the\nprovided `ruleTypeIds` and `consumers` (the final query can be refined\nthrough the `query` and `sort` props). The `id` prop is required in order\nto persist the table state in `localStorage`\n"
         ],
         "signature": [
           "<AC extends ",
@@ -50,7 +50,7 @@
         "tags": [],
         "label": "AlertsTable",
         "description": [
-          "\nAn `EuiDataGrid` abstraction to render alert documents\n\nIt manages the paginated and cached fetching of alerts based on the\nprovided `ruleTypeIds` and `consumers` (the final query can be refined\nthrough the `query` and `initialSort` props). The `id` prop is required in order\nto persist the table state in `localStorage`\n"
+          "\nAn `EuiDataGrid` abstraction to render alert documents\n\nIt manages the paginated and cached fetching of alerts based on the\nprovided `ruleTypeIds` and `consumers` (the final query can be refined\nthrough the `query` and `sort` props). The `id` prop is required in order\nto persist the table state in `localStorage`\n"
         ],
         "signature": [
           "<AC extends ",

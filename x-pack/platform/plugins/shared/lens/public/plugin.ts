@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { AppMountParameters, CoreSetup, CoreStart } from '@kbn/core/public';
-import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
+import type { AppMountParameters, CoreSetup, CoreStart, DocLinksStart } from '@kbn/core/public';
 import type { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
   UsageCollectionSetup,
@@ -16,9 +15,7 @@ import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type {
   ExpressionsServiceSetup,
   ExpressionsSetup,
@@ -31,19 +28,10 @@ import {
   DASHBOARD_VISUALIZATION_PANEL_TRIGGER,
   ACTION_CONVERT_AGG_BASED_TO_LENS,
 } from '@kbn/visualizations-plugin/public';
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
 import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
 import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
-import type {
-  EventAnnotationPluginStart,
-  EventAnnotationServiceType,
-} from '@kbn/event-annotation-plugin/public';
-import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
-import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
-import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import type { UiActionsStart, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import {
   ACTION_VISUALIZE_FIELD,
@@ -56,20 +44,40 @@ import {
   AGG_BASED_VISUALIZATION_TRIGGER,
 } from '@kbn/visualizations-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { AdvancedUiActionsSetup } from '@kbn/ui-actions-enhanced-plugin/public';
-import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { SharePluginSetup, SharePluginStart, ExportShare } from '@kbn/share-plugin/public';
+import type { SharePluginSetup, ExportShare, SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   ContentManagementPublicSetup,
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { ChartType } from '@kbn/visualization-utils';
-import type { ServerlessPluginStart } from '@kbn/serverless/public';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import type {
+  VisualizationType,
+  LensAppLocator,
+  DatasourceMap,
+  VisualizationMap,
+  LensTopNavMenuEntryGenerator,
+  VisualizeEditorContext,
+  EditorFrameSetup,
+  LensDocument,
+  LensByRefSerializedState,
+} from '@kbn/lens-common';
+import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
+import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
+import type { EventAnnotationServiceType } from '@kbn/event-annotation-components';
+import type { EventAnnotationPluginStart } from '@kbn/event-annotation-plugin/public';
+import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
+import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { EditorFrameService as EditorFrameServiceType } from './editor_frame_service';
 import type {
   FormBasedDatasource as FormBasedDatasourceType,
@@ -106,31 +114,16 @@ import {
   NOT_INTERNATIONALIZED_PRODUCT_NAME,
 } from '../common/constants';
 import type { FormatFactory } from '../common/types';
-import type {
-  Visualization,
-  VisualizationType,
-  EditorFrameSetup,
-  LensTopNavMenuEntryGenerator,
-  VisualizeEditorContext,
-  Suggestion,
-  DatasourceMap,
-  VisualizationMap,
-} from './types';
 import { lensVisTypeAlias } from './vis_type_alias';
 import { inAppEmbeddableEditTrigger } from './trigger_actions/open_lens_config/in_app_embeddable_edit/in_app_embeddable_edit_trigger';
-import type {
-  LensEmbeddableStartServices,
-  LensSerializedState,
-  TypedLensByValueInput,
-} from './react_embeddable/types';
+
 import { getSaveModalComponent } from './app_plugin/shared/saved_modal_lazy';
 import type { SaveModalContainerProps } from './app_plugin/save_modal_container';
 
 import { setupExpressions } from './expressions';
 import { OpenInDiscoverDrilldown } from './trigger_actions/open_in_discover_drilldown';
 import type { ChartInfoApi } from './chart_info_api';
-import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
-import type { LensDocument } from './persistence';
+import { LensAppLocatorDefinition } from '../common/locator/locator';
 import { LENS_CONTENT_TYPE, LENS_ITEM_LATEST_VERSION } from '../common/constants';
 import type { LensAttributes } from '../server/content_management';
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
@@ -141,6 +134,11 @@ import {
   IN_APP_EMBEDDABLE_EDIT_TRIGGER,
 } from './trigger_actions/open_lens_config/constants';
 import { downloadCsvLensShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
+import { setLensFeatureFlags } from './get_feature_flags';
+import type { Visualization, LensSerializedState, TypedLensByValueInput, Suggestion } from '.';
+import type { LensEmbeddableStartServices } from './react_embeddable/types';
+import type { EditorFrameServiceValue } from './editor_frame_service/editor_frame_service_context';
+import { setLensBuilder } from './lazy_builder';
 
 export type { SaveProps } from './app_plugin';
 
@@ -311,10 +309,10 @@ export class LensPlugin {
   private visualizationMap: VisualizationMap | undefined;
 
   // Note: this method will be overwritten in the setup flow
-  private initEditorFrameService = async (): Promise<{
-    datasourceMap: DatasourceMap;
-    visualizationMap: VisualizationMap;
-  }> => ({ datasourceMap: {}, visualizationMap: {} });
+  private initEditorFrameService = async (): Promise<EditorFrameServiceValue> => ({
+    datasourceMap: {},
+    visualizationMap: {},
+  });
 
   setup(
     core: CoreSetup<LensPluginStartDependencies, void>,
@@ -390,23 +388,36 @@ export class LensPlugin {
         return createLensEmbeddableFactory(deps);
       });
 
+      core.getStartServices().then(async ([{ featureFlags }]) => {
+        // This loads the feature flags async to allow synchronous access to flags via getLensFeatureFlags
+        const flags = await setLensFeatureFlags(featureFlags);
+
+        // This loads the builder async to allow synchronous access to builder via getLensBuilder
+        void setLensBuilder(flags.apiFormat);
+
+        embeddable.registerLegacyURLTransform(LENS_EMBEDDABLE_TYPE, async () => {
+          const { getLensTransforms } = await import('./async_services');
+          const { LensConfigBuilder } = await import('@kbn/lens-embeddable-utils');
+          const builder = new LensConfigBuilder(undefined, flags.apiFormat);
+
+          return getLensTransforms({
+            builder,
+            transformEnhancementsIn: embeddable.transformEnhancementsIn,
+            transformEnhancementsOut: embeddable.transformEnhancementsOut,
+          }).transformOut;
+        });
+      });
+
       // Let Dashboard know about the Lens panel type
       embeddable.registerAddFromLibraryType<LensAttributes>({
-        onAdd: async (container, savedObject) => {
-          const { SAVED_OBJECT_REF_NAME } = await import('@kbn/presentation-publishing');
+        onAdd: (container, savedObject) => {
           container.addNewPanel(
             {
               panelType: LENS_EMBEDDABLE_TYPE,
               serializedState: {
-                rawState: {},
-                references: [
-                  ...savedObject.references,
-                  {
-                    name: SAVED_OBJECT_REF_NAME,
-                    type: LENS_EMBEDDABLE_TYPE,
-                    id: savedObject.id,
-                  },
-                ],
+                rawState: {
+                  savedObjectId: savedObject.id,
+                } satisfies LensByRefSerializedState,
               },
             },
             true

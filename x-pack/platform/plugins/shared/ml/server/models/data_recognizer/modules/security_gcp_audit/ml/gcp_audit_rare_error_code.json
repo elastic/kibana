@@ -1,0 +1,29 @@
+{
+  "description": "Security: GCP Audit - Looks for unusual errors. Rare and unusual errors may simply indicate an impending service failure but they can also be byproducts of attempted or successful persistence, privilege escalation, defense evasion, discovery, lateral movement, or collection activity by a threat actor.",
+  "groups": ["security", "gcp"],
+  "analysis_config": {
+    "bucket_span": "60m",
+    "detectors": [
+      {
+        "detector_description": "Detects rare GCP Audit status codes of failing event actions",
+        "function": "rare",
+        "by_field_name": "gcp.audit.status.code",
+        "detector_index": 0
+      }
+    ],
+    "influencers": ["client.user.email", "source.ip", "source.geo.city_name"]
+  },
+  "allow_lazy_open": true,
+  "analysis_limits": {
+    "model_memory_limit": "16mb"
+  },
+  "data_description": {
+    "time_field": "@timestamp"
+  },
+  "custom_settings": {
+    "created_by": "ml-module-security-gcp-audit",
+    "security_app_display_name": "Rare GCP Audit Error Code",
+    "managed": true,
+    "job_revision": 4
+  }
+}

@@ -7,27 +7,26 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EnterIfNode, EnterConditionBranchNode } from '@kbn/workflows/graph';
-import type { WorkflowGraph } from '@kbn/workflows/graph';
 import { KQLSyntaxError } from '@kbn/es-query';
-import type { NodeImplementation } from '../node_implementation';
-import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
+import type { EnterConditionBranchNode, EnterIfNode, WorkflowGraph } from '@kbn/workflows/graph';
 import { evaluateKql } from './eval_kql';
-import type { WorkflowContextManager } from '../../workflow_context_manager/workflow_context_manager';
+import type { StepExecutionRuntime } from '../../workflow_context_manager/step_execution_runtime';
+import type { WorkflowExecutionRuntimeManager } from '../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import type { NodeImplementation } from '../node_implementation';
 
 export class EnterIfNodeImpl implements NodeImplementation {
   constructor(
     private node: EnterIfNode,
     private wfExecutionRuntimeManager: WorkflowExecutionRuntimeManager,
     private workflowGraph: WorkflowGraph,
-    private workflowContextManager: WorkflowContextManager,
+    private stepExecutionRuntime: StepExecutionRuntime,
     private workflowContextLogger: IWorkflowEventLogger
   ) {}
 
   public async run(): Promise<void> {
-    await this.wfExecutionRuntimeManager.startStep();
-    this.wfExecutionRuntimeManager.enterScope();
+    await this.stepExecutionRuntime.startStep();
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const successors: any[] = this.workflowGraph.getDirectSuccessors(this.node.id);
 
     if (
@@ -49,8 +48,13 @@ export class EnterIfNodeImpl implements NodeImplementation {
     const elseNode = successors?.find(
       (node) => !Object.hasOwn(node, 'condition')
     ) as EnterConditionBranchNode;
-
-    const evaluatedConditionResult = this.evaluateCondition(thenNode.condition);
+    const renderedCondition =
+      this.stepExecutionRuntime.contextManager.renderValueAccordingToContext(thenNode.condition);
+    const evaluatedConditionResult = this.evaluateCondition(renderedCondition);
+    await this.stepExecutionRuntime.setInput({
+      condition: renderedCondition,
+      conditionResult: evaluatedConditionResult,
+    });
 
     if (evaluatedConditionResult) {
       this.goToThenBranch(thenNode);
@@ -90,20 +94,32 @@ export class EnterIfNodeImpl implements NodeImplementation {
   private evaluateCondition(condition: string | boolean | undefined): boolean {
     if (typeof condition === 'boolean') {
       return condition;
-    } else if (typeof condition === 'undefined') {
-      return false; // Undefined condition defaults to false
+    }
+    if (typeof condition === 'undefined') {
+      return false;
     }
 
-    try {
-      return evaluateKql(condition, this.workflowContextManager.getContext());
-    } catch (error) {
-      if (error instanceof KQLSyntaxError) {
-        throw new Error(
-          `Syntax error in condition "${condition}" for step ${this.node.stepId}: ${String(error)}`
-        );
+    if (typeof condition === 'string') {
+      try {
+        return evaluateKql(condition, this.stepExecutionRuntime.contextManager.getContext());
+      } catch (error) {
+        if (error instanceof KQLSyntaxError) {
+          throw new Error(
+            `Syntax error in condition "${condition}" for step ${this.node.stepId}: ${String(
+              error
+            )}`
+          );
+        }
+        throw error;
       }
-
-      throw error;
     }
+
+    throw new Error(
+      `Invalid condition type for step ${this.node.stepId}. ` +
+        `Got ${JSON.stringify(
+          condition
+        )} (type: ${typeof condition}), but expected boolean or string. ` +
+        `When using templating syntax, the expression must evaluate to a boolean or string (KQL expression).`
+    );
   }
 }

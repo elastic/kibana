@@ -10,6 +10,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer, EuiButtonEmpty } from '
 import type { SiemMigrationResourceBase } from '../../../../../common/siem_migrations/model/common.gen';
 import { SiemMigrationTaskStatus } from '../../../../../common/siem_migrations/constants';
 import { CenteredLoadingSpinner } from '../../../../common/components/centered_loading_spinner';
+import { useKibana } from '../../../../common/lib/kibana/use_kibana';
 import type { DashboardMigrationStats } from '../../types';
 import * as i18n from './translations';
 import { MigrationsLastError } from '../../../common/components/migration_panels/last_error';
@@ -33,6 +34,8 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
     'dashboard',
     setMissingResources
   );
+  const { telemetry } = useKibana().services.siemMigrations.dashboards;
+
   const { openFlyout } = useMigrationDataInputContext();
 
   useEffect(() => {
@@ -41,7 +44,11 @@ export const MigrationReadyPanel = React.memo<MigrationReadyPanelProps>(({ migra
 
   const onOpenFlyout = useCallback<React.MouseEventHandler>(() => {
     openFlyout(migrationStats);
-  }, [migrationStats, openFlyout]);
+    telemetry.reportSetupMigrationOpenResources({
+      migrationId: migrationStats.id,
+      missingResourcesCount: missingResources.length,
+    });
+  }, [migrationStats, openFlyout, telemetry, missingResources.length]);
 
   const isStopped = useMemo(
     () => migrationStats.status === SiemMigrationTaskStatus.STOPPED,

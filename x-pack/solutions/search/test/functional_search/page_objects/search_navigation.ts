@@ -33,21 +33,18 @@ export function SearchNavigationProvider({ getService, getPageObjects }: FtrProv
         });
       });
     },
-    async navigateToElasticsearchStartPage(expectRedirect: boolean = false, basePath?: string) {
+    async navigateToElasticsearchSearchGettingStartedPage(basePath?: string) {
       await retry.tryForTime(60 * 1000, async () => {
-        await common.navigateToApp('elasticsearchStart', {
-          basePath,
+        await common.navigateToApp('searchGettingStarted', {
           shouldLoginIfPrompted: false,
+          basePath,
         });
-        if (!expectRedirect) {
-          await testSubjects.existOrFail('elasticsearchStartPage', { timeout: 2000 });
-        }
       });
     },
     async navigateToIndexDetailPage(indexName: string) {
-      await solutionNavigation.sidenav.expectLinkExists({ navId: 'ingest_and_data' });
+      await solutionNavigation.sidenav.expectLinkExists({ navId: 'data_management' });
       await solutionNavigation.sidenav.clickLink({
-        navId: 'ingest_and_data',
+        navId: 'data_management',
       });
       await solutionNavigation.sidenav.clickPanelLink('management:index_management');
       const indexNamesList = await testSubjects.findAll('indexTableIndexNameLink');

@@ -4,7 +4,7 @@ info:
   title: Overlays that are applicable to both serverless and non-serverless documents
   version: 0.0.1
 actions:
-  # Add some tag descriptions and displayNames
+# Add some tag descriptions and displayNames
   - target: '$.tags[?(@.name=="maintenance-window")]'
     description: Change tag description and displayName
     update:
@@ -26,17 +26,6 @@ actions:
         description: Alerting documentation
         url: https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts
       x-displayName: 'Alerting'
-  - target: '$.tags[?(@.name=="cases")]'
-    description: Change tag description and displayName
-    update:
-      description: >
-        Cases are used to open and track issues.
-        You can add assignees and tags to your cases, set their severity and status, and add alerts, comments, and visualizations.
-        You can also send cases to external incident management systems by configuring connectors.
-      externalDocs:
-        description: Cases documentation
-        url: https://www.elastic.co/docs/explore-analyze/alerts-cases/cases
-      x-displayName: 'Cases'
   - target: '$.tags[?(@.name=="connectors")]'
     description: Change tag description and displayName
     update:
@@ -47,15 +36,157 @@ actions:
         description: Connector documentation
         url: https://www.elastic.co/docs/reference/kibana/connectors-kibana
       x-displayName: 'Connectors'
-  - target: '$.tags[?(@.name=="elastic agent builder")]'
+  - target: '$.tags[?(@.name=="agent builder")]'
     description: Change tag description and displayName
     update:
-      # description: 
+      description: >
+        Agent Builder is a set of AI-powered capabilities for developing and interacting with agents that work with your Elasticsearch data.
+        
+        Most users will probably want to integrate with Agent Builder using MCP or A2A, but you can also work programmatically with tools, agents, and conversations using these Kibana APIs.
+      externalDocs:
+        description: Learn about working with Agent Builder programmatically
+        url: https://www.elastic.co/docs/solutions/search/agent-builder/programmatic-access
       # externalDocs:
         # description: 
         # url: https://www.elastic.co/docs/solutions/search/elastic-agent-builder
-      x-displayName: 'Elastic Agent Builder'
-  # Add some spaces API examples
+      x-displayName: 'Agent Builder'
+  - target: '$.tags[?(@.name=="Data streams")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Data stream APIs enable you to manage data streams, which are collections of indices that share the same index template and are managed as a single unit for time-series data.
+      x-displayName: 'Data streams'
+  - target: '$.tags[?(@.name=="Elastic Agent actions")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Elastic Agent actions APIs enable you to manage actions performed on Elastic Agents, including agent reassignment, diagnostics collection, enrollment management, upgrades, and bulk operations for agent lifecycle management.
+      x-displayName: 'Elastic Agent actions'
+  - target: '$.tags[?(@.name=="Elastic Agent binary download sources")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Elastic Agent binary download sources APIs enable you to manage download sources for Elastic Agent binaries, including creating, updating, and deleting custom download sources for agent binaries.
+      x-displayName: 'Elastic Agent binary download sources'
+  - target: '$.tags[?(@.name=="Elastic Agent policies")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Elastic Agent policies APIs enable you to manage agent policies, including creating, updating, and deleting policies, as well as to retrieve agent policy outputs, manifests, and auto-upgrade status information.
+      x-displayName: 'Elastic Agent policies'
+  - target: '$.tags[?(@.name=="Elastic Agent status")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Enables you to retrieve status information about Elastic Agents, including health summaries and operational status.
+      x-displayName: 'Elastic Agent status'
+  - target: '$.tags[?(@.name=="Elastic Agents")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Elastic Agents APIs enable you to manage Elastic Agents, including retrieving agent information, managing agent lifecycle, handling file uploads, and initiating agent setup.
+      x-displayName: 'Elastic Agents'
+  - target: '$.tags[?(@.name=="Fleet enrollment API keys")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Fleet enrollment API keys APIs enable you to manage enrollment API keys for Fleet, including creating, retrieving, and revoking API keys used for agent enrollment.
+      x-displayName: 'Fleet enrollment API keys'
+  - target: '$.tags[?(@.name=="Fleet internals")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Fleet internals APIs enable you to manage Fleet internal operations, including checking permissions, monitoring Fleet Server health, managing settings, and initiating Fleet setup.
+      x-displayName: 'Fleet internals'
+  - target: '$.tags[?(@.name=="Fleet outputs")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Fleet outputs APIs enable you to manage Fleet outputs, including creating, updating, and deleting output configurations, generating Logstash API keys, and monitoring output health.
+      x-displayName: 'Fleet outputs'
+  - target: '$.tags[?(@.name=="Fleet package policies")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Fleet package policies APIs enable you to manage Fleet package policies, including creating, updating, and deleting policies, performing bulk operations, and managing policy upgrades.
+      x-displayName: 'Fleet package policies'
+  - target: '$.tags[?(@.name=="Fleet proxies")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Fleet proxies APIs enable you to manage Fleet proxies, including creating, updating, and deleting proxy configurations for Fleet agent communication.
+      x-displayName: 'Fleet proxies'
+  - target: '$.tags[?(@.name=="Fleet Server hosts")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Fleet Server hosts APIs enable you to manage Fleet Server hosts, including creating, updating, and deleting Fleet Server host configurations.
+      x-displayName: 'Fleet Server hosts'
+  - target: '$.tags[?(@.name=="Fleet uninstall tokens")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Fleet uninstall tokens APIs enable you to manage Fleet uninstall tokens, including retrieving metadata and decrypted tokens for agent uninstallation.
+      x-displayName: 'Fleet uninstall tokens'
+  - target: '$.tags[?(@.name=="Message Signing Service")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Enables you to rotate message signing key pairs for secure Fleet communication.
+      x-displayName: 'Fleet Message Signing Service'
+  - target: '$.tags[?(@.name=="ml")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Enables you to synchronize machine learning saved objects.
+      x-displayName: 'Machine learning'
+  - target: '$.tags[?(@.name=="Security Entity Analytics API")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Use the Security entity analytics APIs to manage entity analytics and risk scoring, including asset criticality, privileged user monitoring, and entity engines.
+      x-displayName: 'Security entity analytics'
+  - target: '$.tags[?(@.name=="streams")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Streams is a new and experimental way to manage your data in Kibana (currently experimental - expect changes).
+      x-displayName: "Streams"
+  - target: '$.tags[?(@.name=="data views")]'
+    description: Change displayName
+    update:
+      x-displayName: "Data views"
+  - target: '$.tags[?(@.name=="slo")]'
+    description: Change displayName
+    update:
+      x-displayName: "Service level objectives"
+  - target: '$.tags[?(@.name=="spaces")]'
+    description: Change displayName
+    update:
+      x-displayName: "Spaces"
+      description: Manage your Kibana spaces.
+      externalDocs:
+        url: https://www.elastic.co/docs/deploy-manage/manage-spaces
+        description: Space overview
+  - target: '$.tags[?(@.name=="system")]'
+    description: Change displayName and description
+    update:
+      x-displayName: "System"
+      description: >
+        Get information about the system status, resource usage, features, and installed plugins.
+  - target: '$.tags[?(@.name=="Fleet cloud connectors")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Fleet cloud connectors APIs enable you to manage Fleet cloud connectors, including creating, updating, and deleting cloud connector configurations for Fleet integrations.
+      x-displayName: 'Fleet cloud connectors'
+  - target: '$.tags[?(@.name=="Elastic Package Manager (EPM)")]'
+    description: Change tag description and displayName
+    update:
+      description: >
+        Elastic Package Manager (EPM) APIs enable you to manage packages and integrations, including installing, updating, and uninstalling packages, managing custom integrations, and handling package assets.
+      x-displayName: 'Elastic Package Manager (EPM)'
+# Add some spaces API examples
   - target: "$.paths['/api/spaces/space']['post']"
     description: 'Add example to create space API'
     update:
@@ -96,3 +227,24 @@ actions:
                   $ref: '../examples/get_spaces_response1.yaml'
                 getSpacesResponseExample2:
                   $ref: '../examples/get_spaces_response2.yaml'
+# Add an introduction to spaces
+  - target: '$'
+    description: Add an extra page about spaces
+    update:
+      x-topics:
+        - title: Kibana spaces
+          content: |
+            Spaces enable you to organize your dashboards and other saved objects into meaningful categories.
+            You can use the default space or create your own spaces.
+
+            To run APIs in non-default spaces, you must add `s/{space_id}/` to the path.
+            For example:
+
+            ```bash
+            curl -X GET "http://${KIBANA_URL}/s/marketing/api/data_views" \
+              -H "Authorization: ApiKey ${API_KEY}"
+            ```
+
+            If you use the Kibana console to send API requests, it automatically adds the appropriate space identifier.
+
+            To learn more, check out [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces).

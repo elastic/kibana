@@ -7,22 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
-import { I18nProvider } from '@kbn/i18n-react';
-import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import React from 'react';
+import { fireEvent, screen, waitFor, within, act, render } from '@testing-library/react';
 import { userEvent } from '@testing-library/user-event';
 
-import { EXPANDED_MENU_GAP, EXPANDED_MENU_ITEM_HEIGHT, MAX_MENU_ITEMS } from '../constants';
-import { Navigation } from '../components/navigation';
+import { TestComponent } from './test_component';
+import { flushPopoverTimers } from './flush_popover_timers';
 import { basicMock } from '../mocks/basic_navigation';
-import { createBoundingClientRectMock } from './create_bounding_client_rect_mock';
 import { elasticsearchMock } from '../mocks/elasticsearch';
+import { mockClientHeight } from './mock_client_height';
 import { observabilityMock } from '../mocks/observability';
 import { resizeWindow } from './resize_window';
 import { securityMock } from '../mocks/security';
-import { getHasSubmenu } from '../utils/get_has_submenu';
 
-const SPACE_MARGIN = 100;
+const mockMenuItemHeight = 51;
 
 // Basic mock reusable IDs
 const dashboardsItemId = basicMock.navItems.primaryItems[0].id;
@@ -31,7 +29,7 @@ const settingsItemId = basicMock.navItems.footerItems[2].id;
 const advancedSettingsItemId = basicMock.navItems.footerItems[2].sections?.[0].items[1].id;
 
 // Security mock reusable IDs
-const machinelearningItemId = securityMock.navItems.primaryItems[11].id;
+const mlItemId = securityMock.navItems.primaryItems[11].id;
 
 // Observability mock reusable IDs
 const appsItemId = observabilityMock.navItems.primaryItems[6].id;
@@ -39,39 +37,28 @@ const infrastructureItemId = observabilityMock.navItems.primaryItems[7].id;
 const machineLearningItemId = observabilityMock.navItems.primaryItems[10].id;
 
 describe('Both modes', () => {
-  let restoreWindowSize: () => void;
+  let user: ReturnType<typeof userEvent.setup>;
 
-  const originalGetBoundingClientRect = Element.prototype.getBoundingClientRect;
-  const originalScrollIntoView = Element.prototype.scrollIntoView;
-  const scrollIntoViewMock = jest.fn();
+  let restoreWindowSize: (() => void) | undefined;
 
   beforeAll(() => {
-    Element.prototype.getBoundingClientRect = createBoundingClientRectMock(
-      (EXPANDED_MENU_ITEM_HEIGHT + EXPANDED_MENU_GAP) * (MAX_MENU_ITEMS - 1) +
-        (EXPANDED_MENU_ITEM_HEIGHT + EXPANDED_MENU_GAP) +
-        SPACE_MARGIN
-    );
-    Element.prototype.scrollIntoView = scrollIntoViewMock;
+    mockClientHeight(mockMenuItemHeight);
   });
 
   beforeEach(() => {
-    scrollIntoViewMock.mockClear();
+    user = userEvent.setup({
+      advanceTimers: jest.advanceTimersByTime,
+      pointerEventsCheck: 0,
+    });
   });
 
-  afterAll(() => {
+  afterEach(() => {
     if (restoreWindowSize) restoreWindowSize();
-    Element.prototype.getBoundingClientRect = originalGetBoundingClientRect;
-    Element.prototype.scrollIntoView = originalScrollIntoView;
   });
 
   it('should render the side navigation', () => {
     const { container } = render(
-      <Navigation
-        isCollapsed={false}
-        items={basicMock.navItems}
-        logo={basicMock.logo}
-        setWidth={() => {}}
-      />
+      <TestComponent items={basicMock.navItems} logo={basicMock.logo} />
     );
 
     expect(container).toMatchSnapshot();
@@ -84,14 +71,7 @@ describe('Both modes', () => {
      * THEN I should be redirected to the solution’s homepage
      */
     it('should redirect to the solution homepage when clicked', () => {
-      render(
-        <Navigation
-          isCollapsed={false}
-          items={basicMock.navItems}
-          logo={basicMock.logo}
-          setWidth={() => {}}
-        />
-      );
+      render(<TestComponent items={basicMock.navItems} logo={basicMock.logo} />);
 
       const solutionLogo = screen.getByRole('link', {
         name: 'Solution homepage',
@@ -100,7 +80,7 @@ describe('Both modes', () => {
 
       expect(solutionLogo).toHaveAttribute('href', expectedHref);
 
-      userEvent.click(solutionLogo);
+      user.click(solutionLogo);
     });
 
     /**
@@ -110,12 +90,10 @@ describe('Both modes', () => {
      */
     it('should have active state if the initial active item is the homepage', () => {
       render(
-        <Navigation
-          activeItemId={basicMock.logo.id}
-          isCollapsed={false}
+        <TestComponent
           items={basicMock.navItems}
           logo={basicMock.logo}
-          setWidth={() => {}}
+          initialActiveItemId={basicMock.logo.id}
         />
       );
 
@@ -135,13 +113,12 @@ describe('Both modes', () => {
      */
     it('should render in collapsed mode if the screen size is less than `s` (767px)', () => {
       restoreWindowSize = resizeWindow(640, 480);
+
       render(
-        <Navigation
-          activeItemId={basicMock.logo.id}
-          isCollapsed={false}
+        <TestComponent
           items={basicMock.navItems}
           logo={basicMock.logo}
-          setWidth={() => {}}
+          initialActiveItemId={basicMock.logo.id}
         />
       );
 
@@ -161,13 +138,12 @@ describe('Both modes', () => {
      */
     it('should render in expanded mode if the screen size is more or equal to `s` (767px)', () => {
       restoreWindowSize = resizeWindow(1024, 768);
+
       render(
-        <Navigation
-          activeItemId={basicMock.logo.id}
-          isCollapsed={false}
+        <TestComponent
           items={basicMock.navItems}
           logo={basicMock.logo}
-          setWidth={() => {}}
+          initialActiveItemId={basicMock.logo.id}
         />
       );
 
@@ -190,12 +166,10 @@ describe('Both modes', () => {
        */
       it('should have active state if the initial active item is the primary menu item', () => {
         render(
-          <Navigation
-            activeItemId={dashboardsItemId}
-            isCollapsed={false}
+          <TestComponent
             items={basicMock.navItems}
             logo={basicMock.logo}
-            setWidth={() => {}}
+            initialActiveItemId={dashboardsItemId}
           />
         );
 
@@ -225,25 +199,22 @@ describe('Both modes', () => {
        */
       it('should have active state if the initial active item is the submenu item', async () => {
         render(
-          <Navigation
-            activeItemId={tlsCertificatesItemId}
-            isCollapsed={false}
+          <TestComponent
             items={basicMock.navItems}
             logo={basicMock.logo}
-            setWidth={() => {}}
+            initialActiveItemId={tlsCertificatesItemId}
           />
         );
 
         const appsLink = screen.getByRole('link', {
-          name: 'Apps',
+          name: /Apps/i,
         });
 
-        // Parent should be visually highlighted but not have aria-current since child is the actual active item
         expect(appsLink).toHaveAttribute('data-highlighted', 'true');
         expect(appsLink).not.toHaveAttribute('aria-current', 'page');
 
         const sidePanel = screen.getByRole('region', {
-          name: 'Side panel',
+          name: 'Side panel for Apps',
         });
 
         const tlsCertificatesLink = within(sidePanel).getByRole('link', {
@@ -261,24 +232,13 @@ describe('Both modes', () => {
        * THEN this primary menu item becomes active
        */
       it('(without submenu) should have active state after clicking on it', async () => {
-        const TestComponent = () => {
-          const [activeItemId, setActiveItemId] = useState(dashboardsItemId);
-
-          return (
-            <I18nProvider>
-              <Navigation
-                activeItemId={activeItemId}
-                isCollapsed={false}
-                items={basicMock.navItems}
-                logo={basicMock.logo}
-                onItemClick={(item) => setActiveItemId(item.id)}
-                setWidth={() => {}}
-              />
-            </I18nProvider>
-          );
-        };
-
-        render(<TestComponent />);
+        render(
+          <TestComponent
+            items={basicMock.navItems}
+            logo={basicMock.logo}
+            initialActiveItemId={dashboardsItemId}
+          />
+        );
 
         const discoverLink = screen.getByRole('link', { name: 'Discover' });
 
@@ -286,7 +246,7 @@ describe('Both modes', () => {
         expect(discoverLink).not.toHaveAttribute('aria-current', 'page');
         expect(discoverLink).toHaveAttribute('data-highlighted', 'false');
 
-        await userEvent.click(discoverLink);
+        await user.click(discoverLink);
 
         // After clicking, should be both current and highlighted
         expect(discoverLink).toHaveAttribute('aria-current', 'page');
@@ -301,51 +261,25 @@ describe('Both modes', () => {
        * AND the first item in the submenu is in an active state by default
        */
       it('(with submenu) should have active state after clicking on it, and a side panel should open', async () => {
-        const TestComponent = () => {
-          const [activeItemId, setActiveItemId] = useState(settingsItemId);
-
-          return (
-            <I18nProvider>
-              <Navigation
-                activeItemId={activeItemId}
-                isCollapsed={false}
-                items={{
-                  ...basicMock.navItems,
-                  primaryItems: basicMock.navItems.primaryItems.map((item) => ({
-                    ...item,
-                    onClick: () => {
-                      const hasSubmenu = getHasSubmenu(item);
-                      const firstChild = item.sections?.[0].items?.[0].id;
-
-                      if (hasSubmenu && firstChild) {
-                        setActiveItemId(firstChild);
-                      } else {
-                        setActiveItemId(item.id);
-                      }
-                    },
-                  })),
-                }}
-                logo={basicMock.logo}
-                setWidth={() => {}}
-              />
-            </I18nProvider>
-          );
-        };
-
-        render(<TestComponent />);
+        render(
+          <TestComponent
+            items={basicMock.navItems}
+            logo={basicMock.logo}
+            initialActiveItemId={settingsItemId}
+          />
+        );
 
         const appsLink = screen.getByRole('link', {
-          name: 'Apps',
+          name: /Apps/i,
         });
 
-        await userEvent.click(appsLink);
+        await user.click(appsLink);
 
-        // Parent should be both current and highlighted (since parent and first child have same ID)
         expect(appsLink).toHaveAttribute('aria-current', 'page');
         expect(appsLink).toHaveAttribute('data-highlighted', 'true');
 
         const sidePanel = screen.getByRole('region', {
-          name: 'Side panel',
+          name: 'Side panel for Apps',
         });
 
         expect(sidePanel).toBeInTheDocument();
@@ -392,23 +326,19 @@ describe('Both modes', () => {
         };
 
         render(
-          <I18nProvider>
-            <Navigation
-              activeItemId="child_different_id"
-              isCollapsed={false}
-              items={modifiedNavItems}
-              logo={basicMock.logo}
-              setWidth={() => {}}
-            />
-          </I18nProvider>
+          <TestComponent
+            items={modifiedNavItems}
+            logo={basicMock.logo}
+            initialActiveItemId="child_different_id"
+          />
         );
 
         const parentLink = screen.getByRole('link', {
-          name: 'Apps',
+          name: /Apps/i,
         });
 
         const sidePanel = screen.getByRole('region', {
-          name: 'Side panel',
+          name: /Side panel/,
         });
 
         const childLink = within(sidePanel).getByRole('link', {
@@ -431,31 +361,20 @@ describe('Both modes', () => {
        * AND the clicked submenu item becomes active
        */
       it('(with submenu) should still have active state after clicking on another submenu item', async () => {
-        const TestComponent = () => {
-          const [activeItemId, setActiveItemId] = useState(tlsCertificatesItemId);
-
-          return (
-            <I18nProvider>
-              <Navigation
-                activeItemId={activeItemId}
-                isCollapsed={false}
-                items={basicMock.navItems}
-                logo={basicMock.logo}
-                onItemClick={(item) => setActiveItemId(item.id)}
-                setWidth={() => {}}
-              />
-            </I18nProvider>
-          );
-        };
-
-        render(<TestComponent />);
+        render(
+          <TestComponent
+            items={basicMock.navItems}
+            logo={basicMock.logo}
+            initialActiveItemId={tlsCertificatesItemId}
+          />
+        );
 
         const appsLink = screen.getByRole('link', {
-          name: 'Apps',
+          name: /Apps/i,
         });
 
         const sidePanel = screen.getByRole('region', {
-          name: 'Side panel',
+          name: 'Side panel for Apps',
         });
 
         let overviewLink = within(sidePanel).getByRole('link', {
@@ -472,7 +391,7 @@ describe('Both modes', () => {
         expect(tlsCertificatesLink).toHaveAttribute('aria-current', 'page');
         expect(tlsCertificatesLink).toHaveAttribute('data-highlighted', 'true');
 
-        await userEvent.click(overviewLink);
+        await user.click(overviewLink);
 
         expect(appsLink).toHaveAttribute('data-highlighted', 'true');
         expect(appsLink).toHaveAttribute('aria-current', 'page');
@@ -494,14 +413,12 @@ describe('Both modes', () => {
        * THEN all provided items are displayed
        */
       it('should display all provided items when fewer than 12 exist', () => {
+        // Elasticsearch mock has exactly 10 primary menu items
         render(
-          <Navigation
-            activeItemId={dashboardsItemId}
-            isCollapsed={false}
-            // Elasticsearch mock has exactly 10 primary menu items
+          <TestComponent
             items={elasticsearchMock.navItems}
             logo={elasticsearchMock.logo}
-            setWidth={() => {}}
+            initialActiveItemId={dashboardsItemId}
           />
         );
 
@@ -546,12 +463,10 @@ describe('Both modes', () => {
 
         // Renders exactly 12 primary menu items
         render(
-          <Navigation
-            activeItemId={dashboardsItemId}
-            isCollapsed={false}
+          <TestComponent
             items={navigationWithTwelveItems.navItems}
             logo={navigationWithTwelveItems.logo}
-            setWidth={() => {}}
+            initialActiveItemId={dashboardsItemId}
           />
         );
 
@@ -575,20 +490,16 @@ describe('Both modes', () => {
        * WHEN the navigation renders
        * THEN only 11 of those primary menu items display
        * AND a "More" menu item displays
-       * AND it has a submenu with the 1 primary menu item left
+       * AND it has a submenu with the 2 primary menu items left
        */
       it('should display a "More" menu item with a submenu when more than 12 exist', async () => {
+        // Security mock has exactly 13 primary menu items
         render(
-          <I18nProvider>
-            <Navigation
-              activeItemId={dashboardsItemId}
-              isCollapsed={false}
-              // Security mock has exactly 13 primary menu items
-              items={securityMock.navItems}
-              logo={securityMock.logo}
-              setWidth={() => {}}
-            />
-          </I18nProvider>
+          <TestComponent
+            items={securityMock.navItems}
+            logo={securityMock.logo}
+            initialActiveItemId={dashboardsItemId}
+          />
         );
 
         securityMock.navItems.primaryItems.slice(0, 11).forEach((item) => {
@@ -599,11 +510,13 @@ describe('Both modes', () => {
           expect(link).toBeInTheDocument();
         });
 
-        const twelfthLink = screen.queryByRole('link', {
-          name: securityMock.navItems.primaryItems[11].label,
-        });
+        await waitFor(() => {
+          const twelfthLink = screen.queryByRole('link', {
+            name: securityMock.navItems.primaryItems[11].label,
+          });
 
-        expect(twelfthLink).not.toBeInTheDocument();
+          expect(twelfthLink).not.toBeInTheDocument();
+        });
 
         const moreButton = screen.getByRole('button', {
           name: 'More',
@@ -611,18 +524,22 @@ describe('Both modes', () => {
 
         expect(moreButton).toBeInTheDocument();
 
-        await userEvent.hover(moreButton);
+        await user.hover(moreButton);
+        flushPopoverTimers();
 
-        const morePopover = screen.getByRole('dialog', {
+        const morePopover = await screen.findByRole('dialog', {
           name: 'More',
         });
 
+        // We can have both `link` and `button` in the "More" menu
         securityMock.navItems.primaryItems.slice(11).forEach((item) => {
-          const link = within(morePopover).getByRole('link', {
+          // `button` -> item with a submenu, `link` -> item without a submenu
+          const role = !!item.sections?.length ? 'button' : 'link';
+          const element = within(morePopover).getByRole(role, {
             name: item.label,
           });
 
-          expect(link).toBeInTheDocument();
+          expect(element).toBeInTheDocument();
         });
       });
     });
@@ -635,36 +552,33 @@ describe('Both modes', () => {
        * AND when I hover out the popover should persist
        */
       it('should have persistent popover on hover out after the trigger was clicked', async () => {
+        // Security mock has exactly 13 primary menu items
         render(
-          <I18nProvider>
-            <Navigation
-              activeItemId={dashboardsItemId}
-              isCollapsed={false}
-              // Security mock has exactly 13 primary menu items
-              items={securityMock.navItems}
-              logo={securityMock.logo}
-              setWidth={() => {}}
-            />
-          </I18nProvider>
+          <TestComponent
+            items={securityMock.navItems}
+            logo={securityMock.logo}
+            initialActiveItemId={dashboardsItemId}
+          />
         );
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 
-        await userEvent.hover(moreButton);
+        await user.hover(moreButton);
+        flushPopoverTimers();
 
-        const morePopover = screen.getByRole('dialog', {
+        const morePopover = await screen.findByRole('dialog', {
           name: 'More',
         });
 
         expect(morePopover).toBeInTheDocument();
 
-        await userEvent.click(moreButton);
+        await user.click(moreButton);
 
         expect(morePopover).toBeInTheDocument();
 
-        await userEvent.unhover(moreButton);
+        await user.unhover(moreButton);
 
         expect(morePopover).toBeInTheDocument();
 
@@ -672,7 +586,7 @@ describe('Both modes', () => {
           name: 'Security homepage',
         });
 
-        await userEvent.click(solutionLogo);
+        await user.click(solutionLogo);
 
         // Popover has a delay on hover out so we need to await the assertion
         await waitFor(() => {
@@ -682,43 +596,80 @@ describe('Both modes', () => {
 
       /**
        * GIVEN not all primary menu items fit the menu height
-       * AND the initial active item is a primary menu item within the "More" menu
-       * WHEN the navigation renders
-       * THEN the "More" primary menu item itself is in an active state
+       * WHEN I click on the “More” primary menu
+       * AND when I hover over another popover trigger
+       * THEN the popover attached to that trigger should not show
        */
-      it('should show correct active states when active item is in "More" menu', async () => {
-        render(
-          <I18nProvider>
-            <Navigation
-              activeItemId={machinelearningItemId}
-              isCollapsed={false}
-              // Security mock has exactly 13 primary menu items
-              items={securityMock.navItems}
-              logo={securityMock.logo}
-              setWidth={() => {}}
-            />
-          </I18nProvider>
-        );
+      it('should not show another popover when the "More" popover is open', async () => {
+        // Security mock has exactly 13 primary menu items
+        render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
 
-        const moreButton = screen.getByRole('button', {
+        const moreButton = await screen.findByRole('button', {
           name: 'More',
         });
 
-        // More button should be highlighted when containing active item but not marked as current page
-        expect(moreButton).toHaveAttribute('data-highlighted', 'true');
-
-        await userEvent.hover(moreButton);
+        await user.click(moreButton);
 
         const morePopover = screen.getByRole('dialog', {
           name: 'More',
         });
 
-        const mlLink = within(morePopover).getByRole('link', {
+        expect(morePopover).toBeInTheDocument();
+
+        const investigationsLink = screen.getByRole('link', {
+          name: 'Investigations',
+        });
+
+        await user.hover(investigationsLink);
+        flushPopoverTimers();
+
+        const investigationsPopover = screen.queryByRole('dialog', {
+          name: 'Investigations',
+        });
+
+        expect(investigationsPopover).not.toBeInTheDocument();
+      });
+
+      /**
+       * GIVEN not all primary menu items fit the menu height
+       * AND the initial active item is a primary menu item within the "More" menu
+       * WHEN the navigation renders
+       * THEN the "More" primary menu item itself is in an active state
+       */
+      it('should show correct active states when active item is in "More" menu', async () => {
+        // Security mock has exactly 13 primary menu items
+        render(
+          <TestComponent
+            items={securityMock.navItems}
+            logo={securityMock.logo}
+            initialActiveItemId={mlItemId}
+          />
+        );
+
+        const moreButton = await screen.findByRole('button', {
+          name: 'More',
+        });
+
+        expect(moreButton).toHaveAttribute('data-highlighted', 'true');
+
+        await user.hover(moreButton);
+        flushPopoverTimers();
+
+        const morePopover = await screen.findByRole('dialog', {
+          name: 'More',
+        });
+
+        const mlButton = within(morePopover).getByRole('button', {
           name: 'Machine learning',
         });
 
-        expect(mlLink).toHaveAttribute('aria-current', 'page');
-        expect(mlLink).toHaveAttribute('data-highlighted', 'true');
+        expect(mlButton).toHaveAttribute('data-highlighted', 'true');
+
+        await user.click(mlButton);
+
+        const mlHeader = await within(morePopover).findByText('Machine learning');
+
+        expect(mlHeader).toBeInTheDocument();
       });
     });
   });
@@ -732,12 +683,10 @@ describe('Both modes', () => {
        */
       it('should have active state if the initial active item is the footer item', () => {
         render(
-          <Navigation
-            activeItemId={settingsItemId}
-            isCollapsed={false}
+          <TestComponent
             items={basicMock.navItems}
             logo={basicMock.logo}
-            setWidth={() => {}}
+            initialActiveItemId={settingsItemId}
           />
         );
 
@@ -757,12 +706,10 @@ describe('Both modes', () => {
        */
       it('should have active state if the initial active item is the footer submenu item', async () => {
         render(
-          <Navigation
-            activeItemId={advancedSettingsItemId}
-            isCollapsed={false}
+          <TestComponent
             items={basicMock.navItems}
             logo={basicMock.logo}
-            setWidth={() => {}}
+            initialActiveItemId={advancedSettingsItemId}
           />
         );
 
@@ -770,12 +717,11 @@ describe('Both modes', () => {
           name: 'Settings',
         });
 
-        // Parent should be highlighted but not current (child is current)
         expect(settingsLink).toHaveAttribute('data-highlighted', 'true');
         expect(settingsLink).not.toHaveAttribute('aria-current', 'page');
 
         const sidePanel = screen.getByRole('region', {
-          name: 'Side panel',
+          name: 'Side panel for Settings',
         });
 
         expect(sidePanel).toBeInTheDocument();
@@ -796,52 +742,25 @@ describe('Both modes', () => {
        * AND the first item in the submenu is in an active state by default
        */
       it('(with submenu) should have active state after clicking on it, and a side panel should open', async () => {
-        const TestComponent = () => {
-          const [activeItemId, setActiveItemId] = useState<string | undefined>();
-          return (
-            <I18nProvider>
-              <Navigation
-                activeItemId={activeItemId}
-                isCollapsed={false}
-                items={{
-                  ...basicMock.navItems,
-                  footerItems: basicMock.navItems.footerItems.map((item) => ({
-                    ...item,
-                    onClick: () => {
-                      // If item has submenus, set the first child item as active
-                      if (
-                        item.sections &&
-                        item.sections.length > 0 &&
-                        item.sections[0].items.length > 0
-                      ) {
-                        setActiveItemId(item.sections[0].items[0].id);
-                      } else {
-                        setActiveItemId(item.id);
-                      }
-                    },
-                  })),
-                }}
-                logo={basicMock.logo}
-                setWidth={() => {}}
-              />
-            </I18nProvider>
-          );
-        };
-
-        render(<TestComponent />);
+        render(
+          <TestComponent
+            items={basicMock.navItems}
+            logo={basicMock.logo}
+            initialActiveItemId={settingsItemId}
+          />
+        );
 
         const settingsLink = screen.getByRole('link', {
           name: 'Settings',
         });
 
-        await userEvent.click(settingsLink);
+        await user.click(settingsLink);
 
-        // Parent should be both current and highlighted (since parent and first child have same ID)
         expect(settingsLink).toHaveAttribute('aria-current', 'page');
         expect(settingsLink).toHaveAttribute('data-highlighted', 'true');
 
         const sidePanel = screen.getByRole('region', {
-          name: 'Side panel',
+          name: 'Side panel for Settings',
         });
 
         expect(sidePanel).toBeInTheDocument();
@@ -862,38 +781,27 @@ describe('Both modes', () => {
        * AND the clicked submenu item becomes active
        */
       it('(with submenu) should still have active state after clicking on another submenu item', async () => {
-        const TestComponent = () => {
-          const [activeItemId, setActiveItemId] = useState(advancedSettingsItemId);
-
-          return (
-            <I18nProvider>
-              <Navigation
-                activeItemId={activeItemId}
-                isCollapsed={false}
-                items={basicMock.navItems}
-                logo={basicMock.logo}
-                onItemClick={(item) => setActiveItemId(item.id)}
-                setWidth={() => {}}
-              />
-            </I18nProvider>
-          );
-        };
-
-        render(<TestComponent />);
+        render(
+          <TestComponent
+            items={basicMock.navItems}
+            logo={basicMock.logo}
+            initialActiveItemId={advancedSettingsItemId}
+          />
+        );
 
         const settingsLink = screen.getByRole('link', {
           name: 'Settings',
         });
 
         const sidePanel = screen.getByRole('region', {
-          name: 'Side panel',
+          name: 'Side panel for Settings',
         });
 
         let integrationsLink = within(sidePanel).getByRole('link', {
           name: 'Integrations',
         });
 
-        await userEvent.click(integrationsLink);
+        await user.click(integrationsLink);
 
         // Parent should be highlighted and current (because it represents the same page)
         expect(settingsLink).toHaveAttribute('data-highlighted', 'true');
@@ -918,20 +826,14 @@ describe('Both modes', () => {
        * THEN the tooltip disappears
        */
       it('should display a tooltip with the item label on hover, and hide on hover out', async () => {
-        render(
-          <Navigation
-            isCollapsed
-            items={basicMock.navItems}
-            logo={basicMock.logo}
-            setWidth={() => {}}
-          />
-        );
+        render(<TestComponent items={basicMock.navItems} logo={basicMock.logo} />);
 
         const developerToolsLink = screen.getByRole('link', {
           name: 'Developer tools',
         });
 
-        await userEvent.hover(developerToolsLink);
+        await user.hover(developerToolsLink);
+        flushPopoverTimers();
 
         const tooltip = await screen.findByRole('tooltip', {
           name: 'Developer tools',
@@ -939,8 +841,8 @@ describe('Both modes', () => {
 
         expect(tooltip).toBeInTheDocument();
 
-        await userEvent.click(developerToolsLink);
-        await userEvent.unhover(developerToolsLink);
+        await user.click(developerToolsLink);
+        await user.unhover(developerToolsLink);
 
         // Even after clicking on the trigger which makes the `EuiToolTip` persistent by default
         // See: https://eui.elastic.co/docs/components/display/tooltip/
@@ -958,16 +860,9 @@ describe('Both modes', () => {
        */
       it('should display all existing footer items if fewer than 5 exist', () => {
         // Renders 3 footer items
-        render(
-          <Navigation
-            isCollapsed={false}
-            items={observabilityMock.navItems}
-            logo={observabilityMock.logo}
-            setWidth={() => {}}
-          />
-        );
+        render(<TestComponent items={observabilityMock.navItems} logo={observabilityMock.logo} />);
 
-        const footer = screen.getByRole('contentinfo', { name: 'Side navigation footer' });
+        const footer = screen.getByRole('contentinfo', { name: 'Side navigation' });
         const footerItems = within(footer).getAllByRole('link');
 
         expect(footerItems.length).toBe(3);
@@ -980,16 +875,9 @@ describe('Both modes', () => {
        */
       it('should display all 5 footer items if exactly 5 exist', () => {
         // Renders 5 footer items
-        render(
-          <Navigation
-            isCollapsed={false}
-            items={basicMock.navItems}
-            logo={basicMock.logo}
-            setWidth={() => {}}
-          />
-        );
+        render(<TestComponent items={basicMock.navItems} logo={basicMock.logo} />);
 
-        const footer = screen.getByRole('contentinfo', { name: 'Side navigation footer' });
+        const footer = screen.getByRole('contentinfo', { name: 'Side navigation' });
         const footerItems = within(footer).getAllByRole('link');
 
         expect(footerItems.length).toBe(5);
@@ -1014,16 +902,9 @@ describe('Both modes', () => {
           ],
         };
 
-        render(
-          <Navigation
-            isCollapsed={false}
-            items={navItemsWithSixFooterItems}
-            logo={basicMock.logo}
-            setWidth={() => {}}
-          />
-        );
+        render(<TestComponent items={navItemsWithSixFooterItems} logo={basicMock.logo} />);
 
-        const footer = screen.getByRole('contentinfo', { name: 'Side navigation footer' });
+        const footer = screen.getByRole('contentinfo', { name: 'Side navigation' });
         const footerItems = within(footer).getAllByRole('link');
 
         expect(footerItems.length).toBe(5);
@@ -1038,25 +919,16 @@ describe('Both modes', () => {
        * AND a beta badge with beta icon
        */
       it('should render a tooltip with the item label and a beta badge with beta icon', async () => {
-        render(
-          <I18nProvider>
-            <Navigation
-              isCollapsed={false}
-              items={observabilityMock.navItems}
-              logo={observabilityMock.logo}
-              onItemClick={() => {}}
-              setWidth={() => {}}
-            />
-          </I18nProvider>
-        );
+        render(<TestComponent items={observabilityMock.navItems} logo={observabilityMock.logo} />);
 
-        const footer = await screen.findByRole('contentinfo', { name: 'Side navigation footer' });
+        const footer = await screen.findByRole('contentinfo', { name: 'Side navigation' });
 
         const gettingStartedLink = within(footer).getByRole('link', {
           name: 'Getting started',
         });
 
-        await userEvent.hover(gettingStartedLink);
+        await user.hover(gettingStartedLink);
+        flushPopoverTimers();
 
         const tooltip = await screen.findByRole('tooltip');
 
@@ -1076,20 +948,14 @@ describe('Both modes', () => {
        * AND a beta badge with flask icon
        */
       it('should render a tooltip with the item label and a beta badge with flask icon', async () => {
-        render(
-          <Navigation
-            isCollapsed
-            items={observabilityMock.navItems}
-            logo={observabilityMock.logo}
-            setWidth={() => {}}
-          />
-        );
+        render(<TestComponent items={observabilityMock.navItems} logo={observabilityMock.logo} />);
 
         const gettingStartedLink = screen.getByRole('link', {
           name: 'Developer tools',
         });
 
-        await userEvent.hover(gettingStartedLink);
+        await user.hover(gettingStartedLink);
+        flushPopoverTimers();
 
         const tooltip = await screen.findByRole('tooltip');
 
@@ -1111,17 +977,15 @@ describe('Both modes', () => {
        */
       it('should render a beta badge with beta icon next to the menu title', async () => {
         render(
-          <Navigation
-            activeItemId={appsItemId}
-            isCollapsed={false}
+          <TestComponent
             items={observabilityMock.navItems}
             logo={observabilityMock.logo}
-            setWidth={() => {}}
+            initialActiveItemId={appsItemId}
           />
         );
 
         const sidePanel = screen.getByRole('region', {
-          name: 'Side panel',
+          name: 'Side panel for Apps',
         });
         const panelHeader = within(sidePanel).getByRole('heading', {
           name: 'Apps',
@@ -1138,17 +1002,15 @@ describe('Both modes', () => {
        */
       it('should render a beta badge with beta icon next to the menu item label', async () => {
         render(
-          <Navigation
-            activeItemId={appsItemId}
-            isCollapsed={false}
+          <TestComponent
             items={observabilityMock.navItems}
             logo={observabilityMock.logo}
-            setWidth={() => {}}
+            initialActiveItemId={appsItemId}
           />
         );
 
         const sidePanel = screen.getByRole('region', {
-          name: 'Side panel',
+          name: 'Side panel for Apps',
         });
         const tlsCertificatesLink = within(sidePanel).getByRole('link', {
           name: 'TLS certificates Beta',
@@ -1167,17 +1029,15 @@ describe('Both modes', () => {
        */
       it('should render a beta badge with flask icon next to the menu title', async () => {
         render(
-          <Navigation
-            activeItemId={machineLearningItemId}
-            isCollapsed={false}
+          <TestComponent
             items={observabilityMock.navItems}
             logo={observabilityMock.logo}
-            setWidth={() => {}}
+            initialActiveItemId={machineLearningItemId}
           />
         );
 
         const sidePanel = screen.getByRole('region', {
-          name: 'Side panel',
+          name: 'Side panel for Machine learning',
         });
         const panelHeader = within(sidePanel).getByRole('heading', {
           name: 'Machine learning',
@@ -1196,17 +1056,15 @@ describe('Both modes', () => {
        */
       it('should render a beta badge with flask icon next to the menu item label', async () => {
         render(
-          <Navigation
-            activeItemId={infrastructureItemId}
-            isCollapsed={false}
+          <TestComponent
             items={observabilityMock.navItems}
             logo={observabilityMock.logo}
-            setWidth={() => {}}
+            initialActiveItemId={infrastructureItemId}
           />
         );
 
         const sidePanel = screen.getByRole('region', {
-          name: 'Side panel',
+          name: 'Side panel for Infrastructure',
         });
         const hostsLink = within(sidePanel).getByRole('link', {
           name: 'Hosts Tech preview',
@@ -1225,17 +1083,15 @@ describe('Both modes', () => {
        */
       it('should render a popout icon next to the link text', async () => {
         render(
-          <Navigation
-            activeItemId={appsItemId}
-            isCollapsed={false}
+          <TestComponent
             items={observabilityMock.navItems}
             logo={observabilityMock.logo}
-            setWidth={() => {}}
+            initialActiveItemId={appsItemId}
           />
         );
 
         const sidePanel = screen.getByRole('region', {
-          name: 'Side panel',
+          name: 'Side panel for Apps',
         });
         const tracesLink = within(sidePanel).getByRole('link', {
           name: /traces/i,
@@ -1252,17 +1108,15 @@ describe('Both modes', () => {
        */
       it('should open the link in a new tab', () => {
         render(
-          <Navigation
-            activeItemId={appsItemId}
-            isCollapsed={false}
+          <TestComponent
             items={observabilityMock.navItems}
             logo={observabilityMock.logo}
-            setWidth={() => {}}
+            initialActiveItemId={appsItemId}
           />
         );
 
         const sidePanel = screen.getByRole('region', {
-          name: 'Side panel',
+          name: 'Side panel for Apps',
         });
         const tracesLink = within(sidePanel).getByRole('link', {
           name: /traces/i,
@@ -1274,200 +1128,479 @@ describe('Both modes', () => {
   });
 
   describe('Keyboard navigation', () => {
-    /**
-     * GIVEN focus is on any menu item within a menu (primary, footer, or submenu)
-     * WHEN I press the Arrow Down or Arrow Up key
-     * THEN focus moves to the next or previous item in that menu, respectively
-     */
-    it('should move focus to the next or previous item in the menu when pressing Arrow Down or Arrow Up', async () => {
-      render(
-        <Navigation
-          isCollapsed={false}
-          items={basicMock.navItems}
-          logo={basicMock.logo}
-          setWidth={() => {}}
-        />
-      );
+    describe('Menu navigation', () => {
+      /**
+       * GIVEN focus is on any menu item within a menu (primary, footer, or submenu)
+       * WHEN I press the Arrow Down or Arrow Up key
+       * THEN focus moves to the next or previous item in that menu, respectively
+       */
+      it('should move focus to the next or previous item in the menu when pressing Arrow Down or Arrow Up', async () => {
+        render(<TestComponent items={basicMock.navItems} logo={basicMock.logo} />);
 
-      const primaryMenu = await screen.findByRole('navigation', { name: 'Main navigation' });
-      const dashboardsLink = await screen.findByRole('link', { name: 'Dashboards' });
-      const discoverLink = await screen.findByRole('link', { name: 'Discover' });
+        const primaryMenu = await screen.findByRole('navigation', { name: 'Main' });
+        const dashboardsLink = await screen.findByRole('link', { name: 'Dashboards' });
+        const discoverLink = await screen.findByRole('link', { name: 'Discover' });
 
-      dashboardsLink.focus();
+        act(() => {
+          dashboardsLink.focus();
+        });
 
-      expect(dashboardsLink).toHaveFocus();
+        expect(dashboardsLink).toHaveFocus();
 
-      fireEvent.keyDown(primaryMenu, { key: 'ArrowDown', code: 'ArrowDown' });
+        fireEvent.keyDown(primaryMenu, { key: 'ArrowDown', code: 'ArrowDown' });
 
-      expect(discoverLink).toHaveFocus();
+        expect(discoverLink).toHaveFocus();
 
-      fireEvent.keyDown(primaryMenu, { key: 'ArrowUp', code: 'ArrowUp' });
+        fireEvent.keyDown(primaryMenu, { key: 'ArrowUp', code: 'ArrowUp' });
 
-      expect(dashboardsLink).toHaveFocus();
-    });
-
-    /**
-     * GIVEN focus is on any menu item within a menu (primary, footer, or submenu)
-     * AND I am navigating with a keyboard
-     * WHEN I repeatedly press the Tab key
-     * THEN focus moves sequentially through the primary menu, the footer menu, and the side panel (if open), before moving to the main page content
-     *
-     * NOTE: With roving index, Tab only hits one focusable item per menu section
-     */
-    it('should move focus through all navigable menus when pressing Tab', async () => {
-      render(
-        <Navigation
-          activeItemId={appsItemId}
-          isCollapsed={false}
-          items={observabilityMock.navItems}
-          logo={observabilityMock.logo}
-          setWidth={() => {}}
-        />
-      );
-
-      const solutionLogo = screen.getByRole('link', { name: 'Observability homepage' });
-      const discoverLink = screen.getByRole('link', { name: 'Discover' });
-      const gettingStartedLink = screen.getByRole('link', { name: 'Getting started' });
-      const sidePanel = screen.getByRole('region', { name: 'Side panel' });
-      const serviceInventoryLink = within(sidePanel).getByRole('link', {
-        name: 'Service inventory',
+        expect(dashboardsLink).toHaveFocus();
       });
 
-      solutionLogo.focus();
-
-      expect(solutionLogo).toHaveFocus();
-
-      // Tab to primary menu - should land on first focusable item (Dashboards)
-      await userEvent.tab();
-
-      expect(discoverLink).toHaveFocus();
-
-      // Tab to footer menu - should land on first focusable item (Getting started)
-      await userEvent.tab();
-
-      expect(gettingStartedLink).toHaveFocus();
-
-      // Tab to side panel - should land on first focusable item (Service inventory)
-      await userEvent.tab();
-
-      expect(serviceInventoryLink).toHaveFocus();
-    });
-
-    /**
-     * GIVEN I am navigating with a keyboard
-     * AND focus is in the primary menu, the footer menu, the popover or the side panel
-     * WHEN I press the Home or End key
-     * THEN focus moves to the first or last item in that menu, respectively
-     */
-
-    it('should move focus to the first or last item in the menu when pressing Home or End', async () => {
-      render(
-        <Navigation
-          isCollapsed={false}
-          items={basicMock.navItems}
-          logo={basicMock.logo}
-          setWidth={() => {}}
-        />
-      );
-
-      const primaryMenu = screen.getByRole('navigation', { name: 'Main navigation' });
-      const solutionLogo = screen.getByRole('link', { name: 'Solution homepage' });
-      const dashboardsLink = screen.getByRole('link', { name: 'Dashboards' });
-      const appsLink = screen.getByRole('link', { name: 'Apps' });
-
-      await userEvent.tab();
-
-      expect(solutionLogo).toHaveFocus();
-
-      await userEvent.tab();
-
-      expect(dashboardsLink).toHaveFocus();
-
-      fireEvent.keyDown(primaryMenu, { key: 'End', code: 'End' });
-
-      expect(appsLink).toHaveFocus();
-
-      fireEvent.keyDown(primaryMenu, { key: 'Home', code: 'Home' });
-
-      expect(dashboardsLink).toHaveFocus();
-    });
-
-    /**
-     * GIVEN focus is inside an open popover
-     * WHEN I repeatedly press the Tab or Shift + Tab key
-     * THEN focus cycles only through the interactive elements within that container and does not leave it
-     */
-    it('should cycle focus through interactive elements in the popover when pressing Tab or Shift + Tab', async () => {
-      render(
-        <I18nProvider>
-          <Navigation
-            isCollapsed
-            items={securityMock.navItems}
-            logo={securityMock.logo}
-            setWidth={() => {}}
+      /**
+       * GIVEN focus is on any menu item within a menu (primary, footer, or submenu)
+       * AND I am navigating with a keyboard
+       * WHEN I repeatedly press the Tab key
+       * THEN focus moves sequentially through the primary menu, the footer menu,
+       * and the side panel (if open), before moving to the main page content
+       */
+      it('should move focus through all navigable menus when pressing Tab', async () => {
+        render(
+          <TestComponent
+            items={observabilityMock.navItems}
+            logo={observabilityMock.logo}
+            initialActiveItemId={appsItemId}
           />
-        </I18nProvider>
-      );
+        );
 
-      const moreButton = screen.getByRole('button', { name: 'More' });
+        const solutionLogo = screen.getByRole('link', { name: 'Observability homepage' });
+        const discoverLink = screen.getByRole('link', { name: 'Discover' });
+        const gettingStartedLink = screen.getByRole('link', { name: 'Getting started' });
+        const sidePanel = screen.getByRole('region', { name: 'Side panel for Apps' });
+        const serviceInventoryLink = within(sidePanel).getByRole('link', {
+          name: 'Service inventory',
+        });
 
-      moreButton.focus();
+        act(() => {
+          solutionLogo.focus();
+        });
 
-      await userEvent.click(moreButton);
+        expect(solutionLogo).toHaveFocus();
 
-      const popover = screen.getByRole('dialog', { name: 'More' });
-      const popoverItems = within(popover).getAllByRole('link');
+        // Tab to primary menu - should land on first focusable item (Dashboards)
+        await user.tab();
 
-      const firstItem = popoverItems[0];
-      const lastItem = popoverItems[popoverItems.length - 1];
+        expect(discoverLink).toHaveFocus();
 
-      firstItem.focus();
+        // Tab to footer menu - should land on first focusable item (Getting started)
+        await user.tab();
 
-      await userEvent.keyboard('{end}');
+        expect(gettingStartedLink).toHaveFocus();
 
-      expect(lastItem).toHaveFocus();
+        // Tab to side panel - should land on first focusable item (Service inventory)
+        await user.tab();
 
-      // Test focus trap by pressing tab from last item should wrap to first
-      fireEvent.keyDown(popover, { key: 'Tab', code: 'Tab' });
-
-      // Should wrap around to the first item
-      expect(firstItem).toHaveFocus();
-    });
-
-    /**
-     * GIVEN the focus is inside the popover
-     * WHEN I press the Escape key
-     * THEN the popover closes
-     * AND focus returns to the menu item that originally opened it
-     */
-
-    it('should return focus to the menu item that opened the popover when it is closed', async () => {
-      render(
-        <I18nProvider>
-          <Navigation
-            isCollapsed
-            items={securityMock.navItems}
-            logo={securityMock.logo}
-            setWidth={() => {}}
-          />
-        </I18nProvider>
-      );
-
-      const moreButton = screen.getByRole('button', { name: 'More' });
-
-      await userEvent.click(moreButton);
-
-      const popover = screen.getByRole('dialog', { name: 'More' });
-
-      expect(popover).toBeInTheDocument();
-
-      await userEvent.keyboard('{escape}');
-
-      await waitFor(() => {
-        expect(popover).not.toBeInTheDocument();
+        expect(serviceInventoryLink).toHaveFocus();
       });
 
-      expect(moreButton).toHaveFocus();
+      /**
+       * GIVEN I am navigating with a keyboard
+       * AND focus is in the primary menu, the footer menu, the popover or the side panel
+       * WHEN I press the Home or End key
+       * THEN focus moves to the first or last item in that menu, respectively
+       */
+      it('should move focus to the first or last item in the menu when pressing Home or End', async () => {
+        render(<TestComponent items={basicMock.navItems} logo={basicMock.logo} />);
+
+        const solutionLogo = screen.getByRole('link', { name: 'Solution homepage' });
+        const dashboardsLink = screen.getByRole('link', { name: 'Dashboards' });
+        const appsLink = screen.getByRole('link', { name: /Apps/i });
+
+        await user.tab();
+
+        expect(solutionLogo).toHaveFocus();
+
+        await user.tab();
+
+        expect(dashboardsLink).toHaveFocus();
+
+        await user.keyboard('{end}');
+
+        expect(appsLink).toHaveFocus();
+
+        await user.keyboard('{home}');
+
+        expect(dashboardsLink).toHaveFocus();
+      });
+    });
+
+    describe('Popover navigation', () => {
+      /**
+       * GIVEN I am navigating with a keyboard
+       * AND focus is inside an open popover
+       * WHEN I repeatedly press the Arrow Down or Arrow Up key
+       * THEN focus cycles only through the interactive elements within that container
+       * AND does not leave it
+       */
+      it('should cycle focus through interactive elements in the popover when pressing Arrow Down or Arrow Up', async () => {
+        render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
+
+        const assetsLink = screen.getByRole('link', { name: 'Assets' });
+
+        act(() => {
+          assetsLink.focus();
+        });
+
+        const popover = await screen.findByRole('dialog', { name: 'Assets' });
+        const popoverLinks = within(popover).queryAllByRole('link');
+
+        const firstItem = popoverLinks[0];
+        const secondItem = popoverLinks[1];
+        const penultimateItem = popoverLinks[popoverLinks.length - 2];
+        const lastItem = popoverLinks[popoverLinks.length - 1];
+
+        act(() => {
+          firstItem.focus();
+        });
+
+        // Pressing Arrow Down from first item should move to the second
+        await user.keyboard('{ArrowDown}');
+
+        expect(secondItem).toHaveFocus();
+
+        // Pressing Arrow Down from last item should wrap to first
+        await user.keyboard('{end}');
+
+        expect(lastItem).toHaveFocus();
+
+        await user.keyboard('{ArrowDown}');
+
+        expect(firstItem).toHaveFocus();
+
+        // Pressing Arrow Up from first item should wrap to last
+        await user.keyboard('{ArrowUp}');
+
+        expect(lastItem).toHaveFocus();
+
+        // Pressing Arrow Up from the last item should move to the penultimate item
+        await user.keyboard('{ArrowUp}');
+
+        expect(penultimateItem).toHaveFocus();
+      });
+
+      /**
+       * GIVEN I am navigating with a keyboard
+       * AND focus is in an open popover
+       * WHEN I press the Home or End key
+       * THEN focus moves to the first or last item in that popover, respectively
+       */
+      it('should move focus to the first or last item in the popover when pressing Home or End', async () => {
+        render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
+
+        const moreButton = await screen.findByRole('button', { name: 'More' });
+
+        act(() => {
+          moreButton.focus();
+        });
+
+        await user.click(moreButton);
+
+        const popover = screen.getByRole('dialog', { name: 'More' });
+        const popoverLinks = within(popover).queryAllByRole('link');
+        const popoverButtons = within(popover).queryAllByRole('button');
+        const popoverItems = [...popoverButtons, ...popoverLinks];
+
+        const firstItem = popoverItems[0];
+        const lastItem = popoverItems[popoverItems.length - 1];
+
+        act(() => {
+          firstItem.focus();
+        });
+
+        // Pressing End should move focus to the last item
+        await user.keyboard('{ArrowDown}');
+        await user.keyboard('{end}');
+
+        expect(lastItem).toHaveFocus();
+
+        // Pressing Home should move focus to the first item
+        await user.keyboard('{home}');
+
+        expect(firstItem).toHaveFocus();
+      });
+
+      /**
+       * GIVEN the focus is inside the popover
+       * WHEN I press the Escape key
+       * THEN the popover closes
+       * AND focus returns to the menu item that originally opened it
+       */
+      it('should return focus to the menu item that opened the popover when it is closed', async () => {
+        render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
+
+        const moreButton = await screen.findByRole('button', { name: 'More' });
+
+        await user.click(moreButton);
+
+        const popover = screen.getByRole('dialog', { name: 'More' });
+
+        expect(popover).toBeInTheDocument();
+
+        // Move focus to the first item in the popover
+        await user.keyboard('{Enter}');
+
+        // Exit the popover
+        await user.keyboard('{Escape}');
+
+        await waitFor(() => {
+          expect(popover).not.toBeInTheDocument();
+        });
+
+        expect(moreButton).toHaveFocus();
+      });
+
+      /**
+       * GIVEN the focus is inside the popover
+       * WHEN I press the Tab key
+       * THEN the popover closes
+       * AND focus moves to the next primary menu or footer menu item
+       */
+      it('should move focus to the next primary menu or footer menu item when pressing Tab', async () => {
+        render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
+
+        const moreButton = await screen.findByRole('button', { name: 'More' });
+
+        act(() => {
+          moreButton.focus();
+        });
+
+        const popover = await screen.findByRole('dialog', { name: 'More' });
+
+        expect(popover).toBeInTheDocument();
+
+        // Move focus to the first item in the popover
+        await user.keyboard('{Enter}');
+
+        // Move focus out of the popover to the next primary menu or footer menu item
+        await user.tab();
+
+        await waitFor(() => {
+          expect(popover).not.toBeInTheDocument();
+        });
+
+        const gettingStartedLink = await screen.findByRole('link', { name: 'Getting started' });
+
+        expect(gettingStartedLink).toHaveFocus();
+      });
+
+      /**
+       * GIVEN the focus is inside the popover
+       * WHEN I press the Shift + Tab key
+       * THEN the popover closes
+       * AND focus moves to the previous primary menu or footer menu item
+       */
+      it('should move focus to the previous primary menu or footer menu item when pressing Shift + Tab', async () => {
+        render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
+
+        const moreButton = await screen.findByRole('button', { name: 'More' });
+
+        act(() => {
+          moreButton.focus();
+        });
+
+        const popover = await screen.findByRole('dialog', { name: 'More' });
+
+        expect(popover).toBeInTheDocument();
+
+        // Move focus to the first item in the popover
+        await user.keyboard('{Enter}');
+
+        // Move focus out of the popover to the previous primary menu or footer menu item
+        await user.tab({ shift: true });
+
+        await waitFor(() => {
+          expect(popover).not.toBeInTheDocument();
+        });
+
+        const assetsLink = screen.getByRole('link', { name: 'Assets' });
+
+        expect(assetsLink).toHaveFocus();
+      });
+    });
+
+    describe('More menu navigation', () => {
+      /**
+       * GIVEN the focus is in the "More" popover
+       * WHEN I press Enter on a menu item with a submenu
+       * THEN the nested panel opens
+       * AND the "Go back" button receives focus
+       */
+      it('should focus the "Go back" button when opening a nested panel with Enter', async () => {
+        render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
+
+        const moreButton = await screen.findByRole('button', { name: 'More' });
+
+        act(() => {
+          moreButton.focus();
+        });
+
+        const popover = await screen.findByRole('dialog', { name: 'More' });
+
+        expect(popover).toBeInTheDocument();
+
+        // Move focus to the "More" popover
+        await user.keyboard('{Enter}');
+
+        const machineLearningButton = within(popover).getByRole('button', {
+          name: 'Machine learning',
+        });
+
+        expect(machineLearningButton).toHaveFocus();
+
+        // Open the "Machine learning" nested panel
+        await user.keyboard('{Enter}');
+
+        const goBackButton = within(popover).getByRole('button', { name: 'Go back' });
+
+        expect(goBackButton).toHaveFocus();
+      });
+
+      /**
+       * GIVEN the focus is in the "More" popover nested submenu
+       * WHEN I press Arrow Down or Arrow Up
+       * THEN focus moves between the submenu items
+       * AND does not leave the panel
+       */
+      it('should keep focus within nested submenu items when using arrow keys', async () => {
+        render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
+
+        const moreButton = await screen.findByRole('button', { name: 'More' });
+
+        act(() => {
+          moreButton.focus();
+        });
+
+        const popover = await screen.findByRole('dialog', { name: 'More' });
+
+        expect(popover).toBeInTheDocument();
+
+        // Move focus to the "More" popover
+        await user.keyboard('{Enter}');
+
+        const machineLearningButton = within(popover).getByRole('button', {
+          name: 'Machine learning',
+        });
+
+        expect(machineLearningButton).toHaveFocus();
+
+        // Open the "Machine learning" nested panel
+        await user.keyboard('{Enter}');
+
+        // Move focus to the first item in the nested panel
+        await user.keyboard('{ArrowDown}');
+
+        const firstItem = within(popover).getByRole('link', {
+          name: 'Overview',
+        });
+
+        expect(firstItem).toHaveFocus();
+
+        // Move focus to the last item in the nested panel
+        await user.keyboard('{End}');
+
+        const lastItem = within(popover).getByRole('link', {
+          name: 'Change point detection',
+        });
+
+        expect(lastItem).toHaveFocus();
+
+        // Move focus to the penultimate item in the nested panel
+        await user.keyboard('{ArrowUp}');
+
+        const penultimateItem = within(popover).getByRole('link', {
+          name: 'Log pattern analysis',
+        });
+
+        expect(penultimateItem).toHaveFocus();
+
+        // Move focus to the "Go back" button in the nested panel
+        await user.keyboard('{Home}');
+
+        const goBackButton = within(popover).getByRole('button', { name: 'Go back' });
+
+        expect(goBackButton).toHaveFocus();
+      });
+
+      /**
+       * GIVEN the focus is in the "More" popover nested submenu
+       * WHEN I focus the "Go back" button
+       * AND I press Enter
+       * THEN the nested panel closes
+       * AND focus returns to the menu item that opened it
+       */
+      it('should return focus to the trigger that opened the nested panel when activating the "Go back" button', async () => {
+        render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
+
+        const moreButton = await screen.findByRole('button', { name: 'More' });
+
+        act(() => {
+          moreButton.focus();
+        });
+
+        const popover = await screen.findByRole('dialog', { name: 'More' });
+
+        expect(popover).toBeInTheDocument();
+
+        // Move focus to the "More" popover
+        await user.keyboard('{Enter}');
+
+        const machineLearningButton = within(popover).getByRole('button', {
+          name: 'Machine learning',
+        });
+
+        expect(machineLearningButton).toHaveFocus();
+
+        // Open the "Machine learning" nested panel
+        await user.keyboard('{Enter}');
+
+        const goBackButton = within(popover).getByRole('button', { name: 'Go back' });
+
+        expect(goBackButton).toHaveFocus();
+
+        await user.click(goBackButton);
+
+        // Expect the "Machine learning" button to regain focus
+        expect(within(popover).getByRole('button', { name: 'Machine learning' })).toHaveFocus();
+      });
+
+      // https://github.com/elastic/kibana/issues/239726
+      it('does NOT close the popover when onBlur has relatedTarget === null (Safari quirk)', async () => {
+        render(<TestComponent items={securityMock.navItems} logo={securityMock.logo} />);
+
+        const moreButton = await screen.findByRole('button', { name: 'More' });
+        act(() => {
+          moreButton.focus();
+        });
+
+        const popover = await screen.findByRole('dialog', { name: 'More' });
+        expect(popover).toBeInTheDocument();
+
+        // Enter to open the popover content
+        await user.keyboard('{Enter}');
+
+        // Focus an element inside the popover to make the blur meaningful
+        const mlBtn = within(popover).getByRole('button', { name: 'Machine learning' });
+        expect(mlBtn).toHaveFocus();
+
+        // Simulate Safari: blur/focusout with null relatedTarget
+        // Use focusout (bubbling) because React's onBlur maps to it.
+        act(() => {
+          fireEvent.focusOut(popover, { relatedTarget: null });
+        });
+        flushPopoverTimers(); // allow any delayed close to run
+
+        // Blur handler should skip close when nextElement is null -> popover stays open
+        expect(screen.getByRole('dialog', { name: 'More' })).toBeInTheDocument();
+      });
     });
   });
 });

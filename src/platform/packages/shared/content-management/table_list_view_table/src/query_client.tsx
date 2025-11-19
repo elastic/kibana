@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { defaultContext, QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { defaultContext, QueryClient, QueryClientProvider } from '@kbn/react-query';
 
 const defaultTableQueryClient = new QueryClient({
   defaultOptions: { queries: { retry: false } },

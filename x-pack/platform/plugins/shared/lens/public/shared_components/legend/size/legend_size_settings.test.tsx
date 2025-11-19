@@ -8,7 +8,7 @@
 import React from 'react';
 import type { LegendSizeSettingsProps } from './legend_size_settings';
 import { LegendSizeSettings } from './legend_size_settings';
-import { LegendSize } from '@kbn/visualizations-plugin/public';
+import { LegendSize } from '@kbn/chart-expressions-common';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 

@@ -47,7 +47,9 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     await expect(page.getByRole('columnheader').getByText('Type', { exact: true })).toBeVisible();
     await expect(page.getByRole('columnheader').getByText('Format', { exact: true })).toBeVisible();
     await expect(page.getByRole('columnheader').getByText('Field Parent')).toBeVisible();
-    await expect(page.getByRole('columnheader').getByText('Status', { exact: true })).toBeVisible();
+    await expect(
+      page.getByRole('columnheader').getByText('Mapping status', { exact: true })
+    ).toBeVisible();
 
     // Verify at least one field is displayed (fields from the stream setup)
     const rows = await pageObjects.streams.getPreviewTableRows();
@@ -91,7 +93,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     });
   });
 
-  test('should allow filtering by field type and status', async ({ page, pageObjects }) => {
+  test('should allow filtering by field type and status', async ({ pageObjects }) => {
     // Wait for the schema editor table to load
     await pageObjects.streams.expectSchemaEditorTableVisible();
 
@@ -126,7 +128,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     }
   });
 
-  test('should allow mapping a field', async ({ page, pageObjects }) => {
+  test('should allow mapping a field', async ({ pageObjects }) => {
     // Wait for the schema editor table to load
     await pageObjects.streams.expectSchemaEditorTableVisible();
     // Search specific unmapped field
@@ -140,7 +142,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     await pageObjects.streams.expectCellValueContains({
       columnName: 'status',
       rowIndex: 0,
-      value: 'Unmanaged',
+      value: 'Unmapped',
     });
 
     // Open the field actions menu
@@ -168,7 +170,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     });
   });
 
-  test('should allow unmapping a field', async ({ page, pageObjects }) => {
+  test('should allow unmapping a field', async ({ pageObjects }) => {
     // Wait for the schema editor table to load
     await pageObjects.streams.expectSchemaEditorTableVisible();
     // Search specific unmapped field
@@ -182,7 +184,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     await pageObjects.streams.expectCellValueContains({
       columnName: 'status',
       rowIndex: 0,
-      value: 'Unmanaged',
+      value: 'Unmapped',
     });
 
     // Open the field actions menu
@@ -196,7 +198,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
 
     await pageObjects.streams.reviewStagedFieldMappingChanges();
     await pageObjects.streams.submitSchemaChanges();
-    await pageObjects.streams.closeToasts();
+    await pageObjects.toasts.closeAll();
 
     // Verify the field is now mapped
     await pageObjects.streams.expectCellValueContains({
@@ -225,7 +227,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     await pageObjects.streams.expectCellValueContains({
       columnName: 'status',
       rowIndex: 0,
-      value: 'Unmanaged',
+      value: 'Unmapped',
     });
   });
 
@@ -258,7 +260,7 @@ test.describe('Stream data mapping - schema editor', { tag: ['@ess', '@svlOblt']
     await pageObjects.streams.reviewStagedFieldMappingChanges();
     await pageObjects.streams.submitSchemaChanges();
 
-    await pageObjects.streams.closeToasts();
+    await pageObjects.toasts.closeAll();
     await pageObjects.streams.expectSchemaEditorTableVisible();
     // Search for the newly added field
     await pageObjects.streams.searchFields(fieldName);

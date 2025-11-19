@@ -6,7 +6,7 @@
  */
 
 import type { CoreStart, ScopedHistory } from '@kbn/core/public';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
@@ -17,6 +17,7 @@ import { OnechatRoutes } from './routes';
 import type { OnechatInternalService } from '../services';
 import type { OnechatStartDependencies } from '../types';
 import { OnechatServicesContext } from './context/onechat_services_context';
+import { PageWrapper } from './page_wrapper';
 
 export const mountApp = async ({
   core,
@@ -33,6 +34,7 @@ export const mountApp = async ({
 }) => {
   const kibanaServices = { ...core, plugins, appParams: { history } };
   const queryClient = new QueryClient();
+  await services.accessChecker.initAccess();
 
   ReactDOM.render(
     core.rendering.addContext(
@@ -41,9 +43,11 @@ export const mountApp = async ({
           <QueryClientProvider client={queryClient}>
             <OnechatServicesContext.Provider value={services}>
               <RedirectAppLinks coreStart={core}>
-                <Router history={history}>
-                  <OnechatRoutes />
-                </Router>
+                <PageWrapper>
+                  <Router history={history}>
+                    <OnechatRoutes />
+                  </Router>
+                </PageWrapper>
               </RedirectAppLinks>
             </OnechatServicesContext.Provider>
           </QueryClientProvider>

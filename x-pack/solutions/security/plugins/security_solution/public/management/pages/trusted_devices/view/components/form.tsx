@@ -35,6 +35,7 @@ import type { ArtifactFormComponentProps } from '../../../../components/artifact
 import { FormattedError } from '../../../../components/formatted_error';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
 import { useCanAssignArtifactPerPolicy } from '../../../../hooks/artifacts';
+import { useGetTrustedDeviceSuggestions } from '../../hooks/use_get_trusted_device_suggestions';
 import type { EffectedPolicySelectProps } from '../../../../components/effected_policy_select';
 import { EffectedPolicySelect } from '../../../../components/effected_policy_select';
 import { OPERATING_SYSTEM_WINDOWS_AND_MAC, OS_TITLES } from '../../../../common/translations';
@@ -170,7 +171,7 @@ const ConditionsSection = memo<{
   currentEntry: ExceptionListItemSchema['entries'][0];
   handleFieldChange: (value: string) => void;
   handleOperatorChange: (value: string) => void;
-  handleValueChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
+  handleValueChange: (options: Array<EuiComboBoxOptionOption<string>>) => void;
   handleValueBlur: () => void;
   disabled: boolean;
   visitedFields: Record<string, boolean>;
@@ -193,6 +194,13 @@ const ConditionsSection = memo<{
     const availableFieldOptions = useMemo(() => {
       return getFieldOptionsForOs(selectedOs);
     }, [selectedOs]);
+
+    // Load suggestions when field changes - useQuery handles race conditions automatically
+    const { data: suggestions = [], isLoading: isLoadingSuggestions } =
+      useGetTrustedDeviceSuggestions({
+        field: currentEntry.field || '',
+        enabled: !disabled,
+      });
 
     return (
       <>
@@ -266,12 +274,24 @@ const ConditionsSection = memo<{
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiFormRow label="Value">
-                <EuiFieldText
-                  value={('value' in currentEntry ? currentEntry.value : '') || ''}
+                <EuiComboBox
+                  placeholder="Enter or select value"
+                  singleSelection={{ asPlainText: true }}
+                  options={suggestions.map((suggestion) => ({ label: suggestion }))}
+                  selectedOptions={
+                    'value' in currentEntry && currentEntry.value
+                      ? [{ label: String(currentEntry.value) }]
+                      : []
+                  }
                   onChange={handleValueChange}
                   onBlur={handleValueBlur}
+                  onCreateOption={(searchValue) => {
+                    handleValueChange([{ label: searchValue }]);
+                  }}
+                  isLoading={isLoadingSuggestions}
                   data-test-subj={getTestId('valueField')}
-                  disabled={disabled}
+                  isDisabled={disabled}
+                  isClearable={false}
                 />
               </EuiFormRow>
             </EuiFlexItem>
@@ -546,8 +566,9 @@ export const TrustedDevicesForm = memo<ArtifactFormComponentProps>(
     );
 
     const handleValueChange = useCallback(
-      (event: React.ChangeEvent<HTMLInputElement>) => {
-        updateConditionField({ value: event.target.value });
+      (options: Array<EuiComboBoxOptionOption<string>>) => {
+        const value = options.length > 0 ? options[0].label : '';
+        updateConditionField({ value });
       },
       [updateConditionField]
     );

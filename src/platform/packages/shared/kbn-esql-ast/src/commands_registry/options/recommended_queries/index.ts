@@ -30,6 +30,16 @@ export const getRecommendedQueriesTemplates = ({
 }) => {
   const queries = [
     {
+      label: i18n.translate('kbn-esql-ast.recommendedQueries.searchExample.label', {
+        defaultMessage: 'Search all fields',
+      }),
+      description: i18n.translate('kbn-esql-ast.recommendedQueries.searchExample.description', {
+        defaultMessage: 'Use WHERE to filter/search data',
+      }),
+      queryString: `${fromCommand}\n  | WHERE KQL("term") /* Search all fields using KQL – e.g. WHERE KQL("debug") */`,
+      sortText: 'D',
+    },
+    {
       label: i18n.translate('kbn-esql-ast.recommendedQueries.aggregateExample.label', {
         defaultMessage: 'Aggregate with STATS',
       }),
@@ -37,16 +47,6 @@ export const getRecommendedQueriesTemplates = ({
         defaultMessage: 'Count aggregation',
       }),
       queryString: `${fromCommand}  | STATS count = COUNT(*) /* you can group by a field using the BY operator */`,
-    },
-    {
-      label: i18n.translate('kbn-esql-ast.recommendedQueries.searchExample.label', {
-        defaultMessage: 'Search all fields',
-      }),
-      description: i18n.translate('kbn-esql-ast.recommendedQueries.searchExample.description', {
-        defaultMessage: 'Use WHERE to filter/search data',
-      }),
-      queryString: `${fromCommand}| WHERE QSTR("""term""") /* Search all fields using QSTR – e.g. WHERE QSTR("""debug""") */`,
-      sortText: 'D',
     },
     ...(timeField
       ? [
@@ -160,28 +160,33 @@ export const getRecommendedQueriesTemplates = ({
   return queries;
 };
 
+export async function getTimeAndCategorizationFields(
+  getColumnsByType: GetColumnsByTypeFn
+): Promise<{ timeField: string; categorizationField: string | undefined }> {
+  const [dateFields, textFields] = await Promise.all([
+    getColumnsByType(['date'], [], { openSuggestions: true }),
+    // get text fields separately to avoid mixing them with date fields
+    getColumnsByType(['text'], [], { openSuggestions: true }),
+  ]);
+
+  const timeField =
+    dateFields.length > 0
+      ? dateFields.find((field) => field.text === '@timestamp')?.text || dateFields[0].text
+      : '';
+
+  const categorizationField =
+    textFields.length > 0
+      ? getCategorizationField(textFields.map((field) => field.text))
+      : undefined;
+
+  return { timeField, categorizationField };
+}
+
 export const getRecommendedQueriesSuggestionsFromStaticTemplates = async (
   getFieldsByType: GetColumnsByTypeFn,
   fromCommand: string = ''
 ): Promise<ISuggestionItem[]> => {
-  const [fieldSuggestions, textFieldSuggestions] = await Promise.all([
-    getFieldsByType(['date'], [], { openSuggestions: true }),
-    // get text fields separately to avoid mixing them with date fields
-    getFieldsByType(['text'], [], { openSuggestions: true }),
-  ]);
-
-  let timeField = '';
-  let categorizationField: string | undefined = '';
-
-  if (fieldSuggestions.length) {
-    timeField =
-      fieldSuggestions?.find((field) => field.label === '@timestamp')?.label ||
-      fieldSuggestions[0].label;
-  }
-
-  if (textFieldSuggestions.length) {
-    categorizationField = getCategorizationField(textFieldSuggestions.map((field) => field.label));
-  }
+  const { timeField, categorizationField } = await getTimeAndCategorizationFields(getFieldsByType);
 
   const recommendedQueries = getRecommendedQueriesTemplates({
     fromCommand,
@@ -196,6 +201,11 @@ export const getRecommendedQueriesSuggestionsFromStaticTemplates = async (
       kind: 'Issue',
       detail: query.description,
       sortText: query?.sortText ?? 'E',
+      command: {
+        id: 'esql.recommendedQuery.accept',
+        title: 'Accept recommended query',
+        arguments: [{ queryLabel: query.label }],
+      },
     };
   });
 
@@ -239,13 +249,20 @@ export const getRecommendedQueriesTemplatesFromExtensions = (
 // Function returning suggestions from static templates and editor extensions
 export const getRecommendedQueriesSuggestions = async (
   editorExtensions: EditorExtensions,
-  getColumnsByType: GetColumnsByTypeFn,
+  // Optional function to get fields by type, if not provided only the extensions will be used
+  getColumnsByType?: GetColumnsByTypeFn,
   prefix: string = ''
 ) => {
   const recommendedQueriesFromExtensions = getRecommendedQueriesTemplatesFromExtensions(
     editorExtensions.recommendedQueries
   );
 
+  // If getColumnsByType is not provided, we cannot get the static templates
+  // so we return only the extensions. For example in timeseries command the majority of
+  // the static templates are not relevant as the count() aggregation is not supported there.
+  if (!getColumnsByType) {
+    return recommendedQueriesFromExtensions;
+  }
   const recommendedQueriesFromTemplates = await getRecommendedQueriesSuggestionsFromStaticTemplates(
     getColumnsByType,
     prefix

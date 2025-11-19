@@ -13,6 +13,9 @@ import {
   EuiPanel,
   EuiTextTruncate,
   useEuiTheme,
+  euiTextTruncate,
+  EuiButtonEmpty,
+  EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isActionBlock } from '@kbn/streamlang';
@@ -34,6 +37,8 @@ export const ActionBlockListItem = ({
   stepUnderEdit,
   rootLevelMap,
   stepsProcessingSummaryMap,
+  isFirstStepInLevel,
+  isLastStepInLevel,
 }: ActionBlockProps) => {
   const step = useSelector(stepRef, (snapshot) => snapshot.context.step);
   const { euiTheme } = useEuiTheme();
@@ -50,6 +55,10 @@ export const ActionBlockListItem = ({
 
   const stepDescription = getStepDescription(step);
 
+  const handleTitleClick = () => {
+    stepRef.send({ type: 'step.edit' });
+  };
+
   return (
     <>
       {/* The step under edit is part of the same root level hierarchy,
@@ -61,20 +70,59 @@ export const ActionBlockListItem = ({
       {stepUnderEdit && !step.parentId && <BlockDisableOverlay />}
       <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
         <EuiFlexItem>
-          <EuiFlexGroup>
-            <EuiFlexItem>
-              <EuiFlexGroup gutterSize="xs" alignItems="center">
-                <EuiFlexItem grow={false}>
-                  <ProcessorStatusIndicator
-                    stepRef={stepRef}
-                    stepsProcessingSummaryMap={stepsProcessingSummaryMap}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <strong data-test-subj="streamsAppProcessorLegend">
-                    {step.action.toUpperCase()}
-                  </strong>
-                </EuiFlexItem>
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <ProcessorStatusIndicator
+                stepRef={stepRef}
+                stepsProcessingSummaryMap={stepsProcessingSummaryMap}
+              />
+            </EuiFlexItem>
+            <EuiFlexItem
+              grow={true}
+              css={css`
+                min-width: 0;
+                margin-right: ${euiTheme.size.s};
+              `}
+            >
+              <EuiFlexGroup alignItems="center" gutterSize="xs">
+                <EuiToolTip
+                  position="top"
+                  content={
+                    <p>
+                      {i18n.translate(
+                        'xpack.streams.actionBlockListItem.tooltip.editProcessorLabel',
+                        {
+                          defaultMessage: 'Edit {stepAction} processor',
+                          values: {
+                            stepAction: step.action,
+                          },
+                        }
+                      )}
+                    </p>
+                  }
+                >
+                  <EuiButtonEmpty
+                    onClick={handleTitleClick}
+                    color="text"
+                    aria-label={i18n.translate(
+                      'xpack.streams.actionBlockListItem.euiButtonEmpty.editProcessorLabel',
+                      { defaultMessage: 'Edit processor' }
+                    )}
+                    size="xs"
+                    data-test-subj="streamsAppProcessorTitleEditButton"
+                  >
+                    <EuiText
+                      size="s"
+                      style={{ fontWeight: euiTheme.font.weight.bold }}
+                      css={css`
+                        display: block;
+                        ${euiTextTruncate()}
+                      `}
+                    >
+                      {step.action.toUpperCase()}
+                    </EuiText>
+                  </EuiButtonEmpty>
+                </EuiToolTip>
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
@@ -95,7 +143,12 @@ export const ActionBlockListItem = ({
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem>
-                  <StepContextMenu stepRef={stepRef} stepUnderEdit={stepUnderEdit} />
+                  <StepContextMenu
+                    stepRef={stepRef}
+                    stepUnderEdit={stepUnderEdit}
+                    isFirstStepInLevel={isFirstStepInLevel}
+                    isLastStepInLevel={isLastStepInLevel}
+                  />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>

@@ -16,12 +16,12 @@ import {
 
 import type { DragDropIdentifier, DropType } from '@kbn/dom-drag-drop';
 import { css } from '@emotion/react';
+import type { AddLayerFunction, DragDropOperation, Visualization } from '@kbn/lens-common';
 import {
   changeIndexPattern,
   onDropToDimension,
   removeDimension,
 } from '../../../state_management/lens_slice';
-import type { AddLayerFunction, DragDropOperation, Visualization } from '../../../types';
 import { LayerPanel } from './layer_panel';
 import { generateId } from '../../../id_generator';
 import type { ConfigPanelWrapperProps, LayerPanelProps } from './types';
@@ -40,12 +40,14 @@ import {
   registerLibraryAnnotationGroup,
 } from '../../../state_management';
 import { getRemoveOperation } from '../../../utils';
+import { useEditorFrameService } from '../../editor_frame_service_context';
 
 export const ConfigPanelWrapper = memo(function ConfigPanelWrapper(props: ConfigPanelWrapperProps) {
+  const { visualizationMap } = useEditorFrameService();
   const visualization = useLensSelector(selectVisualization);
 
   const activeVisualization = visualization.activeId
-    ? props.visualizationMap[visualization.activeId]
+    ? visualizationMap[visualization.activeId]
     : null;
 
   return activeVisualization && visualization.state ? (
@@ -58,7 +60,8 @@ export function LayerPanels(
     activeVisualization: Visualization;
   }
 ) {
-  const { activeVisualization, datasourceMap, indexPatternService } = props;
+  const { datasourceMap } = useEditorFrameService();
+  const { activeVisualization, indexPatternService } = props;
   const { activeDatasourceId, visualization, datasourceStates, query } = useLensSelector(
     (state) => state.lens
   );

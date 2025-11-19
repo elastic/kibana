@@ -10,7 +10,7 @@ import type { CommonProps } from '@elastic/eui';
 import { EuiIconTip, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useTestIdGenerator } from '../../../../hooks/use_test_id_generator';
-import { PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY_TEXT } from '../../../../../../common/endpoint/service/artifacts/constants';
+import { PROCESS_DESCENDANT_EXTRA_ENTRY_TEXT } from '../../../../../../common/endpoint/service/artifacts/constants';
 
 interface ProcessDescendantsTooltipProps extends CommonProps {
   indicateExtraEntry?: boolean;
@@ -44,7 +44,7 @@ export const ProcessDescendantsTooltip = memo<ProcessDescendantsTooltipProps>(
                   />
                 </p>
                 <p>
-                  <code>{PROCESS_DESCENDANT_EVENT_FILTER_EXTRA_ENTRY_TEXT}</code>
+                  <code>{PROCESS_DESCENDANT_EXTRA_ENTRY_TEXT}</code>
                 </p>
               </>
             )}

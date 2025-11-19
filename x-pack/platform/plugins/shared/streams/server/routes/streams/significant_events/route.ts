@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { badRequest } from '@hapi/boom';
 import type {
   SignificantEventsGenerateResponse,
   SignificantEventsGetResponse,
@@ -20,6 +19,7 @@ import { previewSignificantEvents } from '../../../lib/significant_events/previe
 import { readSignificantEventsFromAlertsIndices } from '../../../lib/significant_events/read_significant_events_from_alerts_indices';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
+import { getRequestAbortSignal } from '../../utils/get_request_abort_signal';
 
 // Make sure strings are expected for input, but still converted to a
 // Date, without breaking the OpenAPI generator
@@ -32,7 +32,7 @@ const previewSignificantEventsRoute = createServerRoute({
     query: z.object({ from: dateFromString, to: dateFromString, bucketSize: z.string() }),
     body: z.object({
       query: z.object({
-        system: z
+        feature: z
           .object({
             name: NonEmptyString,
             filter: conditionSchema,
@@ -69,11 +69,6 @@ const previewSignificantEventsRoute = createServerRoute({
         request,
       });
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
-
-    const isStreamEnabled = await streamsClient.isStreamsEnabled();
-    if (!isStreamEnabled) {
-      throw badRequest('Streams is not enabled');
-    }
 
     const {
       body: { query },
@@ -162,7 +157,7 @@ const generateSignificantEventsRoute = createServerRoute({
       to: dateFromString,
     }),
     body: z.object({
-      system: z
+      feature: z
         .object({
           name: NonEmptyString,
           filter: conditionSchema,
@@ -204,7 +199,7 @@ const generateSignificantEventsRoute = createServerRoute({
       generateSignificantEventDefinitions(
         {
           definition,
-          system: params.body?.system,
+          feature: params.body?.feature,
           connectorId: params.query.connectorId,
           start: params.query.from.valueOf(),
           end: params.query.to.valueOf(),
@@ -213,6 +208,7 @@ const generateSignificantEventsRoute = createServerRoute({
           inferenceClient,
           esClient: scopedClusterClient.asCurrentUser,
           logger,
+          signal: getRequestAbortSignal(request),
         }
       )
     ).pipe(

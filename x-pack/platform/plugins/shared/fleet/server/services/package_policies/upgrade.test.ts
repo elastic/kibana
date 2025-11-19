@@ -8,7 +8,9 @@
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 
-import { createPackagePolicyMock } from '../../../common/mocks';
+import type { PackagePolicyAssetsMap } from '../../../common/types';
+
+import { createPackagePolicyMock, createAgentPolicyMock } from '../../../common/mocks';
 
 import { createAppContextStartContractMock, createSavedObjectClientMock } from '../../mocks';
 
@@ -16,10 +18,10 @@ import { FleetError, PackagePolicyIneligibleForUpgradeError } from '../../errors
 
 import { packagePolicyService } from '../package_policy';
 import { appContextService } from '../app_context';
-
 import { auditLoggingService } from '../audit_logging';
 import { agentPolicyService } from '../agent_policy';
 import { isSpaceAwarenessEnabled } from '../spaces/helpers';
+import { getAgentTemplateAssetsMap } from '../epm/packages/get';
 
 import {
   _getUpgradePackagePolicyInfo,
@@ -67,6 +69,31 @@ async function mockedGetPackageInfo(params: any) {
                   name: 'test-var-required',
                   required: true,
                   type: 'integer',
+                },
+              ],
+            },
+          ],
+        },
+      ],
+    };
+  }
+
+  if (params.pkgName === 'test-duplicated-vars') {
+    pkg = {
+      version: params.pkgVersion,
+      policy_templates: [
+        {
+          name: 'test-duplicated-vars',
+          inputs: [
+            {
+              title: 'test',
+              type: 'logs',
+              description: 'test',
+              template_path: 'stream.yml.hbs',
+              vars: [
+                {
+                  name: 'custom',
+                  type: 'yaml',
                 },
               ],
             },
@@ -250,7 +277,53 @@ describe('Upgrade', () => {
       expect(res.hasErrors).toBeFalsy();
     });
 
-    it('should no errors if there is a conflict to upgrade', async () => {
+    it('should return errors if there is a conflict to upgrade', async () => {
+      jest
+        .mocked(getAgentTemplateAssetsMap)
+        .mockResolvedValueOnce(
+          new Map([
+            ['/agent/input/stream.yml.hbs', Buffer.from('test: 1\n{{custom}}\n')],
+          ]) as PackagePolicyAssetsMap
+        );
+      const res = await _packagePoliciesGetUpgradeDryRunDiff({
+        id: 'package-policy-id',
+        soClient: savedObjectsClient,
+        packagePolicyService,
+        packagePolicy: {
+          id: '123',
+          name: 'test-123',
+          package: {
+            title: 'test',
+            name: 'test-duplicated-vars',
+            version: '1.0.1',
+          },
+          namespace: 'default',
+          inputs: [
+            {
+              id: 'toto',
+              policy_template: 'test-duplicated-vars',
+              enabled: true,
+              streams: [],
+              type: 'logs',
+              vars: {
+                custom: {
+                  type: 'yaml',
+                  value: 'test: 1\nduplicated: 2\n',
+                },
+              },
+            },
+          ],
+        } as any,
+        pkgVersion: '1.0.2',
+      });
+
+      expect(res.hasErrors).toBeTruthy();
+      expect(res?.diff?.[1]?.errors?.[0].message).toContain(
+        'Duplicated key "test" found in agent policy yaml, please check your yaml variables.'
+      );
+    });
+
+    it('should return errors if there is an error with duplicated variables during upgrade', async () => {
       const res = await _packagePoliciesGetUpgradeDryRunDiff({
         id: 'package-policy-id',
         soClient: savedObjectsClient,
@@ -362,6 +435,9 @@ describe('Upgrade', () => {
       appContextService.stop();
     });
     it('should omit spaceIds when upgrading package policies with spaceIds', async () => {
+      mockAgentPolicyService.get.mockResolvedValue({
+        ...createAgentPolicyMock({ space_ids: ['test'] }),
+      });
       soClient.bulkGet.mockImplementation((objects) =>
         Promise.resolve({
           saved_objects: objects.map(({ id }) => ({

@@ -25,9 +25,12 @@ import {
 import { Draggable } from '@kbn/dom-drag-drop';
 import { generateFilters, getEsQueryConfig } from '@kbn/data-plugin/public';
 import { type DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { DatasourceDataPanelProps } from '../../types';
-import type { IndexPattern, IndexPatternField } from '../../types';
-import type { LensAppServices } from '../../app_plugin/types';
+import type {
+  DatasourceDataPanelProps,
+  IndexPattern,
+  IndexPatternField,
+  LensAppServices,
+} from '@kbn/lens-common';
 import { APP_ID, DOCUMENT_FIELD_NAME } from '../../../common/constants';
 import { combineQueryAndFilters } from '../../app_plugin/show_underlying_data';
 import { getFieldItemActions } from './get_field_item_actions';
@@ -130,6 +133,13 @@ export function InnerFieldItem(props: FieldItemProps) {
   const closePopover = useCallback(() => {
     setOpen(false);
   }, [setOpen]);
+
+  const adaptedGetCustomFieldType = useMemo(() => {
+    if (isTextBasedColumnField(field) && getCustomFieldType) {
+      return () => getCustomFieldType(field);
+    }
+    return undefined;
+  }, [field, getCustomFieldType]);
 
   const addFilterAndClose: AddFieldFilterHandler | undefined = useMemo(
     () =>
@@ -304,6 +314,7 @@ export function InnerFieldItem(props: FieldItemProps) {
               field={dataViewField}
               closePopover={closePopover}
               buttonAddFieldToWorkspaceProps={buttonAddFieldToWorkspaceProps}
+              getCustomFieldType={adaptedGetCustomFieldType}
               onAddFieldToWorkspace={onAddFieldToWorkspace}
               onAddFilter={addFilterAndClose}
               onEditField={editFieldAndClose}

@@ -255,7 +255,7 @@
               "APMPluginSetupDependencies",
               ") => { config$: ",
               "Observable",
-              "<Readonly<{} & { ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; enabled: boolean; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapMaxAllowableBytes: number; serviceMapTraceIdBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; serviceMapTerminateAfter: number; serviceMapMaxTraces: number; searchAggregatedTransactions: ",
+              "<Readonly<{} & { enabled: boolean; ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapMaxAllowableBytes: number; serviceMapTraceIdBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; serviceMapTerminateAfter: number; serviceMapMaxTraces: number; searchAggregatedTransactions: ",
               "SearchAggregatedTransactionSetting",
               "; telemetryCollectionEnabled: boolean; metricsInterval: number; forceSyntheticSource: boolean; latestAgentVersionsUrl: string; serverless: Readonly<{} & { enabled: true; }>; serverlessOnboarding: boolean; managedServiceUrl: string; managedOtlpServiceUrl: string; featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; profilingIntegrationAvailable: boolean; ruleFormV2Enabled: boolean; }>; }>>; }"
             ],
@@ -412,7 +412,7 @@
         "label": "APMConfig",
         "description": [],
         "signature": [
-          "{ readonly ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; readonly enabled: boolean; readonly agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; readonly autoCreateApmDataView: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapMaxAllowableBytes: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly serviceMapTerminateAfter: number; readonly serviceMapMaxTraces: number; readonly searchAggregatedTransactions: ",
+          "{ readonly enabled: boolean; readonly ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; readonly agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; readonly autoCreateApmDataView: boolean; readonly serviceMapEnabled: boolean; readonly serviceMapFingerprintBucketSize: number; readonly serviceMapFingerprintGlobalBucketSize: number; readonly serviceMapMaxAllowableBytes: number; readonly serviceMapTraceIdBucketSize: number; readonly serviceMapTraceIdGlobalBucketSize: number; readonly serviceMapMaxTracesPerRequest: number; readonly serviceMapTerminateAfter: number; readonly serviceMapMaxTraces: number; readonly searchAggregatedTransactions: ",
           "SearchAggregatedTransactionSetting",
           "; readonly telemetryCollectionEnabled: boolean; readonly metricsInterval: number; readonly forceSyntheticSource: boolean; readonly latestAgentVersionsUrl: string; readonly serverless: Readonly<{} & { enabled: true; }>; readonly serverlessOnboarding: boolean; readonly managedServiceUrl: string; readonly managedOtlpServiceUrl: string; readonly featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; profilingIntegrationAvailable: boolean; ruleFormV2Enabled: boolean; }>; }"
         ],
@@ -6411,7 +6411,9 @@
           "PartialC",
           "<{ maxTraceItems: ",
           "Type",
-          "<number, number, unknown>; }>]>; }>, ",
+          "<number, number, unknown>; serviceName: ",
+          "StringC",
+          "; }>]>; }>, ",
           "APMRouteHandlerResources",
           ", { traceItems: ",
           "TraceItem",
@@ -9270,7 +9272,7 @@
           "description": [],
           "signature": [
             "Observable",
-            "<Readonly<{} & { ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; enabled: boolean; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapMaxAllowableBytes: number; serviceMapTraceIdBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; serviceMapTerminateAfter: number; serviceMapMaxTraces: number; searchAggregatedTransactions: ",
+            "<Readonly<{} & { enabled: boolean; ui: Readonly<{} & { enabled: boolean; maxTraceItems: number; }>; agent: Readonly<{} & { migrations: Readonly<{} & { enabled: boolean; }>; }>; autoCreateApmDataView: boolean; serviceMapEnabled: boolean; serviceMapFingerprintBucketSize: number; serviceMapFingerprintGlobalBucketSize: number; serviceMapMaxAllowableBytes: number; serviceMapTraceIdBucketSize: number; serviceMapTraceIdGlobalBucketSize: number; serviceMapMaxTracesPerRequest: number; serviceMapTerminateAfter: number; serviceMapMaxTraces: number; searchAggregatedTransactions: ",
             "SearchAggregatedTransactionSetting",
             "; telemetryCollectionEnabled: boolean; metricsInterval: number; forceSyntheticSource: boolean; latestAgentVersionsUrl: string; serverless: Readonly<{} & { enabled: true; }>; serverlessOnboarding: boolean; managedServiceUrl: string; managedOtlpServiceUrl: string; featureFlags: Readonly<{} & { agentConfigurationAvailable: boolean; configurableIndicesAvailable: boolean; infrastructureTabAvailable: boolean; infraUiAvailable: boolean; migrationToFleetAvailable: boolean; sourcemapApiAvailable: boolean; storageExplorerAvailable: boolean; profilingIntegrationAvailable: boolean; ruleFormV2Enabled: boolean; }>; }>>"
           ],

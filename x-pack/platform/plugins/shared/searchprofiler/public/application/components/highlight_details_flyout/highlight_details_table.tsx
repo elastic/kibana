@@ -22,7 +22,7 @@ export const HighlightDetailsTable = ({ breakdown }: Props) => {
       name: 'Description',
       render: (item: BreakdownItem) => (
         <EuiToolTip position="left" content={item.tip}>
-          <span>{item.key}</span>
+          <span tabIndex={0}>{item.key}</span>
         </EuiToolTip>
       ),
     },

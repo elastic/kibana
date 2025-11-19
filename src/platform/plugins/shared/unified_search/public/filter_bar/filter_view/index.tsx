@@ -109,7 +109,7 @@ export const FilterView: FC<Props> = ({
 
   return readOnly ? (
     <EuiToolTip position="bottom" content={title}>
-      <span ref={ref}>
+      <span ref={ref} tabIndex={0}>
         <FilterPill />
       </span>
     </EuiToolTip>

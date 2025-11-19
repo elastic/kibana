@@ -6,14 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import React, { useState, useCallback, useMemo } from 'react';
+import React, { useState, useCallback, useMemo, useRef } from 'react';
 import { EuiPopover, EuiHeaderLink, EuiContextMenu } from '@elastic/eui';
 import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
+  EuiFlyoutResizableProps,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { createFocusTrapProps } from '../../../utils/create_focus_trap_props';
 import { usePluginConfig } from '../../../containers/plugin_config_context';
 import { PrefilledInventoryAlertFlyout } from '../../inventory/components/alert_flyout';
 import { PrefilledMetricThresholdAlertFlyout } from '../../metric_threshold/components/alert_flyout';
@@ -137,6 +139,7 @@ function useCustomThresholdMenu(
 export const MetricsAlertDropdown = () => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [visibleFlyoutType, setVisibleFlyoutType] = useState<VisibleFlyoutType | null>(null);
+  const alertsButtonRef = useRef<HTMLButtonElement>(null);
   const uiCapabilities = useKibana().services.application?.capabilities;
   const {
     services: { observability },
@@ -168,6 +171,7 @@ export const MetricsAlertDropdown = () => {
   const customThresholdMenu = useCustomThresholdMenu(onCreateRuleClick);
 
   const manageRulesLinkProps = observability.useRulesLink();
+  const focusTrapProps = createFocusTrapProps(alertsButtonRef.current);
 
   const manageAlertsMenuItem = useMemo(
     () => ({
@@ -210,6 +214,7 @@ export const MetricsAlertDropdown = () => {
         anchorPosition="downLeft"
         button={
           <EuiHeaderLink
+            buttonRef={alertsButtonRef}
             color="primary"
             iconSide={'right'}
             iconType={'arrowDown'}
@@ -224,7 +229,11 @@ export const MetricsAlertDropdown = () => {
       >
         <EuiContextMenu initialPanelId={0} panels={panels} data-test-subj="metrics-alert-menu" />
       </EuiPopover>
-      <AlertFlyout visibleFlyoutType={visibleFlyoutType} onClose={closeFlyout} />
+      <AlertFlyout
+        visibleFlyoutType={visibleFlyoutType}
+        onClose={closeFlyout}
+        focusTrapProps={focusTrapProps}
+      />
     </>
   );
 };
@@ -232,16 +241,19 @@ export const MetricsAlertDropdown = () => {
 interface AlertFlyoutProps {
   visibleFlyoutType: VisibleFlyoutType | null;
   onClose(): void;
+  focusTrapProps?: EuiFlyoutResizableProps['focusTrapProps'];
 }
 
-const AlertFlyout = ({ visibleFlyoutType, onClose }: AlertFlyoutProps) => {
+const AlertFlyout = ({ visibleFlyoutType, onClose, focusTrapProps }: AlertFlyoutProps) => {
   switch (visibleFlyoutType) {
     case 'inventory':
-      return <PrefilledInventoryAlertFlyout onClose={onClose} />;
+      return <PrefilledInventoryAlertFlyout onClose={onClose} focusTrapProps={focusTrapProps} />;
     case 'metricThreshold':
-      return <PrefilledMetricThresholdAlertFlyout onClose={onClose} />;
+      return (
+        <PrefilledMetricThresholdAlertFlyout onClose={onClose} focusTrapProps={focusTrapProps} />
+      );
     case 'customThreshold':
-      return <CustomThresholdAlertFlyout onClose={onClose} />;
+      return <CustomThresholdAlertFlyout onClose={onClose} focusTrapProps={focusTrapProps} />;
     default:
       return null;
   }

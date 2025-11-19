@@ -11,27 +11,27 @@ export const getMockAttackDiscoveryFindResponse = (): AttackDiscoveryFindRespons
   connector_names: ['Claude Sonnet 3.5', 'GPT-4.1', 'GPT-4o'],
   data: [
     {
-      alertIds: [
+      alert_ids: [
         '14bd5f2a3839278e467dcdd31de5d74a80315a86625f8c87917f76652132ff2e',
         'cbec85fa2f911a9711cc76d0ab4b65d327e08d1a4afab530120fd1d402834013',
         'f049cb9a261d34e037bb2abbc67eec8a99388d9fc3586d500f4e214d26699705',
         '61073bf3467ada541ad6605e27021ba9abe437ce2ae958e680c9935ffd3fcbf0',
         '05d7f602c6f44f7943e17e9f7a6c3b20ec5583c07f8c2ae55395b91e729e2a0a',
       ],
-      alertRuleUuid: 'attack_discovery_ad_hoc_rule_id',
-      alertStart: '2025-06-27T17:06:07.163Z',
-      alertUpdatedAt: '2025-06-27T17:13:33.318Z',
-      alertWorkflowStatus: 'open',
-      alertWorkflowStatusUpdatedAt: '2025-06-27T17:13:33.318Z',
-      connectorId: 'gpt41Azure',
-      connectorName: 'GPT-4.1',
-      detailsMarkdown:
+      alert_rule_uuid: 'attack_discovery_ad_hoc_rule_id',
+      alert_start: '2025-06-27T17:06:07.163Z',
+      alert_updated_at: '2025-06-27T17:13:33.318Z',
+      alert_workflow_status: 'open',
+      alert_workflow_status_updated_at: '2025-06-27T17:13:33.318Z',
+      connector_id: 'gpt41Azure',
+      connector_name: 'GPT-4.1',
+      details_markdown:
         '- On {{ host.name 8f66d5b8-595e-4189-bfce-6541f81f4477 }}, user {{ user.name fb5924ec-2cfb-406d-a96d-4c2ea85fba36 }} opened a malicious Word document ({{ process.parent.name WINWORD.EXE }}) which spawned {{ process.name wscript.exe }} to execute a suspicious VBS script ({{ file.name AppPool.vbs }}).\n- The script created a scheduled task to persistently execute itself and then launched {{ process.name powershell.exe }} with obfuscated arguments ({{ process.command_line "C:\\Windows\\System32\\WindowsPowerShell\\v1.0\\powershell.exe" -exec bypass -file ... }}).\n- The PowerShell script is indicative of command-and-control activity, likely connecting to an external server for further instructions or payloads.\n- The attack chain demonstrates initial access via phishing, execution of a script via LOLBins, persistence via scheduled tasks, and C2 via PowerShell, all on {{ host.name 8f66d5b8-595e-4189-bfce-6541f81f4477 }} by {{ user.name fb5924ec-2cfb-406d-a96d-4c2ea85fba36 }}.',
-      entitySummaryMarkdown:
+      entity_summary_markdown:
         'PowerShell C2 on {{ host.name 8f66d5b8-595e-4189-bfce-6541f81f4477 }} by {{ user.name fb5924ec-2cfb-406d-a96d-4c2ea85fba36 }}.',
-      generationUuid: 'bb09576f-60fb-4f05-8219-f1c796585021',
+      generation_uuid: 'bb09576f-60fb-4f05-8219-f1c796585021',
       id: '4986644a9ae68ce8e51cc5c26fd0bf573a1fca0cd1c43a09fe07d93e6cc79a49',
-      mitreAttackTactics: [
+      mitre_attack_tactics: [
         'Initial Access',
         'Execution',
         'Persistence',
@@ -51,13 +51,13 @@ export const getMockAttackDiscoveryFindResponse = (): AttackDiscoveryFindRespons
         '6ff109ee-17f0-48df-b799-3847bf426dca': 'SRVWIN02',
         'ec003e6b-7dd1-4905-8523-ce42525381da': 'SRVWIN01',
       },
-      riskScore: 495,
-      summaryMarkdown:
+      risk_score: 495,
+      summary_markdown:
         'Office phishing led to persistent PowerShell C2 on {{ host.name 8f66d5b8-595e-4189-bfce-6541f81f4477 }} by {{ user.name fb5924ec-2cfb-406d-a96d-4c2ea85fba36 }}.',
       timestamp: '2025-06-27T17:06:07.163Z',
       title: 'Office phishing to PowerShell C2',
-      userId: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-      userName: 'elastic',
+      user_id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+      user_name: 'elastic',
       users: [
         {
           id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
@@ -66,7 +66,7 @@ export const getMockAttackDiscoveryFindResponse = (): AttackDiscoveryFindRespons
       ],
     },
     {
-      alertIds: [
+      alert_ids: [
         '62779b19c70bc8c86809812f9787ef284117c87b50292c549b66d0dcb8a24834',
         'd8f622898b24c263fd0b0cfe0057ce4a3ca68931aa4753ecc8ecfc33909a754e',
         'e25cede2ca5bfb0480f29a2dae221d9ff29053a37466719dfdc6b97303ebf49b',
@@ -76,20 +76,20 @@ export const getMockAttackDiscoveryFindResponse = (): AttackDiscoveryFindRespons
         '91f8bf7df177cb3aeee0909335c12a683aee459e00fc5fd9074b454c24d6f09c',
         'dc109d0fc3d25fc9bdb179575d91996b5129770c8eb31511ce63c1564575272a',
       ],
-      alertRuleUuid: 'attack_discovery_ad_hoc_rule_id',
-      alertStart: '2025-06-27T17:06:07.163Z',
-      alertUpdatedAt: '2025-06-27T17:13:33.318Z',
-      alertWorkflowStatus: 'open',
-      alertWorkflowStatusUpdatedAt: '2025-06-27T17:13:33.318Z',
-      connectorId: 'gpt41Azure',
-      connectorName: 'GPT-4.1',
-      detailsMarkdown:
+      alert_rule_uuid: 'attack_discovery_ad_hoc_rule_id',
+      alert_start: '2025-06-27T17:06:07.163Z',
+      alert_updated_at: '2025-06-27T17:13:33.318Z',
+      alert_workflow_status: 'open',
+      alert_workflow_status_updated_at: '2025-06-27T17:13:33.318Z',
+      connector_id: 'gpt41Azure',
+      connector_name: 'GPT-4.1',
+      details_markdown:
         "- On {{ host.name c07f52c5-19b2-4eec-99ca-8f802acf97e4 }}, user {{ user.name 19931f1b-b438-41e4-b423-8c3030e81516 }} was targeted by a phishing attack using a trojanized application ({{ file.name My Go Application.app }}) with a failed code signature ({{ process.code_signature.trusted false }}).\n- The application spawned {{ process.name osascript }} to display a fake password prompt ({{ process.args osascript -e display dialog ... }}), attempting to phish credentials.\n- The malware then used {{ process.name chmod }} to make a new binary ({{ file.name unix1 }}) executable, which was subsequently executed with arguments targeting the user's keychain database ({{ process.command_line /Users/james/unix1 /Users/james/library/Keychains/login.keychain-db ... }}), indicating credential theft.\n- The attack chain shows initial access via a trojanized app, credential phishing, privilege escalation, and credential exfiltration, all on {{ host.name c07f52c5-19b2-4eec-99ca-8f802acf97e4 }} by {{ user.name 19931f1b-b438-41e4-b423-8c3030e81516 }}.",
-      entitySummaryMarkdown:
+      entity_summary_markdown:
         'macOS credential theft on {{ host.name c07f52c5-19b2-4eec-99ca-8f802acf97e4 }} by {{ user.name 19931f1b-b438-41e4-b423-8c3030e81516 }}.',
-      generationUuid: 'bb09576f-60fb-4f05-8219-f1c796585021',
+      generation_uuid: 'bb09576f-60fb-4f05-8219-f1c796585021',
       id: '457623feab9f1023520e7660a747fbdad98087e2074de9464ba8cf6ed72017a6',
-      mitreAttackTactics: [
+      mitre_attack_tactics: [
         'Initial Access',
         'Execution',
         'Credential Access',
@@ -109,13 +109,13 @@ export const getMockAttackDiscoveryFindResponse = (): AttackDiscoveryFindRespons
         '6ff109ee-17f0-48df-b799-3847bf426dca': 'SRVWIN02',
         'ec003e6b-7dd1-4905-8523-ce42525381da': 'SRVWIN01',
       },
-      riskScore: 792,
-      summaryMarkdown:
+      risk_score: 792,
+      summary_markdown:
         'macOS phishing app led to credential theft on {{ host.name c07f52c5-19b2-4eec-99ca-8f802acf97e4 }} by {{ user.name 19931f1b-b438-41e4-b423-8c3030e81516 }}.',
       timestamp: '2025-06-27T17:06:07.163Z',
       title: 'macOS phishing to credential theft',
-      userId: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
-      userName: 'elastic',
+      user_id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',
+      user_name: 'elastic',
       users: [
         {
           id: 'u_mGBROF_q5bmFCATbLXAcCwKa0k8JvONAwSruelyKA5E_0',

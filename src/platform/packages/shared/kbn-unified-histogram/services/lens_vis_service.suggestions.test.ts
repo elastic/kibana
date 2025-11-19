@@ -125,7 +125,7 @@ describe('LensVisService suggestions', () => {
 
     const histogramQuery = {
       esql: `from the-data-view | limit 100
-| EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats results = count(*) by timestamp`,
+| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 30 minute)`,
     };
 
     expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
@@ -163,7 +163,7 @@ describe('LensVisService suggestions', () => {
 
     const histogramQuery = {
       esql: `from the-data-view | limit 100
-| EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats results = count(*) by timestamp`,
+| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 30 minute)`,
     };
 
     expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
@@ -201,7 +201,7 @@ describe('LensVisService suggestions', () => {
 
     const histogramQuery = {
       esql: `FROM metrics*
-| EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats results = count(*) by timestamp`,
+| STATS results = COUNT(*) BY timestamp = BUCKET(@timestamp, 30 minute)`,
     };
 
     expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
@@ -286,7 +286,7 @@ describe('LensVisService suggestions', () => {
 
     const histogramQuery = {
       esql: `from the-data-view | limit 100
-| EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats results = count(*) by timestamp, \`var0\` | sort \`var0\` asc`,
+| STATS results = COUNT(*) BY \`var0\`, timestamp = BUCKET(@timestamp, 30 minute) | sort \`var0\` asc`,
     };
 
     expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
@@ -367,7 +367,7 @@ describe('LensVisService suggestions', () => {
 
     const histogramQuery = {
       esql: `from the-data-view | limit 100
-| EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats results = count(*) by timestamp, \`coordinates\``,
+| STATS results = COUNT(*) BY \`coordinates\`, timestamp = BUCKET(@timestamp, 30 minute)`,
     };
 
     expect(lensVis.visContext?.attributes.state.query).toStrictEqual(histogramQuery);
