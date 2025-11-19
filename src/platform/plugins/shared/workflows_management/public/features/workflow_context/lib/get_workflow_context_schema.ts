@@ -35,8 +35,7 @@ export function getWorkflowContextSchema(
     try {
       const yamlJson = yamlDocument.toJSON();
       if (yamlJson && typeof yamlJson === 'object' && 'inputs' in yamlJson) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        inputs = (yamlJson as any).inputs;
+        inputs = (yamlJson as Record<string, unknown>).inputs as typeof inputs;
       }
     } catch (e) {
       // Ignore errors when extracting from YAML

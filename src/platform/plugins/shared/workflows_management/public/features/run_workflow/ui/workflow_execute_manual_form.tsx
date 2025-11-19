@@ -97,7 +97,7 @@ function generateSampleFromJsonSchema(schema: JSONSchema7): unknown {
       return sample;
     }
     default:
-      return null;
+      return undefined;
   }
 }
 

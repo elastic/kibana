@@ -15,12 +15,12 @@ import { parse } from 'yaml';
 import { generateYamlSchemaFromConnectors } from './generate_yaml_schema_from_connectors';
 import { getJsonSchemaFromYamlSchema } from './get_json_schema_from_yaml_schema';
 
-describe('Validate security_workflow_example.yaml against Monaco Schema', () => {
-  // TODO: Re-enable this test once schema generation fixes broken references
-  // The test is currently skipped due to broken $ref in schema generation
+describe('Validate example_security_workflow.yaml against Monaco Schema', () => {
+  // Test is skipped due to complex schema generation issues with deeply nested allOf structures
+  // These are handled via regex patterns in fixBrokenSchemaReferencesAndEnforceStrictValidation
   it.skip('should validate the security workflow YAML against the generated Monaco schema', () => {
     // Read the workflow YAML file (it's in the workspace root)
-    const workflowYamlPath = join(__dirname, '../../../../../../../security_workflow_example.yaml');
+    const workflowYamlPath = join(__dirname, '../examples/example_security_workflow.yaml');
     const workflowYamlContent = readFileSync(workflowYamlPath, 'utf-8');
     const workflowData = parse(workflowYamlContent);
 

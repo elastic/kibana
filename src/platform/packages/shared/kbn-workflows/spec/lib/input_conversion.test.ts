@@ -304,6 +304,49 @@ describe('applyInputDefaults', () => {
     });
   });
 
+  it('should apply defaults for $ref references', () => {
+    const inputsSchema = normalizeInputsToJsonSchema({
+      properties: {
+        user: {
+          $ref: '#/definitions/UserSchema',
+        },
+      },
+      required: ['user'],
+      additionalProperties: false,
+      definitions: {
+        UserSchema: {
+          type: 'object',
+          properties: {
+            name: {
+              type: 'string',
+              default: 'John Doe',
+            },
+            email: {
+              type: 'string',
+              format: 'email',
+              default: 'john.doe@example.com',
+            },
+            age: {
+              type: 'number',
+              default: 30,
+            },
+          },
+          required: ['name', 'email'],
+          additionalProperties: false,
+        },
+      },
+    });
+
+    const result = applyInputDefaults(undefined, inputsSchema);
+    expect(result).toEqual({
+      user: {
+        name: 'John Doe',
+        email: 'john.doe@example.com',
+        age: 30,
+      },
+    });
+  });
+
   it('should handle the security workflow example with all defaults', () => {
     const inputsSchema = normalizeInputsToJsonSchema({
       properties: {

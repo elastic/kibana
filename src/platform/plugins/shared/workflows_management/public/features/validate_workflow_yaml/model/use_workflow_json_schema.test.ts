@@ -16,7 +16,9 @@ describe('useWorkflowJsonSchema - Version Field', () => {
     const jsonSchema = getJsonSchemaFromYamlSchema(zodSchema);
 
     // Check the version field structure - it might be in definitions or at root
-    const workflowSchema = jsonSchema?.definitions?.WorkflowSchema;
+    const workflowSchema = jsonSchema?.definitions?.WorkflowSchema as
+      | { properties?: { version?: unknown }; required?: string[] }
+      | undefined;
     const versionSchema = workflowSchema?.properties?.version;
 
     // CRITICAL: Version must NOT be in the required array
@@ -25,10 +27,11 @@ describe('useWorkflowJsonSchema - Version Field', () => {
     expect(requiredFields).not.toContain('version');
 
     // If version property exists, it should be optional
-    if (versionSchema) {
+    if (versionSchema && typeof versionSchema === 'object' && 'anyOf' in versionSchema) {
       // Version should be optional (either wrapped in anyOf with undefined, or not in required array)
-      if (versionSchema?.anyOf) {
-        const hasUndefinedOption = versionSchema.anyOf.some(
+      const anyOf = (versionSchema as { anyOf?: unknown[] }).anyOf;
+      if (Array.isArray(anyOf)) {
+        const hasUndefinedOption = anyOf.some(
           (subSchema: any) => subSchema.type === 'undefined' || subSchema.type === 'null'
         );
         expect(hasUndefinedOption).toBe(true);
@@ -41,7 +44,9 @@ describe('useWorkflowJsonSchema - Version Field', () => {
     const zodSchema = getWorkflowZodSchema({});
     const jsonSchema = getJsonSchemaFromYamlSchema(zodSchema);
 
-    const workflowSchema = jsonSchema?.definitions?.WorkflowSchema;
+    const workflowSchema = jsonSchema?.definitions?.WorkflowSchema as
+      | { required?: string[] }
+      | undefined;
 
     // This is the critical check - version must NOT be in required
     const requiredFields = workflowSchema?.required || [];

@@ -44,6 +44,7 @@ describe('parseWorkflowYamlToJSON', () => {
         >
       ).data
     ).toEqual({
+      triggers: [],
       steps: [{ name: 'step1', type: 'noop', with: { message: 'Hello, world!' } }],
     });
   });
@@ -84,6 +85,7 @@ describe('parseWorkflowYamlToJSON', () => {
         >
       ).data
     ).toEqual({
+      triggers: [],
       steps: [{ name: 'step1', type: 'noop', with: { message: 'Hello, {{event.message}}' } }],
     });
   });

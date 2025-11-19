@@ -152,18 +152,7 @@ export function getSuggestions(
     return jsonSchemaSuggestions;
   }
 
-  // TODO: Implement connector with block completion
-  // Connector with block completion
-  // e.g.
-  // steps:
-  // - name: search-alerts
-  //   type: elasticsearch.search
-  //   with:
-  //     index: "alerts-*"
-  //     query:
-  //       range:
-  //         "@timestamp":
-  //           gte: "now-1h"
-  //     |<-
+  // Future enhancement: Connector with block completion
+  // This would provide autocompletion for connector-specific parameters
   return [];
 }

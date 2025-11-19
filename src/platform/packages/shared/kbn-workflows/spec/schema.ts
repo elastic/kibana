@@ -373,7 +373,6 @@ export const getMergeStepSchema = (stepSchema: z.ZodType, loose: boolean = false
 };
 
 /* --- Inputs --- */
-// Legacy input schemas (kept for backward compatibility conversion)
 export const WorkflowInputTypeEnum = z.enum(['string', 'number', 'boolean', 'choice', 'array']);
 
 const WorkflowInputBaseSchema = z.object({
@@ -420,12 +419,14 @@ export const WorkflowInputSchema = z.union([
 ]);
 
 // New JSON Schema-based inputs structure
-// This represents a JSON Schema object with properties, required, and additionalProperties
+// This represents a JSON Schema object with properties, required, additionalProperties, and definitions
 export const WorkflowInputsJsonSchema = z
   .object({
     properties: z.record(z.string(), z.any()).optional(),
     required: z.array(z.string()).optional(),
     additionalProperties: z.union([z.boolean(), z.any()]).optional(),
+    definitions: z.record(z.string(), z.any()).optional(),
+    $defs: z.record(z.string(), z.any()).optional(),
   })
   .refine(
     (data) => {
@@ -433,6 +434,13 @@ export const WorkflowInputsJsonSchema = z
       if (data.properties) {
         // Validate each property is a valid JSON Schema
         for (const value of Object.values(data.properties)) {
+          // $ref objects are valid JSON Schema but can't be validated in isolation
+          // since they reference definitions that exist in the parent schema
+          if (typeof value === 'object' && value !== null && '$ref' in value) {
+            // $ref is a valid JSON Schema construct, skip validation
+            // eslint-disable-next-line no-continue
+            continue;
+          }
           if (!isValidJsonSchema(value)) {
             return false;
           }
@@ -610,7 +618,8 @@ export const WorkflowDataContextSchema = z.object({
 });
 export type WorkflowDataContext = z.infer<typeof WorkflowDataContextSchema>;
 
-// TODO: import AlertSchema from from '@kbn/alerts-as-data-utils' once it exported, now only type is exported
+// Note: AlertSchema from '@kbn/alerts-as-data-utils' uses io-ts runtime types, not Zod.
+// Once a Zod-compatible version is available, we should import and use it instead.
 const AlertSchema = z.object({
   _id: z.string(),
   _index: z.string(),

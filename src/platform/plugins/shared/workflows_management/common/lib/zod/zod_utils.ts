@@ -10,7 +10,6 @@
 import { zodToJsonSchema } from 'zod-to-json-schema';
 import type { ZodFirstPartySchemaTypes } from '@kbn/zod';
 import { z } from '@kbn/zod';
-import type { WorkflowZodSchemaLooseType } from '../../schema';
 
 export function parsePath(path: string) {
   const segments = path
@@ -34,7 +33,7 @@ interface GetSchemaAtPathResult {
  */
 // eslint-disable-next-line complexity
 export function getSchemaAtPath(
-  schema: WorkflowZodSchemaLooseType,
+  schema: z.ZodType,
   path: string,
   { partial = false }: { partial?: boolean } = {}
 ): GetSchemaAtPathResult {
@@ -47,17 +46,12 @@ export function getSchemaAtPath(
     let current = schema;
 
     for (const [index, segment] of segments.entries()) {
-      // Keep unwrapping ZodOptional and ZodDefault until we get to the base type
-      // This handles cases like ZodDefault(ZodOptional(ZodObject)) or ZodOptional(ZodDefault(ZodObject))
-      while (current instanceof z.ZodOptional || current instanceof z.ZodDefault) {
-        if (current instanceof z.ZodOptional) {
-          current = current.unwrap();
-        }
-        if (current instanceof z.ZodDefault) {
-          current = current.removeDefault();
-        }
+      if (current instanceof z.ZodOptional) {
+        current = current.unwrap();
       }
-
+      if (current instanceof z.ZodDefault) {
+        current = current.removeDefault();
+      }
       if (current instanceof z.ZodObject) {
         const shape = current.shape;
         if (!(segment in shape)) {
@@ -66,21 +60,6 @@ export function getSchemaAtPath(
             : { schema: null, scopedToPath: null };
         }
         current = shape[segment];
-        // After accessing a property, unwrap any optional/default wrappers
-        // This is important for nested objects that might be wrapped
-        // Keep unwrapping until we get to a non-wrapper type
-        while (current instanceof z.ZodOptional || current instanceof z.ZodDefault) {
-          if (current instanceof z.ZodOptional) {
-            current = current.unwrap();
-          }
-          if (current instanceof z.ZodDefault) {
-            current = current.removeDefault();
-          }
-        }
-        // After unwrapping, if we have more segments and current is still a ZodObject,
-        // we can continue traversing. Otherwise, if there are more segments, we need to check
-        // if the unwrapped type is something we can traverse (like ZodObject)
-        // This is handled by the next iteration of the loop
       } else if (current instanceof z.ZodUnion) {
         const branches = current.options;
         const validBranch = branches.find((branch: z.ZodType) =>
@@ -131,6 +110,10 @@ export function getSchemaAtPath(
 
     if (current instanceof z.ZodOptional) {
       return { schema: current.unwrap(), scopedToPath: segments.join('.') };
+    }
+
+    if (current instanceof z.ZodDefault) {
+      return { schema: current.removeDefault(), scopedToPath: segments.join('.') };
     }
 
     return { schema: current as z.ZodType, scopedToPath: segments.join('.') };
@@ -238,7 +221,6 @@ export function getZodTypeName(schema: z.ZodType) {
     case 'ZodLiteral':
       return 'literal';
     case 'ZodEnum':
-      // Enums are string-based, so return 'string' for type checking
       return 'string';
     case 'ZodUnion': {
       // Check if all union members are arrays - if so, treat as array type

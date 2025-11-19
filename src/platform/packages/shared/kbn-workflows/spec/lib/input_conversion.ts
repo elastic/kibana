@@ -135,13 +135,17 @@ export function normalizeInputsToJsonSchema(
  * @param currentValue - The current value for this property
  * @returns The value with defaults applied
  */
-function applyDefaultToObjectProperty(prop: JSONSchema7, currentValue: unknown): unknown {
+function applyDefaultToObjectProperty(
+  prop: JSONSchema7,
+  currentValue: unknown,
+  inputsSchema?: ReturnType<typeof normalizeInputsToJsonSchema>
+): unknown {
   if (currentValue === undefined) {
     if (prop.default !== undefined) {
       return prop.default;
     }
     if (prop.type === 'object' && prop.properties) {
-      return applyDefaultFromSchema(prop, undefined);
+      return applyDefaultFromSchema(prop, undefined, inputsSchema);
     }
     return undefined;
   }
@@ -152,7 +156,7 @@ function applyDefaultToObjectProperty(prop: JSONSchema7, currentValue: unknown):
     typeof currentValue === 'object' &&
     !Array.isArray(currentValue)
   ) {
-    return applyDefaultFromSchema(prop, currentValue);
+    return applyDefaultFromSchema(prop, currentValue, inputsSchema);
   }
 
   return currentValue;
@@ -166,13 +170,14 @@ function applyDefaultToObjectProperty(prop: JSONSchema7, currentValue: unknown):
  */
 function applyDefaultsToObjectProperties(
   schema: JSONSchema7,
-  value: Record<string, unknown>
+  value: Record<string, unknown>,
+  inputsSchema?: ReturnType<typeof normalizeInputsToJsonSchema>
 ): Record<string, unknown> {
   const result: Record<string, unknown> = { ...value };
   for (const [key, propSchema] of Object.entries(schema.properties || {})) {
     const prop = propSchema as JSONSchema7;
     const currentValue = result[key];
-    const defaultValue = applyDefaultToObjectProperty(prop, currentValue);
+    const defaultValue = applyDefaultToObjectProperty(prop, currentValue, inputsSchema);
     if (defaultValue !== undefined) {
       result[key] = defaultValue;
     }
@@ -185,13 +190,16 @@ function applyDefaultsToObjectProperties(
  * @param schema - The object schema
  * @returns An object with defaults applied, or undefined if no defaults
  */
-function createObjectWithDefaults(schema: JSONSchema7): Record<string, unknown> | undefined {
+function createObjectWithDefaults(
+  schema: JSONSchema7,
+  inputsSchema?: ReturnType<typeof normalizeInputsToJsonSchema>
+): Record<string, unknown> | undefined {
   const result: Record<string, unknown> = {};
   for (const [key, propSchema] of Object.entries(schema.properties || {})) {
     const prop = propSchema as JSONSchema7;
     const isRequired = schema.required?.includes(key) ?? false;
     if (isRequired || prop.default !== undefined) {
-      const defaultValue = applyDefaultFromSchema(prop, undefined);
+      const defaultValue = applyDefaultFromSchema(prop, undefined, inputsSchema);
       if (defaultValue !== undefined) {
         result[key] = defaultValue;
       }
@@ -201,12 +209,55 @@ function createObjectWithDefaults(schema: JSONSchema7): Record<string, unknown> 
 }
 
 /**
+ * Resolves a $ref reference within the inputs schema context
+ * @param ref - The $ref string (e.g., "#/definitions/UserSchema")
+ * @param inputsSchema - The full inputs schema containing definitions
+ * @returns The resolved schema, or null if not found
+ */
+function resolveRef(
+  ref: string,
+  inputsSchema: ReturnType<typeof normalizeInputsToJsonSchema>
+): JSONSchema7 | null {
+  if (!ref.startsWith('#/')) {
+    // External references not supported yet
+    return null;
+  }
+
+  const path = ref.slice(2).split('/'); // Remove '#/' and split
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let current: any = inputsSchema;
+
+  for (const segment of path) {
+    if (current && typeof current === 'object') {
+      current = current[segment];
+    } else {
+      return null;
+    }
+  }
+
+  return current as JSONSchema7 | null;
+}
+
+/**
  * Recursively applies default values from JSON Schema to input values
  * @param schema - The JSON Schema property definition
  * @param value - The current input value (may be undefined)
+ * @param inputsSchema - The full inputs schema (for resolving $ref)
  * @returns The value with defaults applied
  */
-function applyDefaultFromSchema(schema: JSONSchema7, value: unknown): unknown {
+function applyDefaultFromSchema(
+  schema: JSONSchema7,
+  value: unknown,
+  inputsSchema?: ReturnType<typeof normalizeInputsToJsonSchema>
+): unknown {
+  // Resolve $ref if present
+  if (schema.$ref && inputsSchema) {
+    const resolvedSchema = resolveRef(schema.$ref, inputsSchema);
+    if (resolvedSchema) {
+      // Use resolved schema for applying defaults
+      return applyDefaultFromSchema(resolvedSchema, value, inputsSchema);
+    }
+  }
   // If value is already provided, use it (unless it's undefined/null for objects)
   if (value !== undefined && value !== null) {
     // For objects, recursively apply defaults to nested properties
@@ -216,7 +267,11 @@ function applyDefaultFromSchema(schema: JSONSchema7, value: unknown): unknown {
       typeof value === 'object' &&
       !Array.isArray(value)
     ) {
-      return applyDefaultsToObjectProperties(schema, value as Record<string, unknown>);
+      return applyDefaultsToObjectProperties(
+        schema,
+        value as Record<string, unknown>,
+        inputsSchema
+      );
     }
     return value;
   }
@@ -228,7 +283,7 @@ function applyDefaultFromSchema(schema: JSONSchema7, value: unknown): unknown {
 
   // For objects, create object with defaults for required properties
   if (schema.type === 'object' && schema.properties) {
-    return createObjectWithDefaults(schema);
+    return createObjectWithDefaults(schema, inputsSchema);
   }
 
   // For arrays, return empty array if no default
@@ -261,7 +316,7 @@ export function applyInputDefaults(
 
     // Apply defaults if value is missing or undefined
     if (currentValue === undefined) {
-      const defaultValue = applyDefaultFromSchema(jsonSchema, undefined);
+      const defaultValue = applyDefaultFromSchema(jsonSchema, undefined, inputsSchema);
       if (defaultValue !== undefined) {
         result[propertyName] = defaultValue;
       }
@@ -272,7 +327,13 @@ export function applyInputDefaults(
       !Array.isArray(currentValue)
     ) {
       // Recursively apply defaults to nested objects
-      result[propertyName] = applyDefaultFromSchema(jsonSchema, currentValue);
+      result[propertyName] = applyDefaultFromSchema(jsonSchema, currentValue, inputsSchema);
+    } else if (jsonSchema.$ref) {
+      // Handle $ref: resolve and apply defaults
+      const defaultValue = applyDefaultFromSchema(jsonSchema, currentValue, inputsSchema);
+      if (defaultValue !== undefined) {
+        result[propertyName] = defaultValue;
+      }
     }
   }
 

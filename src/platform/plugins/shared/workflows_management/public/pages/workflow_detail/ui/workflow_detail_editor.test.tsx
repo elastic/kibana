@@ -67,7 +67,7 @@ jest.mock('../../../features/workflow_visual_editor', () => ({
   ),
 }));
 
-jest.mock('../../../features/debug-graph/execution_graph', () => ({
+jest.mock('../../../features/debug_graph/execution_graph', () => ({
   ExecutionGraph: () => (
     <div data-test-subj="execution-graph">
       <div data-test-subj="execution-graph-content">{'Execution Graph'}</div>

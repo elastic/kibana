@@ -130,7 +130,6 @@ export function buildAutocompleteContext({
     absoluteOffset,
     focusedStepInfo,
     focusedYamlPair,
-    // TODO: add currentTriggerInfo
 
     // context
     contextSchema,

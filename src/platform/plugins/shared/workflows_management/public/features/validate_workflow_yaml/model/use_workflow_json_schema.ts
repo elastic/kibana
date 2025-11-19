@@ -7,7 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// TODO: Remove the eslint-disable comments to use the proper types.
+// Note: JSON Schema manipulation requires dynamic type handling.
+// The `any` types are necessary for traversing and modifying JSON Schema structures
+// that come from zod-to-json-schema, which can have varying shapes.
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import type { JSONSchema7 } from 'json-schema';
@@ -40,9 +42,9 @@ export const useWorkflowJsonSchema = ({
 }: UseWorkflowJsonSchemaOptions = {}): UseWorkflowJsonSchemaResult => {
   const connectorsData = useAvailableConnectors();
 
-  // TODO: download from server instead of generating on client
-
   // Generate JSON schema dynamically to include all current connectors (static + dynamic)
+  // Note: Schema generation happens on the client to ensure it includes all available connectors.
+  // Future optimization: Consider server-side generation with caching for better performance.
   // Now uses lazy loading to keep large generated files out of main bundle
   return useMemo(() => {
     try {
@@ -52,52 +54,16 @@ export const useWorkflowJsonSchema = ({
           ? WorkflowSchemaUriLooseWithDynamicConnectors
           : WorkflowSchemaUriStrictWithDynamicConnectors;
       }
-
       const zodSchema = loose
         ? getWorkflowZodSchemaLoose(connectorsData?.connectorTypes ?? {})
-        : getWorkflowZodSchema(connectorsData?.connectorTypes ?? {}); // TODO: remove this once we move the schema generation up to detail page or some wrapper component
+        : getWorkflowZodSchema(connectorsData?.connectorTypes ?? {});
       const jsonSchema = getJsonSchemaFromYamlSchema(zodSchema);
 
       // Post-process to improve validation messages and add display names for connectors
-      // Note: improveTypeFieldDescriptions only modifies descriptions/titles, not structure
-      // fixInputsSchemaForMonaco (called in getJsonSchemaFromYamlSchema) already handles inputs schema structure
       const processedSchema = improveTypeFieldDescriptions(jsonSchema, connectorsData);
 
-      // Ensure steps schema is always an array type (fix after all post-processing)
-      ensureStepsSchemaIsArrayFormat(processedSchema);
-
-      // CRITICAL: Ensure version field is optional AFTER all other processing
-      // This must be done after improveTypeFieldDescriptions which might modify the schema
-      ensureVersionIsOptional(processedSchema);
-
-      // Deep clone the schema to ensure React sees it as a new object
-      // This forces Monaco to re-register the schema when it changes
-      const clonedSchema = JSON.parse(JSON.stringify(processedSchema));
-
-      // Double-check that version is not in required after cloning (safety net)
-      ensureVersionIsOptional(clonedSchema);
-
-      // Final verification: ensure version is definitely not in required
-      // This is a last-ditch effort to catch any edge cases
-      const workflowSchemaFinal = clonedSchema?.definitions?.WorkflowSchema;
-      if (workflowSchemaFinal?.required && Array.isArray(workflowSchemaFinal.required)) {
-        const hasVersion = workflowSchemaFinal.required.includes('version');
-        if (hasVersion) {
-          // This should never happen, but if it does, remove it
-          workflowSchemaFinal.required = workflowSchemaFinal.required.filter(
-            (field: string) => field !== 'version'
-          );
-          if (workflowSchemaFinal.required.length === 0) {
-            delete workflowSchemaFinal.required;
-          }
-        }
-      }
-
-      // Return the schema with the original URI (no query parameters)
-      // The schema is provided inline, so Monaco doesn't need to fetch it
-      // The deep clone ensures React detects changes and updates Monaco
       return {
-        jsonSchema: clonedSchema ?? null,
+        jsonSchema: processedSchema ?? null,
         uri,
       };
     } catch (error) {
@@ -176,162 +142,4 @@ function improveTypeFieldDescriptions(schema: any, connectorsData?: any): any {
   }
 
   return enhanceSchema(schema);
-}
-
-/**
- * Ensure the version field is optional in the Monaco schema
- * This allows workflows without an explicit version field (backward compatibility)
- * This function is called multiple times as a safety net to ensure version is always optional
- */
-function ensureVersionIsOptional(schema: any): void {
-  if (!schema || typeof schema !== 'object') {
-    return;
-  }
-
-  // Check both definitions.WorkflowSchema and direct properties (in case schema structure varies)
-  const workflowSchema = schema?.definitions?.WorkflowSchema || schema;
-  if (!workflowSchema || typeof workflowSchema !== 'object') {
-    return;
-  }
-
-  // CRITICAL: Handle allOf structure (zod-to-json-schema creates allOf for piped schemas)
-  // The properties and required fields are inside allOf[0], not directly in workflowSchema
-  if (workflowSchema.allOf && Array.isArray(workflowSchema.allOf)) {
-    // Process each item in allOf array
-    workflowSchema.allOf.forEach((allOfItem: any) => {
-      if (!allOfItem || typeof allOfItem !== 'object') {
-        return;
-      }
-
-      // Remove version from required array in allOf item
-      if (allOfItem.required && Array.isArray(allOfItem.required)) {
-        const originalLength = allOfItem.required.length;
-        allOfItem.required = allOfItem.required.filter((field: string) => field !== 'version');
-        // If we removed version, ensure the array is still valid (or delete if empty)
-        if (allOfItem.required.length === 0 && originalLength > 0) {
-          delete allOfItem.required;
-        }
-      }
-
-      // Make version property optional in allOf item
-      const versionSchema = allOfItem.properties?.version;
-      if (versionSchema && typeof versionSchema === 'object') {
-        // If version is not wrapped in anyOf, wrap it to make it optional
-        if (!versionSchema.anyOf || !Array.isArray(versionSchema.anyOf)) {
-          const originalSchema = { ...versionSchema };
-          versionSchema.anyOf = [originalSchema, { type: 'undefined' }];
-          // Remove the direct properties since we're using anyOf now
-          delete versionSchema.type;
-          delete versionSchema.const;
-          delete versionSchema.default;
-        } else {
-          // If already wrapped in anyOf, ensure undefined option exists
-          const hasUndefinedOption = versionSchema.anyOf.some(
-            (subSchema: any) =>
-              subSchema &&
-              typeof subSchema === 'object' &&
-              (subSchema.type === 'null' || subSchema.type === 'undefined')
-          );
-          if (!hasUndefinedOption) {
-            versionSchema.anyOf.push({ type: 'undefined' });
-          }
-        }
-      }
-    });
-  } else {
-    // Fallback: Handle direct properties structure (if allOf doesn't exist)
-    // CRITICAL: Always ensure version is not in the required array
-    // This is the most important fix - if version is in required, Monaco will show the error
-    if (workflowSchema.required && Array.isArray(workflowSchema.required)) {
-      const originalLength = workflowSchema.required.length;
-      workflowSchema.required = workflowSchema.required.filter(
-        (field: string) => field !== 'version'
-      );
-      // If we removed version, ensure the array is still valid (or delete if empty)
-      if (workflowSchema.required.length === 0 && originalLength > 0) {
-        delete workflowSchema.required;
-      }
-    }
-
-    // If version property exists, make it optional
-    const versionSchema = workflowSchema.properties?.version;
-    if (versionSchema && typeof versionSchema === 'object') {
-      // If version is wrapped in anyOf (for optional), ensure it's truly optional
-      if (versionSchema.anyOf && Array.isArray(versionSchema.anyOf)) {
-        // Check if there's already a null/undefined option
-        const hasNullOption = versionSchema.anyOf.some(
-          (subSchema: any) =>
-            subSchema &&
-            typeof subSchema === 'object' &&
-            (subSchema.type === 'null' || subSchema.type === 'undefined')
-        );
-
-        // If not, add undefined option to make it truly optional
-        if (!hasNullOption) {
-          versionSchema.anyOf.push({ type: 'undefined' });
-        }
-      } else {
-        // If version is not wrapped in anyOf, wrap it to make it optional
-        // Keep the original schema and add undefined option
-        const originalSchema = { ...versionSchema };
-        versionSchema.anyOf = [originalSchema, { type: 'undefined' }];
-        // Remove the direct properties since we're using anyOf now
-        delete versionSchema.type;
-        delete versionSchema.const;
-        delete versionSchema.default;
-      }
-    }
-  }
-}
-
-/**
- * Ensure the steps schema is always an array type for Monaco editor
- * This is a safety net that runs after all other post-processing
- * to ensure steps schema is correctly recognized as an array type
- */
-function ensureStepsSchemaIsArrayFormat(schema: any): void {
-  if (!schema?.definitions?.WorkflowSchema?.properties?.steps) {
-    return;
-  }
-
-  const stepsSchema = schema.definitions.WorkflowSchema.properties.steps;
-
-  // Helper to fix a single steps schema object
-
-  const fixStepsSchemaObject = (schemaObj: any): void => {
-    if (!schemaObj || typeof schemaObj !== 'object') {
-      return;
-    }
-
-    // Ensure it's an array type
-    if (schemaObj.type && schemaObj.type !== 'array') {
-      schemaObj.type = 'array';
-    }
-
-    // Ensure items exists and is an object (not an array)
-    // The items should be the step schema (an object), not an array
-    if (schemaObj.type === 'array') {
-      if (!schemaObj.items) {
-        schemaObj.items = { type: 'object' };
-      } else if (Array.isArray(schemaObj.items)) {
-        // If items is an array, convert it to an object (shouldn't happen, but fix it)
-        schemaObj.items = { type: 'object' };
-      } else if (schemaObj.items.type === 'array') {
-        // If items.type is array, that's wrong - items should be the step object schema
-        schemaObj.items.type = 'object';
-      }
-    }
-  };
-
-  // If steps is wrapped in anyOf (due to being optional), ensure the non-null schema is an array
-  if (stepsSchema.anyOf && Array.isArray(stepsSchema.anyOf)) {
-    stepsSchema.anyOf.forEach((subSchema: any) => {
-      if (subSchema && subSchema.type !== 'null' && subSchema.type !== 'undefined') {
-        fixStepsSchemaObject(subSchema);
-      }
-    });
-  } else {
-    // Not wrapped in anyOf, fix directly
-    fixStepsSchemaObject(stepsSchema);
-  }
 }
