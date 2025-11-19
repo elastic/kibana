@@ -20,6 +20,7 @@ import { useMovingAttacksCallout } from './use_moving_attacks_callout';
 import * as i18n from './translations';
 
 export const CALLOUT_TEST_DATA_ID = 'moving-attacks-callout' as string;
+export const HIDE_BUTTON_TEST_DATA_ID = 'hide-callout-button' as string;
 
 /**
  * Component to display a moving attacks callout
@@ -67,7 +68,12 @@ export const MovingAttacksCallout: React.FC = React.memo(() => {
           {i18n.VIEW_ATTACKS_BUTTON}
         </SecuritySolutionLinkButton>
 
-        <EuiButton css={hideButtonSpacing} size="s" onClick={hideMovingAttacksCallout}>
+        <EuiButton
+          data-test-subj={HIDE_BUTTON_TEST_DATA_ID}
+          css={hideButtonSpacing}
+          size="s"
+          onClick={hideMovingAttacksCallout}
+        >
           {i18n.HIDE_BUTTON}
         </EuiButton>
       </EuiCallOut>
