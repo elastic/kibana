@@ -8,8 +8,8 @@
 import type {
   SentinelOneExecuteScriptParams,
   SentinelOneIsolateHostParams,
-} from '../../../common/sentinelone/types';
-import type { SUB_ACTION } from '../../../common/sentinelone/constants';
+} from '@kbn/connector-schemas/sentinelone';
+import type { SUB_ACTION } from '@kbn/connector-schemas/sentinelone/constants';
 
 export type SentinelOneExecuteSubActionParams =
   | SentinelOneExecuteScriptParams

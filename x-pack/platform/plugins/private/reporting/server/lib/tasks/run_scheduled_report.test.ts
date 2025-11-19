@@ -136,6 +136,7 @@ describe('Run Scheduled Report Task', () => {
   const notifications = notificationsMock.createStart();
   let emailNotificationService: EmailNotificationService;
   let logger: MockedLogger;
+  let notifyUsage: jest.Mock<any>;
 
   const runTaskFn = jest.fn().mockResolvedValue({ content_type: 'application/pdf' });
   beforeEach(async () => {
@@ -144,12 +145,16 @@ describe('Run Scheduled Report Task', () => {
 
     soClient = await mockReporting.getInternalSoClient();
 
+    notifyUsage = jest.fn();
     mockReporting.getExportTypesRegistry().register({
       id: 'test1',
       name: 'Test1',
       setup: jest.fn(),
       start: jest.fn(),
       createJob: () => new Promise(() => {}),
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: pdf scheduled export',
+      notifyUsage,
       runTask: runTaskFn,
       jobContentEncoding: 'base64',
       jobContentExtension: 'pdf',
@@ -347,6 +352,8 @@ describe('Run Scheduled Report Task', () => {
 
     await taskRunner.run();
 
+    expect(notifyUsage).toHaveBeenCalledWith('scheduled');
+
     expect(soClient.get).toHaveBeenCalledWith('scheduled_report', 'report-so-id', {
       namespace: 'default',
     });
@@ -424,6 +431,7 @@ describe('Run Scheduled Report Task', () => {
 
     await taskRunner.run();
 
+    expect(notifyUsage).toHaveBeenCalledWith('scheduled');
     expect(mockReporting.getEventTracker).toHaveBeenCalledWith('test', 'test1', 'dashboard');
     expect(mockEventTracker.claimJob).toHaveBeenCalledWith({
       timeSinceCreation: expect.any(Number),
@@ -462,6 +470,7 @@ describe('Run Scheduled Report Task', () => {
       `"ReportingError(code: missing_authentication_header_error)"`
     );
 
+    expect(notifyUsage).not.toHaveBeenCalledWith();
     expect(soClient.get).toHaveBeenCalled();
     expect(reportStore.addReport).toHaveBeenCalled();
 
@@ -485,6 +494,9 @@ describe('Run Scheduled Report Task', () => {
       start: jest.fn(),
       createJob: () => new Promise(() => {}),
       runTask: () => new Promise(() => {}),
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: pdf scheduled export',
+      notifyUsage: jest.fn(),
       jobContentExtension: 'pdf',
       jobType: 'noop',
       validLicenses: [],
@@ -565,6 +577,9 @@ describe('Run Scheduled Report Task', () => {
       start: jest.fn(),
       createJob: () => new Promise(() => {}),
       runTask: runThisTaskFn,
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: test2 scheduled export',
+      notifyUsage: jest.fn(),
       jobContentEncoding: 'base64',
       jobType: 'test2',
       validLicenses: [],
@@ -641,6 +656,9 @@ describe('Run Scheduled Report Task', () => {
       start: jest.fn(),
       createJob: () => new Promise(() => {}),
       runTask: runThisTaskFn,
+      shouldNotifyUsage: () => true,
+      getFeatureUsageName: () => 'Reporting: test2 scheduled export',
+      notifyUsage: jest.fn(),
       jobContentEncoding: 'base64',
       jobType: 'test2',
       validLicenses: [],
