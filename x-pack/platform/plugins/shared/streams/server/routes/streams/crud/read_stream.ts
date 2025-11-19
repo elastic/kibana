@@ -126,7 +126,7 @@ export async function readStream({
       rules,
       queries,
       effective_failure_store: getFailureStore({
-        dataStream: dataStream as unknown as DataStreamWithFailureStore,
+        dataStream: dataStream as DataStreamWithFailureStore,
       }),
     } satisfies Streams.ClassicStream.GetResponse;
   }

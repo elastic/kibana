@@ -8,6 +8,7 @@
 import { Streams } from '@kbn/streams-schema';
 import { isEnabledFailureStore, isRoot } from '@kbn/streams-schema';
 import type {
+  FailureStore,
   FailureStoreDisabled,
   FailureStoreDisabledLifecycle,
   FailureStoreInherit,
@@ -24,22 +25,22 @@ export function transformFailureStoreConfig(update: {
   customRetentionPeriod?: string;
   retentionDisabled?: boolean;
   inherit?: boolean;
-}) {
+}): FailureStore {
   const failureStoreEnabled = update.failureStoreEnabled ?? false;
 
   // Inherit
   if ('inherit' in update && update.inherit) {
-    return { inherit: {} } as FailureStoreInherit;
+    return { inherit: {} };
   }
 
   // Disabled
   if (!failureStoreEnabled) {
-    return { disabled: {} } as FailureStoreDisabled;
+    return { disabled: {} };
   }
 
   // Disabled lifecycle
   if ('retentionDisabled' in update && update.retentionDisabled) {
-    return { lifecycle: { disabled: {} } } as FailureStoreDisabledLifecycle;
+    return { lifecycle: { disabled: {} } };
   }
 
   // Enabled
@@ -48,7 +49,7 @@ export function transformFailureStoreConfig(update: {
 
   return {
     lifecycle: { enabled: { data_retention: customRetentionPeriod } },
-  } as FailureStoreEnabled;
+  };
 }
 
 export function useFailureStoreConfig(definition: Streams.ingest.all.GetResponse) {
