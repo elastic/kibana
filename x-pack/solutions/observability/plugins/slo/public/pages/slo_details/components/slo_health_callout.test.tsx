@@ -110,6 +110,7 @@ describe('SloHealthCallout', () => {
       data: [
         {
           sloId: 'test-slo-id',
+          sloInstanceId: 'irrelevant',
           sloRevision: 1,
           sloName: 'Test SLO',
           health: {
@@ -139,6 +140,7 @@ describe('SloHealthCallout', () => {
       data: [
         {
           sloId: 'test-slo-id',
+          sloInstanceId: 'irrelevant',
           sloRevision: 1,
           sloName: 'Test SLO',
           health: {
@@ -171,6 +173,7 @@ describe('SloHealthCallout', () => {
       data: [
         {
           sloId: 'test-slo-id',
+          sloInstanceId: 'irrelevant',
           sloRevision: 1,
           sloName: 'Test SLO',
           health: {
@@ -202,6 +205,7 @@ describe('SloHealthCallout', () => {
       data: [
         {
           sloId: 'test-slo-id',
+          sloInstanceId: 'irrelevant',
           sloRevision: 1,
           sloName: 'Test SLO',
           health: {
@@ -234,6 +238,7 @@ describe('SloHealthCallout', () => {
       data: [
         {
           sloId: 'test-slo-id',
+          sloInstanceId: 'irrelevant',
           sloRevision: 1,
           sloName: 'Test SLO',
           health: {
@@ -265,6 +270,7 @@ describe('SloHealthCallout', () => {
       data: [
         {
           sloId: 'test-slo-id',
+          sloInstanceId: 'irrelevant',
           sloRevision: 1,
           sloName: 'Test SLO',
           health: {
@@ -286,7 +292,9 @@ describe('SloHealthCallout', () => {
 
     expect(screen.getByText('This SLO has issues with its transforms')).toBeInTheDocument();
     expect(
-      screen.getByText(/The following transforms are in an unhealthy or missing state/)
+      screen.getByText(
+        /The following transforms are problematic \(either missing, stopped or unhealthy\)/
+      )
     ).toBeInTheDocument();
 
     // Should show both transforms
@@ -305,6 +313,7 @@ describe('SloHealthCallout', () => {
       data: [
         {
           sloId: 'test-slo-id',
+          sloInstanceId: 'irrelevant',
           sloRevision: 1,
           sloName: 'Test SLO',
           health: {
@@ -326,7 +335,9 @@ describe('SloHealthCallout', () => {
 
     expect(screen.getByText('This SLO has issues with its transforms')).toBeInTheDocument();
     expect(
-      screen.getByText(/The following transforms are in an unhealthy or missing state/)
+      screen.getByText(
+        /The following transforms are problematic \(either missing, stopped or unhealthy\)/
+      )
     ).toBeInTheDocument();
 
     // Should show both transforms
@@ -345,6 +356,7 @@ describe('SloHealthCallout', () => {
       data: [
         {
           sloId: 'test-slo-id',
+          sloInstanceId: 'irrelevant',
           sloRevision: 1,
           sloName: 'Test SLO',
           health: {
@@ -367,7 +379,9 @@ describe('SloHealthCallout', () => {
 
     expect(screen.getByText('This SLO has issues with its transforms')).toBeInTheDocument();
     expect(
-      screen.getByText(/The following transforms are in an unhealthy state/)
+      screen.getByText(
+        /The following transforms are problematic \(either missing, stopped or unhealthy\)/
+      )
     ).toBeInTheDocument();
 
     // Should show both transforms as unhealthy
@@ -386,6 +400,7 @@ describe('SloHealthCallout', () => {
       data: [
         {
           sloId: 'test-slo-id',
+          sloInstanceId: 'irrelevant',
           sloRevision: 1,
           sloName: 'Test SLO',
           health: {
@@ -405,7 +420,11 @@ describe('SloHealthCallout', () => {
     renderComponent();
 
     expect(screen.getByText('This SLO has issues with its transforms')).toBeInTheDocument();
-    expect(screen.getByText(/The following transforms are in a missing state/)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /The following transforms are problematic \(either missing, stopped or unhealthy\)/
+      )
+    ).toBeInTheDocument();
 
     // Should show both transforms as missing
     expect(screen.getByText(/slo-test-slo-id-1 \(missing\)/)).toBeInTheDocument();
@@ -423,6 +442,7 @@ describe('SloHealthCallout', () => {
       data: [
         {
           sloId: 'test-slo-id',
+          sloInstanceId: 'irrelevant',
           sloRevision: 1,
           sloName: 'Test SLO',
           health: {
@@ -458,6 +478,7 @@ describe('SloHealthCallout', () => {
       data: [
         {
           sloId: 'test-slo-id',
+          sloInstanceId: 'irrelevant',
           sloRevision: 1,
           sloName: 'Test SLO',
           health: {
