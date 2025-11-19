@@ -31,7 +31,7 @@ import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public
 import type { HttpSetup, IToasts } from '@kbn/core/public';
 import * as LABELS from '../translations';
 import type { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/types';
-import { isMapWithStringValues } from '../types/types';
+import { FieldType, isMapWithStringValues } from '../types/types';
 import {
   SERVICE_PROVIDERS,
   solutionKeys,
