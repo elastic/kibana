@@ -9,7 +9,13 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { collapseBySchema, layerSettingsSchemaRaw, sharedPanelInfoSchema } from '../shared';
+import {
+  collapseBySchema,
+  dslOnlyPanelInfoSchema,
+  ignoringGlobalFiltersSchemaRaw,
+  layerSettingsSchemaRaw,
+  sharedPanelInfoSchema,
+} from '../shared';
 import { datasetEsqlTableSchema, datasetSchema } from '../dataset';
 import {
   mergeAllBucketsWithChartDimensionSchema,
@@ -211,7 +217,11 @@ const xySharedSettings = {
       ),
       show_value_labels: schema.maybe(schema.boolean()),
       fill_opacity: schema.maybe(
-        schema.number({ min: 0, max: 1, meta: { description: 'The fill opacity for area charts' } })
+        schema.number({
+          min: 0,
+          max: 2, // for some reason we have charts with opacity > 1
+          meta: { description: 'The fill opacity for area charts' },
+        })
       ),
       value_labels: schema.maybe(schema.boolean()),
     })
@@ -286,6 +296,10 @@ const referenceLineLayerShared = {
       meta: { description: 'The dash style of the reference line' },
     })
   ),
+  color: schema.maybe(staticColorSchema),
+  axis: schema.oneOf([schema.literal('bottom'), schema.literal('left'), schema.literal('right')], {
+    defaultValue: 'left',
+  }),
 };
 
 const referenceLineLayerSchemaNoESQL = schema.object({
@@ -307,9 +321,7 @@ const referenceLineLayerSchemaESQL = schema.object({
 
 const annotationEventShared = {
   name: schema.maybe(schema.string({ meta: { description: 'The name of the event' } })),
-  color: schema.maybe(
-    schema.string({ meta: { description: 'The color to assign to the annotation event' } })
-  ),
+  color: schema.maybe(staticColorSchema),
   hidden: schema.maybe(
     schema.boolean({ meta: { description: 'Whether to hide the annotation event' } })
   ),
@@ -362,12 +374,12 @@ const annotationManualRange = schema.object({
   type: schema.literal('range'),
   interval: schema.object({ from: annotationTimestampSchema, to: annotationTimestampSchema }),
   fill: schema.maybe(
-    schema.string({ meta: { description: 'The color to assign to the annotation range' } })
+    schema.oneOf([schema.literal('inside'), schema.literal('outside')], { defaultValue: 'inside' })
   ),
 });
 
 const annotationLayerSchema = schema.object({
-  ...layerSettingsSchemaRaw,
+  ...ignoringGlobalFiltersSchemaRaw,
   ...datasetSchema,
   type: schema.literal('annotations'),
   events: schema.arrayOf(
@@ -387,7 +399,8 @@ export const xyStateSchema = schema.object({
   type: schema.literal('xy'),
   ...sharedPanelInfoSchema,
   ...xySharedSettings,
-  layers: schema.arrayOf(xyLayerSchema),
+  ...dslOnlyPanelInfoSchema,
+  layers: schema.arrayOf(xyLayerSchema, { minSize: 1 }),
 });
 
 export type XYState = TypeOf<typeof xyStateSchema>;
