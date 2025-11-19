@@ -653,7 +653,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
-      it.only('disables lifecycle on classic stream failure store only for not serverless', async () => {
+      it('disables lifecycle on classic stream failure store only for not serverless', async () => {
         const indexName = 'classic-stream-disabled-lifecycle';
         await createDataStream(indexName, true, '30d');
 
