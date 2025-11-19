@@ -78,7 +78,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     expect(await discover.getHitCount()).to.be(totalCount);
   }
 
-  describe('discover lens vis', function () {
+  // TODO: see https://github.com/elastic/kibana/pull/243499
+  describe.skip('discover lens vis', function () {
     before(async () => {
       await security.testUser.setRoles(['kibana_admin', 'test_logstash_reader']);
       await esArchiver.loadIfNeeded(
