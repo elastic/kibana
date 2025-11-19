@@ -331,7 +331,7 @@ describe('muteInstance()', () => {
       expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
     });
 
-    test('logs error but continues when alertsService fails', async () => {
+    test('throws error and does not update rule when alertsService fails', async () => {
       const loggerMock = loggingSystemMock.create().get();
       const rulesClient = new RulesClient({ ...rulesClientParams, logger: loggerMock });
       alertsService.muteAlertInstance.mockRejectedValueOnce(new Error('ES connection failed'));
@@ -350,9 +350,11 @@ describe('muteInstance()', () => {
         references: [],
       });
 
-      await rulesClient.muteInstance({ alertId: '1', alertInstanceId: '2' });
+      await expect(
+        rulesClient.muteInstance({ alertId: '1', alertInstanceId: '2' })
+      ).rejects.toThrow('ES connection failed');
 
-      expect(unsecuredSavedObjectsClient.update).toHaveBeenCalled();
+      expect(unsecuredSavedObjectsClient.update).not.toHaveBeenCalled();
     });
   });
 });

@@ -86,6 +86,7 @@ async function muteAllWithOCC(context: RulesClientContext, params: MuteAllRulePa
       context.logger.error(
         `Failed to mute all alerts for rule ${id} in Elasticsearch: ${error.message}`
       );
+      throw error;
     }
   }
 

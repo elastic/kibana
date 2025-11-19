@@ -94,6 +94,7 @@ async function muteInstanceWithOCC(
         context.logger.error(
           `Failed to mute alert instance ${alertInstanceId} in Elasticsearch: ${error.message}`
         );
+        throw error;
       }
     }
 

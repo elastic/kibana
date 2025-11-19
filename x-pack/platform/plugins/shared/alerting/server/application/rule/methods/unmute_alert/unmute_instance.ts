@@ -91,6 +91,7 @@ async function unmuteInstanceWithOCC(
         context.logger.error(
           `Failed to unmute alert instance ${alertInstanceId} in Elasticsearch: ${error.message}`
         );
+        throw error;
       }
     }
 

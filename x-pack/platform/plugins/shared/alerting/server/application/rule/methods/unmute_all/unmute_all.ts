@@ -86,6 +86,7 @@ async function unmuteAllWithOCC(context: RulesClientContext, params: UnmuteAllRu
       context.logger.error(
         `Failed to unmute all alerts for rule ${id} in Elasticsearch: ${error.message}`
       );
+      throw error;
     }
   }
 

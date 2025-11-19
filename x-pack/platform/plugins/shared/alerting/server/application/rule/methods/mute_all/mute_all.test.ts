@@ -17,20 +17,15 @@ jest.mock('../../../../lib/retry_if_conflicts', () => ({
   },
 }));
 
-jest.mock('../../../../rules_client/lib', () => ({
-  updateMetaAttributes: () => {},
-}));
-
-jest.mock('../../../../saved_objects', () => ({
-  partiallyUpdateRule: async () => {},
-}));
-
 const loggerErrorMock = jest.fn();
 const getBulkMock = jest.fn();
 const muteAllAlertsMock = jest.fn();
 
 const savedObjectsMock = savedObjectsRepositoryMock.create();
-savedObjectsMock.get = jest.fn().mockReturnValue({
+savedObjectsMock.get = jest.fn().mockResolvedValue({
+  id: 'rule-123',
+  type: RULE_SAVED_OBJECT_TYPE,
+  references: [],
   attributes: {
     actions: [],
     alertTypeId: 'test-type',
@@ -99,7 +94,46 @@ describe('muteAll', () => {
     expect(muteAllAlertsMock).not.toHaveBeenCalled();
   });
 
-  it('should continue when alertsService fails', async () => {
+  it('should clear mutedInstanceIds when muting all alerts', async () => {
+    const realDate = Date;
+    const isoDate = '2025-11-18T12:34:56.789Z';
+    // @ts-expect-error we can mock Date
+    global.Date = class extends realDate {
+      constructor() {
+        super(isoDate);
+      }
+    };
+    jest.spyOn(context, 'getUserName').mockResolvedValue('test_user');
+    savedObjectsMock.get.mockResolvedValue({
+      type: RULE_SAVED_OBJECT_TYPE,
+      id: 'rule-123',
+      references: [],
+      attributes: {
+        actions: [],
+        alertTypeId: 'test-type',
+        mutedInstanceIds: ['instance-1', 'instance-2'],
+      },
+      version: '9.0.0',
+    });
+    const validParams = {
+      id: 'rule-123',
+    };
+
+    await muteAll(context, validParams);
+
+    expect(savedObjectsMock.update).toHaveBeenCalledWith(
+      RULE_SAVED_OBJECT_TYPE,
+      'rule-123',
+      expect.objectContaining({
+        muteAll: true,
+        mutedInstanceIds: [],
+      }),
+      { version: '9.0.0' }
+    );
+    global.Date = realDate;
+  });
+
+  it('throws error and does not update rule when alertsService fails', async () => {
     const loggerMock = loggingSystemMock.create().get();
     const muteAllAlertsErrorMock = jest
       .fn()
@@ -116,6 +150,7 @@ describe('muteAll', () => {
       id: 'rule-123',
     };
 
-    await muteAll(contextWithLogger, validParams);
+    await expect(muteAll(contextWithLogger, validParams)).rejects.toThrow('ES connection failed');
+    expect(savedObjectsMock.update).not.toHaveBeenCalled();
   });
 });

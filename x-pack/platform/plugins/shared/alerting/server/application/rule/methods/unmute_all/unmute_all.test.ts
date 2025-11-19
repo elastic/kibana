@@ -22,7 +22,7 @@ jest.mock('../../../../rules_client/lib', () => ({
 }));
 
 jest.mock('../../../../saved_objects', () => ({
-  partiallyUpdateRule: async () => {},
+  partiallyUpdateRule: jest.fn(),
 }));
 
 const loggerErrorMock = jest.fn();
@@ -100,11 +100,14 @@ describe('unmuteAll', () => {
     expect(unmuteAllAlertsMock).not.toHaveBeenCalled();
   });
 
-  it('should continue when alertsService fails', async () => {
+  it('throws error and does not update rule when alertsService fails', async () => {
     const loggerMock = loggingSystemMock.create().get();
     const unmuteAllAlertsErrorMock = jest
       .fn()
       .mockRejectedValueOnce(new Error('ES connection failed'));
+    const { partiallyUpdateRule: partiallyUpdateRuleMock } = jest.requireMock(
+      '../../../../saved_objects'
+    );
     const contextWithLogger = {
       ...context,
       logger: loggerMock,
@@ -117,6 +120,7 @@ describe('unmuteAll', () => {
       id: 'rule-123',
     };
 
-    await unmuteAll(contextWithLogger, validParams);
+    await expect(unmuteAll(contextWithLogger, validParams)).rejects.toThrow('ES connection failed');
+    expect(partiallyUpdateRuleMock).not.toHaveBeenCalled();
   });
 });

@@ -1556,6 +1556,8 @@ describe('Alerts Service', () => {
               spaceId: 'default',
               tags: ['rule-', '-tags'],
               alertDelay: 0,
+              muteAll: false,
+              mutedInstanceIds: [],
             },
           });
 
@@ -1611,6 +1613,8 @@ describe('Alerts Service', () => {
             namespace: 'default',
             spaceId: 'default',
             rule: {
+              muteAll: false,
+              mutedInstanceIds: [],
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
               id: '1',
@@ -1666,6 +1670,8 @@ describe('Alerts Service', () => {
             namespace: 'default',
             spaceId: 'default',
             rule: {
+              muteAll: false,
+              mutedInstanceIds: [],
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
               id: '1',
@@ -1777,6 +1783,8 @@ describe('Alerts Service', () => {
               namespace: 'default',
               spaceId: 'default',
               rule: {
+                muteAll: false,
+                mutedInstanceIds: [],
                 consumer: 'bar',
                 executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
                 id: '1',
@@ -1799,6 +1807,8 @@ describe('Alerts Service', () => {
               namespace: 'default',
               spaceId: 'default',
               rule: {
+                muteAll: false,
+                mutedInstanceIds: [],
                 consumer: 'bar',
                 executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
                 id: '1',
@@ -1902,6 +1912,8 @@ describe('Alerts Service', () => {
             namespace: 'default',
             spaceId: 'default',
             rule: {
+              muteAll: false,
+              mutedInstanceIds: [],
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
               id: '1',
@@ -1999,6 +2011,8 @@ describe('Alerts Service', () => {
               namespace: 'default',
               spaceId: 'default',
               rule: {
+                muteAll: false,
+                mutedInstanceIds: [],
                 consumer: 'bar',
                 executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
                 id: '1',
@@ -2108,6 +2122,8 @@ describe('Alerts Service', () => {
               namespace: 'default',
               spaceId: 'default',
               rule: {
+                muteAll: false,
+                mutedInstanceIds: [],
                 consumer: 'bar',
                 executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
                 id: '1',
@@ -2180,6 +2196,8 @@ describe('Alerts Service', () => {
             namespace: 'default',
             spaceId: 'default',
             rule: {
+              muteAll: false,
+              mutedInstanceIds: [],
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
               id: '1',
@@ -2252,6 +2270,8 @@ describe('Alerts Service', () => {
             namespace: 'default',
             spaceId: 'default',
             rule: {
+              muteAll: false,
+              mutedInstanceIds: [],
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
               id: '1',
@@ -2322,6 +2342,8 @@ describe('Alerts Service', () => {
             namespace: 'default',
             spaceId: 'default',
             rule: {
+              muteAll: false,
+              mutedInstanceIds: [],
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
               id: '1',
@@ -2565,6 +2587,326 @@ describe('Alerts Service', () => {
           expect(logger.debug).toHaveBeenCalledWith(
             `Server is stopping; must stop all async operations`
           );
+        });
+      });
+
+      describe('muteAlertInstance', () => {
+        test('should throw an error if no indices are provided', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.muteAlertInstance({
+              ruleId: 'rule-1',
+              alertInstanceId: 'alert-1',
+              indices: [],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Unable to mute alert instance alert-1 - no alert indices available"`
+          );
+        });
+
+        test('should call updateByQuery with the correct parameters', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await alertsService.muteAlertInstance({
+            ruleId: 'rule-1',
+            alertInstanceId: 'alert-1',
+            indices: ['.alerts-default'],
+            logger,
+          });
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledWith({
+            index: ['.alerts-default'],
+            conflicts: 'proceed',
+            refresh: true,
+            query: {
+              bool: {
+                must: [
+                  { term: { 'kibana.alert.instance.id': 'alert-1' } },
+                  { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
+                ],
+              },
+            },
+            script: {
+              source: `ctx._source['kibana.alert.muted'] = true;`,
+              lang: 'painless',
+            },
+          });
+        });
+
+        test('should re-throw an error if updateByQuery fails', async () => {
+          clusterClient.updateByQuery.mockRejectedValueOnce(new Error('ES connection failed'));
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.muteAlertInstance({
+              ruleId: 'rule-1',
+              alertInstanceId: 'alert-1',
+              indices: ['.alerts-default'],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(`"ES connection failed"`);
+        });
+      });
+
+      describe('unmuteAlertInstance', () => {
+        test('should throw an error if no indices are provided', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.unmuteAlertInstance({
+              ruleId: 'rule-1',
+              alertInstanceId: 'alert-1',
+              indices: [],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Unable to unmute alert instance alert-1 - no alert indices available"`
+          );
+        });
+
+        test('should call updateByQuery with the correct parameters', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await alertsService.unmuteAlertInstance({
+            ruleId: 'rule-1',
+            alertInstanceId: 'alert-1',
+            indices: ['.alerts-default'],
+            logger,
+          });
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledWith({
+            index: ['.alerts-default'],
+            conflicts: 'proceed',
+            refresh: true,
+            query: {
+              bool: {
+                must: [
+                  { term: { 'kibana.alert.instance.id': 'alert-1' } },
+                  { term: { 'kibana.alert.rule.uuid': 'rule-1' } },
+                ],
+              },
+            },
+            script: {
+              source: `ctx._source['kibana.alert.muted'] = false;`,
+              lang: 'painless',
+            },
+          });
+        });
+
+        test('should re-throw an error if updateByQuery fails', async () => {
+          clusterClient.updateByQuery.mockRejectedValueOnce(new Error('ES connection failed'));
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.unmuteAlertInstance({
+              ruleId: 'rule-1',
+              alertInstanceId: 'alert-1',
+              indices: ['.alerts-default'],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(`"ES connection failed"`);
+        });
+      });
+
+      describe('muteAllAlerts', () => {
+        test('should throw an error if no indices are provided', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.muteAllAlerts({
+              ruleId: 'rule-1',
+              indices: [],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Unable to mute all alerts for rule rule-1 - no alert indices available"`
+          );
+        });
+
+        test('should call updateByQuery with the correct parameters', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await alertsService.muteAllAlerts({
+            ruleId: 'rule-1',
+            indices: ['.alerts-default'],
+            logger,
+          });
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledWith({
+            index: ['.alerts-default'],
+            conflicts: 'proceed',
+            refresh: true,
+            query: {
+              term: { 'kibana.alert.rule.uuid': 'rule-1' },
+            },
+            script: {
+              source: `ctx._source['kibana.alert.muted'] = true;`,
+              lang: 'painless',
+            },
+          });
+        });
+
+        test('should re-throw an error if updateByQuery fails', async () => {
+          clusterClient.updateByQuery.mockRejectedValueOnce(new Error('ES connection failed'));
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.muteAllAlerts({
+              ruleId: 'rule-1',
+              indices: ['.alerts-default'],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(`"ES connection failed"`);
+        });
+      });
+
+      describe('unmuteAllAlerts', () => {
+        test('should throw an error if no indices are provided', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.unmuteAllAlerts({
+              ruleId: 'rule-1',
+              indices: [],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(
+            `"Unable to unmute all alerts for rule rule-1 - no alert indices available"`
+          );
+        });
+
+        test('should call updateByQuery with the correct parameters', async () => {
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await alertsService.unmuteAllAlerts({
+            ruleId: 'rule-1',
+            indices: ['.alerts-default'],
+            logger,
+          });
+
+          expect(clusterClient.updateByQuery).toHaveBeenCalledWith({
+            index: ['.alerts-default'],
+            conflicts: 'proceed',
+            refresh: true,
+            query: {
+              term: { 'kibana.alert.rule.uuid': 'rule-1' },
+            },
+            script: {
+              source: `ctx._source['kibana.alert.muted'] = false;`,
+              lang: 'painless',
+            },
+          });
+        });
+
+        test('should re-throw an error if updateByQuery fails', async () => {
+          clusterClient.updateByQuery.mockRejectedValueOnce(new Error('ES connection failed'));
+          const alertsService = new AlertsService({
+            logger,
+            elasticsearchClientPromise: Promise.resolve(clusterClient),
+            pluginStop$,
+            kibanaVersion: '8.8.0',
+            dataStreamAdapter,
+            elasticsearchAndSOAvailability$,
+            isServerless: false,
+          });
+
+          await expect(
+            alertsService.unmuteAllAlerts({
+              ruleId: 'rule-1',
+              indices: ['.alerts-default'],
+              logger,
+            })
+          ).rejects.toThrowErrorMatchingInlineSnapshot(`"ES connection failed"`);
         });
       });
     });
