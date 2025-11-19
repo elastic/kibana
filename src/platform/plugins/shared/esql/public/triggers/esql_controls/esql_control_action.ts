@@ -17,7 +17,7 @@ import {
   ESQLVariableType,
   type ESQLControlVariable,
   type ESQLControlState,
-  ControlTriggerSource,
+  type ControlTriggerSource,
   TelemetryControlCancelledReason,
 } from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
@@ -81,7 +81,7 @@ export class CreateESQLControlAction implements Action<Context> {
     cursorPosition,
     initialState,
     parentApi,
-    triggerSource = ControlTriggerSource.EDIT_CONTROL,
+    triggerSource,
   }: Context) {
     if (!isActionCompatible(this.core, variableType)) {
       throw new IncompatibleActionError();

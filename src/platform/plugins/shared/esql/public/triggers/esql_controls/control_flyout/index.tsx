@@ -51,7 +51,7 @@ interface ESQLControlsFlyoutProps {
   closeFlyout: () => void;
   ariaLabelledBy: string;
   currentApp?: string;
-  telemetryTriggerSource: ControlTriggerSource;
+  telemetryTriggerSource?: ControlTriggerSource;
   telemetryService: ESQLEditorTelemetryService;
 }
 
@@ -179,7 +179,12 @@ export function ESQLControlsFlyout({
       } else {
         await onSaveControl?.(controlState, '');
       }
-      telemetryService.trackEsqlControlConfigSaved(variableType, telemetryTriggerSource);
+      if (!isControlInEditMode) {
+        telemetryService.trackEsqlControlConfigSaved(
+          variableType,
+          telemetryTriggerSource as ControlTriggerSource
+        );
+      }
     }
     closeFlyout();
   }, [

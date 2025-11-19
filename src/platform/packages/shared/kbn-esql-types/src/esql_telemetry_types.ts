@@ -28,7 +28,7 @@ export interface TelemetryQuerySubmittedProps {
 export enum ControlTriggerSource {
   SMART_SUGGESTION = 'smart_suggestion',
   QUESTION_MARK = 'question_mark',
-  EDIT_CONTROL = 'edit_control',
+  ADD_CONTROL_BTN = 'add_control_btn',
 }
 
 export enum TelemetryControlCancelledReason {

@@ -37,7 +37,7 @@ interface Context {
   closeFlyout?: () => void;
   ariaLabelledBy: string;
   currentApp?: string;
-  triggerSource: ControlTriggerSource;
+  triggerSource?: ControlTriggerSource;
   telemetryService: ESQLEditorTelemetryService;
 }
 
