@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getTourPriority, type TourId } from '..';
+import { getTourOrder, type TourId } from '..';
 
 export interface Tour {
   skip: () => void;
@@ -40,9 +40,9 @@ export class TourQueueStateManager {
       };
     }
 
-    // Sort by priority (lower number = higher priority = shown first)
+    // Sort by order (lower number = shown first)
     this.registeredTourIds = [...this.registeredTourIds, tourId].sort(
-      (a, b) => getTourPriority(a) - getTourPriority(b)
+      (a, b) => getTourOrder(a) - getTourOrder(b)
     );
     this.notifySubscribers();
 
@@ -64,7 +64,7 @@ export class TourQueueStateManager {
       return null;
     }
 
-    // Find the first tour (by priority) that hasn't been completed
+    // Find the first tour (order-based) that hasn't been completed
     const activeTour = this.registeredTourIds.find(
       (registeredTourId) => !this.completedTourIds.has(registeredTourId)
     );

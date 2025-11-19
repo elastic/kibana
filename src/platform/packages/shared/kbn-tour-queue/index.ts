@@ -23,6 +23,6 @@ export const TOURS = {
 
 export type TourId = (typeof TOURS)[keyof typeof TOURS];
 
-export const getTourPriority = (tourId: TourId): number => {
+export const getTourOrder = (tourId: TourId): number => {
   return TOUR_REGISTRY[tourId];
 };
