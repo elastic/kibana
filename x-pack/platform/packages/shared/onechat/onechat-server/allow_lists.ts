@@ -14,8 +14,6 @@ export const AGENT_BUILDER_BUILTIN_TOOLS: string[] = [
   'observability.search_knowledge_base',
   'observability.get_data_sources',
   'observability.elasticsearch',
-  'observability.query_elasticsearch',
-  // 'observability.kibana',
 ];
 
 /**
