@@ -225,7 +225,7 @@ export const ColumnHeaderPopover = ({
                 </EuiText>
               </EuiButton>
               <EuiButton
-                data-test-subj="indexEditorindexEditorColumnNameSaveButton"
+                data-test-subj="indexEditorindexEditorColumnNameAcceptButton"
                 fill
                 type="submit"
                 disabled={!canSubmit}
@@ -233,8 +233,8 @@ export const ColumnHeaderPopover = ({
               >
                 <EuiText size="xs">
                   <FormattedMessage
-                    id="indexEditor.flyout.grid.columnHeader.saveButton"
-                    defaultMessage="Save"
+                    id="indexEditor.flyout.grid.columnHeader.acceptButton"
+                    defaultMessage="Accept"
                   />
                 </EuiText>
               </EuiButton>
