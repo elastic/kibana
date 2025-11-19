@@ -41,6 +41,8 @@ describe('gap_auto_fill_scheduler_event_log', () => {
       ruleTypes: [],
       ruleTypeConsumerPairs: [],
       schedule: { interval: '1h' },
+      createdBy: null,
+      updatedBy: null,
       createdAt: '2024-01-01T00:00:00.000Z',
       updatedAt: '2024-01-01T00:00:00.000Z',
     },
