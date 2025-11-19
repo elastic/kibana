@@ -79,7 +79,7 @@ export async function executor(
         },
       });
     }
-    if (status === 'new') {
+    if (status === 'active') {
       newAlerts.add(alertId);
     }
   }
