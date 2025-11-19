@@ -9,12 +9,12 @@ import React, { useCallback, useMemo } from 'react';
 
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
+import { PageScope } from '../../../data_view_manager/constants';
 import { useSignalIndexWithDefault } from '../../hooks/use_signal_index_with_default';
 import {
   type GetLensAttributes,
   VisualizationContextMenuActions,
 } from '../../../common/components/visualization_actions/types';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { getTimeSavedMetricLensAttributes } from '../../../common/components/visualization_actions/lens_attributes/ai/time_saved_metric';
 import * as i18n from './translations';
 import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
@@ -82,7 +82,7 @@ const TimeSavedMetricComponent: React.FC<Props> = ({ from, to, minutesPerAlert }
         timerange={timerange}
         id={`${ID}-metric`}
         inspectTitle={i18n.TIME_SAVED}
-        scopeId={SourcererScopeName.detections}
+        scopeId={PageScope.alerts}
         withActions={[
           VisualizationContextMenuActions.addToExistingCase,
           VisualizationContextMenuActions.addToNewCase,

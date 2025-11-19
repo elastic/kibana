@@ -9,8 +9,8 @@ import type { RootSchema, SchemaArray } from '@elastic/ebt';
 import type {
   StreamsAIGrokSuggestionAcceptedProps,
   StreamsAIGrokSuggestionLatencyProps,
-  StreamsAssetClickEventProps,
-  StreamsAssetCountProps,
+  StreamsAttachmentClickEventProps,
+  StreamsAttachmentCountProps,
   StreamsChildStreamCreatedProps,
   StreamsProcessingSavedProps,
   StreamsRetentionChangedProps,
@@ -20,7 +20,7 @@ import type {
   WiredStreamsStatusChangedProps,
 } from './types';
 
-const streamsAssetCountSchema: RootSchema<StreamsAssetCountProps> = {
+const streamsAttachmentCountSchema: RootSchema<StreamsAttachmentCountProps> = {
   name: {
     type: 'keyword',
     _meta: {
@@ -49,23 +49,23 @@ const streamsAssetCountSchema: RootSchema<StreamsAssetCountProps> = {
   },
 };
 
-const streamsAssetClickEventSchema: RootSchema<StreamsAssetClickEventProps> = {
+const streamsAttachmentClickEventSchema: RootSchema<StreamsAttachmentClickEventProps> = {
   name: {
     type: 'keyword',
     _meta: {
       description: 'The name of the Stream',
     },
   },
-  asset_type: {
+  attachment_type: {
     type: 'keyword',
     _meta: {
-      description: 'The type of asset: dashboard, slo, rule',
+      description: 'The type of attachment: dashboard, slo, rule',
     },
   },
-  asset_id: {
+  attachment_id: {
     type: 'keyword',
     _meta: {
-      description: 'The id of the asset',
+      description: 'The id of the attachment',
     },
   },
 };
@@ -247,8 +247,8 @@ const streamsSignificantEventsCreatedSchema: RootSchema<StreamsSignificantEvents
 };
 
 export {
-  streamsAssetCountSchema,
-  streamsAssetClickEventSchema,
+  streamsAttachmentCountSchema,
+  streamsAttachmentClickEventSchema,
   streamsAIGrokSuggestionLatencySchema,
   streamsAIGrokSuggestionAcceptedSchema,
   streamsRetentionChangedSchema,

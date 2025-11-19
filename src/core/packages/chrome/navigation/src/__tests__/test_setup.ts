@@ -26,13 +26,18 @@ beforeAll(() => {
   Element.prototype.scrollIntoView = mockedScrollIntoView;
 });
 
+const areFakeTimersEnabled = () =>
+  typeof jest.isMockFunction === 'function' && jest.isMockFunction(setTimeout);
+
 beforeEach(() => {
   jest.useFakeTimers();
   mockedScrollIntoView.mockClear();
 });
 
 afterEach(() => {
-  jest.runOnlyPendingTimers();
+  if (areFakeTimersEnabled()) {
+    jest.runOnlyPendingTimers();
+  }
   jest.useRealTimers();
 });
 

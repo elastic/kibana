@@ -140,7 +140,7 @@ describe('WorkflowsParamsFields', () => {
     await waitFor(() => {
       expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search', {
         body: JSON.stringify({
-          limit: 1000,
+          size: 1000,
           page: 1,
           query: '',
         }),
@@ -163,7 +163,7 @@ describe('WorkflowsParamsFields', () => {
     await waitFor(() => {
       expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search', {
         body: JSON.stringify({
-          limit: 1000,
+          size: 1000,
           page: 1,
           query: '',
         }),
@@ -398,9 +398,6 @@ describe('WorkflowsParamsFields', () => {
   });
 
   test('should handle create new workflow click', async () => {
-    const originalOpen = window.open;
-    window.open = jest.fn();
-
     // Mock the application service
     const mockGetUrlForApp = jest.fn().mockReturnValue('/app/workflows');
     mockUseKibana.mockReturnValue({
@@ -419,14 +416,18 @@ describe('WorkflowsParamsFields', () => {
     });
 
     await waitFor(() => {
-      const createLink = screen.getByText('Create new');
-      fireEvent.click(createLink);
+      const createLink = screen.getByRole('link', { name: /Create new/i });
+      expect(createLink).toBeInTheDocument();
     });
 
-    expect(mockGetUrlForApp).toHaveBeenCalledWith('workflows');
-    expect(window.open).toHaveBeenCalledWith('/app/workflows', '_blank');
+    const createLink = screen.getByRole('link', { name: /Create new/i });
 
-    window.open = originalOpen;
+    // Verify that the link has the correct href and target attributes
+    expect(createLink).toHaveAttribute('href', '/app/workflows');
+    expect(createLink).toHaveAttribute('target', '_blank');
+
+    // Verify that getUrlForApp was called (indirectly through the component)
+    expect(mockGetUrlForApp).toHaveBeenCalledWith('workflows');
   });
 
   test('should handle missing HTTP service gracefully', async () => {
@@ -520,7 +521,7 @@ describe('WorkflowsParamsFields', () => {
     await waitFor(() => {
       expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search', {
         body: JSON.stringify({
-          limit: 1000,
+          size: 1000,
           page: 1,
           query: '',
         }),
@@ -605,7 +606,7 @@ describe('WorkflowsParamsFields', () => {
     await waitFor(() => {
       expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search', {
         body: JSON.stringify({
-          limit: 1000,
+          size: 1000,
           page: 1,
           query: '',
         }),
@@ -687,7 +688,7 @@ describe('WorkflowsParamsFields', () => {
     await waitFor(() => {
       expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search', {
         body: JSON.stringify({
-          limit: 1000,
+          size: 1000,
           page: 1,
           query: '',
         }),
@@ -721,9 +722,6 @@ describe('WorkflowsParamsFields', () => {
   });
 
   test('should render view all workflows link and handle click to open in new tab', async () => {
-    const originalOpen = window.open;
-    window.open = jest.fn();
-
     // Mock the application service
     const mockGetUrlForApp = jest.fn().mockReturnValue('/app/workflows');
     mockUseKibana.mockReturnValue({
@@ -759,7 +757,7 @@ describe('WorkflowsParamsFields', () => {
     await waitFor(() => {
       expect(mockHttpPost).toHaveBeenCalledWith('/api/workflows/search', {
         body: JSON.stringify({
-          limit: 1000,
+          size: 1000,
           page: 1,
           query: '',
         }),
@@ -776,17 +774,15 @@ describe('WorkflowsParamsFields', () => {
     });
 
     // Find the "View all workflows" link button in the footer
-    const viewAllWorkflowsButton = screen.getByRole('button', { name: 'View all workflows' });
-    expect(viewAllWorkflowsButton).toBeInTheDocument();
+    const viewAllWorkflowsLink = screen.getByRole('link', { name: 'View all workflows' });
+    expect(viewAllWorkflowsLink).toBeInTheDocument();
 
-    // Click the "View all workflows" button
-    fireEvent.click(viewAllWorkflowsButton);
+    // Verify that the link has the correct href and target attributes
+    expect(viewAllWorkflowsLink).toHaveAttribute('href', '/app/workflows');
+    expect(viewAllWorkflowsLink).toHaveAttribute('target', '_blank');
 
-    // Verify that the workflows page was opened in a new tab
+    // Verify that getUrlForApp was called (indirectly through the component)
     expect(mockGetUrlForApp).toHaveBeenCalledWith('workflows');
-    expect(window.open).toHaveBeenCalledWith('/app/workflows', '_blank');
-
-    window.open = originalOpen;
   });
 
   test('should show disabled badge for disabled workflows', async () => {

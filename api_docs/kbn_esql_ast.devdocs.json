@@ -16874,6 +16874,21 @@
       },
       {
         "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.subqueryCompleteItem",
+        "type": "Object",
+        "tags": [],
+        "label": "subqueryCompleteItem",
+        "description": [],
+        "signature": [
+          "ISuggestionItem"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
         "id": "def-common.userDefinedTypes",
         "type": "Object",
         "tags": [],
@@ -16882,7 +16897,7 @@
           "\nAll supported field types in ES|QL. This is all the types\nthat can come back in the table from a query."
         ],
         "signature": [
-          "readonly [\"boolean\", \"date\", \"double\", \"ip\", \"keyword\", \"integer\", \"long\", \"text\", \"unsigned_long\", \"version\", \"cartesian_point\", \"cartesian_shape\", \"geo_point\", \"geo_shape\", \"counter_integer\", \"counter_long\", \"counter_double\", \"unsupported\", \"date_nanos\", \"function_named_parameters\", \"null\", \"time_duration\", \"date_period\", \"param\"]"
+          "readonly [\"boolean\", \"date\", \"double\", \"ip\", \"keyword\", \"integer\", \"long\", \"text\", \"unsigned_long\", \"version\", \"cartesian_point\", \"cartesian_shape\", \"geo_point\", \"geo_shape\", \"counter_integer\", \"counter_long\", \"counter_double\", \"unsupported\", \"date_nanos\", \"function_named_parameters\", \"null\", \"time_duration\", \"date_period\", \"param\", \"histogram\", \"exponential_histogram\", \"tdigest\"]"
         ],
         "path": "src/platform/packages/shared/kbn-esql-ast/src/definitions/types.ts",
         "deprecated": false,
@@ -16910,6 +16925,21 @@
         "type": "Object",
         "tags": [],
         "label": "withCompleteItem",
+        "description": [],
+        "signature": [
+          "ISuggestionItem"
+        ],
+        "path": "src/platform/packages/shared/kbn-esql-ast/src/commands_registry/complete_items.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/esql-ast",
+        "id": "def-common.withMapCompleteItem",
+        "type": "Object",
+        "tags": [],
+        "label": "withMapCompleteItem",
         "description": [],
         "signature": [
           "ISuggestionItem"

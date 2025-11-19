@@ -481,6 +481,89 @@
               }
             }
           }
+        },
+        "llm_usage": {
+          "properties": {
+            "by_provider": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "provider": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "LLM provider name (e.g., openai, bedrock)"
+                    }
+                  },
+                  "count": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "Number of LLM invocations for this provider"
+                    }
+                  }
+                }
+              }
+            },
+            "by_model": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "model": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "LLM model identifier"
+                    }
+                  },
+                  "count": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "Number of LLM invocations for this model"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "errors": {
+          "properties": {
+            "total": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of errors surfaced to users"
+              }
+            },
+            "avg_errors_per_conversation": {
+              "type": "float",
+              "_meta": {
+                "description": "Average number of errors per conversation that had errors"
+              }
+            },
+            "total_conversations_with_errors": {
+              "type": "long",
+              "_meta": {
+                "description": "Total number of unique conversations that had at least one error"
+              }
+            },
+            "by_type": {
+              "type": "array",
+              "items": {
+                "properties": {
+                  "type": {
+                    "type": "keyword",
+                    "_meta": {
+                      "description": "Error type/code (e.g., internalError, badRequest)"
+                    }
+                  },
+                  "count": {
+                    "type": "long",
+                    "_meta": {
+                      "description": "Number of errors of this type"
+                    }
+                  }
+                }
+              }
+            }
+          }
         }
       }
     },

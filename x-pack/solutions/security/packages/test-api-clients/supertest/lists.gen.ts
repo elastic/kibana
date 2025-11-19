@@ -14,6 +14,9 @@
  *   version: Bundle (no version)
  */
 
+import supertest_ from 'supertest';
+import type SuperTest from 'supertest';
+import { format as formatUrl } from 'url';
 import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -37,32 +40,29 @@ import type { UpdateListItemRequestBodyInput } from '@kbn/securitysolution-lists
 import type { FtrProviderContext } from '@kbn/ftr-common-functional-services';
 import { getRouteUrlForSpace } from '@kbn/spaces-plugin/common';
 
-export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
-
-  return {
-    /**
-     * Create a new value list.
-     */
-    createList(props: CreateListProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/lists', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Create `.lists` and `.items` data streams in the relevant space.
-     */
-    createListIndex(kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/lists/index', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
+const securitySolutionApiServiceFactory = (supertest: SuperTest.Agent) => ({
+  /**
+   * Create a new value list.
+   */
+  createList(props: CreateListProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/lists', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Create `.lists` and `.items` data streams in the relevant space.
+   */
+  createListIndex(kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/lists/index', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
       * Create a value list item and associate it with the specified value list.
 
 All value list items in the same list must be the same type. For example, each list item in an `ip` list must define a specific IP address.
@@ -70,184 +70,199 @@ All value list items in the same list must be the same type. For example, each l
 > Before creating a list item, you must create a list.
 
       */
-    createListItem(props: CreateListItemProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/lists/items', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
+  createListItem(props: CreateListItemProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/lists/items', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
       * Delete a value list using the list ID.
 > info
 > When you delete a list, all of its list items are also deleted.
 
       */
-    deleteList(props: DeleteListProps, kibanaSpace: string = 'default') {
-      return supertest
-        .delete(getRouteUrlForSpace('/api/lists', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
-     * Delete the `.lists` and `.items` data streams.
-     */
-    deleteListIndex(kibanaSpace: string = 'default') {
-      return supertest
-        .delete(getRouteUrlForSpace('/api/lists/index', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
-     * Delete a value list item using its `id`, or its `list_id` and `value` fields.
-     */
-    deleteListItem(props: DeleteListItemProps, kibanaSpace: string = 'default') {
-      return supertest
-        .delete(getRouteUrlForSpace('/api/lists/items', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
-     * Export list item values from the specified value list.
-     */
-    exportListItems(props: ExportListItemsProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/lists/items/_export', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
-     * Get all value list items in the specified list.
-     */
-    findListItems(props: FindListItemsProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/lists/items/_find', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
-     * Get a paginated subset of value lists. By default, the first page is returned, with 20 results per page.
-     */
-    findLists(props: FindListsProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/lists/_find', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
+  deleteList(props: DeleteListProps, kibanaSpace: string = 'default') {
+    return supertest
+      .delete(getRouteUrlForSpace('/api/lists', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Delete the `.lists` and `.items` data streams.
+   */
+  deleteListIndex(kibanaSpace: string = 'default') {
+    return supertest
+      .delete(getRouteUrlForSpace('/api/lists/index', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+   * Delete a value list item using its `id`, or its `list_id` and `value` fields.
+   */
+  deleteListItem(props: DeleteListItemProps, kibanaSpace: string = 'default') {
+    return supertest
+      .delete(getRouteUrlForSpace('/api/lists/items', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Export list item values from the specified value list.
+   */
+  exportListItems(props: ExportListItemsProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/lists/items/_export', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Get all value list items in the specified list.
+   */
+  findListItems(props: FindListItemsProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/lists/items/_find', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Get a paginated subset of value lists. By default, the first page is returned, with 20 results per page.
+   */
+  findLists(props: FindListsProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/lists/_find', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
       * Import value list items from a TXT or CSV file. The maximum file size is 9 million bytes.
 
 You can import items to a new or existing list.
 
       */
-    importListItems(props: ImportListItemsProps, kibanaSpace: string = 'default') {
-      return supertest
-        .post(getRouteUrlForSpace('/api/lists/items/_import', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
-     * Update specific fields of an existing list using the list `id`.
-     */
-    patchList(props: PatchListProps, kibanaSpace: string = 'default') {
-      return supertest
-        .patch(getRouteUrlForSpace('/api/lists', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Update specific fields of an existing value list item using the item `id`.
-     */
-    patchListItem(props: PatchListItemProps, kibanaSpace: string = 'default') {
-      return supertest
-        .patch(getRouteUrlForSpace('/api/lists/items', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
-     * Get the details of a value list using the list ID.
-     */
-    readList(props: ReadListProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/lists', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    /**
-     * Verify that `.lists` and `.items` data streams exist.
-     */
-    readListIndex(kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/lists/index', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
-     * Get the details of a value list item.
-     */
-    readListItem(props: ReadListItemProps, kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/lists/items', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .query(props.query);
-    },
-    readListPrivileges(kibanaSpace: string = 'default') {
-      return supertest
-        .get(getRouteUrlForSpace('/api/lists/privileges', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
-    /**
+  importListItems(props: ImportListItemsProps, kibanaSpace: string = 'default') {
+    return supertest
+      .post(getRouteUrlForSpace('/api/lists/items/_import', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Update specific fields of an existing list using the list `id`.
+   */
+  patchList(props: PatchListProps, kibanaSpace: string = 'default') {
+    return supertest
+      .patch(getRouteUrlForSpace('/api/lists', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Update specific fields of an existing value list item using the item `id`.
+   */
+  patchListItem(props: PatchListItemProps, kibanaSpace: string = 'default') {
+    return supertest
+      .patch(getRouteUrlForSpace('/api/lists/items', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
+   * Get the details of a value list using the list ID.
+   */
+  readList(props: ReadListProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/lists', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  /**
+   * Verify that `.lists` and `.items` data streams exist.
+   */
+  readListIndex(kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/lists/index', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
+   * Get the details of a value list item.
+   */
+  readListItem(props: ReadListItemProps, kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/lists/items', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .query(props.query);
+  },
+  readListPrivileges(kibanaSpace: string = 'default') {
+    return supertest
+      .get(getRouteUrlForSpace('/api/lists/privileges', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+  },
+  /**
       * Update a value list using the list `id`. The original list is replaced, and all unspecified fields are deleted.
 > info
 > You cannot modify the `id` value.
 
       */
-    updateList(props: UpdateListProps, kibanaSpace: string = 'default') {
-      return supertest
-        .put(getRouteUrlForSpace('/api/lists', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
-    },
-    /**
+  updateList(props: UpdateListProps, kibanaSpace: string = 'default') {
+    return supertest
+      .put(getRouteUrlForSpace('/api/lists', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+  /**
       * Update a value list item using the list item ID. The original list item is replaced, and all unspecified fields are deleted.
 > info
 > You cannot modify the `id` value.
 
       */
-    updateListItem(props: UpdateListItemProps, kibanaSpace: string = 'default') {
-      return supertest
-        .put(getRouteUrlForSpace('/api/lists/items', kibanaSpace))
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
-        .send(props.body as object);
+  updateListItem(props: UpdateListItemProps, kibanaSpace: string = 'default') {
+    return supertest
+      .put(getRouteUrlForSpace('/api/lists/items', kibanaSpace))
+      .set('kbn-xsrf', 'true')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+      .send(props.body as object);
+  },
+});
+
+export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) {
+  const supertestService = getService('supertest');
+  const config = getService('config');
+
+  return {
+    ...securitySolutionApiServiceFactory(supertestService),
+    withUser: (user: { username: string; password: string }) => {
+      const kbnUrl = formatUrl({ ...config.get('servers.kibana'), auth: false });
+
+      return securitySolutionApiServiceFactory(
+        supertest_.agent(kbnUrl).auth(user.username, user.password)
+      );
     },
   };
 }

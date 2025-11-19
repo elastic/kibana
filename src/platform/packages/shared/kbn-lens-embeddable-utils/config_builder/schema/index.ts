@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { metricStateSchema } from './charts/metric';
 import { legacyMetricStateSchema } from './charts/legacy_metric';
@@ -20,7 +21,7 @@ export const lensApiStateSchema = schema.oneOf([
   gaugeStateSchema,
 ]);
 
-export type LensApiState = typeof lensApiStateSchema.type;
+export type LensApiState = TypeOf<typeof lensApiStateSchema>;
 
 export type { MetricState, metricStateSchemaNoESQL } from './charts/metric';
 export type { LegacyMetricState, legacyMetricStateSchemaNoESQL } from './charts/legacy_metric';

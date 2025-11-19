@@ -7,6 +7,7 @@
 
 import { boomify, isBoom } from '@hapi/boom';
 
+import { isLensLegacyAttributes } from '@kbn/lens-embeddable-utils/config_builder/utils';
 import {
   LENS_VIS_API_PATH,
   LENS_API_VERSION,
@@ -25,7 +26,7 @@ import { getLensRequestConfig, getLensResponseItem } from '../utils';
 
 export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
   router,
-  { contentManagement }
+  { contentManagement, builder }
 ) => {
   const updateRoute = router.put({
     path: `${LENS_VIS_API_PATH}/{id}`,
@@ -81,7 +82,7 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
     },
     async (ctx, req, res) => {
       const requestBodyData = req.body;
-      if (!requestBodyData.visualizationType) {
+      if (isLensLegacyAttributes(requestBodyData) && !requestBodyData.visualizationType) {
         throw new Error('visualizationType is required');
       }
 
@@ -91,7 +92,7 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
         .for<LensSavedObject>(LENS_CONTENT_TYPE);
 
       // Note: these types are to enforce loose param typings of client methods
-      const { references, ...data } = getLensRequestConfig(req.body);
+      const { references, ...data } = getLensRequestConfig(builder, req.body);
       const options: LensUpdateIn['options'] = { ...req.query, references };
 
       try {
@@ -101,7 +102,7 @@ export const registerLensVisualizationsUpdateAPIRoute: RegisterAPIRouteFn = (
           throw result.item.error;
         }
 
-        const responseItem = getLensResponseItem(result.item);
+        const responseItem = getLensResponseItem(builder, result.item);
         return res.ok<LensUpdateResponseBody>({
           body: responseItem,
         });

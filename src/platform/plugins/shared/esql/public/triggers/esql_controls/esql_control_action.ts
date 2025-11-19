@@ -13,7 +13,12 @@ import { firstValueFrom, of } from 'rxjs';
 import type { CoreStart } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { ESQLVariableType, type ESQLControlVariable, type ESQLControlState } from '@kbn/esql-types';
+import {
+  ESQLVariableType,
+  type ESQLControlVariable,
+  type ESQLControlState,
+  type ControlTriggerSource,
+} from '@kbn/esql-types';
 import type { monaco } from '@kbn/monaco';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { dismissAllFlyoutsExceptFor, DiscoverFlyouts } from '@kbn/discover-utils';
@@ -37,6 +42,7 @@ interface Context {
   cursorPosition?: monaco.Position;
   initialState?: ESQLControlState;
   parentApi?: unknown;
+  triggerSource: ControlTriggerSource;
 }
 
 export class CreateESQLControlAction implements Action<Context> {
@@ -73,6 +79,7 @@ export class CreateESQLControlAction implements Action<Context> {
     cursorPosition,
     initialState,
     parentApi,
+    triggerSource,
   }: Context) {
     if (!isActionCompatible(this.core, variableType)) {
       throw new IncompatibleActionError();
@@ -106,6 +113,7 @@ export class CreateESQLControlAction implements Action<Context> {
           initialState,
           closeFlyout,
           currentApp,
+          triggerSource,
         });
       },
       flyoutProps: {

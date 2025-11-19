@@ -293,10 +293,10 @@ describe('When using processes action from response actions console', () => {
             'Show all running processes' +
             'Usage' +
             'processes [--comment]' +
-            'Example' +
-            'processes --comment "get the processes"' +
             'Optional parameters' +
-            '--comment - A comment to go along with the action'
+            '--comment - A comment to go along with the action' +
+            'Example' +
+            'processes --comment "get the processes"'
         );
       });
     });
