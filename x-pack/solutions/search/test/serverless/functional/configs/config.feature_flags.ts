@@ -25,7 +25,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...baseConfig.get('kbnTestServer.serverArgs'),
         `--uiSettings.overrides.agentBuilder:enabled=true`,
         `--uiSettings.overrides.searchPlayground:searchModeEnabled=true`,
-        '--uiSettings.overrides.hideAnnouncements=true',
+        // '--uiSettings.overrides.hideAnnouncements=true',
         '--feature_flags.overrides.searchSolution.gettingStartedEnabled=true',
       ],
     },

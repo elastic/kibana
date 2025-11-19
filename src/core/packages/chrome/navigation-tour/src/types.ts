@@ -14,7 +14,7 @@ export type TourStepId =
   | 'sidenav-home'
   | 'sidenav-more'
   | 'sidenav-manage-data'
-  | 'sidenav-getting-started';
+  | 'sidenav-search-getting-started';
 
 export interface TourStep {
   id: TourStepId;

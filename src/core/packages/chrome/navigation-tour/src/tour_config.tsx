@@ -87,21 +87,21 @@ export const tourSteps: TourStep[] = [
     target: `[data-test-subj~="projectSideNav"] [data-test-subj*="${DATA_MANAGEMENT_NAV_ID}"]`,
   },
   {
-    id: 'sidenav-getting-started',
+    id: 'sidenav-search-getting-started',
     required: false, // tour will continue even if this step is not visible
-    title: i18n.translate('core.chrome.navigationTour.sidenavGettingStartedTitle', {
+    title: i18n.translate('core.chrome.navigationTour.sidenavSearchGettingStartedTitle', {
       defaultMessage: 'Learning content now available!',
     }),
     content: (
       <EuiText size={'s'}>
         <p>
           <FormattedMessage
-            id="core.chrome.navigationTour.sidenavGettingStartedMessage"
+            id="core.chrome.navigationTour.sidenavSearchGettingStartedMessage"
             defaultMessage="The Getting started page provides a single location for learning content to help you start building with Elasticsearch."
           />
         </p>
       </EuiText>
     ),
-    target: `[data-test-subj~="projectSideNav"] [data-test-subj*="nav-item-id-getting_started"]`,
+    target: `[data-test-subj~="projectSideNav"] [data-test-subj*="nav-item-id-search_getting_started"]`,
   },
 ];

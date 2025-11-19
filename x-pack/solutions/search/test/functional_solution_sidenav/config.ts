@@ -25,7 +25,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     testFiles: [require.resolve('.')],
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
-      serverArgs: [...functionalConfig.get('kbnTestServer.serverArgs')],
+      serverArgs: [
+        ...functionalConfig.get('kbnTestServer.serverArgs'),
+        '--feature_flags.overrides.searchSolution.gettingStartedEnabled=true',
+      ],
     },
   };
 }
