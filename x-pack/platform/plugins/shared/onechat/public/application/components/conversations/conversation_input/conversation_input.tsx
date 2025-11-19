@@ -8,6 +8,7 @@
 import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import type { PropsWithChildren } from 'react';
 import React, { useState } from 'react';
 import { useSendMessage } from '../../../context/send_message/send_message_context';
 import { useIsSendingMessage } from '../../../hooks/use_is_sending_message';
@@ -19,34 +20,13 @@ import { ConversationInputActions } from './conversation_input_actions';
 
 const MIN_HEIGHT = 150;
 
-interface ConversationInputProps {
-  onSubmit?: () => void;
-}
-
-export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }) => {
-  const isSendingMessage = useIsSendingMessage();
-  const [input, setInput] = useState('');
-  const { sendMessage, pendingMessage } = useSendMessage();
+const InputContainer: React.FC<PropsWithChildren<{ isDisabled: boolean }>> = ({
+  children,
+  isDisabled,
+}) => {
   const { euiTheme } = useEuiTheme();
-  const { isFetched } = useOnechatAgents();
-  const agentId = useAgentId();
 
-  const validateAgentId = useValidateAgentId();
-  const isAgentIdValid = validateAgentId(agentId);
-
-  const shouldDisableTextArea = !isAgentIdValid && isFetched && !!agentId;
-  const isSubmitDisabled = !input.trim() || isSendingMessage || !isAgentIdValid;
-
-  const handleSubmit = () => {
-    if (isSubmitDisabled) {
-      return;
-    }
-    sendMessage({ message: input });
-    setInput('');
-    onSubmit?.();
-  };
-
-  const formContainerStyles = css`
+  const inputContainerStyles = css`
     width: 100%;
     min-height: ${MIN_HEIGHT}px;
     padding: ${euiTheme.size.base};
@@ -59,14 +39,13 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
       border-bottom-color: ${euiTheme.colors.primary};
     }
   `;
-
-  const formContainerDisabledStyles = css`
+  const inputContainerDisabledStyles = css`
     background-color: ${euiTheme.colors.backgroundBaseDisabled};
   `;
 
   return (
     <EuiFlexGroup
-      css={[formContainerStyles, shouldDisableTextArea && formContainerDisabledStyles]}
+      css={[inputContainerStyles, isDisabled && inputContainerDisabledStyles]}
       direction="column"
       gutterSize="s"
       responsive={false}
@@ -76,8 +55,42 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
       aria-label={i18n.translate('xpack.onechat.conversationInput.container.label', {
         defaultMessage: 'Message input form',
       })}
-      aria-disabled={shouldDisableTextArea}
+      aria-disabled={isDisabled}
     >
+      {children}
+    </EuiFlexGroup>
+  );
+};
+
+interface ConversationInputProps {
+  onSubmit?: () => void;
+}
+
+export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }) => {
+  const isSendingMessage = useIsSendingMessage();
+  const [input, setInput] = useState('');
+  const hasInput = Boolean(input.trim());
+  const { sendMessage, pendingMessage } = useSendMessage();
+  const { isFetched } = useOnechatAgents();
+  const agentId = useAgentId();
+
+  const validateAgentId = useValidateAgentId();
+  const isAgentIdValid = validateAgentId(agentId);
+
+  const shouldDisableTextArea = !isAgentIdValid && isFetched && !!agentId;
+  const isSubmitDisabled = !hasInput || isSendingMessage || !isAgentIdValid;
+
+  const handleSubmit = () => {
+    if (isSubmitDisabled) {
+      return;
+    }
+    sendMessage({ message: input });
+    setInput('');
+    onSubmit?.();
+  };
+
+  return (
+    <InputContainer isDisabled={shouldDisableTextArea}>
       <ConversationInputTextArea
         input={input}
         setInput={setInput}
@@ -97,6 +110,6 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
           agentId={agentId}
         />
       )}
-    </EuiFlexGroup>
+    </InputContainer>
   );
 };
