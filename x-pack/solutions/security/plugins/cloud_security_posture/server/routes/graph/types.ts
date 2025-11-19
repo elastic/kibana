@@ -31,7 +31,7 @@ export interface GraphEdge {
   sourceIps?: string[] | string;
   sourceCountryCodes?: string[] | string;
   // actor attributes
-  actorIds: string[] | string;
+  actorNodeId: string;
   actorIdsCount: number;
   actorsDocData?: Array<string | null> | string;
   actorEntityType?: string | null;
@@ -39,7 +39,7 @@ export interface GraphEdge {
   actorEntityName?: string | null;
   actorHostIps?: string[] | string;
   // target attributes
-  targetIds: Array<string | null> | string;
+  targetNodeId: string | null;
   targetIdsCount: number;
   targetsDocData?: Array<string | null> | string;
   targetEntityType?: string | null;

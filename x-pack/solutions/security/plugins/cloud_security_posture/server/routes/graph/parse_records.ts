@@ -122,14 +122,14 @@ const resolveEntityType = (entityType: string | null | undefined, idsCount: numb
  */
 const generateEntityLabel = (
   idsCount: number,
-  entityIds: Array<string | null>,
+  entityNodeId: string,
   entityType: string,
   entityName: string | null | undefined,
   entitySubType: string | null | undefined
 ): string => {
-  // Single non-enriched entity: show the ID
+  // Single non-enriched entity: show the group ID (which is the entity ID for single entities)
   if (idsCount === 1 && entityType === NON_ENRICHED_ENTITY_TYPE_SINGULAR) {
-    return String(entityIds[0]);
+    return entityNodeId;
   }
   // Single enriched entity: show the name
   if (idsCount === 1 && entityType !== NON_ENRICHED_ENTITY_TYPE_SINGULAR) {
@@ -152,7 +152,7 @@ const createGroupedActorAndTargetNodes = (
   const { nodesMap } = context;
   const {
     // actor attributes
-    actorIds,
+    actorNodeId,
     actorIdsCount,
     actorsDocData,
     actorEntityType: rawActorEntityType,
@@ -160,7 +160,7 @@ const createGroupedActorAndTargetNodes = (
     actorEntityName,
     actorHostIps,
     // target attributes
-    targetIds,
+    targetNodeId,
     targetIdsCount,
     targetsDocData,
     targetEntityType: rawTargetEntityType,
@@ -169,8 +169,6 @@ const createGroupedActorAndTargetNodes = (
     targetHostIps,
   } = record;
 
-  const actorIdsArray = actorIds ? castArray(actorIds) : [];
-  const targetIdsArray = targetIds ? castArray(targetIds) : [];
   const actorHostIpsArray = actorHostIps ? castArray(actorHostIps) : [];
   const targetHostIpsArray = targetHostIps ? castArray(targetHostIps) : [];
 
@@ -180,7 +178,7 @@ const createGroupedActorAndTargetNodes = (
 
   const actorLabel = generateEntityLabel(
     actorIdsCount,
-    actorIdsArray,
+    actorNodeId,
     actorEntityType,
     actorEntityName,
     actorEntitySubType
@@ -188,7 +186,7 @@ const createGroupedActorAndTargetNodes = (
 
   const targetLabel = generateEntityLabel(
     targetIdsCount,
-    targetIdsArray,
+    targetNodeId || '',
     targetEntityType,
     targetEntityName,
     targetEntitySubType
@@ -208,13 +206,11 @@ const createGroupedActorAndTargetNodes = (
         .map((targetData) => JSON.parse(targetData))
     : [];
 
-  const actorNodeId = actorIdsCount === 1 && actorIdsArray[0] ? actorIdsArray[0] : uuidv4();
-  const targetNodeId =
+  // Target: Use node ID from ES|QL or UUID for unknown
+  const targetId =
     targetIdsCount === 0
-      ? `unknown-${uuidv4()}` // Unknown target
-      : targetIdsCount === 1 && targetIdsArray[0]
-      ? targetIdsArray[0] // Single target
-      : uuidv4(); // Group target
+      ? `unknown-${uuidv4()}` // Multiple unknown target nodes possible - differentiate via UUID
+      : targetNodeId!; // Use node ID from ES|QL (we know it's not null here)
 
   const actorGroup: {
     id: string;
@@ -224,7 +220,7 @@ const createGroupedActorAndTargetNodes = (
     hostIps: string[];
     label?: string;
   } = {
-    id: actorNodeId,
+    id: actorNodeId, // Actor: Always use node ID from ES|QL (single entity ID or MD5 hash)
     type: actorEntityType,
     docData: actorsDocDataArray,
     hostIps: actorHostIpsArray,
@@ -242,7 +238,7 @@ const createGroupedActorAndTargetNodes = (
   } =
     targetIdsCount > 0
       ? {
-          id: targetNodeId,
+          id: targetId,
           type: targetEntityType,
           docData: targetsDocDataArray,
           hostIps: targetHostIpsArray,
@@ -251,7 +247,7 @@ const createGroupedActorAndTargetNodes = (
         }
       : {
           // Unknown target
-          id: targetNodeId,
+          id: targetId,
           type: '',
           label: 'Unknown',
           docData: [],

@@ -270,13 +270,24 @@ ${
   sourceIps = MV_DEDUPE(VALUES(sourceIps)),
   sourceCountryCodes = MV_DEDUPE(VALUES(sourceCountryCodes)),
   // actor attributes
-  actorIds = VALUES(actor.entity.id),
+  actorNodeId = CASE(
+    // deterministic group IDs - use raw entity ID for single values, MD5 hash for multiple
+    MV_COUNT(VALUES(actor.entity.id)) == 1, TO_STRING(VALUES(actor.entity.id)),
+    MD5(MV_CONCAT(MV_SORT(VALUES(actor.entity.id)), ","))
+  ),
   actorIdsCount = COUNT_DISTINCT(actor.entity.id),
   actorEntityName = VALUES(actorEntityName),
   actorHostIp = VALUES(actorHostIp),
   actorsDocData = VALUES(actorDocData),
   // target attributes
-  targetIds = VALUES(target.entity.id),
+  targetNodeId = CASE(
+    // deterministic group IDs - use raw entity ID for single values, MD5 hash for multiple
+    COUNT_DISTINCT(target.entity.id) == 0, null,
+    CASE(
+      MV_COUNT(VALUES(target.entity.id)) == 1, TO_STRING(VALUES(target.entity.id)),
+      MD5(MV_CONCAT(MV_SORT(VALUES(target.entity.id)), ","))
+    )
+  ),
   targetIdsCount = COUNT_DISTINCT(target.entity.id),
   targetEntityName = VALUES(targetEntityName),
   targetHostIp = VALUES(targetHostIp),
