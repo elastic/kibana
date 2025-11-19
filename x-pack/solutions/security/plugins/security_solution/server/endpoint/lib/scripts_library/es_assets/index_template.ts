@@ -20,7 +20,6 @@ export const ScriptsFileMetadataIndexTemplate = deepFreeze<IndicesPutIndexTempla
   name: SCRIPTS_LIBRARY_FILE_METADATA_INDEX_NAME_PREFIX,
   index_patterns: [`${SCRIPTS_LIBRARY_FILE_METADATA_INDEX_NAME_PREFIX}-*`],
   priority: 500,
-  data_stream: {},
   allow_auto_create: true,
   _meta: {
     description: 'Index template for Elastic Defend scripts library storage of file metadata',
@@ -34,7 +33,6 @@ export const ScriptsFileMetadataIndexTemplate = deepFreeze<IndicesPutIndexTempla
     mappings: {
       dynamic: false,
       properties: {
-        '@timestamp': { type: 'date' },
         file: {
           properties: {
             Status: { type: 'keyword' },
@@ -61,7 +59,6 @@ export const ScriptsFileDataIndexTemplate = deepFreeze<IndicesPutIndexTemplateRe
   name: SCRIPTS_LIBRARY_FILE_DATA_INDEX_NAME_PREFIX,
   index_patterns: [`${SCRIPTS_LIBRARY_FILE_DATA_INDEX_NAME_PREFIX}-*`],
   priority: 500,
-  data_stream: {},
   allow_auto_create: true,
   _meta: {
     description: 'Index template for Elastic Defend scripts library storage of file data content',
@@ -75,7 +72,6 @@ export const ScriptsFileDataIndexTemplate = deepFreeze<IndicesPutIndexTemplateRe
     mappings: {
       dynamic: false,
       properties: {
-        '@timestamp': { type: 'date' },
         data: {
           type: 'binary',
           store: true,
