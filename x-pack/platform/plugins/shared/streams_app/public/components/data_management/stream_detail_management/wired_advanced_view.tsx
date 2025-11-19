@@ -44,7 +44,7 @@ export function WiredAdvancedView({
           <StreamFeatureConfiguration definition={definition.stream} />
         </>
       )}
-      <EuiSpacer size="m" />
+      <EuiSpacer />
       <IndexConfiguration definition={definition} refreshDefinition={refreshDefinition}>
         <EuiCallOut
           iconType="warning"
