@@ -40,7 +40,7 @@ export const buildEsqlQuery = (
     Builder.expression.literal.string(query.kql.query),
   ]);
 
-  const whereCondition = query.feature
+  const whereCondition = query.feature?.filter
     ? Builder.expression.func.binary('and', [
         kqlQuery,
         Builder.expression.literal.string(conditionToESQL(query.feature.filter), {
