@@ -11,7 +11,6 @@ import type { GetAnomalyDetectionJobsToolResult } from '@kbn/observability-agent
 import { OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID } from '@kbn/observability-agent-plugin/server/tools/get_anomaly_detection_jobs/get_anomaly_detection_jobs';
 import datemath from '@elastic/datemath';
 import moment from 'moment';
-import type { ErrorResult } from '@kbn/onechat-common';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
 
@@ -158,18 +157,21 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(toolResults[0].data.jobs[0].jobId).to.be(jobId);
     });
 
-    it('returns error for non-existent job ID', async () => {
-      const toolResults = await agentBuilderApiClient.executeTool<ErrorResult>({
-        id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
-        params: {
-          jobIds: ['non-existent-job-id'],
-          start: START,
-          end: END,
-        },
-      });
+    it('returns empty response for non-existent job ID', async () => {
+      const toolResults =
+        await agentBuilderApiClient.executeTool<GetAnomalyDetectionJobsToolResult>({
+          id: OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+          params: {
+            jobIds: ['non-existent-job-id'],
+            start: START,
+            end: END,
+          },
+        });
 
-      expect(toolResults[0].type).to.be('error');
-      expect(toolResults[0].data.message).to.contain('Failed to retrieve anomaly detection jobs');
+      expect(toolResults[0].data.jobs).to.be.empty();
+      expect(toolResults[0].data.message).to.contain(
+        'No anomaly detection jobs found for the provided filters'
+      );
     });
 
     it('returns job without anomalies when time range excludes them', async () => {

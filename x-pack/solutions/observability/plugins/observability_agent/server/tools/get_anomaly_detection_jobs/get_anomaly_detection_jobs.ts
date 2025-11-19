@@ -158,7 +158,12 @@ async function getMlJobs({
   rangeStart: string;
   rangeEnd: string;
 }) {
-  const { jobs = [] } = await mlClient.getJobs({ job_id: jobIds.join(',') });
+  const { jobs = [] } = await mlClient.getJobs({ job_id: jobIds.join(',') }).catch((error) => {
+    if (error.statusCode === 404) {
+      return { jobs: [] };
+    }
+    throw error;
+  });
 
   return Promise.all(
     jobs.slice(0, jobsLimit).map(async (job) => {
