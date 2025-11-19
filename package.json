@@ -1639,6 +1639,7 @@
     "@kbn/migrator-test-kit": "link:src/platform/packages/private/kbn-migrator-test-kit",
     "@kbn/mock-idp-plugin": "link:packages/kbn-mock-idp-plugin",
     "@kbn/mock-idp-utils": "link:src/platform/packages/private/kbn-mock-idp-utils",
+    "@kbn/moon": "link:packages/kbn-moon",
     "@kbn/observability-synthetics-test-data": "link:x-pack/solutions/observability/packages/synthetics-test-data",
     "@kbn/openapi-bundler": "link:src/platform/packages/shared/kbn-openapi-bundler",
     "@kbn/openapi-generator": "link:src/platform/packages/shared/kbn-openapi-generator",

@@ -1324,7 +1324,7 @@ describe('rules_list with show only capability', () => {
       await waitForElementToBeRemoved(() => screen.queryByTestId('centerJustifiedSpinner'));
 
       expect(await screen.findAllByTestId('rulesList')).toHaveLength(1);
-      expect(await screen.findAllByTestId('rule-row')).toHaveLength(2);
+      expect(await screen.findAllByTestId('rule-row-isNotEditable')).toHaveLength(2);
       expect(screen.queryByTestId('deleteActionHoverButton')).not.toBeInTheDocument();
 
       hasAllPrivilege.mockReturnValue(true);
