@@ -10,7 +10,7 @@ import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { getSLOSummaryTransformId, getSLOTransformId } from '../../common/constants';
 import { createSLO } from './fixtures/slo';
-import { aSummaryDocument } from './fixtures/summary_search_document';
+import { aHitFromSummaryIndex, aSummaryDocument } from './fixtures/summary_search_document';
 import { GetSLOHealth } from './get_slo_health';
 
 describe('GetSLOHealth', () => {
@@ -44,7 +44,7 @@ describe('GetSLOHealth', () => {
             const summaryDocData = summaryDocs.find((doc) => doc.sloId === slo.id);
             const hasOnlyTempSummaryDoc = summaryDocData?.hasOnlyTempSummaryDoc ?? false;
             // Always provide a summaryDoc when a bucket exists - use provided one or create a default
-            const summaryDoc = summaryDocData?.summaryDoc ?? aSummaryDocument(slo);
+            const summaryDoc = summaryDocData?.summaryDoc ?? aHitFromSummaryIndex(slo);
             return {
               key: {
                 sloId: slo.id,
@@ -119,7 +119,7 @@ describe('GetSLOHealth', () => {
           },
         ],
         "page": 0,
-        "perPage": 100,
+        "perPage": 20,
         "total": 1,
       }
     `);
@@ -195,7 +195,7 @@ describe('GetSLOHealth', () => {
             },
           ],
           "page": 0,
-          "perPage": 100,
+          "perPage": 20,
           "total": 1,
         }
       `);
@@ -257,7 +257,7 @@ describe('GetSLOHealth', () => {
             },
           ],
           "page": 0,
-          "perPage": 100,
+          "perPage": 20,
           "total": 1,
         }
       `);

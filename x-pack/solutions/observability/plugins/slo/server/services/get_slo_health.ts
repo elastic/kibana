@@ -6,9 +6,9 @@
  */
 
 import type {
+  TransformGetTransformStatsTransformStats,
   AggregationsAggregate,
   FieldValue,
-  TransformGetTransformStatsTransformStats,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { FetchSLOHealthParams, FetchSLOHealthResponse } from '@kbn/slo-schema';
@@ -50,6 +50,9 @@ export class GetSLOHealth {
   public async execute(params: FetchSLOHealthParams): Promise<FetchSLOHealthResponse> {
     let afterKey: AggregationsAggregate | undefined;
     let sloKeysFromES: Array<SloData> = [];
+
+    const page = params.page ?? 0;
+    const perPage = params.perPage ?? 20;
 
     do {
       const sloIdCompositeQueryResponse = await this.scopedClusterClient.asCurrentUser.search({
@@ -148,16 +151,20 @@ export class GetSLOHealth {
       })
     );
 
-    /*
-     * Map results based on SLO ids since transforms represent all instances
-     * Since "state" is not being used in Kibana, we can group by SLO id and return only one result per SLO
-     * If needed in the future, we can return all instances by removing this mapping
-     * and adding sloInstanceId to the response schema
-     */
     const mappedResults = Array.from(
       new Map(results.map((item) => [`${item.sloId}-${item.sloRevision}`, item])).values()
     );
-    return fetchSLOHealthResponseSchema.encode(mappedResults);
+
+    const uniqueResults = params.statusFilter
+      ? mappedResults.filter((item) => item.health.overall === params.statusFilter)
+      : mappedResults;
+
+    return fetchSLOHealthResponseSchema.encode({
+      data: uniqueResults.slice(page * perPage, (page + 1) * perPage),
+      page,
+      perPage,
+      total: uniqueResults.length,
+    });
   }
 
   private async getTransformStatsForSLO(item: {

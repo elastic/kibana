@@ -33,19 +33,24 @@ describe('FindSLODefinitions with Health validation', () => {
     } as unknown as jest.Mocked<GetSLOHealth>;
 
     MockedGetSLOHealth.mockImplementation(() => mockGetSLOHealth);
-    mockGetSLOHealth.execute.mockResolvedValue([
-      {
-        sloId: slo.id,
-        sloRevision: slo.revision,
-        sloName: slo.name,
-        health: {
-          overall: 'healthy',
-          rollup: { status: 'healthy' },
-          summary: { status: 'healthy' },
+    mockGetSLOHealth.execute.mockResolvedValue({
+      data: [
+        {
+          sloId: slo.id,
+          sloRevision: slo.revision,
+          sloName: slo.name,
+          health: {
+            overall: 'healthy',
+            rollup: { status: 'healthy' },
+            summary: { status: 'healthy' },
+          },
+          state: 'running',
         },
-        state: 'running',
-      },
-    ]);
+      ],
+      total: 1,
+      page: 1,
+      perPage: 10,
+    });
   });
 
   const results = {

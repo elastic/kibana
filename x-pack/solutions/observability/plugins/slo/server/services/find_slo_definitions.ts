@@ -41,7 +41,7 @@ export class FindSLODefinitions {
     });
 
     if (params.includeHealth) {
-      const getSLOHealth = new GetSLOHealth(this.scopedClusterClient, this.repository);
+      const getSLOHealth = new GetSLOHealth(this.scopedClusterClient);
 
       const healthResponses = await getSLOHealth.execute({
         list: result.results.map((item) => ({
@@ -50,10 +50,12 @@ export class FindSLODefinitions {
           sloRevision: item.revision,
           sloName: item.name,
         })),
+        perPage: Number(params.perPage) || DEFAULT_PER_PAGE,
+        page: 0,
       });
 
       const resultsWithHealth = result.results.map((slo) => {
-        const healthInfo = healthResponses.find((health) => health.sloId === slo.id);
+        const healthInfo = healthResponses.data.find((health) => health.sloId === slo.id);
         return {
           ...slo,
           health: healthInfo?.health,
