@@ -25,7 +25,6 @@ import {
 } from '../../../../../common/translations';
 import { useQualityIssues } from '../../../../hooks';
 import React from 'react';
-import { css } from '@emotion/css';
 
 const failedDocsErrorsTableNoData = i18n.translate(
   'xpack.datasetQuality.details.qualityIssue.failedDocs.erros.noData',
