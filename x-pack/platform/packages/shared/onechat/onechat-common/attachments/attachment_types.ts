@@ -16,12 +16,14 @@ export enum AttachmentType {
   screenContext = 'screen_context',
   text = 'text',
   esql = 'esql',
+  alert = 'alert',
 }
 
 interface AttachmentDataMap {
   [AttachmentType.esql]: EsqlAttachmentData;
   [AttachmentType.text]: TextAttachmentData;
   [AttachmentType.screenContext]: ScreenContextAttachmentData;
+  [AttachmentType.alert]: AlertAttachmentData;
 }
 
 export const esqlAttachmentDataSchema = z.object({
@@ -75,6 +77,17 @@ export interface ScreenContextAttachmentData {
   description?: string;
   /** arbitrary additional context data */
   additional_data?: Record<string, string>;
+}
+
+export const alertAttachmentDataSchema = z.object({
+  alert: z.string(),
+});
+/**
+ * Data for an alert attachment.
+ */
+export interface AlertAttachmentData {
+  /** The condensed alert data in key-value format (comma-separated, newline-delimited) */
+  alert: string;
 }
 
 export type AttachmentDataOf<Type extends AttachmentType> = AttachmentDataMap[Type];

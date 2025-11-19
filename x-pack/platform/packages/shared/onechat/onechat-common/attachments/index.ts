@@ -11,13 +11,16 @@ export type {
   TextAttachment,
   ScreenContextAttachment,
   EsqlAttachment,
+  AlertAttachment,
 } from './attachments';
 export {
   AttachmentType,
   textAttachmentDataSchema,
   esqlAttachmentDataSchema,
   screenContextAttachmentDataSchema,
+  alertAttachmentDataSchema,
   type TextAttachmentData,
   type ScreenContextAttachmentData,
   type EsqlAttachmentData,
+  type AlertAttachmentData,
 } from './attachment_types';

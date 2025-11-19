@@ -8,46 +8,60 @@
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { createErrorResult } from '@kbn/onechat-server';
+import { runSearchTool } from '@kbn/onechat-genai-utils/tools/search/run_search_tool';
+import { SECURITY_LABS_RESOURCE } from '@kbn/elastic-assistant-plugin/server/routes/knowledge_base/constants';
 import { securityTool } from '../constants';
 
-// TODO: Update to follow same pattern as Product Documentation Tool (use llmTasks.retrieveDocumentation)
-// TODO: Investigate how to install Security Labs documents using the same installation/retrieval pattern as product documentation
-// This requires determining how Security Labs content should be installed and made available via llmTasks.retrieveDocumentation
-
-const securityLabsSchema = z.object({
-  question: z
+const securityLabsSearchSchema = z.object({
+  query: z
     .string()
     .describe(
-      `Key terms to retrieve Elastic Security Labs content for, like specific malware names or attack techniques.`
+      'A natural language query expressing the search request for Security Labs articles. Use this to find Security Labs content about specific malware, attack techniques, MITRE ATT&CK techniques, or rule names.'
     ),
 });
+
 export const SECURITY_LABS_TOOL_ID = securityTool('security_labs');
 
-export const securityLabsTool = (): BuiltinToolDefinition<typeof securityLabsSchema> => {
+const SECURITY_LABS_INDEX_PATTERN = '.kibana-elastic-ai-assistant-knowledge-base-default';
+
+export const securityLabsTool = (): BuiltinToolDefinition<typeof securityLabsSearchSchema> => {
   return {
     id: SECURITY_LABS_TOOL_ID,
     type: ToolType.builtin,
-    description: `Retrieve knowledge from Elastic Security Labs content about malware, attack techniques, threat intelligence, and security research.`,
-    schema: securityLabsSchema,
-    handler: async ({ question }, { request, logger }) => {
-      // TODO: Follow the same pattern as Product Documentation Tool
-      // Need to determine how to install Security Labs documents using the same installation/retrieval pattern
-      // as product documentation, then use llmTasks.retrieveDocumentation to retrieve them
-      // This requires investigation into how Security Labs content should be installed and accessed
-      return {
-        results: [
-          createErrorResult({
-            message:
-              'Security Labs tool is not yet fully implemented. TODO: Install Security Labs documents using the same pattern as product documentation, then use llmTasks.retrieveDocumentation to retrieve them.',
-            metadata: {
-              question,
-              note: 'This tool needs to be updated to use llmTasks.retrieveDocumentation pattern, following the same installation/retrieval approach as product documentation',
+    description: `Search and analyze Security Labs knowledge base content. Use this tool to find Security Labs articles about specific malware, attack techniques, MITRE ATT&CK techniques, or rule names. Automatically filters to Security Labs content only and limits results to 10 articles.`,
+    schema: securityLabsSearchSchema,
+    handler: async ({ query: nlQuery }, { esClient, modelProvider, logger, events }) => {
+      logger.debug(`security-labs-search tool called with query: ${nlQuery}`);
+
+      try {
+        // Enhance query to filter by Security Labs resource and limit results
+        const enhancedQuery = `${nlQuery} Filter to only Security Labs content (kb_resource: ${SECURITY_LABS_RESOURCE}). Limit to 3 results.`;
+
+        const results = await runSearchTool({
+          nlQuery: enhancedQuery,
+          index: SECURITY_LABS_INDEX_PATTERN,
+          model: await modelProvider.getDefaultModel(),
+          esClient: esClient.asCurrentUser,
+          logger,
+          events,
+        });
+        console.log('SL ==>', results);
+
+        return { results };
+      } catch (error) {
+        logger.error(`Error in security-labs-search tool: ${error.message}`);
+        return {
+          results: [
+            {
+              type: 'error',
+              data: {
+                message: `Error: ${error.message}`,
+              },
             },
-          }),
-        ],
-      };
+          ],
+        };
+      }
     },
-    tags: ['security', 'security-labs'],
+    tags: ['security', 'security-labs', 'knowledge-base', 'search'],
   };
 };
