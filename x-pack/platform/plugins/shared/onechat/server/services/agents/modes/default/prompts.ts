@@ -17,6 +17,7 @@ import { ChartType } from '@kbn/visualization-utils';
 import { customInstructionsBlock, formatDate } from './prompts/prompt_helpers';
 import type { ResearchAgentAction, AnswerAgentAction } from './actions';
 import { formatResearcherActionHistory, formatAnswerActionHistory } from './prompts/format_actions';
+import type { ProcessedAttachmentType } from '../utils/prepare_conversation';
 
 const tools = {
   indexExplorer: sanitizeToolId(platformCoreTools.indexExplorer),
@@ -29,11 +30,13 @@ export const getActPrompt = ({
   capabilities,
   initialMessages,
   actions,
+  attachmentTypes,
 }: {
   customInstructions?: string;
   capabilities: ResolvedAgentCapabilities;
   initialMessages: BaseMessageLike[];
   actions: ResearchAgentAction[];
+  attachmentTypes: ProcessedAttachmentType[];
 }): BaseMessageLike[] => {
   return [
     [
@@ -125,6 +128,8 @@ Constraints:
       - Keep the note concise and focused on insights that are not obvious from the data.
 
 ${customInstructionsBlock(customInstructions)}
+
+${renderAttachmentTypeInstructions(attachmentTypes)}
 
 ## ADDITIONAL INFO
 - Current date: ${formatDate()}
@@ -243,3 +248,23 @@ function renderVisualizationPrompt() {
       To visualize this response as a bar chart your reply should be:
       <${tagName} ${attributes.toolResultId}="LiDoF1" ${attributes.chartType}="${ChartType.Bar}"/>`;
 }
+
+const renderAttachmentTypeInstructions = (attachmentTypes: ProcessedAttachmentType[]): string => {
+  if (attachmentTypes.length === 0) {
+    return '';
+  }
+
+  const perTypeInstructions = attachmentTypes.map(({ type, agentDescription }) => {
+    return `### ${type} attachments
+
+${agentDescription ?? 'No instructions available.'}
+`;
+  });
+
+  return `## ATTACHMENT TYPES
+
+  The current conversation contains attachments. Here is the list of attachment types present in the conversation and their corresponding instructions:
+
+${perTypeInstructions.join('\n\n')}
+  `;
+};
