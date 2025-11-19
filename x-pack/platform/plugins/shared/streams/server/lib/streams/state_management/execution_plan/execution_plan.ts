@@ -249,9 +249,8 @@ export class ExecutionPlan {
 
     return Promise.all(
       actions.flatMap((action) => [
-        this.dependencies.assetClient.syncAssetList(action.request.name, [], 'dashboard'),
-        this.dependencies.assetClient.syncAssetList(action.request.name, [], 'rule'),
-        this.dependencies.assetClient.syncAssetList(action.request.name, [], 'slo'),
+        this.dependencies.attachmentClient.syncAttachmentList(action.request.name, [], 'dashboard'),
+        this.dependencies.attachmentClient.syncAttachmentList(action.request.name, [], 'rule'),
       ])
     );
   }
@@ -425,6 +424,7 @@ export class ExecutionPlan {
     return this.dependencies.storageClient.bulk({
       operations: actions.map(dotDocumentActionToBulkOperation),
       refresh: true,
+      throwOnFail: true,
     });
   }
 

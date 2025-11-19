@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import {
   EuiFilterButton,
@@ -49,7 +50,7 @@ import {
   NoPreviewDocumentsEmptyPrompt,
   NoProcessingDataAvailableEmptyPrompt,
 } from './empty_prompts';
-import { PreviewFlyout, MemoPreviewTable } from '../shared';
+import { PreviewFlyout, MemoPreviewTable, type PreviewTableMode } from '../shared';
 import { toDataTableRecordWithIndex } from '../stream_detail_routing/utils';
 import { RowSelectionContext } from '../shared/preview_table';
 import { getActiveDataSourceRef } from './state_management/stream_enrichment_state_machine/utils';
@@ -131,6 +132,7 @@ const PreviewDocumentsGroupBy = () => {
   return (
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
       <EuiFilterGroup
+        compressed={true}
         aria-label={i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.processor.outcomeControlsAriaLabel',
           { defaultMessage: 'Filter for all, matching or unmatching previewed documents.' }
@@ -175,6 +177,11 @@ const PreviewDocumentsGroupBy = () => {
 };
 
 const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRecord[] }) => {
+  const [userSelectedViewMode, setViewMode] = useLocalStorage<PreviewTableMode>(
+    'streams:processorOutcomePreview:viewMode',
+    'summary'
+  );
+
   const detectedFields = useSimulatorSelector((state) => state.context.simulation?.detected_fields);
   const streamName = useSimulatorSelector((state) => state.context.streamName);
 
@@ -254,6 +261,12 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
       ? currentProcessorSourceField
       : undefined;
 
+  // Calculate if view mode should be forced to 'columns'
+  const isViewModeForced = Boolean(validGrokField || validCurrentProcessorSourceField);
+
+  // Determine the effective view mode (forced to 'columns' if needed, otherwise user's choice)
+  const effectiveViewMode = isViewModeForced ? 'columns' : userSelectedViewMode ?? 'summary';
+
   const availableColumns = useMemo(() => {
     let cols = getTableColumns({
       currentProcessorSourceField: validCurrentProcessorSourceField,
@@ -262,7 +275,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     });
 
     if (cols.length === 0) {
-      // If no columns are detected, we fall back to all fields from the preview documents
+      // If no columns are detected, fall back to all fields from the preview documents
       cols = allColumns;
     }
     // Filter out columns that are explicitly disabled
@@ -273,6 +286,7 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
         filteredCols.push(col);
       }
     });
+
     return filteredCols;
   }, [
     allColumns,
@@ -294,22 +308,56 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
 
   const previewColumns = grokColumns ?? availableColumns;
 
+  // Calculate columns specifically for summary mode
+  const displayColumnsForSummaryMode = useMemo(() => {
+    // Start with detected fields
+    const uniqueDetectedFields = detectedFields ? detectedFields.map((field) => field.name) : [];
+    const baseFields = Array.from(new Set(uniqueDetectedFields));
+
+    // Remove explicitly disabled columns
+    const filteredFields = baseFields.filter(
+      (field) => !explicitlyDisabledPreviewColumns.includes(field)
+    );
+
+    // Add explicitly enabled columns (if they exist in allColumns)
+    const fieldsToShow = [...filteredFields];
+    explicitlyEnabledPreviewColumns.forEach((col) => {
+      if (!fieldsToShow.includes(col) && allColumns.includes(col)) {
+        fieldsToShow.push(col);
+      }
+    });
+
+    return fieldsToShow;
+  }, [
+    detectedFields,
+    explicitlyDisabledPreviewColumns,
+    explicitlyEnabledPreviewColumns,
+    allColumns,
+  ]);
+
+  // Use appropriate columns based on view mode
+  const displayColumnsForTable =
+    effectiveViewMode === 'summary' ? displayColumnsForSummaryMode : previewColumns;
+
   const setVisibleColumns = useCallback(
     (visibleColumns: string[]) => {
       if (visibleColumns.length === 0) {
-        // If no columns are visible, we reset the explicitly enabled and disabled columns
-        setExplicitlyDisabledPreviewColumns(allColumns);
+        // If no columns are visible, reset to default state
+        setExplicitlyDisabledPreviewColumns([]);
+        setExplicitlyEnabledPreviewColumns([]);
+        setPreviewColumnsOrder([]);
         return;
       }
+
       // find which columns got added or removed comparing visibleColumns with the current displayColumns
-      const addedColumns = visibleColumns.filter((col) => !previewColumns.includes(col));
+      const addedColumns = visibleColumns.filter((col) => !displayColumnsForTable.includes(col));
       if (addedColumns.length > 0) {
         setExplicitlyEnabledPreviewColumns([
           ...explicitlyEnabledPreviewColumns,
           ...addedColumns.filter((col) => !explicitlyEnabledPreviewColumns.includes(col)),
         ]);
       }
-      const removedColumns = previewColumns.filter((col) => !visibleColumns.includes(col));
+      const removedColumns = displayColumnsForTable.filter((col) => !visibleColumns.includes(col));
       if (removedColumns.length > 0) {
         setExplicitlyDisabledPreviewColumns([
           ...explicitlyDisabledPreviewColumns,
@@ -319,10 +367,9 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
       setPreviewColumnsOrder(visibleColumns);
     },
     [
-      allColumns,
       explicitlyDisabledPreviewColumns,
       explicitlyEnabledPreviewColumns,
-      previewColumns,
+      displayColumnsForTable,
       setExplicitlyDisabledPreviewColumns,
       setExplicitlyEnabledPreviewColumns,
       setPreviewColumnsOrder,
@@ -379,12 +426,21 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
     [selectedRowIndex, onRowSelected]
   );
 
+  const viewToggleMode = useMemo(
+    () => ({
+      currentMode: userSelectedViewMode ?? 'summary',
+      setViewMode,
+      isDisabled: isViewModeForced,
+    }),
+    [userSelectedViewMode, isViewModeForced, setViewMode]
+  );
+
   return (
     <>
       <RowSelectionContext.Provider value={rowSelectionContextValue}>
         <MemoPreviewTable
           documents={previewDocuments}
-          displayColumns={previewColumns}
+          displayColumns={displayColumnsForTable}
           rowHeightsOptions={validGrokField ? staticRowHeightsOptions : undefined}
           toolbarVisibility
           setVisibleColumns={setVisibleColumns}
@@ -392,6 +448,9 @@ const OutcomePreviewTable = ({ previewDocuments }: { previewDocuments: FlattenRe
           setSorting={setPreviewColumnsSorting}
           columnOrderHint={previewColumnsOrder}
           renderCellValue={renderCellValue}
+          mode={effectiveViewMode}
+          streamName={streamName}
+          viewModeToggle={viewToggleMode}
           dataViewFieldTypes={dataViewFieldTypes}
         />
       </RowSelectionContext.Provider>

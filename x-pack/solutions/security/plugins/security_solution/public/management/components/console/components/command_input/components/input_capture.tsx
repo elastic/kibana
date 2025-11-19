@@ -16,6 +16,7 @@ import React, { memo, useCallback, useMemo, useRef } from 'react';
 import { pick } from 'lodash';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
+import { useIsMounted } from '@kbn/securitysolution-hook-utils';
 import { useTestIdGenerator } from '../../../../../hooks/use_test_id_generator';
 import { useDataTestSubj } from '../../../hooks/state_selectors/use_data_test_subj';
 
@@ -97,6 +98,7 @@ export type InputCaptureProps = PropsWithChildren<{
  */
 export const InputCapture = memo<InputCaptureProps>(
   ({ onCapture, focusRef, onChangeFocus, children }) => {
+    const isMounted = useIsMounted();
     const getTestId = useTestIdGenerator(useDataTestSubj());
     // Reference to the `<div>` that take in focus (`tabIndex`)
     const focusEleRef = useRef<HTMLDivElement | null>(null);
@@ -266,17 +268,33 @@ export const InputCapture = memo<InputCaptureProps>(
             return;
           }
 
-          hiddenInputEleRef.current?.focus();
+          // Method could be called from State reducers, so need to make sure we don't cause
+          // state to be changed in the middle of an update.
+          // Avoids the nasty React warning: Cannot update a component (`name here`) while rendering a different component (`name here`)
+          Promise.resolve().then(() => {
+            if (isMounted() && hiddenInputEleRef.current) {
+              hiddenInputEleRef.current?.focus();
+            }
+          });
         },
 
         blur: () => {
-          // only blur if the input has focus
-          if (hiddenInputEleRef.current && document.activeElement === hiddenInputEleRef.current) {
-            hiddenInputEleRef.current?.blur();
-          }
+          // Method could be called from State reducers, so need to make sure we don't cause
+          // state to be changed in the middle of an update.
+          // Avoids the nasty React warning: Cannot update a component (`name here`) while rendering a different component (`name here`)
+          Promise.resolve().then(() => {
+            // only blur if the input has focus
+            if (
+              isMounted() &&
+              hiddenInputEleRef.current &&
+              document.activeElement === hiddenInputEleRef.current
+            ) {
+              hiddenInputEleRef.current?.blur();
+            }
+          });
         },
       };
-    }, []);
+    }, [isMounted]);
 
     if (focusRef) {
       focusRef.current = focusInterface;

@@ -2714,6 +2714,28 @@
           },
           {
             "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.ConversationRound.model_usage",
+            "type": "Object",
+            "tags": [],
+            "label": "model_usage",
+            "description": [
+              "Model Usage statistics for this round"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/onechat-common",
+                "scope": "common",
+                "docId": "kibKbnOnechatCommonPluginApi",
+                "section": "def-common.RoundModelUsageStats",
+                "text": "RoundModelUsageStats"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
             "id": "def-common.ConversationRound.trace_id",
             "type": "string",
             "tags": [],
@@ -3024,7 +3046,7 @@
             ],
             "signature": [
               "AttachmentInput",
-              "[] | undefined"
+              "<string, Record<string, unknown>>[] | undefined"
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
             "deprecated": false,
@@ -3193,6 +3215,72 @@
             "signature": [
               "Attachment",
               "<string, Record<string, unknown>>[] | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/onechat-common",
+        "id": "def-common.RoundModelUsageStats",
+        "type": "Interface",
+        "tags": [],
+        "label": "RoundModelUsageStats",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.RoundModelUsageStats.connector_id",
+            "type": "string",
+            "tags": [],
+            "label": "connector_id",
+            "description": [
+              "\nId of the connector used for this round"
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.RoundModelUsageStats.llm_calls",
+            "type": "number",
+            "tags": [],
+            "label": "llm_calls",
+            "description": [
+              "\nNumber of LLM calls which were done during this round."
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.RoundModelUsageStats.input_tokens",
+            "type": "number",
+            "tags": [],
+            "label": "input_tokens",
+            "description": [
+              "\nTotal number of input tokens sent this round."
+            ],
+            "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/onechat-common",
+            "id": "def-common.RoundModelUsageStats.output_tokens",
+            "type": "number",
+            "tags": [],
+            "label": "output_tokens",
+            "description": [
+              "\nTotal number of output tokens received this round."
             ],
             "path": "x-pack/platform/packages/shared/onechat/onechat-common/chat/conversation.ts",
             "deprecated": false,
@@ -5337,7 +5425,7 @@
           "\nList of internally used namespaces\nNote: those are not necessarily all protected."
         ],
         "signature": [
-          "{ readonly platformCore: \"platform.core\"; }"
+          "{ readonly platformCore: \"platform.core\"; readonly observability: \"observability\"; }"
         ],
         "path": "x-pack/platform/packages/shared/onechat/onechat-common/base/namespaces.ts",
         "deprecated": false,
