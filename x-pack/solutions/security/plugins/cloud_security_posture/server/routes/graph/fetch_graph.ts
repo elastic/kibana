@@ -121,7 +121,7 @@ const buildDslFilter = (
         : [
             {
               bool: {
-                should: [...GRAPH_TARGET_ENTITY_FIELDS.map((field) => ({ exists: { field } }))],
+                should: GRAPH_TARGET_ENTITY_FIELDS.map((field) => ({ exists: { field } })),
                 minimum_should_match: 1,
               },
             },
@@ -177,13 +177,13 @@ const buildEsqlQuery = ({
   const SECURITY_ALERTS_PARTIAL_IDENTIFIER = '.alerts-security.alerts-';
   const enrichPolicyName = getEnrichPolicyId(spaceId);
 
-  const actorFieldsWhereClause = [
-    ...GRAPH_ACTOR_ENTITY_FIELDS.map((field) => `${field} IS NOT NULL`),
-  ].join(' OR ');
+  const actorFieldsWhereClause = GRAPH_ACTOR_ENTITY_FIELDS.map(
+    (field) => `${field} IS NOT NULL`
+  ).join(' OR ');
 
-  const actorFieldsCoalesce = [...GRAPH_ACTOR_ENTITY_FIELDS].join(',\n    ');
+  const actorFieldsCoalesce = GRAPH_ACTOR_ENTITY_FIELDS.join(',\n    ');
 
-  const targetFieldsCoalesce = [...GRAPH_TARGET_ENTITY_FIELDS].join(',\n    ');
+  const targetFieldsCoalesce = GRAPH_TARGET_ENTITY_FIELDS.join(',\n    ');
 
   const query = `FROM ${indexPatterns
     .filter((indexPattern) => indexPattern.length > 0)
