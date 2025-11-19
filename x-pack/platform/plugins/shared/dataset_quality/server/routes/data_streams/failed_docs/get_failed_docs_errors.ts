@@ -48,11 +48,11 @@ export async function getFailedDocsErrors({
           example_failure: {
             top_hits: {
               size: MAX_EXAMPLES_PER_ERROR,
-              _source: [ERROR_MESSAGE]
-            }
-          }
-        }
-      }
+              _source: [ERROR_MESSAGE],
+            },
+          },
+        },
+      },
     },
   });
 
@@ -65,17 +65,20 @@ export async function getFailedDocsErrors({
 
 function extractAndDeduplicateValues(
   buckets: ({
-      doc_count: number;
-      key: string | number;
-      key_as_string?: string | undefined;
-    } & AggregationResultOfMap<{
+    doc_count: number;
+    key: string | number;
+    key_as_string?: string | undefined;
+  } & AggregationResultOfMap<
+    {
       example_failure: {
         top_hits: {
           size: number;
           _source: string[];
         };
       };
-    }, unknown>)[]
+    },
+    unknown
+  >)[]
 ): Array<{ type: string; message: string }> {
   return buckets.flatMap((bucket) => {
     const type = String(bucket.key);
