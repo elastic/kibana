@@ -7,6 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/onechat-common';
+import type { ErrorResult } from '@kbn/onechat-common/tools/tool_result';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition, StaticToolRegistration } from '@kbn/onechat-server';
 import type { CoreSetup, Logger } from '@kbn/core/server';
@@ -24,6 +25,15 @@ const DEFAULT_TIME_RANGE = {
   start: 'now-24h',
   end: 'now',
 };
+
+export interface GetAnomalyDetectionJobsToolResult {
+  type: ToolResultType.other;
+  data: {
+    jobs: Awaited<ReturnType<typeof getMlJobs>>;
+    totalReturned: number;
+    message?: string;
+  };
+}
 
 const getAnomalyDetectionJobsSchema = z.object({
   jobIds: z
@@ -81,7 +91,9 @@ export function createGetAnomalyDetectionJobsTool({
         end: rangeEnd = DEFAULT_TIME_RANGE.end,
       },
       { esClient }
-    ) => {
+    ): Promise<{
+      results: (GetAnomalyDetectionJobsToolResult | Omit<ErrorResult, 'tool_result_id'>)[];
+    }> => {
       const mlClient = esClient.asCurrentUser.ml;
 
       try {
