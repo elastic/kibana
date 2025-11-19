@@ -8,7 +8,7 @@ import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { schema } from '@kbn/config-schema';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import {
   AGGREGATE_ROUTE,
   AGGREGATE_PAGE_SIZE,
@@ -23,7 +23,7 @@ import {
   ENTRY_LEADER_USER_ID,
   ENTRY_LEADER_INTERACTIVE,
 } from '../../common/constants';
-import { AggregateBucketPaginationResult } from '../../common/types';
+import type { AggregateBucketPaginationResult } from '../../common/types';
 
 // sort by values
 const ASC = 'asc';
@@ -34,6 +34,11 @@ export const registerAggregateRoute = (router: IRouter, logger: Logger) => {
     .get({
       access: 'internal',
       path: AGGREGATE_ROUTE,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
     })
     .addVersion(
       {
@@ -135,23 +140,21 @@ export const doSearch = async (
 
   const search = await client.search({
     index: [index],
-    body: {
-      query: queryDSL,
-      size: 0,
-      aggs: {
-        custom_agg: {
-          terms: {
-            field: groupBy,
-            size: AGGREGATE_MAX_BUCKETS,
-          },
-          aggs: {
-            ...countByAggs,
+    query: queryDSL,
+    size: 0,
+    aggs: {
+      custom_agg: {
+        terms: {
+          field: groupBy,
+          size: AGGREGATE_MAX_BUCKETS,
+        },
+        aggs: {
+          ...countByAggs,
+          bucket_sort: {
             bucket_sort: {
-              bucket_sort: {
-                sort: [sort], // defaulting to alphabetic sort
-                size: perPage + 1, // check if there's a "next page"
-                from: perPage * page,
-              },
+              sort: [sort], // defaulting to alphabetic sort
+              size: perPage + 1, // check if there's a "next page"
+              from: perPage * page,
             },
           },
         },

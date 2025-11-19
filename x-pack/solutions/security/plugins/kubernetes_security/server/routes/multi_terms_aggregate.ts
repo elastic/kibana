@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import {
   MULTI_TERMS_AGGREGATE_ROUTE,
   AGGREGATE_PAGE_SIZE,
@@ -21,7 +21,7 @@ import {
   ENTRY_LEADER_USER_ID,
   ENTRY_LEADER_INTERACTIVE,
 } from '../../common/constants';
-import {
+import type {
   MultiTermsAggregateGroupBy,
   MultiTermsAggregateBucketPaginationResult,
 } from '../../common/types';
@@ -31,6 +31,11 @@ export const registerMultiTermsAggregateRoute = (router: IRouter, logger: Logger
     .get({
       access: 'internal',
       path: MULTI_TERMS_AGGREGATE_ROUTE,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
     })
     .addVersion(
       {
@@ -127,21 +132,19 @@ export const doSearch = async (
 
   const search = await client.search({
     index: [index],
-    body: {
-      query: queryDSL,
-      size: 0,
-      aggs: {
-        custom_agg: {
-          multi_terms: {
-            terms: groupBys,
-          },
-          aggs: {
-            ...countByAggs,
+    query: queryDSL,
+    size: 0,
+    aggs: {
+      custom_agg: {
+        multi_terms: {
+          terms: groupBys,
+        },
+        aggs: {
+          ...countByAggs,
+          bucket_sort: {
             bucket_sort: {
-              bucket_sort: {
-                size: perPage + 1, // check if there's a "next page"
-                from: perPage * page,
-              },
+              size: perPage + 1, // check if there's a "next page"
+              from: perPage * page,
             },
           },
         },

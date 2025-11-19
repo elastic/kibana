@@ -7,7 +7,7 @@
 import { schema } from '@kbn/config-schema';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { IRouter, Logger } from '@kbn/core/server';
+import type { IRouter, Logger } from '@kbn/core/server';
 import {
   COUNT_ROUTE,
   ORCHESTRATOR_CLUSTER_ID,
@@ -24,6 +24,11 @@ export const registerCountRoute = (router: IRouter, logger: Logger) => {
     .get({
       access: 'internal',
       path: COUNT_ROUTE,
+      security: {
+        authz: {
+          requiredPrivileges: ['securitySolution'],
+        },
+      },
     })
     .addVersion(
       {
@@ -83,14 +88,12 @@ export const doCount = async (
 
   const search = await client.search({
     index: [index],
-    body: {
-      query: queryDSL,
-      size: 0,
-      aggs: {
-        custom_count: {
-          cardinality: {
-            field,
-          },
+    query: queryDSL,
+    size: 0,
+    aggs: {
+      custom_count: {
+        cardinality: {
+          field,
         },
       },
     },
