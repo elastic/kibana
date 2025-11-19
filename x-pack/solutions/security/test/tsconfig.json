@@ -64,5 +64,6 @@
     "@kbn/core-chrome-browser",
     "@kbn/management-settings-ids",
     "@kbn/cloud-security-posture-graph",
+    "@kbn/kubernetes-security-plugin",
   ]
 }
