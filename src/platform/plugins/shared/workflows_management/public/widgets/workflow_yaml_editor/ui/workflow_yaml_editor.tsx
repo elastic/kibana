@@ -17,7 +17,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import type YAML from 'yaml';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { monaco, YAML_LANG_ID } from '@kbn/monaco';
+import { monaco } from '@kbn/monaco';
 import { isTriggerType } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
 import type { z } from '@kbn/zod';
@@ -267,8 +267,6 @@ export const WorkflowYAMLEditor = ({
     []
   );
 
-  const completionProvider = useWorkflowYamlCompletionProvider();
-
   const handleEditorDidMount = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       editorRef.current = editor;
@@ -278,14 +276,6 @@ export const WorkflowYAMLEditor = ({
         openActionsPopover,
         ...keyboardHandlers,
       });
-
-      if (completionProvider) {
-        const disposable = monaco.languages.registerCompletionItemProvider(
-          YAML_LANG_ID,
-          completionProvider
-        );
-        disposablesRef.current.push(disposable);
-      }
 
       // Listen to content changes to detect typing
       const model = editor.getModel();
@@ -355,6 +345,9 @@ export const WorkflowYAMLEditor = ({
       editor?.dispose();
     };
   }, []);
+
+  // Completion provider
+  useWorkflowYamlCompletionProvider(editorRef.current);
 
   // Decorations
   useTriggerTypeDecorations({
