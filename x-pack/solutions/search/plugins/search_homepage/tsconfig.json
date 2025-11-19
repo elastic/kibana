@@ -45,6 +45,7 @@
     "@kbn/core-feature-flags-browser",
     "@kbn/index-management-shared-types",
     "@kbn/data-views-plugin",
+    "@kbn/cloud",
   ],
   "exclude": [
     "target/**/*",
