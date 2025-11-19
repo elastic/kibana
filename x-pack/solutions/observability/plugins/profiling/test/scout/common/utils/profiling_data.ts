@@ -112,12 +112,13 @@ export async function setupProfiling(
     log(`Setting up Universal Profiling`);
 
     try {
-      await kbnClient.request({
+      const response = await kbnClient.request({
         description: 'Setup profiling resources',
         path: '/api/profiling/setup/es_resources',
         method: 'POST',
         body: {},
       });
+      log(`Universal Profiling setup response: ${JSON.stringify(response.data)}`);
     } catch (error: any) {
       log(`Error setting up profiling resources: ${error}`);
     }

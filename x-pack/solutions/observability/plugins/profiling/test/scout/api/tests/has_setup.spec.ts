@@ -49,7 +49,12 @@ apiTest.describe('Profiling is not setup and no data is loaded', { tag: ['@ess']
 });
 
 apiTest.describe('APM integration not installed but setup completed', { tag: ['@ess'] }, () => {
-  apiTest.beforeEach(async ({ apiServices, kbnClient, log }) => {
+  apiTest.beforeEach(async ({ apiServices, esClient, config, kbnClient, log }) => {
+    await cleanUpProfilingData({
+      es: esClient,
+      config,
+      logger: log,
+    });
     await setupProfiling(apiServices, kbnClient, log);
   });
   apiTest('Admin user', async ({ roleBasedApiClient }) => {
@@ -140,7 +145,12 @@ apiTest.describe('Profiling is setup', { tag: ['@ess'] }, () => {
 });
 
 apiTest.describe('Collector integration is not installed', { tag: ['@ess'] }, () => {
-  apiTest.beforeEach(async ({ apiServices, kbnClient, log }) => {
+  apiTest.beforeEach(async ({ apiServices, esClient, config, kbnClient, log }) => {
+    await cleanUpProfilingData({
+      es: esClient,
+      config,
+      logger: log,
+    });
     await setupProfiling(apiServices, kbnClient, log);
   });
 
