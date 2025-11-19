@@ -11,7 +11,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 
-import { appContextService } from '../services';
+import { appContextService } from '../../services';
 
 import {
   FleetPolicyRevisionsCleanupTask,
@@ -19,7 +19,7 @@ import {
   VERSION,
 } from './fleet_policy_revisions_cleanup_task';
 
-jest.mock('../services');
+jest.mock('../../services');
 
 const mockAppContextService = appContextService as jest.Mocked<typeof appContextService>;
 
@@ -44,9 +44,9 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
   let taskInstance: ConcreteTaskInstance;
 
   const defaultConfig = {
-    max_revisions: 10,
-    frequency: '1h',
-    max_policies_per_run: 100,
+    maxRevisions: 10,
+    interval: '1h',
+    maxPoliciesPerRun: 100,
   };
 
   beforeEach(() => {
@@ -110,9 +110,9 @@ describe('FleetPolicyRevisionsCleanupTask', () => {
 
     it('should use provided configuration values', () => {
       const customConfig = {
-        max_revisions: 20,
-        frequency: '2h',
-        max_policies_per_run: 50,
+        maxRevisions: 20,
+        interval: '2h',
+        maxPoliciesPerRun: 50,
       };
 
       const task = new FleetPolicyRevisionsCleanupTask({

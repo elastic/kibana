@@ -388,9 +388,9 @@ export const config: PluginConfigDescriptor = {
       ),
       fleetPolicyRevisionsCleanup: schema.maybe(
         schema.object({
-          max_revisions: schema.number({ defaultValue: 10 }),
+          maxRevisions: schema.number({ min: 1, defaultValue: 10 }),
           interval: schema.string({ defaultValue: '1h' }),
-          max_policies_per_run: schema.number({ defaultValue: 100 }),
+          maxPoliciesPerRun: schema.number({ min: 1, defaultValue: 100 }),
         })
       ),
       integrationsHomeOverride: schema.maybe(schema.string()),

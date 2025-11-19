@@ -146,9 +146,9 @@ describe('Config schema', () => {
     expect(() => {
       config.schema.validate({
         fleetPolicyRevisionsCleanup: {
-          max_revisions: 20,
+          maxRevisions: 20,
           interval: '2h',
-          max_policies_per_run: 50,
+          maxPoliciesPerRun: 50,
         },
       });
     }).not.toThrow();

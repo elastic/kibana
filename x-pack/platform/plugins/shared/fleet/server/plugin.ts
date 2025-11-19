@@ -154,7 +154,7 @@ import { AutomaticAgentUpgradeTask } from './tasks/automatic_agent_upgrade_task'
 import { registerPackagesBulkOperationTask } from './tasks/packages_bulk_operations';
 import { AutoInstallContentPackagesTask } from './tasks/auto_install_content_packages_task';
 import { AgentStatusChangeTask } from './tasks/agent_status_change_task';
-import { FleetPolicyRevisionsCleanupTask } from './tasks/fleet_policy_revisions_cleanup_task';
+import { FleetPolicyRevisionsCleanupTask } from './tasks/fleet_policy_revisions_cleanup/fleet_policy_revisions_cleanup_task';
 import { registerSetupTasks } from './tasks/setup';
 
 export interface FleetSetupDeps {
@@ -719,9 +719,9 @@ export class FleetPlugin
       taskManager: deps.taskManager,
       logFactory: this.initializerContext.logger,
       config: {
-        max_revisions: config.fleetPolicyRevisionsCleanup?.max_revisions,
+        maxRevisions: config.fleetPolicyRevisionsCleanup?.maxRevisions,
         interval: config.fleetPolicyRevisionsCleanup?.interval,
-        max_policies_per_run: config.fleetPolicyRevisionsCleanup?.max_policies_per_run,
+        maxPoliciesPerRun: config.fleetPolicyRevisionsCleanup?.maxPoliciesPerRun,
       },
     });
     this.lockManagerService = new LockManagerService(core, this.initializerContext.logger.get());

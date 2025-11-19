@@ -114,9 +114,9 @@ export interface FleetConfigType {
   integrationRollbackTTL?: string;
   installIntegrationsKnowledge?: boolean;
   fleetPolicyRevisionsCleanup?: {
-    max_revisions: number;
+    maxRevisions: number;
     interval: string;
-    max_policies_per_run: number;
+    maxPoliciesPerRun: number;
   };
 }
 

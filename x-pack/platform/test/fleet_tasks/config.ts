@@ -31,7 +31,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--xpack.fleet.autoUpgrades.taskInterval=30s`,
         `--xpack.fleet.autoUpgrades.retryDelays=${JSON.stringify(['1m'])}`,
         `--xpack.fleet.fleetPolicyRevisionsCleanup.interval=30s`,
-        `--xpack.fleet.fleetPolicyRevisionsCleanup.max_revisions=5`,
+        `--xpack.fleet.fleetPolicyRevisionsCleanup.maxRevisions=5`,
       ],
     },
   };
