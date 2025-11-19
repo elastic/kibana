@@ -258,8 +258,6 @@
     "@kbn/core-analytics-server-mocks",
     "@kbn/object-utils",
     "@kbn/onechat-plugin",
-    "@kbn/llm-tasks-plugin",
-    "@kbn/core-analytics-server-mocks",
     "@kbn/onechat-common",
     "@kbn/react-query",
     "@kbn/core-chrome-layout-constants",
