@@ -116,7 +116,13 @@ export function Wrapper({
                 <EuiFlexItem grow={true}>
                   <EuiFlexGroup alignItems="center" gutterSize="s">
                     {Streams.ingest.all.GetResponse.is(definition) && (
-                      <DiscoverBadgeButton definition={definition} />
+                      <DiscoverBadgeButton
+                        stream={definition.stream}
+                        hasDataStream={
+                          Streams.ClassicStream.GetResponse.is(definition) &&
+                          definition.data_stream_exists
+                        }
+                      />
                     )}
                     {Streams.ClassicStream.GetResponse.is(definition) && <ClassicStreamBadge />}
                     {Streams.WiredStream.GetResponse.is(definition) && <WiredStreamBadge />}

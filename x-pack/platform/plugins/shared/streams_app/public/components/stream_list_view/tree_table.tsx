@@ -364,7 +364,9 @@ export function StreamsTreeTable({
                 histogramQueryFetch={getStreamDocCounts(item.stream.name)}
                 streamName={item.stream.name}
               />
-            ) : null,
+            ) : (
+              '-'
+            ),
         },
         {
           field: 'retentionMs',
@@ -394,14 +396,7 @@ export function StreamsTreeTable({
           sortable: false,
           dataType: 'string',
           render: (_: unknown, item: TableRow) => (
-            <DiscoverBadgeButton
-              definition={
-                {
-                  stream: item.stream,
-                  data_stream_exists: !!item.data_stream,
-                } as Streams.ingest.all.GetResponse
-              }
-            />
+            <DiscoverBadgeButton stream={item.stream} hasDataStream={!!item.data_stream} />
           ),
         },
       ]}

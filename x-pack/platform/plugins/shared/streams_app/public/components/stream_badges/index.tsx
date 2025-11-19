@@ -165,19 +165,18 @@ export function LifecycleBadge({
 }
 
 export function DiscoverBadgeButton({
-  definition,
+  stream,
+  hasDataStream,
 }: {
-  definition: Streams.ingest.all.GetResponse;
+  stream: Streams.all.Definition;
+  hasDataStream: boolean;
 }) {
   const {
     dependencies: {
       start: { share },
     },
   } = useKibana();
-  const dataStreamExists =
-    Streams.WiredStream.GetResponse.is(definition) || definition.data_stream_exists;
-  const indexPatterns = getIndexPatternsForStream(definition.stream);
-  const esqlQuery = indexPatterns ? `FROM ${indexPatterns.join(', ')}` : undefined;
+  const esqlQuery = getESQLQuery(stream, hasDataStream);
   const useUrl = share.url.locators.useUrl;
 
   const discoverLink = useUrl<DiscoverAppLocatorParams>(
@@ -190,13 +189,13 @@ export function DiscoverBadgeButton({
     [esqlQuery]
   );
 
-  if (!discoverLink || !dataStreamExists || !esqlQuery) {
+  if (!discoverLink || !esqlQuery) {
     return null;
   }
 
   return (
     <EuiButtonIcon
-      data-test-subj={`streamsDiscoverActionButton-${definition.stream.name}`}
+      data-test-subj={`streamsDiscoverActionButton-${stream.name}`}
       href={discoverLink}
       iconType="discoverApp"
       size="xs"
@@ -207,3 +206,17 @@ export function DiscoverBadgeButton({
     />
   );
 }
+
+const getESQLQuery = (stream: Streams.all.Definition, hasDataStream: boolean) => {
+  if (Streams.WiredStream.Definition.is(stream) || hasDataStream) {
+    const indexPatterns = getIndexPatternsForStream(stream);
+    return indexPatterns ? `FROM ${indexPatterns.join(', ')}` : undefined;
+  }
+
+  if (Streams.QueryStream.Definition.is(stream)) {
+    // TODO: replace with ESQL view name
+    return stream.query.esql;
+  }
+
+  return undefined;
+};
