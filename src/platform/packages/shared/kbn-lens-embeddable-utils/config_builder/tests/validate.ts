@@ -52,6 +52,7 @@ export function validateConverter(attributes: LensAttributes, schema: Type<any>)
   }).not.toThrow();
 
   expect(newApiConfig).toEqual(newApiConfig2);
+  return newLensAttributes;
 }
 
 /**
