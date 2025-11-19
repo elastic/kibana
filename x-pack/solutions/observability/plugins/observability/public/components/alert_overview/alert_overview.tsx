@@ -144,16 +144,6 @@ export const AlertOverview = memo(
           },
         },
         {
-          id: ColumnIDs.THRESHOLD_WARNING,
-          key: i18n.translate('xpack.observability.alertFlyout.overviewTab.thresholdWarning', {
-            defaultMessage: 'Threshold Warning',
-          }),
-          value: [],
-          meta: {
-            ruleCriteria,
-          },
-        },
-        {
           id: ColumnIDs.RULE_NAME,
           key: i18n.translate('xpack.observability.alertFlyout.overviewTab.ruleName', {
             defaultMessage: 'Rule name',

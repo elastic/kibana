@@ -36,43 +36,48 @@ const formatComparator = (comparator: string): string => {
 
 /**
  * Renders threshold rows for a list of criteria.
+ * Combines alert threshold and warning threshold into one line when warning threshold exists.
  */
 const renderThresholdRows = (ruleCriteria: FlyoutThresholdData[]): React.ReactElement => {
   return (
     <div>
       {ruleCriteria.map((criteria, index) => {
-        const { threshold, comparator } = criteria;
+        const { threshold, comparator, warningThreshold, warningComparator } = criteria;
         const formattedComparator = formatComparator(comparator);
-        return (
-          <EuiText size="s" key={`${threshold}-${index}`}>
-            <h4>{`${formattedComparator} ${threshold}`}</h4>
-          </EuiText>
-        );
-      })}
-    </div>
-  );
-};
+        // threshold is typed as string[] but is actually a string at runtime
+        const thresholdStr = Array.isArray(threshold) ? threshold.join(' AND ') : threshold;
 
-/**
- * Renders warning threshold rows for a list of criteria.
- */
-const renderWarningThresholdRows = (ruleCriteria: FlyoutThresholdData[]): React.ReactElement => {
-  return (
-    <div>
-      {ruleCriteria.map((criteria, index) => {
-        const { warningThreshold, warningComparator } = criteria;
-        if (!warningThreshold || !warningComparator) {
-          return (
-            <EuiText size="s" key={`warning-${index}`}>
-              <h4>{'-'}</h4>
-            </EuiText>
+        let thresholdText = i18n.translate(
+          'xpack.observability.alertFlyout.overviewTab.thresholdAlert',
+          {
+            defaultMessage: '{comparator} {threshold}',
+            values: {
+              comparator: formattedComparator,
+              threshold: thresholdStr,
+            },
+          }
+        );
+
+        if (warningThreshold && warningComparator) {
+          const formattedWarningComparator = formatComparator(warningComparator);
+          thresholdText = i18n.translate(
+            'xpack.observability.alertFlyout.overviewTab.thresholdWithWarning',
+            {
+              defaultMessage:
+                'Alert when {comparator} {threshold}, Warning when {warningComparator} {warningThreshold}',
+              values: {
+                comparator: formattedComparator,
+                threshold: thresholdStr,
+                warningComparator: formattedWarningComparator,
+                warningThreshold,
+              },
+            }
           );
         }
 
-        const formattedComparator = formatComparator(warningComparator);
         return (
-          <EuiText size="s" key={`${warningThreshold}-${index}`}>
-            <h4>{`${formattedComparator} ${warningThreshold}`}</h4>
+          <EuiText size="s" key={`${thresholdStr}-${index}`}>
+            <h4>{thresholdText}</h4>
           </EuiText>
         );
       })}
@@ -93,7 +98,6 @@ export const ColumnIDs = {
   DURATION: 'duration',
   OBSERVED_VALUE: 'observed_value',
   THRESHOLD: 'threshold',
-  THRESHOLD_WARNING: 'threshold_warning',
   RULE_NAME: 'rule_name',
   RULE_TYPE: 'rule_type',
   CASES: 'cases',
@@ -185,10 +189,6 @@ export const overviewColumns: Array<EuiBasicTableColumn<AlertOverviewField>> = [
         case ColumnIDs.THRESHOLD:
           if (!ruleCriteria) return <>{'-'}</>;
           return renderThresholdRows(ruleCriteria);
-
-        case ColumnIDs.THRESHOLD_WARNING:
-          if (!ruleCriteria) return <>{'-'}</>;
-          return renderWarningThresholdRows(ruleCriteria);
 
         case ColumnIDs.RULE_TYPE:
           const ruleType = value as string;
