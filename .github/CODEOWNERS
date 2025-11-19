@@ -1927,6 +1927,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/test/functional/services/field_editor.ts @elastic/kibana-data-discovery
 /src/platform/test/functional/services/embedding.ts @elastic/appex-qa
 /src/platform/test/functional/services/data_grid.ts @elastic/kibana-data-discovery
+/src/platform/test/functional/services/search_sessions.ts @elastic/search-kibana
 /src/platform/test/functional/services/combo_box.ts @elastic/appex-qa
 /src/platform/test/functional/page_objects/time_picker.ts @elastic/appex-qa
 /src/platform/test/functional/page_objects/index.ts @elastic/appex-qa
@@ -2288,7 +2289,6 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /src/platform/test/functional/fixtures/kbn_archiver/annotation_listing_page_search.json @elastic/search-kibana
 /src/platform/test/functional/fixtures/es_archiver/search/downsampled @elastic/search-kibana
 /x-pack/solutions/search/functional_solution_sidenav/ @elastic/search-kibana
-/x-pack/platform/test/functional/services/search_sessions.ts @elastic/search-kibana
 /x-pack/platform/test/functional/page_objects/search_sessions_management_page.ts @elastic/search-kibana
 x-pack/platform/test/functional/page_objects/search_profiler_page.ts @elastic/search-kibana
 /x-pack/solutions/search/test/functional/apps/search_playground @elastic/search-kibana
