@@ -126,8 +126,6 @@ export interface PluginSetupContract {
 
   getAxiosInstanceWithAuth(validatedSecrets: Record<string, unknown>): Promise<AxiosInstance>;
 
-  getAxiosInstanceWithAuth(validatedSecrets: Record<string, unknown>): Promise<AxiosInstance>;
-
   isPreconfiguredConnector(connectorId: string): boolean;
 
   getSubActionConnectorClass: <Config, Secrets>() => IServiceAbstract<Config, Secrets>;
