@@ -2919,6 +2919,8 @@ x-pack/solutions/security/test/session_view @elastic/contextual-security-apps # 
 x-pack/solutions/security/test/api_integration/apis/cloud_security_posture/ @elastic/contextual-security-apps
 x-pack/solutions/security/test/cloud_security_posture_functional/ @elastic/contextual-security-apps
 x-pack/solutions/security/test/cloud_security_posture_api/ @elastic/contextual-security-apps
+## Kubernetes Security tests
+x-pack/solutions/security/test/kubernetes_security/ @elastic/contextual-security-apps
 ## CSP Serverless tests
 x-pack/solutions/security/test/serverless/functional/configs/config.cloud_security_posture.* @elastic/contextual-security-apps
 x-pack/solutions/security/test/serverless/functional/test_suites/ftr/cloud_security_posture/ @elastic/contextual-security-apps
