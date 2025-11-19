@@ -112,7 +112,7 @@ export const AddPrebuiltRulesTableContextProvider = ({
   const [loadingRules, setLoadingRules] = useState<RuleSignatureId[]>([]);
   const [selectedRules, setSelectedRules] = useState<RuleResponse[]>([]);
 
-  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
 
   const [filterOptions, setFilterOptions] = useState<AddPrebuiltRulesTableFilterOptions>({
     filter: '',

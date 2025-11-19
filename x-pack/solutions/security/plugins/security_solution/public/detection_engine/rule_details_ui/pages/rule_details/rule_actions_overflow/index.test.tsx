@@ -64,7 +64,7 @@ describe('RuleActionsOverflow', () => {
     });
     (useUserPrivileges as jest.Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
-      rulesPrivileges: { read: true, edit: true },
+      rulesPrivileges: { rules: { read: true, edit: true } },
     });
   });
   describe('rules details menu panel', () => {

@@ -231,7 +231,10 @@ describe('SharedLists', () => {
   it('renders overflow card button as disabled if user is read only', async () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       ...initialUserPrivilegesState(),
-      rulesPrivileges: { read: true, edit: false },
+      rulesPrivileges: {
+        rules: { read: true, edit: false },
+        exceptions: { read: true, crud: false },
+      },
     });
 
     const wrapper = render(

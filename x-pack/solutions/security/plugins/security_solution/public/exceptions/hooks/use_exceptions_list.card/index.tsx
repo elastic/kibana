@@ -71,6 +71,9 @@ export const useExceptionsListCard = ({
   const [showEditExceptionFlyout, setShowEditExceptionFlyout] = useState(false);
   const [showIncludeExpiredExceptionsModal, setShowIncludeExpiredExceptionsModal] =
     useState<CheckExceptionTtlActionTypes | null>(null);
+  // TODO: test with endpoint exceptions
+  // const { read: canReadExceptions, crud: canCrudExceptions } =
+  //   useUserPrivileges().rulesPrivileges.exceptions;
 
   const {
     name: listName,
@@ -117,7 +120,7 @@ export const useExceptionsListCard = ({
   const [toggleAccordion, setToggleAccordion] = useState(false);
   const openAccordionId = useGeneratedHtmlId({ prefix: 'openAccordion' });
 
-  const listCannotBeEdited = checkIfListCannotBeEdited(exceptionsList);
+  const listCannotBeEdited = checkIfListCannotBeEdited(exceptionsList); // TODO: test with endpoint exceptions || !canCrudExceptions;
 
   const emptyViewerTitle = useMemo(() => {
     return viewerStatus === ViewerStatus.EMPTY ? i18n.EXCEPTION_LIST_EMPTY_VIEWER_TITLE : '';
@@ -154,6 +157,7 @@ export const useExceptionsListCard = ({
             setShowIncludeExpiredExceptionsModal(CHECK_EXCEPTION_TTL_ACTION_TYPES.EXPORT);
           }
         },
+        // disabled: !canReadExceptions, // TODO: test this with endpoint exceptions usage
       },
       {
         key: 'Duplicate',
@@ -188,6 +192,7 @@ export const useExceptionsListCard = ({
       },
     ],
     [
+      // canReadExceptions,
       listCannotBeEdited,
       listType,
       handleExport,

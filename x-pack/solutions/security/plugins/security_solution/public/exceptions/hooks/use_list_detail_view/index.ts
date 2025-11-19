@@ -54,13 +54,14 @@ export const useListDetailsView = (exceptionListId: string) => {
   const { navigateToApp } = services.application;
 
   const { exportExceptionList, deleteExceptionList, duplicateExceptionList } = useApi(http);
-  const { read: canReadRules, edit: canEditRules } = useUserPrivileges().rulesPrivileges;
+  const { read: canReadExceptions, crud: canCrudExceptions } =
+    useUserPrivileges().rulesPrivileges.exceptions;
 
   const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
   const canUserWriteCurrentList =
     exceptionListId === ENDPOINT_ARTIFACT_LISTS.endpointExceptions.id
       ? canWriteEndpointExceptions
-      : canEditRules;
+      : canCrudExceptions;
 
   const [isLoading, setIsLoading] = useState<boolean>();
   const [showManageButtonLoader, setShowManageButtonLoader] = useState<boolean>(false);
@@ -411,12 +412,12 @@ export const useListDetailsView = (exceptionListId: string) => {
   return {
     isLoading,
     invalidListId,
-    isReadOnly: !!(!canUserWriteCurrentList && canReadRules),
+    isReadOnly: !!(!canUserWriteCurrentList && canReadExceptions),
     list,
     listName: list?.name,
     listDescription: list?.description,
     listId: exceptionListId,
-    canUserEditList,
+    canUserEditList: canUserEditList && canCrudExceptions,
     linkedRules,
     exportedList,
     handleOnDownload,

@@ -16,6 +16,8 @@ import {
   EXCEPTIONS_SUBFEATURE_ID_READ,
   LISTS_API_ALL,
   LISTS_API_READ,
+  EXCEPTIONS_UI_READ,
+  EXCEPTIONS_UI_CRUD,
 } from '../../constants';
 import type { SecurityFeatureParams } from '../security/types';
 
@@ -60,7 +62,7 @@ export const getExceptionsSubFeaturesMap = (
               all: savedObjects,
               read: savedObjects,
             },
-            ui: ['readExceptions', 'crudExceptions'],
+            ui: [EXCEPTIONS_UI_READ, EXCEPTIONS_UI_CRUD],
             api: [EXCEPTIONS_API_READ, EXCEPTIONS_API_ALL, LISTS_API_ALL, LISTS_API_READ],
           },
           {
@@ -72,7 +74,7 @@ export const getExceptionsSubFeaturesMap = (
               all: [],
               read: savedObjects,
             },
-            ui: ['readExceptions'],
+            ui: [EXCEPTIONS_UI_READ],
             api: [EXCEPTIONS_API_READ, LISTS_API_READ],
           },
         ],

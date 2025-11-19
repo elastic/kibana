@@ -47,7 +47,7 @@ const RulesPageComponent: React.FC = () => {
 
   const [{ loading: userInfoLoading, isSignalIndexExists, isAuthenticated, hasEncryptionKey }] =
     useUserData();
-  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const {
     loading: listsConfigLoading,
     canWriteIndex: canWriteListsIndex,

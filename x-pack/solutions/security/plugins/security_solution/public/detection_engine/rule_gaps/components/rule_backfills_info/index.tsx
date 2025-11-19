@@ -135,7 +135,7 @@ const getBackfillsTableColumns = (canEditRules: boolean) => {
 export const RuleBackfillsInfo = React.memo<{ ruleId: string }>(({ ruleId }) => {
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
-  const canEditRules = useUserPrivileges().rulesPrivileges.edit;
+  const canEditRules = useUserPrivileges().rulesPrivileges.rules.edit;
   const { timelines } = useKibana().services;
   const { data, isLoading, isError, refetch, dataUpdatedAt } = useFindBackfillsForRules({
     ruleIds: [ruleId],
