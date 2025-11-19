@@ -254,10 +254,9 @@ const renderAttachmentTypeInstructions = (attachmentTypes: ProcessedAttachmentTy
     return '';
   }
 
-  const perTypeInstructions = attachmentTypes.map(({ type, agentDescription }) => {
+  const perTypeInstructions = attachmentTypes.map(({ type, description }) => {
     return `### ${type} attachments
-
-${agentDescription ?? 'No instructions available.'}
+${description ?? 'No instructions available.'}
 `;
   });
 

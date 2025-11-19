@@ -19,7 +19,7 @@ export interface ProcessedAttachment {
 
 export interface ProcessedAttachmentType {
   type: string;
-  agentDescription?: string;
+  description?: string;
 }
 
 export interface ProcessedRoundInput {
