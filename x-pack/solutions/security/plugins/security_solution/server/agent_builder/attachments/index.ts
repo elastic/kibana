@@ -6,5 +6,4 @@
  */
 
 export { createAlertAttachmentType } from './alert';
-
-
+// export { createAlertAttachmentType } from './core-alert';
