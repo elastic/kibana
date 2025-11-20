@@ -29,6 +29,7 @@ import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import type { DiscoverDataSource } from '../../common/data_sources';
 import type { DiscoverAppState } from '../application/main/state_management/discover_app_state_container';
 import type { DiscoverStateContainer } from '../application/main/state_management/discover_state';
+import type { TabState } from '../application/main/state_management/redux';
 
 /**
  * Supports extending the Discover app menu
@@ -332,12 +333,12 @@ export interface AdditionalCellAction {
 }
 
 /**
- * Parameters passed to the openInNewTab extension point action
+ * Parameters passed to the open in the new tab extension point action
  */
 export interface OpenInNewTabExtPointAction {
-  query?: DiscoverAppState['query'];
+  query?: TabState['appState']['query'];
   tabLabel?: string;
-  timeRange?: TimeRange;
+  timeRange?: TabState['globalState']['timeRange'];
 }
 
 /**
