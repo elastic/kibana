@@ -21,10 +21,7 @@ interface UseNavigationAbortParams {
  * When user confirms navigation, the request is aborted and the round is marked as aborted.
  * When user cancels, they stay on the page and the request continues.
  */
-export const useNavigationAbort = ({
-  onAppLeave,
-  isResponseLoading,
-}: UseNavigationAbortParams) => {
+export const useNavigationAbort = ({ onAppLeave, isResponseLoading }: UseNavigationAbortParams) => {
   const shouldAbortOnUnmountRef = useRef(false);
 
   useEffect(() => {
