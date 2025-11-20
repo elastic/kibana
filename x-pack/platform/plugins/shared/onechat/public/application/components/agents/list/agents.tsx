@@ -19,7 +19,7 @@ import { DeleteAgentProvider } from '../../../context/delete_agent_context';
 import { TechPreviewTitle } from '../../common/tech_preview';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
 
-const manageToolsLabel = i18n.translate('xpack.onechat.tools.manageToolsLabel', {
+const manageToolsLabel = i18n.translate('xpack.onechat.agents.manageToolsLabel', {
   defaultMessage: 'Manage tools',
 });
 
@@ -72,7 +72,7 @@ export const OnechatAgents = () => {
           description={
             <FormattedMessage
               id="xpack.onechat.agents.description"
-              defaultMessage="Define agents with custom instructions and assign them Tools to answer questions about your data and take actions on your behalf. {learnMoreLink}"
+              defaultMessage="Define agents with custom instructions and assign them tools to answer questions about your data and take actions on your behalf. {learnMoreLink}"
               values={{
                 learnMoreLink: (
                   <EuiLink
