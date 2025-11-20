@@ -43,7 +43,7 @@ const InputContainer: React.FC<PropsWithChildren<{ isDisabled: boolean }>> = ({
     border-color: ${euiTheme.colors.borderBaseSubdued};
     border-radius: 6px;
     flex-grow: 0;
-    &:focus-within {
+    &:focus-within[aria-disabled='false'] {
       ${useEuiShadow('xl')}
       border-color: ${euiTheme.colors.primary};
       :hover {
@@ -53,14 +53,14 @@ const InputContainer: React.FC<PropsWithChildren<{ isDisabled: boolean }>> = ({
     &:hover {
       ${useEuiShadowHover('s')}
     }
-  `;
-  const inputContainerDisabledStyles = css`
-    background-color: ${euiTheme.colors.backgroundBaseDisabled};
+    &[aria-disabled='true'] {
+      background-color: ${euiTheme.colors.backgroundBaseDisabled};
+    }
   `;
 
   return (
     <EuiFlexGroup
-      css={[inputContainerStyles, isDisabled && inputContainerDisabledStyles]}
+      css={inputContainerStyles}
       direction="column"
       gutterSize="s"
       responsive={false}
