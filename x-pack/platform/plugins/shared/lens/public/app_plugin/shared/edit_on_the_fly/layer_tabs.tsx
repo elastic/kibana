@@ -11,7 +11,6 @@ import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 
 import { isOfAggregateQueryType } from '@kbn/es-query';
-import { getLensLayerTypeTabDisplayName, lensLayerTypeTabDisplayNames } from '@kbn/lens-common';
 import type { LayerAction, Visualization } from '@kbn/lens-common';
 import {
   UPDATE_FILTER_REFERENCES_ACTION,
@@ -39,6 +38,7 @@ import { getSharedActions } from '../../../editor_frame_service/editor_frame/con
 import { getRemoveOperation } from '../../../utils';
 
 import type { LayerTabsProps } from './types';
+import { useGetLayerTabsLabel } from './use_layer_tabs_labels';
 
 export const LENS_LAYER_TABS_CONTENT_ID = 'lnsLayerTabsContent';
 
@@ -101,32 +101,7 @@ export function LayerTabs({
   }, [activeVisualization, layerIds, framePublicAPI, visualization.state]);
 
   // Create layer labels for the tabs
-  const layerLabels = useMemo(() => {
-    const visibleLayerConfigs = layerConfigs.filter((layer) => !layer.config.hidden);
-    const countsByLayerId = new Map<string, number>();
-    const typeCounters = new Map<string, number>();
-    const layerTabDisplayNames = new Map<string, string>();
-
-    for (const config of visibleLayerConfigs) {
-      const layerType = config.layerType || '';
-      const currentCount = (typeCounters.get(layerType) || 0) + 1;
-      typeCounters.set(layerType, currentCount);
-      countsByLayerId.set(config.layerId, currentCount);
-    }
-
-    for (const config of visibleLayerConfigs) {
-      const layerType = config.layerType || '';
-      const typeCount = typeCounters.get(layerType) || 0;
-      const formattedLayerType = getLensLayerTypeTabDisplayName(config.layerType);
-      const layerCountForId = countsByLayerId.get(config.layerId) || 1;
-      const displayName =
-        typeCount > 1 ? `${formattedLayerType} ${layerCountForId}` : formattedLayerType;
-
-      layerTabDisplayNames.set(config.layerId, displayName);
-    }
-
-    return layerTabDisplayNames;
-  }, [layerConfigs]);
+  const getLayerTabsLabel = useGetLayerTabsLabel(layerConfigs);
 
   const layerActionsFlyoutRef = useRef<HTMLDivElement | null>(null);
 
@@ -235,7 +210,7 @@ export function LayerTabs({
 
       return {
         id: layerConfig.layerId,
-        label: layerLabels.get(layerConfig.layerId) || lensLayerTypeTabDisplayNames.unknown,
+        label: getLayerTabsLabel(layerConfig.layerId),
         customMenuButton: (
           <LayerActions
             actions={compatibleActions}
@@ -252,7 +227,7 @@ export function LayerTabs({
     isSaveable,
     isTextBasedLanguage,
     layerIds.length,
-    layerLabels,
+    getLayerTabsLabel,
     onRemoveLayer,
     registerLibraryAnnotationGroupFunction,
     visibleLayerConfigs,
