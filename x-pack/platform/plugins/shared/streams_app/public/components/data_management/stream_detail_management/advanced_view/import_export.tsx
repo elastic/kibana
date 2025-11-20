@@ -17,7 +17,7 @@ export function ImportExportPanel({
   definition,
   refreshDefinition,
 }: {
-  definition: Streams.WiredStream.GetResponse;
+  definition: Streams.all.GetResponse;
   refreshDefinition: () => void;
 }) {
   const [isExportFlyoutOpen, setIsExportFlyoutOpen] = React.useState(false);

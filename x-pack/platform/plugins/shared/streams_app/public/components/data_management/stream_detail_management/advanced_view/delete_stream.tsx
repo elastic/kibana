@@ -14,7 +14,7 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { StreamDeleteModal } from '../../../stream_delete_modal';
 import { Row } from './row';
 
-export function DeleteStreamPanel({ definition }: { definition: Streams.ingest.all.GetResponse }) {
+export function DeleteStreamPanel({ definition }: { definition: Streams.all.GetResponse }) {
   const {
     core: {
       application: { navigateToApp },

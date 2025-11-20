@@ -7,9 +7,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Streams } from '@kbn/streams-schema';
-import { EuiFlexGroup, EuiSpacer, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
-import { StreamDescription } from '../../stream_detail_features/stream_description';
 import { useStreamsAppParams } from '../../../hooks/use_streams_app_params';
 import { useStreamsPrivileges } from '../../../hooks/use_streams_privileges';
 import type { ManagementTabs } from './wrapper';
@@ -19,6 +18,7 @@ import { useStreamsDetailManagementTabs } from './use_streams_detail_management_
 import { StreamDetailAttachments } from '../../stream_detail_attachments';
 import { RedirectTo } from '../../redirect_to';
 import { QueryStreamSchemaEditor } from '../../query_streams/query_stream_schema_editor';
+import { QueryStreamsAdvancedView } from '../../query_streams/query_streams_advanced_view';
 
 const queryStreamManagementSubTabs = [
   'overview',
@@ -91,13 +91,8 @@ export function QueryStreamDetailManagement({
   }
 
   tabs.advanced = {
-    content: significantEvents ? (
-      <>
-        <StreamDescription definition={definition} refreshDefinition={refreshDefinition} />
-        <EuiSpacer />
-      </>
-    ) : (
-      <></>
+    content: (
+      <QueryStreamsAdvancedView definition={definition} refreshDefinition={refreshDefinition} />
     ),
     label: (
       <EuiToolTip
