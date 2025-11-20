@@ -13,6 +13,7 @@ import type { MessageEditorInstance } from './use_message_editor';
 const EDITOR_MAX_HEIGHT = 240;
 
 const heightStyles = css`
+  flex-grow: 1;
   height: 100%;
   max-height: ${EDITOR_MAX_HEIGHT}px;
   overflow-y: auto;
