@@ -23,7 +23,7 @@ import type {
 import { ConnectorSelectable } from '@kbn/ai-assistant-connector-selector-action';
 import type { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/public';
 
-import type { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import type { OpenAiProviderType } from '@kbn/connector-schemas/openai';
 import { some } from 'lodash';
 import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
