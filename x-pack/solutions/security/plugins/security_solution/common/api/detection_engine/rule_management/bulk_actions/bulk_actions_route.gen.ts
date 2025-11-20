@@ -133,9 +133,9 @@ Only valid when query property is undefined.
    */
   gaps_range_end: z.string().optional(),
   /**
-   * Gap status to filter rules with gaps by status (used together with gaps_range_*).
+   * Aggregated gap fill statuses to filter rules with gaps by status (used together with gaps_range_*).
    */
-  gap_status: AggregatedGapStatus.optional(),
+  gap_fill_statuses: z.array(AggregatedGapStatus).optional(),
 });
 
 export type BulkDeleteRules = z.infer<typeof BulkDeleteRules>;

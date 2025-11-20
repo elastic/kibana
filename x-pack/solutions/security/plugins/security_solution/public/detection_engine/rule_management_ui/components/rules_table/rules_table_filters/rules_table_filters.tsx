@@ -19,7 +19,7 @@ import { TagsFilterPopover } from './tags_filter_popover';
 import { RuleExecutionStatusSelector } from './rule_execution_status_selector';
 import { RuleSearchField } from './rule_search_field';
 import type { RuleExecutionStatus } from '../../../../../../common/api/detection_engine';
-import { GapStatusSelector } from './gap_status_selector';
+import { GapFillStatusSelector } from './gap_fill_status_selector';
 
 const FilterWrapper = styled(EuiFlexGroup)`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
@@ -46,7 +46,7 @@ const RulesTableFiltersComponent = () => {
     tags: selectedTags,
     enabled,
     ruleExecutionStatus: selectedRuleExecutionStatus,
-    gapStatus,
+    gapFillStatuses,
   } = filterOptions;
 
   const handleOnSearch = useCallback(
@@ -97,14 +97,15 @@ const RulesTableFiltersComponent = () => {
     [selectedRuleExecutionStatus, setFilterOptions, startTransaction]
   );
 
-  const handleSelectedGapStatus = useCallback(
-    (newStatus?: AggregatedGapStatus) => {
-      if (newStatus !== gapStatus) {
+  const handleSelectedGapStatuses = useCallback(
+    (newStatuses: AggregatedGapStatus[]) => {
+      const currentStatuses = gapFillStatuses ?? [];
+      if (!isEqual(newStatuses, currentStatuses)) {
         startTransaction({ name: RULES_TABLE_ACTIONS.FILTER });
-        setFilterOptions({ gapStatus: newStatus });
+        setFilterOptions({ gapFillStatuses: newStatuses });
       }
     },
-    [gapStatus, setFilterOptions, startTransaction]
+    [gapFillStatuses, setFilterOptions, startTransaction]
   );
 
   return (
@@ -123,9 +124,9 @@ const RulesTableFiltersComponent = () => {
 
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
-          <GapStatusSelector
-            selectedStatus={gapStatus}
-            onSelectedStatusChanged={handleSelectedGapStatus}
+          <GapFillStatusSelector
+            selectedStatuses={gapFillStatuses ?? []}
+            onSelectedStatusesChanged={handleSelectedGapStatuses}
           />
         </EuiFilterGroup>
       </EuiFlexItem>

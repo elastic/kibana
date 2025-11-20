@@ -200,7 +200,7 @@ export const fetchRules = async ({
 }: FetchRulesProps): Promise<FetchRulesResponse> => {
   const kql = convertRulesFilterToKQL(filterOptions);
 
-  const shouldApplyDefaultGapsRange = Boolean(filterOptions?.gapStatus);
+  const shouldApplyDefaultGapsRange = Boolean(filterOptions?.gapFillStatuses?.length);
   const defaultGapsRange = shouldApplyDefaultGapsRange ? getGapRange(defaultRangeValue) : undefined;
 
   const query = {
@@ -208,7 +208,9 @@ export const fetchRules = async ({
     per_page: pagination.perPage,
     sort_field: sortingOptions.field,
     sort_order: sortingOptions.order,
-    ...(filterOptions?.gapStatus ? { gap_status: filterOptions.gapStatus } : {}),
+    ...(filterOptions?.gapFillStatuses?.length
+      ? { gap_fill_statuses: filterOptions.gapFillStatuses }
+      : {}),
     ...(defaultGapsRange
       ? { gaps_range_start: defaultGapsRange.start, gaps_range_end: defaultGapsRange.end }
       : {}),
@@ -361,7 +363,7 @@ export type QueryOrIds =
       query: string;
       ids?: undefined;
       gapRange?: { start: string; end: string };
-      gapStatus?: AggregatedGapStatus;
+      gapFillStatuses?: AggregatedGapStatus[];
     }
   | { query?: undefined; ids: string[] };
 
@@ -430,7 +432,10 @@ export async function performBulkAction({
     run: bulkAction.type === BulkActionTypeEnum.run ? bulkAction.runPayload : undefined,
     gaps_range_start: 'gapRange' in bulkAction ? bulkAction.gapRange?.start : undefined,
     gaps_range_end: 'gapRange' in bulkAction ? bulkAction.gapRange?.end : undefined,
-    gap_status: 'gapStatus' in bulkAction ? bulkAction.gapStatus : undefined,
+    gap_fill_statuses:
+      'gapFillStatuses' in bulkAction && bulkAction.gapFillStatuses?.length
+        ? bulkAction.gapFillStatuses
+        : undefined,
     fill_gaps:
       bulkAction.type === BulkActionTypeEnum.fill_gaps ? bulkAction.fillGapsPayload : undefined,
   };

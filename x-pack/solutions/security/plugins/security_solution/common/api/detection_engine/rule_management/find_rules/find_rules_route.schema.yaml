@@ -77,12 +77,14 @@ paths:
           required: false
           schema:
             type: string
-        - name: gap_status
+        - name: gap_fill_statuses
           in: query
-          description: Aggregated gap status
+          description: Aggregated gap fill statuses
           required: false
           schema:
-            $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/AggregatedGapStatus'
+            type: array
+            items:
+              $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/AggregatedGapStatus'
       x-codeSamples:
         - lang: cURL
           source: |

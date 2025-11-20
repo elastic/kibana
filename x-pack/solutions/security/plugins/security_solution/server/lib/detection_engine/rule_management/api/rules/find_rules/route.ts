@@ -53,9 +53,11 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
           const rulesClient = await ctx.alerting.getRulesClient();
 
           let ruleIds: string[] | undefined;
-          if (query.gap_status && query.gaps_range_start && query.gaps_range_end) {
+          const gapFillStatuses = query.gap_fill_statuses;
+          const hasGapFillStatuses = gapFillStatuses && gapFillStatuses.length > 0;
+          if (hasGapFillStatuses && query.gaps_range_start && query.gaps_range_end) {
             const ruleIdsWithGaps = await rulesClient.getRuleIdsWithGaps({
-              aggregatedStatuses: [query.gap_status],
+              aggregatedStatuses: gapFillStatuses,
               start: query.gaps_range_start,
               end: query.gaps_range_end,
             });

@@ -102,7 +102,7 @@ export interface FilterOptions {
   enabled?: boolean; // undefined is to display all the rules
   ruleExecutionStatus?: RuleExecutionStatus; // undefined means "all"
   ruleSource?: RuleCustomizationStatus[]; // undefined is to display all the rules
-  gapStatus?: AggregatedGapStatus;
+  gapFillStatuses?: AggregatedGapStatus[];
   includeRuleTypes?: Type[];
 }
 

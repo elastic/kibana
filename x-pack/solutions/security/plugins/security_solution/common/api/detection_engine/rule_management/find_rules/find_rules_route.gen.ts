@@ -84,9 +84,9 @@ Filters the returned results according to the value of the specified field, usin
    */
   gaps_range_end: z.string().optional(),
   /**
-   * Aggregated gap status
+   * Aggregated gap fill statuses
    */
-  gap_status: AggregatedGapStatus.optional(),
+  gap_fill_statuses: ArrayFromString(AggregatedGapStatus).optional(),
 });
 export type FindRulesRequestQueryInput = z.input<typeof FindRulesRequestQuery>;
 

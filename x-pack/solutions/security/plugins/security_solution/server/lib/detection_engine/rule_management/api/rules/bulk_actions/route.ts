@@ -9,7 +9,7 @@ import type { IKibanaResponse } from '@kbn/core/server';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
-import type { BulkActionSkipResult } from '@kbn/alerting-plugin/common';
+import type { BulkActionSkipResult, AggregatedGapStatus } from '@kbn/alerting-plugin/common';
 import type { PerformRulesBulkActionResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   BulkActionTypeEnum,
@@ -75,14 +75,16 @@ const validateBulkAction = (
     };
   }
 
+  const hasGapFillStatuses =
+    Array.isArray(body.gap_fill_statuses) && body.gap_fill_statuses.length > 0;
   const hasAnyGapParam =
-    Boolean(body.gaps_range_start) || Boolean(body.gaps_range_end) || Boolean(body.gap_status);
+    Boolean(body.gaps_range_start) || Boolean(body.gaps_range_end) || hasGapFillStatuses;
   const hasAllGapParams =
-    Boolean(body.gaps_range_start) && Boolean(body.gaps_range_end) && Boolean(body.gap_status);
+    Boolean(body.gaps_range_start) && Boolean(body.gaps_range_end) && hasGapFillStatuses;
 
   if (hasAnyGapParam && !hasAllGapParams) {
     return {
-      body: `gaps_range_start, gaps_range_end and gap_status must be provided together.`,
+      body: `gaps_range_start, gaps_range_end and gap_fill_statuses must be provided together.`,
       statusCode: 400,
     };
   }
@@ -189,15 +191,17 @@ export const performBulkActionRoute = (
 
           const query = body.query !== '' ? body.query : undefined;
           let gapRange;
-          let gapStatus;
+          let gapFillStatuses: AggregatedGapStatus[] | undefined;
+          const hasGapStatuses =
+            Array.isArray(body.gap_fill_statuses) && body.gap_fill_statuses.length > 0;
 
           // If gap range params are present, set up the gap range parameter
-          if (body.gaps_range_start && body.gaps_range_end && body.gap_status) {
+          if (body.gaps_range_start && body.gaps_range_end && hasGapStatuses) {
             gapRange = {
               start: body.gaps_range_start,
               end: body.gaps_range_end,
             };
-            gapStatus = body.gap_status;
+            gapFillStatuses = body.gap_fill_statuses;
           }
 
           const fetchRulesOutcome = await fetchRulesByQueryOrIds({
@@ -209,7 +213,7 @@ export const performBulkActionRoute = (
                 ? MAX_RULES_TO_BULK_EDIT
                 : MAX_RULES_TO_PROCESS_TOTAL,
             gapRange,
-            gapStatuses: gapStatus ? [gapStatus] : undefined,
+            gapFillStatuses,
           });
 
           const rules = fetchRulesOutcome.results.map(({ result }) => result);

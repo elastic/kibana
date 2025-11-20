@@ -12,56 +12,50 @@ import { css } from '@emotion/react';
 import type { AggregatedGapStatus } from '@kbn/alerting-plugin/common';
 import { aggregatedGapStatus } from '@kbn/alerting-plugin/common';
 import {
-  GAP_STATUS_FILTER_LABEL,
-  GAP_STATUS_FILLED,
-  GAP_STATUS_IN_PROGRESS,
-  GAP_STATUS_UNFILLED,
+  GAP_FILL_STATUS_FILTER_LABEL,
+  GAP_FILL_STATUS_FILLED,
+  GAP_FILL_STATUS_IN_PROGRESS,
+  GAP_FILL_STATUS_UNFILLED,
 } from '../../../../common/translations';
 
-interface GapStatusSelectorProps {
-  selectedStatus?: AggregatedGapStatus;
-  onSelectedStatusChanged: (newStatus?: AggregatedGapStatus) => void;
+interface GapFillStatusSelectorProps {
+  selectedStatuses: AggregatedGapStatus[];
+  onSelectedStatusesChanged: (newStatuses: AggregatedGapStatus[]) => void;
 }
 
-export const GapStatusSelector = ({
-  selectedStatus,
-  onSelectedStatusChanged,
-}: GapStatusSelectorProps) => {
+export const GapFillStatusSelector = ({
+  selectedStatuses,
+  onSelectedStatusesChanged,
+}: GapFillStatusSelectorProps) => {
   const [isOpen, setIsOpen] = useState(false);
 
   const options: EuiSelectableOption[] = useMemo(
     () => [
       {
-        label: GAP_STATUS_IN_PROGRESS,
+        label: GAP_FILL_STATUS_IN_PROGRESS,
         data: { status: aggregatedGapStatus.IN_PROGRESS as AggregatedGapStatus },
-        checked: selectedStatus === aggregatedGapStatus.IN_PROGRESS ? 'on' : undefined,
+        checked: selectedStatuses.includes(aggregatedGapStatus.IN_PROGRESS) ? 'on' : undefined,
       },
       {
-        label: GAP_STATUS_UNFILLED,
+        label: GAP_FILL_STATUS_UNFILLED,
         data: { status: aggregatedGapStatus.UNFILLED as AggregatedGapStatus },
-        checked: selectedStatus === aggregatedGapStatus.UNFILLED ? 'on' : undefined,
+        checked: selectedStatuses.includes(aggregatedGapStatus.UNFILLED) ? 'on' : undefined,
       },
       {
-        label: GAP_STATUS_FILLED,
+        label: GAP_FILL_STATUS_FILLED,
         data: { status: aggregatedGapStatus.FILLED as AggregatedGapStatus },
-        checked: selectedStatus === aggregatedGapStatus.FILLED ? 'on' : undefined,
+        checked: selectedStatuses.includes(aggregatedGapStatus.FILLED) ? 'on' : undefined,
       },
     ],
-    [selectedStatus]
+    [selectedStatuses]
   );
 
-  const onChange = (
-    newOptions: EuiSelectableOption[],
-    _: unknown,
-    changed: EuiSelectableOption
-  ) => {
-    setIsOpen(false);
-    const status = (changed?.data as { status?: AggregatedGapStatus } | undefined)?.status;
-    if (changed.checked && status) {
-      onSelectedStatusChanged(status);
-    } else if (!changed.checked) {
-      onSelectedStatusChanged(undefined);
-    }
+  const onChange = (newOptions: EuiSelectableOption[]) => {
+    const statuses = newOptions
+      .filter((option) => option.checked === 'on')
+      .map((option) => (option.data as { status?: AggregatedGapStatus } | undefined)?.status)
+      .filter((status): status is AggregatedGapStatus => status != null);
+    onSelectedStatusesChanged(statuses);
   };
 
   const trigger = (
@@ -71,11 +65,11 @@ export const GapStatusSelector = ({
       onClick={() => setIsOpen(!isOpen)}
       numFilters={options.length}
       isSelected={isOpen}
-      hasActiveFilters={selectedStatus !== undefined}
-      numActiveFilters={selectedStatus !== undefined ? 1 : 0}
-      data-test-subj="gapStatusFilterButton"
+      hasActiveFilters={selectedStatuses.length > 0}
+      numActiveFilters={selectedStatuses.length}
+      data-test-subj="gapFillStatusFilterButton"
     >
-      {GAP_STATUS_FILTER_LABEL}
+      {GAP_FILL_STATUS_FILTER_LABEL}
     </EuiFilterButton>
   );
 
@@ -89,12 +83,11 @@ export const GapStatusSelector = ({
       repositionOnScroll
     >
       <EuiSelectable
-        aria-label={GAP_STATUS_FILTER_LABEL}
+        aria-label={GAP_FILL_STATUS_FILTER_LABEL}
         options={options}
         onChange={onChange}
-        singleSelection
         listProps={{ isVirtualized: false }}
-        data-test-subj="gapStatusFilterSelectableList"
+        data-test-subj="gapFillStatusFilterSelectableList"
       >
         {(list) => (
           <div

@@ -11,9 +11,9 @@ import { validateFindRulesRequestQuery } from './request_schema_validation';
 describe('Find rules request schema, additional validation', () => {
   describe('validateFindRulesRequestQuery', () => {
     describe('gap filters coupling', () => {
-      test('Valid when gap_status with both gaps_range_start and gaps_range_end', () => {
+      test('Valid when gap_fill_statuses with both gaps_range_start and gaps_range_end', () => {
         const schema: FindRulesRequestQueryInput = {
-          gap_status: 'unfilled',
+          gap_fill_statuses: ['unfilled'],
           gaps_range_start: '2024-01-01T00:00:00.000Z',
           gaps_range_end: '2024-01-02T00:00:00.000Z',
         };
@@ -21,66 +21,66 @@ describe('Find rules request schema, additional validation', () => {
         expect(errors).toEqual([]);
       });
 
-      test('Error when gap_status present without gaps_range_start and gaps_range_end', () => {
+      test('Error when gap_fill_statuses present without gaps_range_start and gaps_range_end', () => {
         const schema: FindRulesRequestQueryInput = {
-          gap_status: 'in_progress',
+          gap_fill_statuses: ['in_progress'],
         };
         const errors = validateFindRulesRequestQuery(schema);
         expect(errors).toEqual([
-          'when "gap_status" is present, "gaps_range_start" and "gaps_range_end" must also be present',
+          'when "gap_fill_statuses" is present, "gaps_range_start" and "gaps_range_end" must also be present',
         ]);
       });
 
-      test('Error when gap_status present with only gaps_range_start', () => {
+      test('Error when gap_fill_statuses present with only gaps_range_start', () => {
         const schema: FindRulesRequestQueryInput = {
-          gap_status: 'filled',
+          gap_fill_statuses: ['filled'],
           gaps_range_start: '2024-01-01T00:00:00.000Z',
         };
         const errors = validateFindRulesRequestQuery(schema);
         expect(errors).toEqual([
-          'when "gap_status" is present, "gaps_range_start" and "gaps_range_end" must also be present',
+          'when "gap_fill_statuses" is present, "gaps_range_start" and "gaps_range_end" must also be present',
         ]);
       });
 
-      test('Error when gap_status present with only gaps_range_end', () => {
+      test('Error when gap_fill_statuses present with only gaps_range_end', () => {
         const schema: FindRulesRequestQueryInput = {
-          gap_status: 'filled',
+          gap_fill_statuses: ['filled'],
           gaps_range_end: '2024-01-02T00:00:00.000Z',
         };
         const errors = validateFindRulesRequestQuery(schema);
         expect(errors).toEqual([
-          'when "gap_status" is present, "gaps_range_start" and "gaps_range_end" must also be present',
+          'when "gap_fill_statuses" is present, "gaps_range_start" and "gaps_range_end" must also be present',
         ]);
       });
 
-      test('Error when gaps_range_start and gaps_range_end present without gap_status', () => {
+      test('Error when gaps_range_start and gaps_range_end present without gap_fill_statuses', () => {
         const schema: FindRulesRequestQueryInput = {
           gaps_range_start: '2024-01-01T00:00:00.000Z',
           gaps_range_end: '2024-01-02T00:00:00.000Z',
         };
         const errors = validateFindRulesRequestQuery(schema);
         expect(errors).toEqual([
-          'when "gap_status" is not present, "gaps_range_start" and "gaps_range_end" must not be present',
+          'when "gap_fill_statuses" is not present, "gaps_range_start" and "gaps_range_end" must not be present',
         ]);
       });
 
-      test('Error when only gaps_range_start present without gap_status', () => {
+      test('Error when only gaps_range_start present without gap_fill_statuses', () => {
         const schema: FindRulesRequestQueryInput = {
           gaps_range_start: '2024-01-01T00:00:00.000Z',
         };
         const errors = validateFindRulesRequestQuery(schema);
         expect(errors).toEqual([
-          'when "gap_status" is not present, "gaps_range_start" and "gaps_range_end" must not be present',
+          'when "gap_fill_statuses" is not present, "gaps_range_start" and "gaps_range_end" must not be present',
         ]);
       });
 
-      test('Error when only gaps_range_end present without gap_status', () => {
+      test('Error when only gaps_range_end present without gap_fill_statuses', () => {
         const schema: FindRulesRequestQueryInput = {
           gaps_range_end: '2024-01-02T00:00:00.000Z',
         };
         const errors = validateFindRulesRequestQuery(schema);
         expect(errors).toEqual([
-          'when "gap_status" is not present, "gaps_range_start" and "gaps_range_end" must not be present',
+          'when "gap_fill_statuses" is not present, "gaps_range_start" and "gaps_range_end" must not be present',
         ]);
       });
 

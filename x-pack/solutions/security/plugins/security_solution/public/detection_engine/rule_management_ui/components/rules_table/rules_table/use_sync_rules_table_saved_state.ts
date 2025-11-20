@@ -79,9 +79,9 @@ export function useSyncRulesTableSavedState(): void {
       storageStateToSave.ruleExecutionStatus = state.filterOptions.ruleExecutionStatus;
     }
 
-    if (state.filterOptions.gapStatus !== undefined) {
-      urlStateToSave.gapStatus = state.filterOptions.gapStatus;
-      storageStateToSave.gapStatus = state.filterOptions.gapStatus;
+    if (state.filterOptions.gapFillStatuses?.length) {
+      urlStateToSave.gapFillStatuses = state.filterOptions.gapFillStatuses;
+      storageStateToSave.gapFillStatuses = state.filterOptions.gapFillStatuses;
     }
 
     const hasUrlStateToSave = Object.keys(urlStateToSave).length > 0;

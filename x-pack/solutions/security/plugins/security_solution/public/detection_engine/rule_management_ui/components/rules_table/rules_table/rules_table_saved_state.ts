@@ -22,7 +22,7 @@ export const RulesTableSavedFilter = z
     tags: z.array(z.string()),
     enabled: z.boolean(),
     ruleExecutionStatus: RuleExecutionStatus,
-    gapStatus: z.nativeEnum(aggregatedGapStatus),
+    gapFillStatuses: z.array(z.nativeEnum(aggregatedGapStatus)).min(1),
   })
   .partial();
 

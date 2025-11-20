@@ -688,7 +688,7 @@ describe('Perform bulk action route', () => {
 
       expect(response.status).toEqual(400);
       expect(response.body.message).toEqual(
-        'gaps_range_start, gaps_range_end and gap_status must be provided together.'
+        'gaps_range_start, gaps_range_end and gap_fill_statuses must be provided together.'
       );
     });
 
@@ -707,7 +707,7 @@ describe('Perform bulk action route', () => {
 
       expect(response.status).toEqual(400);
       expect(response.body.message).toEqual(
-        'gaps_range_start, gaps_range_end and gap_status must be provided together.'
+        'gaps_range_start, gaps_range_end and gap_fill_statuses must be provided together.'
       );
     });
 
@@ -726,11 +726,11 @@ describe('Perform bulk action route', () => {
 
       expect(response.status).toEqual(400);
       expect(response.body.message).toEqual(
-        'gaps_range_start, gaps_range_end and gap_status must be provided together.'
+        'gaps_range_start, gaps_range_end and gap_fill_statuses must be provided together.'
       );
     });
 
-    it('rejects payload if gaps range is provided without gap_status', async () => {
+    it('rejects payload if gaps range is provided without gap_fill_statuses', async () => {
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_BULK_ACTION,
@@ -744,24 +744,24 @@ describe('Perform bulk action route', () => {
       const response = await server.inject(request, requestContextMock.convertContext(context));
       expect(response.status).toEqual(400);
       expect(response.body.message).toEqual(
-        'gaps_range_start, gaps_range_end and gap_status must be provided together.'
+        'gaps_range_start, gaps_range_end and gap_fill_statuses must be provided together.'
       );
     });
 
-    it('rejects payload if gap_status is provided without gaps range', async () => {
+    it('rejects payload if gap_fill_statuses are provided without gaps range', async () => {
       const request = requestMock.create({
         method: 'patch',
         path: DETECTION_ENGINE_RULES_BULK_ACTION,
         body: {
           ...getBulkDisableRuleActionSchemaMock(),
           query: '',
-          gap_status: 'unfilled',
+          gap_fill_statuses: ['unfilled'],
         },
       });
       const response = await server.inject(request, requestContextMock.convertContext(context));
       expect(response.status).toEqual(400);
       expect(response.body.message).toEqual(
-        'gaps_range_start, gaps_range_end and gap_status must be provided together.'
+        'gaps_range_start, gaps_range_end and gap_fill_statuses must be provided together.'
       );
     });
   });
@@ -779,7 +779,7 @@ describe('Perform bulk action route', () => {
           query: '',
           gaps_range_start: gapStartDate,
           gaps_range_end: gapEndDate,
-          gap_status: 'unfilled',
+          gap_fill_statuses: ['unfilled'],
         },
       });
 

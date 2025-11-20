@@ -212,7 +212,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
     enabled: savedFilter?.enabled,
     ruleExecutionStatus:
       savedFilter?.ruleExecutionStatus ?? DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
-    gapStatus: savedFilter?.gapStatus ?? DEFAULT_FILTER_OPTIONS.gapStatus,
+    gapFillStatuses: savedFilter?.gapFillStatuses ?? DEFAULT_FILTER_OPTIONS.gapFillStatuses,
   });
 
   const [sortingOptions, setSortingOptions] = useState<SortingOptions>({
@@ -257,7 +257,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
       tags: DEFAULT_FILTER_OPTIONS.tags,
       enabled: undefined,
       ruleExecutionStatus: DEFAULT_FILTER_OPTIONS.ruleExecutionStatus,
-      gapStatus: undefined,
+      gapFillStatuses: undefined,
     });
     setSortingOptions({
       field: DEFAULT_SORTING_OPTIONS.field,
