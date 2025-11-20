@@ -8,18 +8,20 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { getDashboardDataSchema } from '../../content_management/v1/schema';
+import { getDashboardStateSchema } from '../dashboard_state_schemas';
 import { baseMetaSchema, updatedMetaSchema } from '../meta_schemas';
 
 export function getUpdateRequestBodySchema() {
   return schema.object({
-    data: getDashboardDataSchema(),
+    data: getDashboardStateSchema(),
   });
 }
 
-export const updateResponseBodySchema = schema.object({
-  id: schema.string(),
-  data: getDashboardDataSchema(),
-  meta: schema.allOf([baseMetaSchema, updatedMetaSchema]),
-  spaces: schema.maybe(schema.arrayOf(schema.string())),
-});
+export function getUpdateResponseBodySchema() {
+  return schema.object({
+    id: schema.string(),
+    data: getDashboardStateSchema(),
+    meta: schema.allOf([baseMetaSchema, updatedMetaSchema]),
+    spaces: schema.maybe(schema.arrayOf(schema.string())),
+  });
+}
