@@ -10,6 +10,18 @@
 import type { ProjectRouting } from '@kbn/es-query';
 import type { Observable } from 'rxjs';
 
+/**
+ * Access levels for project routing picker
+ */
+export enum ProjectRoutingAccess {
+  /** Cannot interact with picker - picker is disabled */
+  DISABLED = 'disabled',
+  /** Can view but not edit - shows read-only message */
+  READONLY = 'readonly',
+  /** Full functionality - can change project scope */
+  EDITABLE = 'editable',
+}
+
 export interface CPSProject {
   _id: string;
   _alias: string;
@@ -26,6 +38,11 @@ export interface ProjectTagsResponse {
 export interface ProjectsData {
   origin: CPSProject | null;
   linkedProjects: CPSProject[];
+}
+
+export interface ProjectPickerAccessInfo {
+  access: ProjectRoutingAccess;
+  readonlyMessage?: string;
 }
 
 export interface ICPSManager {

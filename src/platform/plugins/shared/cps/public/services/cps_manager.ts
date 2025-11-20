@@ -7,11 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { HttpSetup } from '@kbn/core/public';
+import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import type { ProjectRouting } from '@kbn/es-query';
-import { BehaviorSubject } from 'rxjs';
-import type { ProjectTagsResponse, ICPSManager, ProjectsData } from '@kbn/cps-utils';
+import { BehaviorSubject, combineLatest, map } from 'rxjs';
+import {
+  type ProjectTagsResponse,
+  type ICPSManager,
+  type ProjectsData,
+  PROJECT_ROUTING,
+} from '@kbn/cps-utils';
+import { getProjectRoutingAccess, getReadonlyMessage } from './access_control';
 
 const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 1000;
@@ -27,17 +33,34 @@ export const DEFAULT_PROJECT_ROUTING: ProjectRouting = PROJECT_ROUTING.ALL;
  *
  * - Fetches project data from ES via `/internal/cps/projects_tags` endpoint (with caching and retry logic)
  * - Manages current project routing state using observables
+ * - projectRouting$ represents temporary UI state; apps should reset to their saved value or DEFAULT_PROJECT_ROUTING on navigation
  */
 export class CPSManager implements ICPSManager {
   private readonly http: HttpSetup;
   private readonly logger: Logger;
+  private readonly application: ApplicationStart;
   private fetchPromise: Promise<ProjectsData | null> | null = null;
   private cachedData: ProjectsData | null = null;
-  private readonly projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(undefined);
+  // Initialize without a value - apps will set their value during initialization
+  private readonly projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(
+    DEFAULT_PROJECT_ROUTING
+  );
+  private readonly projectPickerAccess$;
 
-  constructor(deps: { http: HttpSetup; logger: Logger }) {
+  constructor(deps: { http: HttpSetup; logger: Logger; application: ApplicationStart }) {
     this.http = deps.http;
     this.logger = deps.logger.get('cps_manager');
+    this.application = deps.application;
+
+    this.projectPickerAccess$ = combineLatest([
+      this.application.currentAppId$,
+      this.application.currentLocation$,
+    ]).pipe(
+      map(([appId, location]) => {
+        const access = getProjectRoutingAccess(appId ?? '', location ?? '');
+        return { access, readonlyMessage: getReadonlyMessage(appId) };
+      })
+    );
   }
 
   /**
@@ -75,6 +98,10 @@ export class CPSManager implements ICPSManager {
    * the project picker should be editable, readonly, or disabled.
    * Also returns the custom readonly message if applicable.
    */
+  public getProjectPickerAccess$() {
+    return this.projectPickerAccess$;
+  }
+
   /**
    * Fetches projects from the server with caching and retry logic.
    * Returns cached data if already loaded. If a fetch is already in progress, returns the existing promise.
