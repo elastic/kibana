@@ -62,18 +62,17 @@ export const createApiKey = async (
   }
 
   const user = security.authc.getCurrentUser(request);
-  if (!user) {
-    throw Error('Cannot authenticate current user.');
-  }
 
   const apiKeyByTaskIdMap = new Map<string, EncodedApiKeyResult>();
 
-  // If the user passed in their own API key, simply return it
-  if (isRequestApiKeyType(user)) {
+  // If the user passed in their own API key or the request is a fake request, use the API key from the request
+  if ((user && isRequestApiKeyType(user)) || request.isFakeRequest) {
     const apiKeyCreateResult = getApiKeyFromRequest(request);
 
     if (!apiKeyCreateResult) {
-      throw Error('Could not create API key.');
+      throw Error(
+        `Could not extract API key from ${request.isFakeRequest ? 'fake' : 'user'} request header.`
+      );
     }
 
     const { id, api_key: apiKey } = apiKeyCreateResult;
@@ -93,8 +92,10 @@ export const createApiKey = async (
   const apiKeyByTaskTypeMap = new Map<string, EncodedApiKeyResult>();
 
   for (const taskType of taskTypes) {
+    const apiKeyNamePrefix = `TaskManager: ${taskType}`;
+    const apiKeyName = user ? `${apiKeyNamePrefix} - ${user.username}` : apiKeyNamePrefix;
     const apiKeyCreateResult = await security.authc.apiKeys.grantAsInternalUser(request, {
-      name: truncate(`TaskManager: ${taskType} - ${user.username}`, { length: 256 }),
+      name: truncate(apiKeyName, { length: 256 }),
       role_descriptors: {},
       metadata: { managed: true },
     });
