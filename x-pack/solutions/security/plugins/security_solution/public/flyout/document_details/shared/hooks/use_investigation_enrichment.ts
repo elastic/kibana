@@ -75,7 +75,7 @@ export const useInvestigationTimeEnrichment = ({
   const { data, storage, uiSettings } = useKibana().services;
   const defaultThreatIndices = uiSettings.get<string[]>(DEFAULT_THREAT_INDEX_KEY);
 
-  const timeSavedInLocalStorage = storage.get(FLYOUT_STORAGE_KEYS.THREAT_INTELLIGENCE_INTERVAL);
+  const timeSavedInLocalStorage = storage.get(FLYOUT_STORAGE_KEYS.THREAT_INTELLIGENCE_TIME_RANGE);
 
   const dispatch = useDispatch();
 
@@ -87,7 +87,7 @@ export const useInvestigationTimeEnrichment = ({
   const setRange = useCallback(
     (rge: { from: string; to: string }) => {
       setCustomRange(rge);
-      storage.set(FLYOUT_STORAGE_KEYS.THREAT_INTELLIGENCE_INTERVAL, {
+      storage.set(FLYOUT_STORAGE_KEYS.THREAT_INTELLIGENCE_TIME_RANGE, {
         start: rge.from,
         end: rge.to,
       });

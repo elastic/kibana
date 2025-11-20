@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiIconTip } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
 import { useFetchThreatIntelligence } from '../hooks/use_fetch_threat_intelligence';
@@ -89,15 +89,21 @@ export const ThreatIntelligenceOverview: FC = () => {
         link,
         iconType: !isPreviewMode ? 'arrowStart' : undefined,
         headerContent: (
-          <EuiIconTip
+          <EuiToolTip
             content={
               <FormattedMessage
-                id="xpack.securitySolution.flyout.right.threatintelligence.time"
-                defaultMessage="The threat intelligence is calculated from a specific time interval. To change that interval, go to the Threat intelligence tab in the flyout expanded view and use the date picker."
+                id="xpack.securitySolution.flyout.right.insights.threatIntelligence.custom-time-range-applied-tooltip"
+                defaultMessage="The threat intelligence is calculated from a specific time range. To change it, click on the Threat intelligence title (to the left) and use the date picker."
               />
             }
-            type="info"
-          />
+          >
+            <EuiBadge color="hollow" iconSide="left" iconType="clock" tabIndex={0}>
+              <FormattedMessage
+                id="xpack.securitySolution.flyout.right.insights.threatIntelligence.custom-time-range-applied-badge-label"
+                defaultMessage="Time range applied"
+              />
+            </EuiBadge>
+          </EuiToolTip>
         ),
       }}
       data-test-subj={INSIGHTS_THREAT_INTELLIGENCE_TEST_ID}
