@@ -294,9 +294,7 @@ describe('throwOnUnmappedKeys', () => {
   it('should throw when dashboard contains a panel with enhancements', () => {
     mockGetTransforms.mockImplementation(() => {
       return {
-        schema: schema.object({
-          foo: schema.string(),
-        }),
+        schema: schema.object({}),
       };
     });
     const dashboardState = {
