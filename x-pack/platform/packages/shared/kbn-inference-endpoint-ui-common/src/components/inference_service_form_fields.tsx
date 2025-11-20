@@ -31,7 +31,7 @@ import type { ConnectorFormSchema } from '@kbn/triggers-actions-ui-plugin/public
 import type { HttpSetup, IToasts } from '@kbn/core/public';
 import * as LABELS from '../translations';
 import type { Config, ConfigEntryView, InferenceProvider, Secrets } from '../types/types';
-import { isMapWithStringValues } from '../types/types';
+import { isMapWithStringValues, FieldType } from '../types/types';
 import {
   SERVICE_PROVIDERS,
   solutionKeys,
@@ -178,21 +178,33 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
   };
 
   const getOverrides = useCallback(
-    (providerService: string | undefined) => {
-      let overrides = INTERNAL_OVERRIDE_FIELDS[providerService ?? ''];
+    (provider?: InferenceProvider) => {
+      let overrides = INTERNAL_OVERRIDE_FIELDS[provider?.service ?? ''];
+      // Return early if override only applies to serverless and this is not on serverless
       if (overrides?.serverlessOnly && !enforceAdaptiveAllocations) {
-        overrides = undefined;
+        return;
       }
+
+      const hiddenFields = [...(overrides?.hidden ?? [])];
+
       if (enableCustomHeaders !== true) {
-        overrides = {
-          ...(overrides ?? {}),
-          ...(overrides?.hidden
-            ? {
-                hidden: [...overrides.hidden, 'headers'],
-              }
-            : { hidden: ['headers'] }),
-        };
+        hiddenFields.unshift('headers');
       }
+
+      if (provider?.configurations) {
+        Object.entries(provider.configurations).forEach(([field, configEntry]) => {
+          if (Object.values(FieldType).includes(configEntry.type) === false) {
+            // hide unknown type fields in form as they aren't handled yet
+            hiddenFields.push(field);
+          }
+        });
+      }
+
+      overrides = {
+        ...(overrides ?? {}),
+        hidden: hiddenFields,
+      };
+
       return overrides;
     },
     [enforceAdaptiveAllocations, enableCustomHeaders]
@@ -219,7 +231,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         (p) => p.service === (config.provider === '' ? providerSelected : config.provider)
       );
       if (newProvider) {
-        const overrides = getOverrides(newProvider.service);
+        const overrides = getOverrides(newProvider);
         const newProviderSchema: ConfigEntryView[] = mapProviderFields(
           taskType,
           newProvider,
@@ -235,9 +247,15 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       // Iterate through the new provider configurations so we can ensure all fields supporting task type are added
       Object.keys(newProvider?.configurations ?? {}).forEach((k) => {
         if (
-          newConfig[k] !== undefined &&
-          newProvider?.configurations[k]?.supported_task_types &&
-          !newProvider?.configurations[k].supported_task_types.includes(taskType)
+          (newConfig[k] !== undefined &&
+            newProvider?.configurations[k]?.supported_task_types &&
+            !newProvider?.configurations[k].supported_task_types.includes(taskType)) ||
+          // Remove fields of unknown and unhandled types
+          Object.values(FieldType).includes(
+            newProvider?.configurations[k]?.type ?? ('' as FieldType)
+          ) === false ||
+          // Tempo fix for inference endpoint creation to ensure headers aren't sent until full custom header support is added here https://github.com/elastic/kibana/pull/242187
+          (newProvider?.configurations[k]?.type === FieldType.MAP && enableCustomHeaders !== true)
         ) {
           delete newConfig[k];
         } else if (
@@ -271,7 +289,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
         },
       });
     },
-    [config, secrets, updateFieldValues, updatedProviders, getOverrides]
+    [config, secrets, updateFieldValues, updatedProviders, getOverrides, enableCustomHeaders]
   );
 
   const onProviderChange = useCallback(
@@ -286,7 +304,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       const defaultProviderConfig: Record<string, unknown> = {};
       const defaultProviderSecrets: Record<string, unknown> = {};
 
-      const overrides = getOverrides(newProvider?.service);
+      const overrides = getOverrides(newProvider);
 
       const newProviderSchema: ConfigEntryView[] = newProvider
         ? mapProviderFields(newProvider.task_types[0], newProvider, overrides)
@@ -446,7 +464,7 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       const newProvider = updatedProviders?.find((p) => p.service === config.provider);
       // Update connector providerSchema
 
-      const overrides = getOverrides(newProvider?.service);
+      const overrides = getOverrides(newProvider);
       const newProviderSchema: ConfigEntryView[] = newProvider
         ? mapProviderFields(config.taskType, newProvider, overrides)
         : [];

@@ -1263,21 +1263,21 @@
           "MlEmbeddableBaseApi",
           "<Readonly<{ id?: string | undefined; title?: string | undefined; description?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; perPage?: number | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
-            "pluginId": "@kbn/es-query",
+            "pluginId": "@kbn/es-query-constants",
             "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; hidePanelTitles?: boolean | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; viewBy: string; swimlaneType: \"viewBy\"; }> | Readonly<{ id?: string | undefined; title?: string | undefined; description?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; perPage?: number | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; hidePanelTitles?: boolean | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; viewBy: string; swimlaneType: \"viewBy\"; }> | Readonly<{ id?: string | undefined; title?: string | undefined; description?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; perPage?: number | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
-            "pluginId": "@kbn/es-query",
+            "pluginId": "@kbn/es-query-constants",
             "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; hidePanelTitles?: boolean | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; swimlaneType: \"overall\"; }>> & ",
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; hidePanelTitles?: boolean | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; swimlaneType: \"overall\"; }>> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1361,21 +1361,21 @@
         "signature": [
           "Readonly<{ id?: string | undefined; title?: string | undefined; description?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; perPage?: number | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
-            "pluginId": "@kbn/es-query",
+            "pluginId": "@kbn/es-query-constants",
             "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; hidePanelTitles?: boolean | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; viewBy: string; swimlaneType: \"viewBy\"; }> | Readonly<{ id?: string | undefined; title?: string | undefined; description?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; perPage?: number | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; hidePanelTitles?: boolean | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; viewBy: string; swimlaneType: \"viewBy\"; }> | Readonly<{ id?: string | undefined; title?: string | undefined; description?: string | undefined; timeRange?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; perPage?: number | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
-            "pluginId": "@kbn/es-query",
+            "pluginId": "@kbn/es-query-constants",
             "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; hidePanelTitles?: boolean | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; swimlaneType: \"overall\"; }>"
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; hidePanelTitles?: boolean | undefined; refreshConfig?: Readonly<{} & { value: number; pause: boolean; }> | undefined; } & { jobIds: string[]; swimlaneType: \"overall\"; }>"
         ],
         "path": "x-pack/platform/plugins/shared/ml/public/embeddables/anomaly_swimlane/types.ts",
         "deprecated": false,

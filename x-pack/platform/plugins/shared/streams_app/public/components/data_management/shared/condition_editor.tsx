@@ -166,6 +166,7 @@ function FilterConditionForm(props: {
           compressed
           disabled={disabled}
           dataTestSubj="streamsAppConditionEditorFieldText"
+          showIcon={true}
         />
       </EuiFlexItem>
       <EuiFlexItem grow={showValueField ? 1 : 2}>

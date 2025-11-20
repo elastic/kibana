@@ -153,6 +153,7 @@ export function initRoutes(
           task: schema.object({
             id: schema.string({}),
           }),
+          force: schema.maybe(schema.boolean({ defaultValue: false })),
         }),
       },
     },
@@ -163,10 +164,11 @@ export function initRoutes(
     ): Promise<IKibanaResponse<any>> {
       const {
         task: { id },
+        force,
       } = req.body;
       try {
         const taskManager = await taskManagerStart;
-        return res.ok({ body: await taskManager.runSoon(id) });
+        return res.ok({ body: await taskManager.runSoon(id, force) });
       } catch (err) {
         return res.ok({ body: { id, error: `${err}` } });
       }

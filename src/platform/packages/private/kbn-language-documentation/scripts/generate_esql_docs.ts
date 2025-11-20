@@ -151,22 +151,17 @@ function writeFunctionDocs(functionDocs: Map<string, DocsSectionContent>, pathTo
     ),
     preview: ${doc.preview || false},
     license: ${doc.license ? JSON.stringify(doc.license) : 'undefined'},
-    description: (
-      <Markdown
-        openLinksInNewTab
-        readOnly
-        enableSoftLineBreaks
-        markdownContent={i18n.translate(
-          'languageDocumentation.documentationESQL.${name}.markdown',
-          {
-            defaultMessage: \`${defaultMessage}\`,
-            description:
-              'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
-            ignoreTag: true,
-          }
-        )}
-      />
-    ),
+    description: {
+      markdownContent: i18n.translate(
+        'languageDocumentation.documentationESQL.${name}.markdown',
+        {
+          defaultMessage: \`${defaultMessage}\`,
+          description:
+            'Text is in markdown. Do not translate function names, special characters, or field names like sum(bytes)',
+          ignoreTag: true,
+        }
+      ),
+    },
   };`;
   });
 

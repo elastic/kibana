@@ -12,36 +12,43 @@ import type { monaco } from '@kbn/monaco';
 import type { ConnectorTypeInfo } from '@kbn/workflows';
 import type { z } from '@kbn/zod';
 import type { LineParseResult } from './parse_line_for_completion';
-import type { WorkflowDetailState } from '../../store';
-import type { StepInfo } from '../../store/utils/build_workflow_lookup';
-
-export type MinimalWorkflowDetailState = Pick<
-  WorkflowDetailState,
-  'yamlString' | 'computed' | 'focusedStepId' | 'connectors'
->;
+import type {
+  StepInfo,
+  StepPropInfo,
+} from '../../../../../entities/workflows/store/workflow_detail/utils/build_workflow_lookup';
 
 // TODO: see if we can reduce the number of properties in this interface and group them into smaller interfaces
 export interface AutocompleteContext {
+  // what triggered the completion
   triggerCharacter: string | null;
   triggerKind: monaco.languages.CompletionTriggerKind | null;
-  range: monaco.IRange;
+
+  // content
   line: string;
   lineUpToCursor: string;
   lineParseResult: LineParseResult | null;
+
+  // position of the cursor
+  path: (string | number)[];
+  range: monaco.IRange;
+  absoluteOffset: number;
+  focusedStepInfo: StepInfo | null;
+  focusedYamlPair: StepPropInfo | null;
+
+  // context
   contextSchema: z.ZodType;
   contextScopedToPath: string | null;
-  focusedStepInfo: StepInfo | null;
   yamlDocument: Document;
   scalarType: Scalar.Type | null;
-  path: (string | number)[];
-  absoluteOffset: number;
-  dynamicConnectorTypes: Record<string, ConnectorTypeInfo> | null;
+
+  // kind of ast info
   isInLiquidBlock: boolean;
   isInTriggersContext: boolean;
   isInScheduledTriggerWithBlock: boolean;
   isInStepsContext: boolean;
-  shouldUseCurlyBraces: boolean;
-  shouldBeQuoted: boolean;
+
+  // dynamic connector types
+  dynamicConnectorTypes: Record<string, ConnectorTypeInfo> | null;
 }
 
 // we don't want to pass model and position, but currently it's used in getWithBlockSuggestions

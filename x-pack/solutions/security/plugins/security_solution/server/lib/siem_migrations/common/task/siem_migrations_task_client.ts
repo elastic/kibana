@@ -142,6 +142,13 @@ export abstract class SiemMigrationsTaskClient<
     migrationId: string,
     filter: RuleMigrationFilters
   ): Promise<{ updated: boolean }> {
+    this.logger.warn(
+      `Updating migration ID:${migrationId} to retry with filter: ${JSON.stringify(
+        filter,
+        null,
+        2
+      )}`
+    );
     if (this.migrationsRunning.has(migrationId)) {
       // not update migrations that are currently running
       return { updated: false };
