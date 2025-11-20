@@ -63,13 +63,13 @@ const buildIngestPipeline = ({
         value: '{{entity.last_seen_timestamp}}',
       },
     },
-    {
-      set: {
-        field: 'entity.name',
-        override: false,
-        value: `{{${description.identityField}}}`,
-      },
-    },
+    // {
+    //   set: {
+    //     field: 'entity.name',
+    //     override: false,
+    //     value: `{{${description.identityField}}}`,
+    //   },
+    // },
     ...(debugMode
       ? [
           {
@@ -89,7 +89,7 @@ const buildIngestPipeline = ({
     {
       enrich: {
         policy_name: enrichPolicyName,
-        field: description.identityField,
+        field: 'entity.id',
         target_field: ENRICH_FIELD,
       },
     },

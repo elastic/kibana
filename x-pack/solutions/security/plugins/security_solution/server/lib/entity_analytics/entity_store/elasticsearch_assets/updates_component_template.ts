@@ -73,7 +73,13 @@ function buildMappings({
     }
   }
 
-  properties[identityField] = identityFieldMapping;
+  if (Array.isArray(identityField)) {
+    identityField.forEach((field) => {
+      properties[field] = identityFieldMapping;
+    });
+  } else {
+    properties[identityField] = identityFieldMapping;
+  }
 
   return {
     properties: { ...DEFAULT_MAPPINGS, ...properties },

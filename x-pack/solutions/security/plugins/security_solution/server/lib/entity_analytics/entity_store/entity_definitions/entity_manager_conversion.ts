@@ -21,7 +21,9 @@ export const convertToEntityManagerDefinition = (
     name: `Security '${description.entityType}' Entity Store Definition`,
     type: description.entityType,
     indexPatterns: description.indexPatterns,
-    identityFields: [description.identityField],
+    identityFields: Array.isArray(description.identityField)
+      ? description.identityField
+      : [description.identityField],
     displayNameTemplate: `{{${description.identityField}}}`,
     filter: options.filter,
     metadata,
