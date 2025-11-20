@@ -29,7 +29,7 @@ const OPTIONS: EuiComboBoxOptionOption[] = TYPE_GROUPS.flatMap((group) => [
   })),
 ]).concat({
   value: DOCUMENTATION_VALUE,
-  label: i18n.translate('fieldTypeSelect.documentationLink', {
+  label: i18n.translate('fieldUtils.fieldTypeSelect.documentationLink', {
     defaultMessage: 'Learn about field types',
   }),
 });
@@ -66,10 +66,10 @@ export const FieldSelect = ({ selectedType, onTypeChange, ...restOfProps }: Fiel
   return (
     <EuiComboBox
       compressed
-      aria-label={i18n.translate('fieldTypeSelect.ariaLabel', {
+      aria-label={i18n.translate('fieldUtils.fieldTypeSelect.ariaLabel', {
         defaultMessage: 'Field type select',
       })}
-      placeholder={i18n.translate('fieldTypeSelect.placeholder', {
+      placeholder={i18n.translate('fieldUtils.fieldTypeSelect.placeholder', {
         defaultMessage: 'Select option',
       })}
       data-test-subj="fieldTypeSelect"

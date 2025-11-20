@@ -14,7 +14,7 @@ import { getFieldTypeName } from '../../utils/get_field_type_name';
 
 export const TYPE_GROUPS: { label: string; types: string[] }[] = [
   {
-    label: i18n.translate('fieldTypeSelect.group.text', {
+    label: i18n.translate('fieldUtils.fieldTypeSelect.group.text', {
       defaultMessage: 'Text',
     }),
     types: [
@@ -28,7 +28,7 @@ export const TYPE_GROUPS: { label: string; types: string[] }[] = [
     ],
   },
   {
-    label: i18n.translate('fieldTypeSelect.group.numeric', {
+    label: i18n.translate('fieldUtils.fieldTypeSelect.group.numeric', {
       defaultMessage: 'Numeric',
     }),
     types: [
@@ -44,31 +44,31 @@ export const TYPE_GROUPS: { label: string; types: string[] }[] = [
     ],
   },
   {
-    label: i18n.translate('fieldTypeSelect.group.booleanDate', {
+    label: i18n.translate('fieldUtils.fieldTypeSelect.group.booleanDate', {
       defaultMessage: 'Boolean & Date',
     }),
     types: ['boolean', 'date', 'date_nanos'],
   },
   {
-    label: i18n.translate('fieldTypeSelect.group.ipGeo', {
+    label: i18n.translate('fieldUtils.fieldTypeSelect.group.ipGeo', {
       defaultMessage: 'IP & Geo',
     }),
     types: ['ip', 'geo_point', 'geo_shape'],
   },
   {
-    label: i18n.translate('fieldTypeSelect.group.structured', {
+    label: i18n.translate('fieldUtils.fieldTypeSelect.group.structured', {
       defaultMessage: 'Structured',
     }),
     types: ['flattened'],
   },
   {
-    label: i18n.translate('fieldTypeSelect.group.range', {
+    label: i18n.translate('fieldUtils.fieldTypeSelect.group.range', {
       defaultMessage: 'Range',
     }),
     types: ['integer_range', 'float_range', 'long_range', 'ip_range', 'double_range', 'date_range'],
   },
   {
-    label: i18n.translate('fieldTypeSelect.group.advanced', {
+    label: i18n.translate('fieldUtils.fieldTypeSelect.group.advanced', {
       defaultMessage: 'Advanced',
     }),
     types: [
