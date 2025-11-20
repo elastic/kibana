@@ -11,6 +11,7 @@ import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-obje
 import axios from 'axios';
 import { CloudConnectClient } from '../services/cloud_connect_client';
 import { StorageService } from '../services/storage';
+import { enableInferenceCCM, disableInferenceCCM } from '../services/inference_ccm';
 import { CLOUD_CONNECT_API_KEY_TYPE } from '../../common/constants';
 
 interface CloudConnectedStartDeps {
@@ -257,9 +258,45 @@ export const registerClustersRoute = ({
 
         logger.debug(`Successfully updated cluster services: ${updatedCluster.id}`);
 
-        return response.ok({
-          body: updatedCluster,
-        });
+        // If EIS service is enabled, the response will return a keys.eis string that
+        // needs to be stored in ES for inference nodes to use EIS.
+        const eisRequest = request.body.services['eis'];
+        if (eisRequest) {
+          const esClient = coreContext.elasticsearch.client.asCurrentUser;
+          const eisKey = updatedCluster.keys?.eis;
+
+          if (eisRequest?.enabled && !eisKey) {
+            logger.warn(
+              'EIS service was enabled but Cloud API did not return an API key for inference CCM'
+            );
+            return response.ok({
+              body: {
+                success: true,
+                warning:
+                'EIS service was enabled but inference could not be configured. Please contact support.',
+              },
+            });
+          }
+
+          try {
+            if (eisRequest?.enabled) {
+              await enableInferenceCCM(esClient, eisKey!, logger);
+            } else {
+              await disableInferenceCCM(esClient, logger);
+            }
+          } catch (inferenceError) {
+            return response.ok({
+              body: {
+                success: true,
+                warning:
+                  'Cluster service updated, but failed to update inference ccm settings.',
+                warningError: (inferenceError as Error).message,
+              },
+            });
+          }
+        }
+
+        return response.ok({ body: { success: true } });
       } catch (error) {
         logger.error('Failed to update cluster services', { error });
         console.log(JSON.stringify(error, null, 2));

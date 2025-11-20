@@ -45,7 +45,11 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onRe
   const handleEnableService = async (serviceKey: string) => {
     setLoadingService(serviceKey);
     try {
-      await http.put('/internal/cloud_connect/cluster_details', {
+      const response = await http.put<{
+        success: boolean;
+        warning?: string;
+        warningError?: string;
+      }>('/internal/cloud_connect/cluster_details', {
         body: JSON.stringify({
           services: {
             [serviceKey]: { enabled: true },
@@ -53,11 +57,21 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onRe
         }),
       });
 
-      notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.cloudConnect.services.enable.successTitle', {
-          defaultMessage: 'Service enabled successfully',
-        }),
-      });
+      // Check if there's a warning in the response
+      if (response.warning) {
+        notifications.toasts.addWarning({
+          title: i18n.translate('xpack.cloudConnect.services.enable.warningTitle', {
+            defaultMessage: 'Service enabled with warnings',
+          }),
+          text: response.warning,
+        });
+      } else {
+        notifications.toasts.addSuccess({
+          title: i18n.translate('xpack.cloudConnect.services.enable.successTitle', {
+            defaultMessage: 'Service enabled successfully',
+          }),
+        });
+      }
 
       // Refetch cluster details to update the UI
       await onRefetch();
@@ -79,7 +93,11 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onRe
 
     setLoadingService(disableModalService.key);
     try {
-      await http.put('/internal/cloud_connect/cluster_details', {
+      const response = await http.put<{
+        success: boolean;
+        warning?: string;
+        warningError?: string;
+      }>('/internal/cloud_connect/cluster_details', {
         body: JSON.stringify({
           services: {
             [disableModalService.key]: { enabled: false },
@@ -87,11 +105,39 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ services, onRe
         }),
       });
 
-      notifications.toasts.addSuccess({
-        title: i18n.translate('xpack.cloudConnect.services.disable.successTitle', {
-          defaultMessage: 'Service disabled successfully',
-        }),
-      });
+      // Check if there's a warning in the response
+      if (response.warning) {
+        notifications.toasts.addWarning({
+          title: i18n.translate('xpack.cloudConnect.services.disable.warningTitle', {
+            defaultMessage: 'Service disabled with warnings',
+          }),
+          text: response.warning,
+          ...(response.warningError && {
+            toastLifeTimeMs: 10000,
+            text: (
+              <>
+                <p>{response.warning}</p>
+                <details>
+                  <summary>
+                    {i18n.translate('xpack.cloudConnect.services.disable.warningDetails', {
+                      defaultMessage: 'View details',
+                    })}
+                  </summary>
+                  <pre style={{ marginTop: '8px', fontSize: '12px' }}>
+                    {response.warningError}
+                  </pre>
+                </details>
+              </>
+            ),
+          }),
+        });
+      } else {
+        notifications.toasts.addSuccess({
+          title: i18n.translate('xpack.cloudConnect.services.disable.successTitle', {
+            defaultMessage: 'Service disabled successfully',
+          }),
+        });
+      }
 
       setDisableModalService(null);
 

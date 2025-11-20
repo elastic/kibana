@@ -62,7 +62,9 @@ export interface OnboardClusterResponse {
     auto_ops?: ServiceConfig;
     eis?: ServiceConfig;
   };
-  key?: string;
+  keys?: {
+    eis: string;
+  };
 }
 
 export interface ApiKeyValidationResult {
