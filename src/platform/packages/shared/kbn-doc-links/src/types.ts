@@ -91,6 +91,7 @@ export interface DocLinks {
   readonly searchGettingStarted: {
     readonly visitSearchLabs: string;
     readonly notebooksExamples: string;
+    readonly elasticTraining: string;
   };
   readonly metricbeat: {
     readonly base: string;
