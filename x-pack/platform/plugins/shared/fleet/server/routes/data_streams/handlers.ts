@@ -288,16 +288,25 @@ export const getDeprecatedILMCheckHandler: RequestHandler = async (context, requ
       }
 
       // Fetch Fleet-managed component templates for this policy type
-      const componentTemplateResponse = await esClient.cluster.getComponentTemplate({
-        name: `${policyType}-*@package`,
-        filter_path: [
-          'component_templates.*.name',
-          'component_templates.*.component_template.template.settings.index.lifecycle.name',
-        ],
-      });
+      let componentTemplateResponse;
+      try {
+        componentTemplateResponse = await esClient.cluster.getComponentTemplate({
+          name: `${policyType}-*@package`,
+          filter_path: [
+            'component_templates.*.name',
+            'component_templates.*.component_template.template.settings.index.lifecycle.name',
+          ],
+        });
+      } catch (err) {
+        // If no templates match the pattern, continue to next policy type
+        if (err instanceof errors.ResponseError && err.statusCode === 404) {
+          continue;
+        }
+        throw err;
+      }
 
       // Filter component templates that actually use the deprecated policy
-      const fleetManagedTemplates = componentTemplateResponse.component_templates
+      const fleetManagedTemplates = (componentTemplateResponse.component_templates || [])
         .filter((template) => {
           const ilmPolicyName =
             template.component_template?.template?.settings?.index?.lifecycle?.name;
