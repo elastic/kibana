@@ -21,6 +21,7 @@ export const setCommand = {
   name: 'set',
   methods: setCommandMethods,
   metadata: {
+    type: 'header' as const,
     description: i18n.translate('kbn-esql-ast.esql.definitions.setDoc', {
       defaultMessage: 'Sets a query setting',
     }),
