@@ -13,6 +13,7 @@ import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
 import { WORKFLOWS_EXECUTION_LOGS_DATA_STREAM } from './constants';
 
+// Note: Bump the version when you make changes to the definition.
 export const initializeLogsRepositoryDataStream = (coreDataStreams: DataStreamsSetup) => {
   return coreDataStreams.registerDataStream({
     name: WORKFLOWS_EXECUTION_LOGS_DATA_STREAM,
@@ -23,61 +24,25 @@ export const initializeLogsRepositoryDataStream = (coreDataStreams: DataStreamsS
   });
 };
 
+// Note: Only define schema for fields that will be queries against in ES.
 const logsRepositoryMappings = {
   dynamic: false,
   properties: {
     '@timestamp': mappings.date(),
     spaceId: mappings.keyword(),
-    message: mappings.text(),
     level: mappings.keyword(),
-    tags: mappings.keyword(),
     workflow: mappings.object({
       properties: {
         id: mappings.keyword(),
-        name: mappings.text({
-          fields: {
-            keyword: {
-              type: 'keyword',
-              ignore_above: 256,
-            },
-          },
-        }),
         execution_id: mappings.keyword(),
         step_id: mappings.keyword(),
         step_execution_id: mappings.keyword(),
-        step_name: mappings.text({
-          fields: {
-            keyword: {
-              type: 'keyword',
-              ignore_above: 256,
-            },
-          },
-        }),
-        step_type: mappings.keyword(),
-      },
-    }),
-    event: mappings.object({
-      properties: {
-        action: mappings.keyword(),
-        category: mappings.keyword(),
-        type: mappings.keyword(),
-        provider: mappings.keyword(),
-        outcome: mappings.keyword(),
-        duration: mappings.long(),
-        start: mappings.date(),
-        end: mappings.date(),
-      },
-    }),
-    error: mappings.object({
-      properties: {
-        message: mappings.text(),
-        type: mappings.keyword(),
-        stack_trace: mappings.text({ fields: undefined }),
       },
     }),
   },
 } satisfies MappingsDefinition;
 
+// Note: Document all _source fields here.
 export interface WorkflowLogEvent extends GetFieldsOf<typeof logsRepositoryMappings> {
   '@timestamp': string;
   message?: string;
@@ -116,7 +81,7 @@ export interface WorkflowLogEvent extends GetFieldsOf<typeof logsRepositoryMappi
     stack_trace?: string;
   };
   tags?: string[];
-  labels?: Record<string, string>;
+  labels?: Record<string, string | number | undefined>;
 }
 
 export type LogsRepositoryDataStreamClient = IDataStreamClient<
