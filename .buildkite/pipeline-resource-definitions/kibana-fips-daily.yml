@@ -24,7 +24,7 @@ spec:
       repository: elastic/kibana
       branch_configuration: main 9.1 8.19
       default_branch: main
-      pipeline_file: .buildkite/pipelines/fips/fips_pipeline.sh
+      pipeline_file: .buildkite/pipelines/fips.yml
       provider_settings:
         trigger_mode: none
       schedules:
