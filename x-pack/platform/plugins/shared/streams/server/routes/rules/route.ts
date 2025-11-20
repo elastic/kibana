@@ -7,18 +7,11 @@
 
 import { z } from '@kbn/zod';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
-import type { Asset, RuleAsset } from '../../../common/assets';
 import { createServerRoute } from '../create_server_route';
-import { ASSET_ID, ASSET_TYPE } from '../../lib/streams/assets/fields';
-
-export interface SanitizedRuleAsset {
-  id: string;
-  title: string;
-  tags: string[];
-}
+import type { Attachment } from '../../lib/streams/attachments/types';
 
 export interface ListRulesResponse {
-  rules: SanitizedRuleAsset[];
+  rules: Attachment[];
 }
 
 export interface LinkRuleResponse {
@@ -29,12 +22,8 @@ export interface UnlinkRuleResponse {
   acknowledged: boolean;
 }
 
-function sanitizeRuleAsset(asset: RuleAsset): SanitizedRuleAsset {
-  return {
-    id: asset[ASSET_ID],
-    title: asset.title,
-    tags: asset.tags,
-  };
+export interface SuggestRulesResponse {
+  suggestions: Attachment[];
 }
 
 const listRulesRoute = createServerRoute({
@@ -59,19 +48,19 @@ const listRulesRoute = createServerRoute({
     },
   },
   async handler({ params, request, getScopedClients }): Promise<ListRulesResponse> {
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+    const { attachmentClient, streamsClient } = await getScopedClients({ request });
     await streamsClient.ensureStream(params.path.name);
 
     const {
       path: { name: streamName },
     } = params;
 
-    function isRule(asset: Asset): asset is RuleAsset {
-      return asset[ASSET_TYPE] === 'rule';
+    function isRule(attachment: Attachment) {
+      return attachment.type === 'rule';
     }
 
     return {
-      rules: (await assetClient.getAssets(streamName)).filter(isRule).map(sanitizeRuleAsset),
+      rules: (await attachmentClient.getAttachments(streamName, 'rule')).filter(isRule),
     };
   },
 });
@@ -98,16 +87,16 @@ const linkRuleRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<LinkRuleResponse> => {
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+    const { attachmentClient, streamsClient } = await getScopedClients({ request });
     const {
       path: { ruleId, name: streamName },
     } = params;
 
     await streamsClient.ensureStream(streamName);
 
-    await assetClient.linkAsset(streamName, {
-      [ASSET_TYPE]: 'rule',
-      [ASSET_ID]: ruleId,
+    await attachmentClient.linkAttachment(streamName, {
+      id: ruleId,
+      type: 'rule',
     });
 
     return {
@@ -138,7 +127,7 @@ const unlinkRuleRoute = createServerRoute({
     }),
   }),
   handler: async ({ params, request, getScopedClients }): Promise<UnlinkRuleResponse> => {
-    const { assetClient, streamsClient } = await getScopedClients({ request });
+    const { attachmentClient, streamsClient } = await getScopedClients({ request });
 
     await streamsClient.ensureStream(params.path.name);
 
@@ -146,9 +135,9 @@ const unlinkRuleRoute = createServerRoute({
       path: { ruleId, name: streamName },
     } = params;
 
-    await assetClient.unlinkAsset(streamName, {
-      [ASSET_ID]: ruleId,
-      [ASSET_TYPE]: 'rule',
+    await attachmentClient.unlinkAttachment(streamName, {
+      id: ruleId,
+      type: 'rule',
     });
 
     return {
@@ -157,8 +146,54 @@ const unlinkRuleRoute = createServerRoute({
   },
 });
 
+const suggestRulesRoute = createServerRoute({
+  endpoint: 'POST /internal/streams/{name}/rules/_suggestions',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+    },
+  },
+  params: z.object({
+    path: z.object({
+      name: z.string(),
+    }),
+    query: z.object({
+      query: z.string(),
+    }),
+    body: z.object({
+      tags: z.optional(z.array(z.string())),
+    }),
+  }),
+  handler: async ({ params, request, getScopedClients }): Promise<SuggestRulesResponse> => {
+    const { attachmentClient, streamsClient } = await getScopedClients({ request });
+
+    await streamsClient.ensureStream(params.path.name);
+
+    const {
+      query: { query },
+      body: { tags },
+    } = params;
+
+    const suggestions = (
+      await attachmentClient.getSuggestions({
+        attachmentTypes: ['rule'],
+        query,
+        tags,
+      })
+    ).attachments;
+
+    return {
+      suggestions,
+    };
+  },
+});
+
 export const ruleRoutes = {
   ...listRulesRoute,
   ...linkRuleRoute,
   ...unlinkRuleRoute,
+  ...suggestRulesRoute,
 };

@@ -100,10 +100,12 @@ describe('conditionToESQLAst', () => {
       it('should handle contains with wildcards (*)', () => {
         const condition: Condition = {
           field: 'resource.attributes.service.name',
-          contains: 'synth-service-2',
+          contains: 'synth-SERVICE-2',
         };
         const result = prettyPrint(condition);
-        expect(result).toBe('`resource.attributes.service.name` LIKE "*synth-service-2*"');
+        expect(result).toBe(
+          'CONTAINS(TO_LOWER(`resource.attributes.service.name`), "synth-service-2")'
+        ); // CONTAINS should be applied with both sides lowercased
         expect(result).not.toContain('LIKE(');
         expect(result).not.toContain('%');
       });
@@ -111,7 +113,7 @@ describe('conditionToESQLAst', () => {
       it('should handle startsWith with trailing wildcard', () => {
         const condition: Condition = { field: 'message', startsWith: 'Error:' };
         const result = prettyPrint(condition);
-        expect(result).toBe('message LIKE "Error:*"');
+        expect(result).toBe('STARTS_WITH(message, "Error:")');
         expect(result).not.toContain('LIKE(');
         expect(result).not.toContain('%');
       });
@@ -119,24 +121,24 @@ describe('conditionToESQLAst', () => {
       it('should handle endsWith with leading wildcard', () => {
         const condition: Condition = { field: 'filename', endsWith: '.log' };
         const result = prettyPrint(condition);
-        expect(result).toBe('filename LIKE "*.log"');
+        expect(result).toBe('ENDS_WITH(filename, ".log")');
         expect(result).not.toContain('LIKE(');
         expect(result).not.toContain('%');
       });
 
       it('should handle contains with special characters', () => {
         const condition: Condition = { field: 'path', contains: '/api/v1/' };
-        expect(prettyPrint(condition)).toBe('path LIKE "*/api/v1/*"');
+        expect(prettyPrint(condition)).toBe('CONTAINS(TO_LOWER(path), "/api/v1/")');
       });
 
       it('should handle startsWith with numbers', () => {
         const condition: Condition = { field: 'code', startsWith: '404' };
-        expect(prettyPrint(condition)).toBe('code LIKE "404*"');
+        expect(prettyPrint(condition)).toBe('STARTS_WITH(code, "404")');
       });
 
       it('should handle endsWith with spaces', () => {
         const condition: Condition = { field: 'message', endsWith: ' failed' };
-        expect(prettyPrint(condition)).toBe('message LIKE "* failed"');
+        expect(prettyPrint(condition)).toBe('ENDS_WITH(message, " failed")');
       });
     });
 
@@ -184,7 +186,7 @@ describe('conditionToESQLAst', () => {
           ],
         };
         expect(prettyPrint(condition)).toBe(
-          'status == "active" AND count > 10 AND name LIKE "*test*"'
+          'status == "active" AND count > 10 AND CONTAINS(TO_LOWER(name), "test")'
         );
       });
     });
@@ -226,7 +228,7 @@ describe('conditionToESQLAst', () => {
         const condition: Condition = {
           not: { field: 'message', contains: 'debug' },
         };
-        expect(prettyPrint(condition)).toBe('NOT message LIKE "*debug*"');
+        expect(prettyPrint(condition)).toBe('NOT CONTAINS(TO_LOWER(message), "debug")');
       });
     });
 
@@ -297,7 +299,7 @@ describe('conditionToESQLAst', () => {
           ],
         };
         expect(prettyPrint(condition)).toBe(
-          'active == TRUE AND (role == "admin" AND department LIKE "*engineering*" OR NOT suspended == TRUE)'
+          'active == TRUE AND (role == "admin" AND CONTAINS(TO_LOWER(department), "engineering") OR NOT suspended == TRUE)'
         );
       });
     });
@@ -313,7 +315,7 @@ describe('conditionToESQLAst', () => {
   describe('edge cases', () => {
     it('should handle empty string in contains', () => {
       const condition: Condition = { field: 'message', contains: '' };
-      expect(prettyPrint(condition)).toBe('message LIKE "**"');
+      expect(prettyPrint(condition)).toBe('CONTAINS(TO_LOWER(message), "")');
     });
 
     it('should handle nested field names with dots', () => {

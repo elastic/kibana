@@ -10,6 +10,7 @@
 import { EuiPanel } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+
 import {
   ResizableLayout,
   ResizableLayoutDirection,
@@ -18,6 +19,7 @@ import {
 } from '@kbn/resizable-layout';
 import { WorkflowExecutionPanel } from './workflow_execution_panel';
 import { WorkflowStepExecutionDetails } from './workflow_step_execution_details';
+import { buildTriggerStepExecutionFromContext } from './workflow_trigger_context';
 import { useWorkflowExecutionPolling } from '../../../entities/workflows/model/use_workflow_execution_polling';
 import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 
@@ -68,11 +70,19 @@ export const WorkflowExecutionDetail: React.FC<WorkflowExecutionDetailProps> = R
     }, [workflowExecution]);
 
     const selectedStepExecution = useMemo(() => {
-      if (!workflowExecution?.stepExecutions?.length || !selectedStepExecutionId) {
+      if (!selectedStepExecutionId) {
+        return undefined;
+      }
+
+      if (selectedStepExecutionId === 'trigger' && workflowExecution?.context) {
+        return buildTriggerStepExecutionFromContext(workflowExecution) ?? undefined;
+      }
+
+      if (!workflowExecution?.stepExecutions?.length) {
         return undefined;
       }
       return workflowExecution.stepExecutions.find((step) => step.id === selectedStepExecutionId);
-    }, [workflowExecution?.stepExecutions, selectedStepExecutionId]);
+    }, [workflowExecution, selectedStepExecutionId]);
 
     return (
       <EuiPanel paddingSize="none" color="plain" hasShadow={false} style={{ height: '100%' }}>

@@ -10,7 +10,7 @@
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { RequestHandlerContext } from '@kbn/core/server';
 import { commonRouteConfig, INTERNAL_API_VERSION, PUBLIC_API_PATH } from '../constants';
-import { getCreateRequestBody, getCreateResponseBody } from './schemas';
+import { getCreateRequestBodySchema, getCreateResponseBodySchema } from './schemas';
 import { create } from './create';
 
 export function registerCreateRoute(router: VersionedRouter<RequestHandlerContext>) {
@@ -25,19 +25,19 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
       version: INTERNAL_API_VERSION,
       validate: () => ({
         request: {
-          body: getCreateRequestBody(),
+          body: getCreateRequestBodySchema(),
         },
         response: {
           200: {
-            body: getCreateResponseBody,
+            body: getCreateResponseBodySchema,
           },
         },
       }),
     },
     async (ctx, req, res) => {
-      let result;
       try {
-        result = await create(ctx, req.body);
+        const result = await create(ctx, req.body);
+        return res.ok({ body: result });
       } catch (e) {
         if (e.isBoom && e.output.statusCode === 409) {
           return res.conflict({
@@ -53,7 +53,6 @@ export function registerCreateRoute(router: VersionedRouter<RequestHandlerContex
 
         return res.badRequest({ body: e });
       }
-      return res.ok({ body: result });
     }
   );
 }
