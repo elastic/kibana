@@ -137,7 +137,7 @@ describe('HealthCallout', () => {
     mockUseFetchSloHealth.mockReturnValue({
       data: [
         {
-          sloId: '1',
+          id: '1',
           health: { overall: 'healthy', rollup: 'healthy', summary: 'healthy' },
         },
       ],

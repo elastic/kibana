@@ -15,10 +15,12 @@ const transformHealthSchema = t.union([
 
 const healthStatusSchema = t.intersection([
   t.partial({
-    transformState: t.union([t.literal('stopped'), t.literal('started')]),
+    id: t.string,
+    transformState: t.union([t.literal('missing'), t.literal('stopped'), t.literal('started')]),
   }),
   t.type({
     status: transformHealthSchema,
+    match: t.union([t.undefined, t.boolean]),
   }),
 ]);
 

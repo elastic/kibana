@@ -7,6 +7,7 @@
 
 import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
+
 import type { FetchSLOHealthParams, FetchSLOHealthResponse } from '@kbn/slo-schema';
 import { fetchSLOHealthResponseSchema } from '@kbn/slo-schema';
 import { type Dictionary, groupBy, keyBy } from 'lodash';
@@ -41,6 +42,7 @@ export class GetSLOHealth {
         sloInstanceId: item.sloInstanceId,
         sloRevision: sloById[item.sloId].revision,
         sloName: sloById[item.sloId].name,
+        sloEnabled: item.sloEnabled,
       }));
 
     const summaryDocsById = await this.getSummaryDocsById(filteredList);
@@ -52,10 +54,7 @@ export class GetSLOHealth {
         const state = computeState(summaryDocsById, item);
 
         return {
-          sloId: item.sloId,
-          sloName: item.sloName,
-          sloInstanceId: item.sloInstanceId,
-          sloRevision: item.sloRevision,
+          ...item,
           state,
           health,
         };
@@ -75,23 +74,29 @@ export class GetSLOHealth {
   }
 
   private async getSummaryDocsById(
-    filteredList: Array<{ sloId: string; sloInstanceId: string; sloRevision: number }>
+    filteredList: Array<{
+      sloId: string;
+      sloInstanceId: string;
+      sloRevision: number;
+      sloEnabled?: boolean;
+    }>
   ) {
-    const summaryDocs = await this.scopedClusterClient.asCurrentUser.search<EsSummaryDocument>({
-      index: SUMMARY_DESTINATION_INDEX_PATTERN,
-      query: {
-        bool: {
-          should: filteredList.map((item) => ({
-            bool: {
-              must: [
-                { term: { 'slo.id': item.sloId } },
-                { term: { 'slo.instanceId': item.sloInstanceId } },
-              ],
-            },
-          })),
+    const summaryDocs =
+      await this.scopedClusterClient.asSecondaryAuthUser.search<EsSummaryDocument>({
+        index: SUMMARY_DESTINATION_INDEX_PATTERN,
+        query: {
+          bool: {
+            should: filteredList.map((item) => ({
+              bool: {
+                must: [
+                  { term: { 'slo.id': item.sloId } },
+                  { term: { 'slo.instanceId': item.sloInstanceId } },
+                ],
+              },
+            })),
+          },
         },
-      },
-    });
+      });
 
     const summaryDocsById = groupBy(
       summaryDocs.hits.hits.map((hit) => hit._source!),
@@ -172,38 +177,53 @@ function computeState(
 }
 
 function getTransformHealth(
+  id: string,
+  sloEnabled: boolean | undefined,
   transformStat?: TransformGetTransformStatsTransformStats
 ): HealthStatus {
   if (!transformStat) {
     return {
+      id,
       status: 'missing',
+      match: false,
     };
   }
-  const transformState = transformStat.state?.toLowerCase();
-  return transformStat.health?.status?.toLowerCase() === 'green'
-    ? {
-        status: 'healthy',
-        transformState: transformState as HealthStatus['transformState'],
-      }
-    : {
-        status: 'unhealthy',
-        transformState: transformState as HealthStatus['transformState'],
-      };
+
+  const transformState = transformStat.state?.toLowerCase() as HealthStatus['transformState'];
+  const match =
+    (transformState === 'started' && sloEnabled) || (transformState === 'stopped' && !sloEnabled)
+      ? true
+      : false;
+  const status = transformStat.health?.status?.toLowerCase() === 'green' ? 'healthy' : 'unhealthy';
+  return {
+    id,
+    status,
+    transformState,
+    match,
+  };
 }
 
 function computeHealth(
   transformStatsById: Dictionary<TransformGetTransformStatsTransformStats>,
-  item: { sloId: string; sloInstanceId: string; sloRevision: number }
-): { overall: 'healthy' | 'unhealthy'; rollup: HealthStatus; summary: HealthStatus } {
-  const rollup = getTransformHealth(
-    transformStatsById[getSLOTransformId(item.sloId, item.sloRevision)]
-  );
-  const summary = getTransformHealth(
-    transformStatsById[getSLOSummaryTransformId(item.sloId, item.sloRevision)]
-  );
+  item: { sloId: string; sloInstanceId: string; sloRevision: number; enabled?: boolean }
+): {
+  overall: 'healthy' | 'unhealthy';
+  rollup: HealthStatus;
+  summary: HealthStatus;
+  enabled: boolean | undefined;
+} {
+  const rollupId = getSLOTransformId(item.sloId, item.sloRevision);
+  const summaryId = getSLOSummaryTransformId(item.sloId, item.sloRevision);
 
-  const overall: 'healthy' | 'unhealthy' =
+  const rollup = getTransformHealth(rollupId, item.enabled, transformStatsById[rollupId]);
+  const summary = getTransformHealth(summaryId, item.enabled, transformStatsById[summaryId]);
+
+  const stateMatch = rollup.match && summary.match;
+
+  const overallTransformHealth: 'healthy' | 'unhealthy' =
     rollup.status === 'healthy' && summary.status === 'healthy' ? 'healthy' : 'unhealthy';
 
-  return { overall, rollup, summary };
+  const overall = stateMatch ? overallTransformHealth : 'unhealthy';
+
+  return { overall, rollup, summary, enabled: item.enabled };
 }

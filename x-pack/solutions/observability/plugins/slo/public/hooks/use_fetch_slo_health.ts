@@ -23,10 +23,13 @@ export interface Params {
 
 export function useFetchSloHealth({ list }: Params): UseFetchSloHealth {
   const { sloClient } = usePluginContext();
-  const payload = list.map((slo) => ({
-    sloId: slo.id,
-    sloInstanceId: slo.instanceId ?? ALL_VALUE,
-  }));
+  const payload = list
+    ? list.map((slo) => ({
+        sloId: slo.id,
+        sloInstanceId: slo.instanceId ?? ALL_VALUE,
+        sloEnabled: slo.enabled,
+      }))
+    : [];
 
   const { isLoading, isError, data } = useQuery({
     queryKey: sloKeys.health(payload),

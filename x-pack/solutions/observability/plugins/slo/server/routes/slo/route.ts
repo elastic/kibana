@@ -29,6 +29,7 @@ import { resetSLORoute } from './reset_slo';
 import { getSLOStatsOverview } from './get_slo_stats_overview';
 import { bulkDeleteSLORoute, getBulkDeleteStatusRoute } from './bulk_delete';
 import { bulkPurgeRollupRoute } from './purge_rollup_data';
+import { repairSLORoute } from './repair_slo';
 
 export const getSloRouteRepository = (isServerless?: boolean) => {
   return {
@@ -57,5 +58,6 @@ export const getSloRouteRepository = (isServerless?: boolean) => {
     ...getSLOStatsOverview,
     ...bulkDeleteSLORoute,
     ...getBulkDeleteStatusRoute,
+    ...repairSLORoute,
   };
 };

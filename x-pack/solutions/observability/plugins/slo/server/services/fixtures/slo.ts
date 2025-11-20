@@ -210,6 +210,7 @@ export const createSLO = (params: Partial<SLODefinition> = {}): SLODefinition =>
     createdBy: 'irrelevant',
     updatedBy: 'irrelevant',
     version: SLO_MODEL_VERSION,
+    enabled: true,
     ...params,
   });
 };

@@ -40,8 +40,14 @@ describe('FindSLODefinitions with Health validation', () => {
         sloName: slo.name,
         health: {
           overall: 'healthy',
-          rollup: { status: 'healthy' },
-          summary: { status: 'healthy' },
+          rollup: { status: 'healthy', id: 'rollup-id', transformState: 'started', match: true },
+          summary: {
+            status: 'healthy',
+            id: 'summary-id',
+            transformState: 'started',
+            match: true,
+          },
+          enabled: true,
         },
         state: 'running',
       },
@@ -79,14 +85,16 @@ describe('FindSLODefinitions with Health validation', () => {
             sloInstanceId: '*',
             sloRevision: slo.revision,
             sloName: slo.name,
+            sloEnabled: slo.enabled,
           },
         ],
       });
 
       expect(result.results[0].health).toEqual({
+        enabled: true,
         overall: 'healthy',
-        rollup: { status: 'healthy' },
-        summary: { status: 'healthy' },
+        rollup: { status: 'healthy', id: 'rollup-id', transformState: 'started', match: true },
+        summary: { status: 'healthy', id: 'summary-id', transformState: 'started', match: true },
       });
     });
 
