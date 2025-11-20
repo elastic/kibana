@@ -81,7 +81,7 @@ export default function createMaintenanceWindowTests({ getService }: FtrProvider
             case 'space_1_all at space1':
               expect(response.statusCode).to.eql(200);
               expect(response.body.title).to.eql('test-maintenance-window');
-              expect(response.body.status).to.eql('running');
+              expect(response.body.status).to.eql('upcoming');
               expect(response.body.enabled).to.eql(true);
               expect(response.body.scope.alerting.query.kql).to.eql("_id: '1234'");
               expect(response.body.created_by).to.eql(scenario.user.username);
