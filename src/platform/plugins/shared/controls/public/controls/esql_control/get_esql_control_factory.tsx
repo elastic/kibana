@@ -150,16 +150,25 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
             const newSelection = isSelected ? current.filter((k) => k !== key) : [...current, key];
             selections.internalApi.setSelectedOptions(newSelection);
           }
-          // clear the incompatible selections upon any new selection
-          selections.internalApi.setInvalidSelections(new Set<OptionsListSelection>());
         },
         // Pass no-ops and default values for all of the features of OptionsList that ES|QL controls don't currently use
         ...componentStaticStateManager.api,
         singleSelect$: selections.api.singleSelect$ as PublishingSubject<boolean | undefined>,
         invalidSelections$: selections.internalApi.invalidSelections$,
-        deselectOption: () => {
-          // clear the incompatible selections upon any deselection
-          selections.internalApi.setInvalidSelections(new Set<OptionsListSelection>());
+        deselectOption: (key?: string) => {
+          const incompatibleSelections = selections.internalApi.invalidSelections$.value;
+          const isIncompatible = key ? incompatibleSelections.has(key) : false;
+          if (isIncompatible) {
+            // remove from incompatible selections
+            const newIncompatibleSelections = new Set(incompatibleSelections);
+            newIncompatibleSelections.delete(key!);
+            selections.internalApi.setInvalidSelections(newIncompatibleSelections);
+
+            // remove from selected options
+            const currentSelected = componentApi.selectedOptions$.value || [];
+            const newSelected = currentSelected.filter((option) => option !== key);
+            selections.internalApi.setSelectedOptions(newSelected);
+          }
         },
         selectAll: (keys: string[]) => {
           selections.internalApi.setSelectedOptions(keys);
