@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React, { useEffect, useMemo } from 'react';
-import { isObject } from 'lodash';
 import {
   EuiComboBox,
   EuiFlexGrid,
@@ -26,6 +25,7 @@ import { AdditionalFormField } from './additional_form_field';
 import type { ConnectorFieldsProps } from '../types';
 import { useGetFields } from './use_get_fields';
 import * as i18n from './translations';
+import { formFieldToResilientFieldValue } from './utils';
 
 export const AdditionalFormFields = React.memo<{
   field: FieldHook<string, string>;
@@ -77,27 +77,11 @@ export const AdditionalFormFields = React.memo<{
       if (key === undefined) {
         return acc;
       }
-      // Dates need to be sent to the resilient API as numbers
-      if (
-        isObject(value) &&
-        'toDate' in value &&
-        typeof value.toDate === 'function' &&
-        (fieldsMetadataRecord[key].input_type === 'datetimepicker' ||
-          fieldsMetadataRecord[key].input_type === 'datepicker')
-      ) {
-        // DatePickerFields return Moment objects but resilient expects numbers
-        acc[key] = value.toDate().getTime();
-      } else if (typeof value === 'string' && fieldsMetadataRecord[key].input_type === 'select') {
-        // SelectFields return strings but resilient expects numbers
-        acc[key] = Number(value);
-      } else if (Array.isArray(value) && fieldsMetadataRecord[key].input_type === 'multiselect') {
-        // MultiSelectFields return string[] but resilient expects number[]
-        acc[key] = value.map((v) => Number(v));
-      } else if (typeof value === 'string' && fieldsMetadataRecord[key].input_type === 'number') {
-        acc[key] = Number(value);
-      } else {
-        acc[key] = value;
+      const fieldMetaData = fieldsMetadataRecord[key];
+      if (!fieldMetaData) {
+        return acc;
       }
+      acc[key] = formFieldToResilientFieldValue(value, fieldMetaData);
       return acc;
     }, {} as Record<string, unknown>);
     const newValue = JSON.stringify(transformedFields);
