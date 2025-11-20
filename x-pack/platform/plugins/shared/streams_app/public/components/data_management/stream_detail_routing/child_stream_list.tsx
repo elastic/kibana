@@ -24,6 +24,7 @@ import { css } from '@emotion/css';
 import React from 'react';
 import { MAX_NESTING_LEVEL, getSegments } from '@kbn/streams-schema';
 import { isEmpty } from 'lodash';
+import { useScrollToActive } from '@kbn/core-chrome-navigation/src/hooks/use_scroll_to_active';
 import { NestedView } from '../../nested_view';
 import { CurrentStreamEntry } from './current_stream_entry';
 import { NewRoutingStreamEntry } from './new_routing_stream_entry';
@@ -39,7 +40,6 @@ import { NoSuggestionsCallout } from './review_suggestions_form/no_suggestions_c
 import { useReviewSuggestionsForm } from './review_suggestions_form/use_review_suggestions_form';
 import { useTimefilter } from '../../../hooks/use_timefilter';
 import { useAIFeatures } from '../../../hooks/use_ai_features';
-import { useScrollToActive } from '@kbn/core-chrome-navigation/src/hooks/use_scroll_to_active';
 
 function getReasonDisabledCreateButton(canManageRoutingRules: boolean, maxNestingLevel: boolean) {
   if (maxNestingLevel) {
