@@ -38,7 +38,6 @@ export const createAnswerAgentStructured = ({
   capabilities,
   events,
   outputSchema,
-  logger,
 }: {
   chatModel: InferenceChatModel;
   configuration: ResolvedConfiguration;

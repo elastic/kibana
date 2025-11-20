@@ -46,9 +46,13 @@ export const useSubscribeToChatEvents = ({
           }
           // full message received, override chunk buffer
           else if (isMessageCompleteEvent(event)) {
-            conversationActions.setAssistantMessage({
-              assistantMessage: event.data.message_content,
-            });
+            if (typeof event.data.message_content === 'string') {
+              conversationActions.setAssistantMessage({
+                assistantMessage: event.data.message_content,
+              });
+            } else {
+              throw new Error('Invalid message complete content type (object)');
+            }
           } else if (isToolProgressEvent(event)) {
             conversationActions.setToolCallProgress({
               progress: { message: event.data.message },
