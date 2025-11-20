@@ -24,7 +24,9 @@
     "@kbn/observability-plugin",
     "@kbn/core-http-server",
     "@kbn/data-views-plugin",
-    "@kbn/metrics-data-access-plugin"
+    "@kbn/metrics-data-access-plugin",
+    "@kbn/ml-anomaly-utils",
+    "@kbn/ml-plugin"
   ],
   "exclude": ["target/**/*"]
 }
