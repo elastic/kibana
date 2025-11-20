@@ -669,9 +669,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               lineHeight: isFullScreen ? 24 : 21,
               contextmenu: enableCustomContextMenu,
               fixedOverflowWidgets: enableSuggestWidgetRepositioning,
-              bracketPairColorization: {
-                enabled: false,
-              },
+              // @ts-expect-error, see https://github.com/microsoft/monaco-editor/issues/3829
+              'bracketPairColorization.enabled': false,
               ...options,
               // Explicit links prop always takes precedence over any value passed in options
               links,
