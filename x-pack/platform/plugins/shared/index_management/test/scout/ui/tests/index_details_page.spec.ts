@@ -6,12 +6,10 @@
  */
 
 import { test } from '../fixtures';
-// import { CUSTOM_ROLES } from './custom_roles';
 
 test.describe('Index details page', { tag: ['@ess'] }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    // await browserAuth.loginWithCustomRole(CUSTOM_ROLES.indexManagementUser);
-    await browserAuth.loginAsAdmin();
+  test.beforeEach(async ({ pageObjects, browserAuth }) => {
+    await browserAuth.loginAsIndexManagementUser();
     await pageObjects.indexManagement.goto();
   });
 

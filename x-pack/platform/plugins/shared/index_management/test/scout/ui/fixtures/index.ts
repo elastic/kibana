@@ -6,13 +6,23 @@
  */
 
 import { test as base } from '@kbn/scout';
-import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import type {
+  ScoutPage,
+  ScoutTestFixtures,
+  ScoutWorkerFixtures,
+  BrowserAuthFixture,
+} from '@kbn/scout';
 import type { PageObjects } from '@kbn/scout';
 import { createLazyPageObject } from '@kbn/scout';
 import type { AbstractPageObject } from './page_objects/index_management_page';
 import { IndexManagement } from './page_objects/index_management_page';
+import { CUSTOM_ROLES } from './custom_roles';
 
 type PageObjectClass = new (page: ScoutPage) => AbstractPageObject;
+
+export interface IndexManagementBrowserAuthFixture extends BrowserAuthFixture {
+  loginAsIndexManagementUser: () => Promise<void>;
+}
 
 export const createTest = function <PageObjectsExtensions = Record<string, AbstractPageObject>>(
   pageObjectClassMap: Record<string, PageObjectClass>
@@ -37,7 +47,9 @@ export const createTest = function <PageObjectsExtensions = Record<string, Abstr
     ScoutTestFixtures & {
       pageObjects: PageObjectsExtended;
     },
-    ScoutWorkerFixtures
+    ScoutWorkerFixtures & {
+      browserAuth: IndexManagementBrowserAuthFixture;
+    }
   >({
     pageObjects: async (
       {
@@ -51,6 +63,18 @@ export const createTest = function <PageObjectsExtensions = Record<string, Abstr
     ) => {
       const extendedPageObjects = extendPOs(pageObjects, page);
       await use(extendedPageObjects);
+    },
+    browserAuth: async (
+      { browserAuth }: { browserAuth: BrowserAuthFixture },
+      use: (browserAuth: IndexManagementBrowserAuthFixture) => Promise<void>
+    ) => {
+      const loginAsIndexManagementUser = async () =>
+        browserAuth.loginWithCustomRole(CUSTOM_ROLES.indexManagementUser);
+
+      await use({
+        ...browserAuth,
+        loginAsIndexManagementUser,
+      });
     },
   });
 };
