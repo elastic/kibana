@@ -14,13 +14,13 @@ export type FeatureType = (typeof featureTypes)[number];
 
 export const featureTypeSchema = z.enum(featureTypes);
 
-interface BaseFeature<T extends FeatureType = FeatureType> {
+export interface BaseFeature<T extends FeatureType = FeatureType> {
   type: T;
   name: string;
   description: string;
 }
 
-const baseFeatureSchema: z.Schema<BaseFeature> = z.object({
+export const baseFeatureSchema: z.Schema<BaseFeature> = z.object({
   type: featureTypeSchema,
   name: streamObjectNameSchema,
   description: z.string(),
