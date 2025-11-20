@@ -16,6 +16,7 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 import { InspectorHeaderLink } from './inspector_header_link';
 import { GiveFeedbackHeaderLink } from './give_feedback_header_link';
+import { useCreateApmSLO } from '../../../../hooks/use_create_apm_slo';
 
 export function ApmHeaderActionMenu() {
   const { core, plugins, config, share } = useApmPluginContext();
@@ -34,6 +35,8 @@ export function ApmHeaderActionMenu() {
     OBSERVABILITY_ONBOARDING_LOCATOR
   );
   const addDataUrl = onboardingLocator?.useUrl({ category: 'application' }) ?? '';
+
+  const { CreateSLOFlyout, setIsSLOFlyoutOpen } = useCreateApmSLO();
 
   function apmHref(path: string) {
     return getLegacyApmHref({ basePath, path, search });
@@ -66,6 +69,18 @@ export function ApmHeaderActionMenu() {
           canReadMlJobs={canReadMlJobs}
         />
       )}
+
+      <EuiHeaderLink
+        color="primary"
+        onClick={() => setIsSLOFlyoutOpen(true)}
+        data-test-subj="apmCreateSLOHeaderLink"
+      >
+        {i18n.translate('xpack.apm.createSLOHeaderLinkLabel', {
+          defaultMessage: 'Create SLO',
+        })}
+      </EuiHeaderLink>
+
+      {CreateSLOFlyout}
 
       <EuiHeaderLink
         color="primary"
