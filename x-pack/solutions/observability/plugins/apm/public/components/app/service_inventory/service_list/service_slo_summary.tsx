@@ -77,7 +77,7 @@ export function ServiceSloSummary({ serviceName }: Props) {
                     overviewMode: 'groups',
                     groupFilters: {
                       groupBy: 'status',
-                      kqlQuery: `service.name: "${serviceName}"`,
+                      kqlQuery: `service.name: "${serviceName}" OR slo.tags: "service.name:${serviceName}" OR slo.tags: "service:${serviceName}"`,
                     },
                   },
                 }),

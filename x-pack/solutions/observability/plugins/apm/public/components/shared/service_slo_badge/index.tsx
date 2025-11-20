@@ -43,7 +43,7 @@ export function ServiceSloBadge({ serviceName }: Props) {
   }
 
   const sloListLocator = locators.get(sloListLocatorID);
-  const kqlQuery = `service.name: "${serviceName}" AND (status:"VIOLATED" OR status:"DEGRADING")`;
+  const kqlQuery = `(service.name: "${serviceName}" OR slo.tags: "service.name:${serviceName}" OR slo.tags: "service:${serviceName}") AND (status:"VIOLATED" OR status:"DEGRADING")`;
 
   const handleClick = () => {
     sloListLocator?.navigate({ kqlQuery }, { replace: false });

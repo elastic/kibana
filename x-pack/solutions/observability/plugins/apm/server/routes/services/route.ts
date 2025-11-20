@@ -935,7 +935,7 @@ const serviceSlosRoute = createApmServerRoute({
 
     try {
       const result = await sloClient.findSLOs({
-        kqlQuery: `service.name: "${serviceName}" AND (status:"VIOLATED" OR status:"DEGRADING")`,
+        kqlQuery: `(service.name: "${serviceName}" OR slo.tags: "service.name:${serviceName}" OR slo.tags: "service:${serviceName}") AND (status:"VIOLATED" OR status:"DEGRADING")`,
         page: '1',
         perPage: '1',
       });
@@ -978,7 +978,7 @@ const transactionSlosRoute = createApmServerRoute({
     try {
       // Build KQL query with service name, transaction type, environment, and transaction name
       const kqlParts: string[] = [
-        `service.name: "${serviceName}"`,
+        `(service.name: "${serviceName}" OR slo.tags: "service.name:${serviceName}" OR slo.tags: "service:${serviceName}")`,
         `(status:"VIOLATED" OR status:"DEGRADING")`,
       ];
 

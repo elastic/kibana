@@ -31,7 +31,7 @@ export async function getServicesSLOs({
     const sloPromises = serviceNames.map(async (serviceName) => {
       try {
         const result = await sloClient.findSLOs({
-          kqlQuery: `service.name: "${serviceName}" AND status:"VIOLATED" or status:"DEGRADING"`,
+          kqlQuery: `(service.name: "${serviceName}" OR slo.tags: "service.name:${serviceName}" OR slo.tags: "service:${serviceName}") AND (status:"VIOLATED" OR status:"DEGRADING")`,
           page: '1',
           perPage: '1',
         });

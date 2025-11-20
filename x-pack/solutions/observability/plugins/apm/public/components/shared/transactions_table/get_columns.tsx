@@ -149,7 +149,7 @@ export function getColumns({
 
               const sloListLocator = getSloListLocator?.();
               const kqlParts: string[] = [
-                `service.name: "${serviceName}"`,
+                `(service.name: "${serviceName}" OR slo.tags: "service.name:${serviceName}" OR slo.tags: "service:${serviceName}")`,
                 `(status:"VIOLATED" OR status:"DEGRADING")`,
               ];
 
