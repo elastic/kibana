@@ -8,7 +8,6 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, merge } from 'rxjs';
 import type { ESQLControlState } from '@kbn/esql-types';
 import { apiPublishesESQLVariables } from '@kbn/esql-types';
@@ -27,17 +26,14 @@ import { initializeESQLControlSelections, selectionComparators } from './esql_co
 import { OptionsListControlContext } from '../data_controls/options_list_control/options_list_context_provider';
 import { OptionsListControl } from '../data_controls/options_list_control/components/options_list_control';
 import type { OptionsListComponentApi } from '../data_controls/options_list_control/types';
-
-const displayName = i18n.translate('controls.esqlValuesControl.displayName', {
-  defaultMessage: 'Static values list',
-});
+import { VariableControlsStrings } from './constants';
 
 export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLControlApi> => {
   return {
     type: ESQL_CONTROL,
     order: 3,
     getIconType: () => 'editorChecklist',
-    getDisplayName: () => displayName,
+    getDisplayName: () => VariableControlsStrings.displayName,
     buildControl: async ({ initialState, finalizeApi, uuid, controlGroupApi }) => {
       const defaultControlManager = initializeDefaultControlManager(initialState);
       const selections = initializeESQLControlSelections(
@@ -88,7 +84,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
         ...selections.api,
         defaultTitle$: new BehaviorSubject<string | undefined>(initialState.title),
         isEditingEnabled: () => true,
-        getTypeDisplayName: () => displayName,
+        getTypeDisplayName: () => VariableControlsStrings.displayName,
         onEdit: async () => {
           const state = {
             ...initialState,
@@ -191,23 +187,11 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
                 hideExclude: true,
                 hideExists: true,
                 hideSort: true,
-                placeholder: i18n.translate(
-                  'controls.optionsList.popover.emptySelectionPlaceholder',
-                  {
-                    defaultMessage: 'Select a value',
-                  }
-                ),
+                placeholder: VariableControlsStrings.emptySelectionPlaceholder,
               },
               customStrings: {
-                invalidSelectionsLabel: i18n.translate(
-                  'controls.optionsList.popover.incompatibleSelectionsSectionTitle',
-                  {
-                    defaultMessage:
-                      'Incompatible {incompatibleSelectionCount, plural, one {selection} other {selections}} ({incompatibleSelectionCount})',
-                    values: {
-                      incompatibleSelectionCount: componentApi.invalidSelections$.value.size,
-                    },
-                  }
+                invalidSelectionsLabel: VariableControlsStrings.getIncompatibleSelectionsLabel(
+                  componentApi.invalidSelections$.value.size
                 ),
               },
             }}

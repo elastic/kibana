@@ -284,7 +284,9 @@ const ESQLEditorInternal = function ESQLEditor({
     }
   }, [code, fixedQuery]);
 
-  // Enable the variables service if the feature is supported in the consumer app
+  // If variables are passed to the editor, sync them with the variables service.
+  // This ensures that the latest variables are always available for suggestions.
+  // The "Create control" suggestion is also enabled/disabled here based on the supportsControls flag
   useEffect(() => {
     const variables = variablesService?.esqlVariables;
     if (!isEqual(variables, esqlVariables)) {
@@ -293,10 +295,11 @@ const ESQLEditorInternal = function ESQLEditor({
         variablesService?.addVariable(variable);
       });
     }
+    // Enable or disable suggestions based on whether Create control suggestion is supported
     if (controlsContext?.supportsControls) {
-      variablesService?.enableSuggestions();
+      variablesService?.enableCreateControlSuggestion();
     } else {
-      variablesService?.disableSuggestions();
+      variablesService?.disableCreateControlSuggestion();
     }
   }, [variablesService, controlsContext, esqlVariables]);
 
@@ -615,7 +618,7 @@ const ESQLEditorInternal = function ESQLEditor({
         return variablesService?.esqlVariables;
       },
       canSuggestVariables: () => {
-        return variablesService?.areSuggestionsEnabled ?? false;
+        return variablesService?.isCreateControlSuggestionEnabled ?? false;
       },
       getJoinIndices,
       getTimeseriesIndices: kibana.services?.esql?.getTimeseriesIndicesAutocomplete,
@@ -671,7 +674,7 @@ const ESQLEditorInternal = function ESQLEditor({
     memoizedFieldsFromESQL,
     abortController,
     variablesService?.esqlVariables,
-    variablesService?.areSuggestionsEnabled,
+    variablesService?.isCreateControlSuggestionEnabled,
     histogramBarTarget,
     activeSolutionId,
     canCreateLookupIndex,
