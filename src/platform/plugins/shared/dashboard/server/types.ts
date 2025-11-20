@@ -10,35 +10,22 @@
 import type { RequestHandlerContext } from '@kbn/core/server';
 import type { ScanDashboardsResult } from './scan_dashboards';
 import type { DashboardState } from './api';
-import type {
-  DashboardCreateRequestBody,
-  DashboardCreateResponseBody,
-  DashboardReadResponseBody,
-  DashboardUpdateRequestBody,
-  DashboardUpdateResponseBody,
-} from './api';
+import { create, read, update, deleteDashboard } from './api';
 
 /**
  * Client interface for dashboard CRUD operations
  */
-export interface DashboardClient {
-  create: (
-    ctx: RequestHandlerContext,
-    body: DashboardCreateRequestBody
-  ) => Promise<DashboardCreateResponseBody>;
-  read: (ctx: RequestHandlerContext, id: string) => Promise<DashboardReadResponseBody>;
-  update: (
-    ctx: RequestHandlerContext,
-    id: string,
-    body: DashboardUpdateRequestBody
-  ) => Promise<DashboardUpdateResponseBody>;
-  delete: (ctx: RequestHandlerContext, id: string) => Promise<void>;
+export interface DashboardServerClient {
+  create: typeof create;
+  read: typeof read;
+  update: typeof update;
+  delete: typeof deleteDashboard;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DashboardPluginSetup {}
 export interface DashboardPluginStart {
-  client: DashboardClient;
+  client: DashboardServerClient;
   /**
    * @deprecated This method is deprecated and should be replaced by client.read
    */
