@@ -12,7 +12,6 @@ import { render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
 import type { NotificationsStart } from '@kbn/core/public';
-
 import { ContextMenu } from './context_menu';
 import { ServicesContextProvider } from '../../../../contexts';
 import type { ContextValue } from '../../../../contexts/services_context';

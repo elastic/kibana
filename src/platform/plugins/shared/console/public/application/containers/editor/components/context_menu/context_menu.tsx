@@ -24,6 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { convertRequestToLanguage } from '../../../../../services';
 import type { EditorRequest } from '../../types';
+import { LanguageSelectorModal } from './language_selector_modal';
 
 import { useServicesContext } from '../../../../contexts';
 import { StorageKeys } from '../../../../../services';
@@ -32,7 +33,6 @@ import {
   AVAILABLE_LANGUAGES,
   KIBANA_API_PREFIX,
 } from '../../../../../../common/constants';
-import { LanguageSelectorModal } from './language_selector_modal';
 
 interface Props {
   getRequests: () => Promise<EditorRequest[]>;
