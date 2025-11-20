@@ -84,7 +84,6 @@ export const createNavigationTree = ({
       ...filterForFeatureAvailability(
         {
           link: 'observability-overview:cases' as const,
-          renderAs: 'panelOpener',
           icon: LazyIconBriefcase,
           children: [
             {
