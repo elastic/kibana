@@ -2574,7 +2574,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
   },
   {
     key: 'windows.advanced.mitigations.policies.redirection_guard',
-    first_supported_version: '8.19.8',
+    first_supported_version: '9.3',
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.windows.advanced.mitigations.policies.redirection_guard',
       {
