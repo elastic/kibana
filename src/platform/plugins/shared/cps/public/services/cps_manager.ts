@@ -17,6 +17,12 @@ const MAX_RETRIES = 2;
 const RETRY_DELAY_MS = 1000;
 
 /**
+ * This should be configured on spaces level.
+ * Common values: PROJECT_ROUTING.ALL (all projects, will be parsed to undefined on request level), '_alias:_origin' (origin project only)
+ */
+export const DEFAULT_PROJECT_ROUTING: ProjectRouting = PROJECT_ROUTING.ALL;
+
+/**
  * Central service for managing project routing and project data.
  *
  * - Fetches project data from ES via `/internal/cps/projects_tags` endpoint (with caching and retry logic)
@@ -55,6 +61,20 @@ export class CPSManager implements ICPSManager {
     return this.projectRouting$.value;
   }
 
+  /**
+   * Get the default project routing value.
+   * This is the fallback value used when no app-specific or saved value exists.
+   */
+  public getDefaultProjectRouting(): ProjectRouting {
+    return DEFAULT_PROJECT_ROUTING;
+  }
+
+  /**
+   * Get the project picker access level as an observable.
+   * This combines the current app ID and location to determine whether
+   * the project picker should be editable, readonly, or disabled.
+   * Also returns the custom readonly message if applicable.
+   */
   /**
    * Fetches projects from the server with caching and retry logic.
    * Returns cached data if already loaded. If a fetch is already in progress, returns the existing promise.
