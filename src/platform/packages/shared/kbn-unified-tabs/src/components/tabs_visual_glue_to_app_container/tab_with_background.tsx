@@ -10,7 +10,7 @@
 import type { HTMLAttributes } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
-import { useEuiTheme, euiSlightShadowHover } from '@elastic/eui';
+import { useEuiTheme, euiSlightShadowHover, type EuiThemeComputed } from '@elastic/eui';
 import type { TabsServices } from '../../types';
 
 export interface TabWithBackgroundProps extends HTMLAttributes<HTMLElement> {
@@ -75,8 +75,8 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
         </div>
         {isSelected && !isDragging && (
           <>
-            <Accent direction="left" />
-            <Accent direction="right" />
+            <Accent direction="left" euiTheme={euiTheme} />
+            <Accent direction="right" euiTheme={euiTheme} />
           </>
         )}
       </div>
@@ -84,20 +84,26 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
   }
 );
 
-const Accent = ({ direction }: { direction: 'left' | 'right' }) => {
+const Accent = ({
+  direction,
+  euiTheme,
+}: {
+  direction: 'left' | 'right';
+  euiTheme: EuiThemeComputed;
+}) => {
   return (
     <svg
       css={css`
-        height: 8px;
-        width: 8px;
+        height: ${euiTheme.size.s};
+        width: ${euiTheme.size.s};
         position: absolute;
         bottom: 0;
-        ${direction === 'left' ? 'left: -8px;' : 'right: -8px;'};
+        ${direction === 'left' ? `left: -${euiTheme.size.s};` : `right: -${euiTheme.size.s};`};
         ${direction === 'left' ? 'transform: scaleX(-1);' : ''};
       `}
       xmlns="http://www.w3.org/2000/svg"
-      width="8"
-      height="8"
+      width={euiTheme.size.s}
+      height={euiTheme.size.s}
       viewBox="0 0 8 8"
       fill="none"
     >
