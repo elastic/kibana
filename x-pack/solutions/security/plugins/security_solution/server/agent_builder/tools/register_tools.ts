@@ -11,7 +11,7 @@ import {
   attackDiscoverySearchTool,
   SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
 } from './attack_discovery_search_tool';
-import { alertsTool, SECURITY_ALERTS_TOOL_ID } from './alerts_tool';
+import { SECURITY_ALERTS_TOOL_ID } from './alerts_tool';
 import { entityRiskScoreTool, SECURITY_ENTITY_RISK_SCORE_TOOL_ID } from './entity_risk_score_tool';
 import { SEARCH_ALERTS_TOOL_ID } from './search_alerts_tool';
 
@@ -38,7 +38,7 @@ export const SECURITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...SECURITY_TOOL_I
  * Registers all security agent builder tools with the onechat plugin
  */
 export const registerTools = (onechat: OnechatPluginSetup): void => {
-  onechat.tools.register(alertsTool());
+  // onechat.tools.register(alertsTool());
   // onechat.tools.register(securityLabsTool());
   // onechat.tools.register(searchAlertsTool());
   // onechat.tools.register(triageAlertsTool());
