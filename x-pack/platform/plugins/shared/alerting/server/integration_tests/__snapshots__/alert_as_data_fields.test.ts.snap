@@ -11453,6 +11453,10 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "monitor.failed_step_info": Object {
+      "required": false,
+      "type": "text",
+    },
     "monitor.id": Object {
       "required": false,
       "type": "keyword",
@@ -11614,6 +11618,10 @@ Object {
       "array": true,
       "required": false,
       "type": "keyword",
+    },
+    "monitor.failed_step_info": Object {
+      "required": false,
+      "type": "text",
     },
     "monitor.id": Object {
       "required": false,
@@ -11777,6 +11785,10 @@ Object {
       "required": false,
       "type": "keyword",
     },
+    "monitor.failed_step_info": Object {
+      "required": false,
+      "type": "text",
+    },
     "monitor.id": Object {
       "required": false,
       "type": "keyword",
@@ -11938,6 +11950,10 @@ Object {
       "array": true,
       "required": false,
       "type": "keyword",
+    },
+    "monitor.failed_step_info": Object {
+      "required": false,
+      "type": "text",
     },
     "monitor.id": Object {
       "required": false,
@@ -12106,6 +12122,10 @@ Object {
       "array": true,
       "required": false,
       "type": "keyword",
+    },
+    "monitor.failed_step_info": Object {
+      "required": false,
+      "type": "text",
     },
     "monitor.id": Object {
       "required": false,

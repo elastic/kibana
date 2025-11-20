@@ -54,14 +54,21 @@ export const registerApp = ({
         title: i18n.translate('xpack.onechat.agents.title', { defaultMessage: 'Agents' }),
       },
     ],
-    async mount({ element, history }: AppMountParameters) {
+    async mount({ element, history, onAppLeave }: AppMountParameters) {
       const { mountApp } = await import('./application');
       const [coreStart, startDependencies] = await core.getStartServices();
 
       coreStart.chrome.docTitle.change(AGENT_BUILDER_FULL_TITLE);
       const services = getServices();
 
-      return mountApp({ core: coreStart, services, element, history, plugins: startDependencies });
+      return mountApp({
+        core: coreStart,
+        services,
+        element,
+        history,
+        plugins: startDependencies,
+        onAppLeave,
+      });
     },
   });
 };
