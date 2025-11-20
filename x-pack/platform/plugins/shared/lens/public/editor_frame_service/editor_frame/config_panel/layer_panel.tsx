@@ -363,6 +363,11 @@ export function LayerPanel(props: LayerPanelProps) {
     isTextBasedLanguage,
   ]);
 
+  const supportsMultipleLayers = useMemo(
+    () => Boolean(activeVisualization.getAddLayerButtonComponent),
+    [activeVisualization]
+  );
+
   return (
     <>
       <section
@@ -440,20 +445,22 @@ export function LayerPanel(props: LayerPanelProps) {
                       />
                     </EuiToolTip>
                   </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiToolTip
-                      content={layerActions.cloneLayerAction.displayName}
-                      disableScreenReaderOutput
-                    >
-                      <EuiButtonIcon
-                        iconType={layerActions.cloneLayerAction.icon}
-                        color={layerActions.cloneLayerAction.color}
-                        aria-label={layerActions.cloneLayerAction.displayName}
-                        onClick={() => layerActions.cloneLayerAction.execute(null)}
-                        data-test-subj={layerActions.cloneLayerAction['data-test-subj']}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
+                  {supportsMultipleLayers ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiToolTip
+                        content={layerActions.cloneLayerAction.displayName}
+                        disableScreenReaderOutput
+                      >
+                        <EuiButtonIcon
+                          iconType={layerActions.cloneLayerAction.icon}
+                          color={layerActions.cloneLayerAction.color}
+                          aria-label={layerActions.cloneLayerAction.displayName}
+                          onClick={() => layerActions.cloneLayerAction.execute(null)}
+                          data-test-subj={layerActions.cloneLayerAction['data-test-subj']}
+                        />
+                      </EuiToolTip>
+                    </EuiFlexItem>
+                  ) : null}
                 </>
               )}
             </EuiFlexGroup>
