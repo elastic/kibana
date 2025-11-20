@@ -22,8 +22,8 @@ import { useOverviewTrendsRequests } from '../../../hooks/use_overview_trends_re
 
 const ITEM_HEIGHT = METRIC_ITEM_HEIGHT + 12;
 const MAX_LIST_HEIGHT = 800;
-const MIN_BATCH_SIZE = 1;
-const LIST_THRESHOLD = 3;
+const MIN_BATCH_SIZE = 20;
+const LIST_THRESHOLD = 12;
 const MIN_CARD_WIDTH = 400;
 
 interface ListItem {
