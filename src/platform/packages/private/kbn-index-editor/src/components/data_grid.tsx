@@ -167,7 +167,7 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
       (acc, columnName, columnIndex) => {
         const isSavedColumn = !!props.dataView.fields.getByName(columnName);
         const editMode = editingColumnIndex === columnIndex;
-        const columnType = columnsMeta[columnName]?.type;
+        const columnType = columnsMeta[columnName]?.esType;
         acc[columnName] = memoize(
           getColumnHeaderRenderer(
             columnName,

@@ -93,7 +93,7 @@ const renderOption = (
   searchValue: string,
   contentClassName: string
 ) => {
-  if (option.value === 'documentation') {
+  if (option.value === DOCUMENTATION_VALUE) {
     return (
       <EuiLink href={ES_TYPES_DOCS_URL} target="_blank" external>
         {option.label}

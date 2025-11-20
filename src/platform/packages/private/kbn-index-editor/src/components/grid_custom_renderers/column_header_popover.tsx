@@ -55,7 +55,6 @@ export const ColumnHeaderPopover = ({
   originalColumnDisplay,
 }: PropsWithChildren<ColumnHeaderPopoverProps>) => {
   const { euiTheme } = useEuiTheme();
-
   const { columnType, setColumnType, columnName, setColumnName, saveColumn, validationError } =
     useAddColumnName(initialColumnName, initialColumnType);
 
@@ -96,6 +95,10 @@ export const ColumnHeaderPopover = ({
             defaultMessage:
               'This type has partial suport, editions you do will be saved but will not be visible in this editor after closing it.',
           })}
+          className="fieldWarningTip"
+          anchorProps={{
+            css: { display: 'flex', marginLeft: euiTheme.size.xxs },
+          }}
         />
       )}
       {originalColumnDisplay}
@@ -177,7 +180,6 @@ export const ColumnHeaderPopover = ({
     >
       <EuiForm component="form" onSubmit={onSubmit}>
         <EuiFormRow
-          id="typeSelect"
           label={i18n.translate('indexEditor.columnHeaderEdit.fieldType', {
             defaultMessage: 'Select a field type',
           })}
