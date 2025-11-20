@@ -8,6 +8,7 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme, keys, useGeneratedHtmlId } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { MessageEditorInstance } from './use_message_editor';
 
 const EDITOR_MAX_HEIGHT = 240;
@@ -32,6 +33,10 @@ const disabledStyles = css`
     cursor: not-allowed;
   }
 `;
+
+const editorAriaLabel = i18n.translate('xpack.onechat.conversationInput.messageEditor.label', {
+  defaultMessage: 'Message input',
+});
 
 interface MessageEditorProps {
   messageEditor: MessageEditorInstance;
@@ -68,7 +73,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
       contentEditable={disabled ? 'false' : 'plaintext-only'}
       role="textbox"
       aria-multiline="true"
-      aria-label="Message input"
+      aria-label={editorAriaLabel}
       aria-disabled={disabled}
       tabIndex={0}
       data-placeholder={placeholder}
