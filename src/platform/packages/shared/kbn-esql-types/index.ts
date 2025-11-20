@@ -40,6 +40,16 @@ export {
   SOURCES_AUTOCOMPLETE_ROUTE,
   TIMEFIELD_ROUTE,
   SOURCES_TYPES,
+  LOOKUP_INDEX_CREATE_ROUTE,
+  LOOKUP_INDEX_UPDATE_ROUTE,
+  LOOKUP_INDEX_RECREATE_ROUTE,
+  LOOKUP_INDEX_PRIVILEGES_ROUTE,
 } from './src/constants';
 
-export { type ESQLTelemetryCallbacks } from './src/esql_telemetry_types';
+export {
+  type ESQLTelemetryCallbacks,
+  ControlTriggerSource,
+  QuerySource,
+  TelemetryControlCancelledReason,
+  type TelemetryQuerySubmittedProps,
+} from './src/esql_telemetry_types';

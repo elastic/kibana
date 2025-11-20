@@ -74,7 +74,6 @@ describe('MetricsGrid', () => {
         fields={fields}
         requestParams={requestParams}
         services={services}
-        filters={[]}
       />
     );
 
@@ -91,7 +90,6 @@ describe('MetricsGrid', () => {
         fields={fields}
         requestParams={requestParams}
         services={services}
-        filters={[]}
       />
     );
 
@@ -105,7 +103,6 @@ describe('MetricsGrid', () => {
         fields={fields}
         requestParams={requestParams}
         services={services}
-        filters={[]}
       />
     );
 
@@ -131,7 +128,6 @@ describe('MetricsGrid', () => {
           fields={fields}
           requestParams={requestParams}
           services={services}
-          filters={[]}
         />
       );
 
@@ -155,7 +151,6 @@ describe('MetricsGrid', () => {
           fields={fields}
           requestParams={requestParams}
           services={services}
-          filters={[]}
         />
       );
 
@@ -184,7 +179,6 @@ describe('MetricsGrid', () => {
           fields={fields}
           requestParams={requestParams}
           services={services}
-          filters={[]}
         />
       );
 
@@ -216,7 +210,6 @@ describe('MetricsGrid', () => {
           fields={fields}
           requestParams={requestParams}
           services={services}
-          filters={[]}
         />
       );
 
@@ -255,7 +248,6 @@ describe('MetricsGrid', () => {
           fields={multipleFields}
           requestParams={requestParams}
           services={services}
-          filters={[]}
         />
       );
 
@@ -301,7 +293,6 @@ describe('MetricsGrid', () => {
             fields={fields}
             requestParams={requestParams}
             services={services}
-            filters={[]}
           />
         );
 
@@ -321,7 +312,6 @@ describe('MetricsGrid', () => {
             fields={fields}
             requestParams={requestParams}
             services={services}
-            filters={[]}
           />
         );
 
@@ -353,7 +343,6 @@ describe('MetricsGrid', () => {
             fields={fields}
             requestParams={requestParams}
             services={services}
-            filters={[]}
           />
         );
 
@@ -376,7 +365,6 @@ describe('MetricsGrid', () => {
             fields={fields}
             requestParams={requestParams}
             services={services}
-            filters={[]}
           />
         );
 

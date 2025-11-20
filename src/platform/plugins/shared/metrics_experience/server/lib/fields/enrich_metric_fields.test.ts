@@ -10,13 +10,14 @@
 import { enrichMetricFields } from './enrich_metric_fields';
 import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import type { IndexFieldCapsMap, EpochTimeRange } from '../../types';
-import type { MetricField } from '../../../common/types';
+import type { MetricField, DimensionFilters } from '../../../common/types';
 import { extractDimensions } from '../dimensions/extract_dimensions';
 import type { Logger } from '@kbn/core/server';
 import type { FieldCapsFieldCapability } from '@elastic/elasticsearch/lib/api/types';
 import { normalizeUnit } from './normalize_unit';
+import type { estypes } from '@elastic/elasticsearch';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import { kqlQuery } from '@kbn/es-query';
+import { termsQuery } from '@kbn/es-query';
 jest.mock('../dimensions/extract_dimensions');
 jest.mock('./normalize_unit');
 
@@ -67,10 +68,11 @@ describe('enrichMetricFields', () => {
   });
 
   const createFieldCaps = (
-    fieldName: string = TEST_HOST_FIELD
+    fieldName: string = TEST_HOST_FIELD,
+    type: ES_FIELD_TYPES = ES_FIELD_TYPES.KEYWORD
   ): Record<string, Record<string, FieldCapsFieldCapability>> => ({
     [fieldName]: {
-      keyword: { time_series_dimension: true, meta: {} } as FieldCapsFieldCapability,
+      [type]: { time_series_dimension: true, meta: {}, type } as FieldCapsFieldCapability,
     },
   });
 
@@ -200,10 +202,10 @@ describe('enrichMetricFields', () => {
     });
   });
 
-  describe('kuery filtering', () => {
-    it('passes kuery filter to Elasticsearch query', async () => {
+  describe('dimension filters', () => {
+    it('handles empty filters object', async () => {
       const metricFields = [createMetricField()];
-      const kuery = 'host.name: "server-1"';
+      const filters: DimensionFilters = {};
 
       msearchMock.mockResolvedValue(
         createMsearchResponse(TEST_INDEX_METRICS, { [TEST_HOST_FIELD]: [TEST_HOST_VALUE] })
@@ -217,20 +219,170 @@ describe('enrichMetricFields', () => {
         indexFieldCapsMap,
         logger,
         timerange: timeRangeFixture,
-        kuery,
+        filters,
       });
 
-      expect(msearchMock).toHaveBeenCalledWith('sample_metrics_documents', {
-        body: expect.arrayContaining([
+      const msearchCall = msearchMock.mock.calls[0][1];
+      const body = msearchCall?.body as NonNullable<Array<estypes.SearchRequest>>;
+
+      const queryFilter = body[1].query?.bool?.filter;
+      expect(queryFilter).toEqual(
+        expect.arrayContaining([
+          { exists: { field: TEST_METRIC_NAME } },
+          expect.objectContaining({ range: expect.any(Object) }),
+        ])
+      );
+
+      expect(queryFilter).toHaveLength(2);
+    });
+
+    it('applies single dimension filter with single value', async () => {
+      const metricFields = [createMetricField()];
+      const filters: DimensionFilters = {
+        [TEST_HOST_FIELD]: [TEST_HOST_VALUE],
+      };
+
+      msearchMock.mockResolvedValue(
+        createMsearchResponse(TEST_INDEX_METRICS, { [TEST_HOST_FIELD]: [TEST_HOST_VALUE] })
+      );
+
+      indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
+
+      await enrichMetricFields({
+        esClient: esClientMock,
+        metricFields,
+        indexFieldCapsMap,
+        logger,
+        timerange: timeRangeFixture,
+        filters,
+      });
+
+      const msearchCall = msearchMock.mock.calls[0][1];
+      const body = msearchCall?.body as NonNullable<Array<estypes.SearchRequest>>;
+
+      expect(body[0]).toEqual({ index: TEST_INDEX_METRICS });
+      expect(body[1]?.query?.bool?.filter).toEqual(
+        expect.arrayContaining([
           expect.objectContaining({
-            query: expect.objectContaining({
-              bool: expect.objectContaining({
-                filter: expect.arrayContaining([...kqlQuery(kuery)]),
-              }),
+            bool: expect.objectContaining({
+              should: expect.arrayContaining([...termsQuery(TEST_HOST_FIELD, [TEST_HOST_VALUE])]),
             }),
           }),
-        ]),
+        ])
+      );
+    });
+
+    it('applies single dimension filter with multiple values', async () => {
+      const metricFields = [createMetricField()];
+      const filters: DimensionFilters = {
+        [TEST_HOST_FIELD]: ['host-1', 'host-2', 'host-3'],
+      };
+
+      msearchMock.mockResolvedValue(
+        createMsearchResponse(TEST_INDEX_METRICS, { [TEST_HOST_FIELD]: [TEST_HOST_VALUE] })
+      );
+
+      indexFieldCapsMap.set(TEST_INDEX_METRICS, createFieldCaps());
+
+      await enrichMetricFields({
+        esClient: esClientMock,
+        metricFields,
+        indexFieldCapsMap,
+        logger,
+        timerange: timeRangeFixture,
+        filters,
       });
+
+      const msearchCall = msearchMock.mock.calls[0][1];
+      const body = msearchCall?.body as NonNullable<Array<estypes.SearchRequest>>;
+
+      expect(body[0]).toEqual({ index: TEST_INDEX_METRICS });
+      expect(body[1]?.query?.bool?.filter).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            bool: expect.objectContaining({
+              should: expect.arrayContaining([
+                ...termsQuery(TEST_HOST_FIELD, ['host-1', 'host-2', 'host-3']),
+              ]),
+            }),
+          }),
+        ])
+      );
+    });
+
+    it('applies multiple dimension filters with mapping mismatch', async () => {
+      const metricFields = [
+        createMetricField(TEST_METRIC_NAME, TEST_INDEX_METRICS, {
+          dimensions: [{ name: 'attribute.cpu', type: ES_FIELD_TYPES.KEYWORD }],
+        }),
+        createMetricField(TEST_METRIC_NAME, TEST_INDEX_METRICBEAT, {
+          dimensions: [{ name: 'attribute.cpu', type: ES_FIELD_TYPES.LONG }],
+        }),
+      ];
+
+      const filters: DimensionFilters = {
+        'attribute.cpu': ['1', '2', 'cpu0', 'cpu1'],
+      };
+
+      msearchMock.mockResolvedValue({
+        responses: [
+          ...createMsearchResponse(TEST_INDEX_METRICS, {
+            'attribute.cpu': ['cpu0', 'cpu1'],
+          }).responses,
+          ...createMsearchResponse(TEST_INDEX_METRICBEAT, {
+            'attribute.cpu': ['1', '2'],
+          }).responses,
+        ],
+      });
+
+      indexFieldCapsMap.set(
+        TEST_INDEX_METRICS,
+        createFieldCaps('attribute.cpu', ES_FIELD_TYPES.KEYWORD)
+      );
+      indexFieldCapsMap.set(
+        TEST_INDEX_METRICBEAT,
+        createFieldCaps('attribute.cpu', ES_FIELD_TYPES.LONG)
+      );
+
+      await enrichMetricFields({
+        esClient: esClientMock,
+        metricFields,
+        indexFieldCapsMap,
+        logger,
+        timerange: timeRangeFixture,
+        filters,
+      });
+
+      const msearchCall = msearchMock.mock.calls[0][1];
+      const body = msearchCall?.body as NonNullable<Array<estypes.SearchRequest>>;
+
+      expect(body).toHaveLength(4);
+
+      expect(body[0]).toEqual({ index: TEST_INDEX_METRICS });
+      expect(body[1]?.query?.bool?.filter).toEqual(
+        expect.arrayContaining([
+          { exists: { field: 'system.cpu.utilization' } },
+          expect.objectContaining({
+            bool: expect.objectContaining({
+              should: expect.arrayContaining([
+                { terms: { 'attribute.cpu': ['1', '2', 'cpu0', 'cpu1'] } },
+              ]),
+            }),
+          }),
+        ])
+      );
+
+      expect(body[2]).toEqual({ index: TEST_INDEX_METRICBEAT });
+      expect(body[3]?.query?.bool?.filter).toEqual(
+        expect.arrayContaining([
+          { exists: { field: 'system.cpu.utilization' } },
+          expect.objectContaining({
+            bool: expect.objectContaining({
+              should: expect.arrayContaining([{ terms: { 'attribute.cpu': [1, 2] } }]),
+            }),
+          }),
+        ])
+      );
     });
   });
 
