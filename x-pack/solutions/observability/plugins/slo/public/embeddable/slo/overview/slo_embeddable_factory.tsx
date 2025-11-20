@@ -38,6 +38,7 @@ import type {
   SloOverviewState,
 } from './types';
 import { openSloConfiguration } from './slo_overview_open_configuration';
+import { CreateSloContext } from './create_slo_context';
 
 const getOverviewPanelTitle = () =>
   i18n.translate('xpack.slo.sloEmbeddable.displayName', {
@@ -240,6 +241,16 @@ export const getOverviewEmbeddableFactory = ({
 
         const queryClient = new QueryClient();
 
+        // Get onCreateSLO and onViewSLO from parent API if available
+        const onCreateSLO =
+          parentApi && typeof (parentApi as any).onCreateSLO === 'function'
+            ? (parentApi as any).onCreateSLO
+            : undefined;
+        const onViewSLO =
+          parentApi && typeof (parentApi as any).onViewSLO === 'function'
+            ? (parentApi as any).onViewSLO
+            : undefined;
+
         return (
           <EuiThemeProvider darkMode={true}>
             <KibanaContextProvider services={deps}>
@@ -253,7 +264,13 @@ export const getOverviewEmbeddableFactory = ({
                 }}
               >
                 <QueryClientProvider client={queryClient}>
-                  {showAllGroupByInstances ? <SloCardChartList sloId={sloId!} /> : renderOverview()}
+                  <CreateSloContext.Provider value={{ onCreateSLO, onViewSLO }}>
+                    {showAllGroupByInstances ? (
+                      <SloCardChartList sloId={sloId!} />
+                    ) : (
+                      renderOverview()
+                    )}
+                  </CreateSloContext.Provider>
                 </QueryClientProvider>
               </PluginContext.Provider>
             </KibanaContextProvider>

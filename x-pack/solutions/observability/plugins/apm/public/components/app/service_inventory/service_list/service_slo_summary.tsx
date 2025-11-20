@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { useFetcher } from '../../../../hooks/use_fetcher';
+import { useCreateApmSLO } from '../../../../hooks/use_create_apm_slo';
 
 const SLO_OVERVIEW_EMBEDDABLE_ID = 'SLO_EMBEDDABLE';
 
@@ -18,6 +19,8 @@ interface Props {
 }
 
 export function ServiceSloSummary({ serviceName }: Props) {
+  const { CreateSLOFlyout, setIsSLOFlyoutOpen, onViewSLO } = useCreateApmSLO();
+
   const { data: sloCount, status } = useFetcher(
     (callApmApi) => {
       return callApmApi('GET /internal/apm/services/{serviceName}/slos_count', {
@@ -81,12 +84,17 @@ export function ServiceSloSummary({ serviceName }: Props) {
                     },
                   },
                 }),
+                onCreateSLO: () => {
+                  setIsSLOFlyoutOpen(true);
+                },
+                onViewSLO,
               })}
               hidePanelChrome={true}
             />
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
+      {CreateSLOFlyout}
     </EuiPanel>
   );
 }

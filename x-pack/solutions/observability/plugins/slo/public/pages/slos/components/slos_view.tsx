@@ -22,9 +22,10 @@ export interface Props {
   loading: boolean;
   error: boolean;
   view: ViewType;
+  onViewSLO?: (slo: SLOWithSummaryResponse) => void;
 }
 
-export function SlosView({ sloList, loading, error, view }: Props) {
+export function SlosView({ sloList, loading, error, view, onViewSLO }: Props) {
   if (!loading && !error && sloList.length === 0) {
     return <SloListEmpty />;
   }
@@ -36,7 +37,7 @@ export function SlosView({ sloList, loading, error, view }: Props) {
   if (view === 'cardView') {
     return (
       <Wrapper sloList={sloList}>
-        <SloListCardView sloList={sloList} loading={loading} error={error} />
+        <SloListCardView sloList={sloList} loading={loading} error={error} onViewSLO={onViewSLO} />
       </Wrapper>
     );
   }

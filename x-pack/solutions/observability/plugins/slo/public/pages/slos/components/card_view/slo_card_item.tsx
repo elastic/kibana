@@ -28,6 +28,7 @@ import { BurnRateRuleFlyout } from '../common/burn_rate_rule_flyout';
 import { EditBurnRateRuleFlyout } from '../common/edit_burn_rate_rule_flyout';
 import { SloCardItemActions } from './slo_card_item_actions';
 import { SloCardItemBadges } from './slo_card_item_badges';
+import { useCreateSloContext } from '../../../../embeddable/slo/overview/create_slo_context';
 
 const SavedObjectSaveModalDashboard = withSuspense(LazySavedObjectSaveModalDashboard);
 export interface Props {
@@ -39,6 +40,7 @@ export interface Props {
   loading: boolean;
   error: boolean;
   refetchRules: () => void;
+  onViewSLO?: (slo: SLOWithSummaryResponse) => void;
 }
 
 export const useSloCardColor = (status?: SLOWithSummaryResponse['summary']['status']) => {
@@ -63,8 +65,17 @@ const getFirstGroupBy = (slo: SLOWithSummaryResponse) => {
   return slo.groupBy && ![slo.groupBy].flat().includes(ALL_VALUE) ? firstGroupBy : '';
 };
 
-export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refetchRules }: Props) {
+export function SloCardItem({
+  slo,
+  rules,
+  activeAlerts,
+  historicalSummary,
+  refetchRules,
+  onViewSLO: onViewSLOProp,
+}: Props) {
   const containerRef = React.useRef<HTMLDivElement>(null);
+  const { onViewSLO: onViewSLOContext } = useCreateSloContext();
+  const onViewSLO = onViewSLOProp || onViewSLOContext;
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isAddRuleFlyoutOpen, setIsAddRuleFlyoutOpen] = useState(false);
@@ -119,6 +130,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, refet
         <SloCardChart
           slo={slo}
           historicalSliData={historicalSliData}
+          onClick={onViewSLO ? () => onViewSLO(slo) : undefined}
           badges={
             <SloCardItemBadges
               slo={slo}

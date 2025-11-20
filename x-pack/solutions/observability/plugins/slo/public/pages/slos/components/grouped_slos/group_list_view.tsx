@@ -22,7 +22,7 @@ import {
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import type { GroupSummary } from '@kbn/slo-schema';
+import type { GroupSummary, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React, { memo, useState } from 'react';
 import { paths } from '../../../../../common/locators/paths';
 import { useFetchSloList } from '../../../../hooks/use_fetch_slo_list';
@@ -41,6 +41,7 @@ interface Props {
   groupBy: GroupByField;
   summary?: GroupSummary;
   filters?: Filter[];
+  onViewSLO?: (slo: SLOWithSummaryResponse) => void;
 }
 
 export function GroupListView({
@@ -52,6 +53,7 @@ export function GroupListView({
   groupBy,
   summary,
   filters,
+  onViewSLO,
 }: Props) {
   const groupQuery = `"${groupBy}": "${group}"`;
   const query = kqlQuery ? `${groupQuery} and ${kqlQuery}` : groupQuery;
@@ -202,6 +204,7 @@ export function GroupListView({
                   loading={isLoading || isRefetching}
                   error={isError}
                   view={view}
+                  onViewSLO={onViewSLO}
                 />
                 <EuiSpacer size="m" />
                 {total > 0 && total > itemsPerPage ? (

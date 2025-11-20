@@ -76,8 +76,11 @@ export function useCreateApmSLO() {
     },
   });
 
+  const handleViewSLO = undefined;
+
   return {
     CreateSLOFlyout: isSLOFlyoutOpen ? CreateSLOFlyout : null,
     setIsSLOFlyoutOpen,
+    onViewSLO: undefined,
   };
 }

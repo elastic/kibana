@@ -6,10 +6,13 @@
  */
 
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { useCreateSloContext } from '../../../../embeddable/slo/overview/create_slo_context';
 
 export function SloGroupListEmpty() {
+  const { onCreateSLO } = useCreateSloContext();
+
   return (
     <EuiCallOut
       data-test-subj="sloGroupListEmpty"
@@ -19,9 +22,27 @@ export function SloGroupListEmpty() {
       color="warning"
       iconType="warning"
     >
-      {i18n.translate('xpack.slo.groupList.emptyMessage', {
-        defaultMessage: 'There are no results for your criteria.',
-      })}
+      <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexItem>
+          {i18n.translate('xpack.slo.groupList.emptyMessage', {
+            defaultMessage: 'There are no results for your criteria.',
+          })}
+        </EuiFlexItem>
+        {onCreateSLO && (
+          <EuiFlexItem>
+            <EuiButton
+              data-test-subj="sloGroupListEmptyCreateSloButton"
+              onClick={onCreateSLO}
+              fill
+              iconType="plusInCircle"
+            >
+              {i18n.translate('xpack.slo.groupList.createSloButton', {
+                defaultMessage: 'Create SLO',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
     </EuiCallOut>
   );
 }
