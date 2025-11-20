@@ -7,7 +7,6 @@
 
 import { z } from '@kbn/zod';
 import type { ErrorCause } from '@elastic/elasticsearch/lib/api/types';
-import { internal } from '@hapi/boom';
 import { STREAMS_API_PRIVILEGES } from '../../../common/constants';
 import { createServerRoute } from '../create_server_route';
 import type { Attachment } from '../../lib/streams/attachments/types';
@@ -206,7 +205,7 @@ const bulkDashboardsRoute = createServerRoute({
 
     await streamsClient.ensureStream(streamName);
 
-    const result = await attachmentClient.bulk(
+    await attachmentClient.bulk(
       streamName,
       operations.map((operation) => {
         if ('index' in operation) {
@@ -229,11 +228,6 @@ const bulkDashboardsRoute = createServerRoute({
         };
       })
     );
-
-    if (result.errors) {
-      logger.error(`Error indexing some items`);
-      throw internal(`Could not index all items`, { errors: result.errors });
-    }
 
     return { acknowledged: true };
   },
