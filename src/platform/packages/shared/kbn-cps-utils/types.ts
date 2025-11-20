@@ -27,7 +27,9 @@ export interface CPSProject {
   _alias: string;
   _type: string;
   _organisation: string;
-  [key: string]: string;
+  _csp?: string;
+  _region?: string;
+  [key: string]: string | undefined;
 }
 
 export interface ProjectTagsResponse {
@@ -48,7 +50,9 @@ export interface ProjectPickerAccessInfo {
 export interface ICPSManager {
   fetchProjects(): Promise<ProjectsData | null>;
   refresh(): Promise<ProjectsData | null>;
-  getProjectRouting$(): Observable<ProjectRouting>;
-  setProjectRouting(projectRouting: ProjectRouting): void;
-  getProjectRouting(): ProjectRouting;
+  getProjectRouting$(): Observable<ProjectRouting | undefined>;
+  setProjectRouting(projectRouting: ProjectRouting | undefined): void;
+  getProjectRouting(): ProjectRouting | undefined;
+  getDefaultProjectRouting(): ProjectRouting;
+  getProjectPickerAccess$(): Observable<ProjectPickerAccessInfo>;
 }

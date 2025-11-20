@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import type { ProjectRouting } from '@kbn/es-query';
 import type { ICPSManager } from '../types';
+import { ProjectRoutingAccess } from '../types';
 import { ProjectPicker } from './project_picker';
 
 interface ProjectPickerContainerProps {
@@ -19,15 +21,27 @@ interface ProjectPickerContainerProps {
 /**
  * Container component that connects ProjectPicker to CPSManager
  * Handles observable subscriptions and provides bound fetchProjects
+ * Access control is managed by CPSManager based on current app and route
  */
 export const ProjectPickerContainer: React.FC<ProjectPickerContainerProps> = ({ cpsManager }) => {
   const { projectRouting, updateProjectRouting } = useProjectRouting(cpsManager);
+  const accessInfo = useObservable(cpsManager.getProjectPickerAccess$(), {
+    access: ProjectRoutingAccess.DISABLED,
+    readonlyMessage: undefined,
+  });
+
+  const fetchProjects = useCallback(() => {
+    return cpsManager.fetchProjects();
+  }, [cpsManager]);
 
   return (
     <ProjectPicker
       projectRouting={projectRouting}
       onProjectRoutingChange={updateProjectRouting}
-      fetchProjects={cpsManager.fetchProjects.bind(cpsManager)}
+      fetchProjects={fetchProjects}
+      isDisabled={accessInfo.access === ProjectRoutingAccess.DISABLED}
+      isReadonly={accessInfo.access === ProjectRoutingAccess.READONLY}
+      readonlyCustomTitle={accessInfo.readonlyMessage}
     />
   );
 };
