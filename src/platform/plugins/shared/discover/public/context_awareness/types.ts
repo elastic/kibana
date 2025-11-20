@@ -79,10 +79,6 @@ export interface AppMenuExtensionParams {
      * @param adHocDataViews The new ad hoc data views to set
      */
     updateAdHocDataViews: (adHocDataViews: DataView[]) => Promise<void>;
-    /**
-     * Opens a new tab in Discover
-     */
-    openInNewTabExtPointAction?: (params: OpenInNewTabExtPointAction) => void;
   };
   /**
    * True if Discover is in ESQL mode
@@ -232,10 +228,6 @@ export interface RowControlsExtensionParams {
    * Available actions for row controls
    */
   actions: {
-    /**
-     * Opens a new tab in Discover
-     */
-    openInNewTabExtPointAction?: (params: OpenInNewTabExtPointAction) => void;
     /**
      * Updates the current ES|QL query
      */
