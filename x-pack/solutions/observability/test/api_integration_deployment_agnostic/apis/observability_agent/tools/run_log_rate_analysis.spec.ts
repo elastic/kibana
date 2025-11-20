@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 import type { LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { LOG_RATE_ANALYSIS_TYPE, type LogRateAnalysisType } from '@kbn/aiops-log-rate-analysis';
 import type { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
+import type { ErrorResult } from '@kbn/onechat-common';
 import { OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID } from '@kbn/observability-agent-plugin/server/tools/run_log_rate_analysis/run_log_rate_analysis';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
@@ -118,6 +119,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       it('shows that the log rate decreased from baseline to deviation', () => {
         const { baseline, deviation } = toolResults[0].data.items[0].change;
         expect(baseline).to.be.greaterThan(deviation);
+      });
+    });
+
+    describe('when the index does not exist', () => {
+      it('returns an error', async () => {
+        const toolResults = await agentBuilderApiClient.executeTool<ErrorResult>({
+          id: OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
+          params: {
+            index: 'non-existent-index',
+            baseline: LOG_RATE_ANALYSIS_SPIKE_BASELINE_WINDOW,
+            deviation: LOG_RATE_ANALYSIS_SPIKE_DEVIATION_WINDOW,
+          },
+        });
+
+        expect(toolResults[0].type).to.be('error');
+        expect(toolResults[0].data.message).to.contain('no such index');
       });
     });
   });
