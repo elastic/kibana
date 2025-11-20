@@ -9147,10 +9147,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/uiam-dev-cli@link:x-pack/platform/packages/private/security/kbn_uiam_dev_cli":
-  version "0.0.0"
-  uid ""
-
 "@kbn/unified-data-table@link:src/platform/packages/shared/kbn-unified-data-table":
   version "0.0.0"
   uid ""

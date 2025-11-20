@@ -2316,8 +2316,6 @@
       "@kbn/ui-shared-deps-src/*": ["src/platform/packages/private/kbn-ui-shared-deps-src/*"],
       "@kbn/ui-theme": ["src/platform/packages/shared/kbn-ui-theme"],
       "@kbn/ui-theme/*": ["src/platform/packages/shared/kbn-ui-theme/*"],
-      "@kbn/uiam-dev-cli": ["x-pack/platform/packages/private/security/kbn_uiam_dev_cli"],
-      "@kbn/uiam-dev-cli/*": ["x-pack/platform/packages/private/security/kbn_uiam_dev_cli/*"],
       "@kbn/unified-data-table": ["src/platform/packages/shared/kbn-unified-data-table"],
       "@kbn/unified-data-table/*": ["src/platform/packages/shared/kbn-unified-data-table/*"],
       "@kbn/unified-doc-viewer": ["src/platform/packages/shared/kbn-unified-doc-viewer"],

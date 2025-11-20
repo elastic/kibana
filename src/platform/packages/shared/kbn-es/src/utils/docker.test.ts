@@ -18,7 +18,7 @@ import {
   detectRunningNodes,
   maybeCreateDockerNetwork,
   maybePullDockerImage,
-  printESImageInfo,
+  printDockerImageInfo,
   resolveDockerCmd,
   resolveDockerImage,
   resolveEsArgs,
@@ -968,7 +968,7 @@ describe('printESImageInfo', () => {
       })
     );
 
-    await printESImageInfo(
+    await printDockerImageInfo(
       log,
       'docker.elastic.co/elasticsearch-ci/elasticsearch-serverless:latest'
     );
@@ -992,7 +992,7 @@ describe('printESImageInfo', () => {
       })
     );
 
-    await printESImageInfo(log, 'docker.elastic.co/elasticsearch/elasticsearch:8.15-SNAPSHOT');
+    await printDockerImageInfo(log, 'docker.elastic.co/elasticsearch/elasticsearch:8.15-SNAPSHOT');
 
     expect(execa.mock.calls).toHaveLength(1);
     expect(logWriter.messages[0]).toContain(
