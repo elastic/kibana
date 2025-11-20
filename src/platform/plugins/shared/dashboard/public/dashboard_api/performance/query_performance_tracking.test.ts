@@ -103,8 +103,6 @@ describe('startQueryPerformanceTracking', () => {
     await waitFor(() => {
       expect(performanceState.creationEndTime).toBeDefined();
     });
-
-    expect(window.performance.clearMarks).toHaveBeenCalledWith(DASHBOARD_DURATION_START_MARK);
   });
 
   it('Reports a metric event when all panels with phase event reporting have rendered', async () => {
@@ -186,6 +184,9 @@ describe('startQueryPerformanceTracking', () => {
       );
     });
 
+    expect(window.performance.clearMarks).toHaveBeenCalledTimes(1);
+    expect(window.performance.clearMarks).toHaveBeenLastCalledWith(DASHBOARD_DURATION_START_MARK);
+
     setChildrenStatus(children, 'loading');
     await new Promise((r) => setTimeout(r, 1));
     setChildrenStatus(children, 'rendered');
@@ -196,7 +197,8 @@ describe('startQueryPerformanceTracking', () => {
       })
     );
 
-    expect(window.performance.clearMarks).toHaveBeenCalledWith(DASHBOARD_DURATION_START_MARK);
+    expect(window.performance.clearMarks).toHaveBeenCalledTimes(2);
+    expect(window.performance.clearMarks).toHaveBeenLastCalledWith(DASHBOARD_DURATION_START_MARK);
   });
 
   it('subscribes to newly added panels', async () => {
@@ -247,7 +249,5 @@ describe('startQueryPerformanceTracking', () => {
     expect(mockMetricEvent.mock.calls[0][0].duration).toBeGreaterThanOrEqual(
       mockMetricEvent.mock.calls[0][0].value1
     );
-
-    expect(window.performance.clearMarks).toHaveBeenCalledWith(DASHBOARD_DURATION_START_MARK);
   });
 });
