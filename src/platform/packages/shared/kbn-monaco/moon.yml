@@ -17,12 +17,6 @@ project:
   owner: '@elastic/appex-sharedux'
   metadata:
     sourceRoot: src/platform/packages/shared/kbn-monaco
-dependsOn:
-  - '@kbn/i18n'
-  - '@kbn/repo-info'
-  - '@kbn/esql-ast'
-  - '@kbn/esql-validation-autocomplete'
-  - '@kbn/esql-types'
 tags:
   - is-webpack-built
   - shared-common

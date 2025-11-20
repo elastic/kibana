@@ -329,7 +329,7 @@ function createOrUpdateConfig(
       log.info(`'${MOON_CONFIG_FILE_NAME}' already exists at ${targetPath} - skipping creation.`);
       return 'skip';
     }
-  } else {
+  } else if (!clear) {
     if (dryRun) {
       log.info(`Would create ${name} project configuration.`);
     } else {
@@ -337,6 +337,8 @@ function createOrUpdateConfig(
       writeYaml(targetPath, projectConfig, getGeneratedPreambleForProject(projectConfig.id));
     }
     return 'create';
+  } else {
+    return 'intact';
   }
 }
 
