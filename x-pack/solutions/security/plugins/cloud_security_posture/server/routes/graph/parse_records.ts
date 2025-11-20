@@ -174,6 +174,10 @@ const createGroupedActorAndTargetNodes = (
   const actorHostIpsArray = actorHostIps ? castArray(actorHostIps) : [];
   const targetHostIpsArray = targetHostIps ? castArray(targetHostIps) : [];
 
+  // Convert namespace hints to arrays - each document has its own entity root namespace
+  const actorNamespaceArray = actorEntityFieldHint ? castArray(actorEntityFieldHint) : [];
+  const targetNamespaceArray = targetEntityFieldHint ? castArray(targetEntityFieldHint) : [];
+
   // Resolve entity types and labels using utility functions
   const actorEntityType = resolveEntityType(rawActorEntityType, actorIdsCount);
   const targetEntityType = resolveEntityType(rawTargetEntityType, targetIdsCount);
@@ -193,9 +197,6 @@ const createGroupedActorAndTargetNodes = (
     targetEntityName,
     targetEntitySubType
   );
-  // Convert namespace hints to arrays - each document has its own entity root namespace
-  const actorNamespaceArray = actorEntityFieldHint ? castArray(actorEntityFieldHint) : [];
-  const targetNamespaceArray = targetEntityFieldHint ? castArray(targetEntityFieldHint) : [];
 
   const actorsDocDataArray: NodeDocumentDataModel[] = actorsDocData
     ? castArray(actorsDocData)
@@ -261,6 +262,48 @@ const createGroupedActorAndTargetNodes = (
       : {
           // Unknown target
           id: `unknown-${uuidv4()}`,
+          type: '',
+          label: 'Unknown',
+          docData: [],
+          hostIps: [],
+        };
+
+  const actorGroup: {
+    id: string;
+    type: string;
+    count?: number;
+    docData: NodeDocumentDataModel[];
+    hostIps: string[];
+    label?: string;
+  } = {
+    id: actorNodeId, // Actor: Always use node ID from ES|QL (single entity ID or MD5 hash)
+    type: actorEntityType,
+    docData: actorDocDataWithHint,
+    hostIps: actorHostIpsArray,
+    ...(actorIdsCount > 1 ? { count: actorIdsCount } : {}),
+    ...(actorLabel && actorLabel !== '' ? { label: actorLabel } : {}),
+  };
+
+  const targetGroup: {
+    id: string;
+    type: string;
+    count?: number;
+    docData: NodeDocumentDataModel[];
+    hostIps: string[];
+    label?: string;
+  } =
+    targetIdsCount > 0
+      ? {
+          id: targetId,
+          type: targetEntityType,
+          docData: targetDocDataWithHint,
+          hostIps: targetHostIpsArray,
+          ...(targetIdsCount > 1 ? { count: targetIdsCount } : {}),
+          ...(targetLabel && targetLabel !== '' ? { label: targetLabel } : {}),
+        }
+      : {
+          // Unknown target
+          id: targetId,
           type: '',
           label: 'Unknown',
           docData: [],
