@@ -30,11 +30,8 @@ export const LlmGroundednessEvaluationPrompt = createPrompt({
         template: userPromptText,
       },
     },
-    toolChoice: {
-      function: 'score',
-    },
     tools: {
-      score: {
+      analyze: {
         description: 'Return groundedness evaluation with summary and detailed claim analysis.',
         schema: {
           type: 'object',
