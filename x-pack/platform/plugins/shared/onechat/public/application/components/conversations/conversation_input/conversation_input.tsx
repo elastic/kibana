@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  useEuiTheme,
+  useEuiShadow,
+  useEuiShadowHover,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { PropsWithChildren } from 'react';
@@ -31,13 +37,17 @@ const InputContainer: React.FC<PropsWithChildren<{ isDisabled: boolean }>> = ({
     width: 100%;
     min-height: ${MIN_HEIGHT}px;
     padding: ${euiTheme.size.base};
-    box-shadow: none;
+    ${useEuiShadow('s')}
     border: ${euiTheme.border.thin};
-    border-color: ${euiTheme.colors.borderBasePlain};
-    border-radius: ${euiTheme.border.radius.medium};
+    border-color: ${euiTheme.colors.borderBaseSubdued};
+    border-radius: 6px;
     flex-grow: 0;
     &:focus-within {
-      border-bottom-color: ${euiTheme.colors.primary};
+      border-color: ${euiTheme.colors.primary};
+      ${useEuiShadow('xl')}
+    }
+    &:hover {
+      ${useEuiShadowHover('s')}
     }
   `;
   const inputContainerDisabledStyles = css`
