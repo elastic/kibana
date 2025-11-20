@@ -132,18 +132,35 @@ const getPipeline = (filename: string, removeSteps = true) => {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ux_plugin_e2e.yml'));
     }
 
+    const aiInfraPaths = [
+      /^x-pack\/platform\/packages\/shared\/ai-infra/,
+      /^x-pack\/platform\/plugins\/shared\/ai_infra/,
+      /^x-pack\/platform\/plugins\/shared\/inference/,
+    ];
+    const aiConnectorPaths = [
+      /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/bedrock/,
+      /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/gemini/,
+      /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/openai/,
+      /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/inference/,
+    ];
+    const agentBuilderPaths = [
+      /^x-pack\/platform\/plugins\/shared\/onechat/,
+      /^x-pack\/platform\/packages\/shared\/onechat/,
+    ];
+
     if (
-      (await doAnyChangesMatch([
-        /^x-pack\/platform\/packages\/shared\/ai-infra/,
-        /^x-pack\/platform\/plugins\/shared\/ai_infra/,
-        /^x-pack\/platform\/plugins\/shared\/inference/,
-        /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/bedrock/,
-        /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/gemini/,
-        /^x-pack\/platform\/plugins\/shared\/stack_connectors\/server\/connector_types\/openai/,
-      ])) ||
+      (await doAnyChangesMatch([...aiInfraPaths, ...aiConnectorPaths])) ||
       GITHUB_PR_LABELS.includes('ci:all-gen-ai-suites')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/ai_infra_gen_ai.yml'));
+    }
+
+    if (
+      (await doAnyChangesMatch([...aiInfraPaths, ...aiConnectorPaths, ...agentBuilderPaths])) ||
+      GITHUB_PR_LABELS.includes('agent-builder:run-smoke-tests') ||
+      GITHUB_PR_LABELS.includes('ci:all-gen-ai-suites')
+    ) {
+      pipeline.push(getPipeline('.buildkite/pipelines/pull_request/agent_builder_smoke_tests.yml'));
     }
 
     if (

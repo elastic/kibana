@@ -115,7 +115,7 @@ export const WorkflowDetailHeader = React.memo(
       [workflow]
     );
 
-    const saveYaml = useSaveYaml();
+    const [saveYaml, { isLoading: isSaving }] = useSaveYaml();
     const handleSaveWorkflow = useCallback(() => {
       saveYaml();
     }, [saveYaml]);
@@ -299,7 +299,8 @@ export const WorkflowDetailHeader = React.memo(
                     color="primary"
                     size="s"
                     onClick={handleSaveWorkflow}
-                    disabled={isExecutionsTab || !canSaveWorkflow || isLoading}
+                    disabled={isExecutionsTab || !canSaveWorkflow || isLoading || isSaving}
+                    isLoading={isSaving}
                   >
                     <FormattedMessage
                       id="keepWorkflows.buttonText"
