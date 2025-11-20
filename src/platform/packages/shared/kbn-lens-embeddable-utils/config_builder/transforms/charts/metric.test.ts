@@ -43,7 +43,6 @@ const defaultValues = [
     path: 'breakdown_by',
     value: {
       breakdown_by: {
-        other_bucket: { include_documents_without_field: false },
         rank_by: { direction: 'asc', type: 'alphabetical' },
       },
     } as const,

@@ -34,6 +34,7 @@ import {
 import type { DatasetType } from '../schema/dataset';
 import type { LayerSettingsSchemaType } from '../schema/shared';
 import type { LensApiFilterType, UnifiedSearchFilterType } from '../schema/filter';
+import type { LayerTypeESQL } from '../schema/charts/xy';
 
 export type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -518,6 +519,15 @@ export const filtersAndQueryToApiFormat = (
 function extraQueryFromAPIState(state: LensApiState): { esql: string } | Query | undefined {
   if ('dataset' in state && state.dataset.type === 'esql') {
     return { esql: state.dataset.query };
+  }
+  if ('layers' in state && Array.isArray(state.layers)) {
+    // pick only the first one for now
+    const esqlLayer = state.layers.find(
+      (layer): layer is LayerTypeESQL => layer.dataset?.type === 'esql'
+    );
+    if (esqlLayer && 'query' in esqlLayer.dataset) {
+      return { esql: esqlLayer.dataset.query };
+    }
   }
   if ('query' in state && state.query) {
     return queryToLensState(state.query satisfies LensApiFilterType);

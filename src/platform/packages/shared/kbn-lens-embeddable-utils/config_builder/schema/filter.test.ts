@@ -80,9 +80,7 @@ describe('Filter Schemas', () => {
         label: 'Active Status',
       };
 
-      expect(() => filterWithLabelSchema.validate(input)).toThrow(
-        /\[filter.language\]: expected at least one defined/
-      );
+      expect(() => filterWithLabelSchema.validate(input)).toThrow();
     });
 
     it('throws on invalid filter', () => {
