@@ -17,7 +17,8 @@
       "dashboard"
     ],
     "optionalPlugins": [
-      "share"
+      "share",
+      "spaces"
     ]
   }
 }

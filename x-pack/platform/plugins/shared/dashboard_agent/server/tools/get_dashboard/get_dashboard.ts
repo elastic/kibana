@@ -14,6 +14,8 @@ import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { getToolResultId } from '@kbn/onechat-server';
 import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
+import type { DashboardAppLocator } from '@kbn/dashboard-plugin/common/locator/locator';
+import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { dashboardTools } from '../../../common';
 import { checkDashboardToolsAvailability } from '../utils';
 
@@ -30,7 +32,10 @@ const getDashboardSchema = z.object({
 export const getDashboardTool = (
   dashboard: DashboardPluginStart,
   savedObjects: SavedObjectsServiceStart,
-  { dashboardLocator }: { dashboardLocator: LocatorPublic<DashboardAppLocatorDefinition> }
+  {
+    dashboardLocator,
+    spaces,
+  }: { dashboardLocator: DashboardAppLocator; spaces?: SpacesPluginStart }
 ): BuiltinToolDefinition<typeof getDashboardSchema> => {
   return {
     id: dashboardTools.getDashboard,
@@ -81,9 +86,11 @@ This tool will:
         const dashboardItem = response.result.item;
         logger.info(`Dashboard retrieved successfully: ${dashboardItem.id}}`);
 
-        const dashboardUrl = await dashboardLocator?.getRedirectUrl({
-          dashboardId: dashboardItem.id,
-        });
+        const spaceId = spaces?.spacesService?.getSpaceId(request);
+        const dashboardUrl = await dashboardLocator?.getRedirectUrl(
+          { dashboardId: dashboardItem.id },
+          { spaceId }
+        );
 
         return {
           results: [

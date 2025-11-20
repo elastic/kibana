@@ -7,6 +7,7 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/common';
 import type {
   DashboardAgentSetupDependencies,
   DashboardAgentStartDependencies,
@@ -39,15 +40,31 @@ export class DashboardAgentPlugin
 
     // Register dashboard-specific tools during start lifecycle when dashboard plugin is available
     void coreSetup.getStartServices().then(([coreStart, startDeps]) => {
-      const dashboardLocator = startDeps.share?.url?.locators?.get('DASHBOARD_APP_LOCATOR');
+      const dashboardLocator =
+        startDeps.share?.url?.locators?.get<DashboardLocatorParams>('DASHBOARD_APP_LOCATOR');
+
+      if (!dashboardLocator) {
+        this.logger.warn('Dashboard locator is unavailable; skipping dashboard tool registration.');
+        return;
+      }
+
       setupDeps.onechat.tools.register(
-        createDashboardTool(startDeps.dashboard, coreStart.savedObjects, { dashboardLocator })
+        createDashboardTool(startDeps.dashboard, coreStart.savedObjects, {
+          dashboardLocator,
+          spaces: startDeps.spaces,
+        })
       );
       setupDeps.onechat.tools.register(
-        getDashboardTool(startDeps.dashboard, coreStart.savedObjects, { dashboardLocator })
+        getDashboardTool(startDeps.dashboard, coreStart.savedObjects, {
+          dashboardLocator,
+          spaces: startDeps.spaces,
+        })
       );
       setupDeps.onechat.tools.register(
-        updateDashboardTool(startDeps.dashboard, coreStart.savedObjects, { dashboardLocator })
+        updateDashboardTool(startDeps.dashboard, coreStart.savedObjects, {
+          dashboardLocator,
+          spaces: startDeps.spaces,
+        })
       );
     });
 
