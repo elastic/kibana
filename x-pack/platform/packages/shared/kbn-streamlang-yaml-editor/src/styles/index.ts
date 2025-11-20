@@ -6,6 +6,7 @@
  */
 
 import type { EuiThemeComputed } from '@elastic/eui';
+import { transparentize } from '@elastic/eui';
 import { css, type SerializedStyles } from '@emotion/react';
 
 interface EditorPanelStylesParams {
@@ -150,19 +151,19 @@ export const getStepDecorationsStyles = (euiTheme: EuiThemeComputed): Serialized
       backgroundColor: 'transparent',
     },
     '.streamlang-step-execution-success': {
-      backgroundColor: euiTheme.colors.backgroundLightSuccess,
+      backgroundColor: transparentize(euiTheme.colors.backgroundLightSuccess, 0.5),
     },
     '.streamlang-step-execution-successWithWarnings': {
-      backgroundColor: euiTheme.colors.backgroundLightSuccess,
+      backgroundColor: transparentize(euiTheme.colors.backgroundLightSuccess, 0.5),
     },
     '.streamlang-step-execution-failure': {
-      backgroundColor: euiTheme.colors.backgroundLightDanger,
+      backgroundColor: transparentize(euiTheme.colors.backgroundLightDanger, 0.5),
     },
     '.streamlang-step-execution-skipped': {
       backgroundColor: 'transparent',
     },
     '.streamlang-step-execution-disabled': {
-      backgroundColor: euiTheme.colors.lightShade,
+      backgroundColor: transparentize(euiTheme.colors.lightShade, 0.5),
     },
   });
 
