@@ -1647,7 +1647,183 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Send a message to an agent and receive real-time streaming events. This asynchronous endpoint provides live updates as the agent processes your request, allowing you to see intermediate steps and progress. Use this for interactive experiences where you want to monitor the agent's thinking process.<br/><br/>[Required authorization] Route required privileges: read_onechat.
+        Send a message to an agent and receive real-time streaming events. This asynchronous endpoint provides live updates as the agent processes your request, allowing you to see intermediate steps and progress. Use this for interactive experiences where you want to monitor the agent's thinking process.
+
+        ## Event types
+
+        The endpoint emits Server-Sent Events (SSE) with the following custom event types:
+
+        `conversation_id_set`
+
+        Sets the conversation ID.
+
+        Schema:
+        ```json
+        {
+          "conversation_id": "uuid"
+        }
+        ```
+
+        ---
+
+        `conversation_created`
+
+        Fires when a new conversation is persisted and assigned an ID.
+
+        Schema:
+        ```json
+        {
+          "conversation_id": "uuid",
+          "title": "conversation title"
+        }
+        ```
+
+        ---
+
+        `conversation_updated`
+
+        Fires when a conversation is updated.
+
+        Schema:
+        ```json
+        {
+          "conversation_id": "uuid",
+          "title": "updated conversation title"
+        }
+        ```
+
+        ---
+
+        `reasoning`
+
+        Handles reasoning-related data.
+
+        Schema:
+        ```json
+        {
+          "reasoning": "plain text reasoning content",
+          "transient": false
+        }
+        ```
+
+        ---
+
+        `tool_call`
+
+        Triggers when a tool is invoked.
+
+        Schema:
+        ```json
+        {
+          "tool_call_id": "uuid",
+          "tool_id": "tool_name",
+          "params": {}
+        }
+        ```
+
+        ---
+
+        `tool_progress`
+
+        Reports progress of a running tool.
+
+        Schema:
+        ```json
+        {
+          "tool_call_id": "uuid",
+          "message": "progress message"
+        }
+        ```
+
+        ---
+
+        `tool_result`
+
+        Returns results from a completed tool call.
+
+        Schema:
+        ```json
+        {
+          "tool_call_id": "uuid",
+          "tool_id": "tool_name",
+          "results": []
+        }
+        ```
+
+        **Note:** `results` is an array of `ToolResult` objects.
+
+        ---
+
+        `message_chunk`
+
+        Streams partial text chunks.
+
+        Schema:
+        ```json
+        {
+          "message_id": "uuid",
+          "text_chunk": "partial text"
+        }
+        ```
+
+        ---
+
+        `message_complete`
+
+        Indicates message stream is finished.
+
+        Schema:
+        ```json
+        {
+          "message_id": "uuid",
+          "message_content": "full text content of the message"
+        }
+        ```
+
+        ---
+
+        `thinking_complete`
+
+        Marks the end of the thinking/reasoning phase.
+
+        Schema:
+        ```json
+        {
+          "time_to_first_token": 0
+        }
+        ```
+
+        **Note:** `time_to_first_token` is in milliseconds.
+
+        ---
+
+        `round_complete`
+
+        Marks end of one conversation round.
+
+        Schema:
+        ```json
+        {
+          "round": {}
+        }
+        ```
+
+        **Note:** `round` contains the full round json object.
+
+        ---
+
+        ## Event flow
+
+        A typical conversation round emits events in this sequence:
+
+        1. `reasoning` (potentially multiple, some transient)
+        2. `tool_call` (if tools are used)
+        3. `tool_progress` (zero or more progress updates)
+        4. `tool_result` (when tool completes)
+        5. `thinking_complete`
+        6. `message_chunk` (multiple, as text streams)
+        7. `message_complete`
+        8. `round_complete`<br/><br/>[Required authorization] Route required privileges: read_onechat.
       operationId: post-agent-builder-converse-async
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -51486,6 +51662,100 @@ paths:
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
+  /api/security_ai_assistant/knowledge_base:
+    get:
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_ai_assistant/knowledge_base</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
+
+        Read a single KB
+      operationId: GetKnowledgeBase
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                KnowledgeBaseReadResponse200Example2:
+                  summary: A response that returns information about the knowledge base.
+                  value:
+                    defend_insights_exists: true
+                    elser_exists: false
+                    is_setup_available: true
+                    is_setup_in_progress: true
+                    product_documentation_status: installed
+                    security_labs_exists: false
+                    user_data_exists: true
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseReadResponse200'
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseResponse400'
+          description: Generic Error
+      summary: Read a KnowledgeBase
+      tags:
+        - Security AI Assistant API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+    post:
+      operationId: PostKnowledgeBase
+      parameters:
+        - description: ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
+          example: elser-model-001
+          in: query
+          name: modelId
+          required: false
+          schema:
+            type: string
+        - description: Indicates whether we should or should not install Security Labs docs when setting up the Knowledge Base. Defaults to `false`.
+          example: true
+          in: query
+          name: ignoreSecurityLabs
+          required: false
+          schema:
+            default: false
+            type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              examples:
+                KnowledgeBaseResponse200Example2:
+                  summary: A response that indicates that the request was successful.
+                  value:
+                    success: true
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseResponse'
+          description: Indicates a successful call.
+        '400':
+          content:
+            application/json:
+              examples:
+                KnowledgeBaseResponse400Example2:
+                  summary: A response for a request that failed due to an invalid query parameter value.
+                  value: |
+                    statusCode: 400 error: Bad Request message: "[request query]: ignoreSecurityLabs: Invalid enum value. Expected 'true' | 'false', received 'yes', ignoreSecurityLabs: Expected boolean, received string"
+              schema:
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseResponse400'
+          description: Generic Error
+      summary: Create a KnowledgeBase
+      tags:
+        - Security AI Assistant API
+      x-metaTags:
+        - content: Kibana, Elastic Cloud Serverless
+          name: product_name
+      description: |-
+        **Spaces method and path for this operation:**
+
+        <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_ai_assistant/knowledge_base</span></div>
+
+        Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
   /api/security_ai_assistant/knowledge_base/{resource}:
     get:
       description: |-
@@ -51495,71 +51765,41 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Read a single KB
+        Read a knowledge base with a specific resource identifier.
       operationId: ReadKnowledgeBase
       parameters:
         - description: The KnowledgeBase `resource` value.
           example: kb12345
           in: path
           name: resource
+          required: true
           schema:
             type: string
       responses:
         '200':
           content:
             application/json:
+              examples:
+                KnowledgeBaseReadResponse200Example1:
+                  summary: A response that returns information about the knowledge base.
+                  value:
+                    defend_insights_exists: true
+                    elser_exists: false
+                    is_setup_available: true
+                    is_setup_in_progress: true
+                    product_documentation_status: installed
+                    security_labs_exists: false
+                    user_data_exists: true
               schema:
-                type: object
-                properties:
-                  defend_insights_exists:
-                    description: Indicates if Defend Insights documentation exists in the KnowledgeBase.
-                    example: true
-                    type: boolean
-                  elser_exists:
-                    description: Indicates if the ELSER model exists for the KnowledgeBase.
-                    example: true
-                    type: boolean
-                  is_setup_available:
-                    description: Indicates if the setup process is available for the KnowledgeBase.
-                    example: true
-                    type: boolean
-                  is_setup_in_progress:
-                    description: Indicates if the setup process is currently in progress.
-                    example: false
-                    type: boolean
-                  product_documentation_status:
-                    description: The status of the product documentation in the KnowledgeBase.
-                    example: complete
-                    type: string
-                  security_labs_exists:
-                    description: Indicates if Security Labs documentation exists in the KnowledgeBase.
-                    example: true
-                    type: boolean
-                  user_data_exists:
-                    description: Indicates if user data exists in the KnowledgeBase.
-                    example: false
-                    type: boolean
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseReadResponse200'
           description: Indicates a successful call.
         '400':
           content:
             application/json:
               schema:
-                type: object
-                properties:
-                  error:
-                    description: A short description of the error.
-                    example: Bad Request
-                    type: string
-                  message:
-                    description: A detailed error message.
-                    example: Invalid resource ID provided.
-                    type: string
-                  statusCode:
-                    description: The HTTP status code of the error.
-                    example: 400
-                    type: number
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseResponse400'
           description: Generic Error
-      summary: Read a KnowledgeBase
+      summary: Read a KnowledgeBase for a resource
       tags:
         - Security AI Assistant API
       x-metaTags:
@@ -51573,13 +51813,14 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a KnowledgeBase
+        Create a knowledge base with a specific resource identifier.
       operationId: CreateKnowledgeBase
       parameters:
         - description: The KnowledgeBase `resource` value.
           example: kb12345
           in: path
           name: resource
+          required: true
           schema:
             type: string
         - description: ELSER modelId to use when setting up the Knowledge Base. If not provided, a default model will be used.
@@ -51601,29 +51842,26 @@ paths:
         '200':
           content:
             application/json:
+              examples:
+                KnowledgeBaseResponse200Example1:
+                  summary: A response that indicates that the request was successful.
+                  value:
+                    success: true
               schema:
                 $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseResponse'
           description: Indicates a successful call.
         '400':
           content:
             application/json:
+              examples:
+                KnowledgeBaseResponse400Example1:
+                  summary: A response for a request that failed due to an invalid query parameter value.
+                  value: |
+                    statusCode: 400 error: Bad Request message: "[request query]: ignoreSecurityLabs: Invalid enum value. Expected 'true' | 'false', received 'yes', ignoreSecurityLabs: Expected boolean, received string"
               schema:
-                type: object
-                properties:
-                  error:
-                    description: A short description of the error.
-                    example: Bad Request
-                    type: string
-                  message:
-                    description: A detailed error message.
-                    example: Invalid resource ID provided.
-                    type: string
-                  statusCode:
-                    description: The HTTP status code of the error.
-                    example: 400
-                    type: number
+                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseResponse400'
           description: Generic Error
-      summary: Create a KnowledgeBase
+      summary: Create a KnowledgeBase for a resource
       tags:
         - Security AI Assistant API
       x-metaTags:
@@ -71821,6 +72059,37 @@ components:
         - $ref: '#/components/schemas/Security_AI_Assistant_API_IndexEntryCreateFields'
       discriminator:
         propertyName: type
+    Security_AI_Assistant_API_KnowledgeBaseReadResponse200:
+      type: object
+      properties:
+        defend_insights_exists:
+          description: Indicates if Defend Insights documentation exists in the KnowledgeBase.
+          example: true
+          type: boolean
+        elser_exists:
+          description: Indicates if the ELSER model exists for the KnowledgeBase.
+          example: true
+          type: boolean
+        is_setup_available:
+          description: Indicates if the setup process is available for the KnowledgeBase.
+          example: true
+          type: boolean
+        is_setup_in_progress:
+          description: Indicates if the setup process is currently in progress.
+          example: false
+          type: boolean
+        product_documentation_status:
+          description: The status of the product documentation in the KnowledgeBase.
+          example: complete
+          type: string
+        security_labs_exists:
+          description: Indicates if Security Labs documentation exists in the KnowledgeBase.
+          example: true
+          type: boolean
+        user_data_exists:
+          description: Indicates if user data exists in the KnowledgeBase.
+          example: false
+          type: boolean
     Security_AI_Assistant_API_KnowledgeBaseResource:
       description: Knowledge Base resource name for grouping entries, e.g. 'security_labs', 'user', etc.
       enum:
@@ -71837,6 +72106,21 @@ components:
           description: Identify the success of the method execution.
           example: true
           type: boolean
+    Security_AI_Assistant_API_KnowledgeBaseResponse400:
+      type: object
+      properties:
+        error:
+          description: A short description of the error.
+          example: Bad Request
+          type: string
+        message:
+          description: A detailed error message.
+          example: Invalid resource ID provided.
+          type: string
+        statusCode:
+          description: The HTTP status code of the error.
+          example: 400
+          type: number
     Security_AI_Assistant_API_Message:
       description: AI assistant conversation message.
       type: object
@@ -87595,6 +87879,10 @@ components:
               description: The Slack channel identifier.
               example: C123ABC456
     params_property_apm_anomaly:
+      title: APM anomaly
+      description: |
+        The parameters for the APM anomaly rule. These parameters are appropriate when `rule_type_id` is `apm.rules.anomaly`.
+      type: object
       required:
         - windowSize
         - windowUnit
@@ -87633,6 +87921,10 @@ components:
             - minor
             - warning
     params_property_apm_error_count:
+      title: APM error count
+      description: |
+        The parameters for the APM error count rule. These parameters are appropriate when `rule_type_id` is `apm.error_rate`.
+      type: object
       required:
         - windowSize
         - windowUnit
@@ -87681,6 +87973,10 @@ components:
           description: |
             Filter the errors coming from your application to apply the rule to a specific error grouping key, which is a hash of the stack trace and other properties.
     params_property_apm_transaction_duration:
+      title: APM transaction duration
+      description: |
+        The parameters for the APM transaction duration rule. These parameters are appropriate when `rule_type_id` is `apm.transaction_duration`.
+      type: object
       required:
         - windowSize
         - windowUnit
@@ -87740,6 +88036,10 @@ components:
             - 99th
           description: The type of aggregation to perform.
     params_property_apm_transaction_error_rate:
+      title: APM transaction error rate
+      description: |
+        The parameters for the APM transaction error rate rule. These parameters are appropriate when `rule_type_id` is `apm.transaction_error_rate`.
+      type: object
       required:
         - windowSize
         - windowUnit
@@ -88617,6 +88917,10 @@ components:
           description: |
             If true, an alert occurs if a group that previously reported metrics does not report them again over the expected time period. This check is not recommended for dynamically scaling infrastructures that might rapidly start and stop nodes automatically.
     params_property_slo_burn_rate:
+      title: SLO burn rate
+      description: |
+        The parameters for the SLO burn rate rule. These parameters are appropriate when `rule_type_id` is `slo.rules.burnRate`.
+      type: object
       properties:
         sloId:
           description: The SLO identifier used by the rule
