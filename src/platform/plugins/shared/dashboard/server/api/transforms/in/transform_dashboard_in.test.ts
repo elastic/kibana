@@ -66,7 +66,7 @@ describe('transformDashboardIn', () => {
       },
     };
 
-    const output = transformDashboardIn({ dashboardState });
+    const output = transformDashboardIn(dashboardState);
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
@@ -106,7 +106,7 @@ describe('transformDashboardIn', () => {
       options: DEFAULT_DASHBOARD_OPTIONS,
     };
 
-    const output = transformDashboardIn({ dashboardState });
+    const output = transformDashboardIn(dashboardState);
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": Object {
@@ -129,18 +129,16 @@ describe('transformDashboardIn', () => {
     const dashboardState: DashboardState = {
       title: 'title',
       panels: [],
-    };
-
-    const output = transformDashboardIn({
-      dashboardState,
-      incomingReferences: [
+      references: [
         {
           name: 'someTagRef',
           type: 'tag',
           id: '1',
         },
       ],
-    });
+    };
+
+    const output = transformDashboardIn(dashboardState);
     expect(output).toMatchInlineSnapshot(`
       Object {
         "attributes": null,
