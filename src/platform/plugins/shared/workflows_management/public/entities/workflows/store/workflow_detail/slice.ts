@@ -9,8 +9,8 @@
 
 import { createSlice } from '@reduxjs/toolkit';
 import type { EsWorkflow, WorkflowDetailDto, WorkflowExecutionDto } from '@kbn/workflows';
-import { saveYamlThunk } from './thunks/save_yaml_thunk';
 import type { ActiveTab, ComputedData, WorkflowDetailState } from './types';
+import { addLoadingStateReducers, initialLoadingState } from './utils/loading_states';
 import { findStepByLine } from './utils/step_finder';
 import { getWorkflowZodSchema } from '../../../../../common/schema';
 
@@ -27,9 +27,7 @@ const initialState: WorkflowDetailState = {
   focusedStepId: undefined,
   highlightedStepId: undefined,
   isTestModalOpen: false,
-  loading: {
-    isSavingYaml: false,
-  },
+  loading: initialLoadingState,
 };
 
 // Slice
@@ -93,16 +91,7 @@ const workflowDetailSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder
-      .addCase(saveYamlThunk.pending, (state) => {
-        state.loading.isSavingYaml = true;
-      })
-      .addCase(saveYamlThunk.fulfilled, (state) => {
-        state.loading.isSavingYaml = false;
-      })
-      .addCase(saveYamlThunk.rejected, (state) => {
-        state.loading.isSavingYaml = false;
-      });
+    addLoadingStateReducers(builder);
   },
 });
 
