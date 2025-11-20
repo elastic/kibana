@@ -8,7 +8,7 @@
 import { type EuiAutoSize, EuiAutoSizer, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import InfiniteLoader from 'react-window-infinite-loader';
 import { FixedSizeList, type ListChildComponentProps } from 'react-window';
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { CardsViewFooter } from './cards_view_footer';
 import type { FlyoutParamProps } from '../types';
@@ -21,8 +21,8 @@ import type { OverviewStatusMetaData } from '../../../../../../../../common/runt
 
 const ITEM_HEIGHT = METRIC_ITEM_HEIGHT + 12;
 const MAX_LIST_HEIGHT = 800;
-const MIN_BATCH_SIZE = 20;
-const LIST_THRESHOLD = 12;
+const MIN_BATCH_SIZE = 1;
+const LIST_THRESHOLD = 3;
 const MIN_CARD_WIDTH = 400;
 
 interface ListItem {
@@ -68,6 +68,15 @@ export const OverviewCardView = ({
     return acc;
   }, [monitorsSortedByStatus, rowCount]);
 
+  const loadMoreItems = (_start: number, stop: number) => {
+    console.log('loadMoreItems', { _start, stop });
+    setMaxItem(Math.max(maxItem, stop));
+  };
+
+  const isItemLoaded = (idx: number) => {
+    return listItems[idx].every((m) => !!trendData[m.configId + m.locationId]);
+  };
+
   return (
     <>
       <div style={isUnGrouped ? { height: listHeight } : undefined}>
@@ -76,11 +85,9 @@ export const OverviewCardView = ({
             <EuiAutoSizer>
               {({ width }: EuiAutoSize) => (
                 <InfiniteLoader
-                  isItemLoaded={(idx: number) =>
-                    listItems[idx].every((m) => !!trendData[m.configId + m.locationId])
-                  }
+                  isItemLoaded={isItemLoaded}
                   itemCount={listItems.length}
-                  loadMoreItems={(_, stop: number) => setMaxItem(Math.max(maxItem, stop))}
+                  loadMoreItems={loadMoreItems}
                   minimumBatchSize={MIN_BATCH_SIZE}
                   threshold={LIST_THRESHOLD}
                 >

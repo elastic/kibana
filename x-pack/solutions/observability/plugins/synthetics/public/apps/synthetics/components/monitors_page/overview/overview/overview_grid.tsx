@@ -40,7 +40,7 @@ export const OverviewGrid = memo(
       scopeStatusByLocation: true,
     });
     const monitorsSortedByStatus: OverviewStatusMetaData[] = useMonitorsSortedByStatus();
-    const [maxItem, setMaxItem] = useState(0);
+    const [maxItem, setMaxItem] = useState(5);
 
     useOverviewTrendsRequests(monitorsSortedByStatus, maxItem);
 
