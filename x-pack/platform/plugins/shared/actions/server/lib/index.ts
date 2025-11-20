@@ -42,3 +42,4 @@ export { mergeConfigHeadersWithSecretHeaders } from './merge_config_headers_with
 export { tryCatch } from './try_catch';
 export type { TelemetryMetadata } from './token_tracking/gen_ai_token_tracking';
 export { formatZodError } from './format_zod_error';
+export { createConnectorTypeFromSpec } from './single_file_connectors/create_connector_from_spec';

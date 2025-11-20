@@ -47,6 +47,7 @@ import {
   selectEditorYaml,
   selectHasChanges,
   selectIsExecutionsTab,
+  selectIsSavingYaml,
   selectStepExecutions,
   selectWorkflow,
 } from '../../../entities/workflows/store/workflow_detail/selectors';
@@ -137,7 +138,8 @@ export const WorkflowYAMLEditor = ({
   const { euiTheme } = useEuiTheme();
   const { http, notifications } = useKibana().services;
 
-  const [saveYaml, { isLoading: isSaving }] = useSaveYaml();
+  const saveYaml = useSaveYaml();
+  const isSaving = useSelector(selectIsSavingYaml);
   const dispatch = useDispatch();
   const onChange = useCallback(
     (yaml: string) => {
