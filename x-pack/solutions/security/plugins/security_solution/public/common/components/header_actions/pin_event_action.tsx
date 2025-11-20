@@ -22,7 +22,30 @@ import * as i18n from './translations';
 export const BUTTON_TEST_ID = 'timeline-pin-event-button';
 export const TOOLTIP_TEST_ID = 'timeline-action-pin-tool-tip';
 
-const eventHasNotes = (noteIds: string[]): boolean => !isEmpty(noteIds);
+/**
+ * Returns true if the noteIds array is not empty
+ */
+export const eventHasNotes = (noteIds: string[]): boolean => !isEmpty(noteIds);
+
+/**
+ * Returns the tooltip content based on timeline type, pin state, note ids and the fact that the document is an alert or not
+ */
+export const getPinTooltipContent = (
+  isAlert: boolean,
+  isPinned: boolean,
+  noteIds: string[],
+  timelineType: TimelineType
+): string => {
+  if (timelineType === TimelineTypeEnum.template) {
+    return i18n.DISABLE_PIN(isAlert);
+  } else if (eventHasNotes(noteIds)) {
+    return i18n.PINNED_WITH_NOTES(isAlert);
+  } else if (isPinned) {
+    return i18n.PINNED(isAlert);
+  } else {
+    return i18n.UNPINNED(isAlert);
+  }
+};
 
 export interface PinEventActionProps {
   /**
@@ -80,17 +103,10 @@ export const PinEventAction = memo(
     const isPinnedSelector = useMemo(() => selectIsPinnedEventInTimeline(), []);
     const isPinned = useSelector((state: State) => isPinnedSelector(state, timelineId, eventId));
 
-    const tooltipContent = useMemo(() => {
-      if (timelineType === TimelineTypeEnum.template) {
-        return i18n.DISABLE_PIN(isAlert);
-      } else if (eventHasNotes(noteIds)) {
-        return i18n.PINNED_WITH_NOTES(isAlert);
-      } else if (isPinned) {
-        return i18n.PINNED(isAlert);
-      } else {
-        return i18n.UNPINNED(isAlert);
-      }
-    }, [timelineType, noteIds, isPinned, isAlert]);
+    const tooltipContent = useMemo(
+      () => getPinTooltipContent(isAlert, isPinned, noteIds, timelineType),
+      [timelineType, noteIds, isPinned, isAlert]
+    );
 
     const handlePinClicked = useCallback(() => {
       const allowUnpinning = eventIdToNoteIds ? !eventHasNotes(eventIdToNoteIds[eventId]) : true;
