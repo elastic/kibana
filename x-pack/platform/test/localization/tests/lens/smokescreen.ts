@@ -340,7 +340,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'machine.ram',
       });
 
-      expect(await lens.getLayerCount()).to.eql(2);
+      await lens.assertLayerCount(2);
       await lens.removeLayer();
       await lens.removeLayer();
       await lens.ensureLayerTabIsActive();
