@@ -124,7 +124,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await lens.ensureLayerTabIsActive(0);
         const layerChartSwitches1 = await testSubjects.findAll('lnsChartSwitchPopover');
         expect(layerChartSwitches1.length).to.be(1);
-        expect(await layerChartSwitches1[0].getVisibleText()).to.be('Bar');
+        expect(await layerChartSwitches1[0].getVisibleText()).to.be('Area');
         const yDimensionText1 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
         expect(yDimensionText1).to.be('Count');
 
@@ -132,7 +132,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await lens.ensureLayerTabIsActive(1);
         const layerChartSwitches2 = await testSubjects.findAll('lnsChartSwitchPopover');
         expect(layerChartSwitches2.length).to.be(1);
-        expect(await layerChartSwitches2[0].getVisibleText()).to.be('Area');
+        expect(await layerChartSwitches2[0].getVisibleText()).to.be('Bar');
         const yDimensionText2 = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
         expect(yDimensionText2).to.be('Max memory');
       });
@@ -217,8 +217,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
         await lens.assertLayerCount(2);
+        await lens.ensureLayerTabIsActive(0);
         const yDimensionText = await lens.getDimensionTriggerText('lnsXY_yDimensionPanel', 0);
         expect(yDimensionText).to.be('Count');
+        await lens.ensureLayerTabIsActive(1);
         const referenceLineDimensionText = await lens.getDimensionTriggerText(
           'lnsXY_yReferenceLineLeftPanel',
           0
