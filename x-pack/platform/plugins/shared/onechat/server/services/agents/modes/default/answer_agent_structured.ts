@@ -68,9 +68,13 @@ export const createAnswerAgentStructured = ({
         };
       }
 
-      const structuredModel = chatModel.withStructuredOutput(schemaToUse).withConfig({
-        tags: [tags.agent, tags.answerAgent],
-      });
+      const structuredModel = chatModel
+        .withStructuredOutput(schemaToUse, {
+          name: 'structured_answer',
+        })
+        .withConfig({
+          tags: [tags.agent, tags.answerAgent],
+        });
 
       const prompt = getStructuredAnswerPrompt({
         customInstructions: configuration.answer.instructions,
