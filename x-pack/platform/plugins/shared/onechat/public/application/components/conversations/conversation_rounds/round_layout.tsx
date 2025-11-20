@@ -7,18 +7,19 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { ReactNode } from 'react';
 import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import type { ConversationRound } from '@kbn/onechat-common';
 import { RoundInput } from './round_input';
+import { RoundThinking } from './round_thinking/round_thinking';
+import { RoundResponse } from './round_response';
 
 interface RoundLayoutProps {
-  input: string;
-  outputIcon: ReactNode;
-  output: ReactNode;
   isResponseLoading: boolean;
+  hasError: boolean;
   isCurrentRound: boolean;
   scrollContainerHeight: number;
+  rawRound: ConversationRound;
 }
 
 const labels = {
@@ -28,14 +29,14 @@ const labels = {
 };
 
 export const RoundLayout: React.FC<RoundLayoutProps> = ({
-  input,
-  outputIcon,
-  output,
   isResponseLoading,
+  hasError,
   isCurrentRound,
   scrollContainerHeight,
+  rawRound,
 }) => {
   const [roundContainerMinHeight, setRoundContainerMinHeight] = useState(0);
+  const { steps, response, input } = rawRound;
 
   useEffect(() => {
     if (isCurrentRound && isResponseLoading) {
@@ -56,14 +57,25 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
       aria-label={labels.container}
       css={roundContainerStyles}
     >
+      {/* Input Message */}
       <EuiFlexItem grow={false}>
-        <RoundInput input={input} />
+        <RoundInput input={input.message} />
       </EuiFlexItem>
 
+      {/* Thinking */}
       <EuiFlexItem grow={false}>
-        {/* <EuiFlexItem grow={false}>{outputIcon}</EuiFlexItem> */}
-        <EuiFlexItem>{output}</EuiFlexItem>
+        <RoundThinking steps={steps} isLoading={isResponseLoading} rawRound={rawRound} />
+      </EuiFlexItem>
+
+      {/* Response Message */}
+      <EuiFlexItem grow={false}>
+        <EuiFlexItem>
+          <RoundResponse response={response} steps={steps} isLoading={isResponseLoading} />
+        </EuiFlexItem>
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
+
+// <EuiFlexItem grow={false}>{outputIcon}</EuiFlexItem>
+// outputIcon={<RoundIcon isLoading={isLoading} isError={isError} />}
