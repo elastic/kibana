@@ -11,6 +11,7 @@ import {
   type SignificantEventsPreviewResponse,
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
+import { conditionSchema } from '@kbn/streamlang';
 import { from as fromRxjs, map, mergeMap } from 'rxjs';
 import { STREAMS_API_PRIVILEGES } from '../../../../common/constants';
 import { generateSignificantEventDefinitions } from '../../../lib/significant_events/generate_significant_events';
@@ -31,6 +32,12 @@ const previewSignificantEventsRoute = createServerRoute({
     query: z.object({ from: dateFromString, to: dateFromString, bucketSize: z.string() }),
     body: z.object({
       query: z.object({
+        feature: z
+          .object({
+            name: z.string(),
+            filter: conditionSchema,
+          })
+          .optional(),
         kql: z.object({
           query: z.string(),
         }),

@@ -30,12 +30,17 @@ export type FeatureWithFilter<T extends FeatureType = FeatureType> = BaseFeature
   filter: Condition;
 };
 
+export const featureWithFilterSchema: z.Schema<FeatureWithFilter> = baseFeatureSchema.and(
+  z.object({
+    filter: conditionSchema,
+  })
+);
+
 export type SystemFeature = FeatureWithFilter<'system'>;
 
-export const systemFeatureSchema: z.Schema<SystemFeature> = baseFeatureSchema.and(
+export const systemFeatureSchema: z.Schema<SystemFeature> = featureWithFilterSchema.and(
   z.object({
     type: z.literal('system'),
-    filter: conditionSchema,
   })
 );
 

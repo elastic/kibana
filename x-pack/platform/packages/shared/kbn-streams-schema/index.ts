@@ -125,5 +125,6 @@ export {
   type FeatureType,
   featureSchema,
   featureTypeSchema,
+  featureWithFilterSchema,
   isFeatureWithFilter,
 } from './src/feature';

@@ -21,7 +21,7 @@ interface StreamQueryBase {
 export interface StreamQueryKql extends StreamQueryBase {
   feature?: {
     name: string;
-    filter?: Condition;
+    filter: Condition;
   };
   kql: {
     query: string;
@@ -41,7 +41,7 @@ export const streamQueryKqlSchema: z.Schema<StreamQueryKql> = z.intersection(
     feature: z
       .object({
         name: NonEmptyString,
-        filter: z.optional(conditionSchema),
+        filter: conditionSchema,
       })
       .optional(),
     kql: z.object({
