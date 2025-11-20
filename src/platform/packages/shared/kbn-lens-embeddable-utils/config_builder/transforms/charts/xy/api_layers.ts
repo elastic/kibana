@@ -31,11 +31,11 @@ import {
   buildDatasetState,
   generateApiLayer,
   isDataViewSpec,
+  isFormBasedLayer,
   operationFromColumn,
 } from '../../utils';
 import { getValueApiColumn } from '../../columns/esql_column';
 import { fromColorMappingLensStateToAPI, fromStaticColorLensStateToAPI } from '../../coloring';
-import { isFormBasedLayer } from './helpers';
 
 function convertDataLayerToAPI(
   visualization: XYDataLayerConfig,

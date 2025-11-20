@@ -14,9 +14,9 @@ import type { Writable } from '@kbn/utility-types';
 import type { XYState } from '../../../schema';
 import { convertLegendToAPIFormat, convertLegendToStateFormat } from './legend';
 import { buildXYLayer } from './state_layers';
-import { getIdForLayer, isFormBasedLayer, isLensStateDataLayer, isTextBasedLayer } from './helpers';
+import { getIdForLayer, isLensStateDataLayer } from './helpers';
 import type { DataSourceStateLayer } from '../../utils';
-import { nonNullable } from '../../utils';
+import { nonNullable, isFormBasedLayer, isTextBasedLayer } from '../../utils';
 import {
   buildAPIAnnotationsLayer,
   buildAPIDataLayer,

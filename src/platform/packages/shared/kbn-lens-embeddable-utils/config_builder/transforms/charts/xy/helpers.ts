@@ -7,12 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  FormBasedLayer,
-  TextBasedLayer,
-  XYDataLayerConfig,
-  XYLayerConfig,
-} from '@kbn/lens-common';
+import type { XYDataLayerConfig, XYLayerConfig } from '@kbn/lens-common';
 import type {
   DataLayerType,
   ReferenceLineLayerType,
@@ -20,7 +15,6 @@ import type {
   LayerTypeESQL,
   LayerTypeNoESQL,
 } from '../../../schema/charts/xy';
-import type { DataSourceStateLayer } from '../../utils';
 import {
   XY_ANNOTATION_LAYER_TYPES,
   XY_REFERENCE_LAYER_TYPES,
@@ -69,16 +63,6 @@ export function isAPIXYLayer(layer: unknown): layer is XYLayer {
 
 export function isAPIesqlXYLayer(layer: XYLayer): layer is LayerTypeESQL {
   return ['esql', 'table'].includes(layer.dataset.type);
-}
-
-export function isFormBasedLayer(
-  layer: DataSourceStateLayer
-): layer is Omit<FormBasedLayer, 'indexPatternId'> {
-  return 'columnOrder' in layer;
-}
-
-export function isTextBasedLayer(layer: DataSourceStateLayer): layer is TextBasedLayer {
-  return Array.isArray(layer.columns);
 }
 
 export function isLensStateDataLayer(layer: XYLayerConfig): layer is XYDataLayerConfig {

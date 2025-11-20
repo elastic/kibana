@@ -90,8 +90,14 @@ export const operationFromColumn = (
   return getMetricApiColumnFromLensState(column, typedLayer.columns);
 };
 
-function isTextBasedLayer(
-  layer: LensApiState | Omit<FormBasedLayer, 'indexPatternId'> | TextBasedLayer
+export function isFormBasedLayer(
+  layer: DataSourceStateLayer
+): layer is Omit<FormBasedLayer, 'indexPatternId'> {
+  return 'columnOrder' in layer;
+}
+
+export function isTextBasedLayer(
+  layer: LensApiState | DataSourceStateLayer
 ): layer is TextBasedLayer {
   return 'index' in layer && 'query' in layer;
 }
