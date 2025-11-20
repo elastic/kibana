@@ -6,7 +6,7 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
+import React, { memo, useCallback, useEffect, useRef, useMemo, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -343,6 +343,17 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
     return <ConnectorRulesList connector={connector} />;
   }, [connector]);
 
+  const isExperimental: boolean | undefined = useMemo(() => {
+    if (
+      connector &&
+      'config' in connector &&
+      connector.config?.inferenceId === '.rainbow-sprinkles-elastic'
+    ) {
+      return false;
+    }
+    return actionTypeModel?.isExperimental;
+  }, [actionTypeModel, connector]);
+
   return (
     <>
       <EuiFlyout
@@ -360,7 +371,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
           setTab={handleSetTab}
           selectedTab={selectedTab}
           icon={actionTypeModel?.iconClass}
-          isExperimental={actionTypeModel?.isExperimental}
+          isExperimental={isExperimental}
           subFeature={actionTypeModel?.subFeature}
         />
         <EuiFlyoutBody>
