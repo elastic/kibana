@@ -19,12 +19,21 @@ import {
 import {
   OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
   createRunLogRateAnalysisTool,
-} from './log_rate_analysis/log_rate_analysis';
+} from './get_log_rate_analysis/get_log_rate_analysis';
+import {
+  OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+  createGetAnomalyDetectionJobsTool,
+} from './get_anomaly_detection_jobs/get_anomaly_detection_jobs';
 import type {
   ObservabilityAgentPluginSetupDependencies,
   ObservabilityAgentPluginStart,
   ObservabilityAgentPluginStartDependencies,
 } from '../types';
+import { OBSERVABILITY_GET_ALERTS_TOOL_ID, createGetAlertsTool } from './get_alerts/get_alerts';
+import {
+  OBSERVABILITY_GET_SERVICES_TOOL_ID,
+  OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
+} from '../../common/constants';
 
 const PLATFORM_TOOL_IDS = [
   platformCoreTools.search,
@@ -37,9 +46,21 @@ const OBSERVABILITY_TOOL_IDS = [
   OBSERVABILITY_GET_DATA_SOURCES_TOOL_ID,
   OBSERVABILITY_SEARCH_KNOWLEDGE_BASE_TOOL_ID,
   OBSERVABILITY_RUN_LOG_RATE_ANALYSIS_TOOL_ID,
+  OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID,
+  OBSERVABILITY_GET_ALERTS_TOOL_ID,
 ];
 
-export const OBSERVABILITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...OBSERVABILITY_TOOL_IDS];
+// registered in the APM plugin
+const APM_TOOL_IDS = [
+  OBSERVABILITY_GET_SERVICES_TOOL_ID,
+  OBSERVABILITY_GET_DOWNSTREAM_DEPENDENCIES_TOOL_ID,
+];
+
+export const OBSERVABILITY_AGENT_TOOL_IDS = [
+  ...PLATFORM_TOOL_IDS,
+  ...OBSERVABILITY_TOOL_IDS,
+  ...APM_TOOL_IDS,
+];
 
 export async function registerTools({
   core,
@@ -54,6 +75,8 @@ export async function registerTools({
     createGetDataSourcesTool({ core, plugins, logger }),
     createSearchKnowledgeBaseTool({ core, logger }),
     createRunLogRateAnalysisTool({ core, logger }),
+    createGetAnomalyDetectionJobsTool({ core, logger }),
+    createGetAlertsTool({ core, logger }),
   ];
 
   for (const tool of observabilityTools) {
