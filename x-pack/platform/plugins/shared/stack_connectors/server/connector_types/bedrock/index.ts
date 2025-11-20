@@ -17,15 +17,15 @@ import {
 import { urlAllowListValidator } from '@kbn/actions-plugin/server';
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { assertURL } from '@kbn/actions-plugin/server/sub_action_framework/helpers/validators';
-import { BEDROCK_CONNECTOR_ID, BEDROCK_TITLE } from '../../../common/bedrock/constants';
-import { ConfigSchema, SecretsSchema } from '../../../common/bedrock/schema';
-import type { Config, Secrets } from '../../../common/bedrock/types';
+import { CONNECTOR_ID, CONNECTOR_NAME } from '@kbn/connector-schemas/bedrock';
+import { ConfigSchema, SecretsSchema } from '@kbn/connector-schemas/bedrock';
+import type { Config, Secrets } from '@kbn/connector-schemas/bedrock';
 import { BedrockConnector } from './bedrock';
 import { renderParameterTemplates } from './render';
 
 export const getConnectorType = (): SubActionConnectorType<Config, Secrets> => ({
-  id: BEDROCK_CONNECTOR_ID,
-  name: BEDROCK_TITLE,
+  id: CONNECTOR_ID,
+  name: CONNECTOR_NAME,
   getService: (params) => new BedrockConnector(params),
   schema: {
     config: ConfigSchema,
