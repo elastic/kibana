@@ -8,6 +8,7 @@
  */
 
 import { ExplainCommandContext } from '@kbn/esql-ast/src/antlr/esql_parser';
+import type { Download } from 'playwright-core';
 import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
 import { expect } from '..';
@@ -186,5 +187,15 @@ export class DiscoverApp {
       .all();
     await expect(viewButtons[0]).toBeVisible();
     return viewButtons[0];
+  }
+
+  async exportAsCsv(): Promise<Download> {
+    const downloadPromise = this.page.waitForEvent('download', { timeout: 30000 });
+    await this.page.testSubj.click('exportTopNavButton');
+    await this.page.testSubj.click('exportMenuItem-CSV');
+    await this.page.testSubj.click('generateReportButton');
+    await this.page.testSubj.click('downloadCompletedReportButton', { timeout: 20000 });
+    const download = await downloadPromise;
+    return download;
   }
 }

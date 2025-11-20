@@ -6,6 +6,8 @@
  */
 
 import { expect, test } from '@kbn/scout';
+import fs from 'fs';
+import Papa from 'papaparse';
 
 const defaultSettings = {
   defaultIndex: 'logstash-*',
@@ -16,6 +18,8 @@ const defaultEndTime = 'Sep 23, 2015 @ 18:31:44.000';
 const endTimeNoResults = 'Sep 19, 2015 @ 18:45:00.000';
 const queryName1 = 'Query # 1';
 const queryName2 = 'Query # 2';
+const queryName3 = 'CSV Export Test';
+const totalHitCount = 14004;
 
 test.describe('Discover app', { tag: ['@ess'] }, () => {
   test.beforeAll(async ({ kbnClient, esArchiver }) => {
@@ -94,7 +98,6 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
   });
 
   test('should show the correct hit count', async ({ pageObjects }) => {
-    const totalHitCount = 14004;
     expect(await pageObjects.discover.getHitCountInt()).toBe(totalHitCount);
   });
 
@@ -223,6 +226,31 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
     await viewLensButton.click();
     // Verify we're now on the Lens page
     expect(page.url()).toContain('/app/lens');
+  });
+
+  test('download CSV report and validate row length', async ({ page, pageObjects }) => {
+    // Can download saved searches only, so save first
+    await pageObjects.discover.saveSearch(queryName3);
+    await page.testSubj.click('toastCloseButton'); // close toast to avoid obstruction
+    // Wait for download
+    const download = await pageObjects.discover.exportAsCsv();
+
+    const filePath = `/tmp/${download.suggestedFilename()}`;
+    await download.saveAs(filePath);
+
+    // Validate
+    const content = fs.readFileSync(filePath, 'utf-8');
+    // Parse CSV using papaparse
+    const parseResult = Papa.parse(content, {
+      header: false,
+      skipEmptyLines: true,
+    });
+    const rows = parseResult.data as string[][];
+
+    expect(rows).toHaveLength(totalHitCount + 1); // +1 for header row
+
+    // Cleanup
+    fs.unlinkSync(filePath);
   });
 
   // Click on Patterns works with sample data, tbd once pipeline is in place
