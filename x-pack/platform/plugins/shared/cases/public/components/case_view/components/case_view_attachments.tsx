@@ -5,30 +5,50 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { css } from '@emotion/react';
-import React from 'react';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSelectable } from '@elastic/eui';
+import type { PropsWithChildren } from 'react';
+import React, { useMemo } from 'react';
+import { useCaseViewNavigation } from '../../../common/navigation';
+import type { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import type { CaseUI } from '../../../../common';
-import { CASE_VIEW_PAGE_TABS } from '../../../../common/types';
 import { CaseViewTabs } from '../case_view_tabs';
 import { useCaseViewTabs } from '../use_case_view_tabs';
 
-export const CaseViewAttachments = ({ caseData }: { caseData: CaseUI }) => {
-  const caseViewTabs = useCaseViewTabs({ caseData, activeTab: CASE_VIEW_PAGE_TABS.ALERTS });
+export const CaseViewAttachments = ({
+  caseData,
+  activeTab,
+  children,
+}: PropsWithChildren<{
+  caseData: CaseUI;
+  activeTab: CASE_VIEW_PAGE_TABS;
+}>) => {
+  const caseViewTabs = useCaseViewTabs({ caseData, activeTab });
+  const { navigateToCaseView } = useCaseViewNavigation();
+
+  const tabAsSelectableOptions = useMemo(() => {
+    return caseViewTabs.map(
+      (tab) =>
+        ({
+          label: tab.name,
+          append: tab.badge,
+          isFocused: tab.id === activeTab,
+          onClick: () => {
+            navigateToCaseView({ detailName: caseData.id, tabId: tab.id });
+          },
+        } as EuiSelectableOption)
+    );
+  }, [caseViewTabs, activeTab, navigateToCaseView, caseData.id]);
 
   return (
     <>
-      <EuiFlexItem
-        grow={6}
-        css={css`
-          max-width: 75%;
-        `}
-      >
-        <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.ATTACHMENTS} />
-        <EuiSpacer size="l" />
-        <EuiFlexGroup direction="column" responsive={false} data-test-subj="case-view-attachments">
-          <EuiFlexItem>{`todo`}</EuiFlexItem>
-          <EuiFlexItem>{`todo`}</EuiFlexItem>
+      <EuiFlexItem grow={6}>
+        <CaseViewTabs caseData={caseData} activeTab={activeTab} />
+        <EuiFlexGroup direction="row" responsive={false} data-test-subj="case-view-attachments">
+          <EuiFlexItem grow={1} css={{ maxWidth: '18rem' }}>
+            <EuiSelectable options={tabAsSelectableOptions}>{(list) => list}</EuiSelectable>
+          </EuiFlexItem>
+          <EuiFlexItem grow={1}>{children}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
     </>

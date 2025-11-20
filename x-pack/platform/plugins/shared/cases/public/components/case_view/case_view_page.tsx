@@ -125,27 +125,35 @@ export const CaseViewPage = React.memo<CaseViewPageProps>(
               useFetchAlertData={useFetchAlertData}
             />
           )}
-          {activeTabId === CASE_VIEW_PAGE_TABS.ATTACHMENTS && (
-            <CaseViewAttachments caseData={caseData} />
+          {[
+            CASE_VIEW_PAGE_TABS.ALERTS,
+            CASE_VIEW_PAGE_TABS.EVENTS,
+            CASE_VIEW_PAGE_TABS.FILES,
+            CASE_VIEW_PAGE_TABS.OBSERVABLES,
+          ].includes(activeTabId as CASE_VIEW_PAGE_TABS) && (
+            <CaseViewAttachments activeTab={activeTabId as CASE_VIEW_PAGE_TABS} caseData={caseData}>
+              <>
+                {activeTabId === CASE_VIEW_PAGE_TABS.ALERTS && features.alerts.enabled && (
+                  <CaseViewAlerts
+                    caseData={caseData}
+                    renderAlertsTable={renderAlertsTable}
+                    onAlertsTableLoaded={onAlertsTableLoaded}
+                  />
+                )}
+                {activeTabId === CASE_VIEW_PAGE_TABS.EVENTS && features.events.enabled && (
+                  <CaseViewEvents caseData={caseData} renderEventsTable={renderEventsTable} />
+                )}
+                {activeTabId === CASE_VIEW_PAGE_TABS.FILES && <CaseViewFiles caseData={caseData} />}
+                {activeTabId === CASE_VIEW_PAGE_TABS.OBSERVABLES && (
+                  <CaseViewObservables
+                    isLoading={false}
+                    caseData={caseData}
+                    onUpdateField={onUpdateField}
+                  />
+                )}
+              </>
+            </CaseViewAttachments>
           )}
-          {/* {activeTabId === CASE_VIEW_PAGE_TABS.ALERTS && features.alerts.enabled && ( */}
-          {/*   <CaseViewAlerts */}
-          {/*     caseData={caseData} */}
-          {/*     renderAlertsTable={renderAlertsTable} */}
-          {/*     onAlertsTableLoaded={onAlertsTableLoaded} */}
-          {/*   /> */}
-          {/* )} */}
-          {/* {activeTabId === CASE_VIEW_PAGE_TABS.EVENTS && features.events.enabled && ( */}
-          {/*   <CaseViewEvents caseData={caseData} renderEventsTable={renderEventsTable} /> */}
-          {/* )} */}
-          {/* {activeTabId === CASE_VIEW_PAGE_TABS.FILES && <CaseViewFiles caseData={caseData} />} */}
-          {/* {activeTabId === CASE_VIEW_PAGE_TABS.OBSERVABLES && ( */}
-          {/*   <CaseViewObservables */}
-          {/*     isLoading={false} */}
-          {/*     caseData={caseData} */}
-          {/*     onUpdateField={onUpdateField} */}
-          {/*   /> */}
-          {/* )} */}
           {activeTabId === CASE_VIEW_PAGE_TABS.SIMILAR_CASES && (
             <CaseViewSimilarCases caseData={caseData} />
           )}

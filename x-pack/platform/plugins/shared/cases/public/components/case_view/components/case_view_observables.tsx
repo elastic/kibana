@@ -49,7 +49,7 @@ export const CaseViewObservables = ({
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES} />
+        {false && <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.OBSERVABLES} />}
         <EuiFlexGroup>
           <EuiFlexItem>
             <ObservablesTable

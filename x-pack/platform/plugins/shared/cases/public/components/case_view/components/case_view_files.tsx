@@ -83,7 +83,7 @@ export const CaseViewFiles = ({ caseData }: CaseViewFilesProps) => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.FILES} />
+        {false && <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.FILES} />}
         <EuiFlexGroup>
           <EuiFlexItem>
             <FilesUtilityBar caseId={caseData.id} onSearch={onSearchChange} />

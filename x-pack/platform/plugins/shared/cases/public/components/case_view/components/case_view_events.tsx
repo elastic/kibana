@@ -51,7 +51,7 @@ export const CaseViewEvents = ({
       `}
       data-test-subj="case-view-events"
     >
-      <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.EVENTS} />
+      {false && <CaseViewTabs caseData={caseData} activeTab={CASE_VIEW_PAGE_TABS.EVENTS} />}
       <EventsTable events={events} />
     </EuiFlexItem>
   );

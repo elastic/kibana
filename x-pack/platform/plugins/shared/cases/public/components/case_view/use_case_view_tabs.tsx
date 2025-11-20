@@ -11,18 +11,11 @@ import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { CASE_VIEW_PAGE_TABS } from '../../../common/types';
 import { useCasesContext } from '../cases_context/use_cases_context';
-import {
-  ALERTS_TAB,
-  EVENTS_TAB,
-  FILES_TAB,
-  OBSERVABLES_TAB,
-  SIMILAR_CASES_TAB,
-} from './translations';
+import { ALERTS_TAB, EVENTS_TAB, FILES_TAB, OBSERVABLES_TAB } from './translations';
 import { type CaseUI } from '../../../common';
 import { useGetCaseFileStats } from '../../containers/use_get_case_file_stats';
 import { useCaseObservables } from './use_case_observables';
 import { ExperimentalBadge } from '../experimental_badge/experimental_badge';
-import { useGetSimilarCases } from '../../containers/use_get_similar_cases';
 import { useCasesFeatures } from '../../common/use_cases_features';
 
 const FilesBadge = ({
@@ -81,7 +74,7 @@ const ObservablesBadge = ({
 
 ObservablesBadge.displayName = 'ObservablesBadge';
 
-const SimilarCasesBadge = ({
+export const SimilarCasesBadge = ({
   activeTab,
   count,
   euiTheme,
@@ -175,13 +168,6 @@ export const useCaseViewTabs = ({
   const { observablesAuthorized: canShowObservableTabs, isObservablesFeatureEnabled } =
     useCasesFeatures();
 
-  const { data: similarCasesData } = useGetSimilarCases({
-    caseId: caseData.id,
-    perPage: 0,
-    page: 0,
-    enabled: canShowObservableTabs && isObservablesFeatureEnabled,
-  });
-
   const tabsConfig = useMemo(
     () => [
       ...(features.alerts.enabled
@@ -241,17 +227,6 @@ export const useCaseViewTabs = ({
                 />
               ),
             },
-            {
-              id: CASE_VIEW_PAGE_TABS.SIMILAR_CASES,
-              name: SIMILAR_CASES_TAB,
-              badge: (
-                <SimilarCasesBadge
-                  activeTab={activeTab}
-                  euiTheme={euiTheme}
-                  count={similarCasesData?.total}
-                />
-              ),
-            },
           ]
         : []),
     ],
@@ -269,7 +244,6 @@ export const useCaseViewTabs = ({
       isLoadingObservables,
       isObservablesFeatureEnabled,
       observables.length,
-      similarCasesData?.total,
     ]
   );
 
