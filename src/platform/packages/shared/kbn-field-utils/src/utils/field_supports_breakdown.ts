@@ -17,8 +17,14 @@ const supportedTypes = new Set([
   KNOWN_FIELD_TYPES.IP,
 ]);
 
+const unsupportedTypes = new Set([
+  KNOWN_FIELD_TYPES.EXPONENTIAL_HISTOGRAM,
+  KNOWN_FIELD_TYPES.TDIGEST,
+]);
+
 export const fieldSupportsBreakdown = (field: DataViewField) =>
   supportedTypes.has(field.type as KNOWN_FIELD_TYPES) &&
+  !unsupportedTypes.has(field.type as KNOWN_FIELD_TYPES) &&
   field.aggregatable &&
   !field.scripted &&
   field.timeSeriesMetric !== 'counter';
