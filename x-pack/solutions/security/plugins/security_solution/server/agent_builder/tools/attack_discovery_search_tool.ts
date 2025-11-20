@@ -8,9 +8,7 @@
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
-import { executeEsql } from '@kbn/onechat-genai-utils/tools/utils/esql';
-import { generateEsql } from '@kbn/onechat-genai-utils/tools/generate_esql/nl_to_esql';
-import { ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX } from '@kbn/elastic-assistant-common';
+import { executeEsql } from '@kbn/onechat-genai-utils';
 import { getSpaceIdFromRequest } from './helpers';
 import { securityTool } from '../constants';
 
@@ -23,7 +21,7 @@ const attackDiscoverySearchSchema = z.object({
 });
 
 export const SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID = securityTool('attack_discovery_search');
-// candidate for bound tool
+
 export const attackDiscoverySearchTool = (): BuiltinToolDefinition<
   typeof attackDiscoverySearchSchema
 > => {
@@ -32,7 +30,7 @@ export const attackDiscoverySearchTool = (): BuiltinToolDefinition<
     type: ToolType.builtin,
     description: `Search and analyze attack discoveries. Use this tool to find attack discoveries related to specific alerts by providing alert IDs. The tool searches the kibana.alert.attack_discovery.alert_ids field. Automatically queries both scheduled and ad-hoc attack discovery indices for the current space. Limits results to 5 attack discoveries.`,
     schema: attackDiscoverySearchSchema,
-    handler: async ({ alertIds }, { request, esClient, logger, modelProvider, events }) => {
+    handler: async ({ alertIds }, { request, esClient, logger }) => {
       const spaceId = getSpaceIdFromRequest(request);
 
       logger.debug(
@@ -40,41 +38,20 @@ export const attackDiscoverySearchTool = (): BuiltinToolDefinition<
       );
 
       try {
-        const indexPattern = `${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-${spaceId},.adhoc${ATTACK_DISCOVERY_ALERTS_COMMON_INDEX_PREFIX}-${spaceId}`;
+        // Build date filter for last 7 days
+        const now = new Date();
+        const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        const dateFilter = `@timestamp >= "${sevenDaysAgo.toISOString()}" AND @timestamp <= "${now.toISOString()}"`;
 
-        // Build natural language query for generateEsql
-        const alertIdsList = alertIds && alertIds.length > 0 ? alertIds.join(', ') : '';
-        const nlQuery = alertIdsList
-          ? `Find attack discoveries from the last 7 days where the kibana.alert.attack_discovery.alert_ids array field contains any of these alert IDs: ${alertIdsList}. Return the fields: _id, kibana.alert.attack_discovery.title, kibana.alert.attack_discovery.summary_markdown, kibana.alert.workflow_status, kibana.alert.attack_discovery.alert_ids, kibana.alert.case_ids, @timestamp. Sort by @timestamp descending and limit to 5 results.`
-          : `Find attack discoveries from the last 7 days. Return the fields: _id, kibana.alert.attack_discovery.title, kibana.alert.attack_discovery.summary_markdown, kibana.alert.workflow_status, kibana.alert.attack_discovery.alert_ids, kibana.alert.case_ids, @timestamp. Sort by @timestamp descending and limit to 5 results.`;
+        // TODO use AD API so we can filter by kibana.alert.attack_discovery.alert_ids
+        const esqlQuery = `FROM .alerts-security.attack.discovery.alerts-${spaceId}*,.adhoc.alerts-security.attack.discovery.alerts-${spaceId}* METADATA _id
+        | WHERE ${dateFilter}
+        | KEEP _id, kibana.alert.attack_discovery.title, kibana.alert.severity, kibana.alert.workflow_status, kibana.alert.attack_discovery.alert_ids, kibana.alert.case_ids, @timestamp
+        | SORT @timestamp DESC
+        | LIMIT 100`;
 
-        logger.debug(`Generating ES|QL query from natural language: ${nlQuery}`);
+        logger.debug(`Executing ES|QL query: ${esqlQuery}`);
 
-        // Generate ES|QL query using generateEsql
-        const model = await modelProvider.getDefaultModel();
-        const generateEsqlResponse = await generateEsql({
-          nlQuery,
-          index: indexPattern,
-          executeQuery: false,
-          model,
-          esClient: esClient.asCurrentUser,
-          logger,
-          events,
-        });
-        console.log('generateEsqlResponse==>', JSON.stringify(generateEsqlResponse, null, 2));
-
-        if (generateEsqlResponse.error) {
-          throw new Error(`Failed to generate ES|QL query: ${generateEsqlResponse.error}`);
-        }
-
-        if (!generateEsqlResponse.query) {
-          throw new Error('No ES|QL query was generated');
-        }
-
-        const esqlQuery = generateEsqlResponse.query;
-        logger.debug(`Generated ES|QL query: ${esqlQuery}`);
-
-        // Execute the generated query
         const esqlResponse = await executeEsql({
           query: esqlQuery,
           esClient: esClient.asCurrentUser,

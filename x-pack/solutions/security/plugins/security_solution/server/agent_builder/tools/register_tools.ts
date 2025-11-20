@@ -12,7 +12,7 @@ import {
   SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID,
 } from './attack_discovery_search_tool';
 import { alertsTool, SECURITY_ALERTS_TOOL_ID } from './alerts_tool';
-import { securityLabsTool, SECURITY_LABS_TOOL_ID } from './security_labs_tool';
+import { SECURITY_LABS_TOOL_ID } from './security_labs_tool';
 import { searchAlertsTool, SEARCH_ALERTS_TOOL_ID } from './search_alerts_tool';
 import { triageAlertsTool, TRIAGE_ALERTS_TOOL_ID } from './triage_alerts_tool';
 
@@ -39,7 +39,7 @@ export const SECURITY_AGENT_TOOL_IDS = [...PLATFORM_TOOL_IDS, ...SECURITY_TOOL_I
  */
 export const registerTools = (onechat: OnechatPluginSetup): void => {
   onechat.tools.register(alertsTool());
-  onechat.tools.register(securityLabsTool());
+  // onechat.tools.register(securityLabsTool());
   onechat.tools.register(searchAlertsTool());
   onechat.tools.register(triageAlertsTool());
   onechat.tools.register(attackDiscoverySearchTool());
