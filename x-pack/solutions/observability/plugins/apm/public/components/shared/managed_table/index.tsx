@@ -46,6 +46,8 @@ export interface ITableColumn<T extends object> {
   truncateText?: boolean;
   nameTooltip?: EuiBasicTableColumn<T>['nameTooltip'];
   render?: (value: any, item: T) => unknown;
+  isExpander?: boolean;
+  mobileOptions?: EuiBasicTableColumn<T>['mobileOptions'];
 }
 
 export interface TableSearchBar<T> {
@@ -105,6 +107,10 @@ function UnoptimizedManagedTable<T extends object>(props: {
   saveTableOptionsToUrl?: boolean;
 
   tableCaption?: string;
+
+  // expandable rows
+  itemId?: string;
+  itemIdToExpandedRowMap?: Record<string, ReactNode>;
 }) {
   const [searchQuery, setSearchQuery] = useState('');
   const history = useHistory();
@@ -149,6 +155,8 @@ function UnoptimizedManagedTable<T extends object>(props: {
       placeholder: 'Search...',
       onChangeSearchQuery: () => {},
     },
+    itemId,
+    itemIdToExpandedRowMap,
   } = props;
 
   const {
@@ -337,6 +345,7 @@ function UnoptimizedManagedTable<T extends object>(props: {
           onChange={onTableChange}
           tableCaption={props.tableCaption}
           {...(paginationProps ? { pagination: paginationProps } : {})}
+          {...(itemId ? { itemId, itemIdToExpandedRowMap: itemIdToExpandedRowMap ?? {} } : {})}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

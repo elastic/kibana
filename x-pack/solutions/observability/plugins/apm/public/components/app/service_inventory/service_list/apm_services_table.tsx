@@ -7,9 +7,11 @@
 
 import {
   EuiBadge,
+  EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIconTip,
+  EuiScreenReaderOnly,
   EuiText,
   EuiToolTip,
   RIGHT_ALIGNMENT,
@@ -22,10 +24,11 @@ import {
 import { ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import type { TypeOf } from '@kbn/typed-react-router-config';
 import { omit } from 'lodash';
-import React, { useMemo } from 'react';
+import React, { useMemo, useState, useEffect, useCallback } from 'react';
 import { ServiceHealthStatus } from '../../../../../common/service_health_status';
 import type { ServiceListItem } from '../../../../../common/service_inventory';
 import { ServiceInventoryFieldName } from '../../../../../common/service_inventory';
+import { ServiceSloSummary } from './service_slo_summary';
 import { isDefaultTransactionType } from '../../../../../common/transaction_types';
 import {
   asMillisecondDuration,
@@ -73,6 +76,8 @@ export function getServiceColumns({
   link,
   serviceOverflowCount,
   getSloListLocator,
+  toggleRowDetails,
+  itemIdToExpandedRowMap,
 }: {
   query: TypeOf<ApmRoutes, '/services'>['query'];
   showTransactionTypeColumn: boolean;
@@ -85,12 +90,48 @@ export function getServiceColumns({
   link: any;
   serviceOverflowCount: number;
   getSloListLocator?: () => any;
+  toggleRowDetails?: (serviceName: string) => void;
+  itemIdToExpandedRowMap?: Record<string, React.ReactNode>;
 }): Array<ITableColumn<ServiceListItem>> {
   const { isSmall, isLarge, isXl } = breakpoints;
   const showWhenSmallOrGreaterThanLarge = isSmall || !isLarge;
   const showWhenSmallOrGreaterThanXL = isSmall || !isXl;
 
   return [
+    {
+      align: 'right',
+      width: '40px',
+      isExpander: true,
+      name: (
+        <EuiScreenReaderOnly>
+          <span>
+            {i18n.translate('xpack.apm.servicesTable.expandRow', {
+              defaultMessage: 'Expand row',
+            })}
+          </span>
+        </EuiScreenReaderOnly>
+      ),
+      mobileOptions: { header: false },
+      render: (item: ServiceListItem) => {
+        const isExpanded = itemIdToExpandedRowMap?.[item.serviceName];
+        return (
+          <EuiButtonIcon
+            onClick={() => toggleRowDetails?.(item.serviceName)}
+            aria-label={
+              isExpanded
+                ? i18n.translate('xpack.apm.servicesTable.collapseRow', {
+                    defaultMessage: 'Collapse',
+                  })
+                : i18n.translate('xpack.apm.servicesTable.expandRow', {
+                    defaultMessage: 'Expand',
+                  })
+            }
+            iconType={isExpanded ? 'arrowDown' : 'arrowRight'}
+            data-test-subj={`expandServiceRow-${item.serviceName}`}
+          />
+        );
+      },
+    } as ITableColumn<ServiceListItem>,
     ...(showAlertsColumn
       ? [
           {
@@ -397,6 +438,27 @@ export function ApmServicesTable({
     ({ transactionType }) => transactionType && !isDefaultTransactionType(transactionType)
   );
   const { query } = useApmParams('/services');
+
+  const [itemIdToExpandedRowMap, setItemIdToExpandedRowMap] = useState<
+    Record<string, React.ReactNode>
+  >({});
+
+  useEffect(() => {
+    // Close any open rows when items change
+    setItemIdToExpandedRowMap({});
+  }, [items]);
+
+  const toggleRowDetails = useCallback((serviceName: string) => {
+    setItemIdToExpandedRowMap((prev) => {
+      const expandedRowMapValues = { ...prev };
+      if (expandedRowMapValues[serviceName]) {
+        delete expandedRowMapValues[serviceName];
+      } else {
+        expandedRowMapValues[serviceName] = <ServiceSloSummary serviceName={serviceName} />;
+      }
+      return expandedRowMapValues;
+    });
+  }, []);
   const { kuery } = query;
   const { fallbackToTransactions } = useFallbackToTransactionsFetcher({
     kuery,
@@ -426,6 +488,8 @@ export function ApmServicesTable({
       link,
       serviceOverflowCount,
       getSloListLocator,
+      toggleRowDetails,
+      itemIdToExpandedRowMap,
     });
   }, [
     query,
@@ -439,6 +503,8 @@ export function ApmServicesTable({
     link,
     serviceOverflowCount,
     getSloListLocator,
+    toggleRowDetails,
+    itemIdToExpandedRowMap,
   ]);
 
   const isTableSearchBarEnabled = core.uiSettings.get<boolean>(
@@ -515,6 +581,8 @@ export function ApmServicesTable({
           onChangeRenderedItems={onChangeRenderedItems}
           onChangeItemIndices={onChangeItemIndices}
           tableSearchBar={tableSearchBar}
+          itemId="serviceName"
+          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
         />
       </EuiFlexItem>
     </EuiFlexGroup>

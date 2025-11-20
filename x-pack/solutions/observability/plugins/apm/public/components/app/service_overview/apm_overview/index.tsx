@@ -33,6 +33,7 @@ import { ServiceOverviewInstancesChartAndTable } from '../service_overview_insta
 import { ServiceOverviewThroughputChart } from '../service_overview_throughput_chart';
 import { SloCallout } from '../../../shared/slo_callout';
 import { useLocalStorage } from '../../../../hooks/use_local_storage';
+import { ServiceSloSummary } from '../../service_inventory/service_list/service_slo_summary';
 
 const latencyChartHeight = 200;
 
@@ -109,6 +110,9 @@ export function ApmOverview() {
           <EuiSpacer />
         </>
       )}
+      <EuiFlexItem>
+        <ServiceSloSummary serviceName={serviceName} />
+      </EuiFlexItem>
       {fallbackToTransactions && (
         <EuiFlexItem>
           <AggregatedTransactionsBadge />
