@@ -13,14 +13,17 @@ import { schema, type TypeOf } from '@kbn/config-schema';
 
 import { datasetSchema, datasetEsqlTableSchema } from '../dataset';
 import { colorByValueSchema } from '../color';
-import { esqlColumnSchema, metricOperationDefinitionSchema } from '../metric_ops';
+import { esqlColumnSchema } from '../metric_ops';
 import { sharedPanelInfoSchema, layerSettingsSchema } from '../shared';
-import { mergeAllMetricsWithChartDimensionSchema } from './shared';
+import {
+  mergeAllBucketsWithChartDimensionSchema,
+  mergeAllMetricsWithChartDimensionSchema,
+} from './shared';
 import { positionSchema } from '../alignments';
 
 export const titleSchemaProps = {
   value: schema.maybe(schema.string({ defaultValue: '' })),
-  visible: schema.boolean({ defaultValue: false }),
+  visible: schema.maybe(schema.boolean()),
 };
 
 const legendSchemaProps = {
@@ -53,21 +56,21 @@ const labelsSchemaProps = {
 
 const heatmapSharedStateSchema = {
   type: schema.literal('heatmap'),
-  ...legendSchemaProps,
+  legend: schema.maybe(schema.object(legendSchemaProps)),
   ...sharedPanelInfoSchema,
   ...layerSettingsSchema,
   axes: schema.maybe(
     schema.object({
       x: schema.maybe(
         schema.object({
-          ...titleSchemaProps,
-          ...labelsSchemaProps,
+          title: schema.maybe(schema.object(titleSchemaProps)),
+          labels: schema.maybe(schema.object(labelsSchemaProps)),
         })
       ),
       y: schema.maybe(
         schema.object({
-          ...titleSchemaProps,
-          ...omit(labelsSchemaProps, 'orientation'),
+          title: schema.maybe(schema.object(titleSchemaProps)),
+          labels: schema.maybe(schema.object(omit(labelsSchemaProps, 'orientation'))),
         })
       ),
     })
@@ -75,12 +78,12 @@ const heatmapSharedStateSchema = {
 };
 
 const heatmapAxesStateSchema = {
-  xAxis: schema.maybe(metricOperationDefinitionSchema),
-  yAxis: schema.maybe(metricOperationDefinitionSchema),
+  xAxis: mergeAllBucketsWithChartDimensionSchema(schema.object({})),
+  yAxis: schema.maybe(mergeAllBucketsWithChartDimensionSchema(schema.object({}))),
 };
 
 const heatmapAxesStateESQLSchema = {
-  xAxis: schema.maybe(esqlColumnSchema),
+  xAxis: esqlColumnSchema,
   yAxis: schema.maybe(esqlColumnSchema),
 };
 
