@@ -516,6 +516,7 @@ src/platform/packages/shared/kbn-expect @elastic/kibana-operations @elastic/appe
 src/platform/packages/shared/kbn-field-formats-common @elastic/kibana-visualizations @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-field-types @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-field-utils @elastic/kibana-data-discovery
+src/platform/packages/shared/kbn-field-utils/src/components/field_select @elastic/kibana-esql
 src/platform/packages/shared/kbn-flot-charts @elastic/kibana-presentation @elastic/stack-monitoring
 src/platform/packages/shared/kbn-ftr-common-functional-services @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-ftr-common-functional-ui-services @elastic/appex-qa
