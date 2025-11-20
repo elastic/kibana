@@ -7,19 +7,14 @@
 
 import { Streams } from '@kbn/streams-schema';
 import { isEnabledFailureStore, isRoot } from '@kbn/streams-schema';
-import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import {
   isDisabledLifecycleFailureStore,
   isInheritFailureStore,
 } from '@kbn/streams-schema/src/models/ingest/failure_store';
+import type { FailureStoreFormData } from '@kbn/failure-store-modal';
 import { useFailureStoreDefaultRetention } from './use_failure_store_default_retention';
 
-export function transformFailureStoreConfig(update: {
-  failureStoreEnabled?: boolean;
-  customRetentionPeriod?: string;
-  retentionDisabled?: boolean;
-  inherit?: boolean;
-}): FailureStore {
+export function transformFailureStoreConfig(update: FailureStoreFormData) {
   const failureStoreEnabled = update.failureStoreEnabled ?? false;
 
   // Inherit
