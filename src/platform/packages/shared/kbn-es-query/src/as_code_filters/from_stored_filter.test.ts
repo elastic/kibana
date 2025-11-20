@@ -7,16 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { AsCodeFilter } from '@kbn/es-query-server';
 import { fromStoredFilter } from './from_stored_filter';
-import { FilterConversionError } from './errors';
 import { isConditionFilter, isGroupFilter, isDSLFilter } from './type_guards';
 import { spatialFilterFixture } from '../__fixtures__/spatial_filter';
 
 describe('fromStoredFilter', () => {
   describe('Input validation', () => {
-    it('should throw for null/undefined input', () => {
-      expect(() => fromStoredFilter(null)).toThrow(FilterConversionError);
-      expect(() => fromStoredFilter(undefined)).toThrow(FilterConversionError);
+    it('should return DSL filter for null/undefined input when logger provided', () => {
+      const mockLogger = {
+        warn: jest.fn(),
+      } as any;
+
+      const resultNull = fromStoredFilter(null, mockLogger);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to convert stored filter')
+      );
+      expect(resultNull).toHaveProperty('dsl');
+
+      mockLogger.warn.mockClear();
+
+      const resultUndefined = fromStoredFilter(undefined, mockLogger);
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Failed to convert stored filter')
+      );
+      expect(resultUndefined).toHaveProperty('dsl');
+    });
+
+    it('should return DSL filter for null/undefined input without logger', () => {
+      const resultNull = fromStoredFilter(null);
+      expect(resultNull).toHaveProperty('dsl');
+
+      const resultUndefined = fromStoredFilter(undefined);
+      expect(resultUndefined).toHaveProperty('dsl');
     });
   });
 
@@ -37,7 +60,7 @@ describe('fromStoredFilter', () => {
         $state: { store: 'appState' },
       };
 
-      const result = fromStoredFilter(legacyRangeFilter);
+      const result = fromStoredFilter(legacyRangeFilter) as AsCodeFilter;
 
       expect(isConditionFilter(result)).toBe(true);
       if (isConditionFilter(result)) {
@@ -65,7 +88,7 @@ describe('fromStoredFilter', () => {
         $state: { store: 'appState' },
       };
 
-      const result = fromStoredFilter(legacyPhraseFilter);
+      const result = fromStoredFilter(legacyPhraseFilter) as AsCodeFilter;
 
       expect(isConditionFilter(result)).toBe(true);
       if (isConditionFilter(result)) {
@@ -91,7 +114,7 @@ describe('fromStoredFilter', () => {
         $state: { store: 'appState' },
       };
 
-      const result = fromStoredFilter(legacyExistsFilter);
+      const result = fromStoredFilter(legacyExistsFilter) as AsCodeFilter;
 
       expect(isConditionFilter(result)).toBe(true);
       if (isConditionFilter(result)) {
@@ -115,7 +138,7 @@ describe('fromStoredFilter', () => {
         $state: { store: 'globalState' },
       };
 
-      const result = fromStoredFilter(legacyMatchAllFilter);
+      const result = fromStoredFilter(legacyMatchAllFilter) as AsCodeFilter;
 
       // match_all gets preserved as DSL since it's a special case
       expect(isDSLFilter(result) || isConditionFilter(result)).toBe(true);
@@ -132,7 +155,7 @@ describe('fromStoredFilter', () => {
         },
       };
 
-      const result = fromStoredFilter(storedFilter);
+      const result = fromStoredFilter(storedFilter) as AsCodeFilter;
 
       expect(isConditionFilter(result)).toBe(true);
       if (isConditionFilter(result)) {
@@ -150,7 +173,7 @@ describe('fromStoredFilter', () => {
         query: { term: { status: 'inactive' } },
       };
 
-      const result = fromStoredFilter(storedFilter);
+      const result = fromStoredFilter(storedFilter) as AsCodeFilter;
 
       expect(isConditionFilter(result)).toBe(true);
       if (isConditionFilter(result)) {
@@ -170,7 +193,7 @@ describe('fromStoredFilter', () => {
         },
       };
 
-      const result = fromStoredFilter(storedFilter);
+      const result = fromStoredFilter(storedFilter) as AsCodeFilter;
 
       expect(isConditionFilter(result)).toBe(true);
       if (isConditionFilter(result)) {
@@ -192,7 +215,7 @@ describe('fromStoredFilter', () => {
         },
       };
 
-      const result = fromStoredFilter(storedFilter);
+      const result = fromStoredFilter(storedFilter) as AsCodeFilter;
 
       expect(isConditionFilter(result)).toBe(true);
       if (isConditionFilter(result)) {
@@ -217,7 +240,7 @@ describe('fromStoredFilter', () => {
         },
       };
 
-      const result = fromStoredFilter(storedFilter);
+      const result = fromStoredFilter(storedFilter) as AsCodeFilter;
 
       expect(isConditionFilter(result)).toBe(true);
       if (isConditionFilter(result)) {
@@ -235,7 +258,7 @@ describe('fromStoredFilter', () => {
         query: { term: { username: 'john' } },
       };
 
-      const result = fromStoredFilter(storedFilter);
+      const result = fromStoredFilter(storedFilter) as AsCodeFilter;
 
       expect(isConditionFilter(result)).toBe(true);
       if (isConditionFilter(result)) {
@@ -245,7 +268,8 @@ describe('fromStoredFilter', () => {
   });
 
   describe('Strategy 3: Filter Groups (combined/bool filters)', () => {
-    it('should convert boolean group filters with must clauses', () => {
+    it('should preserve boolean group filters without meta.type as DSL (not group)', () => {
+      // Bool queries without meta.type='combined' are preserved as DSL to prevent data loss
       const storedFilter = {
         meta: {},
         query: {
@@ -255,17 +279,104 @@ describe('fromStoredFilter', () => {
         },
       };
 
-      const result = fromStoredFilter(storedFilter);
+      const result = fromStoredFilter(storedFilter) as AsCodeFilter;
 
-      expect(isGroupFilter(result)).toBe(true);
-      if (isGroupFilter(result)) {
-        expect(result.group).toEqual({
-          type: 'and',
-          conditions: expect.arrayContaining([
-            expect.objectContaining({ field: 'status', operator: 'is', value: 'active' }),
-            expect.objectContaining({ field: 'type', operator: 'is', value: 'user' }),
-          ]),
-        });
+      // Should be DSL to preserve bool structure
+      expect(isDSLFilter(result)).toBe(true);
+      if (isDSLFilter(result)) {
+        const queryStr = JSON.stringify(result.dsl);
+        expect(queryStr.includes('status')).toBe(true);
+        expect(queryStr.includes('active')).toBe(true);
+        expect(queryStr.includes('type')).toBe(true);
+        expect(queryStr.includes('user')).toBe(true);
+      }
+    });
+
+    it('should preserve custom filters as DSL even with simple bool queries', () => {
+      const storedFilter = {
+        meta: {
+          type: 'custom',
+          disabled: false,
+          negate: false,
+          alias: null,
+          key: 'query',
+        },
+        $state: {
+          store: 'appState',
+        },
+        query: {
+          bool: {
+            must: [
+              {
+                term: {
+                  'extension.keyword': 'css',
+                },
+              },
+              {
+                term: {
+                  'machine.os.keyword': 'ios',
+                },
+              },
+            ],
+          },
+        },
+      };
+      const result = fromStoredFilter(storedFilter) as AsCodeFilter;
+
+      // Custom filters are always preserved as DSL, even if they could be simplified
+      expect(isDSLFilter(result)).toBe(true);
+      if (isDSLFilter(result)) {
+        expect(result.dsl.query).toEqual(storedFilter.query);
+      }
+    });
+
+    it('should preserve custom filters with complex bool queries as DSL', () => {
+      const storedFilter = {
+        meta: {
+          type: 'custom',
+          disabled: false,
+          negate: false,
+          alias: null,
+          key: 'query',
+        },
+        $state: {
+          store: 'appState',
+        },
+        query: {
+          bool: {
+            must: [
+              {
+                term: {
+                  'extension.keyword': 'css',
+                },
+              },
+              {
+                term: {
+                  'machine.os.keyword': 'ios',
+                },
+              },
+            ],
+            should: [
+              {
+                range: {
+                  'machine.ram': {
+                    gte: '500',
+                  },
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      const result = fromStoredFilter(storedFilter) as AsCodeFilter;
+
+      // Custom filters should be preserved as DSL to avoid losing complex query structures
+      // (e.g., bool queries with both must and should clauses)
+      expect(isDSLFilter(result)).toBe(true);
+      if (isDSLFilter(result)) {
+        // Verify the entire query structure is preserved, including both must and should clauses
+        expect(result.dsl.query).toEqual(storedFilter.query);
       }
     });
 
@@ -361,7 +472,7 @@ describe('fromStoredFilter', () => {
         query: {},
       };
 
-      const result = fromStoredFilter(storedFilter);
+      const result = fromStoredFilter(storedFilter) as AsCodeFilter;
 
       expect(isGroupFilter(result)).toBe(true);
       if (isGroupFilter(result)) {
@@ -415,7 +526,7 @@ describe('fromStoredFilter', () => {
         },
       };
 
-      const result = fromStoredFilter(storedFilter);
+      const result = fromStoredFilter(storedFilter) as AsCodeFilter;
 
       expect(isDSLFilter(result)).toBe(true);
       if (isDSLFilter(result)) {
@@ -428,7 +539,7 @@ describe('fromStoredFilter', () => {
     it('should preserve spatial filters with geo_shape queries as DSL', () => {
       const spatialFilter = spatialFilterFixture;
 
-      const result = fromStoredFilter(spatialFilter);
+      const result = fromStoredFilter(spatialFilter) as AsCodeFilter;
 
       // Should be converted to DSL format due to geo_shape complexity
       expect(isDSLFilter(result)).toBe(true);
@@ -444,7 +555,7 @@ describe('fromStoredFilter', () => {
     it('should preserve isMultiIndex property in meta for spatial filters', () => {
       const spatialFilter = spatialFilterFixture;
 
-      const result = fromStoredFilter(spatialFilter);
+      const result = fromStoredFilter(spatialFilter) as AsCodeFilter;
 
       // Verify isMultiIndex is extracted from meta
       expect(isDSLFilter(result)).toBe(true);
@@ -465,7 +576,7 @@ describe('fromStoredFilter', () => {
         query: { term: { status: 'active' } },
       };
 
-      const result = fromStoredFilter(storedFilter);
+      const result = fromStoredFilter(storedFilter) as AsCodeFilter;
 
       expect(result.pinned).toBe(true);
       expect(result.disabled).toBe(true);
