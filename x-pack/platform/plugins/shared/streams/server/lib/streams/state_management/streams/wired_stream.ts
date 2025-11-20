@@ -147,8 +147,8 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
     this._changes.processing =
       !startingStateStreamDefinition ||
       !_.isEqual(
-        this._definition.ingest.processing,
-        startingStateStreamDefinition.ingest.processing
+        _.omit(this._definition.ingest.processing, ['updated_at']),
+        _.omit(startingStateStreamDefinition.ingest.processing, ['updated_at'])
       );
 
     this._changes.lifecycle =
@@ -161,7 +161,7 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
 
     // The newly upserted definition will always have a new updated_at timestamp. But, if processing didn't change,
     // we should keep the existing updated_at as processing wasn't touched.
-    if (startingStateStreamDefinition && this._changes.processing) {
+    if (startingStateStreamDefinition && !this._changes.processing) {
       this._definition.ingest.processing.updated_at =
         startingStateStreamDefinition.ingest.processing.updated_at;
     }
