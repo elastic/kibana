@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { PageObjects, ScoutPage } from '@kbn/scout';
-import { createLazyPageObject } from '@kbn/scout';
+import type { ObltPageObjects, ScoutPage } from '@kbn/scout-oblt';
+import { createLazyPageObject } from '@kbn/scout-oblt';
 import { RulesPage } from './rules_page';
 
-export interface TriggersActionsPageObjects extends PageObjects {
+export interface TriggersActionsPageObjects extends ObltPageObjects {
   rulesPage: RulesPage;
 }
 
 export function extendPageObjects(
-  pageObjects: PageObjects,
+  pageObjects: ObltPageObjects,
   page: ScoutPage
 ): TriggersActionsPageObjects {
   return {

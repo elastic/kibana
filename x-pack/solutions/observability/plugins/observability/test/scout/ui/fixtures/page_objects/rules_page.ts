@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ScoutPage } from '@kbn/scout';
-import { expect } from '@kbn/scout';
+import type { ScoutPage } from '@kbn/scout-oblt';
+import { expect } from '@kbn/scout-oblt';
 import { RULES_SETTINGS_TEST_SUBJECTS, RULE_TYPE_MODAL_TEST_SUBJECTS } from '../constants';
 
 export class RulesPage {

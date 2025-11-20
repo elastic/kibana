@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
-import { test as baseTest } from '@kbn/scout';
+import type { ScoutPage, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout-oblt';
+import { test as baseTest } from '@kbn/scout-oblt';
 import type { TriggersActionsPageObjects } from './page_objects';
 import { extendPageObjects } from './page_objects';
 
