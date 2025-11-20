@@ -50,7 +50,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await panelActions.convertToLensByTitle('Gauge - Value count');
       await lens.waitForVisualization('mtrVis');
       await retry.try(async () => {
-        await lens.assertLayerCount(1);
+        // layer tabs hidden for gauge/metric visualizations
+        await lens.assertLayerCount(0);
 
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(dimensions).to.have.length(2);
