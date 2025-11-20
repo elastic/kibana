@@ -11,6 +11,8 @@ import {
   lookupIndexFields,
   getMockCallbacks,
 } from '../../../__tests__/context_fixtures';
+import { esqlCommandRegistry } from '../..';
+import { getCommandAutocompleteDefinitions } from '../../complete_items';
 import { Location } from '../../types';
 import { autocomplete } from './autocomplete';
 import {
@@ -139,24 +141,13 @@ describe('FORK Autocomplete', () => {
     });
 
     describe('(COMMAND ... | COMMAND ...)', () => {
-      const FORK_SUBCOMMANDS = [
-        'WHERE ',
-        'SORT ',
-        'LIMIT ',
-        'DISSECT ',
-        'STATS ',
-        'EVAL ',
-        'GROK ',
-        'CHANGE_POINT ',
-        'COMPLETION ',
-        'MV_EXPAND ',
-        'DROP ',
-        'ENRICH ',
-        'KEEP ',
-        'RENAME ',
-        'SAMPLE ',
-        'LOOKUP JOIN ',
-      ];
+      const forkCommands = esqlCommandRegistry
+        .getProcessingCommandNames()
+        .filter((cmd) => cmd !== 'fork');
+
+      const FORK_SUBCOMMANDS = getCommandAutocompleteDefinitions(forkCommands).map(
+        (item) => item.text
+      );
 
       it('suggests FORK sub commands in an open branch', async () => {
         await forkExpectSuggestions('FROM a | FORK (', FORK_SUBCOMMANDS);
@@ -475,6 +466,35 @@ describe('FORK Autocomplete', () => {
             { notContains: ['foo'] },
             mockCallbacks
           );
+        });
+      });
+
+      describe('command filtering', () => {
+        it('does NOT suggest source commands', async () => {
+          const sourceCommands = esqlCommandRegistry.getSourceCommandNames();
+
+          await forkExpectSuggestions(
+            'FROM a | FORK (',
+            { notContains: sourceCommands.map((cmd) => cmd.toUpperCase() + ' ') },
+            mockCallbacks
+          );
+        });
+
+        it('does NOT suggest hidden processing commands', async () => {
+          const hiddenCommands = esqlCommandRegistry.getProcessingCommandNames().filter((cmd) => {
+            const commandDef = esqlCommandRegistry.getCommandByName(cmd);
+            return commandDef?.metadata?.hidden === true;
+          });
+
+          await forkExpectSuggestions(
+            'FROM a | FORK (',
+            { notContains: hiddenCommands.map((cmd) => cmd.toUpperCase() + ' ') },
+            mockCallbacks
+          );
+        });
+
+        it('does NOT suggest FORK command itself', async () => {
+          await forkExpectSuggestions('FROM a | FORK (', { notContains: ['FORK '] }, mockCallbacks);
         });
       });
     });
