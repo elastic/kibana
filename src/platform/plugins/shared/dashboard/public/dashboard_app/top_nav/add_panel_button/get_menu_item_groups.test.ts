@@ -11,7 +11,8 @@ import { getMenuItemGroups } from './get_menu_item_groups';
 
 jest.mock('../../../services/kibana_services', () => ({
   uiActionsService: {
-    getTriggerCompatibleActions: async () => [
+    getTrigger: jest.fn(),
+    getTriggerActions: async () => [
       {
         id: 'mockAddPanelAction',
         type: '',
