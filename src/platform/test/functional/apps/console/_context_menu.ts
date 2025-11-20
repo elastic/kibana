@@ -113,11 +113,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Wait for menu to be fully open
         await retry.waitFor('context menu to open', async () => {
-          return await testSubjects.exists('consoleMenuCopyToLanguage');
+          return await testSubjects.exists('consoleMenuCopyAsButton');
         });
 
         // Check default language shows "Copy to curl"
-        let copyMenuItem = await testSubjects.find('consoleMenuCopyToLanguage');
+        let copyMenuItem = await testSubjects.find('consoleMenuCopyAsButton');
         let menuItemText = await copyMenuItem.getVisibleText();
         expect(menuItemText.toLowerCase()).to.contain('copy to curl');
 
@@ -126,14 +126,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         // Wait for context menu to be visible again
         await retry.waitFor('context menu to be visible', async () => {
-          return await testSubjects.exists('consoleMenuCopyToLanguage');
+          return await testSubjects.exists('consoleMenuCopyAsButton');
         });
 
         // Wait for UI to update
         await PageObjects.common.sleep(300);
 
         // Check that the menu item now shows "Copy to Python"
-        copyMenuItem = await testSubjects.find('consoleMenuCopyToLanguage');
+        copyMenuItem = await testSubjects.find('consoleMenuCopyAsButton');
         menuItemText = await copyMenuItem.getVisibleText();
         expect(menuItemText).to.contain('Copy to Python');
       });

@@ -482,7 +482,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async isCopyToLanguageButtonVisible() {
-    return await this.testSubjects.exists('consoleMenuCopyToLanguage');
+    return await this.testSubjects.exists('consoleMenuCopyAsButton');
   }
 
   public async isChangeLanguageButtonVisible() {
@@ -527,7 +527,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async clickCopyToLanguageButton() {
-    const button = await this.testSubjects.find('consoleMenuCopyToLanguage');
+    const button = await this.testSubjects.find('consoleMenuCopyAsButton');
     await button.click();
   }
 

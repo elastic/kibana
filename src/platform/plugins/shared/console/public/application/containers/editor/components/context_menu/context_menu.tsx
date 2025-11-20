@@ -241,8 +241,8 @@ export const ContextMenu = ({
       ? [
           <EuiContextMenuItem
             key="Copy to"
-            data-test-subj="consoleMenuCopyToLanguage"
-            id="copyTo"
+            data-test-subj="consoleMenuCopyAsButton"
+            id="copyAs"
             disabled={!window.navigator?.clipboard}
             onClick={(e: React.MouseEvent) => {
               e.preventDefault();
@@ -269,7 +269,7 @@ export const ContextMenu = ({
                   <EuiFlexItem grow={false}>
                     <FormattedMessage
                       tagName="span"
-                      id="console.monaco.requestOptions.copyToLanguageButtonLabel"
+                      id="console.monaco.requestOptions.copyAsUrlButtonLabel"
                       defaultMessage="Copy to"
                     />
                   </EuiFlexItem>
