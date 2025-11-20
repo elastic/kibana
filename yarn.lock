@@ -6343,6 +6343,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dissect-heuristics@link:x-pack/platform/packages/shared/kbn-dissect-heuristics":
+  version "0.0.0"
+  uid ""
+
 "@kbn/doc-links@link:src/platform/packages/shared/kbn-doc-links":
   version "0.0.0"
   uid ""
@@ -7500,6 +7504,10 @@
   uid ""
 
 "@kbn/monitoring-plugin@link:x-pack/platform/plugins/private/monitoring":
+  version "0.0.0"
+  uid ""
+
+"@kbn/moon@link:packages/kbn-moon":
   version "0.0.0"
   uid ""
 
