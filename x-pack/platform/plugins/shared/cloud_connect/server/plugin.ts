@@ -75,6 +75,7 @@ export class CloudConnectedPlugin
       router,
       logger: this.logger,
       getStartServices: core.getStartServices,
+      hasEncryptedSOEnabled: plugins.encryptedSavedObjects.canEncrypt,
     });
 
     return {};

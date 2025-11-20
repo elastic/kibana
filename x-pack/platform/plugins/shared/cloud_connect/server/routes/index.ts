@@ -18,6 +18,7 @@ export interface RouteOptions {
   router: IRouter;
   logger: Logger;
   getStartServices: StartServicesAccessor<CloudConnectedStartDeps, unknown>;
+  hasEncryptedSOEnabled: boolean;
 }
 
 export function registerRoutes(options: RouteOptions) {

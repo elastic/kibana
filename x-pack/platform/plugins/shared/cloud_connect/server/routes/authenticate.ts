@@ -13,8 +13,7 @@ import type { StartServicesAccessor } from '@kbn/core/server';
 import { CloudConnectClient } from '../services/cloud_connect_client';
 import type { OnboardClusterResponse } from '../types';
 import { getCurrentClusterData } from '../lib/cluster_info';
-import { StorageService } from '../services/storage';
-import { CLOUD_CONNECT_API_KEY_TYPE } from '../../common/constants';
+import { createStorageService } from '../lib/create_storage_service';
 
 const bodySchema = schema.object({
   apiKey: schema.string({ minLength: 1 }),
@@ -57,21 +56,10 @@ export const registerAuthenticateRoute = ({
 
       try {
         const cloudConnectClient = new CloudConnectClient(logger);
+        const coreContext = await context.core;
 
         // Initialize storage service for saving the API key
-        const coreContext = await context.core;
-        const [, { encryptedSavedObjects }] = await getStartServices();
-        const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
-          includedHiddenTypes: [CLOUD_CONNECT_API_KEY_TYPE],
-        });
-        const savedObjectsClient = coreContext.savedObjects.getClient({
-          includedHiddenTypes: [CLOUD_CONNECT_API_KEY_TYPE],
-        });
-        const storageService = new StorageService({
-          encryptedSavedObjectsClient,
-          savedObjectsClient,
-          logger,
-        });
+        const storageService = await createStorageService(context, getStartServices, logger);
 
         // Step 1: Validate the API key scope
         const validationResult = await cloudConnectClient.validateApiKeyScope(apiKey);

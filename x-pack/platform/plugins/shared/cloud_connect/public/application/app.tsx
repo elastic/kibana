@@ -28,7 +28,7 @@ export const CloudConnectedAppMain: React.FC = () => {
     } catch (error) {
       // Only show toast for non-503 errors
       if (error?.body?.statusCode !== 503) {
-        notifications.toasts.addError(error as Error, {
+        notifications.toasts.addError(error.body as Error, {
           title: 'Failed to load cluster details',
         });
       }

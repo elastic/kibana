@@ -10,9 +10,8 @@ import type { IRouter, Logger, StartServicesAccessor } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import axios from 'axios';
 import { CloudConnectClient } from '../services/cloud_connect_client';
-import { StorageService } from '../services/storage';
+import { createStorageService } from '../lib/create_storage_service';
 import { enableInferenceCCM, disableInferenceCCM } from '../services/inference_ccm';
-import { CLOUD_CONNECT_API_KEY_TYPE } from '../../common/constants';
 
 interface CloudConnectedStartDeps {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
@@ -22,6 +21,7 @@ export interface ClustersRouteOptions {
   router: IRouter;
   logger: Logger;
   getStartServices: StartServicesAccessor<CloudConnectedStartDeps, unknown>;
+  hasEncryptedSOEnabled: boolean;
 }
 
 export const registerClustersRoute = ({
@@ -48,19 +48,7 @@ export const registerClustersRoute = ({
     async (context, request, response) => {
       try {
         // Initialize storage service for retrieving the API key
-        const coreContext = await context.core;
-        const [, { encryptedSavedObjects }] = await getStartServices();
-        const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
-          includedHiddenTypes: [CLOUD_CONNECT_API_KEY_TYPE],
-        });
-        const savedObjectsClient = coreContext.savedObjects.getClient({
-          includedHiddenTypes: [CLOUD_CONNECT_API_KEY_TYPE],
-        });
-        const storageService = new StorageService({
-          encryptedSavedObjectsClient,
-          savedObjectsClient,
-          logger,
-        });
+        const storageService = await createStorageService(context, getStartServices, logger);
 
         // Retrieve stored API key
         const apiKeyData = await storageService.getApiKey();
@@ -130,7 +118,7 @@ export const registerClustersRoute = ({
         return response.customError({
           statusCode: 500,
           body: {
-            message: 'An error occurred while retrieving cluster details',
+            message: error
           },
         });
       }
@@ -155,19 +143,7 @@ export const registerClustersRoute = ({
     async (context, request, response) => {
       try {
         // Initialize storage service for deleting the API key
-        const coreContext = await context.core;
-        const [, { encryptedSavedObjects }] = await getStartServices();
-        const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
-          includedHiddenTypes: [CLOUD_CONNECT_API_KEY_TYPE],
-        });
-        const savedObjectsClient = coreContext.savedObjects.getClient({
-          includedHiddenTypes: [CLOUD_CONNECT_API_KEY_TYPE],
-        });
-        const storageService = new StorageService({
-          encryptedSavedObjectsClient,
-          savedObjectsClient,
-          logger,
-        });
+        const storageService = await createStorageService(context, getStartServices, logger);
 
         // Delete the stored API key
         await storageService.deleteApiKey();
@@ -220,20 +196,8 @@ export const registerClustersRoute = ({
     },
     async (context, request, response) => {
       try {
-        // Initialize storage service for retrieving the API key
         const coreContext = await context.core;
-        const [, { encryptedSavedObjects }] = await getStartServices();
-        const encryptedSavedObjectsClient = encryptedSavedObjects.getClient({
-          includedHiddenTypes: [CLOUD_CONNECT_API_KEY_TYPE],
-        });
-        const savedObjectsClient = coreContext.savedObjects.getClient({
-          includedHiddenTypes: [CLOUD_CONNECT_API_KEY_TYPE],
-        });
-        const storageService = new StorageService({
-          encryptedSavedObjectsClient,
-          savedObjectsClient,
-          logger,
-        });
+        const storageService = await createStorageService(context, getStartServices, logger);
 
         // Retrieve stored API key
         const apiKeyData = await storageService.getApiKey();
