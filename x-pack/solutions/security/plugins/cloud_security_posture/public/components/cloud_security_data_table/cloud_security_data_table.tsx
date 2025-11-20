@@ -208,11 +208,16 @@ export const CloudSecurityDataTable = ({
       if (height) return height;
 
       // constrain height when virtualization is enabled or for groups with more than 10 rows
-      if (isVirtualizationEnabled || (isGroupingEnabled && total > 10)) {
+      if (isVirtualizationEnabled && !isGroupingEnabled) {
         const baseHeight = 362; // height of Kibana Header + Findings page header and search bar
         const filterBarHeight = filters?.length > 0 ? 40 : 0;
         const distributionBarHeight = hasDistributionBar ? 52 : 0;
         return `calc(100vh - ${baseHeight}px - ${filterBarHeight}px - ${distributionBarHeight}px)`;
+      }
+
+      // constrain height for groups with more than 10 rows when grouping is enabled so users can see the groups without scrolling
+      if (isGroupingEnabled && total > 10) {
+        return 512;
       }
 
       return 'auto';
