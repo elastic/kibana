@@ -26,6 +26,7 @@ import {
   isIlmLifecycle,
 } from '@kbn/streams-schema';
 import _, { cloneDeep } from 'lodash';
+import { MAX_STREAM_NAME_LENGTH } from '../../../../../common/constants';
 import type { FailureStore } from '@kbn/streams-schema/src/models/ingest/failure_store';
 import {
   isDisabledLifecycleFailureStore,
@@ -386,7 +387,22 @@ export class WiredStream extends StreamActiveRecord<Streams.WiredStream.Definiti
 
     // validate routing
     const children: Set<string> = new Set();
+    const prefix = this.definition.name + '.';
     for (const routing of this._definition.ingest.wired.routing) {
+      if (routing.destination.length <= prefix.length) {
+        return {
+          isValid: false,
+          errors: [new Error(`Stream name must not be empty.`)],
+        };
+      }
+      if (routing.destination.length > MAX_STREAM_NAME_LENGTH) {
+        return {
+          isValid: false,
+          errors: [
+            new Error(`Stream name cannot be longer than ${MAX_STREAM_NAME_LENGTH} characters.`),
+          ],
+        };
+      }
       if (children.has(routing.destination)) {
         return {
           isValid: false,
