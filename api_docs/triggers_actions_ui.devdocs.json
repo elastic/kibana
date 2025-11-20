@@ -2532,7 +2532,7 @@
             "label": "validNormalizedTypes",
             "description": [],
             "signature": [
-              "(\"string\" | \"number\" | \"boolean\" | \"object\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"date_range\" | \"ip_range\" | \"histogram\" | \"number_range\")[]"
+              "(\"string\" | \"number\" | \"boolean\" | \"object\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"date_range\" | \"ip_range\" | \"histogram\" | \"number_range\" | \"exponential_histogram\" | \"tdigest\")[]"
             ],
             "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/types.ts",
             "deprecated": false,
@@ -5678,7 +5678,7 @@
         "label": "ValidNormalizedTypes",
         "description": [],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"date_range\" | \"ip_range\" | \"histogram\" | \"number_range\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"date_range\" | \"ip_range\" | \"histogram\" | \"number_range\" | \"exponential_histogram\" | \"tdigest\""
         ],
         "path": "x-pack/platform/plugins/shared/triggers_actions_ui/public/common/types.ts",
         "deprecated": false,

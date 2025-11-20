@@ -386,6 +386,7 @@ export class AttachmentClient {
 
     const bulkResponse = await this.clients.storageClient.bulk({
       operations: bulkOperations,
+      throwOnFail: true,
     });
 
     return { errors: bulkResponse.errors, items: bulkResponse.items };
