@@ -485,8 +485,8 @@ export class ConsolePageObject extends FtrService {
     return await this.testSubjects.exists('consoleMenuCopyToLanguage');
   }
 
-  public async isSelectLanguageButtonVisible() {
-    return await this.testSubjects.exists('consoleMenuSelectLanguage');
+  public async isChangeLanguageButtonVisible() {
+    return await this.testSubjects.exists('changeLanguageButton');
   }
 
   public async clickCopyAsCurlButton() {
@@ -495,8 +495,8 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async changeLanguageAndCopy(language: string) {
-    // Click "Select language" to open language selector modal
-    await this.testSubjects.click('consoleMenuSelectLanguage');
+    // Click "Change" link to open language selector modal
+    await this.testSubjects.click('changeLanguageButton');
 
     // Wait for the modal to open
     await this.retry.waitFor('language selector modal to open', async () => {
@@ -511,8 +511,8 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async changeDefaultLanguage(language: string) {
-    // Click "Select language" to open language selector modal
-    await this.testSubjects.click('consoleMenuSelectLanguage');
+    // Click "Change" link to open language selector modal
+    await this.testSubjects.click('changeLanguageButton');
 
     // Wait for the modal to open
     await this.retry.waitFor('language selector modal to open', async () => {

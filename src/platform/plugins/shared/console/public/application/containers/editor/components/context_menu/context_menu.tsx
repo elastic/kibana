@@ -16,14 +16,17 @@ import {
   EuiLoadingSpinner,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiLink,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { NotificationsStart } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-
-import { convertRequestToLanguage, StorageKeys } from '../../../../../services';
+import { i18n } from '@kbn/i18n';
+import { convertRequestToLanguage } from '../../../../../services';
 import type { EditorRequest } from '../../types';
+
 import { useServicesContext } from '../../../../contexts';
+import { StorageKeys } from '../../../../../services';
 import {
   DEFAULT_LANGUAGE,
   AVAILABLE_LANGUAGES,
@@ -41,6 +44,22 @@ interface Props {
    * for internal Kibana requests since the other languages are not supported yet. */
   getIsKbnRequestSelected: () => Promise<boolean | null>;
 }
+
+const styles = {
+  // Remove the default underline on hover for the context menu items since it
+  // will also be applied to the language selector button, and apply it only to
+  // the text in the context menu item.
+  button: css`
+    &:hover {
+      text-decoration: none !important;
+
+      /* Target the language selector when the button is hovered */
+      .consoleEditorContextMenu__languageSelector {
+        text-decoration: underline;
+      }
+    }
+  `,
+};
 
 const DELAY_FOR_HIDING_SPINNER = 500;
 
@@ -224,32 +243,62 @@ export const ContextMenu = ({
             key="Copy to"
             data-test-subj="consoleMenuCopyToLanguage"
             id="copyTo"
-            disabled={!window.navigator?.clipboard || isRequestConverterLoading}
-            onClick={() => onCopyAsSubmit()}
-            icon={isRequestConverterLoading ? <EuiLoadingSpinner size="m" /> : 'copyClipboard'}
+            disabled={!window.navigator?.clipboard}
+            onClick={(e: React.MouseEvent) => {
+              e.preventDefault();
+              const target = e.target as HTMLButtonElement;
+
+              if (target.dataset.name === 'changeLanguage') {
+                setLanguageSelectorVisibility(true);
+                return;
+              }
+
+              onCopyAsSubmit();
+            }}
+            icon="copyClipboard"
+            css={styles.button}
           >
-            <FormattedMessage
-              id="console.monaco.requestOptions.copyToLanguageButtonLabel"
-              defaultMessage="Copy to {language}"
-              values={{ language: getLanguageLabelByValue(currentLanguage) }}
-            />
-          </EuiContextMenuItem>,
-          ...(!isKbnRequestSelected
-            ? [
-                <EuiContextMenuItem
-                  key="Select language"
-                  data-test-subj="consoleMenuSelectLanguage"
-                  id="selectLanguage"
-                  onClick={() => setLanguageSelectorVisibility(true)}
-                  icon="editorCodeBlock"
+            <EuiFlexGroup alignItems="center">
+              <EuiFlexItem>
+                <EuiFlexGroup
+                  gutterSize="xs"
+                  alignItems="center"
+                  className="consoleEditorContextMenu__languageSelector"
+                  data-test-subj="language-selector"
                 >
-                  <FormattedMessage
-                    id="console.monaco.requestOptions.selectLanguageButtonLabel"
-                    defaultMessage="Select language"
-                  />
-                </EuiContextMenuItem>,
-              ]
-            : []),
+                  <EuiFlexItem grow={false}>
+                    <FormattedMessage
+                      tagName="span"
+                      id="console.monaco.requestOptions.copyToLanguageButtonLabel"
+                      defaultMessage="Copy to"
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <strong>{getLanguageLabelByValue(currentLanguage)}</strong>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiFlexItem>
+              {!isKbnRequestSelected && (
+                <EuiFlexItem grow={false}>
+                  {isRequestConverterLoading ? (
+                    <EuiLoadingSpinner size="s" />
+                  ) : (
+                    // The EuiContextMenuItem renders itself as a button already, so we need to
+                    // force the link to not be a button in order to prevent A11Y issues.
+                    <EuiLink
+                      href=""
+                      data-name="changeLanguage"
+                      data-test-subj="changeLanguageButton"
+                    >
+                      {i18n.translate('console.consoleMenu.changeLanguageButtonLabel', {
+                        defaultMessage: 'Change',
+                      })}
+                    </EuiLink>
+                  )}
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiContextMenuItem>,
         ]
       : []),
     <EuiContextMenuItem

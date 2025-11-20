@@ -102,10 +102,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         // Focus editor once again
         await PageObjects.console.focusInputEditor();
 
-        // Verify that the Select language button is hidden for kbn request
+        // Verify that the Change language button is hidden for kbn request
         await PageObjects.console.clickContextMenu();
-        const selectLanguageVisible = await PageObjects.console.isSelectLanguageButtonVisible();
-        expect(selectLanguageVisible).to.be(false);
+        const changeLanguageVisible = await PageObjects.console.isChangeLanguageButtonVisible();
+        expect(changeLanguageVisible).to.be(false);
       });
 
       it('allows to change default language', async () => {
