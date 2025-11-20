@@ -11,6 +11,8 @@ import type { EnsureSubsetOf, GetFieldsOf, MappingsDefinition } from '@kbn/es-ma
 import type * as api from '@elastic/elasticsearch/lib/api/types';
 import type { BaseSearchRuntimeMappings } from './runtime';
 
+export type AnyDataStreamDefinition = DataStreamDefinition<any, any, any>;
+
 export interface DataStreamDefinition<
   Mappings extends MappingsDefinition,
   FullMappings extends GetFieldsOf<Mappings> = GetFieldsOf<Mappings>,

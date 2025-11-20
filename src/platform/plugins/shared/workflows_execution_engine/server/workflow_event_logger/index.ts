@@ -7,17 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { BaseSearchRuntimeMappings } from './runtime';
-export type { DataStreamDefinition, AnyDataStreamDefinition } from './definition';
-export type {
-  ClientSearchRequest,
-  ClientSearchResponse,
-  ClientGetRequest,
-  ClientGetResponse,
-  ClientIndexRequest,
-  ClientIndexResponse,
-  ClientBulkRequest,
-  ClientBulkResponse,
-} from './es_api';
+export { WorkflowEventLoggerService } from './workflow_event_logger_service';
 
-export type { IDataStreamClient, AnyIDataStreamClient } from './client';
+export {
+  type WorkflowEventLoggerContext,
+  type WorkflowEventLoggerOptions,
+  type IWorkflowEventLogger,
+} from './workflow_event_logger';
+
+export type {
+  IWorkflowEventLoggerService,
+  ExecutionLogsParams,
+  StepLogsParams,
+  LogsByLevelParams,
+  SearchLogsParams,
+} from './types';

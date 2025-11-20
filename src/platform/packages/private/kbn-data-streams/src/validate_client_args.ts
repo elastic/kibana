@@ -9,10 +9,10 @@
 
 import type { Client as ElasticsearchClient } from '@elastic/elasticsearch';
 import type { Logger } from '@kbn/logging';
-import type { DataStreamDefinition } from './types';
+import type { AnyDataStreamDefinition } from './types';
 
 export function validateClientArgs(args: {
-  dataStream: DataStreamDefinition<any, any, any>;
+  dataStream: AnyDataStreamDefinition;
   elasticsearchClient: ElasticsearchClient;
   logger: Logger;
 }) {

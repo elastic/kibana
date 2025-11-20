@@ -13,6 +13,16 @@ import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 import { mappings } from '@kbn/es-mappings';
 import { WORKFLOWS_EXECUTION_LOGS_DATA_STREAM } from './constants';
 
+export const initializeLogsRepositoryDataStream = (coreDataStreams: DataStreamsSetup) => {
+  return coreDataStreams.registerDataStream({
+    name: WORKFLOWS_EXECUTION_LOGS_DATA_STREAM,
+    version: 1,
+    template: {
+      mappings: logsRepositoryMappings,
+    },
+  });
+};
+
 const logsRepositoryMappings = {
   dynamic: false,
   properties: {
@@ -34,6 +44,7 @@ const logsRepositoryMappings = {
         }),
         execution_id: mappings.keyword(),
         step_id: mappings.keyword(),
+        step_execution_id: mappings.keyword(),
         step_name: mappings.text({
           fields: {
             keyword: {
@@ -68,7 +79,7 @@ const logsRepositoryMappings = {
 } satisfies MappingsDefinition;
 
 export interface WorkflowLogEvent extends GetFieldsOf<typeof logsRepositoryMappings> {
-  '@timestamp'?: string;
+  '@timestamp': string;
   message?: string;
   level?: 'trace' | 'debug' | 'info' | 'warn' | 'error';
   workflow?: {
@@ -90,12 +101,22 @@ export interface WorkflowLogEvent extends GetFieldsOf<typeof logsRepositoryMappi
     start?: string;
     end?: string;
   };
+  transaction?: {
+    workflow_transaction_id?: string;
+    task_transaction_id?: string;
+    name?: string;
+    type?: string | null;
+    is_triggered_by_alerting?: boolean;
+    alerting_rule_id?: string;
+    transaction_id?: string;
+  };
   error?: {
     message?: string;
     type?: string;
     stack_trace?: string;
   };
   tags?: string[];
+  labels?: Record<string, string>;
 }
 
 export type LogsRepositoryDataStreamClient = IDataStreamClient<
@@ -107,14 +128,4 @@ export const getDataStreamClient = (
   coreDataStreams: DataStreamsStart
 ): LogsRepositoryDataStreamClient => {
   return coreDataStreams.getClient(WORKFLOWS_EXECUTION_LOGS_DATA_STREAM);
-};
-
-export const initializeLogsRepositoryDataStream = (coreDataStreams: DataStreamsSetup) => {
-  return coreDataStreams.registerDataStream({
-    name: WORKFLOWS_EXECUTION_LOGS_DATA_STREAM,
-    version: 1,
-    template: {
-      mappings: logsRepositoryMappings,
-    },
-  });
 };

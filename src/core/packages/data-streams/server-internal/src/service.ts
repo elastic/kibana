@@ -9,11 +9,13 @@
 
 import pLimit from 'p-limit';
 import {
-  type DataStreamDefinition,
+  type AnyIDataStreamClient,
   type IDataStreamClient,
+  type AnyDataStreamDefinition,
   DataStreamClient,
 } from '@kbn/data-streams';
 import type { InternalElasticsearchServiceStart } from '@kbn/core-elasticsearch-server-internal';
+
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type {
@@ -21,7 +23,7 @@ import type {
   DataStreamsSetup,
   DataStreamsStart,
 } from '@kbn/core-data-streams-server';
-import type { MappingsDefinition } from '@kbn/es-mappings';
+import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 
 interface StartDeps {
   elasticsearch: InternalElasticsearchServiceStart;
@@ -30,10 +32,10 @@ interface StartDeps {
 /** @internal */
 export class DataStreamsService implements CoreService<DataStreamsSetup, DataStreamsStart> {
   private readonly logger: Logger;
-  private readonly dataStreams: Map<
-    DataStreamDefinition<any, any, any>,
-    undefined | IDataStreamClient<any, any, any>
-  > = new Map();
+
+  private readonly dataStreamDefinitions: Map<string, AnyDataStreamDefinition> = new Map();
+
+  private readonly dataStreamClients: Map<string, undefined | AnyIDataStreamClient> = new Map();
 
   constructor(private readonly coreContext: CoreContext) {
     this.logger = this.coreContext.logger.get('data-streams');
@@ -41,8 +43,13 @@ export class DataStreamsService implements CoreService<DataStreamsSetup, DataStr
 
   setup() {
     return {
-      registerDataStream: (dataStreamDefinition: DataStreamDefinition<any, any, any>) => {
-        this.dataStreams.set(dataStreamDefinition, undefined);
+      registerDataStream: (dataStreamDefinition: AnyDataStreamDefinition) => {
+        if (this.dataStreamDefinitions.has(dataStreamDefinition.name)) {
+          throw new Error(`Data stream ${dataStreamDefinition.name} is already registered.`);
+        }
+
+        this.dataStreamDefinitions.set(dataStreamDefinition.name, dataStreamDefinition);
+        this.dataStreamClients.set(dataStreamDefinition.name, undefined);
       },
     };
   }
@@ -51,14 +58,23 @@ export class DataStreamsService implements CoreService<DataStreamsSetup, DataStr
     const limit = pLimit(5);
     const setupPromises: Promise<void>[] = [];
 
-    for (const dataStreamDefinition of this.dataStreams.keys()) {
+    const nonInitializedDataStreams = Array.from(this.dataStreamClients.entries())
+      .filter(([_, client]) => client === undefined)
+      .map(([name]) => name);
+    const elasticsearchClient = elasticsearch.client.asInternalUser;
+    for (const dataStreamName of nonInitializedDataStreams) {
+      const dataStreamDefinition = this.dataStreamDefinitions.get(dataStreamName);
+      if (!dataStreamDefinition) {
+        throw new Error(`Data stream ${dataStreamName} is not registered.`);
+      }
+
       setupPromises.push(
         limit(async () => {
-          this.dataStreams.set(
-            dataStreamDefinition,
+          this.dataStreamClients.set(
+            dataStreamName,
             await DataStreamClient.initialize({
-              dataStreams: dataStreamDefinition,
-              elasticsearchClient: elasticsearch.client.asInternalUser,
+              dataStream: dataStreamDefinition,
+              elasticsearchClient,
               logger: this.logger,
             })
           );
@@ -74,18 +90,19 @@ export class DataStreamsService implements CoreService<DataStreamsSetup, DataStr
         FullDocumentType extends GetFieldsOf<S> = GetFieldsOf<S>,
         SRM extends BaseSearchRuntimeMappings = never
       >(
-        dataStreamDefinition: DataStreamDefinition<S, FullDocumentType, SRM>
+        dataStreamName: string
       ): IDataStreamClient<S, FullDocumentType, SRM> => {
-        if (!this.dataStreams.has(dataStreamDefinition)) {
-          throw new Error(`Data stream ${dataStreamDefinition.name} is not registered.`);
+        if (!this.dataStreamDefinitions.has(dataStreamName)) {
+          throw new Error(`Data stream ${dataStreamName} is not registered.`);
         }
-        const client = this.dataStreams.get(dataStreamDefinition);
-        if (!client) {
+
+        const dataStreamClient = this.dataStreamClients.get(dataStreamName);
+        if (!dataStreamClient) {
           throw new Error(
-            `Data stream client for ${dataStreamDefinition.name} is not initialized. Are you sure you are providing the same definition as in setup?`
+            `Data stream client for ${dataStreamName} is not initialized. Are you sure you are providing the same definition as in setup?`
           );
         }
-        return client;
+        return dataStreamClient;
       },
     };
   }

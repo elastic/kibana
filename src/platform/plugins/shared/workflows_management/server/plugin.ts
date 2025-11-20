@@ -121,9 +121,7 @@ export class WorkflowsPlugin
 
     this.logger.debug('Workflows Management: Creating workflows service');
 
-    // Get ES client from core
     const getCoreStart = () => core.getStartServices().then(([coreStart]) => coreStart);
-
     const getPluginsStart = () => core.getStartServices().then(([, pluginsStart]) => pluginsStart);
     const getWorkflowExecutionEngine = () =>
       getPluginsStart().then(({ workflowsExecutionEngine }) => workflowsExecutionEngine);

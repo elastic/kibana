@@ -8,10 +8,8 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type {
-  Client as ElasticsearchClient,
-  TransportRequestOptionsWithOutMeta,
-} from '@elastic/elasticsearch';
+import type { TransportRequestOptionsWithOutMeta } from '@elastic/elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type api from '@elastic/elasticsearch/lib/api/types';
 import type { GetFieldsOf, MappingsDefinition } from '@kbn/es-mappings';
 

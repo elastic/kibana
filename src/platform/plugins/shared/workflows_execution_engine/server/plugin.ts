@@ -44,6 +44,7 @@ import type {
 
 import { generateExecutionTaskScope } from './utils';
 import type { ContextDependencies } from './workflow_context_manager/types';
+import { WorkflowEventLoggerService } from './workflow_event_logger/workflow_event_logger_service';
 import type {
   ResumeWorkflowExecutionParams,
   StartWorkflowExecutionParams,
@@ -516,7 +517,11 @@ export class WorkflowsExecutionEnginePlugin
     };
 
     return {
-      logsRepository,
+      workflowEventLoggerService: new WorkflowEventLoggerService(
+        logsRepository,
+        this.logger,
+        this.config.logging.console
+      ),
       executeWorkflow,
       executeWorkflowStep,
       cancelWorkflowExecution,

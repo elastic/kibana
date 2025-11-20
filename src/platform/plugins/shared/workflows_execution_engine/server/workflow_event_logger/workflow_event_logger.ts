@@ -40,6 +40,7 @@ export interface IWorkflowEventLogger {
     stepName?: string,
     stepType?: string
   ): IWorkflowEventLogger;
+  flushEvents(): Promise<void>;
 }
 
 export class WorkflowEventLogger implements IWorkflowEventLogger {
@@ -53,7 +54,7 @@ export class WorkflowEventLogger implements IWorkflowEventLogger {
     private options: WorkflowEventLoggerOptions = {}
   ) {}
 
-  public logEvent(eventProperties: WorkflowLogEvent): void {
+  public logEvent(eventProperties: Partial<WorkflowLogEvent>): void {
     const event: WorkflowLogEvent = this.createBaseEvent();
 
     // Merge context, default properties, and provided properties

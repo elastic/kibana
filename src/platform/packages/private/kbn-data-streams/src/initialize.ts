@@ -9,15 +9,15 @@
 
 import invariant from 'node:assert';
 import type api from '@elastic/elasticsearch/lib/api/types';
-import type { Client as ElasticsearchClient } from '@elastic/elasticsearch';
+import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { errors as EsErrors } from '@elastic/elasticsearch';
 import { defaultsDeep } from 'lodash';
 import type { Logger } from '@kbn/logging';
 import { retryEs } from './retry_es';
-import type { DataStreamDefinition } from './types';
+import type { AnyDataStreamDefinition } from './types';
 import { defaultDataStreamDefinition } from './constants';
 
-function applyDefaults(def: DataStreamDefinition<any, any>): DataStreamDefinition<any, any> {
+function applyDefaults(def: AnyDataStreamDefinition): AnyDataStreamDefinition {
   return defaultsDeep(def, defaultDataStreamDefinition());
 }
 
@@ -32,7 +32,7 @@ export async function initialize({
   elasticsearchClient,
 }: {
   logger: Logger;
-  dataStream: DataStreamDefinition<any, any, any>;
+  dataStream: AnyDataStreamDefinition;
   elasticsearchClient: ElasticsearchClient;
 }) {
   logger = logger.get('data-streams-setup');

@@ -12,6 +12,8 @@ import type * as api from '@elastic/elasticsearch/lib/api/types';
 import type { InternalIDataStreamClient } from './es_api';
 import type { BaseSearchRuntimeMappings } from './runtime';
 
+export type AnyIDataStreamClient = IDataStreamClient<any, any, any>;
+
 export interface ClientHelpers<SRM extends BaseSearchRuntimeMappings> {
   /** A helper to get types from your search runtime fields */
   getFieldsFromHit: (response: api.SearchHit) => {

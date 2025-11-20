@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer, SortOrder } from '@elastic/elasticsearch/lib/api/types';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { ClientSearchRequest } from '@kbn/data-streams';
 import {
@@ -21,6 +21,23 @@ export interface LogSearchResult {
   logs: WorkflowLogEvent[];
 }
 
+export interface SearchLogsParams {
+  // pagination
+  sortField?: string;
+  sortOrder?: SortOrder;
+  limit?: number;
+  offset?: number;
+
+  // space
+  spaceId?: string;
+
+  // fields
+  level?: string;
+  executionId?: string;
+  stepExecutionId?: string;
+  stepId?: string;
+}
+
 export class LogsRepository {
   private readonly dataStreamClient: LogsRepositoryDataStreamClient;
 
@@ -28,17 +45,20 @@ export class LogsRepository {
     this.dataStreamClient = getDataStreamClient(coreDataStreams);
   }
 
-  async createLogs(logEvents: WorkflowLogEvent[]): Promise<void> {
+  public async createLogs(logEvents: WorkflowLogEvent[]): Promise<void> {
     await this.dataStreamClient.bulk({
       operations: logEvents.flatMap((logEvent) => [{ create: {} }, logEvent]),
     });
   }
 
-  public async searchLogs(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    params: any,
-    spaceId?: string
-  ): Promise<LogSearchResult> {
+  public async getRecentLogs(limit: number = 100): Promise<LogSearchResult> {
+    return this.searchDataStream({
+      query: { match_all: {} },
+      size: limit,
+    });
+  }
+
+  public async searchLogs(params: SearchLogsParams): Promise<LogSearchResult> {
     const { limit = 100, offset = 0, sortField = '@timestamp', sortOrder = 'desc' } = params;
 
     // Map API field names to Elasticsearch field names
@@ -50,27 +70,33 @@ export class LogsRepository {
 
     const mustQueries: QueryDslQueryContainer[] = [];
 
-    if ('executionId' in params) {
+    if (typeof params.executionId === 'string') {
       mustQueries.push({
         term: { 'workflow.execution_id': params.executionId },
       });
     }
 
-    if ('stepExecutionId' in params && params.stepExecutionId) {
+    if (typeof params.stepExecutionId === 'string') {
       mustQueries.push({
         term: { 'workflow.step_execution_id': params.stepExecutionId },
       });
     }
 
-    if ('stepId' in params && params.stepId) {
+    if (typeof params.stepId === 'string') {
       mustQueries.push({
         term: { 'workflow.step_id': params.stepId },
       });
     }
 
-    if (spaceId) {
+    if (typeof params.level === 'string') {
       mustQueries.push({
-        term: { spaceId },
+        term: { level: params.level },
+      });
+    }
+
+    if (typeof params.spaceId === 'string') {
+      mustQueries.push({
+        term: { spaceId: params.spaceId },
       });
     }
 
@@ -82,92 +108,8 @@ export class LogsRepository {
           must: mustQueries,
         },
       },
-      sort: [{ [mappedSortField]: { order: sortOrder } }],
+      sort: [{ [mappedSortField]: sortOrder }],
     });
-  }
-
-  public async getExecutionLogs(executionId: string): Promise<LogSearchResult> {
-    const query = {
-      bool: {
-        must: [
-          {
-            term: {
-              'workflow.execution_id': executionId,
-            },
-          },
-        ],
-      },
-    };
-
-    return this.searchDataStream({ query });
-  }
-
-  public async getLogsByLevel(level: string, executionId?: string): Promise<LogSearchResult> {
-    const mustClauses: QueryDslQueryContainer[] = [
-      {
-        term: {
-          level,
-        },
-      },
-    ];
-
-    if (executionId) {
-      mustClauses.push({
-        term: {
-          'workflow.execution_id': executionId,
-        },
-      });
-    }
-
-    const query = {
-      bool: {
-        must: mustClauses,
-      },
-    };
-
-    return this.searchDataStream({ query });
-  }
-
-  public async getRecentLogs(limit: number = 100): Promise<LogSearchResult> {
-    const query = {
-      match_all: {},
-    };
-
-    const response = await this.dataStreamClient.search({
-      query,
-      sort: [{ '@timestamp': { order: 'desc' } }],
-      size: limit,
-    });
-
-    return {
-      total:
-        typeof response.hits.total === 'number'
-          ? response.hits.total
-          : response.hits.total?.value || 0,
-      // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-      logs: response.hits.hits.map((hit) => hit._source!),
-    };
-  }
-
-  public async getStepLogs(executionId: string, stepId: string): Promise<LogSearchResult> {
-    const query = {
-      bool: {
-        must: [
-          {
-            term: {
-              'workflow.execution_id': executionId,
-            },
-          },
-          {
-            term: {
-              'workflow.step_id': stepId,
-            },
-          },
-        ],
-      },
-    };
-
-    return this.searchDataStream({ query });
   }
 
   private async searchDataStream(query: ClientSearchRequest): Promise<LogSearchResult> {
@@ -187,61 +129,3 @@ export class LogsRepository {
     };
   }
 }
-
-// const { size = 100, page = 1, sortField = '@timestamp', sortOrder = 'desc' } = params;
-//       const from = (page - 1) * size;
-
-//       // Map API field names to Elasticsearch field names
-//       const fieldMapping: Record<string, string> = {
-//         timestamp: '@timestamp',
-//         '@timestamp': '@timestamp',
-//       };
-//       const mappedSortField = fieldMapping[sortField] || sortField;
-
-//       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//       const mustQueries: any[] = [];
-
-//       if ('executionId' in params) {
-//         mustQueries.push({
-//           term: { 'workflow.execution_id.keyword': params.executionId },
-//         });
-//       }
-
-//       if ('stepExecutionId' in params && params.stepExecutionId) {
-//         mustQueries.push({
-//           term: { 'workflow.step_execution_id.keyword': params.stepExecutionId },
-//         });
-//       }
-
-//       if ('stepId' in params && params.stepId) {
-//         mustQueries.push({
-//           term: { 'workflow.step_id.keyword': params.stepId },
-//         });
-//       }
-
-//       if (spaceId) {
-//         mustQueries.push({
-//           term: { 'spaceId.keyword': spaceId },
-//         });
-//       }
-
-//       const response = await this.esClient.search({
-//         index: this.logsIndex,
-//         size,
-//         from,
-//         query: {
-//           bool: {
-//             must: mustQueries,
-//           },
-//         },
-//         sort: [{ [mappedSortField]: { order: sortOrder } }],
-//       });
-
-//       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//       const logs = response.hits.hits.map((hit: any) => hit._source);
-//       const total =
-//         typeof response.hits.total === 'number'
-//           ? response.hits.total
-//           : response.hits.total?.value || 0;
-
-//       return { total, logs };

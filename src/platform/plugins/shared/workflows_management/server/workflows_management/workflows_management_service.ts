@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable @typescript-eslint/no-non-null-assertion */
-
 import type { estypes } from '@elastic/elasticsearch';
 import { v4 as generateUuid } from 'uuid';
 import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
@@ -42,18 +40,23 @@ import type {
   WorkflowYaml,
 } from '@kbn/workflows';
 import { ExecutionType, transformWorkflowYamlJsontoEsWorkflow } from '@kbn/workflows';
+import type {
+  IWorkflowEventLoggerService,
+  LogSearchResult,
+} from '@kbn/workflows-execution-engine/server';
+import type {
+  ExecutionLogsParams,
+  StepLogsParams,
+} from '@kbn/workflows-execution-engine/server/workflow_event_logger/types';
 import type { z } from '@kbn/zod';
 
 import { getWorkflowExecution } from './lib/get_workflow_execution';
 import { searchStepExecutions } from './lib/search_step_executions';
 import { searchWorkflowExecutions } from './lib/search_workflow_executions';
-import type { IWorkflowEventLogger, LogSearchResult } from './lib/workflow_logger';
-import { SimpleWorkflowLogger } from './lib/workflow_logger';
+
 import type {
   GetAvailableConnectorsResponse,
-  GetExecutionLogsParams,
   GetStepExecutionParams,
-  GetStepLogsParams,
   GetWorkflowsParams,
 } from './workflows_management_api';
 import { WORKFLOWS_EXECUTIONS_INDEX, WORKFLOWS_STEP_EXECUTIONS_INDEX } from '../../common';
@@ -86,7 +89,7 @@ export interface SearchWorkflowExecutionsParams {
 export class WorkflowsService {
   private esClient!: ElasticsearchClient;
   private workflowStorage!: WorkflowStorage;
-  private workflowEventLoggerService!: SimpleWorkflowLogger;
+  private workflowEventLoggerService!: IWorkflowEventLoggerService;
   private taskScheduler: WorkflowTaskScheduler | null = null;
   private readonly logger: Logger;
   private security?: SecurityServiceStart;
@@ -134,11 +137,8 @@ export class WorkflowsService {
       esClient: this.esClient,
     });
 
-    this.workflowEventLoggerService = new SimpleWorkflowLogger(
-      this.logger,
-      pluginsStart.workflowsExecutionEngine.logsRepository,
-      enableConsoleLogging
-    );
+    this.workflowEventLoggerService =
+      pluginsStart.workflowsExecutionEngine.workflowEventLoggerService;
   }
 
   public async getWorkflow(id: string, spaceId: string): Promise<WorkflowDetailDto | null> {
@@ -1041,19 +1041,20 @@ export class WorkflowsService {
     });
   }
 
-  public async getExecutionLogs(
-    params: GetExecutionLogsParams,
-    spaceId: string
-  ): Promise<LogSearchResult> {
-    return this.workflowEventLoggerService!.searchLogs(params, spaceId);
+  public async getExecutionLogs(params: ExecutionLogsParams): Promise<LogSearchResult> {
+    if (!this.workflowEventLoggerService) {
+      throw new Error('WorkflowEventLoggerService not initialized');
+    }
+
+    return this.workflowEventLoggerService.getExecutionLogs(params);
   }
 
-  public async getStepLogs(params: GetStepLogsParams, spaceId: string): Promise<LogSearchResult> {
-    return this.workflowEventLoggerService!.searchLogs(params, spaceId);
-  }
+  public async getStepLogs(params: StepLogsParams): Promise<LogSearchResult> {
+    if (!this.workflowEventLoggerService) {
+      throw new Error('WorkflowEventLoggerService not initialized');
+    }
 
-  public getLogger(): IWorkflowEventLogger {
-    return this.workflowEventLoggerService!;
+    return this.workflowEventLoggerService.getStepLogs(params);
   }
 
   public async getStepExecution(
