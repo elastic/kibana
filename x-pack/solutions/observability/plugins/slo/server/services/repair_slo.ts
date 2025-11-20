@@ -8,7 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import { type Logger } from '@kbn/core/server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { ALL_SPACES_ID } from '@kbn/spaces-plugin/common/constants';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
 import type { RepairParams } from '@kbn/slo-schema';
@@ -35,14 +35,14 @@ export class RepairSLO {
   constructor(
     private logger: Logger,
     private internalSoClient: SavedObjectsClientContract,
-    private internalEsClient: ElasticsearchClient,
+    private scopedClusterClient: IScopedClusterClient,
     private dataViewService: DataViewsService
   ) {}
 
   public async execute(params: RepairParams): Promise<unknown> {
     try {
       const repository = new KibanaSavedObjectsSLORepository(this.internalSoClient, this.logger);
-      const sloHealth = new GetSLOHealth(this.internalEsClient, repository);
+      const sloHealth = new GetSLOHealth(this.scopedClusterClient, repository);
       const healthResponse = await sloHealth.execute({
         list: params.list || [],
         statusFilter: 'unhealthy',
@@ -121,21 +121,15 @@ export class RepairSLO {
             isServerless
           );
 
-          const scopedClusterClient: IScopedClusterClient = {
-            asCurrentUser: this.internalEsClient,
-            asSecondaryAuthUser: this.internalEsClient,
-            asInternalUser: this.internalEsClient,
-          } as IScopedClusterClient;
-
           const transformManager = new DefaultTransformManager(
             transformGenerators,
-            scopedClusterClient,
+            this.scopedClusterClient,
             this.logger
           );
 
           const summaryTransformManager = new DefaultSummaryTransformManager(
             new DefaultSummaryTransformGenerator(),
-            scopedClusterClient,
+            this.scopedClusterClient,
             this.logger
           );
 

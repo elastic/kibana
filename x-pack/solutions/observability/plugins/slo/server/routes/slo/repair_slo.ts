@@ -38,12 +38,7 @@ export const repairSLORoute = createSloServerRoute({
 
     await assertPlatinumLicense(plugins);
 
-    const repairSlo = new RepairSLO(
-      logger,
-      soClient,
-      scopedClusterClient.asCurrentUser,
-      dataViewsService
-    );
+    const repairSlo = new RepairSLO(logger, soClient, scopedClusterClient, dataViewsService);
     return repairSlo.execute(params.body) as Promise<FixSloResponse>;
   },
 });
