@@ -7,24 +7,20 @@
 
 import { useRef, useMemo, useState, useCallback } from 'react';
 
-export interface MessageEditorHandle {
+export interface MessageEditorInstance {
+  _internal: {
+    ref: React.RefObject<HTMLDivElement>;
+    onChange: () => void;
+  };
   focus: () => void;
   getContent: () => string;
   setContent: (html: string) => void;
   clear: () => void;
-  isEmpty: () => boolean;
-}
-
-export interface MessageEditorInstance extends MessageEditorHandle {
-  _internal: {
-    ref: React.RefObject<MessageEditorHandle>;
-    onChange: () => void;
-  };
+  isEmpty: boolean;
 }
 
 /**
- * Creates an imperative handle for controlling a MessageEditor component.
- * Manages isEmpty state internally to avoid manual synchronization.
+ * Creates an imperative handle for controlling MessageEditor
  *
  * @example
  * const editor = useMessageEditor();
@@ -37,32 +33,51 @@ export interface MessageEditorInstance extends MessageEditorHandle {
  * <MessageEditor messageEditor={editor} />
  */
 export const useMessageEditor = (): MessageEditorInstance => {
-  const ref = useRef<MessageEditorHandle>(null);
+  const ref = useRef<HTMLDivElement>(null);
   const [isEmpty, setIsEmpty] = useState(true);
 
   const syncIsEmpty = useCallback(() => {
-    setIsEmpty(ref.current?.isEmpty() ?? true);
+    let content = ref.current?.innerHTML ?? '';
+    content = content.replace(/<br\s*\/?>/gi, '');
+    const nextIsEmpty = content.trim() === '';
+    setIsEmpty(nextIsEmpty);
   }, []);
 
   const instance = useMemo(
     () => ({
       _internal: {
         ref,
-        onChange: syncIsEmpty,
+        onChange: () => {
+          // If current value is a single line break tag, set to empty string
+          if (ref.current && ref.current.innerHTML === '<br>') {
+            ref.current.innerHTML = '';
+          }
+
+          syncIsEmpty();
+        },
       },
       focus: () => {
         ref.current?.focus();
       },
       getContent: () => {
-        return ref.current?.getContent() ?? '';
+        return ref.current?.innerHTML ?? '';
       },
       setContent: (html: string) => {
-        ref.current?.setContent(html);
+        if (ref.current) {
+          // Low risk for XSS as this input is localized to the user's editor
+          // Sanitization must be performed server side before committing message
+          // eslint-disable-next-line no-unsanitized/property
+          ref.current.innerHTML = html;
+          syncIsEmpty();
+        }
       },
       clear: () => {
-        ref.current?.clear();
+        if (ref.current) {
+          ref.current.innerHTML = '';
+          setIsEmpty(true);
+        }
       },
-      isEmpty: () => isEmpty,
+      isEmpty,
     }),
     [isEmpty, syncIsEmpty]
   );

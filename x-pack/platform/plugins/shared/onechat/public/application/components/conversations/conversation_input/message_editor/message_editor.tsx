@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useRef, useImperativeHandle } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme, keys, useGeneratedHtmlId } from '@elastic/eui';
 import type { MessageEditorInstance } from './use_message_editor';
@@ -38,7 +38,7 @@ const useEditorStyles = (editorId: string) => {
   return editorStyles;
 };
 interface MessageEditorProps {
-  messageEditor?: MessageEditorInstance;
+  messageEditor: MessageEditorInstance;
   onSubmit: () => void;
   disabled?: boolean;
   placeholder?: string;
@@ -51,41 +51,9 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
   placeholder = '',
   'data-test-subj': dataTestSubj,
 }) => {
-  const { ref, onChange } = messageEditor?._internal ?? {};
-  const editorRef = useRef<HTMLDivElement>(null);
+  const { ref, onChange } = messageEditor._internal;
   const editorId = useGeneratedHtmlId({ prefix: 'messageEditor' });
   const editorStyles = useEditorStyles(editorId);
-
-  // Expose imperative handle for parent components
-  useImperativeHandle(ref, () => ({
-    focus: () => {
-      editorRef.current?.focus();
-    },
-    getContent: () => {
-      return editorRef.current?.innerHTML ?? '';
-    },
-    setContent: (html: string) => {
-      if (editorRef.current) {
-        // Low risk for XSS as this input is localized to the user's editor
-        // Sanitization must be performed server side before committing message
-        // eslint-disable-next-line no-unsanitized/property
-        editorRef.current.innerHTML = html;
-        onChange?.();
-      }
-    },
-    clear: () => {
-      if (editorRef.current) {
-        editorRef.current.innerHTML = '';
-        onChange?.();
-      }
-    },
-    isEmpty: () => {
-      // TODO: Verify if this works on browsers other than Chrome
-      let content = editorRef.current?.innerHTML ?? '';
-      content = content.replace(/<br\s*\/?>/gi, '');
-      return content.trim() === '';
-    },
-  }));
 
   const handleKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
     if (!event.shiftKey && event.key === keys.ENTER) {
@@ -96,7 +64,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
 
   return (
     <div
-      ref={editorRef}
+      ref={ref}
       id={editorId}
       contentEditable={!disabled}
       role="textbox"

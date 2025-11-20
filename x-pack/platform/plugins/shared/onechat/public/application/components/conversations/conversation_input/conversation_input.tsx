@@ -99,7 +99,7 @@ export const ConversationInput: React.FC<ConversationInputProps> = ({ onSubmit }
   const isAgentIdValid = validateAgentId(agentId);
 
   const shouldDisableTextArea = !isAgentIdValid && isFetched && !!agentId;
-  const isSubmitDisabled = messageEditor.isEmpty() || isSendingMessage || !isAgentIdValid;
+  const isSubmitDisabled = messageEditor.isEmpty || isSendingMessage || !isAgentIdValid;
 
   const placeholder = shouldDisableTextArea ? disabledPlaceholder(agentId) : enabledPlaceholder;
 
