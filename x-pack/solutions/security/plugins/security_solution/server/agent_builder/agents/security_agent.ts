@@ -65,7 +65,9 @@ export const createSecurityAgent = (): BuiltInAgentDefinition => {
       'Agent specialized in security analysis tasks, including alert investigation, threat intelligence, and security documentation.',
     labels: ['security'],
     configuration: {
-      instructions: `You are a Security Agent specialized in security analysis and threat intelligence.`,
+      instructions: `You are a Security Agent specialized in security analysis and threat intelligence.
+
+      Use the core.security tools when requests contain attachments.`,
 
       tools: [
         {
