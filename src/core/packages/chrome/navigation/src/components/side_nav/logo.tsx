@@ -48,9 +48,19 @@ export const Logo = ({
    * We cannot use `euiTheme.size.s` because it's 8px.
    */
   const wrapperStyles = css`
-    border-bottom: ${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBaseSubdued};
+    position: relative;
     padding-top: ${isCollapsed ? euiTheme.size.s : euiTheme.size.m};
     padding-bottom: ${isCollapsed ? '7px' : euiTheme.size.m};
+
+    &::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 8px;
+      right: 8px;
+      height: ${euiTheme.border.width.thin};
+      background-color: ${euiTheme.colors.borderBaseSubdued};
+    }
 
     .euiText {
       font-weight: ${euiTheme.font.weight.bold};
