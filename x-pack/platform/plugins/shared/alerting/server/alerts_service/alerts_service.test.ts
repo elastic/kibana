@@ -1573,6 +1573,8 @@ describe('Alerts Service', () => {
             spaceId: 'default',
             isServerless: true,
             rule: {
+              muteAll: false,
+              mutedInstanceIds: [],
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
               id: '1',
@@ -1712,6 +1714,8 @@ describe('Alerts Service', () => {
             spaceId: 'default',
             isServerless: false,
             rule: {
+              muteAll: false,
+              mutedInstanceIds: [],
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
               id: '1',
@@ -1849,6 +1853,8 @@ describe('Alerts Service', () => {
             spaceId: 'default',
             isServerless: false,
             rule: {
+              muteAll: false,
+              mutedInstanceIds: [],
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
               id: '1',
@@ -1940,6 +1946,8 @@ describe('Alerts Service', () => {
             spaceId: 'default',
             isServerless: false,
             rule: {
+              muteAll: false,
+              mutedInstanceIds: [],
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
               id: '1',
@@ -2046,6 +2054,8 @@ describe('Alerts Service', () => {
             spaceId: 'default',
             isServerless: false,
             rule: {
+              muteAll: false,
+              mutedInstanceIds: [],
               consumer: 'bar',
               executionId: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',
               id: '1',
@@ -2610,7 +2620,7 @@ describe('Alerts Service', () => {
               logger,
             })
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unable to mute alert instance alert-1 - no alert indices available"`
+            `"Unable to mute alert ruleId: rule-1, instanceId: alert-1 - no alert indices available"`
           );
         });
 
@@ -2694,7 +2704,7 @@ describe('Alerts Service', () => {
               logger,
             })
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unable to unmute alert instance alert-1 - no alert indices available"`
+            `"Unable to unmute alert ruleId: rule-1, instanceId: alert-1 - no alert indices available"`
           );
         });
 
@@ -2777,7 +2787,7 @@ describe('Alerts Service', () => {
               logger,
             })
           ).rejects.toThrowErrorMatchingInlineSnapshot(
-            `"Unable to mute all alerts for rule rule-1 - no alert indices available"`
+            `"Unable to mute all alerts for ruleId: rule-1 - no alert indices available"`
           );
         });
 

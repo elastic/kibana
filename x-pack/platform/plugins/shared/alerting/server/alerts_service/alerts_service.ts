@@ -9,6 +9,7 @@ import { isEmpty, isEqual, omit } from 'lodash';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { Observable } from 'rxjs';
 import { filter, firstValueFrom } from 'rxjs';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { alertFieldMap, ecsFieldMap, legacyAlertFieldMap } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { ALERT_MUTED, ALERT_INSTANCE_ID, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
@@ -513,6 +514,41 @@ export class AlertsService implements IAlertsService {
     });
   }
 
+  private async _updateMuteState({
+    muted,
+    indices,
+    query,
+    logger,
+  }: {
+    muted: boolean;
+    indices: string[];
+    query: QueryDslQueryContainer;
+    logger: Logger;
+  }) {
+    const esClient = await this.options.elasticsearchClientPromise;
+
+    try {
+      await esClient.updateByQuery({
+        index: indices,
+        conflicts: 'proceed',
+        refresh: true,
+        query,
+        script: {
+          source: `ctx._source['${ALERT_MUTED}'] = ${muted};`,
+          lang: 'painless',
+        },
+      });
+    } catch (error) {
+      logger.error(
+        `Error updating muted field to ${muted} for query: ${JSON.stringify(query)} - ${
+          error.message
+        }`
+      );
+      console.log('------->error:', error);
+      throw error;
+    }
+  }
+
   public async muteAlertInstance({
     ruleId,
     alertInstanceId,
@@ -526,36 +562,23 @@ export class AlertsService implements IAlertsService {
   }) {
     if (!indices || indices.length === 0) {
       throw new Error(
-        `Unable to mute alert instance ${alertInstanceId} - no alert indices available`
+        `Unable to mute alert ruleId: ${ruleId}, instanceId: ${alertInstanceId} - no alert indices available`
       );
     }
 
-    const esClient = await this.options.elasticsearchClientPromise;
-
-    try {
-      await esClient.updateByQuery({
-        index: indices,
-        conflicts: 'proceed',
-        refresh: true,
-        query: {
-          bool: {
-            must: [
-              { term: { [ALERT_INSTANCE_ID]: alertInstanceId } },
-              { term: { [ALERT_RULE_UUID]: ruleId } },
-            ],
-          },
+    return this._updateMuteState({
+      muted: true,
+      query: {
+        bool: {
+          must: [
+            { term: { [ALERT_INSTANCE_ID]: alertInstanceId } },
+            { term: { [ALERT_RULE_UUID]: ruleId } },
+          ],
         },
-        script: {
-          source: `ctx._source['${ALERT_MUTED}'] = true;`,
-          lang: 'painless',
-        },
-      });
-    } catch (error) {
-      logger.error(
-        `Error updating muted field for alert instance ${alertInstanceId}: ${error.message}`
-      );
-      throw error;
-    }
+      },
+      indices,
+      logger,
+    });
   }
 
   public async unmuteAlertInstance({
@@ -571,36 +594,23 @@ export class AlertsService implements IAlertsService {
   }) {
     if (!indices || indices.length === 0) {
       throw new Error(
-        `Unable to unmute alert instance ${alertInstanceId} - no alert indices available`
+        `Unable to unmute alert ruleId: ${ruleId}, instanceId: ${alertInstanceId} - no alert indices available`
       );
     }
 
-    const esClient = await this.options.elasticsearchClientPromise;
-
-    try {
-      await esClient.updateByQuery({
-        index: indices,
-        conflicts: 'proceed',
-        refresh: true,
-        query: {
-          bool: {
-            must: [
-              { term: { [ALERT_INSTANCE_ID]: alertInstanceId } },
-              { term: { [ALERT_RULE_UUID]: ruleId } },
-            ],
-          },
+    return this._updateMuteState({
+      muted: false,
+      query: {
+        bool: {
+          must: [
+            { term: { [ALERT_INSTANCE_ID]: alertInstanceId } },
+            { term: { [ALERT_RULE_UUID]: ruleId } },
+          ],
         },
-        script: {
-          source: `ctx._source['${ALERT_MUTED}'] = false;`,
-          lang: 'painless',
-        },
-      });
-    } catch (error) {
-      logger.error(
-        `Error updating muted field for alert instance ${alertInstanceId}: ${error.message}`
-      );
-      throw error;
-    }
+      },
+      indices,
+      logger,
+    });
   }
 
   public async muteAllAlerts({
@@ -613,28 +623,19 @@ export class AlertsService implements IAlertsService {
     logger: Logger;
   }) {
     if (!indices || indices.length === 0) {
-      throw new Error(`Unable to mute all alerts for rule ${ruleId} - no alert indices available`);
+      throw new Error(
+        `Unable to mute all alerts for ruleId: ${ruleId} - no alert indices available`
+      );
     }
 
-    const esClient = await this.options.elasticsearchClientPromise;
-
-    try {
-      await esClient.updateByQuery({
-        index: indices,
-        conflicts: 'proceed',
-        refresh: true,
-        query: {
-          term: { [ALERT_RULE_UUID]: ruleId },
-        },
-        script: {
-          source: `ctx._source['${ALERT_MUTED}'] = true;`,
-          lang: 'painless',
-        },
-      });
-    } catch (error) {
-      logger.error(`Error updating muted field for all alerts in rule ${ruleId}: ${error.message}`);
-      throw error;
-    }
+    return this._updateMuteState({
+      muted: true,
+      query: {
+        term: { [ALERT_RULE_UUID]: ruleId },
+      },
+      indices,
+      logger,
+    });
   }
 
   public async unmuteAllAlerts({
@@ -652,24 +653,13 @@ export class AlertsService implements IAlertsService {
       );
     }
 
-    const esClient = await this.options.elasticsearchClientPromise;
-
-    try {
-      await esClient.updateByQuery({
-        index: indices,
-        conflicts: 'proceed',
-        refresh: true,
-        query: {
-          term: { [ALERT_RULE_UUID]: ruleId },
-        },
-        script: {
-          source: `ctx._source['${ALERT_MUTED}'] = false;`,
-          lang: 'painless',
-        },
-      });
-    } catch (error) {
-      logger.error(`Error updating muted field for all alerts in rule ${ruleId}: ${error.message}`);
-      throw error;
-    }
+    return this._updateMuteState({
+      muted: false,
+      query: {
+        term: { [ALERT_RULE_UUID]: ruleId },
+      },
+      indices,
+      logger,
+    });
   }
 }
