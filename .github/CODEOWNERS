@@ -12,6 +12,8 @@ src/platform/packages/shared/kbn-actions-types @elastic/response-ops
 src/platform/plugins/private/advanced_settings @elastic/appex-sharedux @elastic/kibana-management
 x-pack/platform/packages/shared/kbn-ai-assistant @elastic/search-kibana
 x-pack/platform/packages/shared/ai-assistant/common @elastic/search-kibana
+x-pack/platform/packages/shared/ai-assistant/ai-assistant-connector-selector-action @elastic/appex-sharedux
+x-pack/platform/packages/shared/ai-assistant-default-llm-setting @elastic/security-generative-ai
 x-pack/platform/packages/shared/ai-assistant/icon @elastic/appex-sharedux
 src/platform/plugins/shared/ai_assistant_management/selection @elastic/obs-ai-assistant
 x-pack/solutions/security/packages/ai-security-labs-content @elastic/security-generative-ai
@@ -128,51 +130,6 @@ src/platform/packages/shared/kbn-content-management-utils @elastic/kibana-data-d
 x-pack/platform/packages/shared/kbn-content-packs-schema @elastic/streams-program-team
 examples/controls_example @elastic/kibana-presentation
 src/platform/plugins/shared/controls @elastic/kibana-presentation
-packages/kbn-dependency-ownership @elastic/kibana-security
-packages/kbn-dependency-usage @elastic/kibana-security
-packages/kbn-docs-utils @elastic/kibana-operations
-packages/kbn-eslint-config @elastic/kibana-operations
-packages/kbn-eslint-plugin-disable @elastic/kibana-operations
-packages/kbn-eslint-plugin-eslint @elastic/kibana-operations
-packages/kbn-eslint-plugin-i18n @elastic/obs-knowledge-team @elastic/kibana-operations
-packages/kbn-eslint-plugin-imports @elastic/kibana-operations
-packages/kbn-eslint-plugin-telemetry @elastic/obs-knowledge-team
-packages/kbn-extract-plugin-translations @elastic/kibana-core
-packages/kbn-failed-test-reporter-cli @elastic/kibana-operations @elastic/appex-qa
-packages/kbn-find-used-node-modules @elastic/kibana-operations
-packages/kbn-generate @elastic/kibana-operations
-packages/kbn-generate-console-definitions @elastic/kibana-management
-packages/kbn-import-locator @elastic/kibana-operations
-packages/kbn-json-ast @elastic/kibana-operations
-packages/kbn-kibana-manifest-schema @elastic/kibana-operations
-packages/kbn-lint-packages-cli @elastic/kibana-operations
-packages/kbn-lint-ts-projects-cli @elastic/kibana-operations
-packages/kbn-managed-vscode-config @elastic/kibana-operations
-packages/kbn-managed-vscode-config-cli @elastic/kibana-operations
-packages/kbn-manifest @elastic/kibana-core
-packages/kbn-mock-idp-plugin @elastic/kibana-security
-packages/kbn-optimizer @elastic/kibana-operations
-packages/kbn-peggy-loader @elastic/kibana-operations
-packages/kbn-performance-testing-dataset-extractor @elastic/kibana-performance-testing
-packages/kbn-picomatcher @elastic/kibana-operations
-packages/kbn-plugin-check @elastic/appex-sharedux
-packages/kbn-plugin-generator @elastic/kibana-operations
-packages/kbn-plugin-helpers @elastic/kibana-operations
-packages/kbn-relocate @elastic/kibana-core
-packages/kbn-repo-file-maps @elastic/kibana-operations
-packages/kbn-repo-linter @elastic/kibana-operations
-packages/kbn-repo-source-classifier @elastic/kibana-operations
-packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
-packages/kbn-set-map @elastic/kibana-operations
-packages/kbn-sort-package-json @elastic/kibana-operations
-packages/kbn-styled-components-mapping-cli @elastic/kibana-operations @elastic/eui-team
-packages/kbn-ts-projects @elastic/kibana-operations
-packages/kbn-ts-type-check-cli @elastic/kibana-operations
-packages/kbn-tsconfig/base @elastic/kibana-operations
-packages/kbn-validate-next-docs-cli @elastic/kibana-operations
-packages/kbn-web-worker-stub @elastic/kibana-operations
-packages/kbn-whereis-pkg-cli @elastic/kibana-operations
-packages/kbn-yarn-lock-validator @elastic/kibana-operations
 src/core @elastic/kibana-core
 src/core/packages/analytics/browser @elastic/kibana-core
 src/core/packages/analytics/browser-internal @elastic/kibana-core
@@ -487,7 +444,7 @@ x-pack/platform/test/api_integration/apis/entity_manager/fixture_plugin @elastic
 x-pack/platform/plugins/shared/entity_manager @elastic/obs-entities
 examples/error_boundary @elastic/appex-sharedux
 src/platform/packages/shared/kbn-es @elastic/kibana-operations
-src/platform/packages/shared/kbn-es-archiver @elastic/kibana-operations @elastic/appex-qa
+src/platform/packages/shared/kbn-es-archiver @elastic/appex-qa
 src/platform/packages/shared/kbn-es-errors @elastic/kibana-core
 src/platform/packages/shared/kbn-es-query @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-es-types @elastic/kibana-core @elastic/obs-knowledge-team
@@ -790,7 +747,6 @@ src/platform/packages/shared/kbn-profiling-utils @elastic/obs-ux-infra_services-
 x-pack/platform/packages/private/kbn-random-sampling @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-react-field @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-react-hooks @elastic/obs-ux-onboarding-team
-src/platform/packages/shared/kbn-react-query @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/common @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/render @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/root @elastic/appex-sharedux
@@ -798,6 +754,7 @@ src/platform/packages/shared/react/kibana_context/styled @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_context/theme @elastic/appex-sharedux
 src/platform/packages/shared/react/kibana_mount @elastic/appex-sharedux
 src/platform/packages/private/kbn-react-mute-legacy-root-warning @elastic/appex-sharedux
+src/platform/packages/shared/kbn-react-query @elastic/appex-sharedux
 src/platform/packages/shared/kbn-recently-accessed @elastic/appex-sharedux
 packages/kbn-relocate @elastic/kibana-core
 x-pack/platform/plugins/private/remote_clusters @elastic/kibana-management
@@ -821,6 +778,7 @@ src/platform/packages/private/kbn-reporting/mocks_server @elastic/appex-sharedux
 x-pack/platform/plugins/private/reporting @elastic/appex-sharedux
 src/platform/packages/private/kbn-reporting/public @elastic/appex-sharedux
 src/platform/packages/private/kbn-reporting/server @elastic/appex-sharedux
+x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes @elastic/response-ops
 src/platform/packages/shared/kbn-resizable-layout @elastic/kibana-data-discovery
 examples/resizable_layout_examples @elastic/kibana-data-discovery
 x-pack/solutions/security/test/plugin_functional/plugins/resolver_test @elastic/security-solution
@@ -865,6 +823,7 @@ src/platform/plugins/shared/saved_search @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-scout @elastic/appex-qa
 src/platform/packages/private/kbn-scout-info @elastic/appex-qa
 x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
+x-pack/platform/packages/private/kbn-scout-release-testing @elastic/appex-qa
 src/platform/packages/private/kbn-scout-reporting @elastic/appex-qa
 x-pack/solutions/security/packages/kbn-scout-security @elastic/appex-qa
 examples/screenshot_mode_example @elastic/appex-sharedux
@@ -1058,7 +1017,6 @@ src/platform/packages/private/kbn-test-eui-helpers @elastic/kibana-visualization
 x-pack/platform/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
 src/platform/packages/shared/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
 src/platform/packages/shared/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
-x-pack/test_serverless
 src/platform/test
 x-pack/solutions/observability/test
 x-pack/performance @elastic/appex-qa
@@ -1086,6 +1044,7 @@ src/platform/packages/shared/kbn-triggers-actions-ui-types @elastic/response-ops
 src/platform/packages/shared/kbn-try-in-console @elastic/search-kibana
 packages/kbn-ts-projects @elastic/kibana-operations
 packages/kbn-ts-type-check-cli @elastic/kibana-operations
+packages/kbn-tsconfig/base @elastic/kibana-operations
 src/platform/packages/shared/kbn-typed-react-router-config @elastic/obs-knowledge-team @elastic/obs-ux-management-team
 src/platform/packages/shared/kbn-ui-actions-browser @elastic/appex-sharedux
 x-pack/examples/ui_actions_enhanced_examples @elastic/appex-sharedux
@@ -1140,7 +1099,6 @@ src/platform/plugins/private/vis_types/xy @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-visualization-ui-components @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-visualization-utils @elastic/kibana-visualizations
 src/platform/plugins/shared/visualizations @elastic/kibana-visualizations
-x-pack/platform/packages/private/kbn-scout-release-testing @elastic/appex-qa
 x-pack/platform/plugins/private/watcher @elastic/kibana-management
 packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations
