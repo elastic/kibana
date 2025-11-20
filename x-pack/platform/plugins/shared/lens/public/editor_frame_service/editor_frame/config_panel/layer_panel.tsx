@@ -48,6 +48,7 @@ import { ESQLEditor } from './esql_editor';
 import { useEditorFrameService } from '../../editor_frame_service_context';
 import { getOpenLayerSettingsAction } from './layer_actions/open_layer_settings';
 import { getRemoveLayerAction } from './layer_actions/remove_layer_action';
+import { getCloneLayerAction } from './layer_actions/clone_layer_action';
 
 export function LayerPanel(props: LayerPanelProps) {
   const { datasourceMap } = useEditorFrameService();
@@ -323,7 +324,7 @@ export function LayerPanel(props: LayerPanelProps) {
     [hasLayerSettings]
   );
 
-  const clearLayerAction = useMemo(() => {
+  const layerActions = useMemo(() => {
     // Only show clear layer button for single layer visualizations
     // or if it's the only layer in a multi-layer visualization.
     if (!isOnlyLayer) {
@@ -331,7 +332,8 @@ export function LayerPanel(props: LayerPanelProps) {
     }
 
     const layerType = activeVisualization.getLayerType(layerId, visualizationState);
-    return getRemoveLayerAction({
+
+    const removeLayerAction = getRemoveLayerAction({
       execute: () => onRemoveLayer(layerId),
       layerIndex,
       layerType,
@@ -339,6 +341,15 @@ export function LayerPanel(props: LayerPanelProps) {
       core,
       customModalText: activeVisualization.getCustomRemoveLayerText?.(layerId, visualizationState),
     });
+
+    const cloneLayerAction = getCloneLayerAction({
+      execute: onCloneLayer,
+      layerIndex,
+      activeVisualization,
+      isTextBasedLanguage,
+    });
+
+    return { removeLayerAction, cloneLayerAction };
   }, [
     activeVisualization,
     isOnlyLayer,
@@ -347,6 +358,8 @@ export function LayerPanel(props: LayerPanelProps) {
     layerIndex,
     core,
     onRemoveLayer,
+    onCloneLayer,
+    isTextBasedLanguage,
   ]);
 
   return (
@@ -408,16 +421,27 @@ export function LayerPanel(props: LayerPanelProps) {
                   />
                 </EuiFlexItem>
               )}
-              {clearLayerAction && (
-                <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    iconType={clearLayerAction.icon}
-                    color={clearLayerAction.color}
-                    aria-label={clearLayerAction.displayName}
-                    onClick={() => clearLayerAction.execute(null)}
-                    data-test-subj={clearLayerAction['data-test-subj']}
-                  />
-                </EuiFlexItem>
+              {layerActions && (
+                <>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      iconType={layerActions.removeLayerAction.icon}
+                      color={layerActions.removeLayerAction.color}
+                      aria-label={layerActions.removeLayerAction.displayName}
+                      onClick={() => layerActions.removeLayerAction.execute(null)}
+                      data-test-subj={layerActions.removeLayerAction['data-test-subj']}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonIcon
+                      iconType={layerActions.cloneLayerAction.icon}
+                      color={layerActions.cloneLayerAction.color}
+                      aria-label={layerActions.cloneLayerAction.displayName}
+                      onClick={() => layerActions.cloneLayerAction.execute(null)}
+                      data-test-subj={layerActions.cloneLayerAction['data-test-subj']}
+                    />
+                  </EuiFlexItem>
+                </>
               )}
             </EuiFlexGroup>
             {props.indexPatternService &&
