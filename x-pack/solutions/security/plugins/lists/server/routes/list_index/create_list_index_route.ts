@@ -45,10 +45,7 @@ export const createListIndexRoute = (router: ListsPluginRouter): void => {
         }
 
         if (listDataStreamExists && listItemDataStreamExists) {
-          return siemResponse.error({
-            body: `data stream: "${lists.getListName()}" and "${lists.getListItemName()}" already exists`,
-            statusCode: 409,
-          });
+          return response.ok({ body: CreateListIndexResponse.parse({ acknowledged: true }) });
         }
 
         if (!listDataStreamExists) {
@@ -67,6 +64,13 @@ export const createListIndexRoute = (router: ListsPluginRouter): void => {
 
         return response.ok({ body: CreateListIndexResponse.parse({ acknowledged: true }) });
       } catch (err) {
+        if (
+          typeof err?.message === 'string' &&
+          err.message.includes('resource_already_exists_exception')
+        ) {
+          return response.ok({ body: CreateListIndexResponse.parse({ acknowledged: true }) });
+        }
+
         const error = transformError(err);
         return siemResponse.error({
           body: error.message,
