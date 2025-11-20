@@ -12,6 +12,7 @@ export interface BootstrapTemplateData {
   themeTagName: string;
   jsDependencyPaths: string[];
   publicPathMap: string;
+  buildFlavor: 'serverless' | 'traditional';
 }
 
 export const renderTemplate = ({
@@ -19,6 +20,7 @@ export const renderTemplate = ({
   colorMode,
   jsDependencyPaths,
   publicPathMap,
+  buildFlavor,
 }: BootstrapTemplateData) => {
   const kbnThemeTagTemplate =
     colorMode === 'system'
@@ -61,6 +63,7 @@ window.__kbnHardenPrototypes__ = kbnHardenPrototypes.hardenPrototypes;
 window.__kbnStrictCsp__ = kbnCsp.strictCsp;
 ${kbnThemeTagTemplate}
 window.__kbnPublicPath__ = ${publicPathMap};
+window.__kbnBuildFlavor__ = '${buildFlavor}';
 window.__kbnBundles__ = kbnBundlesLoader();
 
 if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {

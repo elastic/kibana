@@ -37,6 +37,7 @@ window.__kbnHardenPrototypes__ = kbnHardenPrototypes.hardenPrototypes;
 window.__kbnStrictCsp__ = kbnCsp.strictCsp;
 window.__kbnThemeTag__ = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'borealisdark' : 'borealislight';
 window.__kbnPublicPath__ = {\\"foo\\": \\"bar\\"};
+window.__kbnBuildFlavor__ = 'traditional';
 window.__kbnBundles__ = kbnBundlesLoader();
 
 if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
@@ -182,6 +183,7 @@ window.__kbnHardenPrototypes__ = kbnHardenPrototypes.hardenPrototypes;
 window.__kbnStrictCsp__ = kbnCsp.strictCsp;
 window.__kbnThemeTag__ = 'borealislight';
 window.__kbnPublicPath__ = {\\"foo\\": \\"bar\\"};
+window.__kbnBuildFlavor__ = 'traditional';
 window.__kbnBundles__ = kbnBundlesLoader();
 
 if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {

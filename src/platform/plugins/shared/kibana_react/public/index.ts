@@ -57,7 +57,7 @@ export { ValidatedDualRange } from './validated_range';
 /** @deprecated use `Markdown` from `@kbn/shared-ux-markdown` */
 export { Markdown, MarkdownSimple } from './markdown';
 
-export { toMountPoint } from './util';
+export { toMountPoint, isServerless } from './util';
 export type { ToMountPointOptions } from './util';
 
 /** @deprecated Use `KibanaThemeProvider`, `wrapWithTheme` from `@kbn/react-kibana-context-theme`  */

@@ -54,3 +54,6 @@ export const toMountPoint = (
   const theme = theme$ ? { theme$ } : themeStart;
   return _toMountPoint(node, { analytics, theme, i18n, userProfile });
 };
+
+// @ts-expect-error
+export const isServerless = window?.__kbnBuildFlavor__ === 'serverless';

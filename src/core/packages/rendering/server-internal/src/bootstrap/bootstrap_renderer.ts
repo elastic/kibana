@@ -111,6 +111,7 @@ export const bootstrapRendererFactory: BootstrapRendererFactory = ({
       themeTagName,
       jsDependencyPaths,
       publicPathMap,
+      buildFlavor: packageInfo.buildFlavor,
     });
 
     const hash = createHash('sha256');
