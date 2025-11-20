@@ -35,21 +35,6 @@ export async function suggestProcessingPipeline({
   documents: FlattenRecord[];
   fieldsMetadataClient: IFieldsMetadataClient;
 }): Promise<StreamlangDSL | null> {
-  // Get initial dataset analysis similar to identifyFeatures
-  // const initialAnalysis = await describeDataset({
-  //   esClient,
-  //   start,
-  //   end,
-  //   index: definition.name,
-  // });
-  // console.log('initialAnalysis', initialAnalysis);
-  // const datasetAnalysis = initialAnalysis;
-  // const truncatedAnalysis = sortAndTruncateAnalyzedFields(datasetAnalysis, {
-  //   dropEmpty: true,
-  //   dropUnmapped: false,
-  // });
-  // console.log('Truncated dataset analysis', truncatedAnalysis);
-
   // No need to involve reasoning if there are no sample documents
   if (documents.length === 0) {
     return null;
@@ -74,7 +59,7 @@ export async function suggestProcessingPipeline({
     input: {
       stream: definition,
       fields_schema: isOtel
-        ? 'OpenTelemetry (OTel) with Logs Semantic Convention'
+        ? `OpenTelemetry (OTel) semantic convention for log records`
         : 'Elastic Common Schema (ECS)',
       pipeline_schema: JSON.stringify(getPipelineDefinitionJsonSchema(pipelineDefinitionSchema)),
       initial_dataset_analysis: JSON.stringify(simulationMetrics),
@@ -188,8 +173,6 @@ async function getSimulationMetrics(
     };
   }
 
-  // const sortedFields = sortAndTruncateAnalyzedFields(simulationResult);
-
   const documents = simulationResult.documents;
   const total = documents.length;
   const sampled = documents.length;
@@ -263,8 +246,9 @@ async function getSimulationMetrics(
   const fieldNames = Array.from(fieldMap.keys());
   const fieldMetadataMap = await fieldsMetadataClient.find({
     fieldNames,
-    source: ['ecs', 'metadata'],
+    source: ['ecs', 'otel', 'metadata'],
   });
+  // console.log('fieldMetadataMap', fieldMetadataMap.toPlain());
 
   const fieldsMetadata = fieldMetadataMap.getFields();
 
@@ -273,7 +257,6 @@ async function getSimulationMetrics(
     const metadata = fieldsMetadata[fieldName];
     const isEcs = metadata?.source === 'ecs';
     const isMetadata = metadata?.source === 'metadata';
-    console.log('metadata', fieldName, metadata);
     // Determine type display
     let typeDisplay = 'unknown';
     if (metadata?.type) {

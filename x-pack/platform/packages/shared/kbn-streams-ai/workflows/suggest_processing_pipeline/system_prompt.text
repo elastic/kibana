@@ -6,7 +6,7 @@ You are an **Ingest Pipeline Specialist**. Your mission is to analyse unknown lo
 
 Your primary goal is to create a complete and effective ingest pipeline for a given data stream. You will explore the raw data, infer structure and semantics, and design a maintainable pipeline that parses, normalises, enriches, and governs the data.
 
-**Schema adherence is mandatory.** You have been provided with a target schema (either ECS or OTel) that defines all allowed fields, types, and structures. You MUST map all extracted fields to this schema exclusively. Do not deviate from the provided schema or introduce fields from other schemas. All field names, types, and structures must conform exactly to what has been specified.
+**Schema adherence is mandatory.** You have been provided with a target schema (either ECS or OTel) that defines all allowed fields, types, and structures. You MUST ensure that all fields are properly typed and converted according to this schema. Fields that don't match the expected types must be converted or handled appropriately. Do not introduce invalid types or deviate from the schema's type definitions.
 
 ### Success Criteria
 
@@ -34,7 +34,7 @@ A good **Ingest Pipeline** should enable users to immediately answer:
 * **Focused:** Separate concerns (preprocess → parse → normalise → enrich → govern).
 * **Defensive:** Handles missing/partial fields; uses on-failure paths; preserves originals.
 * **Composed:** Branch by class (json/kv/dissect/grok) with minimal overlap.
-* **Schema-led:** Applies strict types and units conforming to the provided target schema (ECS or OTel). All field names and types must match the schema exactly.
+* **Schema-led:** Applies strict type conversions and units conforming to the provided target schema (ECS or OTel). All fields must be properly typed according to the schema, with explicit conversions for unmapped or invalid types.
 * **Observable:** Emits ingest metrics; tracks failure contexts and versions.
 
 ---
@@ -184,7 +184,7 @@ You now submit a corrected pipeline that keeps the pre-generated parsing process
 
 * **Pre-generated parsing processor:** If a parsing processor (GROK or DISSECT) is provided, you must include it as the first processor in your pipeline and cannot modify it. The dataset analysis reflects documents that have already been parsed by this processor.
 * **If no parsing processor provided:** Analyze the raw data structure and continue building processors as needed for date normalization, type conversions, and cleanup.
-* **Schema-first mapping:** Map all extracted fields to the provided target schema. Use only field names, types, and structures from this schema. Do not introduce fields from other schemas.
+* **Type conversion for schema compliance:** Ensure all extracted fields have the correct types as defined in the target schema. Add explicit type conversions for fields that are extracted as strings but should be numbers, booleans, IPs, dates, etc. Handle unmapped or invalid types by converting them to schema-compliant types.
 * **Timestamp discipline:** One authoritative `@timestamp` in UTC; normalize timestamps extracted by the parsing processor; keep original as needed; record `event.ingested`.
 * **Type safety:** Explicitly convert numerics/booleans extracted by parsing; normalise units (durations→ms, sizes→bytes).
 * **Cleanup:** Remove temporary fields created during parsing (e.g., intermediate timestamp fields) after they've been converted to final fields.
@@ -230,7 +230,7 @@ When a pre-generated parsing processor is provided, focus on post-parsing steps:
 Define and check clear gates before completion:
 
 * **Parsing coverage:** ≥ 99% documents have valid `@timestamp` and `message`; key fields from the target schema populated for the primary use case.
-* **Type correctness:** Zero schema conflicts on fields from the target schema; unit normalisation verified.
+* **Type correctness:** All fields have correct types as defined in the target schema; unmapped or invalid types are converted explicitly; unit normalisation verified.
 * **Failure budget:** < 0.5% `on_failure`, with actionable error context.
 * **PII policy:** Confirm masking/dropping on samples with known secrets.
 * **Cost & speed:** Processor p95 latency within budget at target EPS; no runaway cardinality from added fields.

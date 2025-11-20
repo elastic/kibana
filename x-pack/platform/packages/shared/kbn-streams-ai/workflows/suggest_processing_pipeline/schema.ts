@@ -25,7 +25,6 @@ import {
   grokProcessorSchema,
   dissectProcessorSchema,
   dateProcessorSchema,
-  renameProcessorSchema,
   removeProcessorSchema,
   convertProcessorSchema,
 } from '@kbn/streamlang';
@@ -39,7 +38,6 @@ export const pipelineDefinitionSchema = z
           grokProcessorSchema,
           dissectProcessorSchema,
           dateProcessorSchema,
-          renameProcessorSchema,
           removeProcessorSchema,
           convertProcessorSchema,
         ])
