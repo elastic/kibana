@@ -17,11 +17,11 @@ import {
 } from '@kbn/discover-utils';
 import { fieldConstants } from '@kbn/discover-utils';
 import { ContentFrameworkSection } from '../../../content_framework/lazy_content_framework_section';
-import { ContentFrameworkChart } from '../../../content_framework/chart';
 import type { ContentFrameworkSectionProps } from '../../../content_framework/section/section';
 import { useDataSourcesContext } from '../../../observability/traces/hooks/use_data_sources';
 import { useGetGenerateDiscoverLink } from '../../../observability/traces/hooks/use_get_generate_discover_link';
 import { getEsqlQuery } from './get_esql_query';
+import { SimilarErrorsOccurrencesChart } from './similar_errors_occurrences_chart';
 
 const sectionTitle = i18n.translate(
   'unifiedDocViewer.docViewerLogsOverview.subComponents.similarErrors.title',
@@ -29,12 +29,7 @@ const sectionTitle = i18n.translate(
     defaultMessage: 'Similar errors',
   }
 );
-const latencyTitle = i18n.translate(
-  'unifiedDocViewer.observability.traces.similarErrors.latency.title',
-  {
-    defaultMessage: 'Occurrences',
-  }
-);
+
 const discoverBtnLabel = i18n.translate(
   'unifiedDocViewer.docViewerLogsOverview.subComponents.similarErrors.openInDiscover.button',
   { defaultMessage: 'Open in Discover' }
@@ -121,7 +116,7 @@ export function SimilarErrors({ hit, formattedDoc }: SimilarErrorsProps) {
   );
 
   // TODO check if there's at least one of the other fields with value
-  if (serviceNameValue) {
+  if (!serviceNameValue) {
     return undefined;
   }
 
@@ -133,12 +128,7 @@ export function SimilarErrors({ hit, formattedDoc }: SimilarErrorsProps) {
       actions={sectionActions}
       description={sectionDescription}
     >
-      <ContentFrameworkChart
-        data-test-subj="docViewerSimilarErrorsLatencyChart"
-        title={latencyTitle}
-      >
-        CHART HERE
-      </ContentFrameworkChart>
+      <SimilarErrorsOccurrencesChart baseEsqlQuery={esqlQuery} />
     </ContentFrameworkSection>
   );
 }
