@@ -80,6 +80,7 @@ export interface ICommandMetadata {
   types?: Array<{ name: string; description: string }>; // Optional property for command-specific types
   license?: LicenseType; // Optional property indicating the license for the command's availability
   observabilityTier?: string; // Optional property indicating the observability tier availability
+  type?: 'source' | 'header' | 'processing'; // Optional property to classify the command type
   subqueryRestrictions?: {
     hideInside: boolean; // Command is hidden inside subqueries
     hideOutside: boolean; // Command is hidden outside subqueries (at root level)
@@ -117,6 +118,19 @@ export interface ICommandRegistry {
    * @returns An array of strings representing the names of all registered commands.
    */
   getAllCommandNames(): string[];
+
+  /**
+   * Retrieves the names of source commands (commands that can start a query).
+   * @returns An array of source command names.
+   */
+  getSourceCommandNames(): string[];
+
+  /**
+   * Retrieves the names of processing commands (commands that transform data).
+   * @returns An array of processing command names.
+   */
+  getProcessingCommandNames(): string[];
+
   /**
    * Retrieves a command by its name, including its methods and optional metadata.
    * @param commandName The name of the command to retrieve.
@@ -144,6 +158,9 @@ export class CommandRegistry implements ICommandRegistry {
     }
   > = new Map();
 
+  private sourceCommandNames: string[] = [];
+  private processingCommandNames: string[] = [];
+
   constructor() {
     this.commands = new Map<
       string,
@@ -160,7 +177,16 @@ export class CommandRegistry implements ICommandRegistry {
    */
   public registerCommand(command: ICommand): void {
     if (!this.commands.has(command.name)) {
-      this.commands.set(command.name, { methods: command.methods, metadata: command.metadata });
+      this.commands.set(command.name, {
+        methods: command.methods,
+        metadata: command.metadata,
+      });
+
+      if (command.metadata.type === 'source') {
+        this.sourceCommandNames.push(command.name);
+      } else if (!command.metadata.type) {
+        this.processingCommandNames.push(command.name);
+      }
     }
   }
 
@@ -179,6 +205,22 @@ export class CommandRegistry implements ICommandRegistry {
    */
   public getAllCommandNames(): string[] {
     return Array.from(this.commands.keys());
+  }
+
+  /**
+   * Retrieves the names of source commands (commands that can start a query).
+   * @returns An array of source command names.
+   */
+  public getSourceCommandNames(): string[] {
+    return this.sourceCommandNames;
+  }
+
+  /**
+   * Retrieves the names of processing commands (commands that transform data).
+   * @returns An array of processing command names.
+   */
+  public getProcessingCommandNames(): string[] {
+    return this.processingCommandNames;
   }
 
   /**
