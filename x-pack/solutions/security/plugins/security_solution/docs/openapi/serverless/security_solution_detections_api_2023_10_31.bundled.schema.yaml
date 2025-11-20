@@ -2897,12 +2897,14 @@ paths:
           required: false
           schema:
             type: string
-        - description: Aggregated gap status
+        - description: Aggregated gap fill statuses
           in: query
-          name: gap_status
+          name: gap_fill_statuses
           required: false
           schema:
-            $ref: '#/components/schemas/GapFillStatus'
+            items:
+              $ref: '#/components/schemas/GapFillStatus'
+            type: array
       responses:
         '200':
           content:
@@ -3729,12 +3731,6 @@ paths:
         - Tags API
 components:
   schemas:
-    GapFillStatus:
-      enum:
-        - unfilled
-        - in_progress
-        - filled
-      type: string
     AlertAssignees:
       type: object
       properties:
@@ -4145,11 +4141,13 @@ components:
           enum:
             - delete
           type: string
-        gap_status:
-          $ref: '#/components/schemas/GapFillStatus'
+        gap_fill_statuses:
           description: >-
-            Gap status to filter rules with gaps by status (used together with
-            gaps_range_*).
+            Aggregated gap fill statuses to filter rules with gaps by status
+            (used together with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4178,11 +4176,13 @@ components:
           enum:
             - disable
           type: string
-        gap_status:
-          $ref: '#/components/schemas/GapFillStatus'
+        gap_fill_statuses:
           description: >-
-            Gap status to filter rules with gaps by status (used together with
-            gaps_range_*).
+            Aggregated gap fill statuses to filter rules with gaps by status
+            (used together with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4224,11 +4224,13 @@ components:
           required:
             - include_exceptions
             - include_expired_exceptions
-        gap_status:
-          $ref: '#/components/schemas/GapFillStatus'
+        gap_fill_statuses:
           description: >-
-            Gap status to filter rules with gaps by status (used together with
-            gaps_range_*).
+            Aggregated gap fill statuses to filter rules with gaps by status
+            (used together with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4337,11 +4339,13 @@ components:
             $ref: '#/components/schemas/BulkActionEditPayload'
           minItems: 1
           type: array
-        gap_status:
-          $ref: '#/components/schemas/GapFillStatus'
+        gap_fill_statuses:
           description: >-
-            Gap status to filter rules with gaps by status (used together with
-            gaps_range_*).
+            Aggregated gap fill statuses to filter rules with gaps by status
+            (used together with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4375,11 +4379,13 @@ components:
           enum:
             - enable
           type: string
-        gap_status:
-          $ref: '#/components/schemas/GapFillStatus'
+        gap_fill_statuses:
           description: >-
-            Gap status to filter rules with gaps by status (used together with
-            gaps_range_*).
+            Aggregated gap fill statuses to filter rules with gaps by status
+            (used together with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4410,11 +4416,13 @@ components:
           enum:
             - export
           type: string
-        gap_status:
-          $ref: '#/components/schemas/GapFillStatus'
+        gap_fill_statuses:
           description: >-
-            Gap status to filter rules with gaps by status (used together with
-            gaps_range_*).
+            Aggregated gap fill statuses to filter rules with gaps by status
+            (used together with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4462,11 +4470,13 @@ components:
           required:
             - start_date
             - end_date
-        gap_status:
-          $ref: '#/components/schemas/GapFillStatus'
+        gap_fill_statuses:
           description: >-
-            Gap status to filter rules with gaps by status (used together with
-            gaps_range_*).
+            Aggregated gap fill statuses to filter rules with gaps by status
+            (used together with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -4496,11 +4506,13 @@ components:
           enum:
             - run
           type: string
-        gap_status:
-          $ref: '#/components/schemas/GapFillStatus'
+        gap_fill_statuses:
           description: >-
-            Gap status to filter rules with gaps by status (used together with
-            gaps_range_*).
+            Aggregated gap fill statuses to filter rules with gaps by status
+            (used together with gaps_range_*).
+          items:
+            $ref: '#/components/schemas/GapFillStatus'
+          type: array
         gaps_range_end:
           description: Gaps range end, valid only when query is provided
           type: string
@@ -5754,6 +5766,12 @@ components:
         - severity
         - updated_at
         - updatedAt
+      type: string
+    GapFillStatus:
+      enum:
+        - unfilled
+        - in_progress
+        - filled
       type: string
     HistoryWindowStart:
       description: >-
