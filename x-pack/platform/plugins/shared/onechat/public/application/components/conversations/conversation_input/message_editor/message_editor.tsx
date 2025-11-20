@@ -73,9 +73,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
       data-placeholder={placeholder}
       data-test-subj={dataTestSubj}
       css={editorStyles}
-      onInput={() => {
-        onChange?.();
-      }}
+      onInput={onChange}
       onKeyDown={(event) => {
         if (!event.shiftKey && event.key === keys.ENTER) {
           event.preventDefault();
