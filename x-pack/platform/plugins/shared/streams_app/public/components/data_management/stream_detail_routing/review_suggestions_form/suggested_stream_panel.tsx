@@ -146,7 +146,9 @@ export function SuggestedStreamPanel({
       <EuiFlexGroup gutterSize="xs" alignItems="center">
         <EuiFlexItem>
           <EuiTitle size="s">
-            <h4>{currentSuggestion.name}</h4>
+            <h4 data-test-subj={`suggestionName-${currentSuggestion.name}`}>
+              {currentSuggestion.name}
+            </h4>
           </EuiTitle>
         </EuiFlexItem>
         {matchRate.loading ? (
@@ -174,7 +176,9 @@ export function SuggestedStreamPanel({
         />
       </EuiFlexGroup>
       <EuiSpacer size="s" />
-      <ConditionPanel condition={currentSuggestion.condition} />
+      <div data-test-subj={`suggestionConditionPanel-${currentSuggestion.name}`}>
+        <ConditionPanel condition={currentSuggestion.condition} />
+      </div>
       <EuiSpacer size="m" />
       <EuiFlexGroup gutterSize="m" justifyContent="spaceBetween" wrap>
         <EuiFlexItem grow={false}>
@@ -189,6 +193,7 @@ export function SuggestedStreamPanel({
                 defaultMessage: 'Preview',
               }
             )}
+            data-test-subj={`suggestionPreviewButton-${currentSuggestion.name}`}
           >
             {i18n.translate('xpack.streams.streamDetailRouting.suggestedStreamPanel.preview', {
               defaultMessage: 'Preview',
@@ -207,6 +212,7 @@ export function SuggestedStreamPanel({
                     defaultMessage: 'Reject',
                   }
                 )}
+                data-test-subj={`suggestionRejectButton-${currentSuggestion.name}`}
               >
                 {i18n.translate('xpack.streams.streamDetailRouting.suggestedStreamPanel.dismiss', {
                   defaultMessage: 'Reject',
@@ -219,6 +225,7 @@ export function SuggestedStreamPanel({
                 size="s"
                 onClick={() => reviewSuggestedRule(currentSuggestion.name || partition.name)}
                 fill
+                data-test-subj={`suggestionAcceptButton-${currentSuggestion.name}`}
               >
                 {i18n.translate('xpack.streams.streamDetailRouting.suggestedStreamPanel.accept', {
                   defaultMessage: 'Accept',

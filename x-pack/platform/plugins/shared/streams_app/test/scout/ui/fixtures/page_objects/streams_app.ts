@@ -773,6 +773,59 @@ export class StreamsApp {
   }
 
   /**
+   * AI Suggestions utility methods
+   */
+  async clickSuggestPartitionsButton() {
+    const button = this.page.getByTestId('streamsAppGenerateSuggestionButton');
+    await expect(button).toBeVisible();
+    await button.click();
+  }
+
+  async expectSuggestionsVisible(count?: number) {
+    await expect(this.page.getByText('Review partitioning suggestions')).toBeVisible();
+    if (count !== undefined) {
+      const suggestions = await this.page
+        .locator('[data-test-subj^="suggestionEditButton-"]')
+        .all();
+      expect(suggestions.length).toHaveLength(count);
+    }
+  }
+
+  async previewSuggestion(suggestionName: string) {
+    const previewButton = this.page.getByTestId(`suggestionPreviewButton-${suggestionName}`);
+    await previewButton.click();
+  }
+
+  async editSuggestion(suggestionName: string) {
+    const editButton = this.page.getByTestId(`suggestionEditButton-${suggestionName}`);
+    await editButton.click();
+  }
+
+  async rejectSuggestion(suggestionName: string) {
+    const rejectButton = this.page.getByTestId(`suggestionRejectButton-${suggestionName}`);
+    await rejectButton.click();
+  }
+
+  async acceptSuggestion(suggestionName: string) {
+    const acceptButton = this.page.getByTestId(`suggestionAcceptButton-${suggestionName}`);
+    await acceptButton.click();
+  }
+
+  async regenerateSuggestions() {
+    const regenerateButton = this.page
+      .getByTestId('streamsAppGenerateSuggestionButton')
+      .filter({ hasText: 'Regenerate' });
+    await expect(regenerateButton).toBeVisible();
+    await regenerateButton.click();
+  }
+
+  async expectConfirmationModalVisible() {
+    const modal = this.page.getByTestId('streamsAppCreateStreamConfirmationModal');
+    await expect(modal).toBeVisible();
+    await expect(modal.getByTestId('streamsAppCreateStreamConfirmationModalTitle')).toBeVisible();
+  }
+
+  /**
    * Share utility methods
    */
 
