@@ -63,7 +63,7 @@ export function ActionsMenu({ onActionSelected }: ActionsMenuProps) {
             {isActionConnectorGroup(option) || isActionConnectorOption(option) ? (
               <StepIcon
                 stepType={getBaseConnectorType(option.connectorType)}
-                executionStatus={null}
+                executionStatus={undefined}
               />
             ) : isActionGroup(option) || isActionOption(option) ? (
               <EuiIcon type={option.iconType} size="m" color={option.iconColor} />

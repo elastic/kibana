@@ -30,5 +30,9 @@ export const forkCommand = {
     }),
     declaration: `TODO`,
     examples: [],
+    subqueryRestrictions: {
+      hideInside: true,
+      hideOutside: true,
+    },
   },
 };

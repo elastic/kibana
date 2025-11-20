@@ -10,17 +10,19 @@
 import React, { useCallback, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
-import { useCapabilities } from '../../../hooks/use_capabilities';
-import { useKibana } from '../../../hooks/use_kibana';
-import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
-import { useAsyncThunk } from '../../../widgets/workflow_yaml_editor/lib/store/hooks/use_async_thunk';
 import {
   selectIsTestModalOpen,
   selectWorkflowDefinition,
-} from '../../../widgets/workflow_yaml_editor/lib/store/selectors';
-import { setIsTestModalOpen } from '../../../widgets/workflow_yaml_editor/lib/store/slice';
-import { testWorkflowThunk } from '../../../widgets/workflow_yaml_editor/lib/store/thunks/test_workflow_thunk';
+  selectWorkflowId,
+} from '../../../entities/workflows/store/workflow_detail/selectors';
+import { setIsTestModalOpen } from '../../../entities/workflows/store/workflow_detail/slice';
+import { runWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/run_workflow_thunk';
+import { testWorkflowThunk } from '../../../entities/workflows/store/workflow_detail/thunks/test_workflow_thunk';
+import { WorkflowExecuteModal } from '../../../features/run_workflow/ui/workflow_execute_modal';
+import { useAsyncThunk } from '../../../hooks/use_async_thunk';
+import { useCapabilities } from '../../../hooks/use_capabilities';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useWorkflowUrlState } from '../../../hooks/use_workflow_url_state';
 
 export const WorkflowDetailTestModal = () => {
   const dispatch = useDispatch();
@@ -31,16 +33,24 @@ export const WorkflowDetailTestModal = () => {
 
   const isTestModalOpen = useSelector(selectIsTestModalOpen);
   const definition = useSelector(selectWorkflowDefinition);
+  const workflowId = useSelector(selectWorkflowId);
 
   const testWorkflow = useAsyncThunk(testWorkflowThunk);
+  const runWorkflow = useAsyncThunk(runWorkflowThunk);
+
+  const isTestRun = !workflowId;
+
   const handleRunWorkflow = useCallback(
     async (inputs: Record<string, unknown>) => {
-      const result = await testWorkflow({ inputs });
-      if (result) {
-        setSelectedExecution(result.workflowExecutionId);
+      const executionId = isTestRun
+        ? await testWorkflow({ inputs })
+        : await runWorkflow({ inputs });
+
+      if (executionId) {
+        setSelectedExecution(executionId.workflowExecutionId);
       }
     },
-    [testWorkflow, setSelectedExecution]
+    [isTestRun, runWorkflow, testWorkflow, setSelectedExecution]
   );
 
   const closeModal = useCallback(() => {
@@ -75,7 +85,9 @@ export const WorkflowDetailTestModal = () => {
 
   return (
     <WorkflowExecuteModal
+      isTestRun={isTestRun}
       definition={definition}
+      workflowId={workflowId}
       onClose={closeModal}
       onSubmit={handleRunWorkflow}
     />

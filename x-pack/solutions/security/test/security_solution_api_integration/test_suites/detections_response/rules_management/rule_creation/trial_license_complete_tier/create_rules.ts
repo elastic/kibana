@@ -17,6 +17,13 @@ import {
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 
+import {
+  deleteAllRules,
+  waitForRuleSuccess,
+  waitForAlertsToBePresent,
+  waitForRulePartialFailure,
+  deleteAllAlerts,
+} from '@kbn/detections-response-ftr-services';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   getActionsWithFrequencies,
@@ -29,14 +36,8 @@ import {
   generateEvent,
   fetchRule,
   waitForAlertToComplete,
+  refreshIndex,
 } from '../../../utils';
-import {
-  deleteAllRules,
-  waitForRuleSuccess,
-  waitForAlertsToBePresent,
-  waitForRulePartialFailure,
-  deleteAllAlerts,
-} from '../../../../../config/services/detections_response';
 import { createUserAndRole, deleteUserAndRole } from '../../../../../config/services/common';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -480,12 +481,13 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/240929
-    describe.skip('@skipInServerless missing timestamps', () => {
+    describe('@skipInServerless missing timestamps', () => {
+      const EVENTS_INDEX_NAME = 'myfakeindex-1';
+
       beforeEach(async () => {
-        await es.indices.delete({ index: 'myfakeindex-1', ignore_unavailable: true });
+        await es.indices.delete({ index: EVENTS_INDEX_NAME, ignore_unavailable: true });
         await es.indices.create({
-          index: 'myfakeindex-1',
+          index: EVENTS_INDEX_NAME,
           mappings: {
             properties: {
               '@timestamp': {
@@ -495,13 +497,14 @@ export default ({ getService }: FtrProviderContext) => {
           },
         });
         await es.index({
-          index: 'myfakeindex-1',
+          index: EVENTS_INDEX_NAME,
           document: generateEvent({ '@timestamp': Date.now() - 1 }),
         });
         await es.index({
-          index: 'myfakeindex-1',
+          index: EVENTS_INDEX_NAME,
           document: generateEvent({ '@timestamp': Date.now() - 2 }),
         });
+        await refreshIndex(es, EVENTS_INDEX_NAME);
         await deleteAllAlerts(supertest, log, es);
         await deleteAllRules(supertest, log);
       });
@@ -512,7 +515,7 @@ export default ({ getService }: FtrProviderContext) => {
         } = await detectionsApi
           .createRule({
             body: getCustomQueryRuleParams({
-              index: ['myfakeindex-1'],
+              index: [EVENTS_INDEX_NAME],
               timestamp_override: 'event.ingested',
               enabled: true,
             }),
@@ -530,17 +533,17 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(rule?.execution_summary?.last_execution.status).toEqual('partial failure');
         expect(rule?.execution_summary?.last_execution.message).toEqual(
-          'The following indices are missing the timestamp override field "event.ingested": ["myfakeindex-1"]'
+          `The following indices are missing the timestamp override field "event.ingested": ["${EVENTS_INDEX_NAME}"]`
         );
       });
 
-      it('generates two signals with a "partial failure" status', async () => {
+      it('generates two alerts with a "partial failure" status', async () => {
         const {
           body: { id },
         } = await detectionsApi
           .createRule({
             body: getCustomQueryRuleParams({
-              index: ['myfa*'],
+              index: [EVENTS_INDEX_NAME],
               timestamp_override: 'event.ingested',
               enabled: true,
             }),

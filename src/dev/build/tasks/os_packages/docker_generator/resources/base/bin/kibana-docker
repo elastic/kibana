@@ -33,6 +33,7 @@ kibana_vars=(
     csp.font_src
     csp.frame_src
     csp.img_src
+    csp.object_src
     csp.frame_ancestors
     csp.report_uri
     csp.report_to

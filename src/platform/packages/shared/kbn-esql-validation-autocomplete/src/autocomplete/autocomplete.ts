@@ -27,12 +27,12 @@ import type {
 } from '@kbn/esql-ast/src/commands_registry/types';
 import { getControlSuggestionIfSupported } from '@kbn/esql-ast/src/definitions/utils';
 import { correctQuerySyntax } from '@kbn/esql-ast/src/definitions/utils/ast';
-import { ESQLVariableType } from '@kbn/esql-types';
+import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
 import { getAstContext } from '../shared/context';
 import { isHeaderCommandSuggestion, isSourceCommandSuggestion } from '../shared/helpers';
-import { getSourcesHelper } from '../shared/resources_helpers';
+import { getFromCommandHelper } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { getCommandContext } from './get_command_context';
 import { mapRecommendedQueriesFromExtensions } from './utils/recommended_queries_helpers';
@@ -56,15 +56,18 @@ export async function suggest(
     return [];
   }
 
+  // Use the appropriate AST context for field retrieval
+  // When in a subquery, use the subquery's AST to get only its fields
+  const astForFields = astContext.isCursorInSubquery ? astContext.astForContext : root;
+
   const { getColumnsByType, getColumnMap } = getColumnsByTypeRetriever(
-    getQueryForFields(correctedQuery, root),
+    getQueryForFields(correctedQuery, astForFields),
     innerText,
     resourceRetriever
   );
 
   const supportsControls = resourceRetriever?.canSuggestVariables?.() ?? false;
   const getVariables = resourceRetriever?.getVariables;
-  const getSources = getSourcesHelper(resourceRetriever);
 
   const activeProduct = resourceRetriever?.getActiveProduct?.();
   const licenseInstance = await resourceRetriever?.getLicense?.();
@@ -74,8 +77,16 @@ export async function suggest(
     // propose main commands here
     // resolve particular commands suggestions after
     // filter source commands if already defined
+
+    const isStartingSubquery =
+      astContext.isCursorInSubquery && !astContext.astForContext.commands.length;
+
     const commands = esqlCommandRegistry
-      .getAllCommands()
+      .getAllCommands({
+        isCursorInSubquery: astContext.isCursorInSubquery,
+        isStartingSubquery,
+        queryContainsSubqueries: astContext.queryContainsSubqueries,
+      })
       .filter((command) => {
         const license = command.metadata?.license;
         const observabilityTier = command.metadata?.observabilityTier;
@@ -96,41 +107,38 @@ export async function suggest(
       .map((command) => command.name);
 
     const suggestions = getCommandAutocompleteDefinitions(commands);
-    if (!root.commands.length) {
-      // Display the recommended queries if there are no commands (empty state)
-      const recommendedQueriesSuggestions: ISuggestionItem[] = [];
-      if (getSources) {
-        let fromCommand = '';
-        const sources = await getSources();
-        const visibleSources = sources.filter((source) => !source.hidden);
-        if (visibleSources.find((source) => source.name.startsWith('logs'))) {
-          fromCommand = 'FROM logs*';
-        } else if (visibleSources.length) {
-          fromCommand = `FROM ${visibleSources[0].name}`;
-        }
 
-        const { getColumnsByType: getColumnsByTypeEmptyState } = getColumnsByTypeRetriever(
-          EsqlQuery.fromSrc(fromCommand).ast,
-          innerText,
-          resourceRetriever
-        );
-        const editorExtensions = (await resourceRetriever?.getEditorExtensions?.('from *')) ?? {
-          recommendedQueries: [],
-        };
-        const recommendedQueriesSuggestionsFromExtensions = mapRecommendedQueriesFromExtensions(
-          editorExtensions.recommendedQueries
-        );
-
-        const recommendedQueriesSuggestionsFromStaticTemplates =
-          await getRecommendedQueriesSuggestionsFromStaticTemplates(
-            getColumnsByTypeEmptyState,
-            fromCommand
-          );
-        recommendedQueriesSuggestions.push(
-          ...recommendedQueriesSuggestionsFromExtensions,
-          ...recommendedQueriesSuggestionsFromStaticTemplates
-        );
+    if (!astContext.astForContext.commands.length) {
+      if (isStartingSubquery) {
+        return suggestions;
       }
+
+      // Root level empty state: show source commands + recommended queries
+      const recommendedQueriesSuggestions: ISuggestionItem[] = [];
+      const fromCommand = await getFromCommandHelper(resourceRetriever);
+
+      const { getColumnsByType: getColumnsByTypeEmptyState } = getColumnsByTypeRetriever(
+        EsqlQuery.fromSrc(fromCommand).ast,
+        innerText,
+        resourceRetriever
+      );
+      const editorExtensions = (await resourceRetriever?.getEditorExtensions?.('from *')) ?? {
+        recommendedQueries: [],
+      };
+      const recommendedQueriesSuggestionsFromExtensions = mapRecommendedQueriesFromExtensions(
+        editorExtensions.recommendedQueries
+      );
+
+      const recommendedQueriesSuggestionsFromStaticTemplates =
+        await getRecommendedQueriesSuggestionsFromStaticTemplates(
+          getColumnsByTypeEmptyState,
+          fromCommand
+        );
+      recommendedQueriesSuggestions.push(
+        ...recommendedQueriesSuggestionsFromExtensions,
+        ...recommendedQueriesSuggestionsFromStaticTemplates
+      );
+
       const sourceCommandsSuggestions = suggestions.filter(isSourceCommandSuggestion);
       const headerCommandsSuggestions = suggestions.filter(isHeaderCommandSuggestion);
       return [
@@ -152,6 +160,7 @@ export async function suggest(
     controlSuggestions = getControlSuggestionIfSupported(
       Boolean(supportsControls),
       ESQLVariableType.VALUES,
+      ControlTriggerSource.QUESTION_MARK,
       getVariables?.(),
       false
     );
@@ -193,6 +202,7 @@ async function getSuggestionsWithinCommandExpression(
     node?: ESQLAstItem;
     option?: ESQLCommandOption;
     containingFunction?: ESQLFunction;
+    isCursorInSubquery: boolean;
   },
   getColumnsByType: GetColumnsByTypeFn,
   getColumnMap: GetColumnMapFn,
@@ -229,10 +239,11 @@ async function getSuggestionsWithinCommandExpression(
     ...references,
     ...additionalCommandContext,
     activeProduct: callbacks?.getActiveProduct?.(),
+    isCursorInSubquery: astContext.isCursorInSubquery,
   };
 
   // does it make sense to have a different context per command?
-  return commandDefinition.methods.autocomplete(
+  const suggestions = await commandDefinition.methods.autocomplete(
     fullText,
     astContext.command,
     {
@@ -250,4 +261,6 @@ async function getSuggestionsWithinCommandExpression(
     context,
     offset
   );
+
+  return suggestions;
 }

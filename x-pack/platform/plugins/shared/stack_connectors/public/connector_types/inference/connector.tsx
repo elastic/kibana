@@ -65,6 +65,8 @@ const InferenceAPIConnectorFields: React.FunctionComponent<ActionConnectorFields
         enforceAdaptiveAllocations: isServerless,
         currentSolution,
         allowContextWindowLength: true,
+        enableCustomHeaders: true,
+        allowTemperature: true,
         reenterSecretsOnEdit: true,
       }}
       http={http}
