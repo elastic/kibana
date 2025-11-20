@@ -154,6 +154,15 @@ export const configSchema = schema.object({
     defaultValue: 26214400, // 25MB,
     max: 104857600, // 100MB,
   }),
+
+  /**
+   * The max file size allowed for files uploaded to the Endpoint (Elastic Defend) Scripts library
+   */
+  maxEndpointScriptFileSize: schema.number({
+    defaultValue: 2e8, // 200 MB
+    max: Number.MAX_SAFE_INTEGER,
+  }),
+
   /**
    * Defines the settings for a specific offering of the Security Solution app.
    * They override the default values.
