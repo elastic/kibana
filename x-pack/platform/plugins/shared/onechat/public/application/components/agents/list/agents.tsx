@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { EuiButton, EuiLink, useEuiTheme } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiLink, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { docLinks } from '../../../../../common/doc_links';
@@ -18,6 +18,10 @@ import { appPaths } from '../../../utils/app_paths';
 import { DeleteAgentProvider } from '../../../context/delete_agent_context';
 import { TechPreviewTitle } from '../../common/tech_preview';
 import { useUiPrivileges } from '../../../hooks/use_ui_privileges';
+
+const manageToolsLabel = i18n.translate('xpack.onechat.tools.manageToolsLabel', {
+  defaultMessage: 'Manage tools',
+});
 
 export const OnechatAgents = () => {
   const { euiTheme } = useEuiTheme();
@@ -42,6 +46,9 @@ export const OnechatAgents = () => {
         })}
       </EuiButton>
     ),
+    <EuiButtonEmpty aria-label={manageToolsLabel} href={createOnechatUrl(appPaths.tools.list)}>
+      <EuiText size="s">{manageToolsLabel}</EuiText>
+    </EuiButtonEmpty>,
   ];
   return (
     <DeleteAgentProvider>
@@ -65,15 +72,8 @@ export const OnechatAgents = () => {
           description={
             <FormattedMessage
               id="xpack.onechat.agents.description"
-              defaultMessage="Define agents with custom instructions and assign them {toolsLink} to answer questions about your data and take actions on your behalf. {learnMoreLink}"
+              defaultMessage="Define agents with custom instructions and assign them Tools to answer questions about your data and take actions on your behalf. {learnMoreLink}"
               values={{
-                toolsLink: (
-                  <EuiLink href={createOnechatUrl(appPaths.tools.list)}>
-                    {i18n.translate('xpack.onechat.agents.toolsLinkText', {
-                      defaultMessage: 'tools',
-                    })}
-                  </EuiLink>
-                ),
                 learnMoreLink: (
                   <EuiLink
                     href={docLinks.agentBuilderAgents}
