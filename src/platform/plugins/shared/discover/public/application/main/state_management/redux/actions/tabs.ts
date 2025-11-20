@@ -17,7 +17,7 @@ import type { TabItem } from '@kbn/unified-tabs';
 import type { DiscoverSession } from '@kbn/saved-search-plugin/common';
 import type { UISession } from '@kbn/data-plugin/public/search/session/sessions_mgmt/types';
 import { createDataSource } from '../../../../../../common/data_sources/utils';
-import { type TabState } from '../types';
+import type { OpenInNewTabExtPointAction, TabState } from '../types';
 import { selectAllTabs, selectRecentlyClosedTabs, selectTab } from '../selectors';
 import {
   internalStateSlice,
@@ -459,6 +459,22 @@ export const openInNewTab: InternalStateThunkActionCreator<
 
     return dispatch(
       updateTabs({ items: [...currentTabs, newDefaultTab], selectedItem: newDefaultTab })
+    );
+  };
+
+export const openInNewTabExtPointAction: InternalStateThunkActionCreator<
+  [OpenInNewTabExtPointAction]
+> = ({ query, tabLabel, timeRange }) =>
+  function openInNewTabExtPointActionThunkFn(dispatch) {
+    const appState: TabState['appState'] = { query };
+    const globalState: TabState['globalState'] = { timeRange };
+
+    return dispatch(
+      openInNewTab({
+        appState,
+        globalState,
+        tabLabel,
+      })
     );
   };
 

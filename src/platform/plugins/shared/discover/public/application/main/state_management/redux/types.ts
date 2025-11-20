@@ -115,3 +115,9 @@ export interface DiscoverInternalState {
     unsafeCurrentId: string;
   };
 }
+
+export interface OpenInNewTabExtPointAction {
+  query?: TabState['appState']['query'];
+  tabLabel?: string;
+  timeRange?: TabState['globalState']['timeRange'];
+}

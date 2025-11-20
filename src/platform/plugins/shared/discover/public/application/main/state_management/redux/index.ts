@@ -22,6 +22,7 @@ import {
   disconnectTab,
   restoreTab,
   openInNewTab,
+  openInNewTabExtPointAction,
   openSearchSessionInNewTab,
   clearRecentlyClosedTabs,
   initializeTabs,
@@ -34,6 +35,7 @@ export {
   type TabState,
   type TabStateGlobalState,
   type InternalStateDataRequestParams,
+  type OpenInNewTabExtPointAction,
 } from './types';
 
 export { DEFAULT_TAB_STATE } from './constants';
@@ -60,6 +62,7 @@ export const internalStateActions = {
   syncLocallyPersistedTabState,
   restoreTab,
   openInNewTab,
+  openInNewTabExtPointAction,
   openSearchSessionInNewTab,
   clearRecentlyClosedTabs,
   initializeTabs,
