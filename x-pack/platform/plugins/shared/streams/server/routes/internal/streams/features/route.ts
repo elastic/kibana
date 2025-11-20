@@ -17,7 +17,6 @@ import type {
   StorageClientDeleteResponse,
   StorageClientIndexResponse,
 } from '@kbn/storage-adapter';
-import { conditionSchema } from '@kbn/streamlang';
 import { generateStreamDescription } from '@kbn/streams-ai';
 import type { Observable } from 'rxjs';
 import { from, map } from 'rxjs';
@@ -29,6 +28,7 @@ import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import type { IdentifiedFeaturesEvent, StreamDescriptionEvent } from './types';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
+import { StatusError } from '@kbn/streams-plugin/server/lib/streams/errors/status_error';
 
 const dateFromString = z.string().transform((input) => new Date(input));
 
@@ -117,12 +117,12 @@ export const deleteFeatureRoute = createServerRoute({
   },
 });
 
-export const updateFeatureRoute = createServerRoute({
+export const upsertFeatureRoute = createServerRoute({
   endpoint: 'PUT /internal/streams/{name}/features/{featureType}/{featureName}',
   options: {
     access: 'internal',
-    summary: 'Updates a feature for a stream',
-    description: 'Updates the specified feature',
+    summary: 'Upserts a feature for a stream',
+    description: 'Upserts the specified feature',
   },
   security: {
     authz: {
@@ -131,10 +131,7 @@ export const updateFeatureRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({ name: z.string(), featureType: featureTypeSchema, featureName: z.string() }),
-    body: z.object({
-      description: z.string(),
-      filter: z.optional(conditionSchema),
-    }),
+    body: featureSchema,
   }),
   handler: async ({
     params,
@@ -154,14 +151,17 @@ export const updateFeatureRoute = createServerRoute({
       body,
     } = params;
 
+    if (body.type !== featureType || body.name !== featureName) {
+      throw new StatusError(`Feature type and name must match the path parameters`, 400);
+    }
+
     const { write } = await checkAccess({ name, scopedClusterClient });
 
     if (!write) {
       throw new SecurityError(`Cannot update features for stream ${name}, insufficient privileges`);
     }
 
-    const feature = await featureClient.getFeature(name, { type: featureType, name: featureName });
-    return await featureClient.updateFeature(name, { ...feature, ...body });
+    return await featureClient.updateFeature(name, body);
   },
 });
 
@@ -426,7 +426,7 @@ export const describeStreamRoute = createServerRoute({
 export const featureRoutes = {
   ...getFeatureRoute,
   ...deleteFeatureRoute,
-  ...updateFeatureRoute,
+  ...upsertFeatureRoute,
   ...listFeaturesRoute,
   ...bulkFeaturesRoute,
   ...identifyFeaturesRoute,

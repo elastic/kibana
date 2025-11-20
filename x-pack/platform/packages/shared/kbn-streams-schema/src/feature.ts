@@ -14,24 +14,35 @@ export type FeatureType = (typeof featureTypes)[number];
 
 export const featureTypeSchema = z.enum(featureTypes);
 
-export interface Feature {
-  type: FeatureType;
+interface BaseFeature<T extends FeatureType = FeatureType> {
+  type: T;
   name: string;
   description: string;
-  filter?: Condition;
 }
 
-export const featureSchema: z.Schema<Feature> = z.object({
+const baseFeatureSchema: z.Schema<BaseFeature> = z.object({
   type: featureTypeSchema,
   name: streamObjectNameSchema,
   description: z.string(),
-  filter: z.optional(conditionSchema),
 });
 
-export type FeatureWithFilter = Feature & { filter: Condition };
+export type FeatureWithFilter<T extends FeatureType = FeatureType> = BaseFeature<T> & {
+  filter: Condition;
+};
 
-export type SystemFeature = FeatureWithFilter;
+export type SystemFeature = FeatureWithFilter<'system'>;
 
-export function isFeatureWithFilter(feature: Feature): feature is FeatureWithFilter {
-  return Boolean(feature.filter && isCondition(feature.filter));
+export const systemFeatureSchema: z.Schema<SystemFeature> = baseFeatureSchema.and(
+  z.object({
+    type: z.literal('system'),
+    filter: conditionSchema,
+  })
+);
+
+export type Feature = SystemFeature;
+
+export const featureSchema: z.Schema<Feature> = systemFeatureSchema;
+
+export function isFeatureWithFilter(feature: Feature): feature is SystemFeature {
+  return 'filter' in feature && isCondition(feature.filter);
 }

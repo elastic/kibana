@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FeatureType, SystemFeature } from '@kbn/streams-schema';
+import type { SystemFeature } from '@kbn/streams-schema';
 import objectHash from 'object-hash';
 import type { IdentifyFeaturesOptions } from '@kbn/streams-ai';
 import { identifySystemFeatures } from '@kbn/streams-ai';
@@ -25,7 +25,7 @@ export class SystemFeatureHandler extends FeatureTypeHandler<SystemFeature> {
 
   fromStorage(stored: StoredFeature): SystemFeature {
     return {
-      type: stored[FEATURE_TYPE] as FeatureType,
+      type: stored[FEATURE_TYPE] as 'system',
       name: stored[FEATURE_NAME],
       description: stored[FEATURE_DESCRIPTION],
       filter: stored[FEATURE_FILTER]!,
