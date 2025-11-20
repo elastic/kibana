@@ -67,7 +67,10 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
         };
       };
 
-      const createApiKey = async (roleName: string, roleDescriptors: Record<string, any>) => {
+      const createApiKeyWithAdminCredentials = async (
+        roleName: string,
+        roleDescriptors: Record<string, any>
+      ) => {
         log.debug(
           `Creating API key for ${roleName} with privileges: ${JSON.stringify(roleDescriptors)}`
         );
@@ -142,7 +145,7 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
                 return { [role]: roleDescriptor };
               })();
         // Regular roles use role_descriptors (not kibana_role_descriptors)
-        return await createApiKey(role, roleDescriptors);
+        return await createApiKeyWithAdminCredentials(role, roleDescriptors);
       };
 
       const getApiKeyForCustomRole = async (
@@ -153,7 +156,7 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
         try {
           await samlAuth.setCustomRole(roleDescriptor);
 
-          const result = await createApiKey(samlAuth.customRoleName, {
+          const result = await createApiKeyWithAdminCredentials(samlAuth.customRoleName, {
             [samlAuth.customRoleName]: roleDescriptor,
           });
           return result;
