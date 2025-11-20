@@ -18,6 +18,7 @@ import { useDataView } from '../../data_view_manager/hooks/use_data_view';
 import { useHasSecurityCapability } from '../../helper_hooks';
 import { TestProviders } from '../../common/mock/test_providers';
 import * as i18n from './translations';
+import { useAIValueExportContext } from '../providers/ai_value/export_provider';
 
 // Mock all dependencies before imports to avoid issues
 jest.mock('../../common/hooks/search_bar/use_sync_timerange_url_param', () => ({
@@ -43,6 +44,15 @@ jest.mock('../../data_view_manager/hooks/use_data_view', () => ({
 jest.mock('../../helper_hooks', () => ({
   useHasSecurityCapability: jest.fn(),
 }));
+
+jest.mock('../providers/ai_value/export_provider', () => {
+  return {
+    AIValueExportProvider: ({ children }: { children: React.ReactNode }) => (
+      <div data-test-subj="AIValueExportProvider">{children}</div>
+    ),
+    useAIValueExportContext: jest.fn(),
+  };
+});
 
 // Mock docLinks for NoPrivileges component
 jest.mock('@kbn/doc-links', () => ({
@@ -126,6 +136,8 @@ const mockUseDataView = useDataView as jest.MockedFunction<typeof useDataView>;
 const mockUseHasSecurityCapability = useHasSecurityCapability as jest.MockedFunction<
   typeof useHasSecurityCapability
 >;
+
+const mockUseAIValueExportContext = useAIValueExportContext as jest.Mock;
 
 describe('AIValue', () => {
   beforeEach(() => {
@@ -259,6 +271,16 @@ describe('AIValue', () => {
       const datePicker = screen.getByTestId('superDatePickerToggleQuickMenuButton');
       expect(datePicker).toBeInTheDocument();
     });
+
+    it('should be wrapped in a AIValueExportProvider', () => {
+      render(
+        <TestProviders>
+          <AIValue />
+        </TestProviders>
+      );
+
+      expect(screen.getByTestId('AIValueExportProvider')).toBeInTheDocument();
+    });
   });
 
   describe('Hook Integration', () => {
@@ -274,6 +296,7 @@ describe('AIValue', () => {
       expect(mockUseIsExperimentalFeatureEnabled).toHaveBeenCalledWith('newDataViewPickerEnabled');
       expect(mockUseHasSecurityCapability).toHaveBeenCalledWith('socManagement');
       expect(mockUseAlertsPrivileges).toHaveBeenCalled();
+      expect(mockUseAIValueExportContext).toHaveBeenCalled();
     });
   });
 
@@ -312,6 +335,29 @@ describe('AIValue', () => {
       );
 
       expect(screen.getByTestId('aiValueLoader')).toBeInTheDocument();
+    });
+  });
+
+  describe('export mode', () => {
+    beforeEach(() => {
+      mockUseAIValueExportContext.mockReturnValue({
+        forwardedState: {
+          timeRange: {
+            from: '2025-01-01T00:00:00.000Z',
+            to: '2025-01-31T23:59:59.999Z',
+          },
+        },
+      });
+    });
+
+    it('should not render the header of the page', () => {
+      render(
+        <TestProviders>
+          <AIValue />
+        </TestProviders>
+      );
+
+      expect(screen.queryByTestId('header-page')).not.toBeInTheDocument();
     });
   });
 });
