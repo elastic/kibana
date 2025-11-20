@@ -65,7 +65,7 @@ export const generateAndSaveEsConnectors = () => {
  * Generated at: ${new Date().toISOString()}
  * Source: elasticsearch-specification repository (${schema.endpoints.length} APIs)
  * 
- * To regenerate: node scripts/generate_workflows_contracts.js
+ * To regenerate: node scripts/generate_workflow_es_contracts.js
  */
 
 import type { InternalConnectorContract } from '../../types/latest';
@@ -145,10 +145,11 @@ function generateContractBlock(contract: ContractMeta): string {
   return `
 const ${contract.contractName}: InternalConnectorContract = {
   type: '${contract.type}',
+  summary: \`${escapeString(contract.summary ?? '')}\`,
   description: \`${escapeString(contract.description ?? '')}\`,
   methods: ${JSON.stringify(contract?.methods ?? [])},
   patterns: ${JSON.stringify(contract?.patterns ?? [])},
-  isInternal: true,
+  isInternal: false,
   documentation: '${contract.documentation}',
   parameterTypes: {
     pathParams: ${JSON.stringify(contract?.parameterTypes?.pathParams ?? [])},
@@ -175,14 +176,18 @@ function generateContractMeta(
   endpoint: SpecificationTypes.Endpoint,
   openApiDocument: OpenAPIV3.Document
 ): ContractMeta {
+  const operations = getRelatedOperations(endpoint, openApiDocument);
   const type = `elasticsearch.${endpoint.name}`;
   const description = endpoint.description;
+  const summary = generateSummary(operations);
   const documentation = endpoint.docUrl;
   const { methods, patterns } = generateMethodsAndPatterns(endpoint);
   const parameterTypes = generateParameterTypes(endpoint, openApiDocument);
 
   const contractName = generateContractName(endpoint);
-  const operationIds = getRelatedOperationIds(endpoint, openApiDocument);
+  const operationIds = operations
+    .map((operation) => operation.operationId ?? '')
+    .filter((operationId) => operationId !== '');
   const schemaImports = operationIds.flatMap((operationId) => [
     getRequestSchemaName(operationId),
     getResponseSchemaName(operationId),
@@ -191,6 +196,7 @@ function generateContractMeta(
   return {
     type,
     description,
+    summary,
     methods,
     patterns,
     documentation,
@@ -203,11 +209,11 @@ function generateContractMeta(
   };
 }
 
-function getRelatedOperationIds(
+function getRelatedOperations(
   endpoint: SpecificationTypes.Endpoint,
   openApiDocument: OpenAPIV3.Document
-): string[] {
-  const operationIds: string[] = [];
+): OpenAPIV3.OperationObject[] {
+  const operations: OpenAPIV3.OperationObject[] = [];
   for (const url of endpoint.urls) {
     const openapiPath = openApiDocument.paths[url.path];
     if (openapiPath) {
@@ -216,12 +222,16 @@ function getRelatedOperationIds(
           method.toLowerCase() as keyof typeof openapiPath
         ] as OpenAPIV3.OperationObject;
         if (operation && operation.operationId) {
-          operationIds.push(operation.operationId);
+          operations.push(operation);
         }
       }
     }
   }
-  return operationIds;
+  return operations;
+}
+
+function generateSummary(operations: OpenAPIV3.OperationObject[]): string {
+  return operations.find((operation) => operation.summary)?.summary ?? '';
 }
 
 function generateParameterTypes(
@@ -283,13 +293,21 @@ function generateParamsSchemaString(operationIds: string[]): string {
       ...(getShape(getShape(${getRequestSchemaName(operationIds[0])}).query)),
     }).partial()`;
   }
-  return `z.looseObject({${operationIds
+  // return `z.looseObject({${operationIds
+  //   .map(
+  //     (operationId) => `...(getShape(getShape(${getRequestSchemaName(operationId)}).body)),
+  //   ...(getShape(getShape(${getRequestSchemaName(operationId)}).path)),
+  //   ...(getShape(getShape(${getRequestSchemaName(operationId)}).query)),`
+  //   )
+  //   .join('\n')}}).partial()`;
+  return `z.union([${operationIds
     .map(
-      (operationId) => `...(getShape(getShape(${getRequestSchemaName(operationId)}).body)), 
+      (operationId) => `z.looseObject({
+    ...(getShape(getShape(${getRequestSchemaName(operationId)}).body)), 
     ...(getShape(getShape(${getRequestSchemaName(operationId)}).path)), 
-    ...(getShape(getShape(${getRequestSchemaName(operationId)}).query)),`
+    ...(getShape(getShape(${getRequestSchemaName(operationId)}).query))}).partial()`
     )
-    .join('\n')}}).partial()`;
+    .join(', ')}])`;
 }
 
 function generateOutputSchemaString(operationIds: string[]): string {

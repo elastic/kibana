@@ -59,7 +59,7 @@ export const generateAndSaveKibanaConnectors = () => {
  * Generated at: ${new Date().toISOString()}
  * Source: /oas_docs/output/kibana.yaml (${openApiSpec.paths.length} APIs)
  * 
- * To regenerate: node scripts/generate_workflows_contracts.js
+ * To regenerate: node scripts/generate_workflow_kibana_contracts.js
  */
 
 import type { InternalConnectorContract } from '../../types/latest';
@@ -139,6 +139,7 @@ function generateContractBlock(contract: ContractMeta): string {
   return `
 const ${contract.contractName}: InternalConnectorContract = {
   type: '${contract.type}',
+  summary: \`${escapeString(contract.summary ?? '')}\`,
   description: \`${escapeString(contract.description ?? '')}\`,
   methods: ${JSON.stringify(contract?.methods ?? [])},
   patterns: ${JSON.stringify(contract?.patterns ?? [])},
@@ -193,6 +194,7 @@ function generateContractMetasFromPath(
     contractMetas.push({
       type,
       description,
+      summary: operation.summary,
       methods: [method],
       patterns: [path],
       documentation,

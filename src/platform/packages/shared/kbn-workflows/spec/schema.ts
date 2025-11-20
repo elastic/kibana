@@ -456,7 +456,7 @@ export type BuiltInStepType = (typeof BuiltInStepTypes)[number];
 
 /* --- Workflow --- */
 export const WorkflowSchema = z.object({
-  version: z.literal('1').default('1').describe('The version of the workflow schema'),
+  version: z.literal('1').optional().default('1').describe('The version of the workflow schema'),
   name: z.string().min(1),
   description: z.string().optional(),
   settings: WorkflowSettingsSchema.optional(),

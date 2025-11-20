@@ -11,10 +11,10 @@
  * AUTO-GENERATED FILE - DO NOT EDIT
  *
  * This file contains Kibana connector definitions generated from the Kibana OpenAPI specification.
- * Generated at: 2025-11-20T18:52:56.337Z
+ * Generated at: 2025-11-20T20:05:06.638Z
  * Source: /oas_docs/output/kibana.yaml (undefined APIs)
  *
- * To regenerate: node scripts/generate_workflows_contracts.js
+ * To regenerate: node scripts/generate_workflow_kibana_contracts.js
  */
 
 import { z } from '@kbn/zod/v4';
@@ -1072,6 +1072,7 @@ import { getShape } from '../utils';
 // declare contracts
 const GET_ACTIONS_CONNECTOR_TYPES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_actions_connector_types',
+  summary: `Get connector types`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/actions/connector_types</span></div>
@@ -1104,6 +1105,7 @@ You do not need any Kibana feature privileges to run this API.`,
 };
 const DELETE_ACTIONS_CONNECTOR_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_actions_connector_id',
+  summary: `Delete a connector`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/actions/connector/{id}</span></div>
@@ -1136,6 +1138,7 @@ WARNING: When you delete a connector, it cannot be recovered.`,
 };
 const GET_ACTIONS_CONNECTOR_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_actions_connector_id',
+  summary: `Get connector information`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/actions/connector/{id}</span></div>
@@ -1166,6 +1169,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_ACTIONS_CONNECTOR_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_actions_connector_id',
+  summary: `Create a connector`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/actions/connector/{id}</span></div>
@@ -1196,6 +1200,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const PUT_ACTIONS_CONNECTOR_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_actions_connector_id',
+  summary: `Update a connector`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/actions/connector/{id}</span></div>
@@ -1226,6 +1231,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_ACTIONS_CONNECTOR_ID_EXECUTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_actions_connector_id_execute',
+  summary: `Run a connector`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/actions/connector/{id}/_execute</span></div>
@@ -1258,6 +1264,7 @@ You can use this API to test an action that involves interaction with Kibana ser
 };
 const GET_ACTIONS_CONNECTORS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_actions_connectors',
+  summary: `Get all connectors`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/actions/connectors</span></div>
@@ -1288,6 +1295,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_AGENT_BUILDER_A2A_AGENTID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_agent_builder_a2a_agentid',
+  summary: `Send A2A task`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/a2a/{agentId}</span></div>
@@ -1320,6 +1328,7 @@ WARNING: This endpoint is designed for A2A protocol clients and should not be us
 };
 const GET_AGENT_BUILDER_A2A_AGENTID_JSON_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_agent_builder_a2a_agentid_json',
+  summary: `Get A2A agent card`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/a2a/{agentId}.json</span></div>
@@ -1352,6 +1361,7 @@ Get agent discovery metadata in JSON format. Use this endpoint to provide agent 
 };
 const GET_AGENT_BUILDER_AGENTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_agent_builder_agents',
+  summary: `List agents`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/agents</span></div>
@@ -1384,6 +1394,7 @@ List all available agents. Use this endpoint to retrieve complete agent informat
 };
 const POST_AGENT_BUILDER_AGENTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_agent_builder_agents',
+  summary: `Create an agent`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/agents</span></div>
@@ -1416,6 +1427,7 @@ Create a new agent. Use this endpoint to define the agent's behavior, appearance
 };
 const DELETE_AGENT_BUILDER_AGENTS_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_agent_builder_agents_id',
+  summary: `Delete an agent`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/agents/{id}</span></div>
@@ -1448,6 +1460,7 @@ Delete an agent by ID. This action cannot be undone.<br/><br/>[Required authoriz
 };
 const GET_AGENT_BUILDER_AGENTS_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_agent_builder_agents_id',
+  summary: `Get an agent by ID`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/agents/{id}</span></div>
@@ -1480,6 +1493,7 @@ Get a specific agent by ID. Use this endpoint to retrieve the complete agent def
 };
 const PUT_AGENT_BUILDER_AGENTS_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_agent_builder_agents_id',
+  summary: `Update an agent`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/agents/{id}</span></div>
@@ -1512,6 +1526,7 @@ Update an existing agent configuration. Use this endpoint to modify any aspect o
 };
 const GET_AGENT_BUILDER_CONVERSATIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_agent_builder_conversations',
+  summary: `List conversations`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/conversations</span></div>
@@ -1544,6 +1559,7 @@ List all conversations for a user. Use the optional agent ID to filter conversat
 };
 const DELETE_AGENT_BUILDER_CONVERSATIONS_CONVERSATION_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_agent_builder_conversations_conversation_id',
+  summary: `Delete conversation by ID`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/conversations/{conversation_id}</span></div>
@@ -1576,6 +1592,7 @@ Delete a conversation by ID. This action cannot be undone.<br/><br/>[Required au
 };
 const GET_AGENT_BUILDER_CONVERSATIONS_CONVERSATION_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_agent_builder_conversations_conversation_id',
+  summary: `Get conversation by ID`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/conversations/{conversation_id}</span></div>
@@ -1608,6 +1625,7 @@ Get a specific conversation by ID. Use this endpoint to retrieve the complete co
 };
 const POST_AGENT_BUILDER_CONVERSE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_agent_builder_converse',
+  summary: `Send chat message`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/converse</span></div>
@@ -1640,6 +1658,7 @@ Send a message to an agent and receive a complete response. This synchronous end
 };
 const POST_AGENT_BUILDER_CONVERSE_ASYNC_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_agent_builder_converse_async',
+  summary: `Send chat message (streaming)`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/converse/async</span></div>
@@ -1848,6 +1867,7 @@ A typical conversation round emits events in this sequence:
 };
 const POST_AGENT_BUILDER_MCP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_agent_builder_mcp',
+  summary: `MCP server`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/mcp</span></div>
@@ -1880,6 +1900,7 @@ WARNING: This endpoint is designed for MCP clients (Claude Desktop, Cursor, VS C
 };
 const GET_AGENT_BUILDER_TOOLS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_agent_builder_tools',
+  summary: `List tools`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/tools</span></div>
@@ -1912,6 +1933,7 @@ List all available tools. Use this endpoint to retrieve complete tool definition
 };
 const POST_AGENT_BUILDER_TOOLS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_agent_builder_tools',
+  summary: `Create a tool`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/tools</span></div>
@@ -1944,6 +1966,7 @@ Create a new tool. Use this endpoint to define a custom tool with specific funct
 };
 const POST_AGENT_BUILDER_TOOLS_EXECUTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_agent_builder_tools_execute',
+  summary: `Execute a Tool`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/tools/_execute</span></div>
@@ -1976,6 +1999,7 @@ Execute a tool with parameters. Use this endpoint to run a tool directly with sp
 };
 const DELETE_AGENT_BUILDER_TOOLS_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_agent_builder_tools_id',
+  summary: `Delete a tool`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/tools/{id}</span></div>
@@ -2008,6 +2032,7 @@ Delete a tool by ID. This action cannot be undone.<br/><br/>[Required authorizat
 };
 const GET_AGENT_BUILDER_TOOLS_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_agent_builder_tools_id',
+  summary: `Get a tool by id`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/tools/{id}</span></div>
@@ -2040,6 +2065,7 @@ Get a specific tool by ID. Use this endpoint to retrieve the complete tool defin
 };
 const PUT_AGENT_BUILDER_TOOLS_TOOLID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_agent_builder_tools_toolid',
+  summary: `Update a tool`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/agent_builder/tools/{toolId}</span></div>
@@ -2072,6 +2098,7 @@ Update an existing tool. Use this endpoint to modify any aspect of the tool's co
 };
 const GETALERTINGHEALTH_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getAlertingHealth',
+  summary: `Get the alerting framework health`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/_health</span></div>
@@ -2105,6 +2132,7 @@ You must have \`read\` privileges for the **Management > Stack Rules** feature o
 };
 const GETRULETYPES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getRuleTypes',
+  summary: `Get the rule types`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule_types</span></div>
@@ -2138,6 +2166,7 @@ If you have \`read\` privileges for one or more Kibana features, the API respons
 };
 const DELETE_ALERTING_RULE_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_alerting_rule_id',
+  summary: `Delete a rule`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{id}</span></div>
@@ -2168,6 +2197,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_ALERTING_RULE_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_alerting_rule_id',
+  summary: `Get rule details`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{id}</span></div>
@@ -2198,6 +2228,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_ALERTING_RULE_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_id',
+  summary: `Create a rule`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{id}</span></div>
@@ -2228,6 +2259,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const PUT_ALERTING_RULE_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_alerting_rule_id',
+  summary: `Update a rule`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{id}</span></div>
@@ -2258,6 +2290,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_ALERTING_RULE_ID_DISABLE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_id_disable',
+  summary: `Disable a rule`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{id}/_disable</span></div>
@@ -2288,6 +2321,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_ALERTING_RULE_ID_ENABLE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_id_enable',
+  summary: `Enable a rule`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{id}/_enable</span></div>
@@ -2318,6 +2352,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_ALERTING_RULE_ID_MUTE_ALL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_id_mute_all',
+  summary: `Mute all alerts`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{id}/_mute_all</span></div>
@@ -2348,6 +2383,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_ALERTING_RULE_ID_UNMUTE_ALL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_id_unmute_all',
+  summary: `Unmute all alerts`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{id}/_unmute_all</span></div>
@@ -2378,6 +2414,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_ALERTING_RULE_ID_UPDATE_API_KEY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_id_update_api_key',
+  summary: `Update the API key for a rule`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{id}/_update_api_key</span></div>
@@ -2408,6 +2445,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_ALERTING_RULE_ID_SNOOZE_SCHEDULE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_id_snooze_schedule',
+  summary: `Schedule a snooze for the rule`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{id}/snooze_schedule</span></div>
@@ -2440,6 +2478,7 @@ When you snooze a rule, the rule checks continue to run but alerts will not gene
 };
 const POST_ALERTING_RULE_RULE_ID_ALERT_ALERT_ID_MUTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_rule_id_alert_alert_id_mute',
+  summary: `Mute an alert`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{rule_id}/alert/{alert_id}/_mute</span></div>
@@ -2470,6 +2509,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_ALERTING_RULE_RULE_ID_ALERT_ALERT_ID_UNMUTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_alerting_rule_rule_id_alert_alert_id_unmute',
+  summary: `Unmute an alert`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{rule_id}/alert/{alert_id}/_unmute</span></div>
@@ -2500,6 +2540,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const DELETE_ALERTING_RULE_RULEID_SNOOZE_SCHEDULE_SCHEDULEID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_alerting_rule_ruleid_snooze_schedule_scheduleid',
+  summary: `Delete a snooze schedule for a rule`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rule/{ruleId}/snooze_schedule/{scheduleId}</span></div>
@@ -2530,6 +2571,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_ALERTING_RULES_FIND_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_alerting_rules_find',
+  summary: `Get information about rules`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/alerting/rules/_find</span></div>
@@ -2572,6 +2614,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const CREATEAGENTKEY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createAgentKey',
+  summary: `Create an APM agent key`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/agent_keys</span></div>
@@ -2607,6 +2650,7 @@ After it is created, you can copy the API key (Base64 encoded) and use it to to 
 };
 const SAVEAPMSERVERSCHEMA_CONTRACT: InternalConnectorContract = {
   type: 'kibana.saveApmServerSchema',
+  summary: `Save APM server schema`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/fleet/apm_server_schema</span></div>
@@ -2637,6 +2681,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const CREATEANNOTATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createAnnotation',
+  summary: `Create a service annotation`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/services/{serviceName}/annotation</span></div>
@@ -2669,6 +2714,7 @@ Create a new annotation for a specific service.`,
 };
 const GETANNOTATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getAnnotation',
+  summary: `Search for annotations`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/services/{serviceName}/annotation/search</span></div>
@@ -2701,6 +2747,7 @@ Search for annotations related to a specific service.`,
 };
 const DELETEAGENTCONFIGURATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteAgentConfiguration',
+  summary: `Delete agent configuration`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/settings/agent-configuration</span></div>
@@ -2731,6 +2778,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GETAGENTCONFIGURATIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getAgentConfigurations',
+  summary: `Get a list of agent configurations`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/settings/agent-configuration</span></div>
@@ -2761,6 +2809,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const CREATEUPDATEAGENTCONFIGURATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createUpdateAgentConfiguration',
+  summary: `Create or update agent configuration`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/settings/agent-configuration</span></div>
@@ -2791,6 +2840,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GETAGENTNAMEFORSERVICE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getAgentNameForService',
+  summary: `Get agent name for service`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/settings/agent-configuration/agent_name</span></div>
@@ -2823,6 +2873,7 @@ Retrieve \`agentName\` for a service.`,
 };
 const GETENVIRONMENTSFORSERVICE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getEnvironmentsForService',
+  summary: `Get environments for service`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/settings/agent-configuration/environments</span></div>
@@ -2853,6 +2904,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const SEARCHSINGLECONFIGURATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.searchSingleConfiguration',
+  summary: `Lookup single agent configuration`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/settings/agent-configuration/search</span></div>
@@ -2886,6 +2938,7 @@ This endpoint enables you to search for a single agent configuration and update 
 };
 const GETSINGLEAGENTCONFIGURATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getSingleAgentConfiguration',
+  summary: `Get single agent configuration`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/settings/agent-configuration/view</span></div>
@@ -2916,6 +2969,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GETSOURCEMAPS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getSourceMaps',
+  summary: `Get source maps`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/sourcemaps</span></div>
@@ -2949,6 +3003,7 @@ Get an array of Fleet artifacts, including source map uploads. You must have \`r
 };
 const UPLOADSOURCEMAP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.uploadSourceMap',
+  summary: `Upload a source map`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/sourcemaps</span></div>
@@ -2983,6 +3038,7 @@ The maximum payload size is \`1mb\`. If you attempt to upload a source map that 
 };
 const DELETESOURCEMAP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteSourceMap',
+  summary: `Delete source map`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/apm/sourcemaps/{id}</span></div>
@@ -3016,6 +3072,7 @@ Delete a previously uploaded source map. You must have \`all\` Kibana privileges
 };
 const DELETEASSETCRITICALITYRECORD_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteAssetCriticalityRecord',
+  summary: `Delete an asset criticality record`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/asset_criticality</span></div>
@@ -3048,6 +3105,7 @@ Delete the asset criticality record for a specific entity.`,
 };
 const GETASSETCRITICALITYRECORD_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetAssetCriticalityRecord',
+  summary: `Get an asset criticality record`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/asset_criticality</span></div>
@@ -3080,6 +3138,7 @@ Get the asset criticality record for a specific entity.`,
 };
 const CREATEASSETCRITICALITYRECORD_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateAssetCriticalityRecord',
+  summary: `Upsert an asset criticality record`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/asset_criticality</span></div>
@@ -3115,6 +3174,7 @@ If a record already exists for the specified entity, that record is overwritten 
 };
 const BULKUPSERTASSETCRITICALITYRECORDS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.BulkUpsertAssetCriticalityRecords',
+  summary: `Bulk upsert asset criticality records`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/asset_criticality/bulk</span></div>
@@ -3150,6 +3210,7 @@ If asset criticality records already exist for the specified entities, those rec
 };
 const FINDASSETCRITICALITYRECORDS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindAssetCriticalityRecords',
+  summary: `List asset criticality records`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/asset_criticality/list</span></div>
@@ -3182,6 +3243,7 @@ List asset criticality records, paging, sorting and filtering as needed.`,
 };
 const POSTATTACKDISCOVERYBULK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PostAttackDiscoveryBulk',
+  summary: `Bulk update Attack discoveries`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/attack_discovery/_bulk</span></div>
@@ -3214,6 +3276,7 @@ Performs bulk updates on multiple Attack discoveries, including workflow status 
 };
 const ATTACKDISCOVERYFIND_CONTRACT: InternalConnectorContract = {
   type: 'kibana.AttackDiscoveryFind',
+  summary: `Find Attack discoveries that match the search criteria`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/attack_discovery/_find</span></div>
@@ -3262,6 +3325,7 @@ Find Attack discoveries that match the search criteria. Supports free text searc
 };
 const POSTATTACKDISCOVERYGENERATE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PostAttackDiscoveryGenerate',
+  summary: `Generate attack discoveries from alerts`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/attack_discovery/_generate</span></div>
@@ -3294,6 +3358,7 @@ Initiates the generation of attack discoveries by analyzing security alerts usin
 };
 const GETATTACKDISCOVERYGENERATIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetAttackDiscoveryGenerations',
+  summary: `Get the latest attack discovery generations metadata for the current user`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/attack_discovery/generations</span></div>
@@ -3326,6 +3391,7 @@ Get the latest attack discovery generations metadata (that are not dismissed) fo
 };
 const GETATTACKDISCOVERYGENERATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetAttackDiscoveryGeneration',
+  summary: `Get a single Attack discovery generation, including its discoveries and (optional) generation metadata`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/attack_discovery/generations/{execution_uuid}</span></div>
@@ -3358,6 +3424,7 @@ Returns a specific Attack discovery generation, including all generated Attack d
 };
 const POSTATTACKDISCOVERYGENERATIONSDISMISS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PostAttackDiscoveryGenerationsDismiss',
+  summary: `Dismiss an attack discovery generation`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/attack_discovery/generations/{execution_uuid}/_dismiss</span></div>
@@ -3390,6 +3457,7 @@ Dismisses an attack discovery generation for the current user, indicating that i
 };
 const CREATEATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateAttackDiscoverySchedules',
+  summary: `Create Attack discovery schedule`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/attack_discovery/schedules</span></div>
@@ -3422,6 +3490,7 @@ Creates a new Attack discovery schedule that analyzes security alerts at specifi
 };
 const FINDATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindAttackDiscoverySchedules',
+  summary: `Finds Attack discovery schedules that match the search criteria`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/attack_discovery/schedules/_find</span></div>
@@ -3454,6 +3523,7 @@ Finds Attack discovery schedules that match the search criteria. Supports pagina
 };
 const DELETEATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteAttackDiscoverySchedules',
+  summary: `Delete Attack discovery schedule`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/attack_discovery/schedules/{id}</span></div>
@@ -3486,6 +3556,7 @@ Permanently deletes an Attack discovery schedule and all associated configuratio
 };
 const GETATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetAttackDiscoverySchedules',
+  summary: `Get Attack discovery schedule by ID`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/attack_discovery/schedules/{id}</span></div>
@@ -3518,6 +3589,7 @@ Retrieves a specific Attack discovery schedule by its unique identifier. Returns
 };
 const UPDATEATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateAttackDiscoverySchedules',
+  summary: `Update Attack discovery schedule`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/attack_discovery/schedules/{id}</span></div>
@@ -3550,6 +3622,7 @@ Updates an existing Attack discovery schedule with new configuration. All schedu
 };
 const DISABLEATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DisableAttackDiscoverySchedules',
+  summary: `Disable Attack discovery schedule`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/attack_discovery/schedules/{id}/_disable</span></div>
@@ -3582,6 +3655,7 @@ Disables an Attack discovery schedule, preventing it from running according to i
 };
 const ENABLEATTACKDISCOVERYSCHEDULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EnableAttackDiscoverySchedules',
+  summary: `Enable Attack discovery schedule`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/attack_discovery/schedules/{id}/_enable</span></div>
@@ -3614,6 +3688,7 @@ Enables a previously disabled Attack discovery schedule, allowing it to run acco
 };
 const DELETECASEDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteCaseDefaultSpace',
+  summary: `Delete cases`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases</span></div>
@@ -3647,6 +3722,7 @@ You must have \`read\` or \`all\` privileges and the \`delete\` sub-feature priv
 };
 const UPDATECASEDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateCaseDefaultSpace',
+  summary: `Update cases`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb patch">patch</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases</span></div>
@@ -3680,6 +3756,7 @@ You must have \`all\` privileges for the **Cases** feature in the  **Management*
 };
 const CREATECASEDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createCaseDefaultSpace',
+  summary: `Create a case`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases</span></div>
@@ -3713,6 +3790,7 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
 };
 const FINDCASESDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.findCasesDefaultSpace',
+  summary: `Search cases`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/_find</span></div>
@@ -3746,6 +3824,7 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
 };
 const GETCASEDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getCaseDefaultSpace',
+  summary: `Get case information`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/{caseId}</span></div>
@@ -3779,6 +3858,7 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
 };
 const GETCASEALERTSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getCaseAlertsDefaultSpace',
+  summary: `Get all alerts for a case`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/{caseId}/alerts</span></div>
@@ -3812,6 +3892,7 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
 };
 const DELETECASECOMMENTSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteCaseCommentsDefaultSpace',
+  summary: `Delete all case comments and alerts`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/{caseId}/comments</span></div>
@@ -3845,6 +3926,7 @@ Deletes all comments and alerts from a case. You must have \`all\` privileges fo
 };
 const UPDATECASECOMMENTDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateCaseCommentDefaultSpace',
+  summary: `Update a case comment or alert`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb patch">patch</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/{caseId}/comments</span></div>
@@ -3878,6 +3960,7 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
 };
 const ADDCASECOMMENTDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.addCaseCommentDefaultSpace',
+  summary: `Add a case comment or alert`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/{caseId}/comments</span></div>
@@ -3911,6 +3994,7 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
 };
 const FINDCASECOMMENTSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.findCaseCommentsDefaultSpace',
+  summary: `Find case comments and alerts`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/{caseId}/comments/_find</span></div>
@@ -3944,6 +4028,7 @@ Retrieves a paginated list of comments for a case. You must have \`read\` privil
 };
 const DELETECASECOMMENTDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteCaseCommentDefaultSpace',
+  summary: `Delete a case comment or alert`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/{caseId}/comments/{commentId}</span></div>
@@ -3977,6 +4062,7 @@ You must have \`all\` privileges for the **Cases** feature in the **Management**
 };
 const GETCASECOMMENTDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getCaseCommentDefaultSpace',
+  summary: `Get a case comment or alert`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/{caseId}/comments/{commentId}</span></div>
@@ -4010,6 +4096,7 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
 };
 const PUSHCASEDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.pushCaseDefaultSpace',
+  summary: `Push a case to an external service`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/{caseId}/connector/{connectorId}/_push</span></div>
@@ -4043,6 +4130,7 @@ You must have \`all\` privileges for the **Actions and Connectors** feature in t
 };
 const ADDCASEFILEDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.addCaseFileDefaultSpace',
+  summary: `Attach a file to a case`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/{caseId}/files</span></div>
@@ -4078,6 +4166,7 @@ Attach a file to a case. You must have \`all\` privileges for the **Cases** feat
 };
 const FINDCASEACTIVITYDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.findCaseActivityDefaultSpace',
+  summary: `Find case activity`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/{caseId}/user_actions/_find</span></div>
@@ -4111,6 +4200,7 @@ Retrives a paginated list of user activity for a case. You must have \`read\` pr
 };
 const GETCASESBYALERTDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getCasesByAlertDefaultSpace',
+  summary: `Get cases for an alert`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/alerts/{alertId}</span></div>
@@ -4144,6 +4234,7 @@ You must have \`read\` privileges for the **Cases** feature in the **Management*
 };
 const GETCASECONFIGURATIONDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getCaseConfigurationDefaultSpace',
+  summary: `Get case settings`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/configure</span></div>
@@ -4177,6 +4268,7 @@ Get setting details such as the closure type, custom fields, templatse, and the 
 };
 const SETCASECONFIGURATIONDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.setCaseConfigurationDefaultSpace',
+  summary: `Add case settings`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/configure</span></div>
@@ -4210,6 +4302,7 @@ Case settings include external connection details, custom fields, and templates.
 };
 const UPDATECASECONFIGURATIONDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateCaseConfigurationDefaultSpace',
+  summary: `Update case settings`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb patch">patch</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/configure/{configurationId}</span></div>
@@ -4243,6 +4336,7 @@ Updates setting details such as the closure type, custom fields, templates, and 
 };
 const FINDCASECONNECTORSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.findCaseConnectorsDefaultSpace',
+  summary: `Get case connectors`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/configure/connectors/_find</span></div>
@@ -4276,6 +4370,7 @@ Get information about connectors that are supported for use in cases. You must h
 };
 const GETCASEREPORTERSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getCaseReportersDefaultSpace',
+  summary: `Get case creators`,
   description: `Returns information about the users who opened cases. You must have read privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases. The API returns information about the users as they existed at the time of the case creation, including their name, full name, and email address. If any of those details change thereafter or if a user is deleted, the information returned by this API is unchanged.
 `,
   methods: ['get'],
@@ -4303,6 +4398,7 @@ const GETCASEREPORTERSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
 };
 const GETCASETAGSDEFAULTSPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getCaseTagsDefaultSpace',
+  summary: `Get case tags`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/cases/tags</span></div>
@@ -4336,6 +4432,7 @@ Aggregates and returns a list of case tags. You must have read privileges for th
 };
 const GETALLDATAVIEWSDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getAllDataViewsDefault',
+  summary: `Get all data views`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views</span></div>
@@ -4366,6 +4463,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const CREATEDATAVIEWDEFAULTW_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createDataViewDefaultw',
+  summary: `Create a data view`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/data_view</span></div>
@@ -4396,6 +4494,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const DELETEDATAVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteDataViewDefault',
+  summary: `Delete a data view`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/data_view/{viewId}</span></div>
@@ -4429,6 +4528,7 @@ WARNING: When you delete a data view, it cannot be recovered.
 };
 const GETDATAVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getDataViewDefault',
+  summary: `Get a data view`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/data_view/{viewId}</span></div>
@@ -4459,6 +4559,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const UPDATEDATAVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateDataViewDefault',
+  summary: `Update a data view`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/data_view/{viewId}</span></div>
@@ -4489,6 +4590,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const UPDATEFIELDSMETADATADEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateFieldsMetadataDefault',
+  summary: `Update data view fields metadata`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/data_view/{viewId}/fields</span></div>
@@ -4522,6 +4624,7 @@ Update fields presentation metadata such as count, customLabel, customDescriptio
 };
 const CREATERUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createRuntimeFieldDefault',
+  summary: `Create a runtime field`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/data_view/{viewId}/runtime_field</span></div>
@@ -4552,6 +4655,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const CREATEUPDATERUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createUpdateRuntimeFieldDefault',
+  summary: `Create or update a runtime field`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/data_view/{viewId}/runtime_field</span></div>
@@ -4582,6 +4686,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const DELETERUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteRuntimeFieldDefault',
+  summary: `Delete a runtime field from a data view`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/data_view/{viewId}/runtime_field/{fieldName}</span></div>
@@ -4612,6 +4717,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GETRUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getRuntimeFieldDefault',
+  summary: `Get a runtime field`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/data_view/{viewId}/runtime_field/{fieldName}</span></div>
@@ -4642,6 +4748,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const UPDATERUNTIMEFIELDDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateRuntimeFieldDefault',
+  summary: `Update a runtime field`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/data_view/{viewId}/runtime_field/{fieldName}</span></div>
@@ -4672,6 +4779,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GETDEFAULTDATAVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getDefaultDataViewDefault',
+  summary: `Get the default data view`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/default</span></div>
@@ -4702,6 +4810,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const SETDEFAULTDATAILVIEWDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.setDefaultDatailViewDefault',
+  summary: `Set the default data view`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/default</span></div>
@@ -4732,6 +4841,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const SWAPDATAVIEWSDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.swapDataViewsDefault',
+  summary: `Swap saved object references`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/swap_references</span></div>
@@ -4765,6 +4875,7 @@ Changes saved object references from one data view identifier to another. WARNIN
 };
 const PREVIEWSWAPDATAVIEWSDEFAULT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.previewSwapDataViewsDefault',
+  summary: `Preview a saved object reference swap`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/data_views/swap_references/_preview</span></div>
@@ -4798,6 +4909,7 @@ Preview the impact of swapping saved object references from one data view identi
 };
 const DELETEALERTSINDEX_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteAlertsIndex',
+  summary: `Delete an alerts index`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/index</span></div>
@@ -4828,6 +4940,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const READALERTSINDEX_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadAlertsIndex',
+  summary: `Reads the alert index name if it exists`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/index</span></div>
@@ -4858,6 +4971,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const CREATEALERTSINDEX_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateAlertsIndex',
+  summary: `Create an alerts index`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/index</span></div>
@@ -4888,6 +5002,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const READPRIVILEGES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadPrivileges',
+  summary: `Returns user privileges for the Kibana space`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/privileges</span></div>
@@ -4924,6 +5039,7 @@ detection engine rules.
 };
 const DELETERULE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteRule',
+  summary: `Delete a detection rule`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/rules</span></div>
@@ -4964,6 +5080,7 @@ The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique
 };
 const READRULE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadRule',
+  summary: `Retrieve a detection rule`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/rules</span></div>
@@ -5004,6 +5121,7 @@ The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique
 };
 const PATCHRULE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PatchRule',
+  summary: `Patch a detection rule`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb patch">patch</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/rules</span></div>
@@ -5043,6 +5161,7 @@ The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique
 };
 const CREATERULE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateRule',
+  summary: `Create a detection rule`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/rules</span></div>
@@ -5129,6 +5248,7 @@ For detailed information on Kibana actions and alerting, and additional API call
 };
 const UPDATERULE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateRule',
+  summary: `Update a detection rule`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/rules</span></div>
@@ -5168,6 +5288,7 @@ The difference between the \`id\` and \`rule_id\` is that the \`id\` is a unique
 };
 const PERFORMRULESBULKACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PerformRulesBulkAction',
+  summary: `Apply a bulk action to detection rules`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/rules/_bulk_action</span></div>
@@ -5208,6 +5329,7 @@ The edit action is idempotent, meaning that if you add a tag to a rule that alre
 };
 const EXPORTRULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ExportRules',
+  summary: `Export detection rules`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/rules/_export</span></div>
@@ -5249,6 +5371,7 @@ Export detection rules to an \`.ndjson\` file. The following configuration items
 };
 const FINDRULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindRules',
+  summary: `List all detection rules`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/rules/_find</span></div>
@@ -5290,6 +5413,7 @@ Retrieve a paginated list of detection rules. By default, the first page is retu
 };
 const IMPORTRULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ImportRules',
+  summary: `Import detection rules`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/rules/_import</span></div>
@@ -5338,6 +5462,7 @@ Import detection rules from an \`.ndjson\` file, including actions and exception
 };
 const CREATERULEEXCEPTIONLISTITEMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateRuleExceptionListItems',
+  summary: `Create rule exception items`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/rules/{id}/exceptions</span></div>
@@ -5370,6 +5495,7 @@ Create exception items that apply to a single detection rule.`,
 };
 const INSTALLPREBUILTRULESANDTIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.InstallPrebuiltRulesAndTimelines',
+  summary: `Install prebuilt detection rules and Timelines`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/rules/prepackaged</span></div>
@@ -5413,6 +5539,7 @@ providing you with the most current and effective threat detection capabilities.
 };
 const READPREBUILTRULESANDTIMELINESSTATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadPrebuiltRulesAndTimelinesStatus',
+  summary: `Retrieve the status of prebuilt detection rules and Timelines`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/rules/prepackaged/_status</span></div>
@@ -5448,6 +5575,7 @@ This endpoint provides detailed information about the number of custom rules, in
 };
 const RULEPREVIEW_CONTRACT: InternalConnectorContract = {
   type: 'kibana.RulePreview',
+  summary: `Preview rule alerts generated on specified time range`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/rules/preview</span></div>
@@ -5478,6 +5606,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const SETALERTASSIGNEES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.SetAlertAssignees',
+  summary: `Assign and unassign users from detection alerts`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/signals/assignees</span></div>
@@ -5513,6 +5642,7 @@ Assign users to detection alerts, and unassign them from alerts.
 };
 const FINALIZEALERTSMIGRATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FinalizeAlertsMigration',
+  summary: `Finalize detection alert migrations`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/signals/finalize_migration</span></div>
@@ -5548,6 +5678,7 @@ finalize it.
 };
 const ALERTSMIGRATIONCLEANUP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.AlertsMigrationCleanup',
+  summary: `Clean up detection alert migrations`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/signals/migration</span></div>
@@ -5587,6 +5718,7 @@ after 30 days. It also deletes other artifacts specific to the migration impleme
 };
 const CREATEALERTSMIGRATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateAlertsMigration',
+  summary: `Initiate a detection alert migration`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/signals/migration</span></div>
@@ -5621,6 +5753,7 @@ Migrations are initiated per index. While the process is neither destructive nor
 };
 const READALERTSMIGRATIONSTATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadAlertsMigrationStatus',
+  summary: `Retrieve the status of detection alert migrations`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/signals/migration_status</span></div>
@@ -5653,6 +5786,7 @@ Retrieve indices that contain detection alerts of a particular age, along with m
 };
 const SEARCHALERTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.SearchAlerts',
+  summary: `Find and/or aggregate detection alerts`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/signals/search</span></div>
@@ -5685,6 +5819,7 @@ Find and/or aggregate detection alerts that match the given query.`,
 };
 const SETALERTSSTATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.SetAlertsStatus',
+  summary: `Set a detection alert status`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/signals/status</span></div>
@@ -5717,6 +5852,7 @@ Set the status of one or more detection alerts.`,
 };
 const SETALERTTAGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.SetAlertTags',
+  summary: `Add and remove detection alert tags`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/signals/tags</span></div>
@@ -5752,6 +5888,7 @@ And tags to detection alerts, and remove them from alerts.
 };
 const READTAGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadTags',
+  summary: `List all detection rule tags`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/detection_engine/tags</span></div>
@@ -5784,6 +5921,7 @@ List all unique tags from all detection rules.`,
 };
 const ROTATEENCRYPTIONKEY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.rotateEncryptionKey',
+  summary: `Rotate a key for encrypted saved objects`,
   description: `Superuser role required.
 
 If a saved object cannot be decrypted using the primary encryption key, then Kibana will attempt to decrypt it using the specified decryption-only keys. In most of the cases this overhead is negligible, but if you're dealing with a large number of saved objects and experiencing performance issues, you may want to rotate the encryption key.
@@ -5815,6 +5953,7 @@ This functionality is in technical preview and may be changed or removed in a fu
 };
 const CREATEENDPOINTLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateEndpointList',
+  summary: `Create an Elastic Endpoint rule exception list`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint_list</span></div>
@@ -5847,6 +5986,7 @@ Create the exception list for Elastic Endpoint rule exceptions. When you create 
 };
 const DELETEENDPOINTLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteEndpointListItem',
+  summary: `Delete an Elastic Endpoint exception list item`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint_list/items</span></div>
@@ -5879,6 +6019,7 @@ Delete an Elastic Endpoint exception list item, specified by the \`id\` or \`ite
 };
 const READENDPOINTLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadEndpointListItem',
+  summary: `Get an Elastic Endpoint rule exception list item`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint_list/items</span></div>
@@ -5911,6 +6052,7 @@ Get the details of an Elastic Endpoint exception list item, specified by the \`i
 };
 const CREATEENDPOINTLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateEndpointListItem',
+  summary: `Create an Elastic Endpoint rule exception list item`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint_list/items</span></div>
@@ -5943,6 +6085,7 @@ Create an Elastic Endpoint exception list item, and associate it with the Elasti
 };
 const UPDATEENDPOINTLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateEndpointListItem',
+  summary: `Update an Elastic Endpoint rule exception list item`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint_list/items</span></div>
@@ -5975,6 +6118,7 @@ Update an Elastic Endpoint exception list item, specified by the \`id\` or \`ite
 };
 const FINDENDPOINTLISTITEMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindEndpointListItems',
+  summary: `Get Elastic Endpoint exception list items`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint_list/items/_find</span></div>
@@ -6007,6 +6151,7 @@ Get a list of all Elastic Endpoint exception list items.`,
 };
 const ENDPOINTGETACTIONSLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointGetActionsList',
+  summary: `Get response actions`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/action</span></div>
@@ -6050,6 +6195,7 @@ Get a list of all response actions.`,
 };
 const ENDPOINTGETACTIONSSTATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointGetActionsStatus',
+  summary: `Get response actions status`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/action_status</span></div>
@@ -6082,6 +6228,7 @@ Get the status of response actions for the specified agent IDs.`,
 };
 const ENDPOINTGETACTIONSDETAILS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointGetActionsDetails',
+  summary: `Get action details`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/action/{action_id}</span></div>
@@ -6114,6 +6261,7 @@ Get the details of a response action using the action ID.`,
 };
 const ENDPOINTFILEINFO_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointFileInfo',
+  summary: `Get file information`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/action/{action_id}/file/{file_id}</span></div>
@@ -6147,6 +6295,7 @@ Get information for the specified response action file download.
 };
 const ENDPOINTFILEDOWNLOAD_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointFileDownload',
+  summary: `Download a file`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/action/{action_id}/file/{file_id}/download</span></div>
@@ -6180,6 +6329,7 @@ Download a file associated with a response action.
 };
 const CANCELACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CancelAction',
+  summary: `Cancel a response action`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/action/cancel</span></div>
@@ -6212,6 +6362,7 @@ Cancel a running or pending response action (Applies only to some agent types).`
 };
 const ENDPOINTEXECUTEACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointExecuteAction',
+  summary: `Run a command`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/action/execute</span></div>
@@ -6244,6 +6395,7 @@ Run a shell command on an endpoint.`,
 };
 const ENDPOINTGETFILEACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointGetFileAction',
+  summary: `Get a file`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/action/get_file</span></div>
@@ -6276,6 +6428,7 @@ Get a file from an endpoint.`,
 };
 const ENDPOINTISOLATEACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointIsolateAction',
+  summary: `Isolate an endpoint`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/action/isolate</span></div>
@@ -6308,6 +6461,7 @@ Isolate an endpoint from the network. The endpoint remains isolated until it's r
 };
 const ENDPOINTKILLPROCESSACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointKillProcessAction',
+  summary: `Terminate a process`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/action/kill_process</span></div>
@@ -6340,6 +6494,7 @@ Terminate a running process on an endpoint.`,
 };
 const ENDPOINTGETPROCESSESACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointGetProcessesAction',
+  summary: `Get running processes`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/action/running_procs</span></div>
@@ -6372,6 +6527,7 @@ Get a list of all processes running on an endpoint.`,
 };
 const RUNSCRIPTACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.RunScriptAction',
+  summary: `Run a script`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/action/runscript</span></div>
@@ -6404,6 +6560,7 @@ Run a script on a host. Currently supported only for some agent types.`,
 };
 const ENDPOINTSCANACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointScanAction',
+  summary: `Scan a file or directory`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/action/scan</span></div>
@@ -6436,6 +6593,7 @@ Scan a specific file or directory on an endpoint for malware.`,
 };
 const ENDPOINTGETACTIONSSTATE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointGetActionsState',
+  summary: `Get actions state`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/action/state</span></div>
@@ -6468,6 +6626,7 @@ Get a response actions state, which reports whether encryption is enabled.`,
 };
 const ENDPOINTSUSPENDPROCESSACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointSuspendProcessAction',
+  summary: `Suspend a process`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/action/suspend_process</span></div>
@@ -6500,6 +6659,7 @@ Suspend a running process on an endpoint.`,
 };
 const ENDPOINTUNISOLATEACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointUnisolateAction',
+  summary: `Release an isolated endpoint`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/action/unisolate</span></div>
@@ -6532,6 +6692,7 @@ Release an isolated endpoint, allowing it to rejoin a network.`,
 };
 const ENDPOINTUPLOADACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.EndpointUploadAction',
+  summary: `Upload a file`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/action/upload</span></div>
@@ -6564,6 +6725,7 @@ Upload a file to an endpoint.`,
 };
 const GETENDPOINTMETADATALIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetEndpointMetadataList',
+  summary: `Get a metadata list`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/metadata</span></div>
@@ -6594,6 +6756,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GETENDPOINTMETADATA_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetEndpointMetadata',
+  summary: `Get metadata`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/metadata/{id}</span></div>
@@ -6624,6 +6787,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GETPOLICYRESPONSE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetPolicyResponse',
+  summary: `Get a policy response`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/policy_response</span></div>
@@ -6654,6 +6818,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GETPROTECTIONUPDATESNOTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetProtectionUpdatesNote',
+  summary: `Get a protection updates note`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/protection_updates_note/{package_policy_id}</span></div>
@@ -6684,6 +6849,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const CREATEUPDATEPROTECTIONUPDATESNOTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateUpdateProtectionUpdatesNote',
+  summary: `Create or update a protection updates note`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/endpoint/protection_updates_note/{package_policy_id}</span></div>
@@ -6714,6 +6880,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const DELETEMONITORINGENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteMonitoringEngine',
+  summary: `Delete the Privilege Monitoring Engine`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/engine/delete</span></div>
@@ -6744,6 +6911,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const DISABLEMONITORINGENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DisableMonitoringEngine',
+  summary: `Disable the Privilege Monitoring Engine`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/engine/disable</span></div>
@@ -6774,6 +6942,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const INITMONITORINGENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.InitMonitoringEngine',
+  summary: `Initialize the Privilege Monitoring Engine`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/engine/init</span></div>
@@ -6804,6 +6973,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const SCHEDULEMONITORINGENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ScheduleMonitoringEngine',
+  summary: `Schedule the Privilege Monitoring Engine`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/engine/schedule_now</span></div>
@@ -6834,6 +7004,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const PRIVMONHEALTH_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PrivMonHealth',
+  summary: `Health check on Privilege Monitoring`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/privileges/health</span></div>
@@ -6864,6 +7035,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const PRIVMONPRIVILEGES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PrivMonPrivileges',
+  summary: `Run a privileges check on Privilege Monitoring`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/privileges/privileges</span></div>
@@ -6896,6 +7068,7 @@ Check if the current user has all required permissions for Privilege Monitoring`
 };
 const CREATEPRIVMONUSER_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreatePrivMonUser',
+  summary: `Create a new monitored user`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users</span></div>
@@ -6926,6 +7099,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const PRIVMONBULKUPLOADUSERSCSV_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PrivmonBulkUploadUsersCSV',
+  summary: `Upsert multiple monitored users via CSV upload`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users/_csv</span></div>
@@ -6956,6 +7130,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const DELETEPRIVMONUSER_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeletePrivMonUser',
+  summary: `Delete a monitored user`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users/{id}</span></div>
@@ -6986,6 +7161,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const UPDATEPRIVMONUSER_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdatePrivMonUser',
+  summary: `Update a monitored user`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users/{id}</span></div>
@@ -7016,6 +7192,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const LISTPRIVMONUSERS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ListPrivMonUsers',
+  summary: `List all monitored users`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/monitoring/users/list</span></div>
@@ -7046,6 +7223,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const INSTALLPRIVILEGEDACCESSDETECTIONPACKAGE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.InstallPrivilegedAccessDetectionPackage',
+  summary: `Installs the privileged access detection package for the Entity Analytics privileged user monitoring experience`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/privileged_user_monitoring/pad/install</span></div>
@@ -7076,6 +7254,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GETPRIVILEGEDACCESSDETECTIONPACKAGESTATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetPrivilegedAccessDetectionPackageStatus',
+  summary: `Gets the status of the privileged access detection package for the Entity Analytics privileged user monitoring experience`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_analytics/privileged_user_monitoring/pad/status</span></div>
@@ -7106,6 +7285,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const INITENTITYSTORE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.InitEntityStore',
+  summary: `Initialize the Entity Store`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/enable</span></div>
@@ -7136,6 +7316,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const DELETEENTITYENGINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteEntityEngines',
+  summary: `Delete Entity Engines`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines</span></div>
@@ -7166,6 +7347,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const LISTENTITYENGINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ListEntityEngines',
+  summary: `List the Entity Engines`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines</span></div>
@@ -7196,6 +7378,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const DELETEENTITYENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteEntityEngine',
+  summary: `Delete the Entity Engine`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/{entityType}</span></div>
@@ -7226,6 +7409,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GETENTITYENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetEntityEngine',
+  summary: `Get an Entity Engine`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/{entityType}</span></div>
@@ -7256,6 +7440,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const INITENTITYENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.InitEntityEngine',
+  summary: `Initialize an Entity Engine`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/{entityType}/init</span></div>
@@ -7286,6 +7471,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const STARTENTITYENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.StartEntityEngine',
+  summary: `Start an Entity Engine`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/{entityType}/start</span></div>
@@ -7316,6 +7502,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const STOPENTITYENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.StopEntityEngine',
+  summary: `Stop an Entity Engine`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/{entityType}/stop</span></div>
@@ -7346,6 +7533,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const APPLYENTITYENGINEDATAVIEWINDICES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ApplyEntityEngineDataviewIndices',
+  summary: `Apply DataView indices to all installed engines`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/engines/apply_dataview_indices</span></div>
@@ -7376,6 +7564,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const DELETESINGLEENTITY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteSingleEntity',
+  summary: `Delete an entity in Entity Store`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/entities/{entityType}</span></div>
@@ -7410,6 +7599,7 @@ The entity will be immediately deleted from the latest index.  It will remain av
 };
 const UPSERTENTITY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpsertEntity',
+  summary: `Upsert an entity in Entity Store`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/entities/{entityType}</span></div>
@@ -7446,6 +7636,7 @@ If the specified entity already exists, it is updated with the provided values. 
 };
 const UPSERTENTITIESBULK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpsertEntitiesBulk',
+  summary: `Upsert many entities in Entity Store`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/entities/bulk</span></div>
@@ -7481,6 +7672,7 @@ The creation is asynchronous. The time for a document to be present in the  fina
 };
 const LISTENTITIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ListEntities',
+  summary: `List Entity Store Entities`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/entities/list</span></div>
@@ -7513,6 +7705,7 @@ List entities records, paging, sorting and filtering as needed.`,
 };
 const GETENTITYSTORESTATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetEntityStoreStatus',
+  summary: `Get the status of the Entity Store`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/entity_store/status</span></div>
@@ -7543,6 +7736,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const DELETEEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteExceptionList',
+  summary: `Delete an exception list`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/exception_lists</span></div>
@@ -7575,6 +7769,7 @@ Delete an exception list using the \`id\` or \`list_id\` field.`,
 };
 const READEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadExceptionList',
+  summary: `Get exception list details`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/exception_lists</span></div>
@@ -7607,6 +7802,7 @@ Get the details of an exception list using the \`id\` or \`list_id\` field.`,
 };
 const CREATEEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateExceptionList',
+  summary: `Create an exception list`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/exception_lists</span></div>
@@ -7642,6 +7838,7 @@ An exception list groups exception items and can be associated with detection ru
 };
 const UPDATEEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateExceptionList',
+  summary: `Update an exception list`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/exception_lists</span></div>
@@ -7674,6 +7871,7 @@ Update an exception list using the \`id\` or \`list_id\` field.`,
 };
 const DUPLICATEEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DuplicateExceptionList',
+  summary: `Duplicate an exception list`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/exception_lists/_duplicate</span></div>
@@ -7706,6 +7904,7 @@ Duplicate an existing exception list.`,
 };
 const EXPORTEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ExportExceptionList',
+  summary: `Export an exception list`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/exception_lists/_export</span></div>
@@ -7738,6 +7937,7 @@ Export an exception list and its associated items to an NDJSON file.`,
 };
 const FINDEXCEPTIONLISTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindExceptionLists',
+  summary: `Get exception lists`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/exception_lists/_find</span></div>
@@ -7770,6 +7970,7 @@ Get a list of all exception list containers.`,
 };
 const IMPORTEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ImportExceptionList',
+  summary: `Import an exception list`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/exception_lists/_import</span></div>
@@ -7802,6 +8003,7 @@ Import an exception list and its associated items from an NDJSON file.`,
 };
 const DELETEEXCEPTIONLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteExceptionListItem',
+  summary: `Delete an exception list item`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/exception_lists/items</span></div>
@@ -7834,6 +8036,7 @@ Delete an exception list item using the \`id\` or \`item_id\` field.`,
 };
 const READEXCEPTIONLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadExceptionListItem',
+  summary: `Get an exception list item`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/exception_lists/items</span></div>
@@ -7866,6 +8069,7 @@ Get the details of an exception list item using the \`id\` or \`item_id\` field.
 };
 const CREATEEXCEPTIONLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateExceptionListItem',
+  summary: `Create an exception list item`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/exception_lists/items</span></div>
@@ -7901,6 +8105,7 @@ Create an exception item and associate it with the specified exception list.
 };
 const UPDATEEXCEPTIONLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateExceptionListItem',
+  summary: `Update an exception list item`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/exception_lists/items</span></div>
@@ -7933,6 +8138,7 @@ Update an exception list item using the \`id\` or \`item_id\` field.`,
 };
 const FINDEXCEPTIONLISTITEMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindExceptionListItems',
+  summary: `Get exception list items`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/exception_lists/items/_find</span></div>
@@ -7974,6 +8180,7 @@ Get a list of all exception list items in the specified list.`,
 };
 const READEXCEPTIONLISTSUMMARY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadExceptionListSummary',
+  summary: `Get an exception list summary`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/exception_lists/summary</span></div>
@@ -8006,6 +8213,7 @@ Get a summary of the specified exception list.`,
 };
 const CREATESHAREDEXCEPTIONLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateSharedExceptionList',
+  summary: `Create a shared exception list`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/exceptions/shared</span></div>
@@ -8041,6 +8249,7 @@ An exception list groups exception items and can be associated with detection ru
 };
 const GET_FEATURES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_features',
+  summary: `Get features`,
   description: `Get information about all Kibana features. Features are used by spaces and security to refine and secure access to Kibana.
 `,
   methods: ['get'],
@@ -8068,6 +8277,7 @@ const GET_FEATURES_CONTRACT: InternalConnectorContract = {
 };
 const GET_FLEET_AGENT_DOWNLOAD_SOURCES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agent_download_sources',
+  summary: `Get agent binary download sources`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agent_download_sources</span></div>
@@ -8100,6 +8310,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_AGENT_DOWNLOAD_SOURCES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agent_download_sources',
+  summary: `Create an agent binary download source`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agent_download_sources</span></div>
@@ -8132,6 +8343,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const DELETE_FLEET_AGENT_DOWNLOAD_SOURCES_SOURCEID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_agent_download_sources_sourceid',
+  summary: `Delete an agent binary download source`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agent_download_sources/{sourceId}</span></div>
@@ -8164,6 +8376,7 @@ Delete an agent binary download source by ID.<br/><br/>[Required authorization] 
 };
 const GET_FLEET_AGENT_DOWNLOAD_SOURCES_SOURCEID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agent_download_sources_sourceid',
+  summary: `Get an agent binary download source`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agent_download_sources/{sourceId}</span></div>
@@ -8196,6 +8409,7 @@ Get an agent binary download source by ID.<br/><br/>[Required authorization] Rou
 };
 const PUT_FLEET_AGENT_DOWNLOAD_SOURCES_SOURCEID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_agent_download_sources_sourceid',
+  summary: `Update an agent binary download source`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agent_download_sources/{sourceId}</span></div>
@@ -8228,6 +8442,7 @@ Update an agent binary download source by ID.<br/><br/>[Required authorization] 
 };
 const GET_FLEET_AGENT_POLICIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agent_policies',
+  summary: `Get agent policies`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agent_policies</span></div>
@@ -8271,6 +8486,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_AGENT_POLICIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agent_policies',
+  summary: `Create an agent policy`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agent_policies</span></div>
@@ -8303,6 +8519,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_AGENT_POLICIES_BULK_GET_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agent_policies_bulk_get',
+  summary: `Bulk get agent policies`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agent_policies/_bulk_get</span></div>
@@ -8335,6 +8552,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_AGENT_POLICIES_AGENTPOLICYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agent_policies_agentpolicyid',
+  summary: `Get an agent policy`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agent_policies/{agentPolicyId}</span></div>
@@ -8367,6 +8585,7 @@ Get an agent policy by ID.<br/><br/>[Required authorization] Route required priv
 };
 const PUT_FLEET_AGENT_POLICIES_AGENTPOLICYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_agent_policies_agentpolicyid',
+  summary: `Update an agent policy`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agent_policies/{agentPolicyId}</span></div>
@@ -8400,6 +8619,7 @@ Update an agent policy by ID.<br/><br/>[Required authorization] Route required p
 const GET_FLEET_AGENT_POLICIES_AGENTPOLICYID_AUTO_UPGRADE_AGENTS_STATUS_CONTRACT: InternalConnectorContract =
   {
     type: 'kibana.get_fleet_agent_policies_agentpolicyid_auto_upgrade_agents_status',
+    summary: `Get auto upgrade agent status`,
     description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agent_policies/{agentPolicyId}/auto_upgrade_agents_status</span></div>
@@ -8440,6 +8660,7 @@ Get auto upgrade agent status<br/><br/>[Required authorization] Route required p
   };
 const POST_FLEET_AGENT_POLICIES_AGENTPOLICYID_COPY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agent_policies_agentpolicyid_copy',
+  summary: `Copy an agent policy`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agent_policies/{agentPolicyId}/copy</span></div>
@@ -8472,6 +8693,7 @@ Copy an agent policy by ID.<br/><br/>[Required authorization] Route required pri
 };
 const GET_FLEET_AGENT_POLICIES_AGENTPOLICYID_DOWNLOAD_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agent_policies_agentpolicyid_download',
+  summary: `Download an agent policy`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agent_policies/{agentPolicyId}/download</span></div>
@@ -8504,6 +8726,7 @@ Download an agent policy by ID.<br/><br/>[Required authorization] Route required
 };
 const GET_FLEET_AGENT_POLICIES_AGENTPOLICYID_FULL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agent_policies_agentpolicyid_full',
+  summary: `Get a full agent policy`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agent_policies/{agentPolicyId}/full</span></div>
@@ -8536,6 +8759,7 @@ Get a full agent policy by ID.<br/><br/>[Required authorization] Route required 
 };
 const GET_FLEET_AGENT_POLICIES_AGENTPOLICYID_OUTPUTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agent_policies_agentpolicyid_outputs',
+  summary: `Get outputs for an agent policy`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agent_policies/{agentPolicyId}/outputs</span></div>
@@ -8568,6 +8792,7 @@ Get a list of outputs associated with agent policy by policy id.<br/><br/>[Requi
 };
 const POST_FLEET_AGENT_POLICIES_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agent_policies_delete',
+  summary: `Delete an agent policy`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agent_policies/delete</span></div>
@@ -8600,6 +8825,7 @@ Delete an agent policy by ID.<br/><br/>[Required authorization] Route required p
 };
 const POST_FLEET_AGENT_POLICIES_OUTPUTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agent_policies_outputs',
+  summary: `Get outputs for agent policies`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agent_policies/outputs</span></div>
@@ -8632,6 +8858,7 @@ Get a list of outputs associated with agent policies.<br/><br/>[Required authori
 };
 const GET_FLEET_AGENT_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agent_status',
+  summary: `Get an agent status summary`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agent_status</span></div>
@@ -8662,6 +8889,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_AGENT_STATUS_DATA_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agent_status_data',
+  summary: `Get incoming agent data`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agent_status/data</span></div>
@@ -8694,6 +8922,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_AGENTLESS_POLICIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agentless_policies',
+  summary: `Create an agentless policy`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agentless_policies</span></div>
@@ -8726,6 +8955,7 @@ Create an agentless policy`,
 };
 const DELETE_FLEET_AGENTLESS_POLICIES_POLICYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_agentless_policies_policyid',
+  summary: `Delete an agentless policy`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agentless_policies/{policyId}</span></div>
@@ -8758,6 +8988,7 @@ Delete an agentless policy`,
 };
 const GET_FLEET_AGENTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agents',
+  summary: `Get agents`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents</span></div>
@@ -8805,6 +9036,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_AGENTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents',
+  summary: `Get agents by action ids`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents</span></div>
@@ -8837,6 +9069,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const DELETE_FLEET_AGENTS_AGENTID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_agents_agentid',
+  summary: `Delete an agent`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/{agentId}</span></div>
@@ -8869,6 +9102,7 @@ Delete an agent by ID.<br/><br/>[Required authorization] Route required privileg
 };
 const GET_FLEET_AGENTS_AGENTID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agents_agentid',
+  summary: `Get an agent`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/{agentId}</span></div>
@@ -8901,6 +9135,7 @@ Get an agent by ID.<br/><br/>[Required authorization] Route required privileges:
 };
 const PUT_FLEET_AGENTS_AGENTID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_agents_agentid',
+  summary: `Update an agent by ID`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/{agentId}</span></div>
@@ -8933,6 +9168,7 @@ Update an agent by ID.<br/><br/>[Required authorization] Route required privileg
 };
 const POST_FLEET_AGENTS_AGENTID_ACTIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_agentid_actions',
+  summary: `Create an agent action`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/{agentId}/actions</span></div>
@@ -8965,6 +9201,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_AGENTS_AGENTID_MIGRATE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_agentid_migrate',
+  summary: `Migrate a single agent`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/{agentId}/migrate</span></div>
@@ -8997,6 +9234,7 @@ Migrate a single agent to another cluster.<br/><br/>[Required authorization] Rou
 };
 const POST_FLEET_AGENTS_AGENTID_REASSIGN_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_agentid_reassign',
+  summary: `Reassign an agent`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/{agentId}/reassign</span></div>
@@ -9029,6 +9267,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_AGENTS_AGENTID_REQUEST_DIAGNOSTICS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_agentid_request_diagnostics',
+  summary: `Request agent diagnostics`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/{agentId}/request_diagnostics</span></div>
@@ -9061,6 +9300,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_AGENTS_AGENTID_UNENROLL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_agentid_unenroll',
+  summary: `Unenroll an agent`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/{agentId}/unenroll</span></div>
@@ -9093,6 +9333,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_AGENTS_AGENTID_UPGRADE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_agentid_upgrade',
+  summary: `Upgrade an agent`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/{agentId}/upgrade</span></div>
@@ -9125,6 +9366,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_AGENTS_AGENTID_UPLOADS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agents_agentid_uploads',
+  summary: `Get agent uploads`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/{agentId}/uploads</span></div>
@@ -9157,6 +9399,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_AGENTS_ACTION_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agents_action_status',
+  summary: `Get an agent action status`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/action_status</span></div>
@@ -9189,6 +9432,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_AGENTS_ACTIONS_ACTIONID_CANCEL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_actions_actionid_cancel',
+  summary: `Cancel an agent action`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/actions/{actionId}/cancel</span></div>
@@ -9221,6 +9465,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_AGENTS_AVAILABLE_VERSIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agents_available_versions',
+  summary: `Get available agent versions`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/available_versions</span></div>
@@ -9253,6 +9498,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_AGENTS_BULK_MIGRATE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_bulk_migrate',
+  summary: `Migrate multiple agents`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/bulk_migrate</span></div>
@@ -9285,6 +9531,7 @@ Bulk migrate agents to another cluster.<br/><br/>[Required authorization] Route 
 };
 const POST_FLEET_AGENTS_BULK_REASSIGN_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_bulk_reassign',
+  summary: `Bulk reassign agents`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/bulk_reassign</span></div>
@@ -9317,6 +9564,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_AGENTS_BULK_REQUEST_DIAGNOSTICS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_bulk_request_diagnostics',
+  summary: `Bulk request diagnostics from agents`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/bulk_request_diagnostics</span></div>
@@ -9349,6 +9597,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_AGENTS_BULK_UNENROLL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_bulk_unenroll',
+  summary: `Bulk unenroll agents`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/bulk_unenroll</span></div>
@@ -9381,6 +9630,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_AGENTS_BULK_UPDATE_AGENT_TAGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_bulk_update_agent_tags',
+  summary: `Bulk update agent tags`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/bulk_update_agent_tags</span></div>
@@ -9413,6 +9663,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_AGENTS_BULK_UPGRADE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_bulk_upgrade',
+  summary: `Bulk upgrade agents`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/bulk_upgrade</span></div>
@@ -9445,6 +9696,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const DELETE_FLEET_AGENTS_FILES_FILEID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_agents_files_fileid',
+  summary: `Delete an uploaded file`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/files/{fileId}</span></div>
@@ -9477,6 +9729,7 @@ Delete a file uploaded by an agent.<br/><br/>[Required authorization] Route requ
 };
 const GET_FLEET_AGENTS_FILES_FILEID_FILENAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agents_files_fileid_filename',
+  summary: `Get an uploaded file`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/files/{fileId}/{fileName}</span></div>
@@ -9509,6 +9762,7 @@ Get a file uploaded by an agent.<br/><br/>[Required authorization] Route require
 };
 const GET_FLEET_AGENTS_SETUP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agents_setup',
+  summary: `Get agent setup info`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/setup</span></div>
@@ -9541,6 +9795,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_AGENTS_SETUP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_agents_setup',
+  summary: `Initiate agent setup`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/setup</span></div>
@@ -9573,6 +9828,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_AGENTS_TAGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_agents_tags',
+  summary: `Get agent tags`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/agents/tags</span></div>
@@ -9605,6 +9861,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_CHECK_PERMISSIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_check_permissions',
+  summary: `Check permissions`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/check-permissions</span></div>
@@ -9635,6 +9892,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_CLOUD_CONNECTORS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_cloud_connectors',
+  summary: `Get cloud connectors`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/cloud_connectors</span></div>
@@ -9667,6 +9925,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_CLOUD_CONNECTORS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_cloud_connectors',
+  summary: `Create cloud connector`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/cloud_connectors</span></div>
@@ -9699,6 +9958,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const DELETE_FLEET_CLOUD_CONNECTORS_CLOUDCONNECTORID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_cloud_connectors_cloudconnectorid',
+  summary: `Delete cloud connector (supports force deletion)`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/cloud_connectors/{cloudConnectorId}</span></div>
@@ -9731,6 +9991,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_CLOUD_CONNECTORS_CLOUDCONNECTORID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_cloud_connectors_cloudconnectorid',
+  summary: `Get cloud connector`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/cloud_connectors/{cloudConnectorId}</span></div>
@@ -9763,6 +10024,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const PUT_FLEET_CLOUD_CONNECTORS_CLOUDCONNECTORID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_cloud_connectors_cloudconnectorid',
+  summary: `Update cloud connector`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/cloud_connectors/{cloudConnectorId}</span></div>
@@ -9795,6 +10057,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_DATA_STREAMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_data_streams',
+  summary: `Get data streams`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/data_streams</span></div>
@@ -9827,6 +10090,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_ENROLLMENT_API_KEYS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_enrollment_api_keys',
+  summary: `Get enrollment API keys`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/enrollment_api_keys</span></div>
@@ -9859,6 +10123,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_ENROLLMENT_API_KEYS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_enrollment_api_keys',
+  summary: `Create an enrollment API key`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/enrollment_api_keys</span></div>
@@ -9891,6 +10156,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const DELETE_FLEET_ENROLLMENT_API_KEYS_KEYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_enrollment_api_keys_keyid',
+  summary: `Revoke an enrollment API key`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/enrollment_api_keys/{keyId}</span></div>
@@ -9923,6 +10189,7 @@ Revoke an enrollment API key by ID by marking it as inactive.<br/><br/>[Required
 };
 const GET_FLEET_ENROLLMENT_API_KEYS_KEYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_enrollment_api_keys_keyid',
+  summary: `Get an enrollment API key`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/enrollment_api_keys/{keyId}</span></div>
@@ -9955,6 +10222,7 @@ Get an enrollment API key by ID.<br/><br/>[Required authorization] Route require
 };
 const POST_FLEET_EPM_BULK_ASSETS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_bulk_assets',
+  summary: `Bulk get assets`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/bulk_assets</span></div>
@@ -9987,6 +10255,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_EPM_CATEGORIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_categories',
+  summary: `Get package categories`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/categories</span></div>
@@ -10019,6 +10288,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_EPM_CUSTOM_INTEGRATIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_custom_integrations',
+  summary: `Create a custom integration`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/custom_integrations</span></div>
@@ -10051,6 +10321,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const PUT_FLEET_EPM_CUSTOM_INTEGRATIONS_PKGNAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_epm_custom_integrations_pkgname',
+  summary: `Update a custom integration`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/custom_integrations/{pkgName}</span></div>
@@ -10083,6 +10354,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_EPM_DATA_STREAMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_data_streams',
+  summary: `Get data streams`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/data_streams</span></div>
@@ -10115,6 +10387,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_EPM_PACKAGES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_packages',
+  summary: `Get packages`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages</span></div>
@@ -10147,6 +10420,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_EPM_PACKAGES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_packages',
+  summary: `Install a package by upload`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages</span></div>
@@ -10179,6 +10453,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_EPM_PACKAGES_BULK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_packages_bulk',
+  summary: `Bulk install packages`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/_bulk</span></div>
@@ -10211,6 +10486,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_EPM_PACKAGES_BULK_ROLLBACK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_packages_bulk_rollback',
+  summary: `Bulk rollback packages`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/_bulk_rollback</span></div>
@@ -10243,6 +10519,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_EPM_PACKAGES_BULK_ROLLBACK_TASKID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_packages_bulk_rollback_taskid',
+  summary: `Get Bulk rollback packages details`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/_bulk_rollback/{taskId}</span></div>
@@ -10275,6 +10552,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_EPM_PACKAGES_BULK_UNINSTALL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_packages_bulk_uninstall',
+  summary: `Bulk uninstall packages`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/_bulk_uninstall</span></div>
@@ -10307,6 +10585,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_EPM_PACKAGES_BULK_UNINSTALL_TASKID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_packages_bulk_uninstall_taskid',
+  summary: `Get Bulk uninstall packages details`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/_bulk_uninstall/{taskId}</span></div>
@@ -10339,6 +10618,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_EPM_PACKAGES_BULK_UPGRADE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_packages_bulk_upgrade',
+  summary: `Bulk upgrade packages`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/_bulk_upgrade</span></div>
@@ -10371,6 +10651,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_EPM_PACKAGES_BULK_UPGRADE_TASKID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_packages_bulk_upgrade_taskid',
+  summary: `Get Bulk upgrade packages details`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/_bulk_upgrade/{taskId}</span></div>
@@ -10403,6 +10684,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const DELETE_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_epm_packages_pkgname_pkgversion',
+  summary: `Delete a package`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/{pkgVersion}</span></div>
@@ -10435,6 +10717,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_packages_pkgname_pkgversion',
+  summary: `Get a package`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/{pkgVersion}</span></div>
@@ -10465,6 +10748,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_packages_pkgname_pkgversion',
+  summary: `Install a package from the registry`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/{pkgVersion}</span></div>
@@ -10497,6 +10781,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const PUT_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_epm_packages_pkgname_pkgversion',
+  summary: `Update package settings`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/{pkgVersion}</span></div>
@@ -10529,6 +10814,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_FILEPATH_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_packages_pkgname_pkgversion_filepath',
+  summary: `Get a package file`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/{pkgVersion}/{filePath}</span></div>
@@ -10562,6 +10848,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 const DELETE_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_DATASTREAM_ASSETS_CONTRACT: InternalConnectorContract =
   {
     type: 'kibana.delete_fleet_epm_packages_pkgname_pkgversion_datastream_assets',
+    summary: `Delete assets for an input package`,
     description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/{pkgVersion}/datastream_assets</span></div>
@@ -10603,6 +10890,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 const DELETE_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_KIBANA_ASSETS_CONTRACT: InternalConnectorContract =
   {
     type: 'kibana.delete_fleet_epm_packages_pkgname_pkgversion_kibana_assets',
+    summary: `Delete Kibana assets for a package`,
     description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/{pkgVersion}/kibana_assets</span></div>
@@ -10642,6 +10930,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 const POST_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_KIBANA_ASSETS_CONTRACT: InternalConnectorContract =
   {
     type: 'kibana.post_fleet_epm_packages_pkgname_pkgversion_kibana_assets',
+    summary: `Install Kibana assets for a package`,
     description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/{pkgVersion}/kibana_assets</span></div>
@@ -10680,6 +10969,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   };
 const POST_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_RULE_ASSETS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_packages_pkgname_pkgversion_rule_assets',
+  summary: `Install Kibana alert rule for a package`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/{pkgVersion}/rule_assets</span></div>
@@ -10713,6 +11003,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 const POST_FLEET_EPM_PACKAGES_PKGNAME_PKGVERSION_TRANSFORMS_AUTHORIZE_CONTRACT: InternalConnectorContract =
   {
     type: 'kibana.post_fleet_epm_packages_pkgname_pkgversion_transforms_authorize',
+    summary: `Authorize transforms`,
     description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/{pkgVersion}/transforms/authorize</span></div>
@@ -10751,6 +11042,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   };
 const POST_FLEET_EPM_PACKAGES_PKGNAME_ROLLBACK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_epm_packages_pkgname_rollback',
+  summary: `Rollback a package to previous version`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/rollback</span></div>
@@ -10783,6 +11075,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_EPM_PACKAGES_PKGNAME_STATS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_packages_pkgname_stats',
+  summary: `Get package stats`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/{pkgName}/stats</span></div>
@@ -10815,6 +11108,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_EPM_PACKAGES_INSTALLED_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_packages_installed',
+  summary: `Get installed packages`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/installed</span></div>
@@ -10854,6 +11148,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_EPM_PACKAGES_LIMITED_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_packages_limited',
+  summary: `Get a limited package list`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/packages/limited</span></div>
@@ -10886,6 +11181,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_EPM_TEMPLATES_PKGNAME_PKGVERSION_INPUTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_templates_pkgname_pkgversion_inputs',
+  summary: `Get an inputs template`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/templates/{pkgName}/{pkgVersion}/inputs</span></div>
@@ -10918,6 +11214,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_EPM_VERIFICATION_KEY_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_epm_verification_key_id',
+  summary: `Get a package signature verification key ID`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/epm/verification_key_id</span></div>
@@ -10950,6 +11247,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_FLEET_SERVER_HOSTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_fleet_server_hosts',
+  summary: `Get Fleet Server hosts`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/fleet_server_hosts</span></div>
@@ -10982,6 +11280,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_FLEET_SERVER_HOSTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_fleet_server_hosts',
+  summary: `Create a Fleet Server host`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/fleet_server_hosts</span></div>
@@ -11014,6 +11313,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const DELETE_FLEET_FLEET_SERVER_HOSTS_ITEMID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_fleet_server_hosts_itemid',
+  summary: `Delete a Fleet Server host`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/fleet_server_hosts/{itemId}</span></div>
@@ -11046,6 +11346,7 @@ Delete a Fleet Server host by ID.<br/><br/>[Required authorization] Route requir
 };
 const GET_FLEET_FLEET_SERVER_HOSTS_ITEMID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_fleet_server_hosts_itemid',
+  summary: `Get a Fleet Server host`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/fleet_server_hosts/{itemId}</span></div>
@@ -11078,6 +11379,7 @@ Get a Fleet Server host by ID.<br/><br/>[Required authorization] Route required 
 };
 const PUT_FLEET_FLEET_SERVER_HOSTS_ITEMID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_fleet_server_hosts_itemid',
+  summary: `Update a Fleet Server host`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/fleet_server_hosts/{itemId}</span></div>
@@ -11110,6 +11412,7 @@ Update a Fleet Server host by ID.<br/><br/>[Required authorization] Route requir
 };
 const POST_FLEET_HEALTH_CHECK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_health_check',
+  summary: `Check Fleet Server health`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/health_check</span></div>
@@ -11142,6 +11445,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_KUBERNETES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_kubernetes',
+  summary: `Get a full K8s agent manifest`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/kubernetes</span></div>
@@ -11174,6 +11478,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_KUBERNETES_DOWNLOAD_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_kubernetes_download',
+  summary: `Download an agent manifest`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/kubernetes/download</span></div>
@@ -11206,6 +11511,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_LOGSTASH_API_KEYS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_logstash_api_keys',
+  summary: `Generate a Logstash API key`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/logstash_api_keys</span></div>
@@ -11238,6 +11544,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_MESSAGE_SIGNING_SERVICE_ROTATE_KEY_PAIR_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_message_signing_service_rotate_key_pair',
+  summary: `Rotate a Fleet message signing key pair`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/message_signing_service/rotate_key_pair</span></div>
@@ -11270,6 +11577,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_OUTPUTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_outputs',
+  summary: `Get outputs`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/outputs</span></div>
@@ -11302,6 +11610,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_OUTPUTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_outputs',
+  summary: `Create output`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/outputs</span></div>
@@ -11334,6 +11643,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const DELETE_FLEET_OUTPUTS_OUTPUTID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_outputs_outputid',
+  summary: `Delete output`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/outputs/{outputId}</span></div>
@@ -11366,6 +11676,7 @@ Delete output by ID.<br/><br/>[Required authorization] Route required privileges
 };
 const GET_FLEET_OUTPUTS_OUTPUTID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_outputs_outputid',
+  summary: `Get output`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/outputs/{outputId}</span></div>
@@ -11398,6 +11709,7 @@ Get output by ID.<br/><br/>[Required authorization] Route required privileges: f
 };
 const PUT_FLEET_OUTPUTS_OUTPUTID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_outputs_outputid',
+  summary: `Update output`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/outputs/{outputId}</span></div>
@@ -11430,6 +11742,7 @@ Update output by ID.<br/><br/>[Required authorization] Route required privileges
 };
 const GET_FLEET_OUTPUTS_OUTPUTID_HEALTH_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_outputs_outputid_health',
+  summary: `Get the latest output health`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/outputs/{outputId}/health</span></div>
@@ -11462,6 +11775,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_PACKAGE_POLICIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_package_policies',
+  summary: `Get package policies`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/package_policies</span></div>
@@ -11501,6 +11815,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_PACKAGE_POLICIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_package_policies',
+  summary: `Create a package policy`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/package_policies</span></div>
@@ -11531,6 +11846,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_PACKAGE_POLICIES_BULK_GET_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_package_policies_bulk_get',
+  summary: `Bulk get package policies`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/package_policies/_bulk_get</span></div>
@@ -11561,6 +11877,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const DELETE_FLEET_PACKAGE_POLICIES_PACKAGEPOLICYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_package_policies_packagepolicyid',
+  summary: `Delete a package policy`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/package_policies/{packagePolicyId}</span></div>
@@ -11593,6 +11910,7 @@ Delete a package policy by ID.<br/><br/>[Required authorization] Route required 
 };
 const GET_FLEET_PACKAGE_POLICIES_PACKAGEPOLICYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_package_policies_packagepolicyid',
+  summary: `Get a package policy`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/package_policies/{packagePolicyId}</span></div>
@@ -11625,6 +11943,7 @@ Get a package policy by ID.`,
 };
 const PUT_FLEET_PACKAGE_POLICIES_PACKAGEPOLICYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_package_policies_packagepolicyid',
+  summary: `Update a package policy`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/package_policies/{packagePolicyId}</span></div>
@@ -11657,6 +11976,7 @@ Update a package policy by ID.`,
 };
 const POST_FLEET_PACKAGE_POLICIES_DELETE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_package_policies_delete',
+  summary: `Bulk delete package policies`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/package_policies/delete</span></div>
@@ -11689,6 +12009,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_PACKAGE_POLICIES_UPGRADE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_package_policies_upgrade',
+  summary: `Upgrade a package policy`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/package_policies/upgrade</span></div>
@@ -11721,6 +12042,7 @@ Upgrade a package policy to a newer package version.<br/><br/>[Required authoriz
 };
 const POST_FLEET_PACKAGE_POLICIES_UPGRADE_DRYRUN_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_package_policies_upgrade_dryrun',
+  summary: `Dry run a package policy upgrade`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/package_policies/upgrade/dryrun</span></div>
@@ -11753,6 +12075,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_PROXIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_proxies',
+  summary: `Get proxies`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/proxies</span></div>
@@ -11785,6 +12108,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_PROXIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_proxies',
+  summary: `Create a proxy`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/proxies</span></div>
@@ -11817,6 +12141,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const DELETE_FLEET_PROXIES_ITEMID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_fleet_proxies_itemid',
+  summary: `Delete a proxy`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/proxies/{itemId}</span></div>
@@ -11849,6 +12174,7 @@ Delete a proxy by ID<br/><br/>[Required authorization] Route required privileges
 };
 const GET_FLEET_PROXIES_ITEMID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_proxies_itemid',
+  summary: `Get a proxy`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/proxies/{itemId}</span></div>
@@ -11881,6 +12207,7 @@ Get a proxy by ID.<br/><br/>[Required authorization] Route required privileges: 
 };
 const PUT_FLEET_PROXIES_ITEMID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_proxies_itemid',
+  summary: `Update a proxy`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/proxies/{itemId}</span></div>
@@ -11914,6 +12241,7 @@ Update a proxy by ID.<br/><br/>[Required authorization] Route required privilege
 const GET_FLEET_REMOTE_SYNCED_INTEGRATIONS_OUTPUTID_REMOTE_STATUS_CONTRACT: InternalConnectorContract =
   {
     type: 'kibana.get_fleet_remote_synced_integrations_outputid_remote_status',
+    summary: `Get remote synced integrations status by outputId`,
     description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/remote_synced_integrations/{outputId}/remote_status</span></div>
@@ -11952,6 +12280,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
   };
 const GET_FLEET_REMOTE_SYNCED_INTEGRATIONS_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_remote_synced_integrations_status',
+  summary: `Get remote synced integrations status`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/remote_synced_integrations/status</span></div>
@@ -11984,6 +12313,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_SERVICE_TOKENS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_service_tokens',
+  summary: `Create a service token`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/service_tokens</span></div>
@@ -12016,6 +12346,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_settings',
+  summary: `Get settings`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/settings</span></div>
@@ -12048,6 +12379,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const PUT_FLEET_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_settings',
+  summary: `Update settings`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/settings</span></div>
@@ -12080,6 +12412,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_FLEET_SETUP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_fleet_setup',
+  summary: `Initiate Fleet setup`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/setup</span></div>
@@ -12112,6 +12445,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_SPACE_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_space_settings',
+  summary: `Get space settings`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/space_settings</span></div>
@@ -12142,6 +12476,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const PUT_FLEET_SPACE_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_fleet_space_settings',
+  summary: `Create space settings`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/space_settings</span></div>
@@ -12174,6 +12509,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_FLEET_UNINSTALL_TOKENS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_uninstall_tokens',
+  summary: `Get metadata for latest uninstall tokens`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/uninstall_tokens</span></div>
@@ -12206,6 +12542,7 @@ List the metadata for the latest uninstall tokens per agent policy.<br/><br/>[Re
 };
 const GET_FLEET_UNINSTALL_TOKENS_UNINSTALLTOKENID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_fleet_uninstall_tokens_uninstalltokenid',
+  summary: `Get a decrypted uninstall token`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/fleet/uninstall_tokens/{uninstallTokenId}</span></div>
@@ -12238,6 +12575,7 @@ Get one decrypted uninstall token by its ID.<br/><br/>[Required authorization] R
 };
 const DELETELIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteList',
+  summary: `Delete a value list`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/lists</span></div>
@@ -12273,6 +12611,7 @@ Delete a value list using the list ID.
 };
 const READLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadList',
+  summary: `Get value list details`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/lists</span></div>
@@ -12305,6 +12644,7 @@ Get the details of a value list using the list ID.`,
 };
 const PATCHLIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PatchList',
+  summary: `Patch a value list`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb patch">patch</span>&nbsp;<span class="operation-path">/s/{space_id}/api/lists</span></div>
@@ -12337,6 +12677,7 @@ Update specific fields of an existing list using the list \`id\`.`,
 };
 const CREATELIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateList',
+  summary: `Create a value list`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/lists</span></div>
@@ -12369,6 +12710,7 @@ Create a new value list.`,
 };
 const UPDATELIST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateList',
+  summary: `Update a value list`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/lists</span></div>
@@ -12404,6 +12746,7 @@ Update a value list using the list \`id\`. The original list is replaced, and al
 };
 const FINDLISTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindLists',
+  summary: `Get value lists`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/lists/_find</span></div>
@@ -12436,6 +12779,7 @@ Get a paginated subset of value lists. By default, the first page is returned, w
 };
 const DELETELISTINDEX_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteListIndex',
+  summary: `Delete value list data streams`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/lists/index</span></div>
@@ -12468,6 +12812,7 @@ Delete the \`.lists\` and \`.items\` data streams.`,
 };
 const READLISTINDEX_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadListIndex',
+  summary: `Get status of value list data streams`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/lists/index</span></div>
@@ -12500,6 +12845,7 @@ Verify that \`.lists\` and \`.items\` data streams exist.`,
 };
 const CREATELISTINDEX_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateListIndex',
+  summary: `Create list data streams`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/lists/index</span></div>
@@ -12532,6 +12878,7 @@ Create \`.lists\` and \`.items\` data streams in the relevant space.`,
 };
 const DELETELISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteListItem',
+  summary: `Delete a value list item`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/lists/items</span></div>
@@ -12564,6 +12911,7 @@ Delete a value list item using its \`id\`, or its \`list_id\` and \`value\` fiel
 };
 const READLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadListItem',
+  summary: `Get a value list item`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/lists/items</span></div>
@@ -12596,6 +12944,7 @@ Get the details of a value list item.`,
 };
 const PATCHLISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PatchListItem',
+  summary: `Patch a value list item`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb patch">patch</span>&nbsp;<span class="operation-path">/s/{space_id}/api/lists/items</span></div>
@@ -12628,6 +12977,7 @@ Update specific fields of an existing value list item using the item \`id\`.`,
 };
 const CREATELISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateListItem',
+  summary: `Create a value list item`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/lists/items</span></div>
@@ -12665,6 +13015,7 @@ All value list items in the same list must be the same type. For example, each l
 };
 const UPDATELISTITEM_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateListItem',
+  summary: `Update a value list item`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/lists/items</span></div>
@@ -12700,6 +13051,7 @@ Update a value list item using the list item ID. The original list item is repla
 };
 const EXPORTLISTITEMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ExportListItems',
+  summary: `Export value list items`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/lists/items/_export</span></div>
@@ -12732,6 +13084,7 @@ Export list item values from the specified value list.`,
 };
 const FINDLISTITEMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindListItems',
+  summary: `Get value list items`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/lists/items/_find</span></div>
@@ -12764,6 +13117,7 @@ Get all value list items in the specified list.`,
 };
 const IMPORTLISTITEMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ImportListItems',
+  summary: `Import value list items`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/lists/items/_import</span></div>
@@ -12799,6 +13153,7 @@ You can import items to a new or existing list.
 };
 const READLISTPRIVILEGES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadListPrivileges',
+  summary: `Get value list privileges`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/lists/privileges</span></div>
@@ -12829,6 +13184,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const DELETE_LOGSTASH_PIPELINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_logstash_pipeline',
+  summary: `Delete a Logstash pipeline`,
   description: `Delete a centrally-managed Logstash pipeline.
 If your Elasticsearch cluster is protected with basic authentication, you must have either the \`logstash_admin\` built-in role or a customized Logstash writer role.
 `,
@@ -12857,6 +13213,7 @@ If your Elasticsearch cluster is protected with basic authentication, you must h
 };
 const GET_LOGSTASH_PIPELINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_logstash_pipeline',
+  summary: `Get a Logstash pipeline`,
   description: `Get information for a centrally-managed Logstash pipeline.
 To use this API, you must have either the \`logstash_admin\` built-in role or a customized Logstash reader role.
 `,
@@ -12885,6 +13242,7 @@ To use this API, you must have either the \`logstash_admin\` built-in role or a 
 };
 const PUT_LOGSTASH_PIPELINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_logstash_pipeline',
+  summary: `Create or update a Logstash pipeline`,
   description: `Create a centrally-managed Logstash pipeline or update a pipeline.
 To use this API, you must have either the \`logstash_admin\` built-in role or a customized Logstash writer role.
 `,
@@ -12913,6 +13271,7 @@ To use this API, you must have either the \`logstash_admin\` built-in role or a 
 };
 const GET_LOGSTASH_PIPELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_logstash_pipelines',
+  summary: `Get all Logstash pipelines`,
   description: `Get a list of all centrally-managed Logstash pipelines.
 
 To use this API, you must have either the \`logstash_admin\` built-in role or a customized Logstash reader role.
@@ -12946,6 +13305,7 @@ The \`username\` property appears in the response when security is enabled and d
 };
 const POST_MAINTENANCE_WINDOW_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_maintenance_window',
+  summary: `Create a maintenance window.`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/maintenance_window</span></div>
@@ -12978,6 +13338,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_MAINTENANCE_WINDOW_FIND_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_maintenance_window_find',
+  summary: `Search for a maintenance window.`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/maintenance_window/_find</span></div>
@@ -13010,6 +13371,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const DELETE_MAINTENANCE_WINDOW_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_maintenance_window_id',
+  summary: `Delete a maintenance window.`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/maintenance_window/{id}</span></div>
@@ -13042,6 +13404,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GET_MAINTENANCE_WINDOW_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_maintenance_window_id',
+  summary: `Get maintenance window details.`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/maintenance_window/{id}</span></div>
@@ -13074,6 +13437,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const PATCH_MAINTENANCE_WINDOW_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.patch_maintenance_window_id',
+  summary: `Update a maintenance window.`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb patch">patch</span>&nbsp;<span class="operation-path">/s/{space_id}/api/maintenance_window/{id}</span></div>
@@ -13106,6 +13470,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_MAINTENANCE_WINDOW_ID_ARCHIVE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_maintenance_window_id_archive',
+  summary: `Archive a maintenance window.`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/maintenance_window/{id}/_archive</span></div>
@@ -13138,6 +13503,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const POST_MAINTENANCE_WINDOW_ID_UNARCHIVE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_maintenance_window_id_unarchive',
+  summary: `Unarchive a maintenance window.`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/maintenance_window/{id}/_unarchive</span></div>
@@ -13170,6 +13536,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const MLSYNC_CONTRACT: InternalConnectorContract = {
   type: 'kibana.mlSync',
+  summary: `Sync saved objects in the default space`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/ml/saved_objects/sync</span></div>
@@ -13203,6 +13570,7 @@ Synchronizes Kibana saved objects for machine learning jobs and trained models i
 };
 const DELETENOTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteNote',
+  summary: `Delete a note`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/note</span></div>
@@ -13235,6 +13603,7 @@ Delete a note from a Timeline using the note ID.`,
 };
 const GETNOTES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetNotes',
+  summary: `Get notes`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/note</span></div>
@@ -13278,6 +13647,7 @@ Get all notes for a given document.`,
 };
 const PERSISTNOTEROUTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PersistNoteRoute',
+  summary: `Add or update a note`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb patch">patch</span>&nbsp;<span class="operation-path">/s/{space_id}/api/note</span></div>
@@ -13310,6 +13680,7 @@ Add a note to a Timeline or update an existing note.`,
 };
 const OBSERVABILITY_AI_ASSISTANT_CHAT_COMPLETE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.observability_ai_assistant_chat_complete',
+  summary: `Generate a chat completion`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/observability_ai_assistant/chat/complete</span></div>
@@ -13349,6 +13720,7 @@ This functionality is in technical preview and may be changed or removed in a fu
 };
 const OSQUERYFINDLIVEQUERIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryFindLiveQueries',
+  summary: `Get live queries`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/osquery/live_queries</span></div>
@@ -13381,6 +13753,7 @@ Get a list of all live queries.`,
 };
 const OSQUERYCREATELIVEQUERY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryCreateLiveQuery',
+  summary: `Create a live query`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/osquery/live_queries</span></div>
@@ -13413,6 +13786,7 @@ Create and run a live query.`,
 };
 const OSQUERYGETLIVEQUERYDETAILS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryGetLiveQueryDetails',
+  summary: `Get live query details`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/osquery/live_queries/{id}</span></div>
@@ -13445,6 +13819,7 @@ Get the details of a live query using the query ID.`,
 };
 const OSQUERYGETLIVEQUERYRESULTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryGetLiveQueryResults',
+  summary: `Get live query results`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/osquery/live_queries/{id}/results/{actionId}</span></div>
@@ -13477,6 +13852,7 @@ Get the results of a live query using the query action ID.`,
 };
 const OSQUERYFINDPACKS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryFindPacks',
+  summary: `Get packs`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/osquery/packs</span></div>
@@ -13509,6 +13885,7 @@ Get a list of all query packs.`,
 };
 const OSQUERYCREATEPACKS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryCreatePacks',
+  summary: `Create a pack`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/osquery/packs</span></div>
@@ -13541,6 +13918,7 @@ Create a query pack.`,
 };
 const OSQUERYDELETEPACKS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryDeletePacks',
+  summary: `Delete a pack`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/osquery/packs/{id}</span></div>
@@ -13573,6 +13951,7 @@ Delete a query pack using the pack ID.`,
 };
 const OSQUERYGETPACKSDETAILS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryGetPacksDetails',
+  summary: `Get pack details`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/osquery/packs/{id}</span></div>
@@ -13605,6 +13984,7 @@ Get the details of a query pack using the pack ID.`,
 };
 const OSQUERYUPDATEPACKS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryUpdatePacks',
+  summary: `Update a pack`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/osquery/packs/{id}</span></div>
@@ -13640,6 +14020,7 @@ Update a query pack using the pack ID.
 };
 const OSQUERYFINDSAVEDQUERIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryFindSavedQueries',
+  summary: `Get saved queries`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/osquery/saved_queries</span></div>
@@ -13672,6 +14053,7 @@ Get a list of all saved queries.`,
 };
 const OSQUERYCREATESAVEDQUERY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryCreateSavedQuery',
+  summary: `Create a saved query`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/osquery/saved_queries</span></div>
@@ -13704,6 +14086,7 @@ Create and run a saved query.`,
 };
 const OSQUERYDELETESAVEDQUERY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryDeleteSavedQuery',
+  summary: `Delete a saved query`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/osquery/saved_queries/{id}</span></div>
@@ -13736,6 +14119,7 @@ Delete a saved query using the query ID.`,
 };
 const OSQUERYGETSAVEDQUERYDETAILS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryGetSavedQueryDetails',
+  summary: `Get saved query details`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/osquery/saved_queries/{id}</span></div>
@@ -13768,6 +14152,7 @@ Get the details of a saved query using the query ID.`,
 };
 const OSQUERYUPDATESAVEDQUERY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.OsqueryUpdateSavedQuery',
+  summary: `Update a saved query`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/osquery/saved_queries/{id}</span></div>
@@ -13803,6 +14188,7 @@ Update a saved query using the query ID.
 };
 const PERSISTPINNEDEVENTROUTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PersistPinnedEventRoute',
+  summary: `Pin/unpin an event`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb patch">patch</span>&nbsp;<span class="operation-path">/s/{space_id}/api/pinned_event</span></div>
@@ -13835,6 +14221,7 @@ Pin/unpin an event to/from an existing Timeline.`,
 };
 const CLEANUPRISKENGINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CleanUpRiskEngine',
+  summary: `Cleanup the Risk Engine`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/risk_score/engine/dangerously_delete_data</span></div>
@@ -13867,6 +14254,7 @@ Cleaning up the the Risk Engine by removing the indices, mapping and transforms`
 };
 const CONFIGURERISKENGINESAVEDOBJECT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ConfigureRiskEngineSavedObject',
+  summary: `Configure the Risk Engine Saved Object`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb patch">patch</span>&nbsp;<span class="operation-path">/s/{space_id}/api/risk_score/engine/saved_object/configure</span></div>
@@ -13899,6 +14287,7 @@ Configuring the Risk Engine Saved Object`,
 };
 const SCHEDULERISKENGINENOW_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ScheduleRiskEngineNow',
+  summary: `Run the risk scoring engine`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/risk_score/engine/schedule_now</span></div>
@@ -13931,6 +14320,7 @@ Schedule the risk scoring engine to run as soon as possible. You can use this to
 };
 const BULKCREATESAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.bulkCreateSavedObjects',
+  summary: `Create saved objects`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/saved_objects/_bulk_create</span></div>
@@ -13961,6 +14351,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const BULKDELETESAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.bulkDeleteSavedObjects',
+  summary: `Delete saved objects`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/saved_objects/_bulk_delete</span></div>
@@ -13994,6 +14385,7 @@ WARNING: When you delete a saved object, it cannot be recovered.
 };
 const BULKGETSAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.bulkGetSavedObjects',
+  summary: `Get saved objects`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/saved_objects/_bulk_get</span></div>
@@ -14024,6 +14416,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const BULKRESOLVESAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.bulkResolveSavedObjects',
+  summary: `Resolve saved objects`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/saved_objects/_bulk_resolve</span></div>
@@ -14057,6 +14450,7 @@ Retrieve multiple Kibana saved objects by identifier using any legacy URL aliase
 };
 const BULKUPDATESAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.bulkUpdateSavedObjects',
+  summary: `Update saved objects`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/saved_objects/_bulk_update</span></div>
@@ -14089,6 +14483,7 @@ Update the attributes for multiple Kibana saved objects.`,
 };
 const POST_SAVED_OBJECTS_EXPORT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_saved_objects_export',
+  summary: `Export saved objects`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/saved_objects/_export</span></div>
@@ -14125,6 +14520,7 @@ NOTE: The \`savedObjects.maxImportExportSize\` configuration setting limits the 
 };
 const FINDSAVEDOBJECTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.findSavedObjects',
+  summary: `Search for saved objects`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/saved_objects/_find</span></div>
@@ -14172,6 +14568,7 @@ Retrieve a paginated set of Kibana saved objects.`,
 };
 const POST_SAVED_OBJECTS_IMPORT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_saved_objects_import',
+  summary: `Import saved objects`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/saved_objects/_import</span></div>
@@ -14206,6 +14603,7 @@ Exported saved objects are not backwards compatible and cannot be imported into 
 };
 const RESOLVEIMPORTERRORS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.resolveImportErrors',
+  summary: `Resolve import errors`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/saved_objects/_resolve_import_errors</span></div>
@@ -14243,6 +14641,7 @@ To resolve errors from the Import objects API, you can:
 };
 const CREATESAVEDOBJECT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createSavedObject',
+  summary: `Create a saved object`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/saved_objects/{type}</span></div>
@@ -14275,6 +14674,7 @@ Create a Kibana saved object with a randomly generated identifier.`,
 };
 const GETSAVEDOBJECT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getSavedObject',
+  summary: `Get a saved object`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/saved_objects/{type}/{id}</span></div>
@@ -14307,6 +14707,7 @@ Retrieve a single Kibana saved object by identifier.`,
 };
 const CREATESAVEDOBJECTID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createSavedObjectId',
+  summary: `Create a saved object`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/saved_objects/{type}/{id}</span></div>
@@ -14339,6 +14740,7 @@ Create a Kibana saved object and specify its identifier instead of using a rando
 };
 const UPDATESAVEDOBJECT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateSavedObject',
+  summary: `Update a saved object`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/saved_objects/{type}/{id}</span></div>
@@ -14371,6 +14773,7 @@ Update the attributes for Kibana saved objects.`,
 };
 const RESOLVESAVEDOBJECT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.resolveSavedObject',
+  summary: `Resolve a saved object`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/saved_objects/resolve/{type}/{id}</span></div>
@@ -14404,6 +14807,7 @@ Retrieve a single Kibana saved object by identifier using any legacy URL alias i
 };
 const PERFORMANONYMIZATIONFIELDSBULKACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PerformAnonymizationFieldsBulkAction',
+  summary: `Apply a bulk action to anonymization fields`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_ai_assistant/anonymization_fields/_bulk_action</span></div>
@@ -14436,6 +14840,7 @@ Apply a bulk action to multiple anonymization fields. The bulk action is applied
 };
 const FINDANONYMIZATIONFIELDS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindAnonymizationFields',
+  summary: `Get anonymization fields`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_ai_assistant/anonymization_fields/_find</span></div>
@@ -14468,6 +14873,7 @@ Get a list of all anonymization fields.`,
 };
 const CHATCOMPLETE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ChatComplete',
+  summary: `Create a model response`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_ai_assistant/chat/complete</span></div>
@@ -14500,6 +14906,7 @@ Create a model response for the given chat conversation.`,
 };
 const DELETEALLCONVERSATIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteAllConversations',
+  summary: `Delete conversations`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_ai_assistant/current_user/conversations</span></div>
@@ -14532,6 +14939,7 @@ This endpoint allows users to permanently delete all conversations.`,
 };
 const CREATECONVERSATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateConversation',
+  summary: `Create a conversation`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_ai_assistant/current_user/conversations</span></div>
@@ -14564,6 +14972,7 @@ Create a new Security AI Assistant conversation. This endpoint allows the user t
 };
 const FINDCONVERSATIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindConversations',
+  summary: `Get conversations`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_ai_assistant/current_user/conversations/_find</span></div>
@@ -14596,6 +15005,7 @@ Get a list of all conversations for the current user. This endpoint allows users
 };
 const DELETECONVERSATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteConversation',
+  summary: `Delete a conversation`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_ai_assistant/current_user/conversations/{id}</span></div>
@@ -14628,6 +15038,7 @@ Delete an existing conversation using the conversation ID. This endpoint allows 
 };
 const READCONVERSATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadConversation',
+  summary: `Get a conversation`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_ai_assistant/current_user/conversations/{id}</span></div>
@@ -14660,6 +15071,7 @@ Get the details of an existing conversation using the conversation ID. This allo
 };
 const UPDATECONVERSATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateConversation',
+  summary: `Update a conversation`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_ai_assistant/current_user/conversations/{id}</span></div>
@@ -14692,6 +15104,7 @@ Update an existing conversation using the conversation ID. This endpoint allows 
 };
 const GETKNOWLEDGEBASE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetKnowledgeBase',
+  summary: `Read a KnowledgeBase`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_ai_assistant/knowledge_base</span></div>
@@ -14724,6 +15137,7 @@ Read a single KB`,
 };
 const POSTKNOWLEDGEBASE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PostKnowledgeBase',
+  summary: `Create a KnowledgeBase`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_ai_assistant/knowledge_base</span></div>
@@ -14754,6 +15168,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const READKNOWLEDGEBASE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadKnowledgeBase',
+  summary: `Read a KnowledgeBase for a resource`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_ai_assistant/knowledge_base/{resource}</span></div>
@@ -14786,6 +15201,7 @@ Read a knowledge base with a specific resource identifier.`,
 };
 const CREATEKNOWLEDGEBASE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateKnowledgeBase',
+  summary: `Create a KnowledgeBase for a resource`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_ai_assistant/knowledge_base/{resource}</span></div>
@@ -14818,6 +15234,7 @@ Create a knowledge base with a specific resource identifier.`,
 };
 const CREATEKNOWLEDGEBASEENTRY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateKnowledgeBaseEntry',
+  summary: `Create a Knowledge Base Entry`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_ai_assistant/knowledge_base/entries</span></div>
@@ -14850,6 +15267,7 @@ Create a Knowledge Base Entry`,
 };
 const PERFORMKNOWLEDGEBASEENTRYBULKACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PerformKnowledgeBaseEntryBulkAction',
+  summary: `Applies a bulk action to multiple Knowledge Base Entries`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_ai_assistant/knowledge_base/entries/_bulk_action</span></div>
@@ -14882,6 +15300,7 @@ The bulk action is applied to all Knowledge Base Entries that match the filter o
 };
 const FINDKNOWLEDGEBASEENTRIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindKnowledgeBaseEntries',
+  summary: `Finds Knowledge Base Entries that match the given query.`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_ai_assistant/knowledge_base/entries/_find</span></div>
@@ -14914,6 +15333,7 @@ Finds Knowledge Base Entries that match the given query.`,
 };
 const DELETEKNOWLEDGEBASEENTRY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteKnowledgeBaseEntry',
+  summary: `Deletes a single Knowledge Base Entry using the \`id\` field`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_ai_assistant/knowledge_base/entries/{id}</span></div>
@@ -14946,6 +15366,7 @@ Delete a Knowledge Base Entry by its unique \`id\`.`,
 };
 const READKNOWLEDGEBASEENTRY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ReadKnowledgeBaseEntry',
+  summary: `Read a Knowledge Base Entry`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_ai_assistant/knowledge_base/entries/{id}</span></div>
@@ -14978,6 +15399,7 @@ Retrieve a Knowledge Base Entry by its unique \`id\`.`,
 };
 const UPDATEKNOWLEDGEBASEENTRY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.UpdateKnowledgeBaseEntry',
+  summary: `Update a Knowledge Base Entry`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_ai_assistant/knowledge_base/entries/{id}</span></div>
@@ -15010,6 +15432,7 @@ Update an existing Knowledge Base Entry by its unique \`id\`.`,
 };
 const PERFORMPROMPTSBULKACTION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PerformPromptsBulkAction',
+  summary: `Apply a bulk action to prompts`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_ai_assistant/prompts/_bulk_action</span></div>
@@ -15042,6 +15465,7 @@ Apply a bulk action to multiple prompts. The bulk action is applied to all promp
 };
 const FINDPROMPTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.FindPrompts',
+  summary: `Get prompts`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/security_ai_assistant/prompts/_find</span></div>
@@ -15074,6 +15498,7 @@ Get a list of all prompts based on optional filters, sorting, and pagination.`,
 };
 const GET_SECURITY_ROLE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_security_role',
+  summary: `Get all roles`,
   description: ``,
   methods: ['get'],
   patterns: ['/api/security/role'],
@@ -15100,6 +15525,7 @@ const GET_SECURITY_ROLE_CONTRACT: InternalConnectorContract = {
 };
 const POST_SECURITY_ROLE_QUERY_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_security_role_query',
+  summary: `Query roles`,
   description: ``,
   methods: ['post'],
   patterns: ['/api/security/role/_query'],
@@ -15126,6 +15552,7 @@ const POST_SECURITY_ROLE_QUERY_CONTRACT: InternalConnectorContract = {
 };
 const DELETE_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_security_role_name',
+  summary: `Delete a role`,
   description: ``,
   methods: ['delete'],
   patterns: ['/api/security/role/{name}'],
@@ -15152,6 +15579,7 @@ const DELETE_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
 };
 const GET_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_security_role_name',
+  summary: `Get a role`,
   description: ``,
   methods: ['get'],
   patterns: ['/api/security/role/{name}'],
@@ -15178,6 +15606,7 @@ const GET_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
 };
 const PUT_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_security_role_name',
+  summary: `Create or update a role`,
   description: `Create a new Kibana role or update the attributes of an existing role. Kibana roles are stored in the Elasticsearch native realm.`,
   methods: ['put'],
   patterns: ['/api/security/role/{name}'],
@@ -15204,6 +15633,7 @@ const PUT_SECURITY_ROLE_NAME_CONTRACT: InternalConnectorContract = {
 };
 const POST_SECURITY_ROLES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_security_roles',
+  summary: `Create or update roles`,
   description: ``,
   methods: ['post'],
   patterns: ['/api/security/roles'],
@@ -15230,6 +15660,7 @@ const POST_SECURITY_ROLES_CONTRACT: InternalConnectorContract = {
 };
 const POST_SECURITY_SESSION_INVALIDATE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_security_session_invalidate',
+  summary: `Invalidate user sessions`,
   description: `Invalidate user sessions that match a query. To use this API, you must be a superuser.
 `,
   methods: ['post'],
@@ -15257,6 +15688,7 @@ const POST_SECURITY_SESSION_INVALIDATE_CONTRACT: InternalConnectorContract = {
 };
 const POST_URL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_url',
+  summary: `Create a short URL`,
   description: `Kibana URLs may be long and cumbersome, short URLs are much easier to remember and share.
 Short URLs are created by specifying the locator ID and locator parameters. When a short URL is resolved, the locator ID and locator parameters are used to redirect user to the right Kibana page.
 `,
@@ -15285,6 +15717,7 @@ Short URLs are created by specifying the locator ID and locator parameters. When
 };
 const RESOLVE_URL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.resolve_url',
+  summary: `Resolve a short URL`,
   description: `Resolve a Kibana short URL by its slug.
 `,
   methods: ['get'],
@@ -15312,6 +15745,7 @@ const RESOLVE_URL_CONTRACT: InternalConnectorContract = {
 };
 const DELETE_URL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_url',
+  summary: `Delete a short URL`,
   description: `Delete a Kibana short URL.
 `,
   methods: ['delete'],
@@ -15339,6 +15773,7 @@ const DELETE_URL_CONTRACT: InternalConnectorContract = {
 };
 const GET_URL_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_url',
+  summary: `Get a short URL`,
   description: `Get a single Kibana short URL.
 `,
   methods: ['get'],
@@ -15366,6 +15801,7 @@ const GET_URL_CONTRACT: InternalConnectorContract = {
 };
 const POST_SPACES_COPY_SAVED_OBJECTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_spaces_copy_saved_objects',
+  summary: `Copy saved objects between spaces`,
   description: `It also allows you to automatically copy related objects, so when you copy a dashboard, this can automatically copy over the associated visualizations, data views, and saved Discover sessions, as required. You can request to overwrite any objects that already exist in the target space if they share an identifier or you can use the resolve copy saved objects conflicts API to do this on a per-object basis.<br/><br/>[Required authorization] Route required privileges: copySavedObjectsToSpaces.`,
   methods: ['post'],
   patterns: ['/api/spaces/_copy_saved_objects'],
@@ -15392,6 +15828,7 @@ const POST_SPACES_COPY_SAVED_OBJECTS_CONTRACT: InternalConnectorContract = {
 };
 const POST_SPACES_DISABLE_LEGACY_URL_ALIASES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_spaces_disable_legacy_url_aliases',
+  summary: `Disable legacy URL aliases`,
   description: ``,
   methods: ['post'],
   patterns: ['/api/spaces/_disable_legacy_url_aliases'],
@@ -15418,6 +15855,7 @@ const POST_SPACES_DISABLE_LEGACY_URL_ALIASES_CONTRACT: InternalConnectorContract
 };
 const POST_SPACES_GET_SHAREABLE_REFERENCES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_spaces_get_shareable_references',
+  summary: `Get shareable references`,
   description: `Collect references and space contexts for saved objects.`,
   methods: ['post'],
   patterns: ['/api/spaces/_get_shareable_references'],
@@ -15444,6 +15882,7 @@ const POST_SPACES_GET_SHAREABLE_REFERENCES_CONTRACT: InternalConnectorContract =
 };
 const POST_SPACES_RESOLVE_COPY_SAVED_OBJECTS_ERRORS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_spaces_resolve_copy_saved_objects_errors',
+  summary: `Resolve conflicts copying saved objects`,
   description: `Overwrite saved objects that are returned as errors from the copy saved objects to space API.<br/><br/>[Required authorization] Route required privileges: copySavedObjectsToSpaces.`,
   methods: ['post'],
   patterns: ['/api/spaces/_resolve_copy_saved_objects_errors'],
@@ -15470,6 +15909,7 @@ const POST_SPACES_RESOLVE_COPY_SAVED_OBJECTS_ERRORS_CONTRACT: InternalConnectorC
 };
 const POST_SPACES_UPDATE_OBJECTS_SPACES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_spaces_update_objects_spaces',
+  summary: `Update saved objects in spaces`,
   description: `Update one or more saved objects to add or remove them from some spaces.`,
   methods: ['post'],
   patterns: ['/api/spaces/_update_objects_spaces'],
@@ -15496,6 +15936,7 @@ const POST_SPACES_UPDATE_OBJECTS_SPACES_CONTRACT: InternalConnectorContract = {
 };
 const GET_SPACES_SPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_spaces_space',
+  summary: `Get all spaces`,
   description: ``,
   methods: ['get'],
   patterns: ['/api/spaces/space'],
@@ -15522,6 +15963,7 @@ const GET_SPACES_SPACE_CONTRACT: InternalConnectorContract = {
 };
 const POST_SPACES_SPACE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_spaces_space',
+  summary: `Create a space`,
   description: ``,
   methods: ['post'],
   patterns: ['/api/spaces/space'],
@@ -15548,6 +15990,7 @@ const POST_SPACES_SPACE_CONTRACT: InternalConnectorContract = {
 };
 const DELETE_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_spaces_space_id',
+  summary: `Delete a space`,
   description: `When you delete a space, all saved objects that belong to the space are automatically deleted, which is permanent and cannot be undone.`,
   methods: ['delete'],
   patterns: ['/api/spaces/space/{id}'],
@@ -15574,6 +16017,7 @@ const DELETE_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
 };
 const GET_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_spaces_space_id',
+  summary: `Get a space`,
   description: ``,
   methods: ['get'],
   patterns: ['/api/spaces/space/{id}'],
@@ -15600,6 +16044,7 @@ const GET_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
 };
 const PUT_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_spaces_space_id',
+  summary: `Update a space`,
   description: ``,
   methods: ['put'],
   patterns: ['/api/spaces/space/{id}'],
@@ -15626,6 +16071,7 @@ const PUT_SPACES_SPACE_ID_CONTRACT: InternalConnectorContract = {
 };
 const GET_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_status',
+  summary: `Get Kibana's current status`,
   description: ``,
   methods: ['get'],
   patterns: ['/api/status'],
@@ -15652,6 +16098,7 @@ const GET_STATUS_CONTRACT: InternalConnectorContract = {
 };
 const GET_STREAMS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_streams',
+  summary: `Get stream list`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams</span></div>
@@ -15684,6 +16131,7 @@ Fetches list of all streams<br/><br/>[Required authorization] Route required pri
 };
 const POST_STREAMS_DISABLE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_disable',
+  summary: `Disable streams`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/_disable</span></div>
@@ -15716,6 +16164,7 @@ Disables wired streams and deletes all existing stream definitions. The data of 
 };
 const POST_STREAMS_ENABLE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_enable',
+  summary: `Enable streams`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/_enable</span></div>
@@ -15748,6 +16197,7 @@ Enables wired streams<br/><br/>[Required authorization] Route required privilege
 };
 const POST_STREAMS_RESYNC_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_resync',
+  summary: `Resync streams`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/_resync</span></div>
@@ -15780,6 +16230,7 @@ Resyncs all streams, making sure that Elasticsearch assets are up to date<br/><b
 };
 const DELETE_STREAMS_NAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_streams_name',
+  summary: `Delete a stream`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}</span></div>
@@ -15812,6 +16263,7 @@ Deletes a stream definition and the underlying data stream<br/><br/>[Required au
 };
 const GET_STREAMS_NAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_streams_name',
+  summary: `Get a stream`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}</span></div>
@@ -15844,6 +16296,7 @@ Fetches a stream definition and associated dashboards<br/><br/>[Required authori
 };
 const PUT_STREAMS_NAME_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_streams_name',
+  summary: `Create or update a stream`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}</span></div>
@@ -15876,6 +16329,7 @@ Creates or updates a stream definition. Classic streams can not be created throu
 };
 const POST_STREAMS_NAME_FORK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_name_fork',
+  summary: `Fork a stream`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/_fork</span></div>
@@ -15908,6 +16362,7 @@ Forks a wired stream and creates a child stream<br/><br/>[Required authorization
 };
 const GET_STREAMS_NAME_GROUP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_streams_name_group',
+  summary: `Get group stream settings`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/_group</span></div>
@@ -15940,6 +16395,7 @@ Fetches the group settings of a group stream definition<br/><br/>[Required autho
 };
 const PUT_STREAMS_NAME_GROUP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_streams_name_group',
+  summary: `Upsert group stream settings`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/_group</span></div>
@@ -15972,6 +16428,7 @@ Upserts the group settings of a group stream definition<br/><br/>[Required autho
 };
 const GET_STREAMS_NAME_INGEST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_streams_name_ingest',
+  summary: `Get ingest stream settings`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/_ingest</span></div>
@@ -16004,6 +16461,7 @@ Fetches the ingest settings of an ingest stream definition<br/><br/>[Required au
 };
 const PUT_STREAMS_NAME_INGEST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_streams_name_ingest',
+  summary: `Update ingest stream settings`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/_ingest</span></div>
@@ -16036,6 +16494,7 @@ Upserts the ingest settings of an ingest stream definition<br/><br/>[Required au
 };
 const POST_STREAMS_NAME_CONTENT_EXPORT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_name_content_export',
+  summary: `Export stream content`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/content/export</span></div>
@@ -16068,6 +16527,7 @@ Exports the content associated to a stream.<br/><br/>[Required authorization] Ro
 };
 const POST_STREAMS_NAME_CONTENT_IMPORT_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_name_content_import',
+  summary: `Import content into a stream`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/content/import</span></div>
@@ -16100,6 +16560,7 @@ Links content objects to a stream.<br/><br/>[Required authorization] Route requi
 };
 const GET_STREAMS_NAME_DASHBOARDS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_streams_name_dashboards',
+  summary: `Get stream dashboards`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/dashboards</span></div>
@@ -16132,6 +16593,7 @@ Fetches all dashboards linked to a stream that are visible to the current user i
 };
 const POST_STREAMS_NAME_DASHBOARDS_BULK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_name_dashboards_bulk',
+  summary: `Bulk update dashboards`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/dashboards/_bulk</span></div>
@@ -16164,6 +16626,7 @@ Bulk update dashboards linked to a stream. Can link new dashboards and delete ex
 };
 const DELETE_STREAMS_NAME_DASHBOARDS_DASHBOARDID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_streams_name_dashboards_dashboardid',
+  summary: `Unlink a dashboard from a stream`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/dashboards/{dashboardId}</span></div>
@@ -16196,6 +16659,7 @@ Unlinks a dashboard from a stream. Noop if the dashboard is not linked to the st
 };
 const PUT_STREAMS_NAME_DASHBOARDS_DASHBOARDID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_streams_name_dashboards_dashboardid',
+  summary: `Link a dashboard to a stream`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/dashboards/{dashboardId}</span></div>
@@ -16228,6 +16692,7 @@ Links a dashboard to a stream. Noop if the dashboard is already linked to the st
 };
 const GET_STREAMS_NAME_QUERIES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_streams_name_queries',
+  summary: `Get stream queries`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/queries</span></div>
@@ -16260,6 +16725,7 @@ Fetches all queries linked to a stream that are visible to the current user in t
 };
 const POST_STREAMS_NAME_QUERIES_BULK_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_name_queries_bulk',
+  summary: `Bulk update queries`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/queries/_bulk</span></div>
@@ -16292,6 +16758,7 @@ Bulk update queries of a stream. Can add new queries and delete existing ones.<b
 };
 const DELETE_STREAMS_NAME_QUERIES_QUERYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_streams_name_queries_queryid',
+  summary: `Remove a query from a stream`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/queries/{queryId}</span></div>
@@ -16324,6 +16791,7 @@ Remove a query from a stream. Noop if the query is not found on the stream.<br/>
 };
 const PUT_STREAMS_NAME_QUERIES_QUERYID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_streams_name_queries_queryid',
+  summary: `Upsert a query to a stream`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/queries/{queryId}</span></div>
@@ -16356,6 +16824,7 @@ Adds a query to a stream. Noop if the query is already present on the stream.<br
 };
 const GET_STREAMS_NAME_RULES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_streams_name_rules',
+  summary: `Get stream rules`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/rules</span></div>
@@ -16388,6 +16857,7 @@ Fetches all rules linked to a stream that are visible to the current user in the
 };
 const DELETE_STREAMS_NAME_RULES_RULEID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_streams_name_rules_ruleid',
+  summary: `Unlink a rule from a stream`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/rules/{ruleId}</span></div>
@@ -16420,6 +16890,7 @@ Unlinks a rule from a stream. Noop if the rule is not linked to the stream.<br/>
 };
 const PUT_STREAMS_NAME_RULES_RULEID_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_streams_name_rules_ruleid',
+  summary: `Link a rule to a stream`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/rules/{ruleId}</span></div>
@@ -16452,6 +16923,7 @@ Links a rule to a stream. Noop if the rule is already linked to the stream.<br/>
 };
 const GET_STREAMS_NAME_SIGNIFICANT_EVENTS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_streams_name_significant_events',
+  summary: `Read the significant events`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/significant_events</span></div>
@@ -16484,6 +16956,7 @@ Read the significant events<br/><br/>[Required authorization] Route required pri
 };
 const POST_STREAMS_NAME_SIGNIFICANT_EVENTS_GENERATE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_name_significant_events_generate',
+  summary: `Generate significant events`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/significant_events/_generate</span></div>
@@ -16516,6 +16989,7 @@ Generate significant events queries based on the stream data<br/><br/>[Required 
 };
 const POST_STREAMS_NAME_SIGNIFICANT_EVENTS_PREVIEW_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_streams_name_significant_events_preview',
+  summary: `Preview significant events`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/streams/{name}/significant_events/_preview</span></div>
@@ -16548,6 +17022,7 @@ Preview significant event results based on a given query<br/><br/>[Required auth
 };
 const POST_SYNTHETICS_MONITOR_TEST_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_synthetics_monitor_test',
+  summary: `Trigger an on-demand test run for a monitor`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/monitor/test/{monitorId}</span></div>
@@ -16581,6 +17056,7 @@ Trigger an immediate test execution for the specified monitor. The response incl
 };
 const GET_SYNTHETIC_MONITORS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_synthetic_monitors',
+  summary: `Get monitors`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/monitors</span></div>
@@ -16629,6 +17105,7 @@ You must have \`read\` privileges for the Synthetics feature in the Observabilit
 };
 const POST_SYNTHETIC_MONITORS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_synthetic_monitors',
+  summary: `Create a monitor`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/monitors</span></div>
@@ -16663,6 +17140,7 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
 };
 const DELETE_SYNTHETIC_MONITORS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_synthetic_monitors',
+  summary: `Delete monitors`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/monitors/_bulk_delete</span></div>
@@ -16696,6 +17174,7 @@ Delete multiple monitors by sending a list of config IDs.
 };
 const DELETE_SYNTHETIC_MONITOR_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_synthetic_monitor',
+  summary: `Delete a monitor`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/monitors/{id}</span></div>
@@ -16730,6 +17209,7 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
 };
 const GET_SYNTHETIC_MONITOR_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_synthetic_monitor',
+  summary: `Get a monitor`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/monitors/{id}</span></div>
@@ -16760,6 +17240,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const PUT_SYNTHETIC_MONITOR_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_synthetic_monitor',
+  summary: `Update a monitor`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/monitors/{id}</span></div>
@@ -16795,6 +17276,7 @@ You can also partially update a monitor. This will only update the fields that a
 };
 const GET_PARAMETERS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_parameters',
+  summary: `Get parameters`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/params</span></div>
@@ -16828,6 +17310,7 @@ Get a list of all parameters. You must have \`read\` privileges for the Syntheti
 };
 const POST_PARAMETERS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_parameters',
+  summary: `Add parameters`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/params</span></div>
@@ -16862,6 +17345,7 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
 };
 const DELETE_PARAMETERS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_parameters',
+  summary: `Delete parameters`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/params/_bulk_delete</span></div>
@@ -16896,6 +17380,7 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
 };
 const DELETE_PARAMETER_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_parameter',
+  summary: `Delete a parameter`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/params/{id}</span></div>
@@ -16930,6 +17415,7 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
 };
 const GET_PARAMETER_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_parameter',
+  summary: `Get a parameter`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/params/{id}</span></div>
@@ -16964,6 +17450,7 @@ You must have \`read\` privileges for the Synthetics feature in the Observabilit
 };
 const PUT_PARAMETER_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_parameter',
+  summary: `Update a parameter`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/params/{id}</span></div>
@@ -16998,6 +17485,7 @@ You must have \`all\` privileges for the Synthetics feature in the Observability
 };
 const GET_PRIVATE_LOCATIONS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_private_locations',
+  summary: `Get private locations`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/private_locations</span></div>
@@ -17032,6 +17520,7 @@ You must have \`read\` privileges for the Synthetics and Uptime feature in the O
 };
 const POST_PRIVATE_LOCATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.post_private_location',
+  summary: `Create a private location`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/private_locations</span></div>
@@ -17064,6 +17553,7 @@ You must have \`all\` privileges for the Synthetics and Uptime feature in the Ob
 };
 const DELETE_PRIVATE_LOCATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.delete_private_location',
+  summary: `Delete a private location`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/private_locations/{id}</span></div>
@@ -17099,6 +17589,7 @@ A location cannot be deleted if it has associated monitors in use. You must dele
 };
 const GET_PRIVATE_LOCATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_private_location',
+  summary: `Get a private location`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/private_locations/{id}</span></div>
@@ -17132,6 +17623,7 @@ You must have \`read\` privileges for the Synthetics and Uptime feature in the O
 };
 const PUT_PRIVATE_LOCATION_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_private_location',
+  summary: `Update a private location`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/synthetics/private_locations/{id}</span></div>
@@ -17167,6 +17659,7 @@ When a private location's label is updated, all monitors using this location wil
 };
 const TASK_MANAGER_HEALTH_CONTRACT: InternalConnectorContract = {
   type: 'kibana.task_manager_health',
+  summary: `Get the task manager health`,
   description: `Get the health status of the Kibana task manager.
 `,
   methods: ['get'],
@@ -17194,6 +17687,7 @@ const TASK_MANAGER_HEALTH_CONTRACT: InternalConnectorContract = {
 };
 const DELETETIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.DeleteTimelines',
+  summary: `Delete Timelines or Timeline templates`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb delete">delete</span>&nbsp;<span class="operation-path">/s/{space_id}/api/timeline</span></div>
@@ -17226,6 +17720,7 @@ Delete one or more Timelines or Timeline templates.`,
 };
 const GETTIMELINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetTimeline',
+  summary: `Get Timeline or Timeline template details`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/timeline</span></div>
@@ -17258,6 +17753,7 @@ Get the details of an existing saved Timeline or Timeline template.`,
 };
 const PATCHTIMELINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PatchTimeline',
+  summary: `Update a Timeline`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb patch">patch</span>&nbsp;<span class="operation-path">/s/{space_id}/api/timeline</span></div>
@@ -17290,6 +17786,7 @@ Update an existing Timeline. You can update the title, description, date range, 
 };
 const CREATETIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CreateTimelines',
+  summary: `Create a Timeline or Timeline template`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/timeline</span></div>
@@ -17322,6 +17819,7 @@ Create a new Timeline or Timeline template.`,
 };
 const COPYTIMELINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CopyTimeline',
+  summary: `Copies timeline or timeline template`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/timeline/_copy</span></div>
@@ -17355,6 +17853,7 @@ Copies and returns a timeline or timeline template.
 };
 const GETDRAFTTIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetDraftTimelines',
+  summary: `Get draft Timeline or Timeline template details`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/timeline/_draft</span></div>
@@ -17387,6 +17886,7 @@ Get the details of the draft Timeline  or Timeline template for the current user
 };
 const CLEANDRAFTTIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.CleanDraftTimelines',
+  summary: `Create a clean draft Timeline or Timeline template`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/timeline/_draft</span></div>
@@ -17422,6 +17922,7 @@ Create a clean draft Timeline or Timeline template for the current user.
 };
 const EXPORTTIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ExportTimelines',
+  summary: `Export Timelines`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/timeline/_export</span></div>
@@ -17454,6 +17955,7 @@ Export Timelines as an NDJSON file.`,
 };
 const PERSISTFAVORITEROUTE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.PersistFavoriteRoute',
+  summary: `Favorite a Timeline or Timeline template`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb patch">patch</span>&nbsp;<span class="operation-path">/s/{space_id}/api/timeline/_favorite</span></div>
@@ -17486,6 +17988,7 @@ Favorite a Timeline or Timeline template for the current user.`,
 };
 const IMPORTTIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ImportTimelines',
+  summary: `Import Timelines`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/timeline/_import</span></div>
@@ -17518,6 +18021,7 @@ Import Timelines.`,
 };
 const INSTALLPREPACKEDTIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.InstallPrepackedTimelines',
+  summary: `Install prepackaged Timelines`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb post">post</span>&nbsp;<span class="operation-path">/s/{space_id}/api/timeline/_prepackaged</span></div>
@@ -17550,6 +18054,7 @@ Install or update prepackaged Timelines.`,
 };
 const RESOLVETIMELINE_CONTRACT: InternalConnectorContract = {
   type: 'kibana.ResolveTimeline',
+  summary: `Get an existing saved Timeline or Timeline template`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/timeline/resolve</span></div>
@@ -17580,6 +18085,7 @@ Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for m
 };
 const GETTIMELINES_CONTRACT: InternalConnectorContract = {
   type: 'kibana.GetTimelines',
+  summary: `Get Timelines or Timeline templates`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/timelines</span></div>
@@ -17621,6 +18127,7 @@ Get a list of all saved Timelines or Timeline templates.`,
 };
 const GET_UPGRADE_STATUS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_upgrade_status',
+  summary: `Get the upgrade readiness status`,
   description: `Check the status of your cluster.`,
   methods: ['get'],
   patterns: ['/api/upgrade_assistant/status'],
@@ -17647,6 +18154,7 @@ const GET_UPGRADE_STATUS_CONTRACT: InternalConnectorContract = {
 };
 const GET_UPTIME_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.get_uptime_settings',
+  summary: `Get uptime settings`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb get">get</span>&nbsp;<span class="operation-path">/s/{space_id}/api/uptime/settings</span></div>
@@ -17680,6 +18188,7 @@ You must have \`read\` privileges for the uptime feature in the Observability se
 };
 const PUT_UPTIME_SETTINGS_CONTRACT: InternalConnectorContract = {
   type: 'kibana.put_uptime_settings',
+  summary: `Update uptime settings`,
   description: `**Spaces method and path for this operation:**
 
 <div><span class="operation-verb put">put</span>&nbsp;<span class="operation-path">/s/{space_id}/api/uptime/settings</span></div>
@@ -17713,6 +18222,7 @@ Update uptime setting attributes like \`heartbeatIndices\`, \`certExpirationThre
 };
 const FINDSLOSOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.findSlosOp',
+  summary: `Get a paginated list of SLOs`,
   description: `You must have the \`read\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
   methods: ['get'],
@@ -17749,6 +18259,7 @@ const FINDSLOSOP_CONTRACT: InternalConnectorContract = {
 };
 const CREATESLOOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.createSloOp',
+  summary: `Create an SLO`,
   description: `You must have \`all\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
   methods: ['post'],
@@ -17776,6 +18287,7 @@ const CREATESLOOP_CONTRACT: InternalConnectorContract = {
 };
 const BULKDELETEOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.bulkDeleteOp',
+  summary: `Bulk delete SLO definitions and their associated summary and rollup data.`,
   description: `Bulk delete SLO definitions and their associated summary and rollup data.  This endpoint initiates a bulk deletion operation for SLOs, which may take some time to complete.  The status of the operation can be checked using the \`GET /api/slo/_bulk_delete/{taskId}\` endpoint.
 `,
   methods: ['post'],
@@ -17803,6 +18315,7 @@ const BULKDELETEOP_CONTRACT: InternalConnectorContract = {
 };
 const BULKDELETESTATUSOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.bulkDeleteStatusOp',
+  summary: `Retrieve the status of the bulk deletion`,
   description: `Retrieve the status of the bulk deletion operation for SLOs.  This endpoint returns the status of the bulk deletion operation, including whether it is completed and the results of the operation.
 `,
   methods: ['get'],
@@ -17830,6 +18343,7 @@ const BULKDELETESTATUSOP_CONTRACT: InternalConnectorContract = {
 };
 const DELETEROLLUPDATAOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteRollupDataOp',
+  summary: `Batch delete rollup and summary data`,
   description: `The deletion occurs for the specified list of \`sloId\`. You must have \`all\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
   methods: ['post'],
@@ -17857,6 +18371,7 @@ const DELETEROLLUPDATAOP_CONTRACT: InternalConnectorContract = {
 };
 const DELETESLOINSTANCESOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteSloInstancesOp',
+  summary: `Batch delete rollup and summary data`,
   description: `The deletion occurs for the specified list of \`sloId\` and \`instanceId\`. You must have \`all\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
   methods: ['post'],
@@ -17884,6 +18399,7 @@ const DELETESLOINSTANCESOP_CONTRACT: InternalConnectorContract = {
 };
 const DELETESLOOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.deleteSloOp',
+  summary: `Delete an SLO`,
   description: `You must have the \`write\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
   methods: ['delete'],
@@ -17911,6 +18427,7 @@ const DELETESLOOP_CONTRACT: InternalConnectorContract = {
 };
 const GETSLOOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getSloOp',
+  summary: `Get an SLO`,
   description: `You must have the \`read\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
   methods: ['get'],
@@ -17938,6 +18455,7 @@ const GETSLOOP_CONTRACT: InternalConnectorContract = {
 };
 const UPDATESLOOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.updateSloOp',
+  summary: `Update an SLO`,
   description: `You must have the \`write\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
   methods: ['put'],
@@ -17965,6 +18483,7 @@ const UPDATESLOOP_CONTRACT: InternalConnectorContract = {
 };
 const RESETSLOOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.resetSloOp',
+  summary: `Reset an SLO`,
   description: `You must have the \`write\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
   methods: ['post'],
@@ -17992,6 +18511,7 @@ const RESETSLOOP_CONTRACT: InternalConnectorContract = {
 };
 const DISABLESLOOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.disableSloOp',
+  summary: `Disable an SLO`,
   description: `You must have the \`write\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
   methods: ['post'],
@@ -18019,6 +18539,7 @@ const DISABLESLOOP_CONTRACT: InternalConnectorContract = {
 };
 const ENABLESLOOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.enableSloOp',
+  summary: `Enable an SLO`,
   description: `You must have the \`write\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
   methods: ['post'],
@@ -18046,6 +18567,7 @@ const ENABLESLOOP_CONTRACT: InternalConnectorContract = {
 };
 const GETDEFINITIONSOP_CONTRACT: InternalConnectorContract = {
   type: 'kibana.getDefinitionsOp',
+  summary: `Get the SLO definitions`,
   description: `You must have the \`read\` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.
 `,
   methods: ['get'],
