@@ -46,24 +46,6 @@ spec:
           cronline: 0 5 * * * America/New_York
           env:
             KBN_FIPS_VERSION: '140-2'
-        '140-3 Daily build (main)':
-          message: 140-3 Daily build
-          branch: main
-          cronline: 0 5 * * * America/New_York
-          env:
-            KBN_FIPS_VERSION: '140-3'
-        '140-3 Daily build (9.1)':
-          message: 140-3 Daily build
-          branch: '9.1'
-          cronline: 0 5 * * * America/New_York
-          env:
-            KBN_FIPS_VERSION: '140-3'
-        '140-3 Daily build (8.19)':
-          message: 140-3 Daily build
-          branch: '8.19'
-          cronline: 0 5 * * * America/New_York
-          env:
-            KBN_FIPS_VERSION: '140-3'
       teams:
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ
