@@ -25,12 +25,12 @@ describe('Type checking with TypeScript compiler', () => {
 
     // The expected errors inside the tests are in the following lines
     const errorLines = errorsByLine.map((error) => error.lineNumber);
-    expect(errorLines).toStrictEqual([46, 54, 61, 69]);
+    expect(errorLines).toStrictEqual([46, 54, 61, 69, 90]);
 
     expect(errorsByLine).toMatchInlineSnapshot(`
       Array [
         Object {
-          "errorMessage": "Type 'number' is not assignable to type 'string'.",
+          "errorMessage": "Type 'number' is not assignable to type 'string | string[] | undefined'.",
           "lineNumber": 46,
           "tsErrorLine": Array [
             "Type Error Explanation: name must be a string",
@@ -38,7 +38,7 @@ describe('Type checking with TypeScript compiler', () => {
           ],
         },
         Object {
-          "errorMessage": "Type 'string' is not assignable to type 'number'.",
+          "errorMessage": "Type 'string' is not assignable to type 'number | number[] | undefined'.",
           "lineNumber": 54,
           "tsErrorLine": Array [
             "Type Error Explanation: age must be a number",
@@ -46,7 +46,7 @@ describe('Type checking with TypeScript compiler', () => {
           ],
         },
         Object {
-          "errorMessage": "Type 'string' is not assignable to type 'boolean | undefined'.",
+          "errorMessage": "Type 'string' is not assignable to type 'Partial<boolean> | Partial<boolean>[] | undefined'.",
           "lineNumber": 61,
           "tsErrorLine": Array [
             "Type Error Explanation: isActive must be a boolean",
@@ -59,6 +59,14 @@ describe('Type checking with TypeScript compiler', () => {
           "tsErrorLine": Array [
             "Type Error Explanation: not_mapped is not defined in the mapping",
             "Error Line [69]: not_mapped: { type: 'invalid_type' },",
+          ],
+        },
+        Object {
+          "errorMessage": "Property 'unknown' does not exist on type '{ name: TextMapping; age: IntegerMapping; }'.",
+          "lineNumber": 90,
+          "tsErrorLine": Array [
+            "Type Error Explanation: Unknown object nested mapping properties are not allowed",
+            "Error Line [90]: export const unknownMappingErrors = objectMapping.properties.nestedObj.properties.unknown;",
           ],
         },
       ]
@@ -75,65 +83,64 @@ describe('Type checking with TypeScript compiler', () => {
 
     // The expected errors inside the tests are in the following lines
     const errorLines = errorsByLine.map((error) => error.lineNumber);
-    expect(errorLines).toStrictEqual([84, 86, 120, 122, 124, 154]);
-
+    expect(errorLines).toStrictEqual([75, 77, 111, 113, 115, 145]);
     expect(errorsByLine).toMatchInlineSnapshot(`
       Array [
         Object {
           "errorMessage": "Type 'Error & \\"The following keys are missing from the document fields: createdAt\\"' is not assignable to type 'MissingKeysError<\\"definedButNotInDocOne\\" | \\"definedButNotInDocTwo\\">'.
         Type 'Error & \\"The following keys are missing from the document fields: createdAt\\"' is not assignable to type 'Error & \\"The following keys are missing from the document fields: definedButNotInDocTwo\\"'.
           Type 'Error & \\"The following keys are missing from the document fields: createdAt\\"' is not assignable to type '\\"The following keys are missing from the document fields: definedButNotInDocTwo\\"'.",
-          "lineNumber": 84,
+          "lineNumber": 75,
           "tsErrorLine": Array [
             "Type Error Explanation: createdAt is in the definition, this checks that an error is not thrown for defined keys",
-            "Error Line [84]: Object.assign(new Error(), 'The following keys are missing from the document fields: createdAt'),",
+            "Error Line [75]: Object.assign(new Error(), 'The following keys are missing from the document fields: createdAt'),",
           ],
         },
         Object {
           "errorMessage": "Type 'Error & \\"The following keys are missing from the document fields: Unknown Key\\"' is not assignable to type 'MissingKeysError<\\"definedButNotInDocOne\\" | \\"definedButNotInDocTwo\\">'.
         Type 'Error & \\"The following keys are missing from the document fields: Unknown Key\\"' is not assignable to type 'Error & \\"The following keys are missing from the document fields: definedButNotInDocTwo\\"'.
           Type 'Error & \\"The following keys are missing from the document fields: Unknown Key\\"' is not assignable to type '\\"The following keys are missing from the document fields: definedButNotInDocTwo\\"'.",
-          "lineNumber": 86,
+          "lineNumber": 77,
           "tsErrorLine": Array [
             "Type Error Explanation: Unknown Key is not in the definition, this checks that an error is thrown for the unknown key",
-            "Error Line [86]: Object.assign(",
+            "Error Line [77]: Object.assign(",
           ],
         },
         Object {
           "errorMessage": "Type 'Error & \\"The following keys are missing from the document fields: name\\"' is not assignable to type 'MissingKeysError<\\"definedButNotInDocOne\\" | \\"definedButNotInDocTwo\\">'.
         Type 'Error & \\"The following keys are missing from the document fields: name\\"' is not assignable to type 'Error & \\"The following keys are missing from the document fields: definedButNotInDocTwo\\"'.
           Type 'Error & \\"The following keys are missing from the document fields: name\\"' is not assignable to type '\\"The following keys are missing from the document fields: definedButNotInDocTwo\\"'.",
-          "lineNumber": 120,
+          "lineNumber": 111,
           "tsErrorLine": Array [
             "Type Error Explanation: createdAt is in the definition, this checks that an error is not thrown for defined keys",
-            "Error Line [120]: Object.assign(new Error(), 'The following keys are missing from the document fields: name'),",
+            "Error Line [111]: Object.assign(new Error(), 'The following keys are missing from the document fields: name'),",
           ],
         },
         Object {
           "errorMessage": "Type 'Error & \\"The following keys are missing from the document fields: createdAt\\"' is not assignable to type 'MissingKeysError<\\"definedButNotInDocOne\\" | \\"definedButNotInDocTwo\\">'.",
-          "lineNumber": 122,
+          "lineNumber": 113,
           "tsErrorLine": Array [
             "Type Error Explanation: createdAt is in the definition, this checks that an error is not thrown for defined keys",
-            "Error Line [122]: Object.assign(new Error(), 'The following keys are missing from the document fields: createdAt'),",
+            "Error Line [113]: Object.assign(new Error(), 'The following keys are missing from the document fields: createdAt'),",
           ],
         },
         Object {
           "errorMessage": "Type 'Error & \\"The following keys are missing from the document fields: Unknown Key\\"' is not assignable to type 'MissingKeysError<\\"definedButNotInDocOne\\" | \\"definedButNotInDocTwo\\">'.",
-          "lineNumber": 124,
+          "lineNumber": 115,
           "tsErrorLine": Array [
             "Type Error Explanation: Unknown Key is not in the definition, this checks that an error is thrown for the unknown key",
-            "Error Line [124]: Object.assign(",
+            "Error Line [115]: Object.assign(",
           ],
         },
         Object {
-          "errorMessage": "Type 'FullEsDocumentFields' does not satisfy the constraint 'Partial<{ name: string; age: number; email: string; isActive: boolean; createdAt: boolean; }>'.
+          "errorMessage": "Type 'FullEsDocumentFields' does not satisfy the constraint 'Partial<{ name?: string | string[] | undefined; age?: number | number[] | undefined; email?: string | string[] | undefined; isActive?: Partial<boolean> | Partial<boolean>[] | undefined; createdAt?: Partial<...> | ... 1 more ... | undefined; }>'.
         Types of property 'createdAt' are incompatible.
-          Type 'string | number' is not assignable to type 'boolean | undefined'.
-            Type 'string' is not assignable to type 'boolean | undefined'.",
-          "lineNumber": 154,
+          Type 'string | number' is not assignable to type 'Partial<boolean> | Partial<boolean>[] | undefined'.
+            Type 'string' is not assignable to type 'Partial<boolean> | Partial<boolean>[] | undefined'.",
+          "lineNumber": 145,
           "tsErrorLine": Array [
             "Type Error Explanation: createdAt is in the definition, this checks that an error is not thrown for defined keys",
-            "Error Line [154]: FullEsDocumentFields",
+            "Error Line [145]: FullEsDocumentFields",
           ],
         },
       ]
@@ -157,6 +164,22 @@ describe('Type checking with TypeScript compiler', () => {
           "tsErrorLine": Array [
             "Type Error Explanation: exclusiveFirstThree is not in the excludedKeys",
             "Error Line [51]: Object.assign(",
+          ],
+        },
+        Object {
+          "errorMessage": "Object literal may only specify known properties, and 'b' does not exist in type '{ b: string; c?: number | undefined; }[]'.",
+          "lineNumber": 126,
+          "tsErrorLine": Array [
+            "Type Error Explanation: a is casted to an array of objects, not an object",
+            "Error Line [126]: b: 'test',",
+          ],
+        },
+        Object {
+          "errorMessage": "Subsequent property declarations must have the same type.  Property 'a' must be of type 'string[] | undefined', but here has type 'number[] | undefined'.",
+          "lineNumber": 133,
+          "tsErrorLine": Array [
+            "Type Error Explanation: a is a string | string[], not a number[]",
+            "Error Line [133]: a?: number[];",
           ],
         },
       ]

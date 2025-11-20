@@ -8,4 +8,4 @@
  */
 
 export * as mappings from './src/mappings';
-export * from './src/types';
+export type * from './src/types';

@@ -63,8 +63,9 @@ describe('mappings', () => {
         "type": "flattened",
       }
     `);
-    expect(mappings.object({})).toMatchInlineSnapshot(`
+    expect(mappings.object({ properties: {} })).toMatchInlineSnapshot(`
       Object {
+        "properties": Object {},
         "type": "object",
       }
     `);
