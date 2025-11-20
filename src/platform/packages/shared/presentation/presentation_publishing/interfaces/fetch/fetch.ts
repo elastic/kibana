@@ -149,13 +149,20 @@ export function fetch$(api: unknown): Observable<FetchContext> {
     }))
   );
 
+  const searchSessionId$ =
+    apiHasParentApi(api) && apiPublishesSearchSession(api.parentApi)
+      ? api.parentApi.searchSessionId$
+      : new BehaviorSubject(undefined);
+
   return merge(fetchContext$, reload$).pipe(
-    combineLatestWith(isFetchPaused$),
-    filter(([, isFetchPaused]) => !isFetchPaused),
-    map(([fetchContext]) => fetchContext as ReloadTimeFetchContext),
-    distinctUntilChanged((prevContext, nextContext) =>
-      isReloadTimeFetchContextEqual(prevContext, nextContext)
+    combineLatestWith(searchSessionId$, isFetchPaused$),
+    filter(([, , isFetchPaused]) => !isFetchPaused),
+    distinctUntilChanged(
+      ([prevContext, prevSearchSessionId], [nextContext, nextSearchSessionId]) =>
+        isReloadTimeFetchContextEqual(prevContext, nextContext) &&
+        prevSearchSessionId === nextSearchSessionId
     ),
+    map(([fetchContext]) => fetchContext as ReloadTimeFetchContext),
     switchMap(async (reloadTimeFetchContext) => {
       let searchSessionId;
       if (apiHasParentApi(api) && apiPublishesSearchSession(api.parentApi)) {

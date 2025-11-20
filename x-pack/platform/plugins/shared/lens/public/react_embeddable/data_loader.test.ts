@@ -25,50 +25,19 @@ import type {
   LensRuntimeState,
 } from '@kbn/lens-common';
 import type { LensApi } from '@kbn/lens-common-2';
-import type {
-  HasParentApi,
-  PublishesTimeRange,
-  PublishesUnifiedSearch,
-  PublishingSubject,
-  ViewMode,
-} from '@kbn/presentation-publishing';
-import type { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
+import type { PublishingSubject, ViewMode } from '@kbn/presentation-publishing';
 import { isObject } from 'lodash';
 import { createMockDatasource, defaultDoc } from '../mocks';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import * as Logger from './logger';
 import type { LensEmbeddableStartServices } from './types';
+import { waitFor } from '@testing-library/dom';
 
 jest.mock('@kbn/interpreter', () => ({
   toExpression: jest.fn().mockReturnValue('expression'),
 }));
 
 const loggerFn = jest.spyOn(Logger, 'addLog');
-
-// Mock it for now, later investigate why the real one is not triggering here on tests
-jest.mock('@kbn/presentation-publishing', () => {
-  const original = jest.requireActual('@kbn/presentation-publishing');
-  const rx = jest.requireActual('rxjs');
-  return {
-    ...original,
-    fetch$: jest.fn((api: unknown) => {
-      const typeApi = api as PublishesTimeRange &
-        PublishesUnifiedSearch &
-        HasParentApi<PublishesUnifiedSearch & PublishesSearchSession>;
-      const emptyObservable = rx.of(undefined);
-      return rx.merge(
-        typeApi.timeRange$ ?? emptyObservable,
-        typeApi.filters$ ?? emptyObservable,
-        typeApi.query$ ?? emptyObservable,
-        typeApi.parentApi?.filters$ ?? emptyObservable,
-        typeApi.parentApi?.query$ ?? emptyObservable,
-        typeApi.parentApi?.searchSessionId$ ?? emptyObservable,
-        typeApi.timeRange$ ?? typeApi.parentApi?.timeRange$ ?? emptyObservable,
-        typeApi.parentApi?.timeslice$ ?? emptyObservable
-      );
-    }),
-  };
-});
 
 // In order to listen the reload function, we need to
 // monitor the internalApi dispatchRenderStart spy
@@ -85,6 +54,7 @@ type ChangeFnType = ({
   parentApi: ReturnType<typeof createUnifiedSearchApi> &
     LensPublicCallbacks & {
       searchSessionId$: BehaviorSubject<string>;
+      esqlVariables$: BehaviorSubject<ESQLControlVariable[]>;
     };
   services: LensEmbeddableStartServices;
 }) => Promise<void | ReloadReason | false>;
@@ -112,6 +82,7 @@ async function expectRerenderOnDataLoader(
   const parentApi = {
     ...createUnifiedSearchApi(),
     searchSessionId$: new BehaviorSubject<string>(''),
+    esqlVariables$: new BehaviorSubject<ESQLControlVariable[]>([]),
     onLoad: jest.fn(),
     onBeforeBadgesRender: jest.fn(),
     onBrushEnd: jest.fn(),
@@ -146,7 +117,7 @@ async function expectRerenderOnDataLoader(
   );
   // there's a debounce, so skip to the next tick
   jest.advanceTimersByTime(100);
-  expect(internalApi.dispatchRenderStart).toHaveBeenCalledTimes(1);
+  await waitFor(() => expect(internalApi.dispatchRenderStart).toHaveBeenCalledTimes(1));
   // change something
   const result = await changeFn({
     api,
@@ -161,8 +132,6 @@ async function expectRerenderOnDataLoader(
   const rerenderReason = typeof result === 'string' ? result : undefined;
   // there's a debounce, so skip to the next tick
   jest.advanceTimersByTime(200);
-  // unsubscribe to all observables before checking
-  cleanup();
 
   if (expectRerender && rerenderReason) {
     const reloadCalls = loggerFn.mock.calls.filter((call) =>
@@ -173,7 +142,12 @@ async function expectRerenderOnDataLoader(
     );
   }
   // now check if the re-render has been dispatched
-  expect(internalApi.dispatchRenderStart).toHaveBeenCalledTimes(expectRerender ? 2 : 1);
+  await waitFor(() =>
+    expect(internalApi.dispatchRenderStart).toHaveBeenCalledTimes(expectRerender ? 2 : 1)
+  );
+
+  // wait for all rendering to complete before cleanup
+  cleanup();
 }
 
 function waitForValue(
@@ -197,8 +171,8 @@ describe('Data Loader', () => {
   beforeEach(() => jest.clearAllMocks());
 
   it('should re-render once on filter change', async () => {
-    await expectRerenderOnDataLoader(async ({ api }) => {
-      (api.filters$ as BehaviorSubject<Filter[]>).next([
+    await expectRerenderOnDataLoader(async ({ parentApi }) => {
+      (parentApi.filters$ as BehaviorSubject<Filter[]>).next([
         { meta: { alias: 'test', negate: false, disabled: false } },
       ]);
       return 'searchContext';
@@ -206,11 +180,10 @@ describe('Data Loader', () => {
   });
 
   it('should re-render once on search session change', async () => {
-    await expectRerenderOnDataLoader(async ({ api }) => {
+    await expectRerenderOnDataLoader(async ({ parentApi }) => {
       // dispatch a new searchSessionId
-
       (
-        api.parentApi as unknown as { searchSessionId$: BehaviorSubject<string | undefined> }
+        parentApi as unknown as { searchSessionId$: BehaviorSubject<string | undefined> }
       ).searchSessionId$.next('newSessionId');
 
       return 'searchContext';
@@ -529,11 +502,11 @@ describe('Data Loader', () => {
   it('should re-render on ES|QL variable changes', async () => {
     const baseAttributes = getLensAttributesMock();
     await expectRerenderOnDataLoader(
-      async ({ internalApi }) => {
-        (internalApi.esqlVariables$ as BehaviorSubject<ESQLControlVariable[]>).next([
+      async ({ parentApi }) => {
+        (parentApi.esqlVariables$ as BehaviorSubject<ESQLControlVariable[]>).next([
           { key: 'foo', value: faker.database.column(), type: ESQLVariableType.FIELDS },
         ]);
-        return 'ESQLvariables';
+        return 'searchContext';
       },
       {
         attributes: getLensAttributesMock({
