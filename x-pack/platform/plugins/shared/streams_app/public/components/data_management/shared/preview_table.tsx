@@ -10,20 +10,31 @@ import type {
   EuiDataGridProps,
   EuiDataGridRowHeightsOptions,
   EuiDataGridSorting,
-  EuiDataGridCellValueElementProps,
 } from '@elastic/eui';
-import { EuiButtonIcon, EuiDataGrid, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import {
+  EuiAvatar,
+  EuiButtonIcon,
+  EuiDataGrid,
+  EuiFlexGroup,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SampleDocument } from '@kbn/streams-schema';
 import ColumnHeaderTruncateContainer from '@kbn/unified-data-table/src/components/column_header_truncate_container';
-import { FieldIcon } from '@kbn/react-field';
-import React, { useMemo, useState, useCallback, createContext, useContext, useEffect } from 'react';
+import React, { useMemo, useState, useCallback, createContext, useContext } from 'react';
 import type {
   IgnoredField,
   DocumentWithIgnoredFields,
 } from '@kbn/streams-schema/src/shared/record_types';
 import { recalcColumnWidths } from '../stream_detail_enrichment/utils';
-import type { SimulationContext } from '../stream_detail_enrichment/state_management/simulation_state_machine';
+import type {
+  SampleDocumentWithUIAttributes,
+  SimulationContext,
+} from '../stream_detail_enrichment/state_management/simulation_state_machine';
+import { DATA_SOURCES_I18N } from '../stream_detail_enrichment/data_sources_flyout/translations';
+import { useDataSourceSelectorById } from '../stream_detail_enrichment/state_management/data_source_state_machine';
+import type { EnrichmentDataSourceWithUIAttributes } from '../stream_detail_enrichment/types';
 
 const emptyCell = <>&nbsp;</>;
 
@@ -59,94 +70,6 @@ function RowSelectionButton({ rowIndex }: { rowIndex: number }) {
   );
 }
 
-interface RowSelectionCellProps extends EuiDataGridCellValueElementProps {
-  highlightColor: string;
-}
-
-const RowSelectionCell: React.FC<RowSelectionCellProps> = ({
-  rowIndex,
-  setCellProps,
-  highlightColor,
-}) => {
-  const { selectedRowIndex } = useRowSelection();
-
-  useEffect(() => {
-    if (selectedRowIndex === rowIndex) {
-      setCellProps({
-        style: {
-          backgroundColor: highlightColor,
-        },
-      });
-    } else {
-      setCellProps({ style: {} });
-    }
-  }, [highlightColor, rowIndex, selectedRowIndex, setCellProps]);
-
-  return <RowSelectionButton rowIndex={rowIndex} />;
-};
-
-interface PreviewCellValueProps extends EuiDataGridCellValueElementProps {
-  documents: (SampleDocument | DocumentWithIgnoredFields)[];
-  highlightColor: string;
-  renderCustomCellValue?: (
-    doc: SampleDocument,
-    columnId: string,
-    ignoredFields?: IgnoredField[]
-  ) => React.ReactNode | undefined;
-}
-
-const PreviewCellValue: React.FC<PreviewCellValueProps> = ({
-  rowIndex,
-  columnId,
-  setCellProps,
-  documents: docs,
-  highlightColor,
-  renderCustomCellValue,
-}) => {
-  const { selectedRowIndex } = useRowSelection();
-
-  useEffect(() => {
-    if (selectedRowIndex === rowIndex) {
-      setCellProps({
-        style: {
-          backgroundColor: highlightColor,
-        },
-      });
-    } else {
-      setCellProps({ style: {} });
-    }
-  }, [highlightColor, rowIndex, selectedRowIndex, setCellProps]);
-
-  const doc = docs[rowIndex];
-  const document = isDocumentWithIgnoredFields(doc) ? doc.values : doc;
-  const ignoredFields = isDocumentWithIgnoredFields(doc) ? doc.ignored_fields : [];
-
-  if (!document || typeof document !== 'object') {
-    return emptyCell;
-  }
-
-  if (renderCustomCellValue) {
-    const renderedValue = renderCustomCellValue(
-      document as SampleDocument,
-      columnId,
-      ignoredFields
-    );
-    if (renderedValue !== undefined) {
-      return <>{renderedValue}</>;
-    }
-  }
-
-  const value = (document as Record<string, unknown>)[columnId];
-  if (value === undefined || value === null) {
-    return emptyCell;
-  }
-  if (typeof value === 'object') {
-    return <>{JSON.stringify(value)}</>;
-  }
-  const stringValue = String(value);
-  return stringValue ? <>{stringValue}</> : emptyCell;
-};
-
 export const MemoPreviewTable = React.memo(PreviewTable);
 
 function isDocumentWithIgnoredFields(
@@ -159,16 +82,17 @@ export function PreviewTable({
   documents,
   displayColumns,
   height,
-  renderCellValue: customRenderCellValue,
+  renderCellValue,
   rowHeightsOptions,
   sorting,
   setSorting,
   toolbarVisibility = false,
   setVisibleColumns,
   columnOrderHint = [],
+  showRowSourceAvatars = false,
   showLeadingControlColumns = true,
+  originalSamples,
   cellActions,
-  dataViewFieldTypes,
 }: {
   documents: SampleDocument[] | DocumentWithIgnoredFields[];
   displayColumns?: string[];
@@ -184,29 +108,12 @@ export function PreviewTable({
   columnOrderHint?: string[];
   sorting?: SimulationContext['previewColumnsSorting'];
   setSorting?: (sorting: SimulationContext['previewColumnsSorting']) => void;
+  showRowSourceAvatars?: boolean;
   showLeadingControlColumns?: boolean;
+  originalSamples?: SampleDocumentWithUIAttributes[];
   cellActions?: EuiDataGridColumnCellAction[];
-  dataViewFieldTypes?: Array<{ name: string; type: string; esType?: string }>;
 }) {
   const { euiTheme: theme } = useEuiTheme();
-
-  // Create a map of field names to their ES types for quick lookup from DataView
-  const fieldTypeMap = useMemo(() => {
-    const typeMap = new Map<string, string>();
-
-    if (dataViewFieldTypes && dataViewFieldTypes.length > 0) {
-      dataViewFieldTypes.forEach((field) => {
-        // Use esType if available (more specific), otherwise use type
-        const fieldType = field.esType || field.type;
-        if (fieldType) {
-          typeMap.set(field.name, fieldType);
-        }
-      });
-    }
-
-    return typeMap;
-  }, [dataViewFieldTypes]);
-
   // Determine canonical column order
   const canonicalColumnOrder = useMemo(() => {
     const cols = new Set<string>();
@@ -278,26 +185,41 @@ export function PreviewTable({
 
   const [columnWidths, setColumnWidths] = useState<Record<string, number | undefined>>({});
 
-  const highlightColor = theme.colors.highlight;
-
-  const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(() => {
-    if (!showLeadingControlColumns) {
-      return [];
-    }
-
-    const rowCellRender: EuiDataGridControlColumn['rowCellRender'] = (props) => (
-      <RowSelectionCell {...props} highlightColor={highlightColor} />
-    );
-
-    return [
+  const leadingControlColumns: EuiDataGridControlColumn[] = useMemo(
+    () => [
       {
         id: 'selection',
-        width: 36,
+        width: showRowSourceAvatars ? 72 : 36,
         headerCellRender: () => null,
-        rowCellRender,
+        rowCellRender: ({ rowIndex, setCellProps }) => {
+          // eslint-disable-next-line react-hooks/rules-of-hooks
+          const { selectedRowIndex } = useRowSelection();
+
+          if (selectedRowIndex === rowIndex) {
+            setCellProps({
+              style: {
+                backgroundColor: theme.colors.highlight,
+              },
+            });
+          } else {
+            setCellProps({
+              style: {},
+            });
+          }
+          const originalSample = originalSamples?.[rowIndex];
+          return (
+            <EuiFlexGroup gutterSize="s">
+              <RowSelectionButton rowIndex={rowIndex} />
+              {showRowSourceAvatars && originalSample && (
+                <RowSourceAvatar originalSample={originalSample} />
+              )}
+            </EuiFlexGroup>
+          );
+        },
       },
-    ];
-  }, [showLeadingControlColumns, highlightColor]);
+    ],
+    [showRowSourceAvatars, originalSamples, theme.colors.highlight]
+  );
 
   // Derive visibleColumns from canonical order
   const visibleColumns = useMemo(() => {
@@ -333,22 +255,12 @@ export function PreviewTable({
         return [...acc, '.', <wbr key={index} />, part];
       }, [] as React.ReactNode[]);
 
-      // Get the field type from the map
-      const fieldType = fieldTypeMap.get(column);
-
       return {
         id: column,
         display: (
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <FieldIcon type={fieldType || 'unknown'} size="s" />
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <ColumnHeaderTruncateContainer wordBreak="normal">
-                {interleavedColumnParts}
-              </ColumnHeaderTruncateContainer>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <ColumnHeaderTruncateContainer wordBreak="normal">
+            {interleavedColumnParts}
+          </ColumnHeaderTruncateContainer>
         ),
         actions:
           Boolean(setVisibleColumns) || Boolean(setSorting)
@@ -364,14 +276,7 @@ export function PreviewTable({
         cellActions,
       };
     });
-  }, [
-    cellActions,
-    canonicalColumnOrder,
-    fieldTypeMap,
-    setSorting,
-    setVisibleColumns,
-    columnWidths,
-  ]);
+  }, [cellActions, canonicalColumnOrder, setSorting, setVisibleColumns, columnWidths]);
 
   return (
     <EuiDataGrid
@@ -394,14 +299,79 @@ export function PreviewTable({
       rowCount={documents.length}
       rowHeightsOptions={rowHeightsOptions}
       onColumnResize={onColumnResize}
-      renderCellValue={(props) => (
-        <PreviewCellValue
-          {...props}
-          documents={documents}
-          highlightColor={highlightColor}
-          renderCustomCellValue={customRenderCellValue}
-        />
-      )}
+      renderCellValue={({ rowIndex, columnId, setCellProps }) => {
+        // eslint-disable-next-line react-hooks/rules-of-hooks
+        const { selectedRowIndex } = useRowSelection();
+
+        if (selectedRowIndex === rowIndex) {
+          setCellProps({
+            style: {
+              backgroundColor: theme.colors.highlight,
+            },
+          });
+        } else {
+          setCellProps({
+            style: {},
+          });
+        }
+
+        const doc = documents[rowIndex];
+        const document = isDocumentWithIgnoredFields(doc) ? doc.values : doc;
+        const ignoredFields = isDocumentWithIgnoredFields(doc) ? doc.ignored_fields : [];
+
+        if (!document || typeof document !== 'object') {
+          return emptyCell;
+        }
+
+        if (renderCellValue) {
+          const renderedValue = renderCellValue(document, columnId, ignoredFields);
+          if (renderedValue !== undefined) {
+            return renderedValue;
+          }
+        }
+
+        const value = document[columnId];
+        if (value === undefined || value === null) {
+          return emptyCell;
+        }
+        if (typeof value === 'object') {
+          return JSON.stringify(value);
+        }
+        return String(value) || emptyCell;
+      }}
     />
+  );
+}
+
+function dataSourceTypeToI18nKey(type: EnrichmentDataSourceWithUIAttributes['type']) {
+  switch (type) {
+    case 'random-samples':
+      return 'randomSamples';
+    case 'kql-samples':
+      return 'kqlDataSource';
+    case 'custom-samples':
+      return 'customSamples';
+  }
+}
+
+function RowSourceAvatar({ originalSample }: { originalSample: SampleDocumentWithUIAttributes }) {
+  const dataSourceContext = useDataSourceSelectorById(
+    originalSample.dataSourceId,
+    (snapshot) => snapshot?.context
+  );
+  if (!dataSourceContext) {
+    // If the data source context is not available, we cannot render the avatar
+    return null;
+  }
+  const {
+    uiAttributes: { color },
+    dataSource: { type: dataSourceType, name: rawDataSourceName },
+  } = dataSourceContext;
+  const name =
+    rawDataSourceName || DATA_SOURCES_I18N[dataSourceTypeToI18nKey(dataSourceType)].placeholderName;
+  return (
+    <EuiToolTip content={name}>
+      <EuiAvatar size="s" color={color} initialsLength={1} name={name} />
+    </EuiToolTip>
   );
 }

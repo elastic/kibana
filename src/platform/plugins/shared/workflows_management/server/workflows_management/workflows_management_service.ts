@@ -11,6 +11,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { v4 as generateUuid } from 'uuid';
+import { WorkflowsConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
 import type {
   ActionsClient,
   PluginStartContract as ActionsPluginStartContract,
@@ -59,7 +60,6 @@ import type {
   GetWorkflowsParams,
 } from './workflows_management_api';
 import {
-  UNSUPPORTED_CONNECTOR_TYPES,
   WORKFLOWS_EXECUTION_LOGS_INDEX,
   WORKFLOWS_EXECUTIONS_INDEX,
   WORKFLOWS_STEP_EXECUTIONS_INDEX,
@@ -1126,7 +1126,10 @@ export class WorkflowsService {
     // Get both connectors and action types
     const [connectors, actionTypes] = await Promise.all([
       actionsClient.getAll(spaceId),
-      actionsClientWithRequest.listTypes({ includeSystemActionTypes: false }),
+      actionsClientWithRequest.listTypes({
+        featureId: WorkflowsConnectorFeatureId,
+        includeSystemActionTypes: false,
+      }),
     ]);
 
     // Note: We now get display names directly from actionTypes, no need for the map
@@ -1136,11 +1139,6 @@ export class WorkflowsService {
 
     // First, add all action types (even those without instances), excluding filtered types
     actionTypes.forEach((actionType) => {
-      // Skip filtered connector types
-      if (UNSUPPORTED_CONNECTOR_TYPES.includes(actionType.id)) {
-        return;
-      }
-
       // Get sub-actions from our static mapping
       const subActions = CONNECTOR_SUB_ACTIONS_MAP[actionType.id];
 
