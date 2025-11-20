@@ -11,8 +11,6 @@ import type { HTMLAttributes } from 'react';
 import React from 'react';
 import { css } from '@emotion/react';
 import { useEuiTheme, euiSlightShadowHover } from '@elastic/eui';
-import { getTabsShadowGradient } from './get_tabs_shadow_gradient';
-import { useChromeStyle } from './use_chrome_style';
 import type { TabsServices } from '../../types';
 
 export interface TabWithBackgroundProps extends HTMLAttributes<HTMLElement> {
@@ -26,11 +24,6 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
   ({ isSelected, isDragging, services, children, ...otherProps }, ref) => {
     const euiThemeContext = useEuiTheme();
     const { euiTheme } = euiThemeContext;
-    const { isProjectChromeStyle } = useChromeStyle(services);
-
-    const selectedTabBackgroundColor = isProjectChromeStyle
-      ? euiTheme.colors.body
-      : euiTheme.colors.emptyShade;
 
     return (
       <div
@@ -39,10 +32,13 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
         // tab main background and another background color on hover
         css={css`
           display: inline-block;
+          border-radius: ${euiTheme.border.radius.small};
           background: ${isSelected || isDragging
-            ? selectedTabBackgroundColor
+            ? euiTheme.colors.backgroundBasePlain
             : euiTheme.colors.lightestShade};
           transition: background ${euiTheme.animation.fast};
+          margin-right: ${euiTheme.size.xs};
+
           ${isDragging
             ? `
               ${euiSlightShadowHover(euiThemeContext)};
@@ -59,17 +55,7 @@ export const TabWithBackground = React.forwardRef<HTMLDivElement, TabWithBackgro
         `}
         `}
       >
-        <div
-          // a top shadow for an unselected tab to make sure that it stays visible when the tab is hovered
-          css={css`
-            background: ${isSelected || isDragging
-              ? 'transparent'
-              : getTabsShadowGradient(euiThemeContext)};
-            transition: background ${euiTheme.animation.fast};
-          `}
-        >
-          {children}
-        </div>
+        {children}
       </div>
     );
   }

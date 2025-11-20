@@ -12,7 +12,6 @@ import React, { useEffect } from 'react';
 import { css } from '@emotion/react';
 import { css as cssString } from '@emotion/css';
 import { useEuiTheme } from '@elastic/eui';
-import { getTabsShadowGradient } from './get_tabs_shadow_gradient';
 import type { TabsServices } from '../../types';
 
 const globalCss = cssString`
@@ -56,16 +55,11 @@ export const TabsBarWithBackground: React.FC<TabsBarWithBackgroundProps> = ({
       css={css`
         // tabs bar background
         background: ${euiTheme.colors.lightestShade};
+        padding-block: ${euiTheme.size.xs};
+        padding-inline: ${euiTheme.size.s};
       `}
     >
-      <div
-        // top shadow for tabs bar
-        css={css`
-          background: ${getTabsShadowGradient(euiThemeContext)};
-        `}
-      >
-        {children}
-      </div>
+      {children}
     </div>
   );
 };
