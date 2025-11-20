@@ -1930,6 +1930,32 @@ describe('MS Defender response actions client', () => {
     let abortController: AbortController;
     let processPendingActionsOptions: ProcessPendingActionsMethodOptions;
 
+    const setGetRunscriptResponseFile = (response: {
+      script_name?: string;
+      script_output?: string;
+      script_errors?: string;
+      exit_code?: number;
+    }) => {
+      const executeMockFn = (connectorActionsMock.execute as jest.Mock).getMockImplementation();
+
+      (connectorActionsMock.execute as jest.Mock).mockImplementation(async (options) => {
+        if (
+          options.params.subAction === MICROSOFT_DEFENDER_ENDPOINT_SUB_ACTION.GET_ACTION_RESULTS
+        ) {
+          return responseActionsClientMock.createConnectorActionExecuteResponse({
+            data: new Readable({
+              read() {
+                this.push(JSON.stringify(response));
+                this.push(null);
+              },
+            }),
+          });
+        }
+
+        return executeMockFn!.call(connectorActionsMock, options);
+      });
+    };
+
     beforeEach(() => {
       abortController = new AbortController();
       processPendingActionsOptions = {
@@ -2235,6 +2261,40 @@ describe('MS Defender response actions client', () => {
               message:
                 'Running script on endpoint failed: Error in Download Script phase: One or more arguments are invalid.\nAnother error',
             },
+          })
+        );
+      });
+
+      it('should have an script output in the completed response when file size is within limit', async () => {
+        setGetRunscriptResponseFile({
+          script_name: 'list-files.sh',
+          exit_code: 0,
+          script_output:
+            'Files and directories in /home/ubuntu/:\ntotal 116\ndrwxr-x--- 4 ubuntu ubuntu  4096 Nov 10 13:53 .\ndrwxr-xr-x 3 root   root    4096 Nov 10 10:26 ..\n-rw------- 1 ubuntu ubuntu   126 Nov 10 13:53 .bash_history\n-rw-r--r-- 1 ubuntu ubuntu   220 Jan  6  2022 .bash_logout\n-rw-r--r-- 1 ubuntu ubuntu  3771 Jan  6  2022 .bashrc\ndrwx------ 2 ubuntu ubuntu  4096 Nov 10 10:26 .cache\n-rw-r--r-- 1 ubuntu ubuntu   807 Jan  6  2022 .profile\ndrwx------ 2 ubuntu ubuntu  4096 Nov 10 10:26 .ssh\n-rw-r--r-- 1 ubuntu ubuntu     0 Nov 10 10:26 .sudo_as_admin_successful\n-rw-r--r-- 1 ubuntu ubuntu  5550 Nov 10 10:26 GatewayWindowsDefenderATPOnboardingPackage.zip\n-rw-r--r-- 1 ubuntu ubuntu  9067 Dec 17  2024 MicrosoftDefenderATPOnboardingLinuxServer.py\n-rwxrwxr-x 1 ubuntu ubuntu 63356 Nov 10 10:26 mde_installer.sh\n',
+          script_errors: '',
+        });
+
+        msMachineActionsApiResponse.value[0].status = 'Succeeded';
+
+        await msClientMock.processPendingActions(processPendingActionsOptions);
+
+        expect(processPendingActionsOptions.addToQueue).toHaveBeenCalledWith(
+          expect.objectContaining({
+            EndpointActions: expect.objectContaining({
+              data: expect.objectContaining({
+                command: 'runscript',
+                output: expect.objectContaining({
+                  type: 'json',
+                  content: expect.objectContaining({
+                    code: expect.stringContaining('0'),
+                    stderr: expect.stringContaining(''),
+                    stdout: expect.stringContaining(
+                      'Files and directories in /home/ubuntu/:\ntotal 116'
+                    ),
+                  }),
+                }),
+              }),
+            }),
           })
         );
       });
