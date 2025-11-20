@@ -187,7 +187,6 @@ export const streamRoutingMachine = setup({
           })),
         },
         'suggestion.preview': {
-          target: '#idle',
           actions: [
             sendTo('routingSamplesMachine', ({ event }) => ({
               type: 'routingSamples.setSelectedPreview',
@@ -195,9 +194,11 @@ export const streamRoutingMachine = setup({
                 ? { type: 'suggestion', name: event.name, index: event.index }
                 : undefined,
             })),
-            sendTo('routingSamplesMachine', ({ event }) => ({
+            sendTo('routingSamplesMachine', ({ event, context }) => ({
               type: 'routingSamples.updateCondition',
-              condition: event.toggle ? event.condition : undefined,
+              condition: event.toggle
+                ? event.condition
+                : context.routing.find((rule) => rule.id === context.currentRuleId)?.where,
             })),
             sendTo('routingSamplesMachine', {
               type: 'routingSamples.setDocumentMatchFilter',
