@@ -24,18 +24,16 @@ interface RoundInputProps {
 }
 
 export const RoundInput = ({ input }: RoundInputProps) => {
-  const { euiTheme, colorMode } = useEuiTheme();
-  const backgroundColorStyle =
-    colorMode === 'DARK'
-      ? { background: euiTheme.colors.backgroundBasePrimary }
-      : {
-          background: `linear-gradient(
+  const { euiTheme } = useEuiTheme();
+
+  const backgroundColorStyle = {
+    background: `linear-gradient(
           90deg,
           ${euiTheme.colors.backgroundBasePrimary} 0%,
           ${euiTheme.colors.backgroundBasePrimary} 70%,
           ${euiTheme.colors.backgroundBaseSubdued} 100%
         )`,
-        };
+  };
 
   const inputContainerStyles = css`
     align-self: end;
