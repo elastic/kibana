@@ -54,7 +54,7 @@ type ChangeFnType = ({
   parentApi: ReturnType<typeof createUnifiedSearchApi> &
     LensPublicCallbacks & {
       searchSessionId$: BehaviorSubject<string>;
-      esqlVariables$: BehaviorSubject<ESQLControlVariable[]>;
+      esqlVariables$: BehaviorSubject<ESQLControlVariable[] | undefined>;
     };
   services: LensEmbeddableStartServices;
 }) => Promise<void | ReloadReason | false>;
@@ -82,7 +82,7 @@ async function expectRerenderOnDataLoader(
   const parentApi = {
     ...createUnifiedSearchApi(),
     searchSessionId$: new BehaviorSubject<string>(''),
-    esqlVariables$: new BehaviorSubject<ESQLControlVariable[]>([]),
+    esqlVariables$: new BehaviorSubject<ESQLControlVariable[] | undefined>([]),
     onLoad: jest.fn(),
     onBeforeBadgesRender: jest.fn(),
     onBrushEnd: jest.fn(),
