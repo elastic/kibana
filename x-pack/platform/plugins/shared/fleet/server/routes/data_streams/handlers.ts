@@ -265,34 +265,8 @@ export const getDeprecatedILMCheckHandler: RequestHandler = async (context, requ
 
     const DEPRECATED_ILM_POLICY_TYPES = ['logs', 'metrics', 'synthetics'];
 
-    // Fetch ILM policies and Fleet-managed component templates in parallel
-    const [ilmResponse, ...componentTemplateResponses] = await Promise.all([
-      esClient.ilm.getLifecycle(),
-      ...DEPRECATED_ILM_POLICY_TYPES.map((dataStreamType) =>
-        esClient.cluster.getComponentTemplate({
-          name: `${dataStreamType}-*@package`,
-        })
-      ),
-    ]);
-
-    // Combine all component templates from the responses
-    const allComponentTemplates = componentTemplateResponses.flatMap(
-      (resp) => resp.component_templates
-    );
-
-    // Build a map of which ILM policies are used by which component templates
-    const componentTemplatesByILMPolicy: Record<string, string[]> = {};
-
-    allComponentTemplates.forEach((template) => {
-      const ilmPolicyName = template.component_template?.template?.settings?.index?.lifecycle?.name;
-
-      if (ilmPolicyName) {
-        if (!componentTemplatesByILMPolicy[ilmPolicyName]) {
-          componentTemplatesByILMPolicy[ilmPolicyName] = [];
-        }
-        componentTemplatesByILMPolicy[ilmPolicyName].push(template.name);
-      }
-    });
+    // Fetch all ILM policies (includes in_use_by.composable_templates metadata)
+    const ilmResponse = await esClient.ilm.getLifecycle();
 
     // Check each deprecated policy type to see if we should show a callout
     const deprecatedILMPolicies: Array<{
@@ -305,15 +279,21 @@ export const getDeprecatedILMCheckHandler: RequestHandler = async (context, requ
       const deprecatedPolicyName = policyType;
       const lifecyclePolicyName = `${policyType}@lifecycle`;
 
-      // Check if the deprecated policy is being used by component templates
-      const componentTemplatesUsingDeprecated = componentTemplatesByILMPolicy[deprecatedPolicyName];
-      if (!componentTemplatesUsingDeprecated || componentTemplatesUsingDeprecated.length === 0) {
-        // Not using deprecated policy, skip
-        continue;
-      }
-
       const deprecatedPolicy = ilmResponse[deprecatedPolicyName];
       const lifecyclePolicy = ilmResponse[lifecyclePolicyName];
+
+      // Get Fleet-managed component templates using this deprecated policy
+      // Filter for templates ending with @package (Fleet-managed)
+      const allComposableTemplates =
+        (deprecatedPolicy as any)?.in_use_by?.composable_templates || [];
+      const fleetManagedTemplates = allComposableTemplates.filter((templateName: string) =>
+        templateName.endsWith('@package')
+      );
+
+      // If no Fleet-managed component templates are using this policy, skip
+      if (fleetManagedTemplates.length === 0) {
+        continue;
+      }
 
       // Case 1: Using deprecated policy but @lifecycle doesn't exist → show callout
       if (!lifecyclePolicy) {
@@ -321,7 +301,7 @@ export const getDeprecatedILMCheckHandler: RequestHandler = async (context, requ
           deprecatedILMPolicies.push({
             policyName: deprecatedPolicyName,
             version: deprecatedPolicy.version,
-            componentTemplates: componentTemplatesUsingDeprecated,
+            componentTemplates: fleetManagedTemplates,
           });
         }
         continue;
@@ -339,7 +319,7 @@ export const getDeprecatedILMCheckHandler: RequestHandler = async (context, requ
         deprecatedILMPolicies.push({
           policyName: deprecatedPolicyName,
           version: deprecatedPolicy.version,
-          componentTemplates: componentTemplatesUsingDeprecated,
+          componentTemplates: fleetManagedTemplates,
         });
       }
     }
