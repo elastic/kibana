@@ -102,7 +102,7 @@ export interface SimulationDocReport {
   detected_fields: Array<{ processor_id: string; name: string }>;
   errors: SimulationError[];
   status: DocSimulationStatus;
-  value: FlattenRecord;
+  value: RecursiveRecord;
 }
 
 export interface ProcessorMetrics {
@@ -158,16 +158,21 @@ export type WithRequired<TObj, TKey extends keyof TObj> = TObj & { [TProp in TKe
  * Detects and groups flattened geo_point fields (*.lat and *.lon) back into a single object.
  * Elasticsearch's geo_point mapper requires coordinates as a single object: { lat: number, lon: number }
  *
- * This function automatically detects any field pairs ending in .lat and .lon and groups them together.
+ * This function only groups field pairs that are known to be geo_point types based on field definitions.
  *
  * @param flattenedDoc - A flattened document with separate lat/lon fields
+ * @param geoPointFields - Set of field names that are known to be geo_point types
  * @returns Document with geo_point fields grouped as objects
  *
  * @example
  * Input: { "source.geo.location.lat": 41.9, "source.geo.location.lon": 42.0, "other": "value" }
+ * With geoPointFields = new Set(["source.geo.location"])
  * Output: { "source.geo.location": { lat: 41.9, lon: 42.0 }, "other": "value" }
  */
-const regroupGeoPointFields = (flattenedDoc: FlattenRecord): RecursiveRecord => {
+const regroupGeoPointFields = (
+  flattenedDoc: FlattenRecord,
+  geoPointFields: Set<string>
+): RecursiveRecord => {
   const result: RecursiveRecord = {};
   const processedGeoFields = new Set<string>();
 
@@ -177,8 +182,9 @@ const regroupGeoPointFields = (flattenedDoc: FlattenRecord): RecursiveRecord => 
       const baseField = key.slice(0, -4); // Remove '.lat'
       const lonKey = `${baseField}.lon`;
 
-      // Check if we have a corresponding .lon field with numeric values
+      // Check if we have a corresponding .lon field with numeric values AND it's a known geo_point field
       if (
+        geoPointFields.has(baseField) &&
         lonKey in flattenedDoc &&
         !processedGeoFields.has(baseField) &&
         typeof flattenedDoc[lonKey] === 'number' &&
@@ -252,7 +258,8 @@ export const simulateProcessing = async ({
     simulationData.docs,
     params.body.processing,
     Streams.WiredStream.Definition.is(stream),
-    streamFields
+    streamFields,
+    params.body.detected_fields
   );
 
   /* 5. Extract valid detected fields with intelligent type suggestions from fieldsMetadataService */
@@ -271,7 +278,8 @@ export const simulateProcessing = async ({
 const prepareSimulationDocs = (
   documents: FlattenRecord[],
   streamName: string,
-  stream: Streams.all.Definition
+  stream: Streams.all.Definition,
+  geoPointFields: Set<string>
 ): IngestDocument[] => {
   const isWiredStream = Streams.WiredStream.Definition.is(stream);
 
@@ -280,7 +288,7 @@ const prepareSimulationDocs = (
     _id: id.toString(),
     // For classic streams, use regroupGeoPointFields to transform lat/lon into geo_point objects
     // For wired streams, keep documents as-is since geo_point transformation happens via processors
-    _source: isWiredStream ? doc : regroupGeoPointFields(doc),
+    _source: isWiredStream ? doc : regroupGeoPointFields(doc, geoPointFields),
   }));
 };
 
@@ -347,8 +355,15 @@ const prepareSimulationData = (
     ? getRoot(stream.name)
     : stream.name;
 
+  // Extract geo_point fields for regrouping
+  const geoPointFields = new Set(
+    additionalFields
+      ? additionalFields.filter((field) => field.type === 'geo_point').map((field) => field.name)
+      : []
+  );
+
   return {
-    docs: prepareSimulationDocs(documents, targetStreamName, stream),
+    docs: prepareSimulationDocs(documents, targetStreamName, stream, geoPointFields),
     processors: prepareSimulationProcessors(processing, stream, additionalFields),
     stream, // Pass stream for later use in ingest simulation
   };
@@ -590,7 +605,8 @@ const computePipelineSimulationResult = (
   sampleDocs: Array<{ _source: FlattenRecord }>,
   processing: StreamlangDSL,
   isWiredStream: boolean,
-  streamFields: FieldDefinition
+  streamFields: FieldDefinition,
+  detectedFields?: NamedFieldDefinitionConfig[]
 ): {
   docReports: SimulationDocReport[];
   processorsMetrics: Record<string, ProcessorMetrics>;
@@ -606,6 +622,16 @@ const computePipelineSimulationResult = (
     .filter(([, { type }]) => type === 'system')
     .map(([name]) => name);
 
+  // Extract geo_point field names from both streamFields and detectedFields
+  const geoPointFields = new Set([
+    ...Object.entries(streamFields)
+      .filter(([, { type }]) => type === 'geo_point')
+      .map(([name]) => name),
+    ...(detectedFields
+      ? detectedFields.filter((field) => field.type === 'geo_point').map((field) => field.name)
+      : []),
+  ]);
+
   const docReports = pipelineSimulationResult.docs.map((pipelineDocResult, id) => {
     const ingestDocResult = ingestSimulationResult.docs[id];
     const ingestDocErrors = collectIngestDocumentErrors(ingestDocResult);
@@ -613,7 +639,8 @@ const computePipelineSimulationResult = (
     const { errors, status, value } = getLastDoc(
       pipelineDocResult,
       sampleDocs[id]._source,
-      ingestDocErrors
+      ingestDocErrors,
+      geoPointFields
     );
 
     // Use ingest simulation result for diff to capture mapping coercion (e.g., geo_point transformation)
@@ -622,7 +649,8 @@ const computePipelineSimulationResult = (
       pipelineDocResult,
       ingestDocResult,
       isWiredStream,
-      forbiddenFields
+      forbiddenFields,
+      geoPointFields
     );
 
     pipelineDocResult.processor_results.forEach((processor) => {
@@ -750,7 +778,8 @@ const getDocumentStatus = (
 const getLastDoc = (
   docResult: SuccessfulPipelineSimulateDocumentResult,
   sample: FlattenRecord,
-  ingestDocErrors: SimulationError[]
+  ingestDocErrors: SimulationError[],
+  geoPointFields: Set<string>
 ) => {
   const status = getDocumentStatus(docResult, ingestDocErrors);
   const lastDocSource =
@@ -759,13 +788,17 @@ const getLastDoc = (
 
   if (status === 'parsed') {
     return {
-      value: flattenObjectNestedLast(lastDocSource),
+      value: regroupGeoPointFields(flattenObjectNestedLast(lastDocSource), geoPointFields),
       errors: [] as SimulationError[],
       status,
     };
   } else {
     const { _errors = [], ...value } = lastDocSource;
-    return { value: flattenObjectNestedLast(value), errors: _errors as SimulationError[], status };
+    return {
+      value: regroupGeoPointFields(flattenObjectNestedLast(value), geoPointFields),
+      errors: _errors as SimulationError[],
+      status,
+    };
   }
 };
 
@@ -778,7 +811,8 @@ const computeSimulationDocDiff = (
   docResult: SuccessfulPipelineSimulateDocumentResult,
   ingestDocResult: SimulateIngestSimulateIngestDocumentResult,
   isWiredStream: boolean,
-  forbiddenFields: string[]
+  forbiddenFields: string[],
+  geoPointFields: Set<string>
 ) => {
   // Keep only the successful processors defined from the user, skipping the on_failure processors from the simulation
   const successfulProcessors = docResult.processor_results.filter(isSuccessfulProcessor);
@@ -814,12 +848,19 @@ const computeSimulationDocDiff = (
     const nextDoc = comparisonDocs[0];
 
     const { added, updated } = calculateObjectDiff(
-      flattenObjectNestedLast(currentDoc.value),
-      flattenObjectNestedLast(nextDoc.value)
+      regroupGeoPointFields(
+        flattenObjectNestedLast(currentDoc.value) as FlattenRecord,
+        geoPointFields
+      ),
+      regroupGeoPointFields(
+        flattenObjectNestedLast(nextDoc.value) as FlattenRecord,
+        geoPointFields
+      )
     );
 
-    const addedFields = Object.keys(flattenObjectNestedLast(added));
-    const updatedFields = Object.keys(flattenObjectNestedLast(updated));
+    // Don't flatten added/updated - they already have geo_points as objects
+    const addedFields = Object.keys(added);
+    const updatedFields = Object.keys(updated);
 
     // Sort list to have deterministic list of results
     const processorDetectedFields = [...addedFields, ...updatedFields].sort().map((name) => ({

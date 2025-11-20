@@ -14,7 +14,7 @@ import { getProcessingPipelineName } from './name';
 
 /**
  * Generates processors to transform flattened geo_point fields (field.lat, field.lon)
- * into proper geo_point objects { lat: ..., lon: ... }
+ * into proper geo_point objects { lat: ..., lon: ... }. Preserves WKT strings if already in that format.
  */
 export function generateGeoPointTransformProcessors(fields: Array<{ name: string; type: string }>) {
   // Filter to only geo_point fields
@@ -32,7 +32,7 @@ export function generateGeoPointTransformProcessors(fields: Array<{ name: string
     // Script processor to handle multiple geo_point formats:
     // 1. Flattened: field.lat and field.lon exist
     // 2. Object: field is already {lat: ..., lon: ...}
-    // 3. String: field is already a WKT string or other geo_point format
+    // 3. String: field is already a WKT string or other geo_point format - leave as-is
     processors.push({
       script: {
         source: `
@@ -45,32 +45,32 @@ export function generateGeoPointTransformProcessors(fields: Array<{ name: string
           def latValue = $(latField, null);
           def lonValue = $(lonField, null);
           
-          // Case 1: Field is already a string (WKT or other format)
+          // Case 1: Field is already a string (WKT or other format) - preserve it
           if (baseValue instanceof String) {
-            // Move to temp field for subsequent rename step
+            // Already in WKT or other string format, leave as-is
             ctx["_tmp_${fieldPath}"] = baseValue;
             return;
           }
           
-          // Case 2: Field is a Map/Object with lat/lon
+          // Case 2: Field is a Map/Object with lat/lon - already in correct format
           if (baseValue instanceof Map) {
             def lat = baseValue.get('lat');
             def lon = baseValue.get('lon');
             if (lat != null && lon != null) {
-              // Convert to WKT format
-              ctx["_tmp_${fieldPath}"] = "POINT(" + lon + " " + lat + ")";
+              // Already in { lat, lon } format, preserve it
+              ctx["_tmp_${fieldPath}"] = ['lat': lat, 'lon': lon];
               return;
             }
           }
           
           // Case 3: Flattened format - lat and lon exist as separate fields
           if (latValue != null && lonValue != null) {
-            // Create the geo_point object using the WKT notation
-            ctx["_tmp_${fieldPath}"] = "POINT(" + lonValue + " " + latValue + ")";
+            // Create the geo_point object as { lat, lon }
+            ctx["_tmp_${fieldPath}"] = ['lat': latValue, 'lon': lonValue];
           }
         `,
         lang: 'painless',
-        description: `Transform ${fieldPath} into geo_point WKT format`,
+        description: `Transform ${fieldPath} into geo_point { lat, lon } format`,
       },
     });
 

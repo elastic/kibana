@@ -15,7 +15,7 @@ import { flattenObjectNestedLast } from '@kbn/object-utils';
 import { CUSTOM_SAMPLES_DATA_SOURCE_STORAGE_KEY_PREFIX } from '../../../../../../common/url_schema/common';
 import type { StreamEnrichmentContextType } from './types';
 import type { SampleDocumentWithUIAttributes } from '../simulation_state_machine';
-import { regroupGeoPointFieldsForDisplay } from '../../../utils/geo_point_utils';
+import { regroupGeoPointFieldsForDisplay, normalizeGeoPointsInObject } from '../../../utils/geo_point_utils';
 import {
   convertToFieldDefinition,
   getMappedSchemaFields,
@@ -102,8 +102,10 @@ export function getActiveDataSourceSamples(
   }));
 
   return dataSourceSnapshot.context.data.map((doc) => {
-    // Flatten the document and apply geo_point regrouping
-    const flattened = flattenObjectNestedLast(doc) as FlattenRecord;
+    // Normalize geo_point fields before flattening to prevent .lat/.lon separation
+    const normalized = normalizeGeoPointsInObject(doc, fields);
+    // Flatten the document and apply geo_point regrouping (for any that were already flat)
+    const flattened = flattenObjectNestedLast(normalized) as FlattenRecord;
     const regrouped = regroupGeoPointFieldsForDisplay(flattened, fields);
 
     return {

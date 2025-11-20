@@ -19,6 +19,7 @@ import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { SecurityError } from '../../../../lib/streams/errors/security_error';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../../create_server_route';
+import { normalizeGeoPointsInObject } from '../../../../lib/streams/helpers/normalize_geo_points';
 
 const UNMAPPED_SAMPLE_SIZE = 500;
 const FIELD_SIMULATION_TIMEOUT = '1s';
@@ -241,7 +242,9 @@ export const schemaFieldsSimulationRoute = createServerRoute({
     console.log('[GEO_POINT DEBUG] Identified geo_point fields:', Array.from(geoPointFields));
 
     const sampleResultsAsSimulationDocs = sampleResults.hits.hits.map((hit) => {
-      const flattenedSource = getFlattenedObject(hit._source as SampleDocument);
+      // Normalize geo_point fields before flattening to prevent .lat/.lon separation
+      const normalized = normalizeGeoPointsInObject(hit._source as SampleDocument, geoPointFields);
+      const flattenedSource = getFlattenedObject(normalized);
 
       // eslint-disable-next-line no-console
       console.log('[GEO_POINT DEBUG] Flattened source keys:', Object.keys(flattenedSource).sort());

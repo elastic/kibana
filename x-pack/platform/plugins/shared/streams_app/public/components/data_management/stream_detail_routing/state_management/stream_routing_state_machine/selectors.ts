@@ -10,7 +10,10 @@ import { flattenObject } from '@kbn/object-utils';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import type { StreamRoutingContext } from './types';
 import type { RoutingSamplesContext } from './routing_samples_state_machine';
-import { regroupGeoPointFieldsForDisplay } from '../../../utils/geo_point_utils';
+import {
+  regroupGeoPointFieldsForDisplay,
+  normalizeGeoPointsInObject,
+} from '../../../utils/geo_point_utils';
 
 /**
  * Selects the set of dotted fields that are not supported by the current simulation.
@@ -46,6 +49,7 @@ export const selectPreviewDocuments = createSelector(
       ...field,
     }));
     return documents
+      .map((doc) => normalizeGeoPointsInObject(doc, fields))
       .map((doc) => flattenObject(doc) as FlattenRecord)
       .map((record) => regroupGeoPointFieldsForDisplay(record, fields));
   }

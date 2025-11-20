@@ -13,7 +13,7 @@ import { Streams } from '@kbn/streams-schema';
 import type { SimulationContext } from './types';
 import { getFilterSimulationDocumentsFn } from './utils';
 import type { StreamEnrichmentContextType } from '../stream_enrichment_state_machine/types';
-import { regroupGeoPointFieldsForDisplay } from '../../../utils/geo_point_utils';
+import { regroupGeoPointFieldsForDisplay, normalizeGeoPointsInObject } from '../../../utils/geo_point_utils';
 
 /**
  * Helper function to get field definitions from enrichment context
@@ -39,21 +39,25 @@ function getFieldDefinitionsArray(
  */
 /**
  * Selects the documents used for the data preview table.
+ * Optionally applies geo_point regrouping if enrichmentContext is provided.
  */
-export const selectPreviewRecords = createSelector(
-  [
-    (context: Pick<SimulationContext, 'samples'>) => context.samples,
-    (context: Pick<SimulationContext, 'previewDocsFilter'>) => context.previewDocsFilter,
-    (context: Pick<SimulationContext, 'simulation'>) => context.simulation?.documents,
-  ],
-  (samples, previewDocsFilter, documents) => {
-    if (!previewDocsFilter || !documents) {
-      return samples.map((sample) => flattenObjectNestedLast(sample.document) as FlattenRecord);
-    }
-    const filterFn = getFilterSimulationDocumentsFn(previewDocsFilter);
-    return documents.filter(filterFn).map((doc) => doc.value);
+export const selectPreviewRecords = (
+  context: Pick<SimulationContext, 'samples' | 'previewDocsFilter' | 'simulation'>,
+  enrichmentContext?: StreamEnrichmentContextType
+): FlattenRecord[] => {
+  const { samples, previewDocsFilter, simulation } = context;
+  const fields = getFieldDefinitionsArray(enrichmentContext);
+
+  if (!previewDocsFilter || !simulation?.documents) {
+    return samples.map((sample) => {
+      const normalized = normalizeGeoPointsInObject(sample.document, fields);
+      const flattened = flattenObjectNestedLast(normalized) as FlattenRecord;
+      return fields.length > 0 ? regroupGeoPointFieldsForDisplay(flattened, fields) : flattened;
+    });
   }
-);
+  const filterFn = getFilterSimulationDocumentsFn(previewDocsFilter);
+  return simulation.documents.filter(filterFn).map((doc) => doc.value);
+};
 
 export const selectOriginalPreviewRecords = createSelector(
   [
@@ -87,7 +91,8 @@ export const selectFieldsInSamples = (
   const fieldSet = new Set<string>();
 
   samples.forEach((sample) => {
-    const flattened = flattenObjectNestedLast(sample.document) as FlattenRecord;
+    const normalized = normalizeGeoPointsInObject(sample.document, fields);
+    const flattened = flattenObjectNestedLast(normalized) as FlattenRecord;
     // Apply geo_point regrouping if fields are available
     const record =
       fields.length > 0 ? regroupGeoPointFieldsForDisplay(flattened, fields) : flattened;
