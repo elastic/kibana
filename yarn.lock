@@ -3712,7 +3712,7 @@
     "@hapi/validate" "^2.0.1"
     "@hapi/wreck" "^18.0.1"
 
-"@hapi/hapi@^21.1.0", "@hapi/hapi@^21.4.3":
+"@hapi/hapi@^21.1.0":
   version "21.4.3"
   resolved "https://registry.yarnpkg.com/@hapi/hapi/-/hapi-21.4.3.tgz#e829eef35659d7618831f4431382229107a71d07"
   integrity sha512-Q7g0ZY4gxU69wabFKH75qR0AFOdiOECj6vGqTHBSO5Lrwe6TwD8r9LkYQIbvtG8N423VDpdVsiZP8MnBwmD6Hw==
@@ -3733,6 +3733,30 @@
     "@hapi/statehood" "^8.2.0"
     "@hapi/subtext" "^8.1.1"
     "@hapi/teamwork" "^6.0.0"
+    "@hapi/topo" "^6.0.2"
+    "@hapi/validate" "^2.0.1"
+
+"@hapi/hapi@^21.4.4":
+  version "21.4.4"
+  resolved "https://registry.yarnpkg.com/@hapi/hapi/-/hapi-21.4.4.tgz#89c239135be1ff2adeb586df157dee7a49593291"
+  integrity sha512-vI6JPLR99WZDKI1nriD0qXDPp8sKFkZfNVGrDDZafDQ8jU+3ERMwS0vPac5aGae6yyyoGZGOBiYExw4N8ScSTQ==
+  dependencies:
+    "@hapi/accept" "^6.0.3"
+    "@hapi/ammo" "^6.0.1"
+    "@hapi/boom" "^10.0.1"
+    "@hapi/bounce" "^3.0.2"
+    "@hapi/call" "^9.0.1"
+    "@hapi/catbox" "^12.1.1"
+    "@hapi/catbox-memory" "^6.0.2"
+    "@hapi/heavy" "^8.0.1"
+    "@hapi/hoek" "^11.0.7"
+    "@hapi/mimos" "^7.0.1"
+    "@hapi/podium" "^5.0.2"
+    "@hapi/shot" "^6.0.2"
+    "@hapi/somever" "^4.1.1"
+    "@hapi/statehood" "^8.2.1"
+    "@hapi/subtext" "^8.1.1"
+    "@hapi/teamwork" "^6.0.1"
     "@hapi/topo" "^6.0.2"
     "@hapi/validate" "^2.0.1"
 
@@ -3848,6 +3872,19 @@
     "@hapi/iron" "^7.0.1"
     "@hapi/validate" "^2.0.1"
 
+"@hapi/statehood@^8.2.1":
+  version "8.2.1"
+  resolved "https://registry.yarnpkg.com/@hapi/statehood/-/statehood-8.2.1.tgz#4435f11f78873f07aa7422a95386ae9802a914e1"
+  integrity sha512-xf72TG/QINW26jUu+uL5H+crE1o8GplIgfPWwPZhnAGJzetIVAQEQYvzq+C0aEVHg5/lMMtQ+L9UryuSa5Yjkg==
+  dependencies:
+    "@hapi/boom" "^10.0.1"
+    "@hapi/bounce" "^3.0.1"
+    "@hapi/bourne" "^3.0.0"
+    "@hapi/cryptiles" "^6.0.1"
+    "@hapi/hoek" "^11.0.2"
+    "@hapi/iron" "^7.0.1"
+    "@hapi/validate" "^2.0.1"
+
 "@hapi/subtext@^8.1.1":
   version "8.1.1"
   resolved "https://registry.yarnpkg.com/@hapi/subtext/-/subtext-8.1.1.tgz#48b93ab9196f7bf5902060ec92459fc354acba6e"
@@ -3865,6 +3902,11 @@
   version "6.0.0"
   resolved "https://registry.yarnpkg.com/@hapi/teamwork/-/teamwork-6.0.0.tgz#b3a173cf811ba59fc6ee22318a1b51f4561f06e0"
   integrity sha512-05HumSy3LWfXpmJ9cr6HzwhAavrHkJ1ZRCmNE2qJMihdM5YcWreWPfyN0yKT2ZjCM92au3ZkuodjBxOibxM67A==
+
+"@hapi/teamwork@^6.0.1":
+  version "6.0.1"
+  resolved "https://registry.yarnpkg.com/@hapi/teamwork/-/teamwork-6.0.1.tgz#2f6496170f47abd8446930447f64e64ba1d57d3f"
+  integrity sha512-52OXRslUfYwXAOG8k58f2h2ngXYQGP0x5RPOo+eWA/FtyLgHjGMrE3+e9LSXP/0q2YfHAK5wj9aA9DTy1K+kyQ==
 
 "@hapi/tlds@^1.1.1":
   version "1.1.2"
