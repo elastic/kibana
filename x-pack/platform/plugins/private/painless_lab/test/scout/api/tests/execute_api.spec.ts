@@ -15,7 +15,7 @@ apiTest.describe(
   () => {
     let adminApiCredentials: RoleApiCredentials;
     apiTest.beforeAll(async ({ requestAuth }) => {
-      adminApiCredentials = await requestAuth.getApiKey('admin');
+      adminApiCredentials = await requestAuth.getApiKey('hello_api_test_role');
     });
 
     apiTest(

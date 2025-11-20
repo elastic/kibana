@@ -132,20 +132,25 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
         }
       };
 
-      const getApiKey = async (role: string): Promise<RoleApiCredentials> => {
+      const getApiKey = async (predefinedRole: string): Promise<RoleApiCredentials> => {
         // fetch role descriptors from roles.yml file
         const roleDescriptors =
-          role === 'admin'
+          predefinedRole === 'admin'
             ? {}
             : (() => {
-                const roleDescriptor = defaultRoles.get(role);
+                const roleDescriptor = defaultRoles.availableRoles.get(predefinedRole);
                 if (!roleDescriptor) {
-                  throw new Error(`Cannot create API key for non-existent role "${role}"`);
+                  const availableRoles = Array.from(defaultRoles.availableRoles.keys()).join(', ');
+                  const errorMessage = [
+                    `Role '${predefinedRole}' not found in the supported list: ${defaultRoles.rolesFilePath}. Available predefined roles: ${availableRoles}.`,
+                    `Is '${predefinedRole}' a custom test role? → Use getApiKeyForCustomRole() to log in with custom Kibana and Elasticsearch privileges`,
+                    `Is '${predefinedRole}' a predefined role? (e.g., admin, viewer, editor) → Add the role descriptor to ${defaultRoles.rolesFilePath} to enable it for testing.`,
+                  ].join('\n\n');
+                  throw new Error(errorMessage);
                 }
-                return { [role]: roleDescriptor };
+                return { [predefinedRole]: roleDescriptor };
               })();
-        // Regular roles use role_descriptors (not kibana_role_descriptors)
-        return await createApiKeyWithAdminCredentials(role, roleDescriptors);
+        return await createApiKeyWithAdminCredentials(predefinedRole, roleDescriptors);
       };
 
       const getApiKeyForCustomRole = async (
