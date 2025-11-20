@@ -21,7 +21,6 @@ export const useOverviewTrendsRequests = (
   const trendData = useSelector(selectOverviewTrends);
 
   useEffect(() => {
-    console.log('Will fetch trend data for visible monitors up to maxItem:', maxItem);
     const visibleMonitors = monitorsSortedByStatus.slice(0, maxItem * rowCount);
     const trendRequests = visibleMonitors.reduce((acc, item) => {
       if (trendData[item.configId + item.locationId] === undefined) {

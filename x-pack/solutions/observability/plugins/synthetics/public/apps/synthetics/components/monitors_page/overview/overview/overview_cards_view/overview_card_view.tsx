@@ -71,15 +71,6 @@ export const OverviewCardView = ({
     return acc;
   }, [monitorsSortedByStatus, rowCount]);
 
-  const loadMoreItems = (_start: number, stop: number) => {
-    console.log('loadMoreItems', { _start, stop });
-    setMaxItem(Math.max(maxItem, stop));
-  };
-
-  const isItemLoaded = (idx: number) => {
-    return listItems[idx].every((m) => !!trendData[m.configId + m.locationId]);
-  };
-
   return (
     <>
       <div style={isUnGrouped ? { height: listHeight } : undefined}>
@@ -88,9 +79,11 @@ export const OverviewCardView = ({
             <EuiAutoSizer>
               {({ width }: EuiAutoSize) => (
                 <InfiniteLoader
-                  isItemLoaded={isItemLoaded}
+                  isItemLoaded={(idx: number) =>
+                    listItems[idx].every((m) => !!trendData[m.configId + m.locationId])
+                  }
                   itemCount={listItems.length}
-                  loadMoreItems={loadMoreItems}
+                  loadMoreItems={(_, stop: number) => setMaxItem(Math.max(maxItem, stop))}
                   minimumBatchSize={MIN_BATCH_SIZE}
                   threshold={LIST_THRESHOLD}
                 >
