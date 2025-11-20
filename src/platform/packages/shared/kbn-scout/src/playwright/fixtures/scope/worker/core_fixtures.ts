@@ -159,10 +159,10 @@ export const coreWorkerFixtures = base.extend<{}, CoreWorkerFixtures>({
 
         if (isElasticsearchRole(role)) {
           await createElasticsearchCustomRole(esClient, customRoleName, role);
-          log.debug(`Successfully created Elasticsearch custom role: ${customRoleName}`);
+          log.debug(`Created Elasticsearch custom role: ${customRoleName}`);
         } else {
           await createCustomRole(kbnClient, customRoleName, role);
-          log.debug(`Successfully created Kibana custom role: ${customRoleName}`);
+          log.debug(`Created Kibana custom role: ${customRoleName}`);
         }
 
         customRoleHash = newRoleHash;

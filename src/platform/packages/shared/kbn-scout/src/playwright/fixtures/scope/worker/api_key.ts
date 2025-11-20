@@ -101,7 +101,7 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
         const apiKey = response.body as ApiKey;
         const apiKeyHeader = { Authorization: `ApiKey ${apiKey.encoded}` };
 
-        log.info(`Successfully created API key for ${roleName} role: ${apiKey.name}`);
+        log.info(`Created API key for ${roleName} role: ${apiKey.name}`);
         generatedApiKeys.push(apiKey);
         return { apiKey, apiKeyHeader };
       };
@@ -127,7 +127,7 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
           if (response.statusCode !== 200) {
             log.info(`Failed to invalidate API key: ${apiKey.name}`);
           } else {
-            log.info(`Successfully invalidated API key: ${apiKey.name}`);
+            log.info(`Invalidated API key: ${apiKey.name}`);
           }
         }
       };
@@ -178,7 +178,7 @@ export const requestAuthFixture = coreWorkerFixtures.extend<
         log.debug(`Deleting custom role with name ${samlAuth.customRoleName}`);
         try {
           await esClient.security.deleteRole({ name: samlAuth.customRoleName });
-          log.info(`Successfully deleted custom role: ${samlAuth.customRoleName}`);
+          log.info(`Deleted ${samlAuth.customRoleName} custom role`);
         } catch (error: any) {
           log.error(`Failed to delete custom role ${samlAuth.customRoleName}: ${error.message}`);
         }
