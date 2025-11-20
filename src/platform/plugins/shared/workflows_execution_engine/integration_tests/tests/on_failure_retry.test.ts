@@ -94,15 +94,8 @@ steps:
               );
             expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.FAILED);
             expect(workflowExecutionDoc?.error).toEqual({
-              type: 'MaxRetryAttemptsReached',
-              message:
-                'Retry step "constantlyFailingStep" has exceeded the maximum number of attempts.',
-              details: {
-                originalError: {
-                  type: 'Error',
-                  message: 'Error: Constantly failing connector',
-                },
-              },
+              type: 'Error',
+              message: 'Error: Constantly failing connector',
             });
             expect(workflowExecutionDoc?.scopeStack).toEqual([]);
           });

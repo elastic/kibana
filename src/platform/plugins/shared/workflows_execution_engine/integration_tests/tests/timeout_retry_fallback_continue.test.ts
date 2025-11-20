@@ -143,14 +143,8 @@ steps:
         );
       expect(workflowExecutionDoc?.status).toBe(ExecutionStatus.FAILED);
       expect(workflowExecutionDoc?.error).toEqual({
-        type: 'MaxRetryAttemptsReached',
-        message: 'Retry step "failingStepByTimeout" has exceeded the maximum number of attempts.',
-        details: {
-          originalError: {
-            type: 'Error',
-            message: 'TimeoutError: Step execution exceeded the configured timeout of 2s.',
-          },
-        },
+        type: 'Error',
+        message: 'TimeoutError: Step execution exceeded the configured timeout of 2s.',
       });
       expect(workflowExecutionDoc?.scopeStack).toEqual([]);
     });

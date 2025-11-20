@@ -398,7 +398,10 @@ export class WorkflowsExecutionEnginePlugin
           await workflowExecutionRepository.updateWorkflowExecution({
             id: workflowExecution.id,
             status: ExecutionStatus.FAILED,
-            error: 'Workflows cannot be executed without the user context',
+            error: {
+              type: 'Error',
+              message: 'Workflows cannot be executed without the user context',
+            },
           });
         }
       }
@@ -470,7 +473,10 @@ export class WorkflowsExecutionEnginePlugin
         await workflowExecutionRepository.updateWorkflowExecution({
           id: workflowExecution.id,
           status: ExecutionStatus.FAILED,
-          error: 'Workflow steps cannot be executed without the user context',
+          error: {
+            type: 'Error',
+            message: 'Workflows cannot be executed without the user context',
+          },
         });
       }
 
