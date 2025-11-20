@@ -10,17 +10,8 @@
 import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import type { ProjectRouting } from '@kbn/es-query';
-import { BehaviorSubject, combineLatest, map } from 'rxjs';
-import {
-  type ProjectTagsResponse,
-  type ICPSManager,
-  type ProjectsData,
-  PROJECT_ROUTING,
-} from '@kbn/cps-utils';
-import { getProjectRoutingAccess, getReadonlyMessage } from './access_control';
-
-const MAX_RETRIES = 2;
-const RETRY_DELAY_MS = 1000;
+import { BehaviorSubject, combineLatest, switchMap } from 'rxjs';
+import { type ICPSManager, type ProjectsData, PROJECT_ROUTING } from '@kbn/cps-utils';
 
 /**
  * This should be configured on spaces level.
@@ -39,9 +30,7 @@ export class CPSManager implements ICPSManager {
   private readonly http: HttpSetup;
   private readonly logger: Logger;
   private readonly application: ApplicationStart;
-  private fetchPromise: Promise<ProjectsData | null> | null = null;
-  private cachedData: ProjectsData | null = null;
-  // Initialize without a value - apps will set their value during initialization
+  private projectFetcherPromise: Promise<any> | null = null;
   private readonly projectRouting$ = new BehaviorSubject<ProjectRouting | undefined>(
     DEFAULT_PROJECT_ROUTING
   );
@@ -56,7 +45,9 @@ export class CPSManager implements ICPSManager {
       this.application.currentAppId$,
       this.application.currentLocation$,
     ]).pipe(
-      map(([appId, location]) => {
+      switchMap(async ([appId, location]) => {
+        // Lazy load access control only when observable is subscribed
+        const { getProjectRoutingAccess, getReadonlyMessage } = await import('./async_services');
         const access = getProjectRoutingAccess(appId ?? '', location ?? '');
         return { access, readonlyMessage: getReadonlyMessage(appId) };
       })
@@ -108,12 +99,8 @@ export class CPSManager implements ICPSManager {
    * @returns Promise resolving to ProjectsData
    */
   public async fetchProjects(): Promise<ProjectsData | null> {
-    // Return cached data if available
-    if (this.cachedData) {
-      return this.cachedData;
-    }
-
-    return this.doFetch();
+    const fetcher = await this.getProjectFetcher();
+    return fetcher.fetchProjects();
   }
 
   /**
@@ -121,59 +108,16 @@ export class CPSManager implements ICPSManager {
    * @returns Promise resolving to ProjectsData
    */
   public async refresh(): Promise<ProjectsData | null> {
-    return this.doFetch();
+    const fetcher = await this.getProjectFetcher();
+    return fetcher.refresh();
   }
 
-  private async doFetch(): Promise<ProjectsData | null> {
-    // If a fetch is already in progress, return the existing promise
-    if (this.fetchPromise) {
-      return this.fetchPromise;
+  private async getProjectFetcher() {
+    if (!this.projectFetcherPromise) {
+      this.projectFetcherPromise = import('./async_services').then(({ createProjectFetcher }) =>
+        createProjectFetcher(this.http, this.logger)
+      );
     }
-
-    this.fetchPromise = this.fetchProjectsWithRetry()
-      .then((projectsData) => {
-        this.cachedData = projectsData;
-        return projectsData;
-      })
-      .finally(() => {
-        this.fetchPromise = null;
-      });
-
-    return this.fetchPromise;
-  }
-
-  private async fetchProjectsWithRetry(): Promise<ProjectsData | null> {
-    let lastError: Error = new Error('');
-
-    for (let attempt = 0; attempt <= MAX_RETRIES; attempt++) {
-      try {
-        const response = await this.http.get<ProjectTagsResponse>('/internal/cps/projects_tags');
-        const originValues = response.origin ? Object.values(response.origin) : [];
-
-        return {
-          origin: originValues.length > 0 ? originValues[0] : null,
-          linkedProjects: response.linked_projects
-            ? Object.values(response.linked_projects).sort((a, b) =>
-                a._alias.localeCompare(b._alias)
-              )
-            : [],
-        };
-      } catch (error) {
-        lastError = error instanceof Error ? error : new Error(String(error));
-        this.logger.error(`Failed to fetch projects (attempt ${attempt + 1}/${MAX_RETRIES + 1})`, {
-          error,
-        });
-
-        // Don't wait after the last attempt
-        if (attempt < MAX_RETRIES) {
-          // Exponential backoff
-          await new Promise((resolve) =>
-            setTimeout(resolve, RETRY_DELAY_MS * Math.pow(2, attempt))
-          );
-        }
-      }
-    }
-
-    throw lastError;
+    return this.projectFetcherPromise;
   }
 }

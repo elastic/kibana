@@ -12,7 +12,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { ProjectRouting } from '@kbn/es-query';
 import type { ICPSManager } from '../types';
 import { ProjectRoutingAccess } from '../types';
-import { ProjectPicker } from './project_picker';
+import { DisabledProjectPicker, ProjectPicker } from './project_picker';
 
 interface ProjectPickerContainerProps {
   cpsManager: ICPSManager;
@@ -34,12 +34,15 @@ export const ProjectPickerContainer: React.FC<ProjectPickerContainerProps> = ({ 
     return cpsManager.fetchProjects();
   }, [cpsManager]);
 
+  if (accessInfo.access === ProjectRoutingAccess.DISABLED) {
+    return <DisabledProjectPicker />;
+  }
+
   return (
     <ProjectPicker
       projectRouting={projectRouting}
       onProjectRoutingChange={updateProjectRouting}
       fetchProjects={fetchProjects}
-      isDisabled={accessInfo.access === ProjectRoutingAccess.DISABLED}
       isReadonly={accessInfo.access === ProjectRoutingAccess.READONLY}
       readonlyCustomTitle={accessInfo.readonlyMessage}
     />

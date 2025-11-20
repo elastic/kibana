@@ -33,7 +33,6 @@ export interface ProjectPickerProps {
   projectRouting?: ProjectRouting;
   onProjectRoutingChange: (projectRouting: ProjectRouting) => void;
   fetchProjects: () => Promise<ProjectsData | null>;
-  isDisabled?: boolean;
   isReadonly?: boolean;
   readonlyCustomTitle?: string;
 }
@@ -42,7 +41,6 @@ export const ProjectPicker = ({
   projectRouting,
   onProjectRoutingChange,
   fetchProjects,
-  isDisabled = false,
   isReadonly = false,
   readonlyCustomTitle,
 }: ProjectPickerProps) => {
@@ -55,23 +53,6 @@ export const ProjectPicker = ({
   // do not render the component if there aren't linked projects
   if (!originProject || linkedProjects.length === 0) {
     return null;
-  }
-
-  // Render disabled button when disabled
-  if (isDisabled) {
-    return (
-      <EuiToolTip content={strings.getProjectPickerDisabledTooltip()}>
-        <EuiButtonIcon
-          css={styles.disabledButton}
-          aria-label={strings.getProjectPickerButtonAriaLabel()}
-          data-test-subj="project-picker-button"
-          size="xs"
-          isDisabled
-          display="fill"
-          iconType={CPSIconDisabled}
-        />
-      </EuiToolTip>
-    );
   }
 
   const button = (
@@ -143,6 +124,23 @@ export const ProjectPicker = ({
         />
       </EuiPopover>
     </EuiTourStep>
+  );
+};
+
+export const DisabledProjectPicker = () => {
+  const styles = useMemoCss(projectPickerStyles);
+  return (
+    <EuiToolTip content={strings.getProjectPickerDisabledTooltip()}>
+      <EuiButtonIcon
+        css={styles.disabledButton}
+        aria-label={strings.getProjectPickerButtonAriaLabel()}
+        data-test-subj="project-picker-button"
+        size="xs"
+        isDisabled
+        display="fill"
+        iconType={CPSIconDisabled}
+      />
+    </EuiToolTip>
   );
 };
 
