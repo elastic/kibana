@@ -14,6 +14,7 @@ import {
   EuiText,
   EuiIconTip,
   EuiButtonIcon,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { BehaviorSubject } from 'rxjs';
@@ -413,33 +414,45 @@ export function LayerPanel(props: LayerPanelProps) {
               </EuiFlexItem>
               {props.displayLayerSettings && layerSettingsAction.isCompatible && (
                 <EuiFlexItem grow={false}>
-                  <EuiButtonIcon
-                    iconType={layerSettingsAction.icon}
-                    aria-label={layerSettingsAction.displayName}
-                    onClick={() => layerSettingsAction.execute(null)}
-                    data-test-subj={layerSettingsAction['data-test-subj']}
-                  />
+                  <EuiToolTip content={layerSettingsAction.displayName} disableScreenReaderOutput>
+                    <EuiButtonIcon
+                      iconType={layerSettingsAction.icon}
+                      aria-label={layerSettingsAction.displayName}
+                      onClick={() => layerSettingsAction.execute(null)}
+                      data-test-subj={layerSettingsAction['data-test-subj']}
+                    />
+                  </EuiToolTip>
                 </EuiFlexItem>
               )}
               {layerActions && (
                 <>
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType={layerActions.removeLayerAction.icon}
-                      color={layerActions.removeLayerAction.color}
-                      aria-label={layerActions.removeLayerAction.displayName}
-                      onClick={() => layerActions.removeLayerAction.execute(null)}
-                      data-test-subj={layerActions.removeLayerAction['data-test-subj']}
-                    />
+                    <EuiToolTip
+                      content={layerActions.removeLayerAction.displayName}
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        iconType={layerActions.removeLayerAction.icon}
+                        color={layerActions.removeLayerAction.color}
+                        aria-label={layerActions.removeLayerAction.displayName}
+                        onClick={() => layerActions.removeLayerAction.execute(null)}
+                        data-test-subj={layerActions.removeLayerAction['data-test-subj']}
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      iconType={layerActions.cloneLayerAction.icon}
-                      color={layerActions.cloneLayerAction.color}
-                      aria-label={layerActions.cloneLayerAction.displayName}
-                      onClick={() => layerActions.cloneLayerAction.execute(null)}
-                      data-test-subj={layerActions.cloneLayerAction['data-test-subj']}
-                    />
+                    <EuiToolTip
+                      content={layerActions.cloneLayerAction.displayName}
+                      disableScreenReaderOutput
+                    >
+                      <EuiButtonIcon
+                        iconType={layerActions.cloneLayerAction.icon}
+                        color={layerActions.cloneLayerAction.color}
+                        aria-label={layerActions.cloneLayerAction.displayName}
+                        onClick={() => layerActions.cloneLayerAction.execute(null)}
+                        data-test-subj={layerActions.cloneLayerAction['data-test-subj']}
+                      />
+                    </EuiToolTip>
                   </EuiFlexItem>
                 </>
               )}
