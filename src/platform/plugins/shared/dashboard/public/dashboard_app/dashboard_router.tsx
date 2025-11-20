@@ -34,6 +34,7 @@ import {
   createDashboardEditUrl,
   createDashboardListingFilterUrl,
 } from '../utils/urls';
+import { DASHBOARD_DURATION_START_MARK } from '../dashboard_api/performance/dashboard_duration_start_mark';
 
 export const dashboardUrlParams = {
   showTopMenu: 'show-top-menu',
@@ -96,6 +97,13 @@ export async function mountApp({
   const renderDashboard = (
     routeProps: RouteComponentProps<{ id?: string; expandedPanelId?: string }>
   ) => {
+    // If we are loading the dashboard app and going directly to a dashboard,
+    // the mark will already be set in the mount method. Otherwise, we are coming
+    // from the listing page or another dashboard, so we need to set the mark here.
+    if (performance.getEntriesByName('dashboard_duration_start', 'mark').length === 0) {
+      performance.mark(DASHBOARD_DURATION_START_MARK);
+    }
+
     const routeParams = parse(routeProps.history.location.search);
     if (routeParams.embed === 'true' && !globalEmbedSettings) {
       globalEmbedSettings = getDashboardEmbedSettings(routeParams);
@@ -113,6 +121,10 @@ export async function mountApp({
   };
 
   const renderListingPage = (routeProps: RouteComponentProps) => {
+    // clear the dashboard duration start mark set during mounting because we
+    // went to the listing page instead of a dashboard view
+    performance.clearMarks(DASHBOARD_DURATION_START_MARK);
+
     coreServices.chrome.docTitle.change(getDashboardPageTitle());
     const routeParams = parse(routeProps.history.location.search);
     const title = (routeParams.title as string) || undefined;
