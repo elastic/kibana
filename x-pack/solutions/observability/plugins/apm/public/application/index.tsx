@@ -59,6 +59,7 @@ export const renderApp = ({
     lens: pluginsStart.lens,
     uiActions: pluginsStart.uiActions,
     observabilityAIAssistant: pluginsStart.observabilityAIAssistant,
+    onechat: pluginsStart.onechat,
     share: pluginsSetup.share,
     kibanaEnvironment,
     licensing: pluginsStart.licensing,

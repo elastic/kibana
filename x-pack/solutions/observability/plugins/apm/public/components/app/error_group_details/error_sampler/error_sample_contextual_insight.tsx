@@ -4,11 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
 import React, { useMemo, useState } from 'react';
 import type { AT_TIMESTAMP } from '@kbn/apm-types';
+// import { OBSERVABILITY_AGENT_ID } from '../../../../../common/observability_agent/agent_id';
+import { OBSERVABILITY_ERROR_CONTEXT_ATTACHMENT_TYPE_ID } from '../../../../../common/observability_agent/attachment_ids';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { ErrorSampleDetailTabContent } from './error_sample_detail';
@@ -39,7 +41,7 @@ export function ErrorSampleContextualInsight({
     };
   };
 }) {
-  const { observabilityAIAssistant } = useApmPluginContext();
+  const { observabilityAIAssistant, onechat } = useApmPluginContext();
 
   const [logStacktrace, setLogStacktrace] = useState('');
   const [exceptionStacktrace, setExceptionStacktrace] = useState('');
@@ -88,6 +90,72 @@ export function ErrorSampleContextualInsight({
           })}
         />
       </EuiFlexItem>
+      {onechat ? (
+        <>
+          <EuiSpacer size="s" />
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              data-test-subj="apmOnechatExplainThisErrorButton"
+              iconType="sparkles"
+              onClick={() => {
+                const serviceName = error.service.name;
+                const languageName = error.service.language?.name ?? '';
+                const runtimeName = error.service.runtime?.name ?? '';
+                const runtimeVersion = error.service.runtime?.version ?? '';
+                const transactionName = transaction?.transaction.name ?? '';
+
+                const attachments = [
+                  {
+                    id: 'apm_error_details_screen_ctx',
+                    type: 'screen_context',
+                    getContent: () => ({
+                      app: 'apm',
+                      url: window.location.href,
+                      description: `APM error details page for ${serviceName}`,
+                    }),
+                  },
+                  {
+                    id: 'apm_error_details_error_ctx',
+                    type: OBSERVABILITY_ERROR_CONTEXT_ATTACHMENT_TYPE_ID,
+                    getContent: () => ({
+                      service: {
+                        name: serviceName,
+                        environment: error.service.environment,
+                        language: languageName,
+                        runtime_name: runtimeName,
+                        runtime_version: runtimeVersion,
+                      },
+                      transaction_name: transactionName,
+                      error_id: error.error.id,
+                      occurred_at: error['@timestamp'],
+                      log_stacktrace: logStacktrace,
+                      exception_stacktrace: exceptionStacktrace,
+                    }),
+                  },
+                ];
+
+                onechat.openConversationFlyout({
+                  initialMessage: i18n.translate(
+                    'xpack.apm.errorGroupContextualInsight.agentBuilderFlyoutInitialMessage',
+                    {
+                      defaultMessage:
+                        "I'm looking at an exception and trying to understand what it means",
+                    }
+                  ),
+                  attachments,
+                  sessionTag: 'apm-error-context',
+                  newConversation: true,
+                  // agentId: OBSERVABILITY_AGENT_ID,
+                });
+              }}
+            >
+              {i18n.translate('xpack.apm.errorGroupContextualInsight.explainButtonLabel', {
+                defaultMessage: 'Explain this error',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        </>
+      ) : null}
       <EuiSpacer size="s" />
       <div
         ref={(next) => {
