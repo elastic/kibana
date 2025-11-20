@@ -153,7 +153,7 @@ export const OptionsListControl = ({
               <EuiToolTip
                 position="top"
                 content={
-                  customStrings?.customInvalidSelectionsLabel ??
+                  customStrings?.invalidSelectionsLabel ??
                   OptionsListStrings.control.getInvalidSelectionWarningLabel(invalidSelections.size)
                 }
                 delay="long"
@@ -166,7 +166,7 @@ export const OptionsListControl = ({
                   shape="square"
                   fill="dark"
                   title={
-                    customStrings?.customInvalidSelectionsLabel ??
+                    customStrings?.invalidSelectionsLabel ??
                     OptionsListStrings.control.getInvalidSelectionWarningLabel(
                       invalidSelections.size
                     )

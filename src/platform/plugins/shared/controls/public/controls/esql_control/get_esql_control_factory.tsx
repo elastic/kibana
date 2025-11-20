@@ -199,7 +199,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
                 ),
               },
               customStrings: {
-                customInvalidSelectionsLabel: i18n.translate(
+                invalidSelectionsLabel: i18n.translate(
                   'controls.optionsList.popover.incompatibleSelectionsSectionTitle',
                   {
                     defaultMessage:

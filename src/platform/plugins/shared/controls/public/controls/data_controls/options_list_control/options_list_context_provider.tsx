@@ -12,7 +12,7 @@ import type { OptionsListDisplaySettings } from '../../../../common/options_list
 import type { OptionsListComponentApi } from './types';
 
 export interface OptionsListCustomStrings {
-  customInvalidSelectionsLabel?: string;
+  invalidSelectionsLabel?: string;
 }
 
 export const OptionsListControlContext = React.createContext<

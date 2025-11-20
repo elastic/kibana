@@ -66,7 +66,7 @@ export const OptionsListPopoverInvalidSelections = () => {
         prepend: (
           <EuiScreenReaderOnly>
             <div>
-              {customStrings?.customInvalidSelectionsLabel ||
+              {customStrings?.invalidSelectionsLabel ||
                 OptionsListStrings.popover.getInvalidSelectionScreenReaderText()}
               {'" "'} {/* Adds a pause for the screen reader */}
             </div>
@@ -86,7 +86,7 @@ export const OptionsListPopoverInvalidSelections = () => {
             <EuiIcon
               type="warning"
               title={
-                customStrings?.customInvalidSelectionsLabel ||
+                customStrings?.invalidSelectionsLabel ||
                 OptionsListStrings.popover.getInvalidSelectionScreenReaderText()
               }
               size="s"
@@ -94,7 +94,7 @@ export const OptionsListPopoverInvalidSelections = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <label>
-              {customStrings?.customInvalidSelectionsLabel ||
+              {customStrings?.invalidSelectionsLabel ||
                 OptionsListStrings.popover.getInvalidSelectionsSectionTitle(invalidSelections.size)}
             </label>
           </EuiFlexItem>
@@ -102,7 +102,7 @@ export const OptionsListPopoverInvalidSelections = () => {
       </EuiTitle>
       <EuiSelectable
         aria-label={
-          customStrings?.customInvalidSelectionsLabel ||
+          customStrings?.invalidSelectionsLabel ||
           OptionsListStrings.popover.getInvalidSelectionsSectionAriaLabel(
             defaultPanelTitle ?? '',
             invalidSelections.size
