@@ -14,7 +14,7 @@ export interface MessageEditorInstance {
   };
   focus: () => void;
   getContent: () => string;
-  setContent: (html: string) => void;
+  setContent: (text: string) => void;
   clear: () => void;
   isEmpty: boolean;
 }
@@ -37,8 +37,7 @@ export const useMessageEditor = (): MessageEditorInstance => {
   const [isEmpty, setIsEmpty] = useState(true);
 
   const syncIsEmpty = useCallback(() => {
-    let content = ref.current?.innerHTML ?? '';
-    content = content.replace(/<br\s*\/?>/gi, '');
+    const content = ref.current?.textContent ?? '';
     const nextIsEmpty = content.trim() === '';
     setIsEmpty(nextIsEmpty);
   }, []);
@@ -60,20 +59,17 @@ export const useMessageEditor = (): MessageEditorInstance => {
         ref.current?.focus();
       },
       getContent: () => {
-        return ref.current?.innerHTML ?? '';
+        return ref.current?.textContent ?? '';
       },
-      setContent: (html: string) => {
+      setContent: (text: string) => {
         if (ref.current) {
-          // Low risk for XSS as this input is localized to the user's editor
-          // Sanitization must be performed server side before committing message
-          // eslint-disable-next-line no-unsanitized/property
-          ref.current.innerHTML = html;
+          ref.current.textContent = text;
           syncIsEmpty();
         }
       },
       clear: () => {
         if (ref.current) {
-          ref.current.innerHTML = '';
+          ref.current.textContent = '';
           setIsEmpty(true);
         }
       },

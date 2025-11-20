@@ -66,7 +66,7 @@ export const MessageEditor: React.FC<MessageEditorProps> = ({
     <div
       ref={ref}
       id={editorId}
-      contentEditable={!disabled}
+      contentEditable={disabled ? 'false' : 'plaintext-only'}
       role="textbox"
       aria-multiline="true"
       aria-label="Message input"
