@@ -97,6 +97,7 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
   router.versioned
     .get({
       path: DATA_STREAM_API_ROUTES.DEPRECATED_ILM_CHECK_PATTERN,
+      access: 'internal',
       security: {
         authz: {
           requiredPrivileges: [
@@ -108,12 +109,12 @@ export const registerRoutes = (router: FleetAuthzRouter) => {
       },
       summary: `Check if Fleet-managed component templates are using deprecated ILM policies that require manual migration`,
       options: {
-        tags: ['oas-tag:Data streams'],
+        tags: ['internal', 'oas-tag:Data streams'],
       },
     })
     .addVersion(
       {
-        version: API_VERSIONS.public.v1,
+        version: API_VERSIONS.internal.v1,
         validate: {
           request: {},
           response: {

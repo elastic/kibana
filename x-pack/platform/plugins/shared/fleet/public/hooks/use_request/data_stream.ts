@@ -41,7 +41,7 @@ export const useGetDeprecatedILMCheckQuery = () => {
     sendRequestForRq<DeprecatedILMPolicyCheckResponse>({
       path: dataStreamRouteService.getDeprecatedILMCheckPath(),
       method: 'get',
-      version: API_VERSIONS.public.v1,
+      version: API_VERSIONS.internal.v1,
     })
   );
 };

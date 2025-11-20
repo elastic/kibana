@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 
@@ -17,8 +17,9 @@ export default function (providerContext: FtrProviderContext) {
   describe('deprecated_ilm_check', () => {
     const getDeprecatedILMCheck = async () => {
       return await supertest
-        .get(`/api/fleet/data_streams/deprecated_ilm_check`)
-        .set('kbn-xsrf', 'xxxx');
+        .get(`/internal/fleet/data_streams/deprecated_ilm_check`)
+        .set('kbn-xsrf', 'xxxx')
+        .set('elastic-api-version', '1');
     };
 
     afterEach(async () => {
