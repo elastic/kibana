@@ -5,16 +5,7 @@
  * 2.0.
  */
 
-import {
-  EuiBadge,
-  EuiCallOut,
-  EuiConfirmModal,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiText,
-  useGeneratedHtmlId,
-} from '@elastic/eui';
+import { EuiBadge, EuiCallOut, EuiConfirmModal, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 import React, { Fragment, useRef, useState } from 'react';
 
 import type { NotificationsStart } from '@kbn/core/public';
@@ -225,35 +216,24 @@ export const InvalidateProvider: React.FunctionComponent<Props> = ({
             <ul>
               {apiKeys.map(({ name, id, metadata }) => (
                 <li key={id}>
-                  <EuiFlexGroup wrap responsive={false} gutterSize="xs" alignItems="center">
-                    <EuiFlexItem grow={false} key={`name-${id}`}>
-                      <EuiText>{name}</EuiText>
-                    </EuiFlexItem>
-                    {metadata.managed && (
-                      <EuiFlexItem grow={false} key={`managed-${id}`}>
-                        <EuiBadge color="hollow" iconType="gear">
-                          {i18n.translate(
-                            'xpack.security.accountManagement.apiKeyBadge.managedTitle',
-                            {
-                              defaultMessage: 'Managed',
-                            }
-                          )}
-                        </EuiBadge>
-                      </EuiFlexItem>
-                    )}
-                    {metadata?.kibana?.type === 'alerting_rule' && (
-                      <EuiFlexItem grow={false} key={`alerting-${id}`}>
-                        <EuiBadge color="warning" iconType="wrench">
-                          {i18n.translate(
-                            'xpack.security.accountManagement.apiKeyBadge.alertingRuleTitle',
-                            {
-                              defaultMessage: 'Alerting',
-                            }
-                          )}
-                        </EuiBadge>
-                      </EuiFlexItem>
-                    )}
-                  </EuiFlexGroup>
+                  <span>{name}&nbsp;</span>
+                  {metadata.managed && (
+                    <EuiBadge color="hollow" iconType="gear">
+                      {i18n.translate('xpack.security.accountManagement.apiKeyBadge.managedTitle', {
+                        defaultMessage: 'Managed',
+                      })}
+                    </EuiBadge>
+                  )}
+                  {metadata?.kibana?.type === 'alerting_rule' && (
+                    <EuiBadge color="warning">
+                      {i18n.translate(
+                        'xpack.security.accountManagement.apiKeyBadge.alertingRuleTitle',
+                        {
+                          defaultMessage: 'Alerting',
+                        }
+                      )}
+                    </EuiBadge>
+                  )}
                 </li>
               ))}
             </ul>
