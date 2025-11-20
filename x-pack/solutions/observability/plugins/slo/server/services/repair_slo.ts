@@ -25,10 +25,10 @@ import type { SLODefinition, StoredSLODefinition } from '../domain/models/slo';
 
 interface RepairAction {
   sloId: string;
-  revision: number;
+  sloRevision: number;
   action: 'recreate-transform' | 'start-transform' | 'stop-transform';
   transformType: 'rollup' | 'summary';
-  enabled: boolean | undefined;
+  sloEnabled: boolean | undefined;
 }
 
 export class RepairSLO {
@@ -45,19 +45,18 @@ export class RepairSLO {
       const sloHealth = new GetSLOHealth(this.scopedClusterClient, repository);
       const healthResponse = await sloHealth.execute({
         list: params.list || [],
-        statusFilter: 'unhealthy',
       });
 
       const repairActions = this.identifyRepairActions(
-        healthResponse.data as Array<{
-          id: string;
-          revision: number;
-          enabled?: boolean;
+        healthResponse as Array<{
+          sloId: string;
+          sloRevision: number;
+          sloEnabled?: boolean;
           health: {
             overall: 'healthy' | 'unhealthy' | 'missing';
             rollup: { status: string; transformState?: string; match: boolean | undefined };
             summary: { status: string; transformState?: string; match: boolean | undefined };
-            enabled?: boolean;
+            sloEnabled?: boolean;
           };
         }>
       );
@@ -70,7 +69,7 @@ export class RepairSLO {
 
       const actionsBySloId = new Map<string, RepairAction[]>();
       for (const action of repairActions) {
-        const key = `${action.sloId}-${action.revision}`;
+        const key = `${action.sloId}-${action.sloRevision}`;
         if (!actionsBySloId.has(key)) {
           actionsBySloId.set(key, []);
         }
@@ -193,48 +192,47 @@ export class RepairSLO {
 
   private identifyRepairActions(
     healthData: Array<{
-      id: string;
-      revision: number;
-      enabled?: boolean;
+      sloId: string;
+      sloRevision: number;
+      sloEnabled?: boolean;
       health: {
         overall: 'healthy' | 'unhealthy' | 'missing';
         rollup: { status: string; transformState?: string; match: boolean | undefined };
         summary: { status: string; transformState?: string; match: boolean | undefined };
-        enabled?: boolean;
+        sloEnabled?: boolean;
       };
     }>
   ): RepairAction[] {
     const actions: RepairAction[] = [];
 
     for (const item of healthData) {
-      const { id, revision, health, enabled } = item;
-      const sloEnabled = enabled ?? health.enabled ?? false;
+      const { sloId, sloRevision, health, sloEnabled } = item;
 
       // check rollup transform
       if (health.rollup.status === 'missing') {
         actions.push({
-          sloId: id,
-          revision,
+          sloId,
+          sloRevision,
           action: 'recreate-transform',
           transformType: 'rollup',
-          enabled: sloEnabled,
+          sloEnabled,
         });
       } else if (health.rollup.match === false) {
         if (health.rollup.transformState === 'stopped' && sloEnabled) {
           actions.push({
-            sloId: id,
-            revision,
+            sloId,
+            sloRevision,
             action: 'start-transform',
             transformType: 'rollup',
-            enabled: sloEnabled,
+            sloEnabled,
           });
         } else if (health.rollup.transformState === 'started' && !sloEnabled) {
           actions.push({
-            sloId: id,
-            revision,
+            sloId,
+            sloRevision,
             action: 'stop-transform',
             transformType: 'rollup',
-            enabled: sloEnabled,
+            sloEnabled,
           });
         }
       }
@@ -242,28 +240,28 @@ export class RepairSLO {
       // Check summary transform
       if (health.summary.status === 'missing') {
         actions.push({
-          sloId: id,
-          revision,
+          sloId,
+          sloRevision,
           action: 'recreate-transform',
           transformType: 'summary',
-          enabled: sloEnabled,
+          sloEnabled,
         });
       } else if (health.summary.match === false) {
         if (health.summary.transformState === 'stopped' && sloEnabled) {
           actions.push({
-            sloId: id,
-            revision,
+            sloId,
+            sloRevision,
             action: 'start-transform',
             transformType: 'summary',
-            enabled: sloEnabled,
+            sloEnabled,
           });
         } else if (health.summary.transformState === 'started' && !sloEnabled) {
           actions.push({
-            sloId: id,
-            revision,
+            sloId,
+            sloRevision,
             action: 'stop-transform',
             transformType: 'summary',
-            enabled: sloEnabled,
+            sloEnabled,
           });
         }
       }
@@ -318,8 +316,8 @@ export class RepairSLO {
   ): Promise<void> {
     const transformId =
       action.transformType === 'rollup'
-        ? getSLOTransformId(action.sloId, action.revision)
-        : getSLOSummaryTransformId(action.sloId, action.revision);
+        ? getSLOTransformId(action.sloId, action.sloRevision)
+        : getSLOSummaryTransformId(action.sloId, action.sloRevision);
 
     const manager = action.transformType === 'rollup' ? transformManager : summaryTransformManager;
 
@@ -329,7 +327,7 @@ export class RepairSLO {
           `Recreating ${action.transformType} transform [${transformId}] for SLO [${action.sloId}]`
         );
         await manager.install(slo);
-        if (action.enabled) {
+        if (action.sloEnabled) {
           return manager.start(transformId);
         }
         return Promise.resolve();

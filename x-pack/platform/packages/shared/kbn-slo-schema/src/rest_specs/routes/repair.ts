@@ -10,7 +10,9 @@ import { allOrAnyString } from '../../schema';
 
 const repairParamsSchema = t.type({
   body: t.type({
-    list: t.array(t.type({ id: sloIdSchema, instanceId: allOrAnyString, enabled: t.boolean })),
+    list: t.array(
+      t.type({ sloId: sloIdSchema, sloInstanceId: allOrAnyString, sloEnabled: t.boolean })
+    ),
   }),
 });
 

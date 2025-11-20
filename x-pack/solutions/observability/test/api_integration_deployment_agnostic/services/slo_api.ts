@@ -8,7 +8,7 @@
 import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import type { StoredSLODefinition } from '@kbn/slo-plugin/server/domain/models/slo';
 import type {
-  BulkOperationInput,
+  BulkDeleteInput,
   CreateSLOInput,
   FindSLODefinitionsResponse,
   UpdateSLOInput,
@@ -93,7 +93,7 @@ export function SloApiProvider({ getService }: DeploymentAgnosticFtrProviderCont
         .expect(204);
     },
 
-    async bulkDelete(params: BulkOperationInput, roleAuthc: RoleCredentials) {
+    async bulkDelete(params: BulkDeleteInput, roleAuthc: RoleCredentials) {
       const { body: response } = await supertestWithoutAuth
         .post(`/api/observability/slos/_bulk_delete`)
         .set(roleAuthc.apiKeyHeader)

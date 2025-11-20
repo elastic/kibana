@@ -140,7 +140,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
               color="accent"
               onClick={() =>
                 repairSlo({
-                  list: [{ id: slo.id, instanceId: slo.instanceId, enabled: slo.enabled }],
+                  list: [{ sloId: slo.id, sloInstanceId: slo.instanceId, sloEnabled: slo.enabled }],
                 })
               }
             >
