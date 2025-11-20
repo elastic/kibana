@@ -333,7 +333,7 @@ export interface AdditionalCellAction {
 }
 
 /**
- * Parameters passed to the open in the new tab extension point action
+ * Parameters passed to the open in new tab extension point action
  */
 export interface OpenInNewTabExtPointAction {
   query?: TabState['appState']['query'];
