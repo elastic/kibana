@@ -17,7 +17,6 @@ import { RunscriptOutput } from './runscript_action_output';
 
 import { useUserPrivileges as _useUserPrivileges } from '../../../common/components/user_privileges';
 import { responseActionsHttpMocks } from '../../mocks/response_actions_http_mocks';
-import { waitFor } from '@testing-library/react';
 
 jest.mock('../../../common/components/user_privileges');
 
