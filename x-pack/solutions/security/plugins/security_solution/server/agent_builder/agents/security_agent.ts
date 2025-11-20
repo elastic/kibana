@@ -8,7 +8,6 @@
 import type { BuiltInAgentDefinition } from '@kbn/onechat-server/agents';
 import { platformCoreTools } from '@kbn/onechat-common/tools';
 import { sanitizeToolId } from '@kbn/onechat-genai-utils/langchain';
-import { SECURITY_LABS_TOOL_ID } from '../tools/security_labs_tool';
 import { SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID } from '../tools/attack_discovery_search_tool';
 import { SECURITY_AGENT_TOOL_IDS } from '../tools/register_tools';
 
@@ -37,8 +36,21 @@ The alert data is provided in the conversation attachments. Extract the alert in
 MANDATORY WORKFLOW - Complete in order:
 
 1. Extract entities: host.name, user.name, source.ip, destination.ip, file.hash.sha256, kibana.alert.uuid (or _id), kibana.alert.rule.name, kibana.alert.rule.threat.tactic.id, kibana.alert.rule.threat.technique.id, event.category, event.action
+2. Query RISK SCORES:
 
-2. Query RELATED ALERTS:
+   Tools: ${sanitizeToolId(platformCoreTools.generateEsql)}, ${sanitizeToolId(
+        platformCoreTools.executeEsql
+      )}
+
+   Parameters: { query: "Find risk scores for host.name '[host]' OR user.name '[user]'", index: "risk-score.risk-score-latest-[spaceId]" }
+
+3. Query ATTACK DISCOVERIES:
+
+   Tool: ${sanitizeToolId(SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID)}
+
+   Parameters: { query: "Find attack discoveries where kibana.alert.attack_discovery.alert_ids contains '[alert ID]'" }
+
+4. Query RELATED ALERTS:
 
    Tool: ${sanitizeToolId(platformCoreTools.generateEsql)} ${sanitizeToolId(
         platformCoreTools.executeEsql
@@ -46,27 +58,13 @@ MANDATORY WORKFLOW - Complete in order:
 
    Parameters: { query: "Find security alerts from last 7 days where host.name is '[host]' OR user.name is '[user]' OR source.ip is '[ip]' OR destination.ip is '[dest_ip]'", index: ".alerts-security.alerts-default" }
 
-3. Query RISK SCORES:
-
-   Tool: ${sanitizeToolId(platformCoreTools.generateEsql)} ${sanitizeToolId(
-        platformCoreTools.executeEsql
-      )}
-
-   Parameters: { query: "Find risk scores for host.name '[host]' OR user.name '[user]'", index: "risk-score.risk-score-latest-default" }
-
-4. Query ATTACK DISCOVERIES:
-
-   Tool: ${sanitizeToolId(SECURITY_LABS_TOOL_ID)}
-
-   Parameters: { query: "Find attack discoveries where kibana.alert.attack_discovery.alert_ids contains '[alert ID]'", index: ".alerts-security.alerts-attack.discovery-default,.adhoc.alerts-security.alerts-attack.discovery-default" }
-
-5. Query SECURITY LABS:
-
-   Tool: ${sanitizeToolId(SECURITY_ATTACK_DISCOVERY_SEARCH_TOOL_ID)}
-
-   Parameters: { query: "Find Security Labs articles about [MITRE technique or rule name]", index: ".kibana-elastic-ai-assistant-knowledge-base-default" }
-
-CRITICAL: You MUST call all 4 tools (steps 2-5) before responding. Do not skip any step.`,
+`,
+      // TODO, skip security labs until the tool is improved. Add below prompt once ready
+      //     5. Query SECURITY LABS:
+      //
+      // Tool: ${sanitizeToolId(SECURITY_LABS_TOOL_ID)}
+      //
+      // Parameters: { query: "Find Security Labs articles about [MITRE technique or rule name]" }
 
       tools: [
         {

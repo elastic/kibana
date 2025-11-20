@@ -10,6 +10,7 @@ import { ToolType } from '@kbn/onechat-common';
 import type { BuiltinToolDefinition } from '@kbn/onechat-server';
 import { runSearchTool } from '@kbn/onechat-genai-utils/tools/search/run_search_tool';
 import { SECURITY_LABS_RESOURCE } from '@kbn/elastic-assistant-plugin/server/routes/knowledge_base/constants';
+import { getSpaceIdFromRequest } from './helpers';
 import { securityTool } from '../constants';
 
 const securityLabsSearchSchema = z.object({
@@ -22,8 +23,6 @@ const securityLabsSearchSchema = z.object({
 
 export const SECURITY_LABS_TOOL_ID = securityTool('security_labs');
 
-const SECURITY_LABS_INDEX_PATTERN = '.kibana-elastic-ai-assistant-knowledge-base-default';
-
 export const securityLabsTool = (): BuiltinToolDefinition<typeof securityLabsSearchSchema> => {
   return {
     id: SECURITY_LABS_TOOL_ID,
@@ -32,7 +31,8 @@ export const securityLabsTool = (): BuiltinToolDefinition<typeof securityLabsSea
     schema: securityLabsSearchSchema,
     handler: async ({ query: nlQuery }, { esClient, modelProvider, logger, events }) => {
       logger.debug(`security-labs-search tool called with query: ${nlQuery}`);
-
+      const spaceId = getSpaceIdFromRequest(request);
+      const SECURITY_LABS_INDEX_PATTERN = `.kibana-elastic-ai-assistant-knowledge-base-${spaceId}`;
       try {
         // Enhance query to filter by Security Labs resource and limit results
         const enhancedQuery = `${nlQuery} Filter to only Security Labs content (kb_resource: ${SECURITY_LABS_RESOURCE}). Limit to 3 results.`;
@@ -45,7 +45,6 @@ export const securityLabsTool = (): BuiltinToolDefinition<typeof securityLabsSea
           logger,
           events,
         });
-        console.log('SL ==>', results);
 
         return { results };
       } catch (error) {

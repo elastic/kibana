@@ -94,7 +94,6 @@ export const attackDiscoverySearchTool = (): BuiltinToolDefinition<
           query: esqlQuery,
           esClient: esClient.asCurrentUser,
         });
-        console.log('ATT ==>', esqlResponse);
 
         const results = [
           {
