@@ -43,6 +43,7 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
   }
 
   const mappedPanels = panels
+    .filter((panel) => isDashboardSection(panel) || isMappedPanelType(panel))
     .map((panel) => {
       if (!isDashboardSection(panel)) return removeEnhancements(panel);
       const { panels: sectionPanels, ...restOfSection } = panel;
@@ -50,8 +51,7 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
         ...restOfSection,
         panels: sectionPanels.filter(isMappedPanelType).map(removeEnhancements),
       };
-    })
-    .filter((panel) => isDashboardSection(panel) || isMappedPanelType(panel));
+    });
 
   return {
     data: {
