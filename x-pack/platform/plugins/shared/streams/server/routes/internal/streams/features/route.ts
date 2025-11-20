@@ -20,6 +20,7 @@ import type {
 import { generateStreamDescription } from '@kbn/streams-ai';
 import type { Observable } from 'rxjs';
 import { from, map } from 'rxjs';
+import { StatusError } from '../../../../lib/streams/errors/status_error';
 import { getDefaultFeatureRegistry } from '../../../../lib/streams/feature/feature_type_registry';
 import { createServerRoute } from '../../../create_server_route';
 import { checkAccess } from '../../../../lib/streams/stream_crud';
@@ -28,7 +29,6 @@ import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { assertSignificantEventsAccess } from '../../../utils/assert_significant_events_access';
 import type { IdentifiedFeaturesEvent, StreamDescriptionEvent } from './types';
 import { getRequestAbortSignal } from '../../../utils/get_request_abort_signal';
-import { StatusError } from '@kbn/streams-plugin/server/lib/streams/errors/status_error';
 
 const dateFromString = z.string().transform((input) => new Date(input));
 
