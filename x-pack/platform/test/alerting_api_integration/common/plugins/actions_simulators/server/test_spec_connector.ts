@@ -1,37 +1,25 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the "Elastic License
- * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
- * Public License v 1"; you may not use this file except in compliance with, at
- * your election, the "Elastic License 2.0", the "GNU Affero General Public
- * License v3.0 only", or the "Server Side Public License, v 1".
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
-/**
- * Example: AbuseIPDB Connector
- *
- * This demonstrates a threat intelligence connector with:
- * - IP reputation checking
- * - Abuse reporting
- * - Geolocation and ISP data
- * - Bulk IP checking
- *
- * MVP implementation focusing on core IP reputation actions.
- */
-
+import type { ConnectorSpec } from '@kbn/connector-specs';
 import { z } from '@kbn/zod/v4';
-import type { ConnectorSpec } from '../connector_spec';
 
-export const AbuseIPDBConnector: ConnectorSpec = {
+export const TestSingleFileConnector: ConnectorSpec = {
   metadata: {
-    id: '.abuseipdb',
-    displayName: 'AbuseIPDB',
-    description: 'IP reputation checking and abuse reporting',
+    id: 'test.single_file_connector',
+    displayName: 'Test Single File Connector',
+    description: 'Functional testing for single file connector registration',
     minimumLicense: 'gold',
-    supportedFeatureIds: ['workflows'],
+    supportedFeatureIds: ['alerting', 'siem'],
   },
 
   authTypes: [
+    'none',
+    'basic',
     {
       type: 'api_key_header',
       defaults: {
@@ -39,6 +27,10 @@ export const AbuseIPDBConnector: ConnectorSpec = {
       },
     },
   ],
+
+  schema: z.object({
+    apiUrl: z.string().describe('API URL'),
+  }),
 
   actions: {
     checkIp: {

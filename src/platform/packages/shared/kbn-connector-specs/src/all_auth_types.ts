@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * as connectorsSpecs from './src/all_specs';
-export type * from './src/connector_spec';
-
-export * as authTypeSpecs from './src/all_auth_types';
+export * from './auth_types/api_key_header';
+export * from './auth_types/bearer';
+export * from './auth_types/basic';
+export * from './auth_types/none';
