@@ -335,7 +335,8 @@ export class JobImportService {
               jobId: job.job_id,
               hasWarning: true,
               warningMessage: i18n.translate('xpack.ml.jobsList.datafeedPreviewNoData', {
-                defaultMessage: 'Datafeed preview returned no data. This job will not run.',
+                defaultMessage:
+                  'Datafeed preview returned no data. This job may not run correctly.',
               }),
             };
           }

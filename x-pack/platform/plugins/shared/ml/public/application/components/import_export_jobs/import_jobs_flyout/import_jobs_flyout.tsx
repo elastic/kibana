@@ -515,6 +515,7 @@ export const ImportJobsFlyout: FC<Props> = ({ isDisabled, onImportComplete }) =>
                               jobId.datafeedWarningMessage && (
                                 <EuiFormRow>
                                   <EuiCallOut
+                                    data-test-subj="mlJobImportJobDatafeedWarning"
                                     title={i18n.translate(
                                       'xpack.ml.importExport.importFlyout.datafeedWarning.title',
                                       {
