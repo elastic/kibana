@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import { ReviewFieldsPrompt } from '@kbn/grok-heuristics';
+import { ReviewDissectFieldsPrompt } from '@kbn/dissect-heuristics';
 import type { InferenceClient, ToolOptionsOfPrompt } from '@kbn/inference-common';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import type { ToolCallsOfToolOptions } from '@kbn/inference-common/src/chat_complete/tools_of';
@@ -20,7 +20,7 @@ import {
   normalizeFieldName,
 } from './common_processing_helpers';
 
-export interface ProcessingGrokSuggestionsParams {
+export interface ProcessingDissectSuggestionsParams {
   path: {
     name: string;
   };
@@ -30,15 +30,15 @@ export interface ProcessingGrokSuggestionsParams {
     review_fields: Record<
       string,
       {
-        grok_component: string;
         example_values: string[];
+        position: number;
       }
     >;
   };
 }
 
-export interface ProcessingGrokSuggestionsHandlerDeps {
-  params: ProcessingGrokSuggestionsParams;
+export interface ProcessingDissectSuggestionsHandlerDeps {
+  params: ProcessingDissectSuggestionsParams;
   inferenceClient: InferenceClient;
   scopedClusterClient: IScopedClusterClient;
   streamsClient: StreamsClient;
@@ -46,7 +46,7 @@ export interface ProcessingGrokSuggestionsHandlerDeps {
   signal: AbortSignal;
 }
 
-export const processingGrokSuggestionsSchema = z.object({
+export const processingDissectSuggestionsSchema = z.object({
   path: z.object({ name: z.string() }),
   body: z.object({
     connector_id: z.string(),
@@ -54,24 +54,24 @@ export const processingGrokSuggestionsSchema = z.object({
     review_fields: z.record(
       z.string(),
       z.object({
-        grok_component: z.string(),
         example_values: z.array(z.string()),
+        position: z.number(),
       })
     ),
   }),
-}) satisfies z.Schema<ProcessingGrokSuggestionsParams>;
+}) satisfies z.Schema<ProcessingDissectSuggestionsParams>;
 
 type FieldReviewResults = ToolCallsOfToolOptions<
-  ToolOptionsOfPrompt<typeof ReviewFieldsPrompt>
+  ToolOptionsOfPrompt<typeof ReviewDissectFieldsPrompt>
 >[number]['function']['arguments']['fields'];
 
-export const handleProcessingGrokSuggestions = async ({
+export const handleProcessingDissectSuggestions = async ({
   params,
   inferenceClient,
   streamsClient,
   fieldsMetadataClient,
   signal,
-}: ProcessingGrokSuggestionsHandlerDeps) => {
+}: ProcessingDissectSuggestionsHandlerDeps) => {
   // Determine if we should use OTEL field names
   const useOtelFieldNames = await determineOtelFieldNameUsage(streamsClient, params.path.name);
 
@@ -79,7 +79,7 @@ export const handleProcessingGrokSuggestions = async ({
   const reviewResult = await callInferenceWithPrompt(
     inferenceClient,
     params.body.connector_id,
-    ReviewFieldsPrompt,
+    ReviewDissectFieldsPrompt,
     params.body.sample_messages,
     params.body.review_fields,
     signal
@@ -103,11 +103,10 @@ export function mapFields(
   useOtelFieldNames: boolean
 ) {
   return reviewResults.map((field) => {
-    const name = normalizeFieldName(field.ecs_field, fieldMetadata, useOtelFieldNames);
+    const ecsField = normalizeFieldName(field.ecs_field, fieldMetadata, useOtelFieldNames);
     return {
-      name,
+      ecs_field: ecsField,
       columns: field.columns,
-      grok_components: field.grok_components,
     };
   });
 }
