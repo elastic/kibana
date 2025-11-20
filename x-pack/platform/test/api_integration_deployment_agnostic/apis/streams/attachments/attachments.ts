@@ -444,8 +444,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await getAttachmentSuggestions({
           apiClient,
           stream: 'logs',
-          query: '',
-          tags: [],
         });
 
         expect(response.suggestions.length).to.be.greaterThan(0);
@@ -459,8 +457,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           apiClient,
           stream: 'logs',
           type: 'dashboard',
-          query: '',
-          tags: [],
         });
 
         expect(response.suggestions.length).to.be.greaterThan(0);
@@ -474,8 +470,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           apiClient,
           stream: 'logs',
           type: 'rule',
-          query: '',
-          tags: [],
         });
 
         expect(response.suggestions.length).to.be.greaterThan(0);
@@ -490,7 +484,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: 'logs',
           type: 'dashboard',
           query: BASIC_DASHBOARD_TITLE,
-          tags: [],
         });
 
         expect(response.suggestions.length).to.eql(1);
@@ -504,7 +497,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: 'logs',
           type: 'dashboard',
           tags: [TAG_ID],
-          query: '',
         });
 
         expect(response.suggestions.length).to.eql(1);
@@ -630,8 +622,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await getAttachmentSuggestions({
           apiClient,
           stream: 'logs',
-          tags: [],
-          query: '',
           spaceId: TEST_SPACE_ID,
         });
 
@@ -642,8 +632,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         const response = await getAttachmentSuggestions({
           apiClient,
           stream: 'logs',
-          tags: [],
-          query: '',
         });
 
         expect(response.suggestions.length).to.eql(0);

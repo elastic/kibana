@@ -340,11 +340,11 @@ export async function getAttachmentSuggestions(options: {
   apiClient: StreamsSupertestRepositoryClient;
   stream: string;
   type?: AttachmentType;
-  tags: string[];
+  tags?: string[];
   query?: string;
   spaceId?: string;
 }) {
-  const { apiClient, stream, type, tags, query = '', spaceId } = options;
+  const { apiClient, stream, type, tags = [], query = '', spaceId } = options;
 
   const baseEndpoint = 'POST /internal/streams/{streamName}/attachments/_suggestions';
   const endpoint = spaceId
