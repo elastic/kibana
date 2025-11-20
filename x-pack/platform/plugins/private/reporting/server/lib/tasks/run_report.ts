@@ -125,6 +125,7 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
   }
 
   // Abstract methods
+  public abstract exportType: string;
   public abstract get TYPE(): string;
 
   public abstract getTaskDefinition(): TaskRegisterDefinition;
@@ -384,6 +385,9 @@ export abstract class RunReportTask<TaskParams extends ReportTaskParamsType>
     if (!exportType) {
       throw new Error(`No export type from ${task.jobtype} found to execute report`);
     }
+    // notify usage
+    exportType.notifyUsage(this.exportType);
+
     // run the report
     // if workerFn doesn't finish before timeout, call the cancellationToken and throw an error
     const request = await this.getRequestToUse({
