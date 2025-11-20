@@ -15,6 +15,7 @@ import type {
 } from '@elastic/eui';
 import {
   EuiEmptyPrompt,
+  EuiHorizontalRule,
   EuiIcon,
   EuiLoadingSpinner,
   EuiText,
@@ -29,6 +30,7 @@ import React from 'react';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { JsonValue } from '@kbn/utility-types';
 import type {
   ExecutionStatus,
   WorkflowExecutionDto,
@@ -212,19 +214,45 @@ export const WorkflowStepExecutionTree = ({
 
     const stepExecutionsTree = buildStepExecutionsTree(
       Array.from(stepExecutionMap.values()),
-      execution.context
+      execution.context,
+      execution.status
     );
 
-    const triggerPseudoStep = stepExecutionsTree.find((item) => item.stepType === '__trigger');
-    const inputsPseudoStep = stepExecutionsTree.find((item) => item.stepType === '__inputs');
-    const triggerStep = triggerPseudoStep ?? inputsPseudoStep;
+    // Add Overview pseudo-step to the stepExecutionMap
+    const overviewPseudoStep = stepExecutionsTree.find((item) => item.stepType === '__overview');
+    if (overviewPseudoStep) {
+      let contextData: JsonValue | undefined;
+      if (execution.context) {
+        const { inputs, event, ...context } = execution.context;
+        contextData = context as JsonValue;
+      }
+      const overviewExecution: WorkflowStepExecutionDto = {
+        id: '__overview',
+        stepId: 'Overview',
+        stepType: '__overview',
+        status: execution.status,
+        stepExecutionIndex: 0,
+        startedAt: execution.startedAt,
+        input: contextData,
+        scopeStack: [],
+        workflowRunId: execution.id, // Use execution ID as the workflow run ID
+        workflowId: execution.workflowId ?? '',
+        topologicalIndex: -1, // Pseudo-step, no topological position
+        globalExecutionIndex: -1, // Pseudo-step, no execution index
+      };
+      stepExecutionMap.set('__overview', overviewExecution);
+    }
 
-    if (triggerStep && execution.context) {
+    const triggerPseudoStep =
+      stepExecutionsTree.find((item) => item.stepType === '__trigger') ??
+      stepExecutionsTree.find((item) => item.stepType === '__inputs');
+
+    if (triggerPseudoStep && execution.context) {
       const triggerExecution = buildTriggerStepExecutionFromContext(execution);
       if (triggerExecution) {
         stepExecutionMap.set(triggerExecution.id, triggerExecution);
-        triggerStep.stepExecutionId = triggerExecution.id;
-        triggerStep.stepType = triggerExecution.stepType ?? '';
+        triggerPseudoStep.stepExecutionId = triggerExecution.id;
+        triggerPseudoStep.stepType = triggerExecution.stepType ?? '';
       }
     }
     const items: EuiTreeViewProps['items'] = convertTreeToEuiTreeViewItems(
@@ -234,20 +262,50 @@ export const WorkflowStepExecutionTree = ({
       selectedId,
       onStepExecutionClick
     );
+
+    // Split items into Overview and the rest
+    const overviewItems = items.filter(
+      (item) => stepExecutionMap.get(item.id)?.stepType === '__overview'
+    );
+    const regularItems = items.filter(
+      (item) => stepExecutionMap.get(item.id)?.stepType !== '__overview'
+    );
+
     return (
       <>
         <div css={styles.treeViewContainer}>
-          <EuiTreeView
-            showExpansionArrows
-            expandByDefault
-            items={items}
-            aria-label={i18n.translate(
-              'workflows.WorkflowStepExecutionTree.workflowStepExecutionTreeAriaLabel',
-              {
-                defaultMessage: 'Workflow step execution tree',
-              }
-            )}
-          />
+          {/* Overview section */}
+          {overviewItems.length > 0 && (
+            <>
+              <EuiTreeView
+                showExpansionArrows
+                expandByDefault
+                items={overviewItems}
+                aria-label={i18n.translate(
+                  'workflows.WorkflowStepExecutionTree.overviewAriaLabel',
+                  {
+                    defaultMessage: 'Execution overview',
+                  }
+                )}
+              />
+              <EuiHorizontalRule margin="none" css={{ marginTop: '5px', marginBottom: '5px' }} />
+            </>
+          )}
+
+          {/* Regular steps */}
+          {regularItems.length > 0 && (
+            <EuiTreeView
+              showExpansionArrows
+              expandByDefault
+              items={regularItems}
+              aria-label={i18n.translate(
+                'workflows.WorkflowStepExecutionTree.workflowStepExecutionTreeAriaLabel',
+                {
+                  defaultMessage: 'Workflow step execution tree',
+                }
+              )}
+            />
+          )}
         </div>
       </>
     );

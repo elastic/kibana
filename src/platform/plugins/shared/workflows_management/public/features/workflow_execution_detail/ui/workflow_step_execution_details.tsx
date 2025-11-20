@@ -40,25 +40,18 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
       [stepExecution?.status]
     );
 
+    const isOverviewPseudoStep = stepExecution?.stepType === '__overview';
     const isTriggerPseudoStep = stepExecution?.stepType?.startsWith('trigger_');
-    const triggerType = isTriggerPseudoStep
-      ? stepExecution?.stepType?.replace('trigger_', '')
-      : undefined;
 
     const tabs = useMemo(() => {
       if (isTriggerPseudoStep) {
-        const pseudoTabs = [];
+        const pseudoTabs: { id: string; name: string }[] = [];
         if (stepExecution?.input) {
-          const isManualTrigger = triggerType === 'manual';
           pseudoTabs.push({
             id: 'input',
-            name: isManualTrigger ? 'Inputs' : 'Event',
+            name: 'Input',
           });
         }
-        pseudoTabs.push({
-          id: 'output',
-          name: 'Context',
-        });
         return pseudoTabs;
       }
       return [
@@ -75,7 +68,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           name: 'Timeline',
         },
       ];
-    }, [stepExecution, isTriggerPseudoStep, triggerType]);
+    }, [stepExecution, isTriggerPseudoStep]);
 
     const [selectedTabId, setSelectedTabId] = useState<string>(tabs[0].id);
 
@@ -91,6 +84,15 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           <EuiSkeletonText lines={1} />
           <EuiSpacer size="l" />
           <EuiSkeletonText lines={4} />
+        </EuiPanel>
+      );
+    }
+
+    // For Overview pseudo-step, show empty panel for now
+    if (isOverviewPseudoStep) {
+      return (
+        <EuiPanel hasShadow={false} paddingSize="m" css={{ height: '100%' }}>
+          {/* Empty panel - will be populated later */}
         </EuiPanel>
       );
     }

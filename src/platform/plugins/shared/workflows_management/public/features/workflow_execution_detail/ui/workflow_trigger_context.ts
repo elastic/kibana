@@ -16,7 +16,6 @@ export type TriggerType = 'alert' | 'scheduled' | 'manual';
 export interface TriggerContextFromExecution {
   triggerType: TriggerType;
   input: JsonValue;
-  output: JsonValue;
 }
 
 export function buildTriggerContextFromExecution(
@@ -44,12 +43,9 @@ export function buildTriggerContextFromExecution(
     ? executionContext.event
     : executionContext.inputs;
 
-  const { inputs, event, ...contextData } = executionContext;
-
   return {
     triggerType,
     input: inputData as JsonValue,
-    output: contextData as JsonValue,
   };
 }
 
@@ -70,7 +66,7 @@ export function buildTriggerStepExecutionFromContext(
     stepType: `trigger_${triggerContext.triggerType}`,
     status: ExecutionStatus.COMPLETED,
     input: triggerContext.input,
-    output: triggerContext.output,
+    output: undefined,
     scopeStack: [],
     workflowRunId: workflowExecution.id,
     workflowId: workflowExecution.workflowId || '',
