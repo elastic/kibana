@@ -82,17 +82,6 @@ export function makeFtrConfigProvider(
       .flatMap(([key, value]) => (value === null || value === undefined ? [] : `${key}=${value}`))
       .join(',');
 
-    /**
-     * This is used by CI to set the docker registry port
-     * you can also define this environment variable locally when running tests which
-     * will spin up a local docker package registry locally for you
-     * if this is defined it takes precedence over the `packageRegistryOverride` variable
-     */
-    const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
-
-    const packageRegistryConfig = path.join(__dirname, '../fixtures/package_registry_config.yml');
-    const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
-
     return {
       ...baseConfig,
 
