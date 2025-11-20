@@ -188,6 +188,7 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     actionTypeRegistry,
     fieldsMetadata,
     contentManagement,
+    uiActions,
     onChangeMetaData,
     id,
     ruleTypeId,
@@ -198,6 +199,7 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     connectorFeatureId,
     initialMetadata,
     initialEditStep,
+    focusTrapProps,
     consumer,
     multiConsumerSelection,
     hideInterval,
@@ -206,7 +208,6 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     shouldUseRuleProducer,
     canShowConsumerSelection,
     initialValues,
-    focusTrapProps,
   ]);
 
   return (
