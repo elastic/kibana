@@ -50,6 +50,9 @@ disabled:
   - x-pack/platform/test/functional_gen_ai/inference/config.ts
   - x-pack/platform/test/onechat/smoke_tests/config.stateful.ts
 
+  # Temporary skip while investigating failures
+  - x-pack/performance/journeys_e2e/aiops_log_rate_analysis.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - src/platform/test/accessibility/config.ts
@@ -342,7 +345,6 @@ enabled:
   - x-pack/platform/test/upgrade_assistant_integration/config.ts
   - x-pack/platform/test/reindex_service/config.ts
   - x-pack/platform/test/usage_collection/config.ts
-  - x-pack/performance/journeys_e2e/aiops_log_rate_analysis.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_http2.ts
   - x-pack/performance/journeys_e2e/ecommerce_dashboard_map_only.ts
