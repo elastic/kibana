@@ -7,7 +7,8 @@
 
 import expect from '@kbn/expect';
 import { OBSERVABILITY_STREAMS_ENABLE_SIGNIFICANT_EVENTS } from '@kbn/management-settings-ids';
-import { FeatureType, emptyAssets, type Feature } from '@kbn/streams-schema';
+import type { FeatureType } from '@kbn/streams-schema';
+import { emptyAssets, type Feature } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../../ftr_provider_context';
 import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
 import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
