@@ -57,5 +57,6 @@
     "@kbn/usage-collection-plugin",
     "@kbn/discover-plugin",
     "@kbn/deeplinks-management",
+    "@kbn/discover-utils",
   ]
 }
