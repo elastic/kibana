@@ -8,54 +8,32 @@
  */
 
 import React from 'react';
-import { EuiFieldPassword, EuiFormRow } from '@elastic/eui';
 import type { EuiFieldPasswordProps } from '@elastic/eui';
-import type { BaseMetadata, StripFormProps } from '../../schema_metadata';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { z } from '@kbn/zod/v4';
+import { PasswordField as FormPasswordField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { BaseWidgetProps } from '../types';
-import type { WidgetType } from '../types';
 
-type PasswordWidgetMeta = BaseMetadata & {
-  widget: WidgetType.Password;
-} & StripFormProps<EuiFieldPasswordProps>;
-
-type PasswordWidgetProps = BaseWidgetProps<string, PasswordWidgetMeta>;
+type PasswordWidgetProps = BaseWidgetProps<z.ZodString, EuiFieldPasswordProps>;
 
 export const PasswordField: React.FC<PasswordWidgetProps> = ({
-  fieldId,
-  value,
-  label,
-  placeholder,
-  fullWidth = true,
-  error,
-  isInvalid,
-  onChange,
-  onBlur,
-  meta,
-  helpText,
+  path,
+  schema,
+  fieldProps,
+  fieldConfig,
 }) => {
-  const { isDisabled, type: passwordType, compressed } = meta || {};
-
   return (
-    <EuiFormRow
-      label={label}
-      error={error}
-      isInvalid={isInvalid}
-      fullWidth={fullWidth}
-      helpText={helpText}
-    >
-      <EuiFieldPassword
-        aria-label={label}
-        data-test-subj={fieldId}
-        type={passwordType ?? 'dual'}
-        value={value}
-        placeholder={placeholder}
-        onChange={(e) => onChange(fieldId, e.target.value)}
-        onBlur={() => onBlur(fieldId, value)}
-        isInvalid={isInvalid}
-        fullWidth={fullWidth}
-        disabled={isDisabled}
-        compressed={compressed}
-      />
-    </EuiFormRow>
+    <UseField
+      path={path}
+      component={FormPasswordField}
+      config={{ ...fieldConfig }}
+      componentProps={{
+        ...fieldProps,
+        euiFieldProps: {
+          type: 'dual',
+          ...fieldProps?.euiFieldProps,
+        },
+      }}
+    />
   );
 };

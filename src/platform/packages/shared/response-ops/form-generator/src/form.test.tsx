@@ -11,11 +11,37 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { z } from '@kbn/zod/v4';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { Form } from './form';
+import { EuiButton } from '@elastic/eui';
+import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { FormGenerator } from './form';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
 );
+
+interface TestFormWrapperProps {
+  schema: z.ZodObject<z.ZodRawShape>;
+  onSubmit?: (data: { data: unknown }) => void;
+}
+
+const TestFormWrapper = ({ schema, onSubmit }: TestFormWrapperProps) => {
+  const { form } = useForm({
+    onSubmit: async (data, isValid) => {
+      if (isValid && onSubmit) {
+        onSubmit({ data });
+      }
+    },
+  });
+
+  return (
+    <Form form={form}>
+      <FormGenerator schema={schema} />
+      <EuiButton onClick={form.submit} isLoading={form.isSubmitting}>
+        Submit
+      </EuiButton>
+    </Form>
+  );
+};
 
 describe('Form', () => {
   const mockOnSubmit = jest.fn();
@@ -38,7 +64,7 @@ describe('Form', () => {
       }),
     });
 
-    render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
+    render(<TestFormWrapper schema={schema} onSubmit={mockOnSubmit} />, { wrapper });
 
     expect(screen.getByText('Username')).toBeInTheDocument();
     expect(screen.getByText('Email')).toBeInTheDocument();
@@ -56,7 +82,7 @@ describe('Form', () => {
       }),
     });
 
-    render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
+    render(<TestFormWrapper schema={schema} onSubmit={mockOnSubmit} />, { wrapper });
 
     expect(screen.getByText('Password')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Enter password')).toBeInTheDocument();
@@ -70,7 +96,7 @@ describe('Form', () => {
       }),
     });
 
-    render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
+    render(<TestFormWrapper schema={schema} onSubmit={mockOnSubmit} />, { wrapper });
 
     expect(screen.getByText('Country')).toBeInTheDocument();
     const select = screen.getByRole('combobox');
@@ -85,7 +111,7 @@ describe('Form', () => {
       }),
     });
 
-    render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
+    render(<TestFormWrapper schema={schema} onSubmit={mockOnSubmit} />, { wrapper });
 
     const input = screen.getByLabelText('Username', { selector: 'input' });
     fireEvent.change(input, { target: { value: 'testuser' } });
@@ -108,7 +134,7 @@ describe('Form', () => {
       }),
     });
 
-    render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
+    render(<TestFormWrapper schema={schema} onSubmit={mockOnSubmit} />, { wrapper });
 
     const input = screen.getByLabelText('Email', { selector: 'input' });
     fireEvent.change(input, { target: { value: 'invalid-email' } });
@@ -129,7 +155,7 @@ describe('Form', () => {
       }),
     });
 
-    render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
+    render(<TestFormWrapper schema={schema} onSubmit={mockOnSubmit} />, { wrapper });
 
     const input = screen.getByLabelText('Email', { selector: 'input' });
     fireEvent.change(input, { target: { value: 'invalid' } });
@@ -146,7 +172,7 @@ describe('Form', () => {
       }),
     });
 
-    render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
+    render(<TestFormWrapper schema={schema} onSubmit={mockOnSubmit} />, { wrapper });
 
     const input = screen.getByLabelText('Email', { selector: 'input' });
 
@@ -162,29 +188,6 @@ describe('Form', () => {
     });
   });
 
-  it('resets form after successful submission', async () => {
-    const schema = z.object({
-      username: z.string().meta({
-        widget: 'text',
-        label: 'Username',
-      }),
-    });
-
-    render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
-
-    const input = screen.getByLabelText('Username', { selector: 'input' }) as HTMLInputElement;
-    fireEvent.change(input, { target: { value: 'testuser' } });
-    expect(input.value).toBe('testuser');
-
-    const submitButton = screen.getByRole('button', { name: 'Submit' });
-    fireEvent.click(submitButton);
-
-    await waitFor(() => {
-      expect(mockOnSubmit).toHaveBeenCalled();
-      expect(input.value).toBe('');
-    });
-  });
-
   it('throws error when widget type is missing and no default is implemented', () => {
     const schema = z.object({
       // use another one if a default widget is defined for this type
@@ -195,7 +198,7 @@ describe('Form', () => {
     const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
     expect(() => {
-      render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
+      render(<TestFormWrapper schema={schema} onSubmit={mockOnSubmit} />, { wrapper });
     }).toThrowErrorMatchingInlineSnapshot(
       `"No widget found for schema type: object. Please specify a widget in the schema metadata."`
     );
@@ -214,7 +217,7 @@ describe('Form', () => {
     const consoleError = jest.spyOn(console, 'error').mockImplementation(() => {});
 
     expect(() => {
-      render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
+      render(<TestFormWrapper schema={schema} onSubmit={mockOnSubmit} />, { wrapper });
     }).toThrowErrorMatchingInlineSnapshot(
       `"Widget \\"fakeWidget\\" specified in string metadata is not registered in the widget registry."`
     );
@@ -239,7 +242,7 @@ describe('Form', () => {
       }),
     });
 
-    const { container } = render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, {
+    const { container } = render(<TestFormWrapper schema={schema} onSubmit={mockOnSubmit} />, {
       wrapper,
     });
 
@@ -265,21 +268,6 @@ describe('Form', () => {
     });
   });
 
-  it('uses default values from metadata', () => {
-    const schema = z.object({
-      username: z.string().meta({
-        widget: 'text',
-        label: 'Username',
-        default: 'defaultUser',
-      }),
-    });
-
-    render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
-
-    const input = screen.getByLabelText('Username', { selector: 'input' }) as HTMLInputElement;
-    expect(input.value).toBe('defaultUser');
-  });
-
   it('handles form submission when onSubmit is not provided', async () => {
     const schema = z.object({
       username: z.string().meta({
@@ -288,7 +276,7 @@ describe('Form', () => {
       }),
     });
 
-    render(<Form connectorSchema={schema} />, { wrapper });
+    render(<TestFormWrapper schema={schema} />, { wrapper });
 
     const input = screen.getByLabelText('Username', { selector: 'input' });
     fireEvent.change(input, { target: { value: 'testuser' } });
@@ -344,15 +332,18 @@ describe('Authentication Form Integration Tests', () => {
       .meta({
         widget: 'formFieldset',
         label: 'Authentication',
-        default: 'basic',
-      }),
+      })
+      .default({ type: 'basic', username: '', password: '' }),
   });
 
-  it('initializes with default discriminated union option when specified', async () => {
-    render(<Form connectorSchema={authSchema} onSubmit={mockOnSubmit} />, { wrapper });
+  const usernameTestId = 'generator-field-authType-basic-username';
+  const passwordTestId = 'generator-field-authType-basic-password';
 
-    const usernameInput = screen.getByTestId('authType.username') as HTMLInputElement;
-    const passwordInput = screen.getByTestId('authType.password') as HTMLInputElement;
+  it('initializes with default discriminated union option when specified', async () => {
+    render(<TestFormWrapper schema={authSchema} onSubmit={mockOnSubmit} />, { wrapper });
+
+    const usernameInput = screen.getByTestId(usernameTestId) as HTMLInputElement;
+    const passwordInput = screen.getByTestId(passwordTestId) as HTMLInputElement;
     const noneCard = screen.getByLabelText('None', { selector: 'input' }) as HTMLInputElement;
     const bearerCard = screen.getByLabelText('Bearer Token', {
       selector: 'input',
@@ -371,9 +362,10 @@ describe('Authentication Form Integration Tests', () => {
       expect(mockOnSubmit).toHaveBeenCalledWith({
         data: {
           authType: {
-            type: 'basic',
-            username: 'admin',
-            password: 'secret123',
+            basic: {
+              username: 'admin',
+              password: 'secret123',
+            },
           },
         },
       });
@@ -381,7 +373,7 @@ describe('Authentication Form Integration Tests', () => {
   });
 
   it('switches between authentication types correctly', async () => {
-    render(<Form connectorSchema={authSchema} onSubmit={mockOnSubmit} />, { wrapper });
+    render(<TestFormWrapper schema={authSchema} onSubmit={mockOnSubmit} />, { wrapper });
 
     expect(screen.getByLabelText('None', { selector: 'input' })).toBeInTheDocument();
 
@@ -389,12 +381,12 @@ describe('Authentication Form Integration Tests', () => {
     fireEvent.click(basicCard);
 
     await waitFor(() => {
-      expect(screen.queryByTestId('authType.username')).toBeDefined();
-      expect(screen.queryByTestId('authType.password')).toBeDefined();
+      expect(screen.queryByTestId(usernameTestId)).toBeDefined();
+      expect(screen.queryByTestId(passwordTestId)).toBeDefined();
     });
 
-    const usernameInput = screen.getByTestId('authType.username');
-    const passwordInput = screen.getByTestId('authType.password');
+    const usernameInput = screen.getByTestId(usernameTestId);
+    const passwordInput = screen.getByTestId(passwordTestId);
     fireEvent.change(usernameInput, { target: { value: 'testuser' } });
     fireEvent.change(passwordInput, { target: { value: 'testpass' } });
 
@@ -405,9 +397,10 @@ describe('Authentication Form Integration Tests', () => {
       expect(mockOnSubmit).toHaveBeenCalledWith({
         data: {
           authType: {
-            type: 'basic',
-            username: 'testuser',
-            password: 'testpass',
+            basic: {
+              username: 'testuser',
+              password: 'testpass',
+            },
           },
         },
       });
@@ -415,14 +408,12 @@ describe('Authentication Form Integration Tests', () => {
   });
 
   it('submits form with bearer token authentication', async () => {
-    render(<Form connectorSchema={authSchema} onSubmit={mockOnSubmit} />, { wrapper });
+    render(<TestFormWrapper schema={authSchema} onSubmit={mockOnSubmit} />, { wrapper });
 
     const bearerCard = screen.getByLabelText('Bearer Token', { selector: 'input' });
     fireEvent.click(bearerCard);
+    const tokenInput = await screen.findByTestId('generator-field-authType-bearer-token');
 
-    await screen.findByTestId('authType.token');
-
-    const tokenInput = screen.getByTestId('authType.token');
     fireEvent.change(tokenInput, { target: { value: 'my-secret-token' } });
 
     const submitButton = screen.getByRole('button', { name: 'Submit' });
@@ -432,8 +423,9 @@ describe('Authentication Form Integration Tests', () => {
       expect(mockOnSubmit).toHaveBeenCalledWith({
         data: {
           authType: {
-            type: 'bearer',
-            token: 'my-secret-token',
+            bearer: {
+              token: 'my-secret-token',
+            },
           },
         },
       });
@@ -441,13 +433,13 @@ describe('Authentication Form Integration Tests', () => {
   });
 
   it('displays validation errors when submitting basic auth with empty username/password', async () => {
-    render(<Form connectorSchema={authSchema} onSubmit={mockOnSubmit} />, { wrapper });
+    render(<TestFormWrapper schema={authSchema} onSubmit={mockOnSubmit} />, { wrapper });
 
     const basicCard = screen.getByLabelText('Basic Auth', { selector: 'input' });
     fireEvent.click(basicCard);
 
-    await screen.findByTestId('authType.username');
-    await screen.findByTestId('authType.password');
+    await screen.findByTestId(usernameTestId);
+    await screen.findByTestId(passwordTestId);
 
     const submitButton = screen.getByRole('button', { name: 'Submit' });
     fireEvent.click(submitButton);
@@ -459,15 +451,15 @@ describe('Authentication Form Integration Tests', () => {
   });
 
   it('shows only username error on blur, not password error', async () => {
-    render(<Form connectorSchema={authSchema} onSubmit={mockOnSubmit} />, { wrapper });
+    render(<TestFormWrapper schema={authSchema} onSubmit={mockOnSubmit} />, { wrapper });
 
     const basicCard = screen.getByLabelText('Basic Auth', { selector: 'input' });
     fireEvent.click(basicCard);
 
-    await screen.findByTestId('authType.username');
-    await screen.findByTestId('authType.password');
+    await screen.findByTestId(usernameTestId);
+    await screen.findByTestId(passwordTestId);
 
-    const usernameInput = screen.getByTestId('authType.username');
+    const usernameInput = screen.getByTestId(usernameTestId);
 
     fireEvent.change(usernameInput, { target: { value: 'test' } });
     fireEvent.change(usernameInput, { target: { value: '' } });
@@ -497,9 +489,9 @@ describe('Authentication Form Integration Tests', () => {
         .meta({ widget: 'formFieldset', label: 'Authentication' }),
     });
 
-    render(<Form connectorSchema={singleOptionSchema} onSubmit={mockOnSubmit} />, { wrapper });
+    render(<TestFormWrapper schema={singleOptionSchema} onSubmit={mockOnSubmit} />, { wrapper });
 
-    const apiKeyInput = screen.getByTestId('apiKey.headers');
+    const apiKeyInput = screen.getByTestId('generator-field-apiKey-headers');
     fireEvent.change(apiKeyInput, { target: { value: 'my-secret-api-key' } });
 
     const submitButton = screen.getByRole('button', { name: 'Submit' });
@@ -509,7 +501,6 @@ describe('Authentication Form Integration Tests', () => {
       expect(mockOnSubmit).toHaveBeenCalledWith({
         data: {
           apiKey: {
-            type: 'headers',
             headers: 'my-secret-api-key',
           },
         },
@@ -551,18 +542,13 @@ describe('Authentication Form Integration Tests', () => {
         }),
     });
 
-    render(<Form connectorSchema={schema} onSubmit={mockOnSubmit} />, { wrapper });
+    render(<TestFormWrapper schema={schema} onSubmit={mockOnSubmit} />, { wrapper });
 
     const basicCard = screen.getByLabelText('Basic Auth', { selector: 'input' });
     fireEvent.click(basicCard);
 
-    await screen.findByTestId('authType.username');
-    await screen.findByTestId('authType.password');
-
-    const nameInput = screen.getByTestId('name');
-    fireEvent.focus(nameInput);
-
-    const usernameInput = screen.getByTestId('authType.username');
+    const usernameInput = screen.getByTestId(usernameTestId);
+    fireEvent.focus(usernameInput);
     fireEvent.change(usernameInput, { target: { value: 'test' } });
     fireEvent.change(usernameInput, { target: { value: '' } });
     fireEvent.blur(usernameInput);

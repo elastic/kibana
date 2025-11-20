@@ -10,7 +10,9 @@
 import React from 'react';
 import type { StoryObj } from '@storybook/react';
 import { z } from '@kbn/zod/v4';
-import { Form } from './form';
+import { EuiButton } from '@elastic/eui';
+import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { FormGenerator } from './form';
 
 const meta = {
   title: 'Form Generator',
@@ -24,59 +26,77 @@ const submit = ({ data }: { data: unknown }) => {
   window.alert(JSON.stringify(data, null, 2));
 };
 
+interface FormWrapperProps {
+  schema: z.ZodObject<z.ZodRawShape>;
+  onSubmit: (data: { data: unknown }) => void;
+}
+
+const FormWrapper = ({ schema, onSubmit }: FormWrapperProps) => {
+  const { form } = useForm({
+    onSubmit: async (data, isValid) => {
+      if (isValid) {
+        onSubmit({ data });
+      }
+    },
+  });
+
+  return (
+    <Form form={form}>
+      <FormGenerator schema={schema} />
+      <EuiButton onClick={form.submit} isLoading={form.isSubmitting}>
+        Submit
+      </EuiButton>
+    </Form>
+  );
+};
+
 export const WebhookConnector: StoryObj = {
   render: () => {
-    return <Form connectorSchema={webhookConnectorFormSchema} onSubmit={submit} />;
+    return <FormWrapper schema={webhookConnectorFormSchema} onSubmit={submit} />;
   },
 };
 
 export const AbuseIPDBConnector: StoryObj = {
   render: () => {
-    return <Form connectorSchema={abuseIPDBConnectorSchema} onSubmit={submit} />;
+    return <FormWrapper schema={abuseIPDBConnectorSchema} onSubmit={submit} />;
   },
 };
 
 export const AlienVaultOTXConnector: StoryObj = {
   render: () => {
-    return <Form connectorSchema={alienVaultOTXConnectorSchema} onSubmit={submit} />;
+    return <FormWrapper schema={alienVaultOTXConnectorSchema} onSubmit={submit} />;
   },
 };
 
 export const GreyNoiseConnector: StoryObj = {
   render: () => {
-    return <Form connectorSchema={GreyNoiseConnectorSchema} onSubmit={submit} />;
+    return <FormWrapper schema={GreyNoiseConnectorSchema} onSubmit={submit} />;
   },
 };
 
 export const ShodanConnector: StoryObj = {
   render: () => {
-    return <Form connectorSchema={ShodanConnectorSchema} onSubmit={submit} />;
+    return <FormWrapper schema={ShodanConnectorSchema} onSubmit={submit} />;
   },
 };
 
 export const UrlVoidConnector: StoryObj = {
   render: () => {
-    return <Form connectorSchema={UrlVoidConnectorSchema} onSubmit={submit} />;
+    return <FormWrapper schema={UrlVoidConnectorSchema} onSubmit={submit} />;
   },
 };
 
 export const VirusTotalConnector: StoryObj = {
   render: () => {
-    return <Form connectorSchema={VirusTotalConnectorSchema} onSubmit={submit} />;
+    return <FormWrapper schema={VirusTotalConnectorSchema} onSubmit={submit} />;
   },
 };
 
-// this is not the object that would be created as SingleConnectorFile, this is the internal
-// representation after parsing a SingleConnectorFile
 const webhookConnectorFormSchema = z.object({
-  name: z.string().min(1, { message: 'Name cannot be empty' }).meta({
-    label: 'Connector Name',
-  }),
   method: z.enum(['POST', 'PUT', 'GET', 'DELETE']).meta({
     label: 'Method',
-    default: 'POST',
   }),
-  url: z.url().meta({ widget: 'text', label: 'URL' }),
+  url: z.url().meta({ widget: 'text', label: 'URL', placeholder: 'https://...' }),
   authType: z
     .discriminatedUnion('type', [
       z.object({ type: z.literal('none') }).meta({
@@ -105,8 +125,8 @@ const webhookConnectorFormSchema = z.object({
     ])
     .meta({
       label: 'Authentication',
-      default: 'basic',
-    }),
+    })
+    .default({ type: 'basic', username: '', password: '' }),
 });
 
 const abuseIPDBConnectorSchema = z.object({
@@ -127,22 +147,23 @@ const abuseIPDBConnectorSchema = z.object({
 });
 
 const alienVaultOTXConnectorSchema = z.object({
-  authType: z.discriminatedUnion('authType', [
+  authType: z.discriminatedUnion('authTypes', [
     z.object({
-      authType: z.literal('header'),
+      authTypes: z.literal('api_key_header'),
       'X-OTX-API-KEY': z.string().min(1, { message: 'API Key cannot be empty' }).meta({
         label: 'API Key',
         sensitive: true,
+        placeholder: 'Your AlienVault OTX API Key',
       }),
     }),
   ]),
 });
 
 const GreyNoiseConnectorSchema = z.object({
-  authType: z.discriminatedUnion('type', [
+  authType: z.discriminatedUnion('authTypes', [
     z
       .object({
-        type: z.literal('apiKey'),
+        authTypes: z.literal('apiKey'),
         key: z.string().min(1, { message: 'API Key cannot be empty' }).meta({
           widget: 'password',
           label: 'API Key',

@@ -7,132 +7,114 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import type { z } from '@kbn/zod/v4';
 import { ZodError } from '@kbn/zod/v4';
-import { EuiButton, EuiForm, EuiSpacer } from '@elastic/eui';
-import { getMeta } from './schema_metadata';
-import type { BaseMetadata } from './schema_metadata';
-import { useFormState } from './use_form_state';
-import type { WidgetType } from './widgets';
-import { getWidgetComponent, getDefaultValueNormalizer } from './widgets/registry';
-
-/**
- * Key used for root-level field validation errors.
- * When Zod validates a field value itself (not a nested property), issue.path is an empty array.
- * Example: z.string().email() fails → issue.path = [] → path.join('.') = ''
- * Nested errors use dot notation: ['user', 'email'] → 'user.email'
- */
-export const ROOT_ERROR_KEY = '';
+import { getMeta } from '@kbn/connector-specs/src/connector_spec_ui';
+import type { ValidationFunc } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
+import { EuiSpacer } from '@elastic/eui';
+import { getWidgetComponent } from './widgets/registry';
+import { unwrap } from './schema_unwrap';
 
 export interface FieldDefinition {
-  id: string;
-  initialValue?: unknown;
-  value?: unknown;
-  validate: (value: unknown) => Record<string, string | string[]> | undefined;
-  schema: z.ZodTypeAny;
-  widget?: WidgetType | string;
-  meta: BaseMetadata;
+  path: string;
+  validate: (...args: Parameters<ValidationFunc>) => ReturnType<ValidationFunc<any, ERROR_CODE>>;
+  schema: z.ZodType;
+  options?: Record<string, unknown>;
 }
 
-const getFieldsFromSchema = <T extends z.ZodRawShape>(schema: z.ZodObject<T>) => {
+export const getFieldFromSchema = ({ schema, path }: { schema: z.ZodType; path: string }) => {
+  return {
+    path,
+    schema,
+    validate: (
+      ...args: Parameters<ValidationFunc>
+    ): ReturnType<ValidationFunc<any, ERROR_CODE>> => {
+      const [{ value, path: formPath }] = args;
+
+      try {
+        schema.parse(value);
+        return undefined;
+      } catch (error) {
+        if (!(error instanceof ZodError)) {
+          throw new Error(`Unexpected validation error: ${error}`);
+        }
+
+        const errors = error.issues.map((issue) => {
+          return issue.message;
+        });
+
+        if (errors.length > 0) {
+          return { code: 'ERR_FIELD_MISSING', path: formPath, message: errors.join(', ') };
+        }
+      }
+    },
+  };
+};
+
+export const getFieldsFromSchema = <T extends z.ZodRawShape>({
+  schema,
+  rootPath,
+}: {
+  schema: z.ZodObject<T>;
+  rootPath?: string;
+}) => {
   const fields: FieldDefinition[] = [];
 
-  Object.entries(schema.shape).forEach(([key, subSchema]) => {
-    const schemaAny = subSchema as z.ZodTypeAny;
-
-    const metaInfo = getMeta(schemaAny);
-
-    const normalizer = getDefaultValueNormalizer(schemaAny);
-    const initialValue = normalizer
-      ? normalizer(schemaAny, metaInfo.default) ?? metaInfo.default
-      : metaInfo.default;
-
-    fields.push({
-      id: key,
-      initialValue,
-      schema: schemaAny,
-      widget: metaInfo.widget,
-      meta: metaInfo,
-      validate: (value: unknown) => {
-        try {
-          schemaAny.parse(value);
-          return undefined;
-        } catch (error) {
-          if (!(error instanceof ZodError)) {
-            throw new Error(`Unexpected validation error: ${error}`);
-          }
-
-          const errors: Record<string, string | string[]> = {};
-
-          error.issues.forEach((issue) => {
-            const path = (issue.path[0] as string) || ROOT_ERROR_KEY;
-            errors[path] = issue.message;
-          });
-
-          return Object.keys(errors).length > 0 ? errors : undefined;
-        }
-      },
-    });
+  Object.keys(schema.shape).forEach((key) => {
+    const fieldSchema = schema.shape[key] as z.ZodType;
+    const path = rootPath ? `${rootPath}.${key}` : key;
+    const field = getFieldFromSchema({ schema: fieldSchema, path });
+    fields.push(field);
   });
 
   return fields;
 };
 
-interface FormProps<TSchema extends z.ZodObject<z.ZodRawShape>> {
-  connectorSchema: TSchema;
-  onSubmit?: ({ data }: { data: z.infer<TSchema> }) => void;
-}
-export const Form = <TSchema extends z.ZodObject<z.ZodRawShape>>({
-  connectorSchema,
-  onSubmit,
-}: FormProps<TSchema>) => {
-  const fields = useMemo(() => getFieldsFromSchema(connectorSchema), [connectorSchema]);
-  const form = useFormState<z.infer<TSchema>>(fields);
+export const renderFieldComponent = ({ field }: { field: FieldDefinition }) => {
+  const { schema: outerSchema, validate, path } = field;
 
-  const _onSubmit = ({ data }: { data: z.infer<TSchema> }) => {
-    onSubmit?.({ data });
-    form.reset();
-  };
+  // Some schemas are wrapped (e.g., with ZodOptional or ZodDefault), so we unwrap them to get the underlying schema
+  const { schema, defaultValue } = unwrap(outerSchema);
+  const meta = getMeta(schema);
+  const WidgetComponent = getWidgetComponent(schema);
 
   return (
-    <EuiForm component="form" onSubmit={form.handleSubmit(_onSubmit)} noValidate>
-      {fields.map((field) => {
-        const { id, schema: fieldSchema, meta } = field;
-
-        const WidgetComponent = getWidgetComponent(fieldSchema);
-
-        const validateField = (fieldId: string, value: unknown) => {
-          return form.validateField(fieldId, value, fields);
-        };
-
-        return (
-          <WidgetComponent
-            key={id}
-            fieldId={id}
-            value={form.values[id]}
-            label={meta.label}
-            placeholder={meta.placeholder}
-            fullWidth={true}
-            error={form.errors[id]}
-            isInvalid={Boolean(form.errors[id])}
-            onChange={form.handleChange}
-            onBlur={form.handleBlur}
-            schema={fieldSchema}
-            meta={meta}
-            setFieldError={form.setFieldError}
-            setFieldTouched={form.setFieldTouched}
-            getFieldValue={form.getFieldValue}
-            validateField={validateField}
-            errors={form.errors}
-            touched={form.touched}
-          />
-        );
-      })}
+    <React.Fragment key={path}>
+      <WidgetComponent
+        key={path}
+        path={path}
+        schema={schema}
+        fieldConfig={{
+          defaultValue: defaultValue ?? meta.default,
+          validations: [
+            {
+              validator: validate,
+            },
+          ],
+        }}
+        fieldProps={{
+          label: meta.label,
+          helpText: meta.helpText,
+          fullWidth: true,
+          euiFieldProps: {
+            placeholder: meta.placeholder,
+            ['data-test-subj']: `generator-field-${path.replace(/\./g, '-')}`,
+          },
+        }}
+      />
       <EuiSpacer size="m" />
-      <EuiButton type="submit" fill>
-        Submit
-      </EuiButton>
-    </EuiForm>
+    </React.Fragment>
   );
+};
+
+interface FormProps<TSchema extends z.ZodObject<z.ZodRawShape>> {
+  schema: TSchema;
+}
+export const FormGenerator = <TSchema extends z.ZodObject<z.ZodRawShape>>({
+  schema,
+}: FormProps<TSchema>) => {
+  const fields = getFieldsFromSchema({ schema });
+  return fields.map((field) => renderFieldComponent({ field }));
 };

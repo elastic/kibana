@@ -7,28 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type React from 'react';
 import { z } from '@kbn/zod/v4';
-import { WidgetType, type BaseWidgetProps } from './types';
+import type { BaseWidgetProps } from './types';
+import { WidgetType } from './types';
 import { getMeta } from '../schema_metadata';
 import { TextField } from './fields/text_field';
 import { SelectField } from './fields/select_field';
 import { PasswordField } from './fields/password_field';
-import {
-  DiscriminatedUnionField,
-  normalizeDiscriminatedUnionDefault,
-} from './fields/discriminated_union_field';
+import { DiscriminatedUnionField } from './fields/discriminated_union_field';
 
-type DefaultValueNormalizer = (schema: z.ZodTypeAny, defaultValue: unknown) => unknown | undefined;
-
-const WIDGET_REGISTRY: Record<WidgetType, React.ComponentType<BaseWidgetProps>> = {
-  [WidgetType.Text]: TextField as React.ComponentType<BaseWidgetProps>,
-  [WidgetType.Password]: PasswordField as React.ComponentType<BaseWidgetProps>,
-  [WidgetType.Select]: SelectField as React.ComponentType<BaseWidgetProps>,
-  [WidgetType.FormFieldset]: DiscriminatedUnionField as React.ComponentType<BaseWidgetProps>,
+const WIDGET_REGISTRY = {
+  [WidgetType.Text]: TextField,
+  [WidgetType.Password]: PasswordField,
+  [WidgetType.Select]: SelectField,
+  [WidgetType.FormFieldset]: DiscriminatedUnionField,
 };
 
-const getDefaultWidgetForSchema = (schema: z.ZodTypeAny) => {
+const getDefaultWidgetForSchema = (schema: z.ZodType) => {
   if (schema instanceof z.ZodString) {
     const metaInfo = getMeta(schema);
     if (metaInfo?.sensitive) {
@@ -44,12 +39,14 @@ const getDefaultWidgetForSchema = (schema: z.ZodTypeAny) => {
   return undefined;
 };
 
-function getWidgetType(schema: z.ZodTypeAny): WidgetType | undefined {
+function getWidgetType(schema: z.ZodType): WidgetType | undefined {
   const { widget } = getMeta(schema);
   return (widget as WidgetType) || getDefaultWidgetForSchema(schema);
 }
 
-export function getWidgetComponent(schema: z.ZodTypeAny): React.ComponentType<BaseWidgetProps> {
+export function getWidgetComponent(
+  schema: z.ZodType
+): React.FC<BaseWidgetProps<z.ZodType, unknown, unknown>> {
   const widgetType = getWidgetType(schema);
 
   if (!widgetType) {
@@ -65,20 +62,5 @@ export function getWidgetComponent(schema: z.ZodTypeAny): React.ComponentType<Ba
     );
   }
 
-  return component;
-}
-
-/**
- * Used to return the default value for a schema.
- * Widgets can optionally provide a normalizer function.
- */
-const DEFAULT_VALUE_NORMALIZER_REGISTRY: Partial<Record<WidgetType, DefaultValueNormalizer>> = {
-  [WidgetType.FormFieldset]: normalizeDiscriminatedUnionDefault,
-};
-
-export function getDefaultValueNormalizer(
-  schema: z.ZodTypeAny
-): DefaultValueNormalizer | undefined {
-  const widgetType = getWidgetType(schema);
-  return widgetType ? DEFAULT_VALUE_NORMALIZER_REGISTRY[widgetType] : undefined;
+  return component as React.FC<BaseWidgetProps<z.ZodType, unknown, unknown>>;
 }

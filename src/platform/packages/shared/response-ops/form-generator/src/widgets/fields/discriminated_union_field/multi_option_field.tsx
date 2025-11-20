@@ -7,149 +7,86 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo } from 'react';
-import { EuiCheckableCard, EuiFormFieldset, EuiFormRow, EuiSpacer } from '@elastic/eui';
-import type { DiscriminatedUnionWidgetProps } from './discriminated_union_field';
-import { getDefaultValuesFromSchema } from './get_default_values';
-import { getWidgetComponent } from '../../registry';
+import React, { useState } from 'react';
+import { EuiCheckableCard, EuiFormFieldset, EuiSpacer, EuiTitle } from '@elastic/eui';
+import { getMeta } from '../../../schema_metadata';
+import {
+  getDiscriminatorFieldValue,
+  type DiscriminatedUnionWithProps,
+} from './discriminated_union_field';
+import { SingleOptionUnionField } from './single_option_field';
 
-export const MultiOptionUnionField: React.FC<DiscriminatedUnionWidgetProps> = ({
-  fieldId,
-  value,
-  label,
-  onChange,
-  onBlur,
-  unionOptions,
-  fullWidth,
-  setFieldError,
-  setFieldTouched,
-  errors = {},
-  touched = {},
-  meta,
-  validateField,
+const getDefaultOption = (
+  options: DiscriminatedUnionWithProps['options'],
+  discriminatorKey: string,
+  fieldConfig: DiscriminatedUnionWithProps['fieldConfig']
+) => {
+  if (fieldConfig?.defaultValue && typeof fieldConfig.defaultValue === 'object') {
+    const defaultValue = fieldConfig.defaultValue as Record<string, any>;
+    const defaultOption = options.find(
+      (option) =>
+        getDiscriminatorFieldValue(option, discriminatorKey) === defaultValue[discriminatorKey]
+    );
+    if (defaultOption) {
+      return defaultOption;
+    }
+  }
+  return options[0];
+};
+
+export const MultiOptionUnionField: React.FC<DiscriminatedUnionWithProps> = ({
+  path: rootPath,
+  options,
+  discriminatorKey,
+  schema,
+  fieldConfig,
+  fieldProps,
 }) => {
-  const { discriminatorKey, options: unionOptionsList } = unionOptions;
-
-  const selectedType = value[discriminatorKey];
-  const options = useMemo(() => {
-    return unionOptionsList.map((option, index: number) => {
-      const { value: discriminatorValue, label: cardLabel, fields, schema: optionSchema } = option;
-      const isChecked = selectedType === discriminatorValue;
-      const checkableCardId = `${fieldId}-option-${discriminatorValue}`;
-
-      const handleCardChange = () => {
-        const newValue = getDefaultValuesFromSchema(optionSchema, discriminatorKey);
-        onChange(fieldId, newValue);
-
-        if (setFieldError) {
-          fields.forEach((field) => {
-            setFieldError(`${fieldId}.${field.id}`, undefined);
-          });
-        }
-      };
-
-      const renderOptionsFields = () => {
-        if (!isChecked) return null;
-
-        return (
-          <>
-            {fields.map((field) => {
-              const { id: fieldKey, schema: fieldSchema, meta: fieldMeta } = field;
-              const optionValue = value[fieldKey];
-
-              const OptionWidgetComponent = getWidgetComponent(fieldSchema);
-
-              const optionFieldId = `${fieldId}.${fieldKey}`;
-              const optionFieldTouched = touched[optionFieldId] || touched[fieldId];
-              const optionFieldError = errors[optionFieldId];
-              const optionFieldIsInvalid = Boolean(optionFieldTouched && optionFieldError);
-
-              const handleOptionChange = (_optionFieldIdArg: string, newValue: unknown) => {
-                const updatedValue = {
-                  ...value,
-                  [fieldKey]: newValue,
-                };
-
-                if (setFieldTouched) {
-                  setFieldTouched(optionFieldId, true);
-                }
-
-                onChange(fieldId, updatedValue);
-
-                if (validateField && setFieldError) {
-                  const fieldErrors = validateField(fieldId, updatedValue, []);
-                  setFieldError(optionFieldId, fieldErrors);
-                }
-              };
-
-              const handleOptionBlur = () => {
-                const wasTouched = touched[optionFieldId];
-
-                if (wasTouched && validateField && setFieldError) {
-                  const fieldErrors = validateField(fieldId, value, []);
-                  setFieldError(optionFieldId, fieldErrors);
-                }
-
-                onBlur(optionFieldId, value);
-              };
-
-              return (
-                <React.Fragment key={fieldKey}>
-                  <EuiSpacer size="s" />
-                  <OptionWidgetComponent
-                    aria-label={fieldMeta.label}
-                    fieldId={optionFieldId}
-                    value={optionValue}
-                    label={fieldMeta.label}
-                    error={optionFieldError}
-                    isInvalid={optionFieldIsInvalid}
-                    onChange={handleOptionChange}
-                    onBlur={handleOptionBlur}
-                    schema={fieldSchema}
-                    meta={fieldMeta}
-                    fullWidth
-                  />
-                </React.Fragment>
-              );
-            })}
-          </>
-        );
-      };
-
-      return (
-        <React.Fragment key={discriminatorValue}>
-          <EuiCheckableCard
-            aria-label={cardLabel}
-            id={checkableCardId}
-            label={cardLabel}
-            value={discriminatorValue}
-            checked={isChecked}
-            onChange={handleCardChange}
-          >
-            {renderOptionsFields()}
-          </EuiCheckableCard>
-          {index < unionOptionsList.length - 1 && <EuiSpacer size="s" />}
-        </React.Fragment>
-      );
-    });
-  }, [
-    unionOptionsList,
-    selectedType,
-    fieldId,
-    discriminatorKey,
-    onChange,
-    setFieldError,
-    value,
-    touched,
-    errors,
-    setFieldTouched,
-    validateField,
-    onBlur,
-  ]);
+  const defaultOption = getDefaultOption(options, discriminatorKey, fieldConfig);
+  const [selectedOption, setSelectedOption] = useState(() =>
+    getDiscriminatorFieldValue(defaultOption, discriminatorKey)
+  );
 
   return (
-    <EuiFormRow fullWidth={fullWidth} helpText={meta?.helpText}>
-      <EuiFormFieldset legend={{ children: label }}>{options}</EuiFormFieldset>
-    </EuiFormRow>
+    <EuiFormFieldset
+      legend={{
+        children: (
+          <EuiTitle size="xxs">
+            <h4>{fieldProps.label as string}</h4>
+          </EuiTitle>
+        ),
+      }}
+    >
+      {options.map((option) => {
+        const discriminatorValue = getDiscriminatorFieldValue(option, discriminatorKey) as string;
+        const onChange = () => setSelectedOption(discriminatorValue);
+        const label = getMeta(option).label;
+        const isChecked = selectedOption === discriminatorValue;
+
+        return (
+          <React.Fragment key={discriminatorValue}>
+            <EuiCheckableCard
+              onChange={onChange}
+              label={label as string}
+              id={discriminatorValue}
+              checked={isChecked}
+              data-test-subj={`form-generator-field-${rootPath}-${discriminatorValue}`}
+            >
+              {isChecked && (
+                <SingleOptionUnionField
+                  options={[option]}
+                  path={`${rootPath}.${discriminatorValue}`}
+                  schema={schema}
+                  discriminatorKey={discriminatorKey}
+                  fieldConfig={fieldConfig}
+                  fieldProps={fieldProps}
+                />
+              )}
+            </EuiCheckableCard>
+            <EuiSpacer size="xs" />
+          </React.Fragment>
+        );
+      })}
+    </EuiFormFieldset>
   );
 };

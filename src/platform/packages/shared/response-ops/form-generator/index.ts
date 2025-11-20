@@ -7,11 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-module.exports = {
-  preset: '@kbn/test',
-  rootDir: '../../../../../..',
-  roots: ['<rootDir>/src/platform/packages/shared/response-ops/form-generator'],
-  setupFilesAfterEnv: [
-    '<rootDir>/src/platform/packages/shared/response-ops/form-generator/setup_tests.ts',
-  ],
-};
+export { FormGenerator } from './src/form';

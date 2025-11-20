@@ -11,31 +11,46 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { z } from '@kbn/zod/v4';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { TextField } from './text_field';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
 );
 
-describe('TextField', () => {
-  const mockOnChange = jest.fn();
-  const mockOnBlur = jest.fn();
+const TestFormWrapper = ({ children }: { children: React.ReactNode }) => {
+  const { form } = useForm();
+  return <Form form={form}>{children}</Form>;
+};
 
+describe('TextField', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('renders with label and placeholder', () => {
     render(
-      <TextField
-        fieldId="username"
-        value=""
-        label="Username"
-        placeholder="Enter username"
-        onChange={mockOnChange}
-        onBlur={mockOnBlur}
-      />,
+      <TestFormWrapper>
+        <TextField
+          path="username"
+          schema={z.string()}
+          fieldProps={{
+            label: 'Username',
+            euiFieldProps: {
+              placeholder: 'Enter username',
+            },
+          }}
+          fieldConfig={{
+            validations: [
+              {
+                validator: () => undefined,
+              },
+            ],
+          }}
+        />
+      </TestFormWrapper>,
       { wrapper }
     );
 
@@ -44,91 +59,132 @@ describe('TextField', () => {
   });
 
   it('displays the current value', () => {
-    render(
-      <TextField
-        fieldId="username"
-        value="testuser"
-        label="Username"
-        onChange={mockOnChange}
-        onBlur={mockOnBlur}
-      />,
-      { wrapper }
-    );
+    const TestForm = () => {
+      const { form } = useForm({ defaultValue: { username: 'testuser' } });
+      return (
+        <Form form={form}>
+          <TextField
+            path="username"
+            schema={z.string()}
+            fieldProps={{ label: 'Username', euiFieldProps: {} }}
+            fieldConfig={{
+              validations: [
+                {
+                  validator: () => undefined,
+                },
+              ],
+            }}
+          />
+        </Form>
+      );
+    };
+
+    render(<TestForm />, { wrapper });
 
     const input = screen.getByDisplayValue('testuser') as HTMLInputElement;
     expect(input.value).toBe('testuser');
   });
 
-  it('calls onChange when value changes', () => {
-    render(
-      <TextField
-        fieldId="username"
-        value=""
-        label="Username"
-        onChange={mockOnChange}
-        onBlur={mockOnBlur}
-      />,
-      { wrapper }
-    );
+  it('updates value when input changes', () => {
+    const TestForm = () => {
+      const { form } = useForm();
+      return (
+        <Form form={form}>
+          <TextField
+            path="username"
+            schema={z.string()}
+            fieldProps={{ label: 'Username', euiFieldProps: {} }}
+            fieldConfig={{
+              validations: [
+                {
+                  validator: () => undefined,
+                },
+              ],
+            }}
+          />
+        </Form>
+      );
+    };
+
+    render(<TestForm />, { wrapper });
 
     const input = screen.getByLabelText('Username', { selector: 'input' });
     fireEvent.change(input, { target: { value: 'newvalue' } });
 
-    expect(mockOnChange).toHaveBeenCalledWith('username', 'newvalue');
+    expect((input as HTMLInputElement).value).toBe('newvalue');
   });
 
-  it('calls onBlur when field loses focus', async () => {
+  it('validates field on blur', async () => {
     const user = userEvent.setup();
-    render(
-      <TextField
-        fieldId="username"
-        value=""
-        label="Username"
-        onChange={mockOnChange}
-        onBlur={mockOnBlur}
-      />,
-      { wrapper }
-    );
+    const TestForm = () => {
+      const { form } = useForm();
+      return (
+        <Form form={form}>
+          <TextField
+            path="username"
+            schema={z.string().min(3, 'Username must be at least 3 characters')}
+            fieldProps={{ label: 'Username', euiFieldProps: {} }}
+            fieldConfig={{
+              validations: [
+                {
+                  validator: ({ value }) => {
+                    const strValue = value as string;
+                    if (!strValue || strValue.length < 3) {
+                      return { message: 'Username must be at least 3 characters' };
+                    }
+                  },
+                },
+              ],
+            }}
+          />
+        </Form>
+      );
+    };
+
+    render(<TestForm />, { wrapper });
 
     const input = screen.getByLabelText('Username', { selector: 'input' });
     await user.click(input);
+    fireEvent.change(input, { target: { value: 'ab' } });
     await user.tab();
 
-    expect(mockOnBlur).toHaveBeenCalledWith('username', '');
+    await screen.findByText('Username must be at least 3 characters');
   });
 
-  it('displays error message when invalid', () => {
-    render(
-      <TextField
-        fieldId="username"
-        value=""
-        label="Username"
-        error="Username is required"
-        isInvalid={true}
-        onChange={mockOnChange}
-        onBlur={mockOnBlur}
-      />,
-      { wrapper }
-    );
+  it('displays error message when invalid', async () => {
+    const user = userEvent.setup();
+    const TestForm = () => {
+      const { form } = useForm();
+      return (
+        <Form form={form}>
+          <TextField
+            path="username"
+            schema={z.string().min(1, 'Username is required')}
+            fieldProps={{ label: 'Username', euiFieldProps: {} }}
+            fieldConfig={{
+              validations: [
+                {
+                  validator: ({ value }) => {
+                    if (!value) {
+                      return { message: 'Username is required' };
+                    }
+                  },
+                },
+              ],
+            }}
+          />
+        </Form>
+      );
+    };
 
-    expect(screen.getByText('Username is required')).toBeDefined();
-  });
+    render(<TestForm />, { wrapper });
 
-  it('displays multiple error messages', () => {
-    render(
-      <TextField
-        fieldId="username"
-        value=""
-        label="Username"
-        error={['Error 1', 'Error 2']}
-        isInvalid={true}
-        onChange={mockOnChange}
-        onBlur={mockOnBlur}
-      />,
-      { wrapper }
-    );
+    const input = screen.getByLabelText('Username', { selector: 'input' });
+    await user.click(input);
+    await user.type(input, 'x');
+    await user.clear(input);
+    await user.tab();
 
-    expect(screen.getByText('Error 1')).toBeDefined();
-    expect(screen.getByText('Error 2')).toBeDefined();
+    expect(await screen.findByText('Username is required')).toBeDefined();
   });
 });

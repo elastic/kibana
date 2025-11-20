@@ -8,56 +8,21 @@
  */
 
 import React from 'react';
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
 import type { EuiFieldTextProps } from '@elastic/eui';
-import type { BaseMetadata, StripFormProps } from '../../schema_metadata';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { z } from '@kbn/zod/v4';
+import { TextField as FormTextField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 import type { BaseWidgetProps } from '../types';
-import type { WidgetType } from '../types';
 
-type TextWidgetMeta = BaseMetadata & {
-  widget: WidgetType.Text;
-} & StripFormProps<EuiFieldTextProps>;
+type TextWidgetProps = BaseWidgetProps<z.ZodString, EuiFieldTextProps>;
 
-type TextWidgetProps = BaseWidgetProps<string, TextWidgetMeta>;
-
-export const TextField: React.FC<TextWidgetProps> = ({
-  fieldId,
-  value,
-  label,
-  placeholder,
-  fullWidth = true,
-  error,
-  isInvalid,
-  onChange,
-  onBlur,
-  meta,
-  helpText,
-}) => {
-  const { prepend, append, compressed, readOnly, isDisabled } = meta || {};
-
+export const TextField: React.FC<TextWidgetProps> = ({ path, schema, fieldProps, fieldConfig }) => {
   return (
-    <EuiFormRow
-      aria-label={label}
-      label={label}
-      error={error}
-      isInvalid={isInvalid}
-      fullWidth={fullWidth}
-      helpText={helpText}
-    >
-      <EuiFieldText
-        data-test-subj={fieldId}
-        value={value}
-        placeholder={placeholder}
-        onChange={(e) => onChange(fieldId, e.target.value)}
-        onBlur={() => onBlur(fieldId, value)}
-        isInvalid={isInvalid}
-        fullWidth={fullWidth}
-        disabled={isDisabled}
-        prepend={prepend}
-        append={append}
-        compressed={compressed}
-        readOnly={readOnly}
-      />
-    </EuiFormRow>
+    <UseField
+      path={path}
+      component={FormTextField}
+      config={fieldConfig}
+      componentProps={fieldProps}
+    />
   );
 };

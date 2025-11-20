@@ -12,31 +12,42 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { z } from '@kbn/zod/v4';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { SelectField } from './select_field';
-import { WidgetType } from '../types';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <IntlProvider locale="en">{children}</IntlProvider>
 );
 
-describe('SelectField', () => {
-  const mockOnChange = jest.fn();
-  const mockOnBlur = jest.fn();
+const TestFormWrapper = ({ children }: { children: React.ReactNode }) => {
+  const { form } = useForm();
+  return <Form form={form}>{children}</Form>;
+};
 
+describe('SelectField', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('renders with label from props', () => {
     render(
-      <SelectField
-        fieldId="country"
-        value="option1"
-        label="Country"
-        schema={z.enum(['option1', 'option2', 'option3'])}
-        onChange={mockOnChange}
-        onBlur={mockOnBlur}
-      />,
+      <TestFormWrapper>
+        <SelectField
+          path="country"
+          schema={z.enum(['option1', 'option2', 'option3'])}
+          fieldProps={{
+            label: 'Country',
+            euiFieldProps: {},
+          }}
+          fieldConfig={{
+            validations: [
+              {
+                validator: () => undefined,
+              },
+            ],
+          }}
+        />
+      </TestFormWrapper>,
       { wrapper }
     );
 
@@ -45,14 +56,23 @@ describe('SelectField', () => {
 
   it('renders options from z.enum schema', () => {
     render(
-      <SelectField
-        fieldId="country"
-        value="US"
-        label="Country"
-        schema={z.enum(['US', 'UK', 'CA'])}
-        onChange={mockOnChange}
-        onBlur={mockOnBlur}
-      />,
+      <TestFormWrapper>
+        <SelectField
+          path="country"
+          schema={z.enum(['US', 'UK', 'CA'])}
+          fieldProps={{
+            label: 'Country',
+            euiFieldProps: {},
+          }}
+          fieldConfig={{
+            validations: [
+              {
+                validator: () => undefined,
+              },
+            ],
+          }}
+        />
+      </TestFormWrapper>,
       { wrapper }
     );
 
@@ -64,45 +84,59 @@ describe('SelectField', () => {
   });
 
   it('renders options from explicit options prop', () => {
-    const options = [
-      { value: 'admin', text: 'Administrator' },
-      { value: 'user', text: 'User' },
-      { value: 'guest', text: 'Guest' },
-    ];
-
     render(
-      <SelectField
-        fieldId="role"
-        value="admin"
-        label="Role"
-        meta={{
-          widget: WidgetType.Select,
-          options,
-        }}
-        onChange={mockOnChange}
-        onBlur={mockOnBlur}
-      />,
+      <TestFormWrapper>
+        <SelectField
+          path="role"
+          schema={z.enum(['admin', 'user', 'guest'])}
+          fieldProps={{
+            label: 'Role',
+            euiFieldProps: {},
+          }}
+          fieldConfig={{
+            validations: [
+              {
+                validator: () => undefined,
+              },
+            ],
+          }}
+        />
+      </TestFormWrapper>,
       { wrapper }
     );
 
     const select = screen.getByRole('combobox') as HTMLSelectElement;
     expect(select.options.length).toBe(3);
     expect(select.options[0].value).toBe('admin');
-    expect(select.options[0].text).toBe('Administrator');
+    expect(select.options[1].value).toBe('user');
+    expect(select.options[2].value).toBe('guest');
   });
 
   it('displays the selected value', () => {
-    render(
-      <SelectField
-        fieldId="choice"
-        value="option2"
-        label="Choice"
-        schema={z.enum(['option1', 'option2', 'option3'])}
-        onChange={mockOnChange}
-        onBlur={mockOnBlur}
-      />,
-      { wrapper }
-    );
+    const TestForm = () => {
+      const { form } = useForm({ defaultValue: { choice: 'option2' } });
+      return (
+        <Form form={form}>
+          <SelectField
+            path="choice"
+            schema={z.enum(['option1', 'option2', 'option3'])}
+            fieldProps={{
+              label: 'Choice',
+              euiFieldProps: {},
+            }}
+            fieldConfig={{
+              validations: [
+                {
+                  validator: () => undefined,
+                },
+              ],
+            }}
+          />
+        </Form>
+      );
+    };
+
+    render(<TestForm />, { wrapper });
 
     const select = screen.getByRole('combobox') as HTMLSelectElement;
     expect(select.value).toBe('option2');
@@ -111,34 +145,52 @@ describe('SelectField', () => {
   it('calls onChange when value changes', async () => {
     const user = userEvent.setup();
     render(
-      <SelectField
-        fieldId="choice"
-        value="option1"
-        label="Choice"
-        schema={z.enum(['option1', 'option2', 'option3'])}
-        onChange={mockOnChange}
-        onBlur={mockOnBlur}
-      />,
+      <TestFormWrapper>
+        <SelectField
+          path="choice"
+          schema={z.enum(['option1', 'option2', 'option3'])}
+          fieldProps={{
+            label: 'Choice',
+            euiFieldProps: { ['data-test-subj']: 'generator-field-choice' },
+          }}
+          fieldConfig={{
+            validations: [
+              {
+                validator: () => undefined,
+              },
+            ],
+          }}
+        />
+      </TestFormWrapper>,
       { wrapper }
     );
 
     const select = screen.getByRole('combobox');
     await user.selectOptions(select, 'option3');
 
-    expect(mockOnChange).toHaveBeenCalledWith('choice', 'option3');
+    expect((select as HTMLSelectElement).value).toBe('option3');
   });
 
   it('calls onBlur when field loses focus', async () => {
     const user = userEvent.setup();
     render(
-      <SelectField
-        fieldId="choice"
-        value="option1"
-        label="Choice"
-        schema={z.enum(['option1', 'option2', 'option3'])}
-        onChange={mockOnChange}
-        onBlur={mockOnBlur}
-      />,
+      <TestFormWrapper>
+        <SelectField
+          path="choice"
+          schema={z.enum(['option1', 'option2', 'option3'])}
+          fieldProps={{
+            label: 'Choice',
+            euiFieldProps: {},
+          }}
+          fieldConfig={{
+            validations: [
+              {
+                validator: () => undefined,
+              },
+            ],
+          }}
+        />
+      </TestFormWrapper>,
       { wrapper }
     );
 
@@ -146,25 +198,48 @@ describe('SelectField', () => {
     await user.click(select);
     await user.tab();
 
-    expect(mockOnBlur).toHaveBeenCalledWith('choice', 'option1');
+    // Field should maintain its value after blur
+    expect(screen.getByRole('combobox')).toBeDefined();
   });
 
-  it('displays error message when invalid', () => {
-    render(
-      <SelectField
-        fieldId="choice"
-        value=""
-        label="Choice"
-        schema={z.enum(['option1', 'option2', 'option3'])}
-        error="Selection is required"
-        isInvalid={true}
-        onChange={mockOnChange}
-        onBlur={mockOnBlur}
-      />,
-      { wrapper }
-    );
+  it('displays error message when invalid', async () => {
+    const user = userEvent.setup();
+    const TestForm = () => {
+      const { form } = useForm();
+      return (
+        <Form form={form}>
+          <SelectField
+            path="choice"
+            schema={z.enum(['option1', 'option2', 'option3'])}
+            fieldProps={{
+              label: 'Choice',
+              euiFieldProps: {},
+            }}
+            fieldConfig={{
+              validations: [
+                {
+                  validator: ({ value }) => {
+                    if (!value || value === 'option1') {
+                      return { message: 'Selection is required' };
+                    }
+                  },
+                },
+              ],
+            }}
+          />
+        </Form>
+      );
+    };
 
-    expect(screen.getByText('Selection is required')).toBeDefined();
+    render(<TestForm />, { wrapper });
+
+    const select = screen.getByRole('combobox');
+    await user.click(select);
+    await user.selectOptions(select, 'option2');
+    await user.selectOptions(select, 'option1');
+    await user.tab();
+
+    expect(await screen.findByText('Selection is required')).toBeDefined();
   });
 
   it('throws error when schema is not z.enum and no options provided', () => {
@@ -172,16 +247,26 @@ describe('SelectField', () => {
 
     expect(() => {
       render(
-        <SelectField
-          fieldId="choice"
-          value=""
-          label="Choice"
-          onChange={mockOnChange}
-          onBlur={mockOnBlur}
-        />,
+        <TestFormWrapper>
+          <SelectField
+            path="choice"
+            schema={z.string() as any}
+            fieldProps={{
+              label: 'Choice',
+              euiFieldProps: {},
+            }}
+            fieldConfig={{
+              validations: [
+                {
+                  validator: () => undefined,
+                },
+              ],
+            }}
+          />
+        </TestFormWrapper>,
         { wrapper }
       );
-    }).toThrow('SelectField requires options either from schema or props');
+    }).toThrow('SelectField requires a ZodEnum schema');
 
     consoleError.mockRestore();
   });

@@ -9,6 +9,9 @@ import { lazy } from 'react';
 import type { ActionTypeModel } from '@kbn/alerts-ui-shared';
 import { type ConnectorSpec } from '@kbn/connector-specs';
 import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-actions-ui-plugin/public';
+import { z } from '@kbn/zod/v4';
+import React from 'react';
+import { FormGenerator } from '@kbn/response-ops-form-generator';
 import { getIcon } from './get_icon';
 
 export function registerConnectorTypesFromSpecs({
@@ -27,13 +30,25 @@ export function registerConnectorTypesFromSpecs({
   });
 }
 
+const schema = z.object({
+  authType: z.discriminatedUnion('authTypes', [
+    z.object({
+      authTypes: z.literal('api_key_header'),
+      'X-OTX-API-KEY': z.string().min(1, { message: 'API Key cannot be empty' }).meta({
+        label: 'API Key',
+        sensitive: true,
+      }),
+    }),
+  ]),
+});
+
 const createConnectorTypeFromSpec = (spec: ConnectorSpec): ActionTypeModel => ({
   id: spec.metadata.id,
   actionTypeTitle: spec.metadata.displayName,
   selectMessage: spec.metadata.description,
   iconClass: getIcon(spec),
   // TODO: Implement the rest of the properties
-  actionConnectorFields: null,
+  actionConnectorFields: () => <FormGenerator schema={schema} />,
   actionParamsFields: lazy(() => Promise.resolve({ default: () => null })),
   validateParams: async () => ({ errors: {} }),
 });

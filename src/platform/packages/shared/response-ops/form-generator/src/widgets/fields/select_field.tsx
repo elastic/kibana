@@ -8,71 +8,47 @@
  */
 
 import React from 'react';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { z } from '@kbn/zod/v4';
-import { EuiFormRow, EuiSelect } from '@elastic/eui';
-import type { EuiSelectOption, EuiSelectProps } from '@elastic/eui';
-import type { BaseMetadata, StripFormProps } from '../../schema_metadata';
+import { SelectField as FormSelectField } from '@kbn/es-ui-shared-plugin/static/forms/components';
+import type { EuiSelectProps } from '@elastic/eui';
 import type { BaseWidgetProps } from '../types';
-import type { WidgetType } from '../types';
 
-type SelectWidgetMeta = BaseMetadata & {
-  widget: WidgetType.Select;
-} & StripFormProps<EuiSelectProps>;
+type SelectWidgetProps = BaseWidgetProps<z.ZodEnum<any>, EuiSelectProps>;
 
-type SelectWidgetProps = BaseWidgetProps<string, SelectWidgetMeta>;
-
-const getSelectOptions = (schema: z.ZodTypeAny): EuiSelectOption[] | undefined => {
-  if (schema instanceof z.ZodEnum) {
-    return schema.options.map((option) => ({
-      value: String(option),
-      text: String(option),
-    }));
-  }
-  return undefined;
+export const getOptions = (schema: z.ZodEnum): EuiSelectProps['options'] => {
+  return schema.options.map((option) => {
+    return {
+      value: option,
+      text: option,
+    };
+  });
 };
 
 export const SelectField: React.FC<SelectWidgetProps> = ({
-  fieldId,
-  value,
-  label,
-  placeholder,
-  fullWidth = true,
-  error,
-  isInvalid,
-  onChange,
-  onBlur,
+  path,
   schema,
-  meta,
-  helpText,
+  fieldProps,
+  fieldConfig,
 }) => {
-  const { options: metaOptions, hasNoInitialSelection, isDisabled } = meta || {};
-
-  const selectOptions = schema ? getSelectOptions(schema) : undefined;
-  const options = selectOptions || metaOptions;
-
-  if (!options || options.length === 0) {
-    throw new Error(`SelectField requires options either from schema or props`);
+  if (!(schema instanceof z.ZodEnum)) {
+    throw new Error('SelectField requires a ZodEnum schema');
   }
 
+  const options = getOptions(schema) ?? [];
+
   return (
-    <EuiFormRow
-      aria-label={label}
-      label={label}
-      error={error}
-      isInvalid={isInvalid}
-      fullWidth={fullWidth}
-      helpText={helpText}
-    >
-      <EuiSelect
-        value={value}
-        options={options}
-        onChange={(e) => onChange(fieldId, e.target.value)}
-        onBlur={() => onBlur(fieldId, value)}
-        isInvalid={isInvalid}
-        fullWidth={fullWidth}
-        disabled={isDisabled}
-        hasNoInitialSelection={hasNoInitialSelection}
-      />
-    </EuiFormRow>
+    <UseField
+      path={path}
+      component={FormSelectField}
+      config={{ ...fieldConfig, defaultValue: fieldConfig?.defaultValue || options[0].value }}
+      componentProps={{
+        ...fieldProps,
+        euiFieldProps: {
+          ...fieldProps.euiFieldProps,
+          options,
+        },
+      }}
+    />
   );
 };
