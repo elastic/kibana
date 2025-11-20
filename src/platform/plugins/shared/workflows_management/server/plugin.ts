@@ -126,12 +126,7 @@ export class WorkflowsPlugin
     const getWorkflowExecutionEngine = () =>
       getPluginsStart().then(({ workflowsExecutionEngine }) => workflowsExecutionEngine);
 
-    this.workflowsService = new WorkflowsService(
-      this.logger,
-      this.config.logging.console,
-      getCoreStart,
-      getPluginsStart
-    );
+    this.workflowsService = new WorkflowsService(this.logger, getCoreStart, getPluginsStart);
 
     this.api = new WorkflowsManagementApi(this.workflowsService, getWorkflowExecutionEngine);
     this.spaces = plugins.spaces?.spacesService;

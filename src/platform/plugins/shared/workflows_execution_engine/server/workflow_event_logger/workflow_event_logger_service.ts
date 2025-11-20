@@ -11,11 +11,12 @@ import type { Logger } from '@kbn/core/server';
 import type {
   BaseLogsParams,
   ExecutionLogsParams,
+  IWorkflowEventLogger,
   IWorkflowEventLoggerService,
   LogsByLevelParams,
   StepLogsParams,
+  WorkflowEventLoggerContext,
 } from './types';
-import type { IWorkflowEventLogger, WorkflowEventLoggerContext } from './workflow_event_logger';
 import { WorkflowEventLogger } from './workflow_event_logger';
 import type {
   LogSearchResult,

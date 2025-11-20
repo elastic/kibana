@@ -10,7 +10,8 @@
 import type { EsWorkflowExecution, EsWorkflowStepExecution, StackFrame } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import type { GraphNodeUnion, WorkflowGraph } from '@kbn/workflows/graph';
-import type { IWorkflowEventLogger } from '../../workflow_event_logger/workflow_event_logger';
+import { createMockWorkflowEventLogger } from '../../workflow_event_logger/mocks';
+import type { IWorkflowEventLogger } from '../../workflow_event_logger/types';
 import { StepExecutionRuntime } from '../step_execution_runtime';
 import type { WorkflowContextManager } from '../workflow_context_manager';
 import type { WorkflowExecutionState } from '../workflow_execution_state';
@@ -46,6 +47,7 @@ describe('StepExecutionRuntime', () => {
   });
 
   beforeEach(() => {
+    workflowLogger = createMockWorkflowEventLogger();
     workflowContextManager = {} as unknown as WorkflowContextManager;
     mockDateNow = new Date('2025-07-05T20:00:00.000Z');
     workflowExecution = {
@@ -59,13 +61,6 @@ describe('StepExecutionRuntime', () => {
       createdAt: new Date('2025-08-05T19:00:00.000Z').toISOString(),
       startedAt: new Date('2025-08-05T20:00:00.000Z').toISOString(),
     } as EsWorkflowExecution;
-
-    workflowLogger = {
-      logInfo: jest.fn(),
-      logWarn: jest.fn(),
-      logDebug: jest.fn(),
-      logError: jest.fn(),
-    } as unknown as IWorkflowEventLogger;
 
     workflowExecutionState = {
       getWorkflowExecution: jest.fn().mockReturnValue(workflowExecution),
@@ -220,6 +215,7 @@ describe('StepExecutionRuntime', () => {
           id: 'fake_step_execution_id',
         } as Partial<EsWorkflowStepExecution>)
       );
+      expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
     });
 
     it('should create a step execution with "RUNNING" status', async () => {
@@ -233,6 +229,7 @@ describe('StepExecutionRuntime', () => {
           startedAt: mockDateNow.toISOString(),
         })
       );
+      expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
     });
 
     it('should log the start of step execution', async () => {
@@ -251,6 +248,7 @@ describe('StepExecutionRuntime', () => {
           step_type: 'fakeStepType1',
         },
       });
+      expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
     });
 
     it('should save step path from the workflow execution stack', async () => {
@@ -263,6 +261,7 @@ describe('StepExecutionRuntime', () => {
           ] as StackFrame[],
         })
       );
+      expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
     });
 
     it('should save step type', async () => {
@@ -272,6 +271,7 @@ describe('StepExecutionRuntime', () => {
           stepType: 'fakeStepType1',
         })
       );
+      expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -309,6 +309,7 @@ describe('StepExecutionRuntime', () => {
           executionTimeMs: 2000,
         })
       );
+      expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
     });
 
     describe('step execution succeeds', () => {
@@ -335,6 +336,7 @@ describe('StepExecutionRuntime', () => {
             id: 'fake_step_execution_id',
           } as Partial<EsWorkflowStepExecution>)
         );
+        expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
       });
 
       it('should finish a step execution with "COMPLETED" status', async () => {
@@ -345,6 +347,7 @@ describe('StepExecutionRuntime', () => {
             status: ExecutionStatus.COMPLETED,
           })
         );
+        expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
       });
 
       it('should finish a step execution executionTime', async () => {
@@ -355,6 +358,7 @@ describe('StepExecutionRuntime', () => {
             executionTimeMs: 86400000,
           })
         );
+        expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
       });
 
       it('should log successful step execution', async () => {
@@ -378,6 +382,7 @@ describe('StepExecutionRuntime', () => {
             step_type: 'fakeStepType1',
           },
         });
+        expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
       });
     });
   });
@@ -403,6 +408,7 @@ describe('StepExecutionRuntime', () => {
           id: 'fake_step_execution_id',
         } as Partial<EsWorkflowStepExecution>)
       );
+      expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
     });
 
     it('should mark the step as failed', async () => {
@@ -415,6 +421,7 @@ describe('StepExecutionRuntime', () => {
           error: String(error),
         })
       );
+      expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
     });
 
     it('should log the failure of the step', async () => {
@@ -439,6 +446,7 @@ describe('StepExecutionRuntime', () => {
           },
         }
       );
+      expect(workflowLogger.flushEvents).toHaveBeenCalledTimes(1);
     });
   });
 });

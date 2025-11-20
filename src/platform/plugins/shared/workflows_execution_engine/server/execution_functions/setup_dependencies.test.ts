@@ -24,9 +24,9 @@ import { StepExecutionRuntimeFactory } from '../workflow_context_manager/step_ex
 import type { ContextDependencies } from '../workflow_context_manager/types';
 import { WorkflowExecutionRuntimeManager } from '../workflow_context_manager/workflow_execution_runtime_manager';
 import { WorkflowExecutionState } from '../workflow_context_manager/workflow_execution_state';
-import { WorkflowEventLogger } from '../workflow_event_logger/workflow_event_logger';
 import { WorkflowTaskManager } from '../workflow_task_manager/workflow_task_manager';
 
+import '../workflow_event_logger/mocks';
 jest.mock('../connector_executor');
 jest.mock('../lib/url_validator');
 jest.mock('../step/nodes_factory');
@@ -107,11 +107,6 @@ describe('setupDependencies', () => {
     (WorkflowExecutionRuntimeManager as jest.Mock).mockImplementation(() => ({}));
     (WorkflowExecutionState as jest.Mock).mockImplementation(() => ({
       getWorkflowExecution: () => mockWorkflowExecution,
-    }));
-    (WorkflowEventLogger as jest.Mock).mockImplementation(() => ({
-      logInfo: jest.fn(),
-      logError: jest.fn(),
-      createStepLogger: jest.fn(),
     }));
     (WorkflowTaskManager as jest.Mock).mockImplementation(() => ({}));
     (WorkflowGraph as unknown as jest.Mock).mockImplementation(() => ({

@@ -9,13 +9,10 @@
 
 export { WorkflowEventLoggerService } from './workflow_event_logger_service';
 
-export {
-  type WorkflowEventLoggerContext,
-  type WorkflowEventLoggerOptions,
-  type IWorkflowEventLogger,
-} from './workflow_event_logger';
-
 export type {
+  WorkflowEventLoggerContext,
+  WorkflowEventLoggerOptions,
+  IWorkflowEventLogger,
   IWorkflowEventLoggerService,
   ExecutionLogsParams,
   StepLogsParams,

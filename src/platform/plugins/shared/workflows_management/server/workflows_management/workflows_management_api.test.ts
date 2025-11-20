@@ -559,7 +559,7 @@ steps:
         });
 
         expect(mockWorkflowsService.getWorkflowZodSchema).toHaveBeenCalledWith(
-          { loose: false },
+          { loose: true },
           spaceId,
           mockRequest
         );

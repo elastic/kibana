@@ -100,7 +100,6 @@ export class WorkflowsService {
 
   constructor(
     logger: Logger,
-    enableConsoleLogging: boolean = false,
     getCoreStart: () => Promise<CoreStart>,
     getPluginsStart: () => Promise<WorkflowsServerPluginStartDeps>
   ) {
@@ -110,7 +109,7 @@ export class WorkflowsService {
     this.getActionsClientWithRequest = (request: KibanaRequest) =>
       getPluginsStart().then((plugins) => plugins.actions.getActionsClientWithRequest(request));
 
-    void this.initialize(getCoreStart, getPluginsStart, enableConsoleLogging);
+    void this.initialize(getCoreStart, getPluginsStart);
   }
 
   public setTaskScheduler(taskScheduler: WorkflowTaskScheduler) {
@@ -123,8 +122,7 @@ export class WorkflowsService {
 
   private async initialize(
     getCoreStart: () => Promise<CoreStart>,
-    getPluginsStart: () => Promise<WorkflowsServerPluginStartDeps>,
-    enableConsoleLogging: boolean = false
+    getPluginsStart: () => Promise<WorkflowsServerPluginStartDeps>
   ) {
     const coreStart = await getCoreStart();
     const pluginsStart = await getPluginsStart();
