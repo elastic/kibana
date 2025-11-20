@@ -150,13 +150,9 @@ export class JobImportService {
     });
   }
 
-  private async validateJobSourceIndices(
-    jobId: string,
-    indices: string[],
-    sourceIndicesErrors: Map<string, SourceIndexError[]>
-  ) {
+  private async validateJobSourceIndices(indices: string[]): Promise<SourceIndexError[]> {
     if (!indices || indices.length === 0) {
-      sourceIndicesErrors.set(jobId, [
+      return [
         {
           index: undefined,
           error: i18n.translate(
@@ -166,8 +162,7 @@ export class JobImportService {
             }
           ),
         },
-      ]);
-      return;
+      ];
     }
 
     const indexValidations = await Promise.all(
@@ -184,9 +179,7 @@ export class JobImportService {
       }
     }
 
-    if (invalidIndices.length > 0) {
-      sourceIndicesErrors.set(jobId, invalidIndices);
-    }
+    return invalidIndices;
   }
 
   private async validateSingleIndex(index: string): Promise<IndexValidationResult> {
@@ -260,11 +253,15 @@ export class JobImportService {
 
     const sourceIndicesErrors = new Map<string, SourceIndexError[]>();
     if (type === 'data-frame-analytics') {
-      await Promise.all(
-        commonJobs.map(({ jobId, indices }) =>
-          this.validateJobSourceIndices(jobId, indices, sourceIndicesErrors)
-        )
+      const sourceIndexErrors = await Promise.all(
+        commonJobs.map(({ indices }) => this.validateJobSourceIndices(indices))
       );
+
+      sourceIndexErrors.forEach((errors, i) => {
+        if (errors.length > 0) {
+          sourceIndicesErrors.set(commonJobs[i].jobId, errors);
+        }
+      });
     }
 
     commonJobs.forEach(({ jobId, filters = [], destIndex }) => {
