@@ -103,6 +103,7 @@ export const useInitDataViewManager = () => {
       DataViewManagerScopeName.default,
       DataViewManagerScopeName.timeline,
       DataViewManagerScopeName.detections,
+      DataViewManagerScopeName.attacks,
       DataViewManagerScopeName.analyzer,
       DataViewManagerScopeName.explore,
     ].map((scope) =>

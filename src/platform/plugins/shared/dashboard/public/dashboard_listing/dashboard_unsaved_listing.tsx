@@ -79,7 +79,7 @@ const DashboardUnsavedItem = ({
 }) => {
   const styles = useMemoCss(unsavedItemStyles);
   return (
-    <div css={styles.item}>
+    <div css={styles.item} key={id}>
       <EuiFlexGroup alignItems="center" gutterSize="none" css={styles.heading} responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiIcon color="text" css={styles.icon} type={title ? 'dashboardApp' : 'clock'} />

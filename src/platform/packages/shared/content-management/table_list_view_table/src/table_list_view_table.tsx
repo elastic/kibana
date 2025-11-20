@@ -62,7 +62,7 @@ import { ContentEditorActivityRow } from './components/content_editor_activity_r
 const disabledEditAction = {
   enabled: false,
   reason: i18n.translate('contentManagement.tableList.managedItemNoEdit', {
-    defaultMessage: 'Elastic manages this item. Clone it to make changes.',
+    defaultMessage: 'Elastic manages this item. Duplicate it to make changes.',
   }),
 };
 

@@ -32,16 +32,20 @@ export class DashboardStorage {
   constructor({
     logger,
     throwOnResultValidationError,
+    isAccessControlEnabled,
   }: {
     logger: Logger;
     throwOnResultValidationError: boolean;
+    isAccessControlEnabled: boolean;
   }) {
     this.logger = logger;
     this.throwOnResultValidationError = throwOnResultValidationError ?? false;
+    this.isAccessControlEnabled = isAccessControlEnabled ?? false;
   }
 
   private logger: Logger;
   private throwOnResultValidationError: boolean;
+  private isAccessControlEnabled: boolean;
 
   async get(ctx: StorageContext, id: string): Promise<DashboardGetOut> {
     const transforms = ctx.utils.getTransforms(cmServicesDefinition);
@@ -54,7 +58,11 @@ export class DashboardStorage {
       outcome,
     } = await soClient.resolve<DashboardSavedObjectAttributes>(DASHBOARD_SAVED_OBJECT_TYPE, id);
 
-    const { item, error: itemError } = savedObjectToItem(savedObject, false);
+    const { item, error: itemError } = savedObjectToItem(
+      savedObject,
+      false,
+      this.isAccessControlEnabled
+    );
     if (itemError) {
       throw Boom.badRequest(`Invalid response. ${itemError.message}`);
     }

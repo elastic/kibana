@@ -13,6 +13,7 @@ import type { DashboardSavedObjectAttributes } from '../../dashboard_saved_objec
 import type { DashboardItem } from './types';
 
 import { savedObjectToItem } from './transform_utils';
+import type { SavedObjectAccessControl } from '@kbn/core-saved-objects-common';
 
 describe('savedObjectToItem', () => {
   const commonSavedObject: SavedObject = {
@@ -125,5 +126,27 @@ describe('savedObjectToItem', () => {
     const { item, error } = savedObjectToItem(input, true);
     expect(item).toBeNull();
     expect(error).not.toBe(null);
+  });
+
+  it('should handle accessControl', () => {
+    const input = {
+      ...commonSavedObject,
+      attributes: {
+        title: 'title',
+        description: 'my description',
+        timeRestore: false,
+      },
+      references: [],
+      accessControl: {
+        owner: 'owner1',
+        accessMode: 'write_restricted' as SavedObjectAccessControl['accessMode'],
+      },
+    };
+    const { item, error } = savedObjectToItem(input, false, true);
+    expect(error).toBeNull();
+    expect(item?.accessControl).toEqual({
+      owner: 'owner1',
+      accessMode: 'write_restricted',
+    });
   });
 });

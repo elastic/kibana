@@ -40,6 +40,7 @@
       "noDataPage",
       "observabilityAIAssistant",
       "lens",
+      "security",
       "cps"
     ],
     "requiredBundles": [

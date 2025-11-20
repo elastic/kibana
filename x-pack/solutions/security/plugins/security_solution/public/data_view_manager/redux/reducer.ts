@@ -22,6 +22,7 @@ const REGISTERED_SCOPES = [
   DataViewManagerScopeName.default,
   DataViewManagerScopeName.timeline,
   DataViewManagerScopeName.detections,
+  DataViewManagerScopeName.attacks,
   DataViewManagerScopeName.analyzer,
   DataViewManagerScopeName.explore,
 ] as const;

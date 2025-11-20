@@ -18,6 +18,7 @@ export const saveDashboard = async ({
   saveOptions,
   dashboardState,
   references,
+  accessMode,
 }: SaveDashboardProps): Promise<SaveDashboardReturn> => {
   /**
    * Save the saved object using the content management
@@ -27,7 +28,7 @@ export const saveDashboard = async ({
   try {
     const newId = idToSaveTo
       ? (await dashboardClient.update(idToSaveTo, dashboardState, references)).item.id
-      : (await dashboardClient.create(dashboardState, references)).id;
+      : (await dashboardClient.create(dashboardState, references, accessMode)).id;
 
     if (newId) {
       coreServices.notifications.toasts.addSuccess({

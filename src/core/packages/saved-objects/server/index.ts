@@ -35,6 +35,8 @@ export type {
   SavedObjectsImportOptions,
   SavedObjectsResolveImportErrorsOptions,
   CreatedObject,
+  AccessControlImportTransforms,
+  AccessControlImportTransformsFactory,
 } from './src/import';
 export type {
   SavedObjectsTypeMappingDefinition,

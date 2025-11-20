@@ -95,6 +95,7 @@ export const performCheckConflicts = async <T>(
 
   const errors: SavedObjectsCheckConflictsResponse['errors'] = [];
   expectedBulkGetResults.forEach((expectedResult) => {
+    // Unsupported type
     if (isLeft(expectedResult)) {
       errors.push(expectedResult.value as any);
       return;

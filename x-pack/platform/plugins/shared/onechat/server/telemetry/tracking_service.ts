@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
-import { ONECHAT_USAGE_DOMAIN } from './usage_counters';
+import { ONECHAT_USAGE_DOMAIN, trackLLMUsage as trackLLMUsageCounter } from './usage_counters';
 /**
  * Tool call source - identifies where the tool was called from
  */
@@ -144,6 +144,29 @@ export class TrackingService {
       this.logger.debug(`Tracked query end: ${requestId} duration: ${durationMs}ms`);
     } catch (error) {
       this.logger.error(`Failed to track query end: ${error.message}`);
+    }
+  }
+
+  /**
+   * Track LLM usage by provider and model
+   * @param provider - LLM provider (e.g., 'openai', 'bedrock')
+   * @param model - Model identifier
+   */
+  trackLLMUsage(provider: string | undefined, model: string | undefined): void {
+    try {
+      const normalizedProvider = provider || 'unknown';
+      const normalizedModel = model || 'unknown';
+
+      const sanitizedProvider = normalizedProvider.replace(/[^a-zA-Z0-9_-]/g, '_');
+      const sanitizedModel = normalizedModel.replace(/[^a-zA-Z0-9_-]/g, '_');
+
+      trackLLMUsageCounter(this.usageCounter, sanitizedProvider, sanitizedModel);
+
+      this.logger.debug(
+        `Tracked LLM usage: provider=${sanitizedProvider}, model=${sanitizedModel}`
+      );
+    } catch (error) {
+      this.logger.error(`Failed to track LLM usage: ${error.message}`);
     }
   }
 }

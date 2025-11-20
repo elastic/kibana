@@ -5,27 +5,17 @@
  * 2.0.
  */
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { SanitizedRule } from '@kbn/alerting-plugin/common';
-import type { RulesClient } from '@kbn/alerting-plugin/server';
-import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import type { IStorageClient } from '@kbn/storage-adapter';
-import { keyBy, partition } from 'lodash';
 import objectHash from 'object-hash';
-import pLimit from 'p-limit';
 import type {
   Asset,
   AssetLink,
   AssetLinkRequest,
   AssetUnlinkRequest,
   AssetType,
-  AssetWithoutUuid,
-  DashboardLink,
-  QueryAsset,
   QueryLink,
-  RuleLink,
-  SloLink,
 } from '../../../../common/assets';
-import { ASSET_TYPES } from '../../../../common/assets';
 import { QUERY_KQL_BODY, QUERY_FEATURE_FILTER, QUERY_FEATURE_NAME, QUERY_TITLE } from './fields';
 import { ASSET_ID, ASSET_TYPE, ASSET_UUID, STREAM_NAME } from './fields';
 import type { AssetStorageSettings } from './storage_settings';
@@ -82,47 +72,12 @@ function toAssetLink<TAssetLink extends AssetLinkRequest>(
   };
 }
 
-function sloSavedObjectToAsset(
-  sloId: string,
-  savedObject: SavedObject<{ name: string; tags: string[] }>
-) {
-  return {
-    [ASSET_ID]: sloId,
-    [ASSET_TYPE]: 'slo' as const,
-    title: savedObject.attributes.name,
-    tags: savedObject.attributes.tags.concat(
-      savedObject.references.filter((ref) => ref.type === 'tag').map((ref) => ref.id)
-    ),
-  };
-}
-
-function dashboardSavedObjectToAsset(
-  dashboardId: string,
-  savedObject: SavedObject<{ title: string }>
-) {
-  return {
-    [ASSET_ID]: dashboardId,
-    [ASSET_TYPE]: 'dashboard' as const,
-    title: savedObject.attributes.title,
-    tags: savedObject.references.filter((ref) => ref.type === 'tag').map((ref) => ref.id),
-  };
-}
-
-function ruleToAsset(ruleId: string, rule: SanitizedRule) {
-  return {
-    [ASSET_TYPE]: 'rule' as const,
-    [ASSET_ID]: ruleId,
-    title: rule.name,
-    tags: rule.tags,
-  };
-}
-
 type StoredQueryLink = Omit<QueryLink, 'query'> & {
   [QUERY_TITLE]: string;
   [QUERY_KQL_BODY]: string;
 };
 
-export type StoredAssetLink = (SloLink | RuleLink | DashboardLink | StoredQueryLink) & {
+export type StoredAssetLink = StoredQueryLink & {
   [STREAM_NAME]: string;
 };
 
@@ -134,50 +89,39 @@ interface AssetBulkDeleteOperation {
 }
 
 function fromStorage(link: StoredAssetLink): AssetLink {
-  if (link[ASSET_TYPE] === 'query') {
-    const storedQueryLink: StoredQueryLink & {
-      [QUERY_FEATURE_NAME]: string;
-      [QUERY_FEATURE_FILTER]: string;
-    } = link as any;
-    return {
-      ...storedQueryLink,
-      query: {
-        id: storedQueryLink[ASSET_ID],
-        title: storedQueryLink[QUERY_TITLE],
-        kql: {
-          query: storedQueryLink[QUERY_KQL_BODY],
-        },
-        feature: storedQueryLink[QUERY_FEATURE_NAME]
-          ? {
-              name: storedQueryLink[QUERY_FEATURE_NAME],
-              filter: JSON.parse(storedQueryLink[QUERY_FEATURE_FILTER]),
-            }
-          : undefined,
+  const storedQueryLink: StoredQueryLink & {
+    [QUERY_FEATURE_NAME]: string;
+    [QUERY_FEATURE_FILTER]: string;
+  } = link as any;
+  return {
+    ...storedQueryLink,
+    query: {
+      id: storedQueryLink[ASSET_ID],
+      title: storedQueryLink[QUERY_TITLE],
+      kql: {
+        query: storedQueryLink[QUERY_KQL_BODY],
       },
-    } satisfies QueryLink;
-  }
-
-  return link;
+      feature: storedQueryLink[QUERY_FEATURE_NAME]
+        ? {
+            name: storedQueryLink[QUERY_FEATURE_NAME],
+            filter: JSON.parse(storedQueryLink[QUERY_FEATURE_FILTER]),
+          }
+        : undefined,
+    },
+  } satisfies QueryLink;
 }
 
 function toStorage(name: string, request: AssetLinkRequest): StoredAssetLink {
   const link = toAssetLink(name, request);
-  if (link[ASSET_TYPE] === 'query') {
-    const { query, ...rest } = link;
-    return {
-      ...rest,
-      [STREAM_NAME]: name,
-      [QUERY_TITLE]: query.title,
-      [QUERY_KQL_BODY]: query.kql.query,
-      [QUERY_FEATURE_NAME]: query.feature ? query.feature.name : '',
-      [QUERY_FEATURE_FILTER]: query.feature ? JSON.stringify(query.feature.filter) : '',
-    } as unknown as StoredAssetLink;
-  }
-
+  const { query, ...rest } = link;
   return {
-    ...link,
+    ...rest,
     [STREAM_NAME]: name,
-  };
+    [QUERY_TITLE]: query.title,
+    [QUERY_KQL_BODY]: query.kql.query,
+    [QUERY_FEATURE_NAME]: query.feature ? query.feature.name : '',
+    [QUERY_FEATURE_FILTER]: query.feature ? JSON.stringify(query.feature.filter) : '',
+  } as unknown as StoredAssetLink;
 }
 
 export type AssetBulkOperation = AssetBulkIndexOperation | AssetBulkDeleteOperation;
@@ -187,7 +131,6 @@ export class AssetClient {
     private readonly clients: {
       storageClient: IStorageClient<AssetStorageSettings, StoredAssetLink>;
       soClient: SavedObjectsClientContract;
-      rulesClient: RulesClient;
     }
   ) {}
 
@@ -346,92 +289,9 @@ export class AssetClient {
       return [];
     }
 
-    const [queryAssetLinks, savedObjectAssetLinks] = partition(
-      assetLinks,
-      (link): link is QueryLink => link[ASSET_TYPE] === 'query'
-    );
-
-    const idsByType = Object.fromEntries(
-      Object.values(ASSET_TYPES).map((type) => [type, [] as string[]])
-    ) as Record<AssetType, string[]>;
-
-    savedObjectAssetLinks.forEach((assetLink) => {
-      const assetType = assetLink['asset.type'] as AssetType;
-      const assetId = assetLink['asset.id'];
-      idsByType[assetType].push(assetId);
-    });
-
-    const limiter = pLimit(10);
-
-    const [dashboards, rules, slos] = await Promise.all([
-      idsByType.dashboard.length
-        ? this.clients.soClient
-            .bulkGet<{ title: string }>(
-              idsByType.dashboard.map((dashboardId) => ({ type: 'dashboard', id: dashboardId }))
-            )
-            .then((response) => {
-              const dashboardsById = keyBy(response.saved_objects, 'id');
-
-              return idsByType.dashboard.flatMap((dashboardId) => {
-                const dashboard = dashboardsById[dashboardId];
-                if (dashboard && !dashboard.error) {
-                  return [dashboardSavedObjectToAsset(dashboardId, dashboard)];
-                }
-                return [];
-              });
-            })
-        : [],
-      Promise.all(
-        idsByType.rule.map((ruleId) => {
-          return limiter(() =>
-            this.clients.rulesClient
-              .get({ id: ruleId })
-              .then((rule) => {
-                return ruleToAsset(ruleId, rule);
-              })
-              .catch((error) => {
-                // Handle missing rules gracefully (404, etc.)
-                // Return null for missing/inaccessible rules, filter them out later
-                return null;
-              })
-          );
-        })
-      ).then((results) =>
-        results.filter((rule): rule is NonNullable<typeof rule> => rule !== null)
-      ),
-      idsByType.slo.length
-        ? this.clients.soClient
-            .find<{ name: string; tags: string[] }>({
-              type: 'slo',
-              filter: `slo.attributes.id:(${idsByType.slo
-                .map((sloId) => `"${sloId}"`)
-                .join(' OR ')})`,
-              perPage: idsByType.slo.length,
-            })
-            .then((soResponse) => {
-              const sloDefinitionsById = keyBy(soResponse.saved_objects, 'slo.attributes.id');
-
-              return idsByType.slo.flatMap((sloId) => {
-                const sloDefinition = sloDefinitionsById[sloId];
-                if (sloDefinition && !sloDefinition.error) {
-                  return [sloSavedObjectToAsset(sloId, sloDefinition)];
-                }
-                return [];
-              });
-            })
-        : [],
-    ]);
-
-    const savedObjectAssetsWithUuids = [...dashboards, ...rules, ...slos].map((asset) => {
-      return {
-        ...asset,
-        [ASSET_UUID]: getAssetLinkUuid(name, asset),
-      };
-    });
-
-    return [
-      ...savedObjectAssetsWithUuids,
-      ...queryAssetLinks.map((link): QueryAsset => {
+    return assetLinks
+      .filter((link): link is QueryLink => link[ASSET_TYPE] === 'query')
+      .map((link) => {
         return {
           [ASSET_ID]: link[ASSET_ID],
           [ASSET_UUID]: link[ASSET_UUID],
@@ -439,89 +299,6 @@ export class AssetClient {
           query: link.query,
           title: link.query.title,
         };
-      }),
-    ];
-  }
-
-  async getSuggestions({
-    query,
-    assetTypes,
-    tags,
-  }: {
-    query: string;
-    assetTypes?: AssetType[];
-    tags?: string[];
-  }): Promise<{ hasMore: boolean; assets: AssetWithoutUuid[] }> {
-    const perPage = 101;
-
-    const searchAll = !assetTypes;
-
-    const searchDashboardsOrSlos =
-      searchAll || assetTypes.includes('dashboard') || assetTypes.includes('slo');
-
-    const searchRules = searchAll || assetTypes.includes('rule');
-
-    const [suggestionsFromSlosAndDashboards, suggestionsFromRules] = await Promise.all([
-      searchDashboardsOrSlos
-        ? this.clients.soClient
-            .find({
-              type: ['dashboard' as const, 'slo' as const].filter(
-                (type) => searchAll || assetTypes.includes(type)
-              ),
-              search: query,
-              perPage,
-              ...(tags
-                ? {
-                    hasReferenceOperator: 'OR',
-                    hasReference: tags.map((tag) => ({ type: 'tag', id: tag })),
-                  }
-                : {}),
-            })
-            .then((results) => {
-              return results.saved_objects.map((savedObject) => {
-                if (savedObject.type === 'slo') {
-                  const sloSavedObject = savedObject as SavedObject<{
-                    id: string;
-                    name: string;
-                    tags: string[];
-                  }>;
-                  return sloSavedObjectToAsset(sloSavedObject.attributes.id, sloSavedObject);
-                }
-
-                const dashboardSavedObject = savedObject as SavedObject<{
-                  title: string;
-                }>;
-
-                return dashboardSavedObjectToAsset(dashboardSavedObject.id, dashboardSavedObject);
-              });
-            })
-        : Promise.resolve([]),
-      searchRules
-        ? this.clients.rulesClient
-            .find({
-              options: {
-                perPage,
-                ...(tags
-                  ? {
-                      hasReferenceOperator: 'OR',
-                      hasReference: tags.map((tag) => ({ type: 'tag', id: tag })),
-                    }
-                  : {}),
-              },
-            })
-            .then((results) => {
-              return results.data.map((rule) => {
-                return ruleToAsset(rule.id, rule);
-              });
-            })
-        : Promise.resolve([]),
-    ]);
-
-    return {
-      assets: [...suggestionsFromRules, ...suggestionsFromSlosAndDashboards],
-      hasMore:
-        Math.max(suggestionsFromSlosAndDashboards.length, suggestionsFromRules.length) >
-        perPage - 1,
-    };
+      });
   }
 }

@@ -118,10 +118,14 @@ const globalTempHackStyles = (euiTheme: UseEuiTheme['euiTheme']) => css`
     ${logicalCSS('padding-right', `var(--euiPushFlyoutOffsetInlineEnd, 0px)`)};
     ${logicalCSS('padding-left', `var(--euiPushFlyoutOffsetInlineStart, 0px)`)};
   }
-  // this is a temporary hack to override EUI's body padding with push flyout
   .kbnBody {
+    // this is a temporary hack to override EUI's body padding with push flyout
     ${logicalCSS('padding-right', `0px !important`)};
     ${logicalCSS('padding-left', `0px !important`)};
+    // this is a temporary hack to override EUI's body padding with euibottom bar
+    ${logicalCSS('padding-bottom', `0px !important`)};
+    // just for consistency with other sides
+    ${logicalCSS('padding-top', `0px !important`)};
   }
 `;
 

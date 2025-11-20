@@ -23,7 +23,7 @@ import { ConversationInputForm } from './conversation_input/conversation_input_f
 import { docLinks } from '../../../../common/doc_links';
 import { WelcomeText } from '../common/welcome_text';
 import { useUiPrivileges } from '../../hooks/use_ui_privileges';
-import { maxConversationWidthStyles } from './conversation.styles';
+import { conversationElementWidthStyles } from './conversation.styles';
 
 interface QuickNavigationCard {
   key: string;
@@ -166,7 +166,7 @@ export const NewConversationPrompt: React.FC<{}> = () => {
   const { euiTheme } = useEuiTheme();
 
   const containerStyles = css`
-    ${maxConversationWidthStyles}
+    ${conversationElementWidthStyles}
     display: flex;
     flex-direction: column;
     align-items: center;
