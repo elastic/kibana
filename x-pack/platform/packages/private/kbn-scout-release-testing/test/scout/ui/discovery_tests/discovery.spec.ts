@@ -193,15 +193,15 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
   test('drag and drop field to grid', async ({ page, pageObjects }) => {
     // Verify chart is initially visible
     await expect(page.testSubj.locator('xyVisChart')).toBeVisible();
-
-    // Drag the @message field to the data grid
-    const sourceLocator = page.testSubj.locator('field-@message');
-    const targetLocator = page.testSubj.locator('euiDataGridBody');
-    await sourceLocator.dragTo(targetLocator);
-
+    const fields = ['@message', '@tags'];
+    // Drag the @message and @tags fields to the data grid
+    await pageObjects.discover.dragFieldToGrid(fields);
     // Verify the field was added to the grid
-    const columnText = await pageObjects.discover.getTheColumnFromGrid();
-    expect(columnText).toContain('@message');
+    const columnTextArray = await pageObjects.discover.getTheColumnFromGrid();
+    expect(columnTextArray).toStrictEqual(fields);
+    await pageObjects.discover.moveColumn('@message', 'right');
+    const updatedColumnTextArray = await pageObjects.discover.getTheColumnFromGrid();
+    expect(updatedColumnTextArray).toStrictEqual(fields.reverse());
   });
 
   test('type a search query and execute a search', async ({ pageObjects }) => {
@@ -234,7 +234,6 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
     await page.testSubj.click('toastCloseButton'); // close toast to avoid obstruction
     // Wait for download
     const download = await pageObjects.discover.exportAsCsv();
-
     const filePath = `/tmp/${download.suggestedFilename()}`;
     await download.saveAs(filePath);
 
@@ -246,12 +245,10 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
       skipEmptyLines: true,
     });
     const rows = parseResult.data as string[][];
-
     expect(rows).toHaveLength(totalHitCount + 1); // +1 for header row
 
     // Cleanup
     fs.unlinkSync(filePath);
   });
-
   // Click on Patterns works with sample data, tbd once pipeline is in place
 });

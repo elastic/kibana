@@ -171,14 +171,23 @@ export class DiscoverApp {
     await this.page.testSubj.click('unifiedHistogramEditVisualization');
   }
 
-  async getTheColumnFromGrid(): Promise<string> {
-    return await this.page.testSubj.locator('unifiedDataTableColumnTitle').innerText();
+  async getTheColumnFromGrid(): Promise<string[]> {
+    const columnLocators = await this.page.testSubj.locator('unifiedDataTableColumnTitle').all();
+    return await Promise.all(columnLocators.map((locator) => locator.innerText()));
   }
 
   async writeSearchQuery(query: string) {
     await this.page.testSubj.typeWithDelay('queryInput', query);
     await this.page.testSubj.click('querySubmitButton');
     await this.waitUntilSearchingHasFinished();
+  }
+
+  async dragFieldToGrid(fieldName: string[]) {
+    for (const field of fieldName) {
+      const sourceLocator = this.page.testSubj.locator(`field-${field}`);
+      const targetLocator = this.page.testSubj.locator('euiDataGridBody');
+      await sourceLocator.dragTo(targetLocator);
+    }
   }
 
   async getFirstViewLensButtonFromFieldStatistics(): Promise<Locator> {
@@ -197,5 +206,11 @@ export class DiscoverApp {
     await this.page.testSubj.click('downloadCompletedReportButton', { timeout: 20000 });
     const download = await downloadPromise;
     return download;
+  }
+
+  async moveColumn(fieldName: string, direction: 'left' | 'right') {
+    await this.page.testSubj.locator(`dataGridHeaderCell-${fieldName}`).hover();
+    await this.page.testSubj.click(`dataGridHeaderCellActionButton-${fieldName}`);
+    await this.page.getByText(`Move ${direction}`).click();
   }
 }
