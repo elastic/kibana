@@ -39,7 +39,7 @@ export class OneChatPageObject extends FtrService {
    * Type a message in the conversation input
    */
   async typeMessage(message: string) {
-    const inputElement = await this.testSubjects.find('onechatAppConversationInputFormTextArea');
+    const inputElement = await this.testSubjects.find('agentBuilderConversationInputEditor');
     await inputElement.click();
     await inputElement.type(message);
   }
