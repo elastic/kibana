@@ -9023,6 +9023,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/tour-queue@link:src/platform/packages/shared/kbn-tour-queue":
+  version "0.0.0"
+  uid ""
+
 "@kbn/traced-es-client@link:src/platform/packages/shared/kbn-traced-es-client":
   version "0.0.0"
   uid ""
