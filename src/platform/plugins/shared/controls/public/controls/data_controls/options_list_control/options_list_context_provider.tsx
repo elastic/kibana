@@ -11,10 +11,15 @@ import React, { useContext } from 'react';
 import type { OptionsListDisplaySettings } from '../../../../common/options_list';
 import type { OptionsListComponentApi } from './types';
 
+export interface OptionsListCustomStrings {
+  customInvalidSelectionsLabel?: string;
+}
+
 export const OptionsListControlContext = React.createContext<
   | {
       componentApi: OptionsListComponentApi;
       displaySettings: OptionsListDisplaySettings;
+      customStrings?: OptionsListCustomStrings;
     }
   | undefined
 >(undefined);
