@@ -73,19 +73,11 @@ function isDataFrameAnalyticsConfigs(obj: any): obj is DataFrameAnalyticsConfig[
 }
 
 export class JobImportService {
-  private esSearch: MlApi['esSearch'];
-  private validateDatafeedPreview: MlApi['validateDatafeedPreview'];
-  private getFilters: () => Promise<Filter[]>;
-
   constructor(
-    esSearch: MlApi['esSearch'],
-    validateDatafeedPreview: MlApi['validateDatafeedPreview'],
-    getFilters: () => Promise<Filter[]>
-  ) {
-    this.esSearch = esSearch;
-    this.validateDatafeedPreview = validateDatafeedPreview;
-    this.getFilters = getFilters;
-  }
+    private readonly esSearch: MlApi['esSearch'],
+    private readonly validateDatafeedPreview: MlApi['validateDatafeedPreview'],
+    private readonly getFilters: () => Promise<Filter[]>
+  ) {}
 
   private _readFile(file: File) {
     return new Promise((resolve, reject) => {
