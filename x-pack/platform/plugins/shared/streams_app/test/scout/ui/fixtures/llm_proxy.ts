@@ -70,18 +70,19 @@ function sseEvent(data: unknown): string {
 
 async function getRequestBody(request: http.IncomingMessage): Promise<ChatCompletionStreamParams> {
   return new Promise((resolve, reject) => {
-    let body = '';
+    let data = '';
+
     request.on('data', (chunk) => {
-      body += chunk.toString();
+      data += chunk.toString();
     });
-    request.on('end', () => {
-      try {
-        resolve(JSON.parse(body));
-      } catch (error) {
-        reject(error);
-      }
+
+    request.on('close', () => {
+      resolve(JSON.parse(data));
     });
-    request.on('error', reject);
+
+    request.on('error', (error) => {
+      reject(error);
+    });
   });
 }
 
@@ -285,22 +286,6 @@ export class LlmProxy {
             };
 
             outerResolve(simulator);
-
-            if (responseChunks !== undefined) {
-              Promise.resolve(
-                isFunction(responseChunks) ? responseChunks(requestBody) : responseChunks
-              ).then(async (chunks) => {
-                simulator.status(200);
-                if (Array.isArray(chunks)) {
-                  for (const chunk of chunks) {
-                    await simulator.next(chunk);
-                  }
-                } else if (chunks !== undefined) {
-                  await simulator.next(chunks);
-                }
-                await simulator.complete();
-              });
-            }
           },
         });
       }),
@@ -310,17 +295,39 @@ export class LlmProxy {
     ]);
 
     return {
-      waitForIntercept: async () => {
-        return waitForInterceptPromise;
-      },
+      waitForIntercept: () => waitForInterceptPromise,
       completeAfterIntercept: async () => {
         const simulator = await waitForInterceptPromise;
-        if (responseChunks === undefined) {
-          await simulator.complete();
+
+        function getParsedChunks(): Array<string | ToolMessage> {
+          const llmMessage = isFunction(responseChunks)
+            ? responseChunks(simulator.requestBody)
+            : responseChunks;
+
+          if (!llmMessage) {
+            return [];
+          }
+
+          if (Array.isArray(llmMessage)) {
+            return llmMessage;
+          }
+
+          if (isString(llmMessage)) {
+            return llmMessage.split(' ').map((token, i) => (i === 0 ? token : ` ${token}`));
+          }
+
+          return [llmMessage];
         }
+
+        const parsedChunks = getParsedChunks();
+        for (const chunk of parsedChunks) {
+          await simulator.next(chunk);
+        }
+
+        await simulator.complete();
         return simulator;
       },
-    };
+    } as any;
   }
 }
 
