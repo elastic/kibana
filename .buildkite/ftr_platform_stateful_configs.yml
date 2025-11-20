@@ -309,6 +309,7 @@ enabled:
   - x-pack/platform/test/security_api_integration/oidc_implicit_flow.config.ts
   - x-pack/platform/test/security_api_integration/oidc.config.ts
   - x-pack/platform/test/security_api_integration/oidc.http2.config.ts
+  - x-pack/platform/test/security_api_integration/oidc_multiple_realms.config.ts
   - x-pack/platform/test/security_api_integration/pki.config.ts
   - x-pack/platform/test/security_api_integration/saml.config.ts
   - x-pack/platform/test/security_api_integration/saml.http2.config.ts

@@ -304,12 +304,20 @@ export class OIDCAuthenticationProvider extends BaseAuthenticationProvider {
       // user usually doesn't have `cluster:admin/xpack/security/oidc/prepare`.
       // We can replace generic `transport.request` with a dedicated API method call once
       // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
-      const { state, nonce, redirect } =
+      const { state, nonce, realm, redirect } =
         (await this.options.client.asInternalUser.transport.request({
           method: 'POST',
           path: '/_security/oidc/prepare',
           body: params,
         })) as any;
+
+      if (realm !== this.realm) {
+        this.logger.debug(
+          `Realm "${realm}" returned by Elasticsearch does not match the configured realm "${this.realm}" ` +
+            `for provider "${this.options.name}". Returning not handled result.`
+        );
+        return AuthenticationResult.notHandled();
+      }
 
       this.logger.debug('Redirecting to OpenID Connect Provider with authentication request.');
       return AuthenticationResult.redirectTo(
