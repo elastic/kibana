@@ -9,7 +9,7 @@
     "id": "unifiedDocViewer",
     "browser": true,
     "server": false,
-    "requiredPlugins": ["data", "fieldFormats", "share", "embeddable", "discoverShared"],
+    "requiredPlugins": ["data", "fieldFormats", "share", "embeddable", "discoverShared", "lens"],
     "optionalPlugins": ["fieldsMetadata"],
     "requiredBundles": ["kibanaUtils"]
   }
