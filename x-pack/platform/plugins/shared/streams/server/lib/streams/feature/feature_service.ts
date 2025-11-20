@@ -9,7 +9,7 @@ import type { CoreSetup, KibanaRequest, Logger } from '@kbn/core/server';
 import { StorageIndexAdapter } from '@kbn/storage-adapter';
 import type { StreamsPluginStartDependencies } from '../../../types';
 import { FeatureClient } from './feature_client';
-import type { StoredFeature } from './stored_feature';
+import { storedFeatureSchema, type StoredFeature } from './stored_feature';
 import type { FeatureStorageSettings } from './storage_settings';
 import { featureStorageSettings } from './storage_settings';
 import type { FeatureTypeRegistry } from './feature_type_registry';
@@ -32,10 +32,9 @@ export class FeatureService {
       {
         migrateSource: (feature: Record<string, unknown>) => {
           if (!(FEATURE_TYPE in feature)) {
-            return {
-              ...feature,
-              [FEATURE_TYPE]: 'system',
-            } as StoredFeature;
+            const migrated = { ...feature, [FEATURE_TYPE]: 'system' } as StoredFeature;
+            storedFeatureSchema.parse(migrated);
+            return migrated;
           }
 
           return feature as unknown as StoredFeature;
