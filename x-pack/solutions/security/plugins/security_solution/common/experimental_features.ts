@@ -186,7 +186,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Kubernetes Dashboard in Security Solution
    */
-  kubernetesEnabled: true,
+  kubernetesEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

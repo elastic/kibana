@@ -32,13 +32,13 @@ export default function aggregateTests({ getService }: FtrProviderContext) {
   describe('Kubernetes security with a basic license', () => {
     before(async () => {
       await esArchiver.load(
-        'x-pack/test/functional/es_archives/kubernetes_security/process_events'
+        'x-pack/solutions/security/test/fixtures/es_archives/kubernetes_security/process_events'
       );
     });
 
     after(async () => {
       await esArchiver.unload(
-        'x-pack/test/functional/es_archives/kubernetes_security/process_events'
+        'x-pack/solutions/security/test/fixtures/es_archives/kubernetes_security/process_events'
       );
     });
 
