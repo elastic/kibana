@@ -37,7 +37,7 @@ const optionsListPopoverInvalidSelectionsStyles = {
 };
 
 export const OptionsListPopoverInvalidSelections = () => {
-  const { componentApi, customStrings } = useOptionsListContext();
+  const { componentApi, displaySettings } = useOptionsListContext();
   const styles = useMemoCss(optionsListPopoverInvalidSelectionsStyles);
 
   const [invalidSelections, fieldFormatter] = useBatchedPublishingSubjects(
@@ -66,7 +66,7 @@ export const OptionsListPopoverInvalidSelections = () => {
         prepend: (
           <EuiScreenReaderOnly>
             <div>
-              {customStrings?.getCustomWarningLabel?.(invalidSelections.size) ||
+              {displaySettings?.invalidSelectionsLabel ||
                 OptionsListStrings.popover.getInvalidSelectionScreenReaderText()}
               {'" "'} {/* Adds a pause for the screen reader */}
             </div>
@@ -75,7 +75,7 @@ export const OptionsListPopoverInvalidSelections = () => {
       };
     });
     setSelectableOptions(options);
-  }, [fieldFormatter, invalidSelections, customStrings]);
+  }, [fieldFormatter, invalidSelections, displaySettings]);
 
   return (
     <>
@@ -86,7 +86,7 @@ export const OptionsListPopoverInvalidSelections = () => {
             <EuiIcon
               type="warning"
               title={
-                customStrings?.getCustomWarningLabel?.(invalidSelections.size) ||
+                displaySettings?.invalidSelectionsLabel ||
                 OptionsListStrings.popover.getInvalidSelectionScreenReaderText()
               }
               size="s"
@@ -94,7 +94,7 @@ export const OptionsListPopoverInvalidSelections = () => {
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <label>
-              {customStrings?.getCustomWarningLabel?.(invalidSelections.size) ||
+              {displaySettings?.invalidSelectionsLabel ||
                 OptionsListStrings.popover.getInvalidSelectionsSectionTitle(invalidSelections.size)}
             </label>
           </EuiFlexItem>
@@ -102,7 +102,7 @@ export const OptionsListPopoverInvalidSelections = () => {
       </EuiTitle>
       <EuiSelectable
         aria-label={
-          customStrings?.getCustomWarningLabel?.(invalidSelections.size) ||
+          displaySettings?.invalidSelectionsLabel ||
           OptionsListStrings.popover.getInvalidSelectionsSectionAriaLabel(
             defaultPanelTitle ?? '',
             invalidSelections.size

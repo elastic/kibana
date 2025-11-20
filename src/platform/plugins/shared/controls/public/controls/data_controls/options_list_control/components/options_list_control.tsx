@@ -79,7 +79,7 @@ export const OptionsListControl = ({
   disableMultiValueEmptySelection?: boolean;
 }) => {
   const popoverId = useMemo(() => htmlIdGenerator()(), []);
-  const { componentApi, displaySettings, customStrings } = useOptionsListContext();
+  const { componentApi, displaySettings } = useOptionsListContext();
 
   const [isPopoverOpen, setPopoverOpen] = useState<boolean>(false);
   const [
@@ -153,7 +153,7 @@ export const OptionsListControl = ({
               <EuiToolTip
                 position="top"
                 content={
-                  customStrings?.getCustomWarningLabel?.(invalidSelections.size) ??
+                  displaySettings?.invalidSelectionsLabel ??
                   OptionsListStrings.control.getInvalidSelectionWarningLabel(invalidSelections.size)
                 }
                 delay="long"
@@ -166,7 +166,7 @@ export const OptionsListControl = ({
                   shape="square"
                   fill="dark"
                   title={
-                    customStrings?.getCustomWarningLabel?.(invalidSelections.size) ??
+                    displaySettings?.invalidSelectionsLabel ??
                     OptionsListStrings.control.getInvalidSelectionWarningLabel(
                       invalidSelections.size
                     )
@@ -189,7 +189,7 @@ export const OptionsListControl = ({
     invalidSelections,
     componentApi.uuid,
     styles,
-    customStrings,
+    displaySettings,
   ]);
 
   const button = (
