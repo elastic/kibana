@@ -10,7 +10,7 @@
 import type { RequestHandlerContext } from '@kbn/core/server';
 import type { ScanDashboardsResult } from './scan_dashboards';
 import type { DashboardState } from './api';
-import { create, read, update, deleteDashboard } from './api';
+import type { create, read, update, deleteDashboard } from './api';
 
 /**
  * Client interface for dashboard CRUD operations
