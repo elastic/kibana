@@ -78,8 +78,6 @@ describe('FindSLODefinitions with Health validation', () => {
           {
             sloId: slo.id,
             sloInstanceId: '*',
-            sloRevision: slo.revision,
-            sloName: slo.name,
           },
         ],
       });
