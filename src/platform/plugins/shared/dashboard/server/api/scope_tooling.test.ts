@@ -106,6 +106,102 @@ describe('stripUnmappedKeys', () => {
     `);
   });
 
+  it('should drop panel enhancements', () => {
+    mockGetTransforms.mockImplementation(() => {
+      return {
+        schema: schema.object({
+          foo: schema.string(),
+        }),
+      };
+    });
+    const dashboardState = {
+      title: 'my dashboard',
+      panels: [
+        {
+          config: {
+            title: 'panel',
+            enhancements: {},
+          },
+          grid: {
+            h: 15,
+            w: 24,
+            x: 0,
+            y: 0,
+          },
+          type: 'typeWithSchema',
+          uid: 'panel1',
+        },
+        {
+          grid: { y: 0 },
+          panels: [
+            {
+              config: {
+                title: 'panel in section',
+                enhancements: {},
+              },
+              grid: {
+                h: 15,
+                w: 24,
+                x: 0,
+                y: 0,
+              },
+              type: 'typeWithSchema',
+              uid: 'panelInSection1',
+            },
+          ],
+          title: 'section 1',
+        },
+      ],
+    };
+    expect(stripUnmappedKeys(dashboardState)).toMatchInlineSnapshot(`
+      Object {
+        "data": Object {
+          "panels": Array [
+            Object {
+              "config": Object {
+                "title": "panel",
+              },
+              "grid": Object {
+                "h": 15,
+                "w": 24,
+                "x": 0,
+                "y": 0,
+              },
+              "type": "typeWithSchema",
+              "uid": "panel1",
+            },
+            Object {
+              "grid": Object {
+                "y": 0,
+              },
+              "panels": Array [
+                Object {
+                  "config": Object {
+                    "title": "panel in section",
+                  },
+                  "grid": Object {
+                    "h": 15,
+                    "w": 24,
+                    "x": 0,
+                    "y": 0,
+                  },
+                  "type": "typeWithSchema",
+                  "uid": "panelInSection1",
+                },
+              ],
+              "title": "section 1",
+            },
+          ],
+          "title": "my dashboard",
+        },
+        "warnings": Array [
+          "Dropped unmapped panel config key 'enhancements' from panel panel1",
+          "Dropped unmapped panel config key 'enhancements' from panel panelInSection1",
+        ],
+      }
+    `);
+  });
+
   it('should drop references', () => {
     const dashboardState = {
       panels: [],

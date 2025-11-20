@@ -31,13 +31,24 @@ export function stripUnmappedKeys(dashboardState: DashboardState) {
     return Boolean(transforms?.schema);
   }
 
+  function removeEnhancements(panel: DashboardPanel) {
+    const { enhancements, ...restOfConfig } = panel.config as { enhancements?: unknown };
+    if (enhancements) {
+      warnings.push(`Dropped unmapped panel config key 'enhancements' from panel ${panel.uid}`);
+    }
+    return {
+      ...panel,
+      config: restOfConfig,
+    };
+  }
+
   const mappedPanels = panels
     .map((panel) => {
-      if (!isDashboardSection(panel)) return panel;
+      if (!isDashboardSection(panel)) return removeEnhancements(panel);
       const { panels: sectionPanels, ...restOfSection } = panel;
       return {
         ...restOfSection,
-        panels: sectionPanels.filter(isMappedPanelType),
+        panels: sectionPanels.filter(isMappedPanelType).map(removeEnhancements),
       };
     })
     .filter((panel) => isDashboardSection(panel) || isMappedPanelType(panel));
