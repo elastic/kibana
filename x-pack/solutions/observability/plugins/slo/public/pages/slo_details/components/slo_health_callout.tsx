@@ -94,7 +94,7 @@ export function SloHealthCallout({ slo }: { slo: SLOWithSummaryResponse }) {
         <EuiFlexItem>
           <FormattedMessage
             id="xpack.slo.sloDetails.healthCallout.description"
-            defaultMessage="The following {count, plural, one {transform is} other {transforms are}} problematic (either missing, stopped or unhealthy). You can inspect {count, plural, it {one} other {each one}} here:"
+            defaultMessage="The following {count, plural, one {transform needs} other {transforms need}} attention. You can inspect {count, plural, it {one} other {each one}} here:"
             values={{ count }}
           />
           <ul>

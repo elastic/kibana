@@ -291,11 +291,7 @@ describe('SloHealthCallout', () => {
     renderComponent();
 
     expect(screen.getByText('This SLO has issues with its transforms')).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        /The following transforms are problematic \(either missing, stopped or unhealthy\)/
-      )
-    ).toBeInTheDocument();
+    expect(screen.getByText(/The following transforms need attention/)).toBeInTheDocument();
 
     // Should show both transforms
     expect(screen.getByText(/slo-test-slo-id-1 \(unhealthy\)/)).toBeInTheDocument();
@@ -334,11 +330,7 @@ describe('SloHealthCallout', () => {
     renderComponent();
 
     expect(screen.getByText('This SLO has issues with its transforms')).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        /The following transforms are problematic \(either missing, stopped or unhealthy\)/
-      )
-    ).toBeInTheDocument();
+    expect(screen.getByText(/The following transforms need attention/)).toBeInTheDocument();
 
     // Should show both transforms
     expect(screen.getByText(/slo-test-slo-id-1 \(missing\)/)).toBeInTheDocument();
@@ -378,11 +370,7 @@ describe('SloHealthCallout', () => {
     renderComponent();
 
     expect(screen.getByText('This SLO has issues with its transforms')).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        /The following transforms are problematic \(either missing, stopped or unhealthy\)/
-      )
-    ).toBeInTheDocument();
+    expect(screen.getByText(/The following transforms need attention/)).toBeInTheDocument();
 
     // Should show both transforms as unhealthy
     expect(screen.getByText(/slo-test-slo-id-1 \(unhealthy\)/)).toBeInTheDocument();
@@ -420,11 +408,7 @@ describe('SloHealthCallout', () => {
     renderComponent();
 
     expect(screen.getByText('This SLO has issues with its transforms')).toBeInTheDocument();
-    expect(
-      screen.getByText(
-        /The following transforms are problematic \(either missing, stopped or unhealthy\)/
-      )
-    ).toBeInTheDocument();
+    expect(screen.getByText(/The following transforms need attention/)).toBeInTheDocument();
 
     // Should show both transforms as missing
     expect(screen.getByText(/slo-test-slo-id-1 \(missing\)/)).toBeInTheDocument();
