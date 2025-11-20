@@ -9,8 +9,11 @@
 
 import type { QueryOperator } from '@kbn/esql-composer';
 import { drop, evaluate, stats, timeseries, where } from '@kbn/esql-composer';
-import type { Dimension } from '@kbn/metrics-experience-plugin/common/types';
-import { type MetricField } from '@kbn/metrics-experience-plugin/common/types';
+import type {
+  MetricField,
+  Dimension,
+  DimensionFilters,
+} from '@kbn/metrics-experience-plugin/common/types';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { sanitazeESQLInput } from '@kbn/esql-utils';
 import { DIMENSIONS_COLUMN } from './constants';
@@ -19,7 +22,7 @@ import { createMetricAggregation, createTimeBucketAggregation } from './create_a
 interface CreateESQLQueryParams {
   metric: MetricField;
   dimensions?: Dimension[];
-  filters?: Array<{ field: string; value: string }>;
+  filters?: DimensionFilters;
 }
 
 const separator = '\u203A'.normalize('NFC');
@@ -58,42 +61,29 @@ function castFieldIfNeeded(fieldName: string, fieldType: string | undefined): st
  * non-keyword types.
  *
  * @param metric - The full metric field object, including dimension type information.
- * @param dimensions - An array of selected dimension objects with name and type.
- * @param filters - An array of filters to apply to the query.
+ * @param dimensions - An array of selected dimension names.
+ * @param filters - A map of field names to arrays of values to filter by.
  * @returns A complete ESQL query string.
  */
-export function createESQLQuery({ metric, dimensions = [], filters }: CreateESQLQueryParams) {
+export function createESQLQuery({ metric, dimensions = [], filters = {} }: CreateESQLQueryParams) {
   const { name: metricField, instrument, index } = metric;
   const source = timeseries(index);
 
   const whereConditions: QueryOperator[] = [];
-  const valuesByField = new Map<string, Set<string>>();
 
-  if (filters && filters.length) {
-    for (const filter of filters) {
-      const currentValues = valuesByField.get(filter.field);
-      if (currentValues) {
-        currentValues.add(filter.value);
-      } else {
-        valuesByField.set(filter.field, new Set([filter.value]));
-      }
-    }
+  Object.entries(filters).forEach(([key, values]) => {
+    const escapedKey = sanitazeESQLInput(key);
 
-    valuesByField.forEach((value, key) => {
-      const valuesArray = Array.from(value);
-      const escapedKey = sanitazeESQLInput(key);
+    // Always cast to STRING for filtering to handle potential mapping conflicts
+    // where the same field name exists with different types (e.g., both long and keyword)
+    const castedKey = `${escapedKey}::STRING`;
 
-      // Always cast to STRING for filtering to handle potential mapping conflicts
-      // where the same field name exists with different types (e.g., both long and keyword)
-      const castedKey = `${escapedKey}::STRING`;
+    whereConditions.push(
+      where(`${castedKey} IN (${new Array(values.length).fill('?').join(', ')})`, values)
+    );
+  });
 
-      whereConditions.push(
-        where(`${castedKey} IN (${new Array(value.size).fill('?').join(', ')})`, valuesArray)
-      );
-    });
-  }
-
-  const unfilteredDimensions = (dimensions ?? []).filter((dim) => !valuesByField.has(dim.name));
+  const unfilteredDimensions = (dimensions ?? []).filter((dim) => !(dim.name in filters));
   const queryPipeline = source.pipe(
     ...whereConditions,
     unfilteredDimensions.length > 0
