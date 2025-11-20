@@ -16,13 +16,16 @@ export interface InstructionsTemplateParams {
   maxAllLimit?: number;
 }
 
+const DEFAULT_LIMIT = 100;
+const MAX_ALL_LIMIT = 250;
+
 /**
  * Generates ES|QL query generation instructions with configurable limit values.
  * This is a copy of the instructions from the inference plugin, modified to support
  * custom row limits for Agent Builder's index search tool.
  */
 export const getEsqlInstructions = (params: InstructionsTemplateParams = {}): string => {
-  const { defaultLimit = 100, maxAllLimit = 250 } = params;
+  const { defaultLimit = DEFAULT_LIMIT, maxAllLimit = MAX_ALL_LIMIT } = params;
 
   return `<instructions>
 

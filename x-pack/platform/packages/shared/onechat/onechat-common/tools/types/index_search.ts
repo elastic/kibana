@@ -11,8 +11,8 @@ import { ToolType, type ToolDefinition, type ToolDefinitionWithSchema } from '..
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type IndexSearchToolConfig = {
   pattern: string;
-  rowLimit?: number;
-  customInstructions?: string;
+  row_limit?: number;
+  custom_instructions?: string;
 };
 
 export type IndexSearchToolDefinition = ToolDefinition<

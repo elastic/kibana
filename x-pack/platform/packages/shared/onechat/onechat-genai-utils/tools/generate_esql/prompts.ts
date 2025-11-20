@@ -18,7 +18,7 @@ const getInstructionsWithRowLimit = (rowLimit?: number): string => {
     return getEsqlInstructions();
   }
 
-  const defaultLimit = Math.min(rowLimit, 100);
+  const defaultLimit = rowLimit;
   const maxAllLimit = rowLimit;
 
   return getEsqlInstructions({ defaultLimit, maxAllLimit });

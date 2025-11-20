@@ -54,10 +54,7 @@ export const createIndexSearchFormValidationSchema = (toolsService: ToolsService
         { message: indexSearchI18nMessages.pattern.noMatchesError }
       ),
 
-    rowLimit: z
-      .number()
-      .min(1, { message: indexSearchI18nMessages.defaultRowLimit.invalidError })
-      .optional(),
+    rowLimit: z.number().min(1, { message: indexSearchI18nMessages.defaultRowLimit.invalidError }),
 
     customInstructions: z.string().optional(),
 

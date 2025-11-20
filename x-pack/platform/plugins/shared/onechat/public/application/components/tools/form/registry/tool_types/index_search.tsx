@@ -31,7 +31,7 @@ export const indexSearchToolRegistryEntry: ToolTypeRegistryEntry<IndexSearchTool
     ...commonToolFormDefaultValues,
     type: ToolType.index_search,
     pattern: '',
-    rowLimit: undefined,
+    rowLimit: 100,
     customInstructions: '',
   },
   toolToFormData: (tool: ToolDefinitionWithSchema) => {

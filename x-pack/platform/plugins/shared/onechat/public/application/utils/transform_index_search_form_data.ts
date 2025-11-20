@@ -18,8 +18,8 @@ export const transformIndexSearchToolToFormData = (
     toolId: tool.id,
     description: tool.description,
     pattern: tool.configuration.pattern,
-    rowLimit: tool.configuration.rowLimit,
-    customInstructions: tool.configuration.customInstructions,
+    rowLimit: tool.configuration.row_limit,
+    customInstructions: tool.configuration.custom_instructions,
     labels: tool.tags,
     type: ToolType.index_search,
   };
@@ -34,8 +34,8 @@ export const transformFormDataToIndexSearchTool = (
     readonly: false,
     configuration: {
       pattern: data.pattern,
-      rowLimit: data.rowLimit,
-      customInstructions: data.customInstructions,
+      row_limit: data.rowLimit,
+      custom_instructions: data.customInstructions,
     },
     type: ToolType.index_search,
     tags: data.labels,

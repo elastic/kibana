@@ -26,8 +26,8 @@ export default function ({ getService }: FtrProviderContext) {
       tags: ['test', 'search'],
       configuration: {
         pattern: testIndex,
-        rowLimit: 100,
-        customInstructions: 'Search test data',
+        row_limit: 100,
+        custom_instructions: 'Search test data',
       },
     };
 
@@ -76,12 +76,12 @@ export default function ({ getService }: FtrProviderContext) {
           mockTool.configuration.pattern
         );
         expect(response.body.configuration).to.have.property(
-          'rowLimit',
-          mockTool.configuration.rowLimit
+          'row_limit',
+          mockTool.configuration.row_limit
         );
         expect(response.body.configuration).to.have.property(
-          'customInstructions',
-          mockTool.configuration.customInstructions
+          'custom_instructions',
+          mockTool.configuration.custom_instructions
         );
 
         createdToolIds.push(mockTool.id);
@@ -120,7 +120,7 @@ export default function ({ getService }: FtrProviderContext) {
           ...mockTool,
           id: 'no-pattern-tool',
           configuration: {
-            rowLimit: 100,
+            row_limit: 100,
           },
         };
 
@@ -170,7 +170,7 @@ export default function ({ getService }: FtrProviderContext) {
           id: 'invalid-row-limit-tool',
           configuration: {
             ...mockTool.configuration,
-            rowLimit: 'not a number',
+            row_limit: 'not a number',
           },
         };
 
@@ -187,7 +187,7 @@ export default function ({ getService }: FtrProviderContext) {
           id: 'invalid-row-limit-tool',
           configuration: {
             ...mockTool.configuration,
-            rowLimit: -1,
+            row_limit: -1,
           },
         };
 
@@ -232,8 +232,8 @@ export default function ({ getService }: FtrProviderContext) {
           mockTool.configuration.pattern
         );
         expect(response.body.configuration).to.have.property(
-          'rowLimit',
-          mockTool.configuration.rowLimit
+          'row_limit',
+          mockTool.configuration.row_limit
         );
       });
 
@@ -267,7 +267,7 @@ export default function ({ getService }: FtrProviderContext) {
             id: `list-search-test-tool-${i}`,
             configuration: {
               pattern: testIndex,
-              rowLimit: 50,
+              row_limit: 50,
             },
           };
 
@@ -343,8 +343,8 @@ export default function ({ getService }: FtrProviderContext) {
         const updates = {
           configuration: {
             pattern: testIndex,
-            rowLimit: 200,
-            customInstructions: 'Updated custom instructions',
+            row_limit: 200,
+            custom_instructions: 'Updated custom instructions',
           },
         };
 
@@ -360,12 +360,12 @@ export default function ({ getService }: FtrProviderContext) {
           updates.configuration.pattern
         );
         expect(response.body.configuration).to.have.property(
-          'rowLimit',
-          updates.configuration.rowLimit
+          'row_limit',
+          updates.configuration.row_limit
         );
         expect(response.body.configuration).to.have.property(
-          'customInstructions',
-          updates.configuration.customInstructions
+          'custom_instructions',
+          updates.configuration.custom_instructions
         );
       });
 

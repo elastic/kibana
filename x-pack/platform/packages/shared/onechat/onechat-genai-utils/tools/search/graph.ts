@@ -111,6 +111,7 @@ export const createSearchToolGraph = ({
       getSearchPrompt({
         nlQuery: state.nlQuery,
         searchTarget: state.searchTarget,
+        customInstructions: state.customInstructions,
       })
     );
     return {
