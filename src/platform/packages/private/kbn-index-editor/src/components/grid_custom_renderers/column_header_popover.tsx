@@ -26,10 +26,10 @@ import type { PropsWithChildren } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { FieldSelect } from '@kbn/field-utils';
 import { useAddColumnName, errorMessages } from '../../hooks/use_add_column_name';
 import type { IndexEditorTelemetryService } from '../../telemetry/telemetry_service';
 import { isPlaceholderColumn } from '../../utils';
-import { FieldTypeSelector } from './field_type_selector';
 
 interface ColumnHeaderPopoverProps {
   isColumnInEditMode: boolean;
@@ -185,7 +185,7 @@ export const ColumnHeaderPopover = ({
             defaultMessage: `You won't be able to change the type after saving it.`,
           })}
         >
-          <FieldTypeSelector selectedType={columnType || null} onTypeChange={setColumnType} />
+          <FieldSelect selectedType={columnType || null} onTypeChange={setColumnType} />
         </EuiFormRow>
         {columnType && (
           <EuiPopoverFooter>

@@ -55,6 +55,7 @@ export const typeToEuiIconMap = {
   semantic_text: { iconType: 'tokenSemanticText' },
   string: { iconType: 'tokenString' },
   text: { iconType: 'tokenString' },
+  search_as_you_type: { iconType: 'tokenString' },
   keyword: { iconType: 'tokenKeyword' },
   constant_keyword: { iconType: 'tokenKeyword' },
   wildcard: { iconType: 'tokenKeyword' },
