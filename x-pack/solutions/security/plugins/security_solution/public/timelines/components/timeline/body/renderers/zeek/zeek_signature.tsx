@@ -5,19 +5,13 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { get } from 'lodash/fp';
-import React, { useCallback, useMemo } from 'react';
+import React from 'react';
 import styled from 'styled-components';
-
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import type { DraggableWrapperProps } from '../../../../../../common/components/drag_and_drop/draggable_wrapper';
-import { DraggableWrapper } from '../../../../../../common/components/drag_and_drop/draggable_wrapper';
-import { escapeDataProviderId } from '../../../../../../common/components/drag_and_drop/helpers';
+import { CellActionsRenderer } from '../../../../../../common/components/cell_actions/cell_actions_renderer';
 import { GoogleLink, ReputationLink } from '../../../../../../common/components/links';
-import type { QueryOperator } from '../../../data_providers/data_provider';
-import { IS_OPERATOR } from '../../../data_providers/data_provider';
-
 import * as i18n from './translations';
 
 const Badge = styled(EuiBadge)`
@@ -62,55 +56,24 @@ export const md5StringRenderer: StringRenderer = (value: string) => `md5: ${valu
 export const sha1StringRenderer: StringRenderer = (value: string) =>
   `sha1: ${value.substr(0, 7)}...`;
 
-export const DraggableZeekElement = React.memo<{
-  id: string;
+export const ZeekElement = React.memo<{
   field: string;
   value: string | null | undefined;
-  stringRenderer?: StringRenderer;
   scopeId: string;
-}>(({ id, field, value, stringRenderer = defaultStringRenderer, scopeId }) => {
-  const dataProviderProp = useMemo(
-    () => ({
-      and: [],
-      enabled: true,
-      id: escapeDataProviderId(`draggable-zeek-element-draggable-wrapper-${id}-${field}-${value}`),
-      name: String(value),
-      excluded: false,
-      kqlQuery: '',
-      queryMatch: {
-        field,
-        value: String(value),
-        operator: IS_OPERATOR as QueryOperator,
-      },
-    }),
-    [field, id, value]
-  );
-
-  const render: DraggableWrapperProps['render'] = useCallback(
-    () => (
-      <EuiToolTip data-test-subj="badge-tooltip" content={field}>
+  stringRenderer?: StringRenderer;
+}>(({ field, value, scopeId, stringRenderer = defaultStringRenderer }) =>
+  value != null ? (
+    <TokensFlexItem grow={false}>
+      <CellActionsRenderer field={field} value={String(value)} scopeId={scopeId}>
         <Badge iconType="tag" color="hollow" title="">
           {stringRenderer(String(value))}
         </Badge>
-      </EuiToolTip>
-    ),
-    [field, stringRenderer, value]
-  );
-
-  return value != null ? (
-    <TokensFlexItem grow={false}>
-      <DraggableWrapper
-        scopeId={scopeId}
-        dataProvider={dataProviderProp}
-        render={render}
-        isAggregatable={true}
-        fieldType={'keyword'}
-      />
+      </CellActionsRenderer>
     </TokensFlexItem>
-  ) : null;
-});
+  ) : null
+);
 
-DraggableZeekElement.displayName = 'DraggableZeekElement';
+ZeekElement.displayName = 'ZeekElement';
 
 interface LinkProps {
   value: string | null | undefined;
@@ -203,11 +166,10 @@ export const constructDroppedValue = (dropped: boolean | null | undefined): stri
 
 interface ZeekSignatureProps {
   data: Ecs;
-  timelineId: string;
+  scopeId: string;
 }
 
-export const ZeekSignature = React.memo<ZeekSignatureProps>(({ data, timelineId }) => {
-  const id = `zeek-signature-draggable-zeek-element-${timelineId}-${data._id}`;
+export const ZeekSignature = React.memo<ZeekSignatureProps>(({ data, scopeId }) => {
   const sessionId: string | null | undefined = get('zeek.session_id[0]', data);
   const dataSet: string | null | undefined = get('event.dataset[0]', data);
   const sslVersion: string | null | undefined = get('zeek.ssl.version[0]', data);
@@ -234,81 +196,41 @@ export const ZeekSignature = React.memo<ZeekSignatureProps>(({ data, timelineId 
   return (
     <>
       <EuiFlexGroup justifyContent="center" gutterSize="none" wrap={true}>
-        <DraggableZeekElement
-          scopeId={timelineId}
-          id={id}
-          field="zeek.session_id"
-          value={sessionId}
-        />
-        <DraggableZeekElement
-          id={id}
+        <ZeekElement field="zeek.session_id" value={sessionId} scopeId={scopeId} />
+        <ZeekElement
           field="event.dataset"
           value={dataSet}
           stringRenderer={moduleStringRenderer}
-          scopeId={timelineId}
+          scopeId={scopeId}
         />
-        <DraggableZeekElement
-          id={id}
+        <ZeekElement
           field="zeek.files.sha1"
           value={fileSha1}
           stringRenderer={sha1StringRenderer}
-          scopeId={timelineId}
+          scopeId={scopeId}
         />
-        <DraggableZeekElement
-          id={id}
+        <ZeekElement
           field="zeek.files.md5"
           value={filemd5}
           stringRenderer={md5StringRenderer}
-          scopeId={timelineId}
+          scopeId={scopeId}
         />
-        <DraggableZeekElement
-          id={id}
+        <ZeekElement
           field="zeek.notice.dropped"
           value={dropped}
           stringRenderer={droppedStringRenderer}
-          scopeId={timelineId}
+          scopeId={scopeId}
         />
-        <DraggableZeekElement
-          scopeId={timelineId}
-          id={id}
-          field="zeek.ssl.version"
-          value={sslVersion}
-        />
-        <DraggableZeekElement scopeId={timelineId} id={id} field="zeek.ssl.cipher" value={cipher} />
-        <DraggableZeekElement
-          scopeId={timelineId}
-          id={id}
-          field="zeek.connection.state"
-          value={state}
-        />
-        <DraggableZeekElement
-          scopeId={timelineId}
-          id={id}
-          field="http.request.method"
-          value={httpMethod}
-        />
-        <DraggableZeekElement
-          scopeId={timelineId}
-          id={id}
-          field="zeek.connection.history"
-          value={history}
-        />
-        <DraggableZeekElement scopeId={timelineId} id={id} field="zeek.notice.note" value={note} />
-        <DraggableZeekElement
-          scopeId={timelineId}
-          id={id}
-          field="zeek.dns.query"
-          value={dnsQuery}
-        />
-        <DraggableZeekElement
-          scopeId={timelineId}
-          id={id}
-          field="zeek.dns.qclass_name"
-          value={qClassName}
-        />
-        <DraggableZeekElement
-          scopeId={timelineId}
-          id={id}
+        <ZeekElement scopeId={scopeId} field="zeek.ssl.version" value={sslVersion} />
+        <ZeekElement scopeId={scopeId} field="zeek.ssl.cipher" value={cipher} />
+        <ZeekElement scopeId={scopeId} field="zeek.connection.state" value={state} />
+        <ZeekElement field="http.request.method" value={httpMethod} scopeId={scopeId} />
+        <ZeekElement field="zeek.connection.history" value={history} scopeId={scopeId} />
+        <ZeekElement scopeId={scopeId} field="zeek.notice.note" value={note} />
+        <ZeekElement scopeId={scopeId} field="zeek.dns.query" value={dnsQuery} />
+        <ZeekElement scopeId={scopeId} field="zeek.dns.qclass_name" value={qClassName} />
+        <ZeekElement
+          scopeId={scopeId}
           field="http.response.status_code"
           value={httpResponseStatusCode}
         />

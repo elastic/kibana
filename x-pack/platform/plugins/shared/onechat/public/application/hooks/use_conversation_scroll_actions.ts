@@ -12,14 +12,17 @@ const SCROLL_POSITION_CHECK_INTERVAL = 1500; // milliseconds
 const DEBOUNCE_DELAY = 20; // milliseconds
 
 const scrollToMostRecentRound = ({
+  scrollContainer,
   position,
   scrollBehavior = 'smooth',
 }: {
+  scrollContainer: HTMLDivElement;
   position: ScrollLogicalPosition;
   scrollBehavior?: ScrollBehavior;
 }) => {
   requestAnimationFrame(() => {
-    const conversationRoundsElement = document.querySelector(
+    // Find the rounds container within the specific scroll container
+    const conversationRoundsElement = scrollContainer.querySelector(
       '[id="onechatConversationRoundsContainer"]'
     );
     if (conversationRoundsElement) {
@@ -34,16 +37,6 @@ const scrollToMostRecentRound = ({
       }
     }
   });
-};
-
-// Scrolls the most recent round to the top of it's parent scroll container
-const scrollToMostRecentRoundTop = () => {
-  scrollToMostRecentRound({ position: 'start' });
-};
-
-// Scrolls the most recent round to the bottom of it's parent scroll container
-const scrollToMostRecentRoundBottom = () => {
-  scrollToMostRecentRound({ position: 'end' });
 };
 
 const checkScrollPosition = (
@@ -114,6 +107,18 @@ export const useConversationScrollActions = ({
       return;
     }
     scrollContainer.scrollTop = scrollContainer.scrollHeight;
+  }, [scrollContainer]);
+
+  // Scrolls the most recent round to the top of it's parent scroll container
+  const scrollToMostRecentRoundTop = useCallback(() => {
+    if (!scrollContainer) return;
+    scrollToMostRecentRound({ scrollContainer, position: 'start' });
+  }, [scrollContainer]);
+
+  // Scrolls the most recent round to the bottom of it's parent scroll container
+  const scrollToMostRecentRoundBottom = useCallback(() => {
+    if (!scrollContainer) return;
+    scrollToMostRecentRound({ scrollContainer, position: 'end' });
   }, [scrollContainer]);
 
   return {

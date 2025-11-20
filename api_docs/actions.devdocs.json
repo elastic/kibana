@@ -6140,21 +6140,6 @@
       },
       {
         "parentPluginId": "actions",
-        "id": "def-common.ALERT_HISTORY_PREFIX",
-        "type": "string",
-        "tags": [],
-        "label": "ALERT_HISTORY_PREFIX",
-        "description": [],
-        "signature": [
-          "\"kibana-alert-history-\""
-        ],
-        "path": "x-pack/platform/plugins/shared/actions/common/alert_history_schema.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "actions",
         "id": "def-common.AlertHistoryDefaultIndexName",
         "type": "string",
         "tags": [],
@@ -6572,6 +6557,21 @@
         "description": [],
         "signature": [
           "\"uptime\""
+        ],
+        "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.WorkflowsConnectorFeatureId",
+        "type": "string",
+        "tags": [],
+        "label": "WorkflowsConnectorFeatureId",
+        "description": [],
+        "signature": [
+          "\"workflows\""
         ],
         "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
         "deprecated": false,
@@ -7033,6 +7033,53 @@
           {
             "parentPluginId": "actions",
             "id": "def-common.UptimeConnectorFeature.compatibility",
+            "type": "string",
+            "tags": [],
+            "label": "compatibility",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "actions",
+        "id": "def-common.WorkflowsConnectorFeature",
+        "type": "Object",
+        "tags": [],
+        "label": "WorkflowsConnectorFeature",
+        "description": [],
+        "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.WorkflowsConnectorFeature.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.WorkflowsConnectorFeature.name",
+            "type": "string",
+            "tags": [],
+            "label": "name",
+            "description": [],
+            "path": "x-pack/platform/plugins/shared/actions/common/connector_feature_config.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "actions",
+            "id": "def-common.WorkflowsConnectorFeature.compatibility",
             "type": "string",
             "tags": [],
             "label": "compatibility",

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BasicPrettyPrinter, EsqlQuery, parse, mutate } from '@kbn/esql-ast';
+import { BasicPrettyPrinter, EsqlQuery, Parser, mutate } from '@kbn/esql-ast';
 import type { BinaryExpressionComparisonOperator } from '@kbn/esql-ast/src/types';
 import { sanitazeESQLInput } from './sanitaze_input';
 
@@ -142,7 +142,7 @@ export function appendWhereClauseToESQLQuery(
 }
 
 export const appendStatsByToQuery = (queryString: string, column: string) => {
-  const { root } = parse(queryString);
+  const { root } = Parser.parse(queryString);
   const lastCommand = root.commands[root.commands.length - 1];
   if (lastCommand.name === 'stats') {
     const statsCommand = lastCommand;

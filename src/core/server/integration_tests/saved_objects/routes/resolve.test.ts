@@ -27,6 +27,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import { deprecationMock, setupConfig } from './routes_test_utils';
 import { contextServiceMock, coreMock } from '../../../mocks';
 import { createInternalHttpService } from '../../utilities';
+import { docLinksServiceMock } from '@kbn/core-doc-links-server-mocks';
 
 const coreId = Symbol('core');
 
@@ -48,7 +49,10 @@ describe('GET /api/saved_objects/resolve/{type}/{id}', () => {
   beforeEach(async () => {
     const coreContext = createCoreContext({ coreId });
     server = createInternalHttpService(coreContext);
-    await server.preboot({ context: contextServiceMock.createPrebootContract() });
+    await server.preboot({
+      context: contextServiceMock.createPrebootContract(),
+      docLinks: docLinksServiceMock.createSetupContract(),
+    });
 
     const contextService = new ContextService(coreContext);
     httpSetup = await server.setup({

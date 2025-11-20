@@ -2950,7 +2950,9 @@
         "label": "LogsOverviewProps",
         "description": [],
         "signature": [
-          "{ timeRange: { start: string; end: string; } & { start: string; end: string; } & { start: string; end: string; } & { start: string; end: string; }; height?: ",
+          "{ timeRange: { start: string; end: string; } & { start: string; end: string; } & { start: string; end: string; } & { start: string; end: string; }; nonHighlightingFilters?: ",
+          "QueryDslQueryContainer",
+          "[] | undefined; height?: ",
           "Property",
           ".Height<string | number> | undefined; logsSource?: ",
           {

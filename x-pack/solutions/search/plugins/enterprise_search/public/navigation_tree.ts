@@ -264,11 +264,23 @@ export const getNavigationTreeDefinition = ({
                         {
                           children: [
                             {
+                              // We include this link here to ensure that the settings icon does not land on Stack Monitoring by default
+                              // https://github.com/elastic/kibana/issues/241518
+                              // And that the sidenav panel opens when user lands to legacy management landing page
+                              // https://github.com/elastic/kibana/issues/240275
+                              link: 'management',
+                              title: i18n.translate(
+                                'xpack.enterpriseSearch.searchNav.management.home',
+                                { defaultMessage: 'Home' }
+                              ),
+                              breadcrumbStatus: 'hidden',
+                            },
+                            {
                               id: 'monitoring',
                               link: 'monitoring',
                             },
                           ],
-                          id: 'monitoring',
+                          id: 'stack_management_home',
                           title: '',
                         },
                         {
@@ -369,12 +381,6 @@ export const getNavigationTreeDefinition = ({
                               defaultMessage: 'Stack',
                             }
                           ),
-                        },
-                        {
-                          // We include this link here to ensure that sidenav panel opens when user lands to legacy management landing page
-                          // https://github.com/elastic/kibana/issues/240275
-                          link: 'management',
-                          sideNavStatus: 'hidden',
                         },
                       ],
                       id: STACK_MANAGEMENT_NAV_ID, // This id can't be changed as we use it to open the panel programmatically

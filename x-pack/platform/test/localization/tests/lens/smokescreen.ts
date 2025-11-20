@@ -407,16 +407,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.editDimensionLabel('Test of label');
       await lens.editDimensionFormat(termTranslator('Percent'));
       await lens.editDimensionColor('#ff0000');
-      await lens.closeDimensionEditor();
 
-      await lens.openVisualOptions();
+      await lens.openStyleSettingsFlyout();
 
       await lens.setCurvedLines('CURVE_MONOTONE_X');
       await lens.editMissingValues('Linear');
 
       await lens.assertMissingValues(termTranslator('Linear'));
 
-      await lens.closeVisualOptionsPopover();
+      await lens.closeFlyoutWithBackButton();
 
       await lens.openDimensionEditor('lnsXY_yDimensionPanel > lns-dimensionTrigger');
       await lens.assertColor('#ff0000');
@@ -496,9 +495,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should show value labels on bar charts when enabled', async () => {
       // enable value labels
-      await lens.openTextOptions();
+      await lens.openStyleSettingsFlyout();
       await testSubjects.click('lns_valueLabels_inside');
-      await lens.closeTitlesAndTextOptionsPopover();
+      await lens.closeFlyoutWithBackButton();
 
       // check for value labels
       let data = await lens.getCurrentChartDebugState('xyVisChart');
@@ -514,7 +513,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should override axis title', async () => {
       const axisTitle = 'overridden axis';
-      await lens.toggleToolbarPopover('lnsLeftAxisButton');
+      await lens.openStyleSettingsFlyout();
       await testSubjects.setValue('lnsyLeftAxisTitle', axisTitle, {
         clearWithKeyboard: true,
       });
@@ -527,6 +526,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       data = await lens.getCurrentChartDebugState('xyVisChart');
       expect(data?.axes?.y?.[1].gridlines.length).to.eql(0);
+
+      await lens.closeFlyoutWithBackButton();
     });
 
     it('should transition from line chart to pie chart and to bar chart', async () => {
@@ -932,10 +933,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await visualize.clickVisType('lens');
       await lens.switchToVisualization('pie', termTranslator('pie'));
 
-      const hasVisualOptionsButton = await lens.hasVisualOptionsButton();
-      expect(hasVisualOptionsButton).to.be(true);
+      await lens.openStyleSettingsFlyout();
 
-      await lens.openVisualOptions();
       await retry.try(async () => {
         expect(await lens.hasEmptySizeRatioButtonGroup()).to.be(true);
       });

@@ -14,3 +14,29 @@ export const PUBLIC_API_PATH = '/api/dashboards/dashboard';
  * const will be removed and a PUBLIC_API_VERSION (ex. 2023-10-31) will be introduced.
  */
 export const INTERNAL_API_VERSION = '1';
+
+export const commonRouteConfig = {
+  // This route is in development and not yet intended for public use.
+  access: 'internal',
+  /**
+   * `enableQueryVersion` is a temporary solution for testing internal endpoints.
+   * Requests to these internal endpoints from Kibana Dev Tools or external clients
+   * should include the ?apiVersion=1 query parameter.
+   * This will be removed when the API is finalized and moved to a stable version.
+   */
+  enableQueryVersion: true,
+  description:
+    'This functionality is in technical preview and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.',
+  options: {
+    tags: ['oas-tag:Dashboards'],
+    availability: {
+      stability: 'experimental',
+    },
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'Relies on Content Client for authorization',
+    },
+  },
+} as const;

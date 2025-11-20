@@ -13,7 +13,7 @@ export const mockTimeRange = { from: '2022-10-03T07:48:31.498Z', to: '2022-10-03
 export const mockIndicatorsFiltersContext: IndicatorsFiltersContextValue = {
   filterManager: {
     getFilters: () => [],
-    setFilters: () => window.alert('setFilters'),
+    setFilters: jest.fn(),
   } as unknown as FilterManager,
   filters: [],
   filterQuery: {

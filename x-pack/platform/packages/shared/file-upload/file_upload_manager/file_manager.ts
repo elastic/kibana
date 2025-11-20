@@ -13,7 +13,7 @@ import { switchMap, combineLatest, BehaviorSubject, of } from 'rxjs';
 import type { CoreStart, HttpSetup, NotificationsStart } from '@kbn/core/public';
 import type { IImporter } from '@kbn/file-upload-plugin/public/importer/types';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
-import { FileUploadTelemetryService } from '@kbn/file-upload-common';
+import { AbortError, FileUploadTelemetryService } from '@kbn/file-upload-common';
 import type {
   IndicesIndexSettings,
   MappingTypeMapping,
@@ -50,6 +50,7 @@ export enum STATUS {
   STARTED,
   COMPLETED,
   FAILED,
+  ABORTED,
 }
 
 export interface Config<T = IndicesIndexSettings | MappingTypeMapping> {
@@ -120,6 +121,7 @@ export class FileUploadManager {
   private docCountService: DocCountService;
   private initializedWithExistingIndex: boolean = false;
   private fileUploadTelemetryService: FileUploadTelemetryService;
+  private importAbortController: AbortController | null = null;
 
   private readonly _uploadStatus$ = new BehaviorSubject<UploadStatus>({
     analysisStatus: STATUS.NOT_STARTED,
@@ -265,6 +267,9 @@ export class FileUploadManager {
   }
 
   destroy() {
+    this.importAbortController?.abort();
+    this.getFiles().forEach((file) => file.destroy());
+
     this.files$.complete();
     this.analysisValid$.complete();
     this._settings$.complete();
@@ -317,6 +322,17 @@ export class FileUploadManager {
       this.setStatus({
         analysisStatus: STATUS.NOT_STARTED,
       });
+    }
+  }
+
+  async abortAnalysis() {
+    const files = this.getFiles();
+    files.forEach((file) => file.abortAnalysis());
+  }
+
+  async abortImport() {
+    if (this.importAbortController) {
+      this.importAbortController.abort();
     }
   }
 
@@ -502,17 +518,21 @@ export class FileUploadManager {
     indexName: string,
     dataViewName?: string | null
   ): Promise<FileUploadResults | null> {
+    this.importAbortController = new AbortController();
+    const signal = this.importAbortController.signal;
+
     const mappings = this.getMappings().json;
     const pipelines = this.getPipelines();
 
     const isExistingIndex = this.isExistingIndexUpload();
     const files = this.getFiles();
-    const sendTelemetry = this.collectTelemetry(
+    const { sendTelemetry } = this.sendTelemetryProvider(
       files,
       new Date().getTime(),
       isExistingIndex,
       dataViewName
     );
+    const { checkImportAborted } = this.checkImportAbortedProvider(sendTelemetry);
 
     if (mappings === null || pipelines === null || this.commonFileFormat === null) {
       this.setStatus({
@@ -539,7 +559,7 @@ export class FileUploadManager {
       this.setStatus({
         modelDeployed: STATUS.STARTED,
       });
-      await this.autoDeploy();
+      await this.autoDeploy(signal);
       this.setStatus({
         modelDeployed: STATUS.COMPLETED,
       });
@@ -568,8 +588,11 @@ export class FileUploadManager {
         this.getSettings().json,
         mappings,
         pipelines,
-        isExistingIndex
+        isExistingIndex,
+        signal
       );
+
+      checkImportAborted();
 
       this.docCountService.startIndexSearchableCheck(indexName);
 
@@ -587,6 +610,8 @@ export class FileUploadManager {
         throw initializeImportResp.error;
       }
     } catch (e) {
+      checkImportAborted();
+
       this.setStatus({
         overallImportStatus: STATUS.FAILED,
         errors: [
@@ -599,6 +624,7 @@ export class FileUploadManager {
         ],
       });
       sendTelemetry(false);
+
       return null;
     }
 
@@ -615,7 +641,7 @@ export class FileUploadManager {
       fileImport: STATUS.STARTED,
     });
 
-    // import data
+    // import files
     const createdPipelineIds = initializeImportResp.pipelineIds;
 
     try {
@@ -625,7 +651,8 @@ export class FileUploadManager {
             indexName,
             mappings!,
             createdPipelineIds[i] ?? undefined,
-            this.getFileClashes(i) // passing in file clashes for telemetry
+            this.getFileClashes(i), // passing in file clashes for telemetry
+            signal
           );
         })
       );
@@ -645,6 +672,8 @@ export class FileUploadManager {
       return null;
     }
 
+    checkImportAborted();
+
     const totalDocCount = files.reduce((acc, file) => {
       const { docCount, failures } = file.getStatus();
       const count = docCount - failures.length;
@@ -662,7 +691,7 @@ export class FileUploadManager {
         this.setStatus({
           pipelinesDeleted: STATUS.STARTED,
         });
-        await this.importer.deletePipelines();
+        await this.importer.deletePipelines(signal);
         this.setStatus({
           pipelinesDeleted: STATUS.COMPLETED,
         });
@@ -683,6 +712,8 @@ export class FileUploadManager {
         });
       }
     }
+
+    checkImportAborted();
 
     let dataViewResp;
     if (this.autoCreateDataView && dataViewName !== null) {
@@ -716,11 +747,15 @@ export class FileUploadManager {
       }
     }
 
+    checkImportAborted();
+
     this.setStatus({
       overallImportStatus: STATUS.COMPLETED,
     });
 
     sendTelemetry(true);
+
+    this.importAbortController = null;
 
     return {
       index: indexName,
@@ -739,13 +774,13 @@ export class FileUploadManager {
     };
   }
 
-  private async autoDeploy() {
+  private async autoDeploy(signal?: AbortSignal) {
     if (this.inferenceId === null) {
       return;
     }
     try {
       const autoDeploy = new AutoDeploy(this.http, this.inferenceId);
-      await autoDeploy.deploy();
+      await autoDeploy.deploy(signal);
     } catch (error) {
       this.setStatus({
         modelDeployed: STATUS.FAILED,
@@ -824,31 +859,74 @@ export class FileUploadManager {
       });
     }
   }
-  private collectTelemetry(
+  private sendTelemetryProvider(
     files: FileWrapper[],
     startTime: number,
     isExistingIndex: boolean,
     dataViewName: string | null | undefined
   ) {
-    return (success: boolean) => {
-      const containsAutoAddedSemanticTextField =
-        this.getMappings().json.properties?.content?.type === 'semantic_text';
+    return {
+      sendTelemetry: (success: boolean) => {
+        const containsAutoAddedSemanticTextField =
+          this.getMappings().json.properties?.content?.type === 'semantic_text';
 
-      const { mappingClashTotalNewFields, mappingClashTotalMissingFields } =
-        this.getFileClashTotals();
+        const { mappingClashTotalNewFields, mappingClashTotalMissingFields } =
+          this.getFileClashTotals();
 
-      this.fileUploadTelemetryService.trackUploadSession({
-        upload_session_id: this.uploadSessionId,
-        total_files: files.length,
-        total_size_bytes: files.reduce((acc, file) => acc + file.getSizeInBytes(), 0),
-        session_success: success,
-        session_time_ms: new Date().getTime() - startTime,
-        new_index_created: isExistingIndex === false,
-        data_view_created: this.autoCreateDataView && dataViewName !== null,
-        mapping_clash_total_new_fields: mappingClashTotalNewFields,
-        mapping_clash_total_missing_fields: mappingClashTotalMissingFields,
-        contains_auto_added_semantic_text_field: containsAutoAddedSemanticTextField,
-      });
+        this.fileUploadTelemetryService.trackUploadSession({
+          upload_session_id: this.uploadSessionId,
+          total_files: files.length,
+          total_size_bytes: files.reduce((acc, file) => acc + file.getSizeInBytes(), 0),
+          session_success: success,
+          session_cancelled: this.importAbortController?.signal.aborted ?? false,
+          session_time_ms: new Date().getTime() - startTime,
+          new_index_created: isExistingIndex === false,
+          data_view_created: this.autoCreateDataView && dataViewName !== null,
+          mapping_clash_total_new_fields: mappingClashTotalNewFields,
+          mapping_clash_total_missing_fields: mappingClashTotalMissingFields,
+          contains_auto_added_semantic_text_field: containsAutoAddedSemanticTextField,
+        });
+      },
+    };
+  }
+
+  private checkImportAbortedProvider(
+    sendTelemetry: (success: boolean, cancelled?: boolean) => void
+  ) {
+    return {
+      checkImportAborted: () => {
+        if (this.importAbortController?.signal.aborted) {
+          this.setStatus({ overallImportStatus: STATUS.ABORTED });
+          const { modelDeployed, indexCreated, pipelineCreated, fileImport, dataViewCreated } =
+            this._uploadStatus$.getValue();
+          this.setStatus({
+            modelDeployed:
+              modelDeployed === STATUS.STARTED || modelDeployed === STATUS.NOT_STARTED
+                ? STATUS.ABORTED
+                : modelDeployed,
+            indexCreated:
+              indexCreated === STATUS.STARTED || indexCreated === STATUS.NOT_STARTED
+                ? STATUS.ABORTED
+                : indexCreated,
+            pipelineCreated:
+              pipelineCreated === STATUS.STARTED || pipelineCreated === STATUS.NOT_STARTED
+                ? STATUS.ABORTED
+                : pipelineCreated,
+            fileImport:
+              fileImport === STATUS.STARTED || fileImport === STATUS.NOT_STARTED
+                ? STATUS.ABORTED
+                : fileImport,
+            dataViewCreated:
+              dataViewCreated === STATUS.STARTED || dataViewCreated === STATUS.NOT_STARTED
+                ? STATUS.ABORTED
+                : dataViewCreated,
+          });
+
+          sendTelemetry(false);
+
+          throw new AbortError();
+        }
+      },
     };
   }
 }

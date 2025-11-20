@@ -12,7 +12,6 @@ import type { NavigationTourManager } from '@kbn/core-chrome-navigation-tour';
 import type { UserProfileServiceStart } from '@kbn/core-user-profile-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-browser';
-import { getSideNavVersion } from '@kbn/core-chrome-layout-feature-flags';
 
 /**
  * This tour combines the spaces solution view tour and new navigation tour into a single
@@ -39,7 +38,6 @@ export class SolutionNavigationTourManager {
     }
 
     // when completes, maybe start the navigation tour (if applicable)
-    if (getSideNavVersion(this.deps.featureFlags) !== 'v2') return;
     const hasCompletedTour = await checkTourCompletion(this.deps.userProfile);
     if (hasCompletedTour) return;
 
