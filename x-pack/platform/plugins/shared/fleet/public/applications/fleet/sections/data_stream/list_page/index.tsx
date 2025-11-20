@@ -23,7 +23,7 @@ import { FormattedMessage, FormattedDate, FormattedTime } from '@kbn/i18n-react'
 
 import type { DataStream } from '../../../types';
 import { useGetDataStreams, usePagination, useBreadcrumbs } from '../../../hooks';
-import { useGetDeprecatedILMCheck } from '../../../../../hooks/use_request/data_stream';
+import { useGetDeprecatedILMCheckQuery } from '../../../../../hooks/use_request/data_stream';
 import { PackageIcon } from '../../../components';
 
 import { DataStreamRowActions } from './components/data_stream_row_actions';
@@ -37,7 +37,7 @@ export const DataStreamListPage: React.FunctionComponent<{}> = () => {
   const { isLoading, data: dataStreamsData, resendRequest } = useGetDataStreams();
 
   // Check for deprecated ILM policies
-  const { data: deprecatedILMCheck } = useGetDeprecatedILMCheck();
+  const { data: deprecatedILMCheck } = useGetDeprecatedILMCheckQuery();
 
   // Some policies retrieved, set up table props
   const columns = useMemo(() => {

@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { useQuery } from '@kbn/react-query';
+
 import { dataStreamRouteService } from '../../services';
 import type { GetDataStreamsResponse } from '../../types';
 import type { DeprecatedILMPolicyCheckResponse } from '../../../common/types';
 import { API_VERSIONS } from '../../../common/constants';
 
-import { useRequest, sendRequest } from './use_request';
+import type { RequestError } from './use_request';
+import { useRequest, sendRequest, sendRequestForRq } from './use_request';
 
 export const useGetDataStreams = () => {
   return useRequest<GetDataStreamsResponse>({
@@ -33,10 +36,12 @@ export const sendGetDataStreams = async () => {
   return res.data;
 };
 
-export const useGetDeprecatedILMCheck = () => {
-  return useRequest<DeprecatedILMPolicyCheckResponse>({
-    path: dataStreamRouteService.getDeprecatedILMCheckPath(),
-    method: 'get',
-    version: API_VERSIONS.public.v1,
-  });
+export const useGetDeprecatedILMCheckQuery = () => {
+  return useQuery<DeprecatedILMPolicyCheckResponse, RequestError>(['deprecated-ilm-check'], () =>
+    sendRequestForRq<DeprecatedILMPolicyCheckResponse>({
+      path: dataStreamRouteService.getDeprecatedILMCheckPath(),
+      method: 'get',
+      version: API_VERSIONS.public.v1,
+    })
+  );
 };
