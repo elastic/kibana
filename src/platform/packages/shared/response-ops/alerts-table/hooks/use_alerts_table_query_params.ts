@@ -82,6 +82,7 @@ export const useAlertsTableQueryParams = ({
           runtimeMappings: prevQueryParams.runtimeMappings,
           trackScores: prevQueryParams.trackScores,
           pageSize: prevQueryParams.pageSize,
+          pageIndex: prevQueryParams.pageIndex,
         },
         {
           ruleTypeIds,
@@ -92,6 +93,7 @@ export const useAlertsTableQueryParams = ({
           runtimeMappings,
           trackScores,
           pageSize,
+          pageIndex,
         }
       );
       if (resetPageIndex) {
