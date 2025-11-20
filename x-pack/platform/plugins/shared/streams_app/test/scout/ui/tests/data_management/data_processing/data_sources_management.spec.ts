@@ -49,6 +49,7 @@ test.describe(
 
       // Assert that the custom samples are correctly displayed in the preview
       await pageObjects.streams.closeFlyout();
+      await pageObjects.streams.switchToColumnsView();
       const rows = await pageObjects.streams.getPreviewTableRows();
       for (let rowIndex = 0; rowIndex < rows.length; rowIndex++) {
         await pageObjects.streams.expectCellValueContains({
