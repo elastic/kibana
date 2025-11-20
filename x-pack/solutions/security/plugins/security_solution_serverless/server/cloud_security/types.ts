@@ -8,6 +8,9 @@
 import type { CSPM, KSPM, CNVM } from './constants';
 import type { MeteringCallbackInput, Tier } from '../types';
 
+export interface CloudDefendAssetCountAggregation {
+  asset_count_groups: AssetCountAggregationBucket;
+}
 export interface AssetCountAggregationBucket {
   buckets: AssetCountAggregation[];
 }
