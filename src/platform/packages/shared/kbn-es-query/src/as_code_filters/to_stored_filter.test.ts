@@ -140,7 +140,7 @@ describe('toStoredFilter', () => {
         },
       } as StoredFilter;
 
-      const asCodeFilter = fromStoredFilter(originalFilter);
+      const asCodeFilter = fromStoredFilter(originalFilter) as AsCodeFilter;
       const roundTripFilter = toStoredFilter(asCodeFilter);
       expect(roundTripFilter).toEqual(originalFilter);
     });
@@ -149,7 +149,7 @@ describe('toStoredFilter', () => {
       const originalFilter = spatialFilterFixture as StoredFilter;
 
       // Convert to SimpleFilter
-      const simpleFilter = fromStoredFilter(originalFilter);
+      const simpleFilter = fromStoredFilter(originalFilter) as AsCodeFilter;
 
       // Convert back to StoredFilter
       const roundTripFilter = toStoredFilter(simpleFilter);
@@ -195,7 +195,7 @@ describe('toStoredFilter', () => {
       };
 
       // Convert to AsCodeFilter
-      const asCodeFilter = fromStoredFilter(scriptedPhraseFilter);
+      const asCodeFilter = fromStoredFilter(scriptedPhraseFilter) as AsCodeFilter;
 
       // Should be converted to DSL format (scripted filters are complex)
       expect('dsl' in asCodeFilter).toBe(true);
@@ -240,7 +240,7 @@ describe('toStoredFilter', () => {
       };
 
       // Convert to AsCodeFilter
-      const asCodeFilter = fromStoredFilter(scriptedRangeFilter);
+      const asCodeFilter = fromStoredFilter(scriptedRangeFilter) as AsCodeFilter;
 
       // Should be converted to DSL format
       expect('dsl' in asCodeFilter).toBe(true);
@@ -291,7 +291,7 @@ describe('toStoredFilter', () => {
       };
 
       // Convert to AsCodeFilter
-      const asCodeFilter = fromStoredFilter(scriptedFilter);
+      const asCodeFilter = fromStoredFilter(scriptedFilter) as AsCodeFilter;
 
       expect('dsl' in asCodeFilter).toBe(true);
       expect(asCodeFilter.pinned).toBe(true); // GLOBAL_STATE = pinned
@@ -335,7 +335,7 @@ describe('toStoredFilter', () => {
       };
 
       // Convert to AsCodeFilter
-      const asCodeFilter = fromStoredFilter(dateRangeFilter);
+      const asCodeFilter = fromStoredFilter(dateRangeFilter) as AsCodeFilter;
 
       // Should detect as range condition
       expect('condition' in asCodeFilter).toBe(true);
@@ -385,7 +385,7 @@ describe('toStoredFilter', () => {
       };
 
       // Convert to AsCodeFilter
-      const asCodeFilter = fromStoredFilter(dateRangeFilter);
+      const asCodeFilter = fromStoredFilter(dateRangeFilter) as AsCodeFilter;
 
       expect('condition' in asCodeFilter).toBe(true);
       if ('condition' in asCodeFilter) {
@@ -426,7 +426,7 @@ describe('toStoredFilter', () => {
         },
       };
 
-      const asCodeFilter = fromStoredFilter(singleDateFilter);
+      const asCodeFilter = fromStoredFilter(singleDateFilter) as AsCodeFilter;
       const roundTrip = toStoredFilter(asCodeFilter);
 
       // Format is normalized (see previous test for explanation)
@@ -460,7 +460,7 @@ describe('toStoredFilter', () => {
         },
       };
 
-      const asCodeFilter = fromStoredFilter(timePickerFilter);
+      const asCodeFilter = fromStoredFilter(timePickerFilter) as AsCodeFilter;
       expect('condition' in asCodeFilter).toBe(true);
       if ('condition' in asCodeFilter) {
         expect(asCodeFilter.condition.operator).toBe('range');
@@ -527,7 +527,7 @@ describe('toStoredFilter', () => {
       };
 
       // Convert to AsCodeFilter
-      const asCodeFilter = fromStoredFilter(originalFilter);
+      const asCodeFilter = fromStoredFilter(originalFilter) as AsCodeFilter;
 
       // Verify it converted to IS_NOT_ONE_OF
       expect('condition' in asCodeFilter).toBe(true);
@@ -628,7 +628,7 @@ describe('toStoredFilter', () => {
       };
 
       // Convert to AsCodeFilter
-      const asCodeFilter = fromStoredFilter(originalStoredFilter);
+      const asCodeFilter = fromStoredFilter(originalStoredFilter) as AsCodeFilter;
 
       // Convert back to StoredFilter
       const roundTripFilter = toStoredFilter(asCodeFilter);
@@ -653,6 +653,238 @@ describe('toStoredFilter', () => {
 
       // Should NOT have a terms query
       expect(roundTripFilter.query).not.toHaveProperty('terms');
+    });
+
+    it('should preserve filters with bool.must containing multiple different query types AS DSL (not group)', () => {
+      // A filter with bool.must containing different query types (match_phrase + range)
+      // WITHOUT meta.type, this should be preserved as DSL to avoid data loss
+      const originalFilter: StoredFilter = {
+        meta: {
+          disabled: false,
+          negate: false,
+          alias: null,
+        },
+        $state: {
+          store: FilterStateStore.APP_STATE,
+        },
+        query: {
+          bool: {
+            must: [
+              {
+                match_phrase: {
+                  message: 'error',
+                },
+              },
+              {
+                range: {
+                  '@timestamp': {
+                    gte: '2024-01-01',
+                    lte: '2024-12-31',
+                  },
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      // Convert to AsCode format
+      const asCodeFilter = fromStoredFilter(originalFilter) as AsCodeFilter;
+
+      // Should be a DSL filter - bool queries without meta.type preserved as DSL
+      expect('dsl' in asCodeFilter).toBe(true);
+
+      if ('dsl' in asCodeFilter) {
+        const queryStr = JSON.stringify(asCodeFilter.dsl);
+        expect(queryStr.includes('message')).toBe(true);
+        expect(queryStr.includes('timestamp') || queryStr.includes('@timestamp')).toBe(true);
+      }
+
+      // Round-trip back to stored format
+      const roundTripped = toStoredFilter(asCodeFilter);
+
+      // Both queries should be preserved
+      if ('query' in roundTripped && roundTripped.query) {
+        const queryStr = JSON.stringify(roundTripped.query);
+        expect(queryStr.includes('message')).toBe(true);
+        expect(queryStr.includes('timestamp') || queryStr.includes('@timestamp')).toBe(true);
+      }
+    });
+
+    it('should handle single query filter with incomplete metadata as condition', () => {
+      // A filter that has query but incomplete metadata
+      const singleQueryFilter: StoredFilter = {
+        meta: {
+          // Incomplete metadata - no type, no key
+          disabled: false,
+          negate: false,
+          alias: null,
+        },
+        $state: {
+          store: FilterStateStore.APP_STATE,
+        },
+        query: {
+          match_phrase: {
+            message: 'error occurred',
+          },
+        },
+      };
+
+      const asCodeFilter = fromStoredFilter(singleQueryFilter) as AsCodeFilter;
+
+      // Should be converted to a simple condition
+      expect('condition' in asCodeFilter).toBe(true);
+      if ('condition' in asCodeFilter) {
+        expect(asCodeFilter.condition.field).toBe('message');
+        expect(asCodeFilter.condition.operator).toBe('is');
+        if ('value' in asCodeFilter.condition) {
+          expect(asCodeFilter.condition.value).toBe('error occurred');
+        }
+      }
+    });
+
+    it('should preserve complex bool.should queries without simplifying', () => {
+      // A complex filter that shouldn't be simplified
+      const complexFilter: StoredFilter = {
+        meta: {
+          disabled: false,
+          negate: false,
+          alias: null,
+        },
+        $state: {
+          store: FilterStateStore.APP_STATE,
+        },
+        query: {
+          bool: {
+            should: [
+              {
+                match_phrase: {
+                  'error.message': 'timeout',
+                },
+              },
+              {
+                match_phrase: {
+                  'error.message': 'connection refused',
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      };
+
+      const asCodeFilter = fromStoredFilter(complexFilter) as AsCodeFilter;
+
+      // Should NOT be a simple condition - should be group or DSL
+      expect('condition' in asCodeFilter).toBe(false);
+
+      // Should be either a group filter or DSL
+      const isGroupOrDSL = 'group' in asCodeFilter || 'dsl' in asCodeFilter;
+      expect(isGroupOrDSL).toBe(true);
+    });
+
+    it('should preserve bool query with BOTH must and should clauses as DSL (prevents data loss)', () => {
+      // A filter with bool query that has BOTH must and should clauses
+      // This prevents the Strategy 3 Bug that would convert to group and lose should clause
+      const complexBoolFilter: StoredFilter = {
+        meta: {
+          disabled: false,
+          negate: false,
+          alias: null,
+        },
+        $state: {
+          store: FilterStateStore.APP_STATE,
+        },
+        query: {
+          bool: {
+            must: [
+              {
+                term: {
+                  'extension.keyword': 'css',
+                },
+              },
+              {
+                term: {
+                  'machine.os.keyword': 'ios',
+                },
+              },
+            ],
+            should: [
+              {
+                range: {
+                  'machine.ram': {
+                    gte: '500',
+                  },
+                },
+              },
+            ],
+            minimum_should_match: 0, // This makes should optional
+          },
+        },
+      };
+
+      // Convert to AsCode format
+      const asCodeFilter = fromStoredFilter(complexBoolFilter) as AsCodeFilter;
+
+      // Should be a DSL filter - preserves complex bool structure
+      expect('dsl' in asCodeFilter).toBe(true);
+
+      if ('dsl' in asCodeFilter) {
+        const queryStr = JSON.stringify(asCodeFilter.dsl);
+        // All clauses should be preserved
+        expect(queryStr.includes('extension.keyword')).toBe(true);
+        expect(queryStr.includes('machine.os.keyword')).toBe(true);
+        expect(queryStr.includes('machine.ram')).toBe(true);
+        expect(queryStr.includes('must')).toBe(true);
+        expect(queryStr.includes('should')).toBe(true);
+      }
+
+      // Round-trip to verify NO data loss
+      const roundTripped = toStoredFilter(asCodeFilter);
+
+      // The should clause is PRESERVED (not lost!)
+      if ('query' in roundTripped && roundTripped.query?.bool) {
+        expect(roundTripped.query.bool.should).toBeDefined();
+        expect(roundTripped.query.bool.must).toBeDefined();
+        expect(roundTripped.query.bool.must).toHaveLength(2);
+        expect(roundTripped.query.bool.should).toHaveLength(1);
+      }
+    });
+
+    it('should preserve bool.must with single query as DSL', () => {
+      // Single-clause bool.must goes to DSL fallback since it can't be simplified
+      const boolMustFilter: StoredFilter = {
+        meta: {
+          disabled: false,
+          negate: false,
+          alias: null,
+        },
+        $state: {
+          store: FilterStateStore.APP_STATE,
+        },
+        query: {
+          bool: {
+            must: [
+              {
+                term: {
+                  status: 'active',
+                },
+              },
+            ],
+          },
+        },
+      };
+
+      const asCodeFilter = fromStoredFilter(boolMustFilter) as AsCodeFilter;
+
+      // Should be preserved as DSL
+      expect('dsl' in asCodeFilter).toBe(true);
+
+      if ('dsl' in asCodeFilter && asCodeFilter.dsl) {
+        const queryStr = JSON.stringify(asCodeFilter.dsl);
+        expect(queryStr.includes('status')).toBe(true);
+        expect(queryStr.includes('active')).toBe(true);
+      }
     });
   });
 });
