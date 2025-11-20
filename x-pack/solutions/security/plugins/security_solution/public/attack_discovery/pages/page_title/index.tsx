@@ -26,13 +26,7 @@ const PageTitleComponent: React.FC = () => {
   );
 
   return (
-    <EuiFlexGroup
-      alignItems="center"
-      data-test-subj="pageTitle"
-      gutterSize="none"
-      responsive={false}
-      wrap={true}
-    >
+    <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false} wrap={true}>
       <EuiFlexItem grow={false}>
         <EuiTitle data-test-subj="attackDiscoveryPageTitle" size="l">
           <h1>{i18n.ATTACK_DISCOVERY_PAGE_TITLE}</h1>
