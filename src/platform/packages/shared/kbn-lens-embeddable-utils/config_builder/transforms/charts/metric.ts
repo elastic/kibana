@@ -456,6 +456,7 @@ export function fromAPItoLensState(config: MetricState): LensAttributes {
     visualizationType: 'lnsMetric',
     ...getSharedChartAPIToLensState(config),
     references,
+    version: 1,
     state: {
       datasourceStates: layers,
       internalReferences,

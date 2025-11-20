@@ -7,22 +7,25 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { metricStateSchema } from '../../schema/charts/metric';
-import { validateConverter } from '../validate';
+import { validator } from '../utils/validator';
 import { simpleMetricAttributes } from './simple.mock';
 import { breakdownMetricAttributes } from './breakdown.mock';
 import { complexMetricAttributes } from './complex.mock';
 
 describe('Metric', () => {
-  it('should convert a simple metric', () => {
-    validateConverter(simpleMetricAttributes, metricStateSchema);
+  describe('state transform validation', () => {
+    it('should convert a simple metric', () => {
+      validator.metric.fromState(simpleMetricAttributes, true);
+    });
+
+    it('should convert a complex metric', () => {
+      validator.metric.fromState(complexMetricAttributes, true);
+    });
+
+    it('should convert a breakdown-by metric', () => {
+      validator.metric.fromState(breakdownMetricAttributes, true);
+    });
   });
 
-  it('should convert a complex metric', () => {
-    validateConverter(complexMetricAttributes, metricStateSchema);
-  });
-
-  it('should convert a breakdown-by metric', () => {
-    validateConverter(breakdownMetricAttributes, metricStateSchema);
-  });
+  it.todo('api transform validation');
 });

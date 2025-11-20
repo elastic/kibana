@@ -1,0 +1,100 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`common canonicalizeCommonState should convert metric common state 1`] = `
+Object {
+  "description": "Metric with breakdown",
+  "references": Array [
+    Object {
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "name": "indexpattern-datasource-layer-layer_0",
+      "type": "index-pattern",
+    },
+  ],
+  "state": Object {
+    "adHocDataViews": Object {},
+    "datasourceStates": Object {
+      "formBased": Object {
+        "layers": Object {
+          "layer_0": Object {
+            "columnOrder": Array [
+              "metric_formula_accessor_breakdown",
+              "metric_formula_accessor_metric",
+              "metric_formula_accessor_secondary",
+              "metric_formula_accessor_max",
+            ],
+            "columns": Object {
+              "metric_formula_accessor_breakdown": Object {
+                "dataType": "string",
+                "isBucketed": true,
+                "label": "Top 5 values of extension.keyword",
+                "operationType": "terms",
+                "params": Object {
+                  "exclude": Array [],
+                  "excludeIsRegex": false,
+                  "include": Array [],
+                  "includeIsRegex": false,
+                  "missingBucket": false,
+                  "orderBy": Object {
+                    "columnId": "594aa5e9-9163-4b22-a19d-89b3546561d9",
+                    "type": "column",
+                  },
+                  "orderDirection": "desc",
+                  "otherBucket": true,
+                  "parentFormat": Object {
+                    "id": "terms",
+                  },
+                  "size": 5,
+                },
+                "sourceField": "extension.keyword",
+              },
+              "metric_formula_accessor_max": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Static value: 400",
+                "operationType": "static_value",
+                "params": Object {
+                  "emptyAsNull": true,
+                  "value": "400",
+                },
+                "references": Array [],
+              },
+              "metric_formula_accessor_metric": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Count of records",
+                "operationType": "count",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
+                "sourceField": "___records___",
+              },
+              "metric_formula_accessor_secondary": Object {
+                "dataType": "number",
+                "isBucketed": false,
+                "label": "Average of bytes",
+                "operationType": "average",
+                "params": Object {
+                  "emptyAsNull": true,
+                },
+                "sourceField": "bytes",
+              },
+            },
+            "ignoreGlobalFilters": false,
+            "sampling": 1,
+          },
+        },
+      },
+    },
+    "filters": Array [],
+    "internalReferences": Array [],
+    "query": Object {
+      "language": "kuery",
+      "query": "",
+    },
+    "visualization": Object {},
+  },
+  "title": "Metric - Breakdown",
+  "version": 1,
+  "visualizationType": "lnsMetric",
+}
+`;
