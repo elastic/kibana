@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { testHasEmbeddedConsole } from './embedded_console';
 
@@ -29,73 +29,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.svlCommonPage.loginAsViewer();
       });
 
-      describe('Getting Started page', function () {
+      describe('Getting Started page is not accessible for viewer role', function () {
         beforeEach(async () => {
           await pageObjects.common.navigateToApp('searchGettingStarted');
         });
-
-        it('load search getting started', async () => {
-          await pageObjects.searchGettingStarted.expectSearchGettingStartedIsLoaded();
-        });
-        it('should have embedded dev console', async () => {
-          await testHasEmbeddedConsole(pageObjects);
-        });
-      });
-
-      describe('Getting Started page interactions', function () {
-        beforeEach(async () => {
-          await pageObjects.common.navigateToApp('searchGettingStarted');
-        });
-
-        describe('Add data button', function () {
-          it('navigates to the sample data page when option is selected', async () => {
-            await pageObjects.searchGettingStarted.selectAddDataOption(
-              'gettingStartedSampleDataMenuItem'
-            );
-            await retry.tryWithRetries(
-              'wait for URL to change',
-              async () => {
-                expect(await browser.getCurrentUrl()).to.contain('/tutorial_directory/sampleData');
-              },
-              { initialDelay: 200, retryCount: 5, retryDelay: 500 }
-            );
-          });
-        });
-
-        describe('Elasticsearch endpoint and API Keys', function () {
-          it('renders endpoint field and copy button', async () => {
-            await testSubjects.existOrFail('endpointValueField');
-            await testSubjects.existOrFail('copyEndpointButton');
-            const endpointValue = await testSubjects.getVisibleText('endpointValueField');
-            expect(endpointValue).to.contain('https://');
-            await testSubjects.existOrFail('apiKeyFormNoUserPrivileges');
-          });
-        });
-
-        describe('View connection details', function () {
-          it('renders the view connection details button', async () => {
-            await testSubjects.existOrFail('viewConnectionDetailsLink');
-          });
-          it('opens the connection flyout when the button is clicked', async () => {
-            await testSubjects.click('viewConnectionDetailsLink');
-            await testSubjects.existOrFail('connectionDetailsModalTitle');
-          });
-        });
-
-        describe('Connect to your application', function () {
-          it('renders the JavaScript code example when selected in Language Selector', async () => {
-            await pageObjects.searchGettingStarted.selectCodingLanguage('javascript');
-            await pageObjects.searchGettingStarted.expectCodeSampleContainsValue(
-              'import { Client } from'
-            );
-          });
-        });
-
-        describe('Footer content', function () {
-          it('renders Python Notebooks callout and navigates correctly', async () => {
-            const href = await testSubjects.getAttribute('gettingStartedOpenNotebooks-btn', 'href');
-            expect(href).to.contain('search-labs/tutorials/examples');
-          });
+        it('Should display not found error page', async () => {
+          const bodyText = await pageObjects.common.getBodyText();
+          expect(bodyText).to.contain('No application was found at this URL');
         });
       });
     });
@@ -108,6 +48,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       describe('Getting Started page interactions', function () {
         beforeEach(async () => {
           await pageObjects.common.navigateToApp('searchGettingStarted');
+        });
+
+        it('load search getting started', async () => {
+          await pageObjects.searchGettingStarted.expectSearchGettingStartedIsLoaded();
+        });
+
+        it('should have embedded dev console', async () => {
+          await testHasEmbeddedConsole(pageObjects);
         });
 
         describe('Add data button', function () {
