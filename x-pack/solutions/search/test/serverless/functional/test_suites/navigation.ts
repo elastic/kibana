@@ -28,7 +28,6 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await esArchiver.load(archiveEmptyIndex);
       await svlCommonPage.loginWithRole('admin');
       await svlSearchNavigation.navigateToElasticsearchHome();
-      // await svlSearchNavigation.navigateToGettingStartedPage();
     });
     after(async () => {
       await esArchiver.unload(archiveEmptyIndex);

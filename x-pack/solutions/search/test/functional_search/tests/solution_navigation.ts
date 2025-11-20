@@ -55,8 +55,6 @@ export default function searchSolutionNavigation({
         deepLinkId: 'searchGettingStarted',
       });
 
-      // nav-item-deepLinkId-searchGettingStarted
-
       const sideNavTestCases: Array<{
         link: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string };
         breadcrumbs: string[];
