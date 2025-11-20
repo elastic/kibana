@@ -33,10 +33,9 @@ export const lensLayerTypeTabDisplayNames = {
 // Utility function to get the tab display name for a layer type
 export function getLensLayerTypeTabDisplayName(layerType?: LensLayerType, count?: number): string {
   if (!layerType) {
-    const baseLabel = i18n.translate('xpack.lens.layerTypes.tabDisplayName.layer', {
-      defaultMessage: 'Layer',
-    });
-    return count ? `${baseLabel} ${count}` : baseLabel;
+    return count
+      ? `${lensLayerTypeTabDisplayNames.unknown} ${count}`
+      : lensLayerTypeTabDisplayNames.unknown;
   }
 
   const baseLabel = lensLayerTypeTabDisplayNames[layerType] || layerType;
