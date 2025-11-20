@@ -31,4 +31,4 @@ export function createAgentBuilderApiClient(supertest: SupertestWithRoleScopeTyp
   };
 }
 
-export type ObservabilityAgentBuilderApiClient = ReturnType<typeof createAgentBuilderApiClient>;
+export type AgentBuilderApiClient = ReturnType<typeof createAgentBuilderApiClient>;
