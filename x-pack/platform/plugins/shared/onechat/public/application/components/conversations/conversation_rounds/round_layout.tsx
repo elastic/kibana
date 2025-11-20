@@ -78,6 +78,3 @@ export const RoundLayout: React.FC<RoundLayoutProps> = ({
     </EuiFlexGroup>
   );
 };
-
-// <EuiFlexItem grow={false}>{outputIcon}</EuiFlexItem>
-// outputIcon={<RoundIcon isLoading={isLoading} isError={isError} />}
