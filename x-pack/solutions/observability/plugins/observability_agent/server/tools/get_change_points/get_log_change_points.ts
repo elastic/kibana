@@ -9,7 +9,7 @@ import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/li
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { ChangePointType } from '@kbn/es-types/src';
-import { omit, orderBy } from 'lodash';
+import { orderBy } from 'lodash';
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
@@ -224,30 +224,13 @@ export function createObservabilityGetLogChangePointsTool({
           (item) => ('p_value' in item.changes ? item.changes.p_value : Number.POSITIVE_INFINITY),
         ]).slice(0, 25);
 
-        const allLogChangePointsWithoutTimeseries = allLogChangePoints
-          .flat()
-          .map((logChangePoint) => {
-            return omit(logChangePoint, 'over_time');
-          });
-
         return {
           results: [
             {
               type: ToolResultType.other,
-              data: {
-                content: {
-                  description: `For each item, the user can see the type of change (dip or spike), the impact, the timestamp, the trend, and the label.
-                  Do not regurgitate these results back to the user.
-                  Instead, focus on the interesting changes, mention possible correlations or root causes, and suggest next steps to the user.
-                  "indeterminate" means that the system could not detect any changes.`,
-                  changes: {
-                    logs: allLogChangePointsWithoutTimeseries,
-                  },
-                },
                 data: {
                   changePoints: {
                     logs: allLogChangePoints,
-                  },
                 },
               },
             },

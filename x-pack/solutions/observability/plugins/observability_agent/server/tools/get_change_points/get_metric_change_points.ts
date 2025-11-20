@@ -8,7 +8,7 @@ import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/li
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
 import type { AggregateOf, AggregateOfMap, ChangePointType } from '@kbn/es-types/src/search';
-import { omit, orderBy } from 'lodash';
+import { orderBy } from 'lodash';
 import { z } from '@kbn/zod';
 import { ToolType } from '@kbn/onechat-common';
 import { ToolResultType } from '@kbn/onechat-common/tools/tool_result';
@@ -240,8 +240,6 @@ const getMetricChangePointsSchema = z.object({
           .optional(),
       })
     )
-    .optional()
-    .default([{ name: 'CPU Usage', index: 'metrics-*' }])
     .describe(
       'Analyze changes in metrics. DO NOT UNDER ANY CIRCUMSTANCES use date or metric fields for groupBy. Leave empty unless needed.'
     ),
@@ -290,30 +288,13 @@ export function createObservabilityGetMetricChangePointsTool({
           (item) => ('p_value' in item.changes ? item.changes.p_value : Number.POSITIVE_INFINITY),
         ]).slice(0, 25);
 
-        const allMetricChangePointsWithoutTimeseries = allMetricChangePoints
-          .flat()
-          .map((metricChangePoint) => {
-            return omit(metricChangePoint, 'over_time');
-          });
-
         return {
           results: [
             {
               type: ToolResultType.other,
               data: {
-                content: {
-                  description: `For each item, the user can see the type of change, the impact, the timestamp, the trend, and the label.
-                  Do not regurgitate these results back to the user.
-                  Instead, focus on the interesting changes, mention possible correlations or root causes, and suggest next steps to the user.
-                  "indeterminate" means that the system could not detect any changes.`,
-                  changes: {
-                    metrics: allMetricChangePointsWithoutTimeseries,
-                  },
-                },
-                data: {
-                  changes: {
-                    metrics: allMetricChangePoints,
-                  },
+                changes: {
+                  metrics: allMetricChangePoints,
                 },
               },
             },
