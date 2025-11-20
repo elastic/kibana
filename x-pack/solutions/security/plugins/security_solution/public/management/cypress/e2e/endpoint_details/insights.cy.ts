@@ -119,7 +119,6 @@ describe(
         selectConnector(connectorId);
         chooseConnectorButtonExistsWithLabel(connectorName);
         stubDefendInsightsApiResponse({ status: 'failed', failureReason }, { times: 1 });
-        interceptGetDefendInsightsApiCall();
 
         clickScanButton();
 
