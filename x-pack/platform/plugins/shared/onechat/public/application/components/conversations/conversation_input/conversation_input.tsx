@@ -32,19 +32,23 @@ const InputContainer: React.FC<PropsWithChildren<{ isDisabled: boolean }>> = ({
   isDisabled,
 }) => {
   const { euiTheme } = useEuiTheme();
-
   const inputContainerStyles = css`
     width: 100%;
     min-height: ${MIN_HEIGHT}px;
     padding: ${euiTheme.size.base};
+    transition: box-shadow 250ms, border-color 250ms;
+
     ${useEuiShadow('s')}
     border: ${euiTheme.border.thin};
     border-color: ${euiTheme.colors.borderBaseSubdued};
     border-radius: 6px;
     flex-grow: 0;
     &:focus-within {
-      border-color: ${euiTheme.colors.primary};
       ${useEuiShadow('xl')}
+      border-color: ${euiTheme.colors.primary};
+      :hover {
+        ${useEuiShadowHover('xl')}
+      }
     }
     &:hover {
       ${useEuiShadowHover('s')}
