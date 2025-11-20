@@ -158,9 +158,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await lens.createLayer('annotations', ANNOTATION_GROUP_TITLE);
 
-        await retry.try(async () => {
-          expect(await lens.getLayerCount()).to.be(2);
-        });
+        await lens.assertLayerCount(2);
 
         await lens.save(SECOND_VIS_TITLE);
       });
@@ -174,9 +172,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           navigateToVisualize: false,
         });
 
-        await retry.try(async () => {
-          expect(await lens.getLayerCount()).to.be(1);
-        });
+        await lens.assertLayerCount(1);
       });
 
       // TODO check various saving configurations (linked layer, clean by-ref, revert)

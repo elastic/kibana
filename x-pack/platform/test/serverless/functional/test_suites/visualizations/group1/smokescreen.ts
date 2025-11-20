@@ -141,7 +141,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'bytes',
       });
 
-      expect(await PageObjects.lens.getLayerCount()).to.eql(2);
+      await PageObjects.lens.assertLayerCount(2);
       await PageObjects.lens.removeLayer();
       await PageObjects.lens.removeLayer();
       await PageObjects.lens.ensureLayerTabIsActive();
@@ -320,7 +320,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.save('twolayerchart');
       await testSubjects.click('lnsSuggestion-treemap > lnsSuggestion');
 
-      expect(await PageObjects.lens.getLayerCount()).to.eql(1);
+      await PageObjects.lens.assertLayerCount(1);
       expect(await PageObjects.lens.getDimensionTriggerText('lnsPie_groupByDimensionPanel')).to.eql(
         'Top 5 values of geo.dest'
       );

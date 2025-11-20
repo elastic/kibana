@@ -1098,13 +1098,6 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     /**
-     * Returns the number of layers visible in the chart configuration
-     */
-    async getLayerCount() {
-      return (await find.allByCssSelector(`[data-test-subj^="lns-layerPanel-"]`)).length;
-    },
-
-    /**
      * Returns the layer vis type from chart switch label
      */
     async getLayerType(index = 0) {
@@ -1122,7 +1115,8 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       seriesType = 'bar'
     ) {
       await testSubjects.click('lnsLayerAddButton');
-      const layerCount = await this.getLayerCount();
+      const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
+      const layerCount = tabs.length;
 
       await retry.waitFor('check for layer type support', async () => {
         const fasterChecks = await Promise.all([
@@ -1703,7 +1697,18 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     },
 
     async assertLayerCount(expectedCount: number) {
+      // Inside the tab content there should be one panel
+      const layerPanels = await find.allByCssSelector('[data-test-subj^="lns-layerPanel-"]');
+      expect(layerPanels.length).to.eql(1);
+
       const tabs = await find.allByCssSelector('[data-test-subj^="unifiedTabs_tab_"]');
+
+      // tabs will hidden if there's just one layer
+      if (expectedCount <= 1) {
+        expect(tabs.length).to.eql(0);
+        return;
+      }
+
       expect(tabs.length).to.eql(expectedCount);
     },
 

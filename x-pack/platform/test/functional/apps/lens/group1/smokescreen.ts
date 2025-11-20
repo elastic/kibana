@@ -140,7 +140,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         field: 'machine.ram',
       });
 
-      expect(await lens.getLayerCount()).to.eql(2);
+      await lens.assertLayerCount(2);
       await lens.removeLayer();
       await lens.removeLayer();
       await lens.ensureLayerTabIsActive();
@@ -358,7 +358,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await lens.save('twolayerchart');
       await testSubjects.click('lnsSuggestion-treemap > lnsSuggestion');
 
-      expect(await lens.getLayerCount()).to.eql(1);
+      await lens.assertLayerCount(1);
       expect(await lens.getDimensionTriggerText('lnsPie_groupByDimensionPanel')).to.eql(
         'Top 5 values of geo.dest'
       );

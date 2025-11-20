@@ -96,7 +96,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await panelActions.convertToLensByTitle('Timeseries - Agg with params');
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
-        expect(await lens.getLayerCount()).to.be(1);
+        await lens.assertLayerCount(1);
 
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(dimensions).to.have.length(2);
@@ -123,7 +123,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await panelActions.convertToLensByTitle('Timeseries - Parent pipeline agg');
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
-        expect(await lens.getLayerCount()).to.be(1);
+        await lens.assertLayerCount(1);
 
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(dimensions).to.have.length(3);
@@ -137,7 +137,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await panelActions.convertToLensByTitle('Timeseries - Sibling pipeline agg');
       await lens.waitForVisualization('xyVisChart');
       await retry.try(async () => {
-        expect(await lens.getLayerCount()).to.be(1);
+        await lens.assertLayerCount(1);
 
         const dimensions = await testSubjects.findAll('lns-dimensionTrigger');
         expect(dimensions).to.have.length(3);
