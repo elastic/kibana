@@ -1,9 +1,7 @@
 {
-  "extends": "../../../../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "include": [
     "**/*",
-    "../cypress.config.ts",
-    "../cypress.config.space_awareness.ts",
     "../../../../../../typings/**/*"
   ],
   "exclude": [
@@ -22,15 +20,9 @@
     "@kbn/test",
     "@kbn/axe-config",
     "@kbn/cypress-config",
-    // cypress projects that are nested inside of other ts project use code
-    // from the parent ts project in ways that can't be automatically deteceted
-    // at this time so we have to force the inclusion of this reference
-    {
-      "path": "../tsconfig.json",
-      "force": true
-    },
     "@kbn/rison",
     "@kbn/actions-plugin",
     "@kbn/core-chrome-layout-constants",
+    "@kbn/fleet-plugin",
   ]
 }

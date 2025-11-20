@@ -9,10 +9,10 @@
 
 import type { z } from '@kbn/zod';
 import { ZodError } from '@kbn/zod';
-import { isDynamicValue } from './get_node_value';
 import { parseYamlToJSONWithoutValidation } from './parse_workflow_yaml_to_json_without_validation';
 import { getYamlDocumentErrors } from './validate_yaml_document';
 import { InvalidYamlSchemaError, InvalidYamlSyntaxError } from '../errors';
+import { isDynamicValue, isVariableValue } from '../regex';
 import { formatZodError } from '../zod/format_zod_error';
 
 export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
@@ -35,7 +35,7 @@ export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
   }
   const result = schema.safeParse(parseResult.json);
   if (!result.success) {
-    // Filter out validation errors for dynamic values (${{ }})
+    // Filter out validation errors for dynamic values (${{ }}) and variable values ({{ }})
     const filteredIssues = result.error.issues.filter((issue) => {
       if (!issue.path || issue.path.length === 0) {
         return true;
@@ -50,8 +50,10 @@ export function parseWorkflowYamlToJSON<T extends z.ZodSchema>(
         value = (value as Record<string, unknown>)[segment as string];
       }
 
-      // Suppress error if value is a dynamic template
-      return !isDynamicValue(value);
+      const shouldSuppressError = isDynamicValue(value) || isVariableValue(value);
+
+      // Suppress error if value is a dynamic template or variable value
+      return !shouldSuppressError;
     });
 
     if (filteredIssues.length === 0) {

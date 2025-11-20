@@ -3962,13 +3962,13 @@
               },
               ", id: string) => Promise<Readonly<{} & { meta: Readonly<{ aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; } & { outcome: \"exactMatch\" | \"aliasMatch\" | \"conflict\"; }>; item: Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
               {
-                "pluginId": "@kbn/es-query",
+                "pluginId": "@kbn/es-query-constants",
                 "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
+                "docId": "kibKbnEsQueryConstantsPluginApi",
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               },
-              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -5001,13 +5001,13 @@
               },
               ", data: Readonly<{ description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
               {
-                "pluginId": "@kbn/es-query",
+                "pluginId": "@kbn/es-query-constants",
                 "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
+                "docId": "kibKbnEsQueryConstantsPluginApi",
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               },
-              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -5963,13 +5963,13 @@
               },
               ".EMS_XYZ; urlTemplate: string; }>; }> | Readonly<{} & {}>)[] | undefined; adHocDataViews?: Readonly<{ name?: string | undefined; allowHidden?: boolean | undefined; timeFieldName?: string | undefined; } & { id: string; title: string; }>[] | undefined; timeFilters?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; zoom?: number | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; } & { title: string; }>, options: Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}> | undefined) => Promise<Readonly<{} & { item: Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
               {
-                "pluginId": "@kbn/es-query",
+                "pluginId": "@kbn/es-query-constants",
                 "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
+                "docId": "kibKbnEsQueryConstantsPluginApi",
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               },
-              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -6960,13 +6960,13 @@
                 "signature": [
                   "Readonly<{ description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
                   {
-                    "pluginId": "@kbn/es-query",
+                    "pluginId": "@kbn/es-query-constants",
                     "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
+                    "docId": "kibKbnEsQueryConstantsPluginApi",
                     "section": "def-common.FilterStateStore",
                     "text": "FilterStateStore"
                   },
-                  "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+                  "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -7963,13 +7963,13 @@
               },
               ", id: string, data: Readonly<{ description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
               {
-                "pluginId": "@kbn/es-query",
+                "pluginId": "@kbn/es-query-constants",
                 "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
+                "docId": "kibKbnEsQueryConstantsPluginApi",
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               },
-              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -8925,13 +8925,13 @@
               },
               ".EMS_XYZ; urlTemplate: string; }>; }> | Readonly<{} & {}>)[] | undefined; adHocDataViews?: Readonly<{ name?: string | undefined; allowHidden?: boolean | undefined; timeFieldName?: string | undefined; } & { id: string; title: string; }>[] | undefined; timeFilters?: Readonly<{ mode?: \"absolute\" | \"relative\" | undefined; } & { from: string; to: string; }> | undefined; zoom?: number | undefined; isLayerTOCOpen?: boolean | undefined; openTOCDetails?: string[] | undefined; } & { title: string; }>, options: Readonly<{ references?: Readonly<{} & { id: string; type: string; name: string; }>[] | undefined; } & {}> | undefined) => Promise<Readonly<{} & { item: Readonly<{ error?: Readonly<{} & { error: string; message: string; metadata: Readonly<{} & {}>; statusCode: number; }> | undefined; version?: string | undefined; namespaces?: string[] | undefined; createdBy?: string | undefined; updatedBy?: string | undefined; createdAt?: string | undefined; updatedAt?: string | undefined; managed?: boolean | undefined; originId?: string | undefined; } & { id: string; type: string; attributes: Readonly<{ description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
               {
-                "pluginId": "@kbn/es-query",
+                "pluginId": "@kbn/es-query-constants",
                 "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
+                "docId": "kibKbnEsQueryConstantsPluginApi",
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               },
-              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -9937,13 +9937,13 @@
                 "signature": [
                   "Readonly<{ description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
                   {
-                    "pluginId": "@kbn/es-query",
+                    "pluginId": "@kbn/es-query-constants",
                     "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
+                    "docId": "kibKbnEsQueryConstantsPluginApi",
                     "section": "def-common.FilterStateStore",
                     "text": "FilterStateStore"
                   },
-                  "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+                  "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -11049,13 +11049,13 @@
               },
               "<Readonly<{ description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
               {
-                "pluginId": "@kbn/es-query",
+                "pluginId": "@kbn/es-query-constants",
                 "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
+                "docId": "kibKbnEsQueryConstantsPluginApi",
                 "section": "def-common.FilterStateStore",
                 "text": "FilterStateStore"
               },
-              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+              "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
               {
                 "pluginId": "maps",
                 "scope": "common",
@@ -12133,13 +12133,13 @@
                   },
                   "<Readonly<{ description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
                   {
-                    "pluginId": "@kbn/es-query",
+                    "pluginId": "@kbn/es-query-constants",
                     "scope": "common",
-                    "docId": "kibKbnEsQueryPluginApi",
+                    "docId": "kibKbnEsQueryConstantsPluginApi",
                     "section": "def-common.FilterStateStore",
                     "text": "FilterStateStore"
                   },
-                  "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+                  "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
                   {
                     "pluginId": "maps",
                     "scope": "common",
@@ -15145,13 +15145,13 @@
         "signature": [
           "{ readonly description?: string | undefined; readonly refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; readonly query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; readonly filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
-            "pluginId": "@kbn/es-query",
+            "pluginId": "@kbn/es-query-constants",
             "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; readonly center?: Readonly<{} & { lat: number; lon: number; }> | undefined; readonly settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; readonly center?: Readonly<{} & { lat: number; lon: number; }> | undefined; readonly settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
           {
             "pluginId": "maps",
             "scope": "common",
@@ -19583,13 +19583,13 @@
           },
           " | undefined; fixedLocation?: Readonly<{} & { lat: number; lon: number; zoom: number; }> | undefined; browserLocation?: Readonly<{} & { zoom: number; }> | undefined; keydownScrollZoom?: boolean | undefined; projection?: \"globeInterpolate\" | \"mercator\" | undefined; showScaleControl?: boolean | undefined; showSpatialFilters?: boolean | undefined; showTimesliderToggleButton?: boolean | undefined; spatialFiltersAlpa?: number | undefined; spatialFiltersFillColor?: string | undefined; spatialFiltersLineColor?: string | undefined; } & {}>>> | undefined; hiddenLayers?: string[] | undefined; filterByMapExtent?: boolean | undefined; isMovementSynchronized?: boolean | undefined; } & { attributes: Readonly<{ description?: string | undefined; refreshInterval?: Readonly<{} & { value: number; pause: boolean; }> | undefined; query?: Readonly<{} & { query: string | Record<string, any>; language: string; }> | undefined; filters?: Readonly<{ query?: Record<string, any> | undefined; $state?: Readonly<{} & { store: ",
           {
-            "pluginId": "@kbn/es-query",
+            "pluginId": "@kbn/es-query-constants",
             "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
+            "docId": "kibKbnEsQueryConstantsPluginApi",
             "section": "def-common.FilterStateStore",
             "text": "FilterStateStore"
           },
-          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
+          "; }> | undefined; } & { meta: Readonly<{ params?: any; key?: string | undefined; value?: string | undefined; type?: string | undefined; alias?: string | null | undefined; index?: string | undefined; disabled?: boolean | undefined; field?: string | undefined; group?: string | undefined; negate?: boolean | undefined; controlledBy?: string | undefined; relation?: string | undefined; isMultiIndex?: boolean | undefined; } & {}>; }>[] | undefined; center?: Readonly<{} & { lat: number; lon: number; }> | undefined; settings?: Readonly<{ backgroundColor?: string | undefined; minZoom?: number | undefined; maxZoom?: number | undefined; autoFitToDataBounds?: boolean | undefined; customIcons?: Readonly<{} & { label: string; svg: string; radius: number; symbolId: string; cutoff: number; }>[] | undefined; disableInteractive?: boolean | undefined; disableTooltipControl?: boolean | undefined; hideToolbarOverlay?: boolean | undefined; hideLayerControl?: boolean | undefined; hideViewControl?: boolean | undefined; initialLocation?: ",
           {
             "pluginId": "maps",
             "scope": "common",

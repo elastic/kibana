@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { eventHasNotes, eventIsPinned, getPinOnClick, getPinTooltip } from './helpers';
+import { eventHasNotes, getPinOnClick, getPinTooltip } from './helpers';
 import { TimelineTypeEnum } from '../../../../../common/api/timeline';
 
 describe('helpers', () => {
@@ -128,22 +128,6 @@ describe('helpers', () => {
           timelineType: TimelineTypeEnum.template,
         })
       ).toEqual('This alert may not be pinned while editing a template timeline');
-    });
-  });
-
-  describe('eventIsPinned', () => {
-    test('returns true when the specified event id is contained in the pinnedEventIds', () => {
-      const eventId = 'race-for-the-prize';
-      const pinnedEventIds = { [eventId]: true, 'waiting-for-superman': true };
-
-      expect(eventIsPinned({ eventId, pinnedEventIds })).toEqual(true);
-    });
-
-    test('returns false when the specified event id is NOT contained in the pinnedEventIds', () => {
-      const eventId = 'safety-pin';
-      const pinnedEventIds = { 'thumb-tack': true };
-
-      expect(eventIsPinned({ eventId, pinnedEventIds })).toEqual(false);
     });
   });
 

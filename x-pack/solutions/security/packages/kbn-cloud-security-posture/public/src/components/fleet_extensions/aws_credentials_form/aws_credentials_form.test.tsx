@@ -409,4 +409,80 @@ describe('AwsCredentialsForm', () => {
       expect(mockUpdatePolicy).not.toHaveBeenCalled();
     });
   });
+
+  describe('supports_cloud_connector cleanup for agent-based deployments', () => {
+    it('should set supports_cloud_connector to false when rendering CloudFormation form', () => {
+      const mockUpdatePolicyFn = jest.fn();
+      const mockPolicyWithSupport = {
+        ...getMockPolicyAWS(),
+        supports_cloud_connector: true, // Start with true (shouldn't be)
+        cloud_connector_id: 'some-connector',
+      };
+
+      renderWithProviders({
+        ...defaultProps,
+        newPolicy: mockPolicyWithSupport,
+        updatePolicy: mockUpdatePolicyFn,
+      });
+
+      expect(mockUpdatePolicyFn).toHaveBeenCalledWith({
+        updatedPolicy: expect.objectContaining({
+          supports_cloud_connector: false,
+          cloud_connector_id: undefined,
+        }),
+      });
+    });
+
+    it('should set supports_cloud_connector to false when rendering Manual setup form', () => {
+      const mockUpdatePolicyFn = jest.fn();
+      const mockManualPolicy = {
+        ...getMockPolicyAWS(),
+        supports_cloud_connector: true,
+        cloud_connector_id: 'some-connector',
+        inputs: [
+          {
+            ...getMockPolicyAWS().inputs[0],
+            streams: [
+              {
+                ...getMockPolicyAWS().inputs[0].streams[0],
+                vars: {
+                  ...getMockPolicyAWS().inputs[0].streams[0].vars,
+                  'aws.credentials.type': { value: 'assume_role', type: 'text' },
+                },
+              },
+            ],
+          },
+        ],
+      };
+
+      renderWithProviders({
+        ...defaultProps,
+        newPolicy: mockManualPolicy,
+        updatePolicy: mockUpdatePolicyFn,
+      });
+
+      expect(mockUpdatePolicyFn).toHaveBeenCalledWith({
+        updatedPolicy: expect.objectContaining({
+          supports_cloud_connector: false,
+          cloud_connector_id: undefined,
+        }),
+      });
+    });
+
+    it('should not call updatePolicy when supports_cloud_connector is already false', () => {
+      const mockUpdatePolicyFn = jest.fn();
+      const mockPolicyWithoutSupport = {
+        ...getMockPolicyAWS(),
+        supports_cloud_connector: false, // Already correct
+      };
+
+      renderWithProviders({
+        ...defaultProps,
+        newPolicy: mockPolicyWithoutSupport,
+        updatePolicy: mockUpdatePolicyFn,
+      });
+
+      expect(mockUpdatePolicyFn).not.toHaveBeenCalled();
+    });
+  });
 });

@@ -15,11 +15,11 @@ import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import type { DynamicGroupingProps } from '@kbn/grouping/src';
 import { parseGroupingQuery } from '@kbn/grouping/src';
 import type { TableIdLiteral } from '@kbn/securitysolution-data-table';
+import { PageScope } from '../../../data_view_manager/constants';
 import { useDataView } from '../../../data_view_manager/hooks/use_data_view';
 import type { GroupTakeActionItems } from './types';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type { RunTimeMappings } from '../../../sourcerer/store/model';
-import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { combineQueries } from '../../../common/lib/kuery';
 import type { AlertsGroupingAggregation } from './grouping_settings/types';
 import { InspectButton } from '../../../common/components/inspect';
@@ -71,6 +71,18 @@ interface OwnProps {
   signalIndexName: string | undefined;
   tableId: TableIdLiteral;
   to: string;
+
+  /**
+   * If you're not using this property, multi-value fields will be transformed into a string
+   * and grouped by that value. For instance, if an object has a property
+   * called "mac" with value ['mac1', 'mac2'], the query will stringify that value
+   * to "mac1, mac2" and then group by it.
+   *
+   * Using this property will create a bucket for each value of the multi-value fields in question.
+   * Following the example above, a field with the ['mac1', 'mac2'] value will be grouped
+   * in 2 groups: one for mac1 and a second formac2.
+   */
+  multiValueFieldsToFlatten?: string[];
 }
 
 export type AlertsTableComponentProps = OwnProps;
@@ -97,17 +109,18 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
   signalIndexName,
   tableId,
   to,
+  multiValueFieldsToFlatten,
 }) => {
   const {
     services: { uiSettings },
   } = useKibana();
   const { browserFields: oldBrowserFields, sourcererDataView: oldSourcererDataView } =
-    useSourcererDataView(SourcererScopeName.detections);
+    useSourcererDataView(PageScope.alerts);
 
   const newDataViewPickerEnabled = useIsExperimentalFeatureEnabled('newDataViewPickerEnabled');
 
-  const { dataView: experimentalDataView } = useDataView(SourcererScopeName.detections);
-  const experimentalBrowserFields = useBrowserFields(SourcererScopeName.detections);
+  const { dataView: experimentalDataView } = useDataView(PageScope.alerts);
+  const experimentalBrowserFields = useBrowserFields(PageScope.alerts);
 
   const sourcererDataView = oldSourcererDataView;
   const browserFields = newDataViewPickerEnabled ? experimentalBrowserFields : oldBrowserFields;
@@ -176,6 +189,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
       to,
       pageSize,
       pageIndex,
+      multiValueFieldsToFlatten,
     });
   }, [
     additionalFilters,
@@ -187,6 +201,7 @@ export const GroupedSubLevelComponent: React.FC<AlertsTableComponentProps> = ({
     selectedGroup,
     to,
     uniqueValue,
+    multiValueFieldsToFlatten,
   ]);
 
   const emptyGlobalQuery = useMemo(() => getGlobalQuery([]), [getGlobalQuery]);

@@ -2767,6 +2767,118 @@ const topDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'date',
+          optional: true,
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'double',
+          optional: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'integer',
+          optional: true,
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'long',
+          optional: true,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'double',
           optional: false,
         },
@@ -2806,6 +2918,118 @@ const topDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'date',
+          optional: true,
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'double',
+          optional: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'integer',
+          optional: true,
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'long',
+          optional: true,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'integer',
           optional: false,
         },
@@ -2840,6 +3064,118 @@ const topDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'date',
+          optional: true,
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'double',
+          optional: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'integer',
+          optional: true,
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'long',
+          optional: true,
+        },
+      ],
+      returnType: 'long',
     },
     {
       params: [
@@ -2954,6 +3290,118 @@ const topDefinition: FunctionDefinition = {
           optional: true,
           constantOnly: true,
           suggestedValues: ['asc', 'desc'],
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'date',
+          optional: true,
+        },
+      ],
+      returnType: 'date',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'double',
+          optional: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'integer',
+          optional: true,
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'limit',
+          type: 'integer',
+          optional: false,
+          constantOnly: true,
+        },
+        {
+          name: 'order',
+          type: 'keyword',
+          optional: true,
+          constantOnly: true,
+          suggestedValues: ['asc', 'desc'],
+        },
+        {
+          name: 'outputField',
+          type: 'long',
+          optional: true,
         },
       ],
       returnType: 'long',

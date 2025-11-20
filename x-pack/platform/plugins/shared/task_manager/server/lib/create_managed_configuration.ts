@@ -15,8 +15,7 @@ import { isEsCannotExecuteScriptError } from './identify_es_error';
 import type { TaskManagerConfig } from '../config';
 import { CLAIM_STRATEGY_MGET, DEFAULT_POLL_INTERVAL, MAX_CAPACITY } from '../config';
 import { TaskCost } from '../task';
-import { getMsearchStatusCode } from './msearch_error';
-import { getBulkUpdateStatusCode, isClusterBlockException } from './bulk_update_error';
+import { getBulkUpdateStatusCode, isClusterBlockException, getMsearchStatusCode } from './errors';
 
 const FLUSH_MARKER = Symbol('flush');
 export const ADJUST_THROUGHPUT_INTERVAL = 10 * 1000;

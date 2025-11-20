@@ -13,79 +13,139 @@ import type { RootState } from '../types';
 // Selectors
 
 // Base selectors - these are simple property accessors that don't need memoization
-export const selectDetailState = (state: RootState) => state.detail;
-export const selectDetailComputedState = (state: RootState) => state.detail.computed;
+export const selectDetail = (state: RootState) => state.detail;
+export const selectYamlComputed = (state: RootState) => state.detail.computed;
 
 // Exported memoized selectors for final properties
-export const selectWorkflow = createSelector(selectDetailState, (detail) => detail.workflow);
-export const selectYamlString = createSelector(selectDetailState, (detail) => detail.yamlString);
+export const selectWorkflow = createSelector(selectDetail, (detail) => detail.workflow);
+export const selectYamlString = createSelector(selectDetail, (detail) => detail.yamlString);
 
 export const selectWorkflowId = createSelector(selectWorkflow, (workflow) => workflow?.id);
 export const selectIsEnabled = createSelector(selectWorkflow, (workflow) => !!workflow?.enabled);
 export const selectWorkflowName = createSelector(selectWorkflow, (workflow) => workflow?.name);
 
 export const selectHasChanges = createSelector(
-  selectDetailState,
+  selectDetail,
   (detail) => detail.yamlString !== detail.workflow?.yaml
 );
 
 export const selectYamlDocument = createSelector(
-  selectDetailComputedState,
+  selectYamlComputed,
   (computed) => computed?.yamlDocument
 );
 
 export const selectYamlLineCounter = createSelector(
-  selectDetailComputedState,
+  selectYamlComputed,
   (computed) => computed?.yamlLineCounter
 );
 
-export const selectWorkflowLookup = createSelector(
-  selectDetailComputedState,
-  (computed) => computed?.workflowLookup
-);
-
 export const selectWorkflowGraph = createSelector(
-  selectDetailComputedState,
+  selectYamlComputed,
   (computed) => computed?.workflowGraph
 );
 
 export const selectWorkflowDefinition = createSelector(
-  selectDetailComputedState,
+  selectYamlComputed,
   (computed) => computed?.workflowDefinition
 );
 
 // Only checks if the current workflow yaml can be parses, does check the schema, only the yaml syntax
-export const selectIsYamlSyntaxValid = createSelector(
-  selectDetailComputedState,
-  (computed): boolean => Boolean(computed?.workflowDefinition)
+export const selectIsYamlSyntaxValid = createSelector(selectYamlComputed, (computed): boolean =>
+  Boolean(computed?.workflowDefinition)
 );
 
-export const selectFocusedStepId = createSelector(
-  selectDetailState,
-  (detail) => detail.focusedStepId
-);
+export const selectFocusedStepId = createSelector(selectDetail, (detail) => detail.focusedStepId);
 
 export const selectHighlightedStepId = createSelector(
-  selectDetailState,
+  selectDetail,
   (detail) => detail.highlightedStepId
 );
 
-export const selectStepExecutions = createSelector(
-  selectDetailState,
-  (detail) => detail.stepExecutions
+export const selectIsTestModalOpen = createSelector(
+  selectDetail,
+  (detail) => detail.isTestModalOpen
 );
 
-export const selectFocusedStepInfo = createSelector(
+export const selectConnectors = createSelector(selectDetail, (detail) => detail.connectors);
+export const selectSchema = createSelector(selectDetail, (detail) => detail.schema);
+
+export const selectActiveTab = createSelector(selectDetail, (detail) => detail.activeTab);
+export const selectExecution = createSelector(selectDetail, (detail) => detail.execution);
+export const selectStepExecutions = createSelector(
+  selectExecution,
+  (execution) => execution?.stepExecutions
+);
+
+export const selectIsExecutionsTab = createSelector(
+  selectActiveTab,
+  (activeTab): activeTab is 'executions' => activeTab === 'executions'
+);
+export const selectIsWorkflowTab = createSelector(
+  selectActiveTab,
+  (activeTab): activeTab is 'workflow' => activeTab === 'workflow'
+);
+
+/**
+ * Editor selectors
+ * These selectors are used to get the correct data for the editor based on the active tab (current workflow or previous execution).
+ */
+
+const selectIsEditorExecutionYaml = createSelector(
+  selectIsExecutionsTab,
+  selectExecution,
+  (isExecutionsTab, execution) => Boolean(isExecutionsTab && execution?.yaml)
+);
+
+export const selectEditorYaml = createSelector(
+  selectIsEditorExecutionYaml,
+  selectExecution,
+  selectYamlString,
+  (isExecutionYamlForEditor, execution, yamlString) => {
+    if (isExecutionYamlForEditor) {
+      return execution?.yaml ?? ''; // Will always be defined if isExecutionYaml is true
+    }
+    return yamlString;
+  }
+);
+export const selectEditorComputed = createSelector(
+  selectIsEditorExecutionYaml,
+  selectDetail,
+  (isExecutionYamlForEditor, detailState) => {
+    if (isExecutionYamlForEditor) {
+      return detailState.computedExecution;
+    }
+    return detailState.computed;
+  }
+);
+
+export const selectEditorYamlDocument = createSelector(
+  selectEditorComputed,
+  (computed) => computed?.yamlDocument
+);
+
+export const selectEditorWorkflowLookup = createSelector(
+  selectEditorComputed,
+  (computed) => computed?.workflowLookup
+);
+
+export const selectEditorFocusedStepInfo = createSelector(
   selectFocusedStepId,
-  selectWorkflowLookup,
+  selectEditorWorkflowLookup,
   (focusedStepId, workflowLookup) =>
     focusedStepId && workflowLookup ? workflowLookup.steps[focusedStepId] : undefined
 );
 
-export const selectIsTestModalOpen = createSelector(
-  selectDetailState,
-  (detail) => detail.isTestModalOpen
+export const selectEditorWorkflowGraph = createSelector(
+  selectEditorComputed,
+  (computed) => computed?.workflowGraph
 );
 
-export const selectConnectors = createSelector(selectDetailState, (detail) => detail.connectors);
-export const selectSchema = createSelector(selectDetailState, (detail) => detail.schema);
+export const selectEditorWorkflowDefinition = createSelector(
+  selectEditorComputed,
+  (computed) => computed?.workflowDefinition
+);
+
+export const selectEditorYamlLineCounter = createSelector(
+  selectEditorComputed,
+  (computed) => computed?.yamlLineCounter
+);
