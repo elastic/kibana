@@ -60,7 +60,7 @@ export const RunscriptActionResult = memo<RunscriptActionResultProps>(
                   action.agentType === 'microsoft_defender_endpoint') &&
                 canWriteExecuteOperations
               }
-              data-test-subj={dataTestSubj}
+              data-test-subj={`${dataTestSubj}-download`}
               agentId={agentId}
               textSize={textSize}
               showPasscode={action.agentType === 'sentinel_one'}
@@ -73,8 +73,7 @@ export const RunscriptActionResult = memo<RunscriptActionResultProps>(
             <RunscriptOutput
               action={action}
               agentId={agentId}
-              // outputContent={outputContent}
-              data-test-subj={dataTestSubj}
+              data-test-subj={`${dataTestSubj}-output`}
               textSize={textSize}
             />
           </>

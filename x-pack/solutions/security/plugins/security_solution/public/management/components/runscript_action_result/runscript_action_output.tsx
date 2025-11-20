@@ -117,7 +117,10 @@ export const RunscriptOutput = memo<RunscriptOutputProps>(
     if (!outputContent) {
       return (
         <EuiFlexItem>
-          <RunscriptActionNoOutput textSize={textSize} data-test-subj={dataTestSubj} />
+          <RunscriptActionNoOutput
+            textSize={textSize}
+            data-test-subj={`${dataTestSubj}-no-output`}
+          />
         </EuiFlexItem>
       );
     }
@@ -128,7 +131,7 @@ export const RunscriptOutput = memo<RunscriptOutputProps>(
     if (isFileTooLargeError) {
       return (
         <EuiFlexItem>
-          <EuiText size={textSize} data-test-subj={dataTestSubj}>
+          <EuiText size={textSize} data-test-subj={`${dataTestSubj}-file-too-large`}>
             {i18n.translate(
               'xpack.securitySolution.endpointResponseActions.runScriptAction.outputFileTooLargeMessage',
               {
@@ -150,7 +153,7 @@ export const RunscriptOutput = memo<RunscriptOutputProps>(
           {hasErrorOutput && (
             <RunscriptOutputAccordion
               content={hasErrorOutput ? stderr : undefined}
-              data-test-subj={`${dataTestSubj}-error`}
+              data-test-subj={`${dataTestSubj}-stderr`}
               initialIsOpen
               textSize={textSize}
               type="error"
@@ -161,7 +164,7 @@ export const RunscriptOutput = memo<RunscriptOutputProps>(
               {hasErrorOutput && <EuiSpacer size="m" />}
               <RunscriptOutputAccordion
                 content={hasStdOutput ? stdout : undefined}
-                data-test-subj={`${dataTestSubj}-output`}
+                data-test-subj={`${dataTestSubj}-stdout`}
                 initialIsOpen
                 textSize={textSize}
                 type="output"
