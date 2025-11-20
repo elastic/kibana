@@ -136,7 +136,6 @@ export async function identifySystemFeatures({
               ...args,
               filter: args.filter as Condition,
               type: 'system' as const,
-              evidence: [],
             };
             return feature;
           })
