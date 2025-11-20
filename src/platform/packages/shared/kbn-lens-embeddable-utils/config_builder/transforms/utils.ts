@@ -16,6 +16,7 @@ import type {
   TextBasedLayer,
   TextBasedLayerColumn,
   TextBasedPersistedState,
+  TypedLensSerializedState,
 } from '@kbn/lens-common';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';
@@ -32,6 +33,7 @@ import {
   LENS_IGNORE_GLOBAL_FILTERS_DEFAULT_VALUE,
 } from '../schema/constants';
 import type { LensApiFilterType, UnifiedSearchFilterType } from '../schema/filter';
+import type { DatasetType, DatasetTypeESQL, DatasetTypeNoESQL } from '../schema/dataset';
 
 type DataSourceStateLayer =
   | FormBasedPersistedState['layers'] // metric chart can return 2 layers (one for the metric and one for the trendline)
@@ -70,9 +72,8 @@ function convertToTypedLayerColumns(layer: FormBasedLayer): {
 export const operationFromColumn = (columnId: string, layer: FormBasedLayer) => {
   const typedLayer = convertToTypedLayerColumns(layer);
   const column = typedLayer.columns[columnId];
-  if (!column) {
-    return undefined;
-  }
+  if (!column) return;
+
   // map columns to array of { column, id }
   const columnMap = Object.entries(layer.columns).map(([id, c]) => ({
     column: c as AnyLensStateColumn,
@@ -84,7 +85,7 @@ export const operationFromColumn = (columnId: string, layer: FormBasedLayer) => 
   return getMetricApiColumnFromLensState(column, typedLayer.columns);
 };
 
-function isTextBasedLayer(
+export function isTextBasedLayer(
   layer: LensApiState | FormBasedLayer | TextBasedLayer
 ): layer is TextBasedLayer {
   return 'index' in layer && 'query' in layer;
@@ -147,26 +148,20 @@ export const getAdhocDataviews = (
   return { adHocDataViews, internalReferences };
 };
 
-/**
- * Builds dataset state from the layer configuration
- *
- * @param layer Lens State Layer
- * @returns Lens API Dataset configuration
- */
-export const buildDatasetState = (
-  layer: FormBasedLayer | TextBasedLayer,
+export function buildDatasetStateESQL(layer: TextBasedLayer): DatasetTypeESQL {
+  return {
+    type: 'esql',
+    query: layer.query?.esql ?? '',
+  };
+}
+
+export function buildDatasetStateNoESQL(
+  layer: FormBasedLayer,
+  layerId: string,
   adHocDataViews: Record<string, DataViewSpec>,
   references: SavedObjectReference[],
-  adhocReferences: SavedObjectReference[] = [],
-  layerId: string
-): LensApiState['dataset'] => {
-  if (isTextBasedLayer(layer)) {
-    return {
-      type: 'esql',
-      query: layer.query?.esql ?? '',
-    };
-  }
-
+  adhocReferences: SavedObjectReference[] = []
+): DatasetTypeNoESQL {
   const adhocReference = (adhocReferences ?? []).find(
     (ref) => ref.name === `${LENS_LAYER_SUFFIX}${layerId}`
   );
@@ -190,7 +185,27 @@ export const buildDatasetState = (
     type: 'dataView',
     id: layer.indexPatternId,
   };
-};
+}
+
+/**
+ * Builds dataset state from the layer configuration
+ *
+ * @param layer Lens State Layer
+ * @returns Lens API Dataset configuration
+ */
+export function buildDatasetState(
+  layer: FormBasedLayer | TextBasedLayer,
+  layerId: string,
+  adHocDataViews: Record<string, DataViewSpec>,
+  references: SavedObjectReference[],
+  adhocReferences: SavedObjectReference[] = []
+): DatasetType {
+  if (isTextBasedLayer(layer)) {
+    return buildDatasetStateESQL(layer);
+  }
+
+  return buildDatasetStateNoESQL(layer, layerId, adHocDataViews, references, adhocReferences);
+}
 
 // builds Lens State references from list of dataviews
 export function buildReferences(dataviews: Record<string, string>) {
