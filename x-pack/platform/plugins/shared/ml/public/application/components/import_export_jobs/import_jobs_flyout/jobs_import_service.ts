@@ -58,6 +58,12 @@ export interface SkippedJobs {
   sourceIndicesErrors?: SourceIndexError[];
 }
 
+export interface DatafeedValidationResult {
+  jobId: string;
+  hasWarning: boolean;
+  warningMessage?: string;
+}
+
 function isImportedAdJobs(obj: any): obj is ImportedAdJob[] {
   return Array.isArray(obj) && obj.some((o) => o.job && o.datafeed);
 }
@@ -286,9 +292,7 @@ export class JobImportService {
     };
   }
 
-  public async validateDatafeeds(
-    jobs: ImportedAdJob[]
-  ): Promise<{ jobId: string; hasWarning: boolean; warningMessage?: string }[]> {
+  public async validateDatafeeds(jobs: ImportedAdJob[]): Promise<DatafeedValidationResult[]> {
     const results = await Promise.all(
       jobs.map(async ({ job, datafeed }) => {
         try {

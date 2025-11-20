@@ -10,6 +10,55 @@ import type { MlApi } from '../../../services/ml_api_service';
 import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import type { ImportedAdJob } from './jobs_import_service';
 
+function createIndexNotFoundError(indexName: string) {
+  return new Error(`no such index [${indexName}]`);
+}
+
+function createBaseAdJob(overrides?: {
+  jobId?: string;
+  indices?: string[];
+  detectors?: any[];
+}): ImportedAdJob {
+  const jobId = overrides?.jobId ?? 'test-job-1';
+  return {
+    job: {
+      job_id: jobId,
+      analysis_config: {
+        detectors: overrides?.detectors ?? [],
+      },
+      allow_lazy_open: false,
+      data_description: {
+        time_field: 'timestamp',
+      },
+      model_snapshot_retention_days: 10,
+      results_index_name: 'results-index',
+    },
+    datafeed: {
+      datafeed_id: `datafeed-${jobId}`,
+      job_id: jobId,
+      indices: overrides?.indices ?? ['valid-index'],
+      query: {},
+      delayed_data_check_config: {
+        enabled: true,
+      },
+    },
+  };
+}
+
+function createBaseDfaJob(overrides?: {
+  jobId?: string;
+  sourceIndices?: string[];
+  destIndex?: string;
+}): DataFrameAnalyticsConfig {
+  const jobId = overrides?.jobId ?? 'test-job-1';
+  return {
+    id: jobId,
+    source: { index: overrides?.sourceIndices ?? ['valid-index'] },
+    dest: { index: overrides?.destIndex ?? 'dest-index' },
+    analysis: { outlier_detection: {} },
+  } as DataFrameAnalyticsConfig;
+}
+
 describe('JobImportService', () => {
   let jobImportService: JobImportService;
   let mockEsSearch: jest.MockedFunction<MlApi['esSearch']>;
@@ -26,18 +75,11 @@ describe('JobImportService', () => {
   describe('validateJobs', () => {
     describe('for data-frame-analytics jobs', () => {
       it('should validate jobs with valid source indices', async () => {
-        const jobs: DataFrameAnalyticsConfig[] = [
-          {
-            id: 'test-job-1',
-            source: { index: ['valid-index'] },
-            dest: { index: 'dest-index' },
-            analysis: { outlier_detection: {} },
-          } as DataFrameAnalyticsConfig,
-        ];
+        const jobs: DataFrameAnalyticsConfig[] = [createBaseDfaJob()];
 
         mockEsSearch.mockResolvedValue({
           _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-        } as any);
+        });
 
         const result = await jobImportService.validateJobs(
           jobs,
@@ -57,22 +99,10 @@ describe('JobImportService', () => {
 
       it('should skip jobs with missing source indices', async () => {
         const jobs: DataFrameAnalyticsConfig[] = [
-          {
-            id: 'test-job-1',
-            source: { index: ['missing-index'] },
-            dest: { index: 'dest-index' },
-            analysis: { outlier_detection: {} },
-          } as DataFrameAnalyticsConfig,
+          createBaseDfaJob({ sourceIndices: ['missing-index'] }),
         ];
 
-        const error = new Error('no such index [missing-index]');
-        (error as any).body = {
-          error: {
-            type: 'index_not_found_exception',
-            reason: 'no such index [missing-index]',
-          },
-        };
-        mockEsSearch.mockRejectedValue(error);
+        mockEsSearch.mockRejectedValue(createIndexNotFoundError('missing-index'));
 
         const result = await jobImportService.validateJobs(
           jobs,
@@ -85,24 +115,17 @@ describe('JobImportService', () => {
         expect(result.skippedJobs[0].jobId).toBe('test-job-1');
         expect(result.skippedJobs[0].sourceIndicesErrors).toBeDefined();
         expect(result.skippedJobs[0].sourceIndicesErrors?.[0].index).toBe('missing-index');
-        expect(result.skippedJobs[0].sourceIndicesErrors?.[0].error).toContain(
-          'no such index [missing-index]'
-        );
+        expect(result.skippedJobs[0].sourceIndicesErrors?.[0].error).toContain('no such index');
       });
 
       it('should skip jobs when index pattern matches no indices', async () => {
         const jobs: DataFrameAnalyticsConfig[] = [
-          {
-            id: 'test-job-1',
-            source: { index: ['pattern-*'] },
-            dest: { index: 'dest-index' },
-            analysis: { outlier_detection: {} },
-          } as DataFrameAnalyticsConfig,
+          createBaseDfaJob({ sourceIndices: ['pattern-*'] }),
         ];
 
         mockEsSearch.mockResolvedValue({
           _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
-        } as any);
+        });
 
         const result = await jobImportService.validateJobs(
           jobs,
@@ -121,14 +144,7 @@ describe('JobImportService', () => {
       });
 
       it('should skip jobs with empty source indices array', async () => {
-        const jobs: DataFrameAnalyticsConfig[] = [
-          {
-            id: 'test-job-1',
-            source: { index: [] },
-            dest: { index: 'dest-index' },
-            analysis: { outlier_detection: {} },
-          } as DataFrameAnalyticsConfig,
-        ];
+        const jobs: DataFrameAnalyticsConfig[] = [createBaseDfaJob({ sourceIndices: [] })];
 
         const result = await jobImportService.validateJobs(
           jobs,
@@ -147,28 +163,47 @@ describe('JobImportService', () => {
         expect(mockEsSearch).not.toHaveBeenCalled();
       });
 
-      it('should handle multiple indices with mixed validity', async () => {
+      it('should handle multiple jobs with mixed validity', async () => {
         const jobs: DataFrameAnalyticsConfig[] = [
-          {
-            id: 'test-job-1',
-            source: { index: ['valid-index', 'missing-index'] },
-            dest: { index: 'dest-index' },
-            analysis: { outlier_detection: {} },
-          } as DataFrameAnalyticsConfig,
+          createBaseDfaJob({ jobId: 'test-job-1', destIndex: 'dest-index-1' }),
+          createBaseDfaJob({
+            jobId: 'test-job-2',
+            sourceIndices: ['invalid-index'],
+            destIndex: 'dest-index-2',
+          }),
         ];
 
         mockEsSearch
           .mockResolvedValueOnce({
             _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
-          } as any)
-          .mockRejectedValueOnce({
-            body: {
-              error: {
-                type: 'index_not_found_exception',
-                reason: 'no such index [missing-index]',
-              },
-            },
-          });
+          })
+          .mockRejectedValueOnce(createIndexNotFoundError('invalid-index'));
+
+        const result = await jobImportService.validateJobs(
+          jobs,
+          'data-frame-analytics',
+          mockGetFilters
+        );
+
+        expect(result.jobs).toHaveLength(1);
+        expect(result.jobs[0].jobId).toBe('test-job-1');
+        expect(result.skippedJobs).toHaveLength(1);
+        expect(result.skippedJobs[0].jobId).toBe('test-job-2');
+        expect(result.skippedJobs[0].sourceIndicesErrors).toBeDefined();
+        expect(result.skippedJobs[0].sourceIndicesErrors).toHaveLength(1);
+        expect(result.skippedJobs[0].sourceIndicesErrors?.[0].index).toBe('invalid-index');
+      });
+
+      it('should handle job with multiple indices where some are invalid', async () => {
+        const jobs: DataFrameAnalyticsConfig[] = [
+          createBaseDfaJob({ sourceIndices: ['valid-index', 'missing-index'] }),
+        ];
+
+        mockEsSearch
+          .mockResolvedValueOnce({
+            _shards: { total: 1, successful: 1, skipped: 0, failed: 0 },
+          })
+          .mockRejectedValueOnce(createIndexNotFoundError('missing-index'));
 
         const result = await jobImportService.validateJobs(
           jobs,
@@ -182,25 +217,16 @@ describe('JobImportService', () => {
         expect(result.skippedJobs[0].sourceIndicesErrors?.[0].index).toBe('missing-index');
       });
 
-      it('should skip jobs with both missing filters and invalid indices', async () => {
+      it('should skip jobs with multiple invalid source indices', async () => {
         const jobs: DataFrameAnalyticsConfig[] = [
-          {
-            id: 'test-job-1',
-            source: { index: ['missing-index'] },
-            dest: { index: 'dest-index' },
-            analysis: { outlier_detection: {} },
-          } as DataFrameAnalyticsConfig,
+          createBaseDfaJob({ sourceIndices: ['missing-index-1', 'missing-index-2'] }),
         ];
 
-        mockGetFilters.mockResolvedValue([{ filter_id: 'existing-filter' }]);
-        mockEsSearch.mockRejectedValue({
-          body: {
-            error: {
-              type: 'index_not_found_exception',
-              reason: 'no such index [missing-index]',
-            },
-          },
-        });
+        mockEsSearch
+          .mockRejectedValueOnce(createIndexNotFoundError('missing-index-1'))
+          .mockResolvedValueOnce({
+            _shards: { total: 0, successful: 0, skipped: 0, failed: 0 },
+          });
 
         const result = await jobImportService.validateJobs(
           jobs,
@@ -208,27 +234,40 @@ describe('JobImportService', () => {
           mockGetFilters
         );
 
+        expect(result.jobs).toHaveLength(0);
         expect(result.skippedJobs).toHaveLength(1);
+        expect(result.skippedJobs[0].jobId).toBe('test-job-1');
         expect(result.skippedJobs[0].sourceIndicesErrors).toBeDefined();
+        expect(result.skippedJobs[0].sourceIndicesErrors).toHaveLength(2);
+        expect(result.skippedJobs[0].sourceIndicesErrors?.[0].index).toBe('missing-index-1');
+        expect(result.skippedJobs[0].sourceIndicesErrors?.[0].error).toContain('no such index');
+        expect(result.skippedJobs[0].sourceIndicesErrors?.[1].index).toBe('missing-index-2');
+        expect(result.skippedJobs[0].sourceIndicesErrors?.[1].error).toBe(
+          'Index pattern matches no indices'
+        );
       });
     });
 
     describe('for anomaly-detector jobs', () => {
+      it('should validate AD jobs with valid indices', async () => {
+        const jobs: ImportedAdJob[] = [createBaseAdJob({ jobId: 'ad-job-1' })];
+
+        const result = await jobImportService.validateJobs(
+          jobs,
+          'anomaly-detector',
+          mockGetFilters
+        );
+
+        expect(result.jobs).toHaveLength(1);
+        expect(result.jobs[0].jobId).toBe('ad-job-1');
+        expect(result.skippedJobs).toHaveLength(0);
+        expect(mockEsSearch).not.toHaveBeenCalled();
+      });
+
       it('should not validate source indices for AD jobs', async () => {
         const jobs: ImportedAdJob[] = [
-          {
-            job: {
-              job_id: 'ad-job-1',
-              analysis_config: { detectors: [] },
-            } as any,
-            datafeed: {
-              datafeed_id: 'datafeed-1',
-              job_id: 'ad-job-1',
-              indices: ['some-index'],
-            } as any,
-          },
+          createBaseAdJob({ jobId: 'ad-job-1', indices: ['some-index'] }),
         ];
-
         const result = await jobImportService.validateJobs(
           jobs,
           'anomaly-detector',
@@ -239,22 +278,154 @@ describe('JobImportService', () => {
         expect(result.jobs[0].jobId).toBe('ad-job-1');
         expect(mockEsSearch).not.toHaveBeenCalled();
       });
+
+      it('should skip AD jobs with missing filters', async () => {
+        const jobs: ImportedAdJob[] = [
+          createBaseAdJob({
+            jobId: 'ad-job-1',
+            indices: ['some-index'],
+            detectors: [
+              {
+                function: 'count',
+                custom_rules: [
+                  {
+                    actions: ['skip_result'],
+                    scope: {
+                      field_name: {
+                        filter_id: 'missing-filter-1',
+                        filter_type: 'include',
+                      },
+                    },
+                  },
+                ],
+              },
+            ],
+          }),
+        ];
+
+        mockGetFilters.mockResolvedValue([{ filter_id: 'existing-filter' }]);
+
+        const result = await jobImportService.validateJobs(
+          jobs,
+          'anomaly-detector',
+          mockGetFilters
+        );
+
+        expect(result.jobs).toHaveLength(0);
+        expect(result.skippedJobs).toHaveLength(1);
+        expect(result.skippedJobs[0].jobId).toBe('ad-job-1');
+        expect(result.skippedJobs[0].missingFilters).toBeDefined();
+        expect(result.skippedJobs[0].missingFilters).toEqual(['missing-filter-1']);
+        expect(mockEsSearch).not.toHaveBeenCalled();
+      });
+
+      it('should skip AD jobs with multiple missing filters', async () => {
+        const jobs: ImportedAdJob[] = [
+          createBaseAdJob({
+            jobId: 'ad-job-1',
+            indices: ['some-index'],
+            detectors: [
+              {
+                function: 'count',
+                custom_rules: [
+                  {
+                    actions: ['skip_result'],
+                    scope: {
+                      field_name: {
+                        filter_id: 'missing-filter-1',
+                        filter_type: 'include',
+                      },
+                    },
+                  },
+                ],
+              },
+              {
+                function: 'mean',
+                field_name: 'value',
+                custom_rules: [
+                  {
+                    actions: ['skip_result'],
+                    scope: {
+                      field_name: {
+                        filter_id: 'missing-filter-2',
+                        filter_type: 'exclude',
+                      },
+                    },
+                  },
+                ],
+              },
+              {
+                function: 'mean',
+                field_name: 'value',
+                custom_rules: [
+                  {
+                    actions: ['skip_result'],
+                    scope: {
+                      field_name: {
+                        filter_id: 'existing-filter',
+                        filter_type: 'exclude',
+                      },
+                    },
+                  },
+                ],
+              },
+            ],
+          }),
+        ];
+
+        mockGetFilters.mockResolvedValue([{ filter_id: 'existing-filter' }]);
+
+        const result = await jobImportService.validateJobs(
+          jobs,
+          'anomaly-detector',
+          mockGetFilters
+        );
+
+        expect(result.jobs).toHaveLength(0);
+        expect(result.skippedJobs).toHaveLength(1);
+        expect(result.skippedJobs[0].jobId).toBe('ad-job-1');
+        expect(result.skippedJobs[0].missingFilters).toBeDefined();
+        expect(result.skippedJobs[0].missingFilters).toEqual([
+          'missing-filter-1',
+          'missing-filter-2',
+        ]);
+        expect(mockEsSearch).not.toHaveBeenCalled();
+      });
     });
   });
 
   describe('validateDatafeeds', () => {
-    it('should return no warnings for valid datafeeds', async () => {
+    it('should return warning for job with mixed patterns and named indices that are missing', async () => {
       const jobs: ImportedAdJob[] = [
-        {
-          job: { job_id: 'test-job-1' } as any,
-          datafeed: { datafeed_id: 'datafeed-1' } as any,
-        },
+        createBaseAdJob({
+          indices: ['logs-*', 'missing-index', 'metrics-*'],
+        }),
       ];
+
+      const errorMessage =
+        'datafeed datafeed-1 cannot retrieve data because index missing-index does not exist';
+
+      mockValidateDatafeedPreview.mockResolvedValue({
+        valid: false,
+        documentsFound: false,
+        error: errorMessage,
+      });
+
+      const result = await jobImportService.validateDatafeeds(jobs);
+
+      expect(result).toHaveLength(1);
+      expect(result[0].jobId).toBe('test-job-1');
+      expect(result[0].hasWarning).toBe(true);
+      expect(result[0].warningMessage).toContain(errorMessage);
+    });
+
+    it('should return no warnings for valid datafeeds', async () => {
+      const jobs: ImportedAdJob[] = [createBaseAdJob()];
 
       mockValidateDatafeedPreview.mockResolvedValue({
         valid: true,
         documentsFound: true,
-      } as any);
+      });
 
       const result = await jobImportService.validateDatafeeds(jobs);
 
@@ -265,38 +436,31 @@ describe('JobImportService', () => {
     });
 
     it('should return warning when datafeed preview returns error', async () => {
-      const jobs: ImportedAdJob[] = [
-        {
-          job: { job_id: 'test-job-1' } as any,
-          datafeed: { datafeed_id: 'datafeed-1' } as any,
-        },
-      ];
+      const jobs: ImportedAdJob[] = [createBaseAdJob()];
+
+      const errorMessage = `datafeed ${jobs[0].datafeed.datafeed_id} cannot retrieve data because index ${jobs[0].datafeed.indices[0]} does not exist`;
 
       mockValidateDatafeedPreview.mockResolvedValue({
         valid: false,
-        error: { message: 'Index not found' },
-      } as any);
+        documentsFound: false,
+        error: errorMessage,
+      });
 
       const result = await jobImportService.validateDatafeeds(jobs);
 
       expect(result).toHaveLength(1);
       expect(result[0].jobId).toBe('test-job-1');
       expect(result[0].hasWarning).toBe(true);
-      expect(result[0].warningMessage).toContain('Unable to validate datafeed preview');
+      expect(result[0].warningMessage).toContain(errorMessage);
     });
 
     it('should return warning when datafeed preview is invalid', async () => {
-      const jobs: ImportedAdJob[] = [
-        {
-          job: { job_id: 'test-job-1' } as any,
-          datafeed: { datafeed_id: 'datafeed-1' } as any,
-        },
-      ];
+      const jobs: ImportedAdJob[] = [createBaseAdJob()];
 
       mockValidateDatafeedPreview.mockResolvedValue({
         valid: false,
         documentsFound: true,
-      } as any);
+      });
 
       const result = await jobImportService.validateDatafeeds(jobs);
 
@@ -307,17 +471,12 @@ describe('JobImportService', () => {
     });
 
     it('should return warning when no documents found', async () => {
-      const jobs: ImportedAdJob[] = [
-        {
-          job: { job_id: 'test-job-1' } as any,
-          datafeed: { datafeed_id: 'datafeed-1' } as any,
-        },
-      ];
+      const jobs: ImportedAdJob[] = [createBaseAdJob()];
 
       mockValidateDatafeedPreview.mockResolvedValue({
         valid: true,
         documentsFound: false,
-      } as any);
+      });
 
       const result = await jobImportService.validateDatafeeds(jobs);
 
@@ -328,12 +487,7 @@ describe('JobImportService', () => {
     });
 
     it('should handle validation errors gracefully', async () => {
-      const jobs: ImportedAdJob[] = [
-        {
-          job: { job_id: 'test-job-1' } as any,
-          datafeed: { datafeed_id: 'datafeed-1' } as any,
-        },
-      ];
+      const jobs: ImportedAdJob[] = [createBaseAdJob()];
 
       mockValidateDatafeedPreview.mockRejectedValue(new Error('Network error'));
 
@@ -346,27 +500,48 @@ describe('JobImportService', () => {
       expect(result[0].warningMessage).toContain('Network error');
     });
 
-    it('should validate multiple jobs in parallel', async () => {
+    it('should validate multiple jobs in parallel with mixed results', async () => {
       const jobs: ImportedAdJob[] = [
-        {
-          job: { job_id: 'test-job-1' } as any,
-          datafeed: { datafeed_id: 'datafeed-1' } as any,
-        },
-        {
-          job: { job_id: 'test-job-2' } as any,
-          datafeed: { datafeed_id: 'datafeed-2' } as any,
-        },
+        createBaseAdJob({ jobId: 'test-job-1' }),
+        createBaseAdJob({ jobId: 'test-job-2' }),
+        createBaseAdJob({ jobId: 'test-job-3' }),
       ];
 
-      mockValidateDatafeedPreview.mockResolvedValue({
-        valid: true,
-        documentsFound: true,
-      } as any);
+      mockValidateDatafeedPreview
+        .mockResolvedValueOnce({
+          valid: true,
+          documentsFound: true,
+        })
+        .mockResolvedValueOnce({
+          valid: false,
+          documentsFound: false,
+          error: 'Validation failed',
+        })
+        .mockResolvedValueOnce({
+          valid: true,
+          documentsFound: false,
+        });
 
       const result = await jobImportService.validateDatafeeds(jobs);
 
-      expect(result).toHaveLength(2);
-      expect(mockValidateDatafeedPreview).toHaveBeenCalledTimes(2);
+      expect(result).toHaveLength(3);
+      expect(mockValidateDatafeedPreview).toHaveBeenCalledTimes(3);
+
+      // First job: valid, no warnings
+      expect(result[0].jobId).toBe('test-job-1');
+      expect(result[0].hasWarning).toBe(false);
+      expect(result[0].warningMessage).toBeUndefined();
+
+      // Second job: validation error
+      expect(result[1].jobId).toBe('test-job-2');
+      expect(result[1].hasWarning).toBe(true);
+      expect(result[1].warningMessage).toContain('Unable to validate datafeed preview');
+      expect(result[1].warningMessage).toContain('Validation failed');
+
+      // Third job: no documents found
+      expect(result[2].jobId).toBe('test-job-3');
+      expect(result[2].hasWarning).toBe(true);
+      expect(result[2].warningMessage).toContain('Datafeed preview returned no data');
     });
   });
 });
