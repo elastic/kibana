@@ -600,6 +600,46 @@ The workflows management UI is available at `/app/workflows` when the feature fl
 - `/app/workflows/{id}/executions` - View workflow execution history
 - `/app/workflows/executions/{executionId}` - View execution details
 
+### Pagination
+
+All paginated endpoints follow a consistent pagination strategy:
+
+**Request Parameters:**
+- `page` (number, default: 1) - Page number (1-indexed)
+- `size` (number, default: 100) - Number of items per page
+
+**Response Structure:**
+```json
+{
+  "results": [...],
+  "page": 1,
+  "size": 100,
+  "total": 100
+}
+```
+
+**Examples:**
+
+Search workflows:
+```bash
+POST /api/workflows/search
+{
+  "page": 1,
+  "size": 100,
+  "query": "sales"
+}
+```
+
+Get workflow executions:
+```bash
+GET /api/workflowExecutions?workflowId=xxx&page=1&size=100
+```
+
+Get execution logs:
+```bash
+GET /api/workflowExecutions/{id}/logs?page=1&size=100
+```
+
 ---
 
 ## Development
