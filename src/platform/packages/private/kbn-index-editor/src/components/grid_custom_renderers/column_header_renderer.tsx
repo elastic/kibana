@@ -21,6 +21,7 @@ export const getColumnHeaderRenderer = (
   columnType: string | undefined,
   columnIndex: number,
   isSavedColumn: boolean,
+  isUnsupportedESQLType: boolean,
   isColumnInEditMode: boolean,
   setEditingColumnIndex: (columnIndex: number | null) => void,
   indexUpdateService: IndexUpdateService,
@@ -35,6 +36,7 @@ export const getColumnHeaderRenderer = (
         isSavedColumn={isSavedColumn}
         initialColumnName={columnName}
         initialColumnType={columnType}
+        isUnsupportedESQLType={isUnsupportedESQLType}
         columnIndex={columnIndex}
         telemetryService={telemetryService}
         originalColumnDisplay={column.display}

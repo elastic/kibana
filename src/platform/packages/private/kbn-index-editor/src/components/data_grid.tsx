@@ -26,6 +26,7 @@ import { difference, intersection, isEqual } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { memoize } from 'lodash';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { RowColumnCreator } from './row_column_creator';
 import { getColumnHeaderRenderer } from './grid_custom_renderers/column_header_renderer';
 import { type KibanaContextExtra } from '../types';
@@ -168,12 +169,14 @@ const DataGrid: React.FC<ESQLDataGridProps> = (props) => {
         const isSavedColumn = !!props.dataView.fields.getByName(columnName);
         const editMode = editingColumnIndex === columnIndex;
         const columnType = columnsMeta[columnName]?.esType;
+        const isUnsupportedESQLType = columnsMeta[columnName]?.type === KBN_FIELD_TYPES.UNKNOWN;
         acc[columnName] = memoize(
           getColumnHeaderRenderer(
             columnName,
             columnType,
             columnIndex,
             isSavedColumn,
+            isUnsupportedESQLType,
             editMode,
             setEditingColumnIndex,
             indexUpdateService,

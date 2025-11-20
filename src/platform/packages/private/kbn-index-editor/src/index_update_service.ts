@@ -141,6 +141,7 @@ export class IndexUpdateService {
 
   public userCanResetIndex: boolean = false;
   private indexHasNewFields: boolean = false;
+  private esqlUnsupportedFieldTypes: Set<string> = new Set<string>();
 
   /** Indicates the service has been completed */
   private readonly _completed$ = new Subject<{
@@ -440,12 +441,15 @@ export class IndexUpdateService {
         .concat(unsavedFields)
         .filter((field) => field.spec.metadata_field !== true && !field.spec.subType)
         .map((field) => {
+          const type = this.esqlUnsupportedFieldTypes.has(field.type)
+            ? KBN_FIELD_TYPES.UNKNOWN
+            : field.type;
           const datatableColumn: DatatableColumn = {
             name: field.name,
             id: field.name,
             isNull: field.isNull,
             meta: {
-              type: field.type as DatatableColumnType,
+              type: type as DatatableColumnType,
               params: {
                 id: field.name,
               },
@@ -762,6 +766,14 @@ export class IndexUpdateService {
         .subscribe({
           next: (response) => {
             const { documents_found: total, values, columns } = response.rawResponse;
+
+            // Populate unsupported ES|QL field types
+            columns.forEach((col) => {
+              if (col.type === 'unsupported' && col.original_types?.length) {
+                this.esqlUnsupportedFieldTypes.add(col.original_types[0]);
+              }
+            });
+
             const columnNames = columns.map(({ name }) => name);
             const resultRows: DataTableRecord[] = values
               .map((row) => zipObject(columnNames, row))
