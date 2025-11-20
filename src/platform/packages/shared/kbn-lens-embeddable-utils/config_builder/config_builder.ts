@@ -74,9 +74,9 @@ const apiConvertersByChart = {
     fromLensStateToAPI: fromGaugeLensStateToAPI,
   },
   tagcloud: {
-      fromAPItoLensState: fromTagcloudAPItoLensState,
-      fromLensStateToAPI: fromTagcloudLensStateToAPI,
-    },
+    fromAPItoLensState: fromTagcloudAPItoLensState,
+    fromLensStateToAPI: fromTagcloudLensStateToAPI,
+  },
 } as const;
 
 export const isSOChartTYpeSupported = (chartType?: string | null): boolean =>
