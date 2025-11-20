@@ -40280,7 +40280,15 @@
                 "section": "def-common.ESQLControlVariable",
                 "text": "ESQLControlVariable"
               },
-              "[] | undefined; }"
+              "[] | undefined; projectRouting?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              "; }"
             ],
             "path": "src/platform/plugins/shared/data/common/search/expressions/remove_filter.ts",
             "deprecated": false,
@@ -40631,7 +40639,15 @@
                 "section": "def-common.ESQLControlVariable",
                 "text": "ESQLControlVariable"
               },
-              "[] | undefined; }"
+              "[] | undefined; projectRouting?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.ProjectRouting",
+                "text": "ProjectRouting"
+              },
+              "; }"
             ],
             "path": "src/platform/plugins/shared/data/common/search/expressions/select_filter.ts",
             "deprecated": false,

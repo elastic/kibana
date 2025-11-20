@@ -17,10 +17,11 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { useDispatch, useSelector } from 'react-redux';
 import type YAML from 'yaml';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { monaco } from '@kbn/monaco';
+import { monaco, YAML_LANG_ID } from '@kbn/monaco';
 import { isTriggerType } from '@kbn/workflows';
 import type { WorkflowStepExecutionDto } from '@kbn/workflows/types/v1';
 import type { z } from '@kbn/zod';
+import { ActionsMenuButton } from './actions_menu_button';
 import {
   useAlertTriggerDecorations,
   useConnectorTypeDecorations,
@@ -29,10 +30,9 @@ import {
   useStepDecorationsInExecution,
   useTriggerTypeDecorations,
 } from './decorations';
-import { useCompletionProvider } from './hooks/use_completion_provider';
+import { useWorkflowYamlCompletionProvider } from './hooks/use_workflow_yaml_completion_provider';
 import { StepActions } from './step_actions';
-import { WorkflowYAMLEditorShortcuts } from './workflow_yaml_editor_shortcuts';
-import { WorkflowYAMLValidationErrors } from './workflow_yaml_validation_errors';
+import { WorkflowYamlValidationAccordion } from './workflow_yaml_validation_accordion';
 import { useAvailableConnectors } from '../../../entities/connectors/model/use_available_connectors';
 import { useSaveYaml } from '../../../entities/workflows/model/use_save_yaml';
 import type { StepInfo } from '../../../entities/workflows/store';
@@ -137,7 +137,7 @@ export const WorkflowYAMLEditor = ({
   const { euiTheme } = useEuiTheme();
   const { http, notifications } = useKibana().services;
 
-  const saveYaml = useSaveYaml();
+  const [saveYaml, { isLoading: isSaving }] = useSaveYaml();
   const dispatch = useDispatch();
   const onChange = useCallback(
     (yaml: string) => {
@@ -160,6 +160,10 @@ export const WorkflowYAMLEditor = ({
   const stepExecutions = useSelector(selectStepExecutions);
   const stepExecutionsRef = useRef<WorkflowStepExecutionDto[] | undefined>(stepExecutions);
   stepExecutionsRef.current = stepExecutions;
+
+  // Ref to track saving state for keyboard handlers
+  const isSavingRef = useRef<boolean>(false);
+  isSavingRef.current = isSaving;
 
   // Refs / Disposables for Monaco providers
   const disposablesRef = useRef<monaco.IDisposable[]>([]);
@@ -245,13 +249,26 @@ export const WorkflowYAMLEditor = ({
   // they should not have any dependencies, so they are not affected by the changes in the component
   const keyboardHandlers = useMemo(
     () => ({
-      save: () => saveYaml(),
+      save: () => {
+        if (isSavingRef.current) {
+          return;
+        }
+        saveYaml();
+      },
       run: () => dispatch(setIsTestModalOpen(true)),
-      saveAndRun: () => saveYaml().then(() => dispatch(setIsTestModalOpen(true))),
+      saveAndRun: () => {
+        if (isSavingRef.current) {
+          return;
+        }
+        saveYaml().then(() => dispatch(setIsTestModalOpen(true)));
+      },
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     []
   );
+
+  const completionProvider = useWorkflowYamlCompletionProvider();
+
   const handleEditorDidMount = useCallback(
     (editor: monaco.editor.IStandaloneCodeEditor) => {
       editorRef.current = editor;
@@ -261,6 +278,14 @@ export const WorkflowYAMLEditor = ({
         openActionsPopover,
         ...keyboardHandlers,
       });
+
+      if (completionProvider) {
+        const disposable = monaco.languages.registerCompletionItemProvider(
+          YAML_LANG_ID,
+          completionProvider
+        );
+        disposablesRef.current.push(disposable);
+      }
 
       // Listen to content changes to detect typing
       const model = editor.getModel();
@@ -419,8 +444,6 @@ export const WorkflowYAMLEditor = ({
     [closeActionsPopover]
   );
 
-  const completionProvider = useCompletionProvider();
-
   const options = useMemo(() => {
     return { ...editorOptions, readOnly: isExecutionYaml };
   }, [isExecutionYaml]);
@@ -526,18 +549,20 @@ export const WorkflowYAMLEditor = ({
           onChange={onChange}
           options={options}
           schemas={schemas}
-          suggestionProvider={completionProvider}
           value={workflowYaml}
         />
       </div>
       <div css={styles.validationErrorsContainer}>
-        <WorkflowYAMLValidationErrors
+        <WorkflowYamlValidationAccordion
           isMounted={isEditorMounted}
           isLoading={isLoadingValidation}
           error={errorValidating}
           validationErrors={validationErrors}
           onErrorClick={handleErrorClick}
-          rightSide={<WorkflowYAMLEditorShortcuts onOpenActionsMenu={setActionsPopoverOpen} />}
+          extraAction={
+            // Only show the shortcuts in edit mode
+            !isExecutionYaml ? <ActionsMenuButton onClick={openActionsPopover} /> : null
+          }
         />
       </div>
     </div>

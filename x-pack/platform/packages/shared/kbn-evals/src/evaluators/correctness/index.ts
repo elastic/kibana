@@ -16,6 +16,29 @@ import {
   calculateProceduralFidelityScore,
 } from './scoring';
 import type { CorrectnessAnalysis } from './types';
+import { parseSelectedEvaluators } from '../filter';
+
+const QUALITATIVE_EVALUATOR_NAME = 'Correctness Analysis';
+const FACTUALITY_EVALUATOR_NAME = 'Factuality';
+const RELEVANCE_EVALUATOR_NAME = 'Relevance';
+const SEQUENCE_ACCURACY_EVALUATOR_NAME = 'Sequence Accuracy';
+
+/**
+ * Avoiding cost and lantecy by running qualitative analysis only when either qualitative or one of the quantitative evaluators for correctness are selected,
+ */
+function shouldRunCorrectnessAnalysis() {
+  const evaluatorSelection = parseSelectedEvaluators();
+
+  return (
+    !evaluatorSelection ||
+    [
+      QUALITATIVE_EVALUATOR_NAME,
+      FACTUALITY_EVALUATOR_NAME,
+      RELEVANCE_EVALUATOR_NAME,
+      SEQUENCE_ACCURACY_EVALUATOR_NAME,
+    ].some((evaluator) => evaluatorSelection.includes(evaluator))
+  );
+}
 
 export function createCorrectnessAnalysisEvaluator({
   inferenceClient,
@@ -26,6 +49,10 @@ export function createCorrectnessAnalysisEvaluator({
 }): Evaluator {
   return {
     evaluate: async ({ input, output, expected }) => {
+      if (!shouldRunCorrectnessAnalysis()) {
+        return {};
+      }
+
       async function runCorrectnessAnalysis(): Promise<CorrectnessAnalysis> {
         const userQuery = input.question;
         const messages = (output as any)?.messages ?? [];

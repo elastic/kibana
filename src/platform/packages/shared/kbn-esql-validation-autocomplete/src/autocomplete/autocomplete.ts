@@ -27,12 +27,12 @@ import type {
 } from '@kbn/esql-ast/src/commands_registry/types';
 import { getControlSuggestionIfSupported } from '@kbn/esql-ast/src/definitions/utils';
 import { correctQuerySyntax } from '@kbn/esql-ast/src/definitions/utils/ast';
-import { ESQLVariableType } from '@kbn/esql-types';
+import { ControlTriggerSource, ESQLVariableType } from '@kbn/esql-types';
 import type { LicenseType } from '@kbn/licensing-types';
 import type { ESQLAstAllCommands } from '@kbn/esql-ast/src/types';
 import { getAstContext } from '../shared/context';
 import { isHeaderCommandSuggestion, isSourceCommandSuggestion } from '../shared/helpers';
-import { getSourcesHelper } from '../shared/resources_helpers';
+import { getFromCommandHelper } from '../shared/resources_helpers';
 import type { ESQLCallbacks } from '../shared/types';
 import { getCommandContext } from './get_command_context';
 import { mapRecommendedQueriesFromExtensions } from './utils/recommended_queries_helpers';
@@ -68,7 +68,6 @@ export async function suggest(
 
   const supportsControls = resourceRetriever?.canSuggestVariables?.() ?? false;
   const getVariables = resourceRetriever?.getVariables;
-  const getSources = getSourcesHelper(resourceRetriever);
 
   const activeProduct = resourceRetriever?.getActiveProduct?.();
   const licenseInstance = await resourceRetriever?.getLicense?.();
@@ -116,38 +115,30 @@ export async function suggest(
 
       // Root level empty state: show source commands + recommended queries
       const recommendedQueriesSuggestions: ISuggestionItem[] = [];
-      if (getSources) {
-        let fromCommand = '';
-        const sources = await getSources();
-        const visibleSources = sources.filter((source) => !source.hidden);
-        if (visibleSources.find((source) => source.name.startsWith('logs'))) {
-          fromCommand = 'FROM logs*';
-        } else if (visibleSources.length) {
-          fromCommand = `FROM ${visibleSources[0].name}`;
-        }
+      const fromCommand = await getFromCommandHelper(resourceRetriever);
 
-        const { getColumnsByType: getColumnsByTypeEmptyState } = getColumnsByTypeRetriever(
-          EsqlQuery.fromSrc(fromCommand).ast,
-          innerText,
-          resourceRetriever
-        );
-        const editorExtensions = (await resourceRetriever?.getEditorExtensions?.('from *')) ?? {
-          recommendedQueries: [],
-        };
-        const recommendedQueriesSuggestionsFromExtensions = mapRecommendedQueriesFromExtensions(
-          editorExtensions.recommendedQueries
-        );
+      const { getColumnsByType: getColumnsByTypeEmptyState } = getColumnsByTypeRetriever(
+        EsqlQuery.fromSrc(fromCommand).ast,
+        innerText,
+        resourceRetriever
+      );
+      const editorExtensions = (await resourceRetriever?.getEditorExtensions?.('from *')) ?? {
+        recommendedQueries: [],
+      };
+      const recommendedQueriesSuggestionsFromExtensions = mapRecommendedQueriesFromExtensions(
+        editorExtensions.recommendedQueries
+      );
 
-        const recommendedQueriesSuggestionsFromStaticTemplates =
-          await getRecommendedQueriesSuggestionsFromStaticTemplates(
-            getColumnsByTypeEmptyState,
-            fromCommand
-          );
-        recommendedQueriesSuggestions.push(
-          ...recommendedQueriesSuggestionsFromExtensions,
-          ...recommendedQueriesSuggestionsFromStaticTemplates
+      const recommendedQueriesSuggestionsFromStaticTemplates =
+        await getRecommendedQueriesSuggestionsFromStaticTemplates(
+          getColumnsByTypeEmptyState,
+          fromCommand
         );
-      }
+      recommendedQueriesSuggestions.push(
+        ...recommendedQueriesSuggestionsFromExtensions,
+        ...recommendedQueriesSuggestionsFromStaticTemplates
+      );
+
       const sourceCommandsSuggestions = suggestions.filter(isSourceCommandSuggestion);
       const headerCommandsSuggestions = suggestions.filter(isHeaderCommandSuggestion);
       return [
@@ -169,6 +160,7 @@ export async function suggest(
     controlSuggestions = getControlSuggestionIfSupported(
       Boolean(supportsControls),
       ESQLVariableType.VALUES,
+      ControlTriggerSource.QUESTION_MARK,
       getVariables?.(),
       false
     );

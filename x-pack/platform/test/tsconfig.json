@@ -1,5 +1,5 @@
 {
-  "extends": "../../../tsconfig.base.json",
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
@@ -175,7 +175,8 @@
     "@kbn/visualizations-common",
     "@kbn/test-subj-selector",
     "@kbn/onechat-server",
-    "@kbn/es-types",
+    "@kbn/setup-node-env",
     "@kbn/connector-schemas",
+    "@kbn/es-types",
   ]
 }
