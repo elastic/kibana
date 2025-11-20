@@ -31,7 +31,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const ml = getService('ml');
   const retry = getService('retry');
 
-  describe(`tool: ${OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID}`, function () {
+  // Failing: See https://github.com/elastic/kibana/issues/243627
+  describe.skip(`tool: ${OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID}`, function () {
     let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
