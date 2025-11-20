@@ -35,10 +35,11 @@ export type DataSourceSimulationMode = 'partial' | 'complete';
 export interface DataSourceContext {
   parentRef: DataSourceParentActor;
   streamName: string;
-  streamProcessingUpdatedAt: string;
+  streamProcessingUpdatedAt: Date;
   dataSource: EnrichmentDataSourceWithUIAttributes;
   data: SampleDocument[];
   simulationMode: DataSourceSimulationMode;
+  hasOutdatedDocuments: boolean;
 }
 
 export type DataSourceEvent =

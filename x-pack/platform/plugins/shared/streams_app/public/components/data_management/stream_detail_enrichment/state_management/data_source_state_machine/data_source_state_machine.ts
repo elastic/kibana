@@ -83,8 +83,31 @@ export const dataSourceMachine = setup({
       })
     ),
     storeStreamProcessingUpdatedAt: assign((_, params: { streamProcessingUpdatedAt: string }) => ({
-      streamProcessingUpdatedAt: params.streamProcessingUpdatedAt,
+      streamProcessingUpdatedAt: new Date(params.streamProcessingUpdatedAt),
     })),
+    checkForOutdatedDocuments: assign(({ context }) => {
+      if (!canDataSourceTypeBeOutdated(context.dataSource.type)) {
+        return { hasOutdatedDocuments: false };
+      }
+
+      if (context.data.length === 0) {
+        return { hasOutdatedDocuments: false };
+      }
+
+      const documentsTimestamps = context.data
+        .map((doc) => doc['@timestamp'])
+        .filter((timestamp): timestamp is string => typeof timestamp === 'string')
+        .map((timestamp) => new Date(timestamp).getTime());
+
+      if (documentsTimestamps.length === 0) {
+        return { hasOutdatedDocuments: false };
+      }
+
+      const oldestDocumentTimestamp = Math.min(...documentsTimestamps);
+      const streamProcessingTimestamp = context.streamProcessingUpdatedAt.getTime();
+
+      return { hasOutdatedDocuments: oldestDocumentTimestamp < streamProcessingTimestamp };
+    }),
   },
   guards: {
     isEnabled: ({ context }) => context.dataSource.enabled,
@@ -107,12 +130,16 @@ export const dataSourceMachine = setup({
     data: [],
     dataSource: input.dataSource,
     streamName: input.streamName,
-    streamProcessingUpdatedAt: input.streamProcessingUpdatedAt,
+    streamProcessingUpdatedAt: new Date(input.streamProcessingUpdatedAt),
     simulationMode: getSimulationModeByDataSourceType(input.dataSource.type),
+    hasOutdatedDocuments: false,
   }),
   on: {
     'dataSource.setStreamProcessingUpdatedAt': {
-      actions: [{ type: 'storeStreamProcessingUpdatedAt', params: ({ event }) => event }],
+      actions: [
+        { type: 'storeStreamProcessingUpdatedAt', params: ({ event }) => event },
+        { type: 'checkForOutdatedDocuments' },
+      ],
     },
   },
   initial: 'determining',
@@ -173,6 +200,7 @@ export const dataSourceMachine = setup({
                   params: ({ event }) => ({ data: event.snapshot.context ?? [] }),
                 },
                 { type: 'notifyParent', params: { eventType: 'dataSource.dataChange' } },
+                { type: 'checkForOutdatedDocuments' },
               ],
             },
             onError: {
@@ -239,6 +267,20 @@ const getSimulationModeByDataSourceType = (
       return 'partial';
     case 'custom-samples':
       return 'complete';
+    default:
+      throw new Error(`Invalid data source type: ${dataSourceType}`);
+  }
+};
+
+const canDataSourceTypeBeOutdated = (
+  dataSourceType: EnrichmentDataSourceWithUIAttributes['type']
+): boolean => {
+  switch (dataSourceType) {
+    case 'latest-samples':
+    case 'kql-samples':
+      return true;
+    case 'custom-samples':
+      return false;
     default:
       throw new Error(`Invalid data source type: ${dataSourceType}`);
   }
