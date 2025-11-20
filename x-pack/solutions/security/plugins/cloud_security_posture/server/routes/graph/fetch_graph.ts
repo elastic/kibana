@@ -294,7 +294,6 @@ ${
         : ''
     }
   "}")
-
 | STATS badge = COUNT(*),
   uniqueEventsCount = COUNT_DISTINCT(CASE(isAlert == false, _id, null)),
   uniqueAlertsCount = COUNT_DISTINCT(CASE(isAlert == true, _id, null)),
@@ -325,7 +324,7 @@ ${
   targetIdsCount = COUNT_DISTINCT(targetEntityId),
   targetEntityName = VALUES(targetEntityName),
   targetHostIp = VALUES(targetHostIp),
-  targetsDocData = VALUES(targetDocData)
+  targetsDocData = VALUES(targetDocData),
   targetEntityFieldHint = VALUES(targetEntityFieldHint)
     BY action = event.action,
       actorEntityType,
