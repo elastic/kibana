@@ -7,6 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-require('@kbn/setup-node-env');
-require('@kbn/workflows/scripts/generate_es_connectors_v2').generateAndSaveEsConnectors();
-require('@kbn/workflows/scripts/generate_kibana_connectors_v2').generateAndSaveKibanaConnectors();
+export { generateAndSaveKibanaConnectors } from './generate_kibana_connectors_v2';

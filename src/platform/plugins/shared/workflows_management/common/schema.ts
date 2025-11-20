@@ -641,7 +641,7 @@ function generateKibanaConnectors(): InternalConnectorContract[] {
   const {
     GENERATED_KIBANA_CONNECTORS,
     // eslint-disable-next-line @typescript-eslint/no-var-requires
-  } = require('@kbn/workflows/common/generated/kibana_connectors');
+  } = require('@kbn/workflows/common/generated/kibana_connectors_v2.gen');
 
   // Enhance connectors with fetcher parameter support
   return enhanceKibanaConnectorsWithFetcher(GENERATED_KIBANA_CONNECTORS);
