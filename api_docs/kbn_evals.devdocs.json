@@ -1049,6 +1049,61 @@
         ],
         "returnComment": [],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals",
+        "id": "def-common.parseSelectedEvaluators",
+        "type": "Function",
+        "tags": [],
+        "label": "parseSelectedEvaluators",
+        "description": [],
+        "signature": [
+          "() => string[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/filter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/evals",
+        "id": "def-common.selectEvaluators",
+        "type": "Function",
+        "tags": [],
+        "label": "selectEvaluators",
+        "description": [],
+        "signature": [
+          "(evaluators: ",
+          "Evaluator",
+          "<TExample, TTaskOutput>[]) => ",
+          "Evaluator",
+          "<TExample, TTaskOutput>[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/filter.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/evals",
+            "id": "def-common.selectEvaluators.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "evaluators",
+            "description": [],
+            "signature": [
+              "Evaluator",
+              "<TExample, TTaskOutput>[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-evals/src/evaluators/filter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
       }
     ],
     "interfaces": [

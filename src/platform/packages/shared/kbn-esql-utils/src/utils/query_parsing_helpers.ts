@@ -24,23 +24,13 @@ import type {
   ESQLSingleAstItem,
   ESQLInlineCast,
   ESQLCommandOption,
-  ESQLCommand,
-  ESQLAstQueryExpression,
+  ESQLAstForkCommand,
 } from '@kbn/esql-ast';
 import { type ESQLControlVariable, ESQLVariableType } from '@kbn/esql-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { monaco } from '@kbn/monaco';
 
 const DEFAULT_ESQL_LIMIT = 1000;
-
-// retrieves the index pattern from the aggregate query for ES|QL using ast parsing
-export function getIndexPatternFromESQLQuery(esql?: string) {
-  const { root } = Parser.parse(esql || '');
-  const sourceCommand = root.commands.find(({ name }) => ['from', 'ts'].includes(name));
-  const args = (sourceCommand?.args ?? []) as ESQLSource[];
-  const indices = args.filter((arg) => arg.sourceType === 'index');
-  return indices?.map((index) => index.name).join(',');
-}
 
 export function getRemoteClustersFromESQLQuery(esql?: string): string[] | undefined {
   if (!esql) return undefined;
@@ -114,16 +104,21 @@ export function hasTransformationalCommand(esql?: string) {
   }
 
   // Check for fork commands with all transformational branches
-  const forkCommands = Walker.findAll(root, (node) => node.name === 'fork') as Array<ESQLCommand>;
+  const forkCommands = Walker.findAll(
+    root,
+    (node) => node.name === 'fork'
+  ) as Array<ESQLAstForkCommand>;
 
   const hasForkWithAllTransformationalBranches = forkCommands.some((forkCommand) => {
-    const forkArguments = forkCommand?.args as ESQLAstQueryExpression[];
+    const forkArguments = forkCommand?.args;
 
     if (!forkArguments || forkArguments.length === 0) {
       return false;
     }
 
-    return forkArguments.every((branch) => {
+    return forkArguments.every((parens) => {
+      const branch = parens.child;
+
       if (branch.type !== 'query') {
         return false;
       }

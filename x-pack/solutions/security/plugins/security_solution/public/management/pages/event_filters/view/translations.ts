@@ -18,7 +18,9 @@ export const getCreationSuccessMessage = (item: ArtifactFormComponentProps['item
 
 export const getCreationErrorMessage = (creationError: IHttpFetchError) => {
   return {
-    title: 'There was an error creating the new event filter: "{error}"',
+    title: i18n.translate('xpack.securitySolution.eventFilter.flyoutForm.creationErrorToastTitle', {
+      defaultMessage: 'There was an error creating the new event filter.',
+    }),
     message: { error: creationError.message },
   };
 };

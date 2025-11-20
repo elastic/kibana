@@ -8,6 +8,7 @@
   "kbn_references": [
     "@kbn/zod",
     "@kbn/es-query",
-    "@kbn/utility-types"  ],
+    "@kbn/utility-types",
+    "@kbn/core"  ],
   "exclude": ["target/**/*"]
 }
