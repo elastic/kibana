@@ -13,4 +13,3 @@ export { generateEsqlTool } from './generate_esql';
 export { executeEsqlTool } from './execute_esql';
 export { searchTool } from './search';
 export { createVisualizationTool } from './create_visualization';
-export { taskTool } from './task';

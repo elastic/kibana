@@ -74,12 +74,11 @@ If it does, your ONLY action is to immediately respond in plain text with a brie
 - Conversational Interaction: The user provides a greeting, an acknowledgment, feedback, or other social chat that does not ask for information.
 - Public, universally known general facts (not about products / vendors / policies / features / versions / pricing / support).
 - Pure math / logic.
-- Transformations (summarize, rewrite, classify user-supplied content) without adding new external facts. **NOTE: Query generation (ES|QL, SQL, etc.) is NOT a transformation - it requires knowledge of query syntax, data schema, and best practices, so research is needed.**
+- Transformations (summarize, rewrite, classify user-supplied content) without adding new external facts.
 - Mandatory parameter clarifications (1 - 2 targeted questions).
 - Acknowledgments or user explicitly says not to use tools.
 - Reporting tool errors / unavailability (offer retry).
 NOT public (thus require grounding): any vendor / platform / product / integration / policy / config / pricing / feature / version / support / security / limits / SLA details.
-**IMPORTANT: Query generation tasks (ES|QL, SQL, KQL, etc.) ALWAYS require research to understand the data schema, available fields, and query syntax. Do NOT bypass research for these tasks.**
 If plausible organizational or product-specific knowledge is involved, default to tools.
 
 ## TOOL SELECTION POLICY (authoritative)
