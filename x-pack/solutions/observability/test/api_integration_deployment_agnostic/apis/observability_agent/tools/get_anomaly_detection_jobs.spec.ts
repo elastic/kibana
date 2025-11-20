@@ -13,7 +13,6 @@ import datemath from '@elastic/datemath';
 import moment from 'moment';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { createAgentBuilderApiClient } from '../utils/agent_builder_client';
-
 import { createSyntheticApmDataWithAnomalies } from '../utils/synthtrace_scenarios/create_synthetic_apm_data_with_anomalies';
 
 const SERVICE_NAME = 'service-a';
@@ -30,19 +29,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
   const ml = getService('ml');
   const retry = getService('retry');
+  const synthtrace = getService('synthtrace');
 
-  // Failing: See https://github.com/elastic/kibana/issues/243627
-  // Failing: See https://github.com/elastic/kibana/issues/243626
-  describe.skip(`tool: ${OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID}`, function () {
+  describe(`tool: ${OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID}`, function () {
     let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
     before(async () => {
       const supertest = await roleScopedSupertest.getSupertestWithRoleScope('admin');
       agentBuilderApiClient = createAgentBuilderApiClient(supertest);
+      apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
 
-      apmSynthtraceEsClient = await createSyntheticApmDataWithAnomalies({
+      await createSyntheticApmDataWithAnomalies({
         getService,
+        apmSynthtraceEsClient,
         serviceName: SERVICE_NAME,
         environment: ENVIRONMENT,
         language: 'nodejs',

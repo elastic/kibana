@@ -7,10 +7,12 @@
 
 import type moment from 'moment';
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
+import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 
 export const createSyntheticApmDataWithAnomalies = async ({
   getService,
+  apmSynthtraceEsClient,
   serviceName,
   environment,
   language,
@@ -20,6 +22,7 @@ export const createSyntheticApmDataWithAnomalies = async ({
   spikeEnd,
 }: {
   getService: DeploymentAgnosticFtrProviderContext['getService'];
+  apmSynthtraceEsClient: ApmSynthtraceEsClient;
   serviceName: string;
   environment: string;
   language: string;
@@ -29,9 +32,7 @@ export const createSyntheticApmDataWithAnomalies = async ({
   spikeEnd: number;
 }) => {
   const roleScopedSupertest = getService('roleScopedSupertest');
-  const synthtrace = getService('synthtrace');
   const ml = getService('ml');
-  const apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
 
   await Promise.all([apmSynthtraceEsClient.clean(), ml.api.cleanMlIndices(), ,]);
   await ml.api.deleteAllAnomalyDetectionJobs();
@@ -81,12 +82,14 @@ export const createSyntheticApmDataWithAnomalies = async ({
   );
 
   // Create anomaly detection job
-  const supertest = await roleScopedSupertest.getSupertestWithRoleScope('editor');
-  await supertest
+
+  const editorClient = await roleScopedSupertest.getSupertestWithRoleScope('editor', {
+    withInternalHeaders: true,
+    useCookieHeader: true,
+  });
+
+  await editorClient
     .post('/internal/apm/settings/anomaly-detection/jobs')
-    .set('kbn-xsrf', 'true') // Add this line to include the XSRF header
     .send({ environments: [environment] })
     .expect(200);
-
-  return apmSynthtraceEsClient;
 };
