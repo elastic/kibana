@@ -76,34 +76,24 @@ export const NoStepsEmptyPrompt: React.FC<React.PropsWithChildren> = ({ children
   return (
     <EuiEmptyPrompt
       aria-live="polite"
-      titleSize="xs"
-      icon={<AssetImage type="extractFields" />}
+      icon={children ? undefined : <AssetImage type="extractFields" />}
       title={
         <h2>
           {i18n.translate('xpack.streams.streamDetailView.managementTab.noStepsEmptyPrompt.title', {
-            defaultMessage: 'Transform your data before indexing by:',
+            defaultMessage: 'Extract useful fields from your data',
           })}
         </h2>
       }
+      titleSize="xs"
       body={
-        <EuiFlexGroup direction="column" gutterSize="s">
+        <EuiFlexGroup direction="column" justifyContent="flexStart" gutterSize="s">
           <EuiFlexItem>
-            <EuiText size="s">
-              {i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.noStepsEmptyPrompt.body',
-                {
-                  defaultMessage: 'Create conditions to focus on specific data in your stream.',
-                }
-              )}
-            </EuiText>
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiText size="s">
+            <EuiText size="m">
               {i18n.translate(
                 'xpack.streams.streamDetailView.managementTab.noStepsEmptyPrompt.body',
                 {
                   defaultMessage:
-                    'Create processors to extract meaningful fields so you can filter and analyze your data effectively.',
+                    'Transform your data before indexing with conditions and processors.',
                 }
               )}
             </EuiText>

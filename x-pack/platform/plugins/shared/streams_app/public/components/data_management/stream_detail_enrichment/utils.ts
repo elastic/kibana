@@ -63,7 +63,7 @@ interface RecalcColumnWidthsParams {
   visibleColumns: string[];
 }
 
-const PRIORITIZED_CONTENT_FIELDS = [
+export const PRIORITIZED_CONTENT_FIELDS = [
   'message',
   'body.text',
   'error.message',
@@ -82,7 +82,7 @@ const PRIORITIZED_DATE_FIELDS = [
   'attributes.custom.timestamp',
 ];
 
-const getDefaultTextField = (sampleDocs: FlattenRecord[], prioritizedFields: string[]) => {
+export const getDefaultTextField = (sampleDocs: FlattenRecord[], prioritizedFields: string[]) => {
   // Count occurrences of well-known text fields in the sample documents
   const acceptableDefaultFields = sampleDocs.flatMap((doc) =>
     Object.keys(doc).filter((key) => prioritizedFields.includes(key))

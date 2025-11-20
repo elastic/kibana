@@ -16,11 +16,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-export interface LoadingPromptProps {
+export interface SuggestPipelineLoadingPromptProps {
   onCancel(): void;
 }
 
-export function LoadingPrompt({ onCancel }: LoadingPromptProps) {
+export function SuggestPipelineLoadingPrompt({ onCancel }: SuggestPipelineLoadingPromptProps) {
   return (
     <EuiEmptyPrompt
       icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
@@ -29,7 +29,7 @@ export function LoadingPrompt({ onCancel }: LoadingPromptProps) {
           <EuiFlexItem>
             <EuiText>
               {i18n.translate('xpack.streams.stepsEditor.loadingDashboardsLabel', {
-                defaultMessage: 'Analysing your documents...',
+                defaultMessage: 'Analysing your data...',
               })}
             </EuiText>
           </EuiFlexItem>

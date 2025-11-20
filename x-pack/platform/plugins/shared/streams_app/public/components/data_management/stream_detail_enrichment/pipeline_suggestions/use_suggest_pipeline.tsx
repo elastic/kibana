@@ -13,18 +13,16 @@ import { useKibana } from '../../../../hooks/use_kibana';
 import { selectPreviewRecords } from '../state_management/simulation_state_machine/selectors';
 import { useSimulatorSelector } from '../state_management/stream_enrichment_state_machine';
 import { useGrokPatternSuggestion } from '../steps/blocks/action/grok/use_grok_pattern_suggestion';
+import { PRIORITIZED_CONTENT_FIELDS, getDefaultTextField } from '../utils';
 
 export const SUGGESTED_GROK_PROCESSOR_ID = 'grok-processor';
 
-export interface SuggestProcessingPipelineParams {
+export interface SuggestPipelineParams {
   streamName: string;
   connectorId: string;
-  fieldName: string;
 }
 
-export function useSuggestProcessingPipeline(
-  abortController: ReturnType<typeof useAbortController>
-) {
+export function useSuggestPipeline(abortController: ReturnType<typeof useAbortController>) {
   const {
     dependencies: {
       start: {
@@ -39,17 +37,19 @@ export function useSuggestProcessingPipeline(
 
   const [, suggestGrokPattern] = useGrokPatternSuggestion(abortController);
 
-  async function suggestProcessing(params: null): Promise<undefined>;
-  async function suggestProcessing(params: SuggestProcessingPipelineParams): Promise<StreamlangDSL>;
-  async function suggestProcessing(params: SuggestProcessingPipelineParams | null) {
+  async function suggestPipeline(params: null): Promise<undefined>;
+  async function suggestPipeline(params: SuggestPipelineParams): Promise<StreamlangDSL>;
+  async function suggestPipeline(params: SuggestPipelineParams | null) {
     if (params === null) {
       return Promise.resolve(undefined); // Reset to initial value
     }
 
+    const fieldName = getDefaultTextField(previewDocuments, PRIORITIZED_CONTENT_FIELDS);
+
     const { grokProcessor } = await suggestGrokPattern({
       streamName: params.streamName,
       connectorId: params.connectorId,
-      fieldName: params.fieldName,
+      fieldName,
     });
 
     // The only reason we're streaming the response here is to avoid timeout issues prevalent with long-running requests to LLMs.
@@ -65,11 +65,9 @@ export function useSuggestProcessingPipeline(
               documents: previewDocuments,
               parsing_processor: {
                 action: 'grok',
-                from: params.fieldName,
+                from: fieldName,
                 patterns: grokProcessor.patterns as [string, ...string[]],
               },
-              start: 0,
-              end: 0,
             },
           },
         })
@@ -77,5 +75,5 @@ export function useSuggestProcessingPipeline(
     );
   }
 
-  return useAsyncFn(suggestProcessing, [abortController, streamsRepositoryClient]);
+  return useAsyncFn(suggestPipeline, [abortController, streamsRepositoryClient]);
 }

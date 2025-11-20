@@ -9,8 +9,7 @@ import { z } from '@kbn/zod';
 import { createPrompt } from '@kbn/inference-common';
 import { Streams } from '@kbn/streams-schema';
 import systemPromptTemplate from './system_prompt.text';
-// import taskPromptTemplate from './task_prompt.text';
-import contentPromptTemplate from './content_prompt.text';
+import taskPromptTemplate from './task_prompt.text';
 
 export const SuggestIngestPipelinePrompt = createPrompt({
   name: 'suggest_ingest_pipeline_prompt',
@@ -18,12 +17,9 @@ export const SuggestIngestPipelinePrompt = createPrompt({
   input: z.object({
     stream: Streams.all.Definition.right,
     pipeline_schema: z.string(),
-    initial_dataset_analysis: z.string(),
-    task_description: z.string(),
-    features: z.string().optional(),
-    guidance: z.string().optional(),
-    previous_pipeline: z.string().optional(),
+    fields_schema: z.string(),
     parsing_processor: z.string().optional(),
+    initial_dataset_analysis: z.string(),
   }),
 })
   .version({
@@ -34,7 +30,7 @@ export const SuggestIngestPipelinePrompt = createPrompt({
     },
     template: {
       mustache: {
-        template: contentPromptTemplate,
+        template: taskPromptTemplate,
       },
     },
     tools: {

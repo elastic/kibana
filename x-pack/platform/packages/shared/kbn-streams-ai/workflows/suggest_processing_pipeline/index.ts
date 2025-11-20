@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { executeAsReasoningAgent } from '@kbn/inference-prompt-utils';
 import type { Streams } from '@kbn/streams-schema';
@@ -13,18 +12,14 @@ import type { StreamlangDSL, GrokProcessor, DissectProcessor } from '@kbn/stream
 import type { simulateProcessing } from '@kbn/streams-plugin/server/routes/internal/streams/processing/simulation_handler';
 import type { FlattenRecord } from '@kbn/streams-schema';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
+import { isOtelStream } from '@kbn/streams-schema';
 import { SuggestIngestPipelinePrompt } from './prompt';
 import { getPipelineDefinitionJsonSchema, pipelineDefinitionSchema } from './schema';
-import taskPromptTemplate from './task_prompt.text';
 
 export async function suggestProcessingPipeline({
   definition,
   inferenceClient,
-  esClient,
-  logger,
   parsingProcessor,
-  start,
-  end,
   maxSteps,
   signal,
   simulatePipeline,
@@ -33,11 +28,7 @@ export async function suggestProcessingPipeline({
 }: {
   definition: Streams.ingest.all.Definition;
   inferenceClient: BoundInferenceClient;
-  esClient: ElasticsearchClient;
-  logger: Logger;
   parsingProcessor?: GrokProcessor | DissectProcessor;
-  start: number;
-  end: number;
   maxSteps?: number | undefined;
   signal: AbortSignal;
   simulatePipeline(pipeline: StreamlangDSL): ReturnType<typeof simulateProcessing>;
@@ -63,6 +54,10 @@ export async function suggestProcessingPipeline({
   if (documents.length === 0) {
     return null;
   }
+
+  const isOtel = isOtelStream(definition);
+  console.log(`Stream ${definition.name} isOtelStream: ${isOtel}`);
+
   console.log('parsingProcessor', parsingProcessor);
 
   // Collect metrics for the initial pipeline
@@ -78,9 +73,11 @@ export async function suggestProcessingPipeline({
     prompt: SuggestIngestPipelinePrompt,
     input: {
       stream: definition,
+      fields_schema: isOtel
+        ? 'OpenTelemetry (OTel) with Logs Semantic Convention'
+        : 'Elastic Common Schema (ECS)',
       pipeline_schema: JSON.stringify(getPipelineDefinitionJsonSchema(pipelineDefinitionSchema)),
       initial_dataset_analysis: JSON.stringify(simulationMetrics),
-      task_description: taskPromptTemplate,
       parsing_processor: parsingProcessor ? JSON.stringify(parsingProcessor) : undefined,
     },
     maxSteps,
@@ -99,9 +96,8 @@ export async function suggestProcessingPipeline({
         }
 
         // 2. Simulate the pipeline and collect metrics
-        const simulateResult = await simulatePipeline(pipeline.data);
+        const simulateResult = await simulatePipeline(pipeline.data as StreamlangDSL);
         const metrics = await getSimulationMetrics(simulateResult, fieldsMetadataClient);
-
         console.log('--------------------------------');
         console.log('validatedPipeline', pipeline.data);
         // console.log('simulateResult', simulateResult);
@@ -150,7 +146,7 @@ export async function suggestProcessingPipeline({
     return null;
   }
 
-  return commitPipeline.data;
+  return commitPipeline.data as StreamlangDSL;
 }
 
 // {

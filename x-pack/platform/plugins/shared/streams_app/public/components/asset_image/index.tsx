@@ -92,6 +92,13 @@ const imageSets = {
       defaultMessage: 'Checklist',
     }),
   },
+  suggestPipeline: {
+    light: () => import('./suggest_pipeline.svg'),
+    dark: () => import('./suggest_pipeline.svg'),
+    alt: i18n.translate('xpack.streams.suggestPipelineImage', {
+      defaultMessage: 'Suggest pipeline',
+    }),
+  },
 };
 
 interface AssetImageProps extends Omit<EuiImageProps, 'src' | 'url' | 'alt'> {

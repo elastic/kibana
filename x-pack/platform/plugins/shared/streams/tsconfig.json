@@ -9,7 +9,8 @@
     "scripts/**/*",
     "server/**/*",
     "public/**/*",
-    "types/**/*"
+    "types/**/*",
+    "../../../packages/shared/kbn-streams-schema/src/helpers/is_otel_stream.ts"
   ],
   "exclude": [
     "target/**/*"

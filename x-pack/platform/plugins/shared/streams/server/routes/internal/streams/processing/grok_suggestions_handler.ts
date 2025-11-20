@@ -9,11 +9,11 @@ import { z } from '@kbn/zod';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { ReviewFieldsPrompt } from '@kbn/grok-heuristics';
 import type { InferenceClient, ToolOptionsOfPrompt } from '@kbn/inference-common';
-import { Streams } from '@kbn/streams-schema';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
 import { prefixOTelField } from '@kbn/otel-semantic-conventions';
 import type { ToolCallsOfToolOptions } from '@kbn/inference-common/src/chat_complete/tools_of';
 import type { FieldMetadataPlain } from '@kbn/fields-metadata-plugin/common';
+import { isOtelStream } from '@kbn/streams-schema';
 import type { StreamsClient } from '../../../../lib/streams/client';
 
 export interface ProcessingGrokSuggestionsParams {
@@ -67,7 +67,6 @@ export const handleProcessingGrokSuggestions = async ({
   fieldsMetadataClient,
 }: ProcessingGrokSuggestionsHandlerDeps) => {
   const stream = await streamsClient.getStream(params.path.name);
-  const isWiredStream = Streams.WiredStream.Definition.is(stream);
 
   const response = await inferenceClient.prompt({
     connectorId: params.body.connector_id,
@@ -79,9 +78,6 @@ export const handleProcessingGrokSuggestions = async ({
   });
   const reviewResult = response.toolCalls[0].function.arguments;
 
-  // if the stream is wired, or if it matches the logs-*.otel-* pattern, use the OTEL field names
-  const useOtelFieldNames = isWiredStream || params.path.name.match(/^logs-.*\.otel-/);
-
   const fieldMetadata = await fieldsMetadataClient
     .find({
       fieldNames: reviewResult.fields.map((field) => field.ecs_field),
@@ -90,7 +86,7 @@ export const handleProcessingGrokSuggestions = async ({
 
   return {
     log_source: reviewResult.log_source,
-    fields: mapFields(reviewResult.fields, fieldMetadata, !!useOtelFieldNames),
+    fields: mapFields(reviewResult.fields, fieldMetadata, isOtelStream(stream)),
   };
 };
 

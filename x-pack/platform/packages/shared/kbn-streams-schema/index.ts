@@ -21,6 +21,7 @@ export {
 } from './src/models/ingest/routing';
 
 export { isRootStreamDefinition } from './src/helpers/is_root';
+export { isOtelStream } from './src/helpers/is_otel_stream';
 export { getIndexPatternsForStream } from './src/helpers/hierarchy_helpers';
 
 export {

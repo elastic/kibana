@@ -31,8 +31,6 @@ export interface SuggestIngestPipelineParams {
   };
   body: {
     connector_id: string;
-    start: number;
-    end: number;
     documents: FlattenRecord[];
     parsing_processor: GrokProcessor | DissectProcessor;
   };
@@ -42,8 +40,6 @@ export const suggestIngestPipelineSchema = z.object({
   path: z.object({ name: z.string() }),
   body: z.object({
     connector_id: z.string(),
-    start: z.number(),
-    end: z.number(),
     documents: z.array(flattenRecord),
     parsing_processor: z.discriminatedUnion('action', [
       grokProcessorSchema,
@@ -98,10 +94,6 @@ export const suggestProcessingPipelineRoute = createServerRoute({
     const pipelinePromise = suggestProcessingPipeline({
       definition: stream,
       inferenceClient: inferenceClient.bindTo({ connectorId: params.body.connector_id }),
-      esClient: scopedClusterClient.asCurrentUser,
-      logger,
-      start: params.body.start,
-      end: params.body.end,
       parsingProcessor: params.body.parsing_processor,
       maxSteps: undefined, // Allow full reasoning for pipeline generation
       signal: abortController.signal,

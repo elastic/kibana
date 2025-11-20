@@ -31,7 +31,7 @@ import { getStepDescription } from '../steps/blocks/action/utils';
 import type { AIFeatures } from '../../../../hooks/use_ai_features';
 import { GenerateSuggestionButton } from '../../stream_detail_routing/review_suggestions_form/generate_suggestions_button';
 
-export interface ProcessingPipielineSuggestionProps {
+export interface PipelineSuggestionProps {
   aiFeatures: AIFeatures;
   pipeline: StreamlangDSL;
   // simulationResult: APIReturnType<'POST /internal/streams/{name}/processing/_simulate'>;
@@ -40,14 +40,14 @@ export interface ProcessingPipielineSuggestionProps {
   onRegenerate(connectorId: string): void;
 }
 
-export function ProcessingPipelineSuggestion({
+export function PipelineSuggestion({
   aiFeatures,
   pipeline,
   // simulationResult,
   onAccept,
   onDismiss,
   onRegenerate,
-}: ProcessingPipielineSuggestionProps) {
+}: PipelineSuggestionProps) {
   // const processorMetrics = simulationResult.processors_metrics['grok-processor'];
   return (
     <EuiCallOut
