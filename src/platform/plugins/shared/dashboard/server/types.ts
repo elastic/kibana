@@ -10,10 +10,35 @@
 import type { RequestHandlerContext } from '@kbn/core/server';
 import type { ScanDashboardsResult } from './scan_dashboards';
 import type { DashboardState } from './api';
+import type {
+  DashboardCreateRequestBody,
+  DashboardCreateResponseBody,
+  DashboardReadResponseBody,
+  DashboardUpdateRequestBody,
+  DashboardUpdateResponseBody,
+} from './api';
+
+/**
+ * Client interface for dashboard CRUD operations
+ */
+export interface DashboardClient {
+  create: (
+    ctx: RequestHandlerContext,
+    body: DashboardCreateRequestBody
+  ) => Promise<DashboardCreateResponseBody>;
+  read: (ctx: RequestHandlerContext, id: string) => Promise<DashboardReadResponseBody>;
+  update: (
+    ctx: RequestHandlerContext,
+    id: string,
+    body: DashboardUpdateRequestBody
+  ) => Promise<DashboardUpdateResponseBody>;
+  delete: (ctx: RequestHandlerContext, id: string) => Promise<void>;
+}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DashboardPluginSetup {}
 export interface DashboardPluginStart {
+  client: DashboardClient;
   getDashboard: (
     ctx: RequestHandlerContext,
     id: string
