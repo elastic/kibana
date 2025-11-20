@@ -149,11 +149,6 @@ const createRoundFromEvents = ({
     throw new Error('No message complete event found in round events');
   }
 
-  const responseMessage =
-    typeof lastMessage.message_content === 'object' && lastMessage.message_content !== null
-      ? { message: '', structured_response: lastMessage.message_content }
-      : { message: lastMessage.message_content };
-
   const round: ConversationRound = {
     id: uuidv4(),
     input,
@@ -163,7 +158,10 @@ const createRoundFromEvents = ({
     time_to_first_token: timeToFirstToken,
     time_to_last_token: timeToLastToken,
     model_usage: getModelUsage(modelProvider.getUsageStats()),
-    response: responseMessage,
+    response: {
+      message: lastMessage.message_content,
+      structured_output: lastMessage.structured_output,
+    },
   };
 
   return round;

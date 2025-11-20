@@ -126,8 +126,10 @@ export const isMessageChunkEvent = (
 export interface MessageCompleteEventData {
   /** ID of the message */
   message_id: string;
-  /** full text content of the message, or structured data object when structuredOutput is true */
-  message_content: string | object;
+  /** full text content of the message */
+  message_content: string;
+  /** optional structured data */
+  structured_output?: object;
 }
 
 export type MessageCompleteEvent = ChatEventBase<
