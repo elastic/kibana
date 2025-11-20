@@ -7,8 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { input } from '@inquirer/prompts';
-import { ListrInquirerPromptAdapter } from '@listr2/prompt-adapter-inquirer';
 import { Listr, PRESET_TIMER } from 'listr2';
 import { run } from '@kbn/dev-cli-runner';
 import { setupKibana, startElasticsearch, stopElasticsearch, stopKibana } from '../util';
@@ -63,12 +61,10 @@ export function runCheckSavedObjectsCli() {
           },
           {
             title: `Wait for ES startup`,
-            task: async (ctx, task) => {
-              task.title = `Running on ${ctx.esServer!.hosts}`;
-              await task.prompt(ListrInquirerPromptAdapter).run(input, {
-                message: `Run the script with '--client' on a different terminal.\nPress return to stop the server`,
-              });
-            },
+            task: async (ctx, task) =>
+              await new Promise(
+                () => (task.title = `Running on ${ctx.esServer!.hosts}. Press Ctrl+C to stop`)
+              ),
             enabled: (ctx) => server && Boolean(ctx.esServer),
           },
           /**
@@ -119,6 +115,7 @@ export function runCheckSavedObjectsCli() {
           {
             title: 'Check removed SO types',
             task: checkRemovedTypes,
+            enabled: !server,
           },
           {
             title: 'Validate new SO types',
