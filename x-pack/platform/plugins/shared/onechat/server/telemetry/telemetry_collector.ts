@@ -64,6 +64,12 @@ export interface OnechatTelemetry {
       count: number;
     }>;
   };
+  errors: {
+    total: number;
+    avg_errors_per_conversation: number;
+    total_conversations_with_errors: number;
+    by_type: Array<{ type: string; count: number }>;
+  };
 }
 
 /**
@@ -269,6 +275,43 @@ export function registerTelemetryCollector(
             },
           },
         },
+        errors: {
+          total: {
+            type: 'long',
+            _meta: {
+              description: 'Total number of errors surfaced to users',
+            },
+          },
+          avg_errors_per_conversation: {
+            type: 'float',
+            _meta: {
+              description: 'Average number of errors per conversation that had errors',
+            },
+          },
+          total_conversations_with_errors: {
+            type: 'long',
+            _meta: {
+              description: 'Total number of unique conversations that had at least one error',
+            },
+          },
+          by_type: {
+            type: 'array',
+            items: {
+              type: {
+                type: 'keyword',
+                _meta: {
+                  description: 'Error type/code (e.g., internalError, badRequest)',
+                },
+              },
+              count: {
+                type: 'long',
+                _meta: {
+                  description: 'Number of errors of this type',
+                },
+              },
+            },
+          },
+        },
       },
       fetch: async (context: CollectorFetchContext): Promise<OnechatTelemetry> => {
         const { esClient, soClient } = context;
@@ -314,7 +357,7 @@ export function registerTelemetryCollector(
           );
 
           const llmUsageByProvider: Array<{ provider: string; count: number }> = [];
-          for (const [counterName, count] of llmProviderCounters.entries()) {
+          for (const [counterName, count] of Array.from(llmProviderCounters.entries())) {
             const provider = counterName.replace(`${ONECHAT_USAGE_DOMAIN}_llm_provider_`, '');
             if (provider && count > 0) {
               llmUsageByProvider.push({ provider, count });
@@ -323,13 +366,39 @@ export function registerTelemetryCollector(
           llmUsageByProvider.sort((a, b) => b.count - a.count);
 
           const llmUsageByModel: Array<{ model: string; count: number }> = [];
-          for (const [counterName, count] of llmModelCounters.entries()) {
+          for (const [counterName, count] of Array.from(llmModelCounters.entries())) {
             const model = counterName.replace(`${ONECHAT_USAGE_DOMAIN}_llm_model_`, '');
             if (model && count > 0) {
               llmUsageByModel.push({ model, count });
             }
           }
           llmUsageByModel.sort((a, b) => b.count - a.count);
+
+          const errorCounters = await queryUtils.getCountersByPrefix(
+            ONECHAT_USAGE_DOMAIN,
+            'error_'
+          );
+
+          const totalErrors = errorCounters.get(`${ONECHAT_USAGE_DOMAIN}_error_total`) || 0;
+          const totalConversationsWithErrors =
+            errorCounters.get(`${ONECHAT_USAGE_DOMAIN}_error_conversations_with_errors`) || 0;
+          const avgErrorsPerConversation =
+            totalConversationsWithErrors > 0 ? totalErrors / totalConversationsWithErrors : 0;
+
+          const errorsByType: Array<{ type: string; count: number }> = [];
+
+          for (const [counterName, count] of Array.from(errorCounters.entries())) {
+            if (count > 0) {
+              if (counterName.startsWith(`${ONECHAT_USAGE_DOMAIN}_error_by_type_`)) {
+                const errorType = counterName.replace(`${ONECHAT_USAGE_DOMAIN}_error_by_type_`, '');
+                if (errorType) {
+                  errorsByType.push({ type: errorType, count });
+                }
+              }
+            }
+          }
+
+          errorsByType.sort((a, b) => b.count - a.count);
 
           const telemetry = {
             custom_tools: customTools,
@@ -343,6 +412,12 @@ export function registerTelemetryCollector(
             llm_usage: {
               by_provider: llmUsageByProvider,
               by_model: llmUsageByModel,
+            },
+            errors: {
+              total: totalErrors,
+              avg_errors_per_conversation: avgErrorsPerConversation,
+              total_conversations_with_errors: totalConversationsWithErrors,
+              by_type: errorsByType,
             },
           };
 
@@ -380,6 +455,12 @@ export function registerTelemetryCollector(
             llm_usage: {
               by_provider: [],
               by_model: [],
+            },
+            errors: {
+              total: 0,
+              avg_errors_per_conversation: 0,
+              total_conversations_with_errors: 0,
+              by_type: [],
             },
           };
         }

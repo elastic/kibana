@@ -64,7 +64,8 @@ export class SimpleWorkflowLogger implements IWorkflowEventLogger {
     spaceId?: string
   ): Promise<LogSearchResult> {
     try {
-      const { limit = 100, offset = 0, sortField = '@timestamp', sortOrder = 'desc' } = params;
+      const { size = 100, page = 1, sortField = '@timestamp', sortOrder = 'desc' } = params;
+      const from = (page - 1) * size;
 
       // Map API field names to Elasticsearch field names
       const fieldMapping: Record<string, string> = {
@@ -102,8 +103,8 @@ export class SimpleWorkflowLogger implements IWorkflowEventLogger {
 
       const response = await this.esClient.search({
         index: this.logsIndex,
-        size: limit,
-        from: offset,
+        size,
+        from,
         query: {
           bool: {
             must: mustQueries,
