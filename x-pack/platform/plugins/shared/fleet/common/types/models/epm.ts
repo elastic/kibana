@@ -294,6 +294,7 @@ export enum RegistryInputKeys {
   required_vars = 'required_vars',
   vars = 'vars',
   deployment_modes = 'deployment_modes',
+  migrate_from = 'migrate_from',
 }
 
 export type RegistryInputGroup = 'logs' | 'metrics';
@@ -308,6 +309,7 @@ export interface RegistryInput {
   [RegistryInputKeys.required_vars]?: RegistryRequiredVars;
   [RegistryInputKeys.vars]?: RegistryVarsEntry[];
   [RegistryInputKeys.deployment_modes]?: string[];
+  [RegistryInputKeys.migrate_from]?: string;
 }
 
 export enum RegistryStreamKeys {

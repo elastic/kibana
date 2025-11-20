@@ -2302,10 +2302,9 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               i.type === input.type &&
               (!input.policy_template || input.policy_template === i.policy_template)
           );
-          const inputHasToMigrate = disableInputToMigrate(inputs, input?.id);
           return {
             ...defaultInput,
-            enabled: inputHasToMigrate ? false : input.enabled, // disable if there is another input with migrate_from linking to this input
+            enabled: input.enabled,
             type: input.type,
             // to propagate "enabled: false" to streams
             streams: defaultInput?.streams?.map((stream) => ({
@@ -3588,7 +3587,6 @@ export function updatePackageInputs(
         : policyTemplate.inputs?.some(
             (policyTemplateInput) => policyTemplateInput.type === input.type
           ) ?? false;
-
       return policyTemplateStillIncludesInput;
     }),
   ];
@@ -3619,6 +3617,19 @@ export function updatePackageInputs(
     // take the override value from the new package as-is. This case typically
     // occurs when inputs or package policy templates are added/removed between versions.
     if (originalInput === undefined) {
+      // Handle migration from another input type
+      if (update.migrate_from !== undefined) {
+        const originalInputToMigrate = basePackagePolicy.inputs.find(
+          (i) => i.type === update.migrate_from
+        );
+        if (originalInputToMigrate) {
+          originalInput = { ...originalInputToMigrate, enabled: false };
+          update.vars = deepMergeVars(originalInputToMigrate.vars, update.vars, true);
+          update.enabled = true;
+          // TO DO: handle streams
+        }
+      }
+
       // Do not enable new inputs for limited packages
       if (limitedPackage) {
         update.enabled = false;
@@ -3693,7 +3704,6 @@ export function updatePackageInputs(
         }
       }
     }
-
     // Filter all stream that have been removed from the input
     originalInput.streams = originalInput.streams.filter((originalStream) => {
       return (
@@ -4084,15 +4094,4 @@ async function requireUniqueName(
       `An integration policy with the name ${packagePolicy.name} already exists. Please rename it or choose a different name.`
     );
   }
-}
-
-function disableInputToMigrate(inputs: NewPackagePolicyInput[], inputId?: string) {
-  if (!inputId) {
-    return false;
-  }
-  const inputToMigrate = inputs.find((i) => i.migrate_from === inputId);
-  if (inputToMigrate) {
-    return true;
-  }
-  return false;
 }
