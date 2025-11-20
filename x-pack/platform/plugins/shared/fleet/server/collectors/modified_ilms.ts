@@ -5,9 +5,14 @@
  * 2.0.
  */
 
+import { appContextService } from '../services';
 import { getILMPolicies } from '../services/epm/elasticsearch/template/default_settings';
 
 export async function getModifiedILMs(): Promise<string[]> {
+  const isILMPolicyDisabled = appContextService.getConfig()?.internal?.disableILMPolicies ?? false;
+  if (isILMPolicyDisabled) {
+    return [];
+  }
   const dataStreamTypes = ['logs', 'metrics', 'synthetics'];
   const ilmPolicies = await getILMPolicies(dataStreamTypes);
   const modifiedILMs: string[] = [];
