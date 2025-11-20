@@ -42,7 +42,7 @@ export const regionMapStateSchemaNoESQL = schema.object({
   ...layerSettingsSchema,
   ...datasetSchema,
   /**
-   * Primary value configuration, must define operation.
+   * Metric configuration
    */
   metric: fieldMetricOrFormulaOperationDefinitionSchema,
   /**
@@ -57,11 +57,11 @@ const regionMapStateSchemaESQL = schema.object({
   ...layerSettingsSchema,
   ...datasetEsqlTableSchema,
   /**
-   * Primary value configuration, must define operation.
+   * Metric configuration
    */
   metric: schema.allOf([schema.object(genericOperationOptionsSchema), esqlColumnSchema]),
   /**
-   * Configure how to break down the metric (e.g. show one metric per region).
+   * Configure how to break down to regions
    */
   region: schema.maybe(schema.allOf([regionMapStateRegionOptionsSchema, esqlColumnSchema])),
 });
