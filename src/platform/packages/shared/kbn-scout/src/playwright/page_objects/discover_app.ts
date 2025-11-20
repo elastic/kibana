@@ -8,6 +8,7 @@
  */
 
 import { ExplainCommandContext } from '@kbn/esql-ast/src/antlr/esql_parser';
+import type { Locator } from '../../..';
 import type { ScoutPage } from '..';
 import { expect } from '..';
 
@@ -177,5 +178,13 @@ export class DiscoverApp {
     await this.page.testSubj.typeWithDelay('queryInput', query);
     await this.page.testSubj.click('querySubmitButton');
     await this.waitUntilSearchingHasFinished();
+  }
+
+  async getFirstViewLensButtonFromFieldStatistics(): Promise<Locator> {
+    const viewButtons: Locator[] = await this.page.testSubj
+      .locator('dataVisualizerActionViewInLensButton')
+      .all();
+    await expect(viewButtons[0]).toBeVisible();
+    return viewButtons[0];
   }
 }

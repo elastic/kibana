@@ -206,10 +206,19 @@ test.describe('Discover app', { tag: ['@ess'] }, () => {
     await expect.poll(async () => await pageObjects.discover.getHitCountInt()).toBe(12891);
   });
 
-  test('click Field Stats button and validate Stats Content is present', async ({ page }) => {
+  test('click Field Stats button and validate Document Stats is present', async ({ page }) => {
     page.testSubj.locator('dscViewModeFieldStatsButton').click();
     await expect(page.testSubj.locator('dataVisualizerTable-loaded')).toBeVisible();
     page.testSubj.locator('dataVisualizerDetailsToggle-@message.raw-arrowRight').click();
     await expect(page.testSubj.locator('dataVisualizerDocumentStatsContent')).toBeVisible();
+  });
+
+  test('navigate to Lens from field statistics', async ({ page, pageObjects }) => {
+    page.testSubj.locator('dscViewModeFieldStatsButton').click({ timeout: 10000 });
+    await expect(page.testSubj.locator('dataVisualizerTable-loaded')).toBeVisible();
+    const viewLensButton = await pageObjects.discover.getFirstViewLensButtonFromFieldStatistics();
+    await viewLensButton.click();
+    // Verify we're now on the Lens page
+    expect(page.url()).toContain('/app/lens');
   });
 });
