@@ -145,11 +145,10 @@ const AdditionalMultiSelectInnerField = React.memo<
     }));
   }, [field.value, outerField.values]);
 
-  const isInvalid = false;
   return (
-    <EuiFormRow label={label} isInvalid={isInvalid}>
+    <EuiFormRow label={label} isInvalid={false}>
       <EuiComboBox
-        isInvalid={isInvalid}
+        isInvalid={false}
         data-test-subj={dataTestSubj}
         isClearable={true}
         isDisabled={false}
