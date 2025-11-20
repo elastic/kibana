@@ -59,7 +59,7 @@ export class EnterRetryNodeImpl implements NodeImplementation, NodeWithErrorCatc
       return;
     }
 
-    // fail retry with last error after exceeding max attemptss
+    // fail retry with last error after exceeding max attempts
     await this.stepExecutionRuntime.failStep(failedContext.stepExecution.error);
   }
 

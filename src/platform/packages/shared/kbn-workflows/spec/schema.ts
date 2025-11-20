@@ -20,7 +20,7 @@ export const RetryPolicySchema = z.object({
 
 export const WorkflowRetrySchema = z.object({
   'max-attempts': z.number().min(1),
-  condition: z.string().optional(), // e.g., "${{error.type == 'NetworkError'}}" or true/false (default: always retry)
+  condition: z.string().optional(), // e.g., "${{error.type == 'NetworkError'}}" (default: always retry)
   delay: z
     .string()
     .regex(/^\d+(ms|[smhdw])$/, 'Invalid duration format')
@@ -597,12 +597,3 @@ export const ExecutionErrorSchema = z.object({
   details: z.any().optional(),
 });
 export type ExecutionError = z.infer<typeof ExecutionErrorSchema>;
-
-export const HttpStepErrorSchema = ExecutionErrorSchema.extend({
-  details: z.object({
-    statusCode: z.number().optional(),
-    statusText: z.string().optional(),
-    responseBody: z.any().optional(),
-  }),
-});
-export type HttpStepError = z.infer<typeof HttpStepErrorSchema>;
