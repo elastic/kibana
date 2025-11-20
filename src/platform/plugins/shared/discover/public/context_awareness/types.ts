@@ -229,6 +229,7 @@ export interface RowControlsExtensionParams {
    * Available actions for row controls
    */
   actions: {
+    openInNewTabExtPointAction?: (params: OpenInNewTabExtPointAction) => void;
     /**
      * Updates the current ES|QL query
      */
@@ -336,8 +337,17 @@ export interface AdditionalCellAction {
  * Parameters passed to the open in new tab extension point action
  */
 export interface OpenInNewTabExtPointAction {
+  /**
+   * The query to open in the new tab
+   */
   query?: TabState['appState']['query'];
+  /**
+   * The label of the new tab
+   */
   tabLabel?: string;
+  /**
+   * The time range to open in the new tab
+   */
   timeRange?: TabState['globalState']['timeRange'];
 }
 
