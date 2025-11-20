@@ -69,7 +69,7 @@ export const cleanupPolicyRevisions = async (
   throwIfAborted(abortController);
 
   const docCount = Object.values(policiesRevisionSummaries).reduce(
-    (sum, summary) => sum + summary.count,
+    (sum, summary) => sum + (summary.count - config.maxRevisions),
     0
   );
 

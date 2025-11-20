@@ -927,7 +927,7 @@ export const RunAgentPolicyRevisionsCleanupTaskHandler: FleetRequestHandler<
 
   const result = await cleanupPolicyRevisions(esClient, {
     logger,
-    config: { ...config, timeout: '5m' },
+    config,
   });
 
   const body: TypeOf<typeof RunAgentPolicyRevisionsCleanupTaskResponseSchema> = {
