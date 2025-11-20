@@ -68,9 +68,27 @@ function convertTreeToEuiTreeViewItems(
       }
     };
 
+    // Check if this is a trigger pseudo-step
+    const isTriggerPseudoStep = stepType.startsWith('trigger_');
+
     return {
       id: item.stepExecutionId ?? `${item.stepId}-${item.executionIndex}-no-step-execution`,
-      css: getStatusCss({ status, selected }, euiTheme),
+      css: [
+        getStatusCss({ status, selected }, euiTheme),
+        isTriggerPseudoStep &&
+          css`
+            .euiTreeView__arrowPlaceholder::before {
+              content: '';
+              display: inline-block;
+              width: 16px;
+              height: 16px;
+              background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16"><path d="M7.04066265,13.2735746 C6.91555227,13.5197493 7.01369433,13.8207354 7.25986907,13.9458457 C7.50604381,14.0709561 7.80702987,13.9728141 7.93214025,13.7266393 L10.9463954,7.79560891 C11.1154447,7.46297732 10.8737805,7.06907652 10.5006566,7.06907652 L5.31563207,7.06907652 L8.03075367,1.72663933 C8.15586405,1.48046459 8.057722,1.17947852 7.81154726,1.05436814 C7.56537251,0.92925776 7.26438645,1.02739982 7.13927607,1.27357456 L4.05491779,7.34254414 C3.8858685,7.67517573 4.1275327,8.06907652 4.50065659,8.06907652 L9.68568111,8.06907652 L7.04066265,13.2735746 Z" fill="%23535966"/></svg>');
+              background-repeat: no-repeat;
+              background-position: center;
+              background-size: 12px 12px;
+            }
+          `,
+      ],
       icon: (
         <StepIcon
           stepType={stepType}

@@ -43,6 +43,11 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     const isOverviewPseudoStep = stepExecution?.stepType === '__overview';
     const isTriggerPseudoStep = stepExecution?.stepType?.startsWith('trigger_');
 
+    // Extract trigger type from stepType (e.g., 'trigger_manual' -> 'manual')
+    const triggerType = isTriggerPseudoStep
+      ? stepExecution?.stepType?.replace('trigger_', '')
+      : undefined;
+
     const tabs = useMemo(() => {
       if (isTriggerPseudoStep) {
         const pseudoTabs: { id: string; name: string }[] = [];
