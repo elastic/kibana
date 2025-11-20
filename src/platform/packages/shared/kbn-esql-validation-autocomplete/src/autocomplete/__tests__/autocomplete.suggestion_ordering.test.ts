@@ -26,7 +26,7 @@ describe('Suggestion Ordering', () => {
 
       const metadataIndex = suggestions.findIndex((s) => s.text === 'METADATA ');
 
-      expect(metadataIndex).toBeLessThan(5);
+      expect(metadataIndex).toBe(2);
     });
   });
 
@@ -46,7 +46,7 @@ describe('Suggestion Ordering', () => {
 
       const col0Index = suggestions.findIndex((s) => s.text === 'col0 = ');
 
-      expect(col0Index).toBeLessThan(10);
+      expect(col0Index).toBe(1);
     });
   });
 
