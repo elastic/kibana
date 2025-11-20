@@ -6,7 +6,12 @@
  */
 import { toBooleanRt } from '@kbn/io-ts-utils/src/to_boolean_rt';
 import * as t from 'io-ts';
-import { sloDefinitionWithHealthSchema, sloDefinitionSchema } from '../../schema';
+import {
+  healthStatusSchema,
+  sloDefinitionSchema,
+  stateSchema,
+  transformHealthSchema,
+} from '../../schema';
 
 const findSloDefinitionsParamsSchema = t.partial({
   query: t.partial({
@@ -19,33 +24,26 @@ const findSloDefinitionsParamsSchema = t.partial({
   }),
 });
 
+const healthMetadataSchema = t.partial({
+  state: stateSchema,
+  health: t.type({
+    overall: transformHealthSchema,
+    rollup: healthStatusSchema,
+    summary: healthStatusSchema,
+  }),
+});
+
+const findSloDefinitionsResultSchema = t.intersection([sloDefinitionSchema, healthMetadataSchema]);
+
 const findSloDefinitionsResponseSchema = t.type({
   page: t.number,
   perPage: t.number,
   total: t.number,
-  results: t.array(sloDefinitionSchema),
-});
-
-const findSloDefinitionsWithHealthResponseSchema = t.type({
-  page: t.number,
-  perPage: t.number,
-  total: t.number,
-  results: t.array(sloDefinitionWithHealthSchema),
+  results: t.array(findSloDefinitionsResultSchema),
 });
 
 type FindSLODefinitionsParams = t.TypeOf<typeof findSloDefinitionsParamsSchema.props.query>;
 type FindSLODefinitionsResponse = t.OutputOf<typeof findSloDefinitionsResponseSchema>;
-type FindSLODefinitionsWithHealthResponse = t.OutputOf<
-  typeof findSloDefinitionsWithHealthResponseSchema
->;
 
-export {
-  findSloDefinitionsParamsSchema,
-  findSloDefinitionsResponseSchema,
-  findSloDefinitionsWithHealthResponseSchema,
-};
-export type {
-  FindSLODefinitionsParams,
-  FindSLODefinitionsResponse,
-  FindSLODefinitionsWithHealthResponse,
-};
+export { findSloDefinitionsParamsSchema, findSloDefinitionsResponseSchema };
+export type { FindSLODefinitionsParams, FindSLODefinitionsResponse };
