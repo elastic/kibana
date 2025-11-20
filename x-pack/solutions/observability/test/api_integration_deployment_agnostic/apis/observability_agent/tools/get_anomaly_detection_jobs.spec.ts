@@ -32,6 +32,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const retry = getService('retry');
 
   // Failing: See https://github.com/elastic/kibana/issues/243627
+  // Failing: See https://github.com/elastic/kibana/issues/243626
   describe.skip(`tool: ${OBSERVABILITY_GET_ANOMALY_DETECTION_JOBS_TOOL_ID}`, function () {
     let agentBuilderApiClient: ReturnType<typeof createAgentBuilderApiClient>;
     let apmSynthtraceEsClient: ApmSynthtraceEsClient;
