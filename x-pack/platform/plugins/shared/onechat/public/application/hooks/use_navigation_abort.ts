@@ -6,8 +6,8 @@
  */
 
 import { useEffect, useRef } from 'react';
-import { i18n } from '@kbn/i18n';
 import type { OnAppLeave } from '../context/app_leave_context';
+import { labels } from '../utils/i18n';
 
 interface UseNavigationAbortParams {
   onAppLeave: OnAppLeave;
@@ -32,17 +32,10 @@ export const useNavigationAbort = ({
       if (isResponseLoading) {
         shouldAbortOnUnmountRef.current = true;
         return actions.confirm(
-          i18n.translate('xpack.onechat.navigationAbort.message', {
-            defaultMessage:
-              'A chat request is in progress. Are you sure you want to navigate away?',
-          }),
-          i18n.translate('xpack.onechat.navigationAbort.title', {
-            defaultMessage: 'Abort chat request?',
-          }),
+          labels.navigationAbort.message,
+          labels.navigationAbort.title,
           () => {},
-          i18n.translate('xpack.onechat.navigationAbort.confirmButton', {
-            defaultMessage: 'Yes, abort',
-          }),
+          labels.navigationAbort.confirmButton,
           'danger'
         );
       }
